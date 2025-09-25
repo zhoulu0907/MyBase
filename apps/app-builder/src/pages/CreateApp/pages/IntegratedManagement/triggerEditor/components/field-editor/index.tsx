@@ -25,6 +25,7 @@ export interface FieldEditorProps {
   nodeId: string;
   form: FormInstance;
   fieldList: AppEntityField[];
+  dataNodeId?: string;
 }
 
 const valueTypeOptions = [
@@ -32,7 +33,7 @@ const valueTypeOptions = [
   { label: '变量', value: FieldType.VARIABLES }
 ];
 
-const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) => {
+const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, dataNodeId }) => {
   const [selectedFields, setSelectedFields] = useState<any[]>();
 
   const fields = Form.useWatch('fields', form);
@@ -100,18 +101,19 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
     );
   };
 
-  const getVariableOptions = (nodeId: string): TreeSelectDataType[] => {
+  const getVariableOptions = (nodeId: string, dataNodeId?: string): TreeSelectDataType[] => {
     const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM];
 
-    const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
-    // console.log('nodes: ', nodes);
+    let nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
+
+    if (dataNodeId) {
+      nodes = triggerEditorSignal.nodes.value.filter((node) => node.id == dataNodeId);
+    }
 
     const options: TreeSelectDataType[] = [];
 
     nodes.forEach((node) => {
       const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
-
-      //   console.log('nodeOutput: ', nodeOutput);
 
       const treeNode = {
         key: node.id,
@@ -306,12 +308,12 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VARIABLES && (
                           <Form.Item field={item.field + '.value'}>
                             <TreeSelect
-                              treeData={getVariableOptions(nodeId)}
+                              treeData={getVariableOptions(nodeId, dataNodeId)}
                               triggerElement={(params) => {
                                 return (
                                   <Input
                                     readOnly
-                                    value={showTriggerElement(params, getVariableOptions(nodeId))}
+                                    value={showTriggerElement(params, getVariableOptions(nodeId, dataNodeId))}
                                   ></Input>
                                 );
                               }}
