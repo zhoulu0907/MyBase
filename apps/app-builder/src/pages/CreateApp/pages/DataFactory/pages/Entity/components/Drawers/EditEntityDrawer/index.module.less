@@ -3,7 +3,7 @@
 .edit-entity-drawer {
   .drawer-style();
   transition: transform 0.3s ease;
-  height: calc(100% - 56px) !important;
+  height: calc(100% - 112px) !important;
 }
 
 .drawerHandleButton {
@@ -57,7 +57,7 @@
   border-radius: 4px 0 0 4px;
   position: absolute;
   right: 396px;
-  top: -46px;
+  top: 0;
   
   .arco-tabs {
     height: 100%;
@@ -89,6 +89,14 @@
       display: none;
     }
   }
+}
+
+.tab-item {
+  padding: 0;
+  width: 32px;
+  height: 90px;
+  writing-mode: vertical-lr;
+  .flex-center();
 }
 
 .drawer-container {
