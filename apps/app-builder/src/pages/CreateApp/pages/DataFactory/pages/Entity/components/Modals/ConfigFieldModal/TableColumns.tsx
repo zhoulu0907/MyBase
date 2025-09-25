@@ -37,7 +37,6 @@ interface TableColumnsProps {
   setConfigPopoverVisible: (id: string | null) => void;
   setConstraintsPopoverVisible: (id: string | null) => void;
   renderFieldConfigContent: (fieldType: string, fieldId: string) => React.ReactNode;
-  updateField: (index: number, updatedField: Partial<FieldFormValues>) => void;
   getFieldIndex: (fieldId: string, index: number) => number;
   deleteField: (index: number) => void;
   fields: FieldFormValues[];
