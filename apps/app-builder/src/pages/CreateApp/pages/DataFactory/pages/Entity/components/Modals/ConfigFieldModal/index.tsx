@@ -1,17 +1,18 @@
+import { batchSaveFields, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
+import React, { useEffect, useState } from 'react';
+import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { useFieldStore } from '@/store/store_field';
-import { Button, Message, Modal, Table } from '@arco-design/web-react';
+import { Button, Form, Message, Modal } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { batchSaveFields, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
-import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
-import React, { useEffect, useState } from 'react';
-// import { ReactSortable } from 'react-sortablejs';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import type { AutoNumberRule } from './types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import SortableTable from './SortableTable';
+import { arrayMove } from './utils';
 import styles from './index.module.less';
-import type { AutoNumberRule } from './types';
 
 interface FieldFormValues {
   id?: string;
@@ -54,21 +55,12 @@ const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE.AUTO_CODE.VALUE
 ];
 
-// 自定义表格行组件，支持拖拽
-// const SortableTableRow = (props: any) => {
-//   const { record, children, ...restProps } = props;
-
-//   // 为可拖拽的行添加 data-id 属性
-//   const rowProps = {
-//     ...restProps,
-//     'data-id': record.id
-//   };
-
-//   return <tr {...rowProps}>{children}</tr>;
-// };
+// 用于计算自定义字段index
+const systemFieldsLength = 10;
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
+  const [form] = Form.useForm();
   const [fields, setFields] = useState<FieldFormValues[]>([]);
   const [originFields, setOriginFields] = useState<FieldFormValues[]>([]);
   const [loading, setLoading] = useState(false);
@@ -87,22 +79,27 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
       // 获取实体字段配置列表
       loadEntityFieldsWithChildren();
+    } else {
+      // 关闭时重置表单
+      form.resetFields();
     }
   }, [visible]);
 
   const loadEntityFields = () => {
+    if (!entity.entityId) return;
     getEntityFields({ entityId: entity.entityId }).then((res: any) => {
       console.log('getEntityFields', res);
-      setFields(
-        res.map((field: object, index: number) => ({
-          ...field,
-          sortOrder: index
-        }))
-      );
+      const fieldsData = res.map((field: object, index: number) => ({
+        ...field,
+        sortOrder: index
+      }));
+      setFields(fieldsData);
+      form.setFieldsValue({ fields: fieldsData });
     });
   };
 
   const loadEntityFieldsWithChildren = () => {
+    if (!entity.entityId) return;
     getEntityFieldsWithChildren(entity.entityId).then((res: any) => {
       const transformEntity = (entity: any, isChild = false) => ({
         label: isChild ? entity.childEntityName : entity.entityName,
@@ -146,9 +143,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         regexPrompt: ''
       },
       isSystemField: FIELD_TYPE.CUSTOM,
-      sortOrder: activeFields.length
+      sortOrder: fields.length + 1
     };
-    setFields([...activeFields, newField]);
+    const newFields = [...activeFields, newField];
+    setFields(newFields);
+    form.setFieldsValue({ fields: newFields });
   };
 
   const deleteField = (index: number) => {
@@ -157,16 +156,22 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       Message.error('系统字段不能删除');
       return;
     }
+    let newFields;
     if (field.id && field.id.startsWith('field-')) {
-      setFields(fields.filter((f, i) => i !== index));
-      return;
+      newFields = fields.filter((_, i) => i !== index);
     } else {
-      setFields(fields.map((f, i) => (i === index ? { ...f, isDeleted: true } : f)));
+      newFields = fields.map((field, i) => (i === index ? { ...field, isDeleted: true } : field));
     }
+    setFields(newFields);
+    form.setFieldsValue({ fields: newFields });
   };
 
   const updateField = (index: number, updatedField: Partial<FieldFormValues>) => {
-    setFields((prevFields) => prevFields.map((field, i) => (i === index ? { ...field, ...updatedField } : field)));
+    setFields((prevFields) => {
+      const newFields = prevFields.map((field, i) => (i === index ? { ...field, ...updatedField } : field));
+      form.setFieldsValue({ fields: newFields });
+      return newFields;
+    });
   };
 
   // 获取字段在数组中的索引
@@ -178,47 +183,18 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     }
   };
 
-  const handleSort = (newFields: FieldFormValues[]) => {
-    console.log('handleSort', newFields);
-    // const allFields = [...fields];
-    // const visibleFields = newFields.map((field, index) => ({ ...field, sortOrder: index }));
-
-    // setFields(
-    //   allFields.map((field) => {
-    //     const visibleField = visibleFields.find((vf) => vf.id === field.id);
-    //     return visibleField ? { ...field, sortOrder: visibleField.sortOrder } : field;
-    //   })
-    // );
-  };
-
   const handleFinish = async () => {
     try {
       setLoading(true);
 
-      const customFields = fields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM && !field.isDeleted);
+      const formValues = await form.validate();
+      console.log('formValues', formValues);
+      const formFields = formValues.fields || [];
 
-      // 表单校验
-      for (const field of customFields) {
-        if (!field.displayName || !field.displayName.trim()) {
-          Message.error('展示名称不能为空');
-          return;
-        }
-        if (!field.fieldName || !field.fieldName.trim()) {
-          Message.error('字段名称不能为空');
-          return;
-        }
-        if (field.fieldName && !/^[a-z][a-z0-9_]{0,39}$/.test(field.fieldName)) {
-          Message.error('请输入符合规范的字段名称');
-          return;
-        }
-        if (!field.fieldType) {
-          Message.error('数据类型不能为空');
-          return;
-        }
-      }
+      const customFields = getCurrentTableData(formFields);
+      console.log('customFields', customFields);
 
-      const allFields = fields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
-      const fieldDataList = allFields.map((field) => {
+      const fieldDataList = customFields.map((field: FieldFormValues) => {
         const fieldData = {
           appId: curAppId,
           entityId: entity.entityId,
@@ -244,6 +220,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       console.error('保存字段失败:', error);
     } finally {
       setLoading(false);
+      // form.resetFields();
     }
   };
 
@@ -286,6 +263,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     }
   };
 
+  const handleCancel = () => {
+    setVisible(false);
+    form.resetFields();
+  };
+
   // 渲染字段配置 popover 内容
   const renderFieldConfigContent = (fieldType: string, fieldId: string) => {
     const field = fields.find((f) => f.id === fieldId);
@@ -316,60 +298,76 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     fields
   });
 
+  // 处理拖拽排序
+  const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+    // 仅对自定义且未删除字段进行排序
+    const active = fields.filter((f) => !f.isDeleted && f.isSystemField === FIELD_TYPE.CUSTOM);
+    const reorderedActive = arrayMove([...active], oldIndex, newIndex);
+
+    const newFields = [...fields];
+    let pointer = 0;
+    for (let i = 0; i < newFields.length; i += 1) {
+      const cur = newFields[i];
+      if (!cur.isDeleted && cur.isSystemField === FIELD_TYPE.CUSTOM) {
+        newFields[i] = {
+          ...reorderedActive[pointer],
+          sortOrder: pointer + systemFieldsLength + 1
+        } as FieldFormValues;
+        pointer += 1;
+      }
+    }
+
+    setFields(newFields);
+    form.setFieldsValue({ fields: newFields });
+  };
+
+  // 将表单数据转换为表格数据
+  const getCurrentTableData = (formFields: FieldFormValues[]) => {
+    return activeFields.map((originalField, index) => {
+      const formField = formFields[index];
+      if (formField) {
+        return {
+          ...originalField,
+          ...formField,
+          id: originalField.id,
+          isSystemField: originalField.isSystemField,
+          isDeleted: originalField.isDeleted,
+          sortOrder: index + systemFieldsLength + 1
+        };
+      }
+      return originalField;
+    });
+  };
+
   return (
     <Modal
       className={styles['config-field-modal']}
       title="字段配置"
       visible={visible}
       onOk={handleFinish}
-      onCancel={() => setVisible(false)}
+      onCancel={handleCancel}
       okText="保存"
       cancelText="取消"
       confirmLoading={loading}
       style={{ width: 1400 }}
     >
-      <div className={styles['field-config-container']}>
-        {/* <ReactSortable
-          list={activeFields}
-          setList={handleSort}
-          animation={200}
-          handle={`.${styles['drag-handle']}`}
-          filter={`.${styles['system-field']}`}
-        >
-          <Table
-            data={activeFields}
-            columns={columns}
-            pagination={false}
-            className={styles['field-table']}
-            rowClassName={(record) =>
-              record.isSystemField === FIELD_TYPE.SYSTEM ? styles['system-field-row'] : styles['custom-field-row']
-            }
-            rowKey="id"
-            components={{
-              body: {
-                row: SortableTableRow
-              }
-            }}
-          />
-        </ReactSortable> */}
+      <Form form={form} initialValues={{ fields: activeFields }} onSubmit={handleFinish}>
+        <Form.List field="fields">
+          {() => {
+            return (
+              <div className={styles['field-config-container']} id="field-config-container">
+                <SortableTable data={activeFields} columns={columns} onSort={handleSort} />
 
-        <SortableTable
-          data={activeFields}
-          columns={columns}
-          rowKey="id"
-          onSort={(newData) => {
-            setFields(newData);
+                <div className={styles['add-field-section']}>
+                  <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles['add-field-button']}>
+                    新增字段
+                  </Button>
+                </div>
+              </div>
+            );
           }}
-          pagination={false}
-          disabledRowKeys={activeFields.filter((r) => r.isSystemField === FIELD_TYPE.SYSTEM).map((r) => r.id || '')}
-        />
-
-        <div className={styles['add-field-section']}>
-          <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles['add-field-button']}>
-            新增字段
-          </Button>
-        </div>
-      </div>
+        </Form.List>
+      </Form>
     </Modal>
   );
 };
