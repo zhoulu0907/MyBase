@@ -3,12 +3,12 @@ export const appThemeColor = ['#4FAE7B', '#81C1C1', '#6439C1', '#E1BD5E', '#D889
 
 // 应用图标
 export const appIcon: string[] = [
-  'icon-yasuo_compression',
-  'icon-wendangshibai_doc-fail',
-  'icon-shanchu_delete-one',
-  'icon-lunboshipin_carousel-video',
-  'icon-quanbu_all-application',
-  'icon-faan_bill',
+  'bike',
+  'bullet-map',
+  'church-one',
+  'data-display',
+  'fingerprint-two',
+  'platte'
 ];
 
 // 图标背景色
