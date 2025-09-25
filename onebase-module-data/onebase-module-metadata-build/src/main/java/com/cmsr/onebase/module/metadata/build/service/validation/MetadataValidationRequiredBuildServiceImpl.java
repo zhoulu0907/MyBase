@@ -138,8 +138,34 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
         Assert.notNull(entityFieldDO, "字段不存在");
 
-        // 如果需要根据 rgName 变化调整组，这里简单保留原 groupId，不做跨字段复用（必填校验每字段唯一）
+        // 保留原 groupId，并同步可能更新的组级配置(popPrompt/valMethod/popType)
         Long targetGroupId = groupIdParam;
+        var groupDO = validationRuleGroupService.getValidationRuleGroup(groupIdParam);
+        if (groupDO != null) {
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(groupDO.getId());
+            updateGroupVO.setRgName(groupDO.getRgName());
+            updateGroupVO.setRgDesc(groupDO.getRgDesc());
+            updateGroupVO.setRgStatus(groupDO.getRgStatus());
+            updateGroupVO.setValidationType(groupDO.getValidationType());
+            updateGroupVO.setEntityId(groupDO.getEntityId());
+            if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(groupDO.getPopPrompt())) {
+                updateGroupVO.setPopPrompt(reqVO.getPopPrompt());
+                needGroupUpdate = true;
+            }
+            if (reqVO.getValMethod() != null && !reqVO.getValMethod().equals(groupDO.getValMethod())) {
+                updateGroupVO.setValMethod(reqVO.getValMethod());
+                needGroupUpdate = true;
+            }
+            if (reqVO.getPopType() != null && !reqVO.getPopType().equals(groupDO.getPopType())) {
+                updateGroupVO.setPopType(reqVO.getPopType());
+                needGroupUpdate = true;
+            }
+            if (needGroupUpdate) {
+                validationRuleGroupService.updateValidationRuleGroup(updateGroupVO);
+            }
+        }
 
         MetadataValidationRequiredDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRequiredDO.class);
         updateDO.setId(existingDO.getId());
@@ -182,8 +208,10 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")"); }
         MetadataValidationRequiredDO requiredDO = list.get(0);
         Long fieldId = requiredDO.getFieldId();
+        Long groupId = requiredDO.getGroupId();
         requiredRepository.deleteById(requiredDO.getId());
         if (fieldId != null) { syncFieldRequiredStatus(fieldId, false); }
+        if (groupId != null) { validationRuleGroupService.safeDeleteGroupDirect(groupId); }
     }
     
     /**

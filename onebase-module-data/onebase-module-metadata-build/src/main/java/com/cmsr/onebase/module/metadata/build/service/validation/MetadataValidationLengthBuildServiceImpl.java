@@ -151,6 +151,31 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             }
             if (existingGroup != null && canReuse) {
                 targetGroupId = existingGroup.getId();
+                // 如果复用已有规则组，需要根据请求更新组级别配置(popPrompt/valMethod/popType)，避免列表查询仍显示旧值
+                boolean needGroupUpdate = false;
+                ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+                updateGroupVO.setId(existingGroup.getId());
+                updateGroupVO.setRgName(existingGroup.getRgName()); // 名称不变
+                updateGroupVO.setRgDesc(existingGroup.getRgDesc());
+                updateGroupVO.setRgStatus(existingGroup.getRgStatus());
+                updateGroupVO.setValidationType(existingGroup.getValidationType());
+                updateGroupVO.setEntityId(existingGroup.getEntityId());
+                // 判定及赋值: 仅当传入值非空且与现有不同才更新
+                if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(existingGroup.getPopPrompt())) {
+                    updateGroupVO.setPopPrompt(reqVO.getPopPrompt());
+                    needGroupUpdate = true;
+                }
+                if (reqVO.getValMethod() != null && !reqVO.getValMethod().equals(existingGroup.getValMethod())) {
+                    updateGroupVO.setValMethod(reqVO.getValMethod());
+                    needGroupUpdate = true;
+                }
+                if (reqVO.getPopType() != null && !reqVO.getPopType().equals(existingGroup.getPopType())) {
+                    updateGroupVO.setPopType(reqVO.getPopType());
+                    needGroupUpdate = true;
+                }
+                if (needGroupUpdate) {
+                    ruleGroupService.updateValidationRuleGroup(updateGroupVO);
+                }
             } else {
                 ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
                 groupVO.setRgName(reqVO.getRgName());

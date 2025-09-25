@@ -50,6 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.modelmapper.ModelMapper;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -110,17 +111,27 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Override
     public List<EntityFieldValidationTypesRespVO> getFieldValidationTypes(@Valid EntityFieldValidationTypesReqVO reqVO) {
-        List<String> fieldIds = reqVO.getFieldIdList();
-        if (fieldIds == null || fieldIds.isEmpty()) {
+        List<String> rawFieldIds = reqVO.getFieldIdList();
+        if (rawFieldIds == null || rawFieldIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // 过滤空/null/纯空白并去重
+        List<Long> fieldIds = rawFieldIds.stream()
+                .filter(s -> s != null && !s.trim().isEmpty())
+                .map(s -> {
+                    try { return Long.valueOf(s.trim()); } catch (NumberFormatException e) { return null; }
+                })
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (fieldIds.isEmpty()) {
+            // 没有任何有效字段ID，直接返回空
             return new ArrayList<>();
         }
 
         // 1) 批量查询字段，获取 fieldId -> fieldType 映射
-    DefaultConfigStore cs = new DefaultConfigStore();
-    cs.and(Compare.IN, "id", fieldIds.stream()
-        .filter(s -> s != null && !s.trim().isEmpty())
-        .map(s -> Long.valueOf(s.trim()))
-        .collect(Collectors.toList()));
+        DefaultConfigStore cs = new DefaultConfigStore();
+        cs.and(Compare.IN, "id", fieldIds);
         cs.and("deleted", 0);
         List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(cs);
         Map<String, String> fieldIdToType = fields.stream()

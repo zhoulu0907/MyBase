@@ -1,7 +1,13 @@
 package com.cmsr.onebase.module.metadata.api.datamethod.assembler;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -222,18 +228,101 @@ public class DataMethodAssembler {
         if (idMap == null || idMap.isEmpty()) {
             return new HashMap<>();
         }
+        List<Map<String, Object>> dataList = convertIdKeyMapListToNameKeyMapList(entityId, Collections.singletonList(idMap));
+        return dataList.isEmpty() ? new HashMap<>() : dataList.get(0);
+    }
+
+    /**
+     * 批量将字段ID键的Map列表转换为字段名称键的Map列表，并按照字段类型进行值转换
+     *
+     * @param entityId 实体ID
+     * @param idMapList 字段ID键的Map列表
+     * @return 字段名称键的Map列表
+     */
+    public List<Map<String, Object>> convertIdKeyMapListToNameKeyMapList(Long entityId, List<Map<Long, Object>> idMapList) {
+        if (CollectionUtils.isEmpty(idMapList)) {
+            return new ArrayList<>();
+        }
         List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entityId);
-        Map<Long, String> idToName = fields.stream()
-                .filter(f -> f.getId() != null && f.getFieldName() != null)
-                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName, (a, b) -> a));
-        Map<String, Object> result = new HashMap<>();
-        idMap.forEach((k, v) -> {
-            String name = idToName.get(k);
-            if (name != null) {
-                result.put(name, v);
+        Map<Long, MetadataEntityFieldDO> idToField = fields.stream()
+                .filter(f -> f.getId() != null && StringUtils.hasText(f.getFieldName()))
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, field -> field, (a, b) -> a));
+
+        List<Map<String, Object>> resultList = new ArrayList<>(idMapList.size());
+        for (Map<Long, Object> idMap : idMapList) {
+            resultList.add(convertSingleIdMap(idMap, idToField));
+        }
+        return resultList;
+    }
+
+    private Map<String, Object> convertSingleIdMap(Map<Long, Object> idMap, Map<Long, MetadataEntityFieldDO> idToField) {
+        if (idMap == null || idMap.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        idMap.forEach((fieldId, value) -> {
+            MetadataEntityFieldDO field = idToField.get(fieldId);
+            if (field == null || !StringUtils.hasText(field.getFieldName())) {
+                return;
             }
+            result.put(field.getFieldName(), convertValueByField(value, field));
         });
         return result;
+    }
+
+    private Object convertValueByField(Object value, MetadataEntityFieldDO field) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String) {
+            Object converted = FieldValueUtil.convertFieldValue((String) value, field);
+            return adaptJdbcTemporal(converted, field);
+        }
+        if (value instanceof List<?>) {
+            List<?> rawList = (List<?>) value;
+            boolean convertible = rawList.stream().allMatch(item -> item == null || item instanceof String);
+            if (convertible) {
+                return rawList.stream()
+                        .map(item -> {
+                            if (item == null) {
+                                return null;
+                            }
+                            Object converted = FieldValueUtil.convertFieldValue((String) item, field);
+                            return adaptJdbcTemporal(converted, field);
+                        })
+                        .collect(Collectors.toList());
+            }
+        }
+        return adaptJdbcTemporal(value, field);
+    }
+
+    private Object adaptJdbcTemporal(Object value, MetadataEntityFieldDO field) {
+        if (value == null || field == null || !StringUtils.hasText(field.getFieldType())) {
+            return value;
+        }
+        return adaptJdbcTemporal(value, field.getFieldType());
+    }
+
+    private Object adaptJdbcTemporal(Object value, String fieldType) {
+        if (value == null || !StringUtils.hasText(fieldType)) {
+            return value;
+        }
+        String upperType = fieldType.toUpperCase();
+        switch (upperType) {
+            case "DATETIME":
+            case "TIMESTAMP":
+                if (value instanceof LocalDateTime) {
+                    return Timestamp.valueOf((LocalDateTime) value);
+                }
+                return value;
+            case "DATE":
+                if (value instanceof LocalDate) {
+                    return Date.valueOf((LocalDate) value);
+                }
+                return value;
+            default:
+                return value;
+        }
     }
 
     /**
@@ -258,14 +347,16 @@ public class DataMethodAssembler {
             for (Map.Entry<String, Object> e : data.entrySet()) {
                 FieldData fd = new FieldData();
                 fd.setFieldName(e.getKey());
-                fd.setFieldValue(e.getValue());
                 MetadataEntityFieldDO fieldDO = nameMap.get(e.getKey());
                 if (fieldDO != null) {
                     fd.setFieldId(fieldDO.getId());
                     fd.setDisplayName(fieldDO.getDisplayName());
                     fd.setFieldType(fieldDO.getFieldType());
+                    fd.setFieldValue(adaptJdbcTemporal(e.getValue(), fieldDO));
                 } else {
-                    fd.setFieldType(fieldTypeMap.get(e.getKey()));
+                    String fieldType = fieldTypeMap.get(e.getKey());
+                    fd.setFieldType(fieldType);
+                    fd.setFieldValue(adaptJdbcTemporal(e.getValue(), fieldType));
                 }
                 fieldDataList.add(fd);
             }

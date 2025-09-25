@@ -136,8 +136,32 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(existing.getFieldId()));
         Assert.notNull(field, "字段不存在");
 
-        // 简化：不变更组
+        // 不变更组，但需要同步组配置(popPrompt/valMethod/popType)
         Long targetGroupId = groupIdParam;
+        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        if (groupDO != null) {
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(groupDO.getId());
+            updateGroupVO.setRgName(groupDO.getRgName());
+            updateGroupVO.setRgDesc(groupDO.getRgDesc());
+            updateGroupVO.setRgStatus(groupDO.getRgStatus());
+            updateGroupVO.setValidationType(groupDO.getValidationType());
+            updateGroupVO.setEntityId(groupDO.getEntityId());
+            if (vo.getPopPrompt() != null && !vo.getPopPrompt().equals(groupDO.getPopPrompt())) {
+                updateGroupVO.setPopPrompt(vo.getPopPrompt());
+                needGroupUpdate = true;
+            }
+            if (vo.getValMethod() != null && !vo.getValMethod().equals(groupDO.getValMethod())) {
+                updateGroupVO.setValMethod(vo.getValMethod());
+                needGroupUpdate = true;
+            }
+            if (vo.getPopType() != null && !vo.getPopType().equals(groupDO.getPopType())) {
+                updateGroupVO.setPopType(vo.getPopType());
+                needGroupUpdate = true;
+            }
+            if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
+        }
         MetadataValidationUniqueDO updateObj = BeanUtils.toBean(vo, MetadataValidationUniqueDO.class);
         updateObj.setId(existing.getId());
         updateObj.setFieldId(existing.getFieldId());
@@ -178,8 +202,10 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条唯一性校验规则(组ID=" + id + ")"); }
         MetadataValidationUniqueDO uniqueDO = list.get(0);
         Long fieldId = uniqueDO.getFieldId();
+        Long groupId = uniqueDO.getGroupId();
         uniqueRepository.deleteById(uniqueDO.getId());
         if (fieldId != null) { syncFieldUniqueStatus(fieldId, false); }
+        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
     }
     
     /**
