@@ -10,5 +10,6 @@ export default defineConfig({
   clean: true,
   loader: {
     '.css': 'copy',
+    '.svg': 'dataurl'
   },
 });

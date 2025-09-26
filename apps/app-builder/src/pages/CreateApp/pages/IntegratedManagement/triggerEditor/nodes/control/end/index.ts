@@ -1,4 +1,4 @@
-import iconEnd from '@/assets/flow/icon-end.jpg';
+import iconEnd from '@/assets/flow/nodes/end.svg';
 import { FlowNodeBaseType } from '@flowgram.ai/fixed-layout-editor';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';

@@ -1,4 +1,4 @@
-import iconCase from '@/assets/flow/icon-case.png';
+import iconControl from '@/assets/flow/nodes/control.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -15,7 +15,7 @@ export const CatchBlockNodeRegistry: FlowNodeRegistry = {
     expandable: false // disable expanded
   },
   info: {
-    icon: iconCase,
+    icon: iconControl,
     description: '满足条件时尝试执行分支'
   },
   canAdd: () => false,

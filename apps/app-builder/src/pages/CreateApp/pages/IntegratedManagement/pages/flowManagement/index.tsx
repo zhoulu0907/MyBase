@@ -267,7 +267,7 @@ const FlowManagementPage: React.FC = () => {
             <TabPane key={TriggerType.TIME} title="时间触发"></TabPane>
             <TabPane key={TriggerType.DATE_FIELD} title="日期字段触发"></TabPane>
             <TabPane key={TriggerType.API} title="API触发"></TabPane>
-            <TabPane key={TriggerType.BPM} title="子流程触发"></TabPane>
+            {/* <TabPane key={TriggerType.BPM} title="子流程触发"></TabPane> */}
           </Tabs>
         </div>
         <div className={styles.content}>

@@ -74,13 +74,17 @@ export const CONFIG_TYPES = {
   SELECT_DATA_SOURCE: 'SelectDataSource',
   // 子表单组件
   SUB_TABLE: 'SubTable',
-  // 子表单组件
+  // 页签组件
+  TABS: 'Tabs',
+  // 页签组件类型
   TABS_TYPE: 'TabsType',
-  // 子表单组件
+  // 页签组件位置
   TABS_POSITION: 'TabsPosition',
   // 静态文件
   IMAGE: 'Image',
   FILE: 'File',
+  // 折叠面板展开状态
+  COLLAPSED: 'Collapsed',
 } as const;
 
 // 状态选项常量
@@ -226,15 +230,27 @@ export const TABS_TYPE_OPTIONS = {
 
 // 页签位置常量
 export const TABS_POSITION_OPTIONS = {
-  LEFT: '左',
   TOP: '上',
   BOTTOM: '下',
+  LEFT: '左',
   RIGHT: '右'
 } as const;
 
 export const TABS_POSITION_VALUES = {
-  [TABS_POSITION_OPTIONS.LEFT]: 'left',
   [TABS_POSITION_OPTIONS.TOP]: 'top',
   [TABS_POSITION_OPTIONS.BOTTOM]: 'bottom',
+  [TABS_POSITION_OPTIONS.LEFT]: 'left',
   [TABS_POSITION_OPTIONS.RIGHT]: 'right'
+} as const;
+
+
+// 折叠选项常量
+export const COLLAPSED_OPTIONS = {
+  EXPOSED: '展开',
+  COLLAPSED: '收起'
+} as const;
+
+export const COLLAPSED_VALUES = {
+  [COLLAPSED_OPTIONS.EXPOSED]: 'exposed',
+  [COLLAPSED_OPTIONS.COLLAPSED]: 'collapsed',
 } as const;

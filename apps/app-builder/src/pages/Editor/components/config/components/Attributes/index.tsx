@@ -28,6 +28,7 @@ import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import DynamicDataSourceConfig from './components/DynamicDataSourceConfig';
 import DynamicSubTableConfig from './components/DynamicSubTableConfig';
+import DynamicTabsConfig from './components/DynamicTabsConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -92,14 +93,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     if (!cpID) {
       return;
     }
-    console.debug('curComponentSchema------', curComponentSchema);
+    // console.debug('curComponentSchema------', curComponentSchema);
 
     setEditData(curComponentSchema.editData);
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);
 
   const handlePropsChange = (key: string, value: string | number | boolean | any[]) => {
-    console.log(`更新了属性: ${key} 值为: `,value);
+    console.log(`更新了属性: ${key} 值为: `, value);
 
     const newCurComponentSchema = {
       id: cpID,
@@ -204,7 +205,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.SELECT_DATA_SOURCE &&
               item.type !== CONFIG_TYPES.SUB_TABLE &&
               item.type !== CONFIG_TYPES.IMAGE &&
-              item.type !== CONFIG_TYPES.FILE
+              item.type !== CONFIG_TYPES.FILE &&
+              item.type !== CONFIG_TYPES.TABS
             ) {
               return (
                 <FormItem
@@ -212,7 +214,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   label={
                     <>
                       {item.name}
-                      {item.type === CONFIG_TYPES.LABEL_INPUT && (
+                      {item.type === CONFIG_TYPES.LABEL_INPUT && typeof configs[item.key]['display'] === 'boolean' && (
                         <Checkbox
                           checked={configs[item.key]['display']}
                           style={{ float: 'right' }}
@@ -350,6 +352,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   {(item.type === CONFIG_TYPES.STATUS_RADIO ||
                     item.type === CONFIG_TYPES.DATE_TYPE ||
                     item.type === CONFIG_TYPES.FORM_LAYOUT ||
+                    item.type === CONFIG_TYPES.COLLAPSED ||
                     item.type === CONFIG_TYPES.TEXT_ALIGN) && (
                       <Radio.Group
                         type="button"
@@ -676,7 +679,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               );
             }
 
-            // 选择数据配置
+            // 子表数据配置
             if (item.type === CONFIG_TYPES.SUB_TABLE) {
               return (
                 <DynamicSubTableConfig
@@ -705,6 +708,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   key={index}
                   id={cpID}
                   handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+            // 页签数据配置
+            if (item.type === CONFIG_TYPES.TABS) {
+              return (
+                <DynamicTabsConfig
+                  key={index}
+                  id={cpID}
+                  handlePropsChange={handlePropsChange}
+                  handleMultiPropsChange={handleMultiPropsChange}
                   item={item}
                   configs={configs}
                 />

@@ -23,8 +23,9 @@ import XSwitch from './FormComponents/Switch/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
 import XUserSelect from './FormComponents/UserSelect/schema';
 import XSubTable from './FormComponents/SubTable/schema';
-import XTabs from './FormComponents/Tabs/schema';
 
+import XTabsLayout from './LayoutComponents/TabsLayout/schema';
+import XCollapseLayout from './LayoutComponents/CollapseLayout/schema';
 import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
 import XCalendar from './ListComponents/Calendar/schema';
 import XCarousel from './ListComponents/Carousel/schema';
@@ -66,7 +67,6 @@ const baseSchema = {
   XFCarousel,
   XSubTable,
   XDataSelect,
-  XTabs,
 
   XTable,
   XCalendar,
@@ -75,7 +75,10 @@ const baseSchema = {
   XCarousel,
   XCollapse,
   XList,
+
   XColumnLayout,
+  XCollapseLayout,
+  XTabsLayout,
 
   XInfoNotice,
   XImage,
