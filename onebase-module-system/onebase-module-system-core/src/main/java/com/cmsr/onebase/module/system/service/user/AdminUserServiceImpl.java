@@ -753,8 +753,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         // 获取部门信息
-        DeptDO dept = deptService.getDept(user.getDeptId());
-
+        DeptDO dept = null;
+        if (user.getDeptId() != null) {
+            dept = deptService.getDept(user.getDeptId());
+        }
         // 获取用户角色信息
         Set<Long> roleIds = permissionService.getRoleIdsListByUserId(id);
         List<RoleDO> roles = new ArrayList<>();
