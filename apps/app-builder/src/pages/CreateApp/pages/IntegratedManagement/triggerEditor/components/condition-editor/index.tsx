@@ -56,6 +56,8 @@ export interface ConditionEditorProps {
   fields: ConfitionField[];
   entityFieldValidationTypes: EntityFieldValidationTypes[];
   form: FormInstance;
+  // 可选变量下拉选项， 如果不传默认从节点id中计算后获取
+  variableOptions?: TreeSelectDataType[];
 }
 
 /**
@@ -67,7 +69,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   entityFieldValidationTypes,
   form,
   label,
-  required
+  required,
+  variableOptions
 }) => {
   useSignals();
 
@@ -239,6 +242,14 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   };
 
   const getVariableOptions = (nodeId: string): TreeSelectDataType[] => {
+    if (nodeId == undefined || nodeId == '') {
+      if (variableOptions) {
+        return variableOptions;
+      }
+
+      return [];
+    }
+
     const nodeTypes = [
       NodeType.DATA_QUERY,
       NodeType.DATA_QUERY_MULTIPLE,
