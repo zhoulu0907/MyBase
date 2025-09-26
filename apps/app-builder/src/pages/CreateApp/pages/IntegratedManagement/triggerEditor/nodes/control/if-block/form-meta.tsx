@@ -1,10 +1,21 @@
 import { type FormMeta, type FormRenderProps, Field } from '@flowgram.ai/fixed-layout-editor';
 
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { useEffect } from 'react';
 import { useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 
-export const renderForm = (props: FormRenderProps<FlowNodeJSON['data']>) => {
+export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { node } = useNodeRenderContext();
+
+  useEffect(() => {
+    if (form.initialValues && form.initialValues.initialData) {
+      triggerEditorSignal.setNodeData(node.id, {
+        ...triggerEditorSignal.nodeData.value[node.id],
+        value: form.initialValues.initialData.value ? true : false
+      });
+    }
+  }, [form]);
 
   return (
     <div
