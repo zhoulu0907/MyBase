@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Layout, Message } from '@arco-design/web-react';
 import { getEntityList, deleteEntity } from '@onebase/app';
 import { useResourceStore } from '@/store/store_resource';
@@ -22,24 +22,32 @@ const EntityTable: React.FC = () => {
   const [editNodeDrawerVisible, setEditNodeDrawerVisible] = useState(false);
   const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   // 加载实体列表
-  const loadEntities = async () => {
+  const loadEntities = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getEntityList(curDataSourceId);
       if (response) {
         setEntities(response);
-        // 如果有实体数据，默认选择第一个
+        // 如果没有选中的实体，默认选择第一个
         if (response.length > 0 && !selectedEntity) {
           setSelectedEntity(response[0]);
+        }
+        // 如果有选中的实体，需要重新设置以触发右侧标签页数据刷新
+        if (response.length > 0 && selectedEntity) {
+          const updatedEntity = response.find((entity: EntityListItem) => entity.id === selectedEntity.id);
+          if (updatedEntity) {
+            setSelectedEntity(updatedEntity);
+          } else {
+            setSelectedEntity(response[0]);
+          }
         }
       }
     } catch (error) {
       console.error('加载实体列表失败:', error);
-      Message.error('加载实体列表失败');
     } finally {
       setLoading(false);
     }
-  };
+  }, [curDataSourceId, selectedEntity]);
 
   const handleDelete = (entity: EntityListItem) => {
     setSelectedEntity(entity);
@@ -114,7 +122,6 @@ const EntityTable: React.FC = () => {
         visible={createEntityModalVisible}
         setVisible={setCreateEntityModalVisible}
         successCallback={successCallback}
-        entityListLength={entities.length}
       />
       <DeleteConfirmModal
         visible={deleteModalVisible}

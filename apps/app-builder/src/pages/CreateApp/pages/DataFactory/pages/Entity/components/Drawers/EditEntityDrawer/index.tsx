@@ -1,5 +1,5 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Button, Drawer, Message, Tabs } from '@arco-design/web-react';
+import { Button, Drawer, Tabs } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import NodeEditForm from './tabs/NodeEditForm';

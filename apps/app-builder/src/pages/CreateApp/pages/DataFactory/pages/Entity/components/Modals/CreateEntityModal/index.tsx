@@ -33,9 +33,7 @@ const CreateEntityModal: React.FC<{
   visible: boolean;
   setVisible: (visible: boolean) => void;
   successCallback: () => void;
-  lastEntity: EntityNode;
-  getGraphPositon: () => { x: number; y: number };
-}> = ({ visible, setVisible, successCallback, lastEntity }) => {
+}> = ({ visible, setVisible, successCallback }) => {
   const { curDataSourceId } = useResourceStore();
   const { curAppId } = useAppStore();
   const { newNodes, setNewNodes } = useNewNodeStore();
@@ -49,8 +47,6 @@ const CreateEntityModal: React.FC<{
       Message.error('数据源ID未获取到，请刷新页面重试');
       return;
     }
-
-    console.log('lastentity', lastEntity);
 
     form.validate().then(async (values) => {
       // 获取新节点位置
