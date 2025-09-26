@@ -1,5 +1,5 @@
 import { Button, Dropdown, Menu, Message, Switch, Tooltip } from '@arco-design/web-react';
-import { IconRobot } from '@arco-design/web-react/icon';
+import { IconRobot, IconDown } from '@arco-design/web-react/icon';
 import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
@@ -56,19 +56,24 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
           toFlowEditor(data.applicationId, data.id);
         }}
       >
-        <div className={styles.cardHeaderLeft}>
-          <div className={styles.cardHeaderLeftIcon}>
-            <IconRobot />
-          </div>
-          <div className={styles.cardHeaderLeftContent}>
-            <div className={styles.cardHeaderLeftContentTitle}>{data.processName}</div>
-            <Tooltip content={data.processDescription}>
-              <div className={styles.cardHeaderLeftContentDesc}>{data.processDescription}</div>
-            </Tooltip>
-          </div>
+        <div className={styles.cardHeaderIcon}>
+          <IconRobot />
         </div>
-        <div className={styles.cardHeaderRight}>
-          <div className={styles.cardHeaderRightTitle}>{showTriggerType()}</div>
+        <div className={styles.cardHeaderContent}>
+          <div className={styles.cardHeaderContentTitle}>{data.processName}</div>
+          <Tooltip content={data.processDescription}>
+            <div className={styles.cardHeaderContentDesc}>{data.processDescription}</div>
+          </Tooltip>
+        </div>
+        {/* data.triggerType  TriggerType.FORM */}
+        <div className={styles.cardHeaderTag}>
+          <div
+            className={
+              data.triggerType === TriggerType.FORM ? styles.cardHeaderTagTitle : styles.cardHeaderBlueTagTitle
+            }
+          >
+            {showTriggerType()}
+          </div>
         </div>
       </div>
       <div
@@ -104,7 +109,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
           <Button type="text" size="small" onClick={() => handleEdit(data.id)}>
             编辑
           </Button>
-          <Button type="text" size="small">
+          <Button type="text" size="small" className={styles.cardFooterRightBtn}>
             调试
           </Button>
           <Dropdown
@@ -118,8 +123,9 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
               </Menu>
             }
           >
-            <Button type="text" size="small">
+            <Button type="text" size="small" className={styles.cardFooterRightBtn}>
               更多
+              <IconDown />
             </Button>
           </Dropdown>
         </div>
