@@ -31,7 +31,9 @@ export const IFNodeRegistry: FlowNodeRegistry = {
           type: NodeType.IF_BLOCK,
           data: {
             title: '通过',
-            value: true
+            initialData: {
+              value: true
+            }
           },
           blocks: []
         },
@@ -40,7 +42,9 @@ export const IFNodeRegistry: FlowNodeRegistry = {
           type: NodeType.IF_BLOCK,
           data: {
             title: '不通过',
-            value: false
+            initialData: {
+              value: false
+            }
           }
         }
       ]
