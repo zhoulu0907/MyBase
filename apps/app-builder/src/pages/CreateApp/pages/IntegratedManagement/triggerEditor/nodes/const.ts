@@ -13,7 +13,8 @@ export enum NodeType {
   END = 'end',
   CASE = 'case',
   CASE_DEFAULT = 'caseDefault',
-  IF = 'if',
+
+  IF = 'ifCase',
   IF_BLOCK = 'ifBlock',
   SWITCH = 'switch',
   LOOP = 'loop',
