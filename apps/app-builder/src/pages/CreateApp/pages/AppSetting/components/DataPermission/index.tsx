@@ -25,7 +25,8 @@ import {
   type AppEntityField,
   type AuthDataFilterVO,
   type ScopeTypeOption,
-  type LoadPageSetReq
+  type LoadPageSetReq,
+  FieldType
   // type GetPageSetIdReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
@@ -43,6 +44,42 @@ const initialFormValues: AuthDataGroupVO = {
   dataFilters: [],
   isOperable: 1
 };
+
+const opCodeOptions = [
+  {
+    label: '公式',
+    value: FieldType.FORMULA
+  },
+  {
+    label: '静态值',
+    value: FieldType.VALUE
+  },
+  {
+    label: '变量',
+    value: FieldType.VARIABLES
+  }
+];
+
+const operatorOptions = [
+  { label: '等于', value: 'EQUALS' },
+  { label: '不等于', value: 'NOT_EQUALS' },
+  { label: '包含', value: 'CONTAINS' },
+  { label: '不包含', value: 'NOT_CONTAINS' },
+  { label: '存在于', value: 'EXISTS' },
+  { label: '不存在于', value: 'NOT_EXISTS' },
+  { label: '大于', value: 'GREATER_THAN' },
+  { label: '大于等于', value: 'GREATER_EQUAL' },
+  { label: '小于', value: 'LESS_THAN' },
+  { label: '小于等于', value: 'LESS_EQUAL' },
+  { label: '晚于', value: 'LATER_THAN' },
+  { label: '早于', value: '' },
+  { label: '包含全部', value: 'CONTAINS_ALL' },
+  { label: '不包含全部', value: 'NOT_CONTAINS_ALL' },
+  { label: '包含任一', value: 'CONTAINS_ANY' },
+  { label: '不包含任一', value: 'NOT_CONTAINS_ANY' },
+  { label: '不为空', value: 'IS_NOT_EMPTY' },
+  { label: '为空', value: 'IS_EMPTY' }
+];
 
 interface IProps {
   appId: string;
@@ -63,9 +100,10 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     {
       groupName: '默认权限',
       description: '系统提供的默认权限',
-      entityId: 3,
+      entityId: '3',
       entityName: '',
       isOperable: 0,
+      scopeFieldName: '拥有者',
       scopeFieldId: 1,
       scopeLevel: 'self',
       scopeValue: ''
@@ -97,7 +135,11 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     const addDisabled = res.authDataGroups.map((field: AuthDataGroupVO) => ({
       ...field
     }));
-    setDataPermission(addDisabled);
+    setDataPermission((prevDataPermission) => {
+      // 保留第一个默认权限组，将获取到的数据添加到后面
+      const defaultPermission = prevDataPermission[0];
+      return [defaultPermission, ...addDisabled];
+    });
     // setIsAllFieldsAllowed(res.isAllFieldsAllowed || 0);
   };
 
@@ -222,6 +264,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const getFieldCheckType = async (fieldIds: string[]) => {
     const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
     setFilterFieldCheckType(fieldCheckTypeResq);
+    console.log('批量获取字段可选校验类型 fieldCheckTypeResq:', fieldCheckTypeResq);
   };
 
   /**
@@ -512,14 +555,18 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                       <>
                         且
                         {perm.dataFilters.map((group, groupIndex: number) => (
-                          <span key={groupIndex}>
-                            {group.map((filter, filterIndex: number) => (
-                              <Tag
-                                color="#E8FFEA"
-                                style={{ color: '#00B42A', margin: '0 4px' }}
-                                key={`${groupIndex}-${filterIndex}`}
-                              >
-                                {filter.fieldName} {filter.fieldOperator} {filter.fieldValueType} {filter.fieldValue}
+                          <span key={`groupIndex-${groupIndex}`}>
+                            {group.map((filter) => (
+                              <Tag color="#E8FFEA" style={{ color: '#00B42A', margin: '0 4px' }} key={filter.id}>
+                                {filter.fieldName}
+                                {/* {filter.fieldOperator} */}{' '}
+                                {operatorOptions.find((option) => option.value === filter.fieldOperator)?.label ||
+                                  filter.fieldOperator}{' '}
+                                {filter.fieldValueType
+                                  ? opCodeOptions.find((option) => option.value === filter.fieldValueType)?.label ||
+                                    filter.fieldValueType
+                                  : ''}{' '}
+                                {filter.fieldValue}
                               </Tag>
                             ))}
                             {groupIndex < perm.dataFilters!.length - 1 && <span>或</span>}
