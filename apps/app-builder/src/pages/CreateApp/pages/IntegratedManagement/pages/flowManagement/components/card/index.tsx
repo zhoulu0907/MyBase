@@ -1,5 +1,5 @@
 import { Button, Dropdown, Menu, Message, Switch, Tooltip } from '@arco-design/web-react';
-import { IconRobot, IconDown } from '@arco-design/web-react/icon';
+import { IconDown } from '@arco-design/web-react/icon';
 import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
