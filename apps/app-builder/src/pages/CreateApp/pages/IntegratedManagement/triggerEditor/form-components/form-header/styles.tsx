@@ -6,6 +6,7 @@ export const Header = styled.div`
   border-radius: 8px 8px 0 0;
   background: linear-gradient(#f2f2ff 0%, rgb(251, 251, 251) 100%);
   padding: 8px 8px 0;
+  overflow: hidden;
 `;
 export const Content = styled.div`
   box-sizing: border-box;
@@ -14,12 +15,10 @@ export const Content = styled.div`
   align-items: center;
   width: 100%;
   column-gap: 8px;
-  overflow: hidden;
 `;
 export const Footer = styled.div`
   padding-left: 4px;
   width: 100%;
-  column-gap: 8px;
   font-weight: 400;
   font-size: 12px;
   line-height: 20px;

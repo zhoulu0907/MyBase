@@ -1,4 +1,4 @@
-import { Button, Dropdown, Menu, Message, Switch, Tooltip } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Message, Switch, Typography } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
@@ -62,9 +62,9 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
         </div>
         <div className={styles.cardHeaderContent}>
           <div className={styles.cardHeaderContentTitle}>{data.processName}</div>
-          <Tooltip content={data.processDescription}>
-            <div className={styles.cardHeaderContentDesc}>{data.processDescription}</div>
-          </Tooltip>
+          <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentDesc}>
+            {data.processDescription}
+          </Typography.Text>
         </div>
         {/* data.triggerType  TriggerType.FORM */}
         <div className={styles.cardHeaderTag}>
