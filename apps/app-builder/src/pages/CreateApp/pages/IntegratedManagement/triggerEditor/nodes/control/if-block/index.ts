@@ -1,4 +1,4 @@
-import iconIf from '@/assets/flow/icon-if.png';
+import iconControl from '@/assets/flow/nodes/control.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -24,7 +24,7 @@ export const IFBlockNodeRegistry: FlowNodeRegistry = {
     }
   },
   info: {
-    icon: iconIf,
+    icon: iconControl,
     description: ''
   },
   canAdd: () => false,

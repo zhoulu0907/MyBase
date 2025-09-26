@@ -1,4 +1,4 @@
-import iconTryCatch from '@/assets/flow/icon-trycatch.svg';
+import iconControl from '@/assets/flow/nodes/control.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -9,7 +9,7 @@ export const TryCatchNodeRegistry: FlowNodeRegistry = {
   title: '异常处理节点',
   category: 'control',
   info: {
-    icon: iconTryCatch,
+    icon: iconControl,
     description: '异常捕获'
   },
   meta: {
