@@ -10,7 +10,7 @@ import { useIsSidebar } from '../../hooks';
 import { clearDataOriginNodeId } from '../../nodes/utils';
 import { FlowCommandId } from '../../shortcuts/constants';
 import { type FlowNodeRegistry } from '../../typings';
-import { Header, Operators, Content,Footer } from './styles';
+import { Header, Operators, Content, Footer } from './styles';
 import { TitleInput } from './title-input';
 import { getIcon } from './utils';
 
@@ -126,7 +126,7 @@ export function FormHeader() {
       {!isSidebar && (
         <Footer>
           <span>ID:</span>
-          <span style={{paddingLeft:'12px'}}>{node.id}</span>
+          <span style={{ paddingLeft: '12px' }}>{node.id}</span>
         </Footer>
       )}
     </Header>
