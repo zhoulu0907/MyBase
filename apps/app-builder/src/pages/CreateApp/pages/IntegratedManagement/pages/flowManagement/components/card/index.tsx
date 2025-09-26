@@ -61,7 +61,9 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
           <img src={entityIcon} alt="" />
         </div>
         <div className={styles.cardHeaderContent}>
-          <div className={styles.cardHeaderContentTitle}>{data.processName}</div>
+          <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentTitle}>
+            {data.processName}
+          </Typography.Text>
           <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentDesc}>
             {data.processDescription}
           </Typography.Text>
