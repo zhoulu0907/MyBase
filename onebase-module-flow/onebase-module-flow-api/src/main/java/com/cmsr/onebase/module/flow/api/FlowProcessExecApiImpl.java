@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.api;
 
-import com.cmsr.onebase.framework.express.ExpressionAssistant;
+import com.cmsr.onebase.module.flow.context.express.ExpressionAssistant;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;

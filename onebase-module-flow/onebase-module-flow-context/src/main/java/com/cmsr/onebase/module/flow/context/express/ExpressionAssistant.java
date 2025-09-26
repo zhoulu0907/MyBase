@@ -1,5 +1,6 @@
-package com.cmsr.onebase.framework.express;
+package com.cmsr.onebase.module.flow.context.express;
 
+import com.cmsr.onebase.framework.common.express.OpEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mvel2.MVEL;

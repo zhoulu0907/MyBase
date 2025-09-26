@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
-import com.cmsr.onebase.framework.express.ExpressionAssistant;
+import com.cmsr.onebase.module.flow.context.express.ExpressionAssistant;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessFormRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;

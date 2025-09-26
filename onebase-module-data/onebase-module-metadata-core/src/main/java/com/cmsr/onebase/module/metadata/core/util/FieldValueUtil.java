@@ -9,8 +9,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.framework.express.OpEnum;
-import com.cmsr.onebase.framework.express.JdbcTypeConvertor;
+import com.cmsr.onebase.framework.common.express.OpEnum;
+import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
 
 import lombok.extern.slf4j.Slf4j;
 

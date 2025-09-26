@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.metadata.core.util;
 
 import org.springframework.util.StringUtils;
 
-import com.cmsr.onebase.framework.express.OpEnum;
+import com.cmsr.onebase.framework.common.express.OpEnum;
 
 import lombok.extern.slf4j.Slf4j;
 

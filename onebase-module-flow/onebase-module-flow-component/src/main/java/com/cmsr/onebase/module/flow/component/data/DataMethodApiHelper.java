@@ -1,14 +1,17 @@
 package com.cmsr.onebase.module.flow.component.data;
 
-import com.cmsr.onebase.framework.express.OperatorTypeEnum;
+import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
+import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.OrderDto;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +30,7 @@ public class DataMethodApiHelper {
      * @param data 包含查询条件的Map数据
      * @return 转换后的EntityFieldDataReqDTO对象
      */
-    public EntityFieldDataReqDTO convert(Map<String, Object> data, VariableContext variableContext) {
+    public EntityFieldDataReqDTO convertQueryReq(Map<String, Object> data, VariableContext variableContext) {
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
 
         // 设置实体ID
@@ -57,7 +60,7 @@ public class DataMethodApiHelper {
      * @param data 包含查询条件的Map数据
      * @return 转换后的条件DTO列表
      */
-    private static List<List<ConditionDTO>> processFilterCondition(Map<String, Object> data, VariableContext variableContext) {
+    private List<List<ConditionDTO>> processFilterCondition(Map<String, Object> data, VariableContext variableContext) {
         List<Map<String, Object>> filterCondition = (List<Map<String, Object>>) MapUtils.getObject(data, "filterCondition");
         if (filterCondition == null || filterCondition.isEmpty()) {
             return null;
@@ -80,11 +83,9 @@ public class DataMethodApiHelper {
                     // 设置操作符
                     conditionDTO.setOperator(MapUtils.getString(innerCondition, "op"));
 
-                    OperatorTypeEnum operatorType = OperatorTypeEnum.getByCode(MapUtils.getString(innerCondition, "operatorType"));
+                    String operatorType = MapUtils.getString(innerCondition, "operatorType");
                     Object value = MapUtils.getObject(innerCondition, "value");
-                    if (operatorType == OperatorTypeEnum.VARIABLE) {
-                        value = variableContext.getVariableByExpression(value.toString());
-                    }
+                    value = convertValue(operatorType, value, variableContext);
                     // 设置字段值
 
                     if (value != null) {
@@ -104,13 +105,36 @@ public class DataMethodApiHelper {
         return conditionDTOList.isEmpty() ? null : conditionDTOList;
     }
 
+    public Object convertValue(String operatorType, Object value, VariableContext variableContext) {
+        OperatorTypeEnum operatorTypeEnum = OperatorTypeEnum.getByCode(operatorType);
+        if (operatorTypeEnum == OperatorTypeEnum.VALUE) {
+            return value;
+        }
+        if (operatorTypeEnum == OperatorTypeEnum.VARIABLE) {
+            return variableContext.getVariableByExpression(value.toString());
+        }
+        return value;
+    }
+
+    public Object convertValue(int i, String operatorType, Object value, VariableContext variableContext) {
+        OperatorTypeEnum operatorTypeEnum = OperatorTypeEnum.getByCode(operatorType);
+        if (operatorTypeEnum == OperatorTypeEnum.VALUE) {
+            return value;
+        }
+        if (operatorTypeEnum == OperatorTypeEnum.VARIABLE) {
+            String expression = value.toString();
+            return variableContext.getVariableByExpression(i, expression);
+        }
+        return value;
+    }
+
     /**
      * 处理排序条件
      *
      * @param data 包含查询条件的Map数据
      * @return 转换后的排序DTO列表
      */
-    private static List<OrderDto> processSortCondition(Map<String, Object> data) {
+    private List<OrderDto> processSortCondition(Map<String, Object> data) {
         List<Map<String, Object>> sortBy = (List<Map<String, Object>>) MapUtils.getObject(data, "sortBy");
         if (sortBy == null || sortBy.isEmpty()) {
             return null;
@@ -132,7 +156,28 @@ public class DataMethodApiHelper {
                 orderDtos.add(orderDto);
             }
         }
-
         return orderDtos.isEmpty() ? null : orderDtos;
     }
+
+
+    public Map<String, Object> convertToMap(List<EntityFieldDataRespDTO> fieldDataRespDTOS) {
+        Map<String, Object> map = new HashMap<>();
+        for (EntityFieldDataRespDTO fieldDataRespDTO : fieldDataRespDTOS) {
+            String key = String.valueOf(fieldDataRespDTO.getFieldId());
+            Object value = JdbcTypeConvertor.convert(fieldDataRespDTO.getJdbcType(), fieldDataRespDTO.getFieldValue());
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public List<Map<String, Object>> convertToListMap(List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (List<EntityFieldDataRespDTO> fieldDataRespDTOS : fieldDataRespDTOSS) {
+            Map<String, Object> map = convertToMap(fieldDataRespDTOS);
+            list.add(map);
+        }
+        return list;
+    }
+
+
 }

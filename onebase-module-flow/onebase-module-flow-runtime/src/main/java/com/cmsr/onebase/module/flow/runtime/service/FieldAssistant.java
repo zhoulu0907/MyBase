@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
-import com.cmsr.onebase.framework.express.JdbcTypeConvertor;
-import com.cmsr.onebase.framework.express.ConditionItem;
-import com.cmsr.onebase.framework.express.RuleItem;
+import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
+import com.cmsr.onebase.module.flow.context.express.ConditionItem;
+import com.cmsr.onebase.module.flow.context.express.RuleItem;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
@@ -33,7 +33,7 @@ public class FieldAssistant {
      * 使用下面的方法，先查询到具体的数据JDBC类型
      * com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi#getFieldJdbcTypes(com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO)
      * 然后根据下面的方法转换成具体的类型
-     * com.cmsr.onebase.framework.express.JdbcTypeConvertor#convert(String, java.lang.Object)
+     * com.cmsr.onebase.framework.common.express.JdbcTypeConvertor#convert(String, java.lang.Object)
      *
      * @param inputParams
      * @return

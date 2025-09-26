@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.express;
+package com.cmsr.onebase.framework.common.express;
 
 /**
  * @Author：huangjie
