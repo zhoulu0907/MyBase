@@ -23,20 +23,6 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
     runtime = true
   } = props;
 
-  const [value, setValue] = useState('');
-  const [InputStatus, setInputStatus] = useState<undefined | 'error' | 'warning'>();
-
-  // 手机号校验正则
-  const validateEmail = (email: string) => /^1[3-9]\d{9}$/.test(email);
-
-  useEffect(() => {
-    if (value && !validateEmail(value)) {
-      setInputStatus('error');
-      return;
-    }
-    setInputStatus(undefined);
-  }, [value]);
-
   return (
     <div className='formWrapper'>
       <Form.Item
@@ -48,7 +34,13 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
           style: { width: labelColSpan, flex: 'unset' }
         }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
+        rules={[
+          { required: verify?.required },
+          {
+            match: /^1[3-9]\d{9}$/,
+            message: '请输入有效的11位中国大陆手机号'
+          }
+        ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -58,7 +50,6 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
         {
           status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
             <Input
-              status={InputStatus}
               defaultValue={defaultValue}
               style={{
                 width: '100%',
@@ -68,7 +59,6 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
                 pointerEvents: runtime ? 'unset' : 'none'
               }}
               placeholder={placeholder}
-              onChange={setValue}
             />
         }
       </Form.Item>

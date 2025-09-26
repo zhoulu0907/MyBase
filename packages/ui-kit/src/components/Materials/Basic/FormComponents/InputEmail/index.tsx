@@ -23,20 +23,6 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
     runtime = true
   } = props;
 
-  const [value, setValue] = useState('');
-  const [InputStatus, setInputStatus] = useState<undefined | 'error' | 'warning'>();
-
-  // 邮箱校验正则
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  useEffect(() => {
-    if (value && !validateEmail(value)) {
-      setInputStatus('error');
-      return;
-    }
-    setInputStatus(undefined);
-  }, [value]);
-
   return (
     <div className='formWrapper'>
       <Form.Item
@@ -49,15 +35,11 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
         }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
-          { required: verify?.required }
-          // { type: "email", message: "请输入合法的邮件地址" },
-          // {
-          //     validator: (value) => {
-          //         if (!value) return true;
-          //         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          //         return regex.test(value);
-          //     },
-          // },
+          { required: verify?.required },
+          {
+            match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: '请输入合法的邮箱地址'
+          }
         ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -69,7 +51,6 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
         {
           status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
             <Input
-              status={InputStatus}
               defaultValue={defaultValue}
               style={{
                 width: '100%',
@@ -79,7 +60,6 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
                 pointerEvents: runtime ? 'unset' : 'none'
               }}
               placeholder={placeholder}
-              onChange={setValue}
             />
         }
       </Form.Item>
