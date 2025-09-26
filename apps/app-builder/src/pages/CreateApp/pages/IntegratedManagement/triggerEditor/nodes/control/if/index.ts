@@ -1,4 +1,4 @@
-import iconIf from '@/assets/flow/icon-if.png';
+import iconControl from '@/assets/flow/nodes/control.svg';
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
@@ -11,7 +11,7 @@ export const IFNodeRegistry: FlowNodeRegistry = {
   title: '条件节点',
   category: 'control',
   info: {
-    icon: iconIf,
+    icon: iconControl,
     description: '只会执行满足设定条件相应的分支。'
   },
   meta: {
@@ -31,7 +31,9 @@ export const IFNodeRegistry: FlowNodeRegistry = {
           type: NodeType.IF_BLOCK,
           data: {
             title: '通过',
-            value: true
+            initialData: {
+              value: true
+            }
           },
           blocks: []
         },
@@ -40,7 +42,9 @@ export const IFNodeRegistry: FlowNodeRegistry = {
           type: NodeType.IF_BLOCK,
           data: {
             title: '不通过',
-            value: false
+            initialData: {
+              value: false
+            }
           }
         }
       ]

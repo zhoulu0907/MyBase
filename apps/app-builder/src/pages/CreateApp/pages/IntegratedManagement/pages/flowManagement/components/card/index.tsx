@@ -1,9 +1,10 @@
-import { Button, Dropdown, Menu, Message, Switch,Tooltip } from '@arco-design/web-react';
-import { IconRobot } from '@arco-design/web-react/icon';
+import { Button, Dropdown, Menu, Message, Switch, Typography } from '@arco-design/web-react';
+import { IconDown } from '@arco-design/web-react/icon';
 import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
 import styles from './index.module.less';
+import entityIcon from '@/assets/flow/flowManage/entity.png';
 
 /**
  * FlowCard 组件
@@ -56,19 +57,24 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
           toFlowEditor(data.applicationId, data.id);
         }}
       >
-        <div className={styles.cardHeaderLeft}>
-          <div className={styles.cardHeaderLeftIcon}>
-            <IconRobot />
-          </div>
-          <div className={styles.cardHeaderLeftContent}>
-            <div className={styles.cardHeaderLeftContentTitle}>{data.processName}</div>
-            <Tooltip content={data.processDescription}>
-              <div className={styles.cardHeaderLeftContentDesc}>{data.processDescription}</div>
-            </Tooltip>
-          </div>
+        <div className={styles.cardHeaderIcon}>
+          <img src={entityIcon} alt="" />
         </div>
-        <div className={styles.cardHeaderRight}>
-          <div className={styles.cardHeaderRightTitle}>{showTriggerType()}</div>
+        <div className={styles.cardHeaderContent}>
+          <div className={styles.cardHeaderContentTitle}>{data.processName}</div>
+          <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentDesc}>
+            {data.processDescription}
+          </Typography.Text>
+        </div>
+        {/* data.triggerType  TriggerType.FORM */}
+        <div className={styles.cardHeaderTag}>
+          <div
+            className={
+              data.triggerType === TriggerType.FORM ? styles.cardHeaderTagTitle : styles.cardHeaderBlueTagTitle
+            }
+          >
+            {showTriggerType()}
+          </div>
         </div>
       </div>
       <div
@@ -98,12 +104,13 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
             checked={data.processStatus === ProcessStatus.ENABLED}
             onChange={(checked) => handleChangeProcessStatus(data.id, checked)}
           />
+          <span>{data.processStatus === ProcessStatus.ENABLED ? '已启用' : '禁用'}</span>
         </div>
         <div className={styles.cardFooterRight}>
           <Button type="text" size="small" onClick={() => handleEdit(data.id)}>
             编辑
           </Button>
-          <Button type="text" size="small">
+          <Button type="text" size="small" className={styles.cardFooterRightBtn}>
             调试
           </Button>
           <Dropdown
@@ -117,8 +124,9 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
               </Menu>
             }
           >
-            <Button type="text" size="small">
+            <Button type="text" size="small" className={styles.cardFooterRightBtn}>
               更多
+              <IconDown />
             </Button>
           </Dropdown>
         </div>

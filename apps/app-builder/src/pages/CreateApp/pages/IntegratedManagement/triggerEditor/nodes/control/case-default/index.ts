@@ -1,4 +1,4 @@
-import iconCase from '@/assets/flow/icon-case.png';
+import iconControl from '@/assets/flow/nodes/control.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -26,7 +26,7 @@ export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
     }
   },
   info: {
-    icon: iconCase,
+    icon: iconControl,
     description: '默认分支'
   },
   canDelete: (ctx, node) => false,
