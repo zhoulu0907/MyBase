@@ -119,6 +119,9 @@ const FlowManagementPage: React.FC = () => {
   const handleCreateFlow = async () => {
     try {
       setFormLoading(true);
+
+      await form.validate();
+
       const req: CreateFlowMgmtReq = {
         applicationId: curAppId,
         processName: form.getFieldValue('processName'),
@@ -165,6 +168,9 @@ const FlowManagementPage: React.FC = () => {
   const handleUpdateFlowMgmt = async () => {
     try {
       setFormLoading(true);
+
+      await form.validate();
+
       const req: UpdateFlowMgmtReq = {
         id: form.getFieldValue('id'),
         applicationId: curAppId,
