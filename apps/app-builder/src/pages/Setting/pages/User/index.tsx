@@ -1,6 +1,6 @@
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
-import { getDeptList, getUserPage, type DeptVO } from '@onebase/platform-center';
+import { getDeptList, getUserPage } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';

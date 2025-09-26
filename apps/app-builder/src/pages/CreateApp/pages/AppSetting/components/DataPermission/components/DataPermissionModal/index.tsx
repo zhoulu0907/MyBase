@@ -86,9 +86,19 @@ const DataPermissionModal = (props: IProps) => {
       fieldType: field.fieldType
     }));
     setConditionFields(convertedFields);
+    console.log('initialFormValues:', initialFormValues.scopeValue);
+    // 如果 initialFormValues 有 scopeValue，需要将其转换为成员对象数组
+    if (initialFormValues.scopeValue && Array.isArray(initialFormValues.scopeValue)) {
+      // 假设 scopeValue 是用户ID数组，需要从 dataPermissionPerson 中查找对应用户信息
+      const memberObjects = initialFormValues.scopeValue.map((id: string) => {
+        const person = dataPermissionPerson.find((p) => p.PersonId === id);
+        return person ? { key: id, name: person.displayName } : { key: id, name: id };
+      });
+      setSelectedMembers(memberObjects);
+    }
 
     setDataFilters(dataFilters);
-  }, [appEntityFields, dataFilters]);
+  }, [appEntityFields, dataFilters, initialFormValues, dataPermissionPerson]);
   // 操作权限 全选反选
   function onChangeAll(checked: boolean) {
     setCheckAll(checked);
@@ -310,7 +320,7 @@ const DataPermissionModal = (props: IProps) => {
           </FormItem>
           {/* 数据过滤 */}
           <ConditionEditor
-            nodeId="10" // 问问：这个值从哪里来？
+            nodeId=""
             form={form}
             label="数据过滤"
             required={false}

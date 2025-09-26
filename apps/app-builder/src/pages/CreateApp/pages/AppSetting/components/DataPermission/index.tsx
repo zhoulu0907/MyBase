@@ -152,14 +152,37 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (id) {
       // 查找要编辑的权限组
       const permToEdit = DataPermission.find((perm) => perm.id === id);
-      if (permToEdit && permToEdit.dataFilters) {
-        // 将后端数据格式转换为condition-editor组件需要的格式
-        const conditionFormat = convertBackendDataToConditionFormat(permToEdit.dataFilters);
+      if (permToEdit) {
+        // 创建编辑数据对象
+        const editingData: any = { ...permToEdit };
+
+        // 处理数据过滤条件
+        if (permToEdit.dataFilters) {
+          // 将后端数据格式转换为condition-editor组件需要的格式
+          const conditionFormat = convertBackendDataToConditionFormat(permToEdit.dataFilters);
+          editingData.filterCondition = conditionFormat;
+        }
+
+        // 处理指定成员或指定部门的情况，将scopeValue从JSON字符串转回数组
+        if (
+          (permToEdit.scopeLevel === 'specifiedPerson' || permToEdit.scopeLevel === 'specifiedDepartment') &&
+          permToEdit.scopeValue
+        ) {
+          let scopeValue = permToEdit.scopeValue;
+          if (typeof scopeValue === 'string') {
+            try {
+              scopeValue = JSON.parse(scopeValue);
+              console.log('JSON.parse(scopeValue) scopeValue:', scopeValue);
+            } catch (e) {
+              console.error('解析scopeValue失败:', e);
+              // 如果解析失败，保持原值
+            }
+          }
+          editingData.scopeValue = scopeValue;
+        }
+
         // 设置正在编辑的数据
-        setEditingPermData({
-          ...permToEdit,
-          filterCondition: conditionFormat
-        });
+        setEditingPermData(editingData);
       }
     } else {
       // 创建模式下清空编辑数据
@@ -278,7 +301,8 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       console.log('进入权限范围是指定的条件判断');
       if (values.scopeValue && values.scopeValue.length > 0) {
         console.log('123');
-        submitData.scopeValue = values.scopeValue.join(',');
+        // submitData.scopeValue = values.scopeValue.join(',');
+        submitData.scopeValue = JSON.stringify(values.scopeValue);
       }
     }
   };
