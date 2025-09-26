@@ -21,7 +21,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [payloadForm]);
 
   const onValuesChange = async (changeValue: any, values: any) => {
-    console.log('变更了',values)
+    console.log('变更了', values);
     // 校验表单
     validateNodeForm(form, payloadForm, false);
     handlePropsOnChange(values);
@@ -71,8 +71,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             {modalType === MODAL_TYPE.INFOR && (
               <>
-                {/* todo 写出组件可拖拽排序 */}
-                <CollectFields form={payloadForm} />
+                <CollectFields data={triggerEditorSignal.nodeData.value[node.id]?.fields || []} form={payloadForm} />
                 <Form.Item label="收集字段排列方式" field="arrange">
                   <Radio.Group>
                     <Radio value={1}>一列</Radio>
@@ -126,12 +125,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                     </>
                   }
                   field="closeWarn"
+                  triggerPropName="checked"
                 >
                   <Switch />
                 </Form.Item>
               </Grid.Col>
               <Grid.Col span={12}>
-                <Form.Item label="弹窗取消后提醒" field="cancelWarn">
+                <Form.Item label="弹窗取消后提醒" field="cancelWarn" triggerPropName="checked">
                   <Switch />
                 </Form.Item>
               </Grid.Col>

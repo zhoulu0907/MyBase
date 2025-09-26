@@ -4,7 +4,7 @@ import { IconDelete, IconDragDotVertical, IconPlusCircle } from '@arco-design/we
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { nanoid } from 'nanoid';
 import styles from './index.module.less';
-import { getFieldTypes } from '@onebase/app';
+import { getFieldTypes, type SelectOption } from '@onebase/app';
 
 interface field {
   id: string;
@@ -24,22 +24,18 @@ const SortableItem = SortableElement((props: any) => {
 });
 
 export interface CollectFieldsProps {
+  data: field[];
   form: FormInstance;
 }
 
-interface FieldType {
-  displayName: string;
-  fieldType: string;
-}
-
-const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
+const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
   const [tableData, setTableData] = useState<field[]>([]);
 
   const columns = [
     {
       title: '字段名称',
       dataIndex: 'fieldName',
-      width:'45%',
+      width: '40%',
       render: (_: any, record: field, index: number) => {
         return (
           <Form.Item field={`fields[${index}].fieldName`} noStyle>
@@ -51,12 +47,12 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
     {
       title: '字段类型',
       dataIndex: 'fieldType',
-      width:'45%',
+      width: '40%',
       render: (_: any, record: field, index: number) => {
-        // todo  select
         return (
           <Form.Item field={`fields[${index}].fieldType`} noStyle>
             <Select
+              placeholder="请选择"
               options={fieldTypeOptions}
               style={{ width: '100%' }}
               showSearch
@@ -72,18 +68,27 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
       title: '操作',
       dataIndex: 'operation',
       render: (_: any, record: field) => {
-        return <Button onClick={() => removeRow(record.id)} type="text" icon={<IconDelete />}></Button>;
+        return (
+          <Button
+            onClick={() => removeRow(record.id)}
+            type="text"
+            icon={<IconDelete style={{ fontSize: '15px', color: '#4E5969'}} />}
+          ></Button>
+        );
       }
     }
   ];
 
-  const [fieldTypeOptions, setFieldTypeOptions] = useState<FieldType[]>([]);
+  const [fieldTypeOptions, setFieldTypeOptions] = useState<SelectOption[]>([]);
 
   useEffect(() => {
     init();
   }, []);
 
   const init = async () => {
+    setTableData(data || []);
+    form.setFieldValue('fields', data || []);
+    // 获取字段类型下拉列表
     const res = await getFieldTypes();
     setFieldTypeOptions(
       res.map((item: any) => ({
@@ -95,18 +100,20 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
 
   // 删除
   const removeRow = (id: string) => {
-    const newtableData = tableData.filter((item: field) => item.id !== id);
+    const newData = form.getFieldValue('fields');
+    const newtableData = newData.filter((item: field) => item.id !== id);
     setTableData(newtableData);
     form.setFieldValue('fields', newtableData);
   };
   // 添加
   const addRow = () => {
+    const newData = form.getFieldValue('fields');
     const temp = {
       id: nanoid(),
-      fieldName: '',
-      fieldType: ''
+      fieldName: undefined,
+      fieldType: undefined
     };
-    const newtableData = [...tableData, temp];
+    const newtableData = [...newData, temp];
     setTableData(newtableData);
     form.setFieldValue('fields', newtableData);
   };
@@ -184,14 +191,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
   };
   return (
     <Form.Item field="fields" className={styles.collectFields} id="collect-field-config">
-      <Table
-        className={styles.collectTable}
-        rowKey="id"
-        components={components}
-        columns={columns}
-        data={tableData}
-        pagination={false}
-      />
+      <Table rowKey="id" components={components} columns={columns} data={tableData} pagination={false} />
       <Button type="text" icon={<IconPlusCircle />} onClick={addRow} className={styles.addBtn}>
         添加收集字段
       </Button>
