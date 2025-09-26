@@ -10,7 +10,7 @@ import { useIsSidebar } from '../../hooks';
 import { clearDataOriginNodeId } from '../../nodes/utils';
 import { FlowCommandId } from '../../shortcuts/constants';
 import { type FlowNodeRegistry } from '../../typings';
-import { Header, Operators } from './styles';
+import { Header, Operators, Content,Footer } from './styles';
 import { TitleInput } from './title-input';
 import { getIcon } from './utils';
 
@@ -94,32 +94,41 @@ export function FormHeader() {
   };
 
   return (
-    <Header
-      onMouseDown={(e) => {
-        // trigger drag node
-        startDrag(e);
-        e.stopPropagation();
-      }}
-    >
-      {getIcon(node)}
-      <TitleInput readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
-      {node.renderData.expandable && !isSidebar && (
-        <Button
-          type="secondary"
-          icon={expanded ? <IconCaretDown /> : <IconCaretLeft />}
-          size="small"
-          onClick={handleExpand}
-        />
+    <Header>
+      <Content
+        onMouseDown={(e) => {
+          // trigger drag node
+          startDrag(e);
+          e.stopPropagation();
+        }}
+      >
+        {getIcon(node)}
+        <TitleInput readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
+        {node.renderData.expandable && !isSidebar && (
+          <Button
+            type="secondary"
+            icon={expanded ? <IconCaretDown /> : <IconCaretLeft />}
+            size="small"
+            onClick={handleExpand}
+          />
+        )}
+        {readonly ? undefined : (
+          <Operators>
+            <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={updateTitleEdit} />}>
+              <Button size="mini" type="secondary" icon={<IconMore />} onClick={(e: Event) => e.stopPropagation()} />
+            </Dropdown>
+          </Operators>
+        )}
+        {/* 如果是在sidebar中，则显示关闭按钮 */}
+        {isSidebar && <Button type="text" icon={<IconClose />} size="small" onClick={handleClose} />}
+      </Content>
+      {/* 如果不是在sidebar中，则显示节点id */}
+      {!isSidebar && (
+        <Footer>
+          <span>ID:</span>
+          <span style={{paddingLeft:'12px'}}>{node.id}</span>
+        </Footer>
       )}
-      {readonly ? undefined : (
-        <Operators>
-          <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={updateTitleEdit} />}>
-            <Button size="mini" type="secondary" icon={<IconMore />} onClick={(e: Event) => e.stopPropagation()} />
-          </Dropdown>
-        </Operators>
-      )}
-      {/* 如果是在sidebar中，则显示关闭按钮 */}
-      {isSidebar && <Button type="text" icon={<IconClose />} size="small" onClick={handleClose} />}
     </Header>
   );
 }
