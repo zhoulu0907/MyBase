@@ -1,7 +1,7 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const DataMapperNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const DataMapperNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `dataMapper_${nanoid()}`,
-      type: 'dataMapper',
+      id: generateNodeId(NodeType.DATA_MAPPER),
+      type: NodeType.DATA_MAPPER,
       data: {
         title: '数据映射节点'
       }

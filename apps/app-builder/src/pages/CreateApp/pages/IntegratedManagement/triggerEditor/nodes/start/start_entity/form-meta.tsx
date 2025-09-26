@@ -73,7 +73,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const entityId = Form.useWatch('entityId', payloadForm);
   const triggerType = Form.useWatch('triggerType', payloadForm);
-  const triggerEvents = Form.useWatch('triggerEvents', payloadForm);
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -88,12 +87,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [entityId]);
 
-  useEffect(() => {
-    if (triggerEvents) {
-      console.log('triggerEvents: ', triggerEvents);
-    }
-  }, [triggerEvents]);
-
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
     setEntityList(res);
@@ -104,10 +97,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (res) {
       console.log(res);
       const newConditionFields: ConfitionField[] = [];
-      const filedIds: string[] = [];
+      const fieldIds: string[] = [];
       const fieldList: any[] = [];
       res.forEach((item: MetadataEntityField) => {
-        filedIds.push(item.id);
+        fieldIds.push(item.id);
         fieldList.push({
           label: item.displayName,
           value: item.id
@@ -120,8 +113,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         });
       });
 
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+      if (fieldIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
         setValidationTypes(newValidationTypes);
       }
 
@@ -214,12 +207,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   label="事件类型"
                   field="triggerEvents"
                   layout="vertical"
-                  triggerPropName="checked"
                   rules={[{ required: true, message: '请选择触发类型' }]}
                 >
                   <CheckboxGroup
                     direction="horizontal"
-                    defaultValue={triggerEvents}
                     options={triggerType === 'before' ? beforeTriggerEvents : afterTriggerEvents}
                   />
                 </Form.Item>

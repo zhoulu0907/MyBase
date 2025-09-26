@@ -4,7 +4,7 @@ import {
   statusConfig,
   widthConfig,
   fillConfig,
-  fileCofig,
+  fileConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType,
@@ -59,7 +59,7 @@ export interface XFileConfig extends ICommonBaseType {
    * 最大限制高度（px）
    */
   maxHeight?: TNumberDefaultType;
-  fileCofig: Files[];
+  fileConfig: Files[];
   verify: {
     required: boolean;
     maxCount: TNumberDefaultType;
@@ -68,13 +68,13 @@ export interface XFileConfig extends ICommonBaseType {
 }
 
 const XFile: XFileSchema = {
-  editData: [...baseConfig, fileCofig, fillConfig, widthConfig, statusConfig],
+  editData: [...baseConfig, fileConfig, fillConfig, widthConfig, statusConfig],
   config: {
     ...baseDefault,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
-    fileCofig:[],
+    fileConfig:[],
     maxHeight: undefined,
     verify: {
       required: false,

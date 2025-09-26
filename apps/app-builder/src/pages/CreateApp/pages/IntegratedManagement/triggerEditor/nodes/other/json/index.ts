@@ -1,7 +1,7 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const JsonNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const JsonNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `json_${nanoid()}`,
-      type: 'json',
+      id: generateNodeId(NodeType.JSON),
+      type: NodeType.JSON,
       data: {
         title: 'JSON节点'
       }

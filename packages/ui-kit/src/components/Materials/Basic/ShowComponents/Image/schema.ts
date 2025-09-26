@@ -4,7 +4,7 @@ import {
   statusConfig,
   widthConfig,
   fillConfig,
-  imageCofig,
+  imageConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType,
@@ -59,7 +59,7 @@ export interface XImageConfig extends ICommonBaseType {
    * 最大限制高度（px）
    */
   maxHeight?: TNumberDefaultType;
-  imageCofig: string;
+  imageConfig: string;
   verify: {
     required: boolean;
     maxSize: TNumberDefaultType;
@@ -67,13 +67,13 @@ export interface XImageConfig extends ICommonBaseType {
 }
 
 const XImage: XImageSchema = {
-  editData: [...baseConfig, imageCofig, fillConfig, widthConfig, statusConfig],
+  editData: [...baseConfig, imageConfig, fillConfig, widthConfig, statusConfig],
   config: {
     ...baseDefault,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
-    imageCofig: '',
+    imageConfig: '',
     maxHeight: undefined,
     verify: {
       required: false,

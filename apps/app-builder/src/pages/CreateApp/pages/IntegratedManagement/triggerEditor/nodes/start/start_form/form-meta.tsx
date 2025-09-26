@@ -83,11 +83,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     const res = await getComponentListByPageId({ pageId: id });
     if (res && res.list) {
       const newConditionFields: ConfitionField[] = [];
-      const filedIds: string[] = [];
+      const fieldIds: string[] = [];
       res.list.forEach((item: ComponentConfig) => {
         const cpConfig = JSON.parse(item.config);
         if (cpConfig.dataField && cpConfig.dataField.length > 1) {
-          filedIds.push(cpConfig.dataField[1]);
+          fieldIds.push(cpConfig.dataField[1]);
 
           newConditionFields.push({
             label: cpConfig.label.text ? cpConfig.label.text : cpConfig.label,
@@ -97,8 +97,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         }
       });
 
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+      if (fieldIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
         setValidationTypes(newValidationTypes);
       }
 

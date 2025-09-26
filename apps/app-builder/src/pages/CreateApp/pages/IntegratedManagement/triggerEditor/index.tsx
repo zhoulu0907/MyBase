@@ -73,13 +73,8 @@ const TriggerEditor = () => {
     const res = await getFlowMgmt(id);
     console.log('res: ', res);
 
-    // if (res.triggerConfig && res.triggerConfig.pageId) {
-    //   setPageId(res.triggerConfig.pageId);
-    // }
-
     // 已保存的节点数据回显
     if (res.processDefinition?.length) {
-      console.log('res.processDefinition: ', res.processDefinition);
       const processDefinitionJson = JSON.parse(res.processDefinition);
       let data = {};
       let nodes = processDefinitionJson.nodes || [];
@@ -89,9 +84,9 @@ const TriggerEditor = () => {
       for (let item of nodes) {
         data = { ...data, [item.id]: item.data };
         // 初始化输出节点
-        console.log('item.id: ', item.id);
+        // console.log('item.id: ', item.id);
         if (item.output) {
-          console.log('item.output: ', item.output);
+          // console.log('item.output: ', item.output);
           triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
         }
       }
