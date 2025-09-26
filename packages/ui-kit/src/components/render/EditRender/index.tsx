@@ -91,10 +91,10 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
         return <LayoutComp.XColumnLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} />;
-      case LAYOUT_COMPONENT_TYPES.TABS:
-        return <LayoutComp.XTabs cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LAYOUT_COMPONENT_TYPES.COLLAPSE_L:
-        return <LayoutComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
+        return <LayoutComp.XTabsLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} />;
+      case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
+        return <LayoutComp.XCollapseLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:

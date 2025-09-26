@@ -1,0 +1,109 @@
+import { useEffect, useState, memo } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import { Collapse } from '@arco-design/web-react';
+import { useSignals } from '@preact/signals-react/runtime';
+import {
+  COMPONENT_GROUP_NAME,
+  EditRender,
+  getComponentWidth,
+  usePageEditorSignal,
+  type GridItem
+} from '@/index';
+import type { XCollapseLayoutConfig } from './schema';
+import { STATUS_OPTIONS, STATUS_VALUES, COLLAPSED_VALUES, COLLAPSED_OPTIONS } from '../../../constants';
+import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
+import './index.css';
+
+const CollapseItem = Collapse.Item;
+
+const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
+  const { id, label, colCount = 1, status, collapsed } = props;
+  useSignals();
+
+  const {
+    setCurComponentID,
+    setCurComponentSchema,
+    pageComponentSchemas,
+    layoutSubComponents,
+    setLayoutSubComponents,
+    setShowDeleteButton,
+  } = usePageEditorSignal();
+
+  const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
+  const [activeKey, setActiveKey] = useState<string[]>([]);
+
+  useEffect(() => {
+    const currentColumns = layoutSubComponents[id];
+    if (!currentColumns || currentColumns.length !== colCount) {
+      const newColumns = Array.from({ length: colCount }, () => []);
+      setLayoutSubComponents(id, newColumns);
+    }
+  }, [colCount, id, colComponents]);
+
+  useEffect(() => {
+    setActiveKey(collapsed === COLLAPSED_VALUES[COLLAPSED_OPTIONS.EXPOSED] ? ['1'] : []);
+  }, [collapsed]);
+
+  return (
+    <Collapse
+      className='XPreviewCollapseLayout'
+      bordered={false}
+      activeKey={activeKey}
+      expandIconPosition='right'
+      expandIcon={<img src={IconCollapsedDown} alt='' />}
+      onChange={(_, key) => setActiveKey(key)}
+      style={{
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+    >
+      <CollapseItem header={label.text} name='1' contentStyle={{ backgroundColor: '#fff', paddingLeft: 13, paddingTop: 20, borderTop: '1px solid #ccc' }}>
+        {colComponents.map((_colComponents, index) => (
+          <div className="item" key={index}>
+            <ReactSortable
+              id={`workspace-content-${id}-${index}`}
+              className="content"
+              list={colComponents[index]}
+              setList={(newList) => {
+                colComponents[index] = newList;
+              }}
+              group={{
+                name: COMPONENT_GROUP_NAME
+              }}
+              animation={150}
+            >
+              {colComponents[index] &&
+                colComponents[index].map((cp: GridItem) => (
+                  <div
+                    key={cp.id}
+                    data-cp-type={cp.type}
+                    data-cp-displayname={cp.displayName}
+                    data-cp-id={cp.id}
+                    className='componentItem'
+                    style={{
+                      width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
+                    }}
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                      e.stopPropagation();
+                      setCurComponentID(cp.id);
+                      const curComponentSchema = pageComponentSchemas[cp.id];
+                      setCurComponentSchema(curComponentSchema);
+                      setShowDeleteButton(true);
+                    }}
+                  >
+                    <EditRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      runtime={true}
+                      pageComponentSchema={pageComponentSchemas[cp.id]}
+                    />
+                  </div>
+                ))}
+            </ReactSortable>
+          </div>
+        ))}
+      </CollapseItem>
+    </Collapse>
+  );
+});
+
+export default XPreviewCollapseLayout;

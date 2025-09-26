@@ -36,8 +36,10 @@ export const FORM_COMPONENT_TYPES = {
 export const LAYOUT_COMPONENT_TYPES = {
   COLUMN_LAYOUT: 'XColumnLayout',
   PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout',
-  TABS: 'XTabs',
-  COLLAPSE_L: 'XLCollapse'
+  TABS_LAYOUT: 'XTabsLayout',
+  PREVIEW_TABS_LAYOUT: 'XPreviewTabsLayout',
+  COLLAPSE_LAYOUT: 'XCollpaseLayout',
+  PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollpaseLayout'
 } as const;
 
 // 列表组件类型

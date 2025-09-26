@@ -36,13 +36,13 @@ import type {
   ICollapsedConfigType
 } from '../../../types';
 
-export interface XCollapseSchema {
-  editData: XCollapseEditData;
-  config: XCollapseConfig;
+export interface XCollapseLayoutSchema {
+  editData: XCollapseLayoutEditData;
+  config: XCollapseLayoutConfig;
 }
 
 export type TColumnCountSelectKeyType = (typeof COLUMN_COUNT_OPTIONS)[keyof typeof COLUMN_COUNT_OPTIONS];
-export type XCollapseEditData = Array<
+export type XCollapseLayoutEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -54,7 +54,7 @@ export type XCollapseEditData = Array<
   | ICollapsedConfigType<TCollapsedSelectKeyType>
 >;
 
-export interface XCollapseConfig extends ICommonBaseType {
+export interface XCollapseLayoutConfig extends ICommonBaseType {
   /**
    * 输入框标题
    * text：标题
@@ -87,7 +87,7 @@ export interface XCollapseConfig extends ICommonBaseType {
   collapsed: TSelectDefaultType<TCollapsedSelectKeyType>;
 }
 
-const XLCollapse: XCollapseSchema = {
+const XLCollapseLayout: XCollapseLayoutSchema = {
   editData: [
     ...baseConfig,
     {
@@ -112,4 +112,4 @@ const XLCollapse: XCollapseSchema = {
   }
 };
 
-export default XLCollapse;
+export default XLCollapseLayout;

@@ -12,8 +12,8 @@ import {
 export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   // 布局组件
   [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: '分栏布局',
-  [LAYOUT_COMPONENT_TYPES.TABS]: '页签组件',
-  [LAYOUT_COMPONENT_TYPES.COLLAPSE_L]: '折叠组件',
+  [LAYOUT_COMPONENT_TYPES.TABS_LAYOUT]: '页签组件',
+  [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: '折叠组件',
 
   // 表单组件
   [FORM_COMPONENT_TYPES.INPUT_TEXT]: '单行文本',
@@ -81,18 +81,18 @@ const allTemplate = {
           category: 'base'
         },
         {
-          type: LAYOUT_COMPONENT_TYPES.TABS,
+          type: LAYOUT_COMPONENT_TYPES.TABS_LAYOUT,
           h: 36,
           w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.TABS],
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.TABS_LAYOUT],
           icon: 'col_layout_cp.svg', // todo
           category: 'base'
         },
         {
-          type: LAYOUT_COMPONENT_TYPES.COLLAPSE_L,
+          type: LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT,
           h: 36,
           w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.COLLAPSE_L],
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT],
           icon: 'col_layout_cp.svg', // todo
           category: 'base'
         }

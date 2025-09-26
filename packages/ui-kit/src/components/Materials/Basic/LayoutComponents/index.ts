@@ -1,11 +1,15 @@
 import XColumnLayout from './ColumnLayout';
 import XPreviewColumnLayout from './PreviewColumnLayout';
-import XCollapse from './Collapse';
-import XTabs from './Tabs';
+import XCollapseLayout from './CollapseLayout';
+import XPreviewCollapseLayout from './PreviewCollapseLayout';
+import XTabsLayout from './TabsLayout';
+import XPreviewTabsLayout from './PreviewTabsLayout';
 
 export const LayoutComp = {
   XColumnLayout,
   XPreviewColumnLayout,
-  XCollapse,
-  XTabs
+  XCollapseLayout,
+  XPreviewCollapseLayout,
+  XTabsLayout,
+  XPreviewTabsLayout
 };

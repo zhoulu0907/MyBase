@@ -31,8 +31,6 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
-  console.log('componentConfig',componentConfig)
-
   // 渲染对应的组件
   const renderComponent = () => {
     switch (cpType) {
@@ -89,11 +87,11 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} />;
-      case LAYOUT_COMPONENT_TYPES.TABS:
-        return <LayoutComp.XTabs cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LAYOUT_COMPONENT_TYPES.COLLAPSE_L:
-        return <LayoutComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
+      case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
+        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} />;
+      case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
+        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:

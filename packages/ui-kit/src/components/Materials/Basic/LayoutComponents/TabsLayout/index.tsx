@@ -17,18 +17,17 @@ import CompDeleteIcon from '@/assets/images/app_delete.svg';
 // import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 // import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 // import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XTabsConfig } from './schema';
+import type { XTabsLayoutConfig } from './schema';
 import './index.css';
 
 const TabPane = Tabs.TabPane;
 
-const leftPanelWidth = 343;
+const leftPanelWidth = 318;
 const rightPanelWidth = 310;
-const canvasPaddingWidth = 40 + 32 + 10;
-const canvasMarginWidth = 10;
-const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
+const canvasPaddingWidth = 40;
+const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth;
 
-const XTabs = memo((props: XTabsConfig & { runtime?: boolean }) => {
+const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean }) => {
   const { id, defaultValue = [], type, colCount, tabPosition, runtime = true } = props;
   useSignals();
 
@@ -100,16 +99,14 @@ const XTabs = memo((props: XTabsConfig & { runtime?: boolean }) => {
   };
 
   return (
-    <Tabs activeTab={activeTab} type={type} tabPosition={tabPosition} onClickTab={(e) => setActiveTab(e)} style={{
+    <Tabs className='XTabsLayout' activeTab={activeTab} type={type} tabPosition={tabPosition} onClickTab={(e) => setActiveTab(e)} style={{
       maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth}px)`,
     }}>
       {
         defaultValue?.map((tab, index) => (
           <TabPane key={tab.key} title={tab.title} style={{ padding: 0 }}>
-            <div className="item">
-
+            <div className="item" key={index}>
               <ReactSortable
-                key={tab.key}
                 id={`workspace-content-${id}`}
                 className="content"
                 list={colComponents[index]}
@@ -243,4 +240,4 @@ const XTabs = memo((props: XTabsConfig & { runtime?: boolean }) => {
   );
 });
 
-export default XTabs;
+export default XTabsLayout;

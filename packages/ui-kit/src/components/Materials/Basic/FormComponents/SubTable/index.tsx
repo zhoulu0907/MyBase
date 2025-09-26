@@ -11,12 +11,12 @@ import DragableTable from './dragableTable';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { COMPONENT_GROUP_NAME } from 'src/utils/const';
 import { STATUS_OPTIONS, STATUS_VALUES, LAYOUT_VALUES, LAYOUT_OPTIONS } from '../../../constants';
-import { ALL_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { getComponentSchema } from '../../../schema';
 import { type XSubTableConfig } from './schema';
 import './index.css';
 
-const leftPanelWidth = 343;
+const leftPanelWidth = 318;
 const rightPanelWidth = 310;
 const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
@@ -28,18 +28,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
   useSignals();
 
   const {
-    curComponentID,
-    setComponents,
     setCurComponentID,
-    clearCurComponentID,
-    curComponentSchema,
     setCurComponentSchema,
     pageComponentSchemas,
     setPageComponentSchemas,
-    delPageComponentSchemas,
-    showDeleteButton,
     setShowDeleteButton,
-
     layoutSubComponents,
     setLayoutSubComponents
   } = usePageEditorSignal();

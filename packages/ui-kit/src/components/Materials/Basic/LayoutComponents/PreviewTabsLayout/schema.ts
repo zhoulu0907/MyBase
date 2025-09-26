@@ -17,7 +17,6 @@ import {
   TABS_POSITION_OPTIONS,
   TABS_POSITION_VALUES,
   COLUMN_COUNT_OPTIONS,
-  COLUMN_COUNT_VALUES,
 } from '../../../constants';
 import type {
   IBooleanConfigType,
@@ -28,18 +27,17 @@ import type {
   IWidthConfigType,
   TSelectDefaultType,
   ITabsConfigType,
-  TRadioDefaultType,
   ITabsTypeConfigType,
   ITabsPositionConfigType,
 } from '../../../types';
 
-export interface XTabsSchema {
-  editData: XTabsEditData;
-  config: XTabsConfig;
+export interface XTabsLayoutSchema {
+  editData: XTabsLayoutEditData;
+  config: XTabsLayoutConfig;
 }
 
 export type TColumnCountSelectKeyType = (typeof COLUMN_COUNT_OPTIONS)[keyof typeof COLUMN_COUNT_OPTIONS];
-export type XTabsEditData = Array<
+export type XTabsLayoutEditData = Array<
   | ITextConfigType
   | IPlaceholderConfigType
   | IWidthConfigType<TWidthSelectKeyType>
@@ -51,7 +49,7 @@ export type XTabsEditData = Array<
   | ITabsPositionConfigType<TTabsPositionSelectKeyType>
 >;
 
-export interface XTabsConfig extends ICommonBaseType {
+export interface XTabsLayoutConfig extends ICommonBaseType {
 
   /**
    * 默认值
@@ -94,7 +92,7 @@ const defaultValue = [
   }
 ]
 
-const XTabs: XTabsSchema = {
+const XTabsLayout: XTabsLayoutSchema = {
   editData: [
     ...baseConfig,
     tabsConfig,
@@ -112,4 +110,4 @@ const XTabs: XTabsSchema = {
   }
 };
 
-export default XTabs;
+export default XTabsLayout;
