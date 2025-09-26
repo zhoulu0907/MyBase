@@ -4,6 +4,7 @@ import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowM
 import dayjs from 'dayjs';
 import React from 'react';
 import styles from './index.module.less';
+import entityIcon from '@/assets/flow/flowManage/entity.png';
 
 /**
  * FlowCard 组件
@@ -57,7 +58,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
         }}
       >
         <div className={styles.cardHeaderIcon}>
-          <IconRobot />
+          <img src={entityIcon} alt="" />
         </div>
         <div className={styles.cardHeaderContent}>
           <div className={styles.cardHeaderContentTitle}>{data.processName}</div>
