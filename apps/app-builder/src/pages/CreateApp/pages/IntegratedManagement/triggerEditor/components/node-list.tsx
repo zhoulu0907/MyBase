@@ -63,7 +63,7 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
         <Tabs.TabPane key="data" title="数据节点">
           {showNodes(dataNodes)}
         </Tabs.TabPane>
-        {nodes.value[0]?.type === NodeType.START_FORM && (
+        {nodes.value && nodes.value.length && nodes.value[0].type === NodeType.START_FORM && (
           <Tabs.TabPane key="interaction" title="交互节点">
             {showNodes(interactionNodes)}
           </Tabs.TabPane>
