@@ -297,13 +297,13 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
 
                       <Grid.Col span={8}>
                         {form.getFieldValue(item.field + '.operatorType') == undefined && (
-                          <Form.Item field={item.field + '.fieldValue'}>
+                          <Form.Item field={item.field + '.value'}>
                             <Input placeholder="请输入" disabled />
                           </Form.Item>
                         )}
 
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE &&
-                          StaticValueComponent(item.field + '.fieldValue', form.getFieldValue(item.field + '.fieldId'))}
+                          StaticValueComponent(item.field + '.value', form.getFieldValue(item.field + '.fieldId'))}
 
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VARIABLES && (
                           <Form.Item field={item.field + '.value'}>
