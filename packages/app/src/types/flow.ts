@@ -88,3 +88,10 @@ export interface SelectOption {
   label: string;
   value: string;
 }
+
+// 弹窗类型
+export enum MODAL_TYPE {
+  CONFIRM = 'confirm',
+  INFOR = 'infor',
+  CUSTOM = 'custom'
+}
