@@ -57,12 +57,17 @@ public class JsonGraph {
         if (StringUtils.equalsAny(node.getType(),
                 "startForm", "startEntity", "startTime", "startDateField", "startAPI", "startBPM",
                 "end",
+                "log",
                 "dataQuery", "dataQueryMultiple", "dataAdd", "dataDelete", "dataUpdate")) {
             return toDefine(node);
-        } else if (Objects.equals(node.getType(), "loop")) {
+        } else if (StringUtils.equals(node.getType(), "loop")) {
             return loopNodeDefine(deep, node);
-        } else if (Objects.equals(node.getType(), "switch")) {
+        } else if (StringUtils.equals(node.getType(), "switch")) {
             return switchNodeDefine(deep, node);
+        } else if (StringUtils.equals(node.getType(), "ifCase")) {
+            return ifNodeDefine(deep, node);
+        } else if (StringUtils.equals(node.getType(), "ifBlock")) {
+            return ifBlockNodeDefine(deep, node);
         }
         throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }
@@ -106,10 +111,43 @@ public class JsonGraph {
         return define.toString();
     }
 
+    private String ifNodeDefine(int deep, JsonGraphNode node) {
+        List<JsonGraphNode> blocks = node.getBlocks();
+        //TODO 必须通过某些属性判断
+        JsonGraphNode trueNode = blocks.get(0);
+        JsonGraphNode falseNode = blocks.get(1);
+
+        StringBuilder define = new StringBuilder();
+        define.append("IF(").append(toDefine(node)).append(",");
+        define.append(ifBlockNodeDefine(deep + 1, trueNode)).append(",");
+        define.append(ifBlockNodeDefine(deep + 1, falseNode)).append("");
+        define.append(NEW_LINE).append(")");
+
+        return define.toString();
+    }
+
+    private String ifBlockNodeDefine(int deep, JsonGraphNode jsonGraphNode) {
+        if (CollectionUtils.isEmpty(jsonGraphNode.getBlocks())) {
+            return NEW_LINE + repeatIndent(deep) + "noop";
+        }
+        String blocksNodeDefine = blocksNodeDefine(deep, jsonGraphNode.getBlocks());
+        StringBuilder define = new StringBuilder();
+        define.append(NEW_LINE).append(blocksNodeDefine).append(".tag(\"").append(jsonGraphNode.getId()).append("\")");
+        return define.toString();
+    }
+
     private String toDefine(JsonGraphNode node) {
         StringBuilder define = new StringBuilder();
-        define.append(node.getType()).append(".tag(\"").append(node.getId()).append("\")");
+        define.append(formatNodeType(node.getType())).append(".tag(\"").append(node.getId()).append("\")");
         return define.toString();
+    }
+
+    private String formatNodeType(String type) {
+        if (StringUtils.equals(type, "if")) {
+            return "ifCmp";
+        } else {
+            return type;
+        }
     }
 
     private static String repeatIndent(int deep) {

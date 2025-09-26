@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.express;
+package com.cmsr.onebase.framework.common.express;
 
 /**
  * 操作符枚举

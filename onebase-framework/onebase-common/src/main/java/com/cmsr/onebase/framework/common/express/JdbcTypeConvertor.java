@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.express;
+package com.cmsr.onebase.framework.common.express;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +19,8 @@ public class JdbcTypeConvertor {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER_NANO = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
 
     /**
      * 将数据库类型转换为对应的Java类型
@@ -93,9 +95,14 @@ public class JdbcTypeConvertor {
         try {
             // 尝试解析为标准时间格式
             return LocalDateTime.parse(stringValue, TIMESTAMP_FORMATTER);
-        } catch (DateTimeParseException e1) {
-            throw new IllegalArgumentException("无效的TIMESTAMP格式: " + stringValue, e1);
+        } catch (DateTimeParseException e) {
         }
+        try {
+            // 尝试解析为带有毫秒的格式
+            return LocalDateTime.parse(stringValue, TIMESTAMP_FORMATTER_NANO);
+        } catch (DateTimeParseException e) {
+        }
+        throw new IllegalArgumentException("无效的TIMESTAMP格式: " + stringValue);
     }
 
 
@@ -135,7 +142,7 @@ public class JdbcTypeConvertor {
         if (value instanceof LocalDate) {
             return value;
         }
-        if(value instanceof java.sql.Date){
+        if (value instanceof java.sql.Date) {
             return ((java.sql.Date) value).toLocalDate();
         }
         String stringValue = value.toString();
