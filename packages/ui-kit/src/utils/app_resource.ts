@@ -186,8 +186,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
         });
       }
 
+      const layoutList: string[] = [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT, FORM_COMPONENT_TYPES.SUB_TABLE, LAYOUT_COMPONENT_TYPES.COLLAPSE_L, LAYOUT_COMPONENT_TYPES.TABS];
+
       // 载入布局组件的列数初始化
-      if (component.componentType === LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT || component.componentType === FORM_COMPONENT_TYPES.SUB_TABLE) {
+      if (layoutList.includes(component.componentType)) {
         const config = JSON.parse(component.config);
         const colCount = config.colCount;
         const columns: any[][] = [];

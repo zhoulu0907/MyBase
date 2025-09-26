@@ -84,12 +84,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
         return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DATA_SELECT:
         return <FormComp.XDataSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.TABS:
-        return <FormComp.XTabs cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
         return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} />;
+      case LAYOUT_COMPONENT_TYPES.TABS:
+        return <LayoutComp.XTabs cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case LAYOUT_COMPONENT_TYPES.COLLAPSE_L:
+        return <LayoutComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:

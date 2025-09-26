@@ -12,6 +12,8 @@ import {
 export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   // 布局组件
   [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: '分栏布局',
+  [LAYOUT_COMPONENT_TYPES.TABS]: '页签组件',
+  [LAYOUT_COMPONENT_TYPES.COLLAPSE_L]: '折叠组件',
 
   // 表单组件
   [FORM_COMPONENT_TYPES.INPUT_TEXT]: '单行文本',
@@ -39,7 +41,6 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.CAROUSEL_F]: '轮播图',
   [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
   [FORM_COMPONENT_TYPES.DATA_SELECT]: '选择数据',
-  [FORM_COMPONENT_TYPES.TABS]: '页签组件',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -77,6 +78,22 @@ const allTemplate = {
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT],
           icon: 'col_layout_cp.svg',
+          category: 'base'
+        },
+        {
+          type: LAYOUT_COMPONENT_TYPES.TABS,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.TABS],
+          icon: 'col_layout_cp.svg', // todo
+          category: 'base'
+        },
+        {
+          type: LAYOUT_COMPONENT_TYPES.COLLAPSE_L,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.COLLAPSE_L],
+          icon: 'col_layout_cp.svg', // todo
           category: 'base'
         }
       ]
@@ -273,14 +290,6 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATA_SELECT],
-          icon: 'readonly_cp.svg', // todo
-          category: 'base'
-        },
-        {
-          type: FORM_COMPONENT_TYPES.TABS,
-          h: 36,
-          w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.TABS],
           icon: 'readonly_cp.svg', // todo
           category: 'base'
         }

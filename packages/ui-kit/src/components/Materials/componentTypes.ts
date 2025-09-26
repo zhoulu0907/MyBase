@@ -29,14 +29,15 @@ export const FORM_COMPONENT_TYPES = {
   RICH_TEXT: 'XRichText',
   CAROUSEL_F: 'XFCarousel',
   SUB_TABLE: 'XSubTable',
-  DATA_SELECT: 'XDataSelect',
-  TABS: 'XTabs',
+  DATA_SELECT: 'XDataSelect'
 } as const;
 
 // 布局组件类型
 export const LAYOUT_COMPONENT_TYPES = {
   COLUMN_LAYOUT: 'XColumnLayout',
-  PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout'
+  PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout',
+  TABS: 'XTabs',
+  COLLAPSE_L: 'XLCollapse'
 } as const;
 
 // 列表组件类型

@@ -349,6 +349,13 @@ export interface ISubTableConfigType {
   type: typeof CONFIG_TYPES.SUB_TABLE;
 }
 
+// 页签组件配置
+export interface ITabsConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS;
+}
+
 // 页签组件类型
 export interface ITabsTypeConfigType<KeyType> {
   key: string;
@@ -369,6 +376,18 @@ export interface ITabsPositionConfigType<KeyType> {
   range: Array<{
     key: string;
     label: string;
+    value: KeyType;
+  }>;
+}
+
+// 折叠配置
+export interface ICollapsedConfigType<KeyType> {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLLAPSED;
+  range: Array<{
+    key: string;
+    text: string;
     value: KeyType;
   }>;
 }
