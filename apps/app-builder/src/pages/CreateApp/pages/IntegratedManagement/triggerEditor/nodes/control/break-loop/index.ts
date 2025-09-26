@@ -1,4 +1,4 @@
-import iconBreak from '@/assets/flow/icon-break.svg';
+import iconControl from '@/assets/flow/nodes/control.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -12,7 +12,7 @@ export const BreakLoopNodeRegistry: FlowNodeRegistry = {
   category: 'control',
   extend: 'end',
   info: {
-    icon: iconBreak,
+    icon: iconControl,
     description: '中断当前循环'
   },
   meta: {

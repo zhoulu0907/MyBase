@@ -1,4 +1,4 @@
-import iconLoop from '@/assets/flow/icon-loop.svg';
+import iconLoop from '@/assets/flow/nodes/loop.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
