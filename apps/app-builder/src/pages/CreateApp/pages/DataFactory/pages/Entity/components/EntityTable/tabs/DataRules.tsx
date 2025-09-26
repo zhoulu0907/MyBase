@@ -2,11 +2,12 @@ import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/i
 import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Dropdown, Menu, Message, Space, Table, Tag } from '@arco-design/web-react';
-import { getEntityRules } from '@onebase/app';
+import * as ruleService from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { CreateCustomRule, CreateOtherRule } from '../../Modals';
+import { CreateCustomRule, CreateOtherRule, DeleteConfirmModal } from '../../Modals';
 import { VALIDATION_TYPES, validationTypeList, validationTypeMap } from '../../Modals/CreateEditRuleModal/rule';
 import styles from './tabs.module.less';
+import { deleteRelation } from '@onebase/app';
 
 interface DataRulesProps {
   entity: EntityListItem;
@@ -21,6 +22,8 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
   const [total, setTotal] = useState(0);
   const [createCustomRuleModalVisible, setCreateCustomRuleModalVisible] = useState(false);
   const [createOtherRuleModalVisible, setCreateOtherRuleModalVisible] = useState(false);
+  const [deleteConfirmModalVisible, setDeleteConfirmModalVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [ruleType, setRuleType] = useState('');
   const [editRule, setEditRule] = useState(null);
   const loadRules = async () => {
@@ -32,7 +35,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
         pageSize: page.pageSize,
         appId: curAppId
       };
-      const response = await getEntityRules(params);
+      const response = await ruleService.getEntityRules(params);
       console.log('getEntityRules', response);
       if (response?.list) {
         setRules(response.list || []);
@@ -58,8 +61,50 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     }
   };
 
+  const handleClickMenu = (value: string) => {
+    setEditRule(null);
+    setRuleType(value);
+    if (value === VALIDATION_TYPES.CUSTOM) {
+      // 自定义校验
+      setCreateCustomRuleModalVisible(true);
+    } else {
+      // 其他校验类型
+      setCreateOtherRuleModalVisible(true);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleteLoading(true);
+
+    const ruleHandlers = {
+      [VALIDATION_TYPES.REQUIRED]: ruleService.deleteRequiredRule,
+      [VALIDATION_TYPES.UNIQUE]: ruleService.deleteUniqueRule,
+      [VALIDATION_TYPES.LENGTH]: ruleService.deleteLengthRule,
+      [VALIDATION_TYPES.RANGE]: ruleService.deleteRangeRule,
+      [VALIDATION_TYPES.FORMAT]: ruleService.deleteFormatRule,
+      [VALIDATION_TYPES.SUBTABLE_EMPTY]: ruleService.deleteChildNotEmptyRule
+    };
+
+    try {
+      const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
+      const res = await handler(editRule?.id || '');
+
+      setDeleteConfirmModalVisible(false);
+      if (res) {
+        Message.success('删除成功');
+        loadRules();
+      }
+    } catch (error) {
+      console.error('删除校验规则失败:', error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const handleDelete = (record: any) => {
-    console.log('handleDelete', record);
+    setRuleType(record.validationType);
+    setEditRule(record);
+    setDeleteConfirmModalVisible(true);
   };
 
   const columns: TableColumnProps[] = [
@@ -121,18 +166,6 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     }
   }, [entity, activeTab, page]);
 
-  const handleClickMenu = (value: string) => {
-    setEditRule(null);
-    setRuleType(value);
-    if (value === VALIDATION_TYPES.CUSTOM) {
-      // 自定义校验
-      setCreateCustomRuleModalVisible(true);
-    } else {
-      // 其他校验类型
-      setCreateOtherRuleModalVisible(true);
-    }
-  };
-
   return (
     <div className={styles.dataRules}>
       <div className={styles.header}>
@@ -181,6 +214,16 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
         entity={entity}
         ruleType={ruleType}
         editRule={editRule}
+      />
+      <DeleteConfirmModal
+        visible={deleteConfirmModalVisible}
+        onVisibleChange={setDeleteConfirmModalVisible}
+        onConfirm={handleDeleteConfirm}
+        confirmLoading={deleteLoading}
+        title="确认删除"
+        content="确定要删除这个校验规则吗？删除后无法恢复。"
+        okText="确认删除"
+        cancelText="取消"
       />
     </div>
   );

@@ -145,7 +145,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       isSystemField: FIELD_TYPE.CUSTOM,
       sortOrder: fields.length + 1
     };
-    const newFields = [...activeFields, newField];
+    const customFields = getCurrentTableData();
+    const newFields = [...customFields, newField];
     setFields(newFields);
     form.setFieldsValue({ fields: newFields });
   };
@@ -162,6 +163,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     } else {
       newFields = fields.map((field, i) => (i === index ? { ...field, isDeleted: true } : field));
     }
+
     setFields(newFields);
     form.setFieldsValue({ fields: newFields });
   };
@@ -189,9 +191,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
       const formValues = await form.validate();
       console.log('formValues', formValues);
-      const formFields = formValues.fields || [];
 
-      const customFields = getCurrentTableData(formFields);
+      const customFields = getCurrentTableData();
       console.log('customFields', customFields);
 
       const fieldDataList = customFields.map((field: FieldFormValues) => {
@@ -292,7 +293,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     setConfigPopoverVisible,
     setConstraintsPopoverVisible,
     renderFieldConfigContent,
-    updateField,
     getFieldIndex,
     deleteField,
     fields
@@ -322,9 +322,12 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   };
 
   // 将表单数据转换为表格数据
-  const getCurrentTableData = (formFields: FieldFormValues[]) => {
+  const getCurrentTableData = (formFields?: Partial<FieldFormValues>) => {
+    const formValues = form.getFieldsValue();
+    const fields = formFields || formValues.fields || [];
+
     return activeFields.map((originalField, index) => {
-      const formField = formFields[index];
+      const formField = fields[index];
       if (formField) {
         return {
           ...originalField,
