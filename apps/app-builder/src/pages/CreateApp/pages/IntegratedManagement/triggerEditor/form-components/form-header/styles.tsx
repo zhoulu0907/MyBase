@@ -17,6 +17,7 @@ export const Content = styled.div`
   column-gap: 8px;
 `;
 export const Footer = styled.div`
+  padding-top: 4px;
   padding-left: 4px;
   width: 100%;
   font-weight: 400;
