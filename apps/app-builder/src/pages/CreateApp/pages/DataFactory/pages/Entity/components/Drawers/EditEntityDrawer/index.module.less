@@ -2,8 +2,6 @@
 
 .edit-entity-drawer {
   .drawer-style();
-  transition: transform 0.3s ease;
-  height: calc(100% - 112px) !important;
 }
 
 .drawerHandleButton {
@@ -51,12 +49,12 @@
 }
 
 .tab-sidebar {
-  width: 200px;
+  width: 32px;
   border-right: 1px solid #e5e6eb;
   background-color: #ffffff;
   border-radius: 4px 0 0 4px;
   position: absolute;
-  right: 396px;
+  right: 500px;
   top: 0;
   
   .arco-tabs {
@@ -91,12 +89,14 @@
   }
 }
 
-.tab-item {
-  padding: 0;
-  width: 32px;
-  height: 90px;
-  writing-mode: vertical-lr;
-  .flex-center();
+.tab-sidebar {
+  :global(.arco-tabs-header-title) {
+    padding: 0 !important;
+    width: 32px;
+    height: 90px;
+    writing-mode: vertical-lr;
+    .flex-center();
+  }
 }
 
 .drawer-container {

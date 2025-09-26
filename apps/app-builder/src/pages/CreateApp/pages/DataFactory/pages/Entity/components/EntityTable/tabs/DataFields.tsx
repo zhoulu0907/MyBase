@@ -71,12 +71,13 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       content: '确定要删除这个字段吗？删除后无法恢复。',
       onOk: async () => {
         try {
-          await deleteField(fieldId);
-          Message.success('删除字段成功');
-          loadFields(); // 重新加载字段列表
+          const res = await deleteField(fieldId);
+          if (res) {
+            Message.success('删除字段成功');
+            loadFields(); // 重新加载字段列表
+          }
         } catch (error) {
           console.error('删除字段失败:', error);
-          Message.error('删除字段失败');
         }
       }
     });
