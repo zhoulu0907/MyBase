@@ -2,11 +2,12 @@ import { useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import { useCallback, useContext, useMemo, useState } from 'react';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Dropdown, Menu } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretLeft, IconClose, IconMore } from '@arco-design/web-react/icon';
-import { clearDataOriginNodeId } from '../../nodes/utils';
 import { NodeRenderContext } from '../../context';
 import { useIsSidebar } from '../../hooks';
+import { clearDataOriginNodeId } from '../../nodes/utils';
 import { FlowCommandId } from '../../shortcuts/constants';
 import { type FlowNodeRegistry } from '../../typings';
 import { Header, Operators } from './styles';
@@ -29,9 +30,16 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
+      console.log('delete node: ', node.id);
+
       // 删除相关应用的节点配置
       clearDataOriginNodeId(node.id);
+
+      triggerEditorSignal.setNodeId(undefined);
       triggerEditorSignal.deleteNodeData(node.id);
+
+      triggerNodeOutputSignal.removeTriggerNodeOutput(node.id);
+
       deleteNode();
       e.stopPropagation(); // Disable clicking prevents the sidebar from opening
     },

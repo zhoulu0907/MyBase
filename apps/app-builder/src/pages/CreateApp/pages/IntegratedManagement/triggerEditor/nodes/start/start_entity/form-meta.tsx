@@ -97,10 +97,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (res) {
       console.log(res);
       const newConditionFields: ConfitionField[] = [];
-      const filedIds: string[] = [];
+      const fieldIds: string[] = [];
       const fieldList: any[] = [];
       res.forEach((item: MetadataEntityField) => {
-        filedIds.push(item.id);
+        fieldIds.push(item.id);
         fieldList.push({
           label: item.displayName,
           value: item.id
@@ -113,8 +113,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         });
       });
 
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+      if (fieldIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
         setValidationTypes(newValidationTypes);
       }
 

@@ -18,6 +18,8 @@ export const generateNodeId = (nodeType: NodeType) => {
 // 清除数据节点依赖关系
 export const clearDataOriginNodeId = (nodeId: string) => {
   const nodeData = triggerEditorSignal.nodeData.value;
+  console.log('555555:    ', nodeData);
+
   const keys = Object.keys(triggerEditorSignal.nodeData.value);
   for (let key of keys) {
     if (nodeData[key].dataNodeId === nodeId) {
@@ -27,6 +29,30 @@ export const clearDataOriginNodeId = (nodeId: string) => {
         sortBy: [] // 清除已选择排序字段
       });
     }
+
+    // TODO(mickey): 对条件进行检查删除条件
+    if (nodeData[key].filterCondition) {
+      let newFilterCondition = [];
+
+      for (let filterCondition of nodeData[key].filterCondition) {
+        // TODO(mickey): remove debug log
+        console.log('XXX: ', filterCondition);
+
+        filterCondition.conditions = filterCondition.conditions
+          .filter((c: any) => !c.fieldId.startsWith(nodeId))
+          .filter((c: any) => c.value && !c.value.startsWith(nodeId));
+        if (filterCondition.conditions.length > 0) {
+          newFilterCondition.push(filterCondition);
+        }
+      }
+
+      triggerEditorSignal.setNodeData(key, {
+        ...nodeData[key],
+        filterCondition: newFilterCondition
+      });
+    }
+
+    // TODO(mickey): 对字段进行检查
   }
 };
 
@@ -186,10 +212,10 @@ export const getEntityFieldList = async (
     return;
   }
   const res = await getEntityFields({ entityId: dataSource });
-  const filedIds: string[] = [];
+  const fieldIds: string[] = [];
   const newConditionFields: ConfitionField[] = [];
   res.forEach((item: any) => {
-    filedIds.push(item.id);
+    fieldIds.push(item.id);
     newConditionFields.push({
       label: item.displayName,
       value: item.id,
@@ -198,8 +224,8 @@ export const getEntityFieldList = async (
   });
 
   setConditionFields(newConditionFields);
-  if (filedIds?.length) {
-    const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+  if (fieldIds?.length) {
+    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
     setValidationTypes(newValidationTypes);
   }
 };

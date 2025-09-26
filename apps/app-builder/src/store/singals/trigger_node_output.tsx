@@ -9,7 +9,7 @@ export const createTriggerNodeOutputSignal = () => {
     nodeOutputs.value[nodeId] = output;
   };
 
-  const removeTriggerNodeOutput = (nodeId: string, output: any) => {
+  const removeTriggerNodeOutput = (nodeId: string) => {
     delete nodeOutputs.value[nodeId];
   };
 

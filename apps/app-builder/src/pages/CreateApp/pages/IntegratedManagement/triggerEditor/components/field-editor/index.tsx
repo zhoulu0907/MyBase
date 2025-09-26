@@ -25,6 +25,7 @@ export interface FieldEditorProps {
   nodeId: string;
   form: FormInstance;
   fieldList: AppEntityField[];
+  dataNodeId?: string;
 }
 
 const valueTypeOptions = [
@@ -32,7 +33,7 @@ const valueTypeOptions = [
   { label: '变量', value: FieldType.VARIABLES }
 ];
 
-const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) => {
+const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, dataNodeId }) => {
   const [selectedFields, setSelectedFields] = useState<any[]>();
 
   const fields = Form.useWatch('fields', form);
@@ -88,7 +89,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
     if (targetField?.fieldType == ENTITY_FIELD_TYPE.DATETIME.VALUE) {
       return (
         <Form.Item field={fieldName}>
-          <DatePicker showTime placeholder="请输入静态值" />
+          <DatePicker showTime placeholder="请输入静态值" style={{ width: '100%' }} />
         </Form.Item>
       );
     }
@@ -100,18 +101,19 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
     );
   };
 
-  const getVariableOptions = (nodeId: string): TreeSelectDataType[] => {
+  const getVariableOptions = (nodeId: string, dataNodeId?: string): TreeSelectDataType[] => {
     const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM];
 
-    const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
-    // console.log('nodes: ', nodes);
+    let nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
+
+    if (dataNodeId) {
+      nodes = triggerEditorSignal.nodes.value.filter((node) => node.id == dataNodeId);
+    }
 
     const options: TreeSelectDataType[] = [];
 
     nodes.forEach((node) => {
       const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
-
-      //   console.log('nodeOutput: ', nodeOutput);
 
       const treeNode = {
         key: node.id,
@@ -264,7 +266,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
               <>
                 {fields.map((item: any, index: number) => {
                   return (
-                    <Grid.Row gutter={8} key={item.key}>
+                    <Grid.Row gutter={8} key={item.key} align="center">
                       <Grid.Col span={6}>
                         <Form.Item field={item.field + '.fieldId'} rules={[{ required: true, message: '请选择字段' }]}>
                           <Select
@@ -281,7 +283,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
                       </Grid.Col>
 
                       <Grid.Col span={2}>
-                        <div style={{ lineHeight: '32px' }}>的值设为</div>
+                        <div style={{ marginBottom: '15px' }}>的值设为</div>
                       </Grid.Col>
 
                       <Grid.Col span={5}>
@@ -306,12 +308,12 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VARIABLES && (
                           <Form.Item field={item.field + '.value'}>
                             <TreeSelect
-                              treeData={getVariableOptions(nodeId)}
+                              treeData={getVariableOptions(nodeId, dataNodeId)}
                               triggerElement={(params) => {
                                 return (
                                   <Input
                                     readOnly
-                                    value={showTriggerElement(params, getVariableOptions(nodeId))}
+                                    value={showTriggerElement(params, getVariableOptions(nodeId, dataNodeId))}
                                   ></Input>
                                 );
                               }}
@@ -321,9 +323,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
                       </Grid.Col>
 
                       <Grid.Col span={2}>
-                        <Button
-                          type="text"
-                          icon={<IconDelete />}
+                        <IconDelete
+                          style={{ fontSize: '15px', color: '#4E5969', marginBottom: '15px' }}
                           onClick={() => {
                             remove(index);
                             setSelectedFields(form.getFieldValue('fields'));
