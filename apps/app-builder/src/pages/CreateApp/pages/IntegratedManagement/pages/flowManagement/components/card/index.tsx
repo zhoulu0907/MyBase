@@ -1,4 +1,4 @@
-import { Button, Dropdown, Menu, Message, Switch,Tooltip } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Message, Switch, Tooltip } from '@arco-design/web-react';
 import { IconRobot } from '@arco-design/web-react/icon';
 import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
@@ -98,6 +98,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
             checked={data.processStatus === ProcessStatus.ENABLED}
             onChange={(checked) => handleChangeProcessStatus(data.id, checked)}
           />
+          <span>{data.processStatus === ProcessStatus.ENABLED ? '已启用' : '禁用'}</span>
         </div>
         <div className={styles.cardFooterRight}>
           <Button type="text" size="small" onClick={() => handleEdit(data.id)}>

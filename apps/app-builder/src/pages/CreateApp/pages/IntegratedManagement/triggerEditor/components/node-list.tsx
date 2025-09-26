@@ -2,6 +2,8 @@ import { Tabs } from '@arco-design/web-react';
 import { FlowNodeEntity, FlowNodeRegistry, useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import { FlowNodeRegistries } from '../nodes';
 import styles from './index.module.less';
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { NodeType } from '../nodes/const';
 
 function Node(props: { label: string; icon: JSX.Element; onClick: () => void }) {
   return (
@@ -32,10 +34,10 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
     (registry) => registry.category === 'other'
   );
 
-  const showNodes = (nodes: FlowNodeRegistry[]) => {
+  const showNodes = (nodeList: FlowNodeRegistry[]) => {
     return (
       <div className={styles.nodePanel}>
-        {nodes.map(
+        {nodeList.map(
           (registry) =>
             (registry.canAdd?.(context, props.from) ?? true) && (
               <Node
@@ -50,6 +52,8 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
     );
   };
 
+  const { nodes } = triggerEditorSignal;
+
   return (
     <div className={styles.nodeList} style={{ width: 400 }}>
       <Tabs>
@@ -59,9 +63,11 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
         <Tabs.TabPane key="data" title="数据节点">
           {showNodes(dataNodes)}
         </Tabs.TabPane>
-        <Tabs.TabPane key="interaction" title="交互节点">
-          {showNodes(interactionNodes)}
-        </Tabs.TabPane>
+        {nodes.value[0]?.type === NodeType.START_FORM && (
+          <Tabs.TabPane key="interaction" title="交互节点">
+            {showNodes(interactionNodes)}
+          </Tabs.TabPane>
+        )}
         <Tabs.TabPane key="other" title="其他节点">
           {showNodes(otherNodes)}
         </Tabs.TabPane>
