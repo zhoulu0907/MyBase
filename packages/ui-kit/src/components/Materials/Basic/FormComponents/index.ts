@@ -23,8 +23,6 @@ import XSwitch from './Switch';
 import XTimePicker from './TimePicker';
 import XUserSelect from './UserSelect';
 import XSubTable from './SubTable';
-import XCollapse from './Collapse';
-import XTabs from './Tabs';
 
 export const FormComp = {
   XInputText,
@@ -51,7 +49,5 @@ export const FormComp = {
   XRichText,
   XCarousel,
   XSubTable,
-  XDataSelect,
-  XCollapse,
-  XTabs
+  XDataSelect
 };

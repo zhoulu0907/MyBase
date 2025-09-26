@@ -26,7 +26,7 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
     <div className={styles.configs}>
       <div className={styles.componentName}>
         <div className={styles.icon}>{ICON_Map_By_Type[curComponentSchema?.type]}</div>
-        {curComponentSchema.config?.cpName}
+        {curComponentSchema?.config?.cpName}
       </div>
       <div className={styles.componentInfo}>
         <Tabs defaultActiveTab="attributes" type="line" size="default">

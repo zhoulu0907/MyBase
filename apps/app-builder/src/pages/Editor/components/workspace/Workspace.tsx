@@ -103,15 +103,13 @@ export default function EditorWorkspace() {
       const schema = getComponentSchema(originalComp.type);
 
       schema.config = schemaConfig;
-      schema.config.cpName = originalComp.displayName || '';
+      schema.config.cpName = comp.displayName || '';
       schema.config.id = newId; // 使用新 ID
 
+      console.debug('newProps', schema, originalComp)
       const newProps = {
         id: newId,
-        type: originalComp.type,
-        displayName: originalComp.displayName,
-        chosen: originalComp.chosen,
-        selected: originalComp.selected,
+        type: comp.type,
         ...schema
       };
 
@@ -126,7 +124,7 @@ export default function EditorWorkspace() {
       // 2. 复制子组件结构
       if (layoutSubComponents[oldId]) {
         const newSubComponents = layoutSubComponents[oldId].map(row =>
-          row.map(item => {
+          row.map((item: any) => {
             // 为每个子组件创建新 ID
             const childNewId = idMap.get(item.id) || `${item.type}-${uuidv4()}`;
 
@@ -173,8 +171,8 @@ export default function EditorWorkspace() {
       // 递归收集需要删除的组件 ID
       function collectDeleteIds(id: string) {
         if (layoutSubComponents[id]) {
-          layoutSubComponents[id].forEach(row => {
-            row.forEach(({ id: childId }) => {
+          layoutSubComponents[id].forEach((row: any) => {
+            row.forEach(({ id: childId }: { id: string }) => {
               if (!idsToDelete.has(childId)) {
                 idsToDelete.add(childId);
                 // 递归收集子组件的子组件

@@ -18,7 +18,9 @@ import {
   WIDTH_VALUES,
   TABS_TYPE_OPTIONS,
   TABS_POSITION_OPTIONS,
-  TABS_POSITION_VALUES
+  TABS_POSITION_VALUES,
+  COLLAPSED_OPTIONS,
+  COLLAPSED_VALUES
 } from './constants';
 import type {
   IAlignConfigType,
@@ -39,10 +41,12 @@ import type {
   TTextDefaultType,
   ISelectDataSourceConfigType,
   ISubTableConfigType,
+  ITabsConfigType,
   ITabsTypeConfigType,
   ITabsPositionConfigType,
   IImageConfigType,
-  IFileConfigType
+  IFileConfigType,
+  ICollapsedConfigType
 } from './types';
 
 export interface ICommonBaseType {
@@ -376,6 +380,12 @@ export const subTableConfig: ISubTableConfigType = {
   type: CONFIG_TYPES.SUB_TABLE
 };
 
+export const tabsConfig: ITabsConfigType = {
+  key: 'tabs',
+  name: '多标签显示',
+  type: CONFIG_TYPES.TABS
+};
+
 // 页签样式
 export type TTabsTypeSelectKeyType = (typeof TABS_TYPE_OPTIONS)[keyof typeof TABS_TYPE_OPTIONS];
 export const tabsTypeConfig: ITabsTypeConfigType<TTabsTypeSelectKeyType> = {
@@ -415,6 +425,7 @@ export const tabsTypeConfig: ITabsTypeConfigType<TTabsTypeSelectKeyType> = {
     }
   ]
 };
+
 // 页签位置
 export type TTabsPositionSelectKeyType = (typeof TABS_POSITION_VALUES)[keyof typeof TABS_POSITION_VALUES];
 export const tabsPositionConfig: ITabsPositionConfigType<TTabsPositionSelectKeyType> = {
@@ -455,4 +466,23 @@ export const fileConfig: IFileConfigType = {
   key: 'file',
   name: '图片',
   type: CONFIG_TYPES.FILE
+};
+
+export type TCollapsedSelectKeyType = (typeof COLLAPSED_VALUES)[keyof typeof COLLAPSED_VALUES];
+export const collapsedConfig: ICollapsedConfigType<TCollapsedSelectKeyType> = {
+  key: 'collapsed',
+  name: '默认展示样式',
+  type: CONFIG_TYPES.COLLAPSED,
+  range: [
+    {
+      key: COLLAPSED_OPTIONS.EXPOSED,
+      text: COLLAPSED_OPTIONS.EXPOSED,
+      value: COLLAPSED_VALUES[COLLAPSED_OPTIONS.EXPOSED]
+    },
+    {
+      key: COLLAPSED_OPTIONS.COLLAPSED,
+      text: COLLAPSED_OPTIONS.COLLAPSED,
+      value: COLLAPSED_VALUES[COLLAPSED_OPTIONS.COLLAPSED]
+    }
+  ]
 };

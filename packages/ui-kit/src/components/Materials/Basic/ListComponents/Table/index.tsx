@@ -15,7 +15,7 @@ import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import './index.css';
 import type { XTableConfig } from './schema';
 
-const leftPanelWidth = 343;
+const leftPanelWidth = 318;
 const rightPanelWidth = 310;
 const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
