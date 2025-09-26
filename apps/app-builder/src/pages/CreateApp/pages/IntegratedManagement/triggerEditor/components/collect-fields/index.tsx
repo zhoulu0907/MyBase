@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid';
 import styles from './index.module.less';
 import { getFieldTypes, type SelectOption } from '@onebase/app';
 
-interface field {
+interface Field {
   id: string;
   fieldName?: string;
   fieldType?: string;
@@ -24,19 +24,19 @@ const SortableItem = SortableElement((props: any) => {
 });
 
 export interface CollectFieldsProps {
-  data: field[];
+  data: Field[];
   form: FormInstance;
 }
 
 const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
-  const [tableData, setTableData] = useState<field[]>([]);
+  const [tableData, setTableData] = useState<Field[]>([]);
 
   const columns = [
     {
       title: '字段名称',
       dataIndex: 'fieldName',
       width: '40%',
-      render: (_: any, record: field, index: number) => {
+      render: (_: any, record: Field, index: number) => {
         return (
           <Form.Item field={`fields[${index}].fieldName`} noStyle>
             <Input placeholder="请输入"></Input>
@@ -48,7 +48,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
       title: '字段类型',
       dataIndex: 'fieldType',
       width: '40%',
-      render: (_: any, record: field, index: number) => {
+      render: (_: any, record: Field, index: number) => {
         return (
           <Form.Item field={`fields[${index}].fieldType`} noStyle>
             <Select
@@ -67,7 +67,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
     {
       title: '操作',
       dataIndex: 'operation',
-      render: (_: any, record: field) => {
+      render: (_: any, record: Field) => {
         return (
           <Button
             onClick={() => removeRow(record.id)}
@@ -101,7 +101,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
   // 删除
   const removeRow = (id: string) => {
     const newData = form.getFieldValue('fields');
-    const newtableData = newData.filter((item: field) => item.id !== id);
+    const newtableData = newData.filter((item: Field) => item.id !== id);
     setTableData(newtableData);
     form.setFieldValue('fields', newtableData);
   };
