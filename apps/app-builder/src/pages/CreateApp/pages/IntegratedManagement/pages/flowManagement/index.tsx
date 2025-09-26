@@ -142,8 +142,8 @@ const FlowManagementPage: React.FC = () => {
 
       setModalVisible('');
       getFlowMgmtList();
-    } catch (error) {
-      console.error('创建流程失败:', error);
+    } catch (error: any) {
+      console.error('创建流程失败:', error.errors);
     } finally {
       setFormLoading(false);
     }
@@ -187,8 +187,8 @@ const FlowManagementPage: React.FC = () => {
       const res = await updateFlowMgmt(req);
       setModalVisible('');
       getFlowMgmtList();
-    } catch (error) {
-      console.error('更新流程失败:', error);
+    } catch (error: any) {
+      console.error('更新流程失败:', error.errors);
     } finally {
       setFormLoading(false);
     }
@@ -390,35 +390,29 @@ const FlowManagementPage: React.FC = () => {
             </Select>
           </FormItem>
 
-          <FormItem
-            label="表单ID"
-            field="pageId"
-            hidden={triggerType != TriggerType.FORM}
-            rules={[{ required: true, message: '请选择表单ID' }]}
-          >
-            <Select>
-              {pageList?.map((item) => (
-                <Option key={item.id} value={item.id}>
-                  {item.pageName}
-                </Option>
-              ))}
-            </Select>
-          </FormItem>
+          {triggerType == TriggerType.FORM && (
+            <FormItem label="表单ID" field="pageId" rules={[{ required: true, message: '请选择表单ID' }]}>
+              <Select>
+                {pageList?.map((item) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.pageName}
+                  </Option>
+                ))}
+              </Select>
+            </FormItem>
+          )}
 
-          <FormItem
-            label="实体ID"
-            field="entityId"
-            hidden={triggerType != TriggerType.ENTITY && triggerType != TriggerType.DATE_FIELD}
-            rules={[{ required: true, message: '请选择实体ID' }]}
-          >
-            <Select>
-              {entityList?.map((item) => (
-                <Option key={item.entityId} value={item.entityId}>
-                  {item.entityName}
-                </Option>
-              ))}
-            </Select>
-          </FormItem>
+          {(triggerType == TriggerType.ENTITY || triggerType == TriggerType.DATE_FIELD) && (
+            <FormItem label="实体ID" field="entityId" rules={[{ required: true, message: '请选择实体ID' }]}>
+              <Select>
+                {entityList?.map((item) => (
+                  <Option key={item.entityId} value={item.entityId}>
+                    {item.entityName}
+                  </Option>
+                ))}
+              </Select>
+            </FormItem>
+          )}
         </Form>
       </Modal>
     </div>
