@@ -4,6 +4,7 @@ import { useResourceStore } from '@/store/store_resource';
 import { useNewNodeStore } from '@/store/store_entity';
 import { Button, Message } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useModalManager } from '../hooks/useModalManager';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
@@ -38,25 +39,13 @@ export const EntityERContainer: React.FC<{
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
   const { clearNewNodes } = useNewNodeStore();
-  // const [mode, setMode] = useState<'view' | 'edit'>('view');
+
+  // 使用统一的弹窗/抽屉管理器
+  const { openModal, closeModal, isModalOpen, getModalData, setModalDataValue } = useModalManager();
+
   const [data, setData] = useState<EntityERProps['data']>({ nodes: [], edges: [] });
-  const [editDrawerVisible, setEditDrawerVisible] = useState(false);
-  const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
-  const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
-  // const [createFieldModalVisible, setCreateFieldModalVisible] = useState(false);
-  const [configFieldModalVisible, setConfigFieldModalVisible] = useState(false);
-  const [nodeId, setNodeId] = useState('');
-  const [nodedata, setNodedata] = useState<EntityNode | null>(null);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
-  const [createMasterDetailModalVisible, setCreateMasterDetailModalVisible] = useState(false);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
-  const [editFieldDrawerVisible, setEditFieldDrawerVisible] = useState(false);
-  const [selectedFieldId, setSelectedFieldId] = useState<string>('');
-  const [selectedEntityId, setSelectedEntityId] = useState<string>('');
-  const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
-  const [relationData, setRelationData] = useState<EdgeData | null>(null);
   const chartRef = useRef<any>(null);
   const loadEntityList = async () => {
     const res = await getEntityGraph(curDataSourceId);
@@ -64,7 +53,7 @@ export const EntityERContainer: React.FC<{
     if (res?.entities || res?.relationships) {
       setData({
         nodes:
-          res?.entities.map((item) => {
+          res?.entities.map((item: any) => {
             const pos = JSON.parse(item?.displayConfig || '{}');
             return {
               ...item,
@@ -73,7 +62,7 @@ export const EntityERContainer: React.FC<{
             };
           }) || [],
         edges:
-          res?.relationships.map((item) => {
+          res?.relationships.map((item: any) => {
             return {
               ...item,
               label: relationshipTypeMap[item?.relationshipType || '']
@@ -83,53 +72,41 @@ export const EntityERContainer: React.FC<{
     }
   };
 
-  const handleNodeEdit = (editData: Partial<EntityNode>) => {
-    console.log('节点编辑:', editData);
-    setEditDrawerVisible(true);
-    setEditFieldDrawerVisible(false);
-    setEditingNode(editData as unknown as EntityNode);
+  // 打开节点编辑抽屉
+  const handleOpenNodeEditDrawer = (editData: Partial<EntityNode>) => {
+    openModal('editEntity', { editingNode: editData as unknown as EntityNode });
   };
 
-  const handleNodeAddField = (node: EntityNode) => {
-    console.log('添加字段', node);
-    setConfigFieldModalVisible(true);
-    setEditDrawerVisible(false);
-    setNodedata(node as unknown as EntityNode);
+  // 打开批量添加字段弹窗
+  const handleOpenFieldConfigModal = (node: EntityNode) => {
+    openModal('configField', { nodedata: node as unknown as EntityNode });
   };
 
-  const handleNodeAddRelation = (id: string) => {
-    console.log('添加关联:', id);
-    setSelectedEntityId(id);
-    setEditDrawerVisible(false);
-    setCreateRelationModalVisible(true);
+  // 打开节点添加关联关系弹窗
+  const handleOpenRelationModal = (id: string) => {
     setUpdateRelationOptions(true);
     setOnlyUpdateNode(false);
+    openModal('createRelation', { selectedEntityId: id });
   };
 
-  const handleNodeAddMasterDetail = (id: string) => {
-    console.log('添加主子关系:', id);
-    setSelectedEntityId(id);
-    setEditDrawerVisible(false);
-    setCreateMasterDetailModalVisible(true);
+  // 打开节点添加主子关系弹窗
+  const handleOpenMasterModal = (id: string) => {
     setOnlyUpdateNode(false);
+    openModal('createMasterDetail', { selectedEntityId: id });
   };
 
+  // 字段点击
   const handleFieldClick = (fieldId: string) => {
-    console.log('字段点击:', fieldId);
-    setSelectedFieldId(fieldId);
-    setEditDrawerVisible(false);
-    setEditFieldDrawerVisible(true);
+    openModal('editField', { selectedFieldId: fieldId });
   };
 
-  const handleNodeDelete = (id: string) => {
-    console.log('删除节点:', id);
-    setDeleteModalVisible(true);
-    setNodeId(id);
+  // 打开节点删除弹窗
+  const handleOpenNodeDeleteModal = (id: string) => {
+    openModal('deleteConfirm', { nodeId: id });
   };
 
+  // 更新节点位置
   const handleUpdateEntityPosition = async (data: EntityNode, x: number, y: number) => {
-    console.log('更新节点位置:', data, x, y);
-
     const params = {
       id: data.entityId,
       displayName: data.entityName,
@@ -139,15 +116,14 @@ export const EntityERContainer: React.FC<{
       datasourceId: curDataSourceId,
       appId: curAppId
     };
-    const res = await updateEntity(params);
-    console.log('updateEntity', res);
+    const res = await updateEntity(params as unknown as UpdateEntityReqVO);
     if (res) {
       console.log('实体位置成功');
     }
   };
 
+  // 更新节点状态
   const handleStatusChange = async (data: Partial<EntityNode>) => {
-    console.log('handleStatusChange', data);
     const params = {
       id: data.entityId,
       status: data.status,
@@ -163,8 +139,8 @@ export const EntityERContainer: React.FC<{
     }
   };
 
+  // 编辑实体信息
   const editEntityInfo = async (data: Partial<Entity>) => {
-    console.log('editEntityInfo', data);
     const params = {
       id: data.id,
       displayName: data.displayName,
@@ -181,43 +157,44 @@ export const EntityERContainer: React.FC<{
     }
   };
 
+  // 删除节点
   const confirmDelete = async () => {
     setDeleteLoading(true);
+    const nodeId = getModalData('nodeId') as string;
     const res = await deleteEntity(nodeId);
-    console.log('deleteEntity', res);
     if (res) {
-      Message.success('删除成功');
+      Message.success('删除节点成功');
       loadEntityList();
     }
-    setDeleteModalVisible(false);
+    closeModal();
     setDeleteLoading(false);
     setRefreshEntityList(true);
     setOnlyUpdateNode(true);
   };
 
+  // 成功回调
   const handleSuccessCallback = async () => {
     setOnlyUpdateNode(true);
     setRefreshEntityList(true);
   };
 
+  // 创建实体成功回调
   const createEntityCallback = () => {
     setRefreshEntityList(true);
     setOnlyUpdateNode(false);
   };
 
-  const handleEdgeEdit = (data: EdgeData) => {
-    console.log('handleEdgeEdit', data);
-    setEditRelationDrawerVisible(true);
-    setRelationData(data);
+  // 打开编辑关联关系抽屉
+  const handleOpenEdgeEditDrawer = (data: EdgeData) => {
+    openModal('editRelation', { relationData: data });
   };
 
-  const getGraphPositon = () => {
-    console.log('chartRef.current', chartRef.current);
-    return chartRef.current?.getGraphPositon();
-  };
+  // 获取图表位置
+  // const getGraphPositon = () => {
+  //   return chartRef.current?.getGraphPositon();
+  // };
 
   useEffect(() => {
-    console.log('refreshEntityList', refreshEntityList);
     if (refreshEntityList) {
       loadEntityList();
       setRefreshEntityList(false);
@@ -236,15 +213,15 @@ export const EntityERContainer: React.FC<{
       <ERchart
         mode="edit"
         data={data as unknown as EntityERProps['data']}
-        onNodeEdit={handleNodeEdit}
-        onNodeAddField={handleNodeAddField}
-        onNodeAddRelation={handleNodeAddRelation}
-        onNodeAddMasterDetail={handleNodeAddMasterDetail}
-        onNodeDelete={handleNodeDelete}
+        onNodeEdit={handleOpenNodeEditDrawer}
+        onNodeAddField={handleOpenFieldConfigModal}
+        onNodeAddRelation={handleOpenRelationModal}
+        onNodeAddMasterDetail={handleOpenMasterModal}
+        onNodeDelete={handleOpenNodeDeleteModal}
         onFieldClick={handleFieldClick}
         onlyUpdateNode={onlyUpdateNode}
         updateEntityPosition={handleUpdateEntityPosition}
-        onEdgeEdit={handleEdgeEdit}
+        onEdgeEdit={handleOpenEdgeEditDrawer}
         onStatusChange={handleStatusChange}
         ref={chartRef}
       />
@@ -252,7 +229,7 @@ export const EntityERContainer: React.FC<{
         type="primary"
         className={styles['entity-page-create-button']}
         onClick={() => {
-          setCreateEntityModalVisible(true);
+          openModal('createEntity');
         }}
       >
         <IconPlus />
@@ -261,55 +238,54 @@ export const EntityERContainer: React.FC<{
 
       {/* 交互弹窗、抽屉、模态框 */}
       <EditEntityDrawer
-        visible={editDrawerVisible}
-        setVisible={setEditDrawerVisible}
-        editingNode={editingNode as EntityNode}
-        setEditingNode={(node: EntityNode | null) => setEditingNode(node)}
+        visible={isModalOpen('editEntity')}
+        setVisible={(visible) => !visible && closeModal()}
+        editingNode={getModalData('editingNode') as EntityNode}
+        setEditingNode={(node: EntityNode | null) => setModalDataValue('editingNode', node)}
         onNodeEdit={editEntityInfo}
         successCallback={handleSuccessCallback}
       />
       <CreateEntityModal
-        visible={createEntityModalVisible}
-        setVisible={setCreateEntityModalVisible}
+        visible={isModalOpen('createEntity')}
+        setVisible={(visible) => !visible && closeModal()}
         successCallback={createEntityCallback}
-        lastEntity={data.nodes[data.nodes.length - 1]}
-        getGraphPositon={getGraphPositon}
+        // getGraphPositon={getGraphPositon}
       />
       <ConfigFieldModal
-        visible={configFieldModalVisible}
-        setVisible={setConfigFieldModalVisible}
-        entity={nodedata as EntityNode}
+        visible={isModalOpen('configField')}
+        setVisible={(visible) => !visible && closeModal()}
+        entity={getModalData('nodedata') as EntityNode}
         successCallback={handleSuccessCallback}
       />
       <CreateRelationModal
-        visible={createRelationModalVisible}
-        entityId={selectedEntityId}
-        setVisible={setCreateRelationModalVisible}
+        visible={isModalOpen('createRelation')}
+        entityId={getModalData('selectedEntityId') as string}
+        setVisible={(visible) => !visible && closeModal()}
         successCallback={handleSuccessCallback}
         updateRelationOptions={updateRelationOptions}
         setUpdateRelationOptions={setUpdateRelationOptions}
       />
       <CreateMasterDetailModal
-        visible={createMasterDetailModalVisible}
-        setVisible={setCreateMasterDetailModalVisible}
-        entityId={selectedEntityId}
+        visible={isModalOpen('createMasterDetail')}
+        setVisible={(visible) => !visible && closeModal()}
+        entityId={getModalData('selectedEntityId') as string}
         successCallback={handleSuccessCallback}
       />
       <EditRelationDrawer
-        visible={editRelationDrawerVisible}
-        setVisible={setEditRelationDrawerVisible}
-        relationData={relationData}
+        visible={isModalOpen('editRelation')}
+        setVisible={(visible) => !visible && closeModal()}
+        relationData={getModalData('relationData')}
         onSuccess={handleSuccessCallback}
       />
       <EditFieldDrawer
-        visible={editFieldDrawerVisible}
-        setVisible={setEditFieldDrawerVisible}
-        fieldId={selectedFieldId}
+        visible={isModalOpen('editField')}
+        setVisible={(visible) => !visible && closeModal()}
+        fieldId={getModalData('selectedFieldId') as string}
         onSuccess={handleSuccessCallback}
       />
       <DeleteConfirmModal
-        visible={deleteModalVisible}
-        onVisibleChange={setDeleteModalVisible}
+        visible={isModalOpen('deleteConfirm')}
+        onVisibleChange={(visible) => !visible && closeModal()}
         onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
         title="确认删除"

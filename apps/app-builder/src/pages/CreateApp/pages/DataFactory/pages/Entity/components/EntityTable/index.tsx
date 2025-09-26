@@ -9,18 +9,19 @@ import styles from './index.module.less';
 import CreateEntityPage from '../Modals/CreateEntityModal';
 import DeleteConfirmModal from '../Modals/DeleteConfirmModal';
 import EditEntityDrawer from '../Drawers/EditEntityDrawer';
+import { useModalManager } from '../../hooks/useModalManager';
 const { Sider, Content } = Layout;
 
 const EntityTable: React.FC = () => {
   const { curDataSourceId } = useResourceStore();
+
+  // 使用统一的弹窗/抽屉管理器
+  const { openModal, closeModal, isModalOpen, getModalData, setModalDataValue } = useModalManager();
+
   const [selectedEntity, setSelectedEntity] = useState<EntityListItem | null>(null);
   const [entities, setEntities] = useState<EntityListItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [editNodeDrawerVisible, setEditNodeDrawerVisible] = useState(false);
-  const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   // 加载实体列表
   const loadEntities = useCallback(async () => {
     try {
@@ -51,11 +52,11 @@ const EntityTable: React.FC = () => {
 
   const handleDelete = (entity: EntityListItem) => {
     setSelectedEntity(entity);
-    setDeleteModalVisible(true);
+    openModal('deleteConfirm', { selectedEntity: entity });
   };
 
   const handleOpenAddModal = () => {
-    setCreateEntityModalVisible(true);
+    openModal('createEntity');
   };
 
   const successCallback = () => {
@@ -64,6 +65,7 @@ const EntityTable: React.FC = () => {
 
   const confirmDelete = async () => {
     setDeleteLoading(true);
+    const selectedEntity = getModalData('selectedEntity') as EntityListItem;
     const res = await deleteEntity(selectedEntity?.id || '');
     console.log('deleteEntity', res);
     if (res) {
@@ -71,7 +73,7 @@ const EntityTable: React.FC = () => {
       loadEntities();
     }
     setDeleteLoading(false);
-    setDeleteModalVisible(false);
+    closeModal();
   };
 
   const handleEntitySelect = async (entity: EntityListItem) => {
@@ -81,8 +83,7 @@ const EntityTable: React.FC = () => {
   };
 
   const handleClickEdit = async (entity: EntityListItem) => {
-    setEditNodeDrawerVisible(true);
-    setEditingNode(entity as unknown as EntityNode);
+    openModal('editEntity', { editingNode: entity as unknown as EntityNode });
   };
 
   const onNodeEdit = (data: Partial<EntityNode>) => {
@@ -119,13 +120,13 @@ const EntityTable: React.FC = () => {
       </Layout>
 
       <CreateEntityPage
-        visible={createEntityModalVisible}
-        setVisible={setCreateEntityModalVisible}
+        visible={isModalOpen('createEntity')}
+        setVisible={(visible) => !visible && closeModal()}
         successCallback={successCallback}
       />
       <DeleteConfirmModal
-        visible={deleteModalVisible}
-        onVisibleChange={setDeleteModalVisible}
+        visible={isModalOpen('deleteConfirm')}
+        onVisibleChange={(visible) => !visible && closeModal()}
         onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
         title="确认删除"
@@ -134,10 +135,10 @@ const EntityTable: React.FC = () => {
         cancelText="取消"
       />
       <EditEntityDrawer
-        visible={editNodeDrawerVisible}
-        setVisible={setEditNodeDrawerVisible}
-        editingNode={editingNode as unknown as EntityNode}
-        setEditingNode={(node: EntityNode | null) => setEditingNode(node)}
+        visible={isModalOpen('editEntity')}
+        setVisible={(visible) => !visible && closeModal()}
+        editingNode={getModalData('editingNode') as unknown as EntityNode}
+        setEditingNode={(node: EntityNode | null) => setModalDataValue('editingNode', node)}
         onNodeEdit={onNodeEdit}
         successCallback={successCallback}
         onlyShowEntity={true}
