@@ -186,7 +186,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
         });
       }
 
-      const layoutList: string[] = [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT, FORM_COMPONENT_TYPES.SUB_TABLE, LAYOUT_COMPONENT_TYPES.COLLAPSE_L, LAYOUT_COMPONENT_TYPES.TABS];
+      const layoutList: string[] = [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT, FORM_COMPONENT_TYPES.SUB_TABLE, LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT, LAYOUT_COMPONENT_TYPES.TABS_LAYOUT];
 
       // 载入布局组件的列数初始化
       if (layoutList.includes(component.componentType)) {
