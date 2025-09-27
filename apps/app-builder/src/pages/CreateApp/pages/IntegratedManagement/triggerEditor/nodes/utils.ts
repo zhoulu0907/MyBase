@@ -85,44 +85,6 @@ const judge = (targetNodeId: string, blocks: FlowNodeJSON[], depth: number): Jud
   return status;
 };
 
-// const judge = (curNodeId: string, blocks: FlowNodeJSON[]): boolean => {
-//   let status: boolean = false;
-//   for (let item of blocks) {
-//     if (item.blocks?.length) {
-//       status = judge(curNodeId, item.blocks);
-//     }
-//     if (item.id === curNodeId) {
-//       status = true;
-//       break;
-//     }
-//   }
-//   return status;
-// };
-
-// 只有存在当前节点的支线才可以使用
-// const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
-//   let blockNode: FlowNodeJSON[] = [];
-
-//   for (let ele of blocks) {
-//     if (ele.id === curNodeId) {
-//       break;
-//     }
-//     // ? 可能 根据格式需要修改内容
-//     if (ele.blocks?.length) {
-//       const hasCurNode = judge(curNodeId, ele.blocks);
-//       if (hasCurNode) {
-//         if (nodeTypes.includes(ele.type as NodeType)) {
-//           blockNode.push(ele);
-//         }
-//         const newBlocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
-//         blockNode.push.apply(blockNode, newBlocks);
-//       }
-//     }
-//   }
-
-//   return blockNode;
-// };
-
 const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
   let blockNode: FlowNodeJSON[] = [];
 
@@ -170,9 +132,6 @@ export function getPrecedingNodes(
       const hasCurNode = judge(targetNodeId, ele.blocks, 0);
 
       if (hasCurNode == JudgeStatus.FOUND) {
-        // console.log('hasCurNode: ', hasCurNode);
-        // console.log('ele: ', ele);
-
         const curIndex = ele.blocks.findIndex((block: any) => block.id === targetNodeId);
         let blocks: any[] = [];
         if (curIndex - 1 > 0) {
@@ -180,11 +139,10 @@ export function getPrecedingNodes(
         } else if (curIndex - 1 === 0) {
           blocks = [ele.blocks[0]];
         }
-        // console.log('blocks: ', blocks);
 
         // 平铺 blocks
         nodes.push({ ...ele, blocks: [] }, ...blocks);
-        // console.log(nodes);
+
         return nodes;
       } else if (hasCurNode == JudgeStatus.INCLUDE) {
         // 在当前节点的blocks中
@@ -197,7 +155,6 @@ export function getPrecedingNodes(
       }
     }
 
-    // const nodeData = triggerEditorSignal.nodeData.value[ele.id];
     if (nodeTypes.includes(ele.type as NodeType)) {
       nodes.push(ele);
     }
