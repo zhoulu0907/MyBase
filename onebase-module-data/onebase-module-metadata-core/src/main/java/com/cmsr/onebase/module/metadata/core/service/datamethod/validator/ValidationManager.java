@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod.validator;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import org.springframework.stereotype.Component;
 
 import java.util.logging.Logger;
 
@@ -13,6 +14,7 @@ import java.util.Map;
  * 负责协调各种校验服务的执行，统一管理校验流程
  *
  */
+@Component
 public class ValidationManager {
 
     private static final Logger log = Logger.getLogger(ValidationManager.class.getName());
