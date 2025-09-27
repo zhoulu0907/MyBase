@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.security.core.util;
 
-import com.cmsr.onebase.framework.common.tools.core.map.MapUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import org.springframework.lang.Nullable;

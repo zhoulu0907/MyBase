@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.common.util.collection;
 
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import cn.hutool.core.collection.CollUtil;
 
 import java.util.Set;
 

@@ -8,7 +8,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_
 
 import java.util.List;
 
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;

@@ -3,10 +3,10 @@ package com.cmsr.onebase.framework.common.util.object;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.SortablePageParam;
 import com.cmsr.onebase.framework.common.pojo.SortingField;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.lang.func.Func1;
-import com.cmsr.onebase.framework.common.tools.core.lang.func.LambdaUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.func.Func1;
+import cn.hutool.core.lang.func.LambdaUtil;
+import cn.hutool.core.util.ArrayUtil;
 import org.springframework.util.Assert;
 
 import static java.util.Collections.singletonList;

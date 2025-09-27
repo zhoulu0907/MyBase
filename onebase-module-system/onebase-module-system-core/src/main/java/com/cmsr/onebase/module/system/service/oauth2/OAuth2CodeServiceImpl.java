@@ -7,7 +7,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_COD
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
+import cn.hutool.core.util.IdUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 

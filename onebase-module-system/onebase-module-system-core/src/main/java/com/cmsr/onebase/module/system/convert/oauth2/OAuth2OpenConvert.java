@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.convert.oauth2;
 
 import com.cmsr.onebase.framework.common.core.KeyValue;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.common.tools.core.date.LocalDateTimeUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.common.util.io;
 
-import com.cmsr.onebase.framework.common.tools.core.io.FileUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import lombok.SneakyThrows;
 
 import java.io.File;

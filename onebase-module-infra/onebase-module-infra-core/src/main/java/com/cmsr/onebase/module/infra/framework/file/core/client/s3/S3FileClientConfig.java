@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client.s3;
 
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientConfig;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.AssertTrue;

@@ -5,11 +5,11 @@ import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiErrorLogCreateR
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.map.MapUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.tools.extra.servlet.JakartaServletUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.JakartaServletUtil;
 import com.cmsr.onebase.framework.common.util.collection.SetUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;

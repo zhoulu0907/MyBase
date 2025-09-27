@@ -50,8 +50,7 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <modelmapper.version>3.2.4</modelmapper.version>
         <mvel2.version>2.4.14.Final</mvel2.version>
-        <!--        <hutool-5.version>5.8.35</hutool-5.version>-->
-        <!--        <hutool-6.version>6.0.0-M19</hutool-6.version>-->
+        <hutool.version>5.8.35</hutool.version>
         <easyexcel.version>4.0.3</easyexcel.version>
         <guava.version>33.4.8-jre</guava.version>
         <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
@@ -379,17 +378,11 @@
                 <artifactId>dom4j</artifactId>
                 <version>${dom4j.version}</version>
             </dependency>
-            <!--            <dependency>-->
-            <!--                <groupId>cn.hutool</groupId>-->
-            <!--                <artifactId>hutool-all</artifactId>-->
-            <!--                <version>${hutool-5.version}</version>-->
-            <!--            </dependency>-->
-            <!--            <dependency>-->
-            <!--                <groupId>org.dromara.hutool</groupId>-->
-            <!--                <artifactId>hutool-extra</artifactId>-->
-            <!--                <version>${hutool-6.version}</version>-->
-            <!--            </dependency>-->
-
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>easyexcel</artifactId>

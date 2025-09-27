@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.common.util.collection;
 
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.collection.IterUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.IterUtil;
+import cn.hutool.core.util.ArrayUtil;
 
 import java.util.Collection;
 import java.util.function.Function;

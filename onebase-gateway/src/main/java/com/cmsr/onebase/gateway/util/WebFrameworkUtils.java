@@ -1,8 +1,8 @@
 package com.cmsr.onebase.gateway.util;
 
-import com.cmsr.onebase.framework.common.tools.core.net.NetUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.NumberUtil;
+import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.NumberUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.route.Route;

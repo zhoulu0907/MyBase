@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.infra.service.file;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.tools.core.io.resource.ResourceUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.infra.convert.file.FileConfigConvert;

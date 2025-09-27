@@ -1,14 +1,14 @@
 package com.cmsr.onebase.module.system.framework.sms.core.client.impl;
 
 import com.cmsr.onebase.framework.common.core.KeyValue;
-import com.cmsr.onebase.framework.common.tools.core.collection.ListUtil;
-import com.cmsr.onebase.framework.common.tools.core.date.format.FastDateFormat;
-import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.tools.crypto.SecureUtil;
-import com.cmsr.onebase.framework.common.tools.http.HttpUtil;
-import com.cmsr.onebase.framework.common.tools.json.JSONObject;
-import com.cmsr.onebase.framework.common.tools.json.JSONUtil;
+import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.date.format.FastDateFormat;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.cmsr.onebase.framework.common.util.http.HttpUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsReceiveRespDTO;
@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
-import static com.cmsr.onebase.framework.common.tools.crypto.digest.DigestUtil.sha256Hex;
+import static cn.hutool.crypto.digest.DigestUtil.sha256Hex;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 /**
@@ -121,7 +121,7 @@ public class HuaweiSmsClient extends AbstractSmsClient {
         String canonicalRequest = method + "\n" + uri + "\n" + canonicalQueryString + "\n"
                 + canonicalHeaders + "\n" + SIGNEDHEADERS + "\n" + sha256Hex(requestBody);
         String stringToSign = "SDK-HMAC-SHA256" + "\n" + sdkDate + "\n" + sha256Hex(canonicalRequest);
-        String signature = SecureUtil.hmacSha256Hex(properties.getApiSecret(), stringToSign);  // 计算签名
+        String signature = SecureUtil.hmacSha256(properties.getApiSecret()).digestHex(stringToSign);  // 计算签名
         headers.put("Authorization", "SDK-HMAC-SHA256" + " " + "Access=" + getAccessKey()
                 + ", " + "SignedHeaders=" + SIGNEDHEADERS + ", " + "Signature=" + signature);
 

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.common.validation;
 
-import com.cmsr.onebase.framework.common.tools.core.text.CharSequenceUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

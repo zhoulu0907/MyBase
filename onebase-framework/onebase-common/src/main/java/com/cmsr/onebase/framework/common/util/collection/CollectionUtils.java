@@ -1,16 +1,16 @@
 package com.cmsr.onebase.framework.common.util.collection;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
+import cn.hutool.core.util.ArrayUtil;
 import com.google.common.collect.ImmutableMap;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import cn.hutool.core.collection.CollUtil;
 
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.cmsr.onebase.framework.common.tools.core.convert.Convert.toCollection;
+import static cn.hutool.core.convert.Convert.toCollection;
 import static java.util.Arrays.asList;
 
 /**

@@ -1,10 +1,10 @@
 package com.cmsr.onebase.framework.common.util.spring;
 
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.map.MapUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.tools.extra.spring.SpringUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.expression.BeanFactoryResolver;

@@ -1,15 +1,15 @@
 package com.cmsr.onebase.module.system.framework.sms.core.client.impl;
 
 import com.cmsr.onebase.framework.common.core.KeyValue;
-import com.cmsr.onebase.framework.common.tools.core.date.format.FastDateFormat;
-import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
-import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
-import com.cmsr.onebase.framework.common.tools.crypto.SecureUtil;
-import com.cmsr.onebase.framework.common.tools.crypto.digest.DigestUtil;
-import com.cmsr.onebase.framework.common.tools.json.JSONArray;
-import com.cmsr.onebase.framework.common.tools.json.JSONObject;
-import com.cmsr.onebase.framework.common.tools.json.JSONUtil;
+import cn.hutool.core.date.format.FastDateFormat;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.cmsr.onebase.framework.common.util.collection.MapUtils;
 import com.cmsr.onebase.framework.common.util.http.HttpUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
@@ -164,7 +164,7 @@ public class AliyunSmsClient extends AbstractSmsClient {
                 + canonicalHeaders + "\n" + signedHeaders + "\n" + hashedRequestBody;
         String hashedCanonicalRequest = DigestUtil.sha256Hex(canonicalRequest);
         String stringToSign = "ACS3-HMAC-SHA256" + "\n" + hashedCanonicalRequest;
-        String signature = SecureUtil.hmacSha256Hex(properties.getApiSecret(), stringToSign); // 计算签名
+        String signature = DigestUtil.sha256Hex(properties.getApiSecret(), stringToSign); // 计算签名
         headers.put("Authorization", "ACS3-HMAC-SHA256" + " " + "Credential=" + properties.getApiKey()
                 + ", " + "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature);
 
