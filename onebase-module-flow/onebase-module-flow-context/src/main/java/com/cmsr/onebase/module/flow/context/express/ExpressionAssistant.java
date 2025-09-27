@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.flow.context.express;
 
 import com.cmsr.onebase.framework.common.express.OpEnum;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.condition.RuleItem;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mvel2.MVEL;
@@ -62,86 +64,90 @@ public class ExpressionAssistant {
         }
     }
 
-    public Serializable compileExpression(List<ConditionItem> conditionItems) {
-        String fullExpression = buildConditionExpression(conditionItems);
+    public Serializable compileExpression(OrExpresses orExpresses) {
+        String fullExpression = buildConditionExpression(orExpresses);
         return MVEL.compileExpression(fullExpression, parserContext);
     }
 
     /**
      * 构建完整的条件表达式
-     * 将整个Condition转换成一个表达式字符串
+     * 将整个OrExpresses转换成一个表达式字符串
      *
+     * @param orExpresses OR表达式集合
      * @return 表达式字符串
      */
-    private String buildConditionExpression(List<ConditionItem> conditionItems) {
-        if (CollectionUtils.isEmpty(conditionItems)) {
+    private String buildConditionExpression(OrExpresses orExpresses) {
+        if (CollectionUtils.isEmpty(orExpresses.getExpressesList())) {
             return "true";
         }
         List<String> conditionExpressions = new ArrayList<>();
-        // 遍历所有条件项
-        for (ConditionItem conditionItem : conditionItems) {
-            String conditionItemExpression = buildConditionItemExpression(conditionItem);
-            if (conditionItemExpression != null && !conditionItemExpression.trim().isEmpty()) {
-                conditionExpressions.add("(" + conditionItemExpression + ")");
+        // 遍历所有AND表达式组
+        for (AndExpresses andExpresses : orExpresses.getExpressesList()) {
+            String andExpression = buildAndExpression(andExpresses);
+            if (andExpression != null && !andExpression.trim().isEmpty()) {
+                conditionExpressions.add("(" + andExpression + ")");
             }
         }
         if (conditionExpressions.isEmpty()) {
             return "true";
         }
-        // 条件项之间用OR连接
+        // AND表达式组之间用OR连接
         return String.join(" || ", conditionExpressions);
     }
 
     /**
-     * 构建单个条件项的表达式
+     * 构建AND表达式
      *
-     * @param conditionItem 条件项
+     * @param andExpresses AND表达式对象
      * @return 表达式字符串
      */
-    private String buildConditionItemExpression(ConditionItem conditionItem) {
-        if (conditionItem == null || conditionItem.getRules() == null || conditionItem.getRules().isEmpty()) {
+    private String buildAndExpression(AndExpresses andExpresses) {
+        if (andExpresses == null || CollectionUtils.isEmpty(andExpresses.getExpressItems())) {
             return "true";
         }
-        List<String> ruleExpressions = new ArrayList<>();
-        // 遍历所有规则项
-        for (RuleItem ruleItem : conditionItem.getRules()) {
-            String ruleExpression = buildRuleItemExpression(ruleItem);
-            if (ruleExpression != null && !ruleExpression.trim().isEmpty()) {
-                ruleExpressions.add(ruleExpression);
+        List<String> expressionItems = new ArrayList<>();
+        // 遍历所有表达式项
+        for (ExpressItem expressItem : andExpresses.getExpressItems()) {
+            String itemExpression = buildExpressItemExpression(expressItem);
+            if (itemExpression != null && !itemExpression.trim().isEmpty()) {
+                expressionItems.add(itemExpression);
             }
         }
-        if (ruleExpressions.isEmpty()) {
+        if (expressionItems.isEmpty()) {
             return "true";
         }
-        // 规则项之间用AND连接
-        return String.join(" && ", ruleExpressions);
+        // 表达式项之间用AND连接
+        return String.join(" && ", expressionItems);
     }
 
     /**
-     * 构建单个规则项的表达式
+     * 构建单个表达式项的表达式
      *
-     * @param ruleItem 规则项
+     * @param expressItem 表达式项
      * @return 表达式字符串
      */
-    private String buildRuleItemExpression(RuleItem ruleItem) {
+    private String buildExpressItemExpression(ExpressItem expressItem) {
         try {
+            if (expressItem == null || expressItem.getKey() == null || expressItem.getOperatorType() == null) {
+                return "true";
+            }
+
             // 获取字段名
-            String fieldName = ruleItem.getFieldName();
+            String fieldName = expressItem.getKey().toString();
 
             // 获取操作符
-            OpEnum operator = OpEnum.valueOf(ruleItem.getOp());
+            OpEnum operator = OpEnum.valueOf(expressItem.getOperatorType());
 
             // 构建表达式
-            String expression = buildExpression(
-                    fieldName, operator, ruleItem.getFieldValue());
+            String expression = buildExpression(fieldName, operator, expressItem.getValue());
 
-            log.debug("构建规则表达式: fieldId={} -> {}", ruleItem.getFieldId(), expression);
+            log.debug("构建表达式项: key={}, operator={} -> {}", expressItem.getKey(), expressItem.getOperatorType(), expression);
 
             return expression;
 
         } catch (Exception e) {
-            log.error("规则表达式构建失败: {}", ruleItem, e);
-            // 返回false表达式，确保整个条件不会因为单个规则失败而崩溃
+            log.error("表达式项构建失败: {}", expressItem, e);
+            // 返回false表达式，确保整个条件不会因为单个表达式失败而崩溃
             return "false";
         }
     }

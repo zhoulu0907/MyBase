@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.core.graph.data;
 
-import com.cmsr.onebase.module.flow.context.express.ConditionItem;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import lombok.Data;
 
 import java.io.Serializable;
