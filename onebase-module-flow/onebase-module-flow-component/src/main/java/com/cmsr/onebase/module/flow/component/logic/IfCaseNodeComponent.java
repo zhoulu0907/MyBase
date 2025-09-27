@@ -23,6 +23,7 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
+        //
         List<Map<String, Object>> filterCondition = (List<Map<String, Object>>) nodeData.get("filterCondition");
         List<ConditionItem> condition = Condition.createCondition(filterCondition);
         //

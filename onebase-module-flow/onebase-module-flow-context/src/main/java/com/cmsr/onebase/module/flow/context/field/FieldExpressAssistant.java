@@ -28,10 +28,6 @@ public class FieldExpressAssistant {
 
     /**
      * 转换字段数据
-     * 使用下面的方法，先查询到具体的数据JDBC类型
-     * com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi#getFieldJdbcTypes(com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO)
-     * 然后根据下面的方法转换成具体的类型
-     * com.cmsr.onebase.framework.common.express.JdbcTypeConvertor#convert(String, java.lang.Object)
      *
      * @param inputParams
      * @return
@@ -45,10 +41,6 @@ public class FieldExpressAssistant {
 
 
     /**
-     * 1、根据fieldId设置RuleItem对象的 fieldName 和  fieldJdbcType。
-     * 2、根据fieldJdbcType，设置 fieldValue 的值。
-     * com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi#getFieldJdbcTypes(com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO)
-     *
      * @param conditions
      */
     public OrExpresses convertToExpresses(List<ConditionItem> conditions, Map<Long, FieldInfo> fieldInfoMap) {
@@ -207,19 +199,6 @@ public class FieldExpressAssistant {
                 .distinct()
                 .collect(Collectors.toList());
     }
-//
-//    /**
-//     * 获取字段信息映射
-//     */
-//    private Map<Long, EntityFieldJdbcTypeRespDTO> getFieldInfoMap(List<Long> fieldIds) {
-//        EntityFieldJdbcTypeReqDTO reqDTO = new EntityFieldJdbcTypeReqDTO();
-//        reqDTO.setFieldIds(fieldIds);
-//
-//        List<EntityFieldJdbcTypeRespDTO> fieldJdbcTypes = metadataEntityFieldApi.getFieldJdbcTypes(reqDTO);
-//
-//        return fieldJdbcTypes.stream()
-//                .collect(Collectors.toMap(EntityFieldJdbcTypeRespDTO::getFieldId, info -> info));
-//    }
 
     /**
      * 转换输入参数为结果映射
@@ -244,77 +223,6 @@ public class FieldExpressAssistant {
         return result;
     }
 
-//    /**
-//     * 填充规则项的字段数据
-//     */
-//    private void fillRuleItemsWithFieldData(List<ConditionItem> conditions,
-//                                            Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
-//        for (ConditionItem condition : conditions) {
-//            if (condition.getRules() != null) {
-//                for (RuleItem rule : condition.getRules()) {
-//                    fillSingleRuleItem(rule, fieldInfoMap);
-//                }
-//            }
-//        }
-//    }
-
-//    /**
-//     * 填充单个规则项的字段数据
-//     */
-//    private void fillSingleRuleItem(RuleItem rule, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
-//        Long fieldId = NumberUtils.createLong(rule.getFieldId());
-//        if (fieldId == null) {
-//            return;
-//        }
-//
-//        EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(fieldId);
-//        if (fieldInfo == null) {
-//            log.warn("找不到字段ID为 {} 的字段信息", fieldId);
-//            return;
-//        }
-//
-//        // 设置字段名称和JDBC类型
-//        rule.setFieldName(fieldInfo.getFieldName());
-//        rule.setFieldJdbcType(fieldInfo.getJdbcType());
-//
-//        // 转换字段值
-//        if (!hasValidValue(rule) || fieldInfo.getJdbcType() == null) {
-//            return;
-//        }
-//        // TODO 这里只处理了OperatorTypeEnum类型为value，并且没有根据OpEnum去校验值的多少
-//        if (rule.getValue().size() == 1) {
-//            String firstValue = rule.getValue().get(0);
-//            Object convertedValue = JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), firstValue);
-//            rule.setFieldValue(convertedValue);
-//        } else {
-//            Object[] convertedValue = new Object[rule.getValue().size()];
-//            for (int i = 0; i < rule.getValue().size(); i++) {
-//                String value = rule.getValue().get(i);
-//                convertedValue[i] = JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), value);
-//            }
-//            rule.setFieldValue(convertedValue);
-//        }
-//    }
-
-//    /**
-//     * 检查规则项是否有有效值
-//     */
-//    private boolean hasValidValue(RuleItem rule) {
-//        return rule.getValue() != null && !rule.getValue().isEmpty();
-//    }
-
-//    /**
-//     * 转换字段值（带错误处理）
-//     */
-//    private Object convertFieldValueWithErrorHandling(Long fieldId, EntityFieldJdbcTypeRespDTO fieldInfo, String value) {
-//        try {
-//            return JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), value);
-//        } catch (Exception e) {
-//            log.warn("字段值转换失败，字段ID: {}, 字段名: {}, JDBC类型: {}, 原始值: {}, 错误: {}",
-//                    fieldId, fieldInfo.getFieldName(), fieldInfo.getJdbcType(), value, e.getMessage());
-//            return value; // 转换失败时保留原始字符串值
-//        }
-//    }
 
     /**
      * 转换字段值
