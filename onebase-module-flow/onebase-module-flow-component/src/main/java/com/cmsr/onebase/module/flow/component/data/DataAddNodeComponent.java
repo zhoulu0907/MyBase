@@ -37,12 +37,10 @@ public class DataAddNodeComponent extends NormalNodeComponent {
     @Override
     public void process() throws Exception {
         log.info("DataAddNodeComponent process - 开始处理节点数据添加操作");
-        
         // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
-        
         // 参数校验
         if (MapUtils.isEmpty(nodeData)) {
             log.warn("DataAddNodeComponent process - 节点数据为空，跳过处理");

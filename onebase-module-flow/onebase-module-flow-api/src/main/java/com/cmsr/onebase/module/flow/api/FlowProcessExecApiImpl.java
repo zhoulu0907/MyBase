@@ -4,6 +4,8 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionAssistant;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
+import com.cmsr.onebase.module.flow.context.field.FieldExpressAssistant;
+import com.cmsr.onebase.module.flow.context.field.FieldInfo;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.graph.data.StartEntityNodeData;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -33,6 +37,9 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
+
+    @Autowired
+    private FieldExpressAssistant fieldExpressAssistant;
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {
@@ -58,7 +65,10 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
                 return EntityTriggerRespDTO.SUCCESS;
             }
             if (startEntityNodeData.getCompiledExpression() == null) {
-                Serializable compileExpression = expressionAssistant.compileExpression(startEntityNodeData.getFilterCondition());
+                List<Long> ids = fieldExpressAssistant.extractFieldIds(startEntityNodeData.getFilterCondition());
+                fieldExpressAssistant.convertToExpresses(startEntityNodeData.getFilterCondition(), fieldInfoMap)
+                startEntityNodeData.getFilterCondition();
+                Serializable compileExpression = expressionAssistant.compileExpression();
                 startEntityNodeData.setCompiledExpression(compileExpression);
             }
             boolean isTrigger = expressionAssistant.evaluate(startEntityNodeData.getCompiledExpression(), entityTriggerReqDTO.getFieldData());
@@ -73,6 +83,21 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         }
     }
 
+    private Map<Long, FieldInfo> getFieldInfoMap(List<Long> fieldIds) {
+        EntityFieldJdbcTypeReqDTO reqDTO = new EntityFieldJdbcTypeReqDTO();
+        reqDTO.setFieldIds(fieldIds);
+
+        List<EntityFieldJdbcTypeRespDTO> fieldJdbcTypes = metadataEntityFieldApi.getFieldJdbcTypes(reqDTO);
+
+        return fieldJdbcTypes.stream()
+                .collect(Collectors.toMap(EntityFieldJdbcTypeRespDTO::getFieldId, info -> {
+                    FieldInfo fieldInfo = new FieldInfo();
+                    fieldInfo.setFieldId(info.getFieldId());
+                    fieldInfo.setFieldName(info.getFieldName());
+                    fieldInfo.setJdbcType(info.getJdbcType());
+                    return fieldInfo;
+                }));
+    }
     /**
      * 检查 triggerEvents 列表是否包含 triggerEvent 的名称（忽略大小写）
      *

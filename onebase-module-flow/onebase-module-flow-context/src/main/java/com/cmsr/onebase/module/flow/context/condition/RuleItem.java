@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.context.express;
+package com.cmsr.onebase.module.flow.context.condition;
 
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class RuleItem {
 
-    private Long fieldId;
+    private String fieldId;
 
     private String op;
 
@@ -19,12 +19,11 @@ public class RuleItem {
 
     private List<String> value;
 
+    //--------------------------------------------------------
     //查询到的字段名称
     private String fieldName;
-
     //查询到的字段jdbc类型
     private String fieldJdbcType;
-
     //根据字段类型，转换实际的值，比如Integer、Date等
     private Object fieldValue;
 
