@@ -18,7 +18,7 @@ import { FieldType, type AppEntityField } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { NodeType } from '../../nodes/const';
-import { getBeforeCurQueryNodes } from '../../nodes/utils';
+import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
 export interface FieldEditorProps {
@@ -104,7 +104,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
   const getVariableOptions = (nodeId: string, dataNodeId?: string): TreeSelectDataType[] => {
     const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM];
 
-    let nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
+    let nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
 
     if (dataNodeId) {
       nodes = triggerEditorSignal.nodes.value.filter((node) => node.id == dataNodeId);
