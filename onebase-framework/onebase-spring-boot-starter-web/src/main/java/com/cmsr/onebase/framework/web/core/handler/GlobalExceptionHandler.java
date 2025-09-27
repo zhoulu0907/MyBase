@@ -1,16 +1,15 @@
 package com.cmsr.onebase.framework.web.core.handler;
 
-import com.cmsr.onebase.framework.common.biz.infra.logger.ApiErrorLogCommonApi;
-import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiErrorLogCreateReqDTO;
-import com.cmsr.onebase.framework.common.exception.ServiceException;
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
-import com.cmsr.onebase.framework.common.util.collection.SetUtils;
+import com.cmsr.onebase.framework.common.biz.infra.logger.ApiErrorLogCommonApi;
+import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiErrorLogCreateReqDTO;
+import com.cmsr.onebase.framework.common.exception.ServiceException;
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
@@ -56,7 +55,7 @@ public class GlobalExceptionHandler {
     /**
      * 忽略的 ServiceException 错误提示，避免打印过多 logger
      */
-    public static final Set<String> IGNORE_ERROR_MESSAGES = SetUtils.asSet("无效的刷新令牌");
+    public static final Set<String> IGNORE_ERROR_MESSAGES = Set.of("无效的刷新令牌");
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final String applicationName;

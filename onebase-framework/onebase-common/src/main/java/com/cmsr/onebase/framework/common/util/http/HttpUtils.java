@@ -2,10 +2,8 @@ package com.cmsr.onebase.framework.common.util.http;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -126,7 +124,7 @@ public class HttpUtils {
         // 先从 Header 中获取
         String authorization = request.getHeader("Authorization");
         authorization = StrUtil.subAfter(authorization, "Basic ", true);
-        if (StringUtils.hasText(authorization)) {
+        if (StringUtils.isNotEmpty(authorization)) {
             authorization = Base64.decodeStr(authorization);
             clientId = StrUtil.subBefore(authorization, ":", false);
             clientSecret = StrUtil.subAfter(authorization, ":", false);
@@ -137,50 +135,50 @@ public class HttpUtils {
         }
 
         // 如果两者非空，则返回
-        if (StrUtil.isNotEmpty(clientId) && StrUtil.isNotEmpty(clientSecret)) {
+        if (StringUtils.isNotEmpty(clientId) && StringUtils.isNotEmpty(clientSecret)) {
             return new String[]{clientId, clientSecret};
         }
         return null;
     }
 
-    /**
-     * 使用 unirest 替代
-     * HTTP post 请求，基于 {@link cn.hutool.http.HttpUtil} 实现
-     * <p>
-     * 为什么要封装该方法，因为 HttpUtil 默认封装的方法，没有允许传递 headers 参数
-     *
-     * @param url         URL
-     * @param headers     请求头
-     * @param requestBody 请求体
-     * @return 请求结果
-     */
-    @Deprecated
-    public static String post(String url, Map<String, String> headers, String requestBody) {
-        try (HttpResponse response = HttpRequest.post(url)
-                .addHeaders(headers)
-                .body(requestBody)
-                .execute()) {
-            return response.body();
-        }
-    }
+//    /**
+//     * 使用 unirest 替代
+//     * HTTP post 请求，基于 {@link cn.hutool.http.HttpUtil} 实现
+//     * <p>
+//     * 为什么要封装该方法，因为 HttpUtil 默认封装的方法，没有允许传递 headers 参数
+//     *
+//     * @param url         URL
+//     * @param headers     请求头
+//     * @param requestBody 请求体
+//     * @return 请求结果
+//     */
+//    @Deprecated
+//    public static String post(String url, Map<String, String> headers, String requestBody) {
+//        try (HttpResponse response = HttpRequest.post(url)
+//                .addHeaders(headers)
+//                .body(requestBody)
+//                .execute()) {
+//            return response.body();
+//        }
+//    }
 
-    /**
-     * 使用 unirest 替代
-     * HTTP get 请求，基于 {@link cn.hutool.http.HttpUtil} 实现
-     * <p>
-     * 为什么要封装该方法，因为 HttpUtil 默认封装的方法，没有允许传递 headers 参数
-     *
-     * @param url     URL
-     * @param headers 请求头
-     * @return 请求结果
-     */
-    @Deprecated
-    public static String get(String url, Map<String, String> headers) {
-        try (HttpResponse response = HttpRequest.get(url)
-                .addHeaders(headers)
-                .execute()) {
-            return response.body();
-        }
-    }
+//    /**
+//     * 使用 unirest 替代
+//     * HTTP get 请求，基于 {@link cn.hutool.http.HttpUtil} 实现
+//     * <p>
+//     * 为什么要封装该方法，因为 HttpUtil 默认封装的方法，没有允许传递 headers 参数
+//     *
+//     * @param url     URL
+//     * @param headers 请求头
+//     * @return 请求结果
+//     */
+//    @Deprecated
+//    public static String get(String url, Map<String, String> headers) {
+//        try (HttpResponse response = HttpRequest.get(url)
+//                .addHeaders(headers)
+//                .execute()) {
+//            return response.body();
+//        }
+//    }
 
 }

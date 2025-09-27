@@ -1,10 +1,11 @@
 package com.cmsr.onebase.framework.common.util.spring;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
+
 import cn.hutool.extra.spring.SpringUtil;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.expression.BeanFactoryResolver;
@@ -18,6 +19,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,8 +63,8 @@ public class SpringExpressionUtils {
      */
     public static Map<String, Object> parseExpressions(JoinPoint joinPoint, List<String> expressionStrings) {
         // 如果为空，则不进行解析
-        if (CollUtil.isEmpty(expressionStrings)) {
-            return MapUtil.newHashMap();
+        if (CollectionUtils.isEmpty(expressionStrings)) {
+            return Collections.emptyMap();
         }
 
         // 第一步，构建解析的上下文 EvaluationContext
@@ -74,7 +76,7 @@ public class SpringExpressionUtils {
         // Spring 的表达式上下文对象
         EvaluationContext context = new StandardEvaluationContext();
         // 给上下文赋值
-        if (ArrayUtil.isNotEmpty(paramNames)) {
+        if (ArrayUtils.isNotEmpty(paramNames)) {
             Object[] args = joinPoint.getArgs();
             for (int i = 0; i < paramNames.length; i++) {
                 context.setVariable(paramNames[i], args[i]);
@@ -82,7 +84,7 @@ public class SpringExpressionUtils {
         }
 
         // 第二步，逐个参数解析
-        Map<String, Object> result = MapUtil.newHashMap(expressionStrings.size(), true);
+        Map<String, Object> result = new HashMap<>(expressionStrings.size());
         expressionStrings.forEach(key -> {
             Object value = EXPRESSION_PARSER.parseExpression(key).getValue(context);
             result.put(key, value);
@@ -108,13 +110,13 @@ public class SpringExpressionUtils {
      * @return 执行界面
      */
     public static Object parseExpression(String expressionString, Map<String, Object> variables) {
-        if (StrUtil.isBlank(expressionString)) {
+        if (StringUtils.isBlank(expressionString)) {
             return null;
         }
         Expression expression = EXPRESSION_PARSER.parseExpression(expressionString);
         StandardEvaluationContext context = new StandardEvaluationContext();
         context.setBeanResolver(new BeanFactoryResolver(SpringUtil.getApplicationContext()));
-        if (MapUtil.isNotEmpty(variables)) {
+        if (MapUtils.isNotEmpty(variables)) {
             context.setVariables(variables);
         }
         return expression.getValue(context);
