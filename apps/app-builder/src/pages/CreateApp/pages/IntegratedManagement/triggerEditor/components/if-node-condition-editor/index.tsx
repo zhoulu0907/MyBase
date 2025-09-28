@@ -37,7 +37,11 @@ const ALLOW_NODE_TYPES = [
   NodeType.START_FORM,
   NodeType.START_ENTITY,
   NodeType.START_DATE_FIELD,
-  NodeType.LOOP
+  NodeType.LOOP,
+  NodeType.IF,
+  NodeType.IF_BLOCK,
+  NodeType.CASE,
+  NodeType.CASE_DEFAULT
 ];
 
 const opCodeOptions = [
@@ -255,7 +259,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
   const getEntityFieldValidationTypes = (nodeId: string): string[] => {
     const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
-    console.log('nodes: ', nodes);
+    // console.log('nodes: ', nodes);
 
     const fieldIds: string[] = [];
 
@@ -348,7 +352,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
   const getVariableOptions = (nodeId: string): TreeSelectDataType[] => {
     const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
-    // console.log('nodes: ', nodes);
+    console.log('nodes: ', nodes);
 
     const options: TreeSelectDataType[] = [];
 
