@@ -1,19 +1,18 @@
 import InfoPanel from '@/components/InfoPanel';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
+import { hasPermission } from '@/utils/permission';
 import { Divider, Empty, Layout, Message, Popconfirm, Space, Tabs } from '@arco-design/web-react';
+import { RoleType } from '@onebase/platform-center';
 import { createRole, deleteRole, updateRole } from '@onebase/platform-center/src/services/role';
 import type { RoleVO } from '@onebase/platform-center/src/types/role';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PermissionList from './components/permission-list';
 import RoleList from './components/role-list';
 import RoleModal from './components/role-modal';
 import UserList from './components/user-list';
 import styles from './index.module.less';
-import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import { hasPermission } from '@/utils/permission';
-import { RoleType } from '@onebase/platform-center';
-import { divide } from 'lodash-es';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -22,43 +21,45 @@ const TabPane = Tabs.TabPane;
 
 export default function RolePage() {
   const [activeRoleId, setActiveRoleId] = useState<number | undefined>(undefined);
+  const [showEmpty, setShowEmpty] = useState(false);
   const [activeRole, setActiveRole] = useState<Partial<RoleVO> | undefined>(undefined);
   const [editRole, setEditRole] = useState<Partial<RoleVO> | null>(null);
   const [roleModalVisible, setRoleModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('user');
-  const [forceRefresh, setForceRefresh] = useState(false);
 
   const roleListRef = useRef<any>(null);
 
-  const handleRoleSelect = useCallback((id: number | undefined, role: Partial<RoleVO> | undefined) => {
+  useEffect(() => {
+    if (!activeRoleId) {
+      setShowEmpty(true);
+    }
+  }, [activeRoleId]);
+
+  const handleRoleSelect = (id: number | undefined, role: Partial<RoleVO> | undefined) => {
     setActiveRoleId(id);
     setActiveRole(role);
-  }, []);
+    setShowEmpty(false);
+  };
 
   // 删除角色
-  const handleDeleteRole = useCallback(
-    async (id: number) => {
-      try {
-        await deleteRole(id);
-        Message.success('删除成功');
+  const handleDeleteRole = async (id: number) => {
+    try {
+      await deleteRole(id);
+      Message.success('删除成功');
 
-        // 如果删除的是当前选中的角色，清空选中状态
-        if (activeRoleId === id) {
-          setActiveRoleId(undefined);
-          setActiveRole(undefined);
-        }
-
-        setForceRefresh((prev) => !prev);
-
-        return true;
-      } catch (error) {
-        Message.error('删除失败');
-        return false;
+      // 如果删除的是当前选中的角色，清空选中状态
+      if (activeRoleId === id) {
+        setActiveRoleId(undefined);
+        setActiveRole(undefined);
       }
-    },
-    [activeRoleId]
-  );
+
+      return true;
+    } catch (error: any) {
+      console.log(error.errors);
+      return false;
+    }
+  };
 
   // 保存角色
   const handleSaveRole = useCallback(
@@ -145,14 +146,16 @@ export default function RolePage() {
         <Sider width={252} className={styles.leftPanel}>
           <RoleList
             ref={roleListRef}
-            activeId={activeRoleId || undefined}
+            activeId={activeRoleId}
             onAdd={() => openRoleModal(null)}
             onSelect={handleRoleSelect}
           />
         </Sider>
         <Layout className={styles.rightPanel}>
-          {!activeRoleId || forceRefresh ? (
-            <Empty />
+          {!activeRoleId || showEmpty ? (
+            <>
+              <Empty />
+            </>
           ) : (
             <>
               <Header>
@@ -171,6 +174,7 @@ export default function RolePage() {
                       <UserList selectedRoleId={activeRoleId} />
                     </PlaceholderPanel>
                   </TabPane>
+
                   <TabPane key="permission" title="关联权限">
                     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.PERMISSION)}>
                       <PermissionList selectedRoleId={activeRoleId} />

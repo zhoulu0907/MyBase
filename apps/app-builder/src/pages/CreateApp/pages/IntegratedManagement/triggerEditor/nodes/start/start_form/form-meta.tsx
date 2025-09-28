@@ -123,15 +123,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               ...triggerEditorSignal.nodeData.value[node.id]
             }}
             layout="vertical"
+            requiredSymbol={{ position: 'end' }}
             onValuesChange={onValuesChange}
           >
             <Grid.Row>
-              <Form.Item
-                label="节点ID"
-                field="id"
-                initialValue={node.id}
-                rules={[{ required: true, message: '请选择' }]}
-              >
+              <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
                 <Input disabled />
               </Form.Item>
             </Grid.Row>

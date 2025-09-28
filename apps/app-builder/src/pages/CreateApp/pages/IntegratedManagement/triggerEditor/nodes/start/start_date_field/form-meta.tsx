@@ -82,9 +82,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             layout="vertical"
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            requiredSymbol={{ position: 'end' }}
             onValuesChange={onValuesChange}
           >
-            <Form.Item label="节点ID" field="id" initialValue={node.id}>
+            <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>
 
