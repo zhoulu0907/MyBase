@@ -1,18 +1,20 @@
 import { useState, useCallback } from 'react';
 
+export const MODAL_TYPE = {
+  CREATE_ENTITY: 'createEntity',
+  EDIT_ENTITY: 'editEntity',
+  CONFIG_FIELD: 'configField',
+  CREATE_RELATION: 'createRelation',
+  CREATE_MASTER_DETAIL: 'createMasterDetail',
+  EDIT_RELATION: 'editRelation',
+  EDIT_FIELD: 'editField',
+  DELETE_CONFIRM: 'deleteConfirm',
+  CREATE_FIELD: 'createField',
+  FIELD_DETAIL: 'fieldDetail'
+};
+
 // 定义所有弹窗/抽屉类型
-export type ModalType =
-  | 'createEntity'
-  | 'editEntity'
-  | 'configField'
-  | 'createRelation'
-  | 'createMasterDetail'
-  | 'editRelation'
-  | 'editField'
-  | 'deleteConfirm'
-  | 'createField'
-  | 'fieldDetail'
-  | null;
+export type ModalType = (typeof MODAL_TYPE)[keyof typeof MODAL_TYPE] | null;
 
 // 弹窗/抽屉管理器Hook
 export const useModalManager = () => {

@@ -9,7 +9,7 @@ import styles from './index.module.less';
 import CreateEntityPage from '../Modals/CreateEntityModal';
 import DeleteConfirmModal from '../Modals/DeleteConfirmModal';
 import EditEntityDrawer from '../Drawers/EditEntityDrawer';
-import { useModalManager } from '../../hooks/useModalManager';
+import { useModalManager, MODAL_TYPE } from '../../hooks/useModalManager';
 const { Sider, Content } = Layout;
 
 const EntityTable: React.FC = () => {
@@ -48,15 +48,15 @@ const EntityTable: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [curDataSourceId, selectedEntity]);
+  }, [curDataSourceId]);
 
   const handleDelete = (entity: EntityListItem) => {
     setSelectedEntity(entity);
-    openModal('deleteConfirm', { selectedEntity: entity });
+    openModal(MODAL_TYPE.DELETE_CONFIRM, { selectedEntity: entity });
   };
 
   const handleOpenAddModal = () => {
-    openModal('createEntity');
+    openModal(MODAL_TYPE.CREATE_ENTITY);
   };
 
   const successCallback = () => {
@@ -83,7 +83,7 @@ const EntityTable: React.FC = () => {
   };
 
   const handleClickEdit = async (entity: EntityListItem) => {
-    openModal('editEntity', { editingNode: entity as unknown as EntityNode });
+    openModal(MODAL_TYPE.EDIT_ENTITY, { editingNode: entity as unknown as EntityNode });
   };
 
   const onNodeEdit = (data: Partial<EntityNode>) => {
@@ -120,12 +120,12 @@ const EntityTable: React.FC = () => {
       </Layout>
 
       <CreateEntityPage
-        visible={isModalOpen('createEntity')}
+        visible={isModalOpen(MODAL_TYPE.CREATE_ENTITY)}
         setVisible={(visible) => !visible && closeModal()}
         successCallback={successCallback}
       />
       <DeleteConfirmModal
-        visible={isModalOpen('deleteConfirm')}
+        visible={isModalOpen(MODAL_TYPE.DELETE_CONFIRM)}
         onVisibleChange={(visible) => !visible && closeModal()}
         onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
@@ -135,7 +135,7 @@ const EntityTable: React.FC = () => {
         cancelText="取消"
       />
       <EditEntityDrawer
-        visible={isModalOpen('editEntity')}
+        visible={isModalOpen(MODAL_TYPE.EDIT_ENTITY)}
         setVisible={(visible) => !visible && closeModal()}
         editingNode={getModalData('editingNode') as unknown as EntityNode}
         setEditingNode={(node: EntityNode | null) => setModalDataValue('editingNode', node)}
