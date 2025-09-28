@@ -201,7 +201,7 @@ const CreateApp = (props: IProps) => {
                 background: iconColor
               }}
             >
-              {iconName && <img src={getIconName(iconName)} />}
+              {iconName && <img src={getIconName(iconName)} className={styles.selectedIconParkColor}/>}
               <Popconfirm
                 icon={null}
                 title={null}
@@ -226,7 +226,7 @@ const CreateApp = (props: IProps) => {
                         <div
                           className={styles.avatar}
                           key={index}
-                          style={{ backgroundColor: item.icon === iconName ? iconColor : '#d9d9d9' }}
+                          style={{ backgroundColor: item.icon === iconName ? iconColor : '#F2F3F5' }}
                           onClick={() => setIconName(item.icon)}
                         >
                           {/* <i className={`iconfont ${icon}`} /> */}

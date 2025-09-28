@@ -29,7 +29,7 @@ const FlowEditorPage: React.FC = () => {
           data: {
             ...restNodeData,
             // 覆写的属性写在后面
-            title: item.data.title
+            title: item.data?.title
           },
           output: output
         };
@@ -41,7 +41,7 @@ const FlowEditorPage: React.FC = () => {
           data: {
             ...restNodeData,
             // 覆写的属性写在后面
-            title: item.data.title
+            title: item.data?.title
           },
           output: output
         };

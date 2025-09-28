@@ -18,7 +18,6 @@ export const generateNodeId = (nodeType: NodeType) => {
 // 清除数据节点依赖关系
 export const clearDataOriginNodeId = (nodeId: string) => {
   const nodeData = triggerEditorSignal.nodeData.value;
-  console.log('555555:    ', nodeData);
 
   const keys = Object.keys(triggerEditorSignal.nodeData.value);
   for (let key of keys) {
@@ -57,31 +56,46 @@ export const clearDataOriginNodeId = (nodeId: string) => {
 };
 
 // 判断bolcks 是否包含当前节点
-const judge = (curNodeId: string, blocks: FlowNodeJSON[]): boolean => {
-  let status: boolean = false;
+
+const enum JudgeStatus {
+  NO_FOUND = 0,
+  // 在blocks的第一层中找到了目标节点
+  FOUND = 1,
+  // 在blocks的更深层次中找到了目标节点
+  INCLUDE = 2
+}
+
+const judge = (targetNodeId: string, blocks: FlowNodeJSON[], depth: number): JudgeStatus => {
+  let status: JudgeStatus = JudgeStatus.NO_FOUND;
   for (let item of blocks) {
     if (item.blocks?.length) {
-      status = judge(curNodeId, item.blocks);
+      status = judge(targetNodeId, item.blocks, depth + 1);
     }
-    if (item.id === curNodeId) {
-      status = true;
+
+    if (item.id === targetNodeId) {
+      status = JudgeStatus.FOUND;
+      if (depth > 0) {
+        status = JudgeStatus.INCLUDE;
+      }
+
       break;
     }
   }
+
   return status;
 };
 
-// 只有存在当前节点的支线才可以使用
 const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
   let blockNode: FlowNodeJSON[] = [];
+
   for (let ele of blocks) {
     if (ele.id === curNodeId) {
       break;
     }
-    // ? 可能 根据格式需要修改内容
+
     if (ele.blocks?.length) {
-      const hasCurNode = judge(curNodeId, ele.blocks);
-      if (hasCurNode) {
+      const hasCurNode = judge(curNodeId, ele.blocks, 0);
+      if (hasCurNode == JudgeStatus.FOUND || hasCurNode == JudgeStatus.INCLUDE) {
         if (nodeTypes.includes(ele.type as NodeType)) {
           blockNode.push(ele);
         }
@@ -94,35 +108,58 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: Node
   return blockNode;
 };
 
-export function getBeforeCurQueryNodes(
-  curNodeId: string,
+/** 获取当前节点的数据
+ * @param curNodeId 当前节点ID
+ * @param allNodes 所有节点
+ * @param nodeTypes 过滤节点类型
+ * @returns 节点数据对象，如果不存在则返回[]
+ */
+export function getPrecedingNodes(
+  targetNodeId: string,
   allNodes: FlowNodeJSON[],
   nodeTypes: NodeType[]
 ): FlowNodeJSON[] {
-  // 获取当前节点前并且是数据查询节点的数据
-  // 条件节点  blocks
   let nodes: FlowNodeJSON[] = [];
+
   for (let ele of allNodes) {
-    if (ele.id === curNodeId) {
-      break;
+    if (ele.id === targetNodeId) {
+      return nodes;
     }
+
+    // 带blocks的节点
     if (ele.blocks?.length) {
-      // todo 处理数据 然后递归
-      // 判断是否包含当前节点
-      const hasCurNode = judge(curNodeId, ele.blocks);
-      if (hasCurNode) {
-        const blocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
-        nodes.push.apply(nodes, blocks);
+      // 判断是否包含目标节点
+      const hasCurNode = judge(targetNodeId, ele.blocks, 0);
+
+      if (hasCurNode == JudgeStatus.FOUND) {
+        const curIndex = ele.blocks.findIndex((block: any) => block.id === targetNodeId);
+        let blocks: any[] = [];
+        if (curIndex - 1 > 0) {
+          blocks = ele.blocks.slice(0, curIndex - 1);
+        } else if (curIndex - 1 === 0) {
+          blocks = [ele.blocks[0]];
+        }
+
+        // 平铺 blocks
+        nodes.push({ ...ele, blocks: [] }, ...blocks);
+
+        return nodes;
+      } else if (hasCurNode == JudgeStatus.INCLUDE) {
+        // 在当前节点的blocks中
+        const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
+        nodes.push(...blocks);
       } else {
-        const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks, nodeTypes);
-        nodes.push.apply(nodes, blocks);
+        // 如果不包含 继续向下递归搜索
+        const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
+        nodes.push(...blocks);
       }
     }
-    // const nodeData = triggerEditorSignal.nodeData.value[ele.id];
+
     if (nodeTypes.includes(ele.type as NodeType)) {
       nodes.push(ele);
     }
   }
+
   return nodes;
 }
 
