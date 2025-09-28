@@ -38,7 +38,7 @@ export const clearDataOriginNodeId = (nodeId: string) => {
         console.log('XXX: ', filterCondition);
 
         filterCondition.conditions = filterCondition.conditions
-          .filter((c: any) => !c.fieldId.startsWith(nodeId))
+          .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
           .filter((c: any) => c.value && !c.value.startsWith(nodeId));
         if (filterCondition.conditions.length > 0) {
           newFilterCondition.push(filterCondition);
@@ -67,40 +67,55 @@ const enum JudgeStatus {
 
 const judge = (targetNodeId: string, blocks: FlowNodeJSON[], depth: number): JudgeStatus => {
   let status: JudgeStatus = JudgeStatus.NO_FOUND;
-  for (let item of blocks) {
-    if (item.blocks?.length) {
-      status = judge(targetNodeId, item.blocks, depth + 1);
-    }
 
+  for (let item of blocks) {
     if (item.id === targetNodeId) {
       status = JudgeStatus.FOUND;
+
       if (depth > 0) {
         status = JudgeStatus.INCLUDE;
       }
 
-      break;
+      return status;
+    }
+
+    if (item.blocks?.length) {
+      status = judge(targetNodeId, item.blocks, depth + 1);
     }
   }
 
   return status;
 };
 
-const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
+const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
   let blockNode: FlowNodeJSON[] = [];
 
   for (let ele of blocks) {
-    if (ele.id === curNodeId) {
+    if (ele.id === targetNodeId) {
+      const curIndex = blocks.findIndex((block: any) => block.id === targetNodeId);
+      let newBlocks: any[] = [];
+      if (curIndex - 1 > 0) {
+        newBlocks = blocks.slice(0, curIndex - 1);
+      } else if (curIndex - 1 === 0) {
+        newBlocks = [blocks[0]];
+      }
+
+      blockNode.push(...newBlocks);
+
       break;
     }
 
     if (ele.blocks?.length) {
-      const hasCurNode = judge(curNodeId, ele.blocks, 0);
+      const hasCurNode = judge(targetNodeId, ele.blocks, 0);
+
       if (hasCurNode == JudgeStatus.FOUND || hasCurNode == JudgeStatus.INCLUDE) {
         if (nodeTypes.includes(ele.type as NodeType)) {
           blockNode.push(ele);
         }
-        const newBlocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
-        blockNode.push.apply(blockNode, newBlocks);
+
+        const newBlocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
+
+        blockNode.push(...newBlocks);
       }
     }
   }
@@ -133,6 +148,7 @@ export function getPrecedingNodes(
 
       if (hasCurNode == JudgeStatus.FOUND) {
         const curIndex = ele.blocks.findIndex((block: any) => block.id === targetNodeId);
+
         let blocks: any[] = [];
         if (curIndex - 1 > 0) {
           blocks = ele.blocks.slice(0, curIndex - 1);
