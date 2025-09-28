@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/data.svg';
+import iconData from '@/assets/flow/nodes/dataDelete.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -17,7 +17,7 @@ export const DataDeleteNodeRegistry: FlowNodeRegistry = {
     addDisable: false
   },
   info: {
-    icon: iconStart,
+    icon: iconData,
     description: '这是数据删除节点，用于删除数据。'
   },
   /**

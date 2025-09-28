@@ -1,4 +1,4 @@
-import iconEnd from '@/assets/flow/nodes/end.svg';
+import iconControl from '@/assets/flow/nodes/end.svg';
 import { FlowNodeBaseType } from '@flowgram.ai/fixed-layout-editor';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
@@ -16,7 +16,7 @@ export const EndNodeRegistry: FlowNodeRegistry = {
     expandable: false // disable expanded
   },
   info: {
-    icon: iconEnd,
+    icon: iconControl,
     description: '工作流的最后一个节点，用于在工作流运行结束后返回结果信息。'
   },
   /**

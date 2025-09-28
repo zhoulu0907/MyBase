@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/interaction.svg';
+import iconInteraction from '@/assets/flow/nodes/tooltip.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -17,7 +17,7 @@ export const TooltipNodeRegistry: FlowNodeRegistry = {
     addDisable: false
   },
   info: {
-    icon: iconStart,
+    icon: iconInteraction,
     description: '这是提示节点，用于提示。'
   },
   /**
