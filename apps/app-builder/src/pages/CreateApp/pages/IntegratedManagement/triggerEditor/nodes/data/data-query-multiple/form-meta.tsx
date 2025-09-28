@@ -33,6 +33,7 @@ const ALLOW_DATANODE_TYPES = [
   NodeType.DATA_QUERY,
   NodeType.LOOP,
   NodeType.IF,
+  NodeType.IF_BLOCK,
   NodeType.CASE,
   NodeType.CASE_DEFAULT
 ];

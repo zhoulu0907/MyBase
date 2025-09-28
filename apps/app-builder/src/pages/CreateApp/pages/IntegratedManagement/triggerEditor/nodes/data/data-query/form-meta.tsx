@@ -26,6 +26,7 @@ const ALLOW_DATANODE_TYPES = [
   NodeType.DATA_QUERY_MULTIPLE,
   NodeType.LOOP,
   NodeType.IF,
+  NodeType.IF_BLOCK,
   NodeType.CASE,
   NodeType.CASE_DEFAULT
 ];
