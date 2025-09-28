@@ -22,7 +22,14 @@ import { NodeType } from '../../const';
 import { getDataNodeSource, getEntityFieldList, getPrecedingNodes, validateNodeForm } from '../../utils';
 import { updateDataQueryOutputs } from './output';
 
-const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE];
+const ALLOW_DATANODE_TYPES = [
+  NodeType.DATA_QUERY_MULTIPLE,
+  NodeType.LOOP,
+  NodeType.IF,
+  NodeType.IF_BLOCK,
+  NodeType.CASE,
+  NodeType.CASE_DEFAULT
+];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();

@@ -28,7 +28,15 @@ import {
 } from '../../utils';
 import { updateDataQueryMultipleOutputs } from './output';
 
-const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY];
+const ALLOW_DATANODE_TYPES = [
+  NodeType.DATA_QUERY_MULTIPLE,
+  NodeType.DATA_QUERY,
+  NodeType.LOOP,
+  NodeType.IF,
+  NodeType.IF_BLOCK,
+  NodeType.CASE,
+  NodeType.CASE_DEFAULT
+];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
