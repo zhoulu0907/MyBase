@@ -94,10 +94,8 @@ const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: N
     if (ele.id === targetNodeId) {
       const curIndex = blocks.findIndex((block: any) => block.id === targetNodeId);
       let newBlocks: any[] = [];
-      if (curIndex - 1 > 0) {
-        newBlocks = blocks.slice(0, curIndex - 1);
-      } else if (curIndex - 1 === 0) {
-        newBlocks = [blocks[0]];
+      if (curIndex > 0) {
+        newBlocks = blocks.slice(0, curIndex);
       }
 
       blockNode.push(...newBlocks);
@@ -149,15 +147,13 @@ export function getPrecedingNodes(
       if (hasCurNode == JudgeStatus.FOUND) {
         const curIndex = ele.blocks.findIndex((block: any) => block.id === targetNodeId);
 
-        let blocks: any[] = [];
-        if (curIndex - 1 > 0) {
-          blocks = ele.blocks.slice(0, curIndex - 1);
-        } else if (curIndex - 1 === 0) {
-          blocks = [ele.blocks[0]];
+        let newBlocks: any[] = [];
+        if (curIndex > 0) {
+          newBlocks = ele.blocks.slice(0, curIndex);
         }
 
         // 平铺 blocks
-        nodes.push({ ...ele, blocks: [] }, ...blocks);
+        nodes.push({ ...ele, blocks: [] }, ...newBlocks);
 
         return nodes;
       } else if (hasCurNode == JudgeStatus.INCLUDE) {
