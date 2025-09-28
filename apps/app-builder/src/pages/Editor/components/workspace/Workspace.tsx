@@ -98,9 +98,10 @@ export default function EditorWorkspace() {
       if (!originalComp) return;
 
       const schemaConfig = cloneDeep(
-        getComponentConfig(pageComponentSchemas[oldId], originalComp.type)
+        getComponentConfig(pageComponentSchemas[oldId], comp.type)
       );
-      const schema = getComponentSchema(originalComp.type);
+
+      const schema = getComponentSchema(comp.type);
 
       schema.config = schemaConfig;
       schema.config.cpName = comp.displayName || '';

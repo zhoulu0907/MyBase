@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from 'react';
+import { useEffect, useState, memo, Fragment } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { Collapse } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -73,30 +73,34 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
             >
               {colComponents[index] &&
                 colComponents[index].map((cp: GridItem) => (
-                  <div
-                    key={cp.id}
-                    data-cp-type={cp.type}
-                    data-cp-displayname={cp.displayName}
-                    data-cp-id={cp.id}
-                    className='componentItem'
-                    style={{
-                      width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
-                    }}
-                    onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                      e.stopPropagation();
-                      setCurComponentID(cp.id);
-                      const curComponentSchema = pageComponentSchemas[cp.id];
-                      setCurComponentSchema(curComponentSchema);
-                      setShowDeleteButton(true);
-                    }}
-                  >
-                    <EditRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      runtime={true}
-                      pageComponentSchema={pageComponentSchemas[cp.id]}
-                    />
-                  </div>
+                  <Fragment key={cp.id}>
+                    {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                      <div
+                        key={cp.id}
+                        data-cp-type={cp.type}
+                        data-cp-displayname={cp.displayName}
+                        data-cp-id={cp.id}
+                        className='componentItem'
+                        style={{
+                          width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
+                        }}
+                        onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                          e.stopPropagation();
+                          setCurComponentID(cp.id);
+                          const curComponentSchema = pageComponentSchemas[cp.id];
+                          setCurComponentSchema(curComponentSchema);
+                          setShowDeleteButton(true);
+                        }}
+                      >
+                        <EditRender
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          runtime={true}
+                          pageComponentSchema={pageComponentSchemas[cp.id]}
+                        />
+                      </div>
+                    }
+                  </Fragment>
                 ))}
             </ReactSortable>
           </div>
