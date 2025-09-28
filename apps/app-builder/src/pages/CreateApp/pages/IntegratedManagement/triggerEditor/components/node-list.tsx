@@ -1,11 +1,11 @@
-import { Tabs, Input } from '@arco-design/web-react';
-import { FlowNodeEntity, FlowNodeRegistry, useClientContext } from '@flowgram.ai/fixed-layout-editor';
-import { FlowNodeRegistries } from '../nodes';
-import './index.less';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { NodeType } from '../nodes/const';
-import { useState, useCallback } from 'react';
+import { Input, Tabs } from '@arco-design/web-react';
+import { FlowNodeEntity, FlowNodeRegistry, useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import { debounce } from 'lodash-es';
+import { useCallback, useState } from 'react';
+import { FlowNodeRegistries } from '../nodes';
+import { NodeType } from '../nodes/const';
+import './index.less';
 
 interface AllNodeRegistry {
   label: string;
@@ -146,6 +146,20 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
     }
   };
 
+  const getHeight = (activeTab: string) => {
+    if (activeTab == 'all') {
+      return '490px';
+    } else if (activeTab == 'control') {
+      return '145px';
+    } else if (activeTab == 'data') {
+      return '185px';
+    } else if (activeTab == 'interaction') {
+      return '185px';
+    } else if (activeTab == 'other') {
+      return '185px';
+    }
+  };
+
   return (
     <div className="nodeList" style={{ width: 412 }}>
       <div className="search">
@@ -159,31 +173,38 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
           }}
         />
       </div>
-      <Tabs
-        activeTab={activeTab}
-        onChange={(e) => {
-          setActiveTab(e);
-          getShowData(e, searchValue);
+      <div
+        style={{
+          height: getHeight(activeTab),
+          transition: '0.3s ease-in-out'
         }}
       >
-        <Tabs.TabPane key="all" title="全部">
-          {showAllNodes()}
-        </Tabs.TabPane>
-        <Tabs.TabPane key="control" title="控制节点">
-          {showNodes(showNodeList)}
-        </Tabs.TabPane>
-        <Tabs.TabPane key="data" title="数据节点">
-          {showNodes(showNodeList)}
-        </Tabs.TabPane>
-        {nodes.value?.[0]?.type === NodeType.START_FORM && (
-          <Tabs.TabPane key="interaction" title="交互节点">
+        <Tabs
+          activeTab={activeTab}
+          onChange={(e) => {
+            setActiveTab(e);
+            getShowData(e, searchValue);
+          }}
+        >
+          <Tabs.TabPane key="all" title="全部">
+            {showAllNodes()}
+          </Tabs.TabPane>
+          <Tabs.TabPane key="control" title="控制节点">
             {showNodes(showNodeList)}
           </Tabs.TabPane>
-        )}
-        <Tabs.TabPane key="other" title="其他节点">
-          {showNodes(showNodeList)}
-        </Tabs.TabPane>
-      </Tabs>
+          <Tabs.TabPane key="data" title="数据节点">
+            {showNodes(showNodeList)}
+          </Tabs.TabPane>
+          {nodes.value?.[0]?.type === NodeType.START_FORM && (
+            <Tabs.TabPane key="interaction" title="交互节点">
+              {showNodes(showNodeList)}
+            </Tabs.TabPane>
+          )}
+          <Tabs.TabPane key="other" title="其他节点">
+            {showNodes(showNodeList)}
+          </Tabs.TabPane>
+        </Tabs>
+      </div>
     </div>
   );
 }
