@@ -232,7 +232,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     // 添加主实体节点
     if (entityData.entityId && entityData.entityName) {
       const mainEntityNode: TreeSelectDataType = {
-        key: `field-${entityData.entityId}`,
+        key: `entity-${entityData.entityId}`, // 使用 entity- 前缀避免冲突
         title: entityData.entityName,
         value: entityData.entityCode,
         disabled: true,
@@ -244,7 +244,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         entityData.parentFields.forEach((field) => {
           if (field.fieldId && field.fieldName) {
             mainEntityNode.children?.push({
-              key: `field-${field.fieldId}`,
+              key: `entity-${entityData.entityId}.${field.fieldId}`, // 关键：使用 "父节点ID.字段ID" 格式
               title: field.displayName || field.fieldName,
               value: field.fieldName
             });
@@ -272,7 +272,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             child.childFields.forEach((field: any) => {
               if (field.fieldId && field.fieldName) {
                 childEntityNode.children?.push({
-                  key: `child-field-${field.fieldId}`,
+                  key: `child-${child.childEntityId}.${field.fieldId}`, // 关键：使用 "父节点ID.字段ID" 格式
                   title: field.displayName || field.fieldName,
                   value: field.fieldName
                 });
@@ -284,6 +284,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         }
       });
     }
+
     return result;
   };
 
@@ -487,6 +488,27 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     return result;
   };
 
+  // 添加这个方法到 DataPermission 组件中
+  const getVariable = (value: any, fieldValueType: string) => {
+    if (value === null || value === undefined) return '';
+
+    // 如果是变量类型（variables），尝试解析为字段名
+    if (fieldValueType === 'variables') {
+      // 假设 value 是类似 "entity-16935056057237504.29169768621965312" 的 key
+      const key = String(value);
+      const parts = key.split('.');
+      const entityId = parts[0].replace('entity-', '');
+      const fieldId = parts[1];
+
+      // 查找对应的字段名（需要 appEntityFields 数据）
+      const field = appEntityFields.find((f) => f.fieldId === fieldId);
+      if (field) {
+        return field.displayName || field.fieldName;
+      }
+      return key; // 如果找不到，返回原始 key
+    }
+  };
+
   const handleModalSubmit = async (values?: AuthDataGroupVO) => {
     if (!values) return;
 
@@ -622,7 +644,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                                       ? opCodeOptions.find((option) => option.value === filter.fieldValueType)?.label ||
                                         filter.fieldValueType
                                       : ''}{' '}
-                                    {filter.fieldValue}
+                                    {getVariable(filter.fieldValue, filter.fieldValueType)}
                                   </>
                                 )}
                               </Tag>
