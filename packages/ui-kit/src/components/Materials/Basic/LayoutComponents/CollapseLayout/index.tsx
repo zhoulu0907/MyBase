@@ -1,7 +1,8 @@
 import { useEffect, useState, memo } from 'react';
-// import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import { cloneDeep } from 'lodash-es';
 import { ReactSortable } from 'react-sortablejs';
-import { Collapse, /* Divider */ } from '@arco-design/web-react';
+import { Collapse, Divider } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
 
 import {
@@ -17,8 +18,8 @@ import {
 import type { XCollapseLayoutConfig } from './schema';
 import { STATUS_OPTIONS, STATUS_VALUES, COLLAPSED_VALUES, COLLAPSED_OPTIONS } from '../../../constants';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
-// import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
-// import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import './index.css';
 
@@ -57,19 +58,127 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
     setActiveKey(collapsed === COLLAPSED_VALUES[COLLAPSED_OPTIONS.EXPOSED] ? ['1'] : []);
   }, [collapsed]);
 
-  // 取消隐藏组件
-  // const handleShowComponent = (componentId: string) => {
-  //   const schema = pageComponentSchemas[componentId];
-  //   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+  // 组件状态同步到子组件
+  useEffect(() => {
+    if (colComponents[0]) {
+      colComponents[0].forEach(comp => {
+        const schema = pageComponentSchemas[comp.id];
+        schema.config.status = status;
+        setPageComponentSchemas(comp.id, schema);
+      })
+    }
+  }, [status]);
 
-  //   setPageComponentSchemas(componentId, schema);
-  //   setCurComponentID(componentId);
-  //   setCurComponentSchema(schema);
-  //   setShowDeleteButton(false);
-  // };
+  // 取消隐藏组件
+  const handleShowComponent = (componentId: string) => {
+    const schema = pageComponentSchemas[componentId];
+    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+    setPageComponentSchemas(componentId, schema);
+    setCurComponentID(componentId);
+    setCurComponentSchema(schema);
+    setShowDeleteButton(false);
+  };
 
   // 复制组件
-  // const handleCopyComponent = (comp: any, originId: string) => { };
+  const handleCopyComponent = (comp: any, originId: string, index: number = 0) => {
+
+    // ID 映射表，记录旧 ID 到新 ID 的映射
+    const idMap = new Map<string, string>();
+    idMap.set(originId, comp.id);
+
+    let rootComponentProps = null;
+
+    // 递归复制组件及其子组件
+    function copyComponentRecursive(oldId: string, newId: string) {
+      // 1. 复制组件配置
+      const originalComp = pageComponentSchemas[oldId];
+      if (!originalComp) return;
+
+      // 深拷贝组件配置
+      const schemaConfig = cloneDeep(
+        getComponentConfig(pageComponentSchemas[oldId], comp.type)
+      );
+      const schema = getComponentSchema(comp.type);
+
+      schema.config = schemaConfig;
+      schema.config.cpName = comp.displayName || '';
+      schema.config.id = newId;
+
+      const newProps = {
+        id: newId,
+        type: comp.type,
+        ...schema
+      };
+
+      // 如果是根组件，保存 props
+      if (newId === comp.id) {
+        rootComponentProps = newProps;
+      }
+
+      // 保存新组件配置
+      setPageComponentSchemas(newId, newProps);
+
+      // 2. 复制子组件结构
+      if (layoutSubComponents[oldId]) {
+        const newSubComponents = layoutSubComponents[oldId].map(row =>
+          row.map(item => {
+            // 为每个子组件创建新 ID
+            const childNewId = idMap.get(item.id) || `${item.type}-${uuidv4()}`;
+
+            // 记录子组件 ID 映射
+            if (!idMap.has(item.id)) {
+              idMap.set(item.id, childNewId);
+              // 递归复制子组件
+              copyComponentRecursive(item.id, childNewId);
+            }
+
+            // 返回更新了 ID 的子组件引用
+            return {
+              ...item,
+              id: childNewId
+            };
+          })
+        );
+
+        // 保存子组件结构
+        setLayoutSubComponents(newId, newSubComponents);
+      }
+    }
+
+    // 开始递归复制
+    copyComponentRecursive(originId, comp.id);
+
+    // 3. 将复制的组件添加到当前布局组件的 layoutSubComponents 中
+    if (layoutSubComponents[id]) {
+      // 获取当前布局组件的子组件结构
+      const currentLayoutSubComponents = layoutSubComponents[id];
+
+      // 创建新的子组件引用
+      const newSubComponentRef = {
+        id: comp.id,
+        type: comp.type
+      };
+
+      // 添加到布局组件的对应列中
+      const updatedLayoutSubComponents = [...currentLayoutSubComponents];
+      if (updatedLayoutSubComponents[index]) {
+        updatedLayoutSubComponents[index] = [...updatedLayoutSubComponents[index], newSubComponentRef];
+      } else {
+        updatedLayoutSubComponents[index] = [newSubComponentRef];
+      }
+
+      // 更新布局组件的子组件结构
+      setLayoutSubComponents(id, updatedLayoutSubComponents);
+    }
+
+    // 设置当前组件
+    setCurComponentID(comp.id!);
+    setCurComponentSchema(rootComponentProps);
+    setShowDeleteButton(false);
+
+    console.log('布局内复制完成，ID 映射:', Object.fromEntries(idMap));
+  };
 
   // 删除组件
   const handleDeleteComponent = (componentId: string) => {
@@ -91,9 +200,9 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
       expandIconPosition='right'
       expandIcon={<img src={IconCollapsedDown} alt='' />}
       onChange={(_, key) => setActiveKey(key)}
-      style={{ opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1, pointerEvents: runtime && status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'auto' }}
+      style={{ opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1 }}
     >
-      <CollapseItem header={label.text} name='1' contentStyle={{ backgroundColor: '#fff', paddingLeft: 13, paddingTop: 20, borderTop: '1px solid #ccc' }}>
+      <CollapseItem header={label.text} name='1' contentStyle={{ backgroundColor: '#fff', paddingLeft: 13, paddingTop: 5, borderTop: '1px solid #ccc' }}>
         {colComponents.map((_colComponents, index) => (
           <div className="item" key={index}>
             <ReactSortable
@@ -179,36 +288,37 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
                       pageComponentSchema={pageComponentSchemas[cp.id]}
                     />
 
+                    {/* 操作按钮 */}
                     {curComponentID === cp.id && showDeleteButton && (
                       <div className='operationArea'>
-                        {/* {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                        <>
-                          <div
-                            className='copyButton'
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.debug('取消隐藏组件: ', cp);
-                              handleShowComponent(cp.id);
-                            }}
-                          >
-                            <img src={CompShowIcon} alt="component show" />
-                          </div>
-                          <Divider className='divider' type="vertical" />
-                        </>
-                      )}
+                        {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                          <>
+                            <div
+                              className='copyButton'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.debug('取消隐藏组件: ', cp);
+                                handleShowComponent(cp.id);
+                              }}
+                            >
+                              <img src={CompShowIcon} alt="component show" />
+                            </div>
+                            <Divider className='divider' type="vertical" />
+                          </>
+                        )}
 
-                      <div
-                        className='copyButton'
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log('复制组件: ', cp);
-                          handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
-                        }}
-                      >
-                        <img src={CompCopyIcon} alt="component copy" />
+                        <div
+                          className='copyButton'
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('复制组件: ', cp);
+                            handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
+                          }}
+                        >
+                          <img src={CompCopyIcon} alt="component copy" />
+                        </div>
+                        <Divider className='divider' type="vertical" />
 
-                      </div>
-                      <Divider className='divider' type="vertical" /> */}
                         <div
                           className='deleteButton'
                           onClick={(e) => {

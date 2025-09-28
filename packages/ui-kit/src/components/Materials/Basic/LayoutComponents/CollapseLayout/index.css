@@ -1,6 +1,7 @@
 .XCollapseLayout {
   width: 100%;
   border: 1px solid #d4d4d4 !important;
+  box-sizing: border-box;
 
   .item {
     min-height: 200px;
