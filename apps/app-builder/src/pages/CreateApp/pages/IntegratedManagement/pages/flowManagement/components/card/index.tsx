@@ -65,7 +65,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
             {data.processName}
           </Typography.Text>
           <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentDesc}>
-            {data.processDescription}
+            {data.id}
           </Typography.Text>
         </div>
         {/* data.triggerType  TriggerType.FORM */}
@@ -92,12 +92,16 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
 
         <div className={styles.cardBodyRow}>
           <div className={styles.cardBodyRowLabel}> 最后执行</div>
-          <div className={styles.cardBodyRowContent}> xx</div>
+          <div className={styles.cardBodyRowContent}>
+            {/* todo 暂不展示数据 */}
+          </div>
         </div>
 
         <div className={styles.cardBodyRow}>
           <div className={styles.cardBodyRowLabel}> 执行次数</div>
-          <div className={styles.cardBodyRowContent}> xx</div>
+          <div className={styles.cardBodyRowContent}>
+            {/* todo 暂不展示数据 */}
+          </div>
         </div>
       </div>
       <div className={styles.cardFooter}>

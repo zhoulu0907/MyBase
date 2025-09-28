@@ -1,6 +1,5 @@
 import { useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import { useCallback, useContext, useMemo, useState } from 'react';
-
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Dropdown, Menu } from '@arco-design/web-react';
@@ -13,6 +12,8 @@ import { type FlowNodeRegistry } from '../../typings';
 import { Header, Operators, Content, Footer } from './styles';
 import { TitleInput } from './title-input';
 import { getIcon } from './utils';
+import { NodeTypeName } from '../../nodes/const';
+
 
 function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void }) {
   const { updateTitleEdit } = props;
@@ -92,6 +93,7 @@ export function FormHeader() {
   const handleClose = () => {
     setNodeId(undefined);
   };
+  console.log('-------',node)
 
   return (
     <Header>
@@ -104,6 +106,7 @@ export function FormHeader() {
       >
         {getIcon(node)}
         <TitleInput readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
+        {/* <div>{NodeTypeName[node.flowNodeType]}</div> */}
         {node.renderData.expandable && !isSidebar && (
           <Button
             type="secondary"
