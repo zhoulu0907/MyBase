@@ -24,12 +24,39 @@ export const getEntityRules = (params: object) => {
 };
 
 /**
- * 创建数据规则
+ * 创建自定义校验规则
  * @param data 数据规则信息
  * @returns 规则ID
  */
-export const createRule = (data: CreateRuleReqVO) => {
-  return metadataService.post('/validation-rule-group/create', data);
+export const createCustomRule = (data: CreateRuleReqVO) => {
+  return metadataService.post('/validation-self-defined/create', data);
+};
+
+
+/**
+ * 更新自定义校验规则
+ * @param data 数据规则信息
+ * @returns 操作结果
+ */
+export const updateCustomRule = (data: UpdateRuleReqVO) => {
+  return metadataService.post('/validation-self-defined/update', data);
+};
+
+/**
+ * 根据ID获取自定义校验规则
+ * @param data 数据规则信息
+ */
+export const getCustomRuleById = (id: string) => {
+  return metadataService.post('/validation-self-defined/get?id=' + id);
+};
+
+/**
+ * 删除自定义校验规则
+ * @param id 规则ID
+ * @returns 操作结果
+ */
+export const deleteCustomRule = (id: string) => {
+  return metadataService.post('/validation-self-defined/delete?id=' + id);
 };
 
 /**
@@ -218,21 +245,4 @@ export const deleteChildNotEmptyRule = (id: string) => {
   return metadataService.post('/validation/child-not-empty/delete?id=' + id);
 };
 
-/**
- * 更新数据规则
- * @param data 数据规则信息
- * @returns 操作结果
- */
-export const updateRule = (data: UpdateRuleReqVO) => {
-  return metadataService.post('/validation-rule-group/update', data);
-};
-
-/**
- * 删除数据规则
- * @param id 规则ID
- * @returns 操作结果
- */
-export const deleteRule = (id: string) => {
-  return metadataService.post('/validation-rule-group/delete?id=' + id);
-};
 

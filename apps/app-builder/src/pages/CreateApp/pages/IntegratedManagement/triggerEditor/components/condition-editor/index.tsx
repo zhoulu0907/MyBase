@@ -85,8 +85,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }
         }
       });
+      form.setFieldValue('filterCondition', filterCondition);
     }
-    form.setFieldValue('filterCondition', filterCondition);
   }, []);
 
   useEffect(() => {

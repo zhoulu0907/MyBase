@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react';
 import { CreateCustomRule, CreateOtherRule, DeleteConfirmModal } from '../../Modals';
 import { VALIDATION_TYPES, validationTypeList, validationTypeMap } from '../../Modals/CreateEditRuleModal/rule';
 import styles from './tabs.module.less';
-import { deleteRelation } from '@onebase/app';
 
 interface DataRulesProps {
   entity: EntityListItem;
@@ -54,7 +53,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     setRuleType(record.validationType);
     setEditRule(record);
 
-    if (record.validationType === VALIDATION_TYPES.CUSTOM) {
+    if (record.validationType === VALIDATION_TYPES.SELF_DEFINED) {
       setCreateCustomRuleModalVisible(true);
     } else {
       setCreateOtherRuleModalVisible(true);
@@ -64,7 +63,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
   const handleClickMenu = (value: string) => {
     setEditRule(null);
     setRuleType(value);
-    if (value === VALIDATION_TYPES.CUSTOM) {
+    if (value === VALIDATION_TYPES.SELF_DEFINED) {
       // 自定义校验
       setCreateCustomRuleModalVisible(true);
     } else {
@@ -82,7 +81,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
       [VALIDATION_TYPES.LENGTH]: ruleService.deleteLengthRule,
       [VALIDATION_TYPES.RANGE]: ruleService.deleteRangeRule,
       [VALIDATION_TYPES.FORMAT]: ruleService.deleteFormatRule,
-      [VALIDATION_TYPES.SUBTABLE_EMPTY]: ruleService.deleteChildNotEmptyRule
+      [VALIDATION_TYPES.CHILD_NOT_EMPTY]: ruleService.deleteChildNotEmptyRule
     };
 
     try {
