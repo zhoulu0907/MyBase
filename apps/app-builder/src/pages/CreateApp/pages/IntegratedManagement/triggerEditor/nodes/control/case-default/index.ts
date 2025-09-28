@@ -21,9 +21,6 @@ export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
      */
     draggable: false,
     deleteDisable: true,
-    style: {
-      width: 240
-    }
   },
   info: {
     icon: iconControl,
