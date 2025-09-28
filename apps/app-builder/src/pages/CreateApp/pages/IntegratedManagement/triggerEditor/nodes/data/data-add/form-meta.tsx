@@ -17,7 +17,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
-import { getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
+import { getPrecedingNodes, validateNodeForm } from '../../utils';
 import { updateDataAddOutputs } from './output';
 
 const RadioGroup = Radio.Group;
@@ -78,7 +78,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     const nodes = triggerEditorSignal.nodes.value;
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
+    const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
     setDataNodeList(newDataNodeList);
   };
 
@@ -198,6 +198,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             onValuesChange={onValuesChange}
+            requiredSymbol={{ position: 'end' }}
             layout="vertical"
           >
             <Grid.Row>
@@ -207,8 +208,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 initialValue={node.id}
                 rules={[
                   {
-                    required: true,
-                    message: '请选择节点ID'
+                    required: true
                   }
                 ]}
               >

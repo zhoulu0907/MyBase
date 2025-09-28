@@ -1,6 +1,7 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
+import type { ConfitionField } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import { BreakMode } from '../../../components/const';
@@ -8,7 +9,14 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
-import { clearDataOriginNodeId, getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
+import {
+  clearDataOriginNodeId,
+  getDataNodeSource,
+  getEntityFieldList,
+  getPrecedingNodes,
+  validateNodeForm
+} from '../../utils';
+import { updateLoopOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE];
 
@@ -32,17 +40,26 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const init = async () => {
     const nodes = triggerEditorSignal.nodes.value;
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
+    const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
     setDataNodeList(newDataNodeList);
   };
 
-  const handleDateNodeSourceChange = async () => {
+  const handleDateNodeSourceChange = async (dataNodeId: string) => {
     const nodes = triggerEditorSignal.nodes.value;
 
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
+    const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
     setDataNodeList(newDataNodeList);
 
+    const originDataSource = getDataNodeSource(dataNodeId);
+    console.log('originDataSource: ', originDataSource);
+
+    getEntityFieldList(originDataSource, handleSetConditionFields, () => {});
+
     clearDataOriginNodeId(node.id);
+  };
+
+  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
+    updateLoopOutputs(node.id, conditionFields);
   };
 
   // 表单内容改变
@@ -66,9 +83,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} initialValues={getInitData()} onValuesChange={onValuesChange} layout="vertical">
+          <Form
+            form={payloadForm}
+            initialValues={getInitData()}
+            onValuesChange={onValuesChange}
+            layout="vertical"
+            requiredSymbol={{ position: 'end' }}
+          >
             <Grid.Row>
-              <Form.Item label="节点ID" field="id" initialValue={node.id}>
+              <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
                 <Input disabled />
               </Form.Item>
             </Grid.Row>

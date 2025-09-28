@@ -48,9 +48,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} initialValues={getInitData()} onValuesChange={onValuesChange} layout="vertical">
+          <Form
+            form={payloadForm}
+            initialValues={getInitData()}
+            onValuesChange={onValuesChange}
+            layout="vertical"
+            requiredSymbol={{ position: 'end' }}
+          >
             <Grid.Row>
-              <Form.Item label="节点ID" field="id" initialValue={node.id}>
+              <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
                 <Input disabled />
               </Form.Item>
             </Grid.Row>

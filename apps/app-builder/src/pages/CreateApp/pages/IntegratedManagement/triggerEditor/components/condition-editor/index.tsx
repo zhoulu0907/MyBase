@@ -26,7 +26,7 @@ import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect } from 'react';
 import { NodeType } from '../../nodes/const';
-import { getBeforeCurQueryNodes } from '../../nodes/utils';
+import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -260,10 +260,11 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
       NodeType.START_TIME,
       NodeType.START_DATE_FIELD,
       NodeType.START_API,
-      NodeType.START_BPM
+      NodeType.START_BPM,
+      NodeType.LOOP
     ];
 
-    const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
+    const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
     // console.log('nodes: ', nodes);
 
     const options: TreeSelectDataType[] = [];
@@ -396,6 +397,20 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }
           break;
         case NodeType.DATA_CALC:
+          break;
+        case NodeType.LOOP:
+          const loopFields = nodeOutput.conditionFields;
+          loopFields &&
+            loopFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
           break;
       }
     });

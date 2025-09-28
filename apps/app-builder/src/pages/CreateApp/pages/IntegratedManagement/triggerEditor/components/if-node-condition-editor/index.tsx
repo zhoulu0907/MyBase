@@ -26,7 +26,7 @@ import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { NodeType } from '../../nodes/const';
-import { getBeforeCurQueryNodes } from '../../nodes/utils';
+import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -36,7 +36,12 @@ const ALLOW_NODE_TYPES = [
   NodeType.DATA_ADD,
   NodeType.START_FORM,
   NodeType.START_ENTITY,
-  NodeType.START_DATE_FIELD
+  NodeType.START_DATE_FIELD,
+  NodeType.LOOP,
+  NodeType.IF,
+  NodeType.IF_BLOCK,
+  NodeType.CASE,
+  NodeType.CASE_DEFAULT
 ];
 
 const opCodeOptions = [
@@ -253,8 +258,8 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   };
 
   const getEntityFieldValidationTypes = (nodeId: string): string[] => {
-    const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
-    console.log('nodes: ', nodes);
+    const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
+    // console.log('nodes: ', nodes);
 
     const fieldIds: string[] = [];
 
@@ -331,6 +336,14 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           break;
         case NodeType.DATA_CALC:
           break;
+        case NodeType.LOOP:
+          const loopFields = nodeOutput.conditionFields;
+          loopFields &&
+            loopFields.forEach((field: any) => {
+              fieldIds.push(field.value);
+            });
+
+          break;
       }
     });
 
@@ -338,8 +351,8 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   };
 
   const getVariableOptions = (nodeId: string): TreeSelectDataType[] => {
-    const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
-    // console.log('nodes: ', nodes);
+    const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
+    console.log('nodes: ', nodes);
 
     const options: TreeSelectDataType[] = [];
 
@@ -471,6 +484,21 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           }
           break;
         case NodeType.DATA_CALC:
+          break;
+        case NodeType.LOOP:
+          const loopFields = nodeOutput.conditionFields;
+          loopFields &&
+            loopFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: `${field.label}`
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+
           break;
       }
     });

@@ -83,6 +83,10 @@ const TriggerEditor = () => {
 
       for (let item of nodes) {
         data = { ...data, [item.id]: item.data };
+        if (item.blocks) {
+          // 递归初始化blocks数据
+          data = initBlocksData(item.blocks, data);
+        }
         // 初始化输出节点
         // console.log('item.id: ', item.id);
         if (item.output) {
@@ -92,9 +96,11 @@ const TriggerEditor = () => {
       }
 
       console.log('nodeData', data);
+
       setAllNodeData(data);
       setInitData({ nodes: nodes });
     } else {
+      // 对开始节点数据初始化
       switch (res.triggerType) {
         case TriggerType.FORM:
           setInitData(StartFormInitData);
@@ -138,6 +144,16 @@ const TriggerEditor = () => {
           break;
       }
     }
+  };
+
+  const initBlocksData = (blocks: any[], data: any) => {
+    for (let item of blocks) {
+      data = { ...data, [item.id]: item.data };
+      if (item.blocks) {
+        data = initBlocksData(item.blocks, data);
+      }
+    }
+    return data;
   };
 
   useEffect(() => {

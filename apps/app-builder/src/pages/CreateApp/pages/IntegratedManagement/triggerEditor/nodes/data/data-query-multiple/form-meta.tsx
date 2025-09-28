@@ -21,14 +21,22 @@ import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
 import {
   clearDataOriginNodeId,
-  getBeforeCurQueryNodes,
   getDataNodeSource,
   getEntityFieldList,
+  getPrecedingNodes,
   validateNodeForm
 } from '../../utils';
 import { updateDataQueryMultipleOutputs } from './output';
 
-const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY];
+const ALLOW_DATANODE_TYPES = [
+  NodeType.DATA_QUERY_MULTIPLE,
+  NodeType.DATA_QUERY,
+  NodeType.LOOP,
+  NodeType.IF,
+  NodeType.IF_BLOCK,
+  NodeType.CASE,
+  NodeType.CASE_DEFAULT
+];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -92,7 +100,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     const nodes = triggerEditorSignal.nodes.value;
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
+    const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
     setDataNodeList(newDataNodeList);
   };
 
@@ -194,7 +202,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     const nodes = triggerEditorSignal.nodes.value;
 
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
+    const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
     setDataNodeList(newDataNodeList);
 
     clearDataOriginNodeId(node.id);
@@ -222,7 +230,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从上游数据节点查询
       const nodes = triggerEditorSignal.nodes.value;
       // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
-      const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
+      const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
 
       setDataNodeList(newDataNodeList);
     }
@@ -288,8 +296,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} layout="vertical" onValuesChange={onValuesChange} initialValues={getInitData()}>
-            <Form.Item label="节点ID" field="id" initialValue={node.id}>
+          <Form
+            form={payloadForm}
+            layout="vertical"
+            onValuesChange={onValuesChange}
+            initialValues={getInitData()}
+            requiredSymbol={{ position: 'end' }}
+          >
+            <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>
 
