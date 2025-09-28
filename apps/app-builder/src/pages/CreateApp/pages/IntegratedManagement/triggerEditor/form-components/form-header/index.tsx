@@ -9,11 +9,10 @@ import { useIsSidebar } from '../../hooks';
 import { clearDataOriginNodeId } from '../../nodes/utils';
 import { FlowCommandId } from '../../shortcuts/constants';
 import { type FlowNodeRegistry } from '../../typings';
-import { Header, Operators, Content, Footer } from './styles';
 import { TitleInput } from './title-input';
 import { getIcon } from './utils';
-import { NodeTypeName } from '../../nodes/const';
-
+import { NodeType, NodeTypeName } from '../../nodes/const';
+import styles from './index.module.less';
 
 function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void }) {
   const { updateTitleEdit } = props;
@@ -93,11 +92,22 @@ export function FormHeader() {
   const handleClose = () => {
     setNodeId(undefined);
   };
-  console.log('-------',node)
+
+  const getNodeTypeNameTag = () => {
+    if (!node.flowNodeType || isSidebar) {
+      return null;
+    }
+    const nodeTypeName = NodeTypeName[node.flowNodeType as keyof typeof NodeTypeName];
+    if (node.flowNodeType === NodeType.START_FORM) {
+      return <div className={styles.orangeTag}>{nodeTypeName}</div>;
+    }
+    return <div className={styles.tag}>{nodeTypeName}</div>;
+  };
 
   return (
-    <Header>
-      <Content
+    <div className={styles.nodeHeader}>
+      <div
+        className={styles.content}
         onMouseDown={(e) => {
           // trigger drag node
           startDrag(e);
@@ -105,8 +115,8 @@ export function FormHeader() {
         }}
       >
         {getIcon(node)}
-        <TitleInput readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
-        {/* <div>{NodeTypeName[node.flowNodeType]}</div> */}
+        <TitleInput isSidebar={isSidebar} readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
+        {getNodeTypeNameTag()}
         {node.renderData.expandable && !isSidebar && (
           <Button
             type="secondary"
@@ -116,22 +126,22 @@ export function FormHeader() {
           />
         )}
         {readonly ? undefined : (
-          <Operators>
+          <div className={styles.operation}>
             <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={updateTitleEdit} />}>
               <Button size="mini" type="secondary" icon={<IconMore />} onClick={(e: Event) => e.stopPropagation()} />
             </Dropdown>
-          </Operators>
+          </div>
         )}
         {/* 如果是在sidebar中，则显示关闭按钮 */}
         {isSidebar && <Button type="text" icon={<IconClose />} size="small" onClick={handleClose} />}
-      </Content>
+      </div>
       {/* 如果不是在sidebar中，则显示节点id */}
       {!isSidebar && (
-        <Footer>
+        <div className={styles.footer}>
           <span>ID:</span>
           <span style={{ paddingLeft: '12px' }}>{node.id}</span>
-        </Footer>
+        </div>
       )}
-    </Header>
+    </div>
   );
 }
