@@ -192,6 +192,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       visible={visible}
       onCancel={handleClose}
       width={500}
+      mask={false}
       footer={
         <div className={styles.footer}>
           <Button type="text" status="danger" onClick={() => openDeleteModal()} style={{ float: 'left' }}>
@@ -200,7 +201,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
           <Space>
             <Button onClick={handleClose}>取消</Button>
             <Button type="primary" loading={submitting} onClick={handleSubmit}>
-              保存
+              确定
             </Button>
           </Space>
         </div>
@@ -208,72 +209,70 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       className={styles['edit-relation-drawer']}
     >
       <div className={styles.content}>
-        <div className={styles.section}>
-          <h4>基本设置</h4>
+        <h4 className={styles.formSectionTitle}>基本设置</h4>
 
-          <Form form={form} layout="vertical" className={styles.form}>
-            <Form.Item label="主表" field="sourceEntityId" required rules={[{ required: true, message: '请选择主表' }]}>
-              <Select
-                placeholder="请选择主表"
-                options={leftEntityOptions}
-                onChange={(value) => handleEntityChange(value, 'left')}
-                disabled
-              />
-            </Form.Item>
+        <Form form={form} layout="vertical" className={styles.form}>
+          <Form.Item label="主表" field="sourceEntityId" required rules={[{ required: true, message: '请选择主表' }]}>
+            <Select
+              placeholder="请选择主表"
+              options={leftEntityOptions}
+              onChange={(value) => handleEntityChange(value, 'left')}
+              disabled
+            />
+          </Form.Item>
 
-            <Form.Item
-              label="主表字段"
-              field="sourceFieldId"
-              required
-              rules={[{ required: true, message: '请选择主表字段' }]}
-            >
-              <Select
-                placeholder="请选择字段"
-                options={leftFieldOptions}
-                allowClear
-                disabled={!form.getFieldValue('sourceEntityId')}
-              />
-            </Form.Item>
+          <Form.Item
+            label="主表字段"
+            field="sourceFieldId"
+            required
+            rules={[{ required: true, message: '请选择主表字段' }]}
+          >
+            <Select
+              placeholder="请选择字段"
+              options={leftFieldOptions}
+              allowClear
+              disabled={!form.getFieldValue('sourceEntityId')}
+            />
+          </Form.Item>
 
-            <Form.Item
-              label="关联关系"
-              field="relationshipType"
-              required
-              rules={[{ required: true, message: '请选择关联关系' }]}
-            >
-              <Select placeholder="请选择关联关系" options={relationTypes} allowClear />
-            </Form.Item>
+          <Form.Item
+            label="关联关系"
+            field="relationshipType"
+            required
+            rules={[{ required: true, message: '请选择关联关系' }]}
+          >
+            <Select placeholder="请选择关联关系" options={relationTypes} allowClear />
+          </Form.Item>
 
-            {/* 关联表 */}
-            <Form.Item
-              label="关联表"
-              field="targetEntityId"
-              required
-              rules={[{ required: true, message: '请选择关联表' }]}
-            >
-              <Select
-                placeholder="请选择关联表"
-                options={rightEntityOptions}
-                onChange={(value) => handleEntityChange(value, 'right')}
-                allowClear
-              />
-            </Form.Item>
+          {/* 关联表 */}
+          <Form.Item
+            label="关联表"
+            field="targetEntityId"
+            required
+            rules={[{ required: true, message: '请选择关联表' }]}
+          >
+            <Select
+              placeholder="请选择关联表"
+              options={rightEntityOptions}
+              onChange={(value) => handleEntityChange(value, 'right')}
+              allowClear
+            />
+          </Form.Item>
 
-            <Form.Item
-              label="关联字段"
-              field="targetFieldId"
-              required
-              rules={[{ required: true, message: '请选择关联字段' }]}
-            >
-              <Select
-                placeholder="请选择字段"
-                options={rightFieldOptions}
-                allowClear
-                disabled={!form.getFieldValue('targetEntityId')}
-              />
-            </Form.Item>
-          </Form>
-        </div>
+          <Form.Item
+            label="关联字段"
+            field="targetFieldId"
+            required
+            rules={[{ required: true, message: '请选择关联字段' }]}
+          >
+            <Select
+              placeholder="请选择字段"
+              options={rightFieldOptions}
+              allowClear
+              disabled={!form.getFieldValue('targetEntityId')}
+            />
+          </Form.Item>
+        </Form>
       </div>
 
       {loading && (

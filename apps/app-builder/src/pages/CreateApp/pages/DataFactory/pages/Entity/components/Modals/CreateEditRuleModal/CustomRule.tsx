@@ -1,15 +1,22 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { useAppStore } from '@/store/store_app';
 import { Button, Form, Input, Message, Modal, Radio, Select, Space } from '@arco-design/web-react';
-import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import type { ConditionRow } from '@onebase/app';
-import { createRule, getEntityFieldsWithChildren } from '@onebase/app';
+// import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import type { ConditionRow, EntityFieldValidationTypes } from '@onebase/app';
+import {
+  createCustomRule,
+  getCustomRuleById,
+  getEntityFieldsWithChildren,
+  getFieldCheckTypeApi,
+  updateCustomRule
+} from '@onebase/app';
 import React, { useState } from 'react';
-import { formatValidationTypeOptions, operatorOptions, valueTypeOptions } from './rule.ts';
+// import { formatValidationTypeOptions, operatorOptions, valueTypeOptions } from './rule.ts';
 import ConditionEditor from '../../../../../../IntegratedManagement/triggerEditor/components/condition-editor/index.tsx';
 import styles from '../modal.module.less';
+import { VALIDATION_TYPES } from './rule.ts';
 
 interface RuleFormValues {
+  id?: string;
   validationType: string;
   formatValidationType?: string;
   rgName: string;
@@ -34,15 +41,11 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
   entity,
   editRule
 }) => {
-  const { curAppId } = useAppStore();
   const [form] = Form.useForm<RuleFormValues>();
   const [loading, setLoading] = useState(false);
-  const [leftFieldOptions, setLeftFieldOptions] = useState<any[]>([]);
-  const [rightFieldOptions, setRightFieldOptions] = useState<any[]>([]);
-
-  // 生成唯一ID
-  const generateId = () => `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
+  const [allOptions, setAllOptions] = useState<any[]>([]);
+  const [parentOptions, setParentOptions] = useState<any[]>([]);
+  const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
   // 创建默认条件行
   const createDefaultConditionRow = (): ConditionRow => ({
     fieldId: '',
@@ -56,17 +59,23 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
   // 创建默认条件组
   const createDefaultConditionGroup = (): ConditionRow[] => [createDefaultConditionRow()];
 
-  // 监听校验类型变化，控制格式校验类型字段的显示
-  const handleValidationTypeChange = (value: string) => {
-    if (value !== 'format') {
-      form.setFieldValue('formatValidationType', undefined);
+  // 根据ID获取规则
+  const handleGetRuleById = async (id: string) => {
+    try {
+      const res = await getCustomRuleById(id);
+      console.log('getRuleById', res);
+      if (res) {
+        form.setFieldsValue(res);
+      }
+    } catch (error) {
+      console.error('获取规则失败:', error);
     }
   };
 
   // 监听校验类型变化，控制条件设置字段的显示
   const isConditionSettingVisible = () => {
     const validationType = form.getFieldValue('validationType');
-    return validationType !== 'subtable_empty';
+    return validationType !== VALIDATION_TYPES.CHILD_NOT_EMPTY;
   };
 
   // 添加AND条件（在同一组内添加行）
@@ -130,23 +139,43 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
       const values = await form.validate();
       setLoading(true);
 
-      console.log('规则表单数据:', values, form.getFieldsValue());
+      console.log('规则表单数据:', values);
 
-      // TODO: 调用创建规则的API
-      const res = await createRule({
-        ...values,
-        entityId: entity.id
-        // appId: curAppId
-      });
+      const params = {
+        popPrompt: values.popPrompt,
+        popType: values.popType,
+        rgName: values.rgName,
+        valueRules: values.filterCondition.map((item) =>
+          item.conditions.map((item) => ({
+            fieldId: item.fieldId,
+            operator: item.op,
+            valueType: item.operatorType,
+            fieldValue: item.value
+          }))
+        ),
+        entityId: entity.id,
+        validationType: VALIDATION_TYPES.SELF_DEFINED
+      };
 
-      console.log('createRule', res);
+      let res;
 
-      Message.success('创建规则成功');
-      form.resetFields();
-      setVisible(false);
-      successCallback();
+      if (editRule) {
+        params.id = editRule.id;
+        res = await updateCustomRule(params);
+      } else {
+        res = await createCustomRule(params);
+      }
+
+      if (res) {
+        Message.success(`${editRule ? '编辑' : '创建'}规则成功`);
+        form.resetFields();
+        setVisible(false);
+        successCallback();
+      } else {
+        console.error(res.msg || `${editRule ? '编辑' : '创建'}失败`);
+      }
     } catch (error) {
-      console.error('创建规则失败:', error);
+      console.error(`${editRule ? '编辑' : '创建'}规则失败:`, error);
     } finally {
       setLoading(false);
     }
@@ -173,11 +202,20 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
       .flatMap((entity: { childFields: { displayName: string; fieldId: string }[] }) => entity?.childFields || [])
       .map((item: { displayName: string; fieldId: string }) => ({
         label: item.displayName,
-        value: item.fieldId
+        value: item.fieldId,
+        fieldType: item.fieldType
       }));
     const allFields = [...parentFields, ...childFields];
-    setLeftFieldOptions(allFields);
-    setRightFieldOptions(childFields);
+    setAllOptions(allFields);
+    setParentOptions(parentFields);
+
+    getFieldCheckType(allFields.map((item) => item.value));
+  };
+
+  // 批量获取字段可选校验类型
+  const getFieldCheckType = async (fieldIds: string[]) => {
+    const res = await getFieldCheckTypeApi(fieldIds);
+    setFilterFieldCheckType(res);
   };
 
   // 初始化表单数据
@@ -186,17 +224,20 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
       // 设置默认的条件组
       form.setFieldValue('valueRules', [createDefaultConditionGroup()]);
       loadFieldOptions();
+      if (editRule) {
+        handleGetRuleById(editRule?.id || '');
+      }
     }
-  }, [visible]);
+  }, [visible, editRule]);
 
   return (
     <Modal
       className={styles['create-rule-modal']}
-      title="添加规则"
+      title={`${editRule ? '编辑' : '添加'}规则`}
       visible={visible}
       onOk={handleFinish}
       onCancel={handleCancel}
-      okText="创建"
+      okText={`${editRule ? '确定' : '创建'}`}
       cancelText="取消"
       confirmLoading={loading}
       style={{ width: 610 }}
@@ -223,36 +264,14 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
           </Select>
         </Form.Item> */}
 
-        {/* 格式校验类型 - 条件显示 */}
-        {/* <Form.Item noStyle shouldUpdate>
-          {(values) => {
-            if (values.validationType === 'format') {
-              return (
-                <Form.Item
-                  label="格式校验类型"
-                  field="formatValidationType"
-                  rules={[{ required: true, message: '请选择格式校验类型' }]}
-                >
-                  <Select
-                    placeholder="请选择格式校验类型"
-                    options={formatValidationTypeOptions}
-                    style={{ width: '100%' }}
-                  />
-                </Form.Item>
-              );
-            }
-            return null;
-          }}
-        </Form.Item> */}
-
-        <Form.Item label="条件设置" field="valueRules">
-          <ConditionEditor
-            data={form.getFieldValue('valueRules') || []}
-            fields={leftFieldOptions}
-            entityFieldValidationTypes={[]}
-            onChange={(value) => form.setFieldValue('valueRules', value)}
-          />
-        </Form.Item>
+        <ConditionEditor
+          nodeId={entity.id}
+          label="条件设置"
+          required
+          form={form}
+          fields={parentOptions}
+          entityFieldValidationTypes={filterFieldCheckType}
+        />
 
         {/* 条件设置 */}
         {/* <Form.Item noStyle shouldUpdate>
@@ -379,7 +398,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         </Form.Item> */}
 
         {/* 验证失败提示语 */}
-        <Form.Item label="验证失败提示语" field="popType">
+        {/* <Form.Item label="验证失败提示语" field="popType">
           <Radio.Group
             defaultValue={'SHORT'}
             options={[
@@ -387,9 +406,16 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
               { label: '长提示框', value: 'LONG' }
             ]}
           />
-        </Form.Item>
-        <Form.Item field="popPrompt">
-          <Input.TextArea placeholder="请输入验证失败提示语" rows={3} maxLength={200} showWordLimit />
+        </Form.Item> */}
+        <Form.Item label="弹窗提示" field="popPrompt">
+          <Input
+            placeholder="请输入校验不通过后的弹窗提示语"
+            maxLength={200}
+            rules={[
+              { required: true, message: '请输入弹窗提示语' },
+              { max: 200, message: '弹窗提示语不能超过200个字符' }
+            ]}
+          />
         </Form.Item>
       </Form>
     </Modal>
