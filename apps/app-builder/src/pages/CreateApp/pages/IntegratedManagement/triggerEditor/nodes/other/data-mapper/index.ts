@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/other.svg';
+import iconOther from '@/assets/flow/nodes/dataMapper.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -17,7 +17,7 @@ export const DataMapperNodeRegistry: FlowNodeRegistry = {
     addDisable: false
   },
   info: {
-    icon: iconStart,
+    icon: iconOther,
     description: '这是数据映射节点，用于映射数据。'
   },
   /**

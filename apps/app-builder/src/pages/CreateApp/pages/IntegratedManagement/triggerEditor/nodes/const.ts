@@ -66,8 +66,8 @@ export enum NodeTypeName {
   loop = '循环',
   breakLoop = '循环结束',
   tryCatch = '异常处理',
-  tryBlock = '异常捕获',
-  catchBlock = '尝试',
+  tryBlock = '尝试',
+  catchBlock = '异常捕获',
 
   // 数据节点
   dataAdd = '数据新增',
