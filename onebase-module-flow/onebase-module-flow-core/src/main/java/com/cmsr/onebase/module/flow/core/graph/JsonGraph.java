@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public class JsonGraph {
         } else if (StringUtils.equals(node.getType(), "switch")) {
             return switchNodeDefine(deep, node);
         } else if (StringUtils.equals(node.getType(), "ifCase")) {
-            return ifNodeDefine(deep, node);
+            return ifCaseNodeDefine(deep, node);
         } else if (StringUtils.equals(node.getType(), "ifBlock")) {
             return ifBlockNodeDefine(deep, node);
         }
@@ -111,12 +112,12 @@ public class JsonGraph {
         return define.toString();
     }
 
-    private String ifNodeDefine(int deep, JsonGraphNode node) {
+    private String ifCaseNodeDefine(int deep, JsonGraphNode node) {
         List<JsonGraphNode> blocks = node.getBlocks();
-        //TODO 必须通过某些属性判断
-        JsonGraphNode trueNode = blocks.get(0);
-        JsonGraphNode falseNode = blocks.get(1);
-
+        //
+        JsonGraphNode trueNode = blocks.stream().filter(jsonGraphNode -> MapUtils.getBooleanValue(jsonGraphNode.getData(), "value") == true).findFirst().get();
+        JsonGraphNode falseNode = blocks.stream().filter(jsonGraphNode -> MapUtils.getBooleanValue(jsonGraphNode.getData(), "value") == false).findFirst().get();
+        //
         StringBuilder define = new StringBuilder();
         define.append("IF(").append(toDefine(node)).append(",");
         define.append(ifBlockNodeDefine(deep + 1, trueNode)).append(",");

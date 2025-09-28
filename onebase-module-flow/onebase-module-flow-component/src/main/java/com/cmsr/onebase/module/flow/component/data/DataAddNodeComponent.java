@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.component.utils.ValueProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
@@ -33,6 +34,9 @@ public class DataAddNodeComponent extends NormalNodeComponent {
 
     @Autowired
     private DataMethodApiHelper dataMethodApiHelper;
+
+    @Autowired
+    private ValueProvider valueProvider;
 
     @Override
     public void process() throws Exception {
@@ -140,9 +144,9 @@ public class DataAddNodeComponent extends NormalNodeComponent {
         }
         // 根据是否为批量操作调用不同的转换方法
         if (index >= 0) {
-            fieldValue = dataMethodApiHelper.convertValue(index, operatorType, fieldValue, variableContext);
+            fieldValue = valueProvider.convertValue(index, operatorType, fieldValue, variableContext);
         } else {
-            fieldValue = dataMethodApiHelper.convertValue(operatorType, fieldValue, variableContext);
+            fieldValue = valueProvider.convertValue(operatorType, fieldValue, variableContext);
         }
         data.put(fieldId, fieldValue);
     }

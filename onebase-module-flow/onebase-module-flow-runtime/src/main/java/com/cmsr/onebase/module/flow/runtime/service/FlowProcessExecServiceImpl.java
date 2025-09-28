@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
-import com.cmsr.onebase.module.flow.context.express.ExpressionAssistant;
+import com.cmsr.onebase.module.flow.context.express.ExpressionProvider;
 import com.cmsr.onebase.module.flow.context.express.OrExpresses;
-import com.cmsr.onebase.module.flow.context.field.FieldExpressAssistant;
+import com.cmsr.onebase.module.flow.context.field.FieldExpressProvider;
 import com.cmsr.onebase.module.flow.context.field.FieldInfo;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessFormRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import com.yomahub.liteflow.core.FlowExecutor;
 import lombok.Setter;
+import org.apache.commons.jexl3.JexlExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,13 +46,13 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private FlowProcessFormRepository flowProcessFormRepository;
 
     @Autowired
-    private FieldExpressAssistant fieldExpressAssistant;
+    private FieldExpressProvider fieldExpressProvider;
 
     @Autowired
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionAssistant expressionAssistant;
+    private ExpressionProvider expressionProvider;
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
@@ -71,15 +72,15 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
         StartFormNodeData startFormNodeData = graphFlowCache.getStartFormNodeData(reqVO.getProcessId());
-        List<Long> ids = fieldExpressAssistant.extractFieldIds(startFormNodeData.getFilterCondition());
+        List<Long> ids = fieldExpressProvider.extractFieldIds(startFormNodeData.getFilterCondition());
         Map<Long, FieldInfo> fieldInfoMap = getFieldInfoMap(ids);
-        Map<String, Object> inputMap = fieldExpressAssistant.convertInputParamsData(reqVO.getInputParams(), fieldInfoMap);
-        OrExpresses orExpresses = fieldExpressAssistant.convertToExpresses(startFormNodeData.getFilterCondition(), fieldInfoMap);
+        Map<String, Object> inputMap = fieldExpressProvider.convertInputParamsData(reqVO.getInputParams(), fieldInfoMap);
+        OrExpresses orExpresses = fieldExpressProvider.convertToExpresses(startFormNodeData.getFilterCondition(), fieldInfoMap);
         if (startFormNodeData.getCompiledExpression() == null) {
-            Serializable compileExpression = expressionAssistant.compileExpression(orExpresses);
+            JexlExpression compileExpression = expressionProvider.compileExpression(orExpresses);
             startFormNodeData.setCompiledExpression(compileExpression);
         }
-        boolean isTrigger = expressionAssistant.evaluate(startFormNodeData.getCompiledExpression(), inputMap);
+        boolean isTrigger = expressionProvider.evaluate(startFormNodeData.getCompiledExpression(), inputMap);
         if (!isTrigger) {
             FormTriggerRespVO respVO = new FormTriggerRespVO();
             respVO.setTriggered(0);

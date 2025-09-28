@@ -2,8 +2,6 @@ package com.cmsr.onebase.module.flow.context.condition;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * @Author：huangjie
  * @Date：2025/9/16 21:08
@@ -17,6 +15,6 @@ public class RuleItem {
 
     private String operatorType;
 
-    private List<String> value;
+    private Object value;
 
 }

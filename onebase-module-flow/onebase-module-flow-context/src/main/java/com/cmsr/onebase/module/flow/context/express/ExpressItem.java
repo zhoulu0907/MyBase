@@ -11,7 +11,7 @@ public class ExpressItem {
 
     private Object key;
 
-    private String operatorType;
+    private String op;
 
     private Object value;
 

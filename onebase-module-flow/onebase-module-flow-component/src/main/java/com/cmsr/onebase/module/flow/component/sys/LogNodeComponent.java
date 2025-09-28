@@ -14,7 +14,7 @@ public class LogNodeComponent extends NodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("LogNodeComponent process");
+        log.info("LogNodeComponent process: {}", this.getTag());
     }
 
 }

@@ -1,20 +1,24 @@
 package com.cmsr.onebase.module.flow.context.express;
 
 import com.cmsr.onebase.framework.common.express.OpEnum;
-import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.mvel2.MVEL;
-import org.mvel2.ParserContext;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 表达式助手类
@@ -26,21 +30,14 @@ import java.util.*;
  */
 @Slf4j
 @Component
-public class ExpressionAssistant {
+public class ExpressionProvider {
 
-    /**
-     * MVEL解析器上下文
-     */
-    private final ParserContext parserContext;
+    private JexlEngine jexlEngine;
 
-    public ExpressionAssistant() {
-        this.parserContext = new ParserContext();
-        // 导入常用的Java类
-        parserContext.addImport("LocalDate", LocalDate.class);
-        parserContext.addImport("LocalDateTime", LocalDateTime.class);
-        parserContext.addImport("LocalTime", LocalTime.class);
-        parserContext.addImport("Arrays", Arrays.class);
-        parserContext.addImport("Collections", Collections.class);
+    public ExpressionProvider() {
+        Map<String, Object> funcs = new HashedMap();
+        JexlPermissions permissions = JexlPermissions.UNRESTRICTED;
+        this.jexlEngine = new JexlBuilder().permissions(permissions).namespaces(funcs).strict(true).silent(false).create();
     }
 
     /**
@@ -48,25 +45,21 @@ public class ExpressionAssistant {
      * 优化版本：将整个条件结构转换成一个大表达式一次性执行
      * 根据Condition类的注释：条件项之间是OR关系
      * 根据ConditionItem类的注释：规则项之间是AND关系
-     *
-     * @param compiled 条件对象
-     * @param context  上下文数据
-     * @return 评估结果
      */
-    public boolean evaluate(Serializable compiled, Map<String, Object> context) {
+    public boolean evaluate(JexlExpression expression, Map<String, Object> context) {
         try {
-            // 一次性执行整个表达式
-            Object result = MVEL.executeExpression(compiled, context);
+            MapContext jc = new MapContext(context);
+            Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {
-            log.error("条件评估失败: {}", compiled, e);
+            log.error("条件评估失败: {}", expression, e);
             return false;
         }
     }
 
-    public Serializable compileExpression(OrExpresses orExpresses) {
+    public JexlExpression compileExpression(OrExpresses orExpresses) {
         String fullExpression = buildConditionExpression(orExpresses);
-        return MVEL.compileExpression(fullExpression, parserContext);
+        return jexlEngine.createExpression(fullExpression);
     }
 
     /**
@@ -128,7 +121,7 @@ public class ExpressionAssistant {
      */
     private String buildExpressItemExpression(ExpressItem expressItem) {
         try {
-            if (expressItem == null || expressItem.getKey() == null || expressItem.getOperatorType() == null) {
+            if (expressItem == null || expressItem.getKey() == null || expressItem.getOp() == null) {
                 return "true";
             }
 
@@ -136,12 +129,12 @@ public class ExpressionAssistant {
             String fieldName = expressItem.getKey().toString();
 
             // 获取操作符
-            OpEnum operator = OpEnum.valueOf(expressItem.getOperatorType());
+            OpEnum operator = OpEnum.valueOf(expressItem.getOp());
 
             // 构建表达式
             String expression = buildExpression(fieldName, operator, expressItem.getValue());
 
-            log.debug("构建表达式项: key={}, operator={} -> {}", expressItem.getKey(), expressItem.getOperatorType(), expression);
+            log.debug("构建表达式项: key={}, operator={} -> {}", expressItem.getKey(), expressItem.getOp(), expression);
 
             return expression;
 
@@ -170,16 +163,16 @@ public class ExpressionAssistant {
                 return String.format("%s != %s", fieldName, formatValue(value));
 
             case CONTAINS:
-                return String.format("%s contains %s", fieldName, formatValue(value));
+                return String.format("%s.contains(%s)", fieldName, formatValue(value));
 
             case NOT_CONTAINS:
-                return String.format("!(%s contains %s)", fieldName, formatValue(value));
+                return String.format("!(%s.contains(%s))", fieldName, formatValue(value));
 
             case EXISTS_IN:
-                return String.format("%s contains %s", formatValue(value), fieldName);
+                return String.format("%s.contains(%s)", formatValue(value), fieldName);
 
             case NOT_EXISTS_IN:
-                return String.format("!(%s contains %s)", formatValue(value), fieldName);
+                return String.format("!(%s.contains(%s))", formatValue(value), fieldName);
 
             case GREATER_THAN:
                 return String.format("%s > %s", fieldName, formatValue(value));
@@ -194,16 +187,16 @@ public class ExpressionAssistant {
                 return String.format("%s <= %s", fieldName, formatValue(value));
 
             case LATER_THAN:
-                return String.format("%s.isAfter(%s)", fieldName, formatDateValue(value));
+                return String.format("%s > %s", fieldName, formatDateValue(value));
 
             case EARLIER_THAN:
-                return String.format("%s.isBefore(%s)", fieldName, formatDateValue(value));
+                return String.format("%s < %s", fieldName, formatDateValue(value));
 
             case RANGE:
-                if (value.getClass().isArray()) {
+                if (value instanceof List list) {
                     return String.format("%s >= %s && %s <= %s",
-                            fieldName, formatValue(Array.get(value, 0)),
-                            fieldName, formatValue(Array.get(value, 1)));
+                            fieldName, formatValue(list.get(0)),
+                            fieldName, formatValue(list.get(1)));
                 }
                 throw new IllegalArgumentException("RANGE操作需要两个值");
 

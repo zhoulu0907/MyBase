@@ -22,10 +22,10 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
-        <!-- MVEL表达式引擎 -->
+        <!-- 表达式引擎 -->
         <dependency>
-            <groupId>org.mvel</groupId>
-            <artifactId>mvel2</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-jexl3</artifactId>
         </dependency>
         <!-- 测试依赖 -->
         <dependency>

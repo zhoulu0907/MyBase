@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.core.graph.data;
 
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import lombok.Data;
+import org.apache.commons.jexl3.JexlExpression;
 
 import java.io.Serializable;
 import java.util.List;
@@ -28,5 +29,5 @@ public class StartFormNodeData {
     /**
      * 缓存的表达式
      */
-    private Serializable compiledExpression;
+    private JexlExpression compiledExpression;
 }

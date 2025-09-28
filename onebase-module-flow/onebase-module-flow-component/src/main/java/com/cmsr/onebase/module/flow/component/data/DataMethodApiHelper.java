@@ -1,13 +1,15 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
-import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
+import com.cmsr.onebase.module.flow.component.utils.ValueProvider;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.OrderDto;
+import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -21,8 +23,12 @@ import java.util.Map;
  * @Author：huangjie
  * @Date：2025/9/23 16:53
  */
+@Setter
 @Component
 public class DataMethodApiHelper {
+
+    @Autowired
+    private ValueProvider valueProvider;
 
     /**
      * 将Map数据转换为EntityFieldDataReqDTO对象
@@ -85,7 +91,7 @@ public class DataMethodApiHelper {
 
                     String operatorType = MapUtils.getString(innerCondition, "operatorType");
                     Object value = MapUtils.getObject(innerCondition, "value");
-                    value = convertValue(operatorType, value, variableContext);
+                    value = valueProvider.convertValue(operatorType, value, variableContext);
                     // 设置字段值
 
                     if (value != null) {
@@ -105,28 +111,6 @@ public class DataMethodApiHelper {
         return conditionDTOList.isEmpty() ? null : conditionDTOList;
     }
 
-    public Object convertValue(String operatorType, Object value, VariableContext variableContext) {
-        OperatorTypeEnum operatorTypeEnum = OperatorTypeEnum.getByCode(operatorType);
-        if (operatorTypeEnum == OperatorTypeEnum.VALUE) {
-            return value;
-        }
-        if (operatorTypeEnum == OperatorTypeEnum.VARIABLE) {
-            return variableContext.getVariableByExpression(value.toString());
-        }
-        return value;
-    }
-
-    public Object convertValue(int i, String operatorType, Object value, VariableContext variableContext) {
-        OperatorTypeEnum operatorTypeEnum = OperatorTypeEnum.getByCode(operatorType);
-        if (operatorTypeEnum == OperatorTypeEnum.VALUE) {
-            return value;
-        }
-        if (operatorTypeEnum == OperatorTypeEnum.VARIABLE) {
-            String expression = value.toString();
-            return variableContext.getVariableByExpression(i, expression);
-        }
-        return value;
-    }
 
     /**
      * 处理排序条件
