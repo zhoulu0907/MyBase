@@ -2,6 +2,7 @@ import { convertEntityListItemToConfigField } from '@/pages/CreateApp/pages/Data
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
+import { useFieldStore } from '@/store/store_field';
 import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Message, Modal, Space, Table, Tag } from '@arco-design/web-react';
 import { deleteField, getEntityFieldsPage } from '@onebase/app';
@@ -24,6 +25,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
   const [configFieldModalVisible, setConfigFieldModalVisible] = useState(false);
   const [page, setPage] = useState({ pageNo: 1, pageSize: 10 });
   const [total, setTotal] = useState(0);
+  const { fieldTypes } = useFieldStore();
 
   // 加载字段列表
   const loadFields = async () => {
@@ -111,7 +113,10 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       title: '数据类型',
       dataIndex: 'fieldType',
       key: 'fieldType',
-      width: 100
+      width: 100,
+      render: (fieldType: string) => (
+        <Tag color="cyan">{fieldTypes.find((item) => item.fieldType === fieldType)?.displayName}</Tag>
+      )
     },
     {
       title: '字段类型',
