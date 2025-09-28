@@ -37,14 +37,20 @@ public class DatasourceRespVO {
     @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
     private Integer datasourceOrigin;
 
-    @Schema(description = "创建人", example = "1024")
-    private Long creator;
+    @Schema(description = "创建人编号", example = "1024")
+    private Long creatorId;
+
+    @Schema(description = "创建人名称", example = "张三")
+    private String creator;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 
-    @Schema(description = "更新人", example = "1024")
-    private Long updater;
+    @Schema(description = "更新人编号", example = "1024")
+    private Long updaterId;
+
+    @Schema(description = "更新人名称", example = "李四")
+    private String updater;
 
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;

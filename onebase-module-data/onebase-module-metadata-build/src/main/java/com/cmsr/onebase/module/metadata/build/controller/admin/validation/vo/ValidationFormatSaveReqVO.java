@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,11 +22,13 @@ public class ValidationFormatSaveReqVO {
     @Schema(description = "是否启用(0/1)")
     private Integer isEnabled;
 
-    @Schema(description = "格式类型")
-    private String formatType;
+    @Schema(description = "格式代码", example = "REGEX")
+    @JsonAlias("formatType")
+    private String formatCode;
 
     @Schema(description = "正则表达式")
-    private String regex;
+    @JsonAlias("regex")
+    private String regexPattern;
 
     @Schema(description = "提示信息")
     private String promptMessage;
