@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourcePageReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceTestConnectionReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
@@ -19,6 +20,8 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepo
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.module.system.api.user.AdminUserApi;
+import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,8 +36,14 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import jakarta.validation.Valid;
 import org.anyline.data.jdbc.util.DataSourceUtil;
 import org.anyline.proxy.ServiceProxy;
@@ -70,6 +79,8 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     private MetadataAppAndDatasourceCoreService appAndDatasourceService;
     @Resource
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
+    @Resource
+    private AdminUserApi adminUserApi;
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
@@ -480,6 +491,66 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     @Override
     public List<MetadataDatasourceDO> findAllByConfig(DefaultConfigStore configStore) {
         return metadataDatasourceRepository.findAllByConfig(configStore);
+    }
+
+    @Override
+    public List<DatasourceRespVO> buildDatasourceRespVOList(List<MetadataDatasourceDO> datasourceList) {
+        if (datasourceList == null || datasourceList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<Long> userIds = datasourceList.stream()
+                .flatMap(datasource -> Stream.of(datasource.getCreator(), datasource.getUpdater()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        Map<Long, AdminUserRespDTO> userMap = Collections.emptyMap();
+        if (!userIds.isEmpty()) {
+            Map<Long, AdminUserRespDTO> fetchedUserMap = adminUserApi.getUserMap(userIds);
+            if (fetchedUserMap != null) {
+                userMap = fetchedUserMap;
+            }
+        }
+
+        Map<Long, AdminUserRespDTO> finalUserMap = userMap;
+        return datasourceList.stream()
+                .map(datasource -> convertDatasource(datasource, finalUserMap))
+                .toList();
+    }
+
+    @Override
+    public DatasourceRespVO buildDatasourceRespVO(MetadataDatasourceDO datasource) {
+        if (datasource == null) {
+            return null;
+        }
+        List<DatasourceRespVO> respVOList = buildDatasourceRespVOList(Collections.singletonList(datasource));
+        return respVOList.isEmpty() ? null : respVOList.get(0);
+    }
+
+    private DatasourceRespVO convertDatasource(MetadataDatasourceDO datasource, Map<Long, AdminUserRespDTO> userMap) {
+        DatasourceRespVO respVO = modelMapper.map(datasource, DatasourceRespVO.class);
+
+        Long creatorId = datasource.getCreator();
+        if (creatorId != null) {
+            AdminUserRespDTO user = userMap.get(creatorId);
+            respVO.setCreatorId(creatorId);
+            respVO.setCreator(user != null ? user.getNickname() : String.valueOf(creatorId));
+        } else {
+            respVO.setCreatorId(null);
+            respVO.setCreator(null);
+        }
+
+        Long updaterId = datasource.getUpdater();
+        if (updaterId != null) {
+            AdminUserRespDTO user = userMap.get(updaterId);
+            respVO.setUpdaterId(updaterId);
+            respVO.setUpdater(user != null ? user.getNickname() : String.valueOf(updaterId));
+        } else {
+            respVO.setUpdaterId(null);
+            respVO.setUpdater(null);
+        }
+
+        return respVO;
     }
 
     /**
