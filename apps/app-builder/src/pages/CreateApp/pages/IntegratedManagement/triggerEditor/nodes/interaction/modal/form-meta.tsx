@@ -1,14 +1,14 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input, Select, Radio, Grid, Switch, Tooltip } from '@arco-design/web-react';
+import { Form, Grid, Input, Radio, Select, Switch, Tooltip } from '@arco-design/web-react';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
+import { MODAL_TYPE } from '@onebase/app';
+import { useEffect } from 'react';
+import CollectFields from '../../../components/collect-fields';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { MODAL_TYPE } from '@onebase/app';
 import { validateNodeForm } from '../../utils';
-import { useEffect } from 'react';
-import { IconQuestionCircle } from '@arco-design/web-react/icon';
-import CollectFields from '../../../components/collect-fields';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -50,10 +50,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             layout="vertical"
+            requiredSymbol={{ position: 'end' }}
             onValuesChange={onValuesChange}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
           >
-            <Form.Item label="节点ID" field="id" initialValue={node.id}>
+            <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>
 

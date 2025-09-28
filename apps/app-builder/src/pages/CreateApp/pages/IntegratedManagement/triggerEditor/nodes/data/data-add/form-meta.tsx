@@ -198,6 +198,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             onValuesChange={onValuesChange}
+            requiredSymbol={{ position: 'end' }}
             layout="vertical"
           >
             <Grid.Row>
@@ -207,8 +208,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 initialValue={node.id}
                 rules={[
                   {
-                    required: true,
-                    message: '请选择节点ID'
+                    required: true
                   }
                 ]}
               >
