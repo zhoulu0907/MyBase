@@ -1,9 +1,12 @@
 package com.cmsr.onebase.module.system.framework.test;
 
-import com.cmsr.onebase.framework.common.tools.extra.spring.SpringUtil;
+
 import com.cmsr.onebase.framework.redis.config.OneBaseCacheAutoConfiguration;
 import com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration;
 import com.cmsr.onebase.framework.test.config.SqlInitializationTestConfiguration;
+
+import cn.hutool.extra.spring.SpringUtil;
+
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
