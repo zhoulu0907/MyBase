@@ -1,10 +1,6 @@
 .card {
   width: 350px;
-  height: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
+  height: 188px;
   background-color: #fff;
   border-radius: 8px;
   border: 1px solid #e5e5e5;
@@ -16,72 +12,76 @@
   }
 
   .cardHeader {
-    width: 100%;
-    height: 64px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
+    height: 72px;
     box-sizing: border-box;
-    padding-top: 16px;
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 8px;
+    padding: 16px 16px 8px 16px;
+    display: flex;
     cursor: pointer;
 
-    .cardHeaderLeft {
-      width: calc(100% - 128px);
+    .cardHeaderIcon {
+      width: 48px;
+      height: 48px;
       display: flex;
-      flex-direction: row;
       align-items: center;
-      .cardHeaderLeftIcon {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f0f0f0;
-        border-radius: 8px;
+      justify-content: center;
+      background-color: #e8fffe;
+      border-radius: 8px;
+    }
+
+    .cardHeaderContent {
+      flex: 1;
+      padding-left: 16px;
+      overflow: hidden;
+
+      .cardHeaderContentTitle {
+        margin-bottom: 0;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px;
+        color: #1d2129;
       }
-      .cardHeaderLeftContent {
-        margin-left: 16px;
-        width: calc(100% - 64px);
-        .cardHeaderLeftContentTitle {
-          font-size: 16px;
-          font-weight: 500;
-        }
-        .cardHeaderLeftContentDesc {
-          font-size: 12px;
-          font-weight: 400;
-          width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+
+      .cardHeaderContentDesc {
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 20px;
+        color: #6b7785;
+        margin-bottom: 0;
       }
     }
-    .cardHeaderRight {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: flex-start;
 
-      .cardHeaderRightTitle {
+    .cardHeaderTag {
+      .cardHeaderTagTitle {
         font-size: 14px;
         font-weight: 400;
         color: #ff7d00;
         background-color: #fff7e8;
-        width: 120px;
+        width: auto;
         height: 24px;
         line-height: 22px;
         text-align: center;
-        padding: 1px 4px;
+        padding: 1px 8px;
+        border-radius: 2px;
+      }
+
+      .cardHeaderBlueTagTitle {
+        font-size: 14px;
+        font-weight: 400;
+        color: #165dff;
+        background-color: #e8f3ff;
+        width: auto;
+        height: 24px;
+        line-height: 22px;
+        text-align: center;
+        padding: 1px 8px;
+        border-radius: 2px;
       }
     }
   }
+
   .cardBody {
     width: 100%;
-    height: 84px;
+    height: 76px;
     padding-left: 16px;
     padding-right: 16px;
     box-sizing: border-box;
@@ -93,27 +93,31 @@
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-
       padding-bottom: 8px;
+
       .cardBodyRowLabel {
         font-size: 12px;
         font-weight: 400;
         color: #86909c;
       }
       .cardBodyRowContent {
+        text-align: right;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-left: 16px;
         font-size: 12px;
         font-weight: 400;
         color: #272e3b;
       }
     }
   }
+
   .cardFooter {
-    flex: 1;
+    height: 40px;
     width: 100%;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding: 6px 8px;
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
@@ -128,8 +132,17 @@
       align-items: center;
       justify-content: flex-start;
       gap: 16px;
+      line-height: 20px;
+      font-size: 12px;
+      color: #4e5969;
     }
+
     .cardFooterRight {
+      .cardFooterRightBtn {
+        font-weight: 400;
+        font-size: 14px;
+        color: #4e5969;
+      }
     }
   }
 }

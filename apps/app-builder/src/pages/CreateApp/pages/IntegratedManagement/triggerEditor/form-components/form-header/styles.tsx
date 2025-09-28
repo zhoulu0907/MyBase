@@ -2,17 +2,28 @@ import styled from 'styled-components';
 
 export const Header = styled.div`
   box-sizing: border-box;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(#f2f2ff 0%, rgb(251, 251, 251) 100%);
+  padding: 8px 8px 0;
+  overflow: hidden;
+`;
+export const Content = styled.div`
+  box-sizing: border-box;
   display: flex;
   justify-content: flex-start;
   align-items: center;
   width: 100%;
   column-gap: 8px;
-  border-radius: 8px 8px 0 0;
-
-  background: linear-gradient(#f2f2ff 0%, rgb(251, 251, 251) 100%);
-  overflow: hidden;
-
-  padding: 8px;
+`;
+export const Footer = styled.div`
+  padding-top: 4px;
+  padding-left: 4px;
+  width: 100%;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+  color: #6b7785;
 `;
 
 export const Title = styled.div`

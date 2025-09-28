@@ -26,7 +26,6 @@ export const FORM_COMPONENT_TYPES = {
   AUTO_CODE: 'XAutoCode',
   RELATED_FORM: 'XRelatedForm',
   STATIC_TEXT: 'XStaticText',
-  DIVIDER: 'XDivider',
   RICH_TEXT: 'XRichText',
   CAROUSEL_F: 'XFCarousel',
   SUB_TABLE: 'XSubTable',
@@ -36,7 +35,11 @@ export const FORM_COMPONENT_TYPES = {
 // 布局组件类型
 export const LAYOUT_COMPONENT_TYPES = {
   COLUMN_LAYOUT: 'XColumnLayout',
-  PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout'
+  PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout',
+  TABS_LAYOUT: 'XTabsLayout',
+  PREVIEW_TABS_LAYOUT: 'XPreviewTabsLayout',
+  COLLAPSE_LAYOUT: 'XCollpaseLayout',
+  PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollpaseLayout'
 } as const;
 
 // 列表组件类型
@@ -53,8 +56,11 @@ export const LIST_COMPONENT_TYPES = {
 export const SHOW_COMPONENT_TYPES = {
   INFO_NOTICE: 'XInfoNotice',
   IMAGE: 'XImage',
+  FILE: 'XFile',
   TEXT: 'XText',
-  WEB_VIEW: 'XWebView'
+  WEB_VIEW: 'XWebView',
+  DIVIDER: 'XDivider',
+  PLACEHOLDER: 'XPlaceholder'
 } as const;
 
 // 列表组件类型

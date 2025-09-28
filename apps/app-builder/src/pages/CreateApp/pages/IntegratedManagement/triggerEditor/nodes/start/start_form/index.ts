@@ -1,4 +1,5 @@
-import iconStart from '@/assets/flow/icon-start.jpg';
+import iconStart from '@/assets/flow/nodes/start.svg';
+import type { TriggerRange } from '../../../components/const';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -25,3 +26,9 @@ export const StartFormNodeRegistry: FlowNodeRegistry = {
    */
   formMeta
 };
+
+export interface StartFormNodeOutput {
+  pageId: string;
+  fieldId: string;
+  triggerRange: TriggerRange;
+}

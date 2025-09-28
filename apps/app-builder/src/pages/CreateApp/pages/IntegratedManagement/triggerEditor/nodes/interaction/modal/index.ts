@@ -1,7 +1,7 @@
-import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
+import iconStart from '@/assets/flow/nodes/interaction.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const ModalNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const ModalNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `modal_${nanoid()}`,
-      type: 'modal',
+      id: generateNodeId(NodeType.MODAL),
+      type: NodeType.MODAL,
       data: {
         title: '弹窗节点'
       }

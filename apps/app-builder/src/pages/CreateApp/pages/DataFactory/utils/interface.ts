@@ -2,6 +2,7 @@ import type { EntityStatus } from './const';
 
 // 业务对象节点数据
 export interface EntityNode {
+  id?: string;
   entityId: string;
   code?: string;
   entityName: string;

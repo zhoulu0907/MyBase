@@ -57,7 +57,6 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
     if (handler) {
       const res = await handler(id);
-      // TODO 回显
       console.log('getRuleById', res);
       if (res) {
         form.setFieldsValue(res);
@@ -101,9 +100,9 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   };
 
   const handleUpdateRule = async (values: RuleFormValues) => {
-    // TODO fieldId 需要从详情接口中获取
     const params = {
       ...values,
+      isEnabled: 0, // 启用
       id: editRule?.id,
       entityId: entity.id,
       appId: curAppId
@@ -192,7 +191,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   return (
     <Modal
       className={styles['create-rule-modal']}
-      title={`新建数据规则-${validationTypeMap[ruleType]}`}
+      title={`${editRule ? '编辑' : '新建'}数据规则-${validationTypeMap[ruleType]}`}
       visible={visible}
       onOk={handleFinish}
       onCancel={handleCancel}

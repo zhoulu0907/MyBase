@@ -2,17 +2,23 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
-  FLOW_ENTITY_TYPE,
   getEntityFields,
   getFieldCheckTypeApi,
   type ConfitionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
+import { v4 as uuidv4 } from 'uuid';
 import { NodeType } from './const';
+
+export const generateNodeId = (nodeType: NodeType) => {
+  const uuid = uuidv4().replaceAll('-', '');
+  return `${nodeType}_${uuid}`;
+};
 
 // 清除数据节点依赖关系
 export const clearDataOriginNodeId = (nodeId: string) => {
   const nodeData = triggerEditorSignal.nodeData.value;
+
   const keys = Object.keys(triggerEditorSignal.nodeData.value);
   for (let key of keys) {
     if (nodeData[key].dataNodeId === nodeId) {
@@ -22,40 +28,92 @@ export const clearDataOriginNodeId = (nodeId: string) => {
         sortBy: [] // 清除已选择排序字段
       });
     }
+
+    // TODO(mickey): 对条件进行检查删除条件
+    if (nodeData[key].filterCondition) {
+      let newFilterCondition = [];
+
+      for (let filterCondition of nodeData[key].filterCondition) {
+        // TODO(mickey): remove debug log
+        console.log('XXX: ', filterCondition);
+
+        filterCondition.conditions = filterCondition.conditions
+          .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
+          .filter((c: any) => c.value && !c.value.startsWith(nodeId));
+        if (filterCondition.conditions.length > 0) {
+          newFilterCondition.push(filterCondition);
+        }
+      }
+
+      triggerEditorSignal.setNodeData(key, {
+        ...nodeData[key],
+        filterCondition: newFilterCondition
+      });
+    }
+
+    // TODO(mickey): 对字段进行检查
   }
 };
 
 // 判断bolcks 是否包含当前节点
-const judge = (curNodeId: string, blocks: FlowNodeJSON[]): boolean => {
-  let status: boolean = false;
+
+const enum JudgeStatus {
+  NO_FOUND = 0,
+  // 在blocks的第一层中找到了目标节点
+  FOUND = 1,
+  // 在blocks的更深层次中找到了目标节点
+  INCLUDE = 2
+}
+
+const judge = (targetNodeId: string, blocks: FlowNodeJSON[], depth: number): JudgeStatus => {
+  let status: JudgeStatus = JudgeStatus.NO_FOUND;
+
   for (let item of blocks) {
-    if (item.blocks?.length) {
-      status = judge(curNodeId, item.blocks);
+    if (item.id === targetNodeId) {
+      status = JudgeStatus.FOUND;
+
+      if (depth > 0) {
+        status = JudgeStatus.INCLUDE;
+      }
+
+      return status;
     }
-    if (item.id === curNodeId) {
-      status = true;
-      break;
+
+    if (item.blocks?.length) {
+      status = judge(targetNodeId, item.blocks, depth + 1);
     }
   }
+
   return status;
 };
 
-// 只有存在当前节点的支线才可以使用
-const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
+const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
   let blockNode: FlowNodeJSON[] = [];
+
   for (let ele of blocks) {
-    if (ele.id === curNodeId) {
+    if (ele.id === targetNodeId) {
+      const curIndex = blocks.findIndex((block: any) => block.id === targetNodeId);
+      let newBlocks: any[] = [];
+      if (curIndex > 0) {
+        newBlocks = blocks.slice(0, curIndex);
+      }
+
+      blockNode.push(...newBlocks);
+
       break;
     }
-    // ? 可能 根据格式需要修改内容
+
     if (ele.blocks?.length) {
-      const hasCurNode = judge(curNodeId, ele.blocks);
-      if (hasCurNode) {
+      const hasCurNode = judge(targetNodeId, ele.blocks, 0);
+
+      if (hasCurNode == JudgeStatus.FOUND || hasCurNode == JudgeStatus.INCLUDE) {
         if (nodeTypes.includes(ele.type as NodeType)) {
           blockNode.push(ele);
         }
-        const newBlocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
-        blockNode.push.apply(blockNode, newBlocks);
+
+        const newBlocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
+
+        blockNode.push(...newBlocks);
       }
     }
   }
@@ -63,35 +121,57 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: Node
   return blockNode;
 };
 
-export function getBeforeCurQueryNodes(
-  curNodeId: string,
+/** 获取当前节点的数据
+ * @param curNodeId 当前节点ID
+ * @param allNodes 所有节点
+ * @param nodeTypes 过滤节点类型
+ * @returns 节点数据对象，如果不存在则返回[]
+ */
+export function getPrecedingNodes(
+  targetNodeId: string,
   allNodes: FlowNodeJSON[],
   nodeTypes: NodeType[]
 ): FlowNodeJSON[] {
-  // 获取当前节点前并且是数据查询节点的数据
-  // 条件节点  blocks
   let nodes: FlowNodeJSON[] = [];
+
   for (let ele of allNodes) {
-    if (ele.id === curNodeId) {
-      break;
+    if (ele.id === targetNodeId) {
+      return nodes;
     }
+
+    // 带blocks的节点
     if (ele.blocks?.length) {
-      // todo 处理数据 然后递归
-      // 判断是否包含当前节点
-      const hasCurNode = judge(curNodeId, ele.blocks);
-      if (hasCurNode) {
-        const blocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
-        nodes.push.apply(nodes, blocks);
+      // 判断是否包含目标节点
+      const hasCurNode = judge(targetNodeId, ele.blocks, 0);
+
+      if (hasCurNode == JudgeStatus.FOUND) {
+        const curIndex = ele.blocks.findIndex((block: any) => block.id === targetNodeId);
+
+        let newBlocks: any[] = [];
+        if (curIndex > 0) {
+          newBlocks = ele.blocks.slice(0, curIndex);
+        }
+
+        // 平铺 blocks
+        nodes.push({ ...ele, blocks: [] }, ...newBlocks);
+
+        return nodes;
+      } else if (hasCurNode == JudgeStatus.INCLUDE) {
+        // 在当前节点的blocks中
+        const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
+        nodes.push(...blocks);
       } else {
-        const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks, nodeTypes);
-        nodes.push.apply(nodes, blocks);
+        // 如果不包含 继续向下递归搜索
+        const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
+        nodes.push(...blocks);
       }
     }
-    // const nodeData = triggerEditorSignal.nodeData.value[ele.id];
+
     if (nodeTypes.includes(ele.type as NodeType)) {
       nodes.push(ele);
     }
   }
+
   return nodes;
 }
 
@@ -124,18 +204,18 @@ export const getDataNodeSource = (nodeId: string): string => {
       case NodeType.START_ENTITY:
         return nodeData.entityId;
       case NodeType.DATA_ADD:
-        if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        if (nodeData.addType === DATA_SOURCE_TYPE.FORM) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        if (nodeData.addType === DATA_SOURCE_TYPE.SUBFORM) {
           return nodeData.subEntityId;
         }
         break;
       case NodeType.DATA_UPDATE:
-        if (nodeData.updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.FORM) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.updateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
           return nodeData.subEntityId;
         }
         break;
@@ -181,19 +261,20 @@ export const getEntityFieldList = async (
     return;
   }
   const res = await getEntityFields({ entityId: dataSource });
-  const filedIds: string[] = [];
+  const fieldIds: string[] = [];
   const newConditionFields: ConfitionField[] = [];
   res.forEach((item: any) => {
-    filedIds.push(item.id);
+    fieldIds.push(item.id);
     newConditionFields.push({
       label: item.displayName,
       value: item.id,
       fieldType: item.fieldType
     });
   });
+
   setConditionFields(newConditionFields);
-  if (filedIds?.length) {
-    const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+  if (fieldIds?.length) {
+    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
     setValidationTypes(newValidationTypes);
   }
 };

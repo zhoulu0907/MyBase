@@ -17,6 +17,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
+import { updateStartEntityOutputs } from './output';
 
 const Option = Select.Option;
 const CheckboxGroup = Checkbox.Group;
@@ -67,8 +68,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
-  const [entityList, setEntityList] = useState<any[]>();
-  const [triggerFieldList, setTriggerFieldList] = useState<any[]>();
+  const [entityList, setEntityList] = useState<any[]>([]);
+  const [triggerFieldList, setTriggerFieldList] = useState<any[]>([]);
 
   const entityId = Form.useWatch('entityId', payloadForm);
   const triggerType = Form.useWatch('triggerType', payloadForm);
@@ -86,16 +87,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [entityId]);
 
-  useEffect(() => {
-    if (triggerType) {
-      payloadForm.clearFields('triggerEvents');
-      handlePropsOnChange({
-        ...triggerEditorSignal.nodeData.value[node.id],
-        triggerEvents: []
-      });
-    }
-  }, [triggerType]);
-
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
     setEntityList(res);
@@ -106,10 +97,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (res) {
       console.log(res);
       const newConditionFields: ConfitionField[] = [];
-      const filedIds: string[] = [];
+      const fieldIds: string[] = [];
       const fieldList: any[] = [];
       res.forEach((item: MetadataEntityField) => {
-        filedIds.push(item.id);
+        fieldIds.push(item.id);
         fieldList.push({
           label: item.displayName,
           value: item.id
@@ -122,12 +113,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         });
       });
 
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+      if (fieldIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
         setValidationTypes(newValidationTypes);
       }
 
       setConditionFields(newConditionFields);
+
+      // 更新节点输出配置
+      updateStartEntityOutputs(node.id, newConditionFields);
+
       setTriggerFieldList(fieldList);
     }
   };
@@ -139,6 +134,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     handlePropsOnChange(values);
   };
 
+  // 触发类型
+  const handleTriggerTypeChange = () => {
+    payloadForm.clearFields('triggerEvents');
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      triggerEvents: []
+    });
+  };
+
   return (
     <>
       <FormHeader />
@@ -148,15 +152,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             layout="vertical"
+            requiredSymbol={{ position: 'end' }}
             onValuesChange={onValuesChange}
           >
             <Grid.Row>
-              <Form.Item
-                label="节点ID"
-                field="id"
-                initialValue={node.id}
-                rules={[{ required: true, message: '请选择' }]}
-              >
+              <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
                 <Input disabled />
               </Form.Item>
             </Grid.Row>
@@ -181,6 +181,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 rules={[{ required: true, message: '请选择触发类型' }]}
               >
                 <RadioGroup
+                  onChange={handleTriggerTypeChange}
                   direction="horizontal"
                   options={[
                     {
@@ -222,6 +223,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <ConditionEditor
+                nodeId={node.id}
                 label="过滤条件"
                 required
                 fields={conditionFields}

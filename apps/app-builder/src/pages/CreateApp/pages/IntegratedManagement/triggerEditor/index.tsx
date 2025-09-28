@@ -1,6 +1,7 @@
 import { EditorRenderer, FixedLayoutEditorProvider, type FlowDocumentJSON } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import '@flowgram.ai/fixed-layout-editor/index.css';
 import { ENTITY_TYPE, getAppEntities, getFlowMgmt, TriggerType } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
@@ -22,6 +23,7 @@ import { FlowNodeRegistries } from './nodes';
 
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
+
   const {
     setNodeId,
     nodeId,
@@ -33,6 +35,7 @@ const TriggerEditor = () => {
     setMainEntities,
     setSubEntities
   } = triggerEditorSignal;
+
   const [initData, setInitData] = useState<FlowDocumentJSON>();
   const sidebarContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +45,7 @@ const TriggerEditor = () => {
     const flowId = getHashQueryParam('flowId');
     if (flowId) {
       setFlowId(flowId);
+      initFlowData(flowId);
     }
 
     // 获取应用对应需要用到的实体
@@ -50,13 +54,6 @@ const TriggerEditor = () => {
       handleGetAppEntities(appId);
     }
   }, [window.location.hash]);
-
-  useEffect(() => {
-    if (flowId.value) {
-      console.log('flowId: ', flowId.value);
-      initFlowData(flowId.value);
-    }
-  }, [flowId]);
 
   const handleGetAppEntities = async (appId: string) => {
     const res = await getAppEntities(appId);
@@ -76,25 +73,34 @@ const TriggerEditor = () => {
     const res = await getFlowMgmt(id);
     console.log('res: ', res);
 
-    // if (res.triggerConfig && res.triggerConfig.pageId) {
-    //   setPageId(res.triggerConfig.pageId);
-    // }
-
     // 已保存的节点数据回显
     if (res.processDefinition?.length) {
-      console.log('res.processDefinition: ', res.processDefinition);
       const processDefinitionJson = JSON.parse(res.processDefinition);
       let data = {};
       let nodes = processDefinitionJson.nodes || [];
 
+      console.log('nodes: ', nodes);
+
       for (let item of nodes) {
         data = { ...data, [item.id]: item.data };
+        if (item.blocks) {
+          // 递归初始化blocks数据
+          data = initBlocksData(item.blocks, data);
+        }
+        // 初始化输出节点
+        // console.log('item.id: ', item.id);
+        if (item.output) {
+          // console.log('item.output: ', item.output);
+          triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
+        }
       }
 
       console.log('nodeData', data);
+
       setAllNodeData(data);
       setInitData({ nodes: nodes });
     } else {
+      // 对开始节点数据初始化
       switch (res.triggerType) {
         case TriggerType.FORM:
           setInitData(StartFormInitData);
@@ -138,6 +144,16 @@ const TriggerEditor = () => {
           break;
       }
     }
+  };
+
+  const initBlocksData = (blocks: any[], data: any) => {
+    for (let item of blocks) {
+      data = { ...data, [item.id]: item.data };
+      if (item.blocks) {
+        data = initBlocksData(item.blocks, data);
+      }
+    }
+    return data;
   };
 
   useEffect(() => {

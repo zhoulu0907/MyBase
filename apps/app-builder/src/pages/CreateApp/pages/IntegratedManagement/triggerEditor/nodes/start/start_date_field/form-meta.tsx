@@ -16,6 +16,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { getEntityFieldList } from '../../utils';
+import { updateStartDateFieldOutputs } from './output';
 
 const Option = Select.Option;
 
@@ -23,8 +24,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
 
-  const [entityList, setEntityList] = useState<any[]>();
-  const [entityFieldList, setEntityFieldList] = useState<any[]>();
+  const [entityList, setEntityList] = useState<any[]>([]);
+  const [entityFieldList, setEntityFieldList] = useState<any[]>([]);
 
   // 查询规则
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
@@ -43,13 +44,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, []);
 
   useEffect(() => {
-    console.log('entityId: ', entityId);
-
     if (entityId) {
       handleGetEntityFieldsById(entityId);
-      getEntityFieldList(entityId, setConditionFields, setValidationTypes);
+      getEntityFieldList(entityId, handleSetConditionFields, setValidationTypes);
     }
   }, [entityId]);
+
+  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
+    setConditionFields(conditionFields);
+    updateStartDateFieldOutputs(node.id, conditionFields);
+  };
 
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
@@ -78,9 +82,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             layout="vertical"
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            requiredSymbol={{ position: 'end' }}
             onValuesChange={onValuesChange}
           >
-            <Form.Item label="节点ID" field="id" initialValue={node.id}>
+            <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>
 
@@ -173,6 +178,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
             <Grid.Row>
               <ConditionEditor
+                nodeId={node.id}
                 label="匹配规则"
                 required
                 fields={conditionFields}

@@ -1,7 +1,7 @@
-import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
+import iconStart from '@/assets/flow/nodes/other.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const ScriptNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const ScriptNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `script_${nanoid()}`,
-      type: 'script',
+      id: generateNodeId(NodeType.SCRIPT),
+      type: NodeType.SCRIPT,
       data: {
         title: '脚本节点'
       }

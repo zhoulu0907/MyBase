@@ -1,5 +1,7 @@
-
 import { FlowNodeEntity } from '@flowgram.ai/fixed-layout-editor';
-import { nanoid } from 'nanoid';
+import { v4 as uuidv4 } from 'uuid';
 
-export const generateNodeId = (n: FlowNodeEntity) => `${n.type || n.flowNodeType}_${nanoid()}`;
+export const generateNodeId = (n: FlowNodeEntity) => {
+  const uuid = uuidv4().replaceAll('-', '');
+  return `${n.type || n.flowNodeType}_${uuid}`;
+};

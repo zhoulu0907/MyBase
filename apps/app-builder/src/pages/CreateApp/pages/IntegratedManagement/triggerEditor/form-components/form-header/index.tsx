@@ -2,14 +2,15 @@ import { useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import { useCallback, useContext, useMemo, useState } from 'react';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Dropdown, Menu } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretLeft, IconClose, IconMore } from '@arco-design/web-react/icon';
-import { clearDataOriginNodeId } from '../../nodes/utils';
 import { NodeRenderContext } from '../../context';
 import { useIsSidebar } from '../../hooks';
+import { clearDataOriginNodeId } from '../../nodes/utils';
 import { FlowCommandId } from '../../shortcuts/constants';
 import { type FlowNodeRegistry } from '../../typings';
-import { Header, Operators } from './styles';
+import { Header, Operators, Content, Footer } from './styles';
 import { TitleInput } from './title-input';
 import { getIcon } from './utils';
 
@@ -29,9 +30,16 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
+      console.log('delete node: ', node.id);
+
       // 删除相关应用的节点配置
       clearDataOriginNodeId(node.id);
+
+      triggerEditorSignal.setNodeId(undefined);
       triggerEditorSignal.deleteNodeData(node.id);
+
+      triggerNodeOutputSignal.removeTriggerNodeOutput(node.id);
+
       deleteNode();
       e.stopPropagation(); // Disable clicking prevents the sidebar from opening
     },
@@ -86,32 +94,41 @@ export function FormHeader() {
   };
 
   return (
-    <Header
-      onMouseDown={(e) => {
-        // trigger drag node
-        startDrag(e);
-        e.stopPropagation();
-      }}
-    >
-      {getIcon(node)}
-      <TitleInput readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
-      {node.renderData.expandable && !isSidebar && (
-        <Button
-          type="secondary"
-          icon={expanded ? <IconCaretDown /> : <IconCaretLeft />}
-          size="small"
-          onClick={handleExpand}
-        />
+    <Header>
+      <Content
+        onMouseDown={(e) => {
+          // trigger drag node
+          startDrag(e);
+          e.stopPropagation();
+        }}
+      >
+        {getIcon(node)}
+        <TitleInput readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
+        {node.renderData.expandable && !isSidebar && (
+          <Button
+            type="secondary"
+            icon={expanded ? <IconCaretDown /> : <IconCaretLeft />}
+            size="small"
+            onClick={handleExpand}
+          />
+        )}
+        {readonly ? undefined : (
+          <Operators>
+            <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={updateTitleEdit} />}>
+              <Button size="mini" type="secondary" icon={<IconMore />} onClick={(e: Event) => e.stopPropagation()} />
+            </Dropdown>
+          </Operators>
+        )}
+        {/* 如果是在sidebar中，则显示关闭按钮 */}
+        {isSidebar && <Button type="text" icon={<IconClose />} size="small" onClick={handleClose} />}
+      </Content>
+      {/* 如果不是在sidebar中，则显示节点id */}
+      {!isSidebar && (
+        <Footer>
+          <span>ID:</span>
+          <span style={{ paddingLeft: '12px' }}>{node.id}</span>
+        </Footer>
       )}
-      {readonly ? undefined : (
-        <Operators>
-          <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={updateTitleEdit} />}>
-            <Button size="mini" type="secondary" icon={<IconMore />} onClick={(e: Event) => e.stopPropagation()} />
-          </Dropdown>
-        </Operators>
-      )}
-      {/* 如果是在sidebar中，则显示关闭按钮 */}
-      {isSidebar && <Button type="text" icon={<IconClose />} size="small" onClick={handleClose} />}
     </Header>
   );
 }

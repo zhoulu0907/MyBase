@@ -28,13 +28,14 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.AUTO_CODE]: BasicSchema.XAutoCode,
   [ALL_COMPONENT_TYPES.RELATED_FORM]: BasicSchema.XRelatedForm,
   [ALL_COMPONENT_TYPES.STATIC_TEXT]: BasicSchema.XStaticText,
-  [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,
   [ALL_COMPONENT_TYPES.RICH_TEXT]: BasicSchema.XRichText,
   [ALL_COMPONENT_TYPES.CAROUSEL_F]: BasicSchema.XFCarousel,
   [ALL_COMPONENT_TYPES.SUB_TABLE]: BasicSchema.XSubTable,
   [ALL_COMPONENT_TYPES.DATA_SELECT]: BasicSchema.XDataSelect,
 
   [ALL_COMPONENT_TYPES.COLUMN_LAYOUT]: BasicSchema.XColumnLayout,
+  [ALL_COMPONENT_TYPES.TABS_LAYOUT]: BasicSchema.XTabsLayout,
+  [ALL_COMPONENT_TYPES.COLLAPSE_LAYOUT]: BasicSchema.XCollapseLayout,
 
   [ALL_COMPONENT_TYPES.TABLE]: BasicSchema.XTable,
   [ALL_COMPONENT_TYPES.CALENDAR]: BasicSchema.XCalendar,
@@ -45,8 +46,11 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
 
   [ALL_COMPONENT_TYPES.INFO_NOTICE]: BasicSchema.XInfoNotice,
   [ALL_COMPONENT_TYPES.IMAGE]: BasicSchema.XImage,
+  [ALL_COMPONENT_TYPES.FILE]: BasicSchema.XFile,
   [ALL_COMPONENT_TYPES.TEXT]: BasicSchema.XText,
-  [ALL_COMPONENT_TYPES.WEB_VIEW]: BasicSchema.XWebView
+  [ALL_COMPONENT_TYPES.WEB_VIEW]: BasicSchema.XWebView,
+  [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,
+  [ALL_COMPONENT_TYPES.PLACEHOLDER]: BasicSchema.XPlaceholder,
 };
 
 /**

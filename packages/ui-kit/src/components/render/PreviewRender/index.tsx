@@ -76,8 +76,6 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
         return <FormComp.XRelatedForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.STATIC_TEXT:
         return <FormComp.XStaticText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.DIVIDER:
-        return <FormComp.XDIVIDER cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.RICH_TEXT:
         return <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.CAROUSEL_F:
@@ -89,7 +87,11 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} />;
+        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
+      case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
+        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} />;
+      case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
+        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
@@ -112,10 +114,16 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
         return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.IMAGE:
         return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.FILE:
+        return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.TEXT:
         return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.WEB_VIEW:
         return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.DIVIDER:
+        return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.PLACEHOLDER:
+        return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;

@@ -1,10 +1,9 @@
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
-import { nanoid } from 'nanoid';
-
-import iconCondition from '@/assets/flow/icon-condition.svg';
+import iconSwitch from '@/assets/flow/nodes/switch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { defaultFormMeta } from '../../default-form-meta';
+import { generateNodeId } from '../../utils';
 
 export const SwitchNodeRegistry: FlowNodeRegistry = {
   extend: FlowNodeSplitType.DYNAMIC_SPLIT,
@@ -12,7 +11,7 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
   title: '分支节点',
   category: 'control',
   info: {
-    icon: iconCondition,
+    icon: iconSwitch,
     description: '连接多个下游分支。如果满足设定的条件，则仅执行相应的分支。'
   },
   meta: {
@@ -21,30 +20,30 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
   formMeta: defaultFormMeta,
   onAdd() {
     return {
-      id: `switch_${nanoid(5)}`,
+      id: generateNodeId(NodeType.SWITCH),
       type: NodeType.SWITCH,
       data: {
         title: '分支节点'
       },
       blocks: [
         {
-          id: nanoid(5),
-          type: 'case',
+          id: generateNodeId(NodeType.CASE),
+          type: NodeType.CASE,
           data: {
             title: '分支_0'
           },
           blocks: []
         },
         {
-          id: nanoid(5),
-          type: 'case',
+          id: generateNodeId(NodeType.CASE),
+          type: NodeType.CASE,
           data: {
             title: '分支_1'
           }
         },
         {
-          id: nanoid(5),
-          type: 'caseDefault',
+          id: generateNodeId(NodeType.CASE_DEFAULT),
+          type: NodeType.CASE_DEFAULT,
           data: {
             title: '默认分支'
           },

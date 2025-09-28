@@ -1,20 +1,25 @@
 import {
-    baseConfig,
-    baseDefault,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  statusConfig,
+  widthConfig,
+  fillConfig,
+  imageConfig,
+  type ICommonBaseType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType,
+  type TFillSelectKeyType,
 } from '../../../common';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, FILL_VALUES, FILL_OPTIONS } from '../../../constants';
 import type {
-    IBooleanConfigType,
-    IStatusConfigType,
-    ITextConfigType,
-    IWidthConfigType,
-    TRadioDefaultType,
-    TSelectDefaultType
+  IBooleanConfigType,
+  IStatusConfigType,
+  ITextConfigType,
+  IWidthConfigType,
+  TNumberDefaultType,
+  TRadioDefaultType,
+  TSelectDefaultType,
+  IImageConfigType
 } from '../../../types';
 
 export interface XImageSchema {
@@ -23,8 +28,15 @@ export interface XImageSchema {
 }
 
 export type TXImageEditData = Array<
-  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType
+  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType |
+  IStatusConfigType<TFillSelectKeyType> | IImageConfigType
 >;
+
+interface Images {
+  image: string;
+  text?: string;
+  url?: string;
+}
 
 export interface XImageConfig extends ICommonBaseType {
   /**
@@ -37,14 +49,36 @@ export interface XImageConfig extends ICommonBaseType {
    * 字段宽度
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
+
+  /**
+   * 填充方式
+   */
+  fillStyle?: TSelectDefaultType<TFillSelectKeyType>;
+
+  /**
+   * 最大限制高度（px）
+   */
+  maxHeight?: TNumberDefaultType;
+  imageConfig: string;
+  verify: {
+    required: boolean;
+    maxSize: TNumberDefaultType;
+  }
 }
 
 const XImage: XImageSchema = {
-  editData: [...baseConfig, widthConfig, statusConfig],
+  editData: [...baseConfig, imageConfig, fillConfig, widthConfig, statusConfig],
   config: {
     ...baseDefault,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
+    imageConfig: '',
+    maxHeight: undefined,
+    verify: {
+      required: false,
+      maxSize: 5
+    }
   }
 };
 

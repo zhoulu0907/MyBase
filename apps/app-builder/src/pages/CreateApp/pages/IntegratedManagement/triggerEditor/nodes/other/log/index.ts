@@ -1,7 +1,7 @@
-import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
+import iconStart from '@/assets/flow/nodes/other.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const LogNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const LogNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `log_${nanoid()}`,
-      type: 'log',
+      id: generateNodeId(NodeType.LOG),
+      type: NodeType.LOG,
       data: {
         title: '日志节点'
       }

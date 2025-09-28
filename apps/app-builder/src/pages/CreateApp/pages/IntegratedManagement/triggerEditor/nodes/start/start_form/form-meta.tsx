@@ -17,6 +17,7 @@ import { TriggerRange } from '../../../components/const';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { updateStartFormOutputs } from './output';
 
 const CheckboxGroup = Checkbox.Group;
 const Option = Select.Option;
@@ -26,7 +27,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
 
-  const [pageList, setPageList] = useState<any[]>();
+  const [pageList, setPageList] = useState<any[]>([]);
 
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
@@ -82,11 +83,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     const res = await getComponentListByPageId({ pageId: id });
     if (res && res.list) {
       const newConditionFields: ConfitionField[] = [];
-      const filedIds: string[] = [];
+      const fieldIds: string[] = [];
       res.list.forEach((item: ComponentConfig) => {
         const cpConfig = JSON.parse(item.config);
         if (cpConfig.dataField && cpConfig.dataField.length > 1) {
-          filedIds.push(cpConfig.dataField[1]);
+          fieldIds.push(cpConfig.dataField[1]);
 
           newConditionFields.push({
             label: cpConfig.label.text ? cpConfig.label.text : cpConfig.label,
@@ -96,12 +97,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         }
       });
 
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+      if (fieldIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
         setValidationTypes(newValidationTypes);
       }
 
       setConditionFields(newConditionFields);
+
+      updateStartFormOutputs(node.id, newConditionFields);
     }
   };
 
@@ -116,17 +119,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            initialValues={{
+              ...triggerEditorSignal.nodeData.value[node.id]
+            }}
             layout="vertical"
+            requiredSymbol={{ position: 'end' }}
             onValuesChange={onValuesChange}
           >
             <Grid.Row>
-              <Form.Item
-                label="节点ID"
-                field="id"
-                initialValue={node.id}
-                rules={[{ required: true, message: '请选择' }]}
-              >
+              <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
                 <Input disabled />
               </Form.Item>
             </Grid.Row>
@@ -245,6 +246,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Grid.Row>
               {validationTypes && (
                 <ConditionEditor
+                  nodeId={node.id}
                   label="过滤条件"
                   required
                   fields={conditionFields}

@@ -6,7 +6,6 @@ import XDatePicker from './DatePicker';
 import XDateRangePicker from './DateRangePicker';
 import XDateTimePicker from './DateTimePicker';
 import XDeptSelect from './DeptSelect';
-import XDIVIDER from './Divider';
 import XFileUpload from './FileUpload';
 import XImgUpload from './ImgUpload';
 import XInputEmail from './InputEmail';
@@ -47,7 +46,6 @@ export const FormComp = {
   XAutoCode,
   XRelatedForm,
   XStaticText,
-  XDIVIDER,
   XRichText,
   XCarousel,
   XSubTable,

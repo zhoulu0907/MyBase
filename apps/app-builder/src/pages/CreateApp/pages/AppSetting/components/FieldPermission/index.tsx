@@ -80,7 +80,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       ...field
     }));
     setFieldPermission(addDisabled);
-    setIsAllFieldsAllowed(res.isAllFieldsAllowed || RoleAllFieldPermission.CustomFieldPermission);
+    setIsAllFieldsAllowed(res.isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
   };
 
   /* 更新字段权限 */
@@ -118,7 +118,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       isCanRead: field.isCanEdit || +(field.isCanRead === FieldRead.notRead)
     }));
     setFieldPermission(updateFields);
-    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.CustomFieldPermission);
+    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
     console.log(fieldPermission, updateFields);
   };
 
@@ -141,7 +141,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       isCanRead: +checked || +(field.isCanRead === FieldRead.notRead)
     }));
     setFieldPermission(updateFields);
-    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.CustomFieldPermission);
+    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
     console.log(fieldPermission, updateFields);
   };
 
@@ -193,7 +193,10 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               setFieldPermission(updateField);
 
               const modifiedField = updateField?.filter((field) => field.fieldId === getChangeFieldName[1]) || [];
-              updateFieldsPermission(modifiedField, isAllFieldsAllowed || RoleAllFieldPermission.CustomFieldPermission);
+              updateFieldsPermission(
+                modifiedField,
+                isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission
+              );
 
               // 更新单个字段
               form.setFieldValue(getChangeFieldKey + '', changeField[1]);
@@ -209,7 +212,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               }}
             >
               <Radio value={RoleAllFieldPermission.AllFieldPermissionAllow}>所有字段内容可操作</Radio>
-              <Radio value={RoleAllFieldPermission.CustomFieldPermission}>自定义权限</Radio>
+              <Radio value={RoleAllFieldPermission.FieldCustomFieldPermission}>自定义权限</Radio>
             </RadioGroup>
 
             <Form.Item
@@ -219,7 +222,8 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               shouldUpdate
               style={{
                 marginTop: 12,
-                visibility: isAllFieldsAllowed === RoleAllFieldPermission.CustomFieldPermission ? 'visible' : 'hidden'
+                visibility:
+                  isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission ? 'visible' : 'hidden'
               }}
             >
               <div className={styles.table}>

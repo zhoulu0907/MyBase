@@ -48,3 +48,8 @@ export const deleteDataGroup = (id: string) => {
 export const updateFieldPermission = (params: UpdateFieldPermissionReq) => {
   return appService.post('/auth-permission/update-field', params);
 };
+
+// 获取权限范围类型 /app/auth-permission/get-permission-scope
+export const getScopeTypeApi = () => {
+  return appService.get('/auth-permission/get-permission-scope');
+};

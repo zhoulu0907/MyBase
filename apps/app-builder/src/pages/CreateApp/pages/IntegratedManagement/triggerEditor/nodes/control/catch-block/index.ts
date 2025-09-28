@@ -1,8 +1,7 @@
-import { nanoid } from 'nanoid';
-
-import iconCase from '@/assets/flow/icon-case.png';
+import iconControl from '@/assets/flow/nodes/control.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 let id = 3;
@@ -16,17 +15,17 @@ export const CatchBlockNodeRegistry: FlowNodeRegistry = {
     expandable: false // disable expanded
   },
   info: {
-    icon: iconCase,
+    icon: iconControl,
     description: '满足条件时尝试执行分支'
   },
   canAdd: () => false,
   canDelete: (ctx, node) => node.parent!.blocks.length >= 2,
   onAdd(ctx, from) {
     return {
-      id: `Catch_${nanoid(5)}`,
-      type: 'catchBlock',
+      id: generateNodeId(NodeType.CATCH_BLOCK),
+      type: NodeType.CATCH_BLOCK,
       data: {
-        title: `Catch Block ${id++}`,
+        title: `Catch Block ${id++}`
       }
     };
   },

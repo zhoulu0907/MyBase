@@ -1,8 +1,7 @@
-import { nanoid } from 'nanoid';
-
-import iconCase from '@/assets/flow/icon-case.png';
+import iconControl from '@/assets/flow/nodes/control.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 let id = 2;
@@ -21,13 +20,13 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
     expandable: false // disable expanded
   },
   info: {
-    icon: iconCase,
+    icon: iconControl,
     description: '满足条件时执行分支。'
   },
   canDelete: (ctx, node) => node.parent!.blocks.length >= 3,
   onAdd(ctx, from) {
     return {
-      id: `Case_${nanoid(5)}`,
+      id: generateNodeId(NodeType.CASE),
       type: NodeType.CASE,
       data: {
         title: `分支_${id++}`
