@@ -25,8 +25,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}>
-            <Form.Item label="节点ID" field="id" initialValue={node.id}>
+          <Form
+            form={payloadForm}
+            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            requiredSymbol={{ position: 'end' }}
+          >
+            <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>
           </Form>
