@@ -114,7 +114,7 @@ export interface AuthDataGroupVO {
   /**
    * 是否可以操作
    */
-  isOperable?: number;
+  isOperable?: IsOperable;
   /**
    * 权限范围字段名称
    */
@@ -131,6 +131,11 @@ export interface AuthDataGroupVO {
    * 业务实体字段对应的权限范围值
    */
   scopeValue?: string;
+}
+
+export enum IsOperable {
+  notAllowed,
+  allowed = 1
 }
 
 export type ScopeType = 

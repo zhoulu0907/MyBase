@@ -78,7 +78,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   // 过滤为空的条件
   useEffect(() => {
-    console.log('filterCondition:  ', filterCondition);
+    // console.log('filterCondition:  ', filterCondition);
     if (Array.isArray(filterCondition)) {
       filterCondition.forEach((item: any, index: number) => {
         if (Array.isArray(item.conditions)) {
@@ -419,13 +419,17 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   };
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
-    // console.log(params.value);
+    // console.log('params.value:', params.value.split('.')[0]);
+    console.log('params.value:', params.value);
+    console.log('options:', options);
 
     if (params.value) {
       const parentId = params.value.split('.')[0];
       const parentNode = options.find((item) => item.key == parentId);
 
       const childrenName = parentNode?.children?.find((item) => item.key == params.value)?.title;
+      // console.log('parentNode:', parentNode);
+      // console.log('childrenName:', childrenName);
       return `${parentNode?.title} - ${childrenName}`;
     }
 
