@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.cmsr.onebase.framework.common.tools.core.exceptions.ExceptionUtil.getRootCauseMessage;
+import static cn.hutool.core.exceptions.ExceptionUtil.getRootCauseMessage;
 
 /**
  * 邮件日志 Service 实现类

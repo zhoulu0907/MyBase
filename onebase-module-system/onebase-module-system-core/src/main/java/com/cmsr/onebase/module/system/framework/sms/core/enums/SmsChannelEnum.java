@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.framework.sms.core.enums;
 
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
+import cn.hutool.core.util.ArrayUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,11 +14,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SmsChannelEnum {
 
-    DEBUG_DING_TALK("DEBUG_DING_TALK", "调试(钉钉)"),
-    ALIYUN("ALIYUN", "阿里云"),
-    TENCENT("TENCENT", "腾讯云"),
-    HUAWEI("HUAWEI", "华为云"),
-    QINIU("QINIU", "七牛云"),
+    CMCC("CMCC", "中国移动") ,
     ;
 
     /**

@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client.ftp;
 
-import com.cmsr.onebase.framework.common.tools.core.io.FileUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.CharsetUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.tools.extra.ftp.Ftp;
-import com.cmsr.onebase.framework.common.tools.extra.ftp.FtpException;
-import com.cmsr.onebase.framework.common.tools.extra.ftp.FtpMode;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.ftp.Ftp;
+import cn.hutool.extra.ftp.FtpException;
+import cn.hutool.extra.ftp.FtpMode;
 import com.cmsr.onebase.module.infra.framework.file.core.client.AbstractFileClient;
 
 import java.io.ByteArrayInputStream;

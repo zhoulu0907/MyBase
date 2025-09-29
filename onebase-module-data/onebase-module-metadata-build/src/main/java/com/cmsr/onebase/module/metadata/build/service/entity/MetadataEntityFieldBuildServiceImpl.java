@@ -1028,8 +1028,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_CODE, "%" + pageReqVO.getFieldCode() + "%");
         }
 
-        // 添加排序：按照字段排序优先，然后按创建时间倒序
-        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
+    // 添加排序：按照字段排序优先（倒序），然后按创建时间倒序
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.DESC);
         configStore.order("create_time", Order.TYPE.DESC);
 
         // 分页查询

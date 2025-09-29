@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.idempotent.core.keyresolver.impl;
 
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.idempotent.core.annotation.Idempotent;
 import com.cmsr.onebase.framework.idempotent.core.keyresolver.IdempotentKeyResolver;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;

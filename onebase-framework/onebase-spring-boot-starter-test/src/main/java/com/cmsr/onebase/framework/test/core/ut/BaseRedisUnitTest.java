@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.test.core.ut;
 
-import com.cmsr.onebase.framework.common.tools.extra.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration;
 import com.cmsr.onebase.framework.test.config.RedisTestConfiguration;
 import org.redisson.spring.starter.RedissonAutoConfiguration;

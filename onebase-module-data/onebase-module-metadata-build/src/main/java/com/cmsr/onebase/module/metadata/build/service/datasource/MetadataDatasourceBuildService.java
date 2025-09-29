@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.build.service.datasource;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourcePageReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceTestConnectionReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
@@ -99,6 +100,22 @@ public interface MetadataDatasourceBuildService {
      * @return 数据源列表
      */
     List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId);
+
+    /**
+     * 将数据源数据对象转换为响应列表，并填充创建人、更新人名称
+     *
+     * @param datasourceList 数据源列表
+     * @return 数据源响应列表
+     */
+    List<DatasourceRespVO> buildDatasourceRespVOList(List<MetadataDatasourceDO> datasourceList);
+
+    /**
+     * 将单个数据源数据对象转换为响应VO，并填充创建人、更新人名称
+     *
+     * @param datasource 数据源数据对象
+     * @return 数据源响应VO
+     */
+    DatasourceRespVO buildDatasourceRespVO(MetadataDatasourceDO datasource);
 
     /**
      * 根据条件查询数据源列表

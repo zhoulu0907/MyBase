@@ -3,8 +3,8 @@ package com.cmsr.onebase.framework.test.core.util;
 import com.cmsr.onebase.framework.common.exception.ErrorCode;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ReflectUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ReflectUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 

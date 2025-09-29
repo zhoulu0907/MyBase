@@ -1,12 +1,7 @@
 package com.cmsr.onebase.framework.common.util.collection;
 
-import com.cmsr.onebase.framework.common.core.KeyValue;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
-import com.google.common.collect.Maps;
-
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -25,7 +20,7 @@ public class MapUtils {
      * @param consumer 进一步处理的逻辑
      */
     public static <K, V> void findAndThen(Map<K, V> map, K key, Consumer<V> consumer) {
-        if (ObjUtil.isNull(key) || CollUtil.isEmpty(map)) {
+        if (Objects.isNull(key) || org.apache.commons.collections4.MapUtils.isEmpty(map)) {
             return;
         }
         V value = map.get(key);
@@ -35,10 +30,10 @@ public class MapUtils {
         consumer.accept(value);
     }
 
-    public static <K, V> Map<K, V> convertMap(List<KeyValue<K, V>> keyValues) {
-        Map<K, V> map = Maps.newLinkedHashMapWithExpectedSize(keyValues.size());
-        keyValues.forEach(keyValue -> map.put(keyValue.getKey(), keyValue.getValue()));
-        return map;
-    }
+//    public static <K, V> Map<K, V> convertMap(List<KeyValue<K, V>> keyValues) {
+//        Map<K, V> map = Maps.newLinkedHashMapWithExpectedSize(keyValues.size());
+//        keyValues.forEach(keyValue -> map.put(keyValue.getKey(), keyValue.getValue()));
+//        return map;
+//    }
 
 }

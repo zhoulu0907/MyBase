@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.system.service.mail;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.tools.extra.mail.MailAccount;
-import com.cmsr.onebase.framework.common.tools.extra.mail.MailUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.mail.MailAccount;
+import cn.hutool.extra.mail.MailUtil;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
@@ -122,7 +122,7 @@ public class MailSendServiceImpl implements MailSendService {
     private MailAccount buildMailAccount(MailAccountDO account, String nickname) {
         String from = StrUtil.isNotEmpty(nickname) ? nickname + " <" + account.getMail() + ">" : account.getMail();
         return new MailAccount().setFrom(from).setAuth(true)
-                .setUser(account.getUsername()).setPass(account.getPassword().toCharArray())
+                .setUser(account.getUsername()).setPass(account.getPassword())
                 .setHost(account.getHost()).setPort(account.getPort())
                 .setSslEnable(account.getSslEnable()).setStarttlsEnable(account.getStarttlsEnable());
     }

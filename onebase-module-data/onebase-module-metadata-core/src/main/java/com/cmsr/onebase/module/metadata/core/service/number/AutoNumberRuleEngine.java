@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.metadata.core.service.number;
 
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.enums.AutoNumberItemTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.NumberModeEnum;
