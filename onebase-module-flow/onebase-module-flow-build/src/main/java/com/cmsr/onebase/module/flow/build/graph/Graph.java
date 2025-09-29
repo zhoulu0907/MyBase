@@ -33,27 +33,40 @@ public class Graph {
         if (CollectionUtils.isEmpty(nodes)) {
             return;
         }
+        
         for (GraphNode node : nodes) {
-            List<GraphNodeDataConditions> filterCondition = node.getData().getFilterCondition();
-            if (CollectionUtils.isNotEmpty(filterCondition)) {
-                for (GraphNodeDataConditions nodeDataConditions : filterCondition) {
-                    List<RuleItem> conditions = nodeDataConditions.getConditions();
-                    if (CollectionUtils.isNotEmpty(conditions)) {
-                        for (RuleItem condition : conditions) {
-                            String fieldId = condition.getFieldId();
-                            addToFieldIds(fieldId, fieldIds);
-                        }
-                    }
-                }
-            }
-            List<RuleItem> fields = node.getData().getFields();
-            if (CollectionUtils.isNotEmpty(fields)) {
-                for (RuleItem field : fields) {
-                    String fieldId = field.getFieldId();
-                    addToFieldIds(fieldId, fieldIds);
-                }
-            }
+            // 处理过滤条件中的字段
+            processFilterConditionsForFieldId(node.getData().getFilterCondition(), fieldIds);
+            
+            // 处理节点数据中的字段
+            processFieldsForFieldId(node.getData().getFields(), fieldIds);
+            
+            // 递归处理子节点
             recursionFindFieldId(node.getBlocks(), fieldIds);
+        }
+    }
+    
+    private void processFilterConditionsForFieldId(List<GraphNodeDataConditions> filterConditions, Set<Long> fieldIds) {
+        if (CollectionUtils.isEmpty(filterConditions)) {
+            return;
+        }
+        
+        for (GraphNodeDataConditions conditionGroup : filterConditions) {
+            if (CollectionUtils.isNotEmpty(conditionGroup.getConditions())) {
+                for (RuleItem condition : conditionGroup.getConditions()) {
+                    addToFieldIds(condition.getFieldId(), fieldIds);
+                }
+            }
+        }
+    }
+    
+    private void processFieldsForFieldId(List<RuleItem> fields, Set<Long> fieldIds) {
+        if (CollectionUtils.isEmpty(fields)) {
+            return;
+        }
+        
+        for (RuleItem field : fields) {
+            addToFieldIds(field.getFieldId(), fieldIds);
         }
     }
 
@@ -89,39 +102,52 @@ public class Graph {
         if (CollectionUtils.isEmpty(nodes)) {
             return;
         }
+        
         for (GraphNode node : nodes) {
-            List<GraphNodeDataConditions> filterCondition = node.getData().getFilterCondition();
-            if (CollectionUtils.isNotEmpty(filterCondition)) {
-                for (GraphNodeDataConditions nodeDataConditions : filterCondition) {
-                    List<RuleItem> conditions = nodeDataConditions.getConditions();
-                    if (CollectionUtils.isNotEmpty(conditions)) {
-                        for (RuleItem condition : conditions) {
-                            String fieldId = condition.getFieldId();
-                            Long id = parseFieldId(fieldId);
-                            if (id != null) {
-                                EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(id);
-                                if (fieldInfo != null) {
-                                    condition.setFieldType(fieldInfo.getFieldType());
-                                    condition.setJdbcType(fieldInfo.getJdbcType());
-                                }
-                            }
-                        }
-                    }
+            // 处理过滤条件中的字段类型
+            processFilterConditionsForDataType(node.getData().getFilterCondition(), fieldInfoMap);
+            
+            // 处理节点数据中的字段类型
+            processFieldsForDataType(node.getData().getFields(), fieldInfoMap);
+            
+            // 递归处理子节点
+            recursionUpdateFieldDataType(node.getBlocks(), fieldInfoMap);
+        }
+    }
+    
+    private void processFilterConditionsForDataType(List<GraphNodeDataConditions> filterConditions, 
+                                                   Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
+        if (CollectionUtils.isEmpty(filterConditions)) {
+            return;
+        }
+        
+        for (GraphNodeDataConditions conditionGroup : filterConditions) {
+            if (CollectionUtils.isNotEmpty(conditionGroup.getConditions())) {
+                for (RuleItem condition : conditionGroup.getConditions()) {
+                    updateRuleItemDataType(condition, fieldInfoMap);
                 }
             }
-            List<RuleItem> fields = node.getData().getFields();
-            if (CollectionUtils.isNotEmpty(fields)) {
-                for (RuleItem field : fields) {
-                    String fieldId = field.getFieldId();
-                    Long id = parseFieldId(fieldId);
-                    if (id != null) {
-                        EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(id);
-                        if (fieldInfo != null) {
-                            field.setFieldType(fieldInfo.getFieldType());
-                            field.setJdbcType(fieldInfo.getJdbcType());
-                        }
-                    }
-                }
+        }
+    }
+    
+    private void processFieldsForDataType(List<RuleItem> fields, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
+        if (CollectionUtils.isEmpty(fields)) {
+            return;
+        }
+        
+        for (RuleItem field : fields) {
+            updateRuleItemDataType(field, fieldInfoMap);
+        }
+    }
+    
+    private void updateRuleItemDataType(RuleItem ruleItem, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
+        String fieldId = ruleItem.getFieldId();
+        Long id = parseFieldId(fieldId);
+        if (id != null) {
+            EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(id);
+            if (fieldInfo != null) {
+                ruleItem.setFieldType(fieldInfo.getFieldType());
+                ruleItem.setJdbcType(fieldInfo.getJdbcType());
             }
         }
     }
