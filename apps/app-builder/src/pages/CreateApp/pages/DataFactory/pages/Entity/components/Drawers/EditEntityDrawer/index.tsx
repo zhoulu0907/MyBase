@@ -96,13 +96,7 @@ const EditEntityDrawer: React.FC<{
       {/* 左侧Tab导航 */}
       {!isCollapsed && visible && !onlyShowEntity && (
         <div className={styles['tab-sidebar']}>
-          <Tabs
-            activeTab={activeTab}
-            onChange={changeTab}
-            direction="vertical"
-            className={styles['vertical-tabs']}
-            renderTabTitle={(title) => <div className={styles['tab-title']}>{title}</div>}
-          >
+          <Tabs activeTab={activeTab} onChange={changeTab} direction="vertical" className={styles['vertical-tabs']}>
             <Tabs.TabPane key="entity" title="业务实体" />
             <Tabs.TabPane key="relation" title="关联关系" />
             <Tabs.TabPane key="rule" title="数据规则" />
