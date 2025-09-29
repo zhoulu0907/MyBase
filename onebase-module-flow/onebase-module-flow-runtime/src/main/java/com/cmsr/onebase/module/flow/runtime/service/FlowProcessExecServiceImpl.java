@@ -5,7 +5,6 @@ import com.cmsr.onebase.module.flow.context.condition.Condition;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpresses;
-import com.cmsr.onebase.module.flow.context.field.FieldExpressProvider;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessFormRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
@@ -19,7 +18,6 @@ import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
-import com.yomahub.liteflow.core.FlowExecutor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jexl3.JexlExpression;
@@ -42,16 +40,10 @@ import java.util.stream.Collectors;
 public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Autowired
-    private FlowExecutor flowExecutor;
-
-    @Autowired
     private FlowProcessRepository flowProcessRepository;
 
     @Autowired
     private FlowProcessFormRepository flowProcessFormRepository;
-
-    @Autowired
-    private FieldExpressProvider fieldExpressProvider;
 
     @Autowired
     private GraphFlowCache graphFlowCache;
@@ -139,11 +131,9 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             if (fieldInfo == null) {
                 throw new IllegalArgumentException("找不到字段ID为 " + fieldId + " 的字段信息");
             }
-
             Object convertedValue = convertFieldValue(fieldId, fieldInfo, inputValue);
             result.put(fieldInfo.getFieldName(), convertedValue);
         }
-
         return result;
     }
 
@@ -154,7 +144,6 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         if (inputValue == null || fieldInfo.getJdbcType() == null) {
             return inputValue;
         }
-
         try {
             return JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), inputValue);
         } catch (Exception e) {
