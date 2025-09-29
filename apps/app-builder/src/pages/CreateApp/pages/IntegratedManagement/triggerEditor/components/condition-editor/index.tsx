@@ -76,6 +76,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   useSignals();
   const [visible, setVisible] = useState<boolean>(false);
   const filterCondition = Form.useWatch('filterCondition', form);
+  const mockData = '{{20613609649310009.CEILING}}([[1.订单编号]][[3.下单日期]])';
 
   // 过滤为空的条件
   useEffect(() => {
@@ -464,6 +465,11 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               form.setFieldValue(item.field + '.op', undefined);
                                               form.setFieldValue(item.field + '.operatorType', undefined);
                                               form.setFieldValue(item.field + '.value', undefined);
+
+                                              form.setFieldValue(
+                                                item.field + '.fieldType',
+                                                fields.find((field) => field.value == _value)?.fieldType
+                                              );
                                             }}
                                           >
                                             {fields.map((field) => (
@@ -472,6 +478,11 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               </Option>
                                             ))}
                                           </Select>
+                                        </Form.Item>
+
+                                        {/* 这个字段给后端使用，实际不需要展示 */}
+                                        <Form.Item field={item.field + '.fieldType'} hidden>
+                                          <Input placeholder="请输入字段类型" />
                                         </Form.Item>
                                       </Grid.Col>
 
@@ -620,7 +631,12 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }}
         </Form.List>
       </Form.Item>
-      <FormulaEditor visible={visible} onCancel={() => setVisible(false)} onConfirm={handleConfirm} />
+      <FormulaEditor
+        initialFormula={mockData}
+        visible={visible}
+        onCancel={() => setVisible(false)}
+        onConfirm={handleConfirm}
+      />
     </div>
   );
 };
