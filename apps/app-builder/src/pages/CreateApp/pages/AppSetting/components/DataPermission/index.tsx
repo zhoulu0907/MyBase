@@ -85,7 +85,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       description: '系统提供的默认权限',
       entityId: '3',
       entityName: '',
-      isOperable: 0,
+      isOperable: 1,
       scopeFieldName: '拥有者',
       scopeFieldId: 1,
       scopeLevel: 'self',

@@ -6,7 +6,7 @@ import {
   updateOperationPermission,
   FunPermissionViewVisit,
   FunOperationPermission,
-  // FunViewPermission,
+  FunViewPermission,
   type AuthOperationVO,
   type GetPermissionReq,
   type FuncPermissionResponse,
@@ -30,12 +30,12 @@ interface IProps {
 const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const [form] = Form.useForm();
   const isPageAllowed = Form.useWatch('isPageAllowed', form);
-  // const isAllViewsAllowed = Form.useWatch('isAllViewsAllowed', form); // 监听字段变化
+  const isAllViewsAllowed = Form.useWatch('isAllViewsAllowed', form); // 监听字段变化
 
   const [operationOptions, setOperationOptions] = useState<any[]>();
   const [funcPermission, setFuncPermission] = useState<FuncPermissionResponse>(); // 功能权限
-  // const [viewPermissionOptions, setViewPermissionOptions] = useState<any[]>();
-  // const [isCustomAllViewsAllowed, setIsCustomAllViewsAllowed] = useState<boolean>(true);
+  const [viewPermissionOptions, setViewPermissionOptions] = useState<any[]>();
+  const [isCustomAllViewsAllowed, setIsCustomAllViewsAllowed] = useState<boolean>(true);
   // 自定义权限是否全选
 
   useEffect(() => {
@@ -51,13 +51,13 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         label: item.displayName,
         value: item.operationCode
       }));
-      // const viewOptions = funcPermission.authViewVO.authViews?.map((item: AuthViewVO) => ({
-      //   label: item.viewDisplayName,
-      //   value: item.viewId,
-      //   isAllowed: item.isAllowed
-      // }));
+      const viewOptions = funcPermission.authViewVO.authViews?.map((item: AuthViewVO) => ({
+        label: item.viewDisplayName,
+        value: item.viewId,
+        isAllowed: item.isAllowed
+      }));
       setOperationOptions(operationOptions); // 存在 state 里
-      // setViewPermissionOptions(viewOptions);
+      setViewPermissionOptions(viewOptions);
 
       // 设置默认值
       const defaultChecked = funcPermission.authOperations
@@ -120,28 +120,28 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     await getApplicationPermission();
   };
 
-  // const changeViewPermission = (value: any) => {
-  //   if (value) {
-  //     form.setFieldValue('isAllViewsAllowed', value);
-  //     const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
-  //     form.setFieldValue('authViews', allViewIds);
-  //   } else {
-  //     form.setFieldValue('isAllViewsAllowed', value);
-  //   }
-  // };
+  const changeViewPermission = (value: any) => {
+    if (value) {
+      form.setFieldValue('isAllViewsAllowed', value);
+      const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
+      form.setFieldValue('authViews', allViewIds);
+    } else {
+      form.setFieldValue('isAllViewsAllowed', value);
+    }
+  };
 
-  // const changeAllViewPermission = (checked: any) => {
-  //   // 实现全选/取消全选逻辑
-  //   setIsCustomAllViewsAllowed(checked);
-  //   if (checked) {
-  //     // 全选：选中所有视图权限
-  //     const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
-  //     form.setFieldValue('authViews', allViewIds);
-  //   } else {
-  //     // 取消全选：清空所有视图权限
-  //     form.setFieldValue('authViews', []);
-  //   }
-  // };
+  const changeAllViewPermission = (checked: any) => {
+    // 实现全选/取消全选逻辑
+    setIsCustomAllViewsAllowed(checked);
+    if (checked) {
+      // 全选：选中所有视图权限
+      const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
+      form.setFieldValue('authViews', allViewIds);
+    } else {
+      // 取消全选：清空所有视图权限
+      form.setFieldValue('authViews', []);
+    }
+  };
 
   return (
     <>
@@ -189,7 +189,7 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
           </div>
 
           {/*  视图权限 */}
-          {/* <div className={styles.formItem}>
+          <div className={styles.formItem}>
             <div className={styles.itemHeader}>
               <div className={styles.left}>视图权限</div>
               <div className={styles.right}>{isAllViewsAllowed ? '全部可访问' : '部分可访问'}</div>
@@ -227,7 +227,7 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                   </div>
                 )}
             </div>
-          </div> */}
+          </div>
         </Form>
       )}
     </>
