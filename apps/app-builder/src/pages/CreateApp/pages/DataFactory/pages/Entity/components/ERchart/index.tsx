@@ -63,7 +63,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
     const handleSectionCollapse = (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
       if (!collapseHandlerRef.current) return;
-      
+
       const nodeData = data.nodes.find((n) => n.entityId === nodeId);
       if (!nodeData) return;
 
@@ -372,6 +372,27 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           });
         });
 
+        // 拖拽开始标记
+        let isDragging = false;
+        let dragStartPosition = { x: 0, y: 0 };
+
+        graphRef.current.on('node:move', ({ x, y }) => {
+          // 记录拖拽开始位置
+          dragStartPosition = { x, y };
+          isDragging = false; // 重置拖拽状态
+        });
+
+        graphRef.current.on('node:moving', ({ x, y }) => {
+          // 移动距离超过阈值则判断为在拖拽
+          const deltaX = Math.abs(x - dragStartPosition.x);
+          const deltaY = Math.abs(y - dragStartPosition.y);
+          const threshold = 5;
+
+          if (deltaX > threshold || deltaY > threshold) {
+            isDragging = true;
+          }
+        });
+
         graphRef.current.on('node:moved', ({ e, x, y, node }) => {
           // 阻止折叠图标点击触发
           const target = e.target as HTMLElement;
@@ -383,9 +404,18 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             e.stopPropagation();
             return;
           }
-          e.preventDefault();
-          e.stopPropagation();
-          updateEntityPosition?.(node.getData().data, x, y);
+
+          // 只在拖拽时才更新位置
+          if (isDragging) {
+            e.preventDefault();
+            e.stopPropagation();
+            updateEntityPosition?.(node.getData().data, x, y);
+          }
+
+          // 延迟重置拖拽状态，给点击事件处理留出时间
+          setTimeout(() => {
+            isDragging = false;
+          }, 50);
         });
 
         graphRef.current.on('edge:click', ({ e, x, y, edge, view }) => {
@@ -404,9 +434,22 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             e.stopPropagation();
             return;
           }
-          e.preventDefault();
-          e.stopPropagation();
-          onNodeEdit?.(node.getData().data);
+
+          // 如果刚刚拖拽过，不触发点击事件
+          if (isDragging) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+
+          // 添加短暂延迟，确保不是拖拽操作
+          setTimeout(() => {
+            if (!isDragging) {
+              e.preventDefault();
+              e.stopPropagation();
+              onNodeEdit?.(node.getData().data);
+            }
+          }, 10);
         });
 
         graphRef.current.on('scale', ({ sx }) => {

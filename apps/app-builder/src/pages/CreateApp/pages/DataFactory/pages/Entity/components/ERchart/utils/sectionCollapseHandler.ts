@@ -123,14 +123,6 @@ export class SectionCollapseHandler {
     // 更新自定义字段聚合端口位置
     const node = this.graph.getCellById(nodeId);
     if (node) {
-      // TODO: 需要根据X6的实际API来更新端口位置
-      // 目前暂时注释掉，因为API可能不同
-      console.log('需要更新自定义字段端口位置:', {
-        nodeId,
-        customTitleY,
-        customFields: customFields.length
-      });
-
       // 更新自定义字段聚合端口位置
       node.portProp(`${nodeId}_custom_fields_source`, 'args', { x: NODE_WIDTH, y: customTitleY });
       node.portProp(`${nodeId}_custom_fields_target`, 'args', { x: 0, y: customTitleY });
