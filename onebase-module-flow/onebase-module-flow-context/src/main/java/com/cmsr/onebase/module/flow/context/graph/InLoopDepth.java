@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.context;
+package com.cmsr.onebase.module.flow.context.graph;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -9,6 +9,8 @@ import java.util.HashMap;
  * @Date：2025/9/28 17:52
  */
 public class InLoopDepth extends HashMap<String, Integer> {
+
+    public static final InLoopDepth EMPTY_LOOP_DEPTH = new InLoopDepth();
 
     public InLoopDepth() {
     }

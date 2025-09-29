@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.context.express;
 
 import com.cmsr.onebase.framework.common.express.OpEnum;
+import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.jexl3.JexlBuilder;
@@ -10,7 +11,6 @@ import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -125,12 +125,12 @@ public class ExpressionProvider {
 
             // 获取字段名
             String fieldName = expressItem.getKey().toString();
-
             // 获取操作符
-            OpEnum operator = OpEnum.valueOf(expressItem.getOp());
-
+            OpEnum operator = expressItem.getOp();
+            // 获取操作符类型
+            OperatorTypeEnum operatorType = expressItem.getOperatorType();
             // 构建表达式
-            String expression = buildExpression(fieldName, operator, expressItem.getValue());
+            String expression = buildExpression(fieldName, operator, expressItem.getValue(), operatorType);
 
             log.debug("构建表达式项: key={}, operator={} -> {}", expressItem.getKey(), expressItem.getOp(), expression);
 
@@ -152,49 +152,49 @@ public class ExpressionProvider {
      * @param value     值列表
      * @return 表达式字符串
      */
-    public String buildExpression(String fieldName, OpEnum operator, Object value) {
+    public String buildExpression(String fieldName, OpEnum operator, Object value, OperatorTypeEnum operatorType) {
         switch (operator) {
             case EQUALS:
-                return String.format("%s == %s", fieldName, formatValue(value));
+                return String.format("%s == %s", fieldName, formatValue(value, operatorType));
 
             case NOT_EQUALS:
-                return String.format("%s != %s", fieldName, formatValue(value));
+                return String.format("%s != %s", fieldName, formatValue(value, operatorType));
 
             case CONTAINS:
-                return String.format("%s.contains(%s)", fieldName, formatValue(value));
+                return String.format("%s.contains(%s)", fieldName, formatValue(value, operatorType));
 
             case NOT_CONTAINS:
-                return String.format("!(%s.contains(%s))", fieldName, formatValue(value));
+                return String.format("!(%s.contains(%s))", fieldName, formatValue(value, operatorType));
 
             case EXISTS_IN:
-                return String.format("%s.contains(%s)", formatValue(value), fieldName);
+                return String.format("%s.contains(%s)", formatValue(value, operatorType), fieldName);
 
             case NOT_EXISTS_IN:
-                return String.format("!(%s.contains(%s))", formatValue(value), fieldName);
+                return String.format("!(%s.contains(%s))", formatValue(value, operatorType), fieldName);
 
             case GREATER_THAN:
-                return String.format("%s > %s", fieldName, formatValue(value));
+                return String.format("%s > %s", fieldName, formatValue(value, operatorType));
 
             case GREATER_EQUALS:
-                return String.format("%s >= %s", fieldName, formatValue(value));
+                return String.format("%s >= %s", fieldName, formatValue(value, operatorType));
 
             case LESS_THAN:
-                return String.format("%s < %s", fieldName, formatValue(value));
+                return String.format("%s < %s", fieldName, formatValue(value, operatorType));
 
             case LESS_EQUALS:
-                return String.format("%s <= %s", fieldName, formatValue(value));
+                return String.format("%s <= %s", fieldName, formatValue(value, operatorType));
 
             case LATER_THAN:
-                return String.format("%s > %s", fieldName, formatDateValue(value));
+                return String.format("%s > %s", fieldName, formatDateValue(value, operatorType));
 
             case EARLIER_THAN:
-                return String.format("%s < %s", fieldName, formatDateValue(value));
+                return String.format("%s < %s", fieldName, formatDateValue(value, operatorType));
 
             case RANGE:
                 if (value instanceof List list) {
                     return String.format("%s >= %s && %s <= %s",
-                            fieldName, formatValue(list.get(0)),
-                            fieldName, formatValue(list.get(1)));
+                            fieldName, formatValue(list.get(0), operatorType),
+                            fieldName, formatValue(list.get(1), operatorType));
                 }
                 throw new IllegalArgumentException("RANGE操作需要两个值");
 
@@ -205,16 +205,16 @@ public class ExpressionProvider {
                 return String.format("(%s != null && !%s.isEmpty())", fieldName, fieldName);
 
             case CONTAINS_ALL:
-                return buildContainsAllExpression(fieldName, value);
+                return buildContainsAllExpression(fieldName, value, operatorType);
 
             case NOT_CONTAINS_ALL:
-                return String.format("!(%s)", buildContainsAllExpression(fieldName, value));
+                return String.format("!(%s)", buildContainsAllExpression(fieldName, value, operatorType));
 
             case CONTAINS_ANY:
-                return buildContainsAnyExpression(fieldName, value);
+                return buildContainsAnyExpression(fieldName, value, operatorType);
 
             case NOT_CONTAINS_ANY:
-                return String.format("!(%s)", buildContainsAnyExpression(fieldName, value));
+                return String.format("!(%s)", buildContainsAnyExpression(fieldName, value, operatorType));
 
             default:
                 throw new UnsupportedOperationException("不支持的操作符: " + operator);
@@ -224,13 +224,14 @@ public class ExpressionProvider {
     /**
      * 构建包含全部的表达式
      */
-    private String buildContainsAllExpression(String fieldName, Object value) {
+    private String buildContainsAllExpression(String fieldName, Object value, OperatorTypeEnum operatorType) {
+        List listValue = (List) value;
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < Array.getLength(value); i++) {
+        for (int i = 0; i < listValue.size(); i++) {
             if (i > 0) {
                 sb.append(" && ");
             }
-            sb.append(String.format("%s contains %s", fieldName, formatValue(Array.get(value, i))));
+            sb.append(String.format("%s contains %s", fieldName, formatValue(listValue.get(i), operatorType)));
         }
         return sb.toString();
     }
@@ -238,13 +239,14 @@ public class ExpressionProvider {
     /**
      * 构建包含任一的表达式
      */
-    private String buildContainsAnyExpression(String fieldName, Object value) {
+    private String buildContainsAnyExpression(String fieldName, Object value, OperatorTypeEnum operatorType) {
+        List listValue = (List) value;
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < Array.getLength(value); i++) {
+        for (int i = 0; i < listValue.size(); i++) {
             if (i > 0) {
                 sb.append(" || ");
             }
-            sb.append(String.format("%s contains %s", fieldName, formatValue(Array.get(value, i))));
+            sb.append(String.format("%s contains %s", fieldName, formatValue(listValue.get(i), operatorType)));
         }
         return sb.toString();
     }
@@ -252,18 +254,21 @@ public class ExpressionProvider {
     /**
      * 格式化值为表达式字符串
      */
-    private String formatValue(Object value) {
+    private String formatValue(Object value, OperatorTypeEnum operatorType) {
         if (value == null) {
             return "null";
         }
-        if (value instanceof String) {
+        if (value instanceof String && operatorType == OperatorTypeEnum.VARIABLE) {
+            return value.toString();
+        }
+        if (value instanceof String && operatorType != OperatorTypeEnum.VARIABLE) {
             return "'" + value.toString().replace("'", "\\'") + "'";
         }
         if (value instanceof Number || value instanceof Boolean) {
             return value.toString();
         }
         if (value instanceof Collection) {
-            return formatCollectionValue((Collection<?>) value);
+            return formatCollectionValue((Collection<?>) value, operatorType);
         }
         return "'" + value.toString() + "'";
     }
@@ -271,7 +276,7 @@ public class ExpressionProvider {
     /**
      * 格式化日期值
      */
-    private String formatDateValue(Object value) {
+    private String formatDateValue(Object value, OperatorTypeEnum operatorType) {
         if (value instanceof LocalDate) {
             LocalDate date = (LocalDate) value;
             return String.format("LocalDate.of(%d, %d, %d)",
@@ -288,20 +293,20 @@ public class ExpressionProvider {
             return String.format("LocalTime.of(%d, %d, %d)",
                     time.getHour(), time.getMinute(), time.getSecond());
         }
-        return formatValue(value);
+        return formatValue(value, operatorType);
     }
 
     /**
      * 格式化集合值
      */
-    private String formatCollectionValue(Collection<?> collection) {
+    private String formatCollectionValue(Collection<?> collection, OperatorTypeEnum operatorType) {
         StringBuilder sb = new StringBuilder("[");
         boolean first = true;
         for (Object item : collection) {
             if (!first) {
                 sb.append(", ");
             }
-            sb.append(formatValue(item));
+            sb.append(formatValue(item, operatorType));
             first = false;
         }
         sb.append("]");

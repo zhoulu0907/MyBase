@@ -4,11 +4,11 @@ import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
-import com.cmsr.onebase.module.flow.context.InLoopDepth;
-import com.cmsr.onebase.module.flow.context.VariableConstants;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Condition;
 import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
@@ -49,8 +49,8 @@ public class DataAddNodeComponent extends NormalNodeComponent {
         // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         VariableContext variableContext = this.getContextBean(VariableContext.class);
-        Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
-        InLoopDepth inLoopDepth = (InLoopDepth) nodeData.get(VariableConstants.IN_LOOP_DEPTH);
+        NodeData nodeData = executeContext.getNodeData(this.getTag());
+        InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         // 参数校验
         if (MapUtils.isEmpty(nodeData)) {
             log.warn("DataAddNodeComponent process - 节点数据为空，跳过处理");
@@ -61,7 +61,7 @@ public class DataAddNodeComponent extends NormalNodeComponent {
         if (entityId == null) {
             throw new IllegalArgumentException("实体ID不能为空");
         }
-        boolean batchType = MapUtils.getBooleanValue(nodeData, "batchType", false);
+        boolean batchType = nodeData.getBooleanValue("batchType", false);
         List<Map<String, Object>> fields = (List<Map<String, Object>>) MapUtils.getObject(nodeData, "fields");
         List<RuleItem> ruleItems = Condition.createRuleItems(fields);
         List<Map<Long, Object>> reqData = new ArrayList<>();
@@ -74,7 +74,7 @@ public class DataAddNodeComponent extends NormalNodeComponent {
             }
             reqData.add(data);
         } else {
-            String dataNodeId = MapUtils.getString(nodeData, "dataNodeId");
+            String dataNodeId = nodeData.getString("dataNodeId");
             int dataSize = variableContext.getVariableSizeByTag(dataNodeId);
 
             for (int i = 0; i < dataSize; i++) {

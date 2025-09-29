@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -164,13 +165,13 @@ public class JsonGraph {
         return jsonGraphNode;
     }
 
-    public Map<String, Map<String, Object>> getNodeData() {
-        Map<String, Map<String, Object>> result = new HashMap<>();
+    public Map<String, NodeData> getNodeData() {
+        Map<String, NodeData> result = new HashMap<>();
         recursiveNode(result, nodes);
         return result;
     }
 
-    private void recursiveNode(Map<String, Map<String, Object>> result, List<JsonGraphNode> nodes) {
+    private void recursiveNode(Map<String, NodeData> result, List<JsonGraphNode> nodes) {
         for (JsonGraphNode node : nodes) {
             result.put(node.getId(), node.getData());
             if (node.getBlocks() != null && node.getBlocks().size() > 0) {

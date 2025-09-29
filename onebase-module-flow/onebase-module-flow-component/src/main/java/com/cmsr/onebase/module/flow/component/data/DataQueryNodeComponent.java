@@ -4,11 +4,12 @@ import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
-import com.cmsr.onebase.module.flow.context.InLoopDepth;
+import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.VariableConstants;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Condition;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
@@ -45,11 +46,11 @@ public class DataQueryNodeComponent extends NormalNodeComponent {
         log.info("DataQueryNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         VariableContext variableContext = this.getContextBean(VariableContext.class);
-        Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
+        NodeData nodeData = executeContext.getNodeData(this.getTag());
         // 转换成数据方法参数
         List<Map<String, Object>> filterCondition = (List<Map<String, Object>>) MapUtils.getObject(nodeData, "filterCondition");
         List<ConditionItem> conditionItems = Condition.createCondition(filterCondition);
-        InLoopDepth inLoopDepth = (InLoopDepth) nodeData.get(VariableConstants.IN_LOOP_DEPTH);
+        InLoopDepth inLoopDepth =  nodeData.getInLoopDepth();
         conditionItems = conditionsProvider.formatForExpression(this, conditionItems, inLoopDepth);
         conditionItems = conditionsProvider.formatForValue(conditionItems, variableContext);
         // 数据方法参数

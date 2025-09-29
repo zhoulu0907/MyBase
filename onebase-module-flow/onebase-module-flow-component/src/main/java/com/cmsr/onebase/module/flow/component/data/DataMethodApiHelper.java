@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
@@ -35,16 +36,16 @@ public class DataMethodApiHelper {
     /**
      * 将Map数据转换为EntityFieldDataReqDTO对象
      *
-     * @param data 包含查询条件的Map数据
+     * @param nodeData 包含查询条件的Map数据
      * @return 转换后的EntityFieldDataReqDTO对象
      */
-    public EntityFieldDataReqDTO convertQueryReq(Map<String, Object> data, List<ConditionItem> conditionItems) {
+    public EntityFieldDataReqDTO convertQueryReq(NodeData nodeData, List<ConditionItem> conditionItems) {
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
 
         // 设置实体ID
-        reqDTO.setEntityId(MapUtils.getLong(data, "mainEntityId"));
+        reqDTO.setEntityId(nodeData.getLong("mainEntityId"));
         if (reqDTO.getEntityId() == null) {
-            reqDTO.setEntityId(MapUtils.getLong(data, "subEntityId"));
+            reqDTO.setEntityId(nodeData.getLong("subEntityId"));
         }
 
         // 处理过滤条件
@@ -54,7 +55,7 @@ public class DataMethodApiHelper {
         }
 
         // 处理排序条件
-        List<OrderDto> orderDtos = processSortCondition(data);
+        List<OrderDto> orderDtos = processSortCondition(nodeData);
         if (orderDtos != null && !orderDtos.isEmpty()) {
             reqDTO.setOrderDtos(orderDtos);
         }
@@ -93,11 +94,11 @@ public class DataMethodApiHelper {
     /**
      * 处理排序条件
      *
-     * @param data 包含查询条件的Map数据
+     * @param nodeData 包含查询条件的Map数据
      * @return 转换后的排序DTO列表
      */
-    private List<OrderDto> processSortCondition(Map<String, Object> data) {
-        List<Map<String, Object>> sortBy = (List<Map<String, Object>>) MapUtils.getObject(data, "sortBy");
+    private List<OrderDto> processSortCondition(NodeData nodeData) {
+        List<Map<String, Object>> sortBy = (List<Map<String, Object>>) MapUtils.getObject(nodeData, "sortBy");
         if (sortBy == null || sortBy.isEmpty()) {
             return null;
         }

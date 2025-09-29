@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.framework.file.core.sftp;
 
-import com.cmsr.onebase.framework.common.tools.core.io.resource.ResourceUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.module.infra.framework.file.core.client.sftp.SftpFileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.sftp.SftpFileClientConfig;
 import org.junit.jupiter.api.Disabled;

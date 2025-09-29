@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
 import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
-import com.cmsr.onebase.module.flow.context.InLoopDepth;
+import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.RuleItem;

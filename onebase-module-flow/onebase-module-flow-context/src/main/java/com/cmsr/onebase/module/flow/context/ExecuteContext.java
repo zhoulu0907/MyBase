@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.flow.context;
 
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,7 +56,7 @@ public class ExecuteContext {
     private Optional<String> currentEndNodeTag = Optional.empty();
 
     // 节点数据
-    private Map<String, Map<String, Object>> nodeDataMap;
+    private Map<String, NodeData> nodeDataMap;
 
     public boolean equalsPreviousNodeTag(String tag) {
         return this.getPreviousNodeTag().filter(t -> StringUtils.equals(tag, t)).isPresent();
@@ -66,8 +66,8 @@ public class ExecuteContext {
         this.previousNodeTag = Optional.empty();
     }
 
-    public Map<String, Object> getNodeData(String nodeTag) {
-        return Collections.unmodifiableMap(nodeDataMap.get(nodeTag));
+    public NodeData getNodeData(String nodeTag) {
+        return nodeDataMap.get(nodeTag);
     }
 
 }

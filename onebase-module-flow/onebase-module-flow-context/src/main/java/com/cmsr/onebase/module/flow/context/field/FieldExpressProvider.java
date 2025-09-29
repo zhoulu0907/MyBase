@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.flow.context.field;
 
 import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
+import com.cmsr.onebase.framework.common.express.OpEnum;
+import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.RuleItem;
 import com.cmsr.onebase.module.flow.context.express.AndExpresses;
@@ -133,8 +135,8 @@ public class FieldExpressProvider {
 
             ExpressItem expressItem = new ExpressItem();
             expressItem.setKey(fieldInfo.getFieldName());
-            expressItem.setOp(rule.getOp());
-
+            expressItem.setOp(OpEnum.getByCode(rule.getOp()));
+            expressItem.setOperatorType(OperatorTypeEnum.getByCode(rule.getOperatorType()));
             // 转换值
             Object convertedValue = convertRuleValue(rule, fieldInfo);
             expressItem.setValue(convertedValue);
