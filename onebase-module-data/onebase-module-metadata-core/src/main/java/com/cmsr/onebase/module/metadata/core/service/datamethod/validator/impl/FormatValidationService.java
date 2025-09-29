@@ -58,20 +58,13 @@ public class FormatValidationService implements ValidationService {
                 continue; // 跳过未启用的规则
             }
 
-            boolean isValid = false;
-            String formatCode = rule.getFormatCode();
-
-            if ("EMAIL".equalsIgnoreCase(formatCode)) {
-                isValid = isValidEmail(stringValue);
-            } else if ("MOBILE".equalsIgnoreCase(formatCode)) {
-                isValid = isValidMobile(stringValue);
-            } else if ("PHONE".equalsIgnoreCase(formatCode)) {
-                isValid = isValidPhone(stringValue);
-            } else if ("URL".equalsIgnoreCase(formatCode)) {
-                isValid = isValidUrl(stringValue);
-            } else if ("REGEX".equalsIgnoreCase(formatCode) && rule.getRegexPattern() != null) {
-                isValid = isValidRegex(stringValue, rule.getRegexPattern(), rule.getFlags());
+            // 使用正则表达式进行验证
+            String regexPattern = rule.getRegexPattern();
+            if (regexPattern == null || regexPattern.trim().isEmpty()) {
+                continue; // 跳过没有正则表达式的规则
             }
+
+            boolean isValid = isValidRegex(stringValue, regexPattern, rule.getFlags());
 
             if (!isValid) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
@@ -82,37 +75,6 @@ public class FormatValidationService implements ValidationService {
         }
     }
 
-    /**
-     * 校验邮箱格式
-     */
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-        return Pattern.matches(emailRegex, email);
-    }
-
-    /**
-     * 校验手机号格式
-     */
-    private boolean isValidMobile(String mobile) {
-        String mobileRegex = "^1[3-9]\\d{9}$";
-        return Pattern.matches(mobileRegex, mobile);
-    }
-
-    /**
-     * 校验电话号码格式
-     */
-    private boolean isValidPhone(String phone) {
-        String phoneRegex = "^0\\d{2,3}-?\\d{7,8}$";
-        return Pattern.matches(phoneRegex, phone);
-    }
-
-    /**
-     * 校验URL格式
-     */
-    private boolean isValidUrl(String url) {
-        String urlRegex = "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$";
-        return Pattern.matches(urlRegex, url);
-    }
 
     /**
      * 校验正则表达式
