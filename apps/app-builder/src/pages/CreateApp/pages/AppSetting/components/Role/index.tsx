@@ -41,6 +41,7 @@ const RoleInfo = (props: IProps) => {
   const [managerType, setManagerType] = useState<ManagerType>('permission'); // 权限管理 or 成员管理
   const [menuList, setMuneList] = useState<ApplicationMenu[]>(); //菜单数据
   const [menuLoading, setMuneLoading] = useState<boolean>(false);
+  const [openKeys, setOpenKeys] = useState<string[]>([]); // 展开的菜单项key数组
 
   useEffect(() => {
     const isAdmin = roleInfo?.roleType === RoleType.ADMIN;
@@ -69,6 +70,12 @@ const RoleInfo = (props: IProps) => {
     setActiveMenuId(value);
     console.log('选择菜单获取权限数据 value:', value);
     // await getApplicationPermission(value);
+  };
+
+  // 处理菜单展开/收起
+  const handleOpenChange = (keys: string[]) => {
+    console.log('handleOpenChange keys:', keys);
+    setOpenKeys(keys);
   };
 
   const firstGroupIndex = menuList?.findIndex((menu: ApplicationMenu) => menu.menuType === MenuType.GROUP); // 第一个菜单为分组时的索引
@@ -143,10 +150,11 @@ const RoleInfo = (props: IProps) => {
                   ) : (
                     <Spin className={styles.loading} loading={menuLoading}>
                       <Menu
-                        openKeys={[firstGroupCode]}
+                        openKeys={openKeys}
                         selectedKeys={[activeMenuId]}
                         defaultSelectedKeys={[findFirstPage(menuList)?.id]}
                         onClickMenuItem={handleSelectMenu}
+                        onClickSubMenu={(_, openKeys) => handleOpenChange(openKeys)}
                       >
                         {renderMenuItems(menuList || [])}
                       </Menu>
