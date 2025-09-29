@@ -437,21 +437,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   const handleFormulaConfirm = (formulaData: any) => {
     setFormulaVisible(false);
-    // TODO(mickey): remove debug log
-    console.log('formulaData', formulaData);
-    console.log('formulaFieldKey', formulaFieldKey);
 
     form.setFieldValue(formulaFieldKey, formulaData);
 
-    console.log('reset formulaField');
     setFormulaData('');
     setFormulaFieldKey('');
   };
 
   const openFormulaEditor = (fieldKey: string) => {
     setFormulaVisible(true);
-    console.log('fieldKey', fieldKey);
-    console.log('form.getFieldValue(fieldKey)', form.getFieldValue(fieldKey));
     setFormulaData(form.getFieldValue(fieldKey));
     setFormulaFieldKey(fieldKey);
   };

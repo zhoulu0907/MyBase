@@ -1,9 +1,9 @@
-import { Modal, Button, Space, Message } from '@arco-design/web-react';
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { VariableList, FunctionList, InfoPanel, FormulaInput } from './components';
-import { getFormulaFunctionSimpleList, getFormulaById } from '@onebase/app';
-import type { Variable, FunctionItem, FormulaEditorProps, info } from './utils/types';
+import { Button, Message, Modal, Space } from '@arco-design/web-react';
+import { getFormulaById, getFormulaFunctionSimpleList } from '@onebase/app';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormulaInput, FunctionList, InfoPanel, VariableList } from './components';
 import styles from './index.module.less';
+import type { FormulaEditorProps, FunctionItem, info, Variable } from './utils/types';
 
 // 模拟数据
 const mockVariables: Variable[] = [
@@ -31,6 +31,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const editorRef = useRef<{ insertAtPosition: (text: string, type: string, position?: number) => void } | null>(null);
   const [info, setInfo] = useState<info | null>(null);
 
+  useEffect(() => {
+    setFormula(initialFormula);
+  }, [initialFormula]);
+
   /**
    * 初始化函数列表
    */
@@ -48,7 +52,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * @param id - 公式ID
    */
   const getFormulaInfo = (id: string) => {
-    getFormulaById(id).then((res:any) => {
+    getFormulaById(id).then((res: any) => {
       console.log(res, 'getFormulaInfo>>>>>>>>>>');
       if (res) {
         setInfo(res);
@@ -74,7 +78,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 根据函数名称或摘要是否包含搜索关键词（不区分大小写）
    */
   const filteredFunctions = useMemo(() => {
-    console.log(functionSearch, 'functionSearch' )
+    console.log(functionSearch, 'functionSearch');
     if (!functionSearch) return funcList;
     return funcList.filter(
       (f) =>
@@ -125,7 +129,6 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     Message.success('公式已复制到剪贴板');
   }, [formula]);
 
-  
   /**
    * 调试公式
    */
@@ -134,7 +137,6 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     Message.info('公式调试信息已输出到控制台');
   }, [formula]);
 
-  
   /**
    * 确认公式
    */
