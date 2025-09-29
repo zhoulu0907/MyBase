@@ -373,6 +373,16 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         });
 
         graphRef.current.on('node:moved', ({ e, x, y, node }) => {
+          // 阻止折叠图标点击触发
+          const target = e.target as HTMLElement;
+          if (
+            target.closest('#collapse-icon') ||
+            target.closest('#status-change-icon') ||
+            target.closest('#node-footer')
+          ) {
+            e.stopPropagation();
+            return;
+          }
           e.preventDefault();
           e.stopPropagation();
           updateEntityPosition?.(node.getData().data, x, y);
