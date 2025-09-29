@@ -1,68 +1,35 @@
 .infoPanel {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .title {
-  margin: 0 0 16px 0 !important;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1d2129;
-}
-
-.instructions {
-  margin-bottom: 20px;
-
-  .instructionItem {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #1d2129;
-    line-height: 20px;
-
-    .bullet {
-      color: #165dff;
-      margin-right: 8px;
-      font-weight: bold;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-  }
-}
-
-.example {
-  margin-bottom: 20px;
-  padding: 16px;
-  background-color: #f7f8fa;
-  border-radius: 6px;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 14px;
-  line-height: 20px;
-
-  .exampleFunction {
-    color: #165dff;
+    margin: 0 0 16px 0 !important;
+    font-size: 16px;
     font-weight: 600;
-  }
-
-  .exampleVariable {
-    color: #00b42a;
-    font-weight: 500;
-  }
-
-  .exampleText {
     color: #1d2129;
-  }
 }
 
 .tips {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid #e5e6eb;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid #e5e6eb;
+    .tipText {
+        font-size: 12px;
+        line-height: 16px;
+    }
+}
 
-  .tipText {
+/* 参数名称样式 - 统一颜色 */
+.paramName {
+    border: 1px solid rgba(79, 174, 123, 0.1);
+    border-radius: 4px;
+    line-height: 20px;
+    background: rgba(79, 174, 123, 0.1);
+    color: #4FAE7B;
     font-size: 12px;
-    line-height: 16px;
-  }
+    padding: 2px 7px;
+    user-select: none;
+    margin: 0 2px;
 }

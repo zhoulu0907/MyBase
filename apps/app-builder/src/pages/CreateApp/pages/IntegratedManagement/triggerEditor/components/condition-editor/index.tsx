@@ -24,10 +24,11 @@ import {
 } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NodeType } from '../../nodes/const';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
+import { FormulaEditor } from '@/components/FormulaEditor';
 
 const Option = Select.Option;
 
@@ -73,7 +74,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   variableOptions
 }) => {
   useSignals();
-
+  const [visible, setVisible] = useState<boolean>(false);
   const filterCondition = Form.useWatch('filterCondition', form);
 
   // 过滤为空的条件
@@ -430,6 +431,10 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     return '';
   };
 
+  const handleConfirm = (formulaData: any) => {
+    setVisible(false);
+    console.log("formulaData",formulaData)
+  }
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item label={label} required={required}>
@@ -549,7 +554,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
-                                                  <Input placeholder="请输入公式" />
+                                                  {/* <Input placeholder="请输入公式" /> */}
+                                                  <Button onClick={()=>setVisible(true)} long>fx编辑公式</Button>
                                                 </Form.Item>
                                               )}
                                             </Grid.Col>
@@ -611,6 +617,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }}
         </Form.List>
       </Form.Item>
+      <FormulaEditor visible={visible} onCancel={()=>setVisible(false)} onConfirm={handleConfirm} />
     </div>
   );
 };

@@ -22,4 +22,7 @@ export interface FunctionItem {
 
 export interface info {
   example: string;
+  usage: string;
+  summary: string;
+  name: string;
 }
