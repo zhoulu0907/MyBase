@@ -247,7 +247,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             ]
           : []
       });
-      graph.addEdge(edge);
+      graph.addEdge(edge, { options: { silent: true } });
       return edge;
     };
 

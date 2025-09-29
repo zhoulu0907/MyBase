@@ -170,8 +170,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     setDeleteLoading(true);
 
     try {
-      const res = await deleteRelation(relationData?.id || '');
-      console.log('deleteRelation', res);
+      const res = await deleteRelation(relationData?.relationshipId || '');
 
       setDeleteModalVisible(false);
       if (res) {
