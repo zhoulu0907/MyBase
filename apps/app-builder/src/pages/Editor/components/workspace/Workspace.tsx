@@ -375,7 +375,13 @@ export default function EditorWorkspace() {
 
                   setCurComponentID(cp.id);
 
-                  const curComponentSchema = pageComponentSchemas[cp.id];
+                  const curComponentSchema = {
+                    id: cp.id,
+                    type: cp.type,
+                    displayName: cp.displayName,
+                    ...pageComponentSchemas[cp.id]
+                  };
+
                   setCurComponentSchema(curComponentSchema);
 
                   // console.log('当前组件的ID: ', cp.id);
