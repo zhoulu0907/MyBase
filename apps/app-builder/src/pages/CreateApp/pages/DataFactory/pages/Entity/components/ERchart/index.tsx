@@ -7,8 +7,7 @@ import { type EntityNode, type EntityERProps } from '../../../../utils/interface
 import { FIELD_TYPE } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import styles from './index.module.less';
-import { GridNodePositioner } from './utils/nodePositioner';
-import { performAutoLayout } from './utils/autoLayout';
+import { GridNodePositioner, performAutoLayout, SectionCollapseHandler } from './utils';
 import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
@@ -49,6 +48,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     const isUnmounting = useRef(false);
     const isGraphInitialized = useRef(false);
+    const collapseHandlerRef = useRef<SectionCollapseHandler | null>(null);
 
     const getGraphPositon = () => {
       const contentArea = graphRef.current?.getContentArea();
@@ -62,109 +62,12 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     }));
 
     const handleSectionCollapse = (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
-      const graph = graphRef.current!;
-      const edges = graph.getEdges();
-
-      // 确定聚合portID
-      const aggregatePortId = `${nodeId}_${section}_fields`;
-
-      // 获取该节点的所有字段，用于判断是否属于当前section
+      if (!collapseHandlerRef.current) return;
+      
       const nodeData = data.nodes.find((n) => n.entityId === nodeId);
       if (!nodeData) return;
 
-      const systemFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.SYSTEM);
-      const customFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.CUSTOM);
-      const fieldsInThisSection = section === 'system' ? systemFields : customFields;
-
-      // 提取所有字段对应的portID
-      const portIdsInSection = new Set(
-        fieldsInThisSection.flatMap((field) => [
-          `${field.fieldId || field.fieldName}_source`,
-          `${field.fieldId || field.fieldName}_target`
-        ])
-      );
-
-      edges.forEach((edge) => {
-        const data = edge.getData();
-        const originalSource = data?.originalSource;
-        const originalTarget = data?.originalTarget;
-
-        if (!originalSource || !originalTarget) return;
-
-        const currentSource = edge.getSource();
-        const currentTarget = edge.getTarget();
-
-        // 处理 source 端
-        if (currentSource.cell === nodeId && typeof currentSource.port === 'string') {
-          const isOriginalInSection =
-            portIdsInSection.has(currentSource.port) ||
-            (originalSource.port && portIdsInSection.has(originalSource.port));
-
-          if (isOriginalInSection) {
-            if (isCollapsed) {
-              // 折叠 → 指向聚合 port
-              edge.setSource({ cell: nodeId, port: `${aggregatePortId}_source` });
-            } else {
-              // 展开 → 恢复原始 port
-              edge.setSource(originalSource);
-            }
-          }
-        }
-
-        // 处理 target 端
-        if (currentTarget.cell === nodeId && typeof currentTarget.port === 'string') {
-          const isOriginalInSection =
-            portIdsInSection.has(currentTarget.port) ||
-            (originalTarget.port && portIdsInSection.has(originalTarget.port));
-
-          if (isOriginalInSection) {
-            if (isCollapsed) {
-              edge.setTarget({ cell: nodeId, port: `${aggregatePortId}_target` });
-            } else {
-              edge.setTarget(originalTarget);
-            }
-          }
-        }
-      });
-
-      // 当系统字段折叠状态改变时，需要重新计算自定义字段的端口位置
-      if (section === 'system') {
-        // 获取当前节点的系统字段折叠状态
-        const systemCollapsed = isCollapsed;
-
-        // 重新计算并更新自定义字段的端口位置
-        const customFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.CUSTOM);
-        if (customFields.length > 0) {
-          // 计算新的自定义字段标题位置
-          const systemTitleOffset =
-            systemFields.length > 0
-              ? systemCollapsed
-                ? LINE_TITLE_HEIGHT
-                : LINE_TITLE_HEIGHT + systemFields.length * LINE_HEIGHT
-              : LINE_TITLE_HEIGHT;
-          const customTitleY = LINE_HEAD_HEIGHT + systemTitleOffset + LINE_TITLE_HEIGHT / 2;
-
-          // 更新自定义字段聚合端口位置
-          const node = graph.getCellById(nodeId);
-          if (node) {
-            // 更新自定义字段聚合端口位置
-            node.portProp(`${nodeId}_custom_fields_source`, 'args', { x: NODE_WIDTH, y: customTitleY });
-            node.portProp(`${nodeId}_custom_fields_target`, 'args', { x: 0, y: customTitleY });
-
-            // 更新所有自定义字段的端口位置
-            customFields.forEach((field, index) => {
-              const accumulatedHeight = index * LINE_HEIGHT;
-              const finalY = customTitleY + accumulatedHeight + LINE_HEIGHT / 2;
-
-              const sourcePortId = `${field.fieldId || field.fieldName}_source`;
-              const targetPortId = `${field.fieldId || field.fieldName}_target`;
-
-              node.portProp(sourcePortId, 'args', { x: NODE_WIDTH, y: finalY });
-              node.portProp(targetPortId, 'args', { x: 0, y: finalY });
-            });
-          }
-        }
-      }
+      collapseHandlerRef.current.handleSectionCollapse(nodeId, section, isCollapsed, nodeData);
     };
 
     const portsItems = (nodeData: EntityNode, systemCollapsed: boolean = true) => {
@@ -444,6 +347,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           console.error('Failed to create graph:', error);
           return;
         }
+
+        // 初始化折叠处理器
+        collapseHandlerRef.current = new SectionCollapseHandler(graphRef.current);
 
         // 事件监听
         graphRef.current.on('node:mouseenter', ({ node }) => {
