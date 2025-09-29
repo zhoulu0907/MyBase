@@ -126,8 +126,13 @@ public enum OpEnum {
     OpEnum(String description) {
         this.description = description;
     }
-    
-    public String getDescription() {
-        return description;
+
+    public static OpEnum getByCode(String code) {
+        for (OpEnum value : OpEnum.values()) {
+            if (value.name().equalsIgnoreCase(code)) {
+                return value;
+            }
+        }
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.component;
+package com.cmsr.onebase.module.flow.component.sys;
 
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeComponent;

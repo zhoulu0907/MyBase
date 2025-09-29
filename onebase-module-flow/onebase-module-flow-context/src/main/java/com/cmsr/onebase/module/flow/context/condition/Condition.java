@@ -31,7 +31,7 @@ public class Condition {
         return conditionItems;
     }
 
-    private static List<RuleItem> createRuleItems(List<Map<String, Object>> innerConditions) {
+    public static List<RuleItem> createRuleItems(List<Map<String, Object>> innerConditions) {
         if (CollectionUtils.isEmpty(innerConditions)) {
             return new ArrayList<>();
         }
@@ -54,13 +54,17 @@ public class Condition {
         ruleItem.setOperatorType(MapUtils.getString(innerCondition, "operatorType"));
         // 获取值列表
         Object value = MapUtils.getObject(innerCondition, "value");
-        List<String> valueList = new ArrayList<>();
-        if (value instanceof List l) {
-            valueList.addAll(l);
-        } else if (value != null) {
-            valueList.add(value.toString());
+        if (value != null) {
+            if (value instanceof List l) {
+                List<String> valueList = new ArrayList<>();
+                for (Object o : l) {
+                    valueList.add(o.toString());
+                }
+                ruleItem.setValue(valueList);
+            } else {
+                ruleItem.setValue(value.toString());
+            }
         }
-        ruleItem.setValue(valueList);
         return ruleItem;
     }
 }

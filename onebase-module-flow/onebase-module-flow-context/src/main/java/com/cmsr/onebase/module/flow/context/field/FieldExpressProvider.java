@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.flow.context.field;
 
 import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
+import com.cmsr.onebase.framework.common.express.OpEnum;
+import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.RuleItem;
 import com.cmsr.onebase.module.flow.context.express.AndExpresses;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Setter
 @Component
-public class FieldExpressAssistant {
+public class FieldExpressProvider {
 
     /**
      * 转换字段数据
@@ -133,8 +135,8 @@ public class FieldExpressAssistant {
 
             ExpressItem expressItem = new ExpressItem();
             expressItem.setKey(fieldInfo.getFieldName());
-            expressItem.setOperatorType(rule.getOp());
-
+            expressItem.setOp(OpEnum.getByCode(rule.getOp()));
+            expressItem.setOperatorType(OperatorTypeEnum.getByCode(rule.getOperatorType()));
             // 转换值
             Object convertedValue = convertRuleValue(rule, fieldInfo);
             expressItem.setValue(convertedValue);
@@ -151,34 +153,34 @@ public class FieldExpressAssistant {
      * 转换规则值
      */
     private Object convertRuleValue(RuleItem rule, FieldInfo fieldInfo) {
-        if (rule.getValue() == null || rule.getValue().isEmpty()) {
+        if (rule.getValue() == null) {
             return null;
         }
 
         try {
-            if (rule.getValue().size() == 1) {
+            if (!(rule.getValue() instanceof List)) {
                 // 单个值
-                String value = rule.getValue().get(0);
+                Object value = rule.getValue();
                 if (value == null) {
                     return null;
                 }
                 return JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), value);
             } else {
+                List listValues = (List) rule.getValue();
                 // 多个值，转换为数组
-                Object[] convertedValues = new Object[rule.getValue().size()];
-                for (int i = 0; i < rule.getValue().size(); i++) {
-                    String value = rule.getValue().get(i);
+                List<Object> convertedValues = new ArrayList<>(listValues.size());
+                for (int i = 0; i < listValues.size(); i++) {
+                    Object value = listValues.get(i);
                     if (value != null) {
-                        convertedValues[i] = JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), value);
+                        convertedValues.add(JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), value));
                     }
                 }
                 return convertedValues;
             }
         } catch (Exception e) {
-            log.warn("转换规则值时发生错误，字段: {}, JDBC类型: {}, 值: {}, 错误: {}",
-                    fieldInfo.getFieldName(), fieldInfo.getJdbcType(), rule.getValue(), e.getMessage());
-            // 转换失败时返回原始值
-            return rule.getValue().size() == 1 ? rule.getValue().get(0) : rule.getValue().toArray();
+            throw new IllegalArgumentException(
+                    String.format("转换规则值时发生错误，字段: %s, JDBC类型: %s, 值:%s", fieldInfo.getFieldName(), fieldInfo.getJdbcType(), rule.getValue()),
+                    e);
         }
     }
 

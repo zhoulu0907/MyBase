@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
 import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.event.FlowProcessEventPublisher;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.module.flow.core.graph.data.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
@@ -81,7 +82,7 @@ public class FlowProcessPublishApiImpl implements FlowProcessPublishApi {
     }
 
     private void startDateFieldJob(FlowProcessDO flowProcessDO) {
-        JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
+        JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
         Map<String, Object> data = jsonGraph.getStartNode().getData();
         StartDateFieldNodeData startDateFieldNodeData = new StartDateFieldNodeData();
         JsonUtils.updateBean(startDateFieldNodeData, data);
@@ -110,7 +111,7 @@ public class FlowProcessPublishApiImpl implements FlowProcessPublishApi {
 
 
     private void startTimeJob(FlowProcessDO flowProcessDO) {
-        JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
+        JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
         Map<String, Object> data = jsonGraph.getStartNode().getData();
         StartTimeNodeData startTimeNodeData = new StartTimeNodeData();
         JsonUtils.updateBean(startTimeNodeData, data);

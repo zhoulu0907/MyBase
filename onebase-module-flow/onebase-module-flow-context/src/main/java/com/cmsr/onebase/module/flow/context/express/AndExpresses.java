@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.context.express;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,6 +12,6 @@ import java.util.List;
 @Data
 public class AndExpresses {
 
-    private List<ExpressItem> expressItems;
+    private List<ExpressItem> expressItems ;
 
 }

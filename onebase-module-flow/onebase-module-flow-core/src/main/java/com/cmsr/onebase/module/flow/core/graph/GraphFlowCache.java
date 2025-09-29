@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.core.graph;
 
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.graph.data.StartDateFieldNodeData;
@@ -24,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Conditional(FlowRuntimeCondition.class)
 public class GraphFlowCache {
 
-    private ConcurrentHashMap<Long, Map<String, Map<String, Object>>> flowNodeDataCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Long, Map<String, NodeData>> flowNodeDataCache = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Long, StartTimeNodeData> startTimeNodeDataCache = new ConcurrentHashMap<>();
 
@@ -35,7 +36,7 @@ public class GraphFlowCache {
     private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
 
     public void update(Long processId, JsonGraph jsonGraph) {
-        Map<String, Map<String, Object>> flowNodeData = jsonGraph.getNodeData();
+        Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
         JsonGraphNode startNode = jsonGraph.getStartNode();
         if (startNode.getType().equalsIgnoreCase(JsonGraphConstant.START_TIME)) {
@@ -67,7 +68,7 @@ public class GraphFlowCache {
         startEntityNodeDataCache.removeIf(startEntityNodeData -> startEntityNodeData.getEntityId().equals(processId));
     }
 
-    public Map<String, Map<String, Object>> getNodeData(Long processId) {
+    public Map<String, NodeData> getNodeData(Long processId) {
         return flowNodeDataCache.get(processId);
     }
 

@@ -1,8 +1,9 @@
 package com.cmsr.onebase.framework.signature.core;
 
-import com.cmsr.onebase.framework.common.tools.core.map.MapUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
-import com.cmsr.onebase.framework.common.tools.crypto.digest.DigestUtil;
+
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.cmsr.onebase.framework.signature.core.annotation.ApiSignature;
 import com.cmsr.onebase.framework.signature.core.aop.ApiSignatureAspect;
 import com.cmsr.onebase.framework.signature.core.redis.ApiSignatureRedisDAO;

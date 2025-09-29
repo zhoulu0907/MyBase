@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.flow.core.flow;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowPublishStatusEnum;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.parser.el.ClassXmlFlowELParser;
 import lombok.Setter;
@@ -49,7 +49,7 @@ public class FlowJsonGraphParser extends ClassXmlFlowELParser {
         addNoOpChain(rootElement);
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
-                JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
+                JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
                 String flowChain = jsonGraph.toFlowChain();
                 //
                 graphFlowCache.update(flowProcessDO.getId(), jsonGraph);

@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -14,22 +17,15 @@ import java.util.stream.Collectors;
  * @Author：huangjie
  * @Date：2025/9/1 11:06
  */
+@Getter
+@Setter
 public class JsonGraph {
 
     private static final String NEW_LINE = "\n";
 
     public static final String INDENT = "    ";
 
-    public static JsonGraph of(String json) {
-        JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
-        return jsonGraph;
-    }
-
     private List<JsonGraphNode> nodes;
-
-    public void setNodes(List<JsonGraphNode> nodes) {
-        this.nodes = nodes;
-    }
 
     public String toFlowChain() {
         return blocksNodeDefine(0, nodes);
@@ -65,7 +61,7 @@ public class JsonGraph {
         } else if (StringUtils.equals(node.getType(), "switch")) {
             return switchNodeDefine(deep, node);
         } else if (StringUtils.equals(node.getType(), "ifCase")) {
-            return ifNodeDefine(deep, node);
+            return ifCaseNodeDefine(deep, node);
         } else if (StringUtils.equals(node.getType(), "ifBlock")) {
             return ifBlockNodeDefine(deep, node);
         }
@@ -74,7 +70,7 @@ public class JsonGraph {
 
     private String loopNodeDefine(int deep, JsonGraphNode node) {
         StringBuilder define = new StringBuilder();
-        define.append("WHILE(").append(toDefine(node)).append(".DO(");
+        define.append("FOR(").append(toDefine(node)).append(").DO(");
         define.append(NEW_LINE).append(blocksNodeDefine(deep + 1, node.getBlocks()));
         define.append(NEW_LINE).append(")");
         return define.toString();
@@ -111,12 +107,12 @@ public class JsonGraph {
         return define.toString();
     }
 
-    private String ifNodeDefine(int deep, JsonGraphNode node) {
+    private String ifCaseNodeDefine(int deep, JsonGraphNode node) {
         List<JsonGraphNode> blocks = node.getBlocks();
-        //TODO 必须通过某些属性判断
-        JsonGraphNode trueNode = blocks.get(0);
-        JsonGraphNode falseNode = blocks.get(1);
-
+        //
+        JsonGraphNode trueNode = blocks.stream().filter(jsonGraphNode -> MapUtils.getBooleanValue(jsonGraphNode.getData(), "value") == true).findFirst().get();
+        JsonGraphNode falseNode = blocks.stream().filter(jsonGraphNode -> MapUtils.getBooleanValue(jsonGraphNode.getData(), "value") == false).findFirst().get();
+        //
         StringBuilder define = new StringBuilder();
         define.append("IF(").append(toDefine(node)).append(",");
         define.append(ifBlockNodeDefine(deep + 1, trueNode)).append(",");
@@ -138,16 +134,8 @@ public class JsonGraph {
 
     private String toDefine(JsonGraphNode node) {
         StringBuilder define = new StringBuilder();
-        define.append(formatNodeType(node.getType())).append(".tag(\"").append(node.getId()).append("\")");
+        define.append(node.getType()).append(".tag(\"").append(node.getId()).append("\")");
         return define.toString();
-    }
-
-    private String formatNodeType(String type) {
-        if (StringUtils.equals(type, "if")) {
-            return "ifCmp";
-        } else {
-            return type;
-        }
     }
 
     private static String repeatIndent(int deep) {
@@ -177,13 +165,13 @@ public class JsonGraph {
         return jsonGraphNode;
     }
 
-    public Map<String, Map<String, Object>> getNodeData() {
-        Map<String, Map<String, Object>> result = new HashMap<>();
+    public Map<String, NodeData> getNodeData() {
+        Map<String, NodeData> result = new HashMap<>();
         recursiveNode(result, nodes);
         return result;
     }
 
-    private void recursiveNode(Map<String, Map<String, Object>> result, List<JsonGraphNode> nodes) {
+    private void recursiveNode(Map<String, NodeData> result, List<JsonGraphNode> nodes) {
         for (JsonGraphNode node : nodes) {
             result.put(node.getId(), node.getData());
             if (node.getBlocks() != null && node.getBlocks().size() > 0) {

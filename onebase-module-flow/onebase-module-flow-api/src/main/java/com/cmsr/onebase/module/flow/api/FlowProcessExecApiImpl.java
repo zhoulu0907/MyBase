@@ -3,9 +3,9 @@ package com.cmsr.onebase.module.flow.api;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.express.ExpressionAssistant;
+import com.cmsr.onebase.module.flow.context.express.ExpressionProvider;
 import com.cmsr.onebase.module.flow.context.express.OrExpresses;
-import com.cmsr.onebase.module.flow.context.field.FieldExpressAssistant;
+import com.cmsr.onebase.module.flow.context.field.FieldExpressProvider;
 import com.cmsr.onebase.module.flow.context.field.FieldInfo;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
@@ -16,10 +16,10 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDT
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.jexl3.JexlExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,13 +37,13 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionAssistant expressionAssistant;
+    private ExpressionProvider expressionProvider;
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
     @Autowired
-    private FieldExpressAssistant fieldExpressAssistant;
+    private FieldExpressProvider fieldExpressProvider;
 
     @Autowired
     private MetadataEntityFieldApi metadataEntityFieldApi;
@@ -71,16 +71,18 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             if (!triggerFieldIdsContained(startEntityNodeData.getTriggerFieldIds(), entityTriggerReqDTO.getChangedFieldIds())) {
                 return EntityTriggerRespDTO.SUCCESS;
             }
-            if (startEntityNodeData.getCompiledExpression() == null) {
-                List<Long> ids = fieldExpressAssistant.extractFieldIds(startEntityNodeData.getFilterCondition());
+            if (startEntityNodeData.getCompiledExpression() == null && CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
+                List<Long> ids = fieldExpressProvider.extractFieldIds(startEntityNodeData.getFilterCondition());
                 Map<Long, FieldInfo> fieldInfoMap = getFieldInfoMap(ids);
-                OrExpresses orExpresses = fieldExpressAssistant.convertToExpresses(startEntityNodeData.getFilterCondition(), fieldInfoMap);
-                Serializable compileExpression = expressionAssistant.compileExpression(orExpresses);
+                OrExpresses orExpresses = fieldExpressProvider.convertToExpresses(startEntityNodeData.getFilterCondition(), fieldInfoMap);
+                JexlExpression compileExpression = expressionProvider.compileExpression(orExpresses);
                 startEntityNodeData.setCompiledExpression(compileExpression);
             }
-            boolean isTrigger = expressionAssistant.evaluate(startEntityNodeData.getCompiledExpression(), entityTriggerReqDTO.getFieldData());
-            if (!isTrigger) {
-                return EntityTriggerRespDTO.SUCCESS;
+            if (startEntityNodeData.getCompiledExpression() != null) {
+                boolean isTrigger = expressionProvider.evaluate(startEntityNodeData.getCompiledExpression(), entityTriggerReqDTO.getFieldData());
+                if (!isTrigger) {
+                    return EntityTriggerRespDTO.SUCCESS;
+                }
             }
             flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
             return EntityTriggerRespDTO.SUCCESS;
