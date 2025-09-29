@@ -1,3 +1,4 @@
+import { FormulaEditor } from '@/components/FormulaEditor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import {
@@ -28,7 +29,6 @@ import React, { useEffect, useState } from 'react';
 import { NodeType } from '../../nodes/const';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
-import { FormulaEditor } from '@/components/FormulaEditor';
 
 const Option = Select.Option;
 
@@ -434,8 +434,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   const handleConfirm = (formulaData: any) => {
     setVisible(false);
-    console.log("formulaData",formulaData)
-  }
+    console.log('formulaData', formulaData);
+  };
+
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item label={label} required={required}>
@@ -464,6 +465,11 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               form.setFieldValue(item.field + '.op', undefined);
                                               form.setFieldValue(item.field + '.operatorType', undefined);
                                               form.setFieldValue(item.field + '.value', undefined);
+
+                                              form.setFieldValue(
+                                                item.field + '.fieldType',
+                                                fields.find((field) => field.value == _value)?.fieldType
+                                              );
                                             }}
                                           >
                                             {fields.map((field) => (
@@ -472,6 +478,11 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               </Option>
                                             ))}
                                           </Select>
+                                        </Form.Item>
+
+                                        {/* 这个字段给后端使用，实际不需要展示 */}
+                                        <Form.Item field={item.field + '.fieldType'} hidden>
+                                          <Input placeholder="请输入字段类型" />
                                         </Form.Item>
                                       </Grid.Col>
 
@@ -556,7 +567,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   {/* <Input placeholder="请输入公式" /> */}
-                                                  <Button onClick={()=>setVisible(true)} long>fx编辑公式</Button>
+                                                  <Button onClick={() => setVisible(true)} long>
+                                                    fx编辑公式
+                                                  </Button>
                                                 </Form.Item>
                                               )}
                                             </Grid.Col>
@@ -618,7 +631,12 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }}
         </Form.List>
       </Form.Item>
-      <FormulaEditor initialFormula = {mockData} visible={visible} onCancel={()=>setVisible(false)} onConfirm={handleConfirm} />
+      <FormulaEditor
+        initialFormula={mockData}
+        visible={visible}
+        onCancel={() => setVisible(false)}
+        onConfirm={handleConfirm}
+      />
     </div>
   );
 };
