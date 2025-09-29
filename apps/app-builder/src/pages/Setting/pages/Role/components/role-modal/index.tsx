@@ -82,7 +82,7 @@ export default function RoleModal({ visible, onCancel, onOk, confirmLoading, ini
           field="name"
           rules={[
             { required: true, message: '请输入角色名称' },
-            { maxLength: 50, message: '角色名称不能超过50个字符' },
+            { maxLength: 30, message: '角色名称不能超过50个字符' },
             {
               validator: (value, cb) => {
                 if (value && value.trim().length === 0) {
@@ -93,7 +93,7 @@ export default function RoleModal({ visible, onCancel, onOk, confirmLoading, ini
             }
           ]}
         >
-          <Input placeholder="请输入角色名称" maxLength={50} showWordLimit />
+          <Input placeholder="请输入角色名称" maxLength={30} showWordLimit />
         </FormItem>
         <FormItem label="角色描述" field="remark" rules={[{ maxLength: 200, message: '角色描述不能超过200个字符' }]}>
           <Input.TextArea placeholder="请输入角色描述" rows={4} maxLength={200} showWordLimit />
