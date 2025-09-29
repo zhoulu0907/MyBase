@@ -1,13 +1,16 @@
 import CalendarIcon from '@/assets/images/cp/calendar_cp.svg';
 import CanvasCardIcon from '@/assets/images/cp/canvas_card_cp.svg';
 import CanvasListIcon from '@/assets/images/cp/canvas_list_cp.svg';
+import CarouselIcon from '@/assets/images/cp/carousel_cp.svg';
 import CheckboxIcon from '@/assets/images/cp/checkbox_cp.svg';
 import ColumnLayoutIcon from '@/assets/images/cp/col_layout_cp.svg';
+import DataSelectIcon from '@/assets/images/cp/data_select_cp.svg';
 import DatePickerIcon from '@/assets/images/cp/date_picker_cp.svg';
 import DeptSelectIcon from '@/assets/images/cp/dept_select_cp.svg';
 import DirectoryIcon from '@/assets/images/cp/directory_cp.svg';
 import DisplayImageIcon from '@/assets/images/cp/display_image_cp.svg';
 import DisplayTextIcon from '@/assets/images/cp/display_text_cp.svg';
+import DividerIcon from '@/assets/images/cp/divider_cp.svg';
 import EmailInputIcon from '@/assets/images/cp/email_input_cp.svg';
 import InfoNoticeIcon from '@/assets/images/cp/info_notice_cp.svg';
 import KanbanIcon from '@/assets/images/cp/kanban_cp.svg';
@@ -17,8 +20,14 @@ import PhoneInputIcon from '@/assets/images/cp/phone_input_cp.svg';
 import PwdInputIcon from '@/assets/images/cp/pwd_input_cp.svg';
 import RadioIcon from '@/assets/images/cp/radio_cp.svg';
 import ReadonlyIcon from '@/assets/images/cp/readonly_cp.svg';
+import RelatedFormIcon from '@/assets/images/cp/related_form_cp.svg';
+import RichTextIcon from '@/assets/images/cp/rich_text_cp.svg';
 import SelectMutipleIcon from '@/assets/images/cp/select_mutiple_cp.svg';
 import SelectOneIcon from '@/assets/images/cp/select_one_cp.svg';
+import StaticFileIcon from '@/assets/images/cp/static_file_cp.svg';
+import StaticImageIcon from '@/assets/images/cp/static_image_cp.svg';
+import StaticTextIcon from '@/assets/images/cp/static_text_cp.svg';
+import SubTableIcon from '@/assets/images/cp/sub_table_cp.svg';
 import SwitchIcon from '@/assets/images/cp/switch_cp.svg';
 import TableIcon from '@/assets/images/cp/table_cp.svg';
 import TextInputIcon from '@/assets/images/cp/text_input_cp.svg';
@@ -29,13 +38,11 @@ import FileUploadIcon from '@/assets/images/cp/upload_file_cp.svg';
 import ImageUploadIcon from '@/assets/images/cp/upload_image_cp.svg';
 import UserSelectIcon from '@/assets/images/cp/user_select_cp.svg';
 import WebComponentIcon from '@/assets/images/cp/web_component_cp.svg';
-import RelatedFormIcon from '@/assets/images/cp/related_form_cp.svg';
-import RichTextIcon from '@/assets/images/cp/rich_text_cp.svg';
-import DividerIcon from '@/assets/images/cp/divider_cp.svg';
 
 export const ICON_Map: Record<string, React.ReactNode> = {
   'text_input_cp.svg': <img src={TextInputIcon} />,
   'textarea_input_cp.svg': <img src={TextareaInputIcon} />,
+  'carousel_cp.svg': <img src={CarouselIcon} />,
   'number_input_cp.svg': <img src={NumberInputIcon} />,
   'email_input_cp.svg': <img src={EmailInputIcon} />,
   'phone_input_cp.svg': <img src={PhoneInputIcon} />,
@@ -59,6 +66,9 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'kanban_cp.svg': <img src={KanbanIcon} />,
   'display_image_cp.svg': <img src={DisplayImageIcon} />,
   'info_notice_cp.svg': <img src={InfoNoticeIcon} />,
+  'static_text_cp.svg': <img src={StaticTextIcon} />,
+  'static_image_cp.svg': <img src={StaticImageIcon} />,
+  'static_file_cp.svg': <img src={StaticFileIcon} />,
   'display_text_cp.svg': <img src={DisplayTextIcon} />,
   'pwd_input_cp.svg': <img src={PwdInputIcon} />,
   'web_component_cp.svg': <img src={WebComponentIcon} />,
@@ -67,7 +77,9 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'calendar_cp.svg': <img src={CalendarIcon} />,
   'related_form_cp.svg': <img src={RelatedFormIcon} />,
   'rich_text_cp.svg': <img src={RichTextIcon} />,
-  'divider_cp.svg': <img src={DividerIcon} />
+  'divider_cp.svg': <img src={DividerIcon} />,
+  'data_select_cp.svg': <img src={DataSelectIcon} />,
+  'sub_table_cp.svg': <img src={SubTableIcon} />
 };
 
 // TODO 图标更新
@@ -96,18 +108,19 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XTimeline: <img src={TimelineIcon} />,
   'directory_cp.svg': <img src={DirectoryIcon} />,
   'kanban_cp.svg': <img src={KanbanIcon} />,
-  XImage: <img src={DisplayImageIcon} />,
-  XFile: <img src={DisplayImageIcon} />,
   XInfoNotice: <img src={InfoNoticeIcon} />,
   'display_text_cp.svg': <img src={DisplayTextIcon} />,
   'pwd_input_cp.svg': <img src={PwdInputIcon} />,
   XWebView: <img src={WebComponentIcon} />,
   XList: <img src={ListContainerIcon} />,
   'canvas_list_cp.svg': <img src={CanvasListIcon} />,
-  XFCarousel: <img src={CalendarIcon} />,
   XRelatedForm: <img src={RelatedFormIcon} />,
   XRichText: <img src={RichTextIcon} />,
-  XSubTable: <img src={RichTextIcon} />,
-  XDataSelect: <img src={RichTextIcon} />,
-  XDivider: <img src={DividerIcon} />
+  XSubTable: <img src={SubTableIcon} />,
+  XDataSelect: <img src={DataSelectIcon} />,
+  XDivider: <img src={DividerIcon} />,
+  XText: <img src={StaticTextIcon} />,
+  XImage: <img src={StaticImageIcon} />,
+  XFile: <img src={StaticFileIcon} />,
+  XFCarousel: <img src={CarouselIcon} />
 };

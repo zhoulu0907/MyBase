@@ -57,7 +57,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [SHOW_COMPONENT_TYPES.IMAGE]: '静态图片',
   [SHOW_COMPONENT_TYPES.FILE]: '静态文件',
   [SHOW_COMPONENT_TYPES.WEB_VIEW]: '网页组件',
-  [SHOW_COMPONENT_TYPES.PLACEHOLDER]: '占位符',
+  [SHOW_COMPONENT_TYPES.PLACEHOLDER]: '占位符'
 };
 
 const allTemplate = {
@@ -274,7 +274,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_F],
-          icon: 'readonly_cp.svg', // todo
+          icon: 'carousel_cp.svg',
           category: 'base'
         },
         {
@@ -282,7 +282,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.SUB_TABLE],
-          icon: 'readonly_cp.svg', // todo
+          icon: 'sub_table_cp.svg',
           category: 'base'
         },
         {
@@ -290,7 +290,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATA_SELECT],
-          icon: 'readonly_cp.svg', // todo
+          icon: 'data_select_cp.svg',
           category: 'base'
         }
       ]
@@ -381,7 +381,7 @@ const allTemplate = {
           h: 48,
           w: 68,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.TEXT],
-          icon: 'display_text_cp.svg',
+          icon: 'static_text_cp.svg',
           category: 'base'
         },
         {
@@ -389,7 +389,7 @@ const allTemplate = {
           h: 48,
           w: 68,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.IMAGE],
-          icon: 'display_image_cp.svg',
+          icon: 'static_image_cp.svg',
           category: 'base'
         },
         {
@@ -397,7 +397,7 @@ const allTemplate = {
           h: 48,
           w: 68,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.FILE],
-          icon: 'display_image_cp.svg',
+          icon: 'static_file_cp.svg',
           category: 'base'
         },
         {
@@ -423,7 +423,7 @@ const allTemplate = {
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.PLACEHOLDER],
           icon: 'divider_cp.svg',
           category: 'base'
-        },
+        }
       ]
     }
   ]
