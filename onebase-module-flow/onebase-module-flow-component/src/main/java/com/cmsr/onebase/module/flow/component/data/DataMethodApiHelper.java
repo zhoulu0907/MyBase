@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
-import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.RuleItem;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
@@ -12,7 +11,6 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.OrderDto;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -29,9 +27,6 @@ import java.util.Map;
 @Setter
 @Component
 public class DataMethodApiHelper {
-
-    @Autowired
-    private ConditionsProvider conditionsProvider;
 
     /**
      * 将Map数据转换为EntityFieldDataReqDTO对象
@@ -68,7 +63,7 @@ public class DataMethodApiHelper {
      *
      * @return 转换后的条件DTO列表
      */
-    private List<List<ConditionDTO>> processFilterCondition(List<ConditionItem> conditionItems) {
+    public List<List<ConditionDTO>> processFilterCondition(List<ConditionItem> conditionItems) {
         List<List<ConditionDTO>> conditionDTtoSS = new ArrayList<>();
         for (ConditionItem conditionItem : conditionItems) {
             List<ConditionDTO> conditionDtoS = new ArrayList<>();

@@ -47,10 +47,10 @@ public class DataQueryNodeComponent extends NormalNodeComponent {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         NodeData nodeData = executeContext.getNodeData(this.getTag());
+        InLoopDepth inLoopDepth =  nodeData.getInLoopDepth();
         // 转换成数据方法参数
         List<Map<String, Object>> filterCondition = (List<Map<String, Object>>) MapUtils.getObject(nodeData, "filterCondition");
         List<ConditionItem> conditionItems = Condition.createCondition(filterCondition);
-        InLoopDepth inLoopDepth =  nodeData.getInLoopDepth();
         conditionItems = conditionsProvider.formatForExpression(this, conditionItems, inLoopDepth);
         conditionItems = conditionsProvider.formatForValue(conditionItems, variableContext);
         // 数据方法参数

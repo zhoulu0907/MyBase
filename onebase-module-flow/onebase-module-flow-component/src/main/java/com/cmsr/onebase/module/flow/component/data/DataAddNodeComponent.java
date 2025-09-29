@@ -64,28 +64,11 @@ public class DataAddNodeComponent extends NormalNodeComponent {
         boolean batchType = nodeData.getBooleanValue("batchType", false);
         List<Map<String, Object>> fields = (List<Map<String, Object>>) MapUtils.getObject(nodeData, "fields");
         List<RuleItem> ruleItems = Condition.createRuleItems(fields);
-        List<Map<Long, Object>> reqData = new ArrayList<>();
-        if (!batchType) {
-            ruleItems = conditionsProvider.formatRuleItemsForExpression(this, ruleItems, inLoopDepth);
-            ruleItems = conditionsProvider.formatRuleItemsForValue(ruleItems, variableContext);
-            Map<Long, Object> data = new HashMap<>();
-            for (RuleItem ruleItem : ruleItems) {
-                data.put(NumberUtils.toLong(ruleItem.getFieldId()), ruleItem.getValue());
-            }
-            reqData.add(data);
+        List<Map<Long, Object>> reqData;
+        if (batchType) {
+            reqData = buildBatchReqData(nodeData, variableContext, ruleItems);
         } else {
-            String dataNodeId = nodeData.getString("dataNodeId");
-            int dataSize = variableContext.getVariableSizeByTag(dataNodeId);
-
-            for (int i = 0; i < dataSize; i++) {
-                Map<Long, Object> data = new HashMap<>();
-                for (RuleItem ruleItem : ruleItems) {
-                    ruleItem = conditionsProvider.formatRuleItemForExpression(i, ruleItem);
-                    ruleItem = conditionsProvider.formatRuleItemForValue(ruleItem, variableContext);
-                    data.put(NumberUtils.toLong(ruleItem.getFieldId()), ruleItem.getValue());
-                }
-                reqData.add(data);
-            }
+            reqData = buildSingleReqData(ruleItems, inLoopDepth, variableContext);
         }
 
         if (CollectionUtils.isEmpty(reqData)) {
@@ -103,6 +86,35 @@ public class DataAddNodeComponent extends NormalNodeComponent {
         } catch (Exception e) {
             throw e; // 重新抛出异常，保持原有行为
         }
+    }
+
+    private List<Map<Long, Object>> buildSingleReqData(List<RuleItem> ruleItems, InLoopDepth inLoopDepth, VariableContext variableContext) {
+        List<Map<Long, Object>> reqData = new ArrayList<>();
+        ruleItems = conditionsProvider.formatRuleItemsForExpression(this, ruleItems, inLoopDepth);
+        ruleItems = conditionsProvider.formatRuleItemsForValue(ruleItems, variableContext);
+        Map<Long, Object> data = new HashMap<>();
+        for (RuleItem ruleItem : ruleItems) {
+            data.put(NumberUtils.toLong(ruleItem.getFieldId()), ruleItem.getValue());
+        }
+        reqData.add(data);
+        return reqData;
+    }
+
+    private List<Map<Long, Object>> buildBatchReqData(NodeData nodeData, VariableContext variableContext, List<RuleItem> ruleItems) {
+        String dataNodeId = nodeData.getString("dataNodeId");
+        int dataSize = variableContext.getVariableSizeByTag(dataNodeId);
+        List<Map<Long, Object>> reqData = new ArrayList<>();
+
+        for (int i = 0; i < dataSize; i++) {
+            Map<Long, Object> data = new HashMap<>();
+            for (RuleItem ruleItem : ruleItems) {
+                ruleItem = conditionsProvider.formatRuleItemForExpression(i, ruleItem);
+                ruleItem = conditionsProvider.formatRuleItemForValue(ruleItem, variableContext);
+                data.put(NumberUtils.toLong(ruleItem.getFieldId()), ruleItem.getValue());
+            }
+            reqData.add(data);
+        }
+        return reqData;
     }
 
     /**
