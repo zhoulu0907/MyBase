@@ -1,7 +1,6 @@
 // 实现插入标签
-import { ViewUpdate } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
-import { Decoration, ViewPlugin, MatchDecorator, EditorView, WidgetType } from '@codemirror/view';
+import { Decoration, EditorView, MatchDecorator, ViewPlugin, ViewUpdate, WidgetType } from '@codemirror/view';
 
 /**
  * 占位符插件，用于在编辑器中显示占位符
@@ -14,8 +13,8 @@ export const placeholdersPlugin = (
   mode = 'name'
 ) => {
   /**
-     * 占位符小部件，用于在编辑器中显示占位符
-     */
+   * 占位符小部件，用于在编辑器中显示占位符
+   */
   class PlaceholderWidget extends WidgetType {
     //占位符的类型 ID
     textId = '';
@@ -78,7 +77,7 @@ export const placeholdersPlugin = (
     //解析输入文本，提取公式名称
     constructor(text: string) {
       super();
-      if(text) {
+      if (text) {
         const [textId, texts] = text.split('.');
         if (textId && texts) {
           this.text = texts.split('(')[0];
@@ -141,7 +140,7 @@ export const placeholdersPlugin = (
       //初始化 decorations，使用 combinedMatcher 创建初始装饰
       constructor(view: EditorView) {
         this.decorations = combinedMatcher.createDeco(view);
-        console.log('view', view, this.decorations);
+        // console.log('view', view, this.decorations);
       }
 
       //当编辑器内容发生变化时，更新 decorations，使用 combinedMatcher 重新创建装饰

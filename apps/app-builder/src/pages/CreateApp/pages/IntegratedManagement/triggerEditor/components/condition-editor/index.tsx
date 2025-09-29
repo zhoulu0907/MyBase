@@ -74,9 +74,12 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   variableOptions
 }) => {
   useSignals();
-  const [visible, setVisible] = useState<boolean>(false);
+
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const filterCondition = Form.useWatch('filterCondition', form);
-  const mockData = '{{20613609649310009.CEILING}}([[1.订单编号]][[3.下单日期]])';
+
+  const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
+  const [formulaData, setFormulaData] = useState<string>('');
 
   // 过滤为空的条件
   useEffect(() => {
@@ -432,9 +435,25 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     return '';
   };
 
-  const handleConfirm = (formulaData: any) => {
-    setVisible(false);
+  const handleFormulaConfirm = (formulaData: any) => {
+    setFormulaVisible(false);
+    // TODO(mickey): remove debug log
     console.log('formulaData', formulaData);
+    console.log('formulaFieldKey', formulaFieldKey);
+
+    form.setFieldValue(formulaFieldKey, formulaData);
+
+    console.log('reset formulaField');
+    setFormulaData('');
+    setFormulaFieldKey('');
+  };
+
+  const openFormulaEditor = (fieldKey: string) => {
+    setFormulaVisible(true);
+    console.log('fieldKey', fieldKey);
+    console.log('form.getFieldValue(fieldKey)', form.getFieldValue(fieldKey));
+    setFormulaData(form.getFieldValue(fieldKey));
+    setFormulaFieldKey(fieldKey);
   };
 
   return (
@@ -465,11 +484,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               form.setFieldValue(item.field + '.op', undefined);
                                               form.setFieldValue(item.field + '.operatorType', undefined);
                                               form.setFieldValue(item.field + '.value', undefined);
-
-                                              form.setFieldValue(
-                                                item.field + '.fieldType',
-                                                fields.find((field) => field.value == _value)?.fieldType
-                                              );
                                             }}
                                           >
                                             {fields.map((field) => (
@@ -478,11 +492,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               </Option>
                                             ))}
                                           </Select>
-                                        </Form.Item>
-
-                                        {/* 这个字段给后端使用，实际不需要展示 */}
-                                        <Form.Item field={item.field + '.fieldType'} hidden>
-                                          <Input placeholder="请输入字段类型" />
                                         </Form.Item>
                                       </Grid.Col>
 
@@ -566,8 +575,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
-                                                  {/* <Input placeholder="请输入公式" /> */}
-                                                  <Button onClick={() => setVisible(true)} long>
+                                                  <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
                                                     fx编辑公式
                                                   </Button>
                                                 </Form.Item>
@@ -631,11 +639,12 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }}
         </Form.List>
       </Form.Item>
+
       <FormulaEditor
-        initialFormula={mockData}
-        visible={visible}
-        onCancel={() => setVisible(false)}
-        onConfirm={handleConfirm}
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
       />
     </div>
   );
