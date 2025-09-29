@@ -75,9 +75,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 }) => {
   useSignals();
 
-  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const filterCondition = Form.useWatch('filterCondition', form);
 
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
   const [formulaData, setFormulaData] = useState<string>('');
 
