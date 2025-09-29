@@ -1,4 +1,4 @@
-import { Graph, Node } from '@antv/x6';
+import { Graph } from '@antv/x6';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
@@ -35,8 +35,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       onFieldClick,
       onEdgeEdit,
       onStatusChange,
-      updateEntityPosition,
-      onlyUpdateNode
+      updateEntityPosition
+      // onlyUpdateNode
     },
     ref
   ) => {
@@ -126,9 +126,48 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           }
         }
       });
+
+      // 当系统字段折叠状态改变时，需要重新计算自定义字段的端口位置
+      if (section === 'system') {
+        // 获取当前节点的系统字段折叠状态
+        const systemCollapsed = isCollapsed;
+
+        // 重新计算并更新自定义字段的端口位置
+        const customFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.CUSTOM);
+        if (customFields.length > 0) {
+          // 计算新的自定义字段标题位置
+          const systemTitleOffset =
+            systemFields.length > 0
+              ? systemCollapsed
+                ? LINE_TITLE_HEIGHT
+                : LINE_TITLE_HEIGHT + systemFields.length * LINE_HEIGHT
+              : LINE_TITLE_HEIGHT;
+          const customTitleY = LINE_HEAD_HEIGHT + systemTitleOffset + LINE_TITLE_HEIGHT / 2;
+
+          // 更新自定义字段聚合端口位置
+          const node = graph.getCellById(nodeId);
+          if (node) {
+            // 更新自定义字段聚合端口位置
+            node.portProp(`${nodeId}_custom_fields_source`, 'args', { x: NODE_WIDTH, y: customTitleY });
+            node.portProp(`${nodeId}_custom_fields_target`, 'args', { x: 0, y: customTitleY });
+
+            // 更新所有自定义字段的端口位置
+            customFields.forEach((field, index) => {
+              const accumulatedHeight = index * LINE_HEIGHT;
+              const finalY = customTitleY + accumulatedHeight + LINE_HEIGHT / 2;
+
+              const sourcePortId = `${field.fieldId || field.fieldName}_source`;
+              const targetPortId = `${field.fieldId || field.fieldName}_target`;
+
+              node.portProp(sourcePortId, 'args', { x: NODE_WIDTH, y: finalY });
+              node.portProp(targetPortId, 'args', { x: 0, y: finalY });
+            });
+          }
+        }
+      }
     };
 
-    const portsItems = (nodeData: EntityNode) => {
+    const portsItems = (nodeData: EntityNode, systemCollapsed: boolean = true) => {
       const items: object[] = [];
 
       const systemFields = nodeData?.fields.filter((f) => f.isSystemField === FIELD_TYPE.SYSTEM);
@@ -151,8 +190,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
       // 自定义字段标题行的聚合 port
       if (customFields.length > 0) {
-        const customTitleOffset = systemFields.length > 0 ? LINE_TITLE_HEIGHT : 0;
-        const customTitleY = LINE_HEAD_HEIGHT + customTitleOffset + LINE_TITLE_HEIGHT / 2;
+        // 如果系统字段折叠，自定义字段标题位置需要向上偏移
+        const systemTitleOffset = systemFields.length > 0 ? (systemCollapsed ? 0 : LINE_TITLE_HEIGHT) : 0;
+        const customTitleY = LINE_HEAD_HEIGHT + systemTitleOffset + LINE_TITLE_HEIGHT / 2;
         items.push({
           id: `${nodeData.entityId}_custom_fields_source`,
           group: 'right',
@@ -252,8 +292,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                   }
                 }
               },
-              // 连接桩定义
-              items: portsItems(nodeData)
+              // 连接桩定义 - 使用默认的系统字段折叠状态（true）
+              items: portsItems(nodeData, true)
             }
           });
         });

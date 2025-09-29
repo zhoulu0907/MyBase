@@ -57,36 +57,38 @@
   right: 500px;
   top: 0;
   
-  .arco-tabs {
-    height: 100%;
+  // .arco-tabs {
+  //   height: 100%;
     
-    .arco-tabs-nav {
-      background-color: transparent;
-      border-right: none;
+  //   .arco-tabs-nav {
+  //     background-color: transparent;
+  //     border-right: none;
       
-      .arco-tabs-tab {
-        padding: 16px 20px;
-        margin: 0;
-        border-radius: 0;
-        border-right: none;
-        border-bottom: 1px solid #e5e6eb;
+  //     .arco-tabs-tab {
+  //       padding: 16px 20px;
+  //       margin: 0;
+  //       border-radius: 0;
+  //       border-right: none;
+  //       border-bottom: 1px solid #e5e6eb;
         
-        &:hover {
-          background-color: #e8f3ff;
-        }
+  //       &:hover {
+  //         background-color: #e8f3ff;
+  //       }
         
-        &.arco-tabs-tab-active {
-          background-color: #e8f3ff;
-          color: @primaryColor;
-          border-right: 2px solid @primaryColor;
-        }
-      }
-    }
+  //       &.arco-tabs-tab-active {
+  //         background-color: #e8f3ff;
+  //         color: @primaryColor;
+  //         border-right: 2px solid @primaryColor;
+  //       }
+  //     }
+  //   }
     
-    .arco-tabs-content {
-      display: none;
-    }
-  }
+  //   .arco-tabs-content {
+  //     display: none;
+  //   }
+  // }
+
+
 }
 
 .tab-sidebar {
@@ -95,7 +97,51 @@
     width: 32px;
     height: 90px;
     writing-mode: vertical-lr;
+    // background: url('@/assets/data_factory/white_tab.svg') no-repeat;
+    // background-position: center;
     .flex-center();
+  }
+  :global(.arco-tabs-header-title-active) {
+    // background: url('@/assets/data_factory/white_in_tab.svg') no-repeat 84px 32px, url('@/assets/data_factory/green_tab.svg') no-repeat 93px 40px;
+    // background-position: center, center;
+    // color: white !important;
+    /* 不规则四边形效果 */
+    // clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+    position: relative;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      // border: 2px solid #3498db;
+      background-color: @primaryColor;
+      clip-path: polygon(0% 0%, 100% 8%, 100% 100%, 0% 92%);
+      z-index: -1;
+      border-radius: 6px;
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      // border: 2px solid #3498db;
+      background-color: white;
+      clip-path: polygon(10% 5%, 90% 11%, 90% 95%, 10% 89%);
+      z-index: 0;
+      border-radius: 6px;
+    }
+  }
+
+  :global(.arco-tabs-header-title-text) {
+    z-index: 10;
+  }
+
+  :global(.arco-tabs-header-nav-vertical .arco-tabs-header-ink) {
+    display: none !important;
   }
 }
 
