@@ -49,53 +49,63 @@
 }
 
 .tab-sidebar {
-  width: 32px;
+  width: 40px;
   border-right: 1px solid #e5e6eb;
-  background-color: #ffffff;
+  background-color: transparent;
   border-radius: 4px 0 0 4px;
   position: absolute;
   right: 500px;
   top: 0;
-  
-  .arco-tabs {
-    height: 100%;
-    
-    .arco-tabs-nav {
-      background-color: transparent;
-      border-right: none;
-      
-      .arco-tabs-tab {
-        padding: 16px 20px;
-        margin: 0;
-        border-radius: 0;
-        border-right: none;
-        border-bottom: 1px solid #e5e6eb;
-        
-        &:hover {
-          background-color: #e8f3ff;
-        }
-        
-        &.arco-tabs-tab-active {
-          background-color: #e8f3ff;
-          color: @primaryColor;
-          border-right: 2px solid @primaryColor;
-        }
-      }
-    }
-    
-    .arco-tabs-content {
-      display: none;
-    }
-  }
 }
 
+// 标签页
 .tab-sidebar {
   :global(.arco-tabs-header-title) {
     padding: 0 !important;
-    width: 32px;
-    height: 90px;
+    width: 40px;
+    height: 91px;
     writing-mode: vertical-lr;
+    // margin-bottom: 4px;
+    margin-top: 0 !important;
+    background-size: contain;
+    background-position: center;
     .flex-center();
+
+    &:first-child {
+      background: url('@/assets/data_factory/white_tab_first.svg') no-repeat;
+    }
+    &:nth-child(2), &:nth-child(3) {
+      background: url('@/assets/data_factory/white_tab_middle.svg') no-repeat;
+    }
+    &:nth-child(4) {
+      background: url('@/assets/data_factory/white_tab_last.svg') no-repeat;
+    }
+  }
+
+
+  :global(.arco-tabs-header-title-text::before) {
+    display: none !important;
+  }
+
+  :global(.arco-tabs-header-title-active) {
+    background-position: center;
+    &:first-child {
+      background: url('@/assets/data_factory/tab_first.svg') no-repeat;
+    }
+    &:nth-child(2), &:nth-child(3) {
+      background: url('@/assets/data_factory/tab_middle.svg') no-repeat;
+    }
+    &:nth-child(4) {
+      background: url('@/assets/data_factory/tab_last.svg') no-repeat;
+    }
+  }
+
+  :global(.arco-tabs-header-title-text) {
+    z-index: 10;
+  }
+
+  :global(.arco-tabs-header-nav-vertical .arco-tabs-header-ink) {
+    display: none !important;
   }
 }
 
