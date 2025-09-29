@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
 import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
-import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.yomahub.liteflow.core.NodeComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -54,6 +54,8 @@ public class ConditionsProvider {
         } else if (operatorTypeEnum == OperatorTypeEnum.VARIABLE) {
             String valueExp = formatValueForExpression(nodeComponent, inLoopDepth, ruleItem.getValue().toString());
             ruleItem.setValue(valueExp);
+        } else if (operatorTypeEnum == OperatorTypeEnum.FORMULA) {
+            //TODO 公式
         }
         return ruleItem;
     }
