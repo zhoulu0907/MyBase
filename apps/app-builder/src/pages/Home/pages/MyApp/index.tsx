@@ -35,7 +35,7 @@ import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
 import CreateApp from '@/components/CreateApp';
-import { appIcon, type Options } from '@/components/CreateApp/const';
+import { appIconPathMapping, type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
@@ -65,7 +65,7 @@ const MyAppPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [ownerTag, setOwnerTag] = useState<number>(0);
+  const [ownerTag, setOwnerTag] = useState<0 | 1>(0);
   const [orderByTime, setOrderByTime] = useState<'create' | 'update'>('create');
   const [status, setStatus] = useState<number | string>('');
 
@@ -362,7 +362,7 @@ const MyAppPage: React.FC = () => {
                     <div className={styles.myAppCardHeader}>
                       <div className={styles.myAppName}>
                         <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
-                          <i className={`iconfont ${item.iconName || appIcon[0]}`} />
+                          <img src={appIconPathMapping.find(icon => icon.icon === item.iconName)?.path || ''} />
                         </div>
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.myAppTitle}>{item.appName}</div>

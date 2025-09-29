@@ -8,6 +8,7 @@ import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app'
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { appIconPathMapping } from '@/components/CreateApp/const';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -117,7 +118,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           </div>
 
           <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
-            <i className={`iconfont ${appIcon || 'icon-box'}`} />
+            <img src={appIconPathMapping.find(icon => icon.icon === appIcon)?.path || ''} />
           </div>
           <div className={styles.appName}>{appName}</div>
 
