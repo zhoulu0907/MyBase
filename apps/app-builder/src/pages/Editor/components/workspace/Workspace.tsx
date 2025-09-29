@@ -251,7 +251,8 @@ export default function EditorWorkspace() {
                     (field: AppEntityField) =>
                       field.fieldName !== 'lock_version' &&
                       field.fieldName !== 'deleted' &&
-                      field.fieldName !== 'parent_id'
+                      field.fieldName !== 'parent_id' &&
+                      field.isSystemField !== 1
                   )
                   .forEach((field: AppEntityField) => {
                     let cpType = COMPONENT_MAP[field.fieldType];

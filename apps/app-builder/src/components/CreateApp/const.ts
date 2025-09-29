@@ -142,329 +142,327 @@ export const appIcon: string[] = [
   'change-date-sort'
 ];
 
-export const appIconPathMapping: {icon: string, path: any}[] = [
-    {
-        'icon': "bike",
-        "path": bike
-    },
-    {
-        "icon": "bullet-map",
-        "path": bulletMap
-    },
-    {
-        "icon": "church-one",
-        "path": churchOne
-    },
-    {
-        "icon": "data-display",
-        "path": dataDisplay
-    },
-    {
-        "icon": "fingerprint-two",
-        "path": fingerPrintTwo
-    },
-    {
-        "icon": "platte",
-        "path": platte
-    },
-    {
-        "icon": "arc-de-triomphe",
-        "path": arcDeTriomphe
-    },
-    {
-        "icon": "brdige-three",
-        "path": brigeThree
-    },
-    {
-        "icon": "bridge-two",
-        "path": bridgeTwo
-    },
-    {
-        "icon": "chinese-pavilion",
-        "path": chinesePavilion
-    },
-    {
-        "icon": "city-gate",
-        "path": cityGate
-    },
-    {
-        "icon": "city-one",
-        "path": cityOne
-    },
-    {
-        "icon": "elevator",
-        "path": elevator
-    },
-    {
-        "icon": "escalators",
-        "path": escalators
-    },
-    {
-        "icon": "factory-building",
-        "path": factoryBuilding
-    },
-    {
-        "icon": "monument-one",
-        "path": monumentOne
-    },
-    {
-        "icon": "link-cloud-faild",
-        "path": linkCloudFaild
-    },
-    {
-        "icon": "network-tree",
-        "path": networkTree
-    },
-    {
-        "icon": "link-break",
-        "path": linkBreak
-    },
-    {
-        "icon": "left-branch",
-        "path": leftBranch
-    },
-    {
-        "icon": "connection-point-two",
-        "path": connectionPointTwo
-    },
-    {
-        "icon": "branch-one",
-        "path": branchOne
-    },
-    {
-        "icon": "assembly-line",
-        "path": assemblyLine
-    },
-    {
-        "icon": "bezier-curve",
-        "path": bezierCurve
-    },
-    {
-        "icon": "anchor-round",
-        "path": anchorRound
-    },
-    {
-        "icon": "anchor",
-        "path": anchor
-    },
-    {
-        "icon": "good",
-        "path": good
-    },
-    {
-        "icon": "four",
-        "path": four
-    },
-    {
-        "icon": "five",
-        "path": five
-    },
-    {
-        "icon": "cool",
-        "path": cool
-    },
-    {
-        "icon": "clap",
-        "path": clap
-    },
-    {
-        "icon": "bad",
-        "path": bad
-    },
-    {
-        "icon": "bye",
-        "path": bye
-    },
-    {
-        "icon": "come",
-        "path": come
-    },
-    {
-        "icon": "easy",
-        "path": easy
-    },
-    {
-        "icon": "concept-sharing",
-        "path": conceptSharing
-    },
-    {
-        "icon": "data-lock",
-        "path": dataLock
-    },
-    {
-        "icon": "database-code",
-        "path": databaseCode
-    },
-    {
-        "icon": "data-user",
-        "path": dataUser
-    },
-    {
-        "icon": "database-download",
-        "path": databaseDownload
-    },
-    {
-        "icon": "database-enter",
-        "path": databaseEnter
-    },
-    {
-        "icon": "database-lock",
-        "path": databaseLock
-    },
-    {
-        "icon": "database-position",
-        "path": databasePosition
-    },
-    {
-        "icon": "database-time",
-        "path": databaseTime
-    },
-    {
-        "icon": "database-sync",
-        "path": databaseSync
-    },
-    {
-        "icon": "database-fail",
-        "path": databaseFail
-    },
-    {
-        "icon": "slide",
-        "path": slide
-    },
-    {
-        "icon": "negative-dynamics",
-        "path": negativeDynamics
-    },
-    {
-        "icon": "parabola",
-        "path": parabola
-    },
-    {
-        "icon": "pie",
-        "path": pie
-    },
-    {
-        "icon": "maslow-pyramids",
-        "path": maslowPyramids
-    },
-    {
-        "icon": "kagi-map",
-        "path": kagiMap
-    },
-    {
-        "icon": "histogram",
-        "path": histogram
-    },
-    {
-        "icon": "chart-histogram",
-        "path": chartHistogram
-    },
-    {
-        "icon": "chart-graph",
-        "path": chartGraph
-    },
-    {
-        "icon": "change-date-sort",
-        "path": changeDateSort
-    },
-    {
-        "icon": "phonograph",
-        "path": phonograph
-    },
-    {
-        "icon": "phone",
-        "path": phone
-    },
-    {
-        "icon": "mouse",
-        "path": mouse
-    },
-    {
-        "icon": "microphone",
-        "path": microphone
-    },
-    {
-        "icon": "memory",
-        "path": memory
-    },
-    {
-        "icon": "master",
-        "path": master
-    },
-    {
-        "icon": "laptop",
-        "path": laptop
-    },
-    {
-        "icon": "lamp",
-        "path": lamp
-    },
-    {
-        "icon": "kettle",
-        "path": kettle
-    },
-    {
-        "icon": "HDD",
-        "path": HDD
-    },
-    {
-        "icon": "gamepad",
-        "path": gamepad
-    },
-    {
-        "icon": "flashlight",
-        "path": flashlight
-    },
-    {
-        "icon": "gopro",
-        "path": gopro
-    },
-    {
-        "icon": "hardDiskOne",
-        "path": hardDiskOne
-    },
-
-
-    {
-        "icon": "open",
-        "path": open
-    },
-    {
-        "icon": "press",
-        "path": press
-    },
-    {
-        "icon": "yep",
-        "path": yep
-    },
-    {
-        "icon": "zoom",
-        "path": zoom
-    },
-    {
-        "icon": "six",
-        "path": six
-    },
-    {
-        "icon": "pagoda",
-        "path": pagoda
-    },
-    {
-        "icon": "palace",
-        "path": palace
-    },
-    {
-        "icon": "shop",
-        "path": shop
-    },
-    {
-        "icon": "school",
-        "path": school
-    },
-    {
-        "icon": "tower",
-        "path": tower
-    }
+export const appIconPathMapping: { icon: string, path: any }[] = [
+  {
+    'icon': "bike",
+    "path": bike
+  },
+  {
+    "icon": "bullet-map",
+    "path": bulletMap
+  },
+  {
+    "icon": "church-one",
+    "path": churchOne
+  },
+  {
+    "icon": "data-display",
+    "path": dataDisplay
+  },
+  {
+    "icon": "fingerprint-two",
+    "path": fingerPrintTwo
+  },
+  {
+    "icon": "platte",
+    "path": platte
+  },
+  {
+    "icon": "arc-de-triomphe",
+    "path": arcDeTriomphe
+  },
+  {
+    "icon": "brdige-three",
+    "path": brigeThree
+  },
+  {
+    "icon": "bridge-two",
+    "path": bridgeTwo
+  },
+  {
+    "icon": "chinese-pavilion",
+    "path": chinesePavilion
+  },
+  {
+    "icon": "city-gate",
+    "path": cityGate
+  },
+  {
+    "icon": "city-one",
+    "path": cityOne
+  },
+  {
+    "icon": "elevator",
+    "path": elevator
+  },
+  {
+    "icon": "escalators",
+    "path": escalators
+  },
+  {
+    "icon": "factory-building",
+    "path": factoryBuilding
+  },
+  {
+    "icon": "monument-one",
+    "path": monumentOne
+  },
+  {
+    "icon": "link-cloud-faild",
+    "path": linkCloudFaild
+  },
+  {
+    "icon": "network-tree",
+    "path": networkTree
+  },
+  {
+    "icon": "link-break",
+    "path": linkBreak
+  },
+  {
+    "icon": "left-branch",
+    "path": leftBranch
+  },
+  {
+    "icon": "connection-point-two",
+    "path": connectionPointTwo
+  },
+  {
+    "icon": "branch-one",
+    "path": branchOne
+  },
+  {
+    "icon": "assembly-line",
+    "path": assemblyLine
+  },
+  {
+    "icon": "bezier-curve",
+    "path": bezierCurve
+  },
+  {
+    "icon": "anchor-round",
+    "path": anchorRound
+  },
+  {
+    "icon": "anchor",
+    "path": anchor
+  },
+  {
+    "icon": "good",
+    "path": good
+  },
+  {
+    "icon": "four",
+    "path": four
+  },
+  {
+    "icon": "five",
+    "path": five
+  },
+  {
+    "icon": "cool",
+    "path": cool
+  },
+  {
+    "icon": "clap",
+    "path": clap
+  },
+  {
+    "icon": "bad",
+    "path": bad
+  },
+  {
+    "icon": "bye",
+    "path": bye
+  },
+  {
+    "icon": "come",
+    "path": come
+  },
+  {
+    "icon": "easy",
+    "path": easy
+  },
+  {
+    "icon": "concept-sharing",
+    "path": conceptSharing
+  },
+  {
+    "icon": "data-lock",
+    "path": dataLock
+  },
+  {
+    "icon": "database-code",
+    "path": databaseCode
+  },
+  {
+    "icon": "data-user",
+    "path": dataUser
+  },
+  {
+    "icon": "database-download",
+    "path": databaseDownload
+  },
+  {
+    "icon": "database-enter",
+    "path": databaseEnter
+  },
+  {
+    "icon": "database-lock",
+    "path": databaseLock
+  },
+  {
+    "icon": "database-position",
+    "path": databasePosition
+  },
+  {
+    "icon": "database-time",
+    "path": databaseTime
+  },
+  {
+    "icon": "database-sync",
+    "path": databaseSync
+  },
+  {
+    "icon": "database-fail",
+    "path": databaseFail
+  },
+  {
+    "icon": "slide",
+    "path": slide
+  },
+  {
+    "icon": "negative-dynamics",
+    "path": negativeDynamics
+  },
+  {
+    "icon": "parabola",
+    "path": parabola
+  },
+  {
+    "icon": "pie",
+    "path": pie
+  },
+  {
+    "icon": "maslow-pyramids",
+    "path": maslowPyramids
+  },
+  {
+    "icon": "kagi-map",
+    "path": kagiMap
+  },
+  {
+    "icon": "histogram",
+    "path": histogram
+  },
+  {
+    "icon": "chart-histogram",
+    "path": chartHistogram
+  },
+  {
+    "icon": "chart-graph",
+    "path": chartGraph
+  },
+  {
+    "icon": "change-date-sort",
+    "path": changeDateSort
+  },
+  {
+    "icon": "phonograph",
+    "path": phonograph
+  },
+  {
+    "icon": "phone",
+    "path": phone
+  },
+  {
+    "icon": "mouse",
+    "path": mouse
+  },
+  {
+    "icon": "microphone",
+    "path": microphone
+  },
+  {
+    "icon": "memory",
+    "path": memory
+  },
+  {
+    "icon": "master",
+    "path": master
+  },
+  {
+    "icon": "laptop",
+    "path": laptop
+  },
+  {
+    "icon": "lamp",
+    "path": lamp
+  },
+  {
+    "icon": "kettle",
+    "path": kettle
+  },
+  {
+    "icon": "HDD",
+    "path": HDD
+  },
+  {
+    "icon": "gamepad",
+    "path": gamepad
+  },
+  {
+    "icon": "flashlight",
+    "path": flashlight
+  },
+  {
+    "icon": "gopro",
+    "path": gopro
+  },
+  {
+    "icon": "hardDiskOne",
+    "path": hardDiskOne
+  },
+  {
+    "icon": "open",
+    "path": open
+  },
+  {
+    "icon": "press",
+    "path": press
+  },
+  {
+    "icon": "yep",
+    "path": yep
+  },
+  {
+    "icon": "zoom",
+    "path": zoom
+  },
+  {
+    "icon": "six",
+    "path": six
+  },
+  {
+    "icon": "pagoda",
+    "path": pagoda
+  },
+  {
+    "icon": "palace",
+    "path": palace
+  },
+  {
+    "icon": "shop",
+    "path": shop
+  },
+  {
+    "icon": "school",
+    "path": school
+  },
+  {
+    "icon": "tower",
+    "path": tower
+  }
 ]
 
 // 图标背景色
