@@ -11,7 +11,7 @@ import {
   Spin,
   Tag
 } from '@arco-design/web-react';
-import { IconCheckCircle, IconEmpty, IconLeft, IconSearch } from '@arco-design/web-react/icon';
+import { IconCheckCircle, IconEmpty, IconLeft, IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
 import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -40,6 +40,7 @@ import CreateDataSource, { type DataSourceHandle } from '@/components/CreateData
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { hasPermission, UserPermissionManager } from '@/utils/permission';
+import TagModal from './components/tagModal';
 import {
   appOptions,
   avatarBgColor,
@@ -76,6 +77,7 @@ const MyAppPage: React.FC = () => {
   const [createVisible, setCreateVisible] = useState<boolean>(false);
   const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [tagModalVisible, setTagModalVisible] = useState<boolean>(false);
 
   const [applicationEmpty, setAapplicationEmpty] = useState<boolean>(false); // 未创建应用
   const [applicationFilterEmpty, setAapplicationFilterEmpty] = useState<boolean>(false); // 应用列表过滤后为空，此时applicationEmpty为true
@@ -319,6 +321,17 @@ const MyAppPage: React.FC = () => {
                   </Option>
                 ))}
               </Select>
+
+              <Button
+                type="text"
+                icon={<IconSettings />}
+                style={{ color: '#21252e' }}
+                onClick={() => {
+                  setTagModalVisible(true);
+                }}
+              >
+                标签管理
+              </Button>
             </div>
           </div>
 
@@ -538,6 +551,15 @@ const MyAppPage: React.FC = () => {
           />
         </div>
       </Modal>
+      <TagModal
+        visible={tagModalVisible}
+        onOk={() => {
+          setTagModalVisible(false);
+        }}
+        onCancel={() => {
+          setTagModalVisible(false);
+        }}
+      />
     </div>
   );
 };
