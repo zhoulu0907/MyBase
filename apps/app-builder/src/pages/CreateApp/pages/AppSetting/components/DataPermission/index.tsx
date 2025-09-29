@@ -1,4 +1,4 @@
-import { Button, Divider, Popconfirm, Space, Tag } from '@arco-design/web-react';
+import { Button, Divider, Message, Popconfirm, Space, Tag } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
   updateDataGroupPermission,
@@ -395,8 +395,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         }
 
         const convertedCondition: AuthDataFilterVO = {
-          conditionGroup: groupIndex + 1, // 条件组编号从1开始
-          conditionOrder: conditionIndex + 1, // 条件顺序从1开始
           fieldId: andCondition.fieldId,
           fieldOperator: andCondition.op || '',
           fieldValue: fieldValue !== undefined ? fieldValue : '',
@@ -497,7 +495,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       // 假设 value 是类似 "entity-16935056057237504.29169768621965312" 的 key
       const key = String(value);
       const parts = key.split('.');
-      const entityId = parts[0].replace('entity-', '');
+      // const entityId = parts[0].replace('entity-', '');
       const fieldId = parts[1];
 
       // 查找对应的字段名（需要 appEntityFields 数据）
@@ -547,6 +545,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       setModelVisible(false);
       // 提交后刷新数据
       await getFieldsPermission();
+      Message.success('添加数据权限成功');
     } catch (error) {
       console.error('提交数据权限失败:', error);
     }
@@ -644,7 +643,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                                       ? opCodeOptions.find((option) => option.value === filter.fieldValueType)?.label ||
                                         filter.fieldValueType
                                       : ''}{' '}
-                                    {getVariable(filter.fieldValue, filter.fieldValueType)}
+                                    {getVariable(filter.fieldValue || '', filter.fieldValueType)}
                                   </>
                                 )}
                               </Tag>
