@@ -2,8 +2,13 @@ package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
+import com.cmsr.onebase.module.flow.context.InLoopDepth;
+import com.cmsr.onebase.module.flow.context.VariableConstants;
 import com.cmsr.onebase.module.flow.context.VariableContext;
+import com.cmsr.onebase.module.flow.context.condition.Condition;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
@@ -32,6 +37,9 @@ public class DataQueryMultipleNodeComponent extends NormalNodeComponent {
     @Autowired
     private DataMethodApiHelper dataMethodApiHelper;
 
+    @Autowired
+    private ConditionsProvider conditionsProvider;
+
     @Override
     public void process() throws Exception {
         log.info("DataQueryMultipleNodeComponent process");
@@ -39,7 +47,13 @@ public class DataQueryMultipleNodeComponent extends NormalNodeComponent {
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
         // 转换成数据方法参数
-        EntityFieldDataReqDTO reqDTO = dataMethodApiHelper.convertQueryReq(nodeData, variableContext);
+        List<Map<String, Object>> filterCondition = (List<Map<String, Object>>) MapUtils.getObject(nodeData, "filterCondition");
+        List<ConditionItem> conditionItems = Condition.createCondition(filterCondition);
+        InLoopDepth inLoopDepth = (InLoopDepth) nodeData.get(VariableConstants.IN_LOOP_DEPTH);
+        conditionItems = conditionsProvider.formatForExpression(this, conditionItems, inLoopDepth);
+        conditionItems = conditionsProvider.formatForValue(conditionItems, variableContext);
+        // 数据方法参数
+        EntityFieldDataReqDTO reqDTO = dataMethodApiHelper.convertQueryReq(nodeData, conditionItems);
         reqDTO.setNum(MapUtils.getInteger(nodeData, "maxCount", 500));
         List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOSS)) {

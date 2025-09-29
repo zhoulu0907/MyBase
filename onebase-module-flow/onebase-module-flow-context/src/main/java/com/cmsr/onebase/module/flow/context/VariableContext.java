@@ -1,6 +1,10 @@
 package com.cmsr.onebase.module.flow.context;
 
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
@@ -13,6 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date：2025/9/23 15:54
  */
 public class VariableContext {
+
+    private static JexlEngine jexl = new JexlBuilder().create();
 
     private Map<String, Object> inputParams = Collections.emptyMap();
 
@@ -61,26 +67,9 @@ public class VariableContext {
         if (expression == null) {
             return null;
         }
-
-        String[] split = StringUtils.split(expression, ".");
-        if (split == null || split.length == 0) {
-            return null;
-        }
-
-        // 获取标签对应的值
-        Object value = nodeVariables.get(split[0]);
-        if (value == null) {
-            return null;
-        }
-
-        // 只有表达式包含键名时才进行二级获取
-        if (split.length > 1 && value instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> mapValue = (Map<String, Object>) value;
-            return mapValue.get(split[1]);
-        }
-
-        return value;
+        JexlExpression exp = jexl.createExpression(expression);
+        MapContext jc = new MapContext(nodeVariables);
+        return exp.evaluate(jc);
     }
 
     /**
@@ -115,7 +104,6 @@ public class VariableContext {
             throw new IllegalStateException("变量 " + tag + " 不是List类型，实际类型: " + value.getClass().getName());
         }
 
-        @SuppressWarnings("unchecked")
         List<Object> list = (List<Object>) value;
 
         // 检查索引是否越界

@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.flow.context.express;
 import com.cmsr.onebase.framework.common.express.OpEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
@@ -35,9 +34,8 @@ public class ExpressionProvider {
     private JexlEngine jexlEngine;
 
     public ExpressionProvider() {
-        Map<String, Object> funcs = new HashedMap();
         JexlPermissions permissions = JexlPermissions.UNRESTRICTED;
-        this.jexlEngine = new JexlBuilder().permissions(permissions).namespaces(funcs).strict(true).silent(false).create();
+        this.jexlEngine = new JexlBuilder().permissions(permissions).arithmetic(new ExtJexlArithmetic(true)).silent(false).create();
     }
 
     /**

@@ -1,14 +1,16 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
-import com.cmsr.onebase.module.flow.component.utils.ValueProvider;
-import com.cmsr.onebase.module.flow.context.VariableContext;
+import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.condition.RuleItem;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.OrderDto;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +30,7 @@ import java.util.Map;
 public class DataMethodApiHelper {
 
     @Autowired
-    private ValueProvider valueProvider;
+    private ConditionsProvider conditionsProvider;
 
     /**
      * 将Map数据转换为EntityFieldDataReqDTO对象
@@ -36,7 +38,7 @@ public class DataMethodApiHelper {
      * @param data 包含查询条件的Map数据
      * @return 转换后的EntityFieldDataReqDTO对象
      */
-    public EntityFieldDataReqDTO convertQueryReq(Map<String, Object> data, VariableContext variableContext) {
+    public EntityFieldDataReqDTO convertQueryReq(Map<String, Object> data, List<ConditionItem> conditionItems) {
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
 
         // 设置实体ID
@@ -46,7 +48,7 @@ public class DataMethodApiHelper {
         }
 
         // 处理过滤条件
-        List<List<ConditionDTO>> conditionDTOList = processFilterCondition(data, variableContext);
+        List<List<ConditionDTO>> conditionDTOList = processFilterCondition(conditionItems);
         if (conditionDTOList != null && !conditionDTOList.isEmpty()) {
             reqDTO.setConditionDTO(conditionDTOList);
         }
@@ -63,52 +65,28 @@ public class DataMethodApiHelper {
     /**
      * 处理过滤条件
      *
-     * @param data 包含查询条件的Map数据
      * @return 转换后的条件DTO列表
      */
-    private List<List<ConditionDTO>> processFilterCondition(Map<String, Object> data, VariableContext variableContext) {
-        List<Map<String, Object>> filterCondition = (List<Map<String, Object>>) MapUtils.getObject(data, "filterCondition");
-        if (filterCondition == null || filterCondition.isEmpty()) {
-            return null;
-        }
-
-        List<List<ConditionDTO>> conditionDTOList = new ArrayList<>();
-
-        // 遍历外层filterCondition数组（OR关系）
-        for (Map<String, Object> outerCondition : filterCondition) {
-            List<Map<String, Object>> innerConditions = (List<Map<String, Object>>) MapUtils.getObject(outerCondition, "conditions");
-            if (innerConditions != null && !innerConditions.isEmpty()) {
-                List<ConditionDTO> innerConditionDTOList = new ArrayList<>();
-
-                // 遍历内层conditions数组（AND关系）
-                for (Map<String, Object> innerCondition : innerConditions) {
-                    ConditionDTO conditionDTO = new ConditionDTO();
-
-                    // 设置字段ID
-                    conditionDTO.setFieldId(MapUtils.getLong(innerCondition, "fieldId"));
-                    // 设置操作符
-                    conditionDTO.setOperator(MapUtils.getString(innerCondition, "op"));
-
-                    String operatorType = MapUtils.getString(innerCondition, "operatorType");
-                    Object value = MapUtils.getObject(innerCondition, "value");
-                    value = valueProvider.convertValue(operatorType, value, variableContext);
-                    // 设置字段值
-
-                    if (value != null) {
-                        List<String> fieldValueList = new ArrayList<>();
-                        fieldValueList.add(value.toString());
-                        conditionDTO.setFieldValue(fieldValueList);
-                    }
-                    innerConditionDTOList.add(conditionDTO);
+    private List<List<ConditionDTO>> processFilterCondition(List<ConditionItem> conditionItems) {
+        List<List<ConditionDTO>> conditionDTtoSS = new ArrayList<>();
+        for (ConditionItem conditionItem : conditionItems) {
+            List<ConditionDTO> conditionDtoS = new ArrayList<>();
+            for (RuleItem ruleItem : conditionItem.getRules()) {
+                ConditionDTO conditionDTO = new ConditionDTO();
+                conditionDTO.setFieldId(NumberUtils.toLong(ruleItem.getFieldId()));
+                conditionDTO.setOperator(ruleItem.getOp());
+                if (ruleItem.getValue() == null) {
+                    conditionDTO.setFieldValue(null);
+                } else if (ruleItem.getValue() instanceof List l) {
+                    conditionDTO.setFieldValue(l);
+                } else {
+                    conditionDTO.setFieldValue(List.of(ruleItem.getValue().toString()));
                 }
-
-                if (!innerConditionDTOList.isEmpty()) {
-                    conditionDTOList.add(innerConditionDTOList);
-                }
+                conditionDtoS.add(conditionDTO);
             }
+            conditionDTtoSS.add(conditionDtoS);
         }
-
-        return conditionDTOList.isEmpty() ? null : conditionDTOList;
+        return conditionDTtoSS;
     }
 
 

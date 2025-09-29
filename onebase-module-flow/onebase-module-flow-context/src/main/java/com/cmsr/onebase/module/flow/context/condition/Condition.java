@@ -31,7 +31,7 @@ public class Condition {
         return conditionItems;
     }
 
-    private static List<RuleItem> createRuleItems(List<Map<String, Object>> innerConditions) {
+    public static List<RuleItem> createRuleItems(List<Map<String, Object>> innerConditions) {
         if (CollectionUtils.isEmpty(innerConditions)) {
             return new ArrayList<>();
         }

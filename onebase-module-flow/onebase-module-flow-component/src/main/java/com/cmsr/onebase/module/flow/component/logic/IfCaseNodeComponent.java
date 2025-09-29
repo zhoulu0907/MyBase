@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.flow.component.logic;
 
-import com.cmsr.onebase.module.flow.component.utils.ValueProvider;
+import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
+import com.cmsr.onebase.module.flow.context.InLoopDepth;
+import com.cmsr.onebase.module.flow.context.VariableConstants;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Condition;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
@@ -29,7 +31,7 @@ import java.util.Map;
 public class IfCaseNodeComponent extends NodeBooleanComponent {
 
     @Autowired
-    private ValueProvider valueProvider;
+    private ConditionsProvider conditionsProvider;
 
     @Autowired
     private ExpressionProvider expressionProvider;
@@ -40,15 +42,18 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
+        InLoopDepth inLoopDepth = (InLoopDepth) nodeData.get(VariableConstants.IN_LOOP_DEPTH);
         //
         List<Map<String, Object>> filterCondition = (List<Map<String, Object>>) nodeData.get("filterCondition");
         List<ConditionItem> conditions = Condition.createCondition(filterCondition);
+        conditions = conditionsProvider.formatForExpression(this, conditions, inLoopDepth);
         OrExpresses orExpresses = convertToOrExpresses(conditions, variableContext);
         JexlExpression compiledExpression = expressionProvider.compileExpression(orExpresses);
         boolean evaluated = expressionProvider.evaluate(compiledExpression, variableContext.getNodeVariables());
         //
         return evaluated;
     }
+
 
     private OrExpresses convertToOrExpresses(List<ConditionItem> conditions, VariableContext variableContext) {
         List<AndExpresses> andExpressesList = new ArrayList<>();
@@ -64,11 +69,10 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
     private AndExpresses convertToAndExpresses(ConditionItem condition, VariableContext variableContext) {
         List<ExpressItem> expressItemList = new ArrayList<>();
         for (RuleItem ruleItem : condition.getRules()) {
-            Object value = valueProvider.convertValue(ruleItem.getOperatorType(), ruleItem.getValue(), variableContext);
             ExpressItem expressItem = new ExpressItem();
             expressItem.setKey(ruleItem.getFieldId());
             expressItem.setOp(ruleItem.getOp());
-            expressItem.setValue(value);
+            expressItem.setValue(ruleItem.getValue());
             expressItemList.add(expressItem);
         }
         AndExpresses andExpresses = new AndExpresses();
