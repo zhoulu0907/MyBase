@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/start.svg';
+import iconStartTime from '@/assets/flow/nodes/startTime.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -17,7 +17,7 @@ export const StartTimeNodeRegistry: FlowNodeRegistry = {
     addDisable: true // Start Node cannot be added
   },
   info: {
-    icon: iconStart,
+    icon: iconStartTime,
     description: '这是定时触发节点，用于设置启动工作流所需的信息。'
   },
   /**
