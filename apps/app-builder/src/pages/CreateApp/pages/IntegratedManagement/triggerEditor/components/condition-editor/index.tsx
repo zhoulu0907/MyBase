@@ -76,6 +76,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   useSignals();
   const [visible, setVisible] = useState<boolean>(false);
   const filterCondition = Form.useWatch('filterCondition', form);
+  const mockData = '{{20613609649310009.CEILING}}([[1.订单编号]][[3.下单日期]])';
 
   // 过滤为空的条件
   useEffect(() => {
@@ -617,7 +618,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }}
         </Form.List>
       </Form.Item>
-      <FormulaEditor visible={visible} onCancel={()=>setVisible(false)} onConfirm={handleConfirm} />
+      <FormulaEditor initialFormula = {mockData} visible={visible} onCancel={()=>setVisible(false)} onConfirm={handleConfirm} />
     </div>
   );
 };
