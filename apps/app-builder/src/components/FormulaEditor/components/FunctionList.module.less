@@ -53,20 +53,22 @@
 
 .listSection {
   flex: 1;
-  overflow-y: auto;
+  :global(.arco-list) {
+    height: 343px;
+    overflow-y: auto;
+    .arco-list-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
 
-  :global(.arco-list-item) {
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+      &:hover {
+        background-color: #f2f3f5;
+      }
 
-    &:hover {
-      background-color: #f2f3f5;
-    }
-
-    &:last-child {
-      border-bottom: none;
+      &:last-child {
+        border-bottom: none;
+      }
     }
   }
 

@@ -24,10 +24,11 @@ import {
 } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NodeType } from '../../nodes/const';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
+import { FormulaEditor } from '@/components/FormulaEditor';
 
 const Option = Select.Option;
 
@@ -73,12 +74,13 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   variableOptions
 }) => {
   useSignals();
-
+  const [visible, setVisible] = useState<boolean>(false);
   const filterCondition = Form.useWatch('filterCondition', form);
+  const mockData = '{{20613609649310009.CEILING}}([[1.订单编号]][[3.下单日期]])';
 
   // 过滤为空的条件
   useEffect(() => {
-    console.log('filterCondition:  ', filterCondition);
+    // console.log('filterCondition:  ', filterCondition);
     if (Array.isArray(filterCondition)) {
       filterCondition.forEach((item: any, index: number) => {
         if (Array.isArray(item.conditions)) {
@@ -88,8 +90,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }
         }
       });
+      form.setFieldValue('filterCondition', filterCondition);
     }
-    form.setFieldValue('filterCondition', filterCondition);
   }, []);
 
   useEffect(() => {
@@ -419,8 +421,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   };
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
-    // console.log(params.value);
-
     if (params.value) {
       const parentId = params.value.split('.')[0];
       const parentNode = options.find((item) => item.key == parentId);
@@ -432,6 +432,10 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     return '';
   };
 
+  const handleConfirm = (formulaData: any) => {
+    setVisible(false);
+    console.log("formulaData",formulaData)
+  }
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item label={label} required={required}>
@@ -551,7 +555,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
-                                                  <Input placeholder="请输入公式" />
+                                                  {/* <Input placeholder="请输入公式" /> */}
+                                                  <Button onClick={()=>setVisible(true)} long>fx编辑公式</Button>
                                                 </Form.Item>
                                               )}
                                             </Grid.Col>
@@ -613,6 +618,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           }}
         </Form.List>
       </Form.Item>
+      <FormulaEditor initialFormula = {mockData} visible={visible} onCancel={()=>setVisible(false)} onConfirm={handleConfirm} />
     </div>
   );
 };

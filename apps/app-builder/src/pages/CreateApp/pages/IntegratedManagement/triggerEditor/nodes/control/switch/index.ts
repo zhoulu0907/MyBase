@@ -1,5 +1,5 @@
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
-import iconSwitch from '@/assets/flow/nodes/switch.svg';
+import iconControl from '@/assets/flow/nodes/switch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { defaultFormMeta } from '../../default-form-meta';
@@ -11,7 +11,7 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
   title: '分支节点',
   category: 'control',
   info: {
-    icon: iconSwitch,
+    icon: iconControl,
     description: '连接多个下游分支。如果满足设定的条件，则仅执行相应的分支。'
   },
   meta: {

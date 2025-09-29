@@ -1,4 +1,4 @@
-import iconLoop from '@/assets/flow/nodes/loop.svg';
+import iconControl from '@/assets/flow/nodes/loop.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -9,7 +9,7 @@ export const LoopNodeRegistry: FlowNodeRegistry = {
   title: '循环节点',
   category: 'control',
   info: {
-    icon: iconLoop,
+    icon: iconControl,
     description: '用于通过设置迭代次数和逻辑来重复执行一系列任务'
   },
   meta: {

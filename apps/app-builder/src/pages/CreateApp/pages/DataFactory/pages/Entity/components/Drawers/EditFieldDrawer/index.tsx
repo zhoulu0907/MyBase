@@ -1,8 +1,9 @@
-import { useAppStore } from '@/store/store_app';
-import { Button, Checkbox, Drawer, Form, Input, Message, Select, Space, Spin } from '@arco-design/web-react';
-import { getFieldById, updateField } from '@onebase/app';
-import { ENTITY_FIELD_TYPE, FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
+import { useAppStore } from '@/store/store_app';
+import { Button, Drawer, Form, Input, Message, Select, Space, Spin } from '@arco-design/web-react';
+import { deleteField, getFieldById, updateField } from '@onebase/app';
+import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
+import { DeleteConfirmModal } from '../../Modals';
 import styles from './EditFieldDrawer.module.less';
 
 interface FieldDetail {
@@ -35,6 +36,8 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
   const [fieldDetail, setFieldDetail] = useState<FieldDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // 字段类型选项
   const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) => ({
@@ -137,113 +140,153 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
     }
   };
 
-  return (
-    <Drawer
-      title="数据字段配置"
-      visible={visible}
-      onCancel={() => setVisible(false)}
-      width={500}
-      className={styles['edit-field-drawer']}
-      footer={
-        <div className={styles['drawer-footer']}>
-          <Space>
-            <Button onClick={() => setVisible(false)}>取消</Button>
-            <Button type="primary" loading={submitting} onClick={handleSubmit}>
-              确定
-            </Button>
-          </Space>
-        </div>
+  const openDeleteModal = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    setDeleteLoading(true);
+
+    try {
+      const res = await deleteField(fieldDetail?.id || '');
+      if (res) {
+        Message.success('删除成功');
+        onSuccess?.();
       }
-    >
-      {loading ? (
-        <div className={styles['loading-container']}>
-          <Spin size={40} />
-          <p>加载中...</p>
-        </div>
-      ) : fieldDetail ? (
-        <Form form={form} layout="vertical" className={styles['edit-form']}>
-          {/* 基本信息 */}
-          <div className={styles['section']}>
-            <h3 className={styles['form-section-title']}>基本设置</h3>
+    } catch (error) {
+      console.error('删除字段失败:', error);
+    } finally {
+      setDeleteModalVisible(false);
+      setVisible(false);
+      setDeleteLoading(false);
+    }
+  };
 
-            <Form.Item
-              label="字段名称"
-              field="fieldName"
-              rules={[{ required: true, message: '请输入字段名称' }, { validator: validateFieldName }]}
-            >
-              <Input placeholder="请输入字段名称" disabled />
-            </Form.Item>
-
-            <Form.Item
-              label="展示名称"
-              field="displayName"
-              rules={[{ required: true, message: '请输入展示名称' }, { validator: validateDisplayName }]}
-            >
-              <Input placeholder="请输入展示名称" />
-            </Form.Item>
-
-            <Form.Item label="字段描述" field="description">
-              <Input.TextArea placeholder="请输入字段描述" rows={3} />
-            </Form.Item>
-
-            <Form.Item label="数据类型" field="fieldType" rules={[{ required: true, message: '请选择数据类型' }]}>
-              <Select
-                placeholder="请选择数据类型"
-                options={fieldTypeOptions}
-                disabled={fieldDetail.isSystemField === FIELD_TYPE.SYSTEM}
-              />
-            </Form.Item>
+  return (
+    <>
+      <Drawer
+        title="数据字段配置"
+        visible={visible}
+        onCancel={() => setVisible(false)}
+        width={500}
+        mask={false}
+        className={styles['edit-field-drawer']}
+        footer={
+          <>
+            <Button type="text" status="danger" onClick={() => openDeleteModal()}>
+              删除
+            </Button>
+            <Space>
+              <Button onClick={() => setVisible(false)}>取消</Button>
+              <Button type="primary" loading={submitting} onClick={handleSubmit}>
+                确定
+              </Button>
+            </Space>
+          </>
+        }
+      >
+        {loading ? (
+          <div className={styles['loading-container']}>
+            <Spin size={40} />
+            <p>加载中...</p>
           </div>
+        ) : fieldDetail ? (
+          <Form form={form} layout="vertical" className={styles['edit-form']}>
+            {/* 基本信息 */}
+            <div className={styles['section']}>
+              <h3 className={styles['form-section-title']}>基本设置</h3>
 
-          {/* 字段属性 */}
-          <div className={styles['section']}>
-            <h3 className={styles['form-section-title']}>字段属性</h3>
+              <Form.Item
+                label="字段名称"
+                field="fieldName"
+                rules={[{ required: true, message: '请输入字段名称' }, { validator: validateFieldName }]}
+              >
+                <Input placeholder="请输入字段名称" disabled />
+              </Form.Item>
 
-            <Form.Item label="默认值" field="defaultValue">
-              <Input placeholder="请输入默认值" />
-            </Form.Item>
+              <Form.Item
+                label="展示名称"
+                field="displayName"
+                rules={[{ required: true, message: '请输入展示名称' }, { validator: validateDisplayName }]}
+              >
+                <Input placeholder="请输入展示名称" />
+              </Form.Item>
 
-            <Form.Item label="唯一性" field="isUnique" triggerPropName="checked">
-              <Checkbox>设置为唯一字段</Checkbox>
-            </Form.Item>
+              <Form.Item label="数据类型" field="fieldType" rules={[{ required: true, message: '请选择数据类型' }]}>
+                <Select
+                  placeholder="请选择数据类型"
+                  options={fieldTypeOptions}
+                  disabled={fieldDetail.isSystemField === FIELD_TYPE.SYSTEM}
+                />
+              </Form.Item>
 
-            <Form.Item label="空值约束" field="allowNull" triggerPropName="checked">
-              <Checkbox>允许空值</Checkbox>
-            </Form.Item>
+              <Form.Item label="字段描述" field="description">
+                <Input.TextArea placeholder="请输入字段描述" rows={3} />
+              </Form.Item>
 
-            <Form.Item label="字段约束" field="constraints">
-              <Input.TextArea placeholder="请输入字段约束" rows={2} />
-            </Form.Item>
-          </div>
-
-          {/* 字段信息 */}
-          <div className={styles['section']}>
-            <h3 className={styles['form-section-title']}>字段信息</h3>
-
-            <div className={styles['info-item']}>
-              <span className={styles['info-label']}>字段类型：</span>
-              <span className={styles['info-value']}>
-                {FIELD_TYPE_LABEL[fieldDetail.isSystemField as keyof typeof FIELD_TYPE_LABEL]}
-              </span>
+              <Form.Item label="默认值" field="defaultValue">
+                <Input placeholder="请输入默认值" />
+              </Form.Item>
             </div>
 
-            <div className={styles['info-item']}>
-              <span className={styles['info-label']}>所属实体：</span>
-              <span className={styles['info-value']}>{fieldDetail.entityName}</span>
-            </div>
+            {/* 字段属性 -- 暂时隐藏 */}
+            {/* <div className={styles['section']}>
+              <h3 className={styles['form-section-title']}>字段属性</h3>
 
-            <div className={styles['info-item']}>
-              <span className={styles['info-label']}>实体ID：</span>
-              <span className={styles['info-value']}>{fieldDetail.entityId}</span>
-            </div>
+              <Form.Item label="默认值" field="defaultValue">
+                <Input placeholder="请输入默认值" />
+              </Form.Item>
+
+              <Form.Item label="唯一性" field="isUnique" triggerPropName="checked">
+                <Checkbox>设置为唯一字段</Checkbox>
+              </Form.Item>
+
+              <Form.Item label="空值约束" field="allowNull" triggerPropName="checked">
+                <Checkbox>允许空值</Checkbox>
+              </Form.Item>
+
+              <Form.Item label="字段约束" field="constraints">
+                <Input.TextArea placeholder="请输入字段约束" rows={2} />
+              </Form.Item>
+            </div> */}
+
+            {/* 字段信息 -- 暂时隐藏 */}
+            {/* <div className={styles['section']}>
+              <h3 className={styles['form-section-title']}>字段信息</h3>
+
+              <div className={styles['info-item']}>
+                <span className={styles['info-label']}>字段类型：</span>
+                <span className={styles['info-value']}>
+                  {FIELD_TYPE_LABEL[fieldDetail.isSystemField as keyof typeof FIELD_TYPE_LABEL]}
+                </span>
+              </div>
+
+              <div className={styles['info-item']}>
+                <span className={styles['info-label']}>所属实体：</span>
+                <span className={styles['info-value']}>{fieldDetail.entityName}</span>
+              </div>
+
+              <div className={styles['info-item']}>
+                <span className={styles['info-label']}>实体ID：</span>
+                <span className={styles['info-value']}>{fieldDetail.entityId}</span>
+              </div>
+            </div> */}
+          </Form>
+        ) : (
+          <div className={styles['empty-container']}>
+            <p>未找到字段信息</p>
           </div>
-        </Form>
-      ) : (
-        <div className={styles['empty-container']}>
-          <p>未找到字段信息</p>
-        </div>
-      )}
-    </Drawer>
+        )}
+      </Drawer>
+
+      <DeleteConfirmModal
+        content="确定要删除这个字段吗？删除后无法恢复。"
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDelete}
+        confirmLoading={deleteLoading}
+      />
+    </>
   );
 };
 

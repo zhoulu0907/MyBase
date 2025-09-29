@@ -1,4 +1,4 @@
-import iconControl from '@/assets/flow/nodes/control.svg';
+import iconControl from '@/assets/flow/nodes/switch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -21,9 +21,6 @@ export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
      */
     draggable: false,
     deleteDisable: true,
-    style: {
-      width: 240
-    }
   },
   info: {
     icon: iconControl,

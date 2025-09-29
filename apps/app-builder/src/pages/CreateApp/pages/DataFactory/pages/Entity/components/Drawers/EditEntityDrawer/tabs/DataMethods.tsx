@@ -72,8 +72,8 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
           <Collapse expandIconPosition="right" bordered={false} defaultActiveKey={methods[0].id}>
             {methods.map((method) => (
               <Collapse.Item
-                key={method.id}
-                name={method.id}
+                key={method.id || method.methodCode}
+                name={method.id || method.methodCode}
                 header={
                   <div className={styles['method-header']}>
                     <span className={styles['method-name']}>{method.methodName}</span>
@@ -99,7 +99,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
                           {param.required && (
                             <Tag size="small" color="red">
                               必填
-                            </Tag>
+                            </Tag> 
                           )}
                           <span className={styles['param-desc']}> - {param.description}</span>
                         </div>

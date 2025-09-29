@@ -46,6 +46,7 @@ const AddMembers = (props: IProps) => {
   ]);
   const isSelectDepartment = title === 'specifiedDepartment';
   const isSelectPerson = title === 'specifiedPerson';
+  const [initialSelectedMembers, setInitialSelectedMembers] = useState<any[]>(selectedMembers);
 
   useEffect(() => {
     if (visible) {
@@ -53,6 +54,14 @@ const AddMembers = (props: IProps) => {
       setSelectedKeys(selectedMembers.map((member) => member.key));
     }
   }, [selectedMembers, visible]);
+
+  useEffect(() => { 
+    if (visible) {
+      setInitialSelectedMembers(selectedMembers);
+      // 当弹窗可见时，更新面包屑
+      setBreadcrumbs([{ key: renderData.key || '-', title: renderData.title || '根目录' }]);
+    }
+  }, [visible, initialSelectedMembers])
 
   const removeMember = (key: string) => {
     const newKeys = selectedKeys.filter((k) => k !== key);
@@ -68,12 +77,12 @@ const AddMembers = (props: IProps) => {
   const resetState = useCallback(() => {
     // 重置面包屑
     setBreadcrumbs([{ key: renderData.key || '-', title: renderData.title || '根目录' }]);
-    // 清空已选中的用户
-    setSelectedKeys([]);
+    // 恢复到初始选中的成员
+    setSelectedKeys(initialSelectedMembers.map((member) => member.key));
     if (onUpdateSelectedMembers) {
-      onUpdateSelectedMembers([]);
+      onUpdateSelectedMembers(initialSelectedMembers);
     }
-  }, [renderData, onUpdateSelectedMembers]);
+  }, [renderData, initialSelectedMembers, onUpdateSelectedMembers]);
 
   // 点击取消时的处理函数
   const handleCancel = () => {

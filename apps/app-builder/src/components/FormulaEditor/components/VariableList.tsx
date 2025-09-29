@@ -1,18 +1,23 @@
 import { Input, List, Tag, Button } from '@arco-design/web-react';
 import { IconSearch, IconFolder, IconSwap } from '@arco-design/web-react/icon';
 import { useCallback } from 'react';
-
-import type { Variable } from '../index';
+import LightText from './LightText';
+import type { Variable } from '../utils/types';
 import styles from './VariableList.module.less';
 
 interface VariableListProps {
-  variables: Variable[];
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-  onInsertVariable: (variable: Variable) => void;
+  variables: Variable[]; //变量数组，包含所有可展示的变量
+  searchValue: string;  // 搜索框的值，用于过滤变量列表
+  onSearchChange: (value: string) => void; // 搜索框值变化回调，用于更新搜索值
+  onInsertVariable: (variable: Variable) => void;  // 插入变量回调，用于将选中的变量插入到公式编辑器中
 }
 
 export function VariableList({ variables, searchValue, onSearchChange, onInsertVariable }: VariableListProps) {
+
+  /**
+   * 处理搜索框值变化
+   * @param value - 搜索框输入的值
+   */
   const handleSearchChange = useCallback(
     (value: string) => {
       onSearchChange(value);
@@ -20,6 +25,10 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
     [onSearchChange]
   );
 
+  /**
+   * 处理变量项点击
+   * @param variable - 点击的变量项
+   */
   const handleVariableClick = useCallback(
     (variable: Variable) => {
       onInsertVariable(variable);
@@ -27,6 +36,11 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
     [onInsertVariable]
   );
 
+  /**
+   * 根据变量类型返回对应的颜色
+   * @param type - 变量的类型
+   * @returns 颜色名称
+   */
   const getTypeColor = useCallback((type: string) => {
     const colorMap: Record<string, string> = {
       文本: 'blue',
@@ -42,7 +56,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
       <div className={styles.searchSection}>
         <Input
           prefix={<IconSearch />}
-          placeholder="Q 搜索变量"
+          placeholder="搜索变量"
           value={searchValue}
           onChange={handleSearchChange}
           className={styles.searchInput}
@@ -71,7 +85,9 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
               onClick={() => handleVariableClick(variable)}
             >
               <div className={styles.variableInfo}>
-                <div className={styles.variableName}>{variable.name}</div>
+                <div className={styles.variableName}>
+                  <LightText text={variable.name} searchValue={searchValue} />
+                </div>
                 <Tag color={getTypeColor(variable.type)} size="small">
                   {variable.type}
                 </Tag>

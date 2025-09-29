@@ -57,6 +57,7 @@ const RoleInfo = (props: IProps) => {
       name: keywords
     };
     const res = await listApplicationMenu(params);
+    console.log('获取菜单 res:', res);
     setMuneList(res);
     setMuneLoading(false);
     handleSelectMenu(findFirstPage(res).id);
@@ -66,6 +67,7 @@ const RoleInfo = (props: IProps) => {
   const handleSelectMenu = async (value: string) => {
     setActiveTab('1');
     setActiveMenuId(value);
+    console.log('选择菜单获取权限数据 value:', value);
     // await getApplicationPermission(value);
   };
 

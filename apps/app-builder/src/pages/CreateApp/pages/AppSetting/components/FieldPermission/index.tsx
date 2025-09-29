@@ -44,7 +44,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
     }
-    console.log('字段权限 menuId: ', menuId);
   }, [appId, menuId, roleId]);
 
   useEffect(() => {
@@ -177,8 +176,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               const getChangeFieldValue = Object.values(value)[0];
               const getChangeFieldName = getChangeFieldKey[0].trim().split('.');
 
-              console.log(changeField, 'changeField');
-
               const updateField = fieldPermission?.map((field) => {
                 if (field.fieldId === getChangeFieldName[1]) {
                   return {
@@ -250,7 +247,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                 </Row>
                 <Divider />
                 {fieldPermission?.map((field) => {
-                  console.log(field);
                   return (
                     <Row className={styles.rowItem} key={field.fieldId}>
                       <Col span={8}>
