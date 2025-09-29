@@ -27,10 +27,11 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
   const {form} = Form.useFormContext();
   const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${props.id}`;
   const [advanceVisible, setAdvanceVisible] = useState(false); //高级选项popup
-  const [currentSelectUser, setCurrentSelectUser] = useState<number>();
+  const [currentSelectUser, setCurrentSelectUser] = useState<string>();
+  const [currentSelectUserID, setCurrentSelectUserID] = useState<number>();
 
   useEffect(() => {
-    if (runtime === true) {
+    if (runtime === true && keywords === '') {
       getUserData('');
     }
   }, [keywords]);
@@ -79,12 +80,13 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
 
   const handleSelectChange = (value: number) => {
     const user = userData.find((item) => item.id === value);
-    form.setFieldValue(fieldName, user?.nickname);
-    setCurrentSelectUser(value);
+    setCurrentSelectUser(user?.nickname);
+    setCurrentSelectUserID(value);
   }
 
-  const handleOKModal = (values: any) => {
-    form.setFieldValue(fieldName, values);
+  const handleOKModal = (user: any) => {
+    form.setFieldValue(fieldName, user.value);
+    setCurrentSelectUser(user.name);
     setAdvanceVisible(false);
   };
 
@@ -155,9 +157,9 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
             return (
                 <span className='renderFormat'>
                     <Avatar size={24} className='avatar'>
-                      {form.getFieldValue(fieldName)[0]}
+                      {currentSelectUser?.[0]}
                     </Avatar>
-                    <span className='displayName'> {form.getFieldValue(fieldName)} </span>
+                    <span className='displayName'> {currentSelectUser} </span>
                     <IconClose className='closeBtn'
                         onClick={(e) => {
                           // 阻止下拉框弹出
@@ -170,7 +172,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
       <AdvanceSelectModal  
           runtime={runtime}
           visible={advanceVisible}
-          currentSelectUser={currentSelectUser}
+          currentSelectUserID={currentSelectUserID}
           onCancel={() => setAdvanceVisible(false)}
           onOk={(value: any) => handleOKModal(value)}/>
     </div>

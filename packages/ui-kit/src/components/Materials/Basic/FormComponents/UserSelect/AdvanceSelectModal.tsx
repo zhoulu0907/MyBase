@@ -16,7 +16,7 @@ const DeptTab = '2';
 interface AdvanceSelectModalProps {
     runtime: boolean | undefined;
     visible: boolean;
-    currentSelectUser: number | undefined;
+    currentSelectUserID: number | undefined;
     onCancel: any;
     onOk: any;
 }
@@ -24,7 +24,7 @@ interface AdvanceSelectModalProps {
 const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
   runtime,
   visible,
-  currentSelectUser,
+  currentSelectUserID,
   onCancel,
   onOk
 }) =>{
@@ -56,7 +56,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
         setSelectUserName('');
         setSelectUser(undefined);
         setSelectedMembers([]);
-    },[currentSelectUser])
+    },[currentSelectUserID])
 
     const getUserData = async (inputValue: string) => {
         setFetching(true);
@@ -162,7 +162,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
                 <>
                     <span className='footerSpan'>单选, 已选择「{selectUserName}」</span>
                     <Button onClick={onCancel}>取消</Button>
-                    <Button onClick={() => onOk(selectUserName)} type="primary">确定</Button>
+                    <Button disabled={(selectedMembers.length === 0 && !selectUser)} onClick={() => onOk({name: selectUserName, value: selectUser || selectedMembers[0].key})} type="primary">确定</Button>
                 </>
             }
       >
