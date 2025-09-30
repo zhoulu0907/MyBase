@@ -1,5 +1,10 @@
 import AppIconSVG from '@/assets/images/app_icon.svg';
 import AvatarSVG from '@/assets/images/avatar.svg';
+import TabMiddleBgSVG from '@/assets/images/tab_bg.svg';
+import TabFirstBgSVG from '@/assets/images/tab_first_bg.svg';
+import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
+import TabFirstSelectBgSVG from '@/assets/images/tab_first_select_bg.svg';
+import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';
@@ -16,6 +21,9 @@ const { Header } = Layout;
 interface HeaderProps {
   className?: string;
 }
+
+// tabs标题顺序，获取当前选型卡下标；
+const tabsList = ['data-factory', 'page-manager', 'integrated-management', 'app-setting', 'app-release'];
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
@@ -38,9 +46,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const [appIcon, setAppIcon] = useState('');
   const [iconColor, setIconColor] = useState('');
   const [appStatus, setAppStatus] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(tabsList.findIndex(tab => location.pathname.includes(tab)));
 
   useEffect(() => {
     setActiveTab(getTabKeyFromPath(location.pathname));
+    setActiveIndex(tabsList.findIndex(tab => location.pathname.includes(tab)));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -156,11 +166,45 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             }
           }}
           size="large"
+          inkBarSize={{
+            width: 0,
+            height: 0
+          }}
+          renderTabTitle={(tabTitle, info) => {
+            const currentIndex = tabsList.findIndex(tab => tab === info.key);
+            const tabBg = () => {
+              if (info.isActive) {
+                if (info.key === tabsList[0]) {
+                  return TabFirstSelectBgSVG;
+                } else if (info.key === tabsList[tabsList.length - 1]) {
+                  return TabLastSelectBgSVG;
+                } else {
+                  return TabMiddleSelectBgSVG;
+                }
+              } else {
+                if (currentIndex >= activeIndex) return;
+                return info.key === tabsList[0] ? TabFirstBgSVG : TabMiddleBgSVG;
+              }
+            }
+            return (
+              <span style={{
+                position: 'relative'
+              }}>
+                {tabTitle}
+                <img src={tabBg()} style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: -1
+                }} />
+              </span>
+            )
+          }}
         >
           <Tabs.TabPane key="data-factory" title={t('createApp.dataFactory')} />
           <Tabs.TabPane key="page-manager" title={t('createApp.pageManager')} />
           <Tabs.TabPane key="integrated-management" title={t('createApp.integratedManagement')} />
-
           <Tabs.TabPane key="app-setting" title={t('createApp.appSetting')} />
           <Tabs.TabPane key="app-release" title={t('createApp.appRelease')} />
         </Tabs>

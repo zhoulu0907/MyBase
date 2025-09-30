@@ -105,7 +105,7 @@ const PageManagerPage: FC = () => {
     nodes.reduce((found, node) => {
       if (found) return found;
       if (Number(node.menuType) === MenuType.PAGE) return node;
-      setExpandedKeys((prev) => [...prev, node.menuCode]);
+      setExpandedKeys((prev) => [...prev, node.id]);
       return node.children ? findFirstPage(node.children) : undefined;
     }, undefined);
 
@@ -401,27 +401,27 @@ const PageManagerPage: FC = () => {
       <Layout style={{ height: '100%' }}>
         <Layout>
           <Sider className={styles.sider}>
-            <div className={styles.siderHeader}>
-              <Input
-                style={{
-                  width: 120,
-                  border: '1px solid #dedede',
-                  borderRadius: 3
-                }}
-                allowClear
-                suffix={<IconSearch />}
-                placeholder={t('common.search')}
-                onChange={debouncedSearch}
-              />
+            <div className={styles.siderTitle}>
+              所有页面
               <Dropdown droplist={createMenuDropList} trigger="click" position="bl">
-                <Button type="primary" icon={<IconPlus />} />
+                <Button type="text" icon={<IconPlus />} style={{ padding: 6 }}>新建</Button>
               </Dropdown>
+            </div>
+            <div className={styles.siderHeader}>
+              <div className={styles.siderHeaderInput}>
+                <Input
+                  allowClear
+                  suffix={<IconSearch />}
+                  placeholder={t('createApp.searchPlaceHolder')}
+                  onChange={debouncedSearch}
+                />
+              </div>
             </div>
 
             <Tree
               blockNode
-              draggable
-              selectedKeys={[curMenu?.menuCode!]}
+              draggable={undefined}
+              selectedKeys={[curMenu?.id!]}
               treeData={treeData}
               className={styles.tree}
               showLine={false}
@@ -436,7 +436,7 @@ const PageManagerPage: FC = () => {
                 width: '200px',
                 overflow: 'hidden',
                 boxSizing: 'border-box',
-                paddingRight: 12
+                padding: '0 8px'
               }}
             />
           </Sider>

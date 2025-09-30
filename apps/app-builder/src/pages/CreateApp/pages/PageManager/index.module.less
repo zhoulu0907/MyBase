@@ -16,13 +16,33 @@
     height: 100%;
     box-sizing: border-box;
 
-    .siderHeader {
-      width: 100%;
+    .siderTitle {
+      color: #1d2129;
+      font-family: 'PingFang SC';
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 24px;
+      padding: 8px 12px;
+      box-sizing: border-box;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px;
+      border-bottom: 1px solid #f2f3f5;
+    }
+
+    .siderHeader {
+      width: 100%;
+      padding: 4px 12px;
       box-sizing: border-box;
+
+      .siderHeaderInput {
+        border-radius: 16px;
+
+        & span {
+          border-radius: 16px;
+        }
+      }
     }
   }
 

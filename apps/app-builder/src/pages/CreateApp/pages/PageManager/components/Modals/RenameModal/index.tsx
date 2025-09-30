@@ -31,6 +31,7 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
       title={title}
       visible={visible}
       onOk={handleRename}
+      closable={!visibleMenuIcon}
       onCancel={() => {
         setVisible(false);
       }}

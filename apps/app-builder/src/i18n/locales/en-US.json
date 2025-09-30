@@ -157,6 +157,7 @@
     "createPage": "Create Page",
     "createForm": "Create Form",
     "createGroup": "Create Group",
-    "copyPage": "Copy Page"
+    "copyPage": "Copy Page",
+    "searchPlaceHolder": "Search Page Or Group"
   }
 }

@@ -40,6 +40,7 @@ import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
+import { appIconPathMapping } from '@/components/CreateApp/const';
 import styles from './index.module.less';
 
 const BreadcrumbItem = Breadcrumb.Item;
@@ -295,6 +296,7 @@ export default function EditorHeader() {
 
         <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
           <i className={`iconfont ${appIcon || 'icon-box'}`} />
+          <img src={appIconPathMapping.find(icon => icon.icon === appIcon)?.path || ''} />
         </div>
 
         <Breadcrumb>
