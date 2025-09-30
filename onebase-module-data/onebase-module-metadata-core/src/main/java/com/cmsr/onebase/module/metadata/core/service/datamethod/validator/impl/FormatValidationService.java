@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 /**
  * 格式校验服务
- * 
+ *
  * 校验字段格式是否符合规则（正则表达式、邮箱、手机号等）
  *
  */
@@ -37,7 +37,7 @@ public class FormatValidationService implements ValidationService {
 
         // 查询格式规则
         List<MetadataValidationFormatDO> rules = formatRepository.findByFieldId( fieldId);
-        
+
         if (rules.isEmpty()) {
             return; // 没有格式规则，跳过校验
         }
@@ -86,7 +86,7 @@ public class FormatValidationService implements ValidationService {
             if (flags.contains("m")) regexFlags |= Pattern.MULTILINE;
             if (flags.contains("s")) regexFlags |= Pattern.DOTALL;
         }
-        
+
         try {
             Pattern compiledPattern = Pattern.compile(pattern, regexFlags);
             return compiledPattern.matcher(value).matches();
@@ -96,94 +96,6 @@ public class FormatValidationService implements ValidationService {
         }
     }
 
-
-    /**
-     * 校验地址格式
-     */
-    private boolean isValidAddress(String addr){
-        return false;
-    }
-
-    /**
-     * 校验数字格式
-     */
-    private boolean isValidNumber(String number){
-        return false;
-    }
-
-
-    /**
-     * 校验日期格式
-     */
-    private boolean isValidDate(String date){
-        return false;
-    }
-
-    /**
-     * 校验日期时间格式
-     */
-    private boolean isValidDatetime(String dateTime){
-        return false;
-    }
-
-    /**
-     * 校验布尔值格式
-     */
-    private boolean isValidBool(String bool){
-        return false;
-    }
-    /**
-     * 校验文件格式
-     */
-    private boolean isValidFile(String file){
-        return false;
-    }
-
-    /**
-     * 校验图片格式
-     */
-    private boolean isValidImage(String image){
-        return false;
-    }
-
-    /**
-     * 校验地理位置格式
-     */
-    private boolean isValidGeography(String geography){
-        return false;
-    }
-
-    /**
-     * 校验密码格式
-     */
-    private boolean isValidPasswrod(String password){
-        return false;
-    }
-
-    /**
-     * 校验加密字段格式
-     */
-    private boolean isValidEncryped(String encryption){
-        return false;
-    }
-
-    /**
-     * 校验聚合统计格式
-     */
-    private boolean isValidAggregate(String aggregate){
-        return false;
-    }
-
-    /**
-     * 校验唯一标识格式
-     */
-    private boolean isValidId(String id){
-        return false;
-    }
-
-
-
-
     @Override
     public String getValidationType() {
         return "FORMAT";
@@ -191,9 +103,7 @@ public class FormatValidationService implements ValidationService {
 
     @Override
     public boolean supports(String fieldType) {
-        // 格式校验主要支持字符串类型
-        return "VARCHAR".equalsIgnoreCase(fieldType) || 
-               "TEXT".equalsIgnoreCase(fieldType) ||
-               "CHAR".equalsIgnoreCase(fieldType);
+        // 格式校验支持所有字段类型
+        return true;
     }
 }
