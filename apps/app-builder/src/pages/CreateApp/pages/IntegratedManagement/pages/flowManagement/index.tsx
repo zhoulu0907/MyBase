@@ -208,7 +208,7 @@ const FlowManagementPage: React.FC = () => {
     setLoading(true);
     const req: ListFlowMgmtReq = {
       applicationId: appId ? appId : curAppId,
-      pageNum: pageNo,
+      pageNo: pageNo,
       pageSize: pageSize || 8,
       processName: processName ? processName : searchFlowProcessName,
       processStatus: processStatus ? processStatus : searchFlowProccessStatus,

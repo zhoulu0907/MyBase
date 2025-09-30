@@ -25,7 +25,7 @@ export enum TriggerType {
 }
 
 export interface ListFlowMgmtReq {
-  pageNum: number;
+  pageNo: number;
   pageSize: number;
 
   applicationId: string;
