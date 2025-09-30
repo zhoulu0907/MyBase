@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.build.graph;
 
 import com.cmsr.onebase.module.flow.context.condition.RuleItem;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,6 +19,7 @@ import java.util.Set;
  * @Date：2025/9/29 20:33
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Graph {
 
     private List<GraphNode> nodes;
@@ -33,24 +35,24 @@ public class Graph {
         if (CollectionUtils.isEmpty(nodes)) {
             return;
         }
-        
+
         for (GraphNode node : nodes) {
             // 处理过滤条件中的字段
             processFilterConditionsForFieldId(node.getData().getFilterCondition(), fieldIds);
-            
+
             // 处理节点数据中的字段
             processFieldsForFieldId(node.getData().getFields(), fieldIds);
-            
+
             // 递归处理子节点
             recursionFindFieldId(node.getBlocks(), fieldIds);
         }
     }
-    
+
     private void processFilterConditionsForFieldId(List<GraphNodeDataConditions> filterConditions, Set<Long> fieldIds) {
         if (CollectionUtils.isEmpty(filterConditions)) {
             return;
         }
-        
+
         for (GraphNodeDataConditions conditionGroup : filterConditions) {
             if (CollectionUtils.isNotEmpty(conditionGroup.getConditions())) {
                 for (RuleItem condition : conditionGroup.getConditions()) {
@@ -59,12 +61,12 @@ public class Graph {
             }
         }
     }
-    
+
     private void processFieldsForFieldId(List<RuleItem> fields, Set<Long> fieldIds) {
         if (CollectionUtils.isEmpty(fields)) {
             return;
         }
-        
+
         for (RuleItem field : fields) {
             addToFieldIds(field.getFieldId(), fieldIds);
         }
@@ -102,25 +104,25 @@ public class Graph {
         if (CollectionUtils.isEmpty(nodes)) {
             return;
         }
-        
+
         for (GraphNode node : nodes) {
             // 处理过滤条件中的字段类型
             processFilterConditionsForDataType(node.getData().getFilterCondition(), fieldInfoMap);
-            
+
             // 处理节点数据中的字段类型
             processFieldsForDataType(node.getData().getFields(), fieldInfoMap);
-            
+
             // 递归处理子节点
             recursionUpdateFieldDataType(node.getBlocks(), fieldInfoMap);
         }
     }
-    
-    private void processFilterConditionsForDataType(List<GraphNodeDataConditions> filterConditions, 
-                                                   Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
+
+    private void processFilterConditionsForDataType(List<GraphNodeDataConditions> filterConditions,
+                                                    Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
         if (CollectionUtils.isEmpty(filterConditions)) {
             return;
         }
-        
+
         for (GraphNodeDataConditions conditionGroup : filterConditions) {
             if (CollectionUtils.isNotEmpty(conditionGroup.getConditions())) {
                 for (RuleItem condition : conditionGroup.getConditions()) {
@@ -129,17 +131,17 @@ public class Graph {
             }
         }
     }
-    
+
     private void processFieldsForDataType(List<RuleItem> fields, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
         if (CollectionUtils.isEmpty(fields)) {
             return;
         }
-        
+
         for (RuleItem field : fields) {
             updateRuleItemDataType(field, fieldInfoMap);
         }
     }
-    
+
     private void updateRuleItemDataType(RuleItem ruleItem, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
         String fieldId = ruleItem.getFieldId();
         Long id = parseFieldId(fieldId);
