@@ -1,10 +1,10 @@
+import entityIcon from '@/assets/flow/flowManage/entity.png';
 import { Button, Dropdown, Menu, Message, Switch, Typography } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
 import styles from './index.module.less';
-import entityIcon from '@/assets/flow/flowManage/entity.png';
 
 /**
  * FlowCard 组件
@@ -31,8 +31,8 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
         return '表单(实体)触发';
       case TriggerType.API:
         return 'API触发';
-      case TriggerType.BPM:
-        return '子流程触发';
+      //   case TriggerType.BPM:
+      //     return '子流程触发';
       default:
         return '未知';
     }
@@ -92,16 +92,12 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
 
         <div className={styles.cardBodyRow}>
           <div className={styles.cardBodyRowLabel}> 最后执行</div>
-          <div className={styles.cardBodyRowContent}>
-            {/* todo 暂不展示数据 */}
-          </div>
+          <div className={styles.cardBodyRowContent}>{/* todo 暂不展示数据 */}</div>
         </div>
 
         <div className={styles.cardBodyRow}>
           <div className={styles.cardBodyRowLabel}> 执行次数</div>
-          <div className={styles.cardBodyRowContent}>
-            {/* todo 暂不展示数据 */}
-          </div>
+          <div className={styles.cardBodyRowContent}>{/* todo 暂不展示数据 */}</div>
         </div>
       </div>
       <div className={styles.cardFooter}>
