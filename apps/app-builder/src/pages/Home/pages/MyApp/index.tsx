@@ -39,7 +39,7 @@ import { appIconPathMapping, type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission, UserPermissionManager } from '@/utils/permission';
+import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
 import TagModal from './components/tagModal';
 import {
   appOptions,
@@ -244,10 +244,10 @@ const MyAppPage: React.FC = () => {
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
-        <div className={styles.myAppWelcome}>
+        {/* <div className={styles.myAppWelcome}>
           Hi {UserPermissionManager.getUserPermissionInfo()?.user.nickname || '用户'}
           ，您好！
-        </div>
+        </div> */}
 
         <PermissionButton
           permission={ACTIONS.CREATE}

@@ -39,7 +39,6 @@ interface MenuItemProps {
 const MyMenuItem: React.FC<MenuItemProps> = ({
   showOption,
   menuID,
-  // menuCode,
   isVisible,
   menuName,
   label,

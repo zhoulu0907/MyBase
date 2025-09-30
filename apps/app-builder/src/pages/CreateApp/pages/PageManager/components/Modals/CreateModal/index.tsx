@@ -45,6 +45,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       visible={visibleCreateForm !== ''}
       onOk={handleCreate}
       onCancel={onCancel}
+      closable={!visibleMenuIcon}
       autoFocus={false}
       focusLock={true}
       unmountOnExit={true}
