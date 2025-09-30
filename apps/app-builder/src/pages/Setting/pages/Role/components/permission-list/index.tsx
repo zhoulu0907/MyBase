@@ -25,8 +25,8 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
 
     setLoading(true);
     try {
-      const response = await getConfiguredPermissions(selectedRoleId) || []
-      const filteredData = response.filter(item => item.type !== PERMISSION_TYPES.MODULE);
+      const response = (await getConfiguredPermissions(selectedRoleId)) || [];
+      const filteredData = response.filter((item) => item.type !== PERMISSION_TYPES.MODULE);
       setPermissions(listToTree(filteredData) as Permission[]);
     } finally {
       setLoading(false);
@@ -37,23 +37,38 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
     fetchPermissions();
   }, [fetchPermissions]);
 
-  // 处理移除权限
+  // 找到要移除的权限及其所有子权限
+  const getPermissionIds = (permissionId: string, data: any[]): string[] => {
+    const permission = data.find((p) => p.id === permissionId);
+    const ids = [permissionId];
+    if (!permission) return [];
+    if (permission.children) {
+      permission.children.forEach((child: any) => {
+        ids.push(...getPermissionIds(child.id, permission.children || []));
+      });
+    }
+    return ids;
+  };
+
   const handleRemove = useCallback(
-    (id: string) => {
+    (id: string, data: Permission[]) => {
+      const permissionIds = getPermissionIds(id, data);
+      console.log('permissionIds:', permissionIds);
+
       Modal.confirm({
         title: '确认移除',
-        content: `确定要移除权限 "${permissions.find((p) => p.id === id)?.name}" 吗？`,
+        content: `确定要移除权限 "${permissions.find((p) => p.id === id)?.name}" 及其所有子权限吗？`,
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
-          removeRolePermission(selectedRoleId!, [id]).then(() => {
+          removeRolePermission(selectedRoleId!, permissionIds).then(() => {
             fetchPermissions();
             Message.success('操作成功');
           });
         }
       });
     },
-    [permissions]
+    [permissions, selectedRoleId]
   );
 
   // 权限配置
@@ -104,7 +119,7 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
         dataIndex: 'op',
         width: 120,
         render: (_: any, record: Permission) => (
-          <Button type="text" size="small" onClick={() => handleRemove(record.id)}>
+          <Button type="text" size="small" onClick={() => handleRemove(record.id, permissions)}>
             移除
           </Button>
         )
@@ -137,13 +152,15 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
 
       <Table {...tableConfig} />
 
-      {configModalVisible && <PermissionConfigModal
-        visible={configModalVisible}
-        onCancel={() => setConfigModalVisible(false)}
-        onConfirm={handleConfigConfirm}
-        configuredPermissions={permissions}
-        confirmLoading={configLoading}
-      />}
+      {configModalVisible && (
+        <PermissionConfigModal
+          visible={configModalVisible}
+          onCancel={() => setConfigModalVisible(false)}
+          onConfirm={handleConfigConfirm}
+          configuredPermissions={permissions}
+          confirmLoading={configLoading}
+        />
+      )}
     </>
   );
 };
