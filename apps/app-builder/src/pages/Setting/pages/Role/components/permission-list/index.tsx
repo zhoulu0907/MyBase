@@ -53,7 +53,6 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
   const handleRemove = useCallback(
     (id: string, data: Permission[]) => {
       const permissionIds = getPermissionIds(id, data);
-      console.log('permissionIds:', permissionIds);
 
       Modal.confirm({
         title: '确认移除',
@@ -132,7 +131,7 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
     () => ({
       rowKey: 'id',
       columns,
-      data: permissions,
+      data: permissions.filter((record) => record.children && record.children.length > 0),
       pagination: false,
       scroll: { y: 400 },
       border: false,
