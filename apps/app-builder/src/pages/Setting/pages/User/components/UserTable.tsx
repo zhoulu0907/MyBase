@@ -137,6 +137,7 @@ export default function UserTable({
       onOk: async () => {
         await deleteUser(record.id);
         Message.success('删除成功');
+        onRefreshDept();
         getUserList();
       }
     });
