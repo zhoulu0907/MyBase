@@ -82,20 +82,6 @@ const DataPermissionModal = (props: IProps) => {
     }
   }, [modalVisible]);
 
-  // 在组件初始化时设置默认值
-  useEffect(() => {
-    // ... 其他初始化代码
-
-    // 如果初始值中没有 scopeLevel，且有可用的选项，则设置默认值
-    if (!initialFormValues.scopeLevel && dataPermissionScope.length > 0) {
-      const defaultOption = dataPermissionScope.find((option) => option.value === 'self');
-      if (defaultOption) {
-        setScopeType(defaultOption.value);
-        form.setFieldValue('scopeLevel', defaultOption.value);
-      }
-    }
-  }, [initialFormValues, dataPermissionScope]);
-
   useEffect(() => {
     // 将 appEntityFields 转换为 ConditionField 格式
     const convertedFields = appEntityFields.map((field) => ({
@@ -288,7 +274,7 @@ const DataPermissionModal = (props: IProps) => {
                   rules={[{ required: true, message: '请选择权限范围' }]}
                 >
                   <Select
-                    placeholder="本人"
+                    placeholder="请选择"
                     onChange={(value) => {
                       setScopeType(value);
                       setSelectedMembers([]);

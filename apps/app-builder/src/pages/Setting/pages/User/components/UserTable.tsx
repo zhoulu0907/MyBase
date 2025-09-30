@@ -18,11 +18,17 @@ interface UserTableProps {
   selectedDeptId?: number;
   deptTree: any[]; // 部门树数据
   deptLoading: boolean; // 部门数据加载状态
+  onRefreshDept: () => void;
 }
 
 type UserRecord = Pick<UserVO, 'id' | 'username' | 'nickname'> & Partial<UserVO>;
 
-export default function UserTable({ selectedDeptId = undefined, deptTree, deptLoading }: UserTableProps) {
+export default function UserTable({
+  selectedDeptId = undefined,
+  deptTree,
+  deptLoading,
+  onRefreshDept
+}: UserTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
@@ -158,9 +164,11 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
             <span className={s.tableColumnUsername} onClick={() => handleViewDetail(record)}>
               {record.nickname}
             </span>
-            {isSystemUser(record) && <Tag color='cyan' style={{ marginLeft: '8px' }}>
-              系统
-            </Tag>}
+            {isSystemUser(record) && (
+              <Tag color="cyan" style={{ marginLeft: '8px' }}>
+                系统
+              </Tag>
+            )}
           </>
         )
       },
@@ -204,8 +212,8 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
             <Button permission={ACTIONS.RESET} type="text" onClick={() => handleResetPassword(record)}>
               重置密码
             </Button>
-            {hasAllPermissions([ACTIONS.DELETE, ACTIONS.STATUS]) ?
-              (<Dropdown
+            {hasAllPermissions([ACTIONS.DELETE, ACTIONS.STATUS]) ? (
+              <Dropdown
                 droplist={
                   <Menu>
                     <Menu.Item key="disable" onClick={() => handleStatusUpdate(record)}>
@@ -222,23 +230,22 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
                 <a style={{ cursor: 'pointer' }}>
                   <IconMoreVertical />
                 </a>
-              </Dropdown>) :
-              (
-                <>
-                  <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleStatusUpdate(record)}>
-                    {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
-                  </Button>
-                  <Button
-                    permission={ACTIONS.RESET}
-                    type="text"
-                    disabled={isSystemUser(record)}
-                    onClick={() => handleDelete(record)}
-                  >
-                    删除
-                  </Button>
-                </>
-              )
-            }
+              </Dropdown>
+            ) : (
+              <>
+                <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleStatusUpdate(record)}>
+                  {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
+                </Button>
+                <Button
+                  permission={ACTIONS.RESET}
+                  type="text"
+                  disabled={isSystemUser(record)}
+                  onClick={() => handleDelete(record)}
+                >
+                  删除
+                </Button>
+              </>
+            )}
           </Space>
         )
       }
@@ -306,6 +313,7 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
         onOk={handleModalOk}
         deptTree={deptTree}
         deptLoading={deptLoading}
+        onRefreshDept={onRefreshDept}
       />
       <UserFormModal
         visible={detailModalVisible}
@@ -316,6 +324,7 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
         onOk={() => setDetailModalVisible(false)}
         deptTree={deptTree}
         deptLoading={deptLoading}
+        onRefreshDept={onRefreshDept}
       />
       <PasswordModal
         visible={resetPasswordModalVisible}
