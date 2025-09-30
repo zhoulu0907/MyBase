@@ -1,5 +1,12 @@
 package com.cmsr.onebase.module.flow.context.condition;
 
+import com.cmsr.onebase.framework.common.express.FieldTypeEnum;
+import com.cmsr.onebase.framework.common.express.JdbcTypeEnum;
+import com.cmsr.onebase.framework.common.express.OpEnum;
+import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
+import com.cmsr.onebase.module.flow.context.express.AndExpresses;
+import com.cmsr.onebase.module.flow.context.express.ExpressItem;
+import com.cmsr.onebase.module.flow.context.express.OrExpresses;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 
@@ -66,5 +73,35 @@ public class Condition {
             }
         }
         return ruleItem;
+    }
+
+
+    public static OrExpresses convertToOrExpresses(List<ConditionItem> conditions) {
+        List<AndExpresses> andExpressesList = new ArrayList<>();
+        for (ConditionItem condition : conditions) {
+            AndExpresses andExpresses = convertToAndExpresses(condition);
+            andExpressesList.add(andExpresses);
+        }
+        OrExpresses orExpresses = new OrExpresses();
+        orExpresses.setExpressesList(andExpressesList);
+        return orExpresses;
+    }
+
+    private static AndExpresses convertToAndExpresses(ConditionItem condition) {
+        List<ExpressItem> expressItemList = new ArrayList<>();
+        for (RuleItem ruleItem : condition.getRules()) {
+            ExpressItem expressItem = new ExpressItem();
+            expressItem.setKey(ruleItem.getFieldId());
+            expressItem.setOp(OpEnum.getByCode(ruleItem.getOp()));
+            expressItem.setOperatorType(OperatorTypeEnum.getByCode(ruleItem.getOperatorType()));
+            expressItem.setValue(ruleItem.getValue());
+
+            expressItem.setFieldType(FieldTypeEnum.getByName(ruleItem.getFieldType()));
+            expressItem.setJdbcType(JdbcTypeEnum.fromValue(ruleItem.getFieldType()));
+            expressItemList.add(expressItem);
+        }
+        AndExpresses andExpresses = new AndExpresses();
+        andExpresses.setExpressItems(expressItemList);
+        return andExpresses;
     }
 }

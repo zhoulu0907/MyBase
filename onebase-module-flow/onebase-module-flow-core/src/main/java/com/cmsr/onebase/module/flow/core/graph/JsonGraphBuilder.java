@@ -2,7 +2,8 @@ package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
-import com.cmsr.onebase.module.flow.context.VariableConstants;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,8 +35,8 @@ public class JsonGraphBuilder {
             loopDeepMap.put(node.getId(), 0);
         }
         if (!(StringUtils.equals(node.getType(), "loop")) && MapUtils.isNotEmpty(loopDeepMap)) {
-            node.getData().put(VariableConstants.IS_IN_LOOP, Boolean.TRUE);
-            node.getData().put(VariableConstants.IN_LOOP_DEPTH, loopDeepMap);
+            node.getData().setIsInLoop(Boolean.TRUE);
+            node.getData().setInLoopDepth(loopDeepMap);
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode childNode : node.getBlocks()) {

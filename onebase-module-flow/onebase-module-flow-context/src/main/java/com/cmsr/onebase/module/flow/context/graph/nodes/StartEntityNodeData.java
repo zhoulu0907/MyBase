@@ -1,10 +1,11 @@
-package com.cmsr.onebase.module.flow.core.graph.data;
+package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.jexl3.JexlExpression;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  * @Date：2025/9/9 13:46
  */
 @Data
-public class StartEntityNodeData {
+public class StartEntityNodeData extends NodeData {
 
     private Long processId;
 
@@ -30,5 +31,6 @@ public class StartEntityNodeData {
     /**
      * 过滤条件缓存的表达式
      */
+    @JsonIgnore
     private JexlExpression compiledExpression;
 }

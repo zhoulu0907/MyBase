@@ -1,6 +1,8 @@
-package com.cmsr.onebase.module.flow.core.graph.data;
+package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,7 +13,7 @@ import java.util.List;
  * @Date：2025/9/22 9:24
  */
 @Data
-public class StartDateFieldNodeData {
+public class StartDateFieldNodeData extends NodeData {
 
     private Long processId;
 
@@ -39,6 +41,7 @@ public class StartDateFieldNodeData {
     /**
      * 过滤条件缓存的表达式
      */
+    @JsonIgnore
     private Serializable compiledExpression;
 
 
