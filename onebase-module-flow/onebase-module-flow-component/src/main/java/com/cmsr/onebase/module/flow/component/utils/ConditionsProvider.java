@@ -32,15 +32,19 @@ public class ConditionsProvider {
      * @return
      */
     public List<ConditionItem> formatForExpression(NodeComponent nodeComponent, List<ConditionItem> conditions, InLoopDepth inLoopDepth) {
-        for (ConditionItem condition : conditions) {
-            formatRuleItemsForExpression(nodeComponent, condition.getRules(), inLoopDepth);
+        if (conditions != null) {
+            for (ConditionItem condition : conditions) {
+                formatRuleItemsForExpression(nodeComponent, condition.getConditions(), inLoopDepth);
+            }
         }
         return conditions;
     }
 
     public List<RuleItem> formatRuleItemsForExpression(NodeComponent nodeComponent, List<RuleItem> ruleItems, InLoopDepth inLoopDepth) {
-        for (RuleItem ruleItem : ruleItems) {
-            formatRuleItemForExpression(nodeComponent, inLoopDepth, ruleItem);
+        if (ruleItems != null) {
+            for (RuleItem ruleItem : ruleItems) {
+                formatRuleItemForExpression(nodeComponent, inLoopDepth, ruleItem);
+            }
         }
         return ruleItems;
     }
@@ -106,15 +110,19 @@ public class ConditionsProvider {
      * @return
      */
     public List<ConditionItem> formatForValue(List<ConditionItem> conditions, VariableContext variableContext) {
-        for (ConditionItem conditionItem : conditions) {
-            formatRuleItemsForValue(conditionItem.getRules(), variableContext);
+        if (conditions != null) {
+            for (ConditionItem conditionItem : conditions) {
+                formatRuleItemsForValue(conditionItem.getConditions(), variableContext);
+            }
         }
         return conditions;
     }
 
     public List<RuleItem> formatRuleItemsForValue(List<RuleItem> ruleItems, VariableContext variableContext) {
-        for (RuleItem ruleItem : ruleItems) {
-            formatRuleItemForValue(ruleItem, variableContext);
+        if (ruleItems != null) {
+            for (RuleItem ruleItem : ruleItems) {
+                formatRuleItemForValue(ruleItem, variableContext);
+            }
         }
         return ruleItems;
     }

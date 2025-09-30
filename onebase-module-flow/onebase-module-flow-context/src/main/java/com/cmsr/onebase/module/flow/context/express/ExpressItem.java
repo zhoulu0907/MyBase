@@ -13,6 +13,18 @@ import lombok.Data;
 @Data
 public class ExpressItem {
 
+    public static ExpressItem copy(ExpressItem item) {
+        ExpressItem newItem = new ExpressItem();
+        newItem.setKey(item.getKey());
+        newItem.setOp(item.getOp());
+        newItem.setValue(item.getValue());
+        newItem.setOperatorType(item.getOperatorType());
+        newItem.setFieldType(item.getFieldType());
+        newItem.setJdbcType(item.getJdbcType());
+        return newItem;
+    }
+
+
     private Object key;
 
     private OpEnum op;

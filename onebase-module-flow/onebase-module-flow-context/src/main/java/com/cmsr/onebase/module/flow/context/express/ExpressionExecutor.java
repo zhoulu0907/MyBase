@@ -9,15 +9,13 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 表达式助手类
@@ -46,13 +44,27 @@ public class ExpressionExecutor {
      */
     public boolean evaluate(JexlExpression expression, Map<String, Object> context) {
         try {
-            MapContext jc = new MapContext(context);
+            MapContext jc = new MapContext(formatMapContextKey(context));
             Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {
             log.error("条件评估失败: {}", expression, e);
             return false;
         }
+    }
+
+    private Map<String, Object> formatMapContextKey(Map<String, Object> context) {
+        Map<String, Object> newContext = new HashMap<>();
+        for (Map.Entry<String, Object> entry : context.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (StringUtils.isNumeric(key)) {
+                newContext.put("var_" + key, value);
+            } else {
+                newContext.put(key, value);
+            }
+        }
+        return newContext;
     }
 
     public JexlExpression compileExpression(OrExpresses orExpresses) {
@@ -68,7 +80,7 @@ public class ExpressionExecutor {
      * @return 表达式字符串
      */
     private String buildConditionExpression(OrExpresses orExpresses) {
-        if (CollectionUtils.isEmpty(orExpresses.getExpressesList())) {
+        if (orExpresses == null || CollectionUtils.isEmpty(orExpresses.getExpressesList())) {
             return "true";
         }
         List<String> conditionExpressions = new ArrayList<>();
@@ -143,6 +155,10 @@ public class ExpressionExecutor {
      * @return 表达式字符串
      */
     public String buildExpression(ExpressItem expressItem) {
+        expressItem = ExpressItem.copy(expressItem);
+        if (StringUtils.isNumeric(expressItem.getKey().toString())) {
+            expressItem.setKey("var_" + expressItem.getKey());
+        }
         switch (expressItem.getOp()) {
             case EQUALS:
                 return String.format("%s == %s", expressItem.getKey(), formatValue(expressItem));

@@ -52,13 +52,16 @@ public class Graph {
         if (CollectionUtils.isEmpty(filterConditions)) {
             return;
         }
-
         for (GraphNodeDataConditions conditionGroup : filterConditions) {
-            if (CollectionUtils.isNotEmpty(conditionGroup.getConditions())) {
-                for (RuleItem condition : conditionGroup.getConditions()) {
+            if (CollectionUtils.isEmpty(conditionGroup.getConditions())) {
+                continue;
+            }
+            for (RuleItem condition : conditionGroup.getConditions()) {
+                if (condition != null) {
                     addToFieldIds(condition.getFieldId(), fieldIds);
                 }
             }
+
         }
     }
 
@@ -66,7 +69,6 @@ public class Graph {
         if (CollectionUtils.isEmpty(fields)) {
             return;
         }
-
         for (RuleItem field : fields) {
             addToFieldIds(field.getFieldId(), fieldIds);
         }
@@ -87,9 +89,9 @@ public class Graph {
             return null;
         }
         String[] split = StringUtils.split(fieldId, ".");
-        if (split.length == 1 && NumberUtils.isDigits(split[0])) {
+        if (split.length == 1 && StringUtils.isNumeric(split[0])) {
             return NumberUtils.toLong(split[0]);
-        } else if (split.length == 2 && NumberUtils.isDigits(split[1])) {
+        } else if (split.length == 2 && StringUtils.isNumeric(split[1])) {
             return NumberUtils.toLong(split[1]);
         }
         return null;
@@ -122,10 +124,12 @@ public class Graph {
         if (CollectionUtils.isEmpty(filterConditions)) {
             return;
         }
-
         for (GraphNodeDataConditions conditionGroup : filterConditions) {
-            if (CollectionUtils.isNotEmpty(conditionGroup.getConditions())) {
-                for (RuleItem condition : conditionGroup.getConditions()) {
+            if (CollectionUtils.isEmpty(conditionGroup.getConditions())) {
+                continue;
+            }
+            for (RuleItem condition : conditionGroup.getConditions()) {
+                if (condition != null) {
                     updateRuleItemDataType(condition, fieldInfoMap);
                 }
             }
@@ -136,13 +140,15 @@ public class Graph {
         if (CollectionUtils.isEmpty(fields)) {
             return;
         }
-
         for (RuleItem field : fields) {
             updateRuleItemDataType(field, fieldInfoMap);
         }
     }
 
     private void updateRuleItemDataType(RuleItem ruleItem, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
+        if (ruleItem == null || StringUtils.isEmpty(ruleItem.getFieldId())) {
+            return;
+        }
         String fieldId = ruleItem.getFieldId();
         Long id = parseFieldId(fieldId);
         if (id != null) {

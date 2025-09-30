@@ -28,10 +28,13 @@ public class DataMethodApiHelper {
      * @return 转换后的条件DTO列表
      */
     public static List<List<ConditionDTO>> processFilterCondition(List<ConditionItem> conditionItems) {
+        if (conditionItems == null || conditionItems.isEmpty()) {
+            return null;
+        }
         List<List<ConditionDTO>> conditionDTtoSS = new ArrayList<>();
         for (ConditionItem conditionItem : conditionItems) {
             List<ConditionDTO> conditionDtoS = new ArrayList<>();
-            for (RuleItem ruleItem : conditionItem.getRules()) {
+            for (RuleItem ruleItem : conditionItem.getConditions()) {
                 ConditionDTO conditionDTO = new ConditionDTO();
                 conditionDTO.setFieldId(NumberUtils.toLong(ruleItem.getFieldId()));
                 conditionDTO.setOperator(ruleItem.getOp());
