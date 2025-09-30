@@ -13,7 +13,6 @@ import { useEditorProps } from './hooks/use-editor-props';
 import styles from './index.module.less';
 import {
   StartApiInitData,
-  StartBpmInitData,
   StartDateFieldInitData,
   StartEntityInitData,
   StartFormInitData,
@@ -139,8 +138,8 @@ const TriggerEditor = () => {
         case TriggerType.API:
           setInitData(StartApiInitData);
           break;
-        case TriggerType.BPM:
-          setInitData(StartBpmInitData);
+          // case TriggerType.BPM:
+          //   setInitData(StartBpmInitData);
           break;
       }
     }

@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/start.svg';
+import iconStartEntity from '@/assets/flow/nodes/startEntity.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -17,7 +17,7 @@ export const StartEntityNodeRegistry: FlowNodeRegistry = {
     addDisable: true // Start Node cannot be added
   },
   info: {
-    icon: iconStart,
+    icon: iconStartEntity,
     description: '这是表单(实体)触发节点，用于设置启动工作流所需的信息。'
   },
   /**

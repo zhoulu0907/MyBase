@@ -75,9 +75,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 }) => {
   useSignals();
 
-  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const filterCondition = Form.useWatch('filterCondition', form);
 
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
   const [formulaData, setFormulaData] = useState<string>('');
 
@@ -437,21 +437,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   const handleFormulaConfirm = (formulaData: any) => {
     setFormulaVisible(false);
-    // TODO(mickey): remove debug log
-    console.log('formulaData', formulaData);
-    console.log('formulaFieldKey', formulaFieldKey);
 
     form.setFieldValue(formulaFieldKey, formulaData);
 
-    console.log('reset formulaField');
     setFormulaData('');
     setFormulaFieldKey('');
   };
 
   const openFormulaEditor = (fieldKey: string) => {
     setFormulaVisible(true);
-    console.log('fieldKey', fieldKey);
-    console.log('form.getFieldValue(fieldKey)', form.getFieldValue(fieldKey));
     setFormulaData(form.getFieldValue(fieldKey));
     setFormulaFieldKey(fieldKey);
   };

@@ -200,13 +200,13 @@ const XStaticText: XStaticTextSchema = {
     },
     statusConfig,
     alignConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '静态文本',
-      display: true,
+      display: true
     },
     dataField: [],
     placeholder: '请输入文字',

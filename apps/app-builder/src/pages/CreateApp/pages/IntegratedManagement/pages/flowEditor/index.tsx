@@ -75,9 +75,9 @@ const FlowEditorPage: React.FC = () => {
         <Button type="primary" onClick={() => handleSaveAndRelease('save')}>
           保存
         </Button>
-        <Button type="outline" style={{ marginLeft: '12px' }} onClick={() => handleSaveAndRelease('release')}>
+        {/* <Button type="outline" style={{ marginLeft: '12px' }} onClick={() => handleSaveAndRelease('release')}>
           发布
-        </Button>
+        </Button> */}
       </div>
       <div className={styles.body}>
         <TriggerEditor />
