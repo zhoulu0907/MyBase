@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/interaction.svg';
+import iconInteraction from '@/assets/flow/nodes/modal.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -17,7 +17,7 @@ export const ModalNodeRegistry: FlowNodeRegistry = {
     addDisable: false
   },
   info: {
-    icon: iconStart,
+    icon: iconInteraction,
     description: '这是弹窗节点，用于弹出弹窗。'
   },
   /**

@@ -1,4 +1,4 @@
-import iconControl from '@/assets/flow/nodes/control.svg';
+import iconControl from '@/assets/flow/nodes/ifCase.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -18,9 +18,8 @@ export const IFBlockNodeRegistry: FlowNodeRegistry = {
     sidebarDisable: true,
     defaultExpanded: false,
     style: {
-      width: 66,
-      height: 20,
-      borderRadius: 4
+      width: 'auto',
+      height: 32,
     }
   },
   info: {

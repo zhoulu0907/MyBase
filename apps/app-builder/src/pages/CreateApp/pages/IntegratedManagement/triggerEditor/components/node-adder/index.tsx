@@ -82,7 +82,7 @@ export default function Adder(props: { from: FlowNodeEntity; to?: FlowNodeEntity
       visible={visible}
       onVisibleChange={setVisible}
       content={<NodeList onSelect={add} from={from} />}
-      placement="right"
+      position="right"
       trigger="click"
       popupAlign={{ offset: [30, 0] }}
       overlayStyle={{

@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/start.svg';
+import iconStartForm from '@/assets/flow/nodes/startForm.svg';
 import type { TriggerRange } from '../../../components/const';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
@@ -18,7 +18,7 @@ export const StartFormNodeRegistry: FlowNodeRegistry = {
     addDisable: true // Start Node cannot be added
   },
   info: {
-    icon: iconStart,
+    icon: iconStartForm,
     description: '这是界面交互触发节点，用于设置启动工作流所需的信息。'
   },
   /**

@@ -34,14 +34,14 @@ export const clearDataOriginNodeId = (nodeId: string) => {
       let newFilterCondition = [];
 
       for (let filterCondition of nodeData[key].filterCondition) {
-        // TODO(mickey): remove debug log
-        console.log('XXX: ', filterCondition);
-
-        filterCondition.conditions = filterCondition.conditions
-          .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
-          .filter((c: any) => c.value && !c.value.startsWith(nodeId));
-        if (filterCondition.conditions.length > 0) {
-          newFilterCondition.push(filterCondition);
+        if (filterCondition.conditions && filterCondition.conditions.length > 0) {
+          const newConditions = filterCondition.conditions
+            .filter((c: any) => c !== null)
+            .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
+            .filter((c: any) => c.value && !c.value.startsWith(nodeId));
+          if (newConditions.length > 0) {
+            newFilterCondition.push(newConditions);
+          }
         }
       }
 

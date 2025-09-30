@@ -1,3 +1,4 @@
+import { FormulaEditor } from '@/components/FormulaEditor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import {
@@ -79,6 +80,10 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
   const [fieldOptions, setFieldOptions] = useState<TreeSelectDataType[]>([]);
   const [entityFieldValidationTypes, setEntityFieldValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
+
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
+  const [formulaData, setFormulaData] = useState<string>('');
 
   // 过滤为空的条件和field字段不存在的条件
   useEffect(() => {
@@ -530,6 +535,21 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     return '';
   };
 
+  const handleFormulaConfirm = (formulaData: any) => {
+    setFormulaVisible(false);
+
+    form.setFieldValue(formulaFieldKey, formulaData);
+
+    setFormulaData('');
+    setFormulaFieldKey('');
+  };
+
+  const openFormulaEditor = (fieldKey: string) => {
+    setFormulaVisible(true);
+    setFormulaData(form.getFieldValue(fieldKey));
+    setFormulaFieldKey(fieldKey);
+  };
+
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item label={label} required={required}>
@@ -657,7 +677,9 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
-                                                  <Input placeholder="请输入公式" />
+                                                  <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
+                                                    fx编辑公式
+                                                  </Button>
                                                 </Form.Item>
                                               )}
                                             </Grid.Col>
@@ -719,6 +741,13 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           }}
         </Form.List>
       </Form.Item>
+
+      <FormulaEditor
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </div>
   );
 };

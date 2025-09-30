@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/data.svg';
+import iconData from '@/assets/flow/nodes/dataCalc.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -17,7 +17,7 @@ export const DataCalcNodeRegistry: FlowNodeRegistry = {
     addDisable: false
   },
   info: {
-    icon: iconStart,
+    icon: iconData,
     description: '这是数据计算节点，用于计算数据。'
   },
   /**

@@ -185,7 +185,8 @@ export class GridNodePositioner {
     const node = this.graph.addNode({
       ...nodeData,
       x,
-      y
+      y,
+      options: { silent: true }
     });
 
     return node;

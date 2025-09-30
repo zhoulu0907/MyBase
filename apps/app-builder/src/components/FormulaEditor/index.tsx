@@ -1,9 +1,9 @@
-import { Modal, Button, Space, Message } from '@arco-design/web-react';
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { VariableList, FunctionList, InfoPanel, FormulaInput } from './components';
-import { getFormulaFunctionSimpleList, getFormulaById } from '@onebase/app';
-import type { Variable, FunctionItem, FormulaEditorProps, info } from './utils/types';
+import { Button, Message, Modal, Space } from '@arco-design/web-react';
+import { getFormulaById, getFormulaFunctionSimpleList } from '@onebase/app';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormulaInput, FunctionList, InfoPanel, VariableList } from './components';
 import styles from './index.module.less';
+import type { FormulaEditorProps, FunctionItem, info, Variable } from './utils/types';
 
 // 模拟数据
 const mockVariables: Variable[] = [
@@ -16,32 +16,54 @@ const mockVariables: Variable[] = [
   { value: '7', name: '发货地址', type: '地址', category: '订单管理' }
 ];
 
-// const mockFunctions: FunctionItem[] = [
-//   { id: '1', name: 'SUM', summary: '求和', type: '常用函数' },
-//   { id: '2', name: 'AVERAGE', summary: '平均值', type: '常用函数' },
-//   { id: '3', name: 'IF', summary: '条件判断', type: '常用函数' },
-//   { id: '4', name: 'AND', summary: '与', type: '常用函数' },
-//   { id: '5', name: 'OR', summary: '或', type: '常用函数' },
-//   { id: '6', name: 'NOT', summary: '非', type: '常用函数' },
-//   { id: '7', name: 'CONCATENATE', summary: '合并', type: '常用函数' },
-//   { id: '8', name: 'TODAY', summary: '今天', type: '常用函数' }
-// ];
-
+/**
+ * 公式编辑器
+ * @param visible - 编辑器是否可见
+ * @param onCancel - 取消编辑回调
+ * @param onConfirm - 确认编辑回调
+ * @param initialFormula - 初始公式
+ */
 export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '' }: FormulaEditorProps) {
   const [formula, setFormula] = useState(initialFormula);
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
   const [funcList, setFuncList] = useState<FunctionItem[]>([]);
   const editorRef = useRef<{ insertAtPosition: (text: string, type: string, position?: number) => void } | null>(null);
-  const [info, setInfo] = useState<info>();
+  const [info, setInfo] = useState<info | null>(null);
+
+  useEffect(() => {
+    setFormula(initialFormula);
+  }, [initialFormula]);
+
+  /**
+   * 初始化函数列表
+   */
   const getFuncList = async () => {
     const res = await getFormulaFunctionSimpleList();
     if (res) {
+      console.log(res, 'getFuncList>>>>>>>>>>');
       setFuncList(res);
     }
+    // setFuncList(mockFunctions)
   };
 
-  // 过滤变量和函数
+  /**
+   * 获取公式详情
+   * @param id - 公式ID
+   */
+  const getFormulaInfo = (id: string) => {
+    getFormulaById(id).then((res: any) => {
+      console.log(res, 'getFormulaInfo>>>>>>>>>>');
+      if (res) {
+        setInfo(res);
+      }
+    });
+  };
+
+  /**
+   * 过滤变量列表
+   * 根据变量名称或类型是否包含搜索关键词（不区分大小写）
+   */
   const filteredVariables = useMemo(() => {
     if (!variableSearch) return mockVariables;
     return mockVariables.filter(
@@ -51,7 +73,12 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     );
   }, [variableSearch]);
 
+  /**
+   * 过滤函数列表
+   * 根据函数名称或摘要是否包含搜索关键词（不区分大小写）
+   */
   const filteredFunctions = useMemo(() => {
+    console.log(functionSearch, 'functionSearch');
     if (!functionSearch) return funcList;
     return funcList.filter(
       (f) =>
@@ -60,7 +87,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     );
   }, [functionSearch]);
 
-  // 插入变量到公式
+  /**
+   * 插入变量到公式
+   * @param variable - 要插入的变量
+   */
   const handleInsertVariable = useCallback((variable: Variable) => {
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
@@ -71,15 +101,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     }
   }, []);
 
-  const getFormulaInfo = (id: string) => {
-    getFormulaById(id).then((res) => {
-      if (res) {
-        setInfo(res);
-      }
-    });
-  };
-
-  // 点击函数
+  /**
+   * 点击函数
+   * @param func - 选中的函数
+   */
   const handleChooseFunction = useCallback((func: FunctionItem) => {
     getFormulaInfo(func.id);
 
@@ -88,32 +113,42 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     // 插入函数到公式
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
-      editorRef.current.insertAtPosition(`{{${func.id}.${func.expression}}}()`, 'fn');
+      console.log(func.id, func.expression, 'fnfnfnfnfnfnf');
+      editorRef.current.insertAtPosition(`{{${func.id}.${func.name}}}()`, 'fn');
     } else {
       // 降级处理：直接添加到末尾
       setFormula((prev) => prev + func.name + '()');
     }
   }, []);
 
-  // 复制公式
+  /**
+   * 复制公式
+   */
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(formula);
     Message.success('公式已复制到剪贴板');
   }, [formula]);
 
-  // 调试公式
+  /**
+   * 调试公式
+   */
   const handleDebug = useCallback(() => {
     console.log('调试公式:', formula);
     Message.info('公式调试信息已输出到控制台');
   }, [formula]);
 
-  // 确认公式
+  /**
+   * 确认公式
+   */
   const handleConfirm = useCallback(() => {
     onConfirm(formula);
     onCancel();
   }, [formula, onConfirm, onCancel]);
 
-  // 编辑器就绪回调
+  /**
+   * 公式编辑器准备就绪
+   * @param editor - 编辑器实例
+   */
   const handleEditorReady = useCallback(
     (editor: { insertAtPosition: (text: string, type: string, position?: number) => void }) => {
       editorRef.current = editor;
@@ -121,6 +156,9 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     []
   );
 
+  /**
+   * 组件挂载时初始化函数列表
+   */
   useEffect(() => {
     if (!visible) return;
     getFuncList();
@@ -146,6 +184,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
 
       {/* 公式编辑区 */}
       <div className={styles.formulaSection}>
+        {/* 文本单行 */}
         <FormulaInput
           value={formula}
           onChange={setFormula}
@@ -159,7 +198,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
 
       {/* 底部面板 */}
       <div className={styles.panelsSection}>
-        {/* 变量列表 */}
+        {/* 变量列表 - 订单管理 */}
         <div className={styles.panel}>
           <VariableList
             variables={filteredVariables}
@@ -169,7 +208,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
           />
         </div>
 
-        {/* 函数列表 */}
+        {/* 函数列表 - 常用函数 */}
         <div className={styles.panel}>
           <FunctionList
             functions={functionSearch ? filteredFunctions : funcList}
