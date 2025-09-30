@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 /**
  * 格式校验服务
- * 
+ *
  * 校验字段格式是否符合规则（正则表达式、邮箱、手机号等）
  *
  */
@@ -37,7 +37,7 @@ public class FormatValidationService implements ValidationService {
 
         // 查询格式规则
         List<MetadataValidationFormatDO> rules = formatRepository.findByFieldId( fieldId);
-        
+
         if (rules.isEmpty()) {
             return; // 没有格式规则，跳过校验
         }
@@ -86,7 +86,7 @@ public class FormatValidationService implements ValidationService {
             if (flags.contains("m")) regexFlags |= Pattern.MULTILINE;
             if (flags.contains("s")) regexFlags |= Pattern.DOTALL;
         }
-        
+
         try {
             Pattern compiledPattern = Pattern.compile(pattern, regexFlags);
             return compiledPattern.matcher(value).matches();
@@ -103,9 +103,7 @@ public class FormatValidationService implements ValidationService {
 
     @Override
     public boolean supports(String fieldType) {
-        // 格式校验主要支持字符串类型
-        return "VARCHAR".equalsIgnoreCase(fieldType) || 
-               "TEXT".equalsIgnoreCase(fieldType) ||
-               "CHAR".equalsIgnoreCase(fieldType);
+        // 格式校验支持所有字段类型
+        return true;
     }
 }
