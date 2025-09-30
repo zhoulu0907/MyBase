@@ -1,10 +1,9 @@
-package com.cmsr.onebase.module.flow.core.graph;
+package com.cmsr.onebase.module.flow.context.graph;
 
-import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.IfBlockNodeData;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -110,8 +109,8 @@ public class JsonGraph {
     private String ifCaseNodeDefine(int deep, JsonGraphNode node) {
         List<JsonGraphNode> blocks = node.getBlocks();
         //
-        JsonGraphNode trueNode = blocks.stream().filter(jsonGraphNode -> MapUtils.getBooleanValue(jsonGraphNode.getData(), "value") == true).findFirst().get();
-        JsonGraphNode falseNode = blocks.stream().filter(jsonGraphNode -> MapUtils.getBooleanValue(jsonGraphNode.getData(), "value") == false).findFirst().get();
+        JsonGraphNode trueNode = blocks.stream().filter(jsonGraphNode -> ((IfBlockNodeData) jsonGraphNode.getData()).isValue() == true).findFirst().get();
+        JsonGraphNode falseNode = blocks.stream().filter(jsonGraphNode -> ((IfBlockNodeData) jsonGraphNode.getData()).isValue() == false).findFirst().get();
         //
         StringBuilder define = new StringBuilder();
         define.append("IF(").append(toDefine(node)).append(",");

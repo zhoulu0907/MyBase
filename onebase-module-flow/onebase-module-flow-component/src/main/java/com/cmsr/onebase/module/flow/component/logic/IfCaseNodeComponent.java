@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpresses;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
-import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.IfCaseNodeData;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeBooleanComponent;
 import lombok.Setter;
@@ -16,7 +16,6 @@ import org.apache.commons.jexl3.JexlExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -37,11 +36,10 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
         // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         VariableContext variableContext = this.getContextBean(VariableContext.class);
-        NodeData nodeData = executeContext.getNodeData(this.getTag());
+        IfCaseNodeData nodeData = (IfCaseNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         //
-        List<Map<String, Object>> filterCondition = (List<Map<String, Object>>) nodeData.get("filterCondition");
-        List<ConditionItem> conditions = Condition.createCondition(filterCondition);
+        List<ConditionItem> conditions = nodeData.getFilterCondition();
         conditions = conditionsProvider.formatForExpression(this, conditions, inLoopDepth);
         OrExpresses orExpresses = Condition.convertToOrExpresses(conditions);
         JexlExpression compiledExpression = expressionExecutor.compileExpression(orExpresses);

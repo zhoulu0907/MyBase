@@ -1,10 +1,10 @@
-package com.cmsr.onebase.module.flow.core.graph.data;
+package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 import org.apache.commons.jexl3.JexlExpression;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,7 +12,7 @@ import java.util.List;
  * @Date：2025/9/9 11:05
  */
 @Data
-public class StartFormNodeData {
+public class StartFormNodeData extends NodeData {
 
     private String triggerUserType;
 

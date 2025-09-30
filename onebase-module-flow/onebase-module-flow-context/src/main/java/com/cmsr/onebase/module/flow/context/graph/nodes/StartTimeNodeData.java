@@ -1,6 +1,7 @@
-package com.cmsr.onebase.module.flow.core.graph.data;
+package com.cmsr.onebase.module.flow.context.graph.nodes;
 
-import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,7 +14,7 @@ import java.util.Optional;
  * @Date：2025/9/9 13:55
  */
 @Data
-public class StartTimeNodeData {
+public class StartTimeNodeData extends NodeData {
     /**
      * 不重复
      */
