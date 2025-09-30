@@ -1,5 +1,6 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
+import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
@@ -187,11 +188,61 @@ const Right: React.FC = () => {
 
   return (
     <div className={styles.loginPageRight}>
-      <div className={styles.loginPageHeader}>
-        <img src={LogoSVG} alt="logo" />
-      </div>
       <div className={styles.loginFormContainer}>
-        <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
+        <img src={LogoSVG} alt="logo" />
+        <h1 className={styles.title}>欢迎登录数智化底座</h1>
+
+        <Form
+          form={form}
+          layout="vertical"
+          onSubmit={handleLoginClick}
+          autoComplete="off"
+          requiredSymbol={false}
+          className={styles.loginForm}
+        >
+          <Form.Item
+            field="username"
+            label="用户名"
+            initialValue=""
+            rules={[
+              { required: true, message: '请输入账号' },
+              { minLength: 3, message: '账号至少3个字符' }
+            ]}
+          >
+            <Input placeholder={t('auth.userAccount')} allowClear size="large" prefix={<IconUser />} />
+          </Form.Item>
+
+          <Form.Item
+            field="password"
+            label="密码"
+            initialValue=""
+            rules={[
+              { required: true, message: '请输入密码' },
+              { minLength: 6, message: '密码至少6个字符' }
+            ]}
+          >
+            <Input.Password placeholder={t('auth.password')} allowClear size="large" prefix={<IconLock />} />
+          </Form.Item>
+
+          <Form.Item>
+            <Space className={styles.formActions}>
+              <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
+                {t('auth.rememberMe')}
+              </Checkbox>
+              <Button type="text" size="small">
+                {t('auth.forgotPassword')}
+              </Button>
+            </Space>
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" long loading={loading} size="large" className={styles.loginButton}>
+              {t('auth.loginButton')}
+            </Button>
+          </Form.Item>
+        </Form>
+
+        {/* <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
           <TabPane key="account" title={t('auth.accountLogin')}>
             <Form
               form={form}
@@ -311,7 +362,7 @@ const Right: React.FC = () => {
               </Form.Item>
             </Form>
           </TabPane>
-        </Tabs>
+        </Tabs> */}
       </div>
 
       {/* 滑块验证码组件 */}

@@ -347,7 +347,7 @@ const FlowManagementPage: React.FC = () => {
       </div>
 
       <Modal
-        title="创建流程"
+        title={modalVisible == 'create' ? '创建流程' : '更新流程'}
         visible={modalVisible !== ''}
         onOk={modalVisible == 'create' ? handleCreateFlow : handleUpdateFlowMgmt}
         onCancel={() => setModalVisible('')}
@@ -381,7 +381,7 @@ const FlowManagementPage: React.FC = () => {
           </FormItem>
 
           <FormItem label="流程定义" field="triggerType" rules={[{ required: true, message: '请选择流程定义' }]}>
-            <Select>
+            <Select disabled={modalVisible == 'update'}>
               {getTriggerTypeList().map((item) => (
                 <Option key={item.value} value={item.value}>
                   {item.label}
@@ -392,7 +392,7 @@ const FlowManagementPage: React.FC = () => {
 
           {triggerType == TriggerType.FORM && (
             <FormItem label="表单ID" field="pageId" rules={[{ required: true, message: '请选择表单ID' }]}>
-              <Select>
+              <Select disabled={modalVisible == 'update'}>
                 {pageList?.map((item) => (
                   <Option key={item.id} value={item.id}>
                     {item.pageName}
@@ -404,7 +404,7 @@ const FlowManagementPage: React.FC = () => {
 
           {(triggerType == TriggerType.ENTITY || triggerType == TriggerType.DATE_FIELD) && (
             <FormItem label="实体ID" field="entityId" rules={[{ required: true, message: '请选择实体ID' }]}>
-              <Select>
+              <Select disabled={modalVisible == 'update'}>
                 {entityList?.map((item) => (
                   <Option key={item.entityId} value={item.entityId}>
                     {item.entityName}
