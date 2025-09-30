@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRangeRepository;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import java.util.Map;
  * 校验字段值是否在指定范围内（数值范围、日期范围）
  *
  */
+@Component
 public class RangeValidationService implements ValidationService {
 
     private final MetadataValidationRangeRepository rangeRepository;
@@ -62,9 +64,9 @@ public class RangeValidationService implements ValidationService {
             }
 
             String rangeType = rule.getRangeType();
-            if ("NUMBER".equalsIgnoreCase(rangeType)) {
+            if ("NUMBER".equalsIgnoreCase(rangeType) || "DECIMAL".equalsIgnoreCase(rangeType)) {
                 validateNumberRange(value, rule, field);
-            } else if ("DATE".equalsIgnoreCase(rangeType)) {
+            } else if ("DATE".equalsIgnoreCase(rangeType) || "DATETIME".equalsIgnoreCase(rangeType)) {
                 validateDateRange(value, rule, field);
             }
         }
