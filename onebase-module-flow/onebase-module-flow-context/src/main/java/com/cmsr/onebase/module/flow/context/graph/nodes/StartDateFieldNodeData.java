@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.context.graph.nodes;
 
-import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -36,7 +36,7 @@ public class StartDateFieldNodeData extends NodeData {
     /**
      * 过滤条件
      */
-    private List<ConditionItem> filterCondition;
+    private List<Conditions> filterCondition;
 
     /**
      * 过滤条件缓存的表达式

@@ -3,16 +3,15 @@ package com.cmsr.onebase.module.flow.api;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.condition.Condition;
+import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
-import com.cmsr.onebase.module.flow.context.express.OrExpresses;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.jexl3.JexlExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,13 +59,9 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             if (!triggerFieldIdsContained(startEntityNodeData.getTriggerFieldIds(), entityTriggerReqDTO.getChangedFieldIds())) {
                 return EntityTriggerRespDTO.SUCCESS;
             }
-            if (startEntityNodeData.getCompiledExpression() == null && CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
-                OrExpresses orExpresses = Condition.convertToOrExpresses(startEntityNodeData.getFilterCondition());
-                JexlExpression compileExpression = expressionExecutor.compileExpression(orExpresses);
-                startEntityNodeData.setCompiledExpression(compileExpression);
-            }
-            if (startEntityNodeData.getCompiledExpression() != null) {
-                boolean isTrigger = expressionExecutor.evaluate(startEntityNodeData.getCompiledExpression(), entityTriggerReqDTO.getFieldData());
+            if (CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
+                OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startEntityNodeData.getFilterCondition());
+                boolean isTrigger = expressionExecutor.evaluate(orExpression, entityTriggerReqDTO.getFieldData());
                 if (!isTrigger) {
                     return EntityTriggerRespDTO.SUCCESS;
                 }
