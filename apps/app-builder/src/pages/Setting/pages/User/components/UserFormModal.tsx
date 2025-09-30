@@ -169,6 +169,10 @@ export default function UserFormModal({
           <Col span={12}>
             <Form.Item label="部门" field="deptId">
               <TreeSelect
+                showSearch
+                filterTreeNode={(inputValue, treeNode) => {
+                  return treeNode.props.name.includes(inputValue);
+                }}
                 placeholder={hasDeptQueryPermission ? '请选择' : '无权限'}
                 allowClear
                 treeData={deptTree}
