@@ -57,7 +57,7 @@ public enum FieldTypeEnum {
                 return typeEnum;
             }
         }
-        return null;
+        throw new IllegalArgumentException("无效的fieldType name: " + name);
     }
 
     /**

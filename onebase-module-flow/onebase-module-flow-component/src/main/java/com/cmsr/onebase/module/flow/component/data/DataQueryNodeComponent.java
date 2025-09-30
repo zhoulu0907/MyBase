@@ -15,6 +15,7 @@ import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -42,17 +43,19 @@ public class DataQueryNodeComponent extends NormalNodeComponent {
         DataQueryNodeData nodeData = (DataQueryNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         // 转换成数据方法参数
-        List<ConditionItem> conditionItems = nodeData.getFilterCondition();
-        conditionItems = conditionsProvider.formatForExpression(this, conditionItems, inLoopDepth);
-        conditionItems = conditionsProvider.formatForValue(conditionItems, variableContext);
-        // 数据方法参数
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
-        if (nodeData.getMainEntityId() != null) {
-            reqDTO.setEntityId(nodeData.getMainEntityId());
-        } else {
-            reqDTO.setEntityId(nodeData.getSubEntityId());
+        if (StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
+            List<ConditionItem> conditionItems = nodeData.getFilterCondition();
+            conditionItems = conditionsProvider.formatForExpression(this, conditionItems, inLoopDepth);
+            conditionItems = conditionsProvider.formatForValue(conditionItems, variableContext);
+            // 数据方法参数
+            if (nodeData.getMainEntityId() != null) {
+                reqDTO.setEntityId(nodeData.getMainEntityId());
+            } else {
+                reqDTO.setEntityId(nodeData.getSubEntityId());
+            }
+            reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(conditionItems));
         }
-        reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(conditionItems));
         reqDTO.setOrderDtos(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));
 
         reqDTO.setNum(1);

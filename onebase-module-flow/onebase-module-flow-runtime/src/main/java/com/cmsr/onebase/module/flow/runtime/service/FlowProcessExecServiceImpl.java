@@ -97,7 +97,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
      */
     private List<Long> extractFieldIds(List<ConditionItem> conditions) {
         return conditions.stream()
-                .flatMap(condition -> condition.getRules().stream())
+                .flatMap(condition -> condition.getConditions().stream())
                 .map(ruleItem -> NumberUtils.toLong(ruleItem.getFieldId()))
                 .distinct()
                 .collect(Collectors.toList());

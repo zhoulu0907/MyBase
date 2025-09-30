@@ -18,6 +18,8 @@ public class DataQueryNodeData extends NodeData {
 
     private Long subEntityId;
 
+    private String filterType;
+
     private List<ConditionItem> filterCondition;
 
     private List<SortItem> sortBy;
