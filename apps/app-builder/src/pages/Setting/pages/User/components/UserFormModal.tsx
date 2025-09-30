@@ -188,7 +188,10 @@ export default function UserFormModal({
               <Select
                 placeholder={hasRoleQueryPermission ? '请选择' : '无权限'}
                 mode="multiple"
-                allowClear
+                showSearch
+                filterOption={(input, option) => {
+                  return option.props.children.includes(input);
+                }}
                 disabled={!hasRoleQueryPermission}
               >
                 {roleList.map((role) => (
