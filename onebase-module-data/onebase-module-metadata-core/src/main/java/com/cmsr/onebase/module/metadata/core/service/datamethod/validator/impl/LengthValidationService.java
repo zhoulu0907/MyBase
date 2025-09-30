@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import org.springframework.stereotype.Component;
 
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Map;
  * 校验字段长度是否符合规则
  *
  */
+@Component
 public class LengthValidationService implements ValidationService {
 
 
