@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import org.springframework.stereotype.Component;
 
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Map;
  * 校验字段是否必填
  *
  */
+@Component
 public class RequiredValidationService implements ValidationService {
 
 

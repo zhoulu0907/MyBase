@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import org.springframework.stereotype.Component;
 
 import java.util.logging.Logger;
 
@@ -17,6 +18,7 @@ import java.util.regex.Pattern;
  * 校验字段格式是否符合规则（正则表达式、邮箱、手机号等）
  *
  */
+@Component
 public class FormatValidationService implements ValidationService {
 
     private static final Logger log = Logger.getLogger(FormatValidationService.class.getName());
@@ -93,6 +95,94 @@ public class FormatValidationService implements ValidationService {
             return false;
         }
     }
+
+
+    /**
+     * 校验地址格式
+     */
+    private boolean isValidAddress(String addr){
+        return false;
+    }
+
+    /**
+     * 校验数字格式
+     */
+    private boolean isValidNumber(String number){
+        return false;
+    }
+
+
+    /**
+     * 校验日期格式
+     */
+    private boolean isValidDate(String date){
+        return false;
+    }
+
+    /**
+     * 校验日期时间格式
+     */
+    private boolean isValidDatetime(String dateTime){
+        return false;
+    }
+
+    /**
+     * 校验布尔值格式
+     */
+    private boolean isValidBool(String bool){
+        return false;
+    }
+    /**
+     * 校验文件格式
+     */
+    private boolean isValidFile(String file){
+        return false;
+    }
+
+    /**
+     * 校验图片格式
+     */
+    private boolean isValidImage(String image){
+        return false;
+    }
+
+    /**
+     * 校验地理位置格式
+     */
+    private boolean isValidGeography(String geography){
+        return false;
+    }
+
+    /**
+     * 校验密码格式
+     */
+    private boolean isValidPasswrod(String password){
+        return false;
+    }
+
+    /**
+     * 校验加密字段格式
+     */
+    private boolean isValidEncryped(String encryption){
+        return false;
+    }
+
+    /**
+     * 校验聚合统计格式
+     */
+    private boolean isValidAggregate(String aggregate){
+        return false;
+    }
+
+    /**
+     * 校验唯一标识格式
+     */
+    private boolean isValidId(String id){
+        return false;
+    }
+
+
+
 
     @Override
     public String getValidationType() {
