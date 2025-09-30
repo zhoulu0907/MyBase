@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.build.graph.Graph;
 import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.dal.database.*;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
@@ -14,7 +15,6 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessFormDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
-import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
@@ -143,9 +143,8 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
     public void updateProcessDefinition(UpdateProcessDefinitionReqVO reqVO) {
         // 检查流程是否存在
         FlowProcessDO flowProcessDO = validateFlowProcessExist(reqVO.getId());
-        flowProcessDO.setProcessDefinition(complicateFieldDataType(reqVO.getProcessDefinition()));
         // 更新流程定义
-        flowProcessDO.setProcessDefinition(reqVO.getProcessDefinition());
+        flowProcessDO.setProcessDefinition(complicateFieldDataType(reqVO.getProcessDefinition()));
         if (reqVO.getProcessStatus() != null && reqVO.getProcessStatus().intValue() >= 0) {
             flowProcessDO.setEnableStatus(reqVO.getProcessStatus());
         }
