@@ -9,7 +9,7 @@ import {
   getEntityListByApp,
   getFieldCheckTypeApi,
   type AppEntityField,
-  type ConfitionField,
+  type ConditionField,
   type EntityFieldValidationTypes,
   type MetadataEntityPair
 } from '@onebase/app';
@@ -34,7 +34,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { curAppId } = useAppStore();
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
   const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
-  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
 
@@ -161,7 +161,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
     const res = await getEntityFields({ entityId: dataSource });
     const fieldIds: string[] = [];
-    const newConditionFields: ConfitionField[] = [];
+    const newConditionFields: ConditionField[] = [];
     res.forEach((item: any) => {
       item.fieldId = item.id;
       fieldIds.push(item.id);

@@ -16,13 +16,7 @@ import {
 } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconDelete } from '@arco-design/web-react/icon';
-import {
-  FieldType,
-  VALIDATION_TYPE,
-  type ConfitionField,
-  type EntityFieldValidationTypes,
-  type ValidationTypeItem
-} from '@onebase/app';
+import { FieldType, VALIDATION_TYPE, type EntityFieldValidationTypes, type ValidationTypeItem } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
@@ -54,7 +48,7 @@ export interface ConditionEditorProps {
   nodeId: string;
   label: string;
   required: boolean;
-  fields: ConfitionField[];
+  fields: TreeSelectDataType[];
   entityFieldValidationTypes: EntityFieldValidationTypes[];
   form: FormInstance;
   // 可选变量下拉选项， 如果不传默认从节点id中计算后获取
@@ -435,6 +429,22 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     return '';
   };
 
+  const showFieldTitle = (params: any): string => {
+    let title = '';
+    if (params.value) {
+      for (const parent of fields) {
+        if (parent.children && Array.isArray(parent.children)) {
+          const found = parent.children.find((child) => child.key === params.value);
+          if (found) {
+            title = '' + parent.title + ' - ' + found.title;
+            break;
+          }
+        }
+      }
+    }
+    return title;
+  };
+
   const handleFormulaConfirm = (formulaData: any) => {
     setFormulaVisible(false);
 
@@ -470,22 +480,21 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                   return (
                                     // 字段id
                                     <Grid.Row key={item.key} gutter={8} align="center">
-                                      <Grid.Col span={5}>
+                                      <Grid.Col span={8}>
                                         <Form.Item field={item.field + '.fieldId'}>
-                                          <Select
+                                          <TreeSelect
+                                            treeData={fields}
                                             className={styles.itemSelect}
                                             onChange={(_value) => {
                                               form.setFieldValue(item.field + '.op', undefined);
                                               form.setFieldValue(item.field + '.operatorType', undefined);
                                               form.setFieldValue(item.field + '.value', undefined);
                                             }}
-                                          >
-                                            {fields.map((field) => (
-                                              <Option key={field.value} value={field.value}>
-                                                {field.label}
-                                              </Option>
-                                            ))}
-                                          </Select>
+                                            triggerElement={(params) => {
+                                              // 找到fields中，children中有params.value对应key的元素的父节点的title
+                                              return <Input readOnly value={showFieldTitle(params)}></Input>;
+                                            }}
+                                          />
                                         </Form.Item>
                                       </Grid.Col>
 
@@ -536,7 +545,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               </Form.Item>
                                             </Grid.Col>
 
-                                            <Grid.Col span={11}>
+                                            <Grid.Col span={8}>
                                               {form.getFieldValue(item.field + '.operatorType') == undefined && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Input placeholder="请输入" disabled />
@@ -570,7 +579,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                                                    fx编辑公式
+                                                    ｆх编辑公式
                                                   </Button>
                                                 </Form.Item>
                                               )}

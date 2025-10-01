@@ -4,7 +4,7 @@ import {
   DATA_SOURCE_TYPE,
   getEntityFields,
   getFieldCheckTypeApi,
-  type ConfitionField,
+  type ConditionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
 import { v4 as uuidv4 } from 'uuid';
@@ -254,15 +254,16 @@ export const getDataNodeSource = (nodeId: string): string => {
 
 export const getEntityFieldList = async (
   dataSource: string,
-  setConditionFields: (fields: ConfitionField[]) => void,
+  setConditionFields: (fields: ConditionField[]) => void,
   setValidationTypes: (types: EntityFieldValidationTypes[]) => void
 ) => {
   if (!dataSource) {
     return;
   }
-  const res = await getEntityFields({ entityId: dataSource });
   const fieldIds: string[] = [];
-  const newConditionFields: ConfitionField[] = [];
+  const newConditionFields: ConditionField[] = [];
+
+  const res = await getEntityFields({ entityId: dataSource });
   res.forEach((item: any) => {
     fieldIds.push(item.id);
     newConditionFields.push({
@@ -273,6 +274,35 @@ export const getEntityFieldList = async (
   });
 
   setConditionFields(newConditionFields);
+  if (fieldIds?.length) {
+    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+    setValidationTypes(newValidationTypes);
+  }
+};
+
+export const getEntityFieldListV2 = async (
+  dataSource: string,
+  entityName: string,
+  setConditionFields: (entityID: string, entityName: string, fields: ConditionField[]) => void,
+  setValidationTypes: (types: EntityFieldValidationTypes[]) => void
+) => {
+  if (!dataSource) {
+    return;
+  }
+  const fieldIds: string[] = [];
+  const newConditionFields: ConditionField[] = [];
+
+  const res = await getEntityFields({ entityId: dataSource });
+  res.forEach((item: any) => {
+    fieldIds.push(item.id);
+    newConditionFields.push({
+      label: item.displayName,
+      value: item.id,
+      fieldType: item.fieldType
+    });
+  });
+
+  setConditionFields(dataSource, entityName, newConditionFields);
   if (fieldIds?.length) {
     const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
     setValidationTypes(newValidationTypes);

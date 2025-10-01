@@ -1,13 +1,13 @@
 import { Button, Form, Grid, Radio, Select, type FormInstance } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus } from '@arco-design/web-react/icon';
-import { SortType, type ConfitionField, type SortData } from '@onebase/app';
+import { SortType, type ConditionField, type SortData } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 
 export interface SortByEditorProps {
-  fields: ConfitionField[];
+  fields: ConditionField[];
   data: SortData[];
   form: FormInstance;
 }
@@ -48,7 +48,11 @@ const SortByEditor: React.FC<SortByEditorProps> = ({ data, fields, form }) => {
                         />
                       </Grid.Col>
                       <Grid.Col span={13} className={styles.sortCol}>
-                        <Form.Item field={item.field + '.sortField'} noStyle rules={[{ required: true, message: '请选择排序字段' }]}>
+                        <Form.Item
+                          field={item.field + '.sortField'}
+                          noStyle
+                          rules={[{ required: true, message: '请选择排序字段' }]}
+                        >
                           <Select
                             allowClear
                             onChange={() => {
@@ -62,7 +66,11 @@ const SortByEditor: React.FC<SortByEditorProps> = ({ data, fields, form }) => {
                         </Form.Item>
                       </Grid.Col>
                       <Grid.Col span={8} className={styles.sortCol}>
-                        <Form.Item field={item.field + '.sortType'} noStyle rules={[{ required: true, message: '请选择排序规则' }]}>
+                        <Form.Item
+                          field={item.field + '.sortType'}
+                          noStyle
+                          rules={[{ required: true, message: '请选择排序规则' }]}
+                        >
                           <Radio.Group
                             onChange={() => {
                               setSortList(form.getFieldValue('sortBy'));

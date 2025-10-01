@@ -1,6 +1,6 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { useAppStore } from '@/store/store_app';
-import { Form, Grid, Input, InputNumber, Radio, Select } from '@arco-design/web-react';
+import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
@@ -19,18 +19,11 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
-import {
-  clearDataOriginNodeId,
-  getDataNodeSource,
-  getEntityFieldList,
-  getPrecedingNodes,
-  validateNodeForm
-} from '../../utils';
-import { updateDataQueryMultipleOutputs } from './output';
+import { getDataNodeSource, getEntityFieldList, getPrecedingNodes, validateNodeForm } from '../../utils';
+import { updateDataQueryOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [
   NodeType.DATA_QUERY_MULTIPLE,
-  NodeType.DATA_QUERY,
   NodeType.LOOP,
   NodeType.IF,
   NodeType.IF_BLOCK,
@@ -68,6 +61,32 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
 
+  /**
+   * 获取方式变更
+   * 更新数据源下拉列表，清除已选择数据源
+   * 清除排序字段下拉列表，清除已选择排序字段
+   */
+  const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
+    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      mainEntityId: undefined,
+      subEntityId: undefined,
+      dataNodeId: undefined,
+      sortBy: [],
+      filterCondition: []
+    });
+
+    setMainEntityList([]);
+    setSubEntityList([]);
+    setDataNodeList([]);
+    setConditionFields([]);
+    setValidationTypes([]);
+
+    getEntityAndDataNodeList(curDataType);
+  };
+
   useEffect(() => {
     init();
   }, []);
@@ -104,34 +123,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setDataNodeList(newDataNodeList);
   };
 
-  /**
-   * 获取方式变更
-   * 更新数据源下拉列表，清除已选择数据源
-   * 清除排序字段下拉列表，清除已选择排序字段
-   */
-  const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
-    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      dataNodeId: undefined,
-      sortBy: [], // 清除已选择排序字段
-      filterCondition: []
-    });
-
-    setMainEntityList([]);
-    setSubEntityList([]);
-    setDataNodeList([]);
-    setConditionFields([]);
-    setValidationTypes([]);
-
-    getEntityAndDataNodeList(curDataType);
-
-    clearDataOriginNodeId(node.id);
-  };
-
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'dataNodeId', 'filterCondition', 'sortBy']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
@@ -139,10 +130,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       subEntityId: undefined,
       dataNodeId: undefined,
-      sortBy: [], // 清除已选择排序字段
+      sortBy: [],
       filterCondition: []
     });
-
     setSubEntityList([]);
     setDataNodeList([]);
     setConditionFields([]);
@@ -155,12 +145,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         entityName: item.childEntityName
       };
     });
+
     setSubEntityList(newEntityList);
     if (dataType !== DATA_SOURCE_TYPE.SUBFORM && curMainEntityId) {
       getFieldList(curMainEntityId);
     }
-
-    clearDataOriginNodeId(node.id);
   };
 
   const handleSubEntityIdChange = (curSubEntityId: string) => {
@@ -172,15 +161,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
       dataNodeId: undefined,
-      sortBy: [], // 清除已选择排序字段
+      sortBy: [],
       filterCondition: []
     });
     // 根据数据源重新获取字段列表
     if (curSubEntityId) {
       getFieldList(curSubEntityId);
     }
-
-    clearDataOriginNodeId(node.id);
   };
 
   const handleDateNodeSourceChange = async (dataNodeId: string) => {
@@ -190,7 +177,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       mainEntityId: undefined,
       subEntityId: undefined,
-      sortBy: [], // 清除已选择排序字段
+      sortBy: [],
       filterCondition: []
     });
 
@@ -202,10 +189,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     const nodes = triggerEditorSignal.nodes.value;
 
-    const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
+    const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
     setDataNodeList(newDataNodeList);
 
-    clearDataOriginNodeId(node.id);
     getFieldList(dataNodeId);
   };
 
@@ -230,7 +216,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从上游数据节点查询
       const nodes = triggerEditorSignal.nodes.value;
       // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
-      const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
+      const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
 
       setDataNodeList(newDataNodeList);
     }
@@ -239,6 +225,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (!nodeData) {
       return;
     }
+
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
       getEntityFieldList(nodeData.mainEntityId, handleSetConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
@@ -268,7 +255,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleSetConditionFields = (conditionFields: ConditionField[]) => {
     setConditionFields(conditionFields);
-    updateDataQueryMultipleOutputs(node.id, conditionFields);
+    updateDataQueryOutputs(node.id, conditionFields);
   };
 
   // 表单内容改变
@@ -284,11 +271,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const getInitData = () => {
-    return {
-      // 初始值写前面,覆写放后面
-      maxCount: 500,
-      ...triggerEditorSignal.nodeData.value[node.id]
-    };
+    return { ...triggerEditorSignal.nodeData.value[node.id] };
   };
 
   return (
@@ -430,20 +413,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 ></SortByEditor>
               </Form.Item>
             </Grid.Row>
-
-            <Grid.Row gutter={8} align="center">
-              <Grid.Col span={6} style={{ color: 'grey' }}>
-                按排序规则，获取过滤后的前
-              </Grid.Col>
-              <Grid.Col span={3}>
-                <Form.Item field="maxCount" style={{ marginTop: '20px' }}>
-                  <InputNumber min={1} max={500} />
-                </Form.Item>
-              </Grid.Col>
-              <Grid.Col span={4} style={{ color: 'grey' }}>
-                条数据
-              </Grid.Col>
-            </Grid.Row>
+            <div style={{ color: '#4e5969' }}>仅查询排序的第一条数据</div>
           </Form>
         </FormContent>
       ) : (

@@ -18,8 +18,8 @@ import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/in
 import { IconDelete } from '@arco-design/web-react/icon';
 import {
   FieldType,
-  getFieldCheckTypeApi,
   VALIDATION_TYPE,
+  type ConditionField,
   type EntityFieldValidationTypes,
   type ValidationTypeItem
 } from '@onebase/app';
@@ -31,19 +31,6 @@ import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
 const Option = Select.Option;
-
-const ALLOW_NODE_TYPES = [
-  NodeType.DATA_QUERY,
-  NodeType.DATA_ADD,
-  NodeType.START_FORM,
-  NodeType.START_ENTITY,
-  NodeType.START_DATE_FIELD,
-  NodeType.LOOP,
-  NodeType.IF,
-  NodeType.IF_BLOCK,
-  NodeType.CASE,
-  NodeType.CASE_DEFAULT
-];
 
 const opCodeOptions = [
   {
@@ -67,27 +54,36 @@ export interface ConditionEditorProps {
   nodeId: string;
   label: string;
   required: boolean;
+  fields: ConditionField[];
+  entityFieldValidationTypes: EntityFieldValidationTypes[];
   form: FormInstance;
+  // 可选变量下拉选项， 如果不传默认从节点id中计算后获取
+  variableOptions?: TreeSelectDataType[];
 }
 
 /**
  * 条件编辑器组件初始化
  */
-const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, label, required }) => {
+const ConditionEditor: React.FC<ConditionEditorProps> = ({
+  nodeId,
+  fields,
+  entityFieldValidationTypes,
+  form,
+  label,
+  required,
+  variableOptions
+}) => {
   useSignals();
 
   const filterCondition = Form.useWatch('filterCondition', form);
-
-  const [fieldOptions, setFieldOptions] = useState<TreeSelectDataType[]>([]);
-  const [entityFieldValidationTypes, setEntityFieldValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
   const [formulaData, setFormulaData] = useState<string>('');
 
-  // 过滤为空的条件和field字段不存在的条件
+  // 过滤为空的条件
   useEffect(() => {
-    console.log('filterCondition:  ', filterCondition);
+    // console.log('filterCondition:  ', filterCondition);
     if (Array.isArray(filterCondition)) {
       filterCondition.forEach((item: any, index: number) => {
         if (Array.isArray(item.conditions)) {
@@ -97,32 +93,20 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           }
         }
       });
+      form.setFieldValue('filterCondition', filterCondition);
     }
-    form.setFieldValue('filterCondition', filterCondition);
   }, []);
 
   useEffect(() => {
-    getFieldOptions(nodeId);
-  }, []);
+    // console.log('entityFieldValidationTypes:  ', entityFieldValidationTypes);
+  }, [entityFieldValidationTypes]);
 
   useEffect(() => {
     // console.log('filterCondition:  ', filterCondition);
   }, [filterCondition]);
 
-  const getFieldOptions = async (nodeId: string) => {
-    const newFieldOptions = getVariableOptions(nodeId);
-    setFieldOptions(newFieldOptions);
-
-    const fieldIds = getEntityFieldValidationTypes(nodeId);
-
-    if (fieldIds?.length) {
-      const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-      setEntityFieldValidationTypes(newValidationTypes);
-    }
-  };
-
   const StaticValueComponent = (fieldName: string, fieldId: string, op: string) => {
-    const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldId == getSplitFieldId(fieldId));
+    const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldId == fieldId);
 
     if (
       fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.TEXT.VALUE ||
@@ -250,7 +234,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
       return (
         <Form.Item field={fieldName}>
-          <DatePicker showTime placeholder="请输入静态值" style={{ width: '100%' }} />
+          <DatePicker showTime placeholder="请输入静态值" />
         </Form.Item>
       );
     }
@@ -262,102 +246,31 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     );
   };
 
-  const getEntityFieldValidationTypes = (nodeId: string): string[] => {
-    const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
-    // console.log('nodes: ', nodes);
-
-    const fieldIds: string[] = [];
-
-    nodes.forEach((node) => {
-      const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
-
-      switch (node.type) {
-        case NodeType.START_FORM:
-          const startFormFields = nodeOutput.conditionFields;
-
-          startFormFields &&
-            startFormFields.forEach((field: any) => {
-              fieldIds.push(field.value);
-            });
-
-          break;
-        case NodeType.START_ENTITY:
-          const startEntityFields = nodeOutput.conditionFields;
-
-          startEntityFields &&
-            startEntityFields.forEach((field: any) => {
-              fieldIds.push(field.value);
-            });
-
-          break;
-        case NodeType.START_TIME:
-          break;
-        case NodeType.START_DATE_FIELD:
-          const startDateFields = nodeOutput.conditionFields;
-
-          startDateFields &&
-            startDateFields.forEach((field: any) => {
-              fieldIds.push(field.value);
-            });
-
-          break;
-        case NodeType.START_API:
-          break;
-        case NodeType.START_BPM:
-          break;
-        case NodeType.DATA_ADD:
-          const dataAddFields = nodeOutput.conditionFields;
-          dataAddFields &&
-            dataAddFields.forEach((field: any) => {
-              fieldIds.push(field.value);
-            });
-
-          break;
-        case NodeType.DATA_DELETE:
-          break;
-        case NodeType.DATA_QUERY:
-          const dataQueryFields = nodeOutput.conditionFields;
-          dataQueryFields &&
-            dataQueryFields.forEach((field: any) => {
-              fieldIds.push(field.value);
-            });
-
-          break;
-        case NodeType.DATA_QUERY_MULTIPLE:
-          const dataQueryMultipleFields = nodeOutput.conditionFields;
-          dataQueryMultipleFields &&
-            dataQueryMultipleFields.forEach((field: any) => {
-              fieldIds.push(field.value);
-            });
-
-          break;
-        case NodeType.DATA_UPDATE:
-          const dataUpdateFields = nodeOutput.conditionFields;
-          dataUpdateFields &&
-            dataUpdateFields.forEach((field: any) => {
-              fieldIds.push(field.value);
-            });
-
-          break;
-        case NodeType.DATA_CALC:
-          break;
-        case NodeType.LOOP:
-          const loopFields = nodeOutput.conditionFields;
-          loopFields &&
-            loopFields.forEach((field: any) => {
-              fieldIds.push(field.value);
-            });
-
-          break;
-      }
-    });
-
-    return fieldIds;
-  };
-
   const getVariableOptions = (nodeId: string): TreeSelectDataType[] => {
-    const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
-    console.log('nodes: ', nodes);
+    if (nodeId == undefined || nodeId == '') {
+      if (variableOptions) {
+        return variableOptions;
+      }
+
+      return [];
+    }
+
+    const nodeTypes = [
+      NodeType.DATA_QUERY,
+      NodeType.DATA_QUERY_MULTIPLE,
+      NodeType.DATA_UPDATE,
+      NodeType.DATA_ADD,
+      NodeType.START_FORM,
+      NodeType.START_ENTITY,
+      NodeType.START_TIME,
+      NodeType.START_DATE_FIELD,
+      NodeType.START_API,
+      NodeType.START_BPM,
+      NodeType.LOOP
+    ];
+
+    const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
+    // console.log('nodes: ', nodes);
 
     const options: TreeSelectDataType[] = [];
 
@@ -496,14 +409,13 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
             loopFields.forEach((field: any) => {
               treeNode.children.push({
                 key: `${node.id}.${field.value}`,
-                title: `${field.label}`
+                title: field.label
               });
             });
 
           if (treeNode.children.length > 0) {
             options.push(treeNode);
           }
-
           break;
       }
     });
@@ -515,21 +427,9 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     if (params.value) {
       const parentId = params.value.split('.')[0];
       const parentNode = options.find((item) => item.key == parentId);
+
       const childrenName = parentNode?.children?.find((item) => item.key == params.value)?.title;
       return `${parentNode?.title} - ${childrenName}`;
-    }
-
-    return '';
-  };
-
-  const getSplitFieldId = (fieldId: string) => {
-    if (fieldId) {
-      const splits = fieldId.split('.');
-      if (splits.length > 1) {
-        return splits[1];
-      }
-
-      return '';
     }
 
     return '';
@@ -572,23 +472,20 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                     <Grid.Row key={item.key} gutter={8} align="center">
                                       <Grid.Col span={8}>
                                         <Form.Item field={item.field + '.fieldId'}>
-                                          <TreeSelect
+                                          <Select
                                             className={styles.itemSelect}
-                                            treeData={fieldOptions}
-                                            triggerElement={(params) => {
-                                              return (
-                                                <Input
-                                                  readOnly
-                                                  value={showTriggerElement(params, getVariableOptions(nodeId))}
-                                                ></Input>
-                                              );
-                                            }}
                                             onChange={(_value) => {
                                               form.setFieldValue(item.field + '.op', undefined);
                                               form.setFieldValue(item.field + '.operatorType', undefined);
                                               form.setFieldValue(item.field + '.value', undefined);
                                             }}
-                                          />
+                                          >
+                                            {fields.map((field) => (
+                                              <Option key={field.value} value={field.value}>
+                                                {field.label}
+                                              </Option>
+                                            ))}
+                                          </Select>
                                         </Form.Item>
                                       </Grid.Col>
 
@@ -606,11 +503,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                             {form.getFieldValue(item.field)?.fieldId &&
                                               entityFieldValidationTypes &&
                                               entityFieldValidationTypes
-                                                .find(
-                                                  (cc) =>
-                                                    cc.fieldId ==
-                                                    getSplitFieldId(form.getFieldValue(item.field).fieldId)
-                                                )
+                                                .find((cc) => cc.fieldId == form.getFieldValue(item.field).fieldId)
                                                 ?.validationTypes.map((operator: ValidationTypeItem) => (
                                                   <Option key={operator.code} value={operator.code}>
                                                     {operator.name}
@@ -649,7 +542,6 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                                   <Input placeholder="请输入" disabled />
                                                 </Form.Item>
                                               )}
-
                                               {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE &&
                                                 StaticValueComponent(
                                                   item.field + '.value',
@@ -752,4 +644,4 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   );
 };
 
-export default IfNodeConditionEditor;
+export default ConditionEditor;

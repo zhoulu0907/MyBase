@@ -2,12 +2,16 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Checkbox, Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
-import type { ComponentConfig } from '@onebase/app';
+import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import {
   getComponentListByPageId,
+  getEntityFieldsWithChildren,
   getFieldCheckTypeApi,
   getPageListByAppId,
-  type ConfitionField,
+  getPageMetadata,
+  type AppEntityField,
+  type ComponentConfig,
+  type ConditionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
@@ -29,7 +33,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const [pageList, setPageList] = useState<any[]>([]);
 
-  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+  const [componentList, setComponentList] = useState<any[]>([]);
+  const [conditionFields, setConditionFields] = useState<TreeSelectDataType[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
   const handlePropsOnChange = (values: any) => {
@@ -52,6 +57,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useEffect(() => {
     if (pageId) {
       handleGetComponentList(pageId);
+      handleGetFieldList(pageId);
     }
   }, [pageId]);
 
@@ -79,22 +85,30 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
   };
 
-  const handleGetComponentList = async (id: string) => {
-    const res = await getComponentListByPageId({ pageId: id });
-    if (res && res.list) {
-      const newConditionFields: ConfitionField[] = [];
-      const fieldIds: string[] = [];
-      res.list.forEach((item: ComponentConfig) => {
-        const cpConfig = JSON.parse(item.config);
-        if (cpConfig.dataField && cpConfig.dataField.length > 1) {
-          fieldIds.push(cpConfig.dataField[1]);
+  const handleGetFieldList = async (id: string) => {
+    const res = await getPageMetadata({ pageId: id });
+    if (res && res.metadata) {
+      console.log(res);
 
-          newConditionFields.push({
-            label: cpConfig.label.text ? cpConfig.label.text : cpConfig.label,
-            value: cpConfig.dataField[1],
-            fieldType: item.componentType
-          });
-        }
+      const entityWithChildren = await getEntityFieldsWithChildren(res.metadata);
+      console.log(entityWithChildren);
+
+      const conditions: ConditionField[] = [];
+      const fieldIds: string[] = [];
+      const fieldList: any[] = [];
+
+      entityWithChildren.parentFields.forEach((item: AppEntityField) => {
+        fieldIds.push(item.fieldId);
+        fieldList.push({
+          label: item.displayName,
+          value: item.fieldId
+        });
+
+        conditions.push({
+          label: item.displayName,
+          value: item.fieldId,
+          fieldType: item.fieldType
+        });
       });
 
       if (fieldIds?.length) {
@@ -102,9 +116,43 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         setValidationTypes(newValidationTypes);
       }
 
-      setConditionFields(newConditionFields);
+      setConditionFields([
+        {
+          key: entityWithChildren.entityId,
+          title: entityWithChildren.entityName,
+          children: conditions.map((item) => {
+            return {
+              key: item.value,
+              title: item.label,
+              fieldType: item.fieldType
+            };
+          })
+        }
+      ]);
 
-      updateStartFormOutputs(node.id, newConditionFields);
+      // 更新节点输出配置
+      updateStartFormOutputs(node.id, conditions);
+    }
+  };
+
+  const handleGetComponentList = async (id: string) => {
+    const res = await getComponentListByPageId({ pageId: id });
+    if (res && res.list) {
+      const newComponentList: any[] = [];
+
+      res.list.forEach((item: ComponentConfig) => {
+        const cpConfig = JSON.parse(item.config);
+        if (cpConfig.dataField && cpConfig.dataField.length > 1) {
+          newComponentList.push({
+            label: cpConfig.label.text ? cpConfig.label.text : cpConfig.label,
+            value: item.componentCode,
+            fieldType: item.componentType
+          });
+        }
+      });
+
+      console.log(newComponentList);
+      setComponentList(newComponentList);
     }
   };
 
@@ -185,7 +233,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   <Grid.Col span={10}>
                     <Form.Item field="fieldId" rules={[{ required: true, message: '请选择字段' }]} layout="vertical">
                       <Select style={{ width: '100%' }}>
-                        {conditionFields?.map((item) => (
+                        {componentList?.map((item) => (
                           <Option key={item.value} value={item.value}>
                             {item.label}
                           </Option>

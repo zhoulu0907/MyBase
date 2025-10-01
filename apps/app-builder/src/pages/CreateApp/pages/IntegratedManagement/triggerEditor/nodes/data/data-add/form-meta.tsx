@@ -8,7 +8,7 @@ import {
   getEntityFieldsWithChildren,
   getEntityListByApp,
   type AppEntityField,
-  type ConfitionField,
+  type ConditionField,
   type MetadataEntityPair
 } from '@onebase/app';
 import { useEffect, useState } from 'react';
@@ -154,12 +154,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   // 获取字段下拉列表
-  const getFieldList = async (dataSource: string) => {
-    if (!dataSource) {
+  const getFieldList = async (mainDataSource: string) => {
+    if (!mainDataSource) {
       return;
     }
-    const res = await getEntityFields({ entityId: dataSource });
-    const newConditionFields: ConfitionField[] = [];
+    const newConditionFields: ConditionField[] = [];
+
+    const res = await getEntityFields({ entityId: mainDataSource });
     res.forEach((item: any) => {
       item.fieldId = item.id;
 

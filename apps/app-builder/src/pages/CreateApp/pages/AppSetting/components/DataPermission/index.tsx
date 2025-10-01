@@ -1,41 +1,41 @@
 import { Button, Divider, Message, Popconfirm, Space, Tag } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
-  updateDataGroupPermission,
   deleteDataGroup,
+  FieldType,
   // getEntityFieldsWithChildren
   // getAppEntities,
   getDataPermission,
-  getEntityFields,
-  getFieldCheckTypeApi,
-  getScopeTypeApi,
-  getPageSetId,
-  loadPageSet,
   getEntityById,
+  getEntityFields,
   getEntityFieldsWithChildren,
-  FieldType,
+  getFieldCheckTypeApi,
+  getPageSetId,
+  getScopeTypeApi,
   IsOperable,
-  type UpdateDataGroupPermissionReq,
+  loadPageSet,
+  updateDataGroupPermission,
+  // type ConditionField,
+  type AppEntityField,
+  type AuthDataFilterVO,
   // type AppEntities,
   // type AppEntityField,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
+  type EntityFieldValidationTypes,
+  type EntityWithChildren,
+  // type GetPageSetIdReq
   // type FilterFieldCheckType,
   type GetPermissionReq,
-  type EntityFieldValidationTypes,
-  // type ConfitionField,
-  type AppEntityField,
-  type AuthDataFilterVO,
-  type ScopeTypeOption,
   type LoadPageSetReq,
-  type EntityWithChildren
-  // type GetPageSetIdReq
+  type ScopeTypeOption,
+  type UpdateDataGroupPermissionReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
 
-import styles from './index.module.less';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
+import styles from './index.module.less';
 
 const initialFormValues: AuthDataGroupVO = {
   id: '',

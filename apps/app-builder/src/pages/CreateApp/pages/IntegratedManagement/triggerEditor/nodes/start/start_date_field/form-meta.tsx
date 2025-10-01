@@ -5,7 +5,7 @@ import { Checkbox, Form, Grid, Input, InputNumber, Select, TimePicker } from '@a
 import {
   getEntityFields,
   getEntityListByApp,
-  type ConfitionField,
+  type ConditionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
@@ -29,7 +29,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   // 查询规则
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
-  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
 
   const [payloadForm] = Form.useForm();
 
@@ -50,7 +50,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [entityId]);
 
-  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
+  const handleSetConditionFields = (conditionFields: ConditionField[]) => {
     setConditionFields(conditionFields);
     updateStartDateFieldOutputs(node.id, conditionFields);
   };
