@@ -1,36 +1,33 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, InputNumber, Radio, Select } from '@arco-design/web-react';
+import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
   FILTER_TYPE,
   getEntityFieldsWithChildren,
   getEntityListByApp,
+  getFieldCheckTypeApi,
+  type AppEntityField,
+  type ChildEntity,
   type ConditionField,
   type EntityFieldValidationTypes,
   type MetadataEntityPair
 } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
-import {
-  clearDataOriginNodeId,
-  getDataNodeSource,
-  getEntityFieldList,
-  getPrecedingNodes,
-  validateNodeForm
-} from '../../utils';
+import { clearDataOriginNodeId, getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
 import { updateDataQueryMultipleOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [
   NodeType.DATA_QUERY_MULTIPLE,
-  NodeType.DATA_QUERY,
   NodeType.LOOP,
   NodeType.IF,
   NodeType.IF_BLOCK,
@@ -49,6 +46,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const dataType = Form.useWatch('dataType', payloadForm);
   const mainEntityId = Form.useWatch('mainEntityId', payloadForm);
+  const subEntityId = Form.useWatch('subEntityId', payloadForm);
   const filterType = Form.useWatch('filterType', payloadForm);
 
   // 数据源选择
@@ -58,55 +56,28 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   // 查询规则
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
-  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
 
-  useEffect(() => {
-    getEntityAndDataNodeList();
-  }, []);
+  const [mainEntityFields, setMainEntityFields] = useState<TreeSelectDataType>([]);
+  const [subEntityFields, setSubEntityFields] = useState<TreeSelectDataType[]>([]);
+  const [dataNodeEntityFields, setDataNodeEntityFields] = useState<TreeSelectDataType>([]);
+
+  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
 
   useEffect(() => {
+    // 初始化 获取实体和数据节点列表数据，用于下拉菜单
+    getEntityList();
+    // 从缓存中载入节点数据
     init();
   }, []);
 
-  const init = async () => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if (nodeData) {
-      if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-        // 在主表中
-        const res = await getEntityListByApp(curAppId);
-        setMainEntityList(res);
-        getFieldList(nodeData?.mainEntityId);
-      }
-      if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-        // 在子表中
-        const res = await getEntityListByApp(curAppId);
-        setMainEntityList(res);
-        if (nodeData?.mainEntityId) {
-          const res = await getEntityFieldsWithChildren(nodeData.mainEntityId);
-          const newEntityList = (res.childEntities || []).map((item: any) => {
-            return {
-              entityId: item.childEntityId,
-              entityName: item.childEntityName
-            };
-          });
-          setSubEntityList(newEntityList);
-          getFieldList(nodeData.subEntityId);
-        }
-      }
-    }
-
-    const nodes = triggerEditorSignal.nodes.value;
-    const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
-    setDataNodeList(newDataNodeList);
-  };
-
   /**
-   * 获取方式变更
+   * 数据查询方式变更（主表、子表、数据节点中查询）
    * 更新数据源下拉列表，清除已选择数据源
+   * 更新条件过滤
    * 清除排序字段下拉列表，清除已选择排序字段
    */
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
@@ -117,100 +88,116 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       mainEntityId: undefined,
       subEntityId: undefined,
       dataNodeId: undefined,
-      sortBy: [], // 清除已选择排序字段
+      sortBy: [],
       filterCondition: []
     });
 
     setMainEntityList([]);
     setSubEntityList([]);
     setDataNodeList([]);
-    setConditionFields([]);
     setValidationTypes([]);
-
-    getEntityAndDataNodeList(curDataType);
 
     clearDataOriginNodeId(node.id);
+
+    getEntityList(curDataType);
   };
 
-  const handleMainEntityIdChange = async (curMainEntityId: string) => {
-    payloadForm.clearFields(['subEntityId', 'dataNodeId', 'filterCondition', 'sortBy']);
+  const init = async () => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subEntityId: undefined,
-      dataNodeId: undefined,
-      sortBy: [], // 清除已选择排序字段
-      filterCondition: []
-    });
+    if (nodeData) {
+      if (nodeData.dataType === DATA_SOURCE_TYPE.FORM || nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+        if (!nodeData?.mainEntityId) {
+          return;
+        }
 
-    setSubEntityList([]);
-    setDataNodeList([]);
-    setConditionFields([]);
-    setValidationTypes([]);
+        const fieldIds: string[] = [];
+        const res = await getEntityFieldsWithChildren(nodeData?.mainEntityId);
 
-    const res = await getEntityFieldsWithChildren(curMainEntityId);
-    const newEntityList = (res.childEntities || []).map((item: any) => {
-      return {
-        entityId: item.childEntityId,
-        entityName: item.childEntityName
-      };
-    });
-    setSubEntityList(newEntityList);
-    if (dataType !== DATA_SOURCE_TYPE.SUBFORM && curMainEntityId) {
-      getFieldList(curMainEntityId);
+        const newSubEntityList = (res.childEntities || []).map((item: any) => {
+          return {
+            entityId: item.childEntityId,
+            entityName: item.childEntityName
+          };
+        });
+
+        setSubEntityList(newSubEntityList);
+
+        if (res.parentFields) {
+          const fields = res.parentFields.map((item: AppEntityField) => {
+            fieldIds.push(item.fieldId);
+            return {
+              key: item.fieldId,
+              title: item.displayName,
+              fieldType: item.fieldType
+            };
+          });
+
+          setMainEntityFields({
+            key: res.entityId,
+            title: res.entityName,
+            children: fields
+          });
+        }
+
+        if (res.childEntities) {
+          const subFields: TreeSelectDataType[] = [];
+          res.childEntities.forEach((item: ChildEntity) => {
+            const fields = item.childFields.map((item: AppEntityField) => {
+              fieldIds.push(item.fieldId);
+              return {
+                key: item.fieldId,
+                title: item.displayName,
+                fieldType: item.fieldType
+              };
+            });
+            subFields.push({
+              key: item.childEntityId,
+              title: item.childEntityName,
+              children: fields
+            });
+          });
+
+          setSubEntityFields(subFields);
+
+          const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+          setValidationTypes(newValidationTypes);
+        }
+      }
+
+      if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+        if (!nodeData?.dataNodeId) {
+          return;
+        }
+
+        const fieldIds: string[] = [];
+
+        const originDataSource = getDataNodeSource(nodeData?.dataNodeId);
+        const res = await getEntityFieldsWithChildren(originDataSource);
+
+        if (res.parentFields) {
+          const fields = res.parentFields.map((item: AppEntityField) => {
+            fieldIds.push(item.fieldId);
+            return {
+              key: item.fieldId,
+              title: item.displayName,
+              fieldType: item.fieldType
+            };
+          });
+
+          setDataNodeEntityFields({
+            key: res.entityId,
+            title: res.entityName,
+            children: fields
+          });
+        }
+
+        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+        setValidationTypes(newValidationTypes);
+      }
     }
-
-    clearDataOriginNodeId(node.id);
   };
 
-  const handleSubEntityIdChange = (curSubEntityId: string) => {
-    payloadForm.clearFields(['dataNodeId', 'filterCondition', 'sortBy']);
-    setConditionFields([]);
-    setValidationTypes([]);
-
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      dataNodeId: undefined,
-      sortBy: [], // 清除已选择排序字段
-      filterCondition: []
-    });
-    // 根据数据源重新获取字段列表
-    if (curSubEntityId) {
-      getFieldList(curSubEntityId);
-    }
-
-    clearDataOriginNodeId(node.id);
-  };
-
-  const handleDateNodeSourceChange = async (dataNodeId: string) => {
-    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      sortBy: [], // 清除已选择排序字段
-      filterCondition: []
-    });
-
-    setMainEntityList([]);
-    setSubEntityList([]);
-    setDataNodeList([]);
-    setConditionFields([]);
-    setValidationTypes([]);
-
-    const nodes = triggerEditorSignal.nodes.value;
-
-    const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
-    setDataNodeList(newDataNodeList);
-
-    clearDataOriginNodeId(node.id);
-    getFieldList(dataNodeId);
-  };
-
-  // 获取各类数据源列表，不传值获取全部(用于初始化)
-  const getEntityAndDataNodeList = async (curDateType?: DATA_SOURCE_TYPE) => {
+  const getEntityList = async (curDateType?: DATA_SOURCE_TYPE) => {
     if (curDateType === DATA_SOURCE_TYPE.FORM || curDateType === undefined) {
       // 从主表中查询  FORM
       const res = await getEntityListByApp(curAppId);
@@ -230,53 +217,218 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从上游数据节点查询
       const nodes = triggerEditorSignal.nodes.value;
       // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
-      const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
-
+      const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
       setDataNodeList(newDataNodeList);
     }
+  };
+
+  const handleMainEntityIdChange = async (curMainEntityId: string) => {
+    payloadForm.clearFields(['subEntityId', 'dataNodeId', 'filterCondition', 'sortBy']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      subEntityId: undefined,
+      dataNodeId: undefined,
+      sortBy: [],
+      filterCondition: []
+    });
+    setSubEntityList([]);
+    setDataNodeList([]);
+    setValidationTypes([]);
+
+    clearDataOriginNodeId(node.id);
+
+    const fieldIds: string[] = [];
+
+    const res = await getEntityFieldsWithChildren(curMainEntityId);
+    console.log(res);
+
+    const newEntityList = (res.childEntities || []).map((item: any) => {
+      return {
+        entityId: item.childEntityId,
+        entityName: item.childEntityName
+      };
+    });
+
+    setSubEntityList(newEntityList);
+
+    if (res.parentFields) {
+      const fields = res.parentFields.map((item: AppEntityField) => {
+        fieldIds.push(item.fieldId);
+        return {
+          key: item.fieldId,
+          title: item.displayName,
+          fieldType: item.fieldType
+        };
+      });
+      setMainEntityFields({
+        key: res.entityId,
+        title: res.entityName,
+        children: fields
+      });
+    }
+
+    if (res.childEntities) {
+      const subFields: TreeSelectDataType[] = [];
+      res.childEntities.forEach((item: ChildEntity) => {
+        const fields = item.childFields.map((item: AppEntityField) => {
+          fieldIds.push(item.fieldId);
+          return {
+            key: item.fieldId,
+            title: item.displayName,
+            fieldType: item.fieldType
+          };
+        });
+        subFields.push({
+          key: item.childEntityId,
+          title: item.childEntityName,
+          children: fields
+        });
+      });
+
+      setSubEntityFields(subFields);
+
+      const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+      setValidationTypes(newValidationTypes);
+    }
+  };
+
+  const handleSubEntityIdChange = (_curSubEntityId: string) => {
+    payloadForm.clearFields(['dataNodeId', 'filterCondition', 'sortBy']);
 
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if (!nodeData) {
-      return;
-    }
-    if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-      getEntityFieldList(nodeData.mainEntityId, handleSetConditionFields, setValidationTypes);
-    } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
-      const originDataSource = getDataNodeSource(nodeData.dataNodeId);
-      getEntityFieldList(originDataSource, handleSetConditionFields, setValidationTypes);
-    } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-      // 从子表中查询  SUBFORM
-      getEntityFieldList(nodeData.subEntityId, handleSetConditionFields, setValidationTypes);
-    }
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      dataNodeId: undefined,
+      sortBy: [],
+      filterCondition: []
+    });
+
+    clearDataOriginNodeId(node.id);
   };
 
-  // 获取排序字段下拉列表
-  const getFieldList = async (dataSource: string) => {
-    // 根据数据源 查询指定实体的字段列表
-    // 根据不同获取方式走不同接口
-    if (dataType === DATA_SOURCE_TYPE.FORM || dataType === DATA_SOURCE_TYPE.SUBFORM) {
-      // 从主表中查询/从子表中查询
-      getEntityFieldList(dataSource, handleSetConditionFields, setValidationTypes);
-    } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
-      // 从数据节点中查询  DATA_NODE
-      const originDataSource = getDataNodeSource(dataSource);
-      getEntityFieldList(originDataSource, handleSetConditionFields, setValidationTypes);
-    } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
-      // 从关联表单中查询  ASSOCIA_FORM
+  const handleDateNodeSourceChange = async (dataNodeId: string) => {
+    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      mainEntityId: undefined,
+      subEntityId: undefined,
+      sortBy: [],
+      filterCondition: []
+    });
+
+    setMainEntityList([]);
+    setSubEntityList([]);
+    setValidationTypes([]);
+
+    clearDataOriginNodeId(node.id);
+
+    const fieldIds: string[] = [];
+
+    const originDataSource = getDataNodeSource(dataNodeId);
+    const res = await getEntityFieldsWithChildren(originDataSource);
+
+    if (res.parentFields) {
+      const fields = res.parentFields.map((item: AppEntityField) => {
+        fieldIds.push(item.fieldId);
+        return {
+          key: item.fieldId,
+          title: item.displayName,
+          fieldType: item.fieldType
+        };
+      });
+
+      setDataNodeEntityFields({
+        key: res.entityId,
+        title: res.entityName,
+        children: fields
+      });
     }
+
+    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+    setValidationTypes(newValidationTypes);
   };
 
-  const handleSetConditionFields = (conditionFields: ConditionField[]) => {
-    setConditionFields(conditionFields);
-    updateDataQueryMultipleOutputs(node.id, conditionFields);
+  const handleFilterTypeChange = (_value: FILTER_TYPE) => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      filterCondition: []
+    });
+
+    payloadForm.clearFields(['filterCondition']);
   };
+
+  const conditionFieldsData = useMemo((): TreeSelectDataType[] => {
+    if (dataType === DATA_SOURCE_TYPE.FORM) {
+      return [mainEntityFields];
+    }
+    if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
+      const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
+      if (curSubEntityFields) {
+        return [mainEntityFields, curSubEntityFields];
+      }
+      return [mainEntityFields];
+    }
+    if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+      return [dataNodeEntityFields];
+    }
+
+    return [];
+  }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId, dataNodeEntityFields]);
+
+  const conditionFieldsForEditor = useMemo((): ConditionField[] => {
+    if (dataType === DATA_SOURCE_TYPE.FORM) {
+      return (
+        (mainEntityFields.children || [])?.map((item) => ({
+          label: item.title as string,
+          value: item.key as string,
+          fieldType: item.fieldType
+        })) || []
+      );
+    }
+    if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
+      const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
+      if (curSubEntityFields) {
+        return (
+          (curSubEntityFields.children || [])?.map((item) => ({
+            label: item.title as string,
+            value: item.key as string,
+            fieldType: item.fieldType
+          })) || []
+        );
+      }
+      return [];
+    }
+    if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+      return (
+        (dataNodeEntityFields.children || [])?.map((item) => ({
+          label: item.title as string,
+          value: item.key as string,
+          fieldType: item.fieldType
+        })) || []
+      );
+    }
+
+    return [];
+  }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId, dataNodeEntityFields]);
+
+  // 使用 useEffect 更新条件字段状态和输出，避免在渲染过程中直接更新状态
+  useEffect(() => {
+    setConditionFields(conditionFieldsForEditor);
+    // 只在有实际数据时才更新 triggerNodeOutputSignal，避免初始化时载入空数据
+    if (conditionFieldsForEditor.length > 0) {
+      updateDataQueryMultipleOutputs(node.id, conditionFieldsForEditor);
+    }
+  }, [conditionFieldsForEditor, node.id]);
 
   // 表单内容改变
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = async (changeValue: any, values: any) => {
+  const onValuesChange = async (_changeValue: any, values: any) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
@@ -401,7 +553,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="查询规则" field="filterType" rules={[{ required: true, message: '请选择查询规则' }]}>
-                <Radio.Group>
+                <Radio.Group onChange={handleFilterTypeChange}>
                   <Radio value={FILTER_TYPE.ALL}>全部数据</Radio>
                   <Radio value={FILTER_TYPE.CONDITION}>按条件过滤</Radio>
                 </Radio.Group>
@@ -414,7 +566,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   nodeId={node.id}
                   label="条件"
                   required
-                  fields={conditionFields}
+                  fields={conditionFieldsData}
                   entityFieldValidationTypes={validationTypes}
                   form={payloadForm}
                 />

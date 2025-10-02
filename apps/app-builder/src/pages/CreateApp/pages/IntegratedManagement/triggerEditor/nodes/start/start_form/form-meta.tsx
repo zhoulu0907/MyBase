@@ -71,7 +71,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleGetPageList = async (appId: string) => {
     const res = await getPageListByAppId({ appId });
-    console.log('res: ', res);
     setPageList(res.pages);
   };
 

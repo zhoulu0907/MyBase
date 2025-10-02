@@ -56,7 +56,7 @@ const TriggerEditor = () => {
 
   const handleGetAppEntities = async (appId: string) => {
     const res = await getAppEntities(appId);
-    console.log('res: ', res);
+
     if (res && res.entities) {
       setMainEntities(
         res.entities.filter(
@@ -70,7 +70,6 @@ const TriggerEditor = () => {
   // 载入初始化数据
   const initFlowData = async (id: string) => {
     const res = await getFlowMgmt(id);
-    console.log('res: ', res);
 
     // 已保存的节点数据回显
     if (res.processDefinition?.length) {
@@ -87,14 +86,14 @@ const TriggerEditor = () => {
           data = initBlocksData(item.blocks, data);
         }
         // 初始化输出节点
-        // console.log('item.id: ', item.id);
         if (item.output) {
-          // console.log('item.output: ', item.output);
+          //   console.log('item.id:  ' + item.id + ' item.output: ', item.output);
           triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
         }
       }
 
       console.log('nodeData', data);
+      console.log('nodeOutputs: ', triggerNodeOutputSignal.nodeOutputs.value);
 
       setAllNodeData(data);
       setInitData({ nodes: nodes });

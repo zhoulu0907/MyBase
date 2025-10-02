@@ -78,7 +78,6 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 根据函数名称或摘要是否包含搜索关键词（不区分大小写）
    */
   const filteredFunctions = useMemo(() => {
-    console.log(functionSearch, 'functionSearch');
     if (!functionSearch) return funcList;
     return funcList.filter(
       (f) =>

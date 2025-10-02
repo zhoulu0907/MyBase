@@ -23,7 +23,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
-import { getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
+import { clearDataOriginNodeId, getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
 import { updateDataQueryOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [
@@ -98,12 +98,18 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setValidationTypes([]);
 
     getEntityList(curDataType);
+
+    clearDataOriginNodeId(node.id);
   };
 
   const init = async () => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     if (nodeData) {
       if (nodeData.dataType === DATA_SOURCE_TYPE.FORM || nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+        if (!nodeData?.mainEntityId) {
+          return;
+        }
+
         const fieldIds: string[] = [];
         const res = await getEntityFieldsWithChildren(nodeData?.mainEntityId);
 
@@ -159,6 +165,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       }
 
       if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+        if (!nodeData?.dataNodeId) {
+          return;
+        }
+
         const fieldIds: string[] = [];
 
         const originDataSource = getDataNodeSource(nodeData?.dataNodeId);
@@ -226,6 +236,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setDataNodeList([]);
     setValidationTypes([]);
 
+    clearDataOriginNodeId(node.id);
+
     const fieldIds: string[] = [];
 
     const res = await getEntityFieldsWithChildren(curMainEntityId);
@@ -284,6 +296,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const handleSubEntityIdChange = (_curSubEntityId: string) => {
     payloadForm.clearFields(['dataNodeId', 'filterCondition', 'sortBy']);
 
+    clearDataOriginNodeId(node.id);
+
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -307,6 +321,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setMainEntityList([]);
     setSubEntityList([]);
     setValidationTypes([]);
+
+    clearDataOriginNodeId(node.id);
 
     const fieldIds: string[] = [];
 
@@ -334,9 +350,17 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setValidationTypes(newValidationTypes);
   };
 
-  const conditionFieldsData = useMemo((): TreeSelectDataType[] => {
-    console.log('dataType:  ' + dataType);
+  const handleFilterTypeChange = (_value: FILTER_TYPE) => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      filterCondition: []
+    });
 
+    payloadForm.clearFields(['filterCondition']);
+  };
+
+  const conditionFieldsData = useMemo((): TreeSelectDataType[] => {
     if (dataType === DATA_SOURCE_TYPE.FORM) {
       return [mainEntityFields];
     }
@@ -352,7 +376,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     return [];
-  }, [dataType, mainEntityFields, subEntityFields, subEntityId, dataNodeEntityFields]);
+  }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId, dataNodeEntityFields]);
 
   const conditionFieldsForEditor = useMemo((): ConditionField[] => {
     if (dataType === DATA_SOURCE_TYPE.FORM) {
@@ -375,6 +399,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           })) || []
         );
       }
+
       return [];
     }
     if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
@@ -388,12 +413,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     return [];
-  }, [dataType, mainEntityFields, subEntityFields, subEntityId, dataNodeEntityFields]);
+  }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId, dataNodeEntityFields]);
 
   // 使用 useEffect 更新条件字段状态和输出，避免在渲染过程中直接更新状态
   useEffect(() => {
     setConditionFields(conditionFieldsForEditor);
-    updateDataQueryOutputs(node.id, conditionFieldsForEditor);
+    // 只在有实际数据时才更新 triggerNodeOutputSignal，避免初始化时载入空数据
+    if (conditionFieldsForEditor.length > 0) {
+      updateDataQueryOutputs(node.id, conditionFieldsForEditor);
+    }
   }, [conditionFieldsForEditor, node.id]);
 
   // 表单内容改变
@@ -522,7 +550,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="查询规则" field="filterType" rules={[{ required: true, message: '请选择查询规则' }]}>
-                <Radio.Group>
+                <Radio.Group onChange={handleFilterTypeChange}>
                   <Radio value={FILTER_TYPE.ALL}>全部数据</Radio>
                   <Radio value={FILTER_TYPE.CONDITION}>按条件过滤</Radio>
                 </Radio.Group>
