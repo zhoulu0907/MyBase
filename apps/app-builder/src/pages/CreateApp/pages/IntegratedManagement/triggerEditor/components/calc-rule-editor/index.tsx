@@ -70,7 +70,7 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                       </Grid.Col>
 
                       <Grid.Col span={5}>
-                        <Form.Item field={item.field + '.fieldType'}>
+                        <Form.Item field={item.field + '.operatorType'}>
                           <Select
                             disabled={form.getFieldValue(item.field + '.field') == undefined}
                             options={valueTypeOptions}
@@ -82,16 +82,16 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                       </Grid.Col>
 
                       <Grid.Col span={8}>
-                        {form.getFieldValue(item.field + '.fieldType') == undefined && (
+                        {form.getFieldValue(item.field + '.operatorType') == undefined && (
                           <Form.Item field={item.field + '.value'}>
                             <Input placeholder="请输入" disabled />
                           </Form.Item>
                         )}
 
-                        {form.getFieldValue(item.field + '.fieldType') == FieldType.VALUE &&
+                        {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE &&
                           StaticValueComponent(item.field + '.value')}
 
-                        {form.getFieldValue(item.field + '.fieldType') == FieldType.FORMULA && (
+                        {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
                           <Form.Item field={item.field + '.value'}>
                             <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
                               ｆх编辑公式
