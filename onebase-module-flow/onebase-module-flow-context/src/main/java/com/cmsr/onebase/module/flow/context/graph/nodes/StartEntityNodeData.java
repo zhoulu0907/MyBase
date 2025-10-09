@@ -19,12 +19,9 @@ public class StartEntityNodeData extends NodeData {
 
     private List<String> triggerEvents;
 
-    private List<Long> triggerFieldIds;
-
     /**
      * 过滤条件
      */
     private List<Conditions> filterCondition;
-
 
 }

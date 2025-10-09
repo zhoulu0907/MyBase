@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow.context.express;
 
 import com.cmsr.onebase.framework.common.express.JdbcTypeEnum;
-import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.jexl3.JexlBuilder;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -28,6 +28,8 @@ import java.util.*;
 @Slf4j
 @Component
 public class ExpressionExecutor {
+
+    public static final String VAR_PREFIX = "var_";
 
     private JexlEngine jexlEngine;
 
@@ -61,7 +63,7 @@ public class ExpressionExecutor {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (StringUtils.isNumeric(key)) {
-                newContext.put("var_" + key, value);
+                newContext.put(VAR_PREFIX + key, value);
             } else {
                 newContext.put(key, value);
             }
@@ -154,7 +156,7 @@ public class ExpressionExecutor {
     public String buildExpression(ExpressionItem expressionItem) {
         expressionItem = ExpressionItem.copy(expressionItem);
         if (StringUtils.isNumeric(expressionItem.getKey().toString())) {
-            expressionItem.setKey("var_" + expressionItem.getKey());
+            expressionItem.setKey(VAR_PREFIX + expressionItem.getKey());
         }
         switch (expressionItem.getOp()) {
             case EQUALS:
@@ -188,14 +190,14 @@ public class ExpressionExecutor {
                 return String.format("%s <= %s", expressionItem.getKey(), formatValue(expressionItem));
 
             case LATER_THAN:
-                return String.format("%s > %s", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s > %s", expressionItem.getKey(), formatDateValue(expressionItem));
 
             case EARLIER_THAN:
-                return String.format("%s < %s", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s < %s", expressionItem.getKey(), formatDateValue(expressionItem));
 
             case RANGE:
                 if (expressionItem.getValue() instanceof List list) {
-                    return String.format("%s >= %s && %s <= %s",
+                    return String.format("(%s >= %s && %s <= %s)",
                             expressionItem.getKey(), formatValue(list.get(0), expressionItem),
                             expressionItem.getKey(), formatValue(list.get(1), expressionItem));
                 }
@@ -263,7 +265,7 @@ public class ExpressionExecutor {
         newExpressionItem.setJdbcType(expressionItem.getJdbcType());
         newExpressionItem.setOperatorType(expressionItem.getOperatorType());
         newExpressionItem.setFieldType(expressionItem.getFieldType());
-        return buildExpression(newExpressionItem);
+        return formatValue(newExpressionItem);
 
     }
 
@@ -274,14 +276,12 @@ public class ExpressionExecutor {
         if (expressionItem.getValue() == null) {
             return "null";
         }
-        if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
-            return expressionItem.getValue().toString();
-        }
-        if (expressionItem.getJdbcType() == JdbcTypeEnum.VARCHAR) {
-            return "'" + expressionItem.getValue().toString().replace("'", "\\'") + "'";
-        }
         if (expressionItem.getValue() instanceof Collection) {
             return formatCollectionValue((Collection<?>) expressionItem.getValue(), expressionItem);
+        }
+        if (expressionItem.getJdbcType() == JdbcTypeEnum.VARCHAR
+                || expressionItem.getJdbcType() == JdbcTypeEnum.LONGVARCHAR) {
+            return "'" + expressionItem.getValue().toString().replace("'", "\\'") + "'";
         }
         if (expressionItem.getJdbcType() == JdbcTypeEnum.BOOLEAN
                 || expressionItem.getJdbcType() == JdbcTypeEnum.BIGINT
@@ -289,32 +289,31 @@ public class ExpressionExecutor {
                 || expressionItem.getJdbcType() == JdbcTypeEnum.DECIMAL) {
             return expressionItem.getValue().toString();
         }
-
+        if (expressionItem.getJdbcType() == JdbcTypeEnum.TIMESTAMP
+                || expressionItem.getJdbcType() == JdbcTypeEnum.DATE) {
+            return formatDateValue(expressionItem);
+        }
         return "'" + expressionItem.getValue() + "'";
     }
 
-//    /**
-//     * 格式化日期值
-//     */
-//    private String formatDateValue(ExpressionItem expressionItem) {
-//        if (expressionItem.getValue() instanceof LocalDate) {
-//            LocalDate date = (LocalDate) expressionItem.getValue();
-//            return String.format("LocalDate.of(%d, %d, %d)",
-//                    date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-//        }
-//        if (expressionItem.getValue() instanceof LocalDateTime) {
-//            LocalDateTime dateTime = (LocalDateTime) expressionItem.getValue();
-//            return String.format("LocalDateTime.of(%d, %d, %d, %d, %d, %d)",
-//                    dateTime.getYear(), dateTime.getMonthValue(), dateTime.getDayOfMonth(),
-//                    dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond());
-//        }
-//        if (expressionItem.getValue() instanceof LocalTime) {
-//            LocalTime time = (LocalTime) expressionItem.getValue();
-//            return String.format("LocalTime.of(%d, %d, %d)",
-//                    time.getHour(), time.getMinute(), time.getSecond());
-//        }
-//        return "'" + expressionItem.getValue().toString() + "'";
-//    }
+    /**
+     * 格式化日期值
+     */
+    private String formatDateValue(ExpressionItem expressionItem) {
+        if (expressionItem.getValue() instanceof LocalDate) {
+            LocalDate date = (LocalDate) expressionItem.getValue();
+            return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+        if (expressionItem.getValue() instanceof LocalDateTime) {
+            LocalDateTime dateTime = (LocalDateTime) expressionItem.getValue();
+            return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+        if (expressionItem.getValue() instanceof LocalTime) {
+            LocalTime time = (LocalTime) expressionItem.getValue();
+            return time.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        }
+        return "'" + expressionItem.getValue().toString() + "'";
+    }
 
     /**
      * 格式化集合值

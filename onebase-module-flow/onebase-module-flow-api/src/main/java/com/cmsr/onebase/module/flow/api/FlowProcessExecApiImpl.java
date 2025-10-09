@@ -42,13 +42,18 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             return EntityTriggerRespDTO.SUCCESS;
         }
+        EntityTriggerRespDTO errorEntityTriggerRespDTO = null;
         for (StartEntityNodeData startEntityNodeData : entityNodeDataList) {
             EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(entityTriggerReqDTO, startEntityNodeData);
             if (!entityTriggerRespDTO.isSuccess()) {
-                return entityTriggerRespDTO;
+                errorEntityTriggerRespDTO = entityTriggerRespDTO;
             }
         }
-        return EntityTriggerRespDTO.SUCCESS;
+        if (errorEntityTriggerRespDTO != null) {
+            return errorEntityTriggerRespDTO;
+        } else {
+            return EntityTriggerRespDTO.SUCCESS;
+        }
     }
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO, StartEntityNodeData startEntityNodeData) {
@@ -56,17 +61,13 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             if (!triggerEventContains(startEntityNodeData.getTriggerEvents(), entityTriggerReqDTO.getTriggerEvent())) {
                 return EntityTriggerRespDTO.SUCCESS;
             }
-            if (!triggerFieldIdsContained(startEntityNodeData.getTriggerFieldIds(), entityTriggerReqDTO.getChangedFieldIds())) {
-                return EntityTriggerRespDTO.SUCCESS;
-            }
             if (CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
                 OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startEntityNodeData.getFilterCondition());
                 boolean isTrigger = expressionExecutor.evaluate(orExpression, entityTriggerReqDTO.getFieldData());
-                if (!isTrigger) {
-                    return EntityTriggerRespDTO.SUCCESS;
+                if (isTrigger) {
+                    flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
                 }
             }
-            flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
             return EntityTriggerRespDTO.SUCCESS;
         } catch (Exception e) {
             log.error("entityTrigger failed, {}, {}", entityTriggerReqDTO, startEntityNodeData, e);
@@ -89,25 +90,8 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         if (triggerEvent == null) {
             return false;
         }
-        String eventName = triggerEvent.getCode();
-        return triggerEvents.stream().anyMatch(event -> event.equalsIgnoreCase(eventName));
-    }
-
-    /**
-     * 检查 triggerFieldIds 列表是否包含 changedFieldIds 中的全部元素，即changedFieldIds是否是triggerFieldIds的子集
-     *
-     * @param triggerFieldIds
-     * @param changedFieldIds
-     * @return
-     */
-    private boolean triggerFieldIdsContained(List<Long> triggerFieldIds, List<Long> changedFieldIds) {
-        if (CollectionUtils.isEmpty(triggerFieldIds)) {
-            return true;
-        }
-        if (CollectionUtils.isNotEmpty(triggerFieldIds) && CollectionUtils.isEmpty(changedFieldIds)) {
-            return false;
-        }
-        return changedFieldIds.stream().allMatch(changedId -> triggerFieldIds.contains(changedId));
+        String eventCode = triggerEvent.getCode();
+        return triggerEvents.stream().anyMatch(event -> event.equalsIgnoreCase(eventCode));
     }
 
 

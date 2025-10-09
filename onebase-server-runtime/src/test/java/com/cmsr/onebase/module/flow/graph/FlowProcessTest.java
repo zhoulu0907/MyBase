@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Map;
 
 
@@ -48,7 +49,11 @@ public class FlowProcessTest {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setEntityId(46999363287089152L);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        reqDTO.setFieldData(Map.of("46999569445519360", "6年级3班"));
+        reqDTO.setFieldData(Map.of(
+                "46999569445519360", "6年级3班",
+                "50026937276661762", LocalDate.now(),
+                "50028191407505411", 30
+        ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
         flowProcessExecApi.entityTrigger(reqDTO);
     }

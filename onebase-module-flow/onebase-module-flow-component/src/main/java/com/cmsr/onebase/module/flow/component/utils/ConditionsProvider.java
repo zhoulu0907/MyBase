@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
+import com.cmsr.onebase.framework.common.express.JdbcTypeEnum;
+import com.cmsr.onebase.framework.common.express.OpEnum;
 import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
@@ -11,12 +13,14 @@ import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.yomahub.liteflow.core.NodeComponent;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -83,9 +87,8 @@ public class ConditionsProvider {
     private void formatRuleItemForExpression(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, ExpressionItem expressionItem) {
         String fieldId = formatFieldIdForExpression(nodeComponent, inLoopDepth, expressionItem.getKey().toString());
         expressionItem.setKey(fieldId);
-
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
-            // do nothing;
+            formatExpressionItemValue(expressionItem);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
             Object value = formatValueForExpression(nodeComponent, inLoopDepth, expressionItem.getValue().toString());
             expressionItem.setValue(value);
@@ -98,7 +101,7 @@ public class ConditionsProvider {
     private void formatRuleItemForValue(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, ExpressionItem expressionItem) {
         // 转换值
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
-            // do nothing;
+            formatExpressionItemValue(expressionItem);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
             String valueExp = formatValueForExpression(nodeComponent, inLoopDepth, expressionItem.getValue().toString());
             Object value = variableContext.getVariableByExpression(valueExp);
@@ -112,7 +115,7 @@ public class ConditionsProvider {
     public ExpressionItem formatConditionItemForValue(int index, VariableContext variableContext, ConditionItem conditionItem) {
         ExpressionItem expressionItem = ConditionsSupport.convertToExpressesItem(conditionItem);
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
-            // do nothing
+            formatExpressionItemValue(expressionItem);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
             String valueExp = formatValueForExpression(conditionItem.getValue().toString(), index);
             Object value = variableContext.getVariableByExpression(valueExp);
@@ -121,6 +124,14 @@ public class ConditionsProvider {
             //TODO 公式
         }
         return expressionItem;
+    }
+
+    private void formatExpressionItemValue(ExpressionItem expressionItem) {
+        if (expressionItem.getOp() == OpEnum.RANGE && expressionItem.getJdbcType() == JdbcTypeEnum.DATE) {
+            String begin = MapUtils.getString((Map) expressionItem.getValue(), "begin");
+            String end = MapUtils.getString((Map) expressionItem.getValue(), "end");
+            expressionItem.setValue(List.of(begin, end));
+        }
     }
 
 
