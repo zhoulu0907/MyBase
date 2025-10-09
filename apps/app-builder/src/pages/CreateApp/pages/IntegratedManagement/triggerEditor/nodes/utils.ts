@@ -179,54 +179,6 @@ export function getPrecedingNodes(
   return nodes;
 }
 
-// export function getPrecedingNodes(
-//   targetNodeId: string,
-//   allNodes: FlowNodeJSON[],
-//   nodeTypes: NodeType[]
-// ): FlowNodeJSON[] {
-//   let nodes: FlowNodeJSON[] = [];
-
-//   for (let ele of allNodes) {
-//     if (ele.id === targetNodeId) {
-//       return nodes;
-//     }
-
-//     // 带blocks的节点
-//     if (ele.blocks?.length) {
-//       // 判断是否包含目标节点
-//       const hasCurNode = judge(targetNodeId, ele.blocks, 0);
-
-//       if (hasCurNode == JudgeStatus.FOUND) {
-//         const curIndex = ele.blocks.findIndex((block: any) => block.id === targetNodeId);
-
-//         let newBlocks: any[] = [];
-//         if (curIndex > 0) {
-//           newBlocks = ele.blocks.slice(0, curIndex);
-//         }
-
-//         // 平铺 blocks
-//         nodes.push({ ...ele, blocks: [] }, ...newBlocks);
-
-//         return nodes;
-//       } else if (hasCurNode == JudgeStatus.INCLUDE) {
-//         // 在当前节点的blocks中
-//         const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
-//         nodes.push(...blocks);
-//       } else {
-//         // 如果不包含 继续向下递归搜索
-//         const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
-//         nodes.push(...blocks);
-//       }
-//     }
-
-//     if (nodeTypes.includes(ele.type as NodeType)) {
-//       nodes.push(ele);
-//     }
-//   }
-
-//   return nodes;
-// }
-
 /**
  * 校验 payloadForm 表单并根据校验结果设置 form 的 invalid 字段
  * @param form 外层表单对象
