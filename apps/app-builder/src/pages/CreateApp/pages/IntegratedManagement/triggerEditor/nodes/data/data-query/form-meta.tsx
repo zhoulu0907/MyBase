@@ -432,7 +432,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const onValuesChange = async (_changeValue: any, values: any) => {
     // 校验表单
     // validateNodeForm(form, payloadForm, false);
-
     // handlePropsOnChange(values);
   };
 
@@ -509,7 +508,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subEntityId" disabled={!mainEntityId} rules={[{ required: true, message: '请选择' }]}>
+                  <Form.Item
+                    field="subEntityId"
+                    disabled={!mainEntityId}
+                    rules={[{ required: true, message: '请选择' }]}
+                  >
                     <Select allowClear onChange={handleSubEntityIdChange}>
                       {subEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>

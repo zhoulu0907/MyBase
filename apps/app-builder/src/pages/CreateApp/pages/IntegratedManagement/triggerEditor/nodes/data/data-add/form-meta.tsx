@@ -22,7 +22,7 @@ import { updateDataAddOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
-const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY];
+const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY, NodeType.DATA_CALC];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -186,7 +186,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const onValuesChange = async (changeValue: any, values: any) => {
     // 校验表单
     // validateNodeForm(form, payloadForm, false);
-
     // handlePropsOnChange(values);
   };
 
