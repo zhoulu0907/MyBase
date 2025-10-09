@@ -164,9 +164,10 @@ export function getPrecedingNodes(
         const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
         nodes.push(...blocks);
       } else {
-        // 如果不包含 继续向下递归搜索
-        const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
-        nodes.push(...blocks);
+        // console.log('ele: ', ele);
+        // // 如果不包含 不向下递归搜索
+        // const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
+        // nodes.push(...blocks);
       }
     } else {
       // 不包含blocks的节点
