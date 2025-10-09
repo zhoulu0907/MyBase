@@ -127,6 +127,7 @@ const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: N
  * @param nodeTypes 过滤节点类型
  * @returns 节点数据对象，如果不存在则返回[]
  */
+
 export function getPrecedingNodes(
   targetNodeId: string,
   allNodes: FlowNodeJSON[],
@@ -144,7 +145,9 @@ export function getPrecedingNodes(
       // 判断是否包含目标节点
       const hasCurNode = judge(targetNodeId, ele.blocks, 0);
 
+      //   目标节点就在当前block下
       if (hasCurNode == JudgeStatus.FOUND) {
+        // 找到在当前block中当前节点之前的节点
         const curIndex = ele.blocks.findIndex((block: any) => block.id === targetNodeId);
 
         let newBlocks: any[] = [];
@@ -157,7 +160,7 @@ export function getPrecedingNodes(
 
         return nodes;
       } else if (hasCurNode == JudgeStatus.INCLUDE) {
-        // 在当前节点的blocks中
+        // 在当前节点的下游blocks中
         const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
         nodes.push(...blocks);
       } else {
@@ -165,10 +168,11 @@ export function getPrecedingNodes(
         const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
         nodes.push(...blocks);
       }
-    }
-
-    if (nodeTypes.includes(ele.type as NodeType)) {
-      nodes.push(ele);
+    } else {
+      // 不包含blocks的节点
+      if (nodeTypes.includes(ele.type as NodeType)) {
+        nodes.push(ele);
+      }
     }
   }
 
