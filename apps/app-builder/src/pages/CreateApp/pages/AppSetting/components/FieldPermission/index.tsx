@@ -76,11 +76,12 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       roleId
     };
     const res = await getFieldPermission(params);
-    console.log('获取字段权限信息 res:', res);
     const addDisabled = res.authFields.map((field: AuthFieldVO) => ({
       ...field
     }));
     setFieldPermission(addDisabled);
+    // 处理操作权限可下载数据 TODO
+    setOperationConfig(addDisabled);
     setIsAllFieldsAllowed(res.isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
   };
 
@@ -101,12 +102,13 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   // 可阅读全部选中
   const onChangeReadableAll = (checked: boolean) => {
+    console.log('可阅读全选反选 checked:', checked);
     const formData = form.getFieldsValue();
 
     // 可编辑时，默认可阅读
     const updatedFieldPermissions = Object.fromEntries(
       Object.entries(formData.authFields as Record<string, { isCanRead: boolean; isCanEdit: boolean }>).map(
-        ([key, value]) => [key, { ...value, isCanRead: value.isCanEdit }]
+        ([key, value]) => [key, { ...value, isCanRead: value.isCanEdit || checked }]
       )
     );
 
@@ -116,7 +118,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
     const updateFields = fieldPermission?.map((field) => ({
       ...field,
-      isCanRead: field.isCanEdit || +(field.isCanRead === FieldRead.notRead)
+      isCanRead: field.isCanEdit || +checked
     }));
     setFieldPermission(updateFields);
     updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
@@ -129,18 +131,19 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
     const updatedFieldPermissions = Object.fromEntries(
       Object.entries(formData.authFields as Record<string, { isCanRead: boolean; isCanEdit: boolean }>).map(
-        ([key, value]) => [key, { ...value, isCanEdit: checked, isCanRead: checked }]
+        ([key, value]) => [key, { ...value, isCanEdit: checked }]
       )
     );
 
+    console.log('updatedFieldPermissions:', updatedFieldPermissions);
     setCheckEditableAll(checked);
     setIndeterminateEditable(false);
     form.setFieldValue('authFields', updatedFieldPermissions);
     const updateFields = fieldPermission?.map((field) => ({
       ...field,
-      isCanEdit: +checked,
-      isCanRead: +checked || +(field.isCanRead === FieldRead.notRead)
+      isCanEdit: +checked
     }));
+    console.log('可编辑 updateFields:', updateFields);
     setFieldPermission(updateFields);
     updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
     console.log(fieldPermission, updateFields);
@@ -159,6 +162,37 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     const allUnCheckedEdit = Object.values(currentValues).every((field: any) => !field.isCanEdit);
     setCheckEditableAll(allCheckedEdit);
     setIndeterminateEditable(!allCheckedEdit && !allUnCheckedEdit);
+
+    // 处理可下载的半选状态
+    const currentOperationValues = form.getFieldsValue().operationPermissions || {};
+    const allCheckedDownload = Object.values(currentOperationValues).every((field: any) => field.isCanDownload);
+    const allUnCheckedDownload = Object.values(currentOperationValues).every((field: any) => !field.isCanDownload);
+    setCheckDownloadableAll(allCheckedDownload);
+    setIndeterminateDownloadable(!allCheckedDownload && !allUnCheckedDownload);
+  };
+
+  // 可下载全部选中
+  const onChangeDownloadableAll = (checked: boolean) => {
+    console.log('可下载全选反选 checked:', checked);
+    const formData = form.getFieldsValue();
+
+    const updatedOperationPermissions = Object.fromEntries(
+      Object.entries(formData.operationPermissions as Record<string, { isCanDownload: boolean }>).map(
+        ([key, value]: [string, any]) => [key, { ...value, isCanDownload: checked }]
+      )
+    );
+    console.log('updatedOperationPermissions:', updatedOperationPermissions);
+    setCheckDownloadableAll(checked);
+    setIndeterminateDownloadable(false);
+    form.setFieldValue('operationPermissions', updatedOperationPermissions);
+    const updateFields = fieldPermission?.map((field) => ({
+      ...field,
+      isCanDownload: +checked
+    }));
+    console.log('可下载 updateFields:', updateFields);
+    setOperationConfig(updateFields);
+    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
+    console.log(operationConfig, updateFields);
   };
 
   return (
@@ -283,13 +317,22 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             </Form.Item>
 
             {operationConfig && operationConfig.length > 0 && (
-              <Form.Item field="operationPermissions" label="操作权限" layout="vertical" shouldUpdate>
+              <Form.Item
+                field="operationPermissions"
+                label="操作权限"
+                layout="vertical"
+                shouldUpdate
+                style={{
+                  visibility:
+                    isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission ? 'visible' : 'hidden'
+                }}
+              >
                 <div className={styles.table}>
                   <Row className={styles.tableTitle}>
                     <Col span={8}></Col>
                     <Col span={4}>
                       <Checkbox
-                        // onChange={onChangeDownloadableAll}
+                        onChange={onChangeDownloadableAll}
                         checked={checkDownloadableAll}
                         indeterminate={indeterminateDownloadable}
                       >
@@ -298,24 +341,27 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     </Col>
                   </Row>
                   <Divider />
-                  {operationConfig?.map((field: any) => (
-                    <Row className={styles.rowItem} key={field.key}>
-                      <Col span={8}>
-                        <IconAttachment style={{ marginRight: 8 }} />
-                        <span>{field.name}</span>
-                      </Col>
+                  {operationConfig?.map((field: any) => {
+                    return (
+                      <Row className={styles.rowItem} key={field.key}>
+                        <Col span={8}>
+                          <IconAttachment style={{ marginRight: 8 }} />
+                          <span>{field.fieldDisplayName}</span>
+                        </Col>
 
-                      <Col span={4}>
-                        <Form.Item
-                          field={`operationPermissions.${field.key}.downloadable`}
-                          triggerPropName="checked"
-                          noStyle
-                        >
-                          <Checkbox />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  ))}
+                        <Col span={4}>
+                          <Form.Item
+                            field={`operationPermissions.${field.fieldId}.isCanDownload`}
+                            trigger="onChange"
+                            triggerPropName="checked"
+                            noStyle
+                          >
+                            <Checkbox />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    );
+                  })}
                 </div>
               </Form.Item>
             )}
