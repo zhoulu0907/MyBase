@@ -392,6 +392,8 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   const getVariableOptions = useCallback(
     (nodeId: string): TreeSelectDataType[] => {
       const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
+      console.log('nodesxxx: ', nodes);
+
       const options: TreeSelectDataType[] = [];
 
       nodes.forEach((node) => {
