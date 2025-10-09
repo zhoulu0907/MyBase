@@ -2,13 +2,14 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Checkbox, Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
+import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import {
-  getEntityFields,
+  getEntityFieldsWithChildren,
   getEntityListByApp,
   getFieldCheckTypeApi,
-  type ConfitionField,
-  type EntityFieldValidationTypes,
-  type MetadataEntityField
+  type AppEntityField,
+  type ConditionField,
+  type EntityFieldValidationTypes
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useEffect, useState } from 'react';
@@ -63,13 +64,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const [payloadForm] = Form.useForm();
 
-  const updateTriggerEvents = Form.useWatch('updateTriggerEvents', payloadForm);
-
-  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+  const [conditionFields, setConditionFields] = useState<TreeSelectDataType[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
   const [entityList, setEntityList] = useState<any[]>([]);
-  const [triggerFieldList, setTriggerFieldList] = useState<any[]>([]);
 
   const entityId = Form.useWatch('entityId', payloadForm);
   const triggerType = Form.useWatch('triggerType', payloadForm);
@@ -93,22 +91,25 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const handleGetEntityFieldList = async (eId: string) => {
-    const res = await getEntityFields({ entityId: eId });
-    if (res) {
+    const res = await getEntityFieldsWithChildren(eId);
+
+    if (res && res.parentFields) {
       console.log(res);
-      const newConditionFields: ConfitionField[] = [];
+
+      const conditions: ConditionField[] = [];
       const fieldIds: string[] = [];
       const fieldList: any[] = [];
-      res.forEach((item: MetadataEntityField) => {
-        fieldIds.push(item.id);
+
+      res.parentFields.forEach((item: AppEntityField) => {
+        fieldIds.push(item.fieldId);
         fieldList.push({
           label: item.displayName,
-          value: item.id
+          value: item.fieldId
         });
 
-        newConditionFields.push({
+        conditions.push({
           label: item.displayName,
-          value: item.id,
+          value: item.fieldId,
           fieldType: item.fieldType
         });
       });
@@ -118,12 +119,22 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         setValidationTypes(newValidationTypes);
       }
 
-      setConditionFields(newConditionFields);
+      setConditionFields([
+        {
+          key: res.entityId,
+          title: res.entityName,
+          children: conditions.map((item) => {
+            return {
+              key: item.value,
+              title: item.label,
+              fieldType: item.fieldType
+            };
+          })
+        }
+      ]);
 
       // 更新节点输出配置
-      updateStartEntityOutputs(node.id, newConditionFields);
-
-      setTriggerFieldList(fieldList);
+      updateStartEntityOutputs(node.id, conditions);
     }
   };
 
@@ -209,14 +220,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                     direction="horizontal"
                     options={triggerType === 'before' ? beforeTriggerEvents : afterTriggerEvents}
                   />
-                </Form.Item>
-              </Grid.Row>
-            )}
-
-            {updateTriggerEvents && (
-              <Grid.Row>
-                <Form.Item label="触发字段" field="triggerFieldIds" layout="vertical">
-                  <Select options={triggerFieldList} mode="multiple" />
                 </Form.Item>
               </Grid.Row>
             )}

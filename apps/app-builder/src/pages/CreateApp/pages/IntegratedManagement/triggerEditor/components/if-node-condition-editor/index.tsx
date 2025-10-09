@@ -20,12 +20,13 @@ import {
   FieldType,
   getFieldCheckTypeApi,
   VALIDATION_TYPE,
+  type ConditionField,
   type EntityFieldValidationTypes,
   type ValidationTypeItem
 } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NodeType } from '../../nodes/const';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
@@ -172,7 +173,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
               {(list, {}) => {
                 return (
                   <div className={styles.inputNumberWrapper}>
-                    {list.map((item, index) => {
+                    {list.map((item) => {
                       return (
                         <Form.Item key={item.key} field={item.field}>
                           <InputNumber style={{ width: '100%' }} />
@@ -355,161 +356,74 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     return fieldIds;
   };
 
-  const getVariableOptions = (nodeId: string): TreeSelectDataType[] => {
-    const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
-    console.log('nodes: ', nodes);
+  // 提取公共的字段处理逻辑
+  const processConditionFields = (
+    nodeId: string,
+    conditionFields: ConditionField[],
+    children: TreeSelectDataType[]
+  ): void => {
+    if (!conditionFields) return;
 
-    const options: TreeSelectDataType[] = [];
-
-    nodes.forEach((node) => {
-      const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
-
-      //   console.log('nodeOutput: ', nodeOutput);
-
-      const treeNode = {
-        key: node.id,
-        title: node.data?.title,
-        disabled: true,
-        // TODO(mickey): add icon
-        children: [] as TreeSelectDataType[]
-      };
-
-      switch (node.type) {
-        case NodeType.START_FORM:
-          const startFormFields = nodeOutput.conditionFields;
-
-          startFormFields &&
-            startFormFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-        case NodeType.START_ENTITY:
-          const startEntityFields = nodeOutput.conditionFields;
-
-          startEntityFields &&
-            startEntityFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-        case NodeType.START_TIME:
-          break;
-        case NodeType.START_DATE_FIELD:
-          const startDateFields = nodeOutput.conditionFields;
-
-          startDateFields &&
-            startDateFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-        case NodeType.START_API:
-          break;
-        case NodeType.START_BPM:
-          break;
-        case NodeType.DATA_ADD:
-          const dataAddFields = nodeOutput.conditionFields;
-          dataAddFields &&
-            dataAddFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-        case NodeType.DATA_DELETE:
-          break;
-        case NodeType.DATA_QUERY:
-          const dataQueryFields = nodeOutput.conditionFields;
-          dataQueryFields &&
-            dataQueryFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-          break;
-        case NodeType.DATA_QUERY_MULTIPLE:
-          const dataQueryMultipleFields = nodeOutput.conditionFields;
-          dataQueryMultipleFields &&
-            dataQueryMultipleFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-          break;
-        case NodeType.DATA_UPDATE:
-          const dataUpdateFields = nodeOutput.conditionFields;
-          dataUpdateFields &&
-            dataUpdateFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-          break;
-        case NodeType.DATA_CALC:
-          break;
-        case NodeType.LOOP:
-          const loopFields = nodeOutput.conditionFields;
-          loopFields &&
-            loopFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: `${field.label}`
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-      }
+    conditionFields.forEach((field: ConditionField) => {
+      children.push({
+        key: `${nodeId}.${field.value}`,
+        title: field.label
+      });
     });
-
-    return options;
   };
+
+  // 使用 useMemo 缓存节点类型集合，避免重复创建
+  const nodesWithConditionFields = useMemo(
+    () =>
+      new Set([
+        NodeType.START_FORM,
+        NodeType.START_ENTITY,
+        NodeType.START_DATE_FIELD,
+        NodeType.DATA_ADD,
+        NodeType.DATA_QUERY,
+        NodeType.DATA_QUERY_MULTIPLE,
+        NodeType.DATA_UPDATE,
+        NodeType.LOOP
+      ]),
+    []
+  );
+
+  // 使用 useCallback 缓存函数，避免不必要的重新创建
+  const getVariableOptions = useCallback(
+    (nodeId: string): TreeSelectDataType[] => {
+      const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
+      const options: TreeSelectDataType[] = [];
+
+      nodes.forEach((node) => {
+        const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
+
+        // 只处理有 conditionFields 的节点类型
+        if (!node.type || !nodesWithConditionFields.has(node.type as NodeType)) {
+          return;
+        }
+
+        const treeNode: TreeSelectDataType = {
+          key: node.id,
+          title: node.data?.title,
+          disabled: true,
+          children: []
+        };
+
+        // 统一处理 conditionFields
+        if (nodeOutput.conditionFields && treeNode.children) {
+          processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children);
+        }
+
+        // 只有当有子字段时才添加到选项中
+        if (treeNode.children && treeNode.children.length > 0) {
+          options.push(treeNode);
+        }
+      });
+
+      return options;
+    },
+    [nodesWithConditionFields]
+  );
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
     if (params.value) {
@@ -554,7 +468,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     <div className={styles.conditionWrapper}>
       <Form.Item label={label} required={required}>
         <Form.List field="filterCondition">
-          {(conditions, { add, remove, move }) => {
+          {(conditions, { add, remove }) => {
             return (
               <div>
                 {conditions.map((item, index) => {
@@ -563,7 +477,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                       <div className={styles.items}>
                         <div className={styles.tag}>且</div>
                         <Form.List field={item.field + '.conditions'}>
-                          {(condition, { add: childAdd, remove: childRemove, move: childMove }) => {
+                          {(condition, { add: childAdd, remove: childRemove }) => {
                             return (
                               <div style={{ width: '100%' }}>
                                 {condition.map((item, childIndex) => {
@@ -630,7 +544,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                                   className={styles.itemSelect}
                                                   disabled={form.getFieldValue(item.field + '.op') == undefined}
                                                   options={opCodeOptions}
-                                                  onChange={(value) => {
+                                                  onChange={() => {
                                                     form.setFieldValue(item.field + '.value', undefined);
                                                     // 如果是范围类型 需要用数组兜底
                                                     if (
@@ -678,7 +592,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                                                    fx编辑公式
+                                                    ｆх编辑公式
                                                   </Button>
                                                 </Form.Item>
                                               )}

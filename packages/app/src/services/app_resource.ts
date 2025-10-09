@@ -4,6 +4,7 @@ import {
   GetAppIdByPageSetIdReq,
   GetComponentListByPageIdReq,
   GetPageListByAppIdReq,
+  GetPageMetadataReq,
   GetPageSetIdReq,
   GetPageSetMainMetaDataReq,
   LoadPageSetReq,
@@ -41,6 +42,10 @@ export const getPageSetMetaData = (params: GetPageSetMainMetaDataReq) => {
 
 export const getPageListByAppId = (params: GetPageListByAppIdReq) => {
   return appService.post('/resource/page/form/app_id', params);
+};
+
+export const getPageMetadata = (params: GetPageMetadataReq) => {
+  return appService.post('/resource/page/metadata', params);
 };
 
 export const getComponentListByPageId = (params: GetComponentListByPageIdReq) => {

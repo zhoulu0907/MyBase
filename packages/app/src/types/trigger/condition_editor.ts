@@ -1,4 +1,4 @@
-export interface ConfitionField {
+export interface ConditionField {
   // 显示标签
   label: string;
   // 字段值
