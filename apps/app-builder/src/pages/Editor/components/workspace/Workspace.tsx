@@ -98,9 +98,10 @@ export default function EditorWorkspace() {
       if (!originalComp) return;
 
       const schemaConfig = cloneDeep(
-        getComponentConfig(pageComponentSchemas[oldId], originalComp.type)
+        getComponentConfig(pageComponentSchemas[oldId], comp.type)
       );
-      const schema = getComponentSchema(originalComp.type);
+
+      const schema = getComponentSchema(comp.type);
 
       schema.config = schemaConfig;
       schema.config.cpName = comp.displayName || '';
@@ -250,7 +251,8 @@ export default function EditorWorkspace() {
                     (field: AppEntityField) =>
                       field.fieldName !== 'lock_version' &&
                       field.fieldName !== 'deleted' &&
-                      field.fieldName !== 'parent_id'
+                      field.fieldName !== 'parent_id' &&
+                      field.isSystemField !== 1
                   )
                   .forEach((field: AppEntityField) => {
                     let cpType = COMPONENT_MAP[field.fieldType];
@@ -373,7 +375,13 @@ export default function EditorWorkspace() {
 
                   setCurComponentID(cp.id);
 
-                  const curComponentSchema = pageComponentSchemas[cp.id];
+                  const curComponentSchema = {
+                    id: cp.id,
+                    type: cp.type,
+                    displayName: cp.displayName,
+                    ...pageComponentSchemas[cp.id]
+                  };
+
                   setCurComponentSchema(curComponentSchema);
 
                   // console.log('当前组件的ID: ', cp.id);

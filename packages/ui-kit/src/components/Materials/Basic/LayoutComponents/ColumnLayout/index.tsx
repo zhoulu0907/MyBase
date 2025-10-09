@@ -1,16 +1,21 @@
-import { Layout } from '@arco-design/web-react';
-import { IconDelete } from '@arco-design/web-react/icon';
-import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { cloneDeep } from 'lodash-es';
+import { Layout, Divider } from '@arco-design/web-react';
+import { useSignals } from '@preact/signals-react/runtime';
 import { ReactSortable } from 'react-sortablejs';
 import { getComponentConfig, getComponentWidth } from 'src/components/Materials/schema';
 import EditRender from 'src/components/render/EditRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
-import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
 import { ALL_COMPONENT_TYPES } from '../../../componentTypes';
+import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { getComponentSchema } from '../../../schema';
-import './index.css';
 import { type XColumnLayoutConfig } from './schema';
+import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import './index.css';
 
 const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean }) => {
   const { colCount, id, runtime = true } = props;
@@ -38,8 +43,6 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean }) => {
 
   // 如果列数变了，就重新初始化列
   useEffect(() => {
-    console.log('layoutSubComponents:  ', colComponents);
-
     const currentColumns = layoutSubComponents[id];
     if (!currentColumns || currentColumns.length !== colCount) {
       console.log('id', id, 'colCount', colCount);
@@ -48,6 +51,119 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean }) => {
     }
   }, [colCount, id, colComponents]);
 
+
+  // 取消隐藏组件
+  const handleShowComponent = (componentId: string) => {
+    const schema = pageComponentSchemas[componentId];
+    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+    setPageComponentSchemas(componentId, schema);
+    setCurComponentID(componentId);
+    setCurComponentSchema(schema);
+    setShowDeleteButton(false);
+  };
+
+  // 复制组件
+  const handleCopyComponent = (comp: any, originId: string, index: number) => {
+
+    // ID 映射表，记录旧 ID 到新 ID 的映射
+    const idMap = new Map<string, string>();
+    idMap.set(originId, comp.id);
+
+    let rootComponentProps = null; // 保存根组件的 props
+
+    // 递归复制组件及其子组件
+    function copyComponentRecursive(oldId: string, newId: string) {
+      // 1. 复制组件配置
+      const originalComp = pageComponentSchemas[oldId];
+      if (!originalComp) return;
+
+      // 深拷贝组件配置
+      const schemaConfig = cloneDeep(
+        getComponentConfig(pageComponentSchemas[oldId], comp.type)
+      );
+      const schema = getComponentSchema(comp.type);
+
+      schema.config = schemaConfig;
+      schema.config.cpName = comp.displayName || '';
+      schema.config.id = newId;
+
+      const newProps = {
+        id: newId,
+        type: comp.type,
+        ...schema
+      };
+
+      // 如果是根组件，保存 props
+      if (newId === comp.id) {
+        rootComponentProps = newProps;
+      }
+
+      // 保存新组件配置
+      setPageComponentSchemas(newId, newProps);
+
+      // 2. 复制子组件结构
+      if (layoutSubComponents[oldId]) {
+        const newSubComponents = layoutSubComponents[oldId].map(row =>
+          row.map(item => {
+            // 为每个子组件创建新 ID
+            const childNewId = idMap.get(item.id) || `${item.type}-${uuidv4()}`;
+
+            // 记录子组件 ID 映射
+            if (!idMap.has(item.id)) {
+              idMap.set(item.id, childNewId);
+              // 递归复制子组件
+              copyComponentRecursive(item.id, childNewId);
+            }
+
+            // 返回更新了 ID 的子组件引用
+            return {
+              ...item,
+              id: childNewId
+            };
+          })
+        );
+
+        // 保存子组件结构
+        setLayoutSubComponents(newId, newSubComponents);
+      }
+    }
+
+    // 开始递归复制
+    copyComponentRecursive(originId, comp.id);
+
+    // 3. 将复制的组件添加到当前布局组件的 layoutSubComponents 中
+    if (layoutSubComponents[id]) {
+      // 获取当前布局组件的子组件结构
+      const currentLayoutSubComponents = layoutSubComponents[id];
+
+      // 创建新的子组件引用
+      const newSubComponentRef = {
+        id: comp.id,
+        type: comp.type,
+      };
+
+      // 添加到布局组件的对应列中
+      const updatedLayoutSubComponents = [...currentLayoutSubComponents];
+      if (updatedLayoutSubComponents[index]) {
+        updatedLayoutSubComponents[index] = [...updatedLayoutSubComponents[index], newSubComponentRef];
+      } else {
+        updatedLayoutSubComponents[index] = [newSubComponentRef];
+      }
+
+      // 更新布局组件的子组件结构
+      setLayoutSubComponents(id, updatedLayoutSubComponents);
+    }
+
+    // 设置当前组件
+    setCurComponentID(comp.id!);
+    setCurComponentSchema(rootComponentProps);
+    setShowDeleteButton(false);
+
+    console.log('布局内复制完成，ID 映射:', Object.fromEntries(idMap));
+  };
+
+  // 删除组件
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
     // 遍历二维数组的每一列，过滤掉 id 匹配的组件
@@ -164,17 +280,47 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean }) => {
                 >
                   <EditRender runtime={runtime} cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
 
-                  {/* 删除按钮 */}
+                  {/* 操作按钮 */}
                   {curComponentID === cp.id && showDeleteButton && (
-                    <div
-                      className="deleteButton"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('删除组件: ', cp.id);
-                        handleDeleteComponent(cp.id);
-                      }}
-                    >
-                      <IconDelete />
+                    <div className='operationArea'>
+                      {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <>
+                          <div
+                            className='copyButton'
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.debug('取消隐藏组件: ', cp);
+                              handleShowComponent(cp.id);
+                            }}
+                          >
+                            <img src={CompShowIcon} alt="component show" />
+                          </div>
+                          <Divider className='divider' type="vertical" />
+                        </>
+                      )}
+
+                      <div
+                        className='copyButton'
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('复制组件: ', cp);
+                          handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
+                        }}
+                      >
+                        <img src={CompCopyIcon} alt="component copy" />
+                      </div>
+                      <Divider className='divider' type="vertical" />
+
+                      <div
+                        className='deleteButton'
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('删除组件: ', cp.id);
+                          handleDeleteComponent(cp.id);
+                        }}
+                      >
+                        <img src={CompDeleteIcon} alt="component delete" />
+                      </div>
                     </div>
                   )}
                 </div>

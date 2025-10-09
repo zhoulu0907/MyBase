@@ -14,10 +14,11 @@ export function FormContent(props: { children?: React.ReactNode }) {
   const registry = node.getNodeRegistry<FlowNodeRegistry>();
 
   return (
-    <div className={styles.formWrapper}>
+    <div className={styles.formWrapper} >
       <>
         {isSidebar && <div className={styles.formTitleDescription}>{registry.info?.description}</div>}
-        {(expanded || isSidebar) && props.children}
+        
+        <div className={styles.formContent}>{(expanded || isSidebar) && props.children}</div>
       </>
     </div>
   );

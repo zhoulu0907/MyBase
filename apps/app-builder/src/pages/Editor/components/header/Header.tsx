@@ -6,6 +6,7 @@ import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
+import { iconMap } from '@/components/CreateApp/const';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
 import { useBasicEditorStore } from '@/store';
@@ -13,6 +14,7 @@ import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
+import DynamicIcon from '@/components/DynamicIcon';
 
 import {
   AppStatus,
@@ -294,7 +296,12 @@ export default function EditorHeader() {
         <Button shape="square" type="default" size="small" onClick={backToPageManager} icon={<IconArrowLeft />} />
 
         <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
-          <i className={`iconfont ${appIcon || 'icon-box'}`} />
+          <DynamicIcon
+            IconComponent={iconMap[appIcon as keyof typeof iconMap]}
+            theme="outline"
+            size="14"
+            fill="#F2F3F5"
+          />
         </div>
 
         <Breadcrumb>

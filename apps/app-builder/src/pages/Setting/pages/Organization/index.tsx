@@ -100,6 +100,9 @@ const OrganizationPage: React.FC = () => {
       }
       handleSearch(searchValue);
       setModalVisible(false);
+    } catch (error) {
+      console.error('操作失败，请重试');
+      setModalLoading(false);
     } finally {
       setModalLoading(false);
     }
@@ -168,7 +171,8 @@ const OrganizationPage: React.FC = () => {
           expandProps={{
             expandRowByClick: true,
             strictTreeData: true,
-            icon: ({ expanded }) => expanded ? <IconCaretDown style={{ marginRight: 8 }}/> : <IconCaretRight style={{ marginRight: 8 }} />,
+            icon: ({ expanded }) =>
+              expanded ? <IconCaretDown style={{ marginRight: 8 }} /> : <IconCaretRight style={{ marginRight: 8 }} />,
             width: 12
           }}
         />

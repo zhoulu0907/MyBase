@@ -25,10 +25,15 @@
 
   .menuIcon {
     margin-right: 16px;
+    cursor: pointer;
 
     img {
       display: block;
-      cursor: pointer;
+    }
+
+    &:hover {
+      border-radius: 4px;
+      background-color: #f2f3f5;
     }
   }
 
@@ -40,15 +45,16 @@
     align-items: center;
     justify-content: center;
 
-    i {
-      color: #fff;
-      font-size: 16px;
+    img {
+      width: 16px;
+      filter: brightness(0) invert(1);
     }
   }
 
   .appName {
     margin-left: 8px;
     margin-right: 4px;
+    white-space: nowrap;
   }
 
   .appStatusDeveloping {
@@ -59,12 +65,13 @@
     color: #3491fa;
     background: #e8f7ff;
 
-    width: 60px;
-    height: 24px;
+    width: 44px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
+    white-space: nowrap;
   }
 
   .appStatusPublished {
@@ -75,12 +82,13 @@
     color: #00b42a66;
     background: #e8ffea;
 
-    width: 60px;
-    height: 24px;
+    width: 44px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
+    white-space: nowrap;
   }
 
   .appStatusEditAfterPublished {
@@ -91,12 +99,13 @@
     color: #ff7d00;
     background: #fff7e8;
 
-    width: 60px;
-    height: 24px;
+    width: 44px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
+    white-space: nowrap;
   }
 }
 

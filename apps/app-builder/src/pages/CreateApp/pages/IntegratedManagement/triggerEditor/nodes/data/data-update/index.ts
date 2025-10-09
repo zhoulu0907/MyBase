@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/data.svg';
+import iconData from '@/assets/flow/nodes/dataUpdate.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -17,7 +17,7 @@ export const DataUpdateNodeRegistry: FlowNodeRegistry = {
     addDisable: false
   },
   info: {
-    icon: iconStart,
+    icon: iconData,
     description: '这是数据更新节点，用于更新数据。'
   },
   /**

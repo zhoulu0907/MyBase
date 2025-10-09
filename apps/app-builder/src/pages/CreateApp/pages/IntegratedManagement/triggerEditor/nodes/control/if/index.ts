@@ -1,4 +1,4 @@
-import iconControl from '@/assets/flow/nodes/control.svg';
+import iconControl from '@/assets/flow/nodes/ifCase.svg';
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';

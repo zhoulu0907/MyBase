@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
 import { getPageListByAppId } from '@onebase/app';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
-import styles from './index.module.less';
 import DropdownRender from './components/DropdownRender';
 import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
+import styles from './index.module.less';
 
 const FormItem = Form.Item;
 const Option = Select.Option;

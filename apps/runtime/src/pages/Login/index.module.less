@@ -7,42 +7,11 @@
   // 左侧区域
   .loginPageLeft {
     flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
     position: relative;
     overflow: hidden;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-
-    .loginPageLeftContent {
-      z-index: 2;
-      text-align: left;
-      color: white;
-      width: 100%;
-      position: absolute;
-      top: 40px;
-      left: 40px;
-    }
-
-    .loginPageLeftTitle {
-      margin-bottom: 60px;
-      width: 100%;
-
-      h1 {
-        width: 100%;
-        text-align: left;
-        font-size: 28px;
-        font-weight: 500;
-        color: rgba(48, 55, 92, 1);
-        margin-bottom: 16px;
-        word-wrap: break-word;
-        word-break: break-word;
-        line-height: 1.4;
-      }
-    }
   }
 
   // 右侧区域
@@ -55,22 +24,6 @@
     background: rgba(255, 255, 255, 1);
     backdrop-filter: blur(20px);
 
-    .loginPageHeader {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 10px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      padding: 40px;
-      z-index: 10;
-      color: rgba(102, 102, 102, 1);
-      font-size: 20px;
-      font-weight: 700;
-    }
-
     .loginFormContainer {
       width: 100%;
       max-width: 370px;
@@ -79,6 +32,13 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+
+      .title {
+        color: #272e3b;
+        font-size: 28px;
+        font-weight: 500;
+        margin-bottom: 64px;
+      }
     }
 
     .loginForm {
@@ -102,7 +62,6 @@
       .formActions {
         width: 100%;
         justify-content: space-between;
-        margin-bottom: 8px;
       }
 
       .loginButton {
@@ -158,24 +117,6 @@
       flex: none;
       height: 200px;
       padding: 20px;
-
-      .loginPageLeftContent {
-        .loginPageLeftTitle {
-          margin-bottom: 20px;
-
-          h1 {
-            font-size: 32px;
-          }
-
-          p {
-            font-size: 16px;
-          }
-        }
-
-        .loginPageLeftFeatures {
-          display: none;
-        }
-      }
     }
 
     .loginPageRight {
@@ -194,18 +135,6 @@
   .loginPage {
     .loginPageLeft {
       height: 150px;
-
-      .loginPageLeftContent {
-        .loginPageLeftTitle {
-          h1 {
-            font-size: 24px;
-          }
-
-          p {
-            font-size: 14px;
-          }
-        }
-      }
     }
 
     .loginPageRight {

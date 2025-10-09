@@ -1,31 +1,40 @@
-import { Button, Divider, Popconfirm, Space, Tag } from '@arco-design/web-react';
+import { Button, Divider, Message, Popconfirm, Space, Tag } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
-  updateDataGroupPermission,
-  // deleteDataGroup,
+  deleteDataGroup,
+  FieldType,
   // getEntityFieldsWithChildren
   // getAppEntities,
   getDataPermission,
+  getEntityById,
   getEntityFields,
+  getEntityFieldsWithChildren,
   getFieldCheckTypeApi,
+  getPageSetId,
   getScopeTypeApi,
-  type UpdateDataGroupPermissionReq,
+  IsOperable,
+  loadPageSet,
+  updateDataGroupPermission,
+  // type ConditionField,
+  type AppEntityField,
+  type AuthDataFilterVO,
   // type AppEntities,
-  type AppEntity,
   // type AppEntityField,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
+  type EntityFieldValidationTypes,
+  type EntityWithChildren,
+  // type GetPageSetIdReq
   // type FilterFieldCheckType,
   type GetPermissionReq,
-  type EntityFieldValidationTypes,
-  // type ConfitionField,
-  type AppEntityField,
-  type AuthDataFilterVO,
-  type ScopeTypeOption
+  type LoadPageSetReq,
+  type ScopeTypeOption,
+  type UpdateDataGroupPermissionReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
 
+import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import styles from './index.module.less';
 
 const initialFormValues: AuthDataGroupVO = {
@@ -33,22 +42,25 @@ const initialFormValues: AuthDataGroupVO = {
   groupName: '',
   description: '',
   scopeFieldId: undefined,
-  scopeLevel: '',
-  scopeValue: [],
+  scopeLevel: undefined,
+  scopeValue: '',
   dataFilters: [],
-  isOperable: 1
+  filterCondition: [],
+  isOperable: IsOperable.allowed
 };
 
-const permission = [
+const opCodeOptions = [
   {
-    name: '默认权限',
-    subTitle: '系统提供的默认权限',
-    operation: {
-      isOwn: true, // 本人
-      purview: 'owner', // 权限范围-拥有者
-      viewable: true,
-      operable: true
-    }
+    label: '公式',
+    value: FieldType.FORMULA
+  },
+  {
+    label: '静态值',
+    value: FieldType.VALUE
+  },
+  {
+    label: '变量',
+    value: FieldType.VARIABLES
   }
 ];
 
@@ -62,17 +74,35 @@ interface IProps {
 const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   // const [form] = Form.useForm();
   const [status, setStatus] = useState<'create' | 'edit'>('create');
-  const [appEntity, setAppEntity] = useState<AppEntity>();
   const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
   const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
   const [dataPermissionScopeType, SetDataPermissionScopeType] = useState<ScopeTypeOption[]>([]);
+  const [DataPermission, setDataPermission] = useState<AuthDataGroupVO[]>([
+    {
+      id: '1',
+      groupName: '默认权限',
+      description: '系统提供的默认权限',
+      entityId: '3',
+      entityName: '',
+      isOperable: 1,
+      scopeFieldName: '拥有者',
+      scopeFieldId: 1,
+      scopeLevel: 'self',
+      scopeValue: ''
+    }
+  ]);
 
+  const [editingPermData, setEditingPermData] = useState<AuthDataGroupVO | null>(null);
+  const [variableOptions, setVariableOptions] = useState<TreeSelectDataType[]>([]);
   const [modalVisible, setModelVisible] = useState<boolean>(false);
+  const [dataPermissionEntityName, setDataPermissionEntityName] = useState<string>('');
 
   useEffect(() => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
+      getScopeType();
+      getSetIdFromMenuId();
     }
   }, [appId, menuId, roleId]);
 
@@ -84,169 +114,215 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       roleId
     };
     const res = await getDataPermission(params);
-    console.log('数据权限', res);
-    // const addDisabled = res.authFields.map((field: AuthFieldVO) => ({
-    //   ...field
-    // }));
-    // setFieldPermission(addDisabled);
-    // setIsAllFieldsAllowed(res.isAllFieldsAllowed || 0);
+    const addDisabled = res.authDataGroups.map((field: AuthDataGroupVO) => ({
+      ...field
+    }));
+    setDataPermission((prevDataPermission) => {
+      // 保留第一个默认权限组，将获取到的数据添加到后面
+      const defaultPermission = prevDataPermission[0];
+      return [defaultPermission, ...addDisabled];
+    });
   };
 
   // 打开model
   const handleModal = async (status: 'create' | 'edit', id?: string) => {
-    console.log('Modal id', id);
     setStatus(status);
     setModelVisible(true);
 
-    // GetModelInitData();
-    getViewDataEntity();
-    getScopeType();
+    if (id) {
+      // 查找要编辑的权限组
+      const permToEdit = DataPermission.find((perm) => perm.id === id);
+      if (permToEdit) {
+        // 创建编辑数据对象
+        const editingData: any = { ...permToEdit };
+        // 处理数据过滤条件
+        if (permToEdit.dataFilters) {
+          // 将后端数据格式转换为condition-editor组件需要的格式
+          const conditionFormat = convertBackendDataToConditionFormat(permToEdit.dataFilters);
+          editingData.filterCondition = conditionFormat;
+        }
+
+        // 处理指定成员或指定部门的情况，将scopeValue从JSON字符串转回数组
+        if (
+          (permToEdit.scopeLevel === 'specifiedPerson' || permToEdit.scopeLevel === 'specifiedDepartment') &&
+          permToEdit.scopeValue
+        ) {
+          let scopeValue = permToEdit.scopeValue;
+          if (typeof scopeValue === 'string') {
+            try {
+              scopeValue = JSON.parse(scopeValue);
+            } catch (e) {
+              console.error('解析scopeValue失败:', e);
+              // 如果解析失败，保持原值
+            }
+          }
+          editingData.scopeValue = scopeValue;
+        }
+
+        // 设置正在编辑的数据
+        setEditingPermData(editingData);
+      }
+    } else {
+      // 创建模式下清空编辑数据
+      // setEditingPermData(null);
+      setEditingPermData({ ...initialFormValues });
+    }
   };
 
   const getScopeType = async () => {
     try {
       const scopeTypeResq = await getScopeTypeApi();
-      SetDataPermissionScopeType(scopeTypeResq);
+      await SetDataPermissionScopeType(scopeTypeResq);
     } catch (error) {
       console.log('获取权限范围失败 error:', error);
     }
   };
 
-  // 获取页面数据实体
-  const getViewDataEntity = async () => {
-    // 暂时没有获取页面表单绑定主实体的接口 mock数据
-    // const dataEntityResq = await getViewDataEntityApi();
-    const dataEntityResq = {
-      entityId: '16935056057237504',
-      entityName: '尝试创建页面',
-      entityType: '独立表',
-      tableName: 'iarg_ceshi',
-      fields: [
-        {
-          fieldId: '29169768621965312',
-          fieldName: 'owner',
-          fieldType: 'USER',
-          isSystemField: 0,
-          displayName: '拥有者'
-        },
-        {
-          fieldId: '29205846347251715',
-          fieldName: 'auditor',
-          fieldType: 'USER',
-          isSystemField: 0,
-          displayName: '审核员'
-        },
-        {
-          fieldId: '16935056057237505',
-          fieldName: 'id',
-          fieldType: 'ID',
-          isSystemField: 1,
-          displayName: 'id'
-        },
-        {
-          fieldId: '30699051858460678',
-          fieldName: 'num',
-          fieldType: 'NUMBER',
-          isSystemField: 0,
-          displayName: '数字'
-        },
-        {
-          fieldId: '16935056057237506',
-          fieldName: 'owner_id',
-          fieldType: 'USER',
-          isSystemField: 1,
-          displayName: 'owner_id'
-        },
-        {
-          fieldId: '16935056057237507',
-          fieldName: 'owner_dept',
-          fieldType: 'DEPARTMENT',
-          isSystemField: 1,
-          displayName: 'owner_dept'
-        },
-        {
-          fieldId: '16935056057237508',
-          fieldName: 'creator',
-          fieldType: 'USER',
-          isSystemField: 1,
-          displayName: 'creator'
-        },
-        {
-          fieldId: '16935056057237509',
-          fieldName: 'updater',
-          fieldType: 'USER',
-          isSystemField: 1,
-          displayName: 'updater'
-        },
-        {
-          fieldId: '16935056057237510',
-          fieldName: 'created_time',
-          fieldType: 'DATETIME',
-          isSystemField: 1,
-          displayName: 'created_time'
-        },
-        {
-          fieldId: '16935056057237511',
-          fieldName: 'updated_time',
-          fieldType: 'DATETIME',
-          isSystemField: 1,
-          displayName: 'updated_time'
-        },
-        {
-          fieldId: '16935056057237512',
-          fieldName: 'lock_version',
-          fieldType: 'NUMBER',
-          isSystemField: 1,
-          displayName: 'lock_version'
-        },
-        {
-          fieldId: '16935056057237513',
-          fieldName: 'deleted',
-          fieldType: 'NUMBER',
-          isSystemField: 1,
-          displayName: 'deleted'
-        },
-        {
-          fieldId: '16935056057237514',
-          fieldName: 'parent_id',
-          fieldType: 'NUMBER',
-          isSystemField: 1,
-          displayName: 'parent_id'
-        }
-      ]
-    };
+  const getSetIdFromMenuId = async () => {
+    try {
+      const resq = await getPageSetId({ menuId: menuId });
+      // getEntityInfoById(resq);
+      loadPageSetForId({ id: resq });
+    } catch (error) {
+      console.log('获取数据集id失败 error:', error);
+    }
+  };
 
-    setAppEntity(dataEntityResq);
-    getDataPermissionFields(dataEntityResq.entityId);
-    getDataPermissionRoles(dataEntityResq.entityId);
+  // loadPageSet
+  const loadPageSetForId = async (params: LoadPageSetReq) => {
+    try {
+      const resq = await loadPageSet(params);
+      getViewDataEntity(resq.mainMetadata);
+      getEntityInfoById(resq.mainMetadata);
+    } catch (error) {
+      console.log('载入数据集获取id失败 error:', error);
+    }
+  };
+
+  // 获取页面数据实体 getEntityById
+  const getViewDataEntity = async (id: string) => {
+    try {
+      const resq = await getEntityById(id);
+      setDataPermissionEntityName(resq.displayName);
+      getDataPermissionFields(resq.id);
+      getDataPermissionRoles(resq.id);
+    } catch (error) {
+      console.log('获取数据集详细信息 error:', error);
+    }
+  };
+
+  // 根据实体ID查询实体名称及其关联的子表信息
+  const getEntityInfoById = async (entityId: string) => {
+    try {
+      const entityInfoResq = await getEntityFieldsWithChildren(entityId);
+      const treeSelectData = convertEntityToTreeSelectData(entityInfoResq);
+      setVariableOptions(treeSelectData);
+      // entityInfoResq 获取的 entityId 是 id 但是 appEntityField 中 是 fieldID
+      // entityInfoResq.forEach((field: any) => {
+      //   field.fieldId = field.id;
+      // });
+    } catch (error) {
+      console.log('获取数据集详细信息 error:', error);
+    }
+  };
+
+  const convertEntityToTreeSelectData = (entityData: EntityWithChildren): TreeSelectDataType[] => {
+    const result: TreeSelectDataType[] = [];
+
+    // 添加主实体节点
+    if (entityData.entityId && entityData.entityName) {
+      const mainEntityNode: TreeSelectDataType = {
+        key: `entity-${entityData.entityId}`, // 使用 entity- 前缀避免冲突
+        title: entityData.entityName,
+        value: entityData.entityCode,
+        disabled: true,
+        children: []
+      };
+
+      // 添加父表字段
+      if (entityData.parentFields && entityData.parentFields.length > 0) {
+        entityData.parentFields.forEach((field) => {
+          if (field.fieldId && field.fieldName) {
+            mainEntityNode.children?.push({
+              key: `entity-${entityData.entityId}.${field.fieldId}`, // 关键：使用 "父节点ID.字段ID" 格式
+              title: field.displayName || field.fieldName,
+              value: field.fieldName
+            });
+          }
+        });
+      }
+
+      result.push(mainEntityNode);
+    }
+
+    // 添加子表实体
+    if (entityData.childEntities && entityData.childEntities.length > 0) {
+      entityData.childEntities.forEach((child: any) => {
+        if (child.childEntityId && child.childEntityName) {
+          const childEntityNode: TreeSelectDataType = {
+            key: `child-${child.childEntityId}`,
+            title: child.childEntityName,
+            value: child.childEntityCode,
+            disabled: true,
+            children: []
+          };
+
+          // 添加子表字段
+          if (child.childFields && child.childFields.length > 0) {
+            child.childFields.forEach((field: any) => {
+              if (field.fieldId && field.fieldName) {
+                childEntityNode.children?.push({
+                  key: `child-${child.childEntityId}.${field.fieldId}`, // 关键：使用 "父节点ID.字段ID" 格式
+                  title: field.displayName || field.fieldName,
+                  value: field.fieldName
+                });
+              }
+            });
+          }
+
+          result.push(childEntityNode);
+        }
+      });
+    }
+
+    return result;
   };
 
   // 获取数据权限数据字段
   const getDataPermissionFields = async (entityId: string) => {
     try {
       const entityFieldsResq = await getEntityFields({ entityId, isSystemField: 0 });
-      console.log('根据实体ID获取数据字段权限 entityFieldsResq:', entityFieldsResq);
       // entityFieldsResq 返回的数据 是 id 但是 appEntityField 中 是 fieldID
       entityFieldsResq.forEach((field: any) => {
         field.fieldId = field.id;
       });
+
       // 批量获取字段可选校验类型
       const getFieldCheckTypeParams: string[] = [];
       entityFieldsResq.forEach((item: any) => {
-        getFieldCheckTypeParams.push(item.fieldId);
+        if (item.fieldId) {
+          getFieldCheckTypeParams.push(item.fieldId);
+        }
       });
-      getFieldCheckType(getFieldCheckTypeParams);
+
+      // 添加空数组检查，避免空参数调用接口
+      if (getFieldCheckTypeParams.length > 0) {
+        getFieldCheckType(getFieldCheckTypeParams);
+      } else {
+        // 如果没有字段需要获取校验类型，直接设置空数组
+        setFilterFieldCheckType([]);
+      }
+
       setAppEntityFields(entityFieldsResq);
-      console.log('setAppEntityFields', appEntityFields);
     } catch (error) {
       console.error('获取权限信息失败', error);
     }
   };
+
   // 获取数据权限角色
   const getDataPermissionRoles = async (entityId: string) => {
     try {
       const dataPermissionRoles = await getEntityFields({ entityId, isPerson: 1 });
-      console.log('获取数据权限角色 dataPermissionRoles:', dataPermissionRoles);
       // 将获取到的数据转换为正确的格式
       const formattedData = dataPermissionRoles.map((item: any) => ({
         PersonId: item.id,
@@ -263,23 +339,205 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
   // 批量获取字段可选校验类型
   const getFieldCheckType = async (fieldIds: string[]) => {
-    const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
-    setFilterFieldCheckType(fieldCheckTypeResq);
+    try {
+      const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
+      setFilterFieldCheckType(fieldCheckTypeResq);
+    } catch (error) {
+      console.log('批量获取字段可选校验类型 error:', error);
+    }
+  };
+
+  /**
+   * 处理权限范围数据以满足后端要求
+   * @param values 原始表单数据
+   * @param submitData 处理后的提交数据
+   */
+  const processScopeLevelData = (values: AuthDataGroupVO, submitData: any) => {
+    // 如果选择的是指定成员或者指定部门，将数据转为JSON字符串给scopeValue
+    if (values.scopeLevel === 'specifiedPerson' || values.scopeLevel === 'specifiedDepartment') {
+      if (values.scopeValue && values.scopeValue.length > 0) {
+        submitData.scopeValue = JSON.stringify(values.scopeValue);
+      }
+    }
+  };
+
+  const processDataFilters = (values: any, submitData: any) => {
+    // 使用新添加的转换方法来处理filterCondition
+    if (values.filterCondition) {
+      submitData.dataFilters = convertConditionDataToBackendFormat(values.filterCondition);
+    }
+  };
+
+  /**
+   * 将condition-editor组件生成的数据结构转换为后端需要的数据结构
+   * @param filterCondition 组件生成的数据结构
+   * @returns 后端需要的数据结构
+   */
+  const convertConditionDataToBackendFormat = (filterCondition: any[]): Array<AuthDataFilterVO[]> => {
+    if (!Array.isArray(filterCondition) || filterCondition.length === 0) {
+      return [];
+    }
+
+    const result: Array<AuthDataFilterVO[]> = [];
+
+    filterCondition.forEach((orGroup, groupIndex) => {
+      if (!orGroup || !Array.isArray(orGroup.conditions)) {
+        return;
+      }
+
+      const convertedGroup: AuthDataFilterVO[] = [];
+
+      orGroup.conditions.forEach((andCondition: any, conditionIndex: number) => {
+        if (!andCondition) {
+          return;
+        }
+
+        // 处理值的格式
+        let fieldValue = andCondition.value;
+        if (Array.isArray(fieldValue)) {
+          // 如果是数组（如范围值），转换为逗号分隔的字符串
+          fieldValue = fieldValue.join(',');
+        } else if (typeof fieldValue === 'object' && fieldValue !== null) {
+          // 如果是对象（如日期范围），转换为适当的格式
+          if (fieldValue.begin !== undefined && fieldValue.end !== undefined) {
+            fieldValue = `${fieldValue.begin},${fieldValue.end}`;
+          } else {
+            fieldValue = JSON.stringify(fieldValue);
+          }
+        }
+
+        const convertedCondition: AuthDataFilterVO = {
+          fieldId: andCondition.fieldId,
+          fieldOperator: andCondition.op || '',
+          fieldValue: fieldValue !== undefined ? fieldValue : '',
+          fieldValueType: andCondition.operatorType || 'value',
+          id: '' // 新建时id为空
+        };
+        convertedGroup.push(convertedCondition);
+      });
+
+      if (convertedGroup.length > 0) {
+        result.push(convertedGroup);
+      }
+    });
+
+    return result;
+  };
+
+  /**
+   * 将后端返回的数据结构转换为condition-editor组件需要的数据结构
+   * @param backendData 后端返回的数据结构
+   * @returns condition-editor组件需要的数据结构
+   */
+  const convertBackendDataToConditionFormat = (backendData: Array<AuthDataFilterVO[]> | undefined): any[] => {
+    if (!backendData || !Array.isArray(backendData) || backendData.length === 0) {
+      return [];
+    }
+
+    // 按条件组分组数据
+    const groupedData: { [key: number]: AuthDataFilterVO[] } = {};
+
+    backendData.forEach((group) => {
+      if (Array.isArray(group)) {
+        group.forEach((condition) => {
+          const groupNumber = condition.conditionGroup || 0;
+          if (!groupedData[groupNumber]) {
+            groupedData[groupNumber] = [];
+          }
+          groupedData[groupNumber].push(condition);
+        });
+      }
+    });
+
+    // 转换为前端需要的格式
+    const result: any[] = [];
+
+    Object.keys(groupedData)
+      .sort((a, b) => Number(a) - Number(b)) // 按组号排序
+      .forEach((groupNumber) => {
+        const groupConditions = groupedData[Number(groupNumber)];
+
+        // 按条件顺序排序
+        groupConditions.sort((a, b) => (a.conditionOrder || 0) - (b.conditionOrder || 0));
+
+        // 转换每个条件为前端格式
+        const convertedConditions = groupConditions.map((condition) => {
+          // 处理字段值
+          let value = condition.fieldValue || '';
+
+          // 根据字段值类型处理特殊值格式
+          if (condition.fieldValueType === 'value') {
+            // 如果是逗号分隔的值，尝试转换为数组
+            if (value.includes(',')) {
+              // 检查是否是范围值 (begin,end 格式)
+              const rangeValues = value.split(',');
+              if (rangeValues.length === 2 && !isNaN(Number(rangeValues[0])) && !isNaN(Number(rangeValues[1]))) {
+                // 可能是范围值，但需要更多信息才能确定
+                // 这里我们保守处理，仍然作为字符串数组
+                value = rangeValues;
+              } else {
+                // 普通数组值
+                value = rangeValues;
+              }
+            }
+          }
+
+          return {
+            fieldId: condition.fieldId ? String(condition.fieldId) : '',
+            op: condition.fieldOperator || '',
+            operatorType: condition.fieldValueType || 'value',
+            value: value
+          };
+        });
+
+        result.push({
+          conditions: convertedConditions
+        });
+      });
+
+    return result;
+  };
+
+  // 添加这个方法到 DataPermission 组件中
+  const getVariable = (value: any, fieldValueType: string) => {
+    if (value === null || value === undefined) return '';
+
+    // 如果是变量类型（variables），尝试解析为字段名
+    if (fieldValueType === 'variables') {
+      // 假设 value 是类似 "entity-16935056057237504.29169768621965312" 的 key
+      const key = String(value);
+      const parts = key.split('.');
+      // const entityId = parts[0].replace('entity-', '');
+      const fieldId = parts[1];
+
+      // 查找对应的字段名（需要 appEntityFields 数据）
+      const field = appEntityFields.find((f) => f.fieldId === fieldId);
+      if (field) {
+        return field.displayName || field.fieldName;
+      }
+      return key; // 如果找不到，返回原始 key
+    }
   };
 
   const handleModalSubmit = async (values?: AuthDataGroupVO) => {
-    console.log('handleModalSubmit values:', values);
-
     if (!values) return;
 
     // 创建符合后端要求的数据结构
     const submitData = { ...values };
+
+    // 如果是编辑模式，确保ID被包含在提交数据中
+    if (status === 'edit' && editingPermData?.id) {
+      submitData.id = editingPermData.id;
+    }
 
     // 处理权限范围数据以满足后端要求
     processScopeLevelData(values, submitData);
 
     // 处理数据过滤条件，将Condition格式转换为AuthDataFilterVO格式
     processDataFilters(values, submitData);
+
+    // 删除原始的filterCondition数据，因为我们已经转换为dataFilters了
+    delete submitData.filterCondition;
 
     // 构造完整的请求参数
     const requestData: UpdateDataGroupPermissionReq = {
@@ -292,163 +550,28 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     };
 
     console.log('处理后的提交数据:', requestData);
-    // 调用后端API提交数据
+    // 调用后端API提交数据;
     try {
       await updateDataGroupPermission(requestData);
       // 提交成功后刷新数据或关闭模态框
       setModelVisible(false);
+      // 提交后刷新数据
+      await getFieldsPermission();
+      Message.success('添加数据权限成功');
     } catch (error) {
       console.error('提交数据权限失败:', error);
     }
   };
 
-  /**
-   * 处理权限范围数据以满足后端要求
-   * @param values 原始表单数据
-   * @param submitData 处理后的提交数据
-   */
-  const processScopeLevelData = (values: AuthDataGroupVO, submitData: any) => {
-    console.log('进入并打印原始表单数据 values', values.scopeValue);
-    console.log('原始表单数据 values.scopeType', values.scopeLevel);
-    // 如果选择的是指定成员或者指定部门，将数据转为JSON字符串给scopeValue
-    if (values.scopeLevel === 'specifiedPerson' || values.scopeLevel === 'specifiedDepartment') {
-      console.log('进入权限范围是指定的条件判断');
-      if (values.scopeValue && values.scopeValue.length > 0) {
-        console.log('123');
-        submitData.scopeValue = values.scopeValue.join(',');
-      }
-    }
-    // }
-  };
-
-  /**
-   * 处理数据过滤条件，将Condition格式转换为AuthDataFilterVO格式
-   * @param values 原始表单数据
-   * @param submitData 处理后的提交数据
-   */
-  const processDataFilters = (values: AuthDataGroupVO, submitData: any) => {
-    if (values.dataFilters) {
-      // 检查dataFilters是否为数组
-      if (Array.isArray(values.dataFilters)) {
-        const convertedDataFilters: Array<AuthDataFilterVO[]> = [];
-
-        // 遍历每个条件组
-        values.dataFilters.forEach((conditionGroup: any, groupIndex: number) => {
-          // 检查conditionGroup是否为数组
-          if (Array.isArray(conditionGroup)) {
-            const filterGroup: AuthDataFilterVO[] = [];
-
-            // 遍历组内的每个条件
-            conditionGroup.forEach((condition: any, conditionIndex: number) => {
-              console.log(`条件 ${conditionIndex}:`, condition);
-
-              // 提取规则中的字段信息
-              const rules = condition.rules;
-              if (rules && Array.isArray(rules)) {
-                rules.forEach((rule: any) => {
-                  const filter: AuthDataFilterVO = {
-                    conditionGroup: groupIndex,
-                    conditionOrder: conditionIndex,
-                    fieldId: rule.fieldId ? Number(rule.fieldId) : undefined,
-                    fieldOperator: rule.op,
-                    fieldValue: rule.value ? rule.value.join(',') : undefined,
-                    fieldValueType: rule.operatorType
-                  };
-                  filterGroup.push(filter);
-                });
-              }
-            });
-
-            convertedDataFilters.push(filterGroup);
-          } else {
-            console.warn(`条件组 ${groupIndex} 不是数组:`, conditionGroup);
-
-            // 如果conditionGroup不是数组，尝试处理它
-            if (conditionGroup && typeof conditionGroup === 'object') {
-              // 可能是单个条件对象，将其包装成数组
-              const filterGroup: AuthDataFilterVO[] = [];
-              const rules = conditionGroup.rules;
-              if (rules && Array.isArray(rules)) {
-                rules.forEach((rule: any, ruleIndex: number) => {
-                  const filter: AuthDataFilterVO = {
-                    conditionGroup: groupIndex,
-                    conditionOrder: ruleIndex,
-                    fieldId: rule.fieldId ? Number(rule.fieldId) : undefined,
-                    fieldOperator: rule.op,
-                    fieldValue: rule.value ? rule.value.join(',') : undefined,
-                    fieldValueType: rule.operatorType
-                  };
-                  filterGroup.push(filter);
-                });
-              }
-              convertedDataFilters.push(filterGroup);
-            }
-          }
-        });
-
-        submitData.dataFilters = convertedDataFilters;
-        console.log('转换后的dataFilters:', convertedDataFilters);
-      } else {
-        console.warn('dataFilters不是数组:', values.dataFilters);
-
-        // 如果dataFilters不是数组，尝试处理它
-        if (values.dataFilters && typeof values.dataFilters === 'object') {
-          // 可能是单个条件组，将其包装成数组
-          const convertedDataFilters: Array<AuthDataFilterVO[]> = [];
-          const conditionGroup = values.dataFilters;
-
-          if (Array.isArray(conditionGroup)) {
-            const filterGroup: AuthDataFilterVO[] = [];
-
-            conditionGroup.forEach((condition: any) => {
-              const rules = condition.rules;
-              if (rules && Array.isArray(rules)) {
-                rules.forEach((rule: any, ruleIndex: number) => {
-                  const filter: AuthDataFilterVO = {
-                    conditionGroup: 0,
-                    conditionOrder: ruleIndex,
-                    fieldId: rule.fieldId ? Number(rule.fieldId) : undefined,
-                    fieldOperator: rule.op,
-                    fieldValue: rule.value ? rule.value.join(',') : undefined,
-                    fieldValueType: rule.operatorType
-                  };
-                  filterGroup.push(filter);
-                });
-              }
-            });
-
-            convertedDataFilters.push(filterGroup);
-            submitData.dataFilters = convertedDataFilters;
-          } else if (conditionGroup && typeof conditionGroup === 'object') {
-            // 单个条件对象
-            const filterGroup: AuthDataFilterVO[] = [];
-            const rules = conditionGroup.rules;
-            if (rules && Array.isArray(rules)) {
-              rules.forEach((rule: any, ruleIndex: number) => {
-                const filter: AuthDataFilterVO = {
-                  conditionGroup: 0,
-                  conditionOrder: ruleIndex,
-                  fieldId: rule.fieldId ? Number(rule.fieldId) : undefined,
-                  fieldOperator: rule.op,
-                  fieldValue: rule.value ? rule.value.join(',') : undefined,
-                  fieldValueType: rule.operatorType
-                };
-                filterGroup.push(filter);
-              });
-            }
-            convertedDataFilters.push(filterGroup);
-            submitData.dataFilters = convertedDataFilters;
-          }
-
-          console.log('转换后的dataFilters:', convertedDataFilters);
-        }
-      }
-    }
-  };
-
   const handleModalCancel = () => {
-    console.log('取消创建数据权限');
     setModelVisible(false);
+    setEditingPermData(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteDataGroup(id);
+    // 提交后刷新数据
+    await getFieldsPermission();
   };
   return (
     <>
@@ -459,12 +582,12 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         </div>
       ) : (
         <div className={styles.dataPermission}>
-          {permission.map((perm, index) => (
+          {DataPermission.map((perm, index) => (
             <div className={styles.permItem} key={index}>
               <div className={styles.top}>
                 <div className={styles.left}>
-                  <div className={styles.title}>{perm.name}</div>
-                  <div className={styles.subtitle}>{perm.subTitle}</div>
+                  <div className={styles.title}>{perm.groupName}</div>
+                  <div className={styles.subtitle}>{perm.description || '-'}</div>
                 </div>
                 <div className={styles.right}>
                   <IconEdit
@@ -478,10 +601,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     title="删除数据权限"
                     content="确定要删除这条数据吗？"
                     onOk={() => {
-                      console.log('确认删除');
-                    }}
-                    onCancel={() => {
-                      console.log('取消删除');
+                      handleDelete(perm.id!);
                     }}
                   >
                     <IconDelete
@@ -504,23 +624,47 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
                       查看
                     </Tag>
-                    <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
+                    <Tag visible={!!perm.isOperable} color="#F2F3F5" style={{ color: '#1D2129' }}>
                       操作
                     </Tag>
                     <Tag color="#E8F3FF" style={{ color: '#3C7EFF' }}>
-                      拥有者
+                      {perm.scopeFieldName}
                     </Tag>
                     是
                     <Tag color="#FFF7E8" style={{ color: '#FF7D00' }}>
-                      本人
+                      {(perm.scopeLevel &&
+                        dataPermissionScopeType.find((item) => item.value === perm.scopeLevel)?.label) ||
+                        perm.scopeLevel}
                     </Tag>
-                    且
-                    <Tag color="#E8FFEA" style={{ color: '#00B42A' }}>
-                      归档状态 等于 已归档
-                    </Tag>
-                    <Tag color="#E8FFEA" style={{ color: '#00B42A' }}>
-                      归档人 等于 巫炘
-                    </Tag>
+                    {perm.dataFilters && perm.dataFilters.length > 0 && (
+                      <>
+                        且
+                        {perm.dataFilters.map((group, groupIndex: number) => (
+                          <span key={`groupIndex-${groupIndex}`}>
+                            {group.map((filter) => (
+                              <Tag color="#E8FFEA" style={{ color: '#00B42A', margin: '0 4px' }} key={filter.id}>
+                                {filter.fieldName}
+                                {/* {filter.fieldOperator} */}{' '}
+                                {filterFieldCheckType
+                                  .find((item) => item.fieldId === filter.fieldId + '')
+                                  ?.validationTypes?.find((type) => type.code === filter.fieldOperator)?.name ||
+                                  filter.fieldOperator}{' '}
+                                {filter.fieldOperator !== 'IS_EMPTY' && filter.fieldOperator !== 'IS_NOT_EMPTY' && (
+                                  <>
+                                    {filter.fieldValueType
+                                      ? opCodeOptions.find((option) => option.value === filter.fieldValueType)?.label ||
+                                        filter.fieldValueType
+                                      : ''}{' '}
+                                    {getVariable(filter.fieldValue || '', filter.fieldValueType)}
+                                  </>
+                                )}
+                              </Tag>
+                            ))}
+                            {groupIndex < perm.dataFilters!.length - 1 && <span>或</span>}
+                          </span>
+                        ))}
+                      </>
+                    )}
                     的数据
                   </Space>
                 </span>
@@ -538,15 +682,15 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
           </Button>
           <DataPermissionModal
             roleId={roleId}
-            initialFormValues={initialFormValues}
+            initialFormValues={editingPermData || initialFormValues}
             modalVisible={modalVisible}
             status={status}
-            appEntity={appEntity}
+            dataPermissionEntityName={dataPermissionEntityName}
             dataPermissionPerson={dataPermissionPerson}
             appEntityFields={appEntityFields}
             filterFieldCheckType={filterFieldCheckType}
             dataPermissionScope={dataPermissionScopeType}
-            // changeEntity={changeEntity}
+            variableOptions={variableOptions}
             handleModalSubmit={(values: AuthDataGroupVO) => handleModalSubmit(values)}
             handleModalCancel={() => handleModalCancel()}
           />

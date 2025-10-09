@@ -1,4 +1,4 @@
-import { Graph, Node } from '@antv/x6';
+import { Graph } from '@antv/x6';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
@@ -7,8 +7,7 @@ import { type EntityNode, type EntityERProps } from '../../../../utils/interface
 import { FIELD_TYPE } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import styles from './index.module.less';
-import { GridNodePositioner } from './utils/nodePositioner';
-import { performAutoLayout } from './utils/autoLayout';
+import { GridNodePositioner, performAutoLayout, SectionCollapseHandler } from './utils';
 import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
@@ -35,8 +34,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       onFieldClick,
       onEdgeEdit,
       onStatusChange,
-      updateEntityPosition,
-      onlyUpdateNode
+      updateEntityPosition
+      // onlyUpdateNode
     },
     ref
   ) => {
@@ -49,6 +48,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     const isUnmounting = useRef(false);
     const isGraphInitialized = useRef(false);
+    const collapseHandlerRef = useRef<SectionCollapseHandler | null>(null);
 
     const getGraphPositon = () => {
       const contentArea = graphRef.current?.getContentArea();
@@ -62,73 +62,15 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     }));
 
     const handleSectionCollapse = (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
-      const graph = graphRef.current!;
-      const edges = graph.getEdges();
+      if (!collapseHandlerRef.current) return;
 
-      // 确定聚合portID
-      const aggregatePortId = `${nodeId}_${section}_fields`;
-
-      // 获取该节点的所有字段，用于判断是否属于当前section
       const nodeData = data.nodes.find((n) => n.entityId === nodeId);
       if (!nodeData) return;
 
-      const systemFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.SYSTEM);
-      const customFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.CUSTOM);
-      const fieldsInThisSection = section === 'system' ? systemFields : customFields;
-
-      // 提取所有字段对应的portID
-      const portIdsInSection = new Set(
-        fieldsInThisSection.flatMap((field) => [
-          `${field.fieldId || field.fieldName}_source`,
-          `${field.fieldId || field.fieldName}_target`
-        ])
-      );
-
-      edges.forEach((edge) => {
-        const data = edge.getData();
-        const originalSource = data?.originalSource;
-        const originalTarget = data?.originalTarget;
-
-        if (!originalSource || !originalTarget) return;
-
-        const currentSource = edge.getSource();
-        const currentTarget = edge.getTarget();
-
-        // 处理 source 端
-        if (currentSource.cell === nodeId && typeof currentSource.port === 'string') {
-          const isOriginalInSection =
-            portIdsInSection.has(currentSource.port) ||
-            (originalSource.port && portIdsInSection.has(originalSource.port));
-
-          if (isOriginalInSection) {
-            if (isCollapsed) {
-              // 折叠 → 指向聚合 port
-              edge.setSource({ cell: nodeId, port: `${aggregatePortId}_source` });
-            } else {
-              // 展开 → 恢复原始 port
-              edge.setSource(originalSource);
-            }
-          }
-        }
-
-        // 处理 target 端
-        if (currentTarget.cell === nodeId && typeof currentTarget.port === 'string') {
-          const isOriginalInSection =
-            portIdsInSection.has(currentTarget.port) ||
-            (originalTarget.port && portIdsInSection.has(originalTarget.port));
-
-          if (isOriginalInSection) {
-            if (isCollapsed) {
-              edge.setTarget({ cell: nodeId, port: `${aggregatePortId}_target` });
-            } else {
-              edge.setTarget(originalTarget);
-            }
-          }
-        }
-      });
+      collapseHandlerRef.current.handleSectionCollapse(nodeId, section, isCollapsed, nodeData);
     };
 
-    const portsItems = (nodeData: EntityNode) => {
+    const portsItems = (nodeData: EntityNode, systemCollapsed: boolean = true) => {
       const items: object[] = [];
 
       const systemFields = nodeData?.fields.filter((f) => f.isSystemField === FIELD_TYPE.SYSTEM);
@@ -151,8 +93,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
       // 自定义字段标题行的聚合 port
       if (customFields.length > 0) {
-        const customTitleOffset = systemFields.length > 0 ? LINE_TITLE_HEIGHT : 0;
-        const customTitleY = LINE_HEAD_HEIGHT + customTitleOffset + LINE_TITLE_HEIGHT / 2;
+        // 如果系统字段折叠，自定义字段标题位置需要向上偏移
+        const systemTitleOffset = systemFields.length > 0 ? (systemCollapsed ? 0 : LINE_TITLE_HEIGHT) : 0;
+        const customTitleY = LINE_HEAD_HEIGHT + systemTitleOffset + LINE_TITLE_HEIGHT / 2;
         items.push({
           id: `${nodeData.entityId}_custom_fields_source`,
           group: 'right',
@@ -252,8 +195,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                   }
                 }
               },
-              // 连接桩定义
-              items: portsItems(nodeData)
+              // 连接桩定义 - 使用默认的系统字段折叠状态（true）
+              items: portsItems(nodeData, true)
             }
           });
         });
@@ -304,7 +247,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             ]
           : []
       });
-      graph.addEdge(edge);
+      graph.addEdge(edge, { options: { silent: true } });
       return edge;
     };
 
@@ -405,6 +348,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           return;
         }
 
+        // 初始化折叠处理器
+        collapseHandlerRef.current = new SectionCollapseHandler(graphRef.current);
+
         // 事件监听
         graphRef.current.on('node:mouseenter', ({ node }) => {
           if (mode === 'edit') {
@@ -426,10 +372,50 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           });
         });
 
+        // 拖拽开始标记
+        let isDragging = false;
+        let dragStartPosition = { x: 0, y: 0 };
+
+        graphRef.current.on('node:move', ({ x, y }) => {
+          // 记录拖拽开始位置
+          dragStartPosition = { x, y };
+          isDragging = false; // 重置拖拽状态
+        });
+
+        graphRef.current.on('node:moving', ({ x, y }) => {
+          // 移动距离超过阈值则判断为在拖拽
+          const deltaX = Math.abs(x - dragStartPosition.x);
+          const deltaY = Math.abs(y - dragStartPosition.y);
+          const threshold = 5;
+
+          if (deltaX > threshold || deltaY > threshold) {
+            isDragging = true;
+          }
+        });
+
         graphRef.current.on('node:moved', ({ e, x, y, node }) => {
-          e.preventDefault();
-          e.stopPropagation();
-          updateEntityPosition?.(node.getData().data, x, y);
+          // 阻止折叠图标点击触发
+          const target = e.target as HTMLElement;
+          if (
+            target.closest('#collapse-icon') ||
+            target.closest('#status-change-icon') ||
+            target.closest('#node-footer')
+          ) {
+            e.stopPropagation();
+            return;
+          }
+
+          // 只在拖拽时才更新位置
+          if (isDragging) {
+            e.preventDefault();
+            e.stopPropagation();
+            updateEntityPosition?.(node.getData().data, x, y);
+          }
+
+          // 延迟重置拖拽状态，给点击事件处理留出时间
+          setTimeout(() => {
+            isDragging = false;
+          }, 50);
         });
 
         graphRef.current.on('edge:click', ({ e, x, y, edge, view }) => {
@@ -448,9 +434,22 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             e.stopPropagation();
             return;
           }
-          e.preventDefault();
-          e.stopPropagation();
-          onNodeEdit?.(node.getData().data);
+
+          // 如果刚刚拖拽过，不触发点击事件
+          if (isDragging) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+
+          // 添加短暂延迟，确保不是拖拽操作
+          setTimeout(() => {
+            if (!isDragging) {
+              e.preventDefault();
+              e.stopPropagation();
+              onNodeEdit?.(node.getData().data);
+            }
+          }, 10);
         });
 
         graphRef.current.on('scale', ({ sx }) => {

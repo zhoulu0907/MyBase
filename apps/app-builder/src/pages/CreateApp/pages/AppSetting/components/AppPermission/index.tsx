@@ -22,6 +22,10 @@ import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
 
+enum EditOpacity {
+  hide = 0,
+  show = 1
+}
 // 应用权限
 const AppPermission: FC = () => {
   const [searchParams] = useSearchParams();
@@ -33,6 +37,7 @@ const AppPermission: FC = () => {
   const [updateRoleId, setUpdateRoleId] = useState<string>('');
   const [memberList, setMemberList] = useState<any[]>([]);
   const [memberTotal, setMemberTotal] = useState<number>(0);
+  const [hoveredRoleId, setHoveredRoleId] = useState<string>(''); // 新增状态用于跟踪鼠标悬停的角色ID
 
   const adminData: Role | undefined = roleList?.find((role) => role.roleType === RoleType.ADMIN);
   const notAdminData: Role | undefined = roleList?.find(
@@ -166,7 +171,12 @@ const AppPermission: FC = () => {
               ?.filter((role) => role.roleType !== RoleType.ADMIN)
               .map((role) => {
                 return (
-                  <MenuItem className={styles.menuItem} key={role.id}>
+                  <MenuItem
+                    className={styles.menuItem}
+                    key={role.id}
+                    onMouseEnter={() => setHoveredRoleId(role.id)} // 鼠标进入时设置hoveredRoleId
+                    onMouseLeave={() => setHoveredRoleId('')} // 鼠标离开时清空hoveredRoleId
+                  >
                     <div className={styles.custom}>
                       <IconUser className={styles.userIcon} />
                       {updateRoleId === role.id ? (
@@ -184,7 +194,11 @@ const AppPermission: FC = () => {
                           {role.roleType === RoleType.CUSTOM && (
                             <IconEdit
                               onClick={() => setUpdateRoleId(role.id)}
-                              style={{ marginLeft: 4, marginRight: 0 }}
+                              className={styles.editIcon}
+                              style={{
+                                opacity: hoveredRoleId === role.id ? EditOpacity.show : EditOpacity.hide,
+                                transition: 'opacity 0.2s'
+                              }}
                             />
                           )}
                         </>

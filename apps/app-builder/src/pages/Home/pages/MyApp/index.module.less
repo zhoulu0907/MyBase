@@ -1,6 +1,6 @@
 @import '../../variables.less';
 
-@myAppPageHeaderHeight: 110px;
+@myAppPageHeaderHeight: 200px;
 @myAppFilterHeight: 32px;
 @myAppPaginationHeight: 50px;
 @myAppContainerMaxWidth: 1460px;
@@ -14,18 +14,19 @@
   align-items: center;
   justify-content: flex-start;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #4fae7b 0%, #b4dcc6 35.1%, #f2f3f5 50.48%);
+  background: linear-gradient(180deg, #e9f5fc 0%, #e3f1fa 30%, #f2f3f5 50%);
 
   .myAppPageHeader {
     position: relative;
     height: @myAppPageHeaderHeight;
     flex-shrink: 0;
     width: 100vw;
-    max-width: @myAppContainerMaxWidth;
+    min-width: 754px;
 
+    background-image: url('@/assets/images/application_banner.png');
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: top center;
 
     .myAppWelcome {
       position: absolute;
@@ -40,9 +41,8 @@
 
     .createAppButton {
       position: absolute;
-      right: 70px;
-      top: 50%;
-      transform: translateY(-50%);
+      right: 155px;
+      top: 44px;
       background-color: #fff;
       width: 140px;
       height: 40px;
@@ -72,7 +72,7 @@
     justify-content: flex-start;
     background-color: #fff;
     border-radius: 24px 24px 0 0;
-    margin: 0 auto;
+    margin: -60px auto 0;
     position: relative;
 
     .applicationEmpty {
@@ -193,9 +193,9 @@
             align-items: center;
             justify-content: center;
 
-            i {
-              color: #fff;
-              font-size: 24px;
+            img {
+              width: 24px;
+              filter: brightness(0) invert(1);
             }
           }
 

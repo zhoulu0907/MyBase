@@ -80,9 +80,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   // 设置允许的列
   useEffect(() => {
     const res =
-      fieldList.filter(
+      fieldList.some(
         (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.fieldName)
-      ).length > 0;
+      );
 
     setEnableAddColumn(res);
   }, [fieldList, columnsConfig]);
@@ -90,9 +90,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   // 设置允许的搜索项
   useEffect(() => {
     const res =
-      fieldList.filter(
+      fieldList.some(
         (item: MetadataEntityField) => !searchItemsConfig.some((col: any) => col.value == item.fieldName)
-      ).length > 0;
+      );
 
     setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
@@ -103,6 +103,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     console.log('fieldList res: ', res);
 
     const newFieldList = res.filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
+    const newFieldListNotSystemField = res.filter((item: MetadataEntityField) => item.isSystemField !== 1);
 
     setFieldList(newFieldList);
 
@@ -110,7 +111,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       return;
     }
 
-    const newColumns = newFieldList.map((item: MetadataEntityField) => ({
+    const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
       // 保留已有的命名，如果没有则使用字段展示名称
       title:
         configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
@@ -159,7 +160,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => {}}
+                setList={() => { }}
                 group={{
                   name: 'table-col-item'
                 }}

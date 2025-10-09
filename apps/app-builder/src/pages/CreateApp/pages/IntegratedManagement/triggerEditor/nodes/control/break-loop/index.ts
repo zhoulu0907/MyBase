@@ -1,4 +1,4 @@
-import iconControl from '@/assets/flow/nodes/control.svg';
+import iconControl from '@/assets/flow/nodes/end.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';

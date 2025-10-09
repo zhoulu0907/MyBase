@@ -1,6 +1,6 @@
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
-import { getDeptList, type DeptVO } from '@onebase/platform-center';
+import { getDeptList, getUserPage } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
@@ -21,21 +21,19 @@ export default function UserPage() {
     setDeptLoading(true);
     try {
       const res = await getDeptList();
-      // 计算所有用户总数:取第一层树节点的用户数之和
-      const deptMap = res.reduce((acc: Record<number, DeptVO>, cur: DeptVO) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, {});
-      const userCount = res.reduce(
-        (acc: number, cur: DeptVO) => (!deptMap[cur.parentId] ? acc + cur.userCount : acc),
-        0
-      );
-      setTotalUserCount(userCount);
+
+      const total = await getUserContent();
+      setTotalUserCount(total);
       const treeData = listToTree(res, {}, true);
       setDeptTree(treeData);
     } finally {
       setDeptLoading(false);
     }
+  };
+
+  const getUserContent = async () => {
+    const resq = await getUserPage({ pageNo: 1, pageSize: 10 });
+    return resq.total;
   };
 
   useEffect(() => {
@@ -63,7 +61,12 @@ export default function UserPage() {
       </Sider>
       <Content className={styles.rightPanel}>
         <PlaceholderPanel hasPermission={hasPermission(TENANT_USER_QUERY)}>
-          <UserTable selectedDeptId={selectedDeptId} deptTree={deptTree} deptLoading={deptLoading} />
+          <UserTable
+            selectedDeptId={selectedDeptId}
+            deptTree={deptTree}
+            deptLoading={deptLoading}
+            onRefreshDept={() => fetchDeptList()}
+          />
         </PlaceholderPanel>
       </Content>
     </Layout>

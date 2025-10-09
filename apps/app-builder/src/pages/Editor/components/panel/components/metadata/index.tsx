@@ -1,5 +1,6 @@
 import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
+import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import FieldCard from '@/components/FieldCard';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Collapse, Input, Layout } from '@arco-design/web-react';
@@ -24,6 +25,22 @@ interface MetadataContainerProps {
   setChildCollapsed: () => void;
 }
 
+interface FieldItem {
+  id: string;
+  displayName: string;
+  label: string;
+  type: string;
+  fieldID: string;
+  entityID: string;
+}
+
+interface GroupedSection {
+  name: string;
+  data: FieldItem[];
+}
+
+type FieldItemsMap = Record<string, GroupedSection[]>;
+
 const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, setChildCollapsed }) => {
   const { mainEntity, subEntities } = useAppEntityStore();
 
@@ -31,16 +48,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
   const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
 
   // 现在支持多个 entity，每个 entityId 对应一个字段数组
-  const [fieldItems, setFieldItems] = useState<{
-    [entityID: string]: {
-      id: string;
-      displayName: string;
-      label: string;
-      type: string;
-      fieldID: string;
-      entityID: string;
-    }[];
-  }>({});
+  const [fieldItems, setFieldItems] = useState<FieldItemsMap>({ [mainEntity.entityId]: [] });
 
   // 主表字段
   useEffect(() => {
@@ -50,7 +58,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField, index: number) => {
           let cpType = COMPONENT_MAP[field.fieldType];
-          console.log('cpType:', cpType);
           if (!cpType) {
             cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
           }
@@ -61,10 +68,25 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             label: field.displayName,
             type: cpType,
             fieldID: field.fieldId,
-            entityID: mainEntity.entityId
+            entityID: mainEntity.entityId,
+            isSystemField: field.isSystemField
           };
         })
-        .filter((item) => item !== null);
+        .filter((item) => item !== null)
+        .reduce(
+          (acc: any, field: any) => {
+            if (field.isSystemField === 1) {
+              acc[1].data.push(field);
+            } else {
+              acc[0].data.push(field);
+            }
+            return acc;
+          },
+          [
+            { name: '自定义字段', data: [] },
+            { name: '系统字段', data: [] }
+          ]
+        );
 
       setFieldItems((prevFieldItems) => ({
         ...prevFieldItems,
@@ -84,7 +106,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
           if (!cpType) {
             cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
           }
-          //   console.log('field: ', field);
           return {
             // TODO(mickey): 使用uuid作为id
             id: `${cpType}-${index}-${Date.now()}`,
@@ -93,10 +114,25 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             label: field.displayName,
             type: cpType,
             fieldID: field.fieldId,
-            entityID: subEntity.entityId
+            entityID: subEntity.entityId,
+            isSystemField: field.isSystemField
           };
         })
-        .filter((item) => item !== null);
+        .filter((item) => item !== null)
+        .reduce(
+          (acc: any, field: any) => {
+            if (field.isSystemField === 1) {
+              acc[1].data.push(field);
+            } else {
+              acc[0].data.push(field);
+            }
+            return acc;
+          },
+          [
+            { name: '自定义字段', data: [] },
+            { name: '系统字段', data: [] }
+          ]
+        );
 
       setFieldItems((prevFieldItems) => ({
         ...prevFieldItems,
@@ -104,10 +140,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
       }));
     });
   }, [subEntities]);
-
-  useEffect(() => {
-    console.log('fieldItems', fieldItems);
-  }, [fieldItems]);
 
   // todo 搜索功能
 
@@ -163,9 +195,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                       className={styles.fieldListContent}
                       forceFallback={true}
                       animation={150}
-                      onEnd={(e) => {
-                        console.log('onEnd', e);
-                      }}
                     >
                       <div
                         className={styles.mainEntityHeader}
@@ -208,9 +237,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                     className={styles.fieldListContent}
                     forceFallback={true}
                     animation={150}
-                    onEnd={(e) => {
-                      console.log('onEnd', e);
-                    }}
                   >
                     {subEntities.entities.map((subEntity) => (
                       <div
@@ -251,50 +277,65 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
 
           <div className={styles.fieldHeader}>数据字段</div>
 
-          <div className={styles.fieldList}>
-            <ReactSortable
-              list={fieldItems[activeEntityID] || []}
-              setList={() => { }}
-              group={{
-                name: COMPONENT_GROUP_NAME,
-                pull: 'clone',
-                put: false
-              }}
-              sort={false}
-              className={styles.fieldListContent}
-              forceFallback={true}
-              animation={150}
-              // onClone={(e) => {
-              //   console.log('onClone', e);
-              // }}
-              onEnd={(e) => {
-                console.log('onEnd', e);
-                const cpType = e.item.getAttribute('data-cp-type');
-                console.log('cpType', cpType);
-                e.item.id = `${cpType}-${Date.now()}`;
+          <Collapse defaultActiveKey={'自定义字段'} accordion={false} bordered={false} expandIconPosition='right' expandIcon={<img src={IconCollapsedDown} alt='' />}>
+            {
+              fieldItems[activeEntityID].map((field: GroupedSection) => (
+                <Collapse.Item
+                  header={field.name}
+                  name={field.name}
+                  key={field.name}
+                  style={{ border: 'none' }}
+                  contentStyle={{ backgroundColor: '#fff', border: 'none', paddingLeft: 13 }}
+                >
+                  <div className={styles.fieldList}>
+                    <ReactSortable
+                      list={field.data || []}
+                      setList={() => { }}
+                      group={{
+                        name: COMPONENT_GROUP_NAME,
+                        pull: 'clone',
+                        put: false
+                      }}
+                      sort={false}
+                      className={styles.fieldListContent}
+                      forceFallback={true}
+                      animation={150}
+                      onEnd={(e) => {
+                        const cpType = e.item.getAttribute('data-cp-type');
+                        e.item.id = `${cpType}-${Date.now()}`;
 
-                const newFieldItems = fieldItems[activeEntityID]?.map((c, idx) => ({
-                  ...c,
-                  id: `${c.type}-${idx}-${Date.now()}`
-                }));
+                        const newFieldItems = field.data?.map((c: FieldItem, idx: number) => ({
+                          ...c,
+                          id: `${c.type}-${idx}-${Date.now()}`
+                        }));
 
-                console.log('newFieldItems', newFieldItems);
-                setFieldItems({ ...fieldItems, [activeEntityID]: newFieldItems });
-              }}
-            >
-              {fieldItems[activeEntityID]?.map((item) => (
-                <FieldCard
-                  key={item.id}
-                  id={item.id}
-                  displayName={item.displayName}
-                  label={item.label}
-                  type={item.type}
-                  fieldID={item.fieldID}
-                  entityID={item.entityID}
-                />
-              ))}
-            </ReactSortable>
-          </div>
+                        setFieldItems((prevFieldItems) => ({
+                          ...prevFieldItems,
+                          [activeEntityID]: prevFieldItems[activeEntityID].map((section) =>
+                            section.name === field.name
+                              ? { ...section, data: newFieldItems }
+                              : section
+                          ),
+                        }));
+                      }}
+                    >
+                      {field.data?.map((item) => (
+                        <FieldCard
+                          key={item.id}
+                          id={item.id}
+                          displayName={item.displayName}
+                          label={item.label}
+                          type={item.type}
+                          fieldID={item.fieldID}
+                          entityID={item.entityID}
+                        />
+                      ))}
+                    </ReactSortable>
+                  </div>
+                </Collapse.Item>
+              ))
+            }
+          </Collapse>
         </div>
       </Sider>
     </div>

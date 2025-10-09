@@ -4,7 +4,7 @@ import {
   DATA_SOURCE_TYPE,
   getEntityFields,
   getFieldCheckTypeApi,
-  type ConfitionField,
+  type ConditionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
 import { v4 as uuidv4 } from 'uuid';
@@ -34,14 +34,14 @@ export const clearDataOriginNodeId = (nodeId: string) => {
       let newFilterCondition = [];
 
       for (let filterCondition of nodeData[key].filterCondition) {
-        // TODO(mickey): remove debug log
-        console.log('XXX: ', filterCondition);
-
-        filterCondition.conditions = filterCondition.conditions
-          .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
-          .filter((c: any) => c.value && !c.value.startsWith(nodeId));
-        if (filterCondition.conditions.length > 0) {
-          newFilterCondition.push(filterCondition);
+        if (filterCondition.conditions && filterCondition.conditions.length > 0) {
+          const newConditions = filterCondition.conditions
+            .filter((c: any) => c !== null && c !== undefined)
+            .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
+            .filter((c: any) => c.value && !c.value.startsWith(nodeId));
+          if (newConditions.length > 0) {
+            newFilterCondition.push(newConditions);
+          }
         }
       }
 
@@ -127,6 +127,7 @@ const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: N
  * @param nodeTypes 过滤节点类型
  * @returns 节点数据对象，如果不存在则返回[]
  */
+
 export function getPrecedingNodes(
   targetNodeId: string,
   allNodes: FlowNodeJSON[],
@@ -144,7 +145,9 @@ export function getPrecedingNodes(
       // 判断是否包含目标节点
       const hasCurNode = judge(targetNodeId, ele.blocks, 0);
 
+      //   目标节点就在当前block下
       if (hasCurNode == JudgeStatus.FOUND) {
+        // 找到在当前block中当前节点之前的节点
         const curIndex = ele.blocks.findIndex((block: any) => block.id === targetNodeId);
 
         let newBlocks: any[] = [];
@@ -157,7 +160,7 @@ export function getPrecedingNodes(
 
         return nodes;
       } else if (hasCurNode == JudgeStatus.INCLUDE) {
-        // 在当前节点的blocks中
+        // 在当前节点的下游blocks中
         const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
         nodes.push(...blocks);
       } else {
@@ -165,10 +168,11 @@ export function getPrecedingNodes(
         const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
         nodes.push(...blocks);
       }
-    }
-
-    if (nodeTypes.includes(ele.type as NodeType)) {
-      nodes.push(ele);
+    } else {
+      // 不包含blocks的节点
+      if (nodeTypes.includes(ele.type as NodeType)) {
+        nodes.push(ele);
+      }
     }
   }
 
@@ -254,15 +258,16 @@ export const getDataNodeSource = (nodeId: string): string => {
 
 export const getEntityFieldList = async (
   dataSource: string,
-  setConditionFields: (fields: ConfitionField[]) => void,
+  setConditionFields: (fields: ConditionField[]) => void,
   setValidationTypes: (types: EntityFieldValidationTypes[]) => void
 ) => {
   if (!dataSource) {
     return;
   }
-  const res = await getEntityFields({ entityId: dataSource });
   const fieldIds: string[] = [];
-  const newConditionFields: ConfitionField[] = [];
+  const newConditionFields: ConditionField[] = [];
+
+  const res = await getEntityFields({ entityId: dataSource });
   res.forEach((item: any) => {
     fieldIds.push(item.id);
     newConditionFields.push({
@@ -273,6 +278,35 @@ export const getEntityFieldList = async (
   });
 
   setConditionFields(newConditionFields);
+  if (fieldIds?.length) {
+    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+    setValidationTypes(newValidationTypes);
+  }
+};
+
+export const getEntityFieldListV2 = async (
+  dataSource: string,
+  entityName: string,
+  setConditionFields: (entityID: string, entityName: string, fields: ConditionField[]) => void,
+  setValidationTypes: (types: EntityFieldValidationTypes[]) => void
+) => {
+  if (!dataSource) {
+    return;
+  }
+  const fieldIds: string[] = [];
+  const newConditionFields: ConditionField[] = [];
+
+  const res = await getEntityFields({ entityId: dataSource });
+  res.forEach((item: any) => {
+    fieldIds.push(item.id);
+    newConditionFields.push({
+      label: item.displayName,
+      value: item.id,
+      fieldType: item.fieldType
+    });
+  });
+
+  setConditionFields(dataSource, entityName, newConditionFields);
   if (fieldIds?.length) {
     const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
     setValidationTypes(newValidationTypes);

@@ -41,10 +41,19 @@ const DeptMember = (props: IProps) => {
     { key: renderData.key || '-', title: renderData.title || '根目录' }
   ]);
   const isSelectDepartment = title === 'specifiedDepartment';
+  const [initialSelectedMembers, setInitialSelectedMembers] = useState<any[]>(selectedMembers);
 
   useEffect(() => {
     setSelectedKeys(selectedMembers.map((member) => member.key));
   }, [selectedMembers, visible]);
+
+  useEffect(() => { 
+    if (visible) {
+      setInitialSelectedMembers(selectedMembers);
+      // 当弹窗可见时，更新面包屑
+      setBreadcrumbs([{ key: renderData.key || '-', title: renderData.title || '根目录' }]);
+    }
+  }, [visible, initialSelectedMembers])
 
   const removeMember = (key: string) => {
     const newKeys = selectedKeys.filter((k) => k !== key);
@@ -56,16 +65,16 @@ const DeptMember = (props: IProps) => {
     }
   };
 
-  // 重置状态函数 待定
+  // 重置状态函数
   const resetState = useCallback(() => {
     // 重置面包屑
     setBreadcrumbs([{ key: renderData.key || '-', title: renderData.title || '根目录' }]);
-    // 清空已选中的用户
-    setSelectedKeys([]);
+    // 恢复到初始选中的成员
+    setSelectedKeys(initialSelectedMembers.map((member) => member.key));
     if (onUpdateSelectedMembers) {
-      onUpdateSelectedMembers([]);
+      onUpdateSelectedMembers(initialSelectedMembers);
     }
-  }, [renderData, onUpdateSelectedMembers]);
+  }, [renderData, initialSelectedMembers, onUpdateSelectedMembers]);
 
   // 点击部门，进入下级
   const handleDeptClick = (node: any) => {

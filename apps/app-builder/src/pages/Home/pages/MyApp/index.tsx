@@ -11,7 +11,7 @@ import {
   Spin,
   Tag
 } from '@arco-design/web-react';
-import { IconCheckCircle, IconEmpty, IconLeft, IconSearch } from '@arco-design/web-react/icon';
+import { IconCheckCircle, IconEmpty, IconLeft, IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
 import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -35,11 +35,13 @@ import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
 import CreateApp from '@/components/CreateApp';
-import { appIcon, type Options } from '@/components/CreateApp/const';
+import { type Options, iconMap } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import { PermissionButton } from '@/components/PermissionControl';
+import DynamicIcon from '@/components/DynamicIcon';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission, UserPermissionManager } from '@/utils/permission';
+import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
+import TagModal from './components/tagModal';
 import {
   appOptions,
   avatarBgColor,
@@ -64,7 +66,7 @@ const MyAppPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [ownerTag, setOwnerTag] = useState<number>(0);
+  const [ownerTag, setOwnerTag] = useState<0 | 1>(0);
   const [orderByTime, setOrderByTime] = useState<'create' | 'update'>('create');
   const [status, setStatus] = useState<number | string>('');
 
@@ -76,6 +78,7 @@ const MyAppPage: React.FC = () => {
   const [createVisible, setCreateVisible] = useState<boolean>(false);
   const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [tagModalVisible, setTagModalVisible] = useState<boolean>(false);
 
   const [applicationEmpty, setAapplicationEmpty] = useState<boolean>(false); // 未创建应用
   const [applicationFilterEmpty, setAapplicationFilterEmpty] = useState<boolean>(false); // 应用列表过滤后为空，此时applicationEmpty为true
@@ -242,10 +245,10 @@ const MyAppPage: React.FC = () => {
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
-        <div className={styles.myAppWelcome}>
+        {/* <div className={styles.myAppWelcome}>
           Hi {UserPermissionManager.getUserPermissionInfo()?.user.nickname || '用户'}
           ，您好！
-        </div>
+        </div> */}
 
         <PermissionButton
           permission={ACTIONS.CREATE}
@@ -319,6 +322,17 @@ const MyAppPage: React.FC = () => {
                   </Option>
                 ))}
               </Select>
+
+              <Button
+                type="text"
+                icon={<IconSettings />}
+                style={{ color: '#21252e' }}
+                onClick={() => {
+                  setTagModalVisible(true);
+                }}
+              >
+                标签管理
+              </Button>
             </div>
           </div>
 
@@ -349,7 +363,12 @@ const MyAppPage: React.FC = () => {
                     <div className={styles.myAppCardHeader}>
                       <div className={styles.myAppName}>
                         <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
-                          <i className={`iconfont ${item.iconName || appIcon[0]}`} />
+                          <DynamicIcon
+                            IconComponent={iconMap[item.iconName as keyof typeof iconMap]}
+                            theme="filled"
+                            size="32"
+                            fill="#F2F3F5"
+                          />
                         </div>
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.myAppTitle}>{item.appName}</div>
@@ -538,6 +557,15 @@ const MyAppPage: React.FC = () => {
           />
         </div>
       </Modal>
+      <TagModal
+        visible={tagModalVisible}
+        onOk={() => {
+          setTagModalVisible(false);
+        }}
+        onCancel={() => {
+          setTagModalVisible(false);
+        }}
+      />
     </div>
   );
 };

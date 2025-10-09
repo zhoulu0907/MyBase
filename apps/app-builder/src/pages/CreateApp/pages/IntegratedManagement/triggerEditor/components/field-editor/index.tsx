@@ -14,9 +14,9 @@ import {
 } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import { FieldType, type AppEntityField } from '@onebase/app';
+import { FieldType, type AppEntityField, type ConditionField } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NodeType } from '../../nodes/const';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
@@ -101,149 +101,80 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
     );
   };
 
-  const getVariableOptions = (nodeId: string, dataNodeId?: string): TreeSelectDataType[] => {
-    const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM];
+  // 提取公共的字段处理逻辑
+  const processConditionFields = (
+    nodeId: string,
+    conditionFields: ConditionField[],
+    children: TreeSelectDataType[]
+  ): void => {
+    if (!conditionFields) return;
 
-    let nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
-
-    if (dataNodeId) {
-      nodes = triggerEditorSignal.nodes.value.filter((node) => node.id == dataNodeId);
-    }
-
-    const options: TreeSelectDataType[] = [];
-
-    nodes.forEach((node) => {
-      const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
-
-      const treeNode = {
-        key: node.id,
-        title: node.data?.title,
-        disabled: true,
-        // TODO(mickey): add icon
-        children: [] as TreeSelectDataType[]
-      };
-
-      switch (node.type) {
-        case NodeType.START_FORM:
-          const startFormFields = nodeOutput.conditionFields;
-
-          startFormFields &&
-            startFormFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-        case NodeType.START_ENTITY:
-          const startEntityFields = nodeOutput.conditionFields;
-
-          startEntityFields &&
-            startEntityFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-        case NodeType.START_TIME:
-          break;
-        case NodeType.START_DATE_FIELD:
-          const startDateFields = nodeOutput.conditionFields;
-
-          startDateFields &&
-            startDateFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-        case NodeType.START_API:
-          break;
-        case NodeType.START_BPM:
-          break;
-        case NodeType.DATA_ADD:
-          const dataAddFields = nodeOutput.conditionFields;
-          dataAddFields &&
-            dataAddFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-
-          break;
-        case NodeType.DATA_DELETE:
-          break;
-        case NodeType.DATA_QUERY:
-          const dataQueryFields = nodeOutput.conditionFields;
-          dataQueryFields &&
-            dataQueryFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-          break;
-        case NodeType.DATA_QUERY_MULTIPLE:
-          const dataQueryMultipleFields = nodeOutput.conditionFields;
-          dataQueryMultipleFields &&
-            dataQueryMultipleFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-          break;
-        case NodeType.DATA_UPDATE:
-          const dataUpdateFields = nodeOutput.conditionFields;
-          dataUpdateFields &&
-            dataUpdateFields.forEach((field: any) => {
-              treeNode.children.push({
-                key: `${node.id}.${field.value}`,
-                title: field.label
-              });
-            });
-
-          if (treeNode.children.length > 0) {
-            options.push(treeNode);
-          }
-          break;
-        case NodeType.DATA_CALC:
-          break;
-      }
+    conditionFields.forEach((field: ConditionField) => {
+      children.push({
+        key: `${nodeId}.${field.value}`,
+        title: field.label
+      });
     });
-
-    return options;
   };
+
+  // 使用 useMemo 缓存节点类型集合，避免重复创建
+  const nodesWithConditionFields = useMemo(
+    () =>
+      new Set([
+        NodeType.START_FORM,
+        NodeType.START_ENTITY,
+        NodeType.START_DATE_FIELD,
+        NodeType.DATA_ADD,
+        NodeType.DATA_QUERY,
+        NodeType.DATA_QUERY_MULTIPLE,
+        NodeType.DATA_UPDATE
+      ]),
+    []
+  );
+
+  // 使用 useCallback 缓存函数，避免不必要的重新创建
+  const getVariableOptions = useCallback(
+    (nodeId: string, dataNodeId?: string): TreeSelectDataType[] => {
+      const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM];
+
+      let nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
+
+      if (dataNodeId) {
+        nodes = triggerEditorSignal.nodes.value.filter((node) => node.id == dataNodeId);
+      }
+
+      const options: TreeSelectDataType[] = [];
+
+      nodes.forEach((node) => {
+        const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
+
+        // 只处理有 conditionFields 的节点类型
+        if (!node.type || !nodesWithConditionFields.has(node.type as NodeType)) {
+          return;
+        }
+
+        const treeNode: TreeSelectDataType = {
+          key: node.id,
+          title: node.data?.title,
+          disabled: true,
+          children: []
+        };
+
+        // 统一处理 conditionFields
+        if (nodeOutput.conditionFields && treeNode.children) {
+          processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children);
+        }
+
+        // 只有当有子字段时才添加到选项中
+        if (treeNode.children && treeNode.children.length > 0) {
+          options.push(treeNode);
+        }
+      });
+
+      return options;
+    },
+    [nodesWithConditionFields]
+  );
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
     if (params.value) {

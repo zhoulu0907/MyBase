@@ -52,7 +52,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       [VALIDATION_TYPES.LENGTH]: ruleService.getLengthRuleById,
       [VALIDATION_TYPES.RANGE]: ruleService.getRangeRuleById,
       [VALIDATION_TYPES.FORMAT]: ruleService.getFormatRuleById,
-      [VALIDATION_TYPES.SUBTABLE_EMPTY]: ruleService.getChildNotEmptyRuleById
+      [VALIDATION_TYPES.CHILD_NOT_EMPTY]: ruleService.getChildNotEmptyRuleById
     };
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
     if (handler) {
@@ -79,7 +79,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       [VALIDATION_TYPES.LENGTH]: ruleService.createLengthRule,
       [VALIDATION_TYPES.RANGE]: ruleService.createRangeRule,
       [VALIDATION_TYPES.FORMAT]: ruleService.createFormatRule,
-      [VALIDATION_TYPES.SUBTABLE_EMPTY]: ruleService.createChildNotEmptyRule
+      [VALIDATION_TYPES.CHILD_NOT_EMPTY]: ruleService.createChildNotEmptyRule
     };
 
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
@@ -114,19 +114,24 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       [VALIDATION_TYPES.LENGTH]: ruleService.updateLengthRule,
       [VALIDATION_TYPES.RANGE]: ruleService.updateRangeRule,
       [VALIDATION_TYPES.FORMAT]: ruleService.updateFormatRule,
-      [VALIDATION_TYPES.SUBTABLE_EMPTY]: ruleService.updateChildNotEmptyRule
+      [VALIDATION_TYPES.CHILD_NOT_EMPTY]: ruleService.updateChildNotEmptyRule
     };
-    const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
-    if (handler) {
-      const res = await handler(params);
-      if (res) {
-        Message.success('更新规则成功');
-        form.resetFields();
-        setVisible(false);
-        successCallback();
-      } else {
-        console.error(res.msg || '更新失败');
+
+    try {
+      const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
+      if (handler) {
+        const res = await handler(params);
+        if (res) {
+          Message.success('更新规则成功');
+          form.resetFields();
+          setVisible(false);
+          successCallback();
+        } else {
+          console.error(res.msg || '更新失败');
+        }
       }
+    } catch (error) {
+      console.error('更新规则失败:', error);
     }
   };
 
@@ -195,7 +200,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       visible={visible}
       onOk={handleFinish}
       onCancel={handleCancel}
-      okText="创建"
+      okText={`${editRule ? '确定' : '创建'}`}
       cancelText="取消"
       confirmLoading={loading}
       style={{ width: 600 }}

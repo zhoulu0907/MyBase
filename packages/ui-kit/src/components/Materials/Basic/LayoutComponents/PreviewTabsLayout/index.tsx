@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, Fragment } from 'react';
 import { Tabs } from '@arco-design/web-react';
 import { ReactSortable } from 'react-sortablejs';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/index';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { XTabsLayoutConfig } from './schema';
+import { STATUS_VALUES, STATUS_OPTIONS } from '@/components/Materials/constants';
 import './index.css';
 
 const TabPane = Tabs.TabPane;
@@ -78,32 +79,37 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig) => {
                 }}
                 animation={150}
               >
-                {colComponents[index]?.map((cp: GridItem) => (
-                  <div
-                    key={cp.id}
-                    data-cp-type={cp.type}
-                    data-cp-displayname={cp.displayName}
-                    data-cp-id={cp.id}
-                    className='componentItem'
-                    style={{
-                      width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
-                    }}
-                    onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                      e.stopPropagation();
-                      setCurComponentID(cp.id);
-                      const curComponentSchema = pageComponentSchemas[cp.id];
-                      setCurComponentSchema(curComponentSchema);
-                      setShowDeleteButton(true);
-                    }}
-                  >
-                    <EditRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      runtime={true}
-                      pageComponentSchema={pageComponentSchemas[cp.id]}
-                    />
-                  </div>
-                ))}
+                {colComponents[index] &&
+                  colComponents[index]?.map((cp: GridItem) => (
+                    <Fragment key={cp.id}>
+                      {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                        <div
+                          key={cp.id}
+                          data-cp-type={cp.type}
+                          data-cp-displayname={cp.displayName}
+                          data-cp-id={cp.id}
+                          className='componentItem'
+                          style={{
+                            width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
+                          }}
+                          onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                            e.stopPropagation();
+                            setCurComponentID(cp.id);
+                            const curComponentSchema = pageComponentSchemas[cp.id];
+                            setCurComponentSchema(curComponentSchema);
+                            setShowDeleteButton(true);
+                          }}
+                        >
+                          <EditRender
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            runtime={true}
+                            pageComponentSchema={pageComponentSchemas[cp.id]}
+                          />
+                        </div>
+                      }
+                    </Fragment>
+                  ))}
               </ReactSortable>
             </div>
           </TabPane>

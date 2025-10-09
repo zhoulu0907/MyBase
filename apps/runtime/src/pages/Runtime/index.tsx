@@ -144,7 +144,7 @@ const Runtime: React.FC = () => {
                 }}
                 allowClear
                 suffix={<IconSearch />}
-                placeholder={t('common.search')}
+                placeholder={t('createApp.searchPlaceHolder')}
               />
             </div>
             <Tree
@@ -163,7 +163,8 @@ const Runtime: React.FC = () => {
               style={{
                 width: '200px',
                 overflow: 'hidden',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                padding: '0 8px'
               }}
             />
           </Sider>

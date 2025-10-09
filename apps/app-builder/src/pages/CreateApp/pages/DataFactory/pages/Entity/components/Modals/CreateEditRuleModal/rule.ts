@@ -81,8 +81,8 @@ export const VALIDATION_TYPES = {
   LENGTH: 'LENGTH',
   RANGE: 'RANGE',
   FORMAT: 'FORMAT',
-  SUBTABLE_EMPTY: 'SUBTABLE_EMPTY',
-  CUSTOM: 'CUSTOM'
+  CHILD_NOT_EMPTY: 'CHILD_NOT_EMPTY',
+  SELF_DEFINED: 'SELF_DEFINED'
 } as const;
 
 // 校验类型选项
@@ -92,8 +92,8 @@ export const validationTypeMap: Record<string, string> = {
   [VALIDATION_TYPES.LENGTH]: '长度校验',
   [VALIDATION_TYPES.RANGE]: '范围校验',
   [VALIDATION_TYPES.FORMAT]: '格式校验',
-  [VALIDATION_TYPES.SUBTABLE_EMPTY]: '子表空行校验',
-  [VALIDATION_TYPES.CUSTOM]: '自定义校验'
+  [VALIDATION_TYPES.CHILD_NOT_EMPTY]: '子表空行校验',
+  [VALIDATION_TYPES.SELF_DEFINED]: '自定义校验'
 };
 
 export const validationTypeList = Object.entries(validationTypeMap).map(([key, value]) => ({
@@ -117,5 +117,5 @@ export const ruleTip: Record<string, string> = {
   LENGTH: '请输入校验不通过后的弹窗提示语，例如“XXX长度范围需在XX~XX之间”',
   RANGE: '请输入校验不通过后的弹窗提示语，例如“XXX范围需在XX~XX之间”',
   FORMAT: '请输入校验不通过后的弹窗提示语，例如“请输入有效的手机号码”',
-  SUBTABLE_EMPTY: '请输入校验不通过后的弹窗提示语，例如“子表存在空行”'
+  CHILD_NOT_EMPTY: '请输入校验不通过后的弹窗提示语，例如“子表存在空行”'
 };

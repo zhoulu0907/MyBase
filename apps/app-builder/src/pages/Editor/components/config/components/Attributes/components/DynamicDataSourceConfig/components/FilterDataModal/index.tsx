@@ -1,7 +1,7 @@
 import { Modal } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 
-import type { ConfitionField, EntityFieldValidationTypes } from '@onebase/app';
+import type { ConditionField, EntityFieldValidationTypes } from '@onebase/app';
 import styles from '../../index.module.less';
 
 interface FilterDataModalProps {
@@ -10,7 +10,7 @@ interface FilterDataModalProps {
 }
 
 // mock up
-const dataFilters: ConfitionField[] = [
+const dataFilters: ConditionField[] = [
   { label: '标题', value: 'title', fieldType: 'string' },
   { label: '单行文本', value: 'singleText', fieldType: 'string' },
   { label: '提交时间', value: 'submitTime', fieldType: 'string' },

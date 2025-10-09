@@ -2,20 +2,22 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Checkbox, Form, Grid, Input, InputNumber, Select, TimePicker } from '@arco-design/web-react';
+import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import {
-  getEntityFields,
+  getEntityFieldsWithChildren,
   getEntityListByApp,
-  type ConfitionField,
+  getFieldCheckTypeApi,
+  type AppEntityField,
+  type ConditionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { getEntityFieldList } from '../../utils';
 import { updateStartDateFieldOutputs } from './output';
 
 const Option = Select.Option;
@@ -25,11 +27,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { node } = useNodeRenderContext();
 
   const [entityList, setEntityList] = useState<any[]>([]);
-  const [entityFieldList, setEntityFieldList] = useState<any[]>([]);
 
   // 查询规则
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
-  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+
+  const [conditionFieldsData, setConditionFieldsData] = useState<TreeSelectDataType>([]);
 
   const [payloadForm] = Form.useForm();
 
@@ -37,33 +39,64 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const batchMode = Form.useWatch('batchMode', payloadForm);
 
   useEffect(() => {
-    const appId = getHashQueryParam('appId');
-    if (appId) {
-      handleGetEntityListByApp(appId);
-    }
+    init();
   }, []);
 
   useEffect(() => {
     if (entityId) {
       handleGetEntityFieldsById(entityId);
-      getEntityFieldList(entityId, handleSetConditionFields, setValidationTypes);
     }
   }, [entityId]);
 
-  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
-    setConditionFields(conditionFields);
-    updateStartDateFieldOutputs(node.id, conditionFields);
-  };
-
-  const handleGetEntityListByApp = async (appId: string) => {
-    const res = await getEntityListByApp(appId);
-    setEntityList(res);
+  const init = async () => {
+    const appId = getHashQueryParam('appId');
+    if (appId) {
+      const res = await getEntityListByApp(appId);
+      setEntityList(res);
+    }
   };
 
   const handleGetEntityFieldsById = async (entityId: string) => {
-    const res = await getEntityFields({ entityId });
-    setEntityFieldList(res);
+    const res = await getEntityFieldsWithChildren(entityId);
+
+    const fieldIds: string[] = [];
+
+    const fields = res.parentFields.map((item: AppEntityField) => {
+      fieldIds.push(item.fieldId);
+      return {
+        key: item.fieldId,
+        title: item.displayName,
+        fieldType: item.fieldType
+      };
+    });
+
+    setConditionFieldsData({
+      key: res.entityId,
+      title: res.entityName,
+      children: fields
+    });
+
+    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+    setValidationTypes(newValidationTypes);
   };
+
+  const conditionFieldsForEditor = useMemo((): ConditionField[] => {
+    return (
+      (conditionFieldsData.children || [])?.map((item) => ({
+        label: item.title as string,
+        value: item.key as string,
+        fieldType: item.fieldType
+      })) || []
+    );
+  }, [conditionFieldsData]);
+
+  // 使用 useEffect 更新条件字段状态和输出，避免在渲染过程中直接更新状态
+  useEffect(() => {
+    // 只在有实际数据时才更新 triggerNodeOutputSignal，避免初始化时载入空数据
+    if (conditionFieldsForEditor.length > 0) {
+      updateStartDateFieldOutputs(node.id, conditionFieldsForEditor);
+    }
+  }, [conditionFieldsForEditor, node.id]);
 
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -108,15 +141,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   rules={[{ required: true, message: '请选择基准日期字段' }]}
                 >
                   <Select
-                    options={entityFieldList
+                    options={conditionFieldsData.children
                       ?.filter(
                         (item) =>
                           item.fieldType == ENTITY_FIELD_TYPE.DATETIME.VALUE ||
                           item.fieldType == ENTITY_FIELD_TYPE.DATE.VALUE
                       )
                       .map((item) => ({
-                        label: item.displayName,
-                        value: item.id
+                        label: item.title as string,
+                        value: item.key as string
                       }))}
                   />
                 </Form.Item>
@@ -181,7 +214,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 nodeId={node.id}
                 label="匹配规则"
                 required
-                fields={conditionFields}
+                fields={[conditionFieldsData]}
                 entityFieldValidationTypes={validationTypes}
                 form={payloadForm}
               />

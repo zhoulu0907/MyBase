@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/other.svg';
+import iconOther from '@/assets/flow/nodes/log.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { generateNodeId } from '../../utils';
@@ -17,7 +17,7 @@ export const LogNodeRegistry: FlowNodeRegistry = {
     addDisable: false
   },
   info: {
-    icon: iconStart,
+    icon: iconOther,
     description: '这是日志节点，用于记录日志。'
   },
   /**

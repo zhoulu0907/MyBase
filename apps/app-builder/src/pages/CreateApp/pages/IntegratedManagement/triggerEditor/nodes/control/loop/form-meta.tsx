@@ -1,7 +1,7 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import type { ConfitionField } from '@onebase/app';
+import type { ConditionField } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import { BreakMode } from '../../../components/const';
@@ -58,7 +58,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     clearDataOriginNodeId(node.id);
   };
 
-  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
+  const handleSetConditionFields = (conditionFields: ConditionField[]) => {
     updateLoopOutputs(node.id, conditionFields);
   };
 

@@ -39,12 +39,12 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   const [fieldPermission, setFieldPermission] = useState<AuthFieldVO[]>(); // 字段权限
   const [isAllFieldsAllowed, setIsAllFieldsAllowed] = useState<number>();
+  const [operationConfig, setOperationConfig] = useState<AuthFieldVO[]>();
 
   useEffect(() => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
     }
-    console.log('字段权限 menuId: ', menuId);
   }, [appId, menuId, roleId]);
 
   useEffect(() => {
@@ -76,6 +76,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       roleId
     };
     const res = await getFieldPermission(params);
+    console.log('获取字段权限信息 res:', res);
     const addDisabled = res.authFields.map((field: AuthFieldVO) => ({
       ...field
     }));
@@ -177,8 +178,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               const getChangeFieldValue = Object.values(value)[0];
               const getChangeFieldName = getChangeFieldKey[0].trim().split('.');
 
-              console.log(changeField, 'changeField');
-
               const updateField = fieldPermission?.map((field) => {
                 if (field.fieldId === getChangeFieldName[1]) {
                   return {
@@ -250,7 +249,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                 </Row>
                 <Divider />
                 {fieldPermission?.map((field) => {
-                  console.log(field);
                   return (
                     <Row className={styles.rowItem} key={field.fieldId}>
                       <Col span={8}>
@@ -284,37 +282,43 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               </div>
             </Form.Item>
 
-            {/* <Form.Item field="operationPermissions" label="操作权限" layout="vertical" shouldUpdate>
-          <div className={styles.table}>
-            <Row className={styles.tableTitle}>
-              <Col span={8}></Col>
-              <Col span={4}>
-                <Checkbox
-                  // onChange={onChangeDownloadableAll}
-                  checked={checkDownloadableAll}
-                  indeterminate={indeterminateDownloadable}
-                >
-                  可下载
-                </Checkbox>
-              </Col>
-            </Row>
-            <Divider />
-            {operationConfig.map((field) => (
-              <Row className={styles.rowItem} key={field.key}>
-                <Col span={8}>
-                  <IconAttachment style={{ marginRight: 8 }} />
-                  <span>{field.name}</span>
-                </Col>
+            {operationConfig && operationConfig.length > 0 && (
+              <Form.Item field="operationPermissions" label="操作权限" layout="vertical" shouldUpdate>
+                <div className={styles.table}>
+                  <Row className={styles.tableTitle}>
+                    <Col span={8}></Col>
+                    <Col span={4}>
+                      <Checkbox
+                        // onChange={onChangeDownloadableAll}
+                        checked={checkDownloadableAll}
+                        indeterminate={indeterminateDownloadable}
+                      >
+                        可下载
+                      </Checkbox>
+                    </Col>
+                  </Row>
+                  <Divider />
+                  {operationConfig?.map((field: any) => (
+                    <Row className={styles.rowItem} key={field.key}>
+                      <Col span={8}>
+                        <IconAttachment style={{ marginRight: 8 }} />
+                        <span>{field.name}</span>
+                      </Col>
 
-                <Col span={4}>
-                  <Form.Item field={`operationPermissions.${field.key}.downloadable`} triggerPropName="checked" noStyle>
-                    <Checkbox />
-                  </Form.Item>
-                </Col>
-              </Row>
-            ))}
-          </div>
-        </Form.Item> */}
+                      <Col span={4}>
+                        <Form.Item
+                          field={`operationPermissions.${field.key}.downloadable`}
+                          triggerPropName="checked"
+                          noStyle
+                        >
+                          <Checkbox />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  ))}
+                </div>
+              </Form.Item>
+            )}
           </Form>
         </div>
       )}
