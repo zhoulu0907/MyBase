@@ -56,7 +56,6 @@ public class EntityFieldController {
         List<FieldTypeConfigRespVO> fieldTypes = entityFieldService.getFieldTypes();
         return success(fieldTypes);
     }
-
     @PostMapping("/batch-create")
     @Operation(summary = "批量为业务实体创建字段")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
@@ -96,7 +95,6 @@ public class EntityFieldController {
         EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetailWithFullConfig(id);
         return success(entityField);
     }
-
     @PostMapping("/batch-update")
     @Operation(summary = "批量更新实体字段信息")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
@@ -104,7 +102,6 @@ public class EntityFieldController {
         EntityFieldBatchUpdateRespVO result = entityFieldService.batchUpdateEntityFields(reqVO);
         return success(result);
     }
-
     @PostMapping("/update")
     @Operation(summary = "更新实体字段信息")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
@@ -112,7 +109,6 @@ public class EntityFieldController {
         Boolean result = entityFieldService.updateEntityFieldWithRelated(reqVO);
         return success(result);
     }
-
     @PostMapping("/delete")
     @Operation(summary = "软删除实体字段")
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
@@ -129,12 +125,10 @@ public class EntityFieldController {
         entityFieldService.batchSortEntityFields(reqVO);
         return success(true);
     }
-
     @PostMapping("/batch-save")
     @Operation(summary = "批量保存实体字段（增删改）")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<EntityFieldBatchSaveRespVO> batchSave(@Valid @RequestBody EntityFieldBatchSaveReqVO reqVO) {
-        // TODO: 批量保存字段时，后续需确保entityId同步到metadata_validation_rule_group
         EntityFieldBatchSaveRespVO resp = entityFieldService.batchSaveEntityFields(reqVO);
         return success(resp);
     }
