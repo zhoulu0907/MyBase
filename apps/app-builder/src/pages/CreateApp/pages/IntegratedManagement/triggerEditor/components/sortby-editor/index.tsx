@@ -17,7 +17,6 @@ const SortByEditor: React.FC<SortByEditorProps> = ({ data, fields, form }) => {
 
   // 排序改变
   const handleSort = (newSortList: SortData[]) => {
-    console.log('handleSort', newSortList);
     setSortList(newSortList || []);
     form.setFieldValue('sortBy', newSortList || []);
   };

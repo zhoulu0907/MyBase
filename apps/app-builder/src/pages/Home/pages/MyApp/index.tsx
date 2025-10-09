@@ -35,12 +35,12 @@ import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
 import CreateApp from '@/components/CreateApp';
-import { type Options, iconMap } from '@/components/CreateApp/const';
+import { iconMap, type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
-import { PermissionButton } from '@/components/PermissionControl';
 import DynamicIcon from '@/components/DynamicIcon';
+import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
+import { hasPermission /* UserPermissionManager */ } from '@/utils/permission';
 import TagModal from './components/tagModal';
 import {
   appOptions,
@@ -245,11 +245,6 @@ const MyAppPage: React.FC = () => {
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
-        {/* <div className={styles.myAppWelcome}>
-          Hi {UserPermissionManager.getUserPermissionInfo()?.user.nickname || '用户'}
-          ，您好！
-        </div> */}
-
         <PermissionButton
           permission={ACTIONS.CREATE}
           type="default"
