@@ -273,6 +273,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.DATA_QUERY,
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
+        NodeType.DATA_CALC,
         NodeType.LOOP
       ]),
     []

@@ -41,7 +41,6 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const getFuncList = async () => {
     const res = await getFormulaFunctionSimpleList();
     if (res) {
-      console.log(res, 'getFuncList>>>>>>>>>>');
       setFuncList(res);
     }
     // setFuncList(mockFunctions)

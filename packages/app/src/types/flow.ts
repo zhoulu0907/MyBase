@@ -95,3 +95,8 @@ export enum MODAL_TYPE {
   INFOR = 'infor',
   CUSTOM = 'custom'
 }
+
+export enum CAL_TYPE {
+  FORMULA = 'FORMULA',
+  DATASUMMARY = 'DATASUMMARY'
+}
