@@ -28,6 +28,9 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
           mode="multiple"
           allowClear
           showSearch={showSearch}
+          filterOption={(input, option) => {
+            return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+          }}
           placeholder="请选择"
           options={defaultValue}
           style={{
