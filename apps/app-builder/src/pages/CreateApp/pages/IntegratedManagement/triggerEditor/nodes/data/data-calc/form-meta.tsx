@@ -1,5 +1,5 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-
+import { useEffect, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio } from '@arco-design/web-react';
 import { CAL_TYPE, type ConditionField } from '@onebase/app';
@@ -31,6 +31,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     clearDataOriginNodeId(node.id);
   };
 
+  useEffect(() => {
+    payloadForm && validateNodeForm(form, payloadForm, true);
+  }, [payloadForm]);
+
   // 表单内容改变
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -38,9 +42,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = async (_changeValue: any, values: any) => {
     // 校验表单
-    validateNodeForm(form, payloadForm, false);
+    // validateNodeForm(form, payloadForm, false);
 
-    handlePropsOnChange(values);
+    // handlePropsOnChange(values);
 
     clearDataOriginNodeId(node.id);
 
@@ -78,7 +82,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Input disabled />
             </Form.Item>
 
-            <Form.Item label="计算方式" field="calType" required>
+            <Form.Item label="计算方式" field="calType" rules={[{ required: true, message: '请选择计算方式' }]}>
               <Radio.Group direction="horizontal" onChange={handleCalTypeChange}>
                 <Radio value={CAL_TYPE.FORMULA}>公式计算</Radio>
                 <Radio disabled value={CAL_TYPE.DATASUMMARY}>
