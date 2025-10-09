@@ -1,5 +1,5 @@
+import LogoSVG from '@/assets/images/app_header_logo.svg';
 import AvatarSVG from '@/assets/images/avatar.svg';
-import LogoSVG from '@/assets/images/ob_logo.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { UserPermissionManager } from '@/utils/permission';
