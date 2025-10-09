@@ -1028,8 +1028,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_CODE, "%" + pageReqVO.getFieldCode() + "%");
         }
 
-        // 添加排序：按照字段排序优先，然后按创建时间倒序
-        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
+    // 添加排序：按照字段排序优先（倒序），然后按创建时间倒序
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.DESC);
         configStore.order("create_time", Order.TYPE.DESC);
 
         // 分页查询
@@ -1856,7 +1856,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (existingValidation != null) {
                     // 如果已经有数据了，那么只需保证maxLength和 MetadataEntityFieldDO中dataLength一致即可
                     var updateReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthUpdateReqVO();
-                    updateReqVO.setId(existingValidation.getId());
+                    Long targetGroupId = existingValidation.getGroupId();
+                    if (targetGroupId == null) {
+                        var existingDO = validationLengthService.getByFieldId(fieldId);
+                        if (existingDO != null) {
+                            targetGroupId = existingDO.getGroupId();
+                        }
+                    }
+                    if (targetGroupId == null) {
+                        log.warn("长度校验同步失败，字段ID: {}, 缺少规则组ID，跳过更新", fieldId);
+                        return;
+                    }
+                    updateReqVO.setId(targetGroupId);
                     updateReqVO.setMaxLength(entityField.getDataLength()); // 最大长度与dataLength保持一致
                     updateReqVO.setMinLength(existingValidation.getMinLength()); // 保持原有最小长度
                     updateReqVO.setIsEnabled(1); // 启用长度校验
@@ -1913,7 +1924,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (existingValidation != null) {
                     // 如果已经有数据了，那么只需保证is_enabled和 MetadataEntityFieldDO中isRequired一致即可
                     var updateReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredUpdateReqVO();
-                    updateReqVO.setId(existingValidation.getId());
+                    Long targetGroupId = existingValidation.getGroupId();
+                    if (targetGroupId == null) {
+                        var existingDO = validationRequiredService.getByFieldId(fieldId);
+                        if (existingDO != null) {
+                            targetGroupId = existingDO.getGroupId();
+                        }
+                    }
+                    if (targetGroupId == null) {
+                        log.warn("必填校验同步失败，字段ID: {}, 缺少规则组ID，跳过更新", fieldId);
+                        return;
+                    }
+                    updateReqVO.setId(targetGroupId);
                     updateReqVO.setIsEnabled(entityField.getIsRequired());
                     updateReqVO.setRgName(existingValidation.getRgName()); // 保持原有规则组名称
                     updateReqVO.setPromptMessage(existingValidation.getPromptMessage()); // 保持原有提示信息
@@ -1963,7 +1985,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (existingValidation != null) {
                     // 如果已经有数据了，那么只需保证is_enabled和 MetadataEntityFieldDO中isUnique一致即可
                     var updateReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueUpdateReqVO();
-                    updateReqVO.setId(existingValidation.getId());
+                    Long targetGroupId = existingValidation.getGroupId();
+                    if (targetGroupId == null) {
+                        var existingDO = validationUniqueService.getByFieldId(fieldId);
+                        if (existingDO != null) {
+                            targetGroupId = existingDO.getGroupId();
+                        }
+                    }
+                    if (targetGroupId == null) {
+                        log.warn("唯一校验同步失败，字段ID: {}, 缺少规则组ID，跳过更新", fieldId);
+                        return;
+                    }
+                    updateReqVO.setId(targetGroupId);
                     updateReqVO.setIsEnabled(entityField.getIsUnique());
                     updateReqVO.setRgName(existingValidation.getRgName()); // 保持原有规则组名称
                     updateReqVO.setPromptMessage(existingValidation.getPromptMessage()); // 保持原有提示信息

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.ratelimiter.core.keyresolver.impl;
 
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.tools.system.SystemUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import com.cmsr.onebase.framework.ratelimiter.core.annotation.RateLimiter;
 import com.cmsr.onebase.framework.ratelimiter.core.keyresolver.RateLimiterKeyResolver;
 import org.aspectj.lang.JoinPoint;

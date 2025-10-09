@@ -2,7 +2,7 @@ package com.cmsr.onebase.framework.tenant.core.security;
 
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;

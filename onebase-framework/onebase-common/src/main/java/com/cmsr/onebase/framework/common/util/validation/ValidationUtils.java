@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.common.util.validation;
 
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import org.springframework.util.StringUtils;
 
 import jakarta.validation.ConstraintViolation;

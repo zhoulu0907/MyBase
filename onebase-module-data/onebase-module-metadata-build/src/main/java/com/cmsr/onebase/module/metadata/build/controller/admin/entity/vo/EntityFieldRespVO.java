@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -65,7 +67,7 @@ public class EntityFieldRespVO {
     private String fieldCode;
 
     @Schema(description = "字段选项列表（单/多选字段专用）")
-    private java.util.List<FieldOptionRespVO> options;
+    private List<FieldOptionRespVO> options;
 
     @Schema(description = "字段约束配置（长度/正则）")
     private FieldConstraintRespVO constraints;

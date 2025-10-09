@@ -2,17 +2,16 @@ package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
-import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
-import com.cmsr.onebase.module.system.vo.role.RoleUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
+import com.cmsr.onebase.module.system.vo.role.RoleUpdateReqVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
@@ -219,7 +218,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<RoleDO> getRoleList(Collection<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return Collections.emptyList();
         }
         return roleDataRepository.findAllByIds(ids);
@@ -227,7 +226,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<RoleDO> getRoleListFromCache(Collection<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return Collections.emptyList();
         }
         // 通过代理对象调用，确保 @Cacheable 生效
@@ -253,7 +252,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void validateRoleList(Collection<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return;
         }
         // 获得角色信息
@@ -273,7 +272,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public boolean isTenantAdmin(Set<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return false;
         }
         // 通过代理对象调用，确保 @Cacheable 生效

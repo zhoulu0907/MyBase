@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.ratelimiter.core.keyresolver.impl;
 
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.ratelimiter.core.annotation.RateLimiter;
 import com.cmsr.onebase.framework.ratelimiter.core.keyresolver.RateLimiterKeyResolver;

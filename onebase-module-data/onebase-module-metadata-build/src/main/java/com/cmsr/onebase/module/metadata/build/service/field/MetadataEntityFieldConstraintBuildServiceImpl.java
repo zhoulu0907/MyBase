@@ -105,11 +105,14 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             if (d.getId() == null) {
                 // 将DO转换为VO
                 ValidationFormatSaveReqVO formatVO = BeanUtils.toBean(d, ValidationFormatSaveReqVO.class);
+                formatVO.setFormatCode("REGEX");
+                formatVO.setRegexPattern(req.getRegexPattern());
                 formatVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
                 formatService.create(formatVO);
             } else {
                 // 将DO转换为UpdateReqVO
                 ValidationFormatUpdateReqVO formatUpdateVO = BeanUtils.toBean(d, ValidationFormatUpdateReqVO.class);
+                formatUpdateVO.setFormatCode("REGEX");
                 formatUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
                 formatService.update(formatUpdateVO);
             }

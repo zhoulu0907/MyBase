@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.common.validation;
 
 import com.cmsr.onebase.framework.common.core.ArrayValuable;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import cn.hutool.core.collection.CollUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

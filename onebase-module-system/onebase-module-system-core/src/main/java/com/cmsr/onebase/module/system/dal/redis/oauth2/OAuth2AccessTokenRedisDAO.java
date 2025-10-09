@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.redis.oauth2;
 
-import com.cmsr.onebase.framework.common.tools.core.date.LocalDateTimeUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
