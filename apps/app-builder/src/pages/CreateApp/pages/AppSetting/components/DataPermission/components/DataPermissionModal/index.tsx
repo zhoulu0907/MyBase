@@ -253,7 +253,7 @@ const DataPermissionModal = (props: IProps) => {
                   rules={[{ required: true, message: '请选择权限范围' }]}
                 >
                   <Select
-                    placeholder="选择拥有者"
+                    placeholder="请选择"
                     onChange={(value) => {
                       console.log('选择拥有者 value:', value);
                     }}
@@ -274,7 +274,7 @@ const DataPermissionModal = (props: IProps) => {
                   rules={[{ required: true, message: '请选择权限范围' }]}
                 >
                   <Select
-                    placeholder="本人"
+                    placeholder="请选择"
                     onChange={(value) => {
                       setScopeType(value);
                       setSelectedMembers([]);

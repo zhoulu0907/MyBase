@@ -18,12 +18,14 @@ interface UserFormModalProps {
   isDetail?: boolean; // 详情模式标志
   deptTree?: any[]; // 部门树数据
   deptLoading?: boolean; // 部门数据加载状态
+  onRefreshDept: () => void;
 }
 
 export default function UserFormModal({
   visible,
   onCancel,
   onOk,
+  onRefreshDept,
   initialValues,
   mode = 'create',
   isDetail = false, // 详情模式
@@ -55,13 +57,13 @@ export default function UserFormModal({
     if (!visible) {
       return;
     }
-    
+
     // 检查是否有角色/部门查询权限
     const rolePermission = hasPermission(TENANT_ROLE_QUERY);
     setHasRoleQueryPermission(rolePermission);
     const deptPermission = hasPermission(TENANT_DEPT_QUERY);
     setHasDeptQueryPermission(deptPermission);
-    
+
     // 只有在有权限的情况下才调用角色查询接口
     if (rolePermission) {
       getSimpleRoleList().then((res) => {
@@ -91,9 +93,11 @@ export default function UserFormModal({
       if (mode === 'create') {
         await createUser(params);
         Message.success('新建成功');
+        onRefreshDept();
       } else {
         await updateUser({ ...params, id: initialValues?.id });
         Message.success('编辑成功');
+        onRefreshDept();
       }
       onOk();
     } finally {
@@ -165,7 +169,11 @@ export default function UserFormModal({
           <Col span={12}>
             <Form.Item label="部门" field="deptId">
               <TreeSelect
-                placeholder={hasDeptQueryPermission ? "请选择" : "无权限"}
+                showSearch
+                filterTreeNode={(inputValue, treeNode) => {
+                  return treeNode.props.name.includes(inputValue);
+                }}
+                placeholder={hasDeptQueryPermission ? '请选择' : '无权限'}
                 allowClear
                 treeData={deptTree}
                 loading={deptLoading}
@@ -177,10 +185,13 @@ export default function UserFormModal({
         <Row gutter={24}>
           <Col span={12}>
             <Form.Item label="角色" field="roleIds">
-              <Select 
-                placeholder={hasRoleQueryPermission ? "请选择" : "无权限"} 
-                mode="multiple" 
-                allowClear
+              <Select
+                placeholder={hasRoleQueryPermission ? '请选择' : '无权限'}
+                mode="multiple"
+                showSearch
+                filterOption={(input, option) => {
+                  return option.props.children.includes(input);
+                }}
                 disabled={!hasRoleQueryPermission}
               >
                 {roleList.map((role) => (

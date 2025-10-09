@@ -296,17 +296,29 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       entityFieldsResq.forEach((field: any) => {
         field.fieldId = field.id;
       });
+
       // 批量获取字段可选校验类型
       const getFieldCheckTypeParams: string[] = [];
       entityFieldsResq.forEach((item: any) => {
-        getFieldCheckTypeParams.push(item.fieldId);
+        if (item.fieldId) {
+          getFieldCheckTypeParams.push(item.fieldId);
+        }
       });
-      getFieldCheckType(getFieldCheckTypeParams);
+
+      // 添加空数组检查，避免空参数调用接口
+      if (getFieldCheckTypeParams.length > 0) {
+        getFieldCheckType(getFieldCheckTypeParams);
+      } else {
+        // 如果没有字段需要获取校验类型，直接设置空数组
+        setFilterFieldCheckType([]);
+      }
+
       setAppEntityFields(entityFieldsResq);
     } catch (error) {
       console.error('获取权限信息失败', error);
     }
   };
+
   // 获取数据权限角色
   const getDataPermissionRoles = async (entityId: string) => {
     try {

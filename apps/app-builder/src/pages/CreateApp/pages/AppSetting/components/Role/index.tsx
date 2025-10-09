@@ -74,7 +74,6 @@ const RoleInfo = (props: IProps) => {
 
   // 处理菜单展开/收起
   const handleOpenChange = (keys: string[]) => {
-    console.log('handleOpenChange keys:', keys);
     setOpenKeys(keys);
   };
 
