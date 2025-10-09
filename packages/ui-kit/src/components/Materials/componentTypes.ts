@@ -27,7 +27,7 @@ export const FORM_COMPONENT_TYPES = {
   RELATED_FORM: 'XRelatedForm',
   STATIC_TEXT: 'XStaticText',
   RICH_TEXT: 'XRichText',
-  CAROUSEL_F: 'XFCarousel',
+  CAROUSEL_FORM: 'XCarouselForm',
   SUB_TABLE: 'XSubTable',
   DATA_SELECT: 'XDataSelect'
 } as const;

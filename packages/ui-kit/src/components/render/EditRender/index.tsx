@@ -81,8 +81,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XStaticText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.RICH_TEXT:
         return <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.CAROUSEL_F:
-        return <FormComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.CAROUSEL_FORM:
+        return <FormComp.XCarouselForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DATA_SELECT:

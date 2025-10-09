@@ -1,5 +1,5 @@
 import XAutoCode from './AutoCode';
-import XCarousel from './Carousel';
+import XCarouselForm from './Carousel';
 import XCheckbox from './Checkbox';
 import XDataSelect from './DataSelect';
 import XDatePicker from './DatePicker';
@@ -47,7 +47,7 @@ export const FormComp = {
   XRelatedForm,
   XStaticText,
   XRichText,
-  XCarousel,
+  XCarouselForm,
   XSubTable,
   XDataSelect
 };
