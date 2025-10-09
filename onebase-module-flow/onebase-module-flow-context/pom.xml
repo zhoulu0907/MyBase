@@ -22,10 +22,18 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
-        <!-- MVEL表达式引擎 -->
+        <!-- 表达式引擎 -->
         <dependency>
-            <groupId>org.mvel</groupId>
-            <artifactId>mvel2</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-jexl3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
         </dependency>
         <!-- 测试依赖 -->
         <dependency>

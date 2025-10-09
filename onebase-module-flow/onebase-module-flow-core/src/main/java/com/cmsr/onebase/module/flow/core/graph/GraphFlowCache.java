@@ -1,13 +1,15 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
-import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
-import com.cmsr.onebase.module.flow.core.graph.data.StartDateFieldNodeData;
-import com.cmsr.onebase.module.flow.core.graph.data.StartEntityNodeData;
-import com.cmsr.onebase.module.flow.core.graph.data.StartFormNodeData;
-import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Conditional(FlowRuntimeCondition.class)
 public class GraphFlowCache {
 
-    private ConcurrentHashMap<Long, Map<String, Map<String, Object>>> flowNodeDataCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Long, Map<String, NodeData>> flowNodeDataCache = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Long, StartTimeNodeData> startTimeNodeDataCache = new ConcurrentHashMap<>();
 
@@ -35,27 +37,23 @@ public class GraphFlowCache {
     private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
 
     public void update(Long processId, JsonGraph jsonGraph) {
-        Map<String, Map<String, Object>> flowNodeData = jsonGraph.getNodeData();
+        Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
         JsonGraphNode startNode = jsonGraph.getStartNode();
         if (startNode.getType().equalsIgnoreCase(JsonGraphConstant.START_TIME)) {
-            StartTimeNodeData startTimeNodeData = new StartTimeNodeData();
-            JsonUtils.updateBean(startTimeNodeData, startNode.getData());
-            startTimeNodeDataCache.put(processId, startTimeNodeData);
+            StartTimeNodeData nodeData = (StartTimeNodeData) startNode.getData();
+            startTimeNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_FORM)) {
-            StartFormNodeData startFormNodeData = new StartFormNodeData();
-            JsonUtils.updateBean(startFormNodeData, startNode.getData());
-            startFormNodeDataCache.put(processId, startFormNodeData);
+            StartFormNodeData nodeData = (StartFormNodeData) startNode.getData();
+            startFormNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_ENTITY)) {
-            StartEntityNodeData startEntityNodeData = new StartEntityNodeData();
-            JsonUtils.updateBean(startEntityNodeData, startNode.getData());
-            startEntityNodeData.setProcessId(processId);
-            startEntityNodeDataCache.add(startEntityNodeData);
+            StartEntityNodeData nodeData = (StartEntityNodeData) startNode.getData();
+            nodeData.setProcessId(processId);
+            startEntityNodeDataCache.add(nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_DATE_FIELD)) {
-            StartDateFieldNodeData startDateFieldNodeData = new StartDateFieldNodeData();
-            JsonUtils.updateBean(startDateFieldNodeData, startNode.getData());
-            startDateFieldNodeData.setProcessId(processId);
-            startDateFieldNodeDataCache.put(processId, startDateFieldNodeData);
+            StartDateFieldNodeData nodeData = (StartDateFieldNodeData) startNode.getData();
+            nodeData.setProcessId(processId);
+            startDateFieldNodeDataCache.put(processId, nodeData);
         }
     }
 
@@ -67,7 +65,7 @@ public class GraphFlowCache {
         startEntityNodeDataCache.removeIf(startEntityNodeData -> startEntityNodeData.getEntityId().equals(processId));
     }
 
-    public Map<String, Map<String, Object>> getNodeData(Long processId) {
+    public Map<String, NodeData> getNodeData(Long processId) {
         return flowNodeDataCache.get(processId);
     }
 

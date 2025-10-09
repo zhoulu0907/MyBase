@@ -44,6 +44,12 @@ public class AppPageSetPageRepository extends DataRepository<PageSetPageDO> {
         return findOne(configs);
     }
 
+    public PageSetPageDO findByPageId(Long pageId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq(PageSetPageDO.PAGE_ID, pageId);
+        return findOne(configs);
+    }
+
     public List<PageSetPageDO> findByPageSetIds(List<Long> pageSetIds) {
         ConfigStore configs = new DefaultConfigStore();
         configs.in(PageSetPageDO.PAGE_SET_ID, pageSetIds);

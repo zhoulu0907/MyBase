@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -105,4 +106,17 @@ public class PageServiceImpl implements PageService {
 
         return pageDTOList;
     }
+
+    @Override
+    public String getMetadataByPageId(Long pageId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("page_id", pageId);
+
+        PageSetPageDO pageSetPageDO =pageSetPageDataRepository.findByPageId(pageId);
+        PageSetDO pageSetDO =  pageSetDataRepository.findById(pageSetPageDO.getPageSetId());
+
+        return pageSetDO.getMainMetadata();
+    }
+
+
 }

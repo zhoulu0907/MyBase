@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.flow.api;
 
 import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
@@ -11,11 +14,8 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowPublishStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
-import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.event.FlowProcessEventPublisher;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
-import com.cmsr.onebase.module.flow.core.graph.data.StartDateFieldNodeData;
-import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
+import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
 import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
 import lombok.Setter;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -81,10 +80,8 @@ public class FlowProcessPublishApiImpl implements FlowProcessPublishApi {
     }
 
     private void startDateFieldJob(FlowProcessDO flowProcessDO) {
-        JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
-        Map<String, Object> data = jsonGraph.getStartNode().getData();
-        StartDateFieldNodeData startDateFieldNodeData = new StartDateFieldNodeData();
-        JsonUtils.updateBean(startDateFieldNodeData, data);
+        JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
+        StartDateFieldNodeData startDateFieldNodeData = (StartDateFieldNodeData) jsonGraph.getStartNode().getData();
         FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId());
         String jobId;
         if (flowProcessDateFieldDO == null) {
@@ -110,10 +107,8 @@ public class FlowProcessPublishApiImpl implements FlowProcessPublishApi {
 
 
     private void startTimeJob(FlowProcessDO flowProcessDO) {
-        JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
-        Map<String, Object> data = jsonGraph.getStartNode().getData();
-        StartTimeNodeData startTimeNodeData = new StartTimeNodeData();
-        JsonUtils.updateBean(startTimeNodeData, data);
+        JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
+        StartTimeNodeData startTimeNodeData = (StartTimeNodeData) jsonGraph.getStartNode().getData();
         FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
         String jobId;
         if (flowProcessTimeDO == null) {

@@ -3,7 +3,8 @@ package com.cmsr.onebase.module.flow.core.event;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.builder.el.LiteFlowChainELBuilder;
 import com.yomahub.liteflow.flow.FlowBus;
@@ -31,7 +32,7 @@ public abstract class FlowProcessEventHandler {
         if (processDO == null) {
             return;
         }
-        JsonGraph jsonGraph = JsonGraph.of(processDO.getProcessDefinition());
+        JsonGraph jsonGraph = JsonGraphBuilder.build(processDO.getProcessDefinition());
         String flowChain = jsonGraph.toFlowChain();
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();

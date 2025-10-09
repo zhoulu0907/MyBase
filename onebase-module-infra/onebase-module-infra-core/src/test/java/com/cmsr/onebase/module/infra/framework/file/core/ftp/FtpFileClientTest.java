@@ -1,8 +1,9 @@
 package com.cmsr.onebase.module.infra.framework.file.core.ftp;
 
-import com.cmsr.onebase.framework.common.tools.core.io.resource.ResourceUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
-import com.cmsr.onebase.framework.common.tools.extra.ftp.FtpMode;
+
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.extra.ftp.FtpMode;
 import com.cmsr.onebase.module.infra.framework.file.core.client.ftp.FtpFileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.ftp.FtpFileClientConfig;
 import org.junit.jupiter.api.Disabled;

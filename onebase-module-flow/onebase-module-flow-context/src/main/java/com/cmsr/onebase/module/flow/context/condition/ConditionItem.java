@@ -14,6 +14,6 @@ public class ConditionItem {
     /**
      * 规则项，一个条件项下可以有多个规则项，逻辑关系是AND关系
      */
-    private List<RuleItem> rules;
+    private List<RuleItem> conditions;
 
 }

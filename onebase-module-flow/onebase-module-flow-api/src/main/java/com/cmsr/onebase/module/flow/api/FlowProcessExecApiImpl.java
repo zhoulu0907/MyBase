@@ -3,26 +3,20 @@ package com.cmsr.onebase.module.flow.api;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.express.ExpressionAssistant;
+import com.cmsr.onebase.module.flow.context.condition.Condition;
+import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpresses;
-import com.cmsr.onebase.module.flow.context.field.FieldExpressAssistant;
-import com.cmsr.onebase.module.flow.context.field.FieldInfo;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.core.graph.data.StartEntityNodeData;
-import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.jexl3.JexlExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -37,16 +31,11 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionAssistant expressionAssistant;
+    private ExpressionExecutor expressionExecutor;
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
-    @Autowired
-    private FieldExpressAssistant fieldExpressAssistant;
-
-    @Autowired
-    private MetadataEntityFieldApi metadataEntityFieldApi;
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {
@@ -71,16 +60,16 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             if (!triggerFieldIdsContained(startEntityNodeData.getTriggerFieldIds(), entityTriggerReqDTO.getChangedFieldIds())) {
                 return EntityTriggerRespDTO.SUCCESS;
             }
-            if (startEntityNodeData.getCompiledExpression() == null) {
-                List<Long> ids = fieldExpressAssistant.extractFieldIds(startEntityNodeData.getFilterCondition());
-                Map<Long, FieldInfo> fieldInfoMap = getFieldInfoMap(ids);
-                OrExpresses orExpresses = fieldExpressAssistant.convertToExpresses(startEntityNodeData.getFilterCondition(), fieldInfoMap);
-                Serializable compileExpression = expressionAssistant.compileExpression(orExpresses);
+            if (startEntityNodeData.getCompiledExpression() == null && CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
+                OrExpresses orExpresses = Condition.convertToOrExpresses(startEntityNodeData.getFilterCondition());
+                JexlExpression compileExpression = expressionExecutor.compileExpression(orExpresses);
                 startEntityNodeData.setCompiledExpression(compileExpression);
             }
-            boolean isTrigger = expressionAssistant.evaluate(startEntityNodeData.getCompiledExpression(), entityTriggerReqDTO.getFieldData());
-            if (!isTrigger) {
-                return EntityTriggerRespDTO.SUCCESS;
+            if (startEntityNodeData.getCompiledExpression() != null) {
+                boolean isTrigger = expressionExecutor.evaluate(startEntityNodeData.getCompiledExpression(), entityTriggerReqDTO.getFieldData());
+                if (!isTrigger) {
+                    return EntityTriggerRespDTO.SUCCESS;
+                }
             }
             flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
             return EntityTriggerRespDTO.SUCCESS;
@@ -90,21 +79,6 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         }
     }
 
-    private Map<Long, FieldInfo> getFieldInfoMap(List<Long> fieldIds) {
-        EntityFieldJdbcTypeReqDTO reqDTO = new EntityFieldJdbcTypeReqDTO();
-        reqDTO.setFieldIds(fieldIds);
-
-        List<EntityFieldJdbcTypeRespDTO> fieldJdbcTypes = metadataEntityFieldApi.getFieldJdbcTypes(reqDTO);
-
-        return fieldJdbcTypes.stream()
-                .collect(Collectors.toMap(EntityFieldJdbcTypeRespDTO::getFieldId, info -> {
-                    FieldInfo fieldInfo = new FieldInfo();
-                    fieldInfo.setFieldId(info.getFieldId());
-                    fieldInfo.setFieldName(info.getFieldName());
-                    fieldInfo.setJdbcType(info.getJdbcType());
-                    return fieldInfo;
-                }));
-    }
 
     /**
      * 检查 triggerEvents 列表是否包含 triggerEvent 的名称（忽略大小写）

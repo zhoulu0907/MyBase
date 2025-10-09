@@ -5,7 +5,7 @@ import com.aizuda.snailjob.client.job.core.dto.JobArgs;
 import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
-import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import lombok.Setter;

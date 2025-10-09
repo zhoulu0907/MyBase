@@ -49,6 +49,9 @@
         <lombok.version>1.18.36</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <modelmapper.version>3.2.4</modelmapper.version>
+        <jexl3.version>3.5.0</jexl3.version>
+        <!--        <hutool-5.version>5.8.35</hutool-5.version>-->
+        <!--        <hutool-6.version>6.0.0-M19</hutool-6.version>-->
         <mvel2.version>2.4.14.Final</mvel2.version>
         <hutool.version>5.8.35</hutool.version>
         <easyexcel.version>4.0.3</easyexcel.version>
@@ -65,7 +68,7 @@
         <liteflow.version>2.15.0.2</liteflow.version>
         <snail-job.version>1.7.2</snail-job.version>
         <dom4j.version>2.2.0</dom4j.version>
-
+        <jackson.version>2.18.3</jackson.version>
         <!-- 三方云服务相关 -->
         <commons-io.version>2.17.0</commons-io.version>
         <commons-compress.version>1.27.1</commons-compress.version>
@@ -379,6 +382,11 @@
                 <version>${dom4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
@@ -407,6 +415,11 @@
                 <groupId>org.mvel</groupId>
                 <artifactId>mvel2</artifactId>
                 <version>${mvel2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-jexl3</artifactId>
+                <version>${jexl3.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tika</groupId>
