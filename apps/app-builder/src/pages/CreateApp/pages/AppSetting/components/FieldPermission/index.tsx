@@ -102,7 +102,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   // 可阅读全部选中
   const onChangeReadableAll = (checked: boolean) => {
-    console.log('可阅读全选反选 checked:', checked);
     const formData = form.getFieldsValue();
 
     // 可编辑时，默认可阅读
@@ -135,7 +134,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       )
     );
 
-    console.log('updatedFieldPermissions:', updatedFieldPermissions);
     setCheckEditableAll(checked);
     setIndeterminateEditable(false);
     form.setFieldValue('authFields', updatedFieldPermissions);
@@ -143,7 +141,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       ...field,
       isCanEdit: +checked
     }));
-    console.log('可编辑 updateFields:', updateFields);
     setFieldPermission(updateFields);
     updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
     console.log(fieldPermission, updateFields);
@@ -173,7 +170,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   // 可下载全部选中
   const onChangeDownloadableAll = (checked: boolean) => {
-    console.log('可下载全选反选 checked:', checked);
     const formData = form.getFieldsValue();
 
     const updatedOperationPermissions = Object.fromEntries(
@@ -181,7 +177,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         ([key, value]: [string, any]) => [key, { ...value, isCanDownload: checked }]
       )
     );
-    console.log('updatedOperationPermissions:', updatedOperationPermissions);
     setCheckDownloadableAll(checked);
     setIndeterminateDownloadable(false);
     form.setFieldValue('operationPermissions', updatedOperationPermissions);
@@ -189,7 +184,6 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       ...field,
       isCanDownload: +checked
     }));
-    console.log('可下载 updateFields:', updateFields);
     setOperationConfig(updateFields);
     updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
     console.log(operationConfig, updateFields);
