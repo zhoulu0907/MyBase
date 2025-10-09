@@ -7,6 +7,7 @@ import { EditorPage } from './pages/Editor';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import SettingPage from './pages/Setting';
+import '@icon-park/react/styles/index.css';
 
 function AppContent() {
   //   // 启用token自动刷新
