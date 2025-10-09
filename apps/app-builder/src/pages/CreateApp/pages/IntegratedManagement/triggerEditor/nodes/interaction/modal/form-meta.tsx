@@ -21,10 +21,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [payloadForm]);
 
   const onValuesChange = async (changeValue: any, values: any) => {
-    console.log('变更了', values);
     // 校验表单
-    validateNodeForm(form, payloadForm, false);
-    handlePropsOnChange(values);
+    // validateNodeForm(form, payloadForm, false);
+    // handlePropsOnChange(values);
   };
   // 表单内容改变
   const handlePropsOnChange = (values: any) => {

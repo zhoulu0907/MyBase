@@ -335,9 +335,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = async (_changeValue: any, values: any) => {
     // 校验表单
-    validateNodeForm(form, payloadForm, false);
+    // validateNodeForm(form, payloadForm, false);
 
-    handlePropsOnChange(values);
+    // handlePropsOnChange(values);
   };
 
   const getInitData = () => {
@@ -360,7 +360,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Input disabled />
             </Form.Item>
 
-            <Form.Item label="查询方式" field="updateType" required>
+            <Form.Item label="更新方式" field="updateType" rules={[{ required: true, message: '请选择更新方式' }]}>
               <Radio.Group direction="vertical" onChange={handleDataTypeChange}>
                 <Radio value={DATA_SOURCE_TYPE.FORM}>更新主表数据</Radio>
                 <Radio value={DATA_SOURCE_TYPE.SUBFORM}>更新子表数据</Radio>
@@ -374,7 +374,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   从
                 </Grid.Col>
                 <Grid.Col span={19}>
-                  <Form.Item field="mainEntityId" disabled={!updateType}>
+                  <Form.Item field="mainEntityId" disabled={!updateType} rules={[{ required: true, message: '请选择' }]}>
                     <Select onChange={handleMainEntityIdChange} allowClear>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -397,7 +397,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   从
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="mainEntityId" disabled={!updateType}>
+                  <Form.Item field="mainEntityId" disabled={!updateType} rules={[{ required: true, message: '请选择' }]}>
                     <Select allowClear onChange={handleMainEntityIdChange}>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -411,7 +411,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subEntityId" disabled={!mainEntityId}>
+                  <Form.Item field="subEntityId" disabled={!mainEntityId} rules={[{ required: true, message: '请选择' }]}>
                     <Select allowClear onChange={handleSubEntityIdChange}>
                       {subEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
