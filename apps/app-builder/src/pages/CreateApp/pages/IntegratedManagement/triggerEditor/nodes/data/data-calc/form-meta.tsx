@@ -1,9 +1,9 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { useEffect, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio } from '@arco-design/web-react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { CAL_TYPE, type ConditionField } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
+import { useEffect } from 'react';
 import CaclRuleEditor from '../../../components/calc-rule-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
@@ -50,12 +50,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     if (values.calRules) {
       const fields: ConditionField[] = values.calRules
-        .filter((item: any) => item && item.field && item.value && item.fieldType)
+        .filter((item: any) => item && item.field && item.value && item.operatorType)
         .map((item: any) => {
           return {
             label: item.field,
             value: item.value,
-            fieldType: item.fieldType
+            fieldType: item.operatorType
           };
         });
       updateDataCalcOutputs(node.id, fields);
