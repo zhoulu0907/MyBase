@@ -61,7 +61,12 @@ export default function UserPage() {
       </Sider>
       <Content className={styles.rightPanel}>
         <PlaceholderPanel hasPermission={hasPermission(TENANT_USER_QUERY)}>
-          <UserTable selectedDeptId={selectedDeptId} deptTree={deptTree} deptLoading={deptLoading} />
+          <UserTable
+            selectedDeptId={selectedDeptId}
+            deptTree={deptTree}
+            deptLoading={deptLoading}
+            onRefreshDept={() => fetchDeptList()}
+          />
         </PlaceholderPanel>
       </Content>
     </Layout>

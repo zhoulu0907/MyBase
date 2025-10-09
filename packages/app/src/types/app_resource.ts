@@ -44,6 +44,10 @@ export interface GetPageListByAppIdReq {
   appId: string;
 }
 
+export interface GetPageMetadataReq {
+  pageId: string;
+}
+
 export interface GetComponentListByPageIdReq {
   pageId: string;
 }

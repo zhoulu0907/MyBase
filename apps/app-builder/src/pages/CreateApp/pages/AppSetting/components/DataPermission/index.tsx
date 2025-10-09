@@ -1,41 +1,41 @@
 import { Button, Divider, Message, Popconfirm, Space, Tag } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
-  updateDataGroupPermission,
   deleteDataGroup,
+  FieldType,
   // getEntityFieldsWithChildren
   // getAppEntities,
   getDataPermission,
-  getEntityFields,
-  getFieldCheckTypeApi,
-  getScopeTypeApi,
-  getPageSetId,
-  loadPageSet,
   getEntityById,
+  getEntityFields,
   getEntityFieldsWithChildren,
-  FieldType,
+  getFieldCheckTypeApi,
+  getPageSetId,
+  getScopeTypeApi,
   IsOperable,
-  type UpdateDataGroupPermissionReq,
+  loadPageSet,
+  updateDataGroupPermission,
+  // type ConditionField,
+  type AppEntityField,
+  type AuthDataFilterVO,
   // type AppEntities,
   // type AppEntityField,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
+  type EntityFieldValidationTypes,
+  type EntityWithChildren,
+  // type GetPageSetIdReq
   // type FilterFieldCheckType,
   type GetPermissionReq,
-  type EntityFieldValidationTypes,
-  // type ConfitionField,
-  type AppEntityField,
-  type AuthDataFilterVO,
-  type ScopeTypeOption,
   type LoadPageSetReq,
-  type EntityWithChildren
-  // type GetPageSetIdReq
+  type ScopeTypeOption,
+  type UpdateDataGroupPermissionReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
 
-import styles from './index.module.less';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
+import styles from './index.module.less';
 
 const initialFormValues: AuthDataGroupVO = {
   id: '',
@@ -296,17 +296,29 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       entityFieldsResq.forEach((field: any) => {
         field.fieldId = field.id;
       });
+
       // 批量获取字段可选校验类型
       const getFieldCheckTypeParams: string[] = [];
       entityFieldsResq.forEach((item: any) => {
-        getFieldCheckTypeParams.push(item.fieldId);
+        if (item.fieldId) {
+          getFieldCheckTypeParams.push(item.fieldId);
+        }
       });
-      getFieldCheckType(getFieldCheckTypeParams);
+
+      // 添加空数组检查，避免空参数调用接口
+      if (getFieldCheckTypeParams.length > 0) {
+        getFieldCheckType(getFieldCheckTypeParams);
+      } else {
+        // 如果没有字段需要获取校验类型，直接设置空数组
+        setFilterFieldCheckType([]);
+      }
+
       setAppEntityFields(entityFieldsResq);
     } catch (error) {
       console.error('获取权限信息失败', error);
     }
   };
+
   // 获取数据权限角色
   const getDataPermissionRoles = async (entityId: string) => {
     try {

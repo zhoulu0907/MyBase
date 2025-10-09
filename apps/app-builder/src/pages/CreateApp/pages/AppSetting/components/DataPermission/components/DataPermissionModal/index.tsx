@@ -1,6 +1,7 @@
-import { Modal, Form, Input, Select, Checkbox, Button, Tag } from '@arco-design/web-react';
+import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
+import { Button, Checkbox, Form, Input, Modal, Select, Tag } from '@arco-design/web-react';
+import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconEdit } from '@arco-design/web-react/icon';
-import styles from './index.module.less';
 import {
   // DataOperationEnum,
   getDeptUser,
@@ -10,19 +11,18 @@ import {
   type AuthDataFilterVO,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
+  // type Condition,
+  type ConditionField,
+  type EntityFieldValidationTypes,
   // type FilterFieldCheckType,
   type GetDeptUserReq,
-  // type Condition,
-  type ConfitionField,
-  type EntityFieldValidationTypes,
   type ScopeTypeOption
   // type RoleAddUserReq
 } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
-import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
 import { useCallback, useEffect, useState } from 'react';
-import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
+import styles from './index.module.less';
 
 const FormItem = Form.Item;
 
@@ -67,7 +67,7 @@ const DataPermissionModal = (props: IProps) => {
   const [checkAll, setCheckAll] = useState<boolean>(!!initialFormValues.isOperable); // 操作权限
   const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
   // const [conditionData, setConditionData] = useState<Condition[]>([]);
-  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
   const [scopeType, setScopeType] = useState('');
 
   // 部门用户信息
@@ -253,7 +253,7 @@ const DataPermissionModal = (props: IProps) => {
                   rules={[{ required: true, message: '请选择权限范围' }]}
                 >
                   <Select
-                    placeholder="选择拥有者"
+                    placeholder="请选择"
                     onChange={(value) => {
                       console.log('选择拥有者 value:', value);
                     }}
@@ -274,7 +274,7 @@ const DataPermissionModal = (props: IProps) => {
                   rules={[{ required: true, message: '请选择权限范围' }]}
                 >
                   <Select
-                    placeholder="本人"
+                    placeholder="请选择"
                     onChange={(value) => {
                       setScopeType(value);
                       setSelectedMembers([]);
