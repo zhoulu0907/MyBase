@@ -52,14 +52,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       const fields: ConditionField[] = values.calRules
         .filter((item: any) => item && item.field && item.value && item.operatorType)
         .map((item: any) => {
-          console.log(item);
           return {
             label: item.field,
             value: item.field,
             fieldType: item.operatorType
           };
         });
-      console.log(fields);
       updateDataCalcOutputs(node.id, fields);
     }
   };
