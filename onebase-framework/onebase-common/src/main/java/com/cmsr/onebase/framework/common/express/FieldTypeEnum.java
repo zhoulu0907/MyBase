@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.common.express;
 
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 字段类型枚举
@@ -52,29 +53,15 @@ public enum FieldTypeEnum {
     }
 
     public static FieldTypeEnum getByName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
         for (FieldTypeEnum typeEnum : values()) {
             if (typeEnum.name().equalsIgnoreCase(name)) {
                 return typeEnum;
             }
         }
-        throw new IllegalArgumentException("无效的fieldType name: " + name);
+        throw new IllegalArgumentException("Invalid FieldTypeEnum name: " + name);
     }
 
-    /**
-     * 根据业务类型字符串获取对应的JDBC类型
-     *
-     * @param fieldType 业务类型字符串
-     * @return JDBC类型枚举实例
-     */
-    public static JdbcTypeEnum getJdbcTypeByFieldType(String fieldType) {
-        if (fieldType == null || fieldType.isEmpty()) {
-            throw new IllegalArgumentException("fieldType 不能为空");
-        }
-        for (FieldTypeEnum typeEnum : values()) {
-            if (typeEnum.name().equalsIgnoreCase(fieldType)) {
-                return typeEnum.getJdbcType();
-            }
-        }
-        throw new IllegalArgumentException("无效的fieldType: " + fieldType);
-    }
 }

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.common.express;
 
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * JDBC类型枚举
@@ -21,28 +22,28 @@ public enum JdbcTypeEnum {
     TIMESTAMP("TIMESTAMP"),
     VARCHAR("VARCHAR");
 
-    private final String value;
+    private final String code;
 
-    JdbcTypeEnum(String value) {
-        this.value = value;
+    JdbcTypeEnum(String code) {
+        this.code = code;
     }
 
     /**
      * 根据字符串值获取对应的枚举实例
      *
-     * @param value JDBC类型字符串值
+     * @param code JDBC类型字符串值
      * @return 对应的枚举实例
      * @throws IllegalArgumentException 如果提供的值不存在对应的枚举实例
      */
-    public static JdbcTypeEnum fromValue(String value) {
-        if (value == null || value.isEmpty()) {
-            throw new IllegalArgumentException("JDBC类型值不能为空");
+    public static JdbcTypeEnum getByCode(String code) {
+        if (StringUtils.isEmpty(code)) {
+            return null;
         }
         for (JdbcTypeEnum type : values()) {
-            if (type.getValue().equalsIgnoreCase(value)) {
+            if (type.getCode().equalsIgnoreCase(code)) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("无效的JDBC类型值: " + value);
+        throw new IllegalArgumentException("Invalid JdbcTypeEnum code: " + code);
     }
 }

@@ -63,11 +63,12 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             }
             if (CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
                 OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startEntityNodeData.getFilterCondition());
-                boolean isTrigger = expressionExecutor.evaluate(orExpression, entityTriggerReqDTO.getFieldData());
-                if (isTrigger) {
-                    flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
+                boolean isMatch = expressionExecutor.evaluate(orExpression, entityTriggerReqDTO.getFieldData());
+                if (!isMatch) {
+                    return EntityTriggerRespDTO.SUCCESS;
                 }
             }
+            flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
             return EntityTriggerRespDTO.SUCCESS;
         } catch (Exception e) {
             log.error("entityTrigger failed, {}, {}", entityTriggerReqDTO, startEntityNodeData, e);

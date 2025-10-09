@@ -46,10 +46,10 @@ public class ConditionsSupport {
     public static ExpressionItem convertToExpressesItem(ConditionItem conditionItem) {
         ExpressionItem expressionItem = new ExpressionItem();
         expressionItem.setKey(conditionItem.getFieldId());
-        expressionItem.setOp(OpEnum.getByCode(conditionItem.getOp()));
+        expressionItem.setOp(OpEnum.getByName(conditionItem.getOp()));
         expressionItem.setOperatorType(OperatorTypeEnum.getByCode(conditionItem.getOperatorType()));
         expressionItem.setFieldType(FieldTypeEnum.getByName(conditionItem.getFieldType()));
-        expressionItem.setJdbcType(JdbcTypeEnum.fromValue(conditionItem.getJdbcType()));
+        expressionItem.setJdbcType(JdbcTypeEnum.getByCode(conditionItem.getJdbcType()));
         expressionItem.setValue(conditionItem.getValue());
         return expressionItem;
     }
