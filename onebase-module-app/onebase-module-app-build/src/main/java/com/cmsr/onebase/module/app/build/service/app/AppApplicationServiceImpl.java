@@ -3,15 +3,22 @@ package com.cmsr.onebase.module.app.build.service.app;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.vo.auth.AuthRoleAddUserReqVO;
+import com.cmsr.onebase.module.app.build.vo.auth.AuthRoleListRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
@@ -70,6 +77,13 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Resource
     private MetadataDatasourceApi metadataDatasourceApi;
 
+    @Resource
+    private AppAuthRoleUserRepository appAuthRoleUserRepository;
+
+    @Resource
+    private AppAuthRoleRepository appAuthRoleRepository;
+
+
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO);
@@ -114,6 +128,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ApplicationCreateRespVO createApplication(ApplicationCreateReqVO createReqVO) {
+
         validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         applicationDO.setId(null);
@@ -129,6 +144,21 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());
         createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
+
+
+        AuthRoleAddUserReqVO reqVO = new AuthRoleAddUserReqVO();
+        List<AuthRoleDO> arlist = appAuthRoleRepository.findByApplicationId(applicationDO.getId());
+
+        for(AuthRoleDO item : arlist ){
+            AuthRoleUserDO entity = new AuthRoleUserDO();
+            entity.setRoleId(item.getId());
+            entity.setUserId(applicationDO.getId());
+            appAuthRoleUserRepository.insert(entity);
+        }
+
+
+
+
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
