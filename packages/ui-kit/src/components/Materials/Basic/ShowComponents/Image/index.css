@@ -2,3 +2,7 @@
   object-fit: var(--fit, contain);
   max-height: var(--maxHeight, none);
 }
+
+.arco-image-error {
+  border-radius: 8px;
+}

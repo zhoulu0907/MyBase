@@ -38,7 +38,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.AUTO_CODE]: '自动编号',
   [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
   [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
-  [FORM_COMPONENT_TYPES.CAROUSEL_F]: '轮播图',
+  [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: '轮播图',
   [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
   [FORM_COMPONENT_TYPES.DATA_SELECT]: '选择数据',
 
@@ -270,10 +270,10 @@ const allTemplate = {
           category: 'base'
         },
         {
-          type: FORM_COMPONENT_TYPES.CAROUSEL_F,
+          type: FORM_COMPONENT_TYPES.CAROUSEL_FORM,
           h: 36,
           w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_F],
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_FORM],
           icon: 'carousel_cp.svg',
           category: 'base'
         },

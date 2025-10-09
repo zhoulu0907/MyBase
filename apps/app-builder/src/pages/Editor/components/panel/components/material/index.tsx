@@ -29,6 +29,8 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
 
   const [baseItems, setBaseItems] = useState<{ key: CategoryKey; items: any[] }[]>([]);
   const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
+  const [keyword, setKeyword] = useState<string>(''); // 搜索关键词
+  const [components, setComponents] = useState<{ key: CategoryKey; items: any[] }[]>([]); // 关键词过滤后的组件
 
   // 按 category 分类，分成 3 个 items
   //   const baseNavigateItems = allTemplate.base.find((cat) => cat.category === 'navigate')?.items || [];
@@ -55,23 +57,50 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
   ];
 
   useEffect(() => {
-    // 初始化，为每个组件分配配置和默认值
-    const newBaseItems = baseCategories.map((cat) => ({
-      ...cat,
-      items: cat.items.map((item) => {
-        const cpID = `${item.type}-${uuidv4()}`;
+    const lowerKeyword = keyword.toLowerCase();
+
+    const newBaseItems = baseCategories
+      .map((cat) => {
+        // 对每个分类的 items 先过滤，再映射
+        const filteredItems = cat.items
+          .filter((item) =>
+            item.displayName?.toLowerCase().includes(lowerKeyword)
+          )
+          .map((item) => {
+            const cpID = `${item.type}-${uuidv4()}`;
+            return {
+              type: item.type,
+              displayName: item.displayName,
+              id: cpID,
+            };
+          });
 
         return {
-          type: item.type,
-          displayName: item.displayName,
-          id: cpID
+          ...cat,
+          items: filteredItems,
         };
       })
-    }));
-    setBaseItems(newBaseItems);
-  }, []);
+      .filter((cat) => cat.items.length > 0); // 去掉空的分类
 
-  // todo 搜索功能
+    setBaseItems(newBaseItems);
+  }, [keyword]);
+
+  useEffect(() => {
+    if (!keyword) return setComponents(baseCategories); // 没关键词直接返回原数据
+
+    const lowerKeyword = keyword.toLowerCase();
+    const filterData = baseCategories
+      .map(category => {
+        // 过滤 items
+        const filteredItems = category.items.filter(item =>
+          item.displayName && item.displayName.includes(lowerKeyword)
+        );
+        return { ...category, items: filteredItems };
+      })
+      .filter(category => category.items.length > 0); // 移除没有匹配项的分类
+
+    setComponents(filterData);
+  }, [keyword]);
 
   return (
     <div>
@@ -84,7 +113,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
               {!showSearchInput ? (
                 <img src={IconSearchForm} alt="search some component" />
               ) : (
-                <InputSearch autoFocus onBlur={() => setShowSearchInput(false)} />
+                <InputSearch value={keyword} autoFocus onBlur={() => setShowSearchInput(false)} onChange={setKeyword} />
               )}
             </div>
             <div className={styles.collapse} onClick={setChildCollapsed}>
@@ -120,7 +149,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
           <div className={styles.componentList}>
             {activeComponentTab === 'base-component' && (
               <Collapse defaultActiveKey={baseCategories.map((c) => c.key)} accordion={false} bordered={false} expandIconPosition='right' expandIcon={<img src={IconCollapsedDown} alt='' />}>
-                {baseCategories.map((cat) => {
+                {components.map((cat) => {
                   if (activeTab === EDITOR_TYPES.LIST_EDITOR && cat.key === 'form') {
                     return null;
                   }
