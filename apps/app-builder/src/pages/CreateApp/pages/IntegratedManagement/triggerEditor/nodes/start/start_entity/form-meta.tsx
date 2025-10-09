@@ -140,9 +140,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = (changeValue: any, values: any) => {
     // 校验表单
-    validateNodeForm(form, payloadForm, false);
+    // validateNodeForm(form, payloadForm, false);
 
-    handlePropsOnChange(values);
+    // handlePropsOnChange(values);
   };
 
   // 触发类型

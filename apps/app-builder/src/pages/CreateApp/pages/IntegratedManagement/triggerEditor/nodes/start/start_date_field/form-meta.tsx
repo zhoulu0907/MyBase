@@ -103,7 +103,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = (changeValue: any, values: any) => {
-    handlePropsOnChange(values);
+    // handlePropsOnChange(values);
   };
 
   return (
