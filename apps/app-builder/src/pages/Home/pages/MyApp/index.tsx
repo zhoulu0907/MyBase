@@ -130,9 +130,14 @@ const MyAppPage: React.FC = () => {
       status: status === '' ? null : Number(status)
     };
     const res = await listApplication(req);
-    setDataList(res.list || []);
-    setTotal(res.total || 0);
-    setLoading(false);
+    if ((!res.list || res.list.length === 0) && res.total != 0 && pageNo > 1) {
+      const newPageNo = pageNo - 1;
+      setPageNo(newPageNo);
+    } else {
+      setDataList(res.list || []);
+      setTotal(res.total || 0);
+      setLoading(false);
+    }
   };
 
   const debouncedUpdate = useCallback(
