@@ -13,7 +13,8 @@ import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app'
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { appIconPathMapping } from '@/components/CreateApp/const';
+import { iconMap } from '@/components/CreateApp/const';
+import DynamicIcon from '@/components/DynamicIcon';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -128,7 +129,12 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           </div>
 
           <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
-            <img src={appIconPathMapping.find(icon => icon.icon === appIcon)?.path || ''} />
+            <DynamicIcon
+              IconComponent={iconMap[appIcon as keyof typeof iconMap]}
+              theme="outline"
+              size="14"
+              fill="#F2F3F5"
+            />
           </div>
           <div className={styles.appName}>{appName}</div>
 
