@@ -53,5 +53,8 @@
     "forbidden": "禁止访问",
     "notFound": "页面未找到",
     "unknownError": "未知错误"
+  },
+  "app": {
+    "searchPlaceHolder": "搜索分组或页面"
   }
 }
