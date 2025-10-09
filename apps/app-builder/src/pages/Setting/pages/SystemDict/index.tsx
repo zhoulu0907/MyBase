@@ -29,6 +29,7 @@ const Content = Layout.Content;
 export default function SystemDictPage() {
   const [dictList, setDictList] = useState<DictItem[]>([]);
   const [activeDictId, setActiveDictId] = useState<number | undefined>(undefined);
+  const [showEmpty, setShowEmpty] = useState<boolean>(false); // 显示空页面
   const [activeDict, setActiveDict] = useState<DictItem | undefined>(undefined);
   const [tableData, setTableData] = useState<DictData[]>([]);
   const [_loading, setLoading] = useState<boolean>(false);
@@ -45,6 +46,14 @@ export default function SystemDictPage() {
   const [dictDataModalLoading, setDictDataModalLoading] = useState(false);
   const [editItem, setEditItem] = useState<DictData | null>(null);
 
+  useEffect(() => {
+    // console.log('activeDictId:', activeDictId);
+    // console.log('showEmpty:', showEmpty);
+    console.log('!activeDictId || activeDictId:', !activeDictId || showEmpty);
+    if (!activeDictId) {
+      setShowEmpty(false);
+    }
+  }, [activeDictId]);
   const loadDictList = async () => {
     getAllDictList().then((data) => {
       setDictList(data);
@@ -146,8 +155,11 @@ export default function SystemDictPage() {
   );
 
   const handleDictSelect = (id: number | undefined) => {
+    // console.log('handleDictSelect id:', id);
+    // console.log('handleDictSelect !activeDictId || activeDictId:', !activeDictId || showEmpty);
     setActiveDictId(id);
     setCurrentPage(1);
+    setShowEmpty(false);
   };
 
   const handlePageChange = (page: number) => {
@@ -161,11 +173,19 @@ export default function SystemDictPage() {
       okText: '确认',
       cancelText: '取消',
       onOk: async () => {
-        await deleteDict(id);
-        Message.success('删除成功');
-        setDictList(dictList.filter((t) => t.id !== id));
+        handleDeleteDictOk(id);
       }
     });
+  };
+  const handleDeleteDictOk = async (id: number) => {
+    try {
+      await deleteDict(id);
+      Message.success('删除成功');
+      setShowEmpty(true);
+      setDictList(dictList.filter((t) => t.id !== id));
+    } catch (error) {
+      console.error('删除字典失败:', error);
+    }
   };
   // 删除字典数据
   const handleDeleteDictData = async (id: number) => {
@@ -261,8 +281,10 @@ export default function SystemDictPage() {
           />
         </Sider>
         <Content className={styles.rightPanel}>
-          {!activeDictId ? (
-            <Empty />
+          {!activeDictId || showEmpty ? (
+            <>
+              <Empty />
+            </>
           ) : (
             <>
               <Header>
