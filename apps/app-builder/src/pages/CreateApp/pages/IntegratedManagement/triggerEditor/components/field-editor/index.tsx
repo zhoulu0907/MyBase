@@ -127,7 +127,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
         NodeType.DATA_ADD,
         NodeType.DATA_QUERY,
         NodeType.DATA_QUERY_MULTIPLE,
-        NodeType.DATA_UPDATE
+        NodeType.DATA_UPDATE,
+        NodeType.DATA_CALC
       ]),
     []
   );
