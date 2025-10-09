@@ -6,7 +6,6 @@ export const createTriggerNodeOutputSignal = () => {
   }>({});
 
   const addTriggerNodeOutput = (nodeId: string, output: any) => {
-    console.log('nodeID: ' + nodeId + ' outputxxx: ', output);
     nodeOutputs.value[nodeId] = output;
   };
 

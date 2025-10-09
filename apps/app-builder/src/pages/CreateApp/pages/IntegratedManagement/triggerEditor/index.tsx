@@ -77,22 +77,23 @@ const TriggerEditor = () => {
       let data = {};
       let nodes = processDefinitionJson.nodes || [];
 
-      console.log('nodes: ', nodes);
-
       for (let item of nodes) {
-        data = { ...data, [item.id]: item.data };
+        data = { ...data, [item.id]: { ...item.data, output: item.output } };
         if (item.blocks) {
           // 递归初始化blocks数据
           data = initBlocksData(item.blocks, data);
         }
-        // 初始化输出节点
-        if (item.output) {
-          //   console.log('item.id:  ' + item.id + ' item.output: ', item.output);
-          triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
-        }
       }
 
       console.log('nodeData', data);
+      // 初始化输出节点
+      Object.values(data).forEach((item: any) => {
+        console.log('item: ', item);
+        if (item.output) {
+          triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
+        }
+      });
+
       console.log('nodeOutputs: ', triggerNodeOutputSignal.nodeOutputs.value);
 
       setAllNodeData(data);
@@ -146,7 +147,7 @@ const TriggerEditor = () => {
 
   const initBlocksData = (blocks: any[], data: any) => {
     for (let item of blocks) {
-      data = { ...data, [item.id]: item.data };
+      data = { ...data, [item.id]: { ...item.data, output: item.output } };
       if (item.blocks) {
         data = initBlocksData(item.blocks, data);
       }
