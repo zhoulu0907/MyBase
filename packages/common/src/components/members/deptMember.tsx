@@ -14,6 +14,7 @@ interface IProps {
   visible: boolean;
   selectedMembers: any[];
   isMultiple?: boolean;
+  resetFlag?: boolean;
   onExpand: (value: string) => void;
   onSearch: (value: string) => void;
   onUpdateSelectedMembers?: (members: any[]) => void;
@@ -28,6 +29,7 @@ const DeptMember = (props: IProps) => {
     loading,
     selectedMembers,
     isMultiple = true,
+    resetFlag = false,
     onExpand,
     onSearch,
     onUpdateSelectedMembers
@@ -53,7 +55,11 @@ const DeptMember = (props: IProps) => {
       // 当弹窗可见时，更新面包屑
       setBreadcrumbs([{ key: renderData.key || '-', title: renderData.title || '根目录' }]);
     }
-  }, [visible, initialSelectedMembers])
+  }, [visible, initialSelectedMembers]);
+
+  useEffect(() => {
+    resetState();
+  }, [resetFlag]);
 
   const removeMember = (key: string) => {
     const newKeys = selectedKeys.filter((k) => k !== key);

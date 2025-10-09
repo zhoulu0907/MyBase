@@ -84,9 +84,18 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
     setCurrentSelectUserID(value);
   }
 
+  const handleRemove = (e: React.MouseEvent<SVGElement, MouseEvent>) => {
+    // 阻止下拉框弹出
+    e.stopPropagation();
+    setCurrentSelectUser(undefined);
+    setCurrentSelectUserID(undefined);
+    form.setFieldValue(fieldName, undefined);
+  }
+
   const handleOKModal = (user: any) => {
     form.setFieldValue(fieldName, user.value);
     setCurrentSelectUser(user.name);
+    setCurrentSelectUserID(user.value);
     setAdvanceVisible(false);
   };
 
@@ -161,11 +170,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
                     </Avatar>
                     <span className='displayName'> {currentSelectUser} </span>
                     <IconClose className='closeBtn'
-                        onClick={(e) => {
-                          // 阻止下拉框弹出
-                          e.stopPropagation();
-                          form.setFieldValue(fieldName, undefined);
-                        }}/>
+                        onClick={(e) => {handleRemove(e)}}/>
                 </span>);
           }}/>
       </Form.Item>

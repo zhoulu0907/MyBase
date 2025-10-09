@@ -38,11 +38,14 @@ const AddMembers = (props: IProps) => {
     onUpdateSelectedMembers
   } = props;
 
+  const [resetFlag, setResetFlag] = useState(false);
+
   const isSelectDepartment = title === 'specifiedDepartment';
   const isSelectPerson = title === 'specifiedPerson';
 
   // 点击取消时的处理函数
   const handleCancel = () => {
+    setResetFlag(flag => !flag);
     onCancel();
   };
 
@@ -78,6 +81,7 @@ const AddMembers = (props: IProps) => {
         data={data}
         loading={loading}
         selectedMembers={selectedMembers}
+        resetFlag={resetFlag}
         onExpand={onExpand}
         onSearch={onSearch}
         onUpdateSelectedMembers={onUpdateSelectedMembers}/>

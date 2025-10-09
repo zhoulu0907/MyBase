@@ -45,6 +45,8 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
     const [memberLoading, setMemberLoading] = useState<boolean>(false);
     const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
 
+    const [finalSelect, setFinalSelect] = useState<any>();
+
     useEffect(() => {
         if (runtime === true) {
           getUserData('');
@@ -53,10 +55,32 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
     }, []);
 
     useEffect(() => {
+      reset();
+    },[currentSelectUserID])
+
+    useEffect(() => {
+      if(visible) {
+        if(finalSelect) {
+          if(finalSelect.tab === UserTab) {
+            setSelectUser(finalSelect.value);
+            setSelectedMembers([]);
+          } else {
+            setSelectedMembers([finalSelect.value]);
+            setSelectUserName('');
+          }
+          setSelectUserName(finalSelect.name);
+        } else {
+          reset();
+        }
+      }
+    },[visible])
+
+    const reset = () => {
         setSelectUserName('');
         setSelectUser(undefined);
         setSelectedMembers([]);
-    },[currentSelectUserID])
+        setFinalSelect(undefined);
+    }
 
     const getUserData = async (inputValue: string) => {
         setFetching(true);
@@ -147,6 +171,12 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
      setSelectUser(undefined);
   };
 
+  const handleOnOk = () => {
+    const tab = selectUser ? UserTab : DeptTab;
+    setFinalSelect({name: selectUserName, value: selectUser || selectedMembers[0], tab: tab})
+    onOk({name: selectUserName, value: selectUser || selectedMembers[0].key})
+  }
+
   return (
     <>
         <Modal
@@ -162,7 +192,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
                 <>
                     <span className='footerSpan'>单选, 已选择「{selectUserName}」</span>
                     <Button onClick={onCancel}>取消</Button>
-                    <Button disabled={(selectedMembers.length === 0 && !selectUser)} onClick={() => onOk({name: selectUserName, value: selectUser || selectedMembers[0].key})} type="primary">确定</Button>
+                    <Button disabled={(selectedMembers.length === 0 && !selectUser)} onClick={handleOnOk} type="primary">确定</Button>
                 </>
             }
       >
