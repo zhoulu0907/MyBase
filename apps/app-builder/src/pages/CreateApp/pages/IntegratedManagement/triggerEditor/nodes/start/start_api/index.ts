@@ -1,4 +1,4 @@
-import iconStart from '@/assets/flow/nodes/start.svg';
+import iconStart from '@/assets/flow/nodes/startApi.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
