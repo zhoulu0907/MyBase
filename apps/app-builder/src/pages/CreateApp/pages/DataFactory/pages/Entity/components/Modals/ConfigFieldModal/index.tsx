@@ -22,7 +22,7 @@ interface FieldFormValues {
   fieldType: string;
   defaultValue: string;
   isUnique: number;
-  allowNull: number;
+  isRequired: number;
   isSystemField: number;
   sortOrder?: number;
   isDeleted?: boolean;
@@ -132,7 +132,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       fieldType: ENTITY_FIELD_TYPE.TEXT.VALUE,
       defaultValue: '',
       isUnique: 1,
-      allowNull: 1,
+      isRequired: 1,
       constraints: {
         lengthEnabled: 0,
         minLength: 0,
