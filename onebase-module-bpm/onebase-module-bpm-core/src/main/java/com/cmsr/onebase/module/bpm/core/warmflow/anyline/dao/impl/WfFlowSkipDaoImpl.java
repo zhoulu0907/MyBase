@@ -22,7 +22,6 @@ public class WfFlowSkipDaoImpl implements FlowSkipDao<WfFlowSkip> {
     @Override
     public WfFlowSkip newEntity() {
         WfFlowSkip wf = new WfFlowSkip();
-        wf.setFlowSkipDO(new BpmFlowSkipDO());
         return wf;
     }
 
@@ -59,15 +58,14 @@ public class WfFlowSkipDaoImpl implements FlowSkipDao<WfFlowSkip> {
 
     @Override
     public int save(WfFlowSkip entity) {
-        BpmFlowSkipDO data = entity.getFlowSkipDO();
-        flowSkipRepository.insert(data);
-        entity.setId(data.getId());
+        flowSkipRepository.insert(entity);
+        entity.setId(entity.getId());
         return 1;
     }
 
     @Override
     public int updateById(WfFlowSkip entity) {
-        flowSkipRepository.update(entity.getFlowSkipDO());
+        flowSkipRepository.update(entity);
         return 1;
     }
 
@@ -83,7 +81,9 @@ public class WfFlowSkipDaoImpl implements FlowSkipDao<WfFlowSkip> {
     @Override
     public int deleteById(Serializable id) {
         Long longId = convertToLong(id);
-        if (longId == null) return 0;
+        if (longId == null) {
+            return 0;
+        }
         flowSkipRepository.deleteById(longId);
         return 1;
     }
@@ -100,19 +100,25 @@ public class WfFlowSkipDaoImpl implements FlowSkipDao<WfFlowSkip> {
 
     @Override
     public void saveBatch(List<WfFlowSkip> list) {
-        for (WfFlowSkip e : list) save(e);
+        for (WfFlowSkip e : list) {
+            save(e);
+        }
     }
 
     @Override
     public void updateBatch(List<WfFlowSkip> list) {
-        for (WfFlowSkip e : list) updateById(e);
+        for (WfFlowSkip e : list) {
+            updateById(e);
+        }
     }
 
     @Override
     public int deleteSkipByDefIds(Collection<? extends Serializable> defIds) {
         int c = 0;
         for (Serializable id : defIds) {
-            if (id == null) continue;
+            if (id == null) {
+                continue;
+            }
             DefaultConfigStore cfg = new DefaultConfigStore();
             cfg.eq("definition_id", id);
             // 简化：按条件查询再逐条删
@@ -126,25 +132,42 @@ public class WfFlowSkipDaoImpl implements FlowSkipDao<WfFlowSkip> {
 
     private DefaultConfigStore buildConfig(WfFlowSkip e) {
         DefaultConfigStore c = new DefaultConfigStore();
-        if (e == null) return c;
-        if (e.getDefinitionId() != null) c.eq("definition_id", e.getDefinitionId());
-        if (e.getNowNodeCode() != null) c.eq("now_node_code", e.getNowNodeCode());
-        if (e.getNextNodeCode() != null) c.eq("next_node_code", e.getNextNodeCode());
-        if (e.getSkipType() != null) c.eq("skip_type", e.getSkipType());
+        if (e == null) {
+            return c;
+        }
+        if (e.getDefinitionId() != null) {
+            c.eq("definition_id", e.getDefinitionId());
+        }
+        if (e.getNowNodeCode() != null) {
+            c.eq("now_node_code", e.getNowNodeCode());
+        }
+        if (e.getNextNodeCode() != null) {
+            c.eq("next_node_code", e.getNextNodeCode());
+        }
+        if (e.getSkipType() != null) {
+            c.eq("skip_type", e.getSkipType());
+        }
         return c;
     }
 
     private WfFlowSkip convert(BpmFlowSkipDO data) {
         WfFlowSkip wf = new WfFlowSkip();
-        wf.setFlowSkipDO(data);
         return wf;
     }
 
     private Long convertToLong(Serializable id) {
-        if (id == null) return null;
-        if (id instanceof Long) return (Long) id;
-        if (id instanceof String) try { return Long.parseLong((String) id); } catch (NumberFormatException ignored) { return null; }
-        if (id instanceof Number) return ((Number) id).longValue();
+        if (id == null) {
+            return null;
+        }
+        if (id instanceof Long) {
+            return (Long) id;
+        }
+        if (id instanceof String) {
+            try { return Long.parseLong((String) id); } catch (NumberFormatException ignored) { return null; }
+        }
+        if (id instanceof Number) {
+            return ((Number) id).longValue();
+        }
         return null;
     }
 }

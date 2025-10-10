@@ -4,7 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.dromara.warm.flow.core.entity.HisTask;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,7 +18,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @Table(name = "flow_his_task")
-public class BpmFlowHisTaskDO extends BpmWarmFlowBaseDO {
+public class BpmFlowHisTaskDO extends BpmWarmFlowBaseDO implements HisTask {
 
     /** 流程定义ID */
     @Column(name = "definition_id", nullable = false)
@@ -107,6 +109,45 @@ public class BpmFlowHisTaskDO extends BpmWarmFlowBaseDO {
      * 流程名称
      */
     private String flowName;
+
+
+    /* ==================== 以下为 HisTask 接口方法实现 ==================== */
+
+    @Override
+    public HisTask setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public HisTask setCreateTime(Date createTime) {
+        this.createTime = createTime;
+        return this;
+    }
+
+    @Override
+    public HisTask setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+        return this;
+    }
+
+    @Override
+    public HisTask setTenantId(String tenantId) {
+        this.tenantId = Long.valueOf(tenantId);
+        return this;
+    }
+
+    @Override
+    public HisTask setDelFlag(String delFlag) {
+        this.delFlag = Long.valueOf(delFlag);
+        return this;
+    }
+
+    @Override
+    public HisTask setCreateBy(String createBy) {
+        this.createBy = Long.valueOf(createBy);
+        return this;
+    }
 }
 
 

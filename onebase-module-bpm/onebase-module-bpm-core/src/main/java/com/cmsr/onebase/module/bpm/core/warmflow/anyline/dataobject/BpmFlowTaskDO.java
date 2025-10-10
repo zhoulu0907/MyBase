@@ -4,6 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.dromara.warm.flow.core.entity.Skip;
+import org.dromara.warm.flow.core.entity.Task;
+import org.dromara.warm.flow.core.entity.User;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * WarmFlow 待办任务 DO，对应表 flow_task。
@@ -14,7 +20,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @Table(name = "flow_task")
-public class BpmFlowTaskDO extends BpmWarmFlowBaseDO {
+public class BpmFlowTaskDO extends BpmWarmFlowBaseDO implements Task {
 
     /** 对应flow_definition表的id */
     @Column(name = "definition_id", nullable = false)
@@ -48,7 +54,58 @@ public class BpmFlowTaskDO extends BpmWarmFlowBaseDO {
     @Column(name = "form_path", length = 100)
     private String formPath;
 
-    /** 业务id */
-    @Column(name = "business_id", length = 40)
+    /* ==================== 以下为非数据库字段 ==================== */
+    /**
+     * 流程名称
+     */
+    private String flowName;
+
+    /**
+     * 业务id
+     */
     private String businessId;
+
+
+    /**
+     * 权限标识 permissionFlag的list形式
+     */
+    private List<String> permissionList;
+
+    /**
+     * 流程用户列表
+     */
+    private List<User> userList;
+
+
+    /* ==================== 以下为 Task 接口方法实现 ==================== */
+
+    @Override
+    public Task setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public Task setCreateTime(Date createTime) {
+        this.createTime = createTime;
+        return this;
+    }
+
+    @Override
+    public Task setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+        return this;
+    }
+
+    @Override
+    public Task setTenantId(String tenantId) {
+        this.tenantId = Long.valueOf(tenantId);
+        return this;
+    }
+
+    @Override
+    public Task setDelFlag(String delFlag) {
+        this.delFlag = Long.valueOf(delFlag);
+        return this;
+    }
 }

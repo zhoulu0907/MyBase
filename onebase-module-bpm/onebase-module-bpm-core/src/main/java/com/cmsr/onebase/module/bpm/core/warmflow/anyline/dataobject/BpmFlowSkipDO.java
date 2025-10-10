@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.dromara.warm.flow.core.entity.Skip;
+
+import java.util.Date;
 
 /**
  * WarmFlow 节点跳转关系 DO，对应表 flow_skip。
@@ -14,7 +17,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @Table(name = "flow_skip")
-public class BpmFlowSkipDO extends BpmWarmFlowBaseDO {
+public class BpmFlowSkipDO extends BpmWarmFlowBaseDO implements Skip {
 
     /** 流程定义ID */
     @Column(name = "definition_id", nullable = false)
@@ -57,6 +60,38 @@ public class BpmFlowSkipDO extends BpmWarmFlowBaseDO {
      * 节点ID
      */
     private Long nodeId;
+
+    /* ==================== 以下为 Skip 接口方法实现 ==================== */
+
+    @Override
+    public Skip setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public Skip setCreateTime(Date createTime) {
+        this.createTime = createTime;
+        return this;
+    }
+
+    @Override
+    public Skip setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+        return this;
+    }
+
+    @Override
+    public Skip setTenantId(String tenantId) {
+        this.tenantId = Long.valueOf(tenantId);
+        return this;
+    }
+
+    @Override
+    public Skip setDelFlag(String delFlag) {
+        this.delFlag = Long.valueOf(delFlag);
+        return this;
+    }
 }
 
 

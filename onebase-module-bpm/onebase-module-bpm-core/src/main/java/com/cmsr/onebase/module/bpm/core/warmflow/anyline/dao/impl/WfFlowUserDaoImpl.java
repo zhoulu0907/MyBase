@@ -22,7 +22,6 @@ public class WfFlowUserDaoImpl implements FlowUserDao<WfFlowUser> {
     @Override
     public WfFlowUser newEntity() {
         WfFlowUser wf = new WfFlowUser();
-        wf.setFlowUserDO(new BpmFlowUserDO());
         return wf;
     }
 
@@ -61,15 +60,14 @@ public class WfFlowUserDaoImpl implements FlowUserDao<WfFlowUser> {
 
     @Override
     public int save(WfFlowUser entity) {
-        BpmFlowUserDO data = entity.getFlowUserDO();
-        flowUserRepository.insert(data);
-        entity.setId(data.getId());
+        flowUserRepository.insert(entity);
+        entity.setId(entity.getId());
         return 1;
     }
 
     @Override
     public int updateById(WfFlowUser entity) {
-        flowUserRepository.update(entity.getFlowUserDO());
+        flowUserRepository.update(entity);
         return 1;
     }
 
@@ -85,7 +83,9 @@ public class WfFlowUserDaoImpl implements FlowUserDao<WfFlowUser> {
     @Override
     public int deleteById(Serializable id) {
         Long longId = convertToLong(id);
-        if (longId == null) return 0;
+        if (longId == null) {
+            return 0;
+        }
         flowUserRepository.deleteById(longId);
         return 1;
     }
@@ -102,20 +102,30 @@ public class WfFlowUserDaoImpl implements FlowUserDao<WfFlowUser> {
 
     @Override
     public void saveBatch(List<WfFlowUser> list) {
-        for (WfFlowUser e : list) save(e);
+        for (WfFlowUser e : list) {
+            save(e);
+        }
     }
 
     @Override
     public void updateBatch(List<WfFlowUser> list) {
-        for (WfFlowUser e : list) updateById(e);
+        for (WfFlowUser e : list) {
+            updateById(e);
+        }
     }
 
     @Override
     public List<WfFlowUser> listByProcessedBys(Long associated, List<String> processedBys, String[] types) {
         DefaultConfigStore c = new DefaultConfigStore();
-        if (associated != null) c.eq("associated", associated);
-        if (processedBys != null && !processedBys.isEmpty()) c.in("processed_by", processedBys);
-        if (types != null && types.length > 0) c.in("type", types);
+        if (associated != null) {
+            c.eq("associated", associated);
+        }
+        if (processedBys != null && !processedBys.isEmpty()) {
+            c.in("processed_by", processedBys);
+        }
+        if (types != null && types.length > 0) {
+            c.in("type", types);
+        }
         List<BpmFlowUserDO> list = flowUserRepository.findAllByConfig(c);
         return list.stream().map(this::convert).collect(Collectors.toList());
     }
@@ -123,15 +133,21 @@ public class WfFlowUserDaoImpl implements FlowUserDao<WfFlowUser> {
     @Override
     public List<WfFlowUser> listByAssociatedAndTypes(List<Long> associatedList, String[] types) {
         DefaultConfigStore c = new DefaultConfigStore();
-        if (associatedList != null && !associatedList.isEmpty()) c.in("associated", associatedList);
-        if (types != null && types.length > 0) c.in("type", types);
+        if (associatedList != null && !associatedList.isEmpty()) {
+            c.in("associated", associatedList);
+        }
+        if (types != null && types.length > 0) {
+            c.in("type", types);
+        }
         List<BpmFlowUserDO> list = flowUserRepository.findAllByConfig(c);
         return list.stream().map(this::convert).collect(Collectors.toList());
     }
 
     @Override
     public int deleteByTaskIds(List<Long> taskIds) {
-        if (taskIds == null || taskIds.isEmpty()) return 0;
+        if (taskIds == null || taskIds.isEmpty()) {
+            return 0;
+        }
         DefaultConfigStore c = new DefaultConfigStore();
         c.in("associated", taskIds);
         List<BpmFlowUserDO> list = flowUserRepository.findAllByConfig(c);
@@ -147,24 +163,39 @@ public class WfFlowUserDaoImpl implements FlowUserDao<WfFlowUser> {
 
     private DefaultConfigStore buildConfig(WfFlowUser e) {
         DefaultConfigStore c = new DefaultConfigStore();
-        if (e == null) return c;
-        if (e.getType() != null) c.eq("type", e.getType());
-        if (e.getProcessedBy() != null) c.eq("processed_by", e.getProcessedBy());
-        if (e.getAssociated() != null) c.eq("associated", e.getAssociated());
+        if (e == null) {
+            return c;
+        }
+        if (e.getType() != null) {
+            c.eq("type", e.getType());
+        }
+        if (e.getProcessedBy() != null) {
+            c.eq("processed_by", e.getProcessedBy());
+        }
+        if (e.getAssociated() != null) {
+            c.eq("associated", e.getAssociated());
+        }
         return c;
     }
 
     private WfFlowUser convert(BpmFlowUserDO data) {
         WfFlowUser wf = new WfFlowUser();
-        wf.setFlowUserDO(data);
         return wf;
     }
 
     private Long convertToLong(Serializable id) {
-        if (id == null) return null;
-        if (id instanceof Long) return (Long) id;
-        if (id instanceof String) try { return Long.parseLong((String) id); } catch (NumberFormatException ignored) { return null; }
-        if (id instanceof Number) return ((Number) id).longValue();
+        if (id == null) {
+            return null;
+        }
+        if (id instanceof Long) {
+            return (Long) id;
+        }
+        if (id instanceof String) {
+            try { return Long.parseLong((String) id); } catch (NumberFormatException ignored) { return null; }
+        }
+        if (id instanceof Number) {
+            return ((Number) id).longValue();
+        }
         return null;
     }
 }

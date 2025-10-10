@@ -61,7 +61,7 @@ public class WfFlowDefinitionDaoImpl implements FlowDefinitionDao<WfFlowDefiniti
     }
 
     @Override
-    public WfFlowDeffinition selectById(Serializable id) {
+    public WfFlowDefinition selectById(Serializable id) {
         Long longId = convertToLong(id);
         if (longId == null) {
             return null;
@@ -192,7 +192,7 @@ public class WfFlowDefinitionDaoImpl implements FlowDefinitionDao<WfFlowDefiniti
      */
     private WfFlowDefinition convertToWfFlowDefinitionDov2(BpmFlowDefinitionDO bpmFlowDefinitionDO) {
         WfFlowDefinition wfFlowDefinitionDov2 = new WfFlowDefinition();
-        wfFlowDefinitionDov2.setFlowDefinitionDO(bpmFlowDefinitionDO);
+        // wfFlowDefinitionDov2.setFlowDefinitionDO(bpmFlowDefinitionDO);
         return wfFlowDefinitionDov2;
     }
 
@@ -200,7 +200,7 @@ public class WfFlowDefinitionDaoImpl implements FlowDefinitionDao<WfFlowDefiniti
      * 将 WfFlowDefinitionDov2 转换为 FlowDefinitionDO
      */
     private BpmFlowDefinitionDO convertToFlowDefinitionDO(WfFlowDefinition wfFlowDefinitionDov2) {
-        return wfFlowDefinitionDov2.getFlowDefinitionDO();
+        return wfFlowDefinitionDov2;
     }
 
     /**

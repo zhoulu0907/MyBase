@@ -29,7 +29,6 @@ public class WfFlowTaskDaoImpl implements FlowTaskDao<WfFlowTask> {
     @Override
     public WfFlowTask newEntity() {
         WfFlowTask wfFlowTaskDo = new WfFlowTask();
-        wfFlowTaskDo.setFlowTaskDO(new BpmFlowTaskDO());
         return wfFlowTaskDo;
     }
 
@@ -177,7 +176,6 @@ public class WfFlowTaskDaoImpl implements FlowTaskDao<WfFlowTask> {
      */
     private WfFlowTask convertToWfFlowTaskDo(BpmFlowTaskDO flowTaskDO) {
         WfFlowTask wfFlowTaskDo = new WfFlowTask();
-        wfFlowTaskDo.setFlowTaskDO(flowTaskDO);
         return wfFlowTaskDo;
     }
 
@@ -185,7 +183,7 @@ public class WfFlowTaskDaoImpl implements FlowTaskDao<WfFlowTask> {
      * 将 WfFlowTaskDo 转换为 FlowTaskDO
      */
     private BpmFlowTaskDO convertToFlowTaskDO(WfFlowTask wfFlowTaskDo) {
-        return wfFlowTaskDo.getFlowTaskDO();
+        return wfFlowTaskDo;
     }
 
     /**

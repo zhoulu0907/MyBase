@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.dromara.warm.flow.core.entity.Instance;
+
+import java.util.Date;
 
 /**
  * WarmFlow 流程实例 DO，对应表 flow_instance。
@@ -14,7 +17,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @Table(name = "flow_instance")
-public class BpmFlowInstanceDO extends BpmWarmFlowBaseDO {
+public class BpmFlowInstanceDO extends BpmWarmFlowBaseDO implements Instance {
 
     /** 对应flow_definition表的id */
     @Column(name = "definition_id", nullable = false)
@@ -63,4 +66,47 @@ public class BpmFlowInstanceDO extends BpmWarmFlowBaseDO {
     /** 审批表单路径 */
     @Column(name = "form_path", length = 100)
     private String formPath;
+
+
+    /* ==================== 以下为 Instance 接口方法实现 ==================== */
+
+    @Override
+    public Instance setId(Long id) {
+        return this;
+    }
+
+    @Override
+    public Instance setCreateTime(Date createTime) {
+        return null;
+    }
+
+    @Override
+    public Instance setUpdateTime(Date updateTime) {
+        return null;
+    }
+
+    @Override
+    public Instance setTenantId(String tenantId) {
+        return null;
+    }
+
+    @Override
+    public Instance setDelFlag(String delFlag) {
+        return null;
+    }
+
+    @Override
+    public String getFlowName() {
+        return null;
+    }
+
+    @Override
+    public Instance setFlowName(String flowName) {
+        return null;
+    }
+
+    @Override
+    public Instance setCreateBy(String createBy) {
+        return null;
+    }
 }

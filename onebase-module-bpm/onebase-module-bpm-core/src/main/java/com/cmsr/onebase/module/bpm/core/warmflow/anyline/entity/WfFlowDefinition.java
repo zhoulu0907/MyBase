@@ -17,7 +17,9 @@ package com.cmsr.onebase.module.bpm.core.warmflow.anyline.entity;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.bpm.core.warmflow.anyline.dataobject.BpmFlowDefinitionDO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.entity.Node;
@@ -35,8 +37,7 @@ import java.util.function.Consumer;
  * @author warm
  * @since 2023-03-29
  */
-@Data
-public class WfFlowDefinition extends BaseDO implements Definition {
+public class WfFlowDefinition extends BpmFlowDefinitionDO {
 //    @Delegate
 //    private BpmFlowDefinitionDO flowDefinitionDO;
 //
