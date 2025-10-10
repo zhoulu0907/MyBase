@@ -3,14 +3,14 @@
 import {
   type CreateApplicationReq,
   type DeleteApplicationReq,
-  type ListApplicationReq,
   type UpdateApplicationNameReq,
   type UpdateApplicationReq,
   type GetApplicationReq
 } from '../types/application';
 import { appService } from './clients';
+import { type PageParam } from '../types/common';
 
-export const listApplication = (params: ListApplicationReq) => {
+export const listApplication = (params: PageParam) => {
   return appService.get('/application/page', params);
 };
 

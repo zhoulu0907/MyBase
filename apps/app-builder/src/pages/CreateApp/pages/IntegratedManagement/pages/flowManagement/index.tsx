@@ -25,9 +25,10 @@ import {
   TriggerType,
   updateFlowMgmt,
   type CreateFlowMgmtReq,
-  type ListFlowMgmtReq,
+  type PageParam,
   type UpdateFlowMgmtReq
 } from '@onebase/app';
+import { getCommonPaginationList } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -206,7 +207,7 @@ const FlowManagementPage: React.FC = () => {
     triggerType?: TriggerType
   ) => {
     setLoading(true);
-    const req: ListFlowMgmtReq = {
+    const req: PageParam = {
       applicationId: appId ? appId : curAppId,
       pageNo: pageNo,
       pageSize: pageSize || 8,
@@ -214,11 +215,13 @@ const FlowManagementPage: React.FC = () => {
       processStatus: processStatus ? processStatus : searchFlowProccessStatus,
       triggerType: triggerType ? triggerType : searchTriggerType
     };
-
-    const res = await listFlowMgmt(req);
-    setFlowMgmtList(res.list || []);
-    setTotal(res.total || 0);
-    setLoading(false);
+    const res = await getCommonPaginationList(listFlowMgmt, req, setPageNo);
+    if (res) {
+      // const res = await listFlowMgmt(req);
+      setFlowMgmtList(res.list || []);
+      setTotal(res.total || 0);
+      setLoading(false);
+    }
   };
 
   const getTriggerTypeList = () => {

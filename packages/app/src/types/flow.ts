@@ -24,16 +24,6 @@ export enum TriggerType {
   BPM = 'bpm'
 }
 
-export interface ListFlowMgmtReq {
-  pageNo: number;
-  pageSize: number;
-
-  applicationId: string;
-  processName?: string;
-  processStatus?: ProcessStatus;
-  triggerType?: string;
-}
-
 export interface TriggerConfig {
   pageId?: string;
   entityId?: string;
