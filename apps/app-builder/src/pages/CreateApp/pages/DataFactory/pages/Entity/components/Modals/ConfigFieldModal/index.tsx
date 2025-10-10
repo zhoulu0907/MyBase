@@ -192,8 +192,9 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       const formValues = await form.validate();
       console.log('formValues', formValues);
 
-      // 获取所有非系统字段（包括标记删除的字段）
-      const nonSystemFields = fields.filter(field => field.isSystemField === FIELD_TYPE.CUSTOM);
+      // 获取最新数据，再进行过滤
+      const mergedFields = getCurrentTableData();
+      const nonSystemFields = mergedFields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
 
       const fieldDataList = nonSystemFields.map((field: FieldFormValues) => {
         const fieldData = {
@@ -324,10 +325,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   // 将表单数据转换为表格数据
   const getCurrentTableData = (formFields?: Partial<FieldFormValues>) => {
     const formValues = form.getFieldsValue();
-    const fields = formFields || formValues.fields || [];
+    const formListFields = formFields || formValues.fields || [];
 
-    return activeFields.map((originalField, index) => {
-      const formField = fields[index];
+    return fields.map((originalField, index) => {
+      const formField = formListFields[index];
       if (formField) {
         return {
           ...originalField,
