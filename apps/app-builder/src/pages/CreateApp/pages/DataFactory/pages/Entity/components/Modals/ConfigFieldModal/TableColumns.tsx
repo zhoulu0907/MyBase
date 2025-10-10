@@ -38,7 +38,7 @@ interface TableColumnsProps {
   setConstraintsPopoverVisible: (id: string | null) => void;
   renderFieldConfigContent: (fieldType: string, fieldId: string) => React.ReactNode;
   getFieldIndex: (fieldId: string, index: number) => number;
-  deleteField: (index: number) => void;
+  deleteField: (id: string) => void;
   fields: FieldFormValues[];
 }
 
@@ -246,10 +246,9 @@ const TableColumns = ({
       width: 80,
       align: 'center',
       render: (value: unknown, record: FieldFormValues) => {
-        const fieldIndex = fields.findIndex((f) => f.id === record.id);
         return (
           record.isSystemField === FIELD_TYPE.CUSTOM && (
-            <Button type="text" status="danger" size="mini" onClick={() => deleteField(fieldIndex)}>
+            <Button type="text" status="danger" size="mini" onClick={() => deleteField(record.id)}>
               删除
             </Button>
           )
