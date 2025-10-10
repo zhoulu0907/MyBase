@@ -10,6 +10,8 @@ const XInfoNotice = memo((props: XInfoNoticeConfig & { runtime?: boolean }) => {
     <Card
       style={{
         width: '100%',
+        borderRadius: 8,
+        boxSizing: 'border-box',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
         display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'block'
       }}

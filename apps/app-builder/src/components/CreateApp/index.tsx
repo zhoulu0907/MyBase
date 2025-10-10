@@ -19,8 +19,10 @@ import formSVG from '@/assets/images/form_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
 import tickSVG from '@/assets/images/tick_icon.svg';
 import previewSVG from '@/assets/images/app_preview.svg';
-import { appIcon, appIconColor, appIconPathMapping, appThemeColor, type Options } from './const';
+import checkIcon from '@/assets/images/check_icon.svg';
+import { appIcon, appIconColor, appThemeColor, iconMap, type Options } from './const';
 import styles from './index.module.less';
+import DynamicIcon from '../DynamicIcon';
 
 type AppStatus = 'create' | 'update';
 interface IProps {
@@ -127,12 +129,6 @@ const CreateApp = (props: IProps) => {
     form.setFieldsValue({ tagIds: normalized });
   };
 
-  /* 根据mapping获取相应的svg路径*/
-  const getIconName = (iconName: string) => {
-    const selectedIconResult = appIconPathMapping.filter(item => item.icon === iconName);
-    return selectedIconResult?.[0]?.path || ""
-  }
-
   return (
     <div className={styles.createApp} style={style}>
       <div className={styles.preview} style={{ backgroundColor: previewBgColor }}>
@@ -201,7 +197,14 @@ const CreateApp = (props: IProps) => {
                 background: iconColor
               }}
             >
-              {iconName && <img src={getIconName(iconName)} className={styles.selectedIconParkColor}/>}
+              {iconName && (
+                <DynamicIcon
+                  IconComponent={iconMap[iconName as keyof typeof iconMap]}
+                  theme="outline"
+                  size="40"
+                  fill="#F2F3F5"
+                />
+              )}
               <Popconfirm
                 icon={null}
                 title={null}
@@ -218,20 +221,23 @@ const CreateApp = (props: IProps) => {
                   setIconName('');
                   setIconColor('');
                 }}
-                style={{maxWidth:"381px"}}
+                style={{ maxWidth: '381px' }}
                 content={
                   <>
                     <div className={styles.avatarWrapper}>
-                      {appIconPathMapping.map((item, index) => (
+                      {appIcon.map((item, index) => (
                         <div
                           className={styles.avatar}
                           key={index}
-                          style={{ backgroundColor: item.icon === iconName ? iconColor : '#F2F3F5' }}
-                          onClick={() => setIconName(item.icon)}
+                          style={{ backgroundColor: item === iconName ? iconColor : '#F2F3F5' }}
+                          onClick={() => setIconName(item)}
                         >
-                          {/* <i className={`iconfont ${icon}`} /> */}
-                          {/* <IconPark iconName={icon}/> */}
-                          <img src={item.path} />
+                          <DynamicIcon
+                            IconComponent={iconMap[item as keyof typeof iconMap]}
+                            theme="outline"
+                            size="24"
+                            fill={item === iconName ? '#F2F3F5' : '#272E3B'}
+                          />
                         </div>
                       ))}
                     </div>
@@ -240,9 +246,11 @@ const CreateApp = (props: IProps) => {
                         <div
                           className={styles.color}
                           key={index}
-                          style={{ backgroundColor: color, borderWidth: color === iconColor ? 1 : 0 }}
+                          style={{ backgroundColor: color }}
                           onClick={() => setIconColor(color)}
-                        />
+                        >
+                          {color === iconColor && <img src={checkIcon} />}
+                        </div>
                       ))}
                     </div>
                   </>

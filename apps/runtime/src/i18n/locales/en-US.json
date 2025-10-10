@@ -53,5 +53,8 @@
     "forbidden": "Access forbidden",
     "notFound": "Page not found",
     "unknownError": "Unknown error"
+  },
+  "app": {
+    "searchPlaceHolder": "Search Page Or Group"
   }
 }

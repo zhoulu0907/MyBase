@@ -1,5 +1,5 @@
 import XAutoCode from './FormComponents/AutoCode/schema';
-import XFCarousel from './FormComponents/Carousel/schema';
+import XCarouselForm from './FormComponents/Carousel/schema';
 import XCheckbox from './FormComponents/Checkbox/schema';
 import XDataSelect from './FormComponents/DataSelect/schema';
 import XDatePicker from './FormComponents/DatePicker/schema';
@@ -64,7 +64,7 @@ const baseSchema = {
   XRelatedForm,
   XStaticText,
   XRichText,
-  XFCarousel,
+  XCarouselForm,
   XSubTable,
   XDataSelect,
 

@@ -30,6 +30,9 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean }) =
         <Select
           placeholder="请选择"
           showSearch={showSearch}
+          filterOption={(input, option) => {
+            return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+          }}
           allowClear
           options={defaultValue}
           style={{

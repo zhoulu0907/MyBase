@@ -3,16 +3,29 @@
   height: 100vh;
   display: flex;
   flex-direction: row;
-  background: rgba(245, 245, 245, 1);
 
   // 左侧区域
   .loginPageLeft {
     flex: 1;
+    background-color: #e4f6fa;
     position: relative;
     overflow: hidden;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .loginBg {
+      width: 100%;
+      height: 100%;
+      object-fit: none;
+      object-position: center;
+      background-color: transparent;
+    }
   }
 
   // 右侧区域

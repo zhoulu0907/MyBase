@@ -35,11 +35,12 @@ import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
 import CreateApp from '@/components/CreateApp';
-import { appIconPathMapping, type Options } from '@/components/CreateApp/const';
+import { iconMap, type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
+import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
+import { hasPermission /* UserPermissionManager */ } from '@/utils/permission';
 import TagModal from './components/tagModal';
 import {
   appOptions,
@@ -129,9 +130,14 @@ const MyAppPage: React.FC = () => {
       status: status === '' ? null : Number(status)
     };
     const res = await listApplication(req);
-    setDataList(res.list || []);
-    setTotal(res.total || 0);
-    setLoading(false);
+    if ((!res.list || res.list.length === 0) && res.total != 0 && pageNo > 1) {
+      const newPageNo = pageNo - 1;
+      setPageNo(newPageNo);
+    } else {
+      setDataList(res.list || []);
+      setTotal(res.total || 0);
+      setLoading(false);
+    }
   };
 
   const debouncedUpdate = useCallback(
@@ -244,11 +250,6 @@ const MyAppPage: React.FC = () => {
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
-        {/* <div className={styles.myAppWelcome}>
-          Hi {UserPermissionManager.getUserPermissionInfo()?.user.nickname || '用户'}
-          ，您好！
-        </div> */}
-
         <PermissionButton
           permission={ACTIONS.CREATE}
           type="default"
@@ -362,7 +363,12 @@ const MyAppPage: React.FC = () => {
                     <div className={styles.myAppCardHeader}>
                       <div className={styles.myAppName}>
                         <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
-                          <img src={appIconPathMapping.find(icon => icon.icon === item.iconName)?.path || ''} />
+                          <DynamicIcon
+                            IconComponent={iconMap[item.iconName as keyof typeof iconMap]}
+                            theme="filled"
+                            size="32"
+                            fill="#F2F3F5"
+                          />
                         </div>
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.myAppTitle}>{item.appName}</div>
