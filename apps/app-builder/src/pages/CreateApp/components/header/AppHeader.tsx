@@ -30,7 +30,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useI18n();
-  const { curAppId, setCurAppId } = useAppStore();
+  const { curAppId, setCurAppId, curAppInfo, setCurAppInfo } = useAppStore();
 
   // Tab 切换
   // 根据当前路径设置 activeTab
@@ -43,10 +43,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     return 'page-manager';
   };
   const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
-  const [appName, setAppName] = useState('未命名应用');
-  const [appIcon, setAppIcon] = useState('');
-  const [iconColor, setIconColor] = useState('');
-  const [appStatus, setAppStatus] = useState(0);
   const [activeIndex, setActiveIndex] = useState(tabsList.findIndex(tab => location.pathname.includes(tab)));
 
   useEffect(() => {
@@ -69,18 +65,12 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     };
     const appResp = await getApplication(appReq);
     if (appResp) {
-      if (appResp.iconName) {
-        setAppIcon(appResp.iconName);
-      }
-      if (appResp.iconColor) {
-        setIconColor(appResp.iconColor);
-      }
-      if (appResp.appName) {
-        setAppName(appResp.appName);
-      }
-      if (appResp.appStatus) {
-        setAppStatus(appResp.appStatus);
-      }
+      setCurAppInfo({
+        iconName: appResp.iconName || '',
+        iconColor: appResp.iconColor || '',
+        appName: appResp.appName || '--',
+        appStatus: appResp.appStatus || 0
+      })
     }
   };
 
@@ -128,25 +118,25 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             <img src={AppIconSVG} alt="application icon" />
           </div>
 
-          <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
+          <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo?.iconColor }}>
             <DynamicIcon
-              IconComponent={iconMap[appIcon as keyof typeof iconMap]}
+              IconComponent={iconMap[curAppInfo?.iconName as keyof typeof iconMap]}
               theme="outline"
               size="14"
               fill="#F2F3F5"
             />
           </div>
-          <div className={styles.appName}>{appName}</div>
+          <div className={styles.appName}>{curAppInfo?.appName}</div>
 
-          {appStatus == AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
-
-          {appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}
-          {appStatus == AppStatus.EDITING_AFTER_PUBLISH && (
+          {curAppInfo?.appStatus === AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
+          {curAppInfo?.appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}
+          {curAppInfo?.appStatus == AppStatus.EDITING_AFTER_PUBLISH && (
             <div className={styles.appStatusEditAfterPublished}>已发布</div>
           )}
         </div>
 
         <Tabs
+          className='createAppTabs'
           type="line"
           activeTab={activeTab}
           onChange={(key) => {
@@ -172,10 +162,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             }
           }}
           size="large"
-          inkBarSize={{
-            width: 0,
-            height: 0
-          }}
           renderTabTitle={(tabTitle, info) => {
             const currentIndex = tabsList.findIndex(tab => tab === info.key);
             const tabBg = () => {
