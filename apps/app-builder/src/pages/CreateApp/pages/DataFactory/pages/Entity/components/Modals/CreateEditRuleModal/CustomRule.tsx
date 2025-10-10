@@ -191,25 +191,33 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
   const loadFieldOptions = async () => {
     const res = await getEntityFieldsWithChildren(entity.id);
     // 处理主表字段
-    const parentFields = (res?.parentFields || []).map((item: { displayName: string; fieldId: string }) => ({
-      label: item.displayName,
-      value: item.fieldId,
-      isParent: true
-    }));
+    const parentFields = [
+      {
+        key: res.entityId,
+        title: res.entityName,
+        children: res?.parentFields.map((item) => {
+          return {
+            key: item.fieldId,
+            title: item.displayName,
+            fieldType: item.fieldType
+          };
+        })
+      }
+    ];
 
     // 处理子表字段
     const childFields = (res?.childEntities || [])
       .flatMap((entity: { childFields: { displayName: string; fieldId: string }[] }) => entity?.childFields || [])
       .map((item: { displayName: string; fieldId: string }) => ({
-        label: item.displayName,
-        value: item.fieldId,
+        title: item.displayName,
+        key: item.fieldId,
         fieldType: item.fieldType
       }));
     const allFields = [...parentFields, ...childFields];
     setAllOptions(allFields);
     setParentOptions(parentFields);
 
-    getFieldCheckType(allFields.map((item) => item.value));
+    getFieldCheckType(res?.parentFields?.map((item) => item.fieldId));
   };
 
   // 批量获取字段可选校验类型
