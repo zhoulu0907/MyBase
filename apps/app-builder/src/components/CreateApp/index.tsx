@@ -263,7 +263,7 @@ const CreateApp = (props: IProps) => {
             <Form.Item
               field="appCode"
               label="应用编码"
-              disabled
+              disabled={status === 'update' ? true : false}
               rules={[
                 { required: true, message: '请填写应用编码' },
                 { maxLength: 40, message: '长度超过限制' },
