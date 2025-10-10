@@ -6,6 +6,7 @@ import DetailDrawer from '../Drawers/DetailDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
 import { FIELD_TYPE } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
+import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
 import { GridNodePositioner, performAutoLayout, SectionCollapseHandler } from './utils';
 import { useNewNodeStore } from '@/store/store_entity';
@@ -399,7 +400,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (
             target.closest('#collapse-icon') ||
             target.closest('#status-change-icon') ||
-            target.closest('#node-footer')
+            target.closest('#node-footer') ||
+            target.closest(`.${nodeStyles['field-section-content']}`)
           ) {
             e.stopPropagation();
             return;
@@ -429,7 +431,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (
             target.closest('#collapse-icon') ||
             target.closest('#status-change-icon') ||
-            target.closest('#node-footer')
+            target.closest('#node-footer') ||
+            target.closest(`.${nodeStyles['field-section-content']}`)
           ) {
             e.stopPropagation();
             return;
