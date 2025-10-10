@@ -3,6 +3,7 @@ import { Node } from '@antv/x6';
 import { Button, Popover, Space, Switch } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';
 import { ENTITY_FIELD_TYPE, ENTITY_STATUS, FIELD_TYPE, SYSTEM_FIELD_MAP } from '@onebase/ui-kit';
+import { useFieldStore } from '@/store/store_field';
 import React, { useEffect, useState } from 'react';
 import styles from './ERnode.module.less';
 import { useNewNodeStore } from '@/store/store_entity';
@@ -33,6 +34,8 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   // 从 node 的 data 中获取节点数据
   const nodeData = (node.getData() as NodeData)?.data;
   const { newNodes } = useNewNodeStore();
+
+  const { fieldTypes } = useFieldStore();
 
   useEffect(() => {
     // 系统字段默认折叠触发边重连
@@ -208,7 +211,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                     {SYSTEM_FIELD_MAP[field.fieldName as keyof typeof SYSTEM_FIELD_MAP] || field.fieldName}
                   </span>
                   <span className={styles['field-type']}>
-                    {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]?.LABEL || field.fieldType}
+                    {fieldTypes.find((item) => item.fieldType === field.fieldType)?.displayName || field.fieldType}
                   </span>
                 </div>
               ))}
