@@ -27,6 +27,12 @@
             <version>${revision}</version>
         </dependency>
 
+        <!-- OneBase框架依赖 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-common</artifactId>
+        </dependency>
+
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -57,6 +63,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- 系统模块依赖 (提供 PermissionCommonApi, OAuth2TokenCommonApi, TenantCommonApi) -->
+<!--        <dependency>-->
+<!--            <groupId>com.cmsr.onebase</groupId>-->
+<!--            <artifactId>onebase-module-system-core</artifactId>-->
+<!--        </dependency>-->
+
         <!-- 公式引擎相关 -->
 <!--        <dependency>-->
 <!--            <groupId>org.graalvm.polyglot</groupId>-->
@@ -71,6 +83,23 @@
             <artifactId>js-scriptengine</artifactId>
         </dependency>
 
+        <!-- warmflow 流程引擎相关 -->
+        <dependency>
+            <groupId>org.dromara.warm</groupId>
+            <artifactId>warm-flow-core</artifactId>
+        </dependency>
+
+        <!-- warmflow 插件 json -->
+        <dependency>
+            <groupId>org.dromara.warm</groupId>
+            <artifactId>warm-flow-plugin-json</artifactId>
+        </dependency>
+
+        <!-- warmflow 框架模式插件 -->
+        <dependency>
+            <groupId>org.dromara.warm</groupId>
+            <artifactId>warm-flow-plugin-modes-sb</artifactId>
+        </dependency>
 
     </dependencies>
     <build>
