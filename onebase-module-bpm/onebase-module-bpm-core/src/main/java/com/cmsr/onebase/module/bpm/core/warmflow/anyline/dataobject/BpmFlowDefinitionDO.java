@@ -21,7 +21,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @Table(name = "bpm_flow_definition")
-public class BpmFlowDefinitionDO extends BpmWarmFlowBaseDO<Definition> implements Definition {
+public class BpmFlowDefinitionDO extends BpmWarmFlowBaseDO implements Definition {
 
     /** 流程编码 */
     @Column(name = "flow_code", length = 40, nullable = false)
@@ -72,6 +72,45 @@ public class BpmFlowDefinitionDO extends BpmWarmFlowBaseDO<Definition> implement
     private List<Node> nodeList = new ArrayList<>();
 
     private List<User> userList = new ArrayList<>();
+
+
+    /* ==================== 以下为 Definition 接口方法实现 ==================== */
+
+    @Override
+    public Definition setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public Definition setCreateTime(Date createTime) {
+        this.createTime = createTime;
+        return this;
+    }
+
+    @Override
+    public Definition setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+        return this;
+    }
+
+    @Override
+    public Definition setTenantId(String tenantId) {
+        this.tenantId = Long.valueOf(tenantId);
+        return this;
+    }
+
+    @Override
+    public Definition setDelFlag(String delFlag) {
+        this.delFlag = Long.valueOf(delFlag);
+        return this;
+    }
+
+    @Override
+    public Definition setVersion(String version) {
+        this.version = Long.valueOf(version);
+        return this;
+    }
 }
 
 

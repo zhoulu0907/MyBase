@@ -29,7 +29,6 @@ public class WfFlowInstanceDaoImpl implements FlowInstanceDao<WfFlowInstance> {
     @Override
     public WfFlowInstance newEntity() {
         WfFlowInstance wfFlowInstanceDo = new WfFlowInstance();
-        wfFlowInstanceDo.setFlowInstanceDO(new BpmFlowInstanceDO());
         return wfFlowInstanceDo;
     }
 
@@ -160,7 +159,6 @@ public class WfFlowInstanceDaoImpl implements FlowInstanceDao<WfFlowInstance> {
      */
     private WfFlowInstance convertToWfFlowInstanceDo(BpmFlowInstanceDO flowInstanceDO) {
         WfFlowInstance wfFlowInstanceDo = new WfFlowInstance();
-        wfFlowInstanceDo.setFlowInstanceDO(flowInstanceDO);
         return wfFlowInstanceDo;
     }
 
@@ -168,7 +166,7 @@ public class WfFlowInstanceDaoImpl implements FlowInstanceDao<WfFlowInstance> {
      * 将 WfFlowInstanceDo 转换为 FlowInstanceDO
      */
     private BpmFlowInstanceDO convertToFlowInstanceDO(WfFlowInstance wfFlowInstanceDo) {
-        return wfFlowInstanceDo.getFlowInstanceDO();
+        return wfFlowInstanceDo;
     }
 
     /**

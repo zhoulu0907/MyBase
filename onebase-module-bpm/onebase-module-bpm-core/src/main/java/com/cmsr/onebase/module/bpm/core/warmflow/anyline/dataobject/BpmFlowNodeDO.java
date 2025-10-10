@@ -4,10 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.dromara.warm.flow.core.entity.Node;
 import org.dromara.warm.flow.core.entity.Skip;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,7 +21,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @Table(name = "flow_node")
-public class BpmFlowNodeDO extends BpmWarmFlowBaseDO {
+public class BpmFlowNodeDO extends BpmWarmFlowBaseDO implements Node {
 
     /** 节点类型（0开始 1中间 2结束 3互斥网关 4并行网关） */
     @Column(name = "node_type", nullable = false)
@@ -87,6 +89,44 @@ public class BpmFlowNodeDO extends BpmWarmFlowBaseDO {
      * 跳转条件
      */
     List<Skip> skipList = new ArrayList<>();
+
+    /* ==================== 以下为 Node 接口方法实现 ==================== */
+
+    @Override
+    public Node setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public Node setCreateTime(Date createTime) {
+        this.createTime = createTime;
+        return this;
+    }
+
+    @Override
+    public Node setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+        return this;
+    }
+
+    @Override
+    public Node setTenantId(String tenantId) {
+        this.tenantId = Long.valueOf(tenantId);
+        return this;
+    }
+
+    @Override
+    public Node setDelFlag(String delFlag) {
+        this.delFlag = Long.valueOf(delFlag);
+        return this;
+    }
+
+    @Override
+    public Node setVersion(String version) {
+        this.version = Long.valueOf(version);
+        return this;
+    }
 }
 
 
