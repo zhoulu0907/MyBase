@@ -1,5 +1,5 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
+import type { FlowNodeJSON, FlowNodeEntity } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
   getEntityFields,
@@ -312,4 +312,16 @@ export const getEntityFieldListV2 = async (
     const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
     setValidationTypes(newValidationTypes);
   }
+};
+
+// 判断是否在循环节点内
+export const getIsLoop = (element: FlowNodeEntity): boolean => {
+  if (element.flowNodeType === NodeType.LOOP) {
+    return true;
+  } else if (element.flowNodeType === 'root') {
+    return false;
+  } else if (element.parent) {
+    return getIsLoop(element.parent);
+  }
+  return false;
 };

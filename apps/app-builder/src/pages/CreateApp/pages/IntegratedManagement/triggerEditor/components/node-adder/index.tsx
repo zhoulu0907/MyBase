@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-
+import { NodeType } from '../../nodes/const';
 import { IconCopyAdd, IconPlusCircle } from '@douyinfe/semi-icons';
 import { Popover } from '@douyinfe/semi-ui';
 import { useClientContext, type FlowNodeEntity } from '@flowgram.ai/fixed-layout-editor';
@@ -9,6 +9,8 @@ import { readData } from '../../shortcuts/utils';
 import { NodeList } from '../node-list';
 import { PasteIcon, Wrap } from './styles';
 import { generateNodeId } from './utils';
+import { getIsLoop } from '../../nodes/utils';
+
 
 const generateNewIdForChildren = (n: FlowNodeEntity): FlowNodeEntity => {
   if (n.blocks) {
@@ -53,25 +55,47 @@ export default function Adder(props: { from: FlowNodeEntity; to?: FlowNodeEntity
     setVisible(false);
   };
 
+  // 判断复制节点是否包含循环节点
+  const getHasLoop = (nodes: any[]): boolean => {
+    let hasLoop = false;
+    for (let ele of nodes) {
+      if (ele.type === NodeType.LOOP) {
+        hasLoop = true;
+        return hasLoop;
+      }
+      if (ele.blocks?.length) {
+        hasLoop = getHasLoop(ele.blocks);
+      }
+    }
+    return hasLoop;
+  };
+
   const handlePaste = useCallback(async (e: any) => {
     try {
       e.stopPropagation();
       const nodes = await readData(clipboard);
 
       if (!nodes) {
-        Message.error('The clipboard content has been updated, please copy the node again.');
+        Message.error('剪贴板内容已更新，请重新复制节点。');
         return;
       }
-
+      // 判断复制的nodes 里面是否包含循环节点
+      const hasLoop = getHasLoop(nodes);
+      //  判断当前位置是否在循环节点内
+      const isLoop = getIsLoop(from);
+      if (hasLoop && isLoop) {
+        Message.error('循环节点不能嵌套循环节点。');
+        return;
+      }
       nodes.reverse().forEach((n: FlowNodeEntity) => {
         const newNodeData = generateNewIdForChildren(n);
         operation.addFromNode(from, newNodeData);
       });
 
-      Message.success('Paste successfully!');
+      Message.success('复制成功！');
     } catch (error) {
       console.error(error);
-      Message.error('Paste failed, please check if you have permission to read the clipboard');
+      Message.error('粘贴失败，请检查您是否有权限读取剪贴板');
     }
   }, []);
 
