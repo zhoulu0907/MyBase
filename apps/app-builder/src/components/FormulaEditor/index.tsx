@@ -1,20 +1,48 @@
-import { Button, Message, Modal, Space } from '@arco-design/web-react';
-import { getFormulaById, getFormulaFunctionSimpleList } from '@onebase/app';
+import { Message, Modal, Grid } from '@arco-design/web-react';
+import { getFormulaById, getFormulaFunctionSimpleList, type AppEntities, type AppEntity, type AppEntityField } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormulaInput, FunctionList, InfoPanel, VariableList } from './components';
 import styles from './index.module.less';
-import type { FormulaEditorProps, FunctionItem, info, Variable } from './utils/types';
-
+import type { FormulaEditorProps, FunctionItem, info } from './utils/types';
+const Row = Grid.Row;
+const Col = Grid.Col;
 // 模拟数据
-const mockVariables: Variable[] = [
-  { value: '1', name: '订单编号', type: '文本', category: '订单管理' },
-  { value: '2', name: '制单人', type: '用户', category: '订单管理' },
-  { value: '3', name: '下单日期', type: '时间戳', category: '订单管理' },
-  { value: '4', name: '客户信息-主键', type: '文本', category: '订单管理' },
-  { value: '5', name: '联系人', type: '文本', category: '订单管理' },
-  { value: '6', name: '联系电话', type: '文本', category: '订单管理' },
-  { value: '7', name: '发货地址', type: '地址', category: '订单管理' }
-];
+const mockVariables: AppEntities = {
+  entities: [
+    {
+      entityId: '1', entityName: '订单管理', entityType: '主表', fields: [
+        {
+          fieldId: "001", fieldName: "订单编号", fieldType: "BIGINT", isSystemField: 1, displayName: "订单编号"
+        },
+        {
+          fieldId: "002", fieldName: "制单人", fieldType: "VARCHAR", isSystemField: 1, displayName: "制单人"
+        },
+        {
+          fieldId: "003", fieldName: "发货地址", fieldType: "TEXT", isSystemField: 1, displayName: "发货地址"
+        },
+        {
+          fieldId: "004", fieldName: "下单日期", fieldType: "DECIMAL", isSystemField: 1, displayName: "下单日期"
+        },
+        {
+          fieldId: "005", fieldName: "联系电话", fieldType: "NUMBER", isSystemField: 1, displayName: "联系电话"
+        },
+        {
+          fieldId: "005", fieldName: "客户信息-主键", fieldType: "TIMESTAMP", isSystemField: 1, displayName: "客户信息-主键"
+        }
+      ]
+    },
+    {
+      entityId: '2', entityName: '其他管理', entityType: '主表', fields: [
+        {
+          fieldId: "001", fieldName: "测试1", fieldType: "BIGINT", isSystemField: 1, displayName: "测试1"
+        },
+        {
+          fieldId: "002", fieldName: "测试2", fieldType: "INT", isSystemField: 1, displayName: "测试2"
+        }
+      ]
+    }
+  ]
+};
 
 /**
  * 公式编辑器
@@ -64,13 +92,15 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 过滤变量列表
    * 根据变量名称或类型是否包含搜索关键词（不区分大小写）
    */
-  const filteredVariables = useMemo(() => {
-    if (!variableSearch) return mockVariables;
-    return mockVariables.filter(
+  const filteredVariables:AppEntity[] = useMemo(() => {
+    if (!variableSearch) return mockVariables?.entities || [];
+   const newFields = mockVariables?.entities?.[0]?.fields?.filter(
       (v) =>
-        v.name.toLowerCase().includes(variableSearch.toLowerCase()) ||
-        v.type.toLowerCase().includes(variableSearch.toLowerCase())
-    );
+        v.fieldName.toLowerCase().includes(variableSearch.toLowerCase()) ||
+        v.fieldName.toLowerCase().includes(variableSearch.toLowerCase())
+    ) || [];
+    mockVariables.entities[0].fields = newFields;
+    return mockVariables.entities
   }, [variableSearch]);
 
   /**
@@ -90,13 +120,13 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 插入变量到公式
    * @param variable - 要插入的变量
    */
-  const handleInsertVariable = useCallback((variable: Variable) => {
+  const handleInsertVariable = useCallback((variable: AppEntityField) => {
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
-      editorRef.current.insertAtPosition(`[[${variable.value}.${variable.name}]]`, 'var');
+      editorRef.current.insertAtPosition(`[[${variable.fieldId}.${variable.fieldName}]]`, 'var');
     } else {
       // 降级处理：直接添加到末尾
-      setFormula((prev) => prev + variable.name);
+      setFormula((prev) => prev + variable.fieldName);
     }
   }, []);
 
@@ -167,23 +197,20 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     <Modal
       visible={visible}
       onCancel={onCancel}
-      title={null}
-      footer={null}
+      title={
+        <div className={styles.formulaHeader}>
+          <span className={styles.title}>公式编辑</span>
+          <span className={styles.subtitle}>使用数学运算符编辑公式</span>
+        </div>
+      }
       style={{ width: '1000px' }}
       className={styles.formulaEditor}
       maskClosable={false}
+      onOk={handleConfirm}
     >
-      {/* 头部 */}
-      <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <h2 className={styles.title}>公式编辑</h2>
-          <p className={styles.subtitle}>使用数学运算符编辑公式</p>
-        </div>
-      </div>
-
-      {/* 公式编辑区 */}
-      <div className={styles.formulaSection}>
-        {/* 文本单行 */}
+      {/* 内容区域 */}
+      <div className={styles.contentWrapper}>
+        {/* 公式编辑区 */}
         <FormulaInput
           value={formula}
           onChange={setFormula}
@@ -193,44 +220,28 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
           filteredFunctions={filteredFunctions}
           onEditorReady={handleEditorReady}
         />
-      </div>
-
-      {/* 底部面板 */}
-      <div className={styles.panelsSection}>
-        {/* 变量列表 - 订单管理 */}
-        <div className={styles.panel}>
-          <VariableList
-            variables={filteredVariables}
-            searchValue={variableSearch}
-            onSearchChange={setVariableSearch}
-            onInsertVariable={handleInsertVariable}
-          />
-        </div>
-
-        {/* 函数列表 - 常用函数 */}
-        <div className={styles.panel}>
-          <FunctionList
-            functions={functionSearch ? filteredFunctions : funcList}
-            searchValue={functionSearch}
-            onSearchChange={setFunctionSearch}
-            onChooseFunction={handleChooseFunction}
-          />
-        </div>
-
-        {/* 说明面板 */}
-        <div className={styles.panel}>
-          <InfoPanel info={info} />
-        </div>
-      </div>
-
-      {/* 底部按钮 */}
-      <div className={styles.footer}>
-        <Space>
-          <Button onClick={onCancel}>取消</Button>
-          <Button type="primary" onClick={handleConfirm}>
-            确定
-          </Button>
-        </Space>
+        {/* 底部面板（变量名称/函数公式/函数概要） */}
+        <Row>
+          <Col xs={2} sm={4} md={6} lg={8} xl={10} xxl={8}>
+            <VariableList
+              variables={filteredVariables}
+              searchValue={variableSearch}
+              onSearchChange={setVariableSearch}
+              onInsertVariable={handleInsertVariable}
+            />
+          </Col>
+          <Col xs={20} sm={16} md={12} lg={8} xl={4} xxl={8}>
+            <FunctionList
+              functions={functionSearch ? filteredFunctions : funcList}
+              searchValue={functionSearch}
+              onSearchChange={setFunctionSearch}
+              onChooseFunction={handleChooseFunction}
+            />
+          </Col>
+          <Col xs={2} sm={4} md={6} lg={8} xl={10} xxl={8}>
+            <InfoPanel info={info} />
+          </Col>
+        </Row>
       </div>
     </Modal>
   );
