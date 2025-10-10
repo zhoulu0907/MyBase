@@ -173,6 +173,9 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public DeptDO getDept(Long id) {
+        if (id == null) {
+            return null;
+        }
         return deptDataRepository.findById(id);
     }
 
