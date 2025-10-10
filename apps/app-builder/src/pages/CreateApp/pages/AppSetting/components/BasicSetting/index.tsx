@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { type FormInstance } from '@arco-design/web-react';
 import EditApp from '@/components/CreateApp';
-import { type Application } from '@onebase/app';
-import { getDatasourceList } from '@onebase/app';
+import { getDatasourceList, type Application } from '@onebase/app';
 import styles from './index.module.less';
 
 interface IProps {
