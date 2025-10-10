@@ -320,6 +320,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                 MetadataValidationRuleDefinitionDO ruleDO = modelMapper.map(singleRule, MetadataValidationRuleDefinitionDO.class);
                 ruleDO.setGroupId(groupId);
                 ruleDO.setParentRuleId(mainOrRuleId);
+                ruleDO.setLogicType("LOGIC");
                 if (ruleDO.getStatus() == null) {
                     ruleDO.setStatus(StatusEnumUtil.ACTIVE);
                 }
