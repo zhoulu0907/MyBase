@@ -1,16 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
-import { NodeType } from '../../nodes/const';
 import { IconCopyAdd, IconPlusCircle } from '@douyinfe/semi-icons';
 import { Popover } from '@douyinfe/semi-ui';
 import { useClientContext, type FlowNodeEntity } from '@flowgram.ai/fixed-layout-editor';
-
 import { Message } from '@arco-design/web-react';
 import { readData } from '../../shortcuts/utils';
 import { NodeList } from '../node-list';
 import { PasteIcon, Wrap } from './styles';
 import { generateNodeId } from './utils';
-import { getIsLoop } from '../../nodes/utils';
-
+import { getIsLoop, getHasLoop } from '../../nodes/utils';
 
 const generateNewIdForChildren = (n: FlowNodeEntity): FlowNodeEntity => {
   if (n.blocks) {
@@ -53,21 +50,6 @@ export default function Adder(props: { from: FlowNodeEntity; to?: FlowNodeEntity
       });
     }, 10);
     setVisible(false);
-  };
-
-  // 判断复制节点是否包含循环节点
-  const getHasLoop = (nodes: any[]): boolean => {
-    let hasLoop = false;
-    for (let ele of nodes) {
-      if (ele.type === NodeType.LOOP) {
-        hasLoop = true;
-        return hasLoop;
-      }
-      if (ele.blocks?.length) {
-        hasLoop = getHasLoop(ele.blocks);
-      }
-    }
-    return hasLoop;
   };
 
   const handlePaste = useCallback(async (e: any) => {

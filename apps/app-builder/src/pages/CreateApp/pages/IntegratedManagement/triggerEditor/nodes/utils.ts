@@ -325,3 +325,18 @@ export const getIsLoop = (element: FlowNodeEntity): boolean => {
   }
   return false;
 };
+
+// 判断节点是否包含循环节点
+export const getHasLoop = (nodes: any[]): boolean => {
+  let hasLoop = false;
+  for (let ele of nodes) {
+    if (ele.type === NodeType.LOOP) {
+      hasLoop = true;
+      return hasLoop;
+    }
+    if (ele.blocks?.length) {
+      hasLoop = getHasLoop(ele.blocks);
+    }
+  }
+  return hasLoop;
+};
