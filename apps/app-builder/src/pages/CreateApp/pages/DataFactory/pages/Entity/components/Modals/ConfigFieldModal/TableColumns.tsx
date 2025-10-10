@@ -13,7 +13,7 @@ interface FieldFormValues {
   fieldType: string;
   defaultValue: string;
   isUnique: number;
-  allowNull: number;
+  isRequired: number;
   constraints?: {
     lengthEnabled: number;
     minLength: number;
@@ -48,6 +48,7 @@ interface ColumnConfig {
   dataIndex: string;
   width?: number;
   ellipsis?: boolean;
+  align?: 'center' | 'left' | 'right';
   render?: (value: any, record: FieldFormValues, index: number) => React.ReactNode;
 }
 
@@ -202,8 +203,8 @@ const TableColumns = ({
         )
     },
     {
-      title: '允许空值',
-      dataIndex: 'allowNull',
+      title: '必填',
+      dataIndex: 'isRequired',
       width: 100,
       align: 'center',
       render: (value: number, record: FieldFormValues, index: number) =>
@@ -211,7 +212,7 @@ const TableColumns = ({
           <span className={styles['system-field']}>-</span>
         ) : (
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.allowNull`}
+            field={`fields.${getFieldIndex(record.id, index)}.isRequired`}
             className={styles['field-form-item']}
           >
             <Checkbox />
