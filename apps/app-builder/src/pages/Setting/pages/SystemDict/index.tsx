@@ -195,9 +195,22 @@ export default function SystemDictPage() {
       okText: '确认',
       cancelText: '取消',
       onOk: async () => {
-        await deleteDictData(id);
-        Message.success('删除成功');
-        setTableData(tableData.filter((t) => t.id !== id));
+        try {
+          await deleteDictData(id);
+          Message.success('删除成功');
+
+          const params: PageParam & { dictType: string } = {
+            dictType: dictList.find((t) => t.id === activeDictId)?.type || '',
+            pageNo: currentPage,
+            pageSize
+          };
+          const res = await getDictDataListByPage(params);
+          setTableData(res.list);
+          setTotal(res.total);
+        } catch (error) {
+          console.error('删除失败:', error);
+          Message.error('删除失败');
+        }
       }
     });
   };
