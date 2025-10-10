@@ -13,15 +13,25 @@ import java.util.List;
 @Data
 public class StartFormNodeData extends NodeData {
 
-    private String triggerUserType;
+    /**
+     * 流程ID，后补充
+     */
+    private Long processId;
 
-    private String triggerUserValue;
+    private String triggerRange;
+
+    private List<String> recordTriggerEvents;
+
+    private String fieldTriggerEvents;
 
     private Long pageId;
 
-    private Long fieldId;
+    /**
+     * 前端组件的Id，所以是字符串
+     */
+    private String fieldId;
 
-    private List<String> triggerEvents;
+    private Boolean isChildTriggerAllowed;
 
     private List<Conditions> filterCondition;
 

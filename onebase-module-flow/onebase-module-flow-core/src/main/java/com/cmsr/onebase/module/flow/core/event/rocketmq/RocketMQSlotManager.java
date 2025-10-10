@@ -1,8 +1,13 @@
 package com.cmsr.onebase.module.flow.core.event.rocketmq;
 
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import lombok.Setter;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -10,7 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Author：huangjie
  * @Date：2025/10/10 11:18
  */
-public class RocketMQSlotManager {
+@Component
+@Conditional(FlowRuntimeCondition.class)
+public class RocketMQSlotManager implements InitializingBean {
 
     private final String MAP_KEY = "flow:process:consumer:group";
 
@@ -19,13 +26,15 @@ public class RocketMQSlotManager {
     private final long expirationThresholdMs = 120 * 1000;
 
     @Setter
+    @Autowired
     private RedissonClient redissonClient;
 
     private RMap<Integer, Long> slotMap;
 
     private AtomicInteger acquiredSlot = new AtomicInteger(-1);
 
-    public void init() {
+    @Override
+    public void afterPropertiesSet() {
         this.slotMap = redissonClient.getMap(MAP_KEY);
         acquireSlot();
         startHeartbeat();

@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.flow.core.event;
 
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.builder.el.LiteFlowChainELBuilder;
@@ -11,6 +12,8 @@ import com.yomahub.liteflow.flow.FlowBus;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Component;
 
 /**
  * @Author：huangjie
@@ -18,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Setter
 @Slf4j
-public abstract class FlowEventHandler {
+@Component
+@Conditional(FlowRuntimeCondition.class)
+public class FlowEventHandler {
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;
@@ -27,7 +32,7 @@ public abstract class FlowEventHandler {
     private GraphFlowCache graphFlowCache;
 
     public void onProcessUpdate(Long processId) {
-        log.info("发布流程更新事件：{}", processId);
+        log.info("处理流程更新事件：{}", processId);
         FlowProcessDO processDO = flowProcessRepository.findById(processId);
         if (processDO == null) {
             return;

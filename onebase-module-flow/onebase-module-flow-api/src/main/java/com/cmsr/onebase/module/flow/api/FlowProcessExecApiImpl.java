@@ -38,7 +38,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {
-        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.getStartEntityNodeData(entityTriggerReqDTO.getEntityId());
+        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.findStartEntityNodeDataByEntityId(entityTriggerReqDTO.getEntityId());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             return EntityTriggerRespDTO.SUCCESS;
         }

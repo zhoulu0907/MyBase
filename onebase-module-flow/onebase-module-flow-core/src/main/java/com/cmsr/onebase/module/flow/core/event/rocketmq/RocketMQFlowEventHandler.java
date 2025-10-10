@@ -1,17 +1,24 @@
 package com.cmsr.onebase.module.flow.core.event.rocketmq;
 
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.event.FlowEvent;
 import com.cmsr.onebase.module.flow.core.event.FlowEventHandler;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
-import org.apache.rocketmq.client.apis.ClientException;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.consumer.MessageListener;
 import org.apache.rocketmq.client.apis.consumer.PushConsumer;
 import org.apache.rocketmq.client.apis.message.MessageView;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
@@ -20,27 +27,37 @@ import java.util.Collections;
  * @Date：2025/10/10 10:19
  */
 @Slf4j
-public class RocketMQFlowEventHandler extends FlowEventHandler implements MessageListener {
+@Component
+@Conditional(FlowRuntimeCondition.class)
+public class RocketMQFlowEventHandler implements MessageListener, ApplicationRunner {
 
     private final String CONSUMER_GROUP_PREFIX = "flow-process-consumer-group-";
 
-    final ClientServiceProvider provider = ClientServiceProvider.loadService();
+    private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 
     @Setter
+    @Value("${rocketmq.endpoints}")
     private String endpoints;
 
     @Setter
     private String topic = "flow-process-event-topic";
 
     @Setter
-    private Integer processId;
+    @Autowired
+    private RocketMQSlotManager slotManager;
+
+    @Setter
+    @Autowired
+    private FlowEventHandler flowEventHandler;
 
     private PushConsumer consumer;
 
-    public void init() throws ClientException {
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
         ClientConfiguration clientConfiguration = ClientConfiguration.newBuilder()
                 .setEndpoints(endpoints)
                 .build();
+        Integer processId = slotManager.getSlot();
         String consumerGroup = CONSUMER_GROUP_PREFIX + processId;
         FilterExpression filterExpression = new FilterExpression();
         this.consumer = provider.newPushConsumerBuilder()
@@ -55,13 +72,10 @@ public class RocketMQFlowEventHandler extends FlowEventHandler implements Messag
     public ConsumeResult consume(MessageView messageView) {
         try {
             FlowEvent event = FlowEvent.decode(messageView.getBody());
-            switch (event.getType()) {
-                case FlowEvent.UPDATE:
-                    onProcessUpdate(event.getProcessId());
-                    break;
-                case FlowEvent.DELETE:
-                    onProcessDelete(event.getProcessId());
-                    break;
+            if (StringUtils.equalsIgnoreCase(event.getType(), FlowEvent.UPDATE)) {
+                flowEventHandler.onProcessUpdate(event.getProcessId());
+            } else if (StringUtils.equalsIgnoreCase(event.getType(), FlowEvent.DELETE)) {
+                flowEventHandler.onProcessDelete(event.getProcessId());
             }
             return ConsumeResult.SUCCESS;
         } catch (Exception e) {
@@ -69,4 +83,6 @@ public class RocketMQFlowEventHandler extends FlowEventHandler implements Messag
             return ConsumeResult.FAILURE;
         }
     }
+
+
 }
