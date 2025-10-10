@@ -7,7 +7,12 @@ import {
   type PageSet,
   type SavePageSetReq
 } from '@onebase/app';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP, EditConfig, LAYOUT_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from 'src/components';
+import {
+  COMPONENT_TYPE_DISPLAY_NAME_MAP,
+  EditConfig,
+  FORM_COMPONENT_TYPES,
+  LAYOUT_COMPONENT_TYPES
+} from 'src/components';
 import { useFormEditorSignal, useListEditorSignal } from 'src/signals';
 
 export interface SavePageSetParams {
@@ -164,7 +169,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     id: pageSetId
   };
   const pageSet = await loadPageSet(loadPageSetReq);
-  console.log('res: ', pageSet);
+  console.log('载入页面集数据: ', pageSet);
 
   pageSet.pages.forEach((page: PageSet) => {
     let newComponents: any[] = [];
@@ -180,13 +185,19 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
           type: component.componentType,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType] || ''
         });
+
         newPageComponentSchemas.set(component.componentCode, {
           config: JSON.parse(component.config),
           editData: JSON.parse(component.editData)
         });
       }
 
-      const layoutList: string[] = [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT, FORM_COMPONENT_TYPES.SUB_TABLE, LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT, LAYOUT_COMPONENT_TYPES.TABS_LAYOUT];
+      const layoutList: string[] = [
+        LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT,
+        FORM_COMPONENT_TYPES.SUB_TABLE,
+        LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT,
+        LAYOUT_COMPONENT_TYPES.TABS_LAYOUT
+      ];
 
       // 载入布局组件的列数初始化
       if (layoutList.includes(component.componentType)) {

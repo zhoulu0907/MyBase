@@ -77,3 +77,5 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
 
 export const useFormEditorSignal = createPageEditorSignal();
 export const useListEditorSignal = createPageEditorSignal();
+
+export const editorSignalMap: { [key: string]: ReturnType<typeof createPageEditorSignal> } = {};
