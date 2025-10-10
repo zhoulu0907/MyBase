@@ -557,7 +557,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       setModelVisible(false);
       // 提交后刷新数据
       await getFieldsPermission();
-      Message.success('添加数据权限成功');
+      Message.success(status === 'edit' ? '修改数据权限成功' : '添加数据权限成功');
     } catch (error) {
       console.error('提交数据权限失败:', error);
     }

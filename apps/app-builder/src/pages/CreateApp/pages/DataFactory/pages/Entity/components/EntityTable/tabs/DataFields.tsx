@@ -148,13 +148,6 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       render: (isRequired: boolean) => (isRequired ? '是' : '否')
     },
     {
-      title: '允许空值',
-      dataIndex: 'allowNull',
-      key: 'allowNull',
-      width: 90,
-      render: (allowNull: boolean) => (allowNull ? '是' : '否')
-    },
-    {
       title: '长度范围',
       dataIndex: 'dataLength',
       key: 'dataLength',

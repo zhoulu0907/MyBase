@@ -1,7 +1,7 @@
 // 通用分页参数
 export interface PageParam {
-  pageNo?: number;
-  pageSize?: number;
+  pageNo: number;
+  pageSize: number;
   [key: string]: any;
 }
 

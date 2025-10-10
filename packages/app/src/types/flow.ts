@@ -24,16 +24,6 @@ export enum TriggerType {
   BPM = 'bpm'
 }
 
-export interface ListFlowMgmtReq {
-  pageNo: number;
-  pageSize: number;
-
-  applicationId: string;
-  processName?: string;
-  processStatus?: ProcessStatus;
-  triggerType?: string;
-}
-
 export interface TriggerConfig {
   pageId?: string;
   entityId?: string;
@@ -94,4 +84,9 @@ export enum MODAL_TYPE {
   CONFIRM = 'confirm',
   INFOR = 'infor',
   CUSTOM = 'custom'
+}
+
+export enum CAL_TYPE {
+  FORMULA = 'FORMULA',
+  DATASUMMARY = 'DATASUMMARY'
 }

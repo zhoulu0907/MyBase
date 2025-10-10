@@ -63,7 +63,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setMainMetaData(mainMetaData);
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-    console.log('entityWithChildren: ', entityWithChildren);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
 
     setMainMetaDataFields(entityWithChildren.parentFields);
   };
@@ -201,7 +201,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
           listComponents.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
-              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                 <div
                   key={cp.id}
                   className={styles.componentItem}
@@ -216,7 +216,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     runtime={runtime}
                     toCreatePage={toCreatePage}
                   />
-                </div>}
+                </div>
+              )}
             </Fragment>
           ))}
 
@@ -224,7 +225,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           <Form layout="inline" form={form}>
             {formComponents.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
-                {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div
                     key={cp.id}
                     className={styles.componentItem}
@@ -241,7 +242,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
                     />
-                  </div>}
+                  </div>
+                )}
               </Fragment>
             ))}
 
