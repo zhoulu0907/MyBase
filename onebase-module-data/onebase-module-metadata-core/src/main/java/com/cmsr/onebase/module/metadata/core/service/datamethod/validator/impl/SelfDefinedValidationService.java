@@ -10,18 +10,21 @@ import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.Valida
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.mvel2.MVEL;
+import org.mvel2.ParserContext;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * 自定义规则校验服务
  * 
- * 直接评估规则定义实现复杂的自定义校验逻辑
+ * 基于 MVEL 表达式引擎实现复杂的自定义校验逻辑
  *
  * @author qd
  * @date 2025-10-10
@@ -37,6 +40,18 @@ public class SelfDefinedValidationService implements ValidationService {
     @Resource
     private com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository entityFieldRepository;
 
+    private final ParserContext parserContext;
+
+    public SelfDefinedValidationService() {
+        this.parserContext = new ParserContext();
+        // 导入常用的Java类
+        parserContext.addImport("LocalDate", LocalDate.class);
+        parserContext.addImport("LocalDateTime", LocalDateTime.class);
+        parserContext.addImport("LocalTime", LocalTime.class);
+        parserContext.addImport("Arrays", Arrays.class);
+        parserContext.addImport("Collections", Collections.class);
+    }
+
     @Override
     public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
         List<MetadataValidationRuleGroupDO> ruleGroups = findActiveRuleGroups(entityId);
@@ -44,17 +59,20 @@ public class SelfDefinedValidationService implements ValidationService {
             return;
         }
 
-        Map<String, Object> context = buildContext(field, value, data);
+        // 构建字段映射
         Map<Long, String> fieldIdToNameMap = buildFieldIdToNameMap(entityId);
+        
+        // 准备完整的上下文（包含所有字段，不存在的字段设为 null）
+        Map<String, Object> context = buildCompleteContext(field, value, data, fieldIdToNameMap);
 
         for (MetadataValidationRuleGroupDO ruleGroup : ruleGroups) {
             validateRuleGroup(ruleGroup, context, fieldIdToNameMap, field);
         }
     }
 
-    private void validateRuleGroup(MetadataValidationRuleGroupDO ruleGroup, 
+    private void validateRuleGroup(MetadataValidationRuleGroupDO ruleGroup,
                                     Map<String, Object> context,
-                                    Map<Long, String> fieldIdToNameMap, 
+                                    Map<Long, String> fieldIdToNameMap,
                                     MetadataEntityFieldDO field) {
         try {
             List<MetadataValidationRuleDefinitionDO> rules = ruleDefinitionRepository.selectByGroupId(ruleGroup.getId());
@@ -63,12 +81,21 @@ public class SelfDefinedValidationService implements ValidationService {
                 return;
             }
 
-            if (evaluateTopLevelRules(rules, context, fieldIdToNameMap)) {
+            // 构建 MVEL 表达式
+            String expression = buildExpression(rules, fieldIdToNameMap);
+            log.debug("生成的MVEL表达式：{}", expression);
+
+            // 编译并执行表达式
+            Serializable compiled = MVEL.compileExpression(expression, parserContext);
+            Object result = MVEL.executeExpression(compiled, context);
+
+            // 如果表达式结果为 true，表示触发规则，抛出异常
+            if (Boolean.TRUE.equals(result)) {
                 String message = Optional.ofNullable(ruleGroup.getPopPrompt())
                         .filter(s -> !s.trim().isEmpty())
                         .orElse("字段[" + field.getDisplayName() + "]不满足自定义校验规则：" + ruleGroup.getRgName());
-                
-                log.info("校验失败：field={}, group={}", field.getFieldName(), ruleGroup.getRgName());
+
+                log.info("校验失败：field={}, group={}, expression={}", field.getFieldName(), ruleGroup.getRgName(), expression);
                 throw new IllegalArgumentException(message);
             }
         } catch (IllegalArgumentException e) {
@@ -79,146 +106,224 @@ public class SelfDefinedValidationService implements ValidationService {
         }
     }
 
-    private boolean evaluateTopLevelRules(List<MetadataValidationRuleDefinitionDO> allRules,
-                                           Map<String, Object> context,
-                                           Map<Long, String> fieldIdToNameMap) {
-        // 顶级规则之间是 OR 关系
-        return allRules.stream()
+    /**
+     * 构建 MVEL 表达式
+     * 将规则定义树转换为表达式字符串
+     *
+     * @param allRules 所有规则定义
+     * @param fieldIdToNameMap fieldId到fieldName的映射
+     * @return MVEL 表达式字符串
+     */
+    private String buildExpression(List<MetadataValidationRuleDefinitionDO> allRules, Map<Long, String> fieldIdToNameMap) {
+        // 获取顶级规则（顶级规则之间是 OR 关系）
+        List<MetadataValidationRuleDefinitionDO> topRules = allRules.stream()
                 .filter(rule -> rule.getParentRuleId() == null)
-                .anyMatch(rule -> evaluateRule(rule, allRules, context, fieldIdToNameMap));
+                .collect(Collectors.toList());
+
+        if (topRules.isEmpty()) {
+            return "false";
+        }
+
+        List<String> topExpressions = new ArrayList<>();
+        for (MetadataValidationRuleDefinitionDO topRule : topRules) {
+            String expr = buildRuleExpression(topRule, allRules, fieldIdToNameMap);
+            if (expr != null && !expr.trim().isEmpty()) {
+                topExpressions.add("(" + expr + ")");
+            }
+        }
+
+        return topExpressions.isEmpty() ? "false" : String.join(" || ", topExpressions);
     }
 
-    private boolean evaluateRule(MetadataValidationRuleDefinitionDO rule,
-                                  List<MetadataValidationRuleDefinitionDO> allRules,
-                                  Map<String, Object> context,
-                                  Map<Long, String> fieldIdToNameMap) {
+    /**
+     * 构建单个规则的表达式
+     *
+     * @param rule 规则定义
+     * @param allRules 所有规则
+     * @param fieldIdToNameMap 字段映射
+     * @return 表达式字符串
+     */
+    private String buildRuleExpression(MetadataValidationRuleDefinitionDO rule,
+                                        List<MetadataValidationRuleDefinitionDO> allRules,
+                                        Map<Long, String> fieldIdToNameMap) {
         if ("CONDITION".equals(rule.getLogicType())) {
-            return evaluateCondition(rule, context, fieldIdToNameMap);
+            return buildConditionExpression(rule, fieldIdToNameMap);
         }
-        
+
         if ("LOGIC".equals(rule.getLogicType())) {
-            return evaluateLogicNode(rule, allRules, context, fieldIdToNameMap);
+            List<MetadataValidationRuleDefinitionDO> children = findChildRules(rule.getId(), allRules);
+
+            // 无子规则时的处理
+            if (children.isEmpty()) {
+                return handleEmptyLogicNode(rule, fieldIdToNameMap);
+            }
+
+            // 构建子规则表达式
+            List<String> childExpressions = new ArrayList<>();
+            for (MetadataValidationRuleDefinitionDO child : children) {
+                String childExpr = buildRuleExpression(child, allRules, fieldIdToNameMap);
+                if (childExpr != null && !childExpr.trim().isEmpty()) {
+                    childExpressions.add("(" + childExpr + ")");
+                }
+            }
+
+            if (childExpressions.isEmpty()) {
+                return "false";
+            }
+
+            String connector = "AND".equals(rule.getLogicOperator()) ? " && " : " || ";
+            return String.join(connector, childExpressions);
         }
-        
+
         log.warn("未知规则类型：ruleId={}, type={}", rule.getId(), rule.getLogicType());
-        return false;
+        return "false";
     }
 
-    private boolean evaluateLogicNode(MetadataValidationRuleDefinitionDO rule,
-                                       List<MetadataValidationRuleDefinitionDO> allRules,
-                                       Map<String, Object> context,
-                                       Map<Long, String> fieldIdToNameMap) {
-        List<MetadataValidationRuleDefinitionDO> children = findChildRules(rule.getId(), allRules);
-        
-        // 无子规则时的处理
-        if (children.isEmpty()) {
-            return handleEmptyLogicNode(rule, context, fieldIdToNameMap);
-        }
-
-        // 有子规则时按 AND/OR 逻辑处理
-        if ("AND".equals(rule.getLogicOperator())) {
-            return children.stream()
-                    .allMatch(child -> evaluateRule(child, allRules, context, fieldIdToNameMap));
-        } else {
-            return children.stream()
-                    .anyMatch(child -> evaluateRule(child, allRules, context, fieldIdToNameMap));
-        }
-    }
-
-    private boolean handleEmptyLogicNode(MetadataValidationRuleDefinitionDO rule,
-                                          Map<String, Object> context,
-                                          Map<Long, String> fieldIdToNameMap) {
+    private String handleEmptyLogicNode(MetadataValidationRuleDefinitionDO rule, Map<Long, String> fieldIdToNameMap) {
         // 如果有 operator，按条件处理
         if (rule.getOperator() != null && !rule.getOperator().trim().isEmpty()) {
             log.warn("LOGIC节点无子规则但有operator，按CONDITION处理：ruleId={}", rule.getId());
-            return evaluateCondition(rule, context, fieldIdToNameMap);
+            return buildConditionExpression(rule, fieldIdToNameMap);
         }
-        
-        // 空逻辑节点：AND返回true，OR返回false
+
+        // 空逻辑节点
         log.warn("LOGIC节点既无子规则也无operator：ruleId={}", rule.getId());
-        return "AND".equals(rule.getLogicOperator());
+        return "AND".equals(rule.getLogicOperator()) ? "true" : "false";
     }
 
-    private boolean evaluateCondition(MetadataValidationRuleDefinitionDO rule,
-                                       Map<String, Object> context,
-                                       Map<Long, String> fieldIdToNameMap) {
+    /**
+     * 构建条件表达式
+     *
+     * @param rule 规则定义
+     * @param fieldIdToNameMap 字段映射
+     * @return 条件表达式字符串
+     */
+    private String buildConditionExpression(MetadataValidationRuleDefinitionDO rule, Map<Long, String> fieldIdToNameMap) {
         String fieldName = getFieldName(rule, fieldIdToNameMap);
         if (fieldName == null) {
-            return false;
+            return "false";
         }
-
-        Object fieldValue = context.get(fieldName);
-        Object compareValue = rule.getFieldValue();
-        Object compareValue2 = rule.getFieldValue2();
 
         try {
             OpEnum operator = OpEnum.valueOf(rule.getOperator());
-            return executeOperator(operator, fieldValue, compareValue, compareValue2);
+            Object value = rule.getFieldValue();
+            Object value2 = rule.getFieldValue2();
+
+            return buildOperatorExpression(fieldName, operator, value, value2);
         } catch (Exception e) {
-            log.error("条件评估失败：field={}, operator={}", fieldName, rule.getOperator(), e);
-            return false;
+            log.error("构建条件表达式失败：ruleId={}", rule.getId(), e);
+            return "false";
         }
     }
 
-    private boolean executeOperator(OpEnum operator, Object fieldValue, Object compareValue, Object compareValue2) {
-        // 特殊处理：IS_EMPTY 和 IS_NOT_EMPTY
-        if (operator == OpEnum.IS_EMPTY) {
-            return fieldValue == null || fieldValue.toString().trim().isEmpty();
-        }
-        if (operator == OpEnum.IS_NOT_EMPTY) {
-            return fieldValue != null && !fieldValue.toString().trim().isEmpty();
-        }
-
-        // 其他操作符需要非null值
-        if (!isValidForComparison(fieldValue, compareValue)) {
-            return false;
-        }
-
+    /**
+     * 根据操作符构建表达式
+     *
+     * @param fieldName 字段名
+     * @param operator 操作符
+     * @param value 值1
+     * @param value2 值2
+     * @return 表达式字符串
+     */
+    private String buildOperatorExpression(String fieldName, OpEnum operator, Object value, Object value2) {
         switch (operator) {
             case EQUALS:
-                return Objects.equals(fieldValue, compareValue);
+                return String.format("(%s != null && %s == %s)", fieldName, fieldName, formatValue(value));
             case NOT_EQUALS:
-                return !Objects.equals(fieldValue, compareValue);
+                return String.format("(%s != null && %s != %s)", fieldName, fieldName, formatValue(value));
             case GREATER_THAN:
-                return compareNumbers(fieldValue, compareValue) > 0;
+                return String.format("(%s != null && %s > %s)", fieldName, fieldName, formatValue(value));
             case GREATER_EQUALS:
-                return compareNumbers(fieldValue, compareValue) >= 0;
+                return String.format("(%s != null && %s >= %s)", fieldName, fieldName, formatValue(value));
             case LESS_THAN:
-                return compareNumbers(fieldValue, compareValue) < 0;
+                return String.format("(%s != null && %s < %s)", fieldName, fieldName, formatValue(value));
             case LESS_EQUALS:
-                return compareNumbers(fieldValue, compareValue) <= 0;
+                return String.format("(%s != null && %s <= %s)", fieldName, fieldName, formatValue(value));
             case CONTAINS:
-                return fieldValue.toString().contains(compareValue.toString());
+                return String.format("(%s != null && %s.toString().contains(%s))", 
+                        fieldName, fieldName, formatValue(value));
             case NOT_CONTAINS:
-                return !fieldValue.toString().contains(compareValue.toString());
+                return String.format("(%s != null && !%s.toString().contains(%s))", 
+                        fieldName, fieldName, formatValue(value));
             case EXISTS_IN:
-                return compareValue.toString().contains(fieldValue.toString());
+                return String.format("(%s != null && %s.contains(%s.toString()))", 
+                        fieldName, formatValue(value), fieldName);
             case NOT_EXISTS_IN:
-                return !compareValue.toString().contains(fieldValue.toString());
+                return String.format("(%s != null && !%s.contains(%s.toString()))", 
+                        fieldName, formatValue(value), fieldName);
             case RANGE:
-                return isValidForComparison(compareValue2, null) &&
-                       compareNumbers(fieldValue, compareValue) >= 0 &&
-                       compareNumbers(fieldValue, compareValue2) <= 0;
+                return String.format("(%s != null && %s >= %s && %s <= %s)",
+                        fieldName, fieldName, formatValue(value), fieldName, formatValue(value2));
+            case IS_EMPTY:
+                return String.format("(%s == null || %s.toString().trim().isEmpty())", fieldName, fieldName);
+            case IS_NOT_EMPTY:
+                return String.format("(%s != null && !%s.toString().trim().isEmpty())", fieldName, fieldName);
             case LATER_THAN:
-                return compareDates(fieldValue, compareValue) > 0;
+                return String.format("(%s != null && %s.isAfter(%s))", 
+                        fieldName, fieldName, formatDateValue(value));
             case EARLIER_THAN:
-                return compareDates(fieldValue, compareValue) < 0;
+                return String.format("(%s != null && %s.isBefore(%s))", 
+                        fieldName, fieldName, formatDateValue(value));
             default:
                 log.warn("不支持的操作符：{}", operator);
-                return false;
+                return "false";
         }
     }
 
-    private boolean isValidForComparison(Object value1, Object value2) {
-        if (value2 == null) {
-            return value1 != null;
+    /**
+     * 格式化值为表达式字符串
+     */
+    private String formatValue(Object value) {
+        if (value == null) {
+            return "null";
         }
-        return value1 != null && value2 != null;
+        if (value instanceof String) {
+            return "\"" + value.toString().replace("\"", "\\\"") + "\"";
+        }
+        if (value instanceof Number || value instanceof Boolean) {
+            return value.toString();
+        }
+        if (value instanceof Collection) {
+            return formatCollectionValue((Collection<?>) value);
+        }
+        return "\"" + value.toString() + "\"";
+    }
+
+    /**
+     * 格式化日期值
+     */
+    private String formatDateValue(Object value) {
+        if (value instanceof LocalDate) {
+            LocalDate date = (LocalDate) value;
+            return String.format("LocalDate.of(%d, %d, %d)",
+                    date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        }
+        if (value instanceof LocalDateTime) {
+            LocalDateTime dateTime = (LocalDateTime) value;
+            return String.format("LocalDateTime.of(%d, %d, %d, %d, %d, %d)",
+                    dateTime.getYear(), dateTime.getMonthValue(), dateTime.getDayOfMonth(),
+                    dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond());
+        }
+        if (value instanceof LocalTime) {
+            LocalTime time = (LocalTime) value;
+            return String.format("LocalTime.of(%d, %d, %d)",
+                    time.getHour(), time.getMinute(), time.getSecond());
+        }
+        return formatValue(value);
+    }
+
+    /**
+     * 格式化集合值
+     */
+    private String formatCollectionValue(Collection<?> collection) {
+        String items = collection.stream()
+                .map(this::formatValue)
+                .collect(Collectors.joining(", "));
+        return "[" + items + "]";
     }
 
     private String getFieldName(MetadataValidationRuleDefinitionDO rule, Map<Long, String> fieldIdToNameMap) {
         String fieldCode = rule.getFieldCode();
-        
         if (fieldCode != null && !fieldCode.trim().isEmpty()) {
             return fieldCode;
         }
@@ -232,31 +337,8 @@ public class SelfDefinedValidationService implements ValidationService {
         return null;
     }
 
-    private int compareNumbers(Object value1, Object value2) {
-        return toBigDecimal(value1).compareTo(toBigDecimal(value2));
-    }
-
-    private BigDecimal toBigDecimal(Object value) {
-        if (value instanceof BigDecimal) {
-            return (BigDecimal) value;
-        }
-        if (value instanceof Number) {
-            return BigDecimal.valueOf(((Number) value).doubleValue());
-        }
-        return new BigDecimal(value.toString());
-    }
-
-    private int compareDates(Object value1, Object value2) {
-        if (value1 instanceof LocalDateTime && value2 instanceof LocalDateTime) {
-            return ((LocalDateTime) value1).compareTo((LocalDateTime) value2);
-        }
-        if (value1 instanceof LocalDate && value2 instanceof LocalDate) {
-            return ((LocalDate) value1).compareTo((LocalDate) value2);
-        }
-        return value1.toString().compareTo(value2.toString());
-    }
-
-    private List<MetadataValidationRuleDefinitionDO> findChildRules(Long parentId, List<MetadataValidationRuleDefinitionDO> allRules) {
+    private List<MetadataValidationRuleDefinitionDO> findChildRules(Long parentId, 
+                                                                      List<MetadataValidationRuleDefinitionDO> allRules) {
         return allRules.stream()
                 .filter(rule -> parentId.equals(rule.getParentRuleId()))
                 .collect(Collectors.toList());
@@ -275,14 +357,40 @@ public class SelfDefinedValidationService implements ValidationService {
         DefaultConfigStore cs = new DefaultConfigStore();
         cs.and("entity_id", entityId);
         cs.and("deleted", 0);
-        
+
         return entityFieldRepository.findAllByConfig(cs).stream()
                 .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName));
     }
 
-    private Map<String, Object> buildContext(MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
-        Map<String, Object> context = new HashMap<>(data != null ? data : Collections.emptyMap());
-        context.put(field.getFieldName(), value != null ? value : "");
+    /**
+     * 构建完整的上下文
+     * 确保所有字段都在 context 中，避免 MVEL 解析时报错
+     *
+     * @param field 当前字段
+     * @param value 当前字段值
+     * @param data 已有数据
+     * @param fieldIdToNameMap 字段映射
+     * @return 完整的上下文
+     */
+    private Map<String, Object> buildCompleteContext(MetadataEntityFieldDO field, 
+                                                      Object value, 
+                                                      Map<String, Object> data,
+                                                      Map<Long, String> fieldIdToNameMap) {
+        Map<String, Object> context = new HashMap<>();
+        
+        // 首先添加所有字段，默认值为 null
+        for (String fieldName : fieldIdToNameMap.values()) {
+            context.put(fieldName, null);
+        }
+        
+        // 然后覆盖已有的数据
+        if (data != null) {
+            context.putAll(data);
+        }
+        
+        // 最后设置当前字段的值
+        context.put(field.getFieldName(), value);
+        
         return context;
     }
 
@@ -296,3 +404,4 @@ public class SelfDefinedValidationService implements ValidationService {
         return true;
     }
 }
+
