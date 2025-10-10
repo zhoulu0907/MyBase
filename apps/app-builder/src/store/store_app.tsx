@@ -1,10 +1,11 @@
 import { create } from 'zustand';
+import { AppStatus } from '@onebase/app';
 
 interface CurAppInfo {
   iconName: string;
   iconColor: string;
   appName: string;
-  appStatus: 0 | 1 | 2;
+  appStatus: AppStatus;
 }
 export interface appStore {
   // 当前应用的appCode

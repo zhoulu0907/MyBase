@@ -270,7 +270,7 @@ export default function EditorWorkspace() {
 
                     schema.config.cpName = field.displayName;
                     schema.config.id = cpID;
-                    schema.config.dataField = [item.entityID, field.fieldId];
+                    schema.config.dataField = [item.entityId, field.fieldId];
                     schema.config.label.text = field.displayName;
                     const props = {
                       id: cpID,
