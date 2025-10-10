@@ -62,7 +62,6 @@ const TableColumns = ({
   renderFieldConfigContent,
   getFieldIndex,
   deleteField,
-  fields
 }: TableColumnsProps): ColumnConfig[] => {
   return [
     {
@@ -197,7 +196,13 @@ const TableColumns = ({
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
-          <Form.Item field={`fields.${getFieldIndex(record.id, index)}.isUnique`} className={styles['field-form-item']}>
+          <Form.Item
+            field={`fields.${getFieldIndex(record.id, index)}.isUnique`}
+            className={styles['field-form-item']}
+            triggerPropName="checked"
+            normalize={(v) => (v ? 1 : 0)}
+            formatter={(v) => v === 1 || v === true}
+          >
             <Checkbox />
           </Form.Item>
         )
@@ -214,6 +219,9 @@ const TableColumns = ({
           <Form.Item
             field={`fields.${getFieldIndex(record.id, index)}.isRequired`}
             className={styles['field-form-item']}
+            triggerPropName="checked"
+            normalize={(v) => (v ? 1 : 0)}
+            formatter={(v) => v === 1 || v === true}
           >
             <Checkbox />
           </Form.Item>
