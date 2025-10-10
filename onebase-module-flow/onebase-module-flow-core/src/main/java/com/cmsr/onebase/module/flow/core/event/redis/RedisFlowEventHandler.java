@@ -1,6 +1,7 @@
-package com.cmsr.onebase.module.flow.core.event;
+package com.cmsr.onebase.module.flow.core.event.redis;
 
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import com.cmsr.onebase.module.flow.core.event.FlowEventHandler;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RTopic;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class RedisFlowProcessEventHandler extends FlowProcessEventHandler {
+public class RedisFlowEventHandler extends FlowEventHandler {
 
     /**
      * Redis Topic 常量定义

@@ -1,12 +1,11 @@
-package com.cmsr.onebase.module.flow.core.event;
+package com.cmsr.onebase.module.flow.core.event.redis;
 
-import com.cmsr.onebase.module.flow.core.config.FlowBuildCondition;
+import com.cmsr.onebase.module.flow.core.event.FlowEventPublisher;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @Slf4j
 @Component
-public class RedisFlowProcessEventPublisher implements FlowProcessEventPublisher {
+public class RedisFlowEventPublisher implements FlowEventPublisher {
 
     /**
      * Redis Topic 常量定义

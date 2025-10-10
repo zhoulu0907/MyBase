@@ -14,7 +14,7 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowPublishStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
-import com.cmsr.onebase.module.flow.core.event.FlowProcessEventPublisher;
+import com.cmsr.onebase.module.flow.core.event.FlowEventPublisher;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
 import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
@@ -47,7 +47,7 @@ public class FlowProcessPublishApiImpl implements FlowProcessPublishApi {
     private JobClient jobClient;
 
     @Autowired
-    private FlowProcessEventPublisher flowProcessEventPublisher;
+    private FlowEventPublisher flowEventPublisher;
 
     @Override
     public void onlineApplicationFlowProcess(Long applicationId) {
@@ -56,7 +56,6 @@ public class FlowProcessPublishApiImpl implements FlowProcessPublishApi {
             startJob(flowProcessDO);
             flowProcessDO.setPublishStatus(FlowPublishStatusEnum.ONLINE.getStatus());
             flowProcessRepository.update(flowProcessDO);
-            flowProcessEventPublisher.publishProcessUpdate(flowProcessDO.getId());
         }
     }
 
