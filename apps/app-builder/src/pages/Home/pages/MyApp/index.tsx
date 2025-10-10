@@ -16,7 +16,7 @@ import dayjs from 'dayjs';
 import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { getCommonPaginationList } from '@onebase/common';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import {
@@ -27,7 +27,7 @@ import {
   type CreateApplicationReq,
   type DatasourceSaveReqDTO,
   type DeleteApplicationReq,
-  type ListApplicationReq
+  type PageParam
 } from '@onebase/app';
 
 import appDeleteSVG from '@/assets/images/app_delete.svg';
@@ -121,7 +121,7 @@ const MyAppPage: React.FC = () => {
 
   const getApplicationList = async () => {
     setLoading(true);
-    const req: ListApplicationReq = {
+    const req: PageParam = {
       pageNo,
       pageSize: pageSize || 8,
       name,
@@ -129,11 +129,8 @@ const MyAppPage: React.FC = () => {
       orderByTime,
       status: status === '' ? null : Number(status)
     };
-    const res = await listApplication(req);
-    if ((!res.list || res.list.length === 0) && res.total != 0 && pageNo > 1) {
-      const newPageNo = pageNo - 1;
-      setPageNo(newPageNo);
-    } else {
+    const res = await getCommonPaginationList(listApplication, req, setPageNo);
+    if (res) {
       setDataList(res.list || []);
       setTotal(res.total || 0);
       setLoading(false);

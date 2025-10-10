@@ -7,8 +7,8 @@
  * total  list
  */
 interface PageParam {
-  pageNo?: number;
-  pageSize?: number;
+  pageNo: number;
+  pageSize: number;
   [key: string]: any;
 }
 export const getCommonPaginationList = async (
@@ -20,8 +20,7 @@ export const getCommonPaginationList = async (
   if (res && (!res.list || res.list.length === 0) && res.total != 0 && req.pageNo > 1) {
     const newPageNo = req.pageNo - 1;
     setPageNo(newPageNo);
-    const newReq = { ...req, pageNo: newPageNo };
-    await getCommonPaginationList(getList, newReq, setPageNo);
+    return null;
   } else {
     return res;
   }

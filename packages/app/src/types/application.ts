@@ -58,14 +58,6 @@ export interface Application {
    */
   updateUser?: string;
 }
-export interface ListApplicationReq {
-  pageNo: number;
-  pageSize: number;
-  name: string;
-  ownerTag?: 0 | 1;
-  orderByTime?: 'create' | 'update';
-  status?: number | null;
-}
 
 /**
  * 应用状态常量
