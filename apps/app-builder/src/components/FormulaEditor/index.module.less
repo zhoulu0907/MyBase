@@ -30,14 +30,16 @@
     padding: 0;
     .contentWrapper {
       padding: 20px 24px;
-      .arco-row {
+      :global(.arco-row){
         border: 1px solid #e5e6eb;
         border-top: none;
-        .arco-input-group{
+        :global(.arco-col){
           border-right: 1px solid #e5e6eb;
-          border-bottom: 1px solid #e5e6eb;
-          :global(.arco-input-inner-wrapper){
-            background-color: #fff;
+          :global(.arco-input-group-wrapper) {
+            border-bottom: 1px solid #e5e6eb;
+            :global(.arco-input-inner-wrapper){
+              background-color: #fff;
+            }
           }
         }
       }
