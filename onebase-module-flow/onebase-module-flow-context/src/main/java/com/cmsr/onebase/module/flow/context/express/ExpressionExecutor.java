@@ -133,18 +133,27 @@ public class ExpressionExecutor {
             if (expressionItem == null || expressionItem.getKey() == null || expressionItem.getOp() == null) {
                 return "true";
             }
-
             String expression = buildExpression(expressionItem);
-
             log.debug("构建表达式项: key={}, operator={} -> {}", expressionItem.getKey(), expressionItem.getOp(), expression);
-
             return expression;
-
         } catch (Exception e) {
             log.error("表达式项构建失败: {}", expressionItem, e);
             // 返回false表达式，确保整个条件不会因为单个表达式失败而崩溃
             return "false";
         }
+    }
+
+    private String formatItemKey(String key) {
+        if (StringUtils.isNumeric(key)) {
+            return VAR_PREFIX + key;
+        }
+        if (key.contains(".")) {
+            String[] ss = StringUtils.split(key, ".");
+            if (!ss[1].startsWith("'") || !ss[1].endsWith("'")) {
+                return String.format("%s.'%s'", ss[0], ss[1]);
+            }
+        }
+        return key;
     }
 
 
@@ -155,9 +164,7 @@ public class ExpressionExecutor {
      */
     public String buildExpression(ExpressionItem expressionItem) {
         expressionItem = ExpressionItem.copy(expressionItem);
-        if (StringUtils.isNumeric(expressionItem.getKey().toString())) {
-            expressionItem.setKey(VAR_PREFIX + expressionItem.getKey());
-        }
+        expressionItem.setKey(formatItemKey(expressionItem.getKey()));
         switch (expressionItem.getOp()) {
             case EQUALS:
                 return String.format("%s == %s", expressionItem.getKey(), formatValue(expressionItem));
