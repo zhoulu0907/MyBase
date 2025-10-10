@@ -1,21 +1,8 @@
 import iconControl from '@/assets/flow/nodes/loop.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
-import { generateNodeId } from '../../utils';
+import { generateNodeId, getIsLoop } from '../../utils';
 import { formMeta } from './form-meta';
-import { FlowNodeEntity } from '@flowgram.ai/fixed-layout-editor';
-
-// 判断是发在循环节点内
-const getIsLoop = (element: FlowNodeEntity): boolean => {
-  if (element.flowNodeType === NodeType.LOOP) {
-    return false;
-  } else if (element.flowNodeType === 'root') {
-    return true;
-  } else if (element.parent) {
-    return getIsLoop(element.parent);
-  }
-  return true;
-};
 
 export const LoopNodeRegistry: FlowNodeRegistry = {
   type: NodeType.LOOP,
@@ -31,7 +18,8 @@ export const LoopNodeRegistry: FlowNodeRegistry = {
   formMeta,
   canAdd(ctx, from) {
     // 循环节点里面不能添加拖循环节点
-    return getIsLoop(from);
+    const isLoop = getIsLoop(from);
+    return !isLoop;
   },
   onAdd() {
     return {

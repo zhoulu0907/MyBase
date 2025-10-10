@@ -1,4 +1,5 @@
 import { Checkbox, Form, Space } from '@arco-design/web-react';
+import { useEffect } from 'react';
 import styles from './index.module.less';
 
 const { useForm } = Form;
@@ -14,6 +15,14 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
   const editViewMode = Form.useWatch('editViewMode', form);
   const detailViewMode = Form.useWatch('detailViewMode', form);
 
+  useEffect(() => {
+    form.resetFields(['isDefaultEditViewMode']);
+  }, [editViewMode]);
+
+  useEffect(() => {
+    form.resetFields(['isDefaultDetailViewMode']);
+  }, [detailViewMode]);
+
   return (
     <div className={styles.configs}>
       <Form form={form}>
@@ -21,7 +30,7 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
         <div className={styles.content}>
           <div className={styles.itemLabel}>视图模式</div>
           <div className={styles.checkboxWrapper}>
-            <Form.Item field="editViewMode">
+            <Form.Item field="editViewMode" triggerPropName="checked">
               <Checkbox></Checkbox>
             </Form.Item>
 
@@ -34,7 +43,7 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
           </div>
 
           <div className={styles.checkboxWrapper}>
-            <Form.Item field="detailViewMode">
+            <Form.Item field="detailViewMode" triggerPropName="checked">
               <Checkbox></Checkbox>
             </Form.Item>
 
@@ -48,7 +57,7 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
 
           <div className={styles.itemLabel}>是否默认视图</div>
           <div className={styles.checkboxWrapper}>
-            <Form.Item field="isDefaultEditViewMode">
+            <Form.Item field="isDefaultEditViewMode" triggerPropName="checked">
               <Checkbox disabled={!editViewMode}></Checkbox>
             </Form.Item>
 
@@ -60,7 +69,7 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
           </div>
 
           <div className={styles.checkboxWrapper}>
-            <Form.Item field="isDefaultDetailViewMode">
+            <Form.Item field="isDefaultDetailViewMode" triggerPropName="checked">
               <Checkbox disabled={!detailViewMode}></Checkbox>
             </Form.Item>
 

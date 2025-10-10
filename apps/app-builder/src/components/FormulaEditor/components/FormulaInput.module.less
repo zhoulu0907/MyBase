@@ -1,41 +1,12 @@
 .formulaInput {
-  .label {
-    font-size: 14px;
-    color: #1d2129;
-    margin-bottom: 12px;
-    font-weight: 500;
-  }
-
-  .inputWrapper {
-    position: relative;
-  }
-
   .editor {
     border: 1px solid #e5e6eb;
-    border-radius: 6px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
     overflow: hidden;
     
     :global(.cm-editor) {
       height: 200px;
-      
-      .cm-content {
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        font-size: 14px;
-        line-height: 1.5;
-        padding: 12px;
-      }
-      
-      .cm-line {
-        padding: 0;
-      }
-      
-      .cm-cursor {
-        border-left: 2px solid #165dff;
-      }
-      
-      .cm-selectionBackground {
-        background-color: rgba(22, 93, 255, 0.1);
-      }
       
       .cm-matchingBracket {
         border-bottom: 2px solid #00b42a;
