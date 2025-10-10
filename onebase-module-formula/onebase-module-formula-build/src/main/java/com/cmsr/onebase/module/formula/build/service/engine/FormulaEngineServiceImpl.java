@@ -6,7 +6,6 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -31,7 +29,6 @@ import java.util.regex.Pattern;
 public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     private final FormulaEngineProperties properties;
-    private final Map<String, Object> compiledFormulaCache;
     private final String formulaJsScript;
     private final Pattern dangerousPatternRegex;
 
@@ -102,7 +99,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     public FormulaEngineServiceImpl(FormulaEngineProperties properties) {
         this.properties = properties;
-        this.compiledFormulaCache = new ConcurrentHashMap<>();
         this.dangerousPatternRegex = Pattern.compile(DANGEROUS_PATTERNS);
 
         // 加载Formula.js脚本
@@ -252,13 +248,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     @Override
     public String[] getSupportedFunctions() {
         return SUPPORTED_FUNCTIONS.clone();
-    }
-
-    @Override
-    @CacheEvict(value = "formulaResults", allEntries = true)
-    public void clearCache() {
-        compiledFormulaCache.clear();
-        log.info("公式引擎缓存已清理");
     }
 
     /**

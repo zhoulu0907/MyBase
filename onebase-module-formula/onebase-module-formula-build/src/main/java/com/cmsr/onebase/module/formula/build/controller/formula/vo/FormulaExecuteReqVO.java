@@ -26,9 +26,4 @@ public class FormulaExecuteReqVO {
      * 公式参数
      */
     private Map<String, Object> parameters;
-
-    /**
-     * 是否启用缓存
-     */
-    private Boolean enableCache = true;
 }

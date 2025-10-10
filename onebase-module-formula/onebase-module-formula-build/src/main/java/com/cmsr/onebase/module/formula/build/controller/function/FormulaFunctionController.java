@@ -26,11 +26,11 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-08-28
  */
-@Tag(name = "公式引擎 - 函数")
+@Tag(name = "公式函数")
 @RestController
 @RequestMapping("/formula/function")
 @Validated
-public class FunctionController {
+public class FormulaFunctionController {
 
     @Resource(name = "formulaFunctionService") // 使用指定的bean名称
     private FormulaFunctionService functionService;
