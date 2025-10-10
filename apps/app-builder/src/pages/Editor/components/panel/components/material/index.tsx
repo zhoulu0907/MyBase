@@ -113,7 +113,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
               {!showSearchInput ? (
                 <img src={IconSearchForm} alt="search some component" />
               ) : (
-                <InputSearch value={keyword} autoFocus onBlur={() => setShowSearchInput(false)} onChange={setKeyword} />
+                <InputSearch value={keyword} autoFocus allowClear onBlur={() => setShowSearchInput(false)} onChange={setKeyword} />
               )}
             </div>
             <div className={styles.collapse} onClick={setChildCollapsed}>

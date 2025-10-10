@@ -25,7 +25,7 @@ const Footer = Layout.Footer;
 
 const AppSettingPage: FC = () => {
   const [form] = Form.useForm();
-  const { curAppId } = useAppStore();
+  const { curAppId, curAppInfo, setCurAppInfo } = useAppStore();
 
   const [appData, setAppData] = useState<Application>();
   const [activeTab, setActiveTab] = useState('baseSetting');
@@ -79,6 +79,12 @@ const AppSettingPage: FC = () => {
         const res = await updateApplication(params);
         if (res) {
           Message.success('保存成功');
+          setCurAppInfo({
+            ...curAppInfo,
+            iconName: iconName || '',
+            iconColor: iconColor || '',
+            appName: appName || '--'
+          })
         }
       } catch (_error) {
       } finally {
