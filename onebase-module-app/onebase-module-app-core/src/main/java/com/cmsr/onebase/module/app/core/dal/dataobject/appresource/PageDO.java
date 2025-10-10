@@ -25,8 +25,20 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "page_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面名称")
     private String pageName;
 
-    @Column(name = "page_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
+    @Column(name = "page_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "页面类型 list form")
     private String pageType;
+
+    @Column(name = "edit_view_mode", columnDefinition = "BOOLEAN NOT NULL", comment = "编辑模式" )
+    private Boolean editViewMode;
+
+    @Column(name = "default_view_mode", columnDefinition = "BOOLEAN NOT NULL", comment = "详情模式" )
+    private Boolean detailViewMode;
+
+    @Column(name = "is_default_edit_view_mode", columnDefinition = "BOOLEAN NOT NULL", comment = "是否默认编辑视图")
+    private Boolean isDefaultEditViewMode;
+
+    @Column(name = "is_default_detail_view_mode", columnDefinition = "BOOLEAN NOT NULL", comment = "是否默认详情视图")
+    private Boolean isDefaultDetailViewMode;
 
     /**
      * 页面标题
