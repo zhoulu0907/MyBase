@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.app.core.dal.database.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultEnum;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthOperationEnum;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthPermissionScopeEnum;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthOperationVO;
@@ -76,6 +77,16 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //
         AuthDetailFunctionPermissionVO functionPermissionVO = new AuthDetailFunctionPermissionVO();
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
+
+        if(null == authPermissionDO ){
+            authPermissionDO.setApplicationId(reqVO.getApplicationId());
+            authPermissionDO.setRoleId(reqVO.getRoleId());
+            authPermissionDO.setMenuId(reqVO.getMenuId());
+            authPermissionDO.setIsAllFieldsAllowed(AuthDefaultEnum.DefaultAllFieldsAllowed.getDefaultValue());
+            authPermissionDO.setIsPageAllowed(AuthDefaultEnum.DefaultPageAllowed.getDefaultValue());
+            authPermissionDO.setIsAllViewsAllowed(AuthDefaultEnum.DefaultAllViewsAllowed.getDefaultValue());
+        }
+
         // 页面权限
         if (authPermissionDO != null) {
             functionPermissionVO.setIsPageAllowed(authPermissionDO.getIsPageAllowed());
@@ -330,6 +341,13 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private List<AuthDataGroupVO> queryAuthDataGroups(AuthPermissionReqVO reqVO) {
         List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
+        if(authDataGroupDOS.isEmpty()){
+            AuthDataGroupDO aDO = new AuthDataGroupDO();
+            aDO.setApplicationId(reqVO.getApplicationId());
+            aDO.setMenuId(reqVO.getMenuId());
+            aDO.setRoleId(reqVO.getRoleId());
+            authDataGroupDOS.add(aDO);
+        }
         List<AuthDataGroupVO> authDataGroupVOS = BeanUtils.toBean(authDataGroupDOS, AuthDataGroupVO.class);
         for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
             MenuDO menuDO = appMenuRepository.findById(reqVO.getMenuId());
