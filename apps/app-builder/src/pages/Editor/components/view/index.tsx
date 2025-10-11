@@ -1,6 +1,8 @@
-import { Button, Dropdown, Form, Input, Modal, Radio } from '@arco-design/web-react';
+import { Button, Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
 import { IconDown, IconPlus } from '@arco-design/web-react/icon';
-import { createPageView, listPageView, type PageView } from '@onebase/app';
+import { createPageView, listPageView, ViewType, type PageView } from '@onebase/app';
+import { usePageViewEditorSignal } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -12,10 +14,13 @@ interface ViewProps {
 
 // 视图组件
 const View: React.FC<ViewProps> = ({ pageSetId }) => {
-  // TODO(mickey): 放到single中
-  const [viewList, setViewList] = useState<PageView[]>([]);
+  useSignals();
+
+  const { pageViews, setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
+
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
+  const [dropListVisible, setDropListVisible] = useState(false);
 
   useEffect(() => {
     handleListPageView();
@@ -26,20 +31,23 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
       pageSetId: pageSetId
     });
 
-    console.log(res);
-
     if (res && res.pages) {
-      const newViewList = res.pages.map((item: PageView) => ({
-        ...item
-      }));
+      console.log('res: ', res);
+      const newCurViewId = res.pages.find(
+        (item: PageView) => item.isDefaultEditViewMode || item.isDefaultDetailViewMode
+      )?.id;
 
-      setViewList(newViewList);
+      if (newCurViewId) {
+        setCurViewId(newCurViewId);
+      }
+
+      setPageViews(res.pages);
     }
   };
 
   const showViewType = (item: PageView | null) => {
     if (!item) {
-      return <div className={`${styles.viewLabel} ${styles.mixViewTitle}`}>默认视图</div>;
+      return <div></div>;
     }
     if (item.detailViewMode && item.editViewMode) {
       return <div className={`${styles.viewLabel} ${styles.mixViewTitle}`}>混合视图</div>;
@@ -51,36 +59,43 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
       return <div className={`${styles.viewLabel} ${styles.detailViewTitle}`}>详情视图</div>;
     }
 
-    return <div className={`${styles.viewLabel} ${styles.mixViewTitle}`}>默认视图</div>;
+    return <div></div>;
   };
 
-  const selectDefaultView = () => {
-    let defaultView = null;
-    if (viewList.length > 0) {
-      defaultView = viewList[0];
-    }
-    viewList.forEach((item) => {
-      if (item.isDefaultEditViewMode || item.isDefaultDetailViewMode) {
-        defaultView = item;
-      }
-    });
-
-    return defaultView;
+  const handleSelectView = (id: string) => {
+    setCurViewId(id);
   };
 
   const dropList = (
     <div className={styles.dropList}>
-      {viewList.map((item) => (
-        <div key={item.id} className={styles.dropItem}>
-          <div className={styles.dropItemLabel}>{item.pageName}</div>
-          <div>{showViewType(item)}</div>
-        </div>
-      ))}
+      <Menu
+        onClickMenuItem={() => {
+          setDropListVisible(false);
+        }}
+      >
+        {Object.entries(pageViews.value).map(([id, view]: [string, any]) => {
+          return (
+            <Menu.Item key={id} onClick={() => handleSelectView(id)}>
+              <div key={id} className={styles.dropItem}>
+                <div className={styles.dropItemLabel}>{view.pageName}</div>
+                <div>{showViewType(view)}</div>
+              </div>
+            </Menu.Item>
+          );
+        })}
 
-      <Button type="text" size="mini" className={styles.addViewButton} onClick={() => setCreateViewModalVisible(true)}>
-        <IconPlus />
-        新增视图
-      </Button>
+        <Menu.Item key="addView">
+          <Button
+            type="text"
+            size="mini"
+            className={styles.addViewButton}
+            onClick={() => setCreateViewModalVisible(true)}
+          >
+            <IconPlus />
+            新增视图
+          </Button>
+        </Menu.Item>
+      </Menu>
     </div>
   );
 
@@ -98,7 +113,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
           viewType: createForm.getFieldValue('viewType'),
           viewName: createForm.getFieldValue('viewName')
         });
-        console.log(res);
+
         setCreateViewModalVisible(false);
       })
       .catch((e) => {
@@ -108,10 +123,18 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
 
   return (
     <div className={styles.viewWrapper}>
-      <div className={styles.viewTitle}>{selectDefaultView()?.pageName}</div>
-      <Dropdown droplist={dropList} position="br">
+      <div className={styles.viewTitle}>{pageViews.value[curViewId.value]?.pageName}</div>
+      <Dropdown
+        droplist={dropList}
+        position="bl"
+        trigger="click"
+        popupVisible={dropListVisible}
+        onVisibleChange={(visible) => {
+          setDropListVisible(visible);
+        }}
+      >
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {showViewType(selectDefaultView())}
+          {showViewType(pageViews.value[curViewId.value])}
           <IconDown />
         </span>
       </Dropdown>
@@ -129,9 +152,9 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
           </Form.Item>
           <Form.Item label="视图类型" field="viewType" rules={[{ required: true, message: '请选择视图类型' }]}>
             <Radio.Group type="button">
-              <Radio value="mix">混合视图</Radio>
-              <Radio value="edit">编辑视图</Radio>
-              <Radio value="detail">详情视图</Radio>
+              <Radio value={ViewType.MIX}>混合视图</Radio>
+              <Radio value={ViewType.EDIT}>编辑视图</Radio>
+              <Radio value={ViewType.DETAIL}>详情视图</Radio>
             </Radio.Group>
           </Form.Item>
         </Form>
