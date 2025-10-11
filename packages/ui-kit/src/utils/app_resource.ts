@@ -1,8 +1,8 @@
 import { Message } from '@arco-design/web-react';
 import {
+  CATEGORY_TYPE,
   loadPageSet,
   savePageSet,
-  PAPE_TYPE,
   type ComponentConfig,
   type LoadPageSetReq,
   type PageSet,
@@ -14,7 +14,7 @@ import {
   FORM_COMPONENT_TYPES,
   LAYOUT_COMPONENT_TYPES
 } from 'src/components';
-import { useFormEditorSignal, useListEditorSignal, pagesRuntimeDataSignal } from 'src/signals';
+import { editorSignalMap, useFormEditorSignal, useListEditorSignal } from 'src/signals';
 
 export interface SavePageSetParams {
   pageSetId: string;
@@ -53,7 +53,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
   console.log('res: ', loadPagesetResp);
 
   loadPagesetResp.pages.forEach((_page: PageSet, index: number) => {
-    if (_page.pageType === PAPE_TYPE.FORM) {
+    if (_page.pageType === CATEGORY_TYPE.FORM) {
       // console.log('formComponentsSchemas: ', formPageComponentSchemas);
 
       loadPagesetResp.pages[index].components = formComponents.map((component) => {
@@ -93,7 +93,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       });
 
       loadPagesetResp.pages[index].components.push(...colComponents);
-    } else if (_page.pageType === PAPE_TYPE.LIST) {
+    } else if (_page.pageType === CATEGORY_TYPE.LIST) {
       console.log('listComponents: ', listComponents);
       loadPagesetResp.pages[index].components = listComponents.map((component) => {
         return {
@@ -166,15 +166,11 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setLayoutSubComponents: setListLayoutSubComponents
   } = useListEditorSignal;
 
-  const {setCurPage} = pagesRuntimeDataSignal;
-
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
   const pageSet = await loadPageSet(loadPageSetReq);
-  setCurPage(pageSet)
   console.log('载入页面集数据: ', pageSet);
-  
 
   pageSet.pages.forEach((page: PageSet) => {
     let newComponents: any[] = [];
@@ -235,9 +231,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType] || ''
           };
         }
-        if (page.pageType === PAPE_TYPE.FORM) {
+        if (page.pageType === CATEGORY_TYPE.FORM) {
           setFromLayoutSubComponents(component.parentCode, colComponents as any[][]);
-        } else if (page.pageType === PAPE_TYPE.LIST) {
+        } else if (page.pageType === CATEGORY_TYPE.LIST) {
           setListLayoutSubComponents(component.parentCode, colComponents as any[][]);
         }
 
@@ -252,12 +248,17 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     //   console.log(page.pageType,": newPageComponentSchemas: ", newPageComponentSchemas);
     //   console.log(page.pageType,": newColComponentsMap: ", newColComponentsMap);
 
-    if (page.pageType === PAPE_TYPE.FORM) {
+    if (page.pageType === CATEGORY_TYPE.FORM) {
+      console.log(page);
+
+      editorSignalMap[page.id] = useFormEditorSignal;
+      editorSignalMap[page.id].setComponents(newComponents);
+
       setFormComponents(newComponents);
       newPageComponentSchemas.forEach((config, componentId) => {
         setFromPageComponentSchemas(componentId, config);
       });
-    } else if (page.pageType === PAPE_TYPE.LIST) {
+    } else if (page.pageType === CATEGORY_TYPE.LIST) {
       setListComponents(newComponents);
       newPageComponentSchemas.forEach((config, componentId) => {
         setListPageComponentSchemas(componentId, config);

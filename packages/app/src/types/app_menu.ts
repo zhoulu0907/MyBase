@@ -30,23 +30,22 @@ export enum PageType {
   NORMAL = 1
 }
 
-export enum PAPE_TYPE {
+export enum CATEGORY_TYPE {
   NAVIGATE = 'navigate',
   LAYOUT = 'layout',
   FORM = 'form',
   LIST = 'list',
-  SHOW = 'show',
+  SHOW = 'show'
 }
 
-
 export const RootParentPage = {
-  id: "0",
-  menuCode: "root",
-  parentId: "0",
+  id: '0',
+  menuCode: 'root',
+  parentId: '0',
   menuSort: 0,
   menuType: MenuType.GROUP,
-  menuName: "根目录",
-  menuIcon: "",
+  menuName: '根目录',
+  menuIcon: '',
   isVisible: 1,
   children: [] as ApplicationMenu[]
 };

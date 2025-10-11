@@ -52,6 +52,8 @@ interface ColumnConfig {
   render?: (value: any, record: FieldFormValues, index: number) => React.ReactNode;
 }
 
+const CHECK_CONST = { IS_TRUE: 0, IS_FALSE: 1 };
+
 const TableColumns = ({
   fieldTypeOptions,
   FIELD_TYPES_NEED_CONFIG,
@@ -61,7 +63,7 @@ const TableColumns = ({
   setConstraintsPopoverVisible,
   renderFieldConfigContent,
   getFieldIndex,
-  deleteField,
+  deleteField
 }: TableColumnsProps): ColumnConfig[] => {
   return [
     {
@@ -200,8 +202,8 @@ const TableColumns = ({
             field={`fields.${getFieldIndex(record.id, index)}.isUnique`}
             className={styles['field-form-item']}
             triggerPropName="checked"
-            normalize={(v) => (v ? 1 : 0)}
-            formatter={(v) => v === 1 || v === true}
+            normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
+            formatter={(v) => v === CHECK_CONST.IS_TRUE || v === true}
           >
             <Checkbox />
           </Form.Item>
@@ -220,8 +222,8 @@ const TableColumns = ({
             field={`fields.${getFieldIndex(record.id, index)}.isRequired`}
             className={styles['field-form-item']}
             triggerPropName="checked"
-            normalize={(v) => (v ? 1 : 0)}
-            formatter={(v) => v === 1 || v === true}
+            normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
+            formatter={(v) => v === CHECK_CONST.IS_TRUE || v === true}
           >
             <Checkbox />
           </Form.Item>
