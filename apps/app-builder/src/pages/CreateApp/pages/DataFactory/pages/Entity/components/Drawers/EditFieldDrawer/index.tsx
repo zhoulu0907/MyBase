@@ -173,7 +173,8 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
         className={styles['edit-field-drawer']}
         footer={
           <>
-            <Button type="text" status="danger" onClick={() => openDeleteModal()}>
+            {/* 本期不支持删除 */}
+            <Button type="text" status="danger" onClick={() => openDeleteModal()} disabled>
               删除
             </Button>
             <Space>

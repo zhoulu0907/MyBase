@@ -258,7 +258,7 @@ const TableColumns = ({
       render: (value: unknown, record: FieldFormValues) => {
         return (
           record.isSystemField === FIELD_TYPE.CUSTOM && (
-            <Button type="text" status="danger" size="mini" onClick={() => deleteField(record.id)}>
+            <Button type="text" status="danger" size="mini" onClick={() => deleteField(record.id)} disabled>
               删除
             </Button>
           )
