@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -19,11 +20,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Conditional(FlowRuntimeCondition.class)
 public class RocketMQSlotManager implements InitializingBean {
 
-    private final String MAP_KEY = "flow:process:consumer:group";
+    public static final String MAP_KEY = "flow:process:consumer:group";
 
     private final int MAX_INSTANCES = 100;
 
-    private final long expirationThresholdMs = 120 * 1000;
+    private final long EXPIRATION_THRESHOLD_MS = 90 * 1000;
 
     @Setter
     @Autowired
@@ -47,7 +48,7 @@ public class RocketMQSlotManager implements InitializingBean {
     private void acquireSlot() {
         for (int i = 1; i < MAX_INSTANCES; i++) {
             Long storedTimestamp = slotMap.get(i);
-            if (storedTimestamp == null || (System.currentTimeMillis() - storedTimestamp) > expirationThresholdMs) {
+            if (storedTimestamp == null || (System.currentTimeMillis() - storedTimestamp) > EXPIRATION_THRESHOLD_MS) {
                 long currentTimestamp = System.currentTimeMillis();
                 boolean acquired;
                 if (storedTimestamp == null) {
@@ -70,8 +71,10 @@ public class RocketMQSlotManager implements InitializingBean {
                 int slot = acquiredSlot.get();
                 slotMap.put(slot, System.currentTimeMillis());
                 try {
-                    Thread.sleep(5000);
+                    TimeUnit.SECONDS.sleep(5);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
                 }
             }
         });

@@ -31,7 +31,7 @@ public class RocketMQFlowEventPublisher implements FlowEventPublisher, Initializ
     private String endpoints;
 
     @Setter
-    private String topic = "flow-process-event-topic";
+    private String topic = RocketMQConstants.TOPIC;
 
     private Producer producer;
 
