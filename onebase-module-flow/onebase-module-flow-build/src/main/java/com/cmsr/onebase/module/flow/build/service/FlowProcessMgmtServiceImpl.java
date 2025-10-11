@@ -2,18 +2,23 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.flow.build.graph.Graph;
 import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.dal.database.*;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessEntityDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessFormDO;
-import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
+import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
-import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
+import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +50,9 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
 
     @Autowired
     private FlowProcessTimeRepository flowProcessTimeRepository;
+
+    @Autowired
+    private MetadataEntityFieldApi metadataEntityFieldApi;
 
     @Override
     public PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO) {
@@ -136,7 +144,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 检查流程是否存在
         FlowProcessDO flowProcessDO = validateFlowProcessExist(reqVO.getId());
         // 更新流程定义
-        flowProcessDO.setProcessDefinition(reqVO.getProcessDefinition());
+        flowProcessDO.setProcessDefinition(complicateFieldDataType(reqVO.getProcessDefinition()));
         if (reqVO.getProcessStatus() != null && reqVO.getProcessStatus().intValue() >= 0) {
             flowProcessDO.setEnableStatus(reqVO.getProcessStatus());
         }
@@ -144,6 +152,22 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         flowProcessRepository.update(flowProcessDO);
     }
 
+    private String complicateFieldDataType(String processDefinition) {
+        Graph graph = JsonUtils.parseObject(processDefinition, Graph.class);
+        List<Long> allFieldId = graph.findAllFieldId();
+        Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap = selectFieldInfoMap(allFieldId);
+        graph.updateFieldDataType(fieldInfoMap);
+        processDefinition = JsonUtils.toJsonString(graph);
+        return processDefinition;
+    }
+
+    private Map<Long, EntityFieldJdbcTypeRespDTO> selectFieldInfoMap(List<Long> fieldIds) {
+        EntityFieldJdbcTypeReqDTO reqDTO = new EntityFieldJdbcTypeReqDTO();
+        reqDTO.setFieldIds(fieldIds);
+        List<EntityFieldJdbcTypeRespDTO> fieldJdbcTypes = metadataEntityFieldApi.getFieldJdbcTypes(reqDTO);
+        return fieldJdbcTypes.stream()
+                .collect(Collectors.toMap(EntityFieldJdbcTypeRespDTO::getFieldId, info -> info));
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -182,6 +206,10 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         validateFlowProcessExist(id);
         // 删除流程
         flowProcessRepository.deleteById(id);
+        flowProcessDateFieldRepository.deleteByProcessId(id);
+        flowProcessEntityRepository.deleteByProcessId(id);
+        flowProcessFormRepository.deleteByProcessId(id);
+        flowProcessTimeRepository.deleteByProcessId(id);
     }
 
 

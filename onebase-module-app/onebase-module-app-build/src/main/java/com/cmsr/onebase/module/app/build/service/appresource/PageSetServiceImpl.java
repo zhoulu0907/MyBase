@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetReqVO;
 import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
 import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
+import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,15 +85,18 @@ public class PageSetServiceImpl implements PageSetService {
         String formPageCode = UUID.randomUUID().toString();
         String formPageName = pageSetDO.getPageSetName() + "_表单";
         String formRouterPath = formPageCode + "/form";
-        String formPageType = "form";
-        PageDO formPageDO = PageUtils.initPage(pageSetDO.getId(), formPageName, formRouterPath, formPageType);
+        String formPageType = PageEnum.FORM.getValue();
+        Boolean formOpenViewMode = true;
+        PageDO formPageDO = PageUtils.initPage(pageSetDO.getId(), formPageName, formRouterPath, formPageType, formOpenViewMode);
         pageDataRepository.insert(formPageDO);
 
         String listPageCode = UUID.randomUUID().toString();
         String listPageName = pageSetDO.getPageSetName() + "_列表";
         String listRouterPath = listPageCode + "/list";
-        String listPageType = "list";
-        PageDO listPageDO = PageUtils.initPage(pageSetDO.getId(), listPageName, listRouterPath, listPageType);
+        String listPageType = PageEnum.LIST.getValue();;
+        Boolean listOpenViewMode = false;
+        PageDO listPageDO = PageUtils.initPage(pageSetDO.getId(), listPageName, listRouterPath, listPageType, listOpenViewMode
+        );
         pageDataRepository.insert(listPageDO);
 
         PageSetPageDO formPageSetPageDO = new PageSetPageDO();

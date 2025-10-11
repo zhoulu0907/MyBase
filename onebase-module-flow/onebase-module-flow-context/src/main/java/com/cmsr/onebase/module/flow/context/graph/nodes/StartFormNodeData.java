@@ -1,0 +1,38 @@
+package com.cmsr.onebase.module.flow.context.graph.nodes;
+
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/9/9 11:05
+ */
+@Data
+public class StartFormNodeData extends NodeData {
+
+    /**
+     * 流程ID，后补充
+     */
+    private Long processId;
+
+    private String triggerRange;
+
+    private List<String> recordTriggerEvents;
+
+    private String fieldTriggerEvents;
+
+    private Long pageId;
+
+    /**
+     * 前端组件的Id，所以是字符串
+     */
+    private String fieldId;
+
+    private Boolean isChildTriggerAllowed;
+
+    private List<Conditions> filterCondition;
+
+}

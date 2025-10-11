@@ -23,4 +23,9 @@ public class FlowProcessTimeRepository extends DataRepository<FlowProcessTimeDO>
         return findOne(configs);
     }
 
+    public void deleteByProcessId(Long processId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("process_id", processId);
+        deleteByConfig(configs);
+    }
 }

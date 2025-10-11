@@ -1,9 +1,14 @@
 package com.cmsr.onebase.module.app.build.service.appresource;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.cmsr.onebase.module.app.build.util.PageUtils;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dto.appresource.*;
+import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+import com.cmsr.onebase.module.app.core.enums.appresource.ViewEnmu;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -19,12 +24,7 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageRespDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
-import com.esotericsoftware.minlog.Log;
 
 import jakarta.annotation.Resource;
 
@@ -58,6 +58,42 @@ public class PageServiceImpl implements PageService {
         PageDO pageDO = BeanUtils.toBean(createPageDTO, PageDO.class);
         pageDO = pageDataRepository.insert(pageDO);
         return pageDO.getId();
+    }
+
+    @Override
+    public Long createPageView(CreatePageViewDTO createPageViewDTO) {
+        String formPageCode = UUID.randomUUID().toString();
+        String formPageName = createPageViewDTO.getViewName();
+        String formRouterPath = formPageCode + "/form";
+        String formPageType = PageEnum.FORM.getValue();
+        Boolean formOpenViewMode = false;
+        PageDO formPageDO = PageUtils.initPage(createPageViewDTO.getPageSetId(), formPageName, formRouterPath, formPageType, formOpenViewMode);
+
+        String viewType = createPageViewDTO.getViewType();
+
+        if (viewType.equals(ViewEnmu.MIX.getValue())){
+            formPageDO.setEditViewMode(true);
+            formPageDO.setDetailViewMode(true);
+        }
+        if (viewType.equals(ViewEnmu.EDIT.getValue())){
+            formPageDO.setEditViewMode(true);
+        }
+        if (viewType.equals(ViewEnmu.DETAIL.getValue())){
+            formPageDO.setDetailViewMode(true);
+        }
+
+        pageDataRepository.insert(formPageDO);
+
+        PageSetPageDO formPageSetPageDO = new PageSetPageDO();
+        formPageSetPageDO.setPageSetId(createPageViewDTO.getPageSetId());
+        formPageSetPageDO.setPageType(formPageType);
+        formPageSetPageDO.setPageId(formPageDO.getId());
+        formPageSetPageDO.setIsDefault(false);
+        formPageSetPageDO.setDefaultSeq(1);
+
+        pageSetPageDataRepository.insert(formPageSetPageDO);
+
+        return formPageDO.getId();
     }
 
     @Override
@@ -98,11 +134,36 @@ public class PageServiceImpl implements PageService {
 
         configs = new DefaultConfigStore();
         configs.in(Compare.EMPTY_VALUE_SWITCH.BREAK, "pageset_id", pageSetIdList, true, true);
-        configs.eq("page_type", "form");
+        configs.eq("page_type", PageEnum.FORM.getValue());
         List<PageDO> pageDOList = pageDataRepository.findAllByConfig(configs);
 
         List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
 
         return pageDTOList;
     }
+
+    @Override
+    public String getMetadataByPageId(Long pageId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("page_id", pageId);
+
+        PageSetPageDO pageSetPageDO =pageSetPageDataRepository.findByPageId(pageId);
+        PageSetDO pageSetDO =  pageSetDataRepository.findById(pageSetPageDO.getPageSetId());
+
+        return pageSetDO.getMainMetadata();
+    }
+
+    @Override
+    public List<PageDTO> listPageView(Long pageSetId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("pageset_id", pageSetId);
+        configs.eq("page_type",  PageEnum.FORM.getValue());
+
+        List<PageDO> pageDOList = pageDataRepository.findAllByConfig(configs);
+        List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
+
+        return pageDTOList;
+    }
+
+
 }

@@ -9,7 +9,7 @@ import com.aizuda.snailjob.client.job.core.openapi.SnailJobOpenApi;
 import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.model.response.JobApiResponse;
-import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import lombok.Setter;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;

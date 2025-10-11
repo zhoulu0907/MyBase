@@ -12,5 +12,7 @@ public interface AppResourceErrorCodeConstants {
 
     ErrorCode PAGE_NOT_EXIST = new ErrorCode(20002, "页面不存在");
 
+    ErrorCode PAGE_TYPE_ERROR = new ErrorCode(20003, "页面类型错误");
+
 
 }

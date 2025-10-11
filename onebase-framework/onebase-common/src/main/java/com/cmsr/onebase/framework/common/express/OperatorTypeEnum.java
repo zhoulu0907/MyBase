@@ -1,5 +1,7 @@
 package com.cmsr.onebase.framework.common.express;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @Author：huangjie
  * @Date：2025/9/16 21:34
@@ -27,11 +29,14 @@ public enum OperatorTypeEnum {
     }
 
     public static OperatorTypeEnum getByCode(String code) {
+        if (StringUtils.isEmpty(code)) {
+            return null;
+        }
         for (OperatorTypeEnum value : OperatorTypeEnum.values()) {
             if (value.getCode().equalsIgnoreCase(code)) {
                 return value;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Invalid OperatorTypeEnum code: " + code);
     }
 }

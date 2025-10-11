@@ -68,7 +68,8 @@
         <liteflow.version>2.15.0.2</liteflow.version>
         <snail-job.version>1.7.2</snail-job.version>
         <dom4j.version>2.2.0</dom4j.version>
-
+        <jackson.version>2.18.3</jackson.version>
+        <rocketmq-client.version>5.0.8</rocketmq-client.version>
         <!-- 三方云服务相关 -->
         <commons-io.version>2.17.0</commons-io.version>
         <commons-compress.version>1.27.1</commons-compress.version>
@@ -377,9 +378,19 @@
                 <version>${snail-job.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client-java</artifactId>
+                <version>${rocketmq-client.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.dom4j</groupId>
                 <artifactId>dom4j</artifactId>
                 <version>${dom4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>cn.hutool</groupId>
