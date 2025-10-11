@@ -31,8 +31,6 @@ import java.util.Collections;
 @Conditional(FlowRuntimeCondition.class)
 public class RocketMQFlowEventHandler implements MessageListener, ApplicationRunner {
 
-    private final String CONSUMER_GROUP_PREFIX = "flow-process-consumer-group-";
-
     private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 
     @Setter
@@ -40,7 +38,7 @@ public class RocketMQFlowEventHandler implements MessageListener, ApplicationRun
     private String endpoints;
 
     @Setter
-    private String topic = "flow-process-event-topic";
+    private String topic = RocketMQConstants.TOPIC;
 
     @Setter
     @Autowired
@@ -58,7 +56,7 @@ public class RocketMQFlowEventHandler implements MessageListener, ApplicationRun
                 .setEndpoints(endpoints)
                 .build();
         Integer processId = slotManager.getSlot();
-        String consumerGroup = CONSUMER_GROUP_PREFIX + processId;
+        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_PREFIX + processId;
         FilterExpression filterExpression = new FilterExpression();
         this.consumer = provider.newPushConsumerBuilder()
                 .setClientConfiguration(clientConfiguration)
