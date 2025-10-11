@@ -30,6 +30,15 @@ export enum PageType {
   NORMAL = 1
 }
 
+export enum PAPE_TYPE {
+  NAVIGATE = 'navigate',
+  LAYOUT = 'layout',
+  FORM = 'form',
+  LIST = 'list',
+  SHOW = 'show',
+}
+
+
 export const RootParentPage = {
     id: "0",
     menuCode: "root",

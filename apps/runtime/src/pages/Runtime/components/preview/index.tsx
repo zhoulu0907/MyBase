@@ -8,6 +8,8 @@ import {
   getPageSetMetaData,
   queryFlowExecForm,
   triggerFlowExecForm,
+  TRIGGER_EVENTS,
+  PAPE_TYPE,
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
@@ -123,7 +125,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('formData:   ', formData);
 
     // 接口判断 页面触发
-    const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === 'form');
+    const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === PAPE_TYPE.FORM);
     const pageId = curFormPage.id;
 
     const flowRes = await queryFlowExecForm(pageId);
@@ -137,8 +139,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodUpdate(req);
       console.log(res);
 
-      const updateFlow = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes('update'));
-      for (let ele of updateFlow) {
+      const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
+      for (let ele of updateFlows) {
         const param = {
           processId: ele.processId,
           executionUuid: '',
@@ -160,8 +162,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodInsert(req);
       console.log(res);
 
-      const createFlow = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes('create'));
-      for (let ele of createFlow) {
+      const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
+      for (let ele of createFlows) {
         const param = {
           processId: ele.processId,
           executionUuid: '',

@@ -2,6 +2,7 @@ import { Message } from '@arco-design/web-react';
 import {
   loadPageSet,
   savePageSet,
+  PAPE_TYPE,
   type ComponentConfig,
   type LoadPageSetReq,
   type PageSet,
@@ -52,7 +53,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
   console.log('res: ', loadPagesetResp);
 
   loadPagesetResp.pages.forEach((_page: PageSet, index: number) => {
-    if (_page.pageType === 'form') {
+    if (_page.pageType === PAPE_TYPE.FORM) {
       // console.log('formComponentsSchemas: ', formPageComponentSchemas);
 
       loadPagesetResp.pages[index].components = formComponents.map((component) => {
@@ -92,7 +93,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       });
 
       loadPagesetResp.pages[index].components.push(...colComponents);
-    } else if (_page.pageType === 'list') {
+    } else if (_page.pageType === PAPE_TYPE.LIST) {
       console.log('listComponents: ', listComponents);
       loadPagesetResp.pages[index].components = listComponents.map((component) => {
         return {
@@ -234,9 +235,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType] || ''
           };
         }
-        if (page.pageType === 'form') {
+        if (page.pageType === PAPE_TYPE.FORM) {
           setFromLayoutSubComponents(component.parentCode, colComponents as any[][]);
-        } else if (page.pageType === 'list') {
+        } else if (page.pageType === PAPE_TYPE.LIST) {
           setListLayoutSubComponents(component.parentCode, colComponents as any[][]);
         }
 
@@ -251,12 +252,12 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     //   console.log(page.pageType,": newPageComponentSchemas: ", newPageComponentSchemas);
     //   console.log(page.pageType,": newColComponentsMap: ", newColComponentsMap);
 
-    if (page.pageType === 'form') {
+    if (page.pageType === PAPE_TYPE.FORM) {
       setFormComponents(newComponents);
       newPageComponentSchemas.forEach((config, componentId) => {
         setFromPageComponentSchemas(componentId, config);
       });
-    } else if (page.pageType === 'list') {
+    } else if (page.pageType === PAPE_TYPE.LIST) {
       setListComponents(newComponents);
       newPageComponentSchemas.forEach((config, componentId) => {
         setListPageComponentSchemas(componentId, config);

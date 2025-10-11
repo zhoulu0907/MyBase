@@ -9,12 +9,13 @@ import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import styles from './index.module.less';
+import {PAPE_TYPE} from '@onebase/app';
 
 const Sider = Layout.Sider;
 const InputSearch = Input.Search;
 
 // 定义类型
-const CATEGORY_KEYS = ['navigate', 'layout', 'form', 'list', 'show'] as const;
+const CATEGORY_KEYS = [PAPE_TYPE.NAVIGATE, PAPE_TYPE.LAYOUT, PAPE_TYPE.FORM, PAPE_TYPE.LIST, PAPE_TYPE.SHOW] as const;
 type CategoryKey = (typeof CATEGORY_KEYS)[number];
 
 interface MaterialContainerProps {
@@ -33,11 +34,11 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
   const [components, setComponents] = useState<{ key: CategoryKey; items: any[] }[]>([]); // 关键词过滤后的组件
 
   // 按 category 分类，分成 3 个 items
-  //   const baseNavigateItems = allTemplate.base.find((cat) => cat.category === 'navigate')?.items || [];
-  const baseLayoutItems = allTemplate.base.find((cat) => cat.category === 'layout')?.items || [];
-  const baseFormItems = allTemplate.base.find((cat) => cat.category === 'form')?.items || [];
-  const baseListItems = allTemplate.base.find((cat) => cat.category === 'list')?.items || [];
-  const baseShowItems = allTemplate.base.find((cat) => cat.category === 'show')?.items || [];
+  //   const baseNavigateItems = allTemplate.base.find((cat) => cat.category === PAPE_TYPE.NAVIGATE)?.items || [];
+  const baseLayoutItems = allTemplate.base.find((cat) => cat.category === PAPE_TYPE.LAYOUT)?.items || [];
+  const baseFormItems = allTemplate.base.find((cat) => cat.category === PAPE_TYPE.FORM)?.items || [];
+  const baseListItems = allTemplate.base.find((cat) => cat.category === PAPE_TYPE.LIST)?.items || [];
+  const baseShowItems = allTemplate.base.find((cat) => cat.category === PAPE_TYPE.SHOW)?.items || [];
 
   // category 对应的国际化 key
   const categoryI18nMap: Record<CategoryKey, string> = {
@@ -49,11 +50,11 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
   };
 
   const baseCategories: { key: CategoryKey; items: any[] }[] = [
-    // { key: 'navigate', items: baseNavigateItems },
-    { key: 'layout', items: baseLayoutItems },
-    { key: 'form', items: baseFormItems },
-    { key: 'list', items: baseListItems },
-    { key: 'show', items: baseShowItems }
+    // { key: PAPE_TYPE.NAVIGATE, items: baseNavigateItems },
+    { key: PAPE_TYPE.LAYOUT, items: baseLayoutItems },
+    { key: PAPE_TYPE.FORM, items: baseFormItems },
+    { key: PAPE_TYPE.LIST, items: baseListItems },
+    { key: PAPE_TYPE.SHOW, items: baseShowItems }
   ];
 
   useEffect(() => {
@@ -150,10 +151,10 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
             {activeComponentTab === 'base-component' && (
               <Collapse defaultActiveKey={baseCategories.map((c) => c.key)} accordion={false} bordered={false} expandIconPosition='right' expandIcon={<img src={IconCollapsedDown} alt='' />}>
                 {components.map((cat) => {
-                  if (activeTab === EDITOR_TYPES.LIST_EDITOR && cat.key === 'form') {
+                  if (activeTab === EDITOR_TYPES.LIST_EDITOR && cat.key === PAPE_TYPE.FORM) {
                     return null;
                   }
-                  if (activeTab === EDITOR_TYPES.FORM_EDITOR && (cat.key === 'list')) {
+                  if (activeTab === EDITOR_TYPES.FORM_EDITOR && (cat.key === PAPE_TYPE.LIST)) {
                     return null;
                   }
 
