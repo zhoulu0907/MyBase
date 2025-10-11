@@ -248,6 +248,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     //   console.log(page.pageType,": newColComponentsMap: ", newColComponentsMap);
 
     if (page.pageType === 'form') {
+      console.log(page);
       setFormComponents(newComponents);
       newPageComponentSchemas.forEach((config, componentId) => {
         setFromPageComponentSchemas(componentId, config);
