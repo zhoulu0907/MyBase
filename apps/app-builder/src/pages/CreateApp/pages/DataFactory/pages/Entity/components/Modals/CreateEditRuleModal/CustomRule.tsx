@@ -24,6 +24,7 @@ interface RuleFormValues {
   valueRules: ConditionRow[][];
   popPrompt: string;
   popType: string;
+  filterCondition?: ConditionRow[][];
 }
 
 interface CreateRuleModalProps {
@@ -52,8 +53,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
     operator: 'equals',
     valueType: 'custom',
     fieldValue: '',
-    logicOperator: 'AND',
-    logicType: 'CONDITION'
+    logicOperator: 'AND'
   });
 
   // 创建默认条件组
@@ -66,6 +66,18 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
       console.log('getRuleById', res);
       if (res) {
         form.setFieldsValue(res);
+
+        const conditions = res?.valueRules.map(item => {
+          return {
+            conditions: item.map(item => ({
+              fieldId: item.fieldId,
+              op: item.operator,
+              operatorType: item.valueType,
+              value: item.fieldValue
+            }))
+          };
+        });
+        form.setFieldValue('filterCondition', conditions);
       }
     } catch (error) {
       console.error('获取规则失败:', error);
@@ -261,16 +273,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         >
           <Input placeholder="请输入规则名称" maxLength={50} showWordLimit />
         </Form.Item>
-
-        {/* <Form.Item label="校验类型" field="validationType" rules={[{ required: true, message: '请选择校验类型' }]}>
-          <Select onChange={handleValidationTypeChange} placeholder="请选择校验类型">
-            {validationTypeOptions.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item> */}
 
         <ConditionEditor
           nodeId={entity.id}

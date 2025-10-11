@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Layout, Message } from '@arco-design/web-react';
-import { getEntityList, deleteEntity } from '@onebase/app';
+import { getEntityList, deleteEntity, updateEntity, type UpdateEntityReqVO } from '@onebase/app';
 import { useResourceStore } from '@/store/store_resource';
+import { useAppStore } from '@/store/store_app';
 import type { EntityListItem, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import EntityList from './EntityList';
 import EntityDetail from './EntityDetail';
@@ -14,6 +15,7 @@ const { Sider, Content } = Layout;
 
 const EntityTable: React.FC = () => {
   const { curDataSourceId } = useResourceStore();
+  const { curAppId } = useAppStore();
 
   // 使用统一的弹窗/抽屉管理器
   const { openModal, closeModal, isModalOpen, getModalData, setModalDataValue } = useModalManager();
@@ -86,8 +88,21 @@ const EntityTable: React.FC = () => {
     openModal(MODAL_TYPE.EDIT_ENTITY, { editingNode: entity as unknown as EntityNode });
   };
 
-  const onNodeEdit = (data: Partial<EntityNode>) => {
-    console.log('onNodeEdit', data);
+  const onNodeEdit = async (data: Partial<EntityNode>) => {
+    const params = {
+      id: data.id,
+      displayName: data.displayName,
+      tableName: data.tableName,
+      description: data.description,
+      datasourceId: curDataSourceId,
+      appId: curAppId
+    };
+
+    const res = await updateEntity(params as unknown as UpdateEntityReqVO);
+    if (res) {
+      Message.success('保存成功');
+      console.log('实体信息更新成功');
+    }
   };
 
   useEffect(() => {
