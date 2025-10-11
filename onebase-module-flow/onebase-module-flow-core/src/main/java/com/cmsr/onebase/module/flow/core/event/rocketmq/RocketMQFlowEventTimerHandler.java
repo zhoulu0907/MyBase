@@ -43,6 +43,7 @@ import java.util.Set;
  * @Date：2025/10/10 10:19
  */
 @Slf4j
+@Setter
 @Component
 @Conditional(FlowRuntimeCondition.class)
 public class RocketMQFlowEventTimerHandler implements MessageListener, ApplicationRunner {
@@ -67,7 +68,6 @@ public class RocketMQFlowEventTimerHandler implements MessageListener, Applicati
 
     @Autowired
     private JobClient jobClient;
-
 
     private PushConsumer consumer;
 
