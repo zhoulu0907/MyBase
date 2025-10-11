@@ -22,7 +22,6 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
-import com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
@@ -41,9 +40,6 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DataRow;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
-
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,8 +55,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_CODE_DUPLICATE;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NAME_DUPLICATE;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_DISPLAY_NAME_DUPLICATE;
 
 /**
  * 实体字段 Service 实现类
@@ -278,6 +276,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         for (EntityFieldCreateItemVO fieldItem : reqVO.getFields()) {
             // 直接执行创建逻辑，异常由全局统一处理
             validateEntityFieldNameUnique(null, reqVO.getEntityId(), fieldItem.getFieldName());
+            validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), fieldItem.getDisplayName());
             // 创建字段及数据库插入操作
             MetadataEntityFieldDO entityField = new MetadataEntityFieldDO();
             entityField.setEntityId(Long.valueOf(reqVO.getEntityId()));
@@ -475,6 +474,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         for (EntityFieldUpdateItemVO fieldItem : reqVO.getFields()) {
             // 校验字段存在
             validateEntityFieldExists(fieldItem.getId());
+            MetadataEntityFieldDO existingField = metadataEntityFieldRepository.findById(Long.valueOf(fieldItem.getId()));
+            if (existingField == null) {
+                failureCount++;
+                continue;
+            }
+            if (fieldItem.getDisplayName() != null && !fieldItem.getDisplayName().trim().isEmpty()) {
+                validateEntityFieldDisplayNameUnique(fieldItem.getId(), existingField.getEntityId().toString(), fieldItem.getDisplayName());
+            }
             // 更新字段
             MetadataEntityFieldDO updateObj = new MetadataEntityFieldDO();
             updateObj.setId(Long.valueOf(fieldItem.getId()));
@@ -602,6 +609,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 名称唯一性（若改名）
                 String newName = item.getFieldName() != null ? item.getFieldName() : origin.getFieldName();
                 validateEntityFieldNameUnique(item.getId(), origin.getEntityId().toString(), newName);
+                String newDisplayName = item.getDisplayName() != null ? item.getDisplayName() : origin.getDisplayName();
+                validateEntityFieldDisplayNameUnique(item.getId(), origin.getEntityId().toString(), newDisplayName);
 
                 validateEntityAllowModifyStructure(origin.getEntityId());
 
@@ -678,6 +687,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                     // 转换为更新操作
                     item.setId(existingField.getId().toString());
+            String updateFieldName = item.getFieldName() != null ? item.getFieldName() : existingField.getFieldName();
+            validateEntityFieldNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateFieldName);
+            String updateDisplayName = item.getDisplayName() != null ? item.getDisplayName() : existingField.getDisplayName();
+            validateEntityFieldDisplayNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateDisplayName);
 
                     // 组装更新对象（只覆盖非空字段）
                     MetadataEntityFieldDO upd = new MetadataEntityFieldDO();
@@ -744,6 +757,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 确实是新增字段的情况
                 // 名称唯一
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
+                validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), item.getDisplayName());
                 validateEntityAllowModifyStructure(Long.valueOf(reqVO.getEntityId()));
 
                 MetadataEntityFieldDO toCreate = new MetadataEntityFieldDO();
@@ -831,6 +845,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     public Long createEntityField(@Valid EntityFieldSaveReqVO createReqVO) {
         // 校验字段名唯一性
         validateEntityFieldNameUnique(null, createReqVO.getEntityId(), createReqVO.getFieldName());
+        validateEntityFieldDisplayNameUnique(null, createReqVO.getEntityId(), createReqVO.getDisplayName());
 
         // 校验实体类型是否允许修改表结构
         validateEntityAllowModifyStructure(Long.valueOf(createReqVO.getEntityId()));
@@ -880,6 +895,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         validateEntityFieldExists(updateReqVO.getId());
         // 校验字段名唯一性
         validateEntityFieldNameUnique(updateReqVO.getId(), updateReqVO.getEntityId(), updateReqVO.getFieldName());
+    validateEntityFieldDisplayNameUnique(updateReqVO.getId(), updateReqVO.getEntityId(), updateReqVO.getDisplayName());
         // 校验实体类型是否允许修改表结构
         validateEntityAllowModifyStructure(Long.valueOf(updateReqVO.getEntityId()));
 
@@ -932,6 +948,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             fieldOptionService.deleteByFieldId(existingField.getId());
             fieldConstraintService.deleteByFieldId(existingField.getId());
             autoNumberConfigBuildService.deleteByFieldId(existingField.getId());
+            validationRequiredService.deleteByFieldId(existingField.getId());
+            validationUniqueService.deleteByFieldId(existingField.getId());
+            validationLengthService.deleteByFieldId(existingField.getId());
         }
 
         // 删除实体字段
@@ -982,7 +1001,27 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         long count = metadataEntityFieldRepository.countByConfig(configStore);
         if (count > 0) {
-            throw exception(ENTITY_FIELD_CODE_DUPLICATE);
+            throw exception(ENTITY_FIELD_NAME_DUPLICATE);
+        }
+    }
+
+    private void validateEntityFieldDisplayNameUnique(String id, String entityId, String displayName) {
+        if (displayName == null || displayName.trim().isEmpty()) {
+            return;
+        }
+
+        Long longEntityId = Long.valueOf(entityId);
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, longEntityId);
+        configStore.and(MetadataEntityFieldDO.DISPLAY_NAME, displayName.trim());
+        if (id != null && !id.trim().isEmpty()) {
+            Long longId = Long.valueOf(id.trim());
+            configStore.and(Compare.NOT_EQUAL, "id", longId);
+        }
+
+        long count = metadataEntityFieldRepository.countByConfig(configStore);
+        if (count > 0) {
+            throw exception(ENTITY_FIELD_DISPLAY_NAME_DUPLICATE);
         }
     }
 
@@ -1111,6 +1150,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         for (MetadataEntityFieldDO field : fields) {
             // 删除数据库记录
+            fieldOptionService.deleteByFieldId(field.getId());
+            fieldConstraintService.deleteByFieldId(field.getId());
+            autoNumberConfigBuildService.deleteByFieldId(field.getId());
+            validationRequiredService.deleteByFieldId(field.getId());
+            validationUniqueService.deleteByFieldId(field.getId());
+            validationLengthService.deleteByFieldId(field.getId());
             metadataEntityFieldRepository.deleteById(field.getId());
 
             // 从物理表删除字段

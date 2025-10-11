@@ -12,10 +12,10 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
-import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 公式引擎控制器
@@ -24,7 +24,7 @@ import java.util.List;
  * @author matianyu
  * @date 2025-09-01
  */
-@Tag(name = "管理后台 - 公式引擎")
+@Tag(name = "公式引擎")
 @RestController
 @RequestMapping("/formula/engine")
 @Validated
@@ -62,28 +62,4 @@ public class FormulaEngineController {
         return CommonResult.success(isValid);
     }
 
-    @GetMapping("/functions")
-    @Operation(summary = "获取支持的函数列表")
-    @PreAuthorize("@ss.hasPermission('formula:engine:query')")
-    public CommonResult<List<String>> getSupportedFunctions() {
-
-        String[] functions = formulaEngineService.getSupportedFunctions();
-        List<String> functionList = Arrays.asList(functions);
-
-        log.debug("获取支持的函数列表，共{}个函数", functions.length);
-
-        return CommonResult.success(functionList);
-
-    }
-
-    @PostMapping("/cache/clear")
-    @Operation(summary = "清理公式缓存")
-    @PreAuthorize("@ss.hasPermission('formula:engine:cache:clear')")
-    public CommonResult<Boolean> clearCache() {
-        formulaEngineService.clearCache();
-
-        log.info("公式缓存清理成功");
-
-        return CommonResult.success(true);
-    }
 }

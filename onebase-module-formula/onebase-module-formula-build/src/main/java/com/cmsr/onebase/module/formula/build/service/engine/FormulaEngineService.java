@@ -42,8 +42,4 @@ public interface FormulaEngineService {
      */
     String[] getSupportedFunctions();
 
-    /**
-     * 清理缓存
-     */
-    void clearCache();
 }
