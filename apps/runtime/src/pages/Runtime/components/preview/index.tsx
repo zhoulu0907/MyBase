@@ -141,7 +141,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       for (let ele of updateFlow) {
         const param = {
           processId: ele.processId,
-          executionUuid: ele.executionUuid || '',
+          executionUuid: '',
           inputParams: formData
         };
         await triggerFlowExecForm(param);
@@ -164,7 +164,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       for (let ele of createFlow) {
         const param = {
           processId: ele.processId,
-          executionUuid: ele.executionUuid || '',
+          executionUuid: '',
           inputParams: formData
         };
         await triggerFlowExecForm(param);
