@@ -616,6 +616,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 validateEntityAllowModifyStructure(origin.getEntityId());
 
+                Integer maxLength = extractMaxLength(item);
+
                 // 组装更新对象（只覆盖非空字段）
                 MetadataEntityFieldDO upd = new MetadataEntityFieldDO();
                 upd.setId(origin.getId());
@@ -623,7 +625,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (item.getFieldName() != null) upd.setFieldName(item.getFieldName());
                 if (item.getDisplayName() != null) upd.setDisplayName(item.getDisplayName());
                 if (item.getFieldType() != null) upd.setFieldType(item.getFieldType());
-                if (item.getDataLength() != null) upd.setDataLength(item.getDataLength());
+                if (maxLength != null) {
+                    upd.setDataLength(maxLength);
+                }
                 if (item.getDecimalPlaces() != null) upd.setDecimalPlaces(item.getDecimalPlaces());
                 if (item.getDefaultValue() != null) upd.setDefaultValue(item.getDefaultValue());
                 if (item.getDescription() != null) upd.setDescription(item.getDescription());
@@ -671,7 +675,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
                 
                 // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
-                if (item.getDataLength() != null && !item.getDataLength().equals(origin.getDataLength())) {
+                if (maxLength != null && !maxLength.equals(origin.getDataLength())) {
                     processLengthValidation(fieldId, full);
                 }
             }
@@ -694,6 +698,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             String updateDisplayName = item.getDisplayName() != null ? item.getDisplayName() : existingField.getDisplayName();
             validateEntityFieldDisplayNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateDisplayName);
 
+                    Integer maxLength = extractMaxLength(item);
+
                     // 组装更新对象（只覆盖非空字段）
                     MetadataEntityFieldDO upd = new MetadataEntityFieldDO();
                     upd.setId(existingField.getId());
@@ -701,7 +707,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     if (item.getFieldName() != null) upd.setFieldName(item.getFieldName());
                     if (item.getDisplayName() != null) upd.setDisplayName(item.getDisplayName());
                     if (item.getFieldType() != null) upd.setFieldType(item.getFieldType());
-                    if (item.getDataLength() != null) upd.setDataLength(item.getDataLength());
+                    if (maxLength != null) {
+                        upd.setDataLength(maxLength);
+                    }
                     if (item.getDecimalPlaces() != null) upd.setDecimalPlaces(item.getDecimalPlaces());
                     if (item.getDefaultValue() != null) upd.setDefaultValue(item.getDefaultValue());
                     if (item.getDescription() != null) upd.setDescription(item.getDescription());
@@ -749,7 +757,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     }
                     
                     // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
-                    if (item.getDataLength() != null && !item.getDataLength().equals(existingField.getDataLength())) {
+                    if (maxLength != null && !maxLength.equals(existingField.getDataLength())) {
                         processLengthValidation(fieldId, full);
                     }
                     
@@ -762,13 +770,15 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), item.getDisplayName());
                 validateEntityAllowModifyStructure(Long.valueOf(reqVO.getEntityId()));
 
+                Integer maxLength = extractMaxLength(item);
+
                 MetadataEntityFieldDO toCreate = new MetadataEntityFieldDO();
                 toCreate.setEntityId(Long.valueOf(reqVO.getEntityId()));
                 toCreate.setAppId(Long.valueOf(reqVO.getAppId()));
                 toCreate.setFieldName(item.getFieldName());
                 toCreate.setDisplayName(item.getDisplayName());
                 toCreate.setFieldType(item.getFieldType());
-                toCreate.setDataLength(item.getDataLength());
+                toCreate.setDataLength(maxLength);
                 toCreate.setDecimalPlaces(item.getDecimalPlaces());
                 toCreate.setDefaultValue(item.getDefaultValue());
                 toCreate.setDescription(item.getDescription());
@@ -805,13 +815,24 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
                 
                 // 特别处理：对于新增字段，如果设置了 dataLength，需要同步到 MetadataValidationLengthDO
-                if (item.getDataLength() != null && item.getDataLength() > 0) {
+                if (maxLength != null && maxLength > 0) {
                     processLengthValidation(fieldId, toCreate);
                 }
             }
         }
 
         return resp;
+    }
+
+    private Integer extractMaxLength(EntityFieldUpsertItemVO item) {
+        if (item == null || item.getConstraints() == null) {
+            return null;
+        }
+        Integer maxLength = item.getConstraints().getMaxLength();
+        if (maxLength == null || maxLength <= 0) {
+            return null;
+        }
+        return maxLength;
     }
 
     /**
