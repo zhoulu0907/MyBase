@@ -20,17 +20,21 @@ import java.util.List;
 @Accessors(chain = true)
 @Table(name = "bpm_flow_task")
 public class FlowTask extends BaseEntity implements Task {
+    public static final String INSTANCE_ID = "instance_id";
+
+    public static final String NODE_CODE = "node_code";
+
 
     /** 对应flow_definition表的id */
     @Column(name = "definition_id", nullable = false)
     private Long definitionId;
 
     /** 对应flow_instance表的id */
-    @Column(name = "instance_id", nullable = false)
+    @Column(name = INSTANCE_ID, nullable = false)
     private Long instanceId;
 
     /** 节点编码 */
-    @Column(name = "node_code", length = 100, nullable = false)
+    @Column(name = NODE_CODE, length = 100, nullable = false)
     private String nodeCode;
 
     /** 节点名称 */

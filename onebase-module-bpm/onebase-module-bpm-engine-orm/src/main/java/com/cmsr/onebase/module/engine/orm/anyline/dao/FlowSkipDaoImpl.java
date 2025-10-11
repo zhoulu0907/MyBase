@@ -4,6 +4,8 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowSkip;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowSkipRepository;
 import jakarta.annotation.Resource;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.dromara.warm.flow.core.orm.dao.FlowSkipDao;
 
 import java.io.Serializable;
@@ -27,8 +29,10 @@ public class FlowSkipDaoImpl extends WarmDaoImpl<FlowSkip> implements FlowSkipDa
 
     @Override
     public int deleteSkipByDefIds(Collection<? extends Serializable> defIds) {
-        // todo 待处理
-        return 0;
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.in(FlowSkip.DEFINITION_ID, defIds);
+
+        return (int) getRepository().deleteByConfig(configStore);
     }
 
     @Override

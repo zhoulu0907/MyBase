@@ -18,17 +18,23 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @Table(name = "bpm_flow_user")
 public class FlowUser extends BaseEntity implements User {
+    public static final String ASSOCIATED = "associated";
+
+    public static final String TYPE = "type";
+
+    public static final String PROCESSED_BY = "processed_by";
+
 
     /** 人员类型（1审批人 2转办人 3委托人） */
-    @Column(name = "type", length = 1, nullable = false)
+    @Column(name = TYPE, length = 1, nullable = false)
     private String type;
 
     /** 权限人（可能是角色ID或用户ID等） */
-    @Column(name = "processed_by", length = 80)
+    @Column(name = PROCESSED_BY, length = 80)
     private String processedBy;
 
     /** 关联的任务ID */
-    @Column(name = "associated", nullable = false)
+    @Column(name = ASSOCIATED, nullable = false)
     private Long associated;
 
 

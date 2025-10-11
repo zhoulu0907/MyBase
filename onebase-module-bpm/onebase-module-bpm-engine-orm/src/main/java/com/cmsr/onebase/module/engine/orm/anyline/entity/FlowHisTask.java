@@ -19,21 +19,31 @@ import java.util.List;
 @Accessors(chain = true)
 @Table(name = "bpm_flow_his_task")
 public class FlowHisTask extends BaseEntity implements HisTask {
+    public static final String INSTANCE_ID = "instance_id";
+
+    public static final String SKIP_TYPE = "skip_type";
+
+    public static final String NODE_CODE = "node_code";
+
+    public static final String TASK_ID = "task_id";
+
+    public static final String COOPERATE_TYPE = "cooperate_type";
+
 
     /** 流程定义ID */
     @Column(name = "definition_id", nullable = false)
     private Long definitionId;
 
     /** 流程实例ID */
-    @Column(name = "instance_id", nullable = false)
+    @Column(name = INSTANCE_ID, nullable = false)
     private Long instanceId;
 
     /** 待办任务ID */
-    @Column(name = "task_id", nullable = false)
+    @Column(name = TASK_ID, nullable = false)
     private Long taskId;
 
     /** 开始节点编码 */
-    @Column(name = "node_code", length = 100)
+    @Column(name = NODE_CODE, length = 100)
     private String nodeCode;
 
     /** 开始节点名称 */
@@ -57,7 +67,7 @@ public class FlowHisTask extends BaseEntity implements HisTask {
     private String approver;
 
     /** 协作方式 */
-    @Column(name = "cooperate_type", nullable = false)
+    @Column(name = COOPERATE_TYPE, nullable = false)
     private Integer cooperateType;
 
     /** 协作人 */
@@ -65,7 +75,7 @@ public class FlowHisTask extends BaseEntity implements HisTask {
     private String collaborator;
 
     /** 流转类型（PASS/REJECT/NONE） */
-    @Column(name = "skip_type", length = 10, nullable = false)
+    @Column(name = SKIP_TYPE, length = 10, nullable = false)
     private String skipType;
 
     /** 流程状态 */

@@ -4,6 +4,8 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
 import jakarta.annotation.Resource;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.dromara.warm.flow.core.orm.dao.FlowTaskDao;
 
 import java.util.List;
@@ -27,18 +29,23 @@ public class FlowTaskDaoImpl extends WarmDaoImpl<FlowTask> implements FlowTaskDa
 
     @Override
     public int deleteByInsIds(List<Long> instanceIds) {
-        // todo 待处理
-        return 0;
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.in(FlowTask.INSTANCE_ID, instanceIds);
+
+        return (int) getRepository().deleteByConfig(configStore);
     }
 
     @Override
     public List<FlowTask> getByInsIdAndNodeCodes(Long instanceId, List<String> nodeCodes) {
-        // todo 待处理
-        return null;
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(FlowTask.INSTANCE_ID, instanceId);
+        configStore.in(FlowTask.NODE_CODE, nodeCodes);
+
+        return getRepository().findAllByConfig(configStore);
     }
 
     @Override
     public FlowTask newEntity() {
-        return newEntity();
+        return new FlowTask();
     }
 }

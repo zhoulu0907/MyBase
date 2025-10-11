@@ -18,9 +18,10 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @Table(name = "bpm_flow_instance")
 public class FlowInstance extends BaseEntity implements Instance {
+    public static final String DEFINITION_ID = "definition_id";
 
     /** 对应flow_definition表的id */
-    @Column(name = "definition_id", nullable = false)
+    @Column(name = DEFINITION_ID, nullable = false)
     private Long definitionId;
 
     /** 业务id */

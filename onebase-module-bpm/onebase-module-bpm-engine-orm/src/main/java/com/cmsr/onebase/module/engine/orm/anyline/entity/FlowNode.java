@@ -22,17 +22,20 @@ import java.util.List;
 @Accessors(chain = true)
 @Table(name = "bpm_flow_node")
 public class FlowNode extends BaseEntity implements Node {
+    public static final String DEFINITION_ID = "definition_id";
+
+    public static final String NODE_CODE = "node_code";
 
     /** 节点类型（0开始 1中间 2结束 3互斥网关 4并行网关） */
     @Column(name = "node_type", nullable = false)
     private Integer nodeType;
 
     /** 流程定义ID */
-    @Column(name = "definition_id", nullable = false)
+    @Column(name = DEFINITION_ID, nullable = false)
     private Long definitionId;
 
     /** 节点编码 */
-    @Column(name = "node_code", length = 100, nullable = false)
+    @Column(name = NODE_CODE, length = 100, nullable = false)
     private String nodeCode;
 
     /** 节点名称 */
