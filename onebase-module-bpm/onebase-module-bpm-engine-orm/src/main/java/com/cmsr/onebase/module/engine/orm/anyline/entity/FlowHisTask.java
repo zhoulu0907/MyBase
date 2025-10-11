@@ -75,7 +75,7 @@ public class FlowHisTask extends BaseEntity implements HisTask {
     private String collaborator;
 
     /** 流转类型（PASS/REJECT/NONE） */
-    @Column(name = SKIP_TYPE, length = 10, nullable = false)
+    @Column(name = SKIP_TYPE, length = 10)
     private String skipType;
 
     /** 流程状态 */

@@ -89,7 +89,7 @@ public class FlowNode extends BaseEntity implements Node {
     /**
      * 版本
      */
-    @Column(name = "version", length = 20)
+    @Column(name = "version", length = 20, nullable = false)
     private String version;
 
     /* ==================== 以下为非数据库字段 ==================== */
