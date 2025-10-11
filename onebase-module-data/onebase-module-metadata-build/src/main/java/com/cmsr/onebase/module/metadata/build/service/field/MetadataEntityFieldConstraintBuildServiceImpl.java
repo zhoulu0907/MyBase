@@ -130,7 +130,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 requiredVO.setIsEnabled(req.getIsEnabled());
                 requiredVO.setPromptMessage(req.getPromptMessage());
                 requiredVO.setRunMode(req.getRunMode());
-                requiredVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                requiredVO.setRgName(buildRequiredGroupName(req.getFieldId()));
                 requiredService.create(requiredVO);
             } else {
                 // 直接创建UpdateReqVO对象，避免DO到VO的转换问题
@@ -139,7 +139,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 requiredUpdateVO.setIsEnabled(req.getIsEnabled());
                 requiredUpdateVO.setPromptMessage(req.getPromptMessage());
                 requiredUpdateVO.setRunMode(req.getRunMode());
-                requiredUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                requiredUpdateVO.setRgName(buildRequiredGroupName(req.getFieldId()));
                 requiredService.update(requiredUpdateVO);
             }
         } else if ("UNIQUE".equalsIgnoreCase(type)) {
@@ -151,6 +151,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
 
             Integer enableFlag = req.getIsEnabled() != null ? req.getIsEnabled() : 0;
             String prompt = StringUtils.hasText(req.getPromptMessage()) ? req.getPromptMessage() : "此字段值必须唯一";
+            String defaultGroupName = buildUniqueGroupName(req.getFieldId());
 
             if (exist == null) {
                 ValidationUniqueSaveReqVO uniqueVO = new ValidationUniqueSaveReqVO();
@@ -160,26 +161,27 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 uniqueVO.setPromptMessage(prompt);
                 uniqueVO.setRunMode(req.getRunMode());
                 uniqueVO.setPopPrompt(prompt);
-                uniqueVO.setRgName("字段约束-" + req.getFieldId());
+                uniqueVO.setRgName(defaultGroupName);
                 uniqueService.create(uniqueVO);
             } else {
+                ValidationUniqueRespVO respVO = uniqueService.getByFieldIdWithRgName(req.getFieldId());
                 Long groupId = exist.getGroupId();
-                if (groupId == null) {
-                    ValidationUniqueRespVO respVO = uniqueService.getByFieldIdWithRgName(req.getFieldId());
-                    if (respVO != null) {
-                        groupId = respVO.getGroupId();
-                    }
+                if (groupId == null && respVO != null) {
+                    groupId = respVO.getGroupId();
                 }
                 if (groupId == null) {
                     throw new IllegalStateException("字段" + req.getFieldId() + "缺少唯一性规则组，无法更新");
                 }
+                String groupName = (respVO != null && StringUtils.hasText(respVO.getRgName()))
+                        ? respVO.getRgName()
+                        : defaultGroupName;
                 ValidationUniqueUpdateReqVO uniqueUpdateVO = new ValidationUniqueUpdateReqVO();
                 uniqueUpdateVO.setId(groupId);
                 uniqueUpdateVO.setIsEnabled(enableFlag);
                 uniqueUpdateVO.setPromptMessage(prompt);
                 uniqueUpdateVO.setRunMode(req.getRunMode());
                 uniqueUpdateVO.setPopPrompt(prompt);
-                uniqueUpdateVO.setRgName("字段约束-" + req.getFieldId());
+                uniqueUpdateVO.setRgName(groupName);
                 uniqueService.update(uniqueUpdateVO);
             }
         }
@@ -202,6 +204,15 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             if (exist != null) { uniqueService.deleteByFieldId(fieldId); }
         }
     }
+
+    private String buildRequiredGroupName(Long fieldId) {
+        return "字段约束-REQUIRED-" + fieldId;
+    }
+
+    private String buildUniqueGroupName(Long fieldId) {
+        return "字段约束-UNIQUE-" + fieldId;
+    }
+
 }
 
 

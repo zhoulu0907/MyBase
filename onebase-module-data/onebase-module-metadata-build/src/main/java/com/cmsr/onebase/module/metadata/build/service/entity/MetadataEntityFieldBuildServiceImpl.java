@@ -2003,9 +2003,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     saveReqVO.setIsEnabled(entityField.getIsRequired());
                     
                     // rg_name可以用display_name+field_name+必填校验进行拼接
-                    String rgName = String.format("%s%s必填校验", 
-                        entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
-                        entityField.getFieldName() != null ? entityField.getFieldName() : "");
+                    String rgName = buildRequiredRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
                     String promptMsg = "此字段为必填项";
                     saveReqVO.setPromptMessage(promptMsg);
@@ -2064,9 +2062,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     saveReqVO.setIsEnabled(entityField.getIsUnique());
                     
                     // rg_name可以用display_name+field_name+唯一校验进行拼接
-                    String rgName = String.format("%s%s唯一校验", 
-                        entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
-                        entityField.getFieldName() != null ? entityField.getFieldName() : "");
+                    String rgName = buildUniqueRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
                     String promptMsg = "此字段值必须唯一";
                     saveReqVO.setPromptMessage(promptMsg);
@@ -2085,6 +2081,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             // 记录错误但不影响主流程
             log.warn("处理唯一性校验时发生异常，字段ID: {}, 错误: {}", fieldId, e.getMessage(), e);
         }
+    }
+
+    private String buildRequiredRuleGroupName(Long fieldId) {
+        return "字段约束-REQUIRED-" + fieldId;
+    }
+
+    private String buildUniqueRuleGroupName(Long fieldId) {
+        return "字段约束-UNIQUE-" + fieldId;
     }
 
 }
