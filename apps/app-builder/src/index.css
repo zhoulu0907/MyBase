@@ -15,3 +15,8 @@
     }
   }
 }
+
+/* 菜单隐藏样式 */
+.menuTree .arco-tree-node-switcher {
+  display: none;
+}

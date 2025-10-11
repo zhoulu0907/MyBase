@@ -1,5 +1,5 @@
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
-import { IconEyeInvisible, IconSettings } from '@arco-design/web-react/icon';
+import { IconDragDotVertical, IconEyeInvisible, IconSettings } from '@arco-design/web-react/icon';
 import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
@@ -215,6 +215,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           >
             <IconSettings onClick={(e) => e.stopPropagation()} />
           </Dropdown>
+          <IconDragDotVertical style={{ cursor: 'move' }} />
         </div>
       )}
     </div>

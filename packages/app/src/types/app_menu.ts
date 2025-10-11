@@ -67,9 +67,18 @@ export interface UpdateApplicationMenuNameReq {
 }
 
 export interface UpdateApplicationMenuOrderReq {
-  id: string;
+  id?: string;
   parentId?: string;
-  ids: number[];
+  /**
+   * 菜单顺序树结构
+   */
+  menuTree?: MenuOrderNode[];
+}
+
+export interface MenuOrderNode {
+  id?: string;
+  children?: MenuOrderNode[];
+  [property: string]: any;
 }
 
 export interface UpdateApplicationMenuVisibleReq {
