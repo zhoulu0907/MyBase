@@ -6,6 +6,10 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  queryFlowExecForm,
+  triggerFlowExecForm,
+  TRIGGER_EVENTS,
+  PAPE_TYPE,
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
@@ -22,6 +26,7 @@ import {
   STATUS_VALUES,
   useFormEditorSignal,
   useListEditorSignal,
+  pagesRuntimeDataSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -41,6 +46,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+
+  const { curPage } = pagesRuntimeDataSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
@@ -117,6 +124,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     console.log('formData:   ', formData);
 
+    // 接口判断 页面触发
+    const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === PAPE_TYPE.FORM);
+    const pageId = curFormPage.id;
+
+    const flowRes = await queryFlowExecForm(pageId);
+
     if (editTargetId) {
       const req: UpdateMethodParams = {
         entityId: mainMetaData,
@@ -125,6 +138,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       };
       const res = await dataMethodUpdate(req);
       console.log(res);
+
+      const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
+      for (let ele of updateFlows) {
+        const param = {
+          processId: ele.processId,
+          executionUuid: '',
+          inputParams: formData
+        };
+        await triggerFlowExecForm(param);
+      }
+
       if (res) {
         Message.success('更新成功');
       }
@@ -137,6 +161,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       const res = await dataMethodInsert(req);
       console.log(res);
+
+      const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
+      for (let ele of createFlows) {
+        const param = {
+          processId: ele.processId,
+          executionUuid: '',
+          inputParams: formData
+        };
+        await triggerFlowExecForm(param);
+      }
+
       if (res) {
         Message.success('创建成功');
       }
