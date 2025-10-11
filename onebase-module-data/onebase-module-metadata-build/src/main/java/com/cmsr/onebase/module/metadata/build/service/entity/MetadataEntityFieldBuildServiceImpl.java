@@ -54,6 +54,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.util.StringUtils;
+
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
@@ -1663,20 +1665,28 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         // 长度
-        if (constraints.getMinLength() != null || constraints.getMaxLength() != null ||
-                constraints.getLengthEnabled() != null ||
-                (constraints.getLengthPrompt() != null && !constraints.getLengthPrompt().isEmpty())) {
+        boolean lengthEnabled = constraints.getLengthEnabled() != null
+                && CommonStatusEnum.isEnabled(constraints.getLengthEnabled());
+        boolean hasLengthRange = (constraints.getMinLength() != null && constraints.getMinLength() > 0)
+                || (constraints.getMaxLength() != null && constraints.getMaxLength() > 0);
+        boolean hasLengthPrompt = StringUtils.hasText(constraints.getLengthPrompt());
+        boolean hasExplicitEnableFlag = constraints.getLengthEnabled() != null;
+        if (lengthEnabled || (!hasExplicitEnableFlag && (hasLengthRange || hasLengthPrompt))) {
             FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
             req.setFieldId(fieldId);
             req.setConstraintType("LENGTH_RANGE");
             req.setMinLength(constraints.getMinLength());
             req.setMaxLength(constraints.getMaxLength());
             req.setPromptMessage(constraints.getLengthPrompt());
-            req.setIsEnabled(constraints.getLengthEnabled());
+            Integer enabledValue = constraints.getLengthEnabled();
+            if (enabledValue == null && (hasLengthRange || hasLengthPrompt)) {
+                enabledValue = CommonStatusEnum.ENABLED.getStatus();
+            }
+            req.setIsEnabled(enabledValue);
             req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             req.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
-            
+
             // 新增：同步到 MetadataValidationLengthDO
             processLengthValidation(fieldId, entityField);
         }
