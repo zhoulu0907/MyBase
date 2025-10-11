@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.context.graph.nodes;
 
-import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 
@@ -17,5 +17,5 @@ public class DataDeleteeNodeData extends NodeData {
 
     private Long subEntityId;
 
-    private List<ConditionItem> filterCondition;
+    private List<Conditions> filterCondition;
 }

@@ -53,7 +53,7 @@ public class JsonGraph {
                 "startForm", "startEntity", "startTime", "startDateField", "startAPI", "startBPM",
                 "end",
                 "log",
-                "dataQuery", "dataQueryMultiple", "dataAdd", "dataDelete", "dataUpdate")) {
+                "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate")) {
             return toDefine(node);
         } else if (StringUtils.equals(node.getType(), "loop")) {
             return loopNodeDefine(deep, node);

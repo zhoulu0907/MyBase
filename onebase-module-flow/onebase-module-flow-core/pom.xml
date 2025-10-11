@@ -49,6 +49,11 @@
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-client-job-core</artifactId>
         </dependency>
+        <!-- RocketMQ消息队列 -->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client-java</artifactId>
+        </dependency>
         <!-- 测试依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

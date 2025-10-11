@@ -90,3 +90,5 @@ snail-job:
     host: 10.0.104.38
     port: 19088
     https: false
+rocketmq:
+  endpoints: 10.0.104.38:8081

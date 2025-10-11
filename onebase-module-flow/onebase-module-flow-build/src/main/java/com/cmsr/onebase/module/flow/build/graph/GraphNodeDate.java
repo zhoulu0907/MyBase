@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.build.graph;
 
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class GraphNodeDate {
 
     @Getter
     @Setter
-    private List<RuleItem> fields;
+    private List<ConditionItem> fields;
 
     private Map<String, Object> otherProperties = new HashMap<>();
 

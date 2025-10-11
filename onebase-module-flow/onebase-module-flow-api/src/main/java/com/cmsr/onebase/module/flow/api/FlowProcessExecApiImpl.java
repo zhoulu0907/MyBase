@@ -3,16 +3,15 @@ package com.cmsr.onebase.module.flow.api;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.condition.Condition;
+import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
-import com.cmsr.onebase.module.flow.context.express.OrExpresses;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.jexl3.JexlExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,17 +38,22 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {
-        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.getStartEntityNodeData(entityTriggerReqDTO.getEntityId());
+        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.findStartEntityNodeDataByEntityId(entityTriggerReqDTO.getEntityId());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             return EntityTriggerRespDTO.SUCCESS;
         }
+        EntityTriggerRespDTO errorEntityTriggerRespDTO = null;
         for (StartEntityNodeData startEntityNodeData : entityNodeDataList) {
             EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(entityTriggerReqDTO, startEntityNodeData);
             if (!entityTriggerRespDTO.isSuccess()) {
-                return entityTriggerRespDTO;
+                errorEntityTriggerRespDTO = entityTriggerRespDTO;
             }
         }
-        return EntityTriggerRespDTO.SUCCESS;
+        if (errorEntityTriggerRespDTO != null) {
+            return errorEntityTriggerRespDTO;
+        } else {
+            return EntityTriggerRespDTO.SUCCESS;
+        }
     }
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO, StartEntityNodeData startEntityNodeData) {
@@ -57,17 +61,10 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             if (!triggerEventContains(startEntityNodeData.getTriggerEvents(), entityTriggerReqDTO.getTriggerEvent())) {
                 return EntityTriggerRespDTO.SUCCESS;
             }
-            if (!triggerFieldIdsContained(startEntityNodeData.getTriggerFieldIds(), entityTriggerReqDTO.getChangedFieldIds())) {
-                return EntityTriggerRespDTO.SUCCESS;
-            }
-            if (startEntityNodeData.getCompiledExpression() == null && CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
-                OrExpresses orExpresses = Condition.convertToOrExpresses(startEntityNodeData.getFilterCondition());
-                JexlExpression compileExpression = expressionExecutor.compileExpression(orExpresses);
-                startEntityNodeData.setCompiledExpression(compileExpression);
-            }
-            if (startEntityNodeData.getCompiledExpression() != null) {
-                boolean isTrigger = expressionExecutor.evaluate(startEntityNodeData.getCompiledExpression(), entityTriggerReqDTO.getFieldData());
-                if (!isTrigger) {
+            if (CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
+                OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startEntityNodeData.getFilterCondition());
+                boolean isMatch = expressionExecutor.evaluate(orExpression, entityTriggerReqDTO.getFieldData());
+                if (!isMatch) {
                     return EntityTriggerRespDTO.SUCCESS;
                 }
             }
@@ -94,25 +91,8 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         if (triggerEvent == null) {
             return false;
         }
-        String eventName = triggerEvent.getCode();
-        return triggerEvents.stream().anyMatch(event -> event.equalsIgnoreCase(eventName));
-    }
-
-    /**
-     * 检查 triggerFieldIds 列表是否包含 changedFieldIds 中的全部元素，即changedFieldIds是否是triggerFieldIds的子集
-     *
-     * @param triggerFieldIds
-     * @param changedFieldIds
-     * @return
-     */
-    private boolean triggerFieldIdsContained(List<Long> triggerFieldIds, List<Long> changedFieldIds) {
-        if (CollectionUtils.isEmpty(triggerFieldIds)) {
-            return true;
-        }
-        if (CollectionUtils.isNotEmpty(triggerFieldIds) && CollectionUtils.isEmpty(changedFieldIds)) {
-            return false;
-        }
-        return changedFieldIds.stream().allMatch(changedId -> triggerFieldIds.contains(changedId));
+        String eventCode = triggerEvent.getCode();
+        return triggerEvents.stream().anyMatch(event -> event.equalsIgnoreCase(eventCode));
     }
 
 

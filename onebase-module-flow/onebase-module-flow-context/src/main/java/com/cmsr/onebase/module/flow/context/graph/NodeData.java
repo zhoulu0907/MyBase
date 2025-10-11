@@ -1,16 +1,25 @@
 package com.cmsr.onebase.module.flow.context.graph;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/29 12:02
  */
-@Data
+@ToString
 public class NodeData {
 
+    @Getter
+    @Setter
     private Boolean isInLoop;
 
+    @Setter
     private InLoopDepth inLoopDepth;
+
+    public InLoopDepth getInLoopDepth() {
+        return inLoopDepth == null ? InLoopDepth.EMPTY_LOOP_DEPTH : inLoopDepth;
+    }
 
 }

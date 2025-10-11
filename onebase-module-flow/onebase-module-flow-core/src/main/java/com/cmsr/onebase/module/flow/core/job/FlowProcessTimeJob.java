@@ -45,7 +45,7 @@ public class FlowProcessTimeJob {
         }
         Map<String, Object> jobParamsMap = JsonUtils.parseObject(jobParams.toString(), Map.class);
         Long processId = NumberUtils.toLong(MapUtils.getString(jobParamsMap, JsonGraphConstant.PROCESS_ID));
-        StartTimeNodeData startTimeNodeData = graphFlowCache.getStartTimeNodeData(processId);
+        StartTimeNodeData startTimeNodeData = graphFlowCache.findStartTimeNodeDataByProcessId(processId);
         // 检查当前时间是否在设定的时间范围内
         if (!startTimeNodeData.isCurrentTimeInRange()) {
             log.info("当前时间不在设定的时间范围内，跳过执行");

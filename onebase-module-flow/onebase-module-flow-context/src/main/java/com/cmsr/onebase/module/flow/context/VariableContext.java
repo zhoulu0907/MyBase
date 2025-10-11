@@ -4,6 +4,7 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,9 +62,20 @@ public class VariableContext {
         if (expression == null) {
             return null;
         }
+        expression = formatExpression(expression);
         JexlExpression exp = jexl.createExpression(expression);
         MapContext jc = new MapContext(nodeVariables);
         return exp.evaluate(jc);
+    }
+
+    private String formatExpression(String expression) {
+        if (expression.contains(".")) {
+            String[] ss = StringUtils.split(expression, ".");
+            if (!ss[1].startsWith("'") || !ss[1].endsWith("'")) {
+                return String.format("%s.'%s'", ss[0], ss[1]);
+            }
+        }
+        return expression;
     }
 
     public int getVariableSizeByTag(String tag) {

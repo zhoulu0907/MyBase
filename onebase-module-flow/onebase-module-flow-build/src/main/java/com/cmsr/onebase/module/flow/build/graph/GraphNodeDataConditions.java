@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.build.graph;
 
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import lombok.Data;
 
 import java.util.List;
@@ -12,6 +12,6 @@ import java.util.List;
 @Data
 public class GraphNodeDataConditions {
 
-    private List<RuleItem> conditions;
+    private List<ConditionItem> conditions;
 
 }

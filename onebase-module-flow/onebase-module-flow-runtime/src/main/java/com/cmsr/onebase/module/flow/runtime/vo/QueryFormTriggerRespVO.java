@@ -1,11 +1,15 @@
 package com.cmsr.onebase.module.flow.runtime.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/4 17:34
  */
+@Data
 public class QueryFormTriggerRespVO {
 
     /**
@@ -18,31 +22,37 @@ public class QueryFormTriggerRespVO {
      * 触发范围：record/field
      */
     @Schema(description = "触发范围：record/field")
-    private String triggerScope;
+    private String triggerRange;
 
 
     /**
      * 触发事件
      */
-    @Schema(description = "触发事件")
-    private String triggerEvent;
+    @Schema(description = "字段触发事件")
+    private String fieldTriggerEvents;
 
+    /**
+     * 记录触发事件
+     */
+    @Schema(description = "记录触发事件")
+    private List<String> recordTriggerEvents;
+
+    /**
+     * 页面Id
+     */
+    @Schema(description = "页面Id")
+    private Long pageId;
 
     /**
      * 字段Id
      */
     @Schema(description = "字段Id")
-    private Long fieldId;
+    private String fieldId;
+
 
     /**
-     * 数据范围，全部数据、变更数据
+     * 是否允许关联子表触发
      */
-    @Schema(description = "数据范围，全部数据、变更数据")
-    private String dataScope;
-
-    /**
-     * 是否允许关联子表触发 0/1布尔值
-     */
-    @Schema(description = "是否允许关联子表触发 0/1布尔值")
-    private Integer isChildTriggerAllowed;
+    @Schema(description = "是否允许关联子表触发")
+    private Boolean isChildTriggerAllowed;
 }
