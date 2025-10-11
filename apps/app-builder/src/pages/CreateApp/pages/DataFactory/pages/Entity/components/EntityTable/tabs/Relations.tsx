@@ -13,6 +13,7 @@ import styles from './tabs.module.less';
 interface RelationsProps {
   entity: EntityListItem;
   activeTab: string;
+  reloadList: () => void;
 }
 
 interface RelationData {
@@ -28,7 +29,7 @@ interface RelationData {
   relationshipType: string;
 }
 
-const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
+const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) => {
   const { curAppId } = useAppStore();
   const [relations, setRelations] = useState<RelationData[]>([]);
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
@@ -49,8 +50,12 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
     }
   };
 
-  const handleSuccessCallback = () => {
+  const handleSuccessCallback = (type?: 'new_master_child' | 'relation') => {
     getRelation();
+    // 新建主子关系子表时，需重新加载实体列表
+    if (type === 'new_master_child') {
+      reloadList();
+    }
   };
 
   const handleEditRelation = (record: RelationData) => {
