@@ -11,10 +11,10 @@ import lombok.Data;
  * @Date：2025/9/26 16:19
  */
 @Data
-public class ExpressItem {
+public class ExpressionItem {
 
-    public static ExpressItem copy(ExpressItem item) {
-        ExpressItem newItem = new ExpressItem();
+    public static ExpressionItem copy(ExpressionItem item) {
+        ExpressionItem newItem = new ExpressionItem();
         newItem.setKey(item.getKey());
         newItem.setOp(item.getOp());
         newItem.setValue(item.getValue());
@@ -25,7 +25,7 @@ public class ExpressItem {
     }
 
 
-    private Object key;
+    private String key;
 
     private OpEnum op;
 

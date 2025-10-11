@@ -36,7 +36,7 @@ public class FlowProcessExecutor {
 
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setProcessId(processId);
-        executeContext.setNodeDataMap(graphFlowCache.getNodeData(processId));
+        executeContext.setNodeDataMap(graphFlowCache.findNodeData(processId));
         LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
         VariableContext resultContext = response.getContextBean(VariableContext.class);
         return resultContext.getOutputParams();

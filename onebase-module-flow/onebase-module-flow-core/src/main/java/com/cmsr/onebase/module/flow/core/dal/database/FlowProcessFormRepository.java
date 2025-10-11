@@ -30,4 +30,10 @@ public class FlowProcessFormRepository extends DataRepository<FlowProcessFormDO>
         configs.eq("page_id", pageId);
         return findAllByConfig(configs);
     }
+
+    public void deleteByProcessId(Long processId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("process_id", processId);
+        deleteByConfig(configs);
+    }
 }

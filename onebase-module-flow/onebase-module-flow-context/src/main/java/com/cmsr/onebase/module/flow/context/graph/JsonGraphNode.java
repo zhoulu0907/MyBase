@@ -27,7 +27,7 @@ public class JsonGraphNode {
     )
     @JsonSubTypes({
             @JsonSubTypes.Type(value = DataAddNodeData.class, name = "dataAdd"),
-            @JsonSubTypes.Type(value = DataDeleteeNodeData.class, name = "dataDelete"),
+            @JsonSubTypes.Type(value = DataCalcNodeData.class, name = "dataCalc"),
             @JsonSubTypes.Type(value = DataDeleteeNodeData.class, name = "dataDelete"),
             @JsonSubTypes.Type(value = DataQueryMultipleNodeData.class, name = "dataQueryMultiple"),
             @JsonSubTypes.Type(value = DataQueryNodeData.class, name = "dataQuery"),

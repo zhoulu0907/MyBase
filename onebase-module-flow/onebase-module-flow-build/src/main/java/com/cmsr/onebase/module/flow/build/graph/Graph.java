@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.build.graph;
 
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.Lists;
@@ -56,7 +56,7 @@ public class Graph {
             if (CollectionUtils.isEmpty(conditionGroup.getConditions())) {
                 continue;
             }
-            for (RuleItem condition : conditionGroup.getConditions()) {
+            for (ConditionItem condition : conditionGroup.getConditions()) {
                 if (condition != null) {
                     addToFieldIds(condition.getFieldId(), fieldIds);
                 }
@@ -65,11 +65,11 @@ public class Graph {
         }
     }
 
-    private void processFieldsForFieldId(List<RuleItem> fields, Set<Long> fieldIds) {
+    private void processFieldsForFieldId(List<ConditionItem> fields, Set<Long> fieldIds) {
         if (CollectionUtils.isEmpty(fields)) {
             return;
         }
-        for (RuleItem field : fields) {
+        for (ConditionItem field : fields) {
             addToFieldIds(field.getFieldId(), fieldIds);
         }
     }
@@ -128,7 +128,7 @@ public class Graph {
             if (CollectionUtils.isEmpty(conditionGroup.getConditions())) {
                 continue;
             }
-            for (RuleItem condition : conditionGroup.getConditions()) {
+            for (ConditionItem condition : conditionGroup.getConditions()) {
                 if (condition != null) {
                     updateRuleItemDataType(condition, fieldInfoMap);
                 }
@@ -136,26 +136,26 @@ public class Graph {
         }
     }
 
-    private void processFieldsForDataType(List<RuleItem> fields, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
+    private void processFieldsForDataType(List<ConditionItem> fields, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
         if (CollectionUtils.isEmpty(fields)) {
             return;
         }
-        for (RuleItem field : fields) {
+        for (ConditionItem field : fields) {
             updateRuleItemDataType(field, fieldInfoMap);
         }
     }
 
-    private void updateRuleItemDataType(RuleItem ruleItem, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
-        if (ruleItem == null || StringUtils.isEmpty(ruleItem.getFieldId())) {
+    private void updateRuleItemDataType(ConditionItem conditionItem, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
+        if (conditionItem == null || StringUtils.isEmpty(conditionItem.getFieldId())) {
             return;
         }
-        String fieldId = ruleItem.getFieldId();
+        String fieldId = conditionItem.getFieldId();
         Long id = parseFieldId(fieldId);
         if (id != null) {
             EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(id);
             if (fieldInfo != null) {
-                ruleItem.setFieldType(fieldInfo.getFieldType());
-                ruleItem.setJdbcType(fieldInfo.getJdbcType());
+                conditionItem.setFieldType(fieldInfo.getFieldType());
+                conditionItem.setJdbcType(fieldInfo.getJdbcType());
             }
         }
     }

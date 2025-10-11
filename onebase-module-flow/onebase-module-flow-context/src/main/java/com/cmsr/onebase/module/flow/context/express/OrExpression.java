@@ -9,7 +9,7 @@ import java.util.List;
  * @Date：2025/9/26 16:22
  */
 @Data
-public class OrExpresses {
+public class OrExpression {
 
-    private List<AndExpresses> expressesList;
+    private List<AndExpression> andExpressions;
 }

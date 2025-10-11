@@ -164,9 +164,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
     private Map<Long, EntityFieldJdbcTypeRespDTO> selectFieldInfoMap(List<Long> fieldIds) {
         EntityFieldJdbcTypeReqDTO reqDTO = new EntityFieldJdbcTypeReqDTO();
         reqDTO.setFieldIds(fieldIds);
-
         List<EntityFieldJdbcTypeRespDTO> fieldJdbcTypes = metadataEntityFieldApi.getFieldJdbcTypes(reqDTO);
-
         return fieldJdbcTypes.stream()
                 .collect(Collectors.toMap(EntityFieldJdbcTypeRespDTO::getFieldId, info -> info));
     }
@@ -208,6 +206,10 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         validateFlowProcessExist(id);
         // 删除流程
         flowProcessRepository.deleteById(id);
+        flowProcessDateFieldRepository.deleteByProcessId(id);
+        flowProcessEntityRepository.deleteByProcessId(id);
+        flowProcessFormRepository.deleteByProcessId(id);
+        flowProcessTimeRepository.deleteByProcessId(id);
     }
 
 
