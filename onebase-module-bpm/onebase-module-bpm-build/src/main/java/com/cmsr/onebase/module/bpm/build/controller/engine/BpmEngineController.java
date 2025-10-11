@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.bpm.build.controller.engine;
 
+import cn.hutool.json.JSONUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.bpm.build.controller.engine.vo.BpmExecuteReqVO;
-import com.cmsr.onebase.module.bpm.core.warmflow.anyline.repository.FlowDefinitionRepository;
-import com.cmsr.onebase.module.bpm.core.warmflow.anyline.entity.WfFlowDefinition;
+import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -14,8 +14,6 @@ import org.dromara.warm.flow.core.service.DefService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
 
 /**
  * 审批流控制器
@@ -196,23 +194,20 @@ public class BpmEngineController {
     }
 
     @GetMapping("/test")
-    @Operation(summary = "执行流程2")
+    @Operation(summary = "流程测试")
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")
     public CommonResult<Boolean> execute2() {
         long count = flowDefinitionRepository.count();
-        System.out.println(count);
+        log.info("流程数量：{}", count);
 
-        WfFlowDefinition copy = new WfFlowDefinition();
-        copy.setCreateTime(new Date());
+        // 测试导入
+        Definition importDefinition = defService.importJson(testJson);
+        log.info("导入流程定义：{}", JSONUtil.toJsonStr(importDefinition));
 
-        System.out.println(copy.getCreateTime());
-        System.out.println(((Definition) copy).getCreateTime());
+        // 测试查询
+        Definition existDefinition = defService.getById(importDefinition.getId());
+        log.info("查询流程定义：{}", JSONUtil.toJsonStr(existDefinition));
 
-
-        defService.importJson(testJson);
-
-        Definition definition = defService.getById("1");
-        System.out.println(definition);
         return CommonResult.success(true);
     }
 }

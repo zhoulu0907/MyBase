@@ -1,15 +1,8 @@
 package com.cmsr.onebase.framework.data.base;
 
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
-
 /**
- * 基础实体对象
+ *
+ * 用于定义基础实体对象的接口，作为实现类的基础接口。
  *
  * @author liyang
  * @date 2025/10/10
@@ -17,9 +10,10 @@ import java.time.LocalDateTime;
 public interface BaseDOInterface {
 
     /**
-     * 获取id
      *
-     * @return {@link Long}
+     * 需要实现该接口，返回实体的id，用于更新等操作。
+     *
+     * @return 实体的id
      */
     Long getId();
 }

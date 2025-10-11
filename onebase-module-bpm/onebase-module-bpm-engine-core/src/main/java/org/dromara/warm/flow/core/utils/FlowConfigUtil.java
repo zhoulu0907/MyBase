@@ -24,7 +24,11 @@ import org.dromara.warm.flow.core.entity.Skip;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.SkipType;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -54,7 +58,7 @@ public class FlowConfigUtil {
         AssertUtil.isEmpty(definition.getFlowCode(), "【" + flowName + "】流程flowCode为空!");
         // 发布
         definition.setIsPublish(0);
-        definition.setUpdateTime(new Date());
+        definition.setUpdateTime(LocalDateTime.now());
         FlowEngine.dataFillHandler().idFill(definition);
 
         List<Node> nodeList = definition.getNodeList();

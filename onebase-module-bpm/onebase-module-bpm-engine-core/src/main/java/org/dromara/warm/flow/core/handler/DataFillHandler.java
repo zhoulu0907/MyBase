@@ -23,7 +23,7 @@ import org.dromara.warm.flow.core.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -64,8 +64,8 @@ public interface DataFillHandler {
             logger.warn("Insert operation failed - Reason: Entity is null after casting");
             return;
         }
-        entity.setCreateTime(ObjectUtil.isNotNull(entity.getCreateTime()) ? entity.getCreateTime() : new Date());
-        entity.setUpdateTime(ObjectUtil.isNotNull(entity.getUpdateTime()) ? entity.getUpdateTime() : new Date());
+        entity.setCreateTime(ObjectUtil.isNotNull(entity.getCreateTime()) ? entity.getCreateTime() : LocalDateTime.now());
+        entity.setUpdateTime(ObjectUtil.isNotNull(entity.getUpdateTime()) ? entity.getUpdateTime() : LocalDateTime.now());
 
         PermissionHandler permissionHandler = FlowEngine.permissionHandler();
         String handler = null;
@@ -87,7 +87,7 @@ public interface DataFillHandler {
             logger.warn("Insert operation failed - Reason: Entity is null after casting");
             return;
         }
-        entity.setUpdateTime(ObjectUtil.isNotNull(entity.getUpdateTime()) ? entity.getUpdateTime() : new Date());
+        entity.setUpdateTime(ObjectUtil.isNotNull(entity.getUpdateTime()) ? entity.getUpdateTime() : LocalDateTime.now());
         PermissionHandler permissionHandler = FlowEngine.permissionHandler();
         String handler = null;
         if (permissionHandler != null) {
