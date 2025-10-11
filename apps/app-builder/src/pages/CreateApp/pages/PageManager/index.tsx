@@ -40,6 +40,7 @@ import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import styles from './index.module.less';
+import TaskCenterSide from './components/TaskCenter/taskSide'
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -417,7 +418,7 @@ const PageManagerPage: FC = () => {
                 />
               </div>
             </div>
-
+            <TaskCenterSide />
             <Tree
               blockNode
               draggable={undefined}
