@@ -13,7 +13,7 @@ import {
   FORM_COMPONENT_TYPES,
   LAYOUT_COMPONENT_TYPES
 } from 'src/components';
-import { useFormEditorSignal, useListEditorSignal } from 'src/signals';
+import { useFormEditorSignal, useListEditorSignal, pagesRuntimeDataSignal } from 'src/signals';
 
 export interface SavePageSetParams {
   pageSetId: string;
@@ -165,11 +165,15 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setLayoutSubComponents: setListLayoutSubComponents
   } = useListEditorSignal;
 
+  const {setCurPage} = pagesRuntimeDataSignal;
+
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
   const pageSet = await loadPageSet(loadPageSetReq);
+  setCurPage(pageSet)
   console.log('载入页面集数据: ', pageSet);
+  
 
   pageSet.pages.forEach((page: PageSet) => {
     let newComponents: any[] = [];
