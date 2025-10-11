@@ -214,11 +214,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
               </Form.Item>
 
               <Form.Item label="数据类型" field="fieldType" rules={[{ required: true, message: '请选择数据类型' }]}>
-                <Select
-                  placeholder="请选择数据类型"
-                  options={fieldTypeOptions}
-                  disabled={fieldDetail.isSystemField === FIELD_TYPE.SYSTEM}
-                />
+                <Select placeholder="请选择数据类型" options={fieldTypeOptions} disabled />
               </Form.Item>
 
               <Form.Item label="字段描述" field="description">

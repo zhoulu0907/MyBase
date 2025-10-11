@@ -80,7 +80,11 @@ const TableColumns = ({
             rules={[...createFieldRules.fieldName]}
             className={styles['field-form-item']}
           >
-            <Input placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符" />
+            {/* 不可编辑 */}
+            <Input
+              placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符"
+              disabled={!record.id?.includes('field-')}
+            />
           </Form.Item>
         )
     },
@@ -116,7 +120,7 @@ const TableColumns = ({
           >
             <Select
               options={fieldTypeOptions}
-              disabled={record.isSystemField === FIELD_TYPE.SYSTEM}
+              disabled={record.isSystemField === FIELD_TYPE.SYSTEM || !record.id?.includes('field-')}
               style={{ width: 100 }}
               showSearch
               filterOption={(input, option) => {
