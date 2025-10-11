@@ -32,7 +32,6 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     });
 
     if (res && res.pages) {
-      console.log('res: ', res);
       const newCurViewId = res.pages.find(
         (item: PageView) => item.isDefaultEditViewMode || item.isDefaultDetailViewMode
       )?.id;

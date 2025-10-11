@@ -1,5 +1,6 @@
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
+  CATEGORY_TYPE,
   dataMethodData,
   dataMethodInsert,
   dataMethodUpdate,
@@ -7,9 +8,8 @@ import {
   getPageSetId,
   getPageSetMetaData,
   queryFlowExecForm,
-  triggerFlowExecForm,
   TRIGGER_EVENTS,
-  PAPE_TYPE,
+  triggerFlowExecForm,
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
@@ -20,13 +20,13 @@ import { getHashQueryParam } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
+  pagesRuntimeDataSignal,
   PreviewRender,
   startLoadPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useFormEditorSignal,
   useListEditorSignal,
-  pagesRuntimeDataSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -125,7 +125,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('formData:   ', formData);
 
     // 接口判断 页面触发
-    const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === PAPE_TYPE.FORM);
+    const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
     const pageId = curFormPage.id;
 
     const flowRes = await queryFlowExecForm(pageId);
