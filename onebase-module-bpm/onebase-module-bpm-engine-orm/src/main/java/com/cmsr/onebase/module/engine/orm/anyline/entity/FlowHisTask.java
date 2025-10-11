@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Data
 @Accessors(chain = true)
-@Table(name = "flow_his_task")
+@Table(name = "bpm_flow_his_task")
 public class FlowHisTask extends BaseEntity implements HisTask {
 
     /** 流程定义ID */
