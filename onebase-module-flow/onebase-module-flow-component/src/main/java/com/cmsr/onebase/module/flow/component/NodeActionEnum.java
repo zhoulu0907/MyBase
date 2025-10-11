@@ -8,5 +8,5 @@ public enum NodeActionEnum {
 
     DO_PROCESS,
     DO_SKIP,
-    SKIP_AND_REST
+    REST_AND_SKIP
 }

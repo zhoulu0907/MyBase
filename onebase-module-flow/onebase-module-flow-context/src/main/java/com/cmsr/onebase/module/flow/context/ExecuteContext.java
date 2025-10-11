@@ -1,12 +1,15 @@
 package com.cmsr.onebase.module.flow.context;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 节点分一般和可恢复两者。
@@ -45,29 +48,43 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Author：huangjie
  * @Date：2025/9/5 16:12
  */
-@Data
-public class ExecuteContext {
+@ToString
+public class ExecuteContext implements Serializable {
 
+    @Setter
     private Long processId;
 
+    // 节点配置数据
+    private Map<String, NodeData> nodeDataMap = new HashMap<>();
+
+    //节点执行的结果
+    private Map<String, Object> nodeProcessResults = new ConcurrentHashMap<>();
+
+    private boolean executeEnd = false;
+
     // 上次执行结束节点
-    private Optional<String> previousNodeTag = Optional.empty();
+    @Setter
+    @Getter
+    private String executionEndTag;
 
-    // 本次执行结束节点
-    private Optional<String> currentEndNodeTag = Optional.empty();
+    @Setter
+    @Getter
+    private String executionUuid;
 
-    // 节点数据
-    private Map<String, NodeData> nodeDataMap;
-
-
-    private AtomicBoolean executeEnd = new AtomicBoolean(false);
-
-    public boolean equalsPreviousNodeTag(String tag) {
-        return this.getPreviousNodeTag().filter(t -> StringUtils.equals(tag, t)).isPresent();
+    public void setNodeDataMap(Map<String, NodeData> nodeData) {
+        this.nodeDataMap = Collections.unmodifiableMap(nodeData);
     }
 
-    public void restPreviousNodeTag() {
-        this.previousNodeTag = Optional.empty();
+    public void putNodeProcessResult(String tag, Object result) {
+        this.nodeProcessResults.put(tag, result);
+    }
+
+    public boolean hasNodeProcessResult(String tag) {
+        return nodeProcessResults.containsKey(tag);
+    }
+
+    public Object getNodeProcessResult(String tag) {
+        return nodeProcessResults.get(tag);
     }
 
     public NodeData getNodeData(String nodeTag) {
@@ -75,15 +92,26 @@ public class ExecuteContext {
     }
 
     public void setExecuteEnd(boolean executeEnd) {
-        this.executeEnd.set(executeEnd);
-    }
-
-    public AtomicBoolean getExecuteEnd() {
-        return executeEnd;
+        this.executeEnd = executeEnd;
     }
 
     public boolean isExecuteEnd() {
-        return executeEnd.get();
+        return executeEnd;
     }
 
+    public void restExecutionEndTag() {
+        this.executionEndTag = null;
+    }
+
+    public boolean isExecutionEndTagEmpty() {
+        return executionEndTag == null;
+    }
+
+    public boolean executionEndTagEquals(String tag) {
+        return executionEndTag != null && executionEndTag.equals(tag);
+    }
+
+    public void restExecutionUuid() {
+        this.executionUuid = null;
+    }
 }

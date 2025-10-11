@@ -50,19 +50,19 @@ public class JsonGraph {
 
     private String nodeDefine(int deep, JsonGraphNode node) {
         if (StringUtils.equalsAny(node.getType(),
-                "startForm", "startEntity", "startTime", "startDateField", "startAPI", "startBPM",
-                "end",
-                "log",
-                "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate")) {
+                "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate",
+                "modal",
+                "startDateField", "startForm", "startEntity", "startTime", "startAPI", "startBPM",
+                "end", "log")) {
             return toDefine(node);
+        } else if (StringUtils.equals(node.getType(), "ifBlock")) {
+            return ifBlockNodeDefine(deep, node);
+        } else if (StringUtils.equals(node.getType(), "ifCase")) {
+            return ifCaseNodeDefine(deep, node);
         } else if (StringUtils.equals(node.getType(), "loop")) {
             return loopNodeDefine(deep, node);
         } else if (StringUtils.equals(node.getType(), "switch")) {
             return switchNodeDefine(deep, node);
-        } else if (StringUtils.equals(node.getType(), "ifCase")) {
-            return ifCaseNodeDefine(deep, node);
-        } else if (StringUtils.equals(node.getType(), "ifBlock")) {
-            return ifBlockNodeDefine(deep, node);
         }
         throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }

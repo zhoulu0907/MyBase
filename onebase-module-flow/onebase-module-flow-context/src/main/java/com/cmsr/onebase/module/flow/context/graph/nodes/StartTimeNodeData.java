@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ import java.util.Optional;
  * @Date：2025/9/9 13:55
  */
 @Data
-public class StartTimeNodeData extends NodeData {
+public class StartTimeNodeData extends NodeData implements Serializable {
     /**
      * 不重复
      */

@@ -23,5 +23,7 @@ public class ExecutorResult {
 
     private String executionUuid;
 
+    private String executionEndTag;
+
     private Map<String, Object> outputParams;
 }
