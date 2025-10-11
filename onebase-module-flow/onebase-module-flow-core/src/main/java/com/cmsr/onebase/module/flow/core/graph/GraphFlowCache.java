@@ -77,6 +77,10 @@ public class GraphFlowCache {
         return startFormNodeDataCache.get(processId);
     }
 
+    public StartDateFieldNodeData findStartDateFieldNodeDataByProcessId(Long processId) {
+        return startDateFieldNodeDataCache.get(processId);
+    }
+
     public List<StartEntityNodeData> findStartEntityNodeDataByEntityId(Long entityId) {
         return startEntityNodeDataCache.values().stream()
                 .filter(startEntityNodeData -> startEntityNodeData.getEntityId().equals(entityId))
