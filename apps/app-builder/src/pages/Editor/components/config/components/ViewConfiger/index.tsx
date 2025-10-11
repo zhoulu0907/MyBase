@@ -1,4 +1,6 @@
 import { Checkbox, Form, Space } from '@arco-design/web-react';
+import { usePageViewEditorSignal } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect } from 'react';
 import styles from './index.module.less';
 
@@ -10,22 +12,53 @@ const { useForm } = Form;
 interface ViewConfigerProps {}
 
 const ViewConfiger = ({}: ViewConfigerProps) => {
+  useSignals();
+
+  const { pageViews, curViewId, updatePageView } = usePageViewEditorSignal;
+
+  useEffect(() => {
+    if (curViewId.value) {
+      const view = pageViews.value[curViewId.value];
+
+      if (view) {
+        form.setFieldsValue({
+          editViewMode: view.editViewMode ? true : false,
+          detailViewMode: view.detailViewMode ? true : false,
+          isDefaultEditViewMode: view.isDefaultEditViewMode ? true : false,
+          isDefaultDetailViewMode: view.isDefaultDetailViewMode ? true : false
+        });
+      }
+    }
+  }, [curViewId.value]);
+
   const [form] = useForm();
 
   const editViewMode = Form.useWatch('editViewMode', form);
   const detailViewMode = Form.useWatch('detailViewMode', form);
 
   useEffect(() => {
-    form.resetFields(['isDefaultEditViewMode']);
+    !editViewMode && form.setFieldValue('isDefaultEditViewMode', false);
   }, [editViewMode]);
 
   useEffect(() => {
-    form.resetFields(['isDefaultDetailViewMode']);
+    !detailViewMode && form.setFieldValue('isDefaultDetailViewMode', false);
   }, [detailViewMode]);
+
+  const handleOnValuesChange = (changeValue: any, values: any) => {
+    let curPageView = pageViews.value[curViewId.value];
+    if (curPageView && curPageView.id) {
+      const newPageView = {
+        ...curPageView,
+        ...form.getFieldsValue()
+      };
+
+      updatePageView(newPageView);
+    }
+  };
 
   return (
     <div className={styles.configs}>
-      <Form form={form}>
+      <Form form={form} onValuesChange={handleOnValuesChange}>
         <div className={styles.title}>视图配置</div>
         <div className={styles.content}>
           <div className={styles.itemLabel}>视图模式</div>
