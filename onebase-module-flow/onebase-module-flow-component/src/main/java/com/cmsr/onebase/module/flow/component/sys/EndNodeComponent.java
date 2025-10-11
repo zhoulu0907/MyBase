@@ -1,6 +1,7 @@
-package com.cmsr.onebase.module.flow.component.logic;
+package com.cmsr.onebase.module.flow.component.sys;
 
 import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +16,8 @@ public class EndNodeComponent extends NormalNodeComponent {
     @Override
     public void process() throws Exception {
         log.info("EndNodeComponent process");
+        ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.setExecuteEnd(true);
     }
 
 }

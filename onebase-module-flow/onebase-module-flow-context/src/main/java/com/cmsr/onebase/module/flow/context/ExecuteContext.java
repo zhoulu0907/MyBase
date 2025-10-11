@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 节点分一般和可恢复两者。
@@ -58,6 +59,9 @@ public class ExecuteContext {
     // 节点数据
     private Map<String, NodeData> nodeDataMap;
 
+
+    private AtomicBoolean executeEnd = new AtomicBoolean(false);
+
     public boolean equalsPreviousNodeTag(String tag) {
         return this.getPreviousNodeTag().filter(t -> StringUtils.equals(tag, t)).isPresent();
     }
@@ -68,6 +72,18 @@ public class ExecuteContext {
 
     public NodeData getNodeData(String nodeTag) {
         return nodeDataMap.get(nodeTag);
+    }
+
+    public void setExecuteEnd(boolean executeEnd) {
+        this.executeEnd.set(executeEnd);
+    }
+
+    public AtomicBoolean getExecuteEnd() {
+        return executeEnd;
+    }
+
+    public boolean isExecuteEnd() {
+        return executeEnd.get();
     }
 
 }

@@ -10,9 +10,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @LiteflowComponent("noop")
-public class NoOpNodeComponent  extends NodeComponent {
+public class NoOpNodeComponent extends NodeComponent {
     @Override
     public void process() throws Exception {
         log.info("NoOpNodeComponent process");
     }
+
 }
