@@ -68,7 +68,6 @@ const RoleInfo = (props: IProps) => {
   const handleSelectMenu = async (value: string) => {
     setActiveTab('1');
     setActiveMenuId(value);
-    console.log('选择菜单获取权限数据 value:', value);
     // await getApplicationPermission(value);
   };
 

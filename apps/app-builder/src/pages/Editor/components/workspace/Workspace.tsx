@@ -30,6 +30,7 @@ import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import { COMPONENT_MAP } from '../panel/components/metadata/component_map';
@@ -39,6 +40,14 @@ import styles from './index.module.less';
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
   const [isFormEditor, setIsFormEditor] = useState(false);
+  const [pageSetId, setPageSetId] = useState('');
+
+  useEffect(() => {
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
+    }
+  }, []);
 
   useSignals();
 
@@ -208,7 +217,7 @@ export default function EditorWorkspace() {
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
-        <div className={styles.workspaceHeaderLeft}>{isFormEditor && <View />}</div>
+        <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
         <div className={styles.workspaceHeaderRight}>
           {/* TODO 撤回重做 */}
           <div className={styles.editorStepCtrl}>

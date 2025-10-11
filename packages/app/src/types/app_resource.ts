@@ -51,3 +51,31 @@ export interface GetPageMetadataReq {
 export interface GetComponentListByPageIdReq {
   pageId: string;
 }
+
+export interface CreatePageViewParams {
+  pageSetId: string;
+
+  viewType: string;
+
+  viewName: string;
+}
+
+export interface ListPageViewParams {
+  pageSetId: string;
+}
+export enum ViewType {
+  MIX = 'mix',
+  EDIT = 'edit',
+  DETAIL = 'detail',
+  UNKNOWN = 'unknown'
+}
+
+export interface PageView {
+  id: string;
+  pageName: string;
+  pageType: string;
+  editViewMode: boolean;
+  detailViewMode: boolean;
+  isDefaultEditViewMode: boolean;
+  isDefaultDetailViewMode: boolean;
+}
