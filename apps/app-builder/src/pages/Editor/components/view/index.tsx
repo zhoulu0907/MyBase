@@ -1,7 +1,7 @@
 import { Button, Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
 import { IconDown, IconPlus } from '@arco-design/web-react/icon';
 import { createPageView, listPageView, ViewType, type PageView } from '@onebase/app';
-import { usePageViewEditorSignal } from '@onebase/ui-kit';
+import { useEditorSignalMap, useFormEditorSignal, usePageEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -21,6 +21,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
   const [dropListVisible, setDropListVisible] = useState(false);
+
+  const { pageComponentSchemas, components } = usePageEditorSignal();
 
   useEffect(() => {
     handleListPageView();
@@ -62,7 +64,24 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
   };
 
   const handleSelectView = (id: string) => {
+    console.log('id: ', id);
+    console.log('curViewId.value: ', curViewId.value);
+
+    // console.log(pageComponentSchemas);
+    // console.log(components);
+    console.log('当前配置， id：', curViewId.value, components);
+
+    // 保存当前配置到editorSignalMap
+    console.log(useEditorSignalMap.editorSignalMap.value);
+    useEditorSignalMap.get(curViewId.value)!.setComponents(components);
+    useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
+
     setCurViewId(id);
+
+    console.log('新的配置， id：', id, useEditorSignalMap.get(id)!.components.value);
+
+    useFormEditorSignal.setComponents(useEditorSignalMap.get(id)!.components.value);
+    useFormEditorSignal.loadPageComponentSchemas(useEditorSignalMap.get(id)!.pageComponentSchemas.value);
   };
 
   const dropList = (

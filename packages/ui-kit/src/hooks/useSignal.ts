@@ -1,12 +1,13 @@
-
-
 import { EDITOR_TYPES } from 'src/utils';
 import { currentEditorSignal } from '../signals/current_editor';
 import { useFormEditorSignal, useListEditorSignal } from '../signals/page_editor';
 
+import { useSignals } from '@preact/signals-react/runtime';
 import { useLocation } from 'react-router-dom';
 
 export function usePageEditorSignal() {
+  useSignals();
+
   const path = useLocation().pathname;
   const useList = path.endsWith(`/${EDITOR_TYPES.LIST_EDITOR}`);
 
@@ -15,32 +16,21 @@ export function usePageEditorSignal() {
   const curComponentSchema = currentEditorSignal.curComponentSchema.value;
   const showDeleteButton = currentEditorSignal.showDeleteButton.value;
 
-  const { setCurComponentID,setCurComponentSchema, clearCurComponentID, setShowDeleteButton } = currentEditorSignal;
+  const { setCurComponentID, setCurComponentSchema, clearCurComponentID, setShowDeleteButton } = currentEditorSignal;
 
+  const components = useList ? useListEditorSignal.components.value : useFormEditorSignal.components?.value;
 
-  const components = useList
-    ? useListEditorSignal.components.value
-    : useFormEditorSignal.components.value;
+  const setComponents = useList ? useListEditorSignal.setComponents : useFormEditorSignal.setComponents;
 
-  const setComponents = useList
-    ? useListEditorSignal.setComponents
-    : useFormEditorSignal.setComponents;
+  const delComponents = useList ? useListEditorSignal.delComponents : useFormEditorSignal.delComponents;
 
-  const delComponents = useList
-    ? useListEditorSignal.delComponents
-    : useFormEditorSignal.delComponents;
+  const addComponents = useList ? useListEditorSignal.addComponents : useFormEditorSignal.addComponents;
 
-  const addComponents = useList
-    ? useListEditorSignal.addComponents
-    : useFormEditorSignal.addComponents;
-
-  const clearComponents = useList
-    ? useListEditorSignal.clearComponents
-    : useFormEditorSignal.clearComponents;
+  const clearComponents = useList ? useListEditorSignal.clearComponents : useFormEditorSignal.clearComponents;
 
   const pageComponentSchemas = useList
     ? useListEditorSignal.pageComponentSchemas.value
-    : useFormEditorSignal.pageComponentSchemas.value;
+    : useFormEditorSignal.pageComponentSchemas?.value;
 
   const setPageComponentSchemas = useList
     ? useListEditorSignal.setPageComponentSchemas
@@ -56,7 +46,7 @@ export function usePageEditorSignal() {
 
   const layoutSubComponents = useList
     ? useListEditorSignal.layoutSubComponents.value
-    : useFormEditorSignal.layoutSubComponents.value;
+    : useFormEditorSignal.layoutSubComponents?.value;
 
   const setLayoutSubComponents = useList
     ? useListEditorSignal.setLayoutSubComponents

@@ -32,10 +32,10 @@ import { getHashQueryParam } from '@onebase/common';
 import {
   EDITOR_TYPES,
   startLoadPageSet,
-  startSavePageSet,
   useFormEditorSignal,
   useListEditorSignal,
   usePageEditorSignal,
+  usePageViewEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
@@ -82,6 +82,7 @@ export default function EditorHeader() {
   const [renameForm] = Form.useForm();
 
   const { clearCurComponentID } = usePageEditorSignal();
+  const { curViewId } = usePageViewEditorSignal;
 
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
@@ -227,6 +228,7 @@ export default function EditorHeader() {
 
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
+    console.log('curViewId: ', curViewId.value);
 
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,
@@ -238,7 +240,8 @@ export default function EditorHeader() {
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
 
-    startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
+    console.log('savePageSetParams: ', savePageSetParams);
+    // startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
   };
 
   const clearAllData = () => {

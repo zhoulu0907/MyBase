@@ -27,6 +27,10 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     pageComponentSchemas.value = { ...pageComponentSchemas.value, [cp_id]: config };
   };
 
+  const loadPageComponentSchemas = (config: { [key: string]: EditConfig }) => {
+    pageComponentSchemas.value = config;
+  };
+
   const delPageComponentSchemas = (cp_id: string) => {
     const newSchemas = { ...pageComponentSchemas.value };
     delete newSchemas[cp_id];
@@ -64,6 +68,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     // 页面组件配置
     pageComponentSchemas,
     setPageComponentSchemas,
+    loadPageComponentSchemas,
     delPageComponentSchemas,
     clearPageComponentSchemas,
 
@@ -78,4 +83,22 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
 export const useFormEditorSignal = createPageEditorSignal();
 export const useListEditorSignal = createPageEditorSignal();
 
-export const editorSignalMap: { [key: string]: ReturnType<typeof createPageEditorSignal> } = {};
+export const createEditorSignalMap = () => {
+  const editorSignalMap = signal<Map<string, ReturnType<typeof createPageEditorSignal>>>(new Map());
+
+  const set = (pageId: string, editorSignal: ReturnType<typeof createPageEditorSignal>) => {
+    editorSignalMap.value.set(pageId, editorSignal);
+  };
+
+  const get = (pageId: string) => {
+    return editorSignalMap.value.get(pageId);
+  };
+
+  return {
+    editorSignalMap,
+    set,
+    get
+  };
+};
+
+export const useEditorSignalMap = createEditorSignalMap();
