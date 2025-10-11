@@ -1,5 +1,5 @@
 import { Message, Modal, Grid } from '@arco-design/web-react';
-import { getFormulaById, getFormulaFunctionSimpleList, type AppEntities, type AppEntity, type AppEntityField } from '@onebase/app';
+import { getFormulaById, getFormulaFunctionSimpleList, type AppEntities, type AppEntity, type AppEntityField, executeFormula, type formulaParams} from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormulaInput, FunctionList, InfoPanel, VariableList } from './components';
 import styles from './index.module.less';
@@ -53,6 +53,7 @@ const mockVariables: AppEntities = {
  */
 export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '' }: FormulaEditorProps) {
   const [formula, setFormula] = useState(initialFormula);
+  const [loading, setLoading] = useState<boolean>(false);
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
   const [funcList, setFuncList] = useState<FunctionItem[]>([]);
@@ -167,11 +168,21 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   }, [formula]);
 
   /**
-   * 确认公式
+   * 点击确认之后计算
    */
-  const handleConfirm = useCallback(() => {
-    onConfirm(formula);
+  const handleConfirm = useCallback(async() => {
+    setLoading(true);
+    const newFormula = formula.replace(/\{\{\d+\.(\w+)\}\}/g, '$1');
+    const newFormulaData:formulaParams = {
+      "formula": newFormula
+    }
+    const executedData = await executeFormula(newFormulaData);
+    if(executedData.code === 0 && Object.keys(executedData.data)?.includes("result")) {
+      setLoading(false);
+      onConfirm(formula);
+    }
     onCancel();
+    
   }, [formula, onConfirm, onCancel]);
 
   /**
@@ -207,6 +218,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       className={styles.formulaEditor}
       maskClosable={false}
       onOk={handleConfirm}
+      confirmLoading={loading}
     >
       {/* 内容区域 */}
       <div className={styles.contentWrapper}>
