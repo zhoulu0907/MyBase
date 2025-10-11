@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Accessors(chain = true)
-@Table(name = "flow_skip")
+@Table(name = "bpm_flow_skip")
 public class FlowSkip extends BaseEntity implements Skip {
 
     /** 流程定义ID */

@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Data
 @Accessors(chain = true)
-@Table(name = "flow_node")
+@Table(name = "bpm_flow_node")
 public class FlowNode extends BaseEntity implements Node {
 
     /** 节点类型（0开始 1中间 2结束 3互斥网关 4并行网关） */

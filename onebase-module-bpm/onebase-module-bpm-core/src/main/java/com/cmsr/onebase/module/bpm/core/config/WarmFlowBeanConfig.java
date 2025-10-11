@@ -13,23 +13,22 @@ import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.config.WarmFlow;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.*;
-import org.dromara.warm.flow.core.service.ChartService;
-import org.dromara.warm.flow.core.service.DefService;
-import org.dromara.warm.flow.core.service.impl.ChartServiceImpl;
-import org.dromara.warm.flow.core.service.impl.DefServiceImpl;
+import org.dromara.warm.flow.core.service.*;
+import org.dromara.warm.flow.core.service.impl.*;
 import org.dromara.warm.flow.core.utils.ExpressionUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 
 import java.util.Objects;
 
 /**
  * WarmFlow 流程引擎配置
+ *
+ * 基于warmflow源码的BeanConfig修改
  *
  * @author liyang
  * @date 2025-09-29
@@ -51,54 +50,41 @@ public class WarmFlowBeanConfig {
      * 配置流程定义 DAO
      */
     @Bean
-    @Primary
     public FlowDefinitionDao definitionDao() {
         return new FlowDefinitionDaoImpl();
     }
 
-    /**
-     * 重写父类方法，返回 null 避免创建不存在的 DAO
-     */
     @Bean
-    public FlowNodeDao<?> nodeDao() {
+    public FlowNodeDao nodeDao() {
         return new FlowNodeDaoImpl();
     }
 
     @Bean
-    
     public FlowInstanceDao instanceDao() {
         return new FlowInstanceDaoImpl();
     }
 
-    
+
     @Bean
-    public FlowTaskDao<?> taskDao() {
+    public FlowTaskDao taskDao() {
         return new FlowTaskDaoImpl();
     }
 
-    
+
     @Bean
-    public FlowHisTaskDao<?> hisTaskDao() {
+    public FlowHisTaskDao hisTaskDao() {
         return new FlowHisTaskDaoImpl();
     }
 
-    
     @Bean
-    public FlowUserDao<?> flowUserDao() {
+    public FlowUserDao flowUserDao() {
         return new FlowUserDaoImpl();
     }
 
-    
     @Bean
-    public FlowSkipDao<?> skipDao() {
+    public FlowSkipDao skipDao() {
         return new FlowSkipDaoImpl();
     }
-
-    
-//    @Bean
-//    public FlowFormDao<?> formDao() {
-//        return null;
-//    }
 
     // ==================== Service Beans ====================
 
@@ -106,58 +92,59 @@ public class WarmFlowBeanConfig {
      * 配置流程定义服务
      */
     @Bean
-    public DefService definitionService(FlowDefinitionDao<?> definitionDao) {
-        return new DefServiceImpl().setDao((FlowDefinitionDao) definitionDao);
+    public DefService flowDefinitionService(FlowDefinitionDao definitionDao) {
+        return new DefServiceImpl().setDao(definitionDao);
     }
 
     /**
      * 配置节点服务
      */
-//    @Bean
-//    public NodeService nodeService(FlowNodeDao<?> flowNodeDao) {
-//        return new NodeServiceImpl().setDao((FlowNodeDao) flowNodeDao);
-//    }
-//
-//    /**
-//     * 配置实例服务
-//     */
-//    @Bean
-//    public InsService insService(FlowInstanceDao<?> flowInstanceDao) {
-//        return new InsServiceImpl().setDao((FlowInstanceDao) flowInstanceDao);
-//    }
-//
-//    /**
-//     * 配置任务服务
-//     */
-//    @Bean
-//    public TaskService taskService(FlowTaskDao<?> flowTaskDao) {
-//        return new TaskServiceImpl().setDao((FlowTaskDao) flowTaskDao);
-//    }
-//
-//    /**
-//     * 配置历史任务服务
-//     */
-//    @Bean
-//    public HisTaskService hisTaskService(FlowHisTaskDao<?> flowHisTaskDao) {
-//        return new HisTaskServiceImpl().setDao((FlowHisTaskDao) flowHisTaskDao);
-//    }
+    @Bean
+    public NodeService flowNodeService(FlowNodeDao flowNodeDao) {
+        return new NodeServiceImpl().setDao(flowNodeDao);
+    }
 
     /**
-     * 配置用户服务
+     * 配置实例服务
      */
-//    @Bean
-//    public UserService userService(FlowUserDao<?> flowUserDao) {
-//        return new UserServiceImpl().setDao((FlowUserDao) flowUserDao);
-//    }
-//
-//    /**
-//     * 配置跳过服务
-//     */
-//    @Bean
-//    public SkipService skipService(FlowSkipDao<?> flowSkipDao) {
-//        return new SkipServiceImpl().setDao((FlowSkipDao) flowSkipDao);
-//    }
-//
+    @Bean
+    public InsService flowInsService(FlowInstanceDao flowInstanceDao) {
+        return new InsServiceImpl().setDao(flowInstanceDao);
+    }
+
+    /**
+     * 配置任务服务
+     */
+    @Bean
+    public TaskService flowTaskService(FlowTaskDao flowTaskDao) {
+        return new TaskServiceImpl().setDao(flowTaskDao);
+    }
+
+    /**
+     * 配置历史任务服务
+     */
+    @Bean
+    public HisTaskService flowHisTaskService(FlowHisTaskDao flowHisTaskDao) {
+        return new HisTaskServiceImpl().setDao(flowHisTaskDao);
+    }
+
+    /**
+     * 配置流程用户服务
+     * 使用@Primary注解，让WarmFlow的UserService成为主要Bean
+     */
+    @Bean
+    public UserService flowUserService(FlowUserDao flowUserDao) {
+        return new UserServiceImpl().setDao(flowUserDao);
+    }
+
+    /**
+     * 配置流程跳过服务
+     */
+    @Bean
+    public SkipService flowSkipService(FlowSkipDao flowSkipDao) {
+        return new SkipServiceImpl().setDao(flowSkipDao);
+    }
+
 //    /**
 //     * 配置表单服务
 //     */
@@ -176,12 +163,9 @@ public class WarmFlowBeanConfig {
      * 配置图表服务
      */
     @Bean
-    
     public ChartService chartService() {
         return new ChartServiceImpl();
     }
-
-
 
     @Bean
     public WarmFlow initFlow() {

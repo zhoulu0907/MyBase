@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Accessors(chain = true)
-@Table(name = "flow_instance")
+@Table(name = "bpm_flow_instance")
 public class FlowInstance extends BaseEntity implements Instance {
 
     /** 对应flow_definition表的id */

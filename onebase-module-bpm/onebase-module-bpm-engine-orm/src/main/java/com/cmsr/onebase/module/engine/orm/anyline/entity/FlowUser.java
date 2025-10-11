@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Accessors(chain = true)
-@Table(name = "flow_user")
+@Table(name = "bpm_flow_user")
 public class FlowUser extends BaseEntity implements User {
 
     /** 人员类型（1审批人 2转办人 3委托人） */
