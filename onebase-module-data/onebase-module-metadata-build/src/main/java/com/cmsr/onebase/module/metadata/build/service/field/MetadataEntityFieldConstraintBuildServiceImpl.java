@@ -5,13 +5,16 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldCo
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldConstraintSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.*;
 import com.cmsr.onebase.module.metadata.build.service.validation.*;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * 字段约束 Service 实现（基于新规则表）
@@ -25,6 +28,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
     @Resource private MetadataValidationUniqueBuildService uniqueService;
     @Resource private MetadataValidationRangeBuildService rangeService;
     @Resource private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
+    @Resource private MetadataEntityFieldRepository entityFieldRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -139,23 +143,43 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 requiredService.update(requiredUpdateVO);
             }
         } else if ("UNIQUE".equalsIgnoreCase(type)) {
-            // 同步唯一性到 unique 表
             MetadataValidationUniqueDO exist = uniqueService.getByFieldId(req.getFieldId());
-            MetadataValidationUniqueDO d = new MetadataValidationUniqueDO();
-            if (exist != null) { d.setId(exist.getId()); }
-            d.setFieldId(req.getFieldId());
-            d.setIsEnabled(req.getIsEnabled());
-            d.setPromptMessage(req.getPromptMessage());
-            d.setRunMode(req.getRunMode());
-            if (d.getId() == null) {
-                // 将DO转换为VO
-                ValidationUniqueSaveReqVO uniqueVO = BeanUtils.toBean(d, ValidationUniqueSaveReqVO.class);
-                uniqueVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+            MetadataEntityFieldDO field = entityFieldRepository.findById(req.getFieldId());
+            if (field == null) {
+                throw new IllegalStateException("字段" + req.getFieldId() + "不存在，无法同步唯一性校验配置");
+            }
+
+            Integer enableFlag = req.getIsEnabled() != null ? req.getIsEnabled() : 0;
+            String prompt = StringUtils.hasText(req.getPromptMessage()) ? req.getPromptMessage() : "此字段值必须唯一";
+
+            if (exist == null) {
+                ValidationUniqueSaveReqVO uniqueVO = new ValidationUniqueSaveReqVO();
+                uniqueVO.setEntityId(field.getEntityId());
+                uniqueVO.setFieldId(req.getFieldId());
+                uniqueVO.setIsEnabled(enableFlag);
+                uniqueVO.setPromptMessage(prompt);
+                uniqueVO.setRunMode(req.getRunMode());
+                uniqueVO.setPopPrompt(prompt);
+                uniqueVO.setRgName("字段约束-" + req.getFieldId());
                 uniqueService.create(uniqueVO);
             } else {
-                // 将DO转换为UpdateReqVO
-                ValidationUniqueUpdateReqVO uniqueUpdateVO = BeanUtils.toBean(d, ValidationUniqueUpdateReqVO.class);
-                uniqueUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                Long groupId = exist.getGroupId();
+                if (groupId == null) {
+                    ValidationUniqueRespVO respVO = uniqueService.getByFieldIdWithRgName(req.getFieldId());
+                    if (respVO != null) {
+                        groupId = respVO.getGroupId();
+                    }
+                }
+                if (groupId == null) {
+                    throw new IllegalStateException("字段" + req.getFieldId() + "缺少唯一性规则组，无法更新");
+                }
+                ValidationUniqueUpdateReqVO uniqueUpdateVO = new ValidationUniqueUpdateReqVO();
+                uniqueUpdateVO.setId(groupId);
+                uniqueUpdateVO.setIsEnabled(enableFlag);
+                uniqueUpdateVO.setPromptMessage(prompt);
+                uniqueUpdateVO.setRunMode(req.getRunMode());
+                uniqueUpdateVO.setPopPrompt(prompt);
+                uniqueUpdateVO.setRgName("字段约束-" + req.getFieldId());
                 uniqueService.update(uniqueUpdateVO);
             }
         }
