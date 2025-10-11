@@ -76,12 +76,12 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       roleId
     };
     const res = await getFieldPermission(params);
-    const addDisabled = res.authFields.map((field: AuthFieldVO) => ({
-      ...field
-    }));
-    setFieldPermission(addDisabled);
+
+    const fieldPermissionFields = res.authFields.filter((field: AuthFieldVO) => field.fieldType !== 'FILE');
+    const operationConfigFields = res.authFields.filter((field: AuthFieldVO) => field.fieldType === 'FILE');
+    setFieldPermission(fieldPermissionFields);
     // 处理操作权限可下载数据 TODO
-    setOperationConfig(addDisabled);
+    setOperationConfig(operationConfigFields);
     setIsAllFieldsAllowed(res.isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
   };
 
