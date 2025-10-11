@@ -215,7 +215,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           >
             <IconSettings onClick={(e) => e.stopPropagation()} />
           </Dropdown>
-          <IconDragDotVertical />
+          <IconDragDotVertical style={{ cursor: 'move' }} />
         </div>
       )}
     </div>
