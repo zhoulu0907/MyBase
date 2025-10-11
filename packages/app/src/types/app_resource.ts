@@ -51,3 +51,15 @@ export interface GetPageMetadataReq {
 export interface GetComponentListByPageIdReq {
   pageId: string;
 }
+
+export interface CreatePageViewParams {
+  pageSetId: string;
+
+  viewType: string;
+
+  viewName: string;
+}
+
+export interface ListPageViewParams {
+  pageSetId: string;
+}
