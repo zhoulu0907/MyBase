@@ -22,7 +22,7 @@ interface FieldFormValues {
   fieldType: string;
   defaultValue: string;
   isUnique: number;
-  allowNull: number;
+  isRequired: number;
   isSystemField: number;
   sortOrder?: number;
   isDeleted?: boolean;
@@ -132,7 +132,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       fieldType: ENTITY_FIELD_TYPE.TEXT.VALUE,
       defaultValue: '',
       isUnique: 1,
-      allowNull: 1,
+      isRequired: 1,
       constraints: {
         lengthEnabled: 0,
         minLength: 0,
@@ -151,17 +151,17 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     form.setFieldsValue({ fields: newFields });
   };
 
-  const deleteField = (index: number) => {
-    const field = fields[index];
-    if (field.isSystemField === FIELD_TYPE.SYSTEM) {
+  const deleteField = (id: string) => {
+    const field = fields.find((f) => f.id === id);
+    if (field?.isSystemField === FIELD_TYPE.SYSTEM) {
       Message.error('系统字段不能删除');
       return;
     }
     let newFields;
-    if (field.id && field.id.startsWith('field-')) {
-      newFields = fields.filter((_, i) => i !== index);
+    if (id && id.startsWith('field-')) {
+      newFields = fields.filter((f) => f.id !== id);
     } else {
-      newFields = fields.map((field, i) => (i === index ? { ...field, isDeleted: true } : field));
+      newFields = fields.map((f) => (f.id === id ? { ...f, isDeleted: true } : f));
     }
 
     setFields(newFields);
@@ -192,10 +192,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       const formValues = await form.validate();
       console.log('formValues', formValues);
 
-      const customFields = getCurrentTableData();
-      console.log('customFields', customFields);
+      // 获取最新数据，再进行过滤
+      const mergedFields = getCurrentTableData();
+      const nonSystemFields = mergedFields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
 
-      const fieldDataList = customFields.map((field: FieldFormValues) => {
+      const fieldDataList = nonSystemFields.map((field: FieldFormValues) => {
         const fieldData = {
           appId: curAppId,
           entityId: entity.entityId,
@@ -324,10 +325,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   // 将表单数据转换为表格数据
   const getCurrentTableData = (formFields?: Partial<FieldFormValues>) => {
     const formValues = form.getFieldsValue();
-    const fields = formFields || formValues.fields || [];
+    const formListFields = formFields || formValues.fields || [];
 
-    return activeFields.map((originalField, index) => {
-      const formField = fields[index];
+    return fields.map((originalField, index) => {
+      const formField = formListFields[index];
       if (formField) {
         return {
           ...originalField,

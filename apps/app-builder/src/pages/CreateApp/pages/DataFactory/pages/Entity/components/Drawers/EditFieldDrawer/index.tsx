@@ -14,7 +14,7 @@ interface FieldDetail {
   fieldType: string;
   defaultValue: string;
   isUnique: boolean;
-  allowNull: boolean;
+  isRequired: boolean;
   constraints: string;
   isSystemField: number;
   entityId: string;
@@ -241,8 +241,8 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
                 <Checkbox>设置为唯一字段</Checkbox>
               </Form.Item>
 
-              <Form.Item label="空值约束" field="allowNull" triggerPropName="checked">
-                <Checkbox>允许空值</Checkbox>
+              <Form.Item label="空值约束" field="isRequired" triggerPropName="checked">
+                <Checkbox>必填</Checkbox>
               </Form.Item>
 
               <Form.Item label="字段约束" field="constraints">

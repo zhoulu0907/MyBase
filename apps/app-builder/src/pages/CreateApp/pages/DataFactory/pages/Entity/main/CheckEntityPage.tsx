@@ -1,7 +1,7 @@
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
-import { Radio, Tag } from '@arco-design/web-react';
-import { IconMindMapping, IconNav } from '@arco-design/web-react/icon';
+import { Message, Radio, Tag } from '@arco-design/web-react';
+import { IconMindMapping, IconNav, IconCopy } from '@arco-design/web-react/icon';
 import { getDatasourceList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import EntityTable from '../components/EntityTable';
@@ -48,6 +48,13 @@ export const CheckEntityPage: React.FC = () => {
     }
   };
 
+  const handleCopy = (text: string | undefined) => {
+    if (text) {
+      navigator.clipboard.writeText(text);
+      Message.success('已复制到剪贴板');
+    }
+  };
+
   useEffect(() => {
     if (curAppId) {
       getAppResources();
@@ -59,7 +66,10 @@ export const CheckEntityPage: React.FC = () => {
       <div className={styles['entity-page-header']}>
         <div className={styles['entity-page-header-left']}>
           <span className={styles['entity-page-header-left-name']}>{dsData?.datasourceName}</span>
-          <Tag className={styles['entity-page-header-left-tag']}>数据源编码：{dsData?.code}</Tag>
+          <Tag className={styles['entity-page-header-left-tag']}>
+            数据源编码：{dsData?.code}{' '}
+            <IconCopy onClick={() => handleCopy(dsData?.code)} className={styles['copy-icon']} fontSize={16} />
+          </Tag>
           <Tag className={styles['entity-page-header-left-tag']}>创建人：{dsData?.creator}</Tag>
           <Tag className={styles['entity-page-header-left-tag']}>
             创建时间：{dayjs(dsData?.createTime).format('YYYY-MM-DD HH:mm:ss')}

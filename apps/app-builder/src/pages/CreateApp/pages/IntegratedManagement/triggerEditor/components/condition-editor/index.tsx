@@ -500,7 +500,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                                                    ｆх编辑公式
+                                                    ƒx 编辑公式
                                                   </Button>
                                                 </Form.Item>
                                               )}

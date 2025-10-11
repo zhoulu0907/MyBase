@@ -29,7 +29,7 @@ export interface Application {
   /**
    * 应用状态, 对应AppStatus
    */
-  appStatus: 0 | 1 | 2;
+  appStatus: AppStatus;
   /**
    * 标签列表
    */
@@ -58,26 +58,18 @@ export interface Application {
    */
   updateUser?: string;
 }
-export interface ListApplicationReq {
-  pageNo: number;
-  pageSize: number;
-  name: string;
-  ownerTag?: 0 | 1;
-  orderByTime?: 'create' | 'update';
-  status?: number | null;
-}
 
 /**
- * 应用状态常量
+ * 应用状态枚举
  * 0: 开发中
  * 1: 已发布
  * 2: 已发布编辑中
  */
-export const AppStatus = {
-  DEVELOPING: 0,      // 开发中
-  PUBLISHED: 1,       // 已发布
-  EDITING_AFTER_PUBLISH: 2, // 已发布编辑中
-} as const;
+export enum AppStatus {
+  DEVELOPING = 0,      // 开发中
+  PUBLISHED = 1,       // 已发布
+  EDITING_AFTER_PUBLISH = 2 // 已发布编辑中
+};
 
 export interface CreateApplicationReq {
   /**

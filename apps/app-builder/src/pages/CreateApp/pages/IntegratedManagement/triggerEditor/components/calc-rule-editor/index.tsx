@@ -60,7 +60,13 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                   return (
                     <Grid.Row gutter={8} key={item.key} align="center">
                       <Grid.Col span={7}>
-                        <Form.Item field={item.field + '.field'} rules={[{ required: true, message: '请输入字段' }]}>
+                        <Form.Item
+                          field={item.field + '.field'}
+                          rules={[
+                            { required: true, message: '请输入字段' },
+                            { match: /^[_a-zA-Z0-9\u4E00-\u9FA5]*$/, message: '字段不符合填写要求' }
+                          ]}
+                        >
                           <Input placeholder="请输入字段名称" onChange={(_value) => {}} />
                         </Form.Item>
                       </Grid.Col>

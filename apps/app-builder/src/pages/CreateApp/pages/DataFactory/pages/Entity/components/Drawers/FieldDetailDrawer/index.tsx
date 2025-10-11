@@ -12,7 +12,7 @@ interface FieldDetail {
   fieldType: string;
   defaultValue: string;
   isUnique: boolean;
-  allowNull: boolean;
+  isRequired: boolean;
   constraints: string;
   isSystemField: number;
   entityId: string;
@@ -92,8 +92,8 @@ const FieldDetailDrawer: React.FC<FieldDetailDrawerProps> = ({ visible, setVisib
     return <Tag color="gray">非唯一</Tag>;
   };
 
-  const renderAllowNullTag = (allowNull: boolean) => {
-    if (allowNull) {
+  const renderisRequiredTag = (isRequired: boolean) => {
+    if (isRequired) {
       return <Tag color="orange">允许空值</Tag>;
     }
     return <Tag color="red">不允许空值</Tag>;
@@ -140,7 +140,7 @@ const FieldDetailDrawer: React.FC<FieldDetailDrawerProps> = ({ visible, setVisib
               data={[
                 { label: '默认值', value: fieldDetail.defaultValue || '-' },
                 { label: '唯一性', value: renderUniqueTag(fieldDetail.isUnique) },
-                { label: '空值约束', value: renderAllowNullTag(fieldDetail.allowNull) },
+                { label: '空值约束', value: renderisRequiredTag(fieldDetail.isRequired) },
                 { label: '字段约束', value: fieldDetail.constraints || '-' }
               ]}
             />

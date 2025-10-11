@@ -13,7 +13,7 @@ interface FieldFormValues {
   fieldType: string;
   defaultValue: string;
   isUnique: number;
-  allowNull: number;
+  isRequired: number;
   constraints?: {
     lengthEnabled: number;
     minLength: number;
@@ -38,7 +38,7 @@ interface TableColumnsProps {
   setConstraintsPopoverVisible: (id: string | null) => void;
   renderFieldConfigContent: (fieldType: string, fieldId: string) => React.ReactNode;
   getFieldIndex: (fieldId: string, index: number) => number;
-  deleteField: (index: number) => void;
+  deleteField: (id: string) => void;
   fields: FieldFormValues[];
 }
 
@@ -48,6 +48,7 @@ interface ColumnConfig {
   dataIndex: string;
   width?: number;
   ellipsis?: boolean;
+  align?: 'center' | 'left' | 'right';
   render?: (value: any, record: FieldFormValues, index: number) => React.ReactNode;
 }
 
@@ -61,7 +62,6 @@ const TableColumns = ({
   renderFieldConfigContent,
   getFieldIndex,
   deleteField,
-  fields
 }: TableColumnsProps): ColumnConfig[] => {
   return [
     {
@@ -196,14 +196,20 @@ const TableColumns = ({
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
-          <Form.Item field={`fields.${getFieldIndex(record.id, index)}.isUnique`} className={styles['field-form-item']}>
+          <Form.Item
+            field={`fields.${getFieldIndex(record.id, index)}.isUnique`}
+            className={styles['field-form-item']}
+            triggerPropName="checked"
+            normalize={(v) => (v ? 1 : 0)}
+            formatter={(v) => v === 1 || v === true}
+          >
             <Checkbox />
           </Form.Item>
         )
     },
     {
-      title: '允许空值',
-      dataIndex: 'allowNull',
+      title: '必填',
+      dataIndex: 'isRequired',
       width: 100,
       align: 'center',
       render: (value: number, record: FieldFormValues, index: number) =>
@@ -211,8 +217,11 @@ const TableColumns = ({
           <span className={styles['system-field']}>-</span>
         ) : (
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.allowNull`}
+            field={`fields.${getFieldIndex(record.id, index)}.isRequired`}
             className={styles['field-form-item']}
+            triggerPropName="checked"
+            normalize={(v) => (v ? 1 : 0)}
+            formatter={(v) => v === 1 || v === true}
           >
             <Checkbox />
           </Form.Item>
@@ -245,10 +254,9 @@ const TableColumns = ({
       width: 80,
       align: 'center',
       render: (value: unknown, record: FieldFormValues) => {
-        const fieldIndex = fields.findIndex((f) => f.id === record.id);
         return (
           record.isSystemField === FIELD_TYPE.CUSTOM && (
-            <Button type="text" status="danger" size="mini" onClick={() => deleteField(fieldIndex)}>
+            <Button type="text" status="danger" size="mini" onClick={() => deleteField(record.id)}>
               删除
             </Button>
           )
