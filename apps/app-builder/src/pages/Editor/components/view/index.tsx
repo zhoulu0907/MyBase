@@ -1,51 +1,79 @@
 import { Button, Dropdown, Form, Input, Modal, Radio } from '@arco-design/web-react';
 import { IconDown, IconPlus } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
+import { createPageView, listPageView, type PageView } from '@onebase/app';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 const { useForm } = Form;
 
-interface ViewProps {}
+interface ViewProps {
+  pageSetId: string;
+}
 
 // 视图组件
-const View: React.FC<ViewProps> = ({}) => {
-  const viewList = [
-    {
-      id: '01',
-      label: '默认表单视图',
-      viewType: 'mix'
-    },
-    {
-      id: '02',
-      label: 'xx编辑视图',
-      viewType: 'edit'
-    },
-    {
-      id: '03',
-      label: 'xx表单视图',
-      viewType: 'detail'
-    }
-  ];
+const View: React.FC<ViewProps> = ({ pageSetId }) => {
+  // TODO(mickey): 放到single中
+  const [viewList, setViewList] = useState<PageView[]>([]);
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
 
-  const showViewType = (viewType: string) => {
-    switch (viewType) {
-      case 'mix':
-        return <div className={`${styles.viewLabel} ${styles.mixViewTitle}`}>混合视图</div>;
-      case 'edit':
-        return <div className={`${styles.viewLabel} ${styles.editViewTitle}`}>编辑视图</div>;
-      case 'detail':
-        return <div className={`${styles.viewLabel} ${styles.detailViewTitle}`}>详情视图</div>;
+  useEffect(() => {
+    handleListPageView();
+  }, [pageSetId]);
+
+  const handleListPageView = async () => {
+    const res = await listPageView({
+      pageSetId: pageSetId
+    });
+
+    console.log(res);
+
+    if (res && res.pages) {
+      const newViewList = res.pages.map((item: PageView) => ({
+        ...item
+      }));
+
+      setViewList(newViewList);
     }
+  };
+
+  const showViewType = (item: PageView | null) => {
+    if (!item) {
+      return <div className={`${styles.viewLabel} ${styles.mixViewTitle}`}>默认视图</div>;
+    }
+    if (item.detailViewMode && item.editViewMode) {
+      return <div className={`${styles.viewLabel} ${styles.mixViewTitle}`}>混合视图</div>;
+    }
+    if (item.detailViewMode && item.editViewMode) {
+      return <div className={`${styles.viewLabel} ${styles.editViewTitle}`}>编辑视图</div>;
+    }
+    if (item.detailViewMode) {
+      return <div className={`${styles.viewLabel} ${styles.detailViewTitle}`}>详情视图</div>;
+    }
+
+    return <div className={`${styles.viewLabel} ${styles.mixViewTitle}`}>默认视图</div>;
+  };
+
+  const selectDefaultView = () => {
+    let defaultView = null;
+    if (viewList.length > 0) {
+      defaultView = viewList[0];
+    }
+    viewList.forEach((item) => {
+      if (item.isDefaultEditViewMode || item.isDefaultDetailViewMode) {
+        defaultView = item;
+      }
+    });
+
+    return defaultView;
   };
 
   const dropList = (
     <div className={styles.dropList}>
       {viewList.map((item) => (
         <div key={item.id} className={styles.dropItem}>
-          <div className={styles.dropItemLabel}>{item.label}</div>
-          <div>{showViewType(item.viewType)}</div>
+          <div className={styles.dropItemLabel}>{item.pageName}</div>
+          <div>{showViewType(item)}</div>
         </div>
       ))}
 
@@ -56,23 +84,41 @@ const View: React.FC<ViewProps> = ({}) => {
     </div>
   );
 
-  const handleCreateView = () => {
+  const handleCloseModal = () => {
     setCreateViewModalVisible(false);
+    createForm.resetFields();
+  };
+
+  const handleCreateView = async () => {
+    createForm
+      .validate()
+      .then(async () => {
+        const res = await createPageView({
+          pageSetId: pageSetId,
+          viewType: createForm.getFieldValue('viewType'),
+          viewName: createForm.getFieldValue('viewName')
+        });
+        console.log(res);
+        setCreateViewModalVisible(false);
+      })
+      .catch((e) => {
+        console.log(e.errors);
+      });
   };
 
   return (
     <div className={styles.viewWrapper}>
-      <div className={styles.viewTitle}>默认表单视图</div>
+      <div className={styles.viewTitle}>{selectDefaultView()?.pageName}</div>
       <Dropdown droplist={dropList} position="br">
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {showViewType('mix')}
+          {showViewType(selectDefaultView())}
           <IconDown />
         </span>
       </Dropdown>
 
       <Modal
         visible={createViewModalVisible}
-        onCancel={() => setCreateViewModalVisible(false)}
+        onCancel={handleCloseModal}
         onOk={handleCreateView}
         title="新增视图"
         style={{ width: 295 }}
