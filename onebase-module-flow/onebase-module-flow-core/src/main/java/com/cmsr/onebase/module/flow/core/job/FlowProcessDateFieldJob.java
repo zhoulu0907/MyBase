@@ -4,8 +4,9 @@ import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
 import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import lombok.Setter;
@@ -44,8 +45,14 @@ public class FlowProcessDateFieldJob {
         }
         Map<String, Object> jobParamsMap = JsonUtils.parseObject(jobParams.toString(), Map.class);
         Long processId = NumberUtils.toLong(MapUtils.getString(jobParamsMap, JsonGraphConstant.PROCESS_ID));
-        flowProcessExecutor.execute(processId, Collections.emptyMap());
-        return ExecuteResult.success("执行成功");
+        StartDateFieldNodeData startDateFieldNodeData = graphFlowCache.findStartDateFieldNodeDataByProcessId(processId);
+        if (startDateFieldNodeData != null && !startDateFieldNodeData.isCurrentDateInRange()) {
+            log.info("当前时间不在设定的时间范围内，跳过执行");
+            return ExecuteResult.success("当前时间不在设定的时间范围内，跳过执行");
+        } else {
+            flowProcessExecutor.execute(processId, Collections.emptyMap());
+            return ExecuteResult.success("执行成功");
+        }
     }
 
 

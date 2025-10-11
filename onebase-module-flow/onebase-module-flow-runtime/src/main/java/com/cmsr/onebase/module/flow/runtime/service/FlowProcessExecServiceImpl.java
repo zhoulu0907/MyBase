@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
@@ -72,16 +73,31 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
         }
         if (!isTrigger) {
-            FormTriggerRespVO respVO = new FormTriggerRespVO();
-            respVO.setTriggered(0);
-            return respVO;
+            return formNotTriggerRespVO();
         } else {
-            Map<String, Object> outputMap = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
-            FormTriggerRespVO respVO = new FormTriggerRespVO();
-            respVO.setTriggered(1);
-            respVO.setResult(outputMap);
-            return respVO;
+            ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
+            return formTriggerRespVO(executorResult);
         }
+    }
+
+    private FormTriggerRespVO formNotTriggerRespVO() {
+        FormTriggerRespVO respVO = new FormTriggerRespVO();
+        respVO.setTriggered(false);
+        respVO.setExecutionEnd(true);
+        return respVO;
+    }
+
+    private FormTriggerRespVO formTriggerRespVO(ExecutorResult executorResult) {
+        FormTriggerRespVO respVO = new FormTriggerRespVO();
+        respVO.setTriggered(true);
+        respVO.setSuccess(executorResult.isSuccess());
+        respVO.setCode(executorResult.getCode());
+        respVO.setMessage(executorResult.getMessage());
+        respVO.setCause(executorResult.getCause());
+        respVO.setExecutionEnd(executorResult.isExecutionEnd());
+        respVO.setExecutionUuid(executorResult.getExecutionUuid());
+        respVO.setOutputParams(executorResult.getOutputParams());
+        return respVO;
     }
 
     /**

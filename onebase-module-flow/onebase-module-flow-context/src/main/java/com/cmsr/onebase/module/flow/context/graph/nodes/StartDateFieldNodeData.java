@@ -50,4 +50,9 @@ public class StartDateFieldNodeData extends NodeData {
         cron.setMinuteAndHour(dailyExecTime);
         return cron.toCron();
     }
+
+    public boolean isCurrentDateInRange() {
+        // TODO
+        return true;
+    }
 }

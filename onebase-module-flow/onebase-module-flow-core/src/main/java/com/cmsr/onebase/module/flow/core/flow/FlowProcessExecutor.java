@@ -29,7 +29,7 @@ public class FlowProcessExecutor {
     @Autowired
     private GraphFlowCache graphFlowCache;
 
-    public Map<String, Object> execute(Long processId, Map<String, Object> inputParams) {
+    public ExecutorResult execute(Long processId, Map<String, Object> inputParams) {
         String chainId = FlowUtils.toFlowChainId(processId);
         VariableContext variableContext = new VariableContext();
         variableContext.setInputParams(inputParams);
@@ -38,8 +38,17 @@ public class FlowProcessExecutor {
         executeContext.setProcessId(processId);
         executeContext.setNodeDataMap(graphFlowCache.findNodeData(processId));
         LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
+        ExecutorResult executorResult = new ExecutorResult();
+        executorResult.setSuccess(response.isSuccess());
+        executorResult.setCode(response.getCode());
+        executorResult.setMessage(response.getMessage());
+        executorResult.setCause(response.getCause());
+
+        executeContext = response.getContextBean(ExecuteContext.class);
+        executorResult.setExecutionEnd(executeContext.isExecuteEnd());
         VariableContext resultContext = response.getContextBean(VariableContext.class);
-        return resultContext.getOutputParams();
+        executorResult.setOutputParams(resultContext.getOutputParams());
+        return executorResult;
     }
 
 }

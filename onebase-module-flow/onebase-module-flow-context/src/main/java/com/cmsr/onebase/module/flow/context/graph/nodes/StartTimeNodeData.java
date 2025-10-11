@@ -50,8 +50,6 @@ public class StartTimeNodeData extends NodeData {
      */
     public static final String REPEAT_TYPE_CRON = "cron";
 
-    private String cronExpression;
-
     private String startTime;
 
     private String endTime;
@@ -106,28 +104,31 @@ public class StartTimeNodeData extends NodeData {
     }
 
     public String createCronExpression() {
-        if (REPEAT_TYPE_DAY.equals(repeatType)) {
+        if (REPEAT_TYPE_DAY.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
             cron.setMinuteAndHour(triggerTime);
             return cron.toCron();
         }
-        if (REPEAT_TYPE_WEEK.equals(repeatType)) {
+        if (REPEAT_TYPE_WEEK.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
             cron.setMinuteAndHour(triggerTime);
             cron.setWeek(repeatWeek);
             return cron.toCron();
         }
-        if (REPEAT_TYPE_MONTH.equals(repeatType)) {
+        if (REPEAT_TYPE_MONTH.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
             cron.setMinuteAndHour(triggerTime);
             cron.setDay(repeatDay);
             return cron.toCron();
         }
-        if (REPEAT_TYPE_YEAR.equals(repeatType)) {
+        if (REPEAT_TYPE_YEAR.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
             cron.setMinuteAndHour(triggerTime);
             cron.setDay(triggerDate);
             return cron.toCron();
+        }
+        if (REPEAT_TYPE_CRON.equalsIgnoreCase(repeatType)) {
+            return triggerTime;
         }
         throw new UnsupportedOperationException("不支持的定时类型: " + repeatType);
     }
