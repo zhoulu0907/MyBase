@@ -245,8 +245,10 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
         </Form>
 
         <div className="tableHeaderButton">
-          <Button type="primary" onClick={handleSearch}>查询</Button>
-          <Button type="primary" onClick={handleReset}>重置</Button>
+          { searchItems?.length ? <>
+            <Button type="primary" onClick={handleSearch}>查询</Button>
+            <Button type="primary" onClick={handleReset}>重置</Button>
+          </>:null}
           <Button type="primary" onClick={handleCreate}>
             新增
           </Button>

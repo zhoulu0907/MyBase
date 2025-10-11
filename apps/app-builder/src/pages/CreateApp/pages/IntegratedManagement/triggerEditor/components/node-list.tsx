@@ -148,7 +148,7 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
 
   const getHeight = (activeTab: string) => {
     if (activeTab == 'all') {
-      return '530px';
+      return '646px';
     } else if (activeTab == 'control') {
       return '185px';
     } else if (activeTab == 'data') {

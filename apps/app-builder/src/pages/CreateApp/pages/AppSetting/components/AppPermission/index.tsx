@@ -1,6 +1,6 @@
 import { useState, useEffect, type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Menu, Popconfirm, Message } from '@arco-design/web-react';
+import { Menu, Popconfirm, Message, Empty } from '@arco-design/web-react';
 import { IconEdit, IconPlus, IconUser, IconClose } from '@arco-design/web-react/icon';
 import {
   listRole,
@@ -32,6 +32,7 @@ const AppPermission: FC = () => {
   const appId = searchParams.get('appId') || '';
 
   const [activeTab, setActiveTab] = useState<string>('');
+  const [showEmpty, setShowEmpty] = useState<boolean>(false);
   const [roleList, setRoleList] = useState<Role[]>([]);
   const [addRole, setAddRole] = useState<boolean>(false);
   const [updateRoleId, setUpdateRoleId] = useState<string>('');
@@ -48,6 +49,9 @@ const AppPermission: FC = () => {
     getRoleList();
   }, []);
 
+  useEffect(() => {
+    console.log('showEmpty', showEmpty, 'activeTab', !activeTab);
+  }, [showEmpty, activeTab]);
   // 获取角色列表
   const getRoleList = async () => {
     const params: ListRoleReq = {
@@ -78,12 +82,13 @@ const AppPermission: FC = () => {
   };
 
   const handleSelectmenu = (val: string) => {
-    // console.log('应用权限选择菜单 val:', val);
+    console.log('应用权限选择菜单 val:', val);
     if (val === 'add') {
       setAddRole(true);
       return;
     }
     setActiveTab(val);
+    setShowEmpty(false);
     const isAdminRole = val === adminData?.id;
     if (isAdminRole) {
       getMemberList(val);
@@ -148,6 +153,8 @@ const AppPermission: FC = () => {
       Message.success('删除成功');
     }
     await getRoleList();
+    setActiveTab('');
+    setShowEmpty(true);
   };
 
   if (!adminData?.id) return null;
@@ -239,11 +246,17 @@ const AppPermission: FC = () => {
         </div>
       </div>
       <div className={styles.right}>
-        <RoleInfo
-          roleInfo={activeTab === adminData?.id ? adminData : notAdminData}
-          memberList={memberList}
-          memberTotal={memberTotal}
-        />
+        {!activeTab || showEmpty ? (
+          <>
+            <Empty />
+          </>
+        ) : (
+          <RoleInfo
+            roleInfo={activeTab === adminData?.id ? adminData : notAdminData}
+            memberList={memberList}
+            memberTotal={memberTotal}
+          />
+        )}
       </div>
     </div>
   );
