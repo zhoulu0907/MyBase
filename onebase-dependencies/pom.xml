@@ -78,9 +78,6 @@
         <weixin-java.version>4.7.5.B</weixin-java.version>
         <!-- 公式引擎相关 -->
         <graalvm.version>23.0.9</graalvm.version>
-
-        <!-- bpm 工作流相关 -->
-        <warmflow.version>1.8.1</warmflow.version>
     </properties>
 
     <dependencyManagement>
@@ -548,36 +545,6 @@
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
                 <version>${graalvm.version}</version>
-            </dependency>
-
-            <!-- bpm流程引擎 -->
-            <dependency>
-                <groupId>org.dromara.warm</groupId>
-                <artifactId>warm-flow-core</artifactId>
-                <version>${warmflow.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.dromara.warm</groupId>
-                <artifactId>warm-flow-plugin-json</artifactId>
-                <version>${warmflow.version}</version>
-            </dependency>
-
-            <!-- 框架模式插件 -->
-            <dependency>
-                <groupId>org.dromara.warm</groupId>
-                <artifactId>warm-flow-plugin-modes-sb</artifactId>
-                <version>${warmflow.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>warm-flow-mybatis-core</artifactId>
-                        <groupId> *</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>warm-flow-mybatis-plus-core</artifactId>
-                        <groupId>*</groupId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
         </dependencies>

@@ -17,7 +17,7 @@ package org.dromara.warm.flow.core.entity;
 
 import org.dromara.warm.flow.core.FlowEngine;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -35,16 +35,16 @@ public interface Definition extends RootEntity {
     Definition setId(Long id);
 
     @Override
-    Date getCreateTime();
+    LocalDateTime getCreateTime();
 
     @Override
-    Definition setCreateTime(Date createTime);
+    Definition setCreateTime(LocalDateTime createTime);
 
     @Override
-    Date getUpdateTime();
+    LocalDateTime getUpdateTime();
 
     @Override
-    Definition setUpdateTime(Date updateTime);
+    Definition setUpdateTime(LocalDateTime updateTime);
 
     @Override
     String getCreateBy();
@@ -176,7 +176,7 @@ public interface Definition extends RootEntity {
 
     default Definition copy() {
         return FlowEngine.newDef()
-            .setTenantId(this.getTenantId())
+            .setTenantId(String.valueOf(this.getTenantId()))
             .setDelFlag(this.getDelFlag())
             .setFlowCode(this.getFlowCode())
             .setFlowName(this.getFlowName())

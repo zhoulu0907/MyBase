@@ -17,7 +17,7 @@ package org.dromara.warm.flow.core.entity;
 
 import org.dromara.warm.flow.core.FlowEngine;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -35,16 +35,16 @@ public interface Instance extends RootEntity {
     Instance setId(Long id);
 
     @Override
-    Date getCreateTime();
+    LocalDateTime getCreateTime();
 
     @Override
-    Instance setCreateTime(Date createTime);
+    Instance setCreateTime(LocalDateTime createTime);
 
     @Override
-    Date getUpdateTime();
+    LocalDateTime getUpdateTime();
 
     @Override
-    Instance setUpdateTime(Date updateTime);
+    Instance setUpdateTime(LocalDateTime updateTime);
 
     @Override
     String getCreateBy();

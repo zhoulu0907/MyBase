@@ -17,13 +17,6 @@
     </description>
 
     <dependencies>
-        <!-- 依赖服务 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-bpm-core</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

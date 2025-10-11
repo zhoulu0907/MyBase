@@ -15,6 +15,7 @@
  */
 package org.dromara.warm.flow.core.service.impl;
 
+import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.constant.ExceptionCons;
@@ -396,7 +397,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
                         highestVersion = version;
                     }
                 } catch (NumberFormatException e) {
-                    long timestamp = otherDef.getCreateTime().getTime();
+                    long timestamp = DateUtils.of(otherDef.getCreateTime()).getTime();
                     if (timestamp > latestTimestamp) {
                         latestTimestamp = timestamp;
                         latestNonPositiveVersion = otherDef.getVersion();

@@ -15,7 +15,7 @@
  */
 package org.dromara.warm.flow.core.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 流程表单 flow_form
@@ -32,16 +32,16 @@ public interface Form extends RootEntity {
     Form setId(Long id);
 
     @Override
-    Date getCreateTime();
+    LocalDateTime getCreateTime();
 
     @Override
-    Form setCreateTime(Date createTime);
+    Form setCreateTime(LocalDateTime createTime);
 
     @Override
-    Date getUpdateTime();
+    LocalDateTime getUpdateTime();
 
     @Override
-    Form setUpdateTime(Date updateTime);
+    Form setUpdateTime(LocalDateTime updateTime);
 
     @Override
     String getCreateBy();

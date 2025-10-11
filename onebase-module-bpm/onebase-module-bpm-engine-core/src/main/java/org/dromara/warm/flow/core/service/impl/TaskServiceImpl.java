@@ -30,6 +30,7 @@ import org.dromara.warm.flow.core.utils.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -493,7 +494,7 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
     @Override
     public Task addTask(Node node, Instance instance, Definition definition, FlowParams flowParams) {
         Task addTask = FlowEngine.newTask();
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         FlowEngine.dataFillHandler().idFill(addTask);
         addTask.setDefinitionId(instance.getDefinitionId())
             .setInstanceId(instance.getId())
@@ -527,7 +528,7 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
 
     @Override
     public void setInsFinishInfo(Instance instance, List<Task> addTasks, FlowParams flowParams) {
-        instance.setUpdateTime(new Date());
+        instance.setUpdateTime(LocalDateTime.now());
         // 合并流程变量到实例对象
         mergeVariable(instance, flowParams.getVariable());
         if (CollUtil.isNotEmpty(addTasks)) {
