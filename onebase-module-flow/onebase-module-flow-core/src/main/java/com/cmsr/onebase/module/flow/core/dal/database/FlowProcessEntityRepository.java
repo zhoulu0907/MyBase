@@ -22,4 +22,10 @@ public class FlowProcessEntityRepository extends DataRepository<FlowProcessEntit
         configs.eq("process_id", processId);
         return findOne(configs);
     }
+
+    public void deleteByProcessId(Long processId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("process_id", processId);
+        deleteByConfig(configs);
+    }
 }
