@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.flow.core.event.rocketmq;
 
-import com.cmsr.onebase.module.flow.core.config.FlowBuildCondition;
 import com.cmsr.onebase.module.flow.core.event.FlowEvent;
 import com.cmsr.onebase.module.flow.core.event.FlowEventPublisher;
 import lombok.Setter;
@@ -13,7 +12,6 @@ import org.apache.rocketmq.client.apis.producer.Producer;
 import org.apache.rocketmq.client.apis.producer.SendReceipt;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 /**
