@@ -71,7 +71,7 @@ public class JobClient {
         }
     }
 
-    public void stopJob(String jobId) {
+    public void deleteJob(String jobId) {
         SnailJobOpenApi
                 .updateClusterJob(Long.parseLong(jobId))
                 .setJobStatus(StatusEnum.NO)

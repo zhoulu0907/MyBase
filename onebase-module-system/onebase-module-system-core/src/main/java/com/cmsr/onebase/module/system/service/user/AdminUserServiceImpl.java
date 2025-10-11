@@ -250,7 +250,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void updateAdminType(Long id, Integer adminType) {
         // 校验正确性
         validateUserExists(id);
-        // 2.1 更新用户管理员状态
+        // 2.1 更新用户管理员类型
         adminUserDataRepository.update(new AdminUserDO().setId(id).setAdminType(adminType));
     }
 

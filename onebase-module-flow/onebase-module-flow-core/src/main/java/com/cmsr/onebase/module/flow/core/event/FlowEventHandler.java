@@ -35,6 +35,7 @@ public class FlowEventHandler {
         log.info("处理流程更新事件：{}", processId);
         FlowProcessDO processDO = flowProcessRepository.findById(processId);
         if (processDO == null) {
+            log.warn("流程不存在：{}", processId);
             return false;
         }
         JsonGraph jsonGraph = JsonGraphBuilder.build(processDO.getProcessDefinition());
