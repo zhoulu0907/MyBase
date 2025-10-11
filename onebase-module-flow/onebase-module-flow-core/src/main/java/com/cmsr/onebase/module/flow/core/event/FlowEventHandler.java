@@ -31,11 +31,11 @@ public class FlowEventHandler {
     @Autowired
     private GraphFlowCache graphFlowCache;
 
-    public void onProcessUpdate(Long processId) {
+    public boolean onProcessUpdate(Long processId) {
         log.info("处理流程更新事件：{}", processId);
         FlowProcessDO processDO = flowProcessRepository.findById(processId);
         if (processDO == null) {
-            return;
+            return false;
         }
         JsonGraph jsonGraph = JsonGraphBuilder.build(processDO.getProcessDefinition());
         String flowChain = jsonGraph.toFlowChain();
@@ -43,14 +43,16 @@ public class FlowEventHandler {
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
         graphFlowCache.update(processDO.getId(), jsonGraph);
+        return true;
     }
 
-    public void onProcessDelete(Long processId) {
+    public boolean onProcessDelete(Long processId) {
         log.info("发布流程删除事件：{}", processId);
         String chainId = FlowUtils.toFlowChainId(processId);
         FlowBus.removeChain(chainId);
         //
         graphFlowCache.delete(processId);
+        return true;
     }
 
 }

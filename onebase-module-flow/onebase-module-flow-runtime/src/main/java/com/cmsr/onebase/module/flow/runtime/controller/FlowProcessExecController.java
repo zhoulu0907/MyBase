@@ -48,15 +48,15 @@ public class FlowProcessExecController {
     @PostMapping("/flow-handler/update")
     @Operation(summary = "更新流程")
     public CommonResult<Boolean> updateProcess(@RequestParam("processId") Long processId) {
-        flowEventHandler.onProcessUpdate(processId);
-        return CommonResult.success(Boolean.TRUE);
+        boolean result = flowEventHandler.onProcessUpdate(processId);
+        return CommonResult.success(result);
     }
 
     @PostMapping("/flow-handler/delete")
     @Operation(summary = "删除流程")
     public CommonResult<Boolean> deleteProcess(@RequestParam("processId") Long processId) {
-        flowEventHandler.onProcessDelete(processId);
-        return CommonResult.success(Boolean.TRUE);
+        boolean result = flowEventHandler.onProcessDelete(processId);
+        return CommonResult.success(result);
     }
 
 }
