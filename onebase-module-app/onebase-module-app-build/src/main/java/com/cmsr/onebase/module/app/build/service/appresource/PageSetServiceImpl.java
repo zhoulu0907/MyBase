@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.esotericsoftware.minlog.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -241,6 +242,7 @@ public class PageSetServiceImpl implements PageSetService {
 
         savePageSetReqVO.getPages().forEach(page -> {
             if (page.getCreated()){
+                Log.info("创建页面：{}", page.getPageName());
                 // 插入新的视图
                 String pageCode = UUID.randomUUID().toString();
                 String pageName = page.getPageName();
