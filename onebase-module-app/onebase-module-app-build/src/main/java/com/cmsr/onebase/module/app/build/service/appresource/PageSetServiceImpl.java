@@ -38,7 +38,6 @@ import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
-import com.esotericsoftware.minlog.Log;
 
 import jakarta.annotation.Resource;
 
@@ -242,7 +241,6 @@ public class PageSetServiceImpl implements PageSetService {
 
         savePageSetReqVO.getPages().forEach(page -> {
             if (Boolean.TRUE.equals(page.getCreated())) {
-                Log.info("创建页面：{}", page.getPageName());
                 // 插入新的视图
                 String pageCode = UUID.randomUUID().toString();
                 String pageName = page.getPageName();
@@ -258,6 +256,16 @@ public class PageSetServiceImpl implements PageSetService {
                 pageDO.setIsDefaultDetailViewMode(page.getIsDefaultDetailViewMode());
 
                 pageDO = pageDataRepository.insert(pageDO);
+
+                // 插入页面集合页面关系
+                PageSetPageDO pageSetPageDO = new PageSetPageDO();
+                pageSetPageDO.setPageSetId(savePageSetReqVO.getId());
+                pageSetPageDO.setPageType(pageType);
+                pageSetPageDO.setPageId(pageDO.getId());
+                pageSetPageDO.setIsDefault(false);
+                pageSetPageDO.setDefaultSeq(1);
+                pageSetPageDataRepository.insert(pageSetPageDO);
+
                 page.setId(pageDO.getId());
             }
 
