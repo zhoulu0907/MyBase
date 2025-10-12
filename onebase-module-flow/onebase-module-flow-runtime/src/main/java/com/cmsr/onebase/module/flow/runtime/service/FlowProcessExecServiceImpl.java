@@ -22,6 +22,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -114,7 +115,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         respVO.setSuccess(executorResult.isSuccess());
         respVO.setCode(executorResult.getCode());
         respVO.setMessage(executorResult.getMessage());
-        respVO.setCause(executorResult.getCause());
+        respVO.setCause(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
         respVO.setExecutionEnd(executorResult.isExecutionEnd());
         respVO.setExecutionUuid(executorResult.getExecutionUuid());
         respVO.setOutputParams(executorResult.getOutputParams());

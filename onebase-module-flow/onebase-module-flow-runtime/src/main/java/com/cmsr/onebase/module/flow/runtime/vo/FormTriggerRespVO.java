@@ -19,7 +19,7 @@ public class FormTriggerRespVO {
 
     private String message;
 
-    private Exception cause;
+    private String cause;
 
     private boolean executionEnd;
 

@@ -42,7 +42,7 @@ public class ModalNodeComponent extends SkippableNodeComponent {
             contextProvider.storeVariableContext(executionUuid, variableContext);
             this.setIsEnd(true);
         }
-        if (nodeActionEnum == NodeActionEnum.REST_AND_SKIP) {
+        if (nodeActionEnum == NodeActionEnum.DO_RESET) {
             executeContext.restExecutionUuid();
             executeContext.restExecutionEndTag();
         }
