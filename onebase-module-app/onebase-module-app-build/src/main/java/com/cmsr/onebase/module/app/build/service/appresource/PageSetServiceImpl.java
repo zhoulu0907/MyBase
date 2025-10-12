@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.esotericsoftware.minlog.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -39,6 +38,7 @@ import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+import com.esotericsoftware.minlog.Log;
 
 import jakarta.annotation.Resource;
 
@@ -241,7 +241,7 @@ public class PageSetServiceImpl implements PageSetService {
     public Boolean savePageSet(SavePageSetReqVO savePageSetReqVO) {
 
         savePageSetReqVO.getPages().forEach(page -> {
-            if (page.getCreated()){
+            if (Boolean.TRUE.equals(page.getCreated())) {
                 Log.info("创建页面：{}", page.getPageName());
                 // 插入新的视图
                 String pageCode = UUID.randomUUID().toString();
@@ -250,7 +250,8 @@ public class PageSetServiceImpl implements PageSetService {
                 String pageType = PageEnum.FORM.getValue();
                 Boolean openViewMode = false;
 
-                PageDO pageDO = PageUtils.initPage(savePageSetReqVO.getId(), pageName, routerPath, pageType, openViewMode);
+                PageDO pageDO = PageUtils.initPage(savePageSetReqVO.getId(), pageName, routerPath, pageType,
+                        openViewMode);
                 pageDO.setEditViewMode(page.getEditViewMode());
                 pageDO.setDetailViewMode(page.getDetailViewMode());
                 pageDO.setIsDefaultEditViewMode(page.getIsDefaultEditViewMode());
@@ -259,6 +260,7 @@ public class PageSetServiceImpl implements PageSetService {
                 pageDO = pageDataRepository.insert(pageDO);
                 page.setId(pageDO.getId());
             }
+
             PageDO pageDO = pageDataRepository.findById(page.getId());
             if (pageDO == null) {
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
