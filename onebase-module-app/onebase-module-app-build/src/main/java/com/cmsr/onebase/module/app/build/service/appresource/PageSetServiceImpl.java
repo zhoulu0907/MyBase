@@ -240,10 +240,7 @@ public class PageSetServiceImpl implements PageSetService {
     public Boolean savePageSet(SavePageSetReqVO savePageSetReqVO) {
 
         savePageSetReqVO.getPages().forEach(page -> {
-            // 校验 pageId 是否为有效的 Long 类型
-            PageDO pageDO;
-
-            if (page.getId() == null) {
+            if (page.getCreated()){
                 // 插入新的视图
                 String pageCode = UUID.randomUUID().toString();
                 String pageName = page.getPageName();
@@ -251,7 +248,7 @@ public class PageSetServiceImpl implements PageSetService {
                 String pageType = PageEnum.FORM.getValue();
                 Boolean openViewMode = false;
 
-                pageDO = PageUtils.initPage(savePageSetReqVO.getId(), pageName, routerPath, pageType, openViewMode);
+                PageDO pageDO = PageUtils.initPage(savePageSetReqVO.getId(), pageName, routerPath, pageType, openViewMode);
                 pageDO.setEditViewMode(page.getEditViewMode());
                 pageDO.setDetailViewMode(page.getDetailViewMode());
                 pageDO.setIsDefaultEditViewMode(page.getIsDefaultEditViewMode());
@@ -259,8 +256,7 @@ public class PageSetServiceImpl implements PageSetService {
 
                 pageDataRepository.insert(pageDO);
             }
-
-            pageDO = pageDataRepository.findById(page.getId());
+            PageDO pageDO = pageDataRepository.findById(page.getId());
             if (pageDO == null) {
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
             }
