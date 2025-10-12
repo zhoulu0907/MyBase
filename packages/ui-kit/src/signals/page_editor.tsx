@@ -47,6 +47,10 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     layoutSubComponents.value = { ...layoutSubComponents.value, [cp_id]: newColumns };
   };
 
+  const loadLayoutSubComponents = (config: { [key: string]: any[][] }) => {
+    layoutSubComponents.value = config;
+  };
+
   const delLayoutSubComponents = (cp_id: string) => {
     const newLayoutSubComponents = { ...layoutSubComponents.value };
     delete newLayoutSubComponents[cp_id];
@@ -74,6 +78,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
 
     // 列布局组件的列数据
     layoutSubComponents,
+    loadLayoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
     clearLayoutSubComponents

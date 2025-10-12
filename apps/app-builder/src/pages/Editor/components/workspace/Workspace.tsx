@@ -246,11 +246,10 @@ export default function EditorWorkspace() {
         className={styles.workspaceBody}
         id="workspace-body"
         onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
-          // 点击空白区域取消选中
-          console.log('点击空白区域取消选中');
-
           const target = e.target as HTMLElement;
           if (target.id === 'workspace-content') {
+            // 点击空白区域取消选中
+            console.log('点击空白区域取消选中');
             clearCurComponentID();
             setShowDeleteButton(false);
           }

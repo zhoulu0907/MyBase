@@ -2,11 +2,10 @@ import { EDITOR_TYPES } from 'src/utils';
 import { currentEditorSignal } from '../signals/current_editor';
 import { useFormEditorSignal, useListEditorSignal } from '../signals/page_editor';
 
-import { useSignals } from '@preact/signals-react/runtime';
 import { useLocation } from 'react-router-dom';
 
 export function usePageEditorSignal() {
-  useSignals();
+  //   useSignals();
 
   const path = useLocation().pathname;
   const useList = path.endsWith(`/${EDITOR_TYPES.LIST_EDITOR}`);

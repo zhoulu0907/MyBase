@@ -32,6 +32,7 @@ import { getHashQueryParam } from '@onebase/common';
 import {
   EDITOR_TYPES,
   startLoadPageSet,
+  startSavePageSet,
   useFormEditorSignal,
   useListEditorSignal,
   usePageEditorSignal,
@@ -233,15 +234,17 @@ export default function EditorHeader() {
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,
       formComponents: formComponents.value,
+      formPageComponentSchemas: cloneDeep(formPageComponentSchemas.value),
+      fromColComponentsMap: cloneDeep(fromLayoutSubComponents.value),
+
       listComponents: listComponents.value,
-      formPageComponentSchemas: new Map(Object.entries(cloneDeep(formPageComponentSchemas.value))),
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
-      fromColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(fromLayoutSubComponents.value))) },
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
 
     console.log('savePageSetParams: ', savePageSetParams);
-    // startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
+
+    startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
   };
 
   const clearAllData = () => {
