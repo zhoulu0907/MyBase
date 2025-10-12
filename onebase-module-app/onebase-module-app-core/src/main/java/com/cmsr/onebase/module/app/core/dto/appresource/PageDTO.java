@@ -22,4 +22,6 @@ public class PageDTO {
     private Boolean isDefaultDetailViewMode;
 
     private List<ComponentDTO> components;
+
+    private Boolean created;
 }
