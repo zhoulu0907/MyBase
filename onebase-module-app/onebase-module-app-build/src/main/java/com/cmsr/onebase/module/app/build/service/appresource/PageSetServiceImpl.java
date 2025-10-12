@@ -222,20 +222,36 @@ public class PageSetServiceImpl implements PageSetService {
         savePageSetReqVO.getPages().forEach(page -> {
             PageDO pageDO = pageDataRepository.findById(page.getId());
             if (pageDO == null) {
+                // 插入新的视图
+                String pageCode = UUID.randomUUID().toString();
+                String pageName = page.getPageName();
+                String routerPath = pageCode + "/form";
+                String pageType = PageEnum.FORM.getValue();
+                Boolean openViewMode = false;
+
+                pageDO = PageUtils.initPage(savePageSetReqVO.getId(), pageName, routerPath, pageType, openViewMode);
+                pageDO.setEditViewMode(page.getEditViewMode());
+                pageDO.setDetailViewMode(page.getDetailViewMode());
+                pageDO.setIsDefaultEditViewMode(page.getIsDefaultEditViewMode());
+                pageDO.setIsDefaultDetailViewMode(page.getIsDefaultDetailViewMode());
+
+                pageDataRepository.insert(pageDO);
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
             }
-            pageDO.setPageName(page.getPageName());
 
-            pageDataRepository.update(pageDO);
+            final PageDO finalPageDO = pageDO;
+            finalPageDO.setPageName(page.getPageName());
+
+            pageDataRepository.update(finalPageDO);
 
             // 删除已有的component
-            componentDataRepository.deleteComponentByPageId(pageDO.getId());
+            componentDataRepository.deleteComponentByPageId(finalPageDO.getId());
 
             // 插入新的component
             page.getComponents().forEach(component -> {
                 ComponentDO componentDO = BeanUtils.toBean(component, ComponentDO.class);
                 componentDO.setInTable(false);
-                componentDO.setPageId(pageDO.getId());
+                componentDO.setPageId(finalPageDO.getId());
                 componentDataRepository.insert(componentDO);
             });
         });
