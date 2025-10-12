@@ -1,27 +1,45 @@
 package com.cmsr.onebase.module.app.build.service.appresource;
 
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.*;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.*;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.*;
-import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetReqVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
-import com.cmsr.onebase.module.app.build.util.PageUtils;
-import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
-import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.util.PageUtils;
+import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetReqVO;
+import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
+import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.AppComponentRepository;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageMetaRepository;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRefRouterRepository;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetLabelRepository;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.ComponentDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageMetadataDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageRefRouterDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetLabelDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
+import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+
+import jakarta.annotation.Resource;
 
 @Service
 @Validated
@@ -87,16 +105,18 @@ public class PageSetServiceImpl implements PageSetService {
         String formRouterPath = formPageCode + "/form";
         String formPageType = PageEnum.FORM.getValue();
         Boolean formOpenViewMode = true;
-        PageDO formPageDO = PageUtils.initPage(pageSetDO.getId(), formPageName, formRouterPath, formPageType, formOpenViewMode);
+        PageDO formPageDO = PageUtils.initPage(pageSetDO.getId(), formPageName, formRouterPath, formPageType,
+                formOpenViewMode);
         pageDataRepository.insert(formPageDO);
 
         String listPageCode = UUID.randomUUID().toString();
         String listPageName = pageSetDO.getPageSetName() + "_列表";
         String listRouterPath = listPageCode + "/list";
-        String listPageType = PageEnum.LIST.getValue();;
+        String listPageType = PageEnum.LIST.getValue();
+        ;
         Boolean listOpenViewMode = false;
-        PageDO listPageDO = PageUtils.initPage(pageSetDO.getId(), listPageName, listRouterPath, listPageType, listOpenViewMode
-        );
+        PageDO listPageDO = PageUtils.initPage(pageSetDO.getId(), listPageName, listRouterPath, listPageType,
+                listOpenViewMode);
         pageDataRepository.insert(listPageDO);
 
         PageSetPageDO formPageSetPageDO = new PageSetPageDO();
@@ -220,8 +240,10 @@ public class PageSetServiceImpl implements PageSetService {
     public Boolean savePageSet(SavePageSetReqVO savePageSetReqVO) {
 
         savePageSetReqVO.getPages().forEach(page -> {
-            PageDO pageDO = pageDataRepository.findById(page.getId());
-            if (pageDO == null) {
+            // 校验 pageId 是否为有效的 Long 类型
+            PageDO pageDO;
+
+            if (page.getId() == null) {
                 // 插入新的视图
                 String pageCode = UUID.randomUUID().toString();
                 String pageName = page.getPageName();
@@ -236,6 +258,10 @@ public class PageSetServiceImpl implements PageSetService {
                 pageDO.setIsDefaultDetailViewMode(page.getIsDefaultDetailViewMode());
 
                 pageDataRepository.insert(pageDO);
+            }
+
+            pageDO = pageDataRepository.findById(page.getId());
+            if (pageDO == null) {
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
             }
 
