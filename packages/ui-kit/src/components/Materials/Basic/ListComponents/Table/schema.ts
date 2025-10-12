@@ -1,39 +1,39 @@
 import {
-    baseConfig,
-    baseDefault,
-    labelColSpanConfig,
-    statusConfig,
-    tableMetaDataConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TPagePositionSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  labelColSpanConfig,
+  statusConfig,
+  tableMetaDataConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TPagePositionSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    CONFIG_TYPES,
-    PAGINATION_POSITION_OPTIONS,
-    PAGINATION_POSITION_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  CONFIG_TYPES,
+  PAGINATION_POSITION_OPTIONS,
+  PAGINATION_POSITION_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IBooleanConfigType,
-    ILabelConfigType,
-    INumberConfigType,
-    IStatusConfigType,
-    ITableDataConfigType,
-    ITablePagePositionConfigType,
-    ITablePageSizeConfigType,
-    ITextConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TRadioDefaultType,
-    TSelectDefaultType,
-    TTextDefaultType
+  IBooleanConfigType,
+  ILabelConfigType,
+  INumberConfigType,
+  IStatusConfigType,
+  ITableDataConfigType,
+  ITablePagePositionConfigType,
+  ITablePageSizeConfigType,
+  ITextConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TRadioDefaultType,
+  TSelectDefaultType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XTableSchema {
@@ -144,6 +144,13 @@ export interface XTableConfig extends ICommonBaseType {
    */
   labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
+
+  /*
+   * 行点击跳转
+   */
+  advancedRowRedirect?: TBooleanDefaultType;
+  redirectPageId?: TTextDefaultType;
+  redirectMethod?: TTextDefaultType;
 }
 
 const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
@@ -247,7 +254,13 @@ const XTable: XTableSchema = {
       type: CONFIG_TYPES.SWITCH_INPUT
     },
     widthConfig,
-    statusConfig
+    statusConfig,
+    {
+      key: 'advancedRowRedirect',
+      name: '行点击跳转',
+      type: CONFIG_TYPES.TABLE_DATA,
+      advanced: true
+    }
   ],
   config: {
     ...baseDefault,
@@ -269,7 +282,11 @@ const XTable: XTableSchema = {
     labelColSpan: 100,
     defaultValue: [],
     columns: [],
-    searchItems: []
+
+    searchItems: [],
+    advancedRowRedirect: false,
+    redirectPageId: '',
+    redirectMethod: ''
   }
 };
 
