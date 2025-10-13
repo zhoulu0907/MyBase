@@ -13,13 +13,13 @@ public class PageDTO {
 
     private String pageType;
 
-    private Boolean editViewMode;
+    private Integer editViewMode;
 
-    private Boolean detailViewMode;
+    private Integer detailViewMode;
 
-    private Boolean isDefaultEditViewMode;
+    private Integer isDefaultEditViewMode;
 
-    private Boolean isDefaultDetailViewMode;
+    private Integer isDefaultDetailViewMode;
 
     private List<ComponentDTO> components;
 
