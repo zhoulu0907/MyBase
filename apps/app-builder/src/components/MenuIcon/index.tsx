@@ -1,6 +1,7 @@
 import { Button, Input, Empty } from '@arco-design/web-react';
 import { IconSync, IconLeft } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
+import DynamicIcon from '../DynamicIcon';
 import { menuIconList, menuIconType, type MenuItem } from './const';
 import styles from './index.module.less';
 
@@ -15,14 +16,10 @@ interface IProps {
 // 菜单图标
 const MenuIcon = (props: IProps) => {
   const { style, onSelected, handleBack } = props;
-  const [data, setData] = useState<MenuItem[]>([]);
+  const [data, setData] = useState<MenuItem[]>(menuIconList);
   const [activeMenu, setActiveMenu] = useState<string>('all');
   const [activeIcon, setActiveIcon] = useState<string>();
   const [inputValue, setInputValue] = useState<string>('');
-
-  useEffect(() => {
-    setData(menuIconList);
-  }, []);
 
   useEffect(() => {
     if (inputValue) {
@@ -83,16 +80,21 @@ const MenuIcon = (props: IProps) => {
             </div>
           ) : (
             <>
-              {data.map((item, index) => (
+              {data.map((item) => (
                 <div
                   className={`${styles.iconItem} ${activeIcon === item.name ? styles.activeIcon : ''}`}
-                  key={index}
+                  key={item.code}
                   onClick={() => {
-                    onSelected(item.icon);
+                    onSelected(item.code);
                     setActiveIcon(item.name);
                   }}
                 >
-                  <i className={`iconfont ${item.icon} ${styles.icon}`} />
+                  <DynamicIcon
+                    IconComponent={item.icon}
+                    theme="outline"
+                    size="32"
+                    fill="#333"
+                  />
                   <div className={styles.name}>{item.name}</div>
                 </div>
               ))}

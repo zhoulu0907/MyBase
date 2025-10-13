@@ -72,7 +72,6 @@ interface Options {
 }
 
 const PageManagerPage: FC = () => {
-  useSignals();
 
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -97,7 +96,6 @@ const PageManagerPage: FC = () => {
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
-  const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -150,7 +148,6 @@ const PageManagerPage: FC = () => {
               setCurMenu(menu);
               menuEditorSignal.setCurMenuId(menu.id);
             }
-            setActiveMenu(menu);
           }}
           triggerCreate={triggerCreate}
           triggerRename={triggerRename}
@@ -187,6 +184,8 @@ const PageManagerPage: FC = () => {
 
     if (res && res.length > 0) {
       setCurMenu(findFirstPage(res));
+
+      menuEditorSignal.setCurMenuId(findFirstPage(res)?.id);
       setSearchResult(false);
     }
 
@@ -369,7 +368,6 @@ const PageManagerPage: FC = () => {
     const res = await deleteApplicationMenu(req);
     if (res) {
       Message.success('删除成功');
-      setActiveMenu(undefined);
       setCurMenu(undefined);
     }
 

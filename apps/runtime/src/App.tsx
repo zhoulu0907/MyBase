@@ -4,6 +4,7 @@ import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import Runtime from './pages/Runtime';
+import '@icon-park/react/styles/index.css';
 // import Runtime from './pages/Runtime';
 
 function AppContent() {

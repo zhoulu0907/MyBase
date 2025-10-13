@@ -1,5 +1,7 @@
 import React from 'react';
 import styles from './index.module.less';
+import DynamicIcon from '../DynamicIcon';
+import { menuIconList } from '../DynamicIcon/const';
 
 /**
  * MenuItem 组件
@@ -25,7 +27,13 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuIcon, onClick, ma
           maxWidth: maxWidth + 'px'
         }}
       >
-        <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
+        <DynamicIcon
+          IconComponent={menuIconList.find(icon => icon.code === menuIcon)?.icon}
+          theme="outline"
+          size="18"
+          fill="#333"
+          style={{ marginRight: 4 }}
+        />
         {label}
       </div>
     </div>
