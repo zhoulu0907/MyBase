@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -43,6 +44,7 @@ import jakarta.annotation.Resource;
 
 @Service
 @Validated
+@Slf4j
 public class PageSetServiceImpl implements PageSetService {
 
     @Resource
@@ -270,12 +272,14 @@ public class PageSetServiceImpl implements PageSetService {
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
             }
 
+            log.info("xxxxxpagedo: {}", page);
             final PageDO finalPageDO = pageDO;
             finalPageDO.setPageName(page.getPageName());
             finalPageDO.setEditViewMode(page.getEditViewMode());
             finalPageDO.setDetailViewMode(page.getDetailViewMode());
             finalPageDO.setIsDefaultEditViewMode(page.getIsDefaultEditViewMode());
             finalPageDO.setIsDefaultDetailViewMode(page.getIsDefaultDetailViewMode());
+            log.info("xxxxxfinalPageDO: {}", finalPageDO);
 
             pageDataRepository.update(finalPageDO);
 
