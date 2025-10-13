@@ -139,10 +139,12 @@ const AdvancedTableConfig: React.FC<AdvancedTableConfigProps> = ({
           >
             <Select
               // TODO(mickey): id保存完之后需要替换
-              options={(Object.values(pageViews.value) as PageView[]).map((item: PageView) => ({
-                label: item.pageName,
-                value: item.id
-              }))}
+              options={(Object.values(pageViews.value) as PageView[])
+                .filter((item: PageView) => item.detailViewMode)
+                .map((item: PageView) => ({
+                  label: item.pageName,
+                  value: item.id
+                }))}
             ></Select>
           </Form.Item>
 
