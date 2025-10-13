@@ -63,7 +63,7 @@ public class FlowProcessExecutor {
         return executorResult;
     }
 
-    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputMap) throws Exception {
+    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputMap) {
         String chainId = FlowUtils.toFlowChainId(processId);
         VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
         variableContext.setOutputParams(Maps.newHashMap());

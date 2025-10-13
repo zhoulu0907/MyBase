@@ -95,9 +95,10 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 return formTriggerRespVO(executorResult);
             }
         } catch (Exception e) {
-            log.error("表单触发异常", e);
+            log.error("表单触发异常: {}", reqVO, e);
             FormTriggerRespVO vo = formNotTriggerRespVO();
-            vo.setMessage(e.getMessage());
+            vo.setMessage("表单触发异常");
+            vo.setCause(ExceptionUtils.getRootCauseMessage(e));
             return vo;
         }
     }
