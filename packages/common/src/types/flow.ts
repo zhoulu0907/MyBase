@@ -11,11 +11,11 @@ export enum NodeType {
   START_BPM = 'startBPM',
 
   END = 'end',
-  CASE = 'case',
+  CASE = 'switchCase',
   CASE_DEFAULT = 'caseDefault',
   IF = 'ifCase',
   IF_BLOCK = 'ifBlock',
-  SWITCH = 'switch',
+  SWITCH = 'switchCondition',
   LOOP = 'loop',
   BREAK_LOOP = 'breakLoop',
   TRY_CATCH = 'tryCatch',
