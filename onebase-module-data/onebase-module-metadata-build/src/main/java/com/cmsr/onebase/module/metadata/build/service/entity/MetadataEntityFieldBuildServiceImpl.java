@@ -1962,7 +1962,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     saveReqVO.setIsEnabled(1); // 启用长度校验
                     
                     // rg_name可以用display_name+field_name+长度进行拼接
-                    String rgName = String.format("%s%s长度校验", 
+                    String rgName = String.format("%s%s长度校验-LENGTH",
                         entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
                         entityField.getFieldName() != null ? entityField.getFieldName() : "");
                     saveReqVO.setRgName(rgName);
