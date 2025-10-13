@@ -2,7 +2,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select, Switch, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { MODAL_TYPE } from '@onebase/app';
+import { FLOW_MODAL_TYPE } from '@onebase/common';
 import { useEffect } from 'react';
 import CollectFields from '../../../components/collect-fields';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
@@ -63,13 +63,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Form.Item label="弹窗类型" field="modalType" rules={[{ required: true, message: '请选择弹窗类型' }]}>
               <Select placeholder="请选择" onChange={modalTypeChange}>
-                <Select.Option value={MODAL_TYPE.CONFIRM}>二次确认</Select.Option>
-                <Select.Option value={MODAL_TYPE.INFOR}>收集信息</Select.Option>
-                {/* <Select.Option value={MODAL_TYPE.CUSTOM}>自定义弹窗</Select.Option> */}
+                <Select.Option value={FLOW_MODAL_TYPE.CONFIRM}>二次确认</Select.Option>
+                <Select.Option value={FLOW_MODAL_TYPE.INFOR}>收集信息</Select.Option>
+                {/* <Select.Option value={FLOW_MODAL_TYPE.CUSTOM}>自定义弹窗</Select.Option> */}
               </Select>
             </Form.Item>
 
-            {modalType === MODAL_TYPE.INFOR && (
+            {modalType === FLOW_MODAL_TYPE.INFOR && (
               <>
                 <CollectFields data={triggerEditorSignal.nodeData.value[node.id]?.fields || []} form={payloadForm} />
                 <Form.Item label="收集字段排列方式" field="arrange">
