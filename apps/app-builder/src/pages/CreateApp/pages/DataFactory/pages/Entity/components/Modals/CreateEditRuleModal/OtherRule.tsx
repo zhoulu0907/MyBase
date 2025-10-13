@@ -57,9 +57,8 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
     if (handler) {
       const res = await handler(id);
-      console.log('getRuleById', res);
       if (res) {
-        form.setFieldsValue(res);
+        form.setFieldsValue({ ...res, popPrompt: res.promptMessage });
       }
     }
   };
