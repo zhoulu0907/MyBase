@@ -3,6 +3,7 @@ import CreatePageIcon from '@/assets/images/addpage.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
+import { menuEditorSignal } from '@/store/singals/menu_editor';
 import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
@@ -12,28 +13,29 @@ import {
   copyApplicationMenu,
   createApplicationMenu,
   deleteApplicationMenu,
-  updateApplicationMenuVisible,
   getEntityListByApp,
   getPageSetId,
   listApplicationMenu,
   MenuType,
-  VisibleType,
   PageType,
   RootParentPage,
   updateApplicationMenu,
   updateApplicationMenuOrder,
+  updateApplicationMenuVisible,
+  VisibleType,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
   type DeleteApplicationMenuReq,
-  type UpdateApplicationMenuVisibleReq,
   type GetPageSetIdReq,
   type ListApplicationMenuReq,
   type MetadataEntityPair,
   type UpdateApplicationMenuNameReq,
-  type UpdateApplicationMenuOrderReq
+  type UpdateApplicationMenuOrderReq,
+  type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -70,6 +72,8 @@ interface Options {
 }
 
 const PageManagerPage: FC = () => {
+  useSignals();
+
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -144,6 +148,7 @@ const PageManagerPage: FC = () => {
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
               setCurMenu(menu);
+              menuEditorSignal.setCurMenuId(menu.id);
             }
             setActiveMenu(menu);
           }}
@@ -160,7 +165,7 @@ const PageManagerPage: FC = () => {
       menuType: menu.menuType,
       props: {
         // ✅ 显式传入 props 让 dragNode.props.menuType 能取到
-        menuType: menu.menuType,
+        menuType: menu.menuType
       },
       children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth, showOption) : []
     }));
@@ -405,11 +410,7 @@ const PageManagerPage: FC = () => {
   }, [debouncedSearch]);
 
   // 菜单节点拖拽排序
-  const moveNode = (
-    dragNode: TreeNode,
-    dropNode: TreeNode | null,
-    dropPosition: number
-  ): void => {
+  const moveNode = (dragNode: TreeNode, dropNode: TreeNode | null, dropPosition: number): void => {
     // 移除节点
     const removeNode = (nodes: TreeNode[], key: string): TreeNode | null => {
       for (let i = 0; i < nodes.length; i++) {
@@ -477,10 +478,10 @@ const PageManagerPage: FC = () => {
 
     insertNode(treeData!, dropNode ? dropNode.key : null, dragItem, dropPosition);
     setTreeData([...treeData!]);
-  }
+  };
 
   const buildMenuTree = (nodes: TreeNode[]): { id: string; children: any[] }[] =>
-    nodes.map(node => ({
+    nodes.map((node) => ({
       id: node.key,
       children: node.children ? buildMenuTree(node.children) : []
     }));
@@ -504,7 +505,9 @@ const PageManagerPage: FC = () => {
             <div className={styles.siderTitle}>
               所有页面
               <Dropdown droplist={createMenuDropList} trigger="click" position="bl">
-                <Button type="text" icon={<IconPlus />} style={{ padding: 6 }}>新建</Button>
+                <Button type="text" icon={<IconPlus />} style={{ padding: 6 }}>
+                  新建
+                </Button>
               </Dropdown>
             </div>
             <div className={styles.siderHeader}>
@@ -568,7 +571,10 @@ const PageManagerPage: FC = () => {
                 // 生成接口参数
                 const payload: UpdateApplicationMenuOrderReq = {
                   id: dragNode.key,
-                  parentId: (dropNode.props.menuType === MenuType.GROUP && dropPosition === 0) ? dropNodeParent?.key || dropNode.key : '0', // 拖到谁的下面
+                  parentId:
+                    dropNode.props.menuType === MenuType.GROUP && dropPosition === 0
+                      ? dropNodeParent?.key || dropNode.key
+                      : '0', // 拖到谁的下面
                   menuTree: buildMenuTree(treeData!)
                 };
 
