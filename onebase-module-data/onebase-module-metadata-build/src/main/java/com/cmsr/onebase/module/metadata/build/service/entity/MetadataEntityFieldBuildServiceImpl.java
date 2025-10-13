@@ -1961,10 +1961,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     saveReqVO.setMinLength(null); // 最小长度默认为null，允许为空
                     saveReqVO.setIsEnabled(1); // 启用长度校验
                     
-                    // rg_name可以用display_name+field_name+长度进行拼接
-                    String rgName = String.format("%s%s长度校验-LENGTH",
-                        entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
-                        entityField.getFieldName() != null ? entityField.getFieldName() : "");
+                    // 使用统一的规则组命名方法
+                    String rgName = buildLengthRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
                     String promptMsg = String.format("字段长度不能超过%d个字符", entityField.getDataLength());
                     saveReqVO.setPromptMessage(promptMsg);
@@ -2104,12 +2102,113 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
     }
 
+    /**
+     * 构建规则组名称
+     * 格式：校验类型-字段展示名称-实体展示名称
+     * 例如：必填校验-姓名-学生信息表
+     *
+     * @param fieldId 字段ID
+     * @param validationType 校验类型（REQUIRED/UNIQUE/LENGTH/RANGE/FORMAT/CHILD_NOT_EMPTY/SELF_DEFINED）
+     * @return 规则组名称
+     */
+    private String buildRuleGroupName(Long fieldId, String validationType) {
+        try {
+            // 获取字段信息
+            DefaultConfigStore cs = new DefaultConfigStore();
+            cs.and("id", fieldId);
+            MetadataEntityFieldDO field = metadataEntityFieldRepository.findOne(cs);
+            if (field == null) {
+                log.warn("构建规则组名称失败，字段不存在: fieldId={}", fieldId);
+                return getValidationTypeName(validationType) + "-未知字段-未知实体";
+            }
+            
+            // 获取实体信息
+            MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(field.getEntityId());
+            
+            // 字段展示名称，优先使用displayName，如果为空则使用fieldName
+            String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty() 
+                ? field.getDisplayName() 
+                : (field.getFieldName() != null ? field.getFieldName() : "未知字段");
+            
+            // 实体展示名称，优先使用displayName，如果为空则使用tableName
+            String entityDisplayName = "未知实体";
+            if (entity != null) {
+                entityDisplayName = entity.getDisplayName() != null && !entity.getDisplayName().trim().isEmpty()
+                    ? entity.getDisplayName()
+                    : (entity.getTableName() != null ? entity.getTableName() : "未知实体");
+            }
+            
+            // 校验类型中文名称
+            String validationTypeName = getValidationTypeName(validationType);
+            
+            // 拼接成最终的规则组名称
+            return String.format("%s-%s-%s", validationTypeName, fieldDisplayName, entityDisplayName);
+        } catch (Exception e) {
+            log.error("构建规则组名称时发生异常，字段ID: {}, 校验类型: {}, 错误: {}", fieldId, validationType, e.getMessage(), e);
+            return getValidationTypeName(validationType) + "-未知字段-未知实体";
+        }
+    }
+    
+    /**
+     * 获取校验类型的中文名称
+     *
+     * @param validationType 校验类型英文标识
+     * @return 校验类型中文名称
+     */
+    private String getValidationTypeName(String validationType) {
+        if (validationType == null) {
+            return "未知校验";
+        }
+        
+        switch (validationType.toUpperCase()) {
+            case "REQUIRED":
+                return "必填校验";
+            case "UNIQUE":
+                return "唯一校验";
+            case "LENGTH":
+            case "LENGTH_RANGE":
+                return "长度校验";
+            case "RANGE":
+                return "范围校验";
+            case "FORMAT":
+            case "REGEX":
+                return "格式校验";
+            case "CHILD_NOT_EMPTY":
+                return "子表空行校验";
+            case "SELF_DEFINED":
+            case "CUSTOM":
+                return "自定义校验";
+            default:
+                return validationType + "校验";
+        }
+    }
+
     private String buildRequiredRuleGroupName(Long fieldId) {
-        return "字段约束-REQUIRED-" + fieldId;
+        return buildRuleGroupName(fieldId, "REQUIRED");
     }
 
     private String buildUniqueRuleGroupName(Long fieldId) {
-        return "字段约束-UNIQUE-" + fieldId;
+        return buildRuleGroupName(fieldId, "UNIQUE");
+    }
+
+    private String buildLengthRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "LENGTH");
+    }
+
+    private String buildRangeRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "RANGE");
+    }
+
+    private String buildFormatRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "FORMAT");
+    }
+
+    private String buildChildNotEmptyRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "CHILD_NOT_EMPTY");
+    }
+
+    private String buildSelfDefinedRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "SELF_DEFINED");
     }
 
 }
