@@ -448,11 +448,29 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         Long entityId = context.getEntityId();
         Map<String, Object> data = context.getData();
         List<MetadataEntityFieldDO> fields = context.getFields();
+        Object id = context.getId();
+        OperationType operationType = context.getOperationType();
 
-        log.info("开始执行数据校验：entityId={}, 字段数量={}", entityId, fields.size());
+        log.info("开始执行数据校验：entityId={}, 操作类型={}, 字段数量={}", entityId, operationType.getDescription(), fields.size());
+
+        // 对于UPDATE操作，需要将ID添加到data中，以便唯一性校验时能够排除当前记录
+        Map<String, Object> dataForValidation = data;
+        if (operationType == OperationType.UPDATE && id != null) {
+            // 查找主键字段名
+            String primaryKeyField = fields.stream()
+                .filter(f -> f.getIsPrimaryKey() != null && f.getIsPrimaryKey() == 1)
+                .map(MetadataEntityFieldDO::getFieldName)
+                .findFirst()
+                .orElse("id");
+            
+            // 创建包含ID的临时数据副本用于校验
+            dataForValidation = new java.util.HashMap<>(data);
+            dataForValidation.put(primaryKeyField, id);
+            log.info("UPDATE操作：将ID[{}]添加到校验数据中，字段名：{}", id, primaryKeyField);
+        }
 
         // 使用校验管理器执行所有字段的校验
-        validationManager.validateEntity(entityId, fields, data);
+        validationManager.validateEntity(entityId, fields, dataForValidation);
 
         log.info("数据校验完成：entityId={}", entityId);
     }
