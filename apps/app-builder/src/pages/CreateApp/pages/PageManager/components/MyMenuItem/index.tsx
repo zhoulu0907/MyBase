@@ -6,6 +6,9 @@ import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
+import DynamicIcon from '@/components/DynamicIcon';
+import { menuIconList } from '@/components/MenuIcon/const';
+import { useSignals } from '@preact/signals-react/runtime';
 
 const MenuItem = Menu.Item;
 
@@ -56,6 +59,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   copyForm,
   createForm
 }) => {
+  useSignals()
   const navigate = useNavigate();
   const { curMenuId } = menuEditorSignal;
 
@@ -139,15 +143,6 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </MenuItem>
       )}
 
-      {/* <MenuItem
-        key="hide"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerHide();
-        }}
-      >
-        {'隐藏'}
-      </MenuItem> */}
       <MenuItem
         key="delete"
         onClick={(e) => {
@@ -195,7 +190,13 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             maxWidth: maxWidth + 'px'
           }}
         >
-          <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
+          <DynamicIcon
+            IconComponent={menuIconList.find(icon => icon.code === menuIcon)?.icon}
+            theme="outline"
+            size="18"
+            fill={curMenuId.value === menuID ? 'rgb(var(--primary-6))' : '#333'}
+            style={{ marginRight: 4 }}
+          />
           {label}
         </div>
       </Tooltip>
