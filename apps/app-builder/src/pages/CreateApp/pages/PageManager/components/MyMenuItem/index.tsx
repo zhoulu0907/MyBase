@@ -1,3 +1,4 @@
+import { menuEditorSignal } from '@/store/singals/menu_editor';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconDragDotVertical, IconEyeInvisible, IconSettings } from '@arco-design/web-react/icon';
 import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
@@ -56,6 +57,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   createForm
 }) => {
   const navigate = useNavigate();
+  const { curMenuId } = menuEditorSignal;
 
   const [popupVisible, setPopupVisible] = useState(false);
 
