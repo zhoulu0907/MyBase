@@ -115,11 +115,13 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 // 将DO转换为VO
                 ValidationLengthSaveReqVO lengthVO = BeanUtils.toBean(d, ValidationLengthSaveReqVO.class);
                 lengthVO.setRgName(buildLengthGroupName(req.getFieldId())); // 设置规则组名称
+                lengthVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
                 lengthService.create(lengthVO);
             } else {
                 // 将DO转换为UpdateReqVO
                 ValidationLengthUpdateReqVO lengthUpdateVO = BeanUtils.toBean(d, ValidationLengthUpdateReqVO.class);
                 lengthUpdateVO.setRgName(buildLengthGroupName(req.getFieldId())); // 设置规则组名称
+                lengthUpdateVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
                 lengthService.update(lengthUpdateVO);
             }
         } else if ("REGEX".equalsIgnoreCase(type)) {
@@ -153,12 +155,14 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 formatVO.setFormatCode("REGEX");
                 formatVO.setRegexPattern(req.getRegexPattern());
                 formatVO.setRgName(buildFormatGroupName(req.getFieldId())); // 设置规则组名称
+                formatVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
                 formatService.create(formatVO);
             } else {
                 // 将DO转换为UpdateReqVO
                 ValidationFormatUpdateReqVO formatUpdateVO = BeanUtils.toBean(d, ValidationFormatUpdateReqVO.class);
                 formatUpdateVO.setFormatCode("REGEX");
                 formatUpdateVO.setRgName(buildFormatGroupName(req.getFieldId())); // 设置规则组名称
+                formatUpdateVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
                 formatService.update(formatUpdateVO);
             }
         } else if ("REQUIRED".equalsIgnoreCase(type)) {
@@ -182,6 +186,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 requiredVO.setFieldId(req.getFieldId());
                 requiredVO.setIsEnabled(req.getIsEnabled());
                 requiredVO.setPromptMessage(prompt);
+                requiredVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
                 requiredVO.setRunMode(req.getRunMode());
                 requiredVO.setRgName(buildRequiredGroupName(req.getFieldId()));
                 requiredService.create(requiredVO);
@@ -191,6 +196,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 requiredUpdateVO.setId(exist.getId());
                 requiredUpdateVO.setIsEnabled(req.getIsEnabled());
                 requiredUpdateVO.setPromptMessage(prompt);
+                requiredUpdateVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
                 requiredUpdateVO.setRunMode(req.getRunMode());
                 requiredUpdateVO.setRgName(buildRequiredGroupName(req.getFieldId()));
                 requiredService.update(requiredUpdateVO);

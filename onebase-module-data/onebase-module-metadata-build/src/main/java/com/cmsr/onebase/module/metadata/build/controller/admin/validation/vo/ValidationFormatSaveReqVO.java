@@ -19,16 +19,19 @@ public class ValidationFormatSaveReqVO {
     @NotNull(message = "字段ID不能为空")
     private Long fieldId;
 
-    @Schema(description = "是否启用(0/1)")
+    @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;
 
-    @Schema(description = "格式代码", example = "REGEX")
-    @JsonAlias("formatType")
+    @Schema(description = "格式代码：TEXT/EMAIL/MOBILE/ID_CARD/URL/IP/REGEX", example = "TEXT")
+    @JsonAlias({"formatType", "formatValidationType"})
     private String formatCode;
 
     @Schema(description = "正则表达式")
     @JsonAlias("regex")
     private String regexPattern;
+
+    @Schema(description = "正则标志位：i/m/s等", example = "i")
+    private String flags;
 
     @Schema(description = "提示信息")
     private String promptMessage;

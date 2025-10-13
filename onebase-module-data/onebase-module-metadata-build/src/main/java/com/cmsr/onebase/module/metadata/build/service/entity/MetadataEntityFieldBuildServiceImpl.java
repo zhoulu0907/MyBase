@@ -675,7 +675,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
                 
                 // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
-                if (maxLength != null && !maxLength.equals(origin.getDataLength())) {
+                // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
+                boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
+                    (item.getConstraints().getLengthEnabled() != null || 
+                     item.getConstraints().getMinLength() != null || 
+                     item.getConstraints().getMaxLength() != null ||
+                     StringUtils.hasText(item.getConstraints().getLengthPrompt()));
+                if (maxLength != null && !maxLength.equals(origin.getDataLength()) && !hasConstraintsLengthConfig) {
                     processLengthValidation(fieldId, full);
                 }
             }
@@ -757,7 +763,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     }
                     
                     // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
-                    if (maxLength != null && !maxLength.equals(existingField.getDataLength())) {
+                    // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
+                    boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
+                        (item.getConstraints().getLengthEnabled() != null || 
+                         item.getConstraints().getMinLength() != null || 
+                         item.getConstraints().getMaxLength() != null ||
+                         StringUtils.hasText(item.getConstraints().getLengthPrompt()));
+                    if (maxLength != null && !maxLength.equals(existingField.getDataLength()) && !hasConstraintsLengthConfig) {
                         processLengthValidation(fieldId, full);
                     }
                     
@@ -815,7 +827,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
                 
                 // 特别处理：对于新增字段，如果设置了 dataLength，需要同步到 MetadataValidationLengthDO
-                if (maxLength != null && maxLength > 0) {
+                // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
+                boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
+                    (item.getConstraints().getLengthEnabled() != null || 
+                     item.getConstraints().getMinLength() != null || 
+                     item.getConstraints().getMaxLength() != null ||
+                     StringUtils.hasText(item.getConstraints().getLengthPrompt()));
+                if (maxLength != null && maxLength > 0 && !hasConstraintsLengthConfig) {
                     processLengthValidation(fieldId, toCreate);
                 }
             }
