@@ -1,9 +1,15 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl;
 
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
+import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -65,21 +71,38 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         return processedData;
     }
 
+    /**
+     * 更新操作的数据存储
+     *
+     * @param context 处理上下文
+     */
+    @Override
     protected void storeData(ProcessContext context) {
-//        TenantUtils.executeIgnore(() -> {
-//            // 8. 获取主键字段名
-//            String primaryKeyField = getPrimaryKeyFieldName(fields);
-//
-//            // 9. 构建更新条件
-//            DefaultConfigStore configStore = new DefaultConfigStore();
-//            configStore.and(primaryKeyField, id);
-//
-//            // 10. 执行更新
-//            DataRow dataRow = new DataRow(processedData);
-//            long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
-//            log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
-//
-//    });
+        MetadataBusinessEntityDO entity = context.getEntity();
+        Map<String, Object> processedData = context.getProcessedData();
+        Long entityId = context.getEntityId();
+        List<MetadataEntityFieldDO> fields = context.getFields();
+        AnylineService<?> temporaryService = context.getTemporaryService();
+        Object id = context.getId();
+
+        TenantUtils.executeIgnore(() -> {
+            // 1. 校验数据存在
+            validateDataExistsWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
+
+            // 2. 获取主键字段名
+            String primaryKeyField = getPrimaryKeyFieldName(fields);
+
+            // 3. 构建更新条件
+            ConfigStore configStore = new DefaultConfigStore();
+            configStore.and(primaryKeyField, id);
+
+            // 4. 执行更新
+            DataRow dataRow = new DataRow(processedData);
+            long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
+            log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
+
+            return null;
+        });
     }
 
 

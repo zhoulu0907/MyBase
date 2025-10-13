@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
 import com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl.MetadataDataMethodCreateImpl;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl.MetadataDataMethodUpdateImpl;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
@@ -46,6 +47,10 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Autowired
     private MetadataDataMethodCreateImpl metadataDataMethodCreate;
+    
+    @Autowired
+    private MetadataDataMethodUpdateImpl metadataDataMethodUpdate;
+    
     @Resource
     private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
 
@@ -133,52 +138,8 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Override
     public Map<String, Object> updateData(Long entityId, Object id, Map<String, Object> data, String methodCode) {
-        // 1. 校验实体存在
-        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-
-        // 2. 获取实体字段信息
-    List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-
-        // 3. 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-        if (datasource == null) {
-            throw exception(DATASOURCE_NOT_EXISTS);
-        }
-
-        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-        log.info("成功切换到数据源：{}", datasource.getCode());
-
-        // 4. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-        return TenantUtils.executeIgnore(() -> {
-
-        // 5. 校验数据存在
-        validateDataExistsWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
-
-        // 6. 校验更新数据
-        validateDataIntegrity(data, fields);
-
-        // 7. 处理更新数据
-        Map<String, Object> processedData = processDataAndSetDefaults(data, fields);
-
-        // 8. 获取主键字段名
-        String primaryKeyField = getPrimaryKeyFieldName(fields);
-
-        // 9. 构建更新条件
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(primaryKeyField, id);
-
-        // 10. 执行更新
-        DataRow dataRow = new DataRow(processedData);
-        long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
-        log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
-
-        // 11. 查询更新后的完整数据
-        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
-
-        // 12. 构建响应（移除多表写入逻辑，直接返回结果）
-        return buildDataResponse(entity, resultData, fields);
-
-        }); // TenantUtils.executeIgnore 闭合
+        // 使用新的统一流程处理更新操作
+        return metadataDataMethodUpdate.executeProcess(OperationType.UPDATE, entityId, id, data, methodCode);
     }
 
     @Override
