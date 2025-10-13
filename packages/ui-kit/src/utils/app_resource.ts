@@ -10,6 +10,7 @@ import {
   type LoadPageSetReq,
   type PageSet
 } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { cloneDeep } from 'lodash-es';
 import {
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
@@ -22,8 +23,7 @@ import {
   useEditorSignalMap,
   useFormEditorSignal,
   useListEditorSignal,
-  usePageViewEditorSignal,
-  pagesRuntimeDataSignal
+  usePageViewEditorSignal
 } from 'src/signals';
 
 export interface SavePageSetParams {
@@ -205,13 +205,13 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setLayoutSubComponents: setListLayoutSubComponents
   } = useListEditorSignal;
 
-  const { setCurPage } = pagesRuntimeDataSignal;
+  const { setCurPage } = pagesRuntimeSignal;
 
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
   const pageSet = await loadPageSet(loadPageSetReq);
-  setCurPage(pageSet)
+  setCurPage(pageSet);
   console.log('载入页面集数据: ', pageSet);
 
   pageSet.pages.forEach((page: PageSet) => {
