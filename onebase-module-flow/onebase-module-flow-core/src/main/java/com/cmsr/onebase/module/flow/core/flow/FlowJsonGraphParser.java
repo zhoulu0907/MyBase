@@ -35,6 +35,7 @@ import java.util.List;
 public class FlowJsonGraphParser extends ClassXmlFlowELParser {
 
     public static final String LINE_BREAK = "\n";
+
     @Autowired
     private FlowProcessRepository flowProcessRepository;
 
