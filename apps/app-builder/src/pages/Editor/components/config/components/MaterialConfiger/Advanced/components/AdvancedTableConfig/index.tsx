@@ -1,7 +1,7 @@
 import { Button, Form, Modal, Select, Switch } from '@arco-design/web-react';
 import { IconEdit } from '@douyinfe/semi-icons';
 import type { PageView } from '@onebase/app';
-import { usePageViewEditorSignal } from '@onebase/ui-kit';
+import { RedirectMethod, usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
@@ -15,8 +15,8 @@ export interface AdvancedTableConfigProps {
 }
 
 const openTypeOptions = [
-  { label: '侧边栏', value: 'drawer' },
-  { label: '新页签', value: 'newTab' }
+  { label: '侧边栏', value: RedirectMethod.DRAWER },
+  { label: '新页签', value: RedirectMethod.NEW_TAB }
 ];
 
 const redirectPageId = 'redirectPageId';

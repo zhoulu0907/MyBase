@@ -118,12 +118,16 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
           pageType: 'form',
           editViewMode:
             createForm.getFieldValue('viewType') === ViewType.EDIT ||
-            createForm.getFieldValue('viewType') === ViewType.MIX,
+            createForm.getFieldValue('viewType') === ViewType.MIX
+              ? 1
+              : 0,
           detailViewMode:
             createForm.getFieldValue('viewType') === ViewType.DETAIL ||
-            createForm.getFieldValue('viewType') === ViewType.MIX,
-          isDefaultEditViewMode: false,
-          isDefaultDetailViewMode: false,
+            createForm.getFieldValue('viewType') === ViewType.MIX
+              ? 1
+              : 0,
+          isDefaultEditViewMode: 0,
+          isDefaultDetailViewMode: 0,
           created: true
         });
 

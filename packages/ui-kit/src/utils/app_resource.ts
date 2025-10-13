@@ -83,6 +83,15 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
         Object.entries(cloneDeep(useEditorSignalMap.get(_page.id)!.layoutSubComponents.value))
       );
 
+      console.log(loadPagesetResp.pages[index]);
+      loadPagesetResp.pages[index] = {
+        ...loadPagesetResp.pages[index],
+        detailViewMode: pageViews.value[_page.id]?.detailViewMode,
+        editViewMode: pageViews.value[_page.id]?.editViewMode,
+        isDefaultDetailViewMode: pageViews.value[_page.id]?.isDefaultDetailViewMode,
+        isDefaultEditViewMode: pageViews.value[_page.id]?.isDefaultEditViewMode
+      };
+
       loadPagesetResp.pages[index].components = components.map((component) => {
         // console.log('component: ', component);
         // console.log('formPageComponentSchemas: ', formPageComponentSchemas);

@@ -26,7 +26,7 @@ export const createPageViewEditorSignal = () => {
   const updatePageView = (pageView: PageView) => {
     if (pageView.isDefaultDetailViewMode) {
       const updatedPageViews = Object.fromEntries(
-        Object.entries(pageViews.value).map(([id, pv]) => [id, { ...pv, isDefaultDetailViewMode: false }])
+        Object.entries(pageViews.value).map(([id, pv]) => [id, { ...pv, isDefaultDetailViewMode: 0 }])
       );
       pageViews.value = {
         ...updatedPageViews,
@@ -36,7 +36,7 @@ export const createPageViewEditorSignal = () => {
 
     if (pageView.isDefaultEditViewMode) {
       const updatedPageViews = Object.fromEntries(
-        Object.entries(pageViews.value).map(([id, pv]) => [id, { ...pv, isDefaultDetailViewMode: false }])
+        Object.entries(pageViews.value).map(([id, pv]) => [id, { ...pv, isDefaultDetailViewMode: 0 }])
       );
       pageViews.value = {
         ...updatedPageViews,
