@@ -13,6 +13,12 @@ import org.dromara.warm.flow.core.utils.ObjectUtil;
 
 import java.util.List;
 
+/**
+ * WarmFlow 用户 DAO 实现
+ *
+ * @author liyang
+ * @date 2025-10-10
+ */
 public class FlowUserDaoImpl extends WarmDaoImpl<FlowUser> implements FlowUserDao<FlowUser> {
 
     @Resource

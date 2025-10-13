@@ -15,10 +15,9 @@ import java.util.List;
 
 /**
  * WarmFlow 待办任务 DAO 实现
- * 使用 WfFlowTaskDo 直接实现
  *
  * @author liyang
- * @date 2025-01-27
+ * @date 2025-10-10
  */
 public class FlowHisTaskDaoImpl extends WarmDaoImpl<FlowHisTask> implements FlowHisTaskDao<FlowHisTask> {
 

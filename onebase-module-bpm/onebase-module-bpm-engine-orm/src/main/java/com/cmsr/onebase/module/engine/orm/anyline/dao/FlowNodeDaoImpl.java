@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * WarmFlow 流程定义 DAO 实现
+ * WarmFlow 节点 DAO 实现
  *
  * @author liyang
  * @date 2025-10-10
