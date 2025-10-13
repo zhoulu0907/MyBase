@@ -30,6 +30,11 @@ Content-Type: application/json
   "leaderUserId": "3385310182593531904"
 }
 
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/dept/delete?id=117
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
 ### 请求 /get-dept-users 接口 => 成功
 GET {{baseUrl}}/system/dept/get-dept-users?deptId=100&keywords=
 Authorization: Bearer {{token}}

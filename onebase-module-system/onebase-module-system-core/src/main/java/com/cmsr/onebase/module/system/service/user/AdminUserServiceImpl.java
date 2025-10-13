@@ -254,7 +254,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void updateAdminType(Long id, Integer adminType) {
         // 校验正确性
         validateUserExists(id);
-        // 2.1 更新用户管理员状态
+        // 2.1 更新用户管理员类型
         adminUserDataRepository.update(new AdminUserDO().setId(id).setAdminType(adminType));
     }
 
@@ -758,10 +758,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         // 获取部门信息
-        DeptDO dept = null;
-        if (user.getDeptId() != null) {
-            dept = deptService.getDept(user.getDeptId());
-        }
+        DeptDO dept = deptService.getDept(user.getDeptId());
         // 获取用户角色信息
         Set<Long> roleIds = permissionService.getRoleIdsListByUserId(id);
         List<RoleDO> roles = new ArrayList<>();
