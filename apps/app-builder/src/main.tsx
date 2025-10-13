@@ -7,6 +7,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import App from './App.tsx';
 import './i18n';
 import './index.css';
+import '@onebase/ui-kit/src/theme.less';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
