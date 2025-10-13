@@ -1,9 +1,15 @@
 import { Button, Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
 import { IconDown, IconPlus } from '@arco-design/web-react/icon';
-import { createPageView, listPageView, ViewType, type PageView } from '@onebase/app';
-import { usePageViewEditorSignal } from '@onebase/ui-kit';
+import { ViewType, type PageView } from '@onebase/app';
+import {
+  createPageEditorSignal,
+  useEditorSignalMap,
+  useFormEditorSignal,
+  usePageEditorSignal,
+  usePageViewEditorSignal
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styles from './index.module.less';
 
 const { useForm } = Form;
@@ -16,33 +22,13 @@ interface ViewProps {
 const View: React.FC<ViewProps> = ({ pageSetId }) => {
   useSignals();
 
-  const { pageViews, setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
+  const { pageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
 
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
   const [dropListVisible, setDropListVisible] = useState(false);
 
-  useEffect(() => {
-    handleListPageView();
-  }, [pageSetId]);
-
-  const handleListPageView = async () => {
-    const res = await listPageView({
-      pageSetId: pageSetId
-    });
-
-    if (res && res.pages) {
-      const newCurViewId = res.pages.find(
-        (item: PageView) => item.isDefaultEditViewMode || item.isDefaultDetailViewMode
-      )?.id;
-
-      if (newCurViewId) {
-        setCurViewId(newCurViewId);
-      }
-
-      setPageViews(res.pages);
-    }
-  };
+  const { pageComponentSchemas, components, layoutSubComponents } = usePageEditorSignal();
 
   const showViewType = (item: PageView | null) => {
     if (!item) {
@@ -51,7 +37,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     if (item.detailViewMode && item.editViewMode) {
       return <div className={`${styles.viewLabel} ${styles.mixViewTitle}`}>混合视图</div>;
     }
-    if (item.detailViewMode && item.editViewMode) {
+    if (item.editViewMode) {
       return <div className={`${styles.viewLabel} ${styles.editViewTitle}`}>编辑视图</div>;
     }
     if (item.detailViewMode) {
@@ -62,7 +48,17 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
   };
 
   const handleSelectView = (id: string) => {
+    // 保存当前配置到editorSignalMap，切换视图后，载入新的配置到useFormEditorSignal
+    useEditorSignalMap.get(curViewId.value)!.setComponents(components);
+
+    useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
+    useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
+
     setCurViewId(id);
+
+    useFormEditorSignal.setComponents(useEditorSignalMap.get(id)!.components.value);
+    useFormEditorSignal.loadPageComponentSchemas(useEditorSignalMap.get(id)!.pageComponentSchemas.value);
+    useFormEditorSignal.loadLayoutSubComponents(useEditorSignalMap.get(id)!.layoutSubComponents.value);
   };
 
   const dropList = (
@@ -107,13 +103,34 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     createForm
       .validate()
       .then(async () => {
-        const res = await createPageView({
-          pageSetId: pageSetId,
-          viewType: createForm.getFieldValue('viewType'),
-          viewName: createForm.getFieldValue('viewName')
+        // const res = await createPageView({
+        //   pageSetId: pageSetId,
+        //   viewType: createForm.getFieldValue('viewType'),
+        //   viewName: createForm.getFieldValue('viewName')
+        // });
+
+        // 创建临时视图
+        const pageId = `${Date.now()}`;
+        usePageViewEditorSignal.addPageView({
+          id: pageId,
+          pageName: createForm.getFieldValue('viewName'),
+          //   TODO(mickey): 定义成常量， 重构categoryType
+          pageType: 'form',
+          editViewMode:
+            createForm.getFieldValue('viewType') === ViewType.EDIT ||
+            createForm.getFieldValue('viewType') === ViewType.MIX,
+          detailViewMode:
+            createForm.getFieldValue('viewType') === ViewType.DETAIL ||
+            createForm.getFieldValue('viewType') === ViewType.MIX,
+          isDefaultEditViewMode: false,
+          isDefaultDetailViewMode: false,
+          created: true
         });
 
+        useEditorSignalMap.set(pageId, createPageEditorSignal());
+
         setCreateViewModalVisible(false);
+        // setCurViewId(pageId);
       })
       .catch((e) => {
         console.log(e.errors);

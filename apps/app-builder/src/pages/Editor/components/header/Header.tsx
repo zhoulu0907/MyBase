@@ -36,6 +36,7 @@ import {
   useFormEditorSignal,
   useListEditorSignal,
   usePageEditorSignal,
+  usePageViewEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
@@ -82,6 +83,7 @@ export default function EditorHeader() {
   const [renameForm] = Form.useForm();
 
   const { clearCurComponentID } = usePageEditorSignal();
+  const { curViewId } = usePageViewEditorSignal;
 
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
@@ -227,16 +229,20 @@ export default function EditorHeader() {
 
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
+    console.log('curViewId: ', curViewId.value);
 
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,
       formComponents: formComponents.value,
+      formPageComponentSchemas: cloneDeep(formPageComponentSchemas.value),
+      fromColComponentsMap: cloneDeep(fromLayoutSubComponents.value),
+
       listComponents: listComponents.value,
-      formPageComponentSchemas: new Map(Object.entries(cloneDeep(formPageComponentSchemas.value))),
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
-      fromColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(fromLayoutSubComponents.value))) },
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
+
+    console.log('savePageSetParams: ', savePageSetParams);
 
     startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
   };

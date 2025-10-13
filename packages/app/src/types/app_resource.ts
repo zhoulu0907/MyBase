@@ -78,4 +78,7 @@ export interface PageView {
   detailViewMode: boolean;
   isDefaultEditViewMode: boolean;
   isDefaultDetailViewMode: boolean;
+
+  // 是否是新增的视图
+  created?: boolean;
 }
