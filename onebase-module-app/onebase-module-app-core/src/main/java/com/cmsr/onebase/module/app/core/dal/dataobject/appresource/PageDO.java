@@ -28,17 +28,17 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "page_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "页面类型 list form")
     private String pageType;
 
-    @Column(name = "edit_view_mode", columnDefinition = "BOOLEAN NOT NULL", comment = "编辑模式" )
-    private Boolean editViewMode;
+    @Column(name = "edit_view_mode", columnDefinition = "INT(2)", comment = "编辑模式" )
+    private Integer editViewMode;
 
-    @Column(name = "default_view_mode", columnDefinition = "BOOLEAN NOT NULL", comment = "详情模式" )
-    private Boolean detailViewMode;
+    @Column(name = "detail_view_mode", columnDefinition = "INT(2)", comment = "详情模式" )
+    private Integer detailViewMode;
 
-    @Column(name = "is_default_edit_view_mode", columnDefinition = "BOOLEAN NOT NULL", comment = "是否默认编辑视图")
-    private Boolean isDefaultEditViewMode;
+    @Column(name = "is_default_edit_view_mode", columnDefinition = "INT(2)", comment = "是否默认编辑视图")
+    private Integer isDefaultEditViewMode;
 
-    @Column(name = "is_default_detail_view_mode", columnDefinition = "BOOLEAN NOT NULL", comment = "是否默认详情视图")
-    private Boolean isDefaultDetailViewMode;
+    @Column(name = "is_default_detail_view_mode", columnDefinition = "INT(2)", comment = "是否默认详情视图")
+    private Integer isDefaultDetailViewMode;
 
     /**
      * 页面标题

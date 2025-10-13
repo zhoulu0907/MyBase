@@ -72,14 +72,14 @@ public class PageServiceImpl implements PageService {
         String viewType = createPageViewDTO.getViewType();
 
         if (viewType.equals(ViewEnmu.MIX.getValue())){
-            formPageDO.setEditViewMode(true);
-            formPageDO.setDetailViewMode(true);
+            formPageDO.setEditViewMode(1);
+            formPageDO.setDetailViewMode(1);
         }
         if (viewType.equals(ViewEnmu.EDIT.getValue())){
-            formPageDO.setEditViewMode(true);
+            formPageDO.setEditViewMode(1);
         }
         if (viewType.equals(ViewEnmu.DETAIL.getValue())){
-            formPageDO.setDetailViewMode(true);
+            formPageDO.setDetailViewMode(1);
         }
 
         pageDataRepository.insert(formPageDO);
