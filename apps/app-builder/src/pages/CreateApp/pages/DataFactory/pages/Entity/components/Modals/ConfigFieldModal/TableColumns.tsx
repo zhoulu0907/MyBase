@@ -3,6 +3,7 @@ import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { Button, Checkbox, Form, Input, Popover, Select, Space, Tooltip } from '@arco-design/web-react';
 import { IconSelectAll, IconSettings, IconEdit } from '@arco-design/web-react/icon';
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
+import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
 import { systemFieldsLength } from './utils';
 import styles from './index.module.less';
 
@@ -262,12 +263,13 @@ const TableColumns = ({
 
         // 检查是否有约束配置 - 基于字段的原始数据
         const hasConstraints =
-          record.constraints && (record.constraints.lengthEnabled === 1 || record.constraints.regexEnabled === 1);
+          record.constraints &&
+          (record.constraints.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE ||
+            record.constraints.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE);
 
         if (hasConstraints) {
-          // 显示约束状态和编辑按钮
-          const lengthStatus = record.constraints?.lengthEnabled === 1 ? '已开启' : '未开启';
-          const regexStatus = record.constraints?.regexEnabled === 1 ? '已开启' : '未开启';
+          const lengthStatus = record.constraints?.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE ? '已开启' : '未开启';
+          const regexStatus = record.constraints?.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE ? '已开启' : '未开启';
 
           return (
             <div className={styles['constraint-status']}>
