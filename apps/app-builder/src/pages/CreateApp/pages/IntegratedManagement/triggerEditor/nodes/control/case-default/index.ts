@@ -11,7 +11,7 @@ export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
    * 分支节点需要继承自 block
    * Branch nodes need to inherit from 'block'
    */
-  extend: 'case',
+  extend: NodeType.CASE,
   meta: {
     copyDisable: true,
     addDisable: true,

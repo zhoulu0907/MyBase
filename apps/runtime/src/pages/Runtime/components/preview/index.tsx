@@ -175,7 +175,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('formData:   ', formData);
 
     // 接口判断 页面触发
-    const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
+    const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
     const pageId = curFormPage?.id;
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
 
