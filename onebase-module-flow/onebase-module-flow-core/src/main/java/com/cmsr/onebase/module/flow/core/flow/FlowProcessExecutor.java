@@ -57,7 +57,8 @@ public class FlowProcessExecutor {
         executorResult.setCause(response.getCause());
         executorResult.setExecutionEnd(executeContext.isExecuteEnd());
         executorResult.setExecutionUuid(executeContext.getExecutionUuid());
-        executorResult.setExecutionEndTag(executeContext.getExecutionEndTag());
+        executorResult.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
+        executorResult.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
         executorResult.setOutputParams(variableContext.getOutputParams());
         return executorResult;
     }

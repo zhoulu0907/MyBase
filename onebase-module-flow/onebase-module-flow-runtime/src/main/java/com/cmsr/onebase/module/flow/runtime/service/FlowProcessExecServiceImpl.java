@@ -117,6 +117,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         respVO.setMessage(executorResult.getMessage());
         respVO.setCause(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
         respVO.setExecutionEnd(executorResult.isExecutionEnd());
+        respVO.setNodeType(executorResult.getExecutionEndNodeType());
         respVO.setExecutionUuid(executorResult.getExecutionUuid());
         respVO.setOutputParams(executorResult.getOutputParams());
         return respVO;
