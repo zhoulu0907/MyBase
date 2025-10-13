@@ -70,7 +70,7 @@ const TableColumns = ({
     {
       title: '字段名称',
       dataIndex: 'fieldName',
-      width: 180,
+      width: 175,
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
@@ -92,7 +92,7 @@ const TableColumns = ({
     {
       title: '展示名称',
       dataIndex: 'displayName',
-      width: 180,
+      width: 175,
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
@@ -233,7 +233,7 @@ const TableColumns = ({
     {
       title: '必填',
       dataIndex: 'isRequired',
-      width: 100,
+      width: 60,
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
@@ -253,14 +253,14 @@ const TableColumns = ({
     {
       title: '字段约束',
       dataIndex: 'constraints',
-      width: 180,
+      width: 190,
       align: 'center',
       render: (value: unknown, record: FieldFormValues) => {
         if (record.isSystemField === FIELD_TYPE.SYSTEM) {
           return <span className={styles['system-field']}>-</span>;
         }
 
-        // 检查是否有约束配置
+        // 检查是否有约束配置 - 基于字段的原始数据
         const hasConstraints =
           record.constraints && (record.constraints.lengthEnabled === 1 || record.constraints.regexEnabled === 1);
 
@@ -272,8 +272,8 @@ const TableColumns = ({
           return (
             <div className={styles['constraint-status']}>
               <div className={styles['constraint-info']}>
-                <div>长度范围约束: {lengthStatus}</div>
-                <div>正则校验约束: {regexStatus}</div>
+                <div>{lengthStatus}长度范围约束</div>
+                <div>{regexStatus}正则表达式验证</div>
               </div>
               <Popover
                 content={renderFieldConfigContent('CONSTRAINTS', record.id || '')}
@@ -287,9 +287,7 @@ const TableColumns = ({
                   icon={<IconEdit />}
                   onClick={() => setConstraintsPopoverVisible(record.id || null)}
                   className={styles['edit-constraint-btn']}
-                >
-                  编辑
-                </Button>
+                ></Button>
               </Popover>
             </div>
           );
@@ -317,7 +315,7 @@ const TableColumns = ({
     {
       title: '操作',
       dataIndex: 'operation',
-      width: 80,
+      width: 70,
       align: 'center',
       render: (value: unknown, record: FieldFormValues) => {
         return (
