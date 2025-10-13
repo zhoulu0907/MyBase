@@ -167,22 +167,40 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     Message.info('公式调试信息已输出到控制台');
   }, [formula]);
 
+  const retrieveAllVariables = (formulaData: string) => {
+    const regex = /\[\[(.*?)\]\]/g;
+    const copyFormulaData = formulaData;
+    const matches = [...copyFormulaData.matchAll(regex)];
+    const variablesMapping: {[key: string]: string} = {};
+    matches.forEach((match) => {
+      const temp = match[1].split(".");
+      const fieldId = temp[0] || "";
+      const fieldName = temp[1] || ""; 
+      variablesMapping[fieldName] = fieldId;
+    })
+    return variablesMapping;
+  }
   /**
    * 点击确认之后计算
    */
   const handleConfirm = useCallback(async() => {
     setLoading(true);
     const newFormula = formula.replace(/\{\{\d+\.(\w+)\}\}/g, '$1');
+    const templateFormula = newFormula.replace(/\[\[\d+\.([^\]]+)\]\]\s*/g, '$1, ').replace(/, \s*(?=\))/,"");
+    const selectedVariables = retrieveAllVariables(newFormula);
     const newFormulaData:formulaParams = {
-      "formula": newFormula
+      formula: templateFormula,
+      parameters: selectedVariables
     }
-    const executedData = await executeFormula(newFormulaData);
-    if(executedData.code === 0 && Object.keys(executedData.data)?.includes("result")) {
-      setLoading(false);
-      onConfirm(formula);
-    }
-    onCancel();
-    
+      try {
+        const executedData = await executeFormula(newFormulaData);
+        console.log("executedData",executedData.data);
+        onConfirm(formula);
+      } catch (error) {
+        onCancel();
+      } finally {
+        setLoading(false);
+      }
   }, [formula, onConfirm, onCancel]);
 
   /**
@@ -250,9 +268,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
               onChooseFunction={handleChooseFunction}
             />
           </Col>
+         {info && 
           <Col xs={2} sm={4} md={6} lg={8} xl={10} xxl={8}>
             <InfoPanel info={info} />
-          </Col>
+          </Col>}
         </Row>
       </div>
     </Modal>

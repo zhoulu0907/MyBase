@@ -3,4 +3,7 @@
  */
 export interface formulaParams {
     formula: string;
+    parameters: {
+        [key: string]: string | number;
+    }
 }
