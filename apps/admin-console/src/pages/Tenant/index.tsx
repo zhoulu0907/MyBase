@@ -97,8 +97,6 @@ const TenantManagement: React.FC = () => {
 
   // 处理状态筛选
   const handleStatusChange = (status: number) => {
-    console.log('启用状态 before: ', statusFilter);
-    console.log('启用状态 new: ', status);
     setStatusFilter(status);
     setCurrentPage(1); // 重置到第一页
   };
@@ -287,7 +285,6 @@ const TenantManagement: React.FC = () => {
    * 更新租户信息
    */
   const updateTenant = async (values: any) => {
-    // console.log('更新租户:', values);
     try {
       // 检查管理员是否发生变化
       const newAdminId = values.admin; // 这里是 id
@@ -298,26 +295,31 @@ const TenantManagement: React.FC = () => {
       const adminUsername = selectedAdmin ? selectedAdmin.username : '';
       const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
       const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
-      console.log('selectAdmin', adminMobile);
       
       // 构建更新参数
-      const updateParams: UpdateTenantParams = {
-        id: currentTenant?.id,
-        name: values.tenantName,
-        tenantCode: values.tenantCode,
-        // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
-        adminNickName: newAdminId !== originalAdminId ? adminNickname : '',
-        adminUserName: newAdminId !== originalAdminId ? adminUsername : '',
-        adminMobile: newAdminId !== originalAdminId ? adminMobile : '',
-        status: values.status,
-        accountCount: values.allocatedCount,
-        website: values.website,
-      };
-      // 调用 updatePlatformTenantApi
-      await updatePlatformTenantApi(updateParams);
-      getPlatformTenantList();
-      Message.success('更新成功');
-      setModalVisible(false);
+      if(currentTenant?.id) {
+        const updateParams: UpdateTenantParams = {
+          id: currentTenant.id,
+          name: values.tenantName,
+          tenantCode: values.tenantCode,
+          // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
+          adminNickName: newAdminId !== originalAdminId ? adminNickname : '',
+          adminUserName: newAdminId !== originalAdminId ? adminUsername : '',
+          adminMobile: newAdminId !== originalAdminId ? adminMobile : '',
+          status: values.status,
+          accountCount: values.allocatedCount,
+          website: values.website,
+        };
+        // 调用 updatePlatformTenantApi
+        await updatePlatformTenantApi(updateParams);
+        getPlatformTenantList();
+        Message.success('更新成功');
+        setModalVisible(false);
+      } else {
+        // 添加错误处理，以防万一id不存在
+        Message.error('租户信息不完整，无法更新');
+        console.error('Tenant ID is missing', currentTenant);
+      }
     } catch (error: any) {
       console.error('更新租户信息失败:', error);
       Message.error('更新租户信息失败');
@@ -674,7 +676,6 @@ const TenantManagement: React.FC = () => {
                   status: checked ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled
                 });
                 if (!checked) {
-                  // console.log('checked', checked);
                   setConfirmDisableVisible(true);
                 } else if (currentTenant && currentTenant.status === PlatformTenantStatus.disabled) {
                   setTenantList(tenantList.map(item => 
