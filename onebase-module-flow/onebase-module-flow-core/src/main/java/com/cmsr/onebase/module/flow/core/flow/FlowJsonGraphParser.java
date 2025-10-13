@@ -77,7 +77,7 @@ public class FlowJsonGraphParser extends ClassXmlFlowELParser {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String xml = buffer.toString();//document.asXML();
+        String xml = buffer.toString();
         log.info("flow xml: {}", xml);
         return xml;
     }

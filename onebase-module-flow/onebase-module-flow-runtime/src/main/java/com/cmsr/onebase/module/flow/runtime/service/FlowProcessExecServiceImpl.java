@@ -95,9 +95,10 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 return formTriggerRespVO(executorResult);
             }
         } catch (Exception e) {
-            log.error("表单触发异常", e);
+            log.error("表单触发异常: {}", reqVO, e);
             FormTriggerRespVO vo = formNotTriggerRespVO();
-            vo.setMessage(e.getMessage());
+            vo.setMessage("表单触发异常");
+            vo.setCause(ExceptionUtils.getRootCauseMessage(e));
             return vo;
         }
     }
@@ -117,6 +118,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         respVO.setMessage(executorResult.getMessage());
         respVO.setCause(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
         respVO.setExecutionEnd(executorResult.isExecutionEnd());
+        respVO.setNodeType(executorResult.getExecutionEndNodeType());
         respVO.setExecutionUuid(executorResult.getExecutionUuid());
         respVO.setOutputParams(executorResult.getOutputParams());
         return respVO;

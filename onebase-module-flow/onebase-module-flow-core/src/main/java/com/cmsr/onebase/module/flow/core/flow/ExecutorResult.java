@@ -23,7 +23,9 @@ public class ExecutorResult {
 
     private String executionUuid;
 
-    private String executionEndTag;
+    private String executionEndNodeType;
+
+    private String executionEndNodeTag;
 
     private Map<String, Object> outputParams;
 }

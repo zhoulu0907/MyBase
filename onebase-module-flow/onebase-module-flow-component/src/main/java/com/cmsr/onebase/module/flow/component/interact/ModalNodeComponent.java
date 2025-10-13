@@ -37,14 +37,15 @@ public class ModalNodeComponent extends SkippableNodeComponent {
             variableContext.setOutputParams(outputParams);
             String executionUuid = UUID.randomUUID().toString();
             executeContext.setExecutionUuid(executionUuid);
-            executeContext.setExecutionEndTag(this.getTag());
+            executeContext.setExecutionEndNodeType("modal");
+            executeContext.setExecutionEndNodeTag(this.getTag());
             contextProvider.storeExecuteContext(executionUuid, executeContext);
             contextProvider.storeVariableContext(executionUuid, variableContext);
             this.setIsEnd(true);
         }
         if (nodeActionEnum == NodeActionEnum.DO_RESET) {
             executeContext.restExecutionUuid();
-            executeContext.restExecutionEndTag();
+            executeContext.restExecutionEndNodeTag();
         }
     }
 

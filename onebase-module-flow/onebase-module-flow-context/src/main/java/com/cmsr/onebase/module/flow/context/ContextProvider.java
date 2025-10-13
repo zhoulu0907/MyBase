@@ -28,27 +28,27 @@ public class ContextProvider implements InitializingBean {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         this.redisTemplate = new RedisTemplate<>();
         this.redisTemplate.setConnectionFactory(redisConnectionFactory);
         this.redisTemplate.setKeySerializer(new StringRedisSerializer());
         this.redisTemplate.afterPropertiesSet();
     }
 
-    public void storeExecuteContext(String executionUuid, ExecuteContext executeContext) throws IOException {
+    public void storeExecuteContext(String executionUuid, ExecuteContext executeContext) {
         redisTemplate.opsForValue().set(EXECUTE_CONTEXT + executionUuid, executeContext, 1, TimeUnit.HOURS);
     }
 
-    public void storeVariableContext(String executionUuid, VariableContext variableContext) throws IOException {
+    public void storeVariableContext(String executionUuid, VariableContext variableContext) {
         redisTemplate.opsForValue().set(VARIABLE_CONTEXT + executionUuid, variableContext, 1, TimeUnit.HOURS);
     }
 
-    public ExecuteContext restoreExecuteContext(String executionUuid) throws IOException, ClassNotFoundException {
+    public ExecuteContext restoreExecuteContext(String executionUuid) {
         ExecuteContext deserialize = (ExecuteContext) redisTemplate.opsForValue().get(EXECUTE_CONTEXT + executionUuid);
         return deserialize;
     }
 
-    public VariableContext restoreVariableContext(String executionUuid) throws IOException, ClassNotFoundException {
+    public VariableContext restoreVariableContext(String executionUuid) {
         VariableContext deserialize = (VariableContext) redisTemplate.opsForValue().get(VARIABLE_CONTEXT + executionUuid);
         return deserialize;
     }
