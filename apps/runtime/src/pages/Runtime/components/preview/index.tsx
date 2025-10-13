@@ -1,4 +1,4 @@
-import { Button, Form, Message } from '@arco-design/web-react';
+import { Button, Drawer, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
   dataMethodInsert,
@@ -12,15 +12,15 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
+import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
-  pagesRuntimeDataSignal,
   PreviewRender,
   startLoadPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  useEditorSignalMap,
   useFormEditorSignal,
   useListEditorSignal,
   type GridItem
@@ -35,15 +35,15 @@ interface PreviewProps {
 }
 
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
-  const [form] = Form.useForm();
-
   useSignals();
+
+  const [form] = Form.useForm();
 
   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
-  const { curPage } = pagesRuntimeDataSignal;
+  const { curPage, drawerVisible, setDrawerVisible, drawerPageId } = pagesRuntimeSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
@@ -77,11 +77,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
   }, [menuId]);
 
-  useEffect(() => {
-    if (editTargetId && mainMetaData) {
-      handleGetData(mainMetaData, editTargetId);
-    }
-  }, [editTargetId, mainMetaData]);
+  //   useEffect(() => {
+  //     if (editTargetId && mainMetaData) {
+  //       handleGetData(mainMetaData, editTargetId);
+  //     }
+  //   }, [editTargetId, mainMetaData]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -183,13 +183,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setPageType(EDITOR_TYPES.LIST_EDITOR);
   };
 
-  const toCreatePage = (id: string) => {
-    setPageType(EDITOR_TYPES.FORM_EDITOR);
-    form.resetFields();
+  const showFromPageData = (id: string, toFormPage: boolean = false) => {
+    if (toFormPage) {
+      setPageType(EDITOR_TYPES.FORM_EDITOR);
+    }
 
+    form.resetFields();
     if (id) {
       console.log('edit row id: ', id);
       setEditTargetId(id);
+      if (mainMetaData) {
+        handleGetData(mainMetaData, id);
+      }
     }
   };
 
@@ -245,7 +250,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     cpType={cp.type}
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
-                    toCreatePage={toCreatePage}
+                    showFromPageData={showFromPageData}
                   />
                 </div>
               )}
@@ -269,7 +274,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                       cpType={cp.type}
                       pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                       runtime={true}
-                      toCreatePage={() => {
+                      showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
                     />
@@ -288,6 +293,48 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             </div>
           </Form>
         )}
+
+        {/* 右侧详情抽屉 */}
+        <Drawer
+          width={600}
+          title={<span>详情</span>}
+          visible={drawerVisible.value}
+          placement="right"
+          onCancel={() => setDrawerVisible(false)}
+          footer={null}
+        >
+          <div className={styles.content}>
+            <Form layout="inline" form={form}>
+              {useEditorSignalMap.get(drawerPageId.value)?.components.value.map((cp: GridItem) => (
+                <Fragment key={cp.id}>
+                  {useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                    STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: getComponentWidth(
+                          useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={true}
+                        showFromPageData={() => {}}
+                      />
+                    </div>
+                  )}
+                </Fragment>
+              ))}
+            </Form>
+          </div>
+        </Drawer>
       </div>
     </div>
   );

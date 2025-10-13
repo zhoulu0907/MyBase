@@ -1,4 +1,4 @@
-import { Button, Form, Input, Table, Popconfirm, Message } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Popconfirm, Table } from '@arco-design/web-react';
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
@@ -11,7 +11,9 @@ import {
   type DeleteMethodParam,
   type PageMethodParam
 } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
+import { RedirectMethod } from '../../../constants';
 import './index.css';
 import type { XTableConfig } from './schema';
 
@@ -20,8 +22,9 @@ const rightPanelWidth = 310;
 const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
-const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: Function }) => {
-  const { runtime = true, toCreatePage } = props;
+
+const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function }) => {
+  const { runtime = true, showFromPageData } = props;
 
   const {
     label,
@@ -40,7 +43,10 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     showTotal,
     showOpearate,
     fixedOpearate,
-    labelColSpan
+    labelColSpan,
+    advancedRowRedirect,
+    redirectPageId,
+    redirectMethod
   } = props;
 
   const [finalColumns, setFinalColumns] = useState<any[]>();
@@ -62,23 +68,21 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
           type="text"
           style={{ marginRight: 5 }}
           icon={<IconEdit />}
-          onClick={() => {
-            handleEdit(record.id);
+          onClick={(event) => {
+            handleEdit(record.id, true);
+            event.stopPropagation();
           }}
         />
         <Popconfirm
           focusLock
-          title='确认删除'
-          content='确定要删除这条数据吗？'
-          onOk={() => {
+          title="确认删除"
+          content="确定要删除这条数据吗？"
+          onOk={(event) => {
             handleDelete(record.id);
+            event.stopPropagation();
           }}
         >
-          <Button
-            status="danger"
-            type="text"
-            icon={<IconDelete />}
-          />
+          <Button status="danger" type="text" icon={<IconDelete />} />
         </Popconfirm>
       </>
     )
@@ -113,22 +117,23 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       return;
     }
 
-    toCreatePage?.();
+    showFromPageData?.();
   };
 
   // 查询
   const handleSearch = () => {
     queryData = form.getFieldsValue();
     setTablePageNo(1);
-    handlePage()
-  }
+    handlePage();
+  };
+
   // 重置
   const handleReset = () => {
     form.resetFields();
     queryData = {};
     setTablePageNo(1);
-    handlePage()
-  }
+    handlePage();
+  };
 
   const handlePage = async () => {
     if (!runtime) {
@@ -150,7 +155,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       //   console.log(item);
       const newItem = item.data;
       Object.entries(newItem).forEach(([key, value]) => {
-        console.log(key, value);
+        // console.log(key, value);
         // 优化：减少重复查找，提升可读性和性能
         if (Array.isArray(mainMetaData?.parentFields)) {
           const field = mainMetaData.parentFields.find(
@@ -192,12 +197,28 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     handlePage();
   };
 
-  const handleEdit = (id: string) => {
+  const handleEdit = (id: string, toFormPage: boolean) => {
     if (!runtime) {
       return;
     }
 
-    toCreatePage?.(id);
+    showFromPageData?.(id, toFormPage);
+  };
+
+  // 行点击事件
+  const handleRowClick = (record: any) => {
+    if (advancedRowRedirect) {
+      if (redirectMethod === RedirectMethod.DRAWER) {
+        // 打开抽屉显示详情
+        console.log(redirectPageId);
+        pagesRuntimeSignal.setDrawerVisible(true);
+        redirectPageId && pagesRuntimeSignal.setDrawerPageId(redirectPageId);
+
+        handleEdit(record.id, false);
+      } else if (redirectMethod === RedirectMethod.NEW_TAB) {
+        // 打开新的标签页
+      }
+    }
   };
 
   const [form] = Form.useForm();
@@ -245,10 +266,16 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
         </Form>
 
         <div className="tableHeaderButton">
-          { searchItems?.length ? <>
-            <Button type="primary" onClick={handleSearch}>查询</Button>
-            <Button type="primary" onClick={handleReset}>重置</Button>
-          </>:null}
+          {searchItems?.length ? (
+            <>
+              <Button type="primary" onClick={handleSearch}>
+                查询
+              </Button>
+              <Button type="primary" onClick={handleReset}>
+                重置
+              </Button>
+            </>
+          ) : null}
           <Button type="primary" onClick={handleCreate}>
             新增
           </Button>
@@ -277,6 +304,13 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
             <Table
               scroll={{
                 x: 'max-content'
+              }}
+              onRow={(record, index) => {
+                return {
+                  onClick: (event) => {
+                    handleRowClick(record);
+                  }
+                };
               }}
               border={border}
               borderCell={borderCell}

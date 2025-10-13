@@ -22,10 +22,10 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
 
       if (view) {
         form.setFieldsValue({
-          editViewMode: view.editViewMode ? true : false,
-          detailViewMode: view.detailViewMode ? true : false,
-          isDefaultEditViewMode: view.isDefaultEditViewMode ? true : false,
-          isDefaultDetailViewMode: view.isDefaultDetailViewMode ? true : false
+          editViewMode: view.editViewMode ? 1 : 0,
+          detailViewMode: view.detailViewMode ? 1 : 0,
+          isDefaultEditViewMode: view.isDefaultEditViewMode ? 1 : 0,
+          isDefaultDetailViewMode: view.isDefaultDetailViewMode ? 1 : 0
         });
       }
     }
@@ -49,7 +49,10 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
     if (curPageView && curPageView.id) {
       const newPageView = {
         ...curPageView,
-        ...form.getFieldsValue()
+        editViewMode: form.getFieldValue('editViewMode') ? 1 : 0,
+        detailViewMode: form.getFieldValue('detailViewMode') ? 1 : 0,
+        isDefaultEditViewMode: form.getFieldValue('isDefaultEditViewMode') ? 1 : 0,
+        isDefaultDetailViewMode: form.getFieldValue('isDefaultDetailViewMode') ? 1 : 0
       };
 
       updatePageView(newPageView);

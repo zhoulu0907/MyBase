@@ -74,10 +74,10 @@ export interface PageView {
   id: string;
   pageName: string;
   pageType: string;
-  editViewMode: boolean;
-  detailViewMode: boolean;
-  isDefaultEditViewMode: boolean;
-  isDefaultDetailViewMode: boolean;
+  editViewMode: number;
+  detailViewMode: number;
+  isDefaultEditViewMode: number;
+  isDefaultDetailViewMode: number;
 
   // 是否是新增的视图
   created?: boolean;
