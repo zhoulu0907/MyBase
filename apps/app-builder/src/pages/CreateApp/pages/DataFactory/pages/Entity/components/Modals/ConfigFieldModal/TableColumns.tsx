@@ -54,7 +54,7 @@ interface ColumnConfig {
   render?: (value: unknown, record: FieldFormValues, index: number) => React.ReactNode;
 }
 
-const CHECK_CONST = { IS_TRUE: 0, IS_FALSE: 1 };
+const CHECK_CONST = { IS_TRUE: 1, IS_FALSE: 0 };
 
 const TableColumns = ({
   fieldTypeOptions,

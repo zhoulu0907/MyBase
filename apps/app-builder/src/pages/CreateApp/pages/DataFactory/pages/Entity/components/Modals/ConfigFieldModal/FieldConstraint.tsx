@@ -109,7 +109,7 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
               <Input
                 type="number"
                 value={config.maxLength}
-                onChange={(value) => updateLengthConfig('maxLength', parseInt(value) || 8000)}
+                onChange={(value) => updateLengthConfig('maxLength', parseInt(value))}
                 placeholder="800"
                 style={{ width: '120px' }}
               />
