@@ -297,23 +297,29 @@ const TenantManagement: React.FC = () => {
       const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
       
       // 构建更新参数
-      const updateParams: UpdateTenantParams = {
-        id: currentTenant?.id || '',
-        name: values.tenantName,
-        tenantCode: values.tenantCode,
-        // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
-        adminNickName: newAdminId !== originalAdminId ? adminNickname : '',
-        adminUserName: newAdminId !== originalAdminId ? adminUsername : '',
-        adminMobile: newAdminId !== originalAdminId ? adminMobile : '',
-        status: values.status,
-        accountCount: values.allocatedCount,
-        website: values.website,
-      };
-      // 调用 updatePlatformTenantApi
-      await updatePlatformTenantApi(updateParams);
-      getPlatformTenantList();
-      Message.success('更新成功');
-      setModalVisible(false);
+      if(currentTenant?.id) {
+        const updateParams: UpdateTenantParams = {
+          id: currentTenant.id,
+          name: values.tenantName,
+          tenantCode: values.tenantCode,
+          // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
+          adminNickName: newAdminId !== originalAdminId ? adminNickname : '',
+          adminUserName: newAdminId !== originalAdminId ? adminUsername : '',
+          adminMobile: newAdminId !== originalAdminId ? adminMobile : '',
+          status: values.status,
+          accountCount: values.allocatedCount,
+          website: values.website,
+        };
+        // 调用 updatePlatformTenantApi
+        await updatePlatformTenantApi(updateParams);
+        getPlatformTenantList();
+        Message.success('更新成功');
+        setModalVisible(false);
+      } else {
+        // 添加错误处理，以防万一id不存在
+        Message.error('租户信息不完整，无法更新');
+        console.error('Tenant ID is missing', currentTenant);
+      }
     } catch (error: any) {
       console.error('更新租户信息失败:', error);
       Message.error('更新租户信息失败');
