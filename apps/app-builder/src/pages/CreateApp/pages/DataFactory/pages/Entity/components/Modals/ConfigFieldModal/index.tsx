@@ -11,7 +11,7 @@ import type { AutoNumberRule } from './types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import SortableTable from './SortableTable';
-import { arrayMove } from './utils';
+import { arrayMove, systemFieldsLength } from './utils';
 import styles from './index.module.less';
 
 interface FieldFormValues {
@@ -54,9 +54,6 @@ const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE,
   ENTITY_FIELD_TYPE.AUTO_CODE.VALUE
 ];
-
-// 用于计算自定义字段index
-const systemFieldsLength = 10;
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();

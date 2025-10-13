@@ -3,6 +3,7 @@ import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { Button, Checkbox, Form, Input, Popover, Select, Space, Tooltip } from '@arco-design/web-react';
 import { IconSelectAll, IconSettings } from '@arco-design/web-react/icon';
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
+import { systemFieldsLength } from './utils';
 import styles from './index.module.less';
 
 interface FieldFormValues {
@@ -128,23 +129,39 @@ const TableColumns = ({
               }}
             />
           </Form.Item>
-          {record.isSystemField === FIELD_TYPE.CUSTOM && FIELD_TYPES_NEED_CONFIG.includes(value) && (
-            <Popover
-              content={renderFieldConfigContent(value, record.id)}
-              trigger="click"
-              popupVisible={configPopoverVisible === record.id}
-              onVisibleChange={(visible) => setConfigPopoverVisible(visible ? record.id : null)}
-            >
-              <Tooltip content="配置">
-                <Button
-                  type="text"
-                  size="mini"
-                  icon={<IconSettings />}
-                  onClick={() => setConfigPopoverVisible(record.id)}
-                />
-              </Tooltip>
-            </Popover>
-          )}
+          <Form.Item
+            className={styles['field-form-item']}
+            shouldUpdate={(prev, next) =>
+              prev.fields[index + systemFieldsLength]?.fieldType !== next.fields[index + systemFieldsLength]?.fieldType
+            }
+          >
+            {(values) => {
+              // 配置按钮仅在自动编号、单选、多选类型时显示
+              const fieldType = values.fields[index + systemFieldsLength]?.fieldType;
+              if (!FIELD_TYPES_NEED_CONFIG.includes(fieldType)) {
+                return null;
+              }
+              return (
+                FIELD_TYPES_NEED_CONFIG.includes(fieldType) && (
+                  <Popover
+                    content={renderFieldConfigContent(fieldType, record.id)}
+                    trigger="click"
+                    popupVisible={configPopoverVisible === record.id}
+                    onVisibleChange={(visible) => setConfigPopoverVisible(visible ? record.id : null)}
+                  >
+                    <Tooltip content="配置">
+                      <Button
+                        type="text"
+                        size="mini"
+                        icon={<IconSettings />}
+                        onClick={() => setConfigPopoverVisible(record.id)}
+                      />
+                    </Tooltip>
+                  </Popover>
+                )
+              );
+            }}
+          </Form.Item>
         </Space>
       )
     },
