@@ -270,7 +270,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                         max={200}
                         min={0}
                         onChange={(value) => {
-                          if (!value) return;
+                          if (!value && value !== 0) return;
                           handlePropsChange(item.key, value);
                         }}
                         // suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
