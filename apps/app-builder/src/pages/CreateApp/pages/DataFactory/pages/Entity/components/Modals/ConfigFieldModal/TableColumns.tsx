@@ -1,7 +1,7 @@
 import React from 'react';
 import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { Button, Checkbox, Form, Input, Popover, Select, Space, Tooltip } from '@arco-design/web-react';
-import { IconSelectAll, IconSettings } from '@arco-design/web-react/icon';
+import { IconSelectAll, IconSettings, IconEdit } from '@arco-design/web-react/icon';
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { systemFieldsLength } from './utils';
 import styles from './index.module.less';
@@ -50,7 +50,7 @@ interface ColumnConfig {
   width?: number;
   ellipsis?: boolean;
   align?: 'center' | 'left' | 'right';
-  render?: (value: any, record: FieldFormValues, index: number) => React.ReactNode;
+  render?: (value: unknown, record: FieldFormValues, index: number) => React.ReactNode;
 }
 
 const CHECK_CONST = { IS_TRUE: 0, IS_FALSE: 1 };
@@ -72,12 +72,12 @@ const TableColumns = ({
       dataIndex: 'fieldName',
       width: 180,
       align: 'center',
-      render: (value: string, record: FieldFormValues, index: number) =>
+      render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
-          <span className={styles['system-field']}>{value}</span>
+          <span className={styles['system-field']}>{value as string}</span>
         ) : (
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.fieldName`}
+            field={`fields.${getFieldIndex(record.id || '', index)}.fieldName`}
             rules={[...createFieldRules.fieldName]}
             className={styles['field-form-item']}
           >
@@ -94,12 +94,12 @@ const TableColumns = ({
       dataIndex: 'displayName',
       width: 180,
       align: 'center',
-      render: (value: string, record: FieldFormValues, index: number) =>
+      render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
-          <span className={styles['system-field']}>{value}</span>
+          <span className={styles['system-field']}>{value as string}</span>
         ) : (
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.displayName`}
+            field={`fields.${getFieldIndex(record.id || '', index)}.displayName`}
             rules={[...createFieldRules.displayName]}
             className={styles['field-form-item']}
           >
@@ -112,10 +112,10 @@ const TableColumns = ({
       dataIndex: 'fieldType',
       width: 140,
       align: 'center',
-      render: (value: string, record: FieldFormValues, index: number) => (
+      render: (value: unknown, record: FieldFormValues, index: number) => (
         <Space>
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.fieldType`}
+            field={`fields.${getFieldIndex(record.id || '', index)}.fieldType`}
             rules={[{ required: true, message: '数据类型不能为空' }]}
             className={styles['field-form-item']}
           >
@@ -144,17 +144,17 @@ const TableColumns = ({
               return (
                 FIELD_TYPES_NEED_CONFIG.includes(fieldType) && (
                   <Popover
-                    content={renderFieldConfigContent(fieldType, record.id)}
+                    content={renderFieldConfigContent(fieldType, record.id || '')}
                     trigger="click"
                     popupVisible={configPopoverVisible === record.id}
-                    onVisibleChange={(visible) => setConfigPopoverVisible(visible ? record.id : null)}
+                    onVisibleChange={(visible) => setConfigPopoverVisible(visible ? record.id || null : null)}
                   >
                     <Tooltip content="配置">
                       <Button
                         type="text"
                         size="mini"
                         icon={<IconSettings />}
-                        onClick={() => setConfigPopoverVisible(record.id)}
+                        onClick={() => setConfigPopoverVisible(record.id || null)}
                       />
                     </Tooltip>
                   </Popover>
@@ -171,12 +171,12 @@ const TableColumns = ({
       width: 200,
       align: 'center',
       ellipsis: true,
-      render: (value: string, record: FieldFormValues, index: number) =>
+      render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === 1 ? (
-          <span className={styles['system-field']}>{value}</span>
+          <span className={styles['system-field']}>{value as string}</span>
         ) : (
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.description`}
+            field={`fields.${getFieldIndex(record.id || '', index)}.description`}
             className={styles['field-form-item']}
           >
             <Input placeholder="请输入字段描述" />
@@ -189,7 +189,7 @@ const TableColumns = ({
       width: 110,
       align: 'center',
       ellipsis: true,
-      render: (value: number) => (
+      render: (value: unknown) => (
         <span className={styles['system-field']}>{FIELD_TYPE_LABEL[value as keyof typeof FIELD_TYPE_LABEL]}</span>
       )
     },
@@ -198,12 +198,12 @@ const TableColumns = ({
       dataIndex: 'defaultValue',
       width: 120,
       align: 'center',
-      render: (value: string, record: FieldFormValues, index: number) =>
+      render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.defaultValue`}
+            field={`fields.${getFieldIndex(record.id || '', index)}.defaultValue`}
             className={styles['field-form-item']}
           >
             <Input />
@@ -215,12 +215,12 @@ const TableColumns = ({
       dataIndex: 'isUnique',
       width: 60,
       align: 'center',
-      render: (value: number, record: FieldFormValues, index: number) =>
+      render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.isUnique`}
+            field={`fields.${getFieldIndex(record.id || '', index)}.isUnique`}
             className={styles['field-form-item']}
             triggerPropName="checked"
             normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
@@ -235,12 +235,12 @@ const TableColumns = ({
       dataIndex: 'isRequired',
       width: 100,
       align: 'center',
-      render: (value: number, record: FieldFormValues, index: number) =>
+      render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Form.Item
-            field={`fields.${getFieldIndex(record.id, index)}.isRequired`}
+            field={`fields.${getFieldIndex(record.id || '', index)}.isRequired`}
             className={styles['field-form-item']}
             triggerPropName="checked"
             normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
@@ -253,23 +253,66 @@ const TableColumns = ({
     {
       title: '字段约束',
       dataIndex: 'constraints',
-      width: 120,
+      width: 180,
       align: 'center',
-      render: (value: any, record: FieldFormValues, index: number) =>
-        record.isSystemField === FIELD_TYPE.SYSTEM ? (
-          <span className={styles['system-field']}>-</span>
-        ) : (
-          <Popover
-            content={renderFieldConfigContent('CONSTRAINTS', record.id)}
-            trigger="click"
-            popupVisible={constraintsPopoverVisible === record.id}
-            onVisibleChange={(visible) => setConstraintsPopoverVisible(visible ? record.id : null)}
-          >
-            <Button size="mini" icon={<IconSelectAll />} onClick={() => setConstraintsPopoverVisible(record.id)}>
-              配置字段约束
-            </Button>
-          </Popover>
-        )
+      render: (value: unknown, record: FieldFormValues) => {
+        if (record.isSystemField === FIELD_TYPE.SYSTEM) {
+          return <span className={styles['system-field']}>-</span>;
+        }
+
+        // 检查是否有约束配置
+        const hasConstraints =
+          record.constraints && (record.constraints.lengthEnabled === 1 || record.constraints.regexEnabled === 1);
+
+        if (hasConstraints) {
+          // 显示约束状态和编辑按钮
+          const lengthStatus = record.constraints?.lengthEnabled === 1 ? '已开启' : '未开启';
+          const regexStatus = record.constraints?.regexEnabled === 1 ? '已开启' : '未开启';
+
+          return (
+            <div className={styles['constraint-status']}>
+              <div className={styles['constraint-info']}>
+                <div>长度范围约束: {lengthStatus}</div>
+                <div>正则校验约束: {regexStatus}</div>
+              </div>
+              <Popover
+                content={renderFieldConfigContent('CONSTRAINTS', record.id || '')}
+                trigger="click"
+                popupVisible={constraintsPopoverVisible === record.id}
+                onVisibleChange={(visible) => setConstraintsPopoverVisible(visible ? record.id || null : null)}
+              >
+                <Button
+                  type="text"
+                  size="mini"
+                  icon={<IconEdit />}
+                  onClick={() => setConstraintsPopoverVisible(record.id || null)}
+                  className={styles['edit-constraint-btn']}
+                >
+                  编辑
+                </Button>
+              </Popover>
+            </div>
+          );
+        } else {
+          // 显示配置按钮
+          return (
+            <Popover
+              content={renderFieldConfigContent('CONSTRAINTS', record.id || '')}
+              trigger="click"
+              popupVisible={constraintsPopoverVisible === record.id}
+              onVisibleChange={(visible) => setConstraintsPopoverVisible(visible ? record.id || null : null)}
+            >
+              <Button
+                size="mini"
+                icon={<IconSelectAll />}
+                onClick={() => setConstraintsPopoverVisible(record.id || null)}
+              >
+                配置字段约束
+              </Button>
+            </Popover>
+          );
+        }
+      }
     },
     {
       title: '操作',
@@ -279,7 +322,7 @@ const TableColumns = ({
       render: (value: unknown, record: FieldFormValues) => {
         return (
           record.isSystemField === FIELD_TYPE.CUSTOM && (
-            <Button type="text" status="danger" size="mini" onClick={() => deleteField(record.id)} disabled>
+            <Button type="text" status="danger" size="mini" onClick={() => deleteField(record.id || '')} disabled>
               删除
             </Button>
           )
