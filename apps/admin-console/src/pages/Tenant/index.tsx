@@ -302,7 +302,7 @@ const TenantManagement: React.FC = () => {
       
       // 构建更新参数
       const updateParams: UpdateTenantParams = {
-        id: currentTenant?.id,
+        id: currentTenant?.id || '',
         name: values.tenantName,
         tenantCode: values.tenantCode,
         // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
