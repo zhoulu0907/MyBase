@@ -12,12 +12,11 @@ export const useTokenRefresh = () => {
     const checkAndRefreshToken = async () => {
       const tokenInfo = TokenManager.getTokenInfo();
 
-      if (!tokenInfo || !tokenInfo.expiresAt) {
+      if (!tokenInfo || !tokenInfo.expiresTime) {
         return;
       }
-
       // 计算距离过期的时间（毫秒）
-      const timeUntilExpiry = tokenInfo.expiresAt - Date.now();
+      const timeUntilExpiry = tokenInfo.expiresTime - Date.now();
 
       // 如果距离过期时间少于5分钟，尝试刷新token
       if (timeUntilExpiry < 5 * 60 * 1000 && timeUntilExpiry > 0) {

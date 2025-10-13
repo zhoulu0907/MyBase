@@ -140,13 +140,11 @@ const Administrator: React.FC = () => {
   
 
   const getPlatformAdminList = async (pageNo: number = 1, keyword: string = searchKeyword) => {
-    // console.log('keyword', keyword);
     const res = await getPlatformAdminListApi({
       pageNo: pageNo,
       pageSize: 10,
       keyword: keyword // 添加搜索关键词参数
     });
-    // console.log('getPlatformAdminList res', res);
     setDataSource(res.list);
     setTotal(res.total);
     
@@ -184,11 +182,9 @@ const Administrator: React.FC = () => {
         mobile: values.mobile,
         adminType: values.adminType,
       };
-      console.log('createTenant', submitData);
       // 调用创建管理员的API
       await createPlatformAdminApi(submitData);
       
-      console.log('创建管理员:', submitData);
       Message.success('创建管理员成功');
       setCreateModalVisible(false);
       getPlatformAdminList();
@@ -213,7 +209,6 @@ const Administrator: React.FC = () => {
   };
 
   const handleDeleteConfirm = async (record: PlatformAdminInfo) => {
-    console.log('record:', record);
     try {
       await deletePlatformAdminApi(record.id);
       Message.success('删除成功');
@@ -232,9 +227,8 @@ const Administrator: React.FC = () => {
       console.log(error);
       Message.error('删除失败');
     }
-    console.log('delete record', record);
 
-    setDeleteConfirmVisible(true);
+    // setDeleteConfirmVisible(true);
   };
 
   const handleUpdata = async () => {
@@ -252,8 +246,7 @@ const Administrator: React.FC = () => {
         return;
       }
       try {
-        const res = await updatePlatformAdminPasswordApi({id: passwordId, password: confirmPassword});
-        console.log('password res:', res);
+        await updatePlatformAdminPasswordApi({id: passwordId, password: confirmPassword});
         getPlatformAdminList();
         Message.success('密码修改成功');
       } catch (error) {
@@ -261,8 +254,7 @@ const Administrator: React.FC = () => {
       }
     } else {
       try {
-        const res = await updatePlatformAdminMailApi({id: emailId, email: newEmail})
-        console.log('email res:', res);
+        await updatePlatformAdminMailApi({id: emailId, email: newEmail})
         getPlatformAdminList();
         Message.success('邮箱修改成功');
       } catch (error) {
@@ -304,7 +296,6 @@ const Administrator: React.FC = () => {
   // 处理分页变化
   const handlePageChange = async (pageNo: number) => {
     try {
-      console.log('pageNo', pageNo);
       await getPlatformAdminList(pageNo, searchKeyword);
       setCurrentPage(pageNo);
     } catch (error) {
@@ -382,7 +373,6 @@ const Administrator: React.FC = () => {
                     validator: (value, cb) => {
                       const formValues = createForm.getFieldsValue();
                       const password = formValues.password;
-                      console.log('passowrd', password, value);
                       if (value !== password) {
                         return cb('两次输入的密码不一致');
                       }
@@ -449,7 +439,6 @@ const Administrator: React.FC = () => {
                       return Promise.resolve();
                     }
                     const pattern = /^[a-zA-Z0-9]+$/;
-                    console.log(value);
                     if (!pattern.test(String(value))) {
                       return cb('用户账号由数字、字母组成')
                     }
@@ -522,7 +511,6 @@ const Administrator: React.FC = () => {
                   validator: (value, cb) => {
                     const formValues = createForm.getFieldsValue();
                     const password = formValues.password;
-                    console.log('passowrd', password, value);
                     if (value !== password) {
                       return cb('两次输入的密码不一致');
                     }

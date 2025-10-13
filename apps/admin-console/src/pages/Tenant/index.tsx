@@ -97,8 +97,6 @@ const TenantManagement: React.FC = () => {
 
   // 处理状态筛选
   const handleStatusChange = (status: number) => {
-    console.log('启用状态 before: ', statusFilter);
-    console.log('启用状态 new: ', status);
     setStatusFilter(status);
     setCurrentPage(1); // 重置到第一页
   };
@@ -287,7 +285,6 @@ const TenantManagement: React.FC = () => {
    * 更新租户信息
    */
   const updateTenant = async (values: any) => {
-    // console.log('更新租户:', values);
     try {
       // 检查管理员是否发生变化
       const newAdminId = values.admin; // 这里是 id
@@ -298,7 +295,6 @@ const TenantManagement: React.FC = () => {
       const adminUsername = selectedAdmin ? selectedAdmin.username : '';
       const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
       const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
-      console.log('selectAdmin', adminMobile);
       
       // 构建更新参数
       const updateParams: UpdateTenantParams = {
@@ -674,7 +670,6 @@ const TenantManagement: React.FC = () => {
                   status: checked ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled
                 });
                 if (!checked) {
-                  // console.log('checked', checked);
                   setConfirmDisableVisible(true);
                 } else if (currentTenant && currentTenant.status === PlatformTenantStatus.disabled) {
                   setTenantList(tenantList.map(item => 
