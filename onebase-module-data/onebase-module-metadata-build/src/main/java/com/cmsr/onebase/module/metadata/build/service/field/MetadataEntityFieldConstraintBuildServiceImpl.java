@@ -77,6 +77,29 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             if (min != null && max != null && min > max) {
                 throw new IllegalArgumentException("最小长度不能大于最大长度");
             }
+            
+            // 获取字段信息用于生成默认提示语
+            MetadataEntityFieldDO field = entityFieldRepository.findById(req.getFieldId());
+            if (field == null) {
+                throw new IllegalStateException("字段" + req.getFieldId() + "不存在，无法同步长度校验配置");
+            }
+            
+            // 生成默认提示语：{字段展示名称}长度不能超过X个字符
+            String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty() 
+                ? field.getDisplayName() 
+                : (field.getFieldName() != null ? field.getFieldName() : "字段");
+            String defaultPrompt = "";
+            if (max != null && min != null) {
+                defaultPrompt = String.format("%s长度必须在%d-%d个字符之间", fieldDisplayName, min, max);
+            } else if (max != null) {
+                defaultPrompt = String.format("%s长度不能超过%d个字符", fieldDisplayName, max);
+            } else if (min != null) {
+                defaultPrompt = String.format("%s长度不能少于%d个字符", fieldDisplayName, min);
+            } else {
+                defaultPrompt = fieldDisplayName + "长度不符合要求";
+            }
+            String prompt = StringUtils.hasText(req.getPromptMessage()) ? req.getPromptMessage() : defaultPrompt;
+            
             // upsert 长度
             MetadataValidationLengthDO exist = lengthService.getByFieldId(req.getFieldId());
             MetadataValidationLengthDO d = new MetadataValidationLengthDO();
@@ -86,7 +109,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             d.setMinLength(req.getMinLength());
             d.setMaxLength(req.getMaxLength());
             d.setTrimBefore(1);
-            d.setPromptMessage(req.getPromptMessage());
+            d.setPromptMessage(prompt);
             d.setRunMode(req.getRunMode());
             if (d.getId() == null) {
                 // 将DO转换为VO
@@ -100,6 +123,19 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 lengthService.update(lengthUpdateVO);
             }
         } else if ("REGEX".equalsIgnoreCase(type)) {
+            // 获取字段信息用于生成默认提示语
+            MetadataEntityFieldDO field = entityFieldRepository.findById(req.getFieldId());
+            if (field == null) {
+                throw new IllegalStateException("字段" + req.getFieldId() + "不存在，无法同步格式校验配置");
+            }
+            
+            // 生成默认提示语：{字段展示名称}格式不正确
+            String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty() 
+                ? field.getDisplayName() 
+                : (field.getFieldName() != null ? field.getFieldName() : "字段");
+            String defaultPrompt = fieldDisplayName + "格式不正确";
+            String prompt = StringUtils.hasText(req.getPromptMessage()) ? req.getPromptMessage() : defaultPrompt;
+            
             // upsert 正则（格式表 format_code=REGEX）
             MetadataValidationFormatDO exist = formatService.getRegexByFieldId(req.getFieldId());
             MetadataValidationFormatDO d = new MetadataValidationFormatDO();
@@ -109,7 +145,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             d.setFormatCode("REGEX");
             d.setRegexPattern(req.getRegexPattern());
             d.setFlags(null);
-            d.setPromptMessage(req.getPromptMessage());
+            d.setPromptMessage(prompt);
             d.setRunMode(req.getRunMode());
             if (d.getId() == null) {
                 // 将DO转换为VO
@@ -128,12 +164,24 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
         } else if ("REQUIRED".equalsIgnoreCase(type)) {
             // 同步必填到 required 表
             MetadataValidationRequiredDO exist = requiredService.getByFieldId(req.getFieldId());
+            MetadataEntityFieldDO field = entityFieldRepository.findById(req.getFieldId());
+            if (field == null) {
+                throw new IllegalStateException("字段" + req.getFieldId() + "不存在，无法同步必填校验配置");
+            }
+            
+            // 生成默认提示语：{字段展示名称}为必填项
+            String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty() 
+                ? field.getDisplayName() 
+                : (field.getFieldName() != null ? field.getFieldName() : "此字段");
+            String defaultPrompt = fieldDisplayName + "为必填项";
+            String prompt = StringUtils.hasText(req.getPromptMessage()) ? req.getPromptMessage() : defaultPrompt;
+            
             if (exist == null) {
                 // 直接创建VO对象，避免DO到VO的转换问题
                 ValidationRequiredSaveReqVO requiredVO = new ValidationRequiredSaveReqVO();
                 requiredVO.setFieldId(req.getFieldId());
                 requiredVO.setIsEnabled(req.getIsEnabled());
-                requiredVO.setPromptMessage(req.getPromptMessage());
+                requiredVO.setPromptMessage(prompt);
                 requiredVO.setRunMode(req.getRunMode());
                 requiredVO.setRgName(buildRequiredGroupName(req.getFieldId()));
                 requiredService.create(requiredVO);
@@ -142,7 +190,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 ValidationRequiredUpdateReqVO requiredUpdateVO = new ValidationRequiredUpdateReqVO();
                 requiredUpdateVO.setId(exist.getId());
                 requiredUpdateVO.setIsEnabled(req.getIsEnabled());
-                requiredUpdateVO.setPromptMessage(req.getPromptMessage());
+                requiredUpdateVO.setPromptMessage(prompt);
                 requiredUpdateVO.setRunMode(req.getRunMode());
                 requiredUpdateVO.setRgName(buildRequiredGroupName(req.getFieldId()));
                 requiredService.update(requiredUpdateVO);
@@ -155,7 +203,13 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             }
 
             Integer enableFlag = req.getIsEnabled() != null ? req.getIsEnabled() : 0;
-            String prompt = StringUtils.hasText(req.getPromptMessage()) ? req.getPromptMessage() : "此字段值必须唯一";
+            
+            // 生成默认提示语：{字段展示名称}必须唯一
+            String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty() 
+                ? field.getDisplayName() 
+                : (field.getFieldName() != null ? field.getFieldName() : "此字段");
+            String defaultPrompt = fieldDisplayName + "必须唯一";
+            String prompt = StringUtils.hasText(req.getPromptMessage()) ? req.getPromptMessage() : defaultPrompt;
             String defaultGroupName = buildUniqueGroupName(req.getFieldId());
 
             if (exist == null) {

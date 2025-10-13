@@ -1964,7 +1964,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // 使用统一的规则组命名方法
                     String rgName = buildLengthRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
-                    String promptMsg = String.format("字段长度不能超过%d个字符", entityField.getDataLength());
+                    
+                    // 生成默认提示语：{字段展示名称}长度不能超过X个字符
+                    String fieldDisplayName = entityField.getDisplayName() != null && !entityField.getDisplayName().trim().isEmpty() 
+                        ? entityField.getDisplayName() 
+                        : (entityField.getFieldName() != null ? entityField.getFieldName() : "字段");
+                    String promptMsg = String.format("%s长度不能超过%d个字符", fieldDisplayName, entityField.getDataLength());
                     saveReqVO.setPromptMessage(promptMsg);
                     // 设置popPrompt确保errorMessage字段能正确返回
                     saveReqVO.setPopPrompt(promptMsg);
@@ -2024,7 +2029,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // rg_name可以用display_name+field_name+必填校验进行拼接
                     String rgName = buildRequiredRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
-                    String promptMsg = "此字段为必填项";
+                    
+                    // 生成默认提示语：{字段展示名称}为必填项
+                    String fieldDisplayName = entityField.getDisplayName() != null && !entityField.getDisplayName().trim().isEmpty() 
+                        ? entityField.getDisplayName() 
+                        : (entityField.getFieldName() != null ? entityField.getFieldName() : "此字段");
+                    String promptMsg = fieldDisplayName + "为必填项";
                     saveReqVO.setPromptMessage(promptMsg);
                     // 设置popPrompt确保errorMessage字段能正确返回
                     saveReqVO.setPopPrompt(promptMsg);
@@ -2083,7 +2093,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // rg_name可以用display_name+field_name+唯一校验进行拼接
                     String rgName = buildUniqueRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
-                    String promptMsg = "此字段值必须唯一";
+                    
+                    // 生成默认提示语：{字段展示名称}必须唯一
+                    String fieldDisplayName = entityField.getDisplayName() != null && !entityField.getDisplayName().trim().isEmpty() 
+                        ? entityField.getDisplayName() 
+                        : (entityField.getFieldName() != null ? entityField.getFieldName() : "此字段");
+                    String promptMsg = fieldDisplayName + "必须唯一";
                     saveReqVO.setPromptMessage(promptMsg);
                     // 设置popPrompt确保errorMessage字段能正确返回
                     saveReqVO.setPopPrompt(promptMsg);
