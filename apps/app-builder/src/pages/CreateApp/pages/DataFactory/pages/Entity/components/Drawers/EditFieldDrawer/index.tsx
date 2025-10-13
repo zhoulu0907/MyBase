@@ -126,7 +126,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
         description: values.description,
         fieldType: values.fieldType,
         isSystemField: fieldDetail.isSystemField,
-        displayName: fieldDetail.displayName
+        displayName: values.displayName
       };
 
       await updateField(updateData);
