@@ -272,14 +272,12 @@ public class PageSetServiceImpl implements PageSetService {
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
             }
 
-            log.info("xxxxxpagedo: {}", page);
             final PageDO finalPageDO = pageDO;
             finalPageDO.setPageName(page.getPageName());
             finalPageDO.setEditViewMode(page.getEditViewMode());
             finalPageDO.setDetailViewMode(page.getDetailViewMode());
             finalPageDO.setIsDefaultEditViewMode(page.getIsDefaultEditViewMode());
             finalPageDO.setIsDefaultDetailViewMode(page.getIsDefaultDetailViewMode());
-            log.info("xxxxxfinalPageDO: {}", finalPageDO);
 
             pageDataRepository.update(finalPageDO);
 

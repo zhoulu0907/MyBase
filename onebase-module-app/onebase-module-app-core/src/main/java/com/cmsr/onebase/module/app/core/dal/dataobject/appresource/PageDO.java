@@ -31,7 +31,7 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "edit_view_mode", columnDefinition = "INT(2)", comment = "编辑模式" )
     private Integer editViewMode;
 
-    @Column(name = "default_view_mode", columnDefinition = "INT(2)", comment = "详情模式" )
+    @Column(name = "detail_view_mode", columnDefinition = "INT(2)", comment = "详情模式" )
     private Integer detailViewMode;
 
     @Column(name = "is_default_edit_view_mode", columnDefinition = "INT(2)", comment = "是否默认编辑视图")
