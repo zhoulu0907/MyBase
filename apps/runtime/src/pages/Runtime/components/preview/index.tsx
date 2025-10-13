@@ -111,20 +111,20 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const triggerFlows = async (param: any) => {
     const res = await triggerFlowExecForm(param);
     if (res?.success) {
-      if(res.executionEnd){
-        return;
-      }
       // 弹窗
       if (res.nodeType === NodeType.MODAL) {
+        // 二次确认
         if (res.outputParams?.modalType === FLOW_MODAL_TYPE.CONFIRM) {
-          // 二次确认
           Modal.confirm({
             title: res.outputParams.modalTitle || '确认',
-            content:  res.outputParams.prompt || '',
+            content: res.outputParams.prompt || '',
             okText: res.outputParams.okText || '确认',
             cancelText: res.outputParams.cancelText || '取消',
             maskClosable: false,
-            onOk: async() => {
+            onOk: async () => {
+              if (res.executionEnd) {
+                return;
+              }
               const newParam = {
                 processId: param.processId,
                 executionUuid: res.executionUuid || '',
@@ -132,16 +132,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               };
               await triggerFlows(newParam);
             },
-            onCancel: async() => {
+            onCancel: async () => {
+              if (res.executionEnd) {
+                return;
+              }
               const newParam = {
                 processId: param.processId,
                 executionUuid: res.executionUuid || '',
                 inputParams: param.inputParams
               };
               await triggerFlows(newParam);
-            },
+            }
           });
         }
+
+        // 信息收集
+        if(res.outputParams?.modalType === FLOW_MODAL_TYPE.INFOR){
+          // todo
+        }
+      }
+
+      if (res.executionEnd) {
+        return;
       }
     }
   };
