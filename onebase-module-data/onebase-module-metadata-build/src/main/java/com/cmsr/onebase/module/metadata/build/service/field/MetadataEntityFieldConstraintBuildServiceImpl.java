@@ -5,13 +5,16 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldCo
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldConstraintSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.*;
 import com.cmsr.onebase.module.metadata.build.service.validation.*;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -20,6 +23,7 @@ import org.springframework.util.StringUtils;
  * 字段约束 Service 实现（基于新规则表）
  */
 @Service
+@Slf4j
 public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEntityFieldConstraintBuildService {
 
     @Resource private MetadataValidationLengthBuildService lengthService;
@@ -29,6 +33,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
     @Resource private MetadataValidationRangeBuildService rangeService;
     @Resource private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
     @Resource private MetadataEntityFieldRepository entityFieldRepository;
+    @Resource private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -86,12 +91,12 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             if (d.getId() == null) {
                 // 将DO转换为VO
                 ValidationLengthSaveReqVO lengthVO = BeanUtils.toBean(d, ValidationLengthSaveReqVO.class);
-                lengthVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                lengthVO.setRgName(buildLengthGroupName(req.getFieldId())); // 设置规则组名称
                 lengthService.create(lengthVO);
             } else {
                 // 将DO转换为UpdateReqVO
                 ValidationLengthUpdateReqVO lengthUpdateVO = BeanUtils.toBean(d, ValidationLengthUpdateReqVO.class);
-                lengthUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                lengthUpdateVO.setRgName(buildLengthGroupName(req.getFieldId())); // 设置规则组名称
                 lengthService.update(lengthUpdateVO);
             }
         } else if ("REGEX".equalsIgnoreCase(type)) {
@@ -111,13 +116,13 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 ValidationFormatSaveReqVO formatVO = BeanUtils.toBean(d, ValidationFormatSaveReqVO.class);
                 formatVO.setFormatCode("REGEX");
                 formatVO.setRegexPattern(req.getRegexPattern());
-                formatVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                formatVO.setRgName(buildFormatGroupName(req.getFieldId())); // 设置规则组名称
                 formatService.create(formatVO);
             } else {
                 // 将DO转换为UpdateReqVO
                 ValidationFormatUpdateReqVO formatUpdateVO = BeanUtils.toBean(d, ValidationFormatUpdateReqVO.class);
                 formatUpdateVO.setFormatCode("REGEX");
-                formatUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                formatUpdateVO.setRgName(buildFormatGroupName(req.getFieldId())); // 设置规则组名称
                 formatService.update(formatUpdateVO);
             }
         } else if ("REQUIRED".equalsIgnoreCase(type)) {
@@ -205,12 +210,111 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
         }
     }
 
+    /**
+     * 构建规则组名称
+     * 格式：校验类型-字段展示名称-实体展示名称
+     * 例如：必填校验-姓名-学生信息表
+     *
+     * @param fieldId 字段ID
+     * @param validationType 校验类型（REQUIRED/UNIQUE/LENGTH/RANGE/FORMAT/CHILD_NOT_EMPTY/SELF_DEFINED）
+     * @return 规则组名称
+     */
+    private String buildRuleGroupName(Long fieldId, String validationType) {
+        try {
+            // 获取字段信息
+            MetadataEntityFieldDO field = entityFieldRepository.findById(fieldId);
+            if (field == null) {
+                log.warn("构建规则组名称失败，字段不存在: fieldId={}", fieldId);
+                return getValidationTypeName(validationType) + "-未知字段-未知实体";
+            }
+            
+            // 获取实体信息
+            MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(field.getEntityId());
+            
+            // 字段展示名称，优先使用displayName，如果为空则使用fieldName
+            String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty() 
+                ? field.getDisplayName() 
+                : (field.getFieldName() != null ? field.getFieldName() : "未知字段");
+            
+            // 实体展示名称，优先使用displayName，如果为空则使用tableName
+            String entityDisplayName = "未知实体";
+            if (entity != null) {
+                entityDisplayName = entity.getDisplayName() != null && !entity.getDisplayName().trim().isEmpty()
+                    ? entity.getDisplayName()
+                    : (entity.getTableName() != null ? entity.getTableName() : "未知实体");
+            }
+            
+            // 校验类型中文名称
+            String validationTypeName = getValidationTypeName(validationType);
+            
+            // 拼接成最终的规则组名称
+            return String.format("%s-%s-%s", validationTypeName, fieldDisplayName, entityDisplayName);
+        } catch (Exception e) {
+            log.error("构建规则组名称时发生异常，字段ID: {}, 校验类型: {}, 错误: {}", fieldId, validationType, e.getMessage(), e);
+            return getValidationTypeName(validationType) + "-未知字段-未知实体";
+        }
+    }
+    
+    /**
+     * 获取校验类型的中文名称
+     *
+     * @param validationType 校验类型英文标识
+     * @return 校验类型中文名称
+     */
+    private String getValidationTypeName(String validationType) {
+        if (validationType == null) {
+            return "未知校验";
+        }
+        
+        switch (validationType.toUpperCase()) {
+            case "REQUIRED":
+                return "必填校验";
+            case "UNIQUE":
+                return "唯一校验";
+            case "LENGTH":
+            case "LENGTH_RANGE":
+                return "长度校验";
+            case "RANGE":
+                return "范围校验";
+            case "FORMAT":
+            case "REGEX":
+                return "格式校验";
+            case "CHILD_NOT_EMPTY":
+                return "子表空行校验";
+            case "SELF_DEFINED":
+            case "CUSTOM":
+                return "自定义校验";
+            default:
+                return validationType + "校验";
+        }
+    }
+
     private String buildRequiredGroupName(Long fieldId) {
-        return "字段约束-REQUIRED-" + fieldId;
+        return buildRuleGroupName(fieldId, "REQUIRED");
     }
 
     private String buildUniqueGroupName(Long fieldId) {
-        return "字段约束-UNIQUE-" + fieldId;
+        return buildRuleGroupName(fieldId, "UNIQUE");
+    }
+
+    private String buildLengthGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "LENGTH");
+    }
+
+    private String buildFormatGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "FORMAT");
+    }
+
+    private String buildRangeGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "RANGE");
+    }
+
+    private String buildChildNotEmptyGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "CHILD_NOT_EMPTY");
+    }
+
+    private String buildSelfDefinedGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "SELF_DEFINED");
     }
 
 }
