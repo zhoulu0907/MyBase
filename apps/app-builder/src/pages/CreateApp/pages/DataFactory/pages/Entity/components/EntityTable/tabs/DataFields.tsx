@@ -169,8 +169,9 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
               编辑
             </Button>
           )}
+          {/* 本期不支持删除 */}
           {record.isSystemField === FIELD_TYPE.CUSTOM && (
-            <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
+            <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)} disabled>
               删除
             </Button>
           )}

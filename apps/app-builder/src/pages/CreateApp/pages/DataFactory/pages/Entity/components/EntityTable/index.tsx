@@ -127,7 +127,7 @@ const EntityTable: React.FC = () => {
         </Sider>
         <Content className={styles.content}>
           {selectedEntity ? (
-            <EntityDetail entity={selectedEntity as unknown as EntityNode} />
+            <EntityDetail entity={selectedEntity as unknown as EntityNode} reloadList={successCallback} />
           ) : (
             <div className={styles.emptyState}>请选择一个实体查看详情</div>
           )}

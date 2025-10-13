@@ -1,7 +1,7 @@
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
-import { Form, Grid, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
-import { createMasterChild, getEntityFields, getEntityList } from '@onebase/app';
+import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
+import { createMasterChild, getEntityList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';
 
@@ -20,16 +20,11 @@ interface EntityOption {
   value: string;
 }
 
-interface FieldOption {
-  label: string;
-  value: string;
-}
-
 const CreateMasterDetailModal: React.FC<{
   visible: boolean;
   setVisible: (visible: boolean) => void;
   entityId: string;
-  successCallback: () => void;
+  successCallback: (type?: string) => void;
 }> = ({ visible, setVisible, successCallback, entityId }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
@@ -102,7 +97,11 @@ const CreateMasterDetailModal: React.FC<{
           Message.success('创建成功');
           form.resetFields();
           setVisible(false);
-          successCallback();
+          if (values.childTableCode) {
+            successCallback('new_master_child');
+          } else {
+            successCallback();
+          }
         }
       } catch (error) {
         console.error('创建主子关系失败:', error);

@@ -106,7 +106,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity, activeTab }) => {
       <Table
         columns={columns}
         data={methods}
-        rowKey="id"
+        rowKey="methodCode"
         pagination={false}
         className={styles.table}
         loading={loading}

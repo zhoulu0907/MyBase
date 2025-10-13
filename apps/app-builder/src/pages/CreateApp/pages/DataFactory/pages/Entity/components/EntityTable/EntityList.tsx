@@ -52,7 +52,8 @@ const EntityList: React.FC<EntityListProps> = ({
                       <Button type="text" onClick={() => handleClickEdit(entity)}>
                         编辑
                       </Button>
-                      <Button type="text" onClick={() => handleDelete(entity)}>
+                      {/* 本期不支持删除 */}
+                      <Button type="text" onClick={() => handleDelete(entity)} disabled>
                         删除
                       </Button>
                     </Space>
