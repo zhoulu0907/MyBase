@@ -108,37 +108,41 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   // 流程多次触发
-  const triggerFlows = async (params: any) => {
-    const res = await triggerFlowExecForm(params);
+  const triggerFlows = async (param: any) => {
+    const res = await triggerFlowExecForm(param);
     if (res?.success) {
-      if(res.nodeType === '')
-      Modal.confirm({
-        title: 'Confirm deletion',
-        content:
-          'Are you sure you want to delete the 3 selected items? Once you press the delete button, the items will be deleted immediately. You can’t undo this action.',
-        okButtonProps: {
-          status: 'danger'
-        },
-        onOk: () => {
-          return new Promise((resolve, reject) => {
-            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-          }).catch((e) => {
-            Message.error({
-              content: 'Error occurs!'
-            });
-            throw e;
+      if(res.executionEnd){
+        return;
+      }
+      // 弹窗
+      if (res.nodeType === NodeType.MODAL) {
+        if (res.outputParams?.modalType === FLOW_MODAL_TYPE.CONFIRM) {
+          // 二次确认
+          Modal.confirm({
+            title: res.outputParams.modalTitle || '确认',
+            content:  res.outputParams.prompt || '',
+            okText: res.outputParams.okText || '确认',
+            cancelText: res.outputParams.cancelText || '取消',
+            maskClosable: false,
+            onOk: async() => {
+              const newParam = {
+                processId: param.processId,
+                executionUuid: res.executionUuid || '',
+                inputParams: param.inputParams
+              };
+              await triggerFlows(newParam);
+            },
+            onCancel: async() => {
+              const newParam = {
+                processId: param.processId,
+                executionUuid: res.executionUuid || '',
+                inputParams: param.inputParams
+              };
+              await triggerFlows(newParam);
+            },
           });
         }
-      });
-    }
-
-    if (res.success && !res.executionEnd) {
-      const param = {
-        processId: params.processId,
-        executionUuid: res.executionUuid || '',
-        inputParams: params.formData
-      };
-      await triggerFlows(param);
+      }
     }
   };
   const submitForm = async () => {
