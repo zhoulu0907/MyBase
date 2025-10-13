@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  * @Date：2025/9/1 11:01
  */
 @Data
-public class JsonGraphNode {
+public class JsonGraphNode implements Serializable {
 
     private String id;
 
@@ -35,6 +36,7 @@ public class JsonGraphNode {
             @JsonSubTypes.Type(value = IfBlockNodeData.class, name = "ifBlock"),
             @JsonSubTypes.Type(value = IfCaseNodeData.class, name = "ifCase"),
             @JsonSubTypes.Type(value = LoopNodeData.class, name = "loop"),
+            @JsonSubTypes.Type(value = ModalNodeData.class, name = "modal"),
             @JsonSubTypes.Type(value = StartDateFieldNodeData.class, name = "startDateField"),
             @JsonSubTypes.Type(value = StartEntityNodeData.class, name = "startEntity"),
             @JsonSubTypes.Type(value = StartFormNodeData.class, name = "startForm"),

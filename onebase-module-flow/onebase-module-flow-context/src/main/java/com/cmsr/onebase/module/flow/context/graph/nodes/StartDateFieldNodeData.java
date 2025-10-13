@@ -13,7 +13,7 @@ import java.util.List;
  * @Date：2025/9/22 9:24
  */
 @Data
-public class StartDateFieldNodeData extends NodeData {
+public class StartDateFieldNodeData extends NodeData implements Serializable{
 
     private Long processId;
 

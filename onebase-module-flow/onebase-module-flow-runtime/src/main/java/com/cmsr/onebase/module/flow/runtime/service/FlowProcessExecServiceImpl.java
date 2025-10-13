@@ -21,6 +21,8 @@ import com.google.common.collect.Sets;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,19 +66,39 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
         StartFormNodeData startFormNodeData = graphFlowCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
+        if (startFormNodeData == null) {
+            FormTriggerRespVO vo = formNotTriggerRespVO();
+            vo.setMessage("流程不存在");
+            return vo;
+        }
         List<Long> ids = extractFieldIds(startFormNodeData.getFilterCondition(), reqVO.getInputParams());
         Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap = getFieldInfoMap(ids);
         Map<String, Object> inputMap = convertInputParamsData(reqVO.getInputParams(), fieldInfoMap);
-        boolean isTrigger = true;
-        if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
-            OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
-            isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
-        }
-        if (!isTrigger) {
-            return formNotTriggerRespVO();
-        } else {
-            ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
-            return formTriggerRespVO(executorResult);
+
+        try {
+            if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
+                boolean isTrigger = true;
+                if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
+                    OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
+                    isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
+                }
+                if (!isTrigger) {
+                    FormTriggerRespVO vo = formNotTriggerRespVO();
+                    vo.setMessage("表单不满足触发条件");
+                    return vo;
+                } else {
+                    ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
+                    return formTriggerRespVO(executorResult);
+                }
+            } else {
+                ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), reqVO.getExecutionUuid(), inputMap);
+                return formTriggerRespVO(executorResult);
+            }
+        } catch (Exception e) {
+            log.error("表单触发异常", e);
+            FormTriggerRespVO vo = formNotTriggerRespVO();
+            vo.setMessage(e.getMessage());
+            return vo;
         }
     }
 
@@ -93,7 +115,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         respVO.setSuccess(executorResult.isSuccess());
         respVO.setCode(executorResult.getCode());
         respVO.setMessage(executorResult.getMessage());
-        respVO.setCause(executorResult.getCause());
+        respVO.setCause(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
         respVO.setExecutionEnd(executorResult.isExecutionEnd());
         respVO.setExecutionUuid(executorResult.getExecutionUuid());
         respVO.setOutputParams(executorResult.getOutputParams());
@@ -107,7 +129,6 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         Set<Long> ids1 = conditions.stream()
                 .flatMap(condition -> condition.getConditions().stream())
                 .map(ruleItem -> NumberUtils.toLong(ruleItem.getFieldId()))
-                .distinct()
                 .collect(Collectors.toSet());
         Set<Long> ids2 = inputParams.keySet();
         Set<Long> ids = Sets.newHashSet();

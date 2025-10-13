@@ -55,8 +55,8 @@ public class RocketMQFlowEventHandler implements MessageListener, ApplicationRun
         ClientConfiguration clientConfiguration = ClientConfiguration.newBuilder()
                 .setEndpoints(endpoints)
                 .build();
-        Integer processId = slotManager.getSlot();
-        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_PREFIX + processId;
+        Integer slot = slotManager.getSlot();
+        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_PREFIX + slot;
         FilterExpression filterExpression = new FilterExpression();
         this.consumer = provider.newPushConsumerBuilder()
                 .setClientConfiguration(clientConfiguration)

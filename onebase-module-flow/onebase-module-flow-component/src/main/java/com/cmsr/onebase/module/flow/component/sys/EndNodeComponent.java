@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.flow.component.sys;
 
-import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
+import com.yomahub.liteflow.core.NodeComponent;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @LiteflowComponent("end")
-public class EndNodeComponent extends NormalNodeComponent {
+public class EndNodeComponent extends NodeComponent {
 
     @Override
     public void process() throws Exception {

@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
  * @Author：huangjie
  * @Date：2025/9/12 15:07
  */
-public class Cron {
+public class Cron implements Serializable {
 
 
     /**

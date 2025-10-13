@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
@@ -31,7 +31,7 @@ import java.util.Map;
 @Slf4j
 @Setter
 @LiteflowComponent("dataAdd")
-public class DataAddNodeComponent extends NormalNodeComponent {
+public class DataAddNodeComponent extends SkippableNodeComponent {
 
     @Autowired
     private DataMethodApi dataMethodApi;

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
@@ -31,7 +31,7 @@ import java.util.Map;
 @Slf4j
 @Setter
 @LiteflowComponent("dataUpdate")
-public class DataUpdateNodeComponent extends NormalNodeComponent {
+public class DataUpdateNodeComponent extends SkippableNodeComponent {
 
     @Autowired
     private DataMethodApi dataMethodApi;
@@ -68,7 +68,7 @@ public class DataUpdateNodeComponent extends NormalNodeComponent {
 
     private List<Map<Long, Object>> buildSingleReqData(List<ConditionItem> conditionItems, InLoopDepth inLoopDepth, VariableContext variableContext) {
         List<Map<Long, Object>> reqData = new ArrayList<>();
-          conditionsProvider.formatConditionItemsForValue(this, variableContext, inLoopDepth, conditionItems);
+        conditionsProvider.formatConditionItemsForValue(this, variableContext, inLoopDepth, conditionItems);
         Map<Long, Object> data = new HashMap<>();
         for (ConditionItem conditionItem : conditionItems) {
             data.put(NumberUtils.toLong(conditionItem.getFieldId()), conditionItem.getValue());
