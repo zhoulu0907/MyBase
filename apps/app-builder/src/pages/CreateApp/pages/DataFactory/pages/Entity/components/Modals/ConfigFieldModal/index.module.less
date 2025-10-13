@@ -334,3 +334,30 @@
     }
   }
 }
+
+  // 约束状态样式
+  .constraint-status {
+    display: flex;
+    align-items: center;
+
+    .constraint-info {
+      flex: 1;
+      font-size: 12px;
+      line-height: 1.4;
+
+      div {
+        margin-bottom: 2px;
+        color: #666;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    .edit-constraint-btn {
+      padding: 2px 6px;
+      height: 24px;
+      font-size: 12px;
+    }
+  }

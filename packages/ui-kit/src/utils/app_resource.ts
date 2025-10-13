@@ -22,7 +22,8 @@ import {
   useEditorSignalMap,
   useFormEditorSignal,
   useListEditorSignal,
-  usePageViewEditorSignal
+  usePageViewEditorSignal,
+  pagesRuntimeDataSignal
 } from 'src/signals';
 
 export interface SavePageSetParams {
@@ -204,10 +205,13 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setLayoutSubComponents: setListLayoutSubComponents
   } = useListEditorSignal;
 
+  const { setCurPage } = pagesRuntimeDataSignal;
+
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
   const pageSet = await loadPageSet(loadPageSetReq);
+  setCurPage(pageSet)
   console.log('载入页面集数据: ', pageSet);
 
   pageSet.pages.forEach((page: PageSet) => {

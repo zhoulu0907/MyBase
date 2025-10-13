@@ -1,7 +1,7 @@
 import iconStartForm from '@/assets/flow/nodes/startForm.svg';
 import type { TriggerRange } from '../../../components/const';
 import { type FlowNodeRegistry } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import { formMeta } from './form-meta';
 
 export const StartFormNodeRegistry: FlowNodeRegistry = {

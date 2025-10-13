@@ -1,18 +1,22 @@
-import { Button, Drawer, Form, Message } from '@arco-design/web-react';
+import { Button, Drawer, Form, Message, Modal } from '@arco-design/web-react';
 import {
+  CATEGORY_TYPE,
   dataMethodData,
   dataMethodInsert,
   dataMethodUpdate,
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  queryFlowExecForm,
+  TRIGGER_EVENTS,
+  triggerFlowExecForm,
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
+import { FLOW_MODAL_TYPE, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -103,6 +107,56 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     startLoadPageSet({ pageSetId: pageSetId });
   };
 
+  // 流程多次触发
+  const triggerFlows = async (param: any) => {
+    const res = await triggerFlowExecForm(param);
+    if (res?.success) {
+      // 弹窗
+      if (res.nodeType === NodeType.MODAL) {
+        // 二次确认
+        if (res.outputParams?.modalType === FLOW_MODAL_TYPE.CONFIRM) {
+          Modal.confirm({
+            title: res.outputParams.modalTitle || '确认',
+            content: res.outputParams.prompt || '',
+            okText: res.outputParams.okText || '确认',
+            cancelText: res.outputParams.cancelText || '取消',
+            maskClosable: false,
+            onOk: async () => {
+              if (res.executionEnd) {
+                return;
+              }
+              const newParam = {
+                processId: param.processId,
+                executionUuid: res.executionUuid || '',
+                inputParams: param.inputParams
+              };
+              await triggerFlows(newParam);
+            },
+            onCancel: async () => {
+              if (res.executionEnd) {
+                return;
+              }
+              const newParam = {
+                processId: param.processId,
+                executionUuid: res.executionUuid || '',
+                inputParams: param.inputParams
+              };
+              await triggerFlows(newParam);
+            }
+          });
+        }
+
+        // 信息收集
+        if (res.outputParams?.modalType === FLOW_MODAL_TYPE.INFOR) {
+          // todo
+        }
+      }
+
+      if (res.executionEnd) {
+        return;
+      }
+    }
+  };
   const submitForm = async () => {
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
@@ -121,10 +175,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('formData:   ', formData);
 
     // 接口判断 页面触发
-    // const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
-    // const pageId = curFormPage.id;
-
-    // const flowRes = await queryFlowExecForm(pageId);
+    const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
+    const pageId = curFormPage?.id;
+    const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
 
     if (editTargetId) {
       const req: UpdateMethodParams = {
@@ -135,15 +188,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodUpdate(req);
       console.log(res);
 
-      //   const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
-      //   for (let ele of updateFlows) {
-      //     const param = {
-      //       processId: ele.processId,
-      //       executionUuid: '',
-      //       inputParams: formData
-      //     };
-      //     await triggerFlowExecForm(param);
-      //   }
+      const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
+      for (let ele of updateFlows) {
+        const param = {
+          processId: ele.processId,
+          executionUuid: '',
+          inputParams: formData
+        };
+        await triggerFlows(param);
+      }
 
       if (res) {
         Message.success('更新成功');
@@ -158,15 +211,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodInsert(req);
       console.log(res);
 
-      //   const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
-      //   for (let ele of createFlows) {
-      //     const param = {
-      //       processId: ele.processId,
-      //       executionUuid: '',
-      //       inputParams: formData
-      //     };
-      //     await triggerFlowExecForm(param);
-      //   }
+      const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
+      for (let ele of createFlows) {
+        const param = {
+          processId: ele.processId,
+          executionUuid: '',
+          inputParams: formData
+        };
+        await triggerFlows(param);
+      }
 
       if (res) {
         Message.success('创建成功');

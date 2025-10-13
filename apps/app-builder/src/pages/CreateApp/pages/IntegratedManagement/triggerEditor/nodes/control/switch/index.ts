@@ -1,7 +1,7 @@
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
 import iconControl from '@/assets/flow/nodes/switch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import { defaultFormMeta } from '../../default-form-meta';
 import { generateNodeId } from '../../utils';
 

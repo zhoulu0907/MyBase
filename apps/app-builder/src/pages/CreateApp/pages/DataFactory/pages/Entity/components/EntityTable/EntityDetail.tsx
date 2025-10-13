@@ -9,9 +9,10 @@ import type { EntityNode, EntityListItem } from '@/pages/CreateApp/pages/DataFac
 
 interface EntityDetailProps {
   entity: EntityNode;
+  reloadList: () => void;
 }
 
-const EntityDetail: React.FC<EntityDetailProps> = ({ entity }) => {
+const EntityDetail: React.FC<EntityDetailProps> = ({ entity, reloadList }) => {
   const [activeTab, setActiveTab] = useState('fields');
 
   // 当实体变化时，重置到第一个标签页
@@ -37,7 +38,12 @@ const EntityDetail: React.FC<EntityDetailProps> = ({ entity }) => {
           <DataFields key={`fields-${entity.id || entity.entityId}`} entity={entityListItem} activeTab={activeTab} />
         </Tabs.TabPane>
         <Tabs.TabPane key="relations" title="关联关系">
-          <Relations key={`relations-${entity.id || entity.entityId}`} entity={entityListItem} activeTab={activeTab} />
+          <Relations
+            key={`relations-${entity.id || entity.entityId}`}
+            entity={entityListItem}
+            activeTab={activeTab}
+            reloadList={reloadList}
+          />
         </Tabs.TabPane>
         <Tabs.TabPane key="rules" title="数据规则">
           <DataRules key={`rules-${entity.id || entity.entityId}`} entity={entityListItem} activeTab={activeTab} />
