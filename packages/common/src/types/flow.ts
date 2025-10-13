@@ -12,7 +12,7 @@ export enum NodeType {
 
   END = 'end',
   CASE = 'switchCase',
-  CASE_DEFAULT = 'caseDefault',
+  CASE_DEFAULT = 'switchDefault',
   IF = 'ifCase',
   IF_BLOCK = 'ifBlock',
   SWITCH = 'switchCondition',
