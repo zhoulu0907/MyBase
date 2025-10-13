@@ -8,7 +8,7 @@ import { BreakMode } from '../../../components/const';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import {
   clearDataOriginNodeId,
   getDataNodeSource,

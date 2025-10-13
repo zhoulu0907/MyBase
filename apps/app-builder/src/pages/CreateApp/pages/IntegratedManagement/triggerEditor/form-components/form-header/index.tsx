@@ -11,7 +11,8 @@ import { FlowCommandId } from '../../shortcuts/constants';
 import { type FlowNodeRegistry } from '../../typings';
 import { TitleInput } from './title-input';
 import { getIcon } from './utils';
-import { NodeType, NodeTypeName } from '../../nodes/const';
+import { NodeTypeName } from '../../nodes/const';
+import { NodeType } from '@onebase/common';
 import styles from './index.module.less';
 
 function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void }) {

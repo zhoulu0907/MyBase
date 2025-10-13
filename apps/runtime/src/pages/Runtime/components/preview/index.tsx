@@ -1,4 +1,4 @@
-import { Button, Form, Message } from '@arco-design/web-react';
+import { Button, Form, Message, Modal } from '@arco-design/web-react';
 import {
   dataMethodData,
   dataMethodInsert,
@@ -6,13 +6,17 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  queryFlowExecForm,
+  triggerFlowExecForm,
+  CATEGORY_TYPE,
+  TRIGGER_EVENTS,
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
+import { getHashQueryParam, FLOW_MODAL_TYPE, NodeType } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -103,6 +107,40 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     startLoadPageSet({ pageSetId: pageSetId });
   };
 
+  // 流程多次触发
+  const triggerFlows = async (params: any) => {
+    const res = await triggerFlowExecForm(params);
+    if (res?.success) {
+      if(res.nodeType === '')
+      Modal.confirm({
+        title: 'Confirm deletion',
+        content:
+          'Are you sure you want to delete the 3 selected items? Once you press the delete button, the items will be deleted immediately. You can’t undo this action.',
+        okButtonProps: {
+          status: 'danger'
+        },
+        onOk: () => {
+          return new Promise((resolve, reject) => {
+            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+          }).catch((e) => {
+            Message.error({
+              content: 'Error occurs!'
+            });
+            throw e;
+          });
+        }
+      });
+    }
+
+    if (res.success && !res.executionEnd) {
+      const param = {
+        processId: params.processId,
+        executionUuid: res.executionUuid || '',
+        inputParams: params.formData
+      };
+      await triggerFlows(param);
+    }
+  };
   const submitForm = async () => {
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
@@ -121,10 +159,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('formData:   ', formData);
 
     // 接口判断 页面触发
-    // const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
-    // const pageId = curFormPage.id;
-
-    // const flowRes = await queryFlowExecForm(pageId);
+    const curFormPage = curPage.value?.pages.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
+    const pageId = curFormPage?.id;
+    const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
 
     if (editTargetId) {
       const req: UpdateMethodParams = {
@@ -135,15 +172,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodUpdate(req);
       console.log(res);
 
-      //   const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
-      //   for (let ele of updateFlows) {
-      //     const param = {
-      //       processId: ele.processId,
-      //       executionUuid: '',
-      //       inputParams: formData
-      //     };
-      //     await triggerFlowExecForm(param);
-      //   }
+      const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
+      for (let ele of updateFlows) {
+        const param = {
+          processId: ele.processId,
+          executionUuid: '',
+          inputParams: formData
+        };
+        await triggerFlows(param);
+      }
 
       if (res) {
         Message.success('更新成功');
@@ -158,15 +195,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodInsert(req);
       console.log(res);
 
-      //   const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
-      //   for (let ele of createFlows) {
-      //     const param = {
-      //       processId: ele.processId,
-      //       executionUuid: '',
-      //       inputParams: formData
-      //     };
-      //     await triggerFlowExecForm(param);
-      //   }
+      const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
+      for (let ele of createFlows) {
+        const param = {
+          processId: ele.processId,
+          executionUuid: '',
+          inputParams: formData
+        };
+        await triggerFlows(param);
+      }
 
       if (res) {
         Message.success('创建成功');

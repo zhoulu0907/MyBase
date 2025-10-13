@@ -8,7 +8,7 @@ import {
   type EntityFieldValidationTypes
 } from '@onebase/app';
 import { v4 as uuidv4 } from 'uuid';
-import { NodeType } from './const';
+import { NodeType } from '@onebase/common';
 
 export const generateNodeId = (nodeType: NodeType) => {
   const uuid = uuidv4().replaceAll('-', '');

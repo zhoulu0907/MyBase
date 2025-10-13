@@ -4,7 +4,7 @@ import { FlowNodeEntity, FlowNodeRegistry, useClientContext } from '@flowgram.ai
 import { debounce } from 'lodash-es';
 import { useCallback, useState } from 'react';
 import { FlowNodeRegistries } from '../nodes';
-import { NodeType } from '../nodes/const';
+import { NodeType } from '@onebase/common';
 import './index.less';
 
 interface AllNodeRegistry {
