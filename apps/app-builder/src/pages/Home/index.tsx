@@ -2,7 +2,6 @@ import { Layout } from '@arco-design/web-react';
 import React from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import CreateAppPage from '../CreateApp';
-import AppReleasePage from '../CreateApp/pages/AppRelease';
 import AppSettingPage from '../CreateApp/pages/AppSetting';
 import DataFactoryPage from '../CreateApp/pages/DataFactory';
 import IntegratedManagementPage from '../CreateApp/pages/IntegratedManagement';
@@ -42,7 +41,6 @@ const Home: React.FC = () => {
                   <Route path="integrated-management/*" element={<IntegratedManagementPage />} />
                   <Route path="data-factory" element={<DataFactoryPage />} />
                   <Route path="app-setting" element={<AppSettingPage />} />
-                  <Route path="app-release" element={<AppReleasePage />} />
                 </Route>
               </Routes>
             </div>
