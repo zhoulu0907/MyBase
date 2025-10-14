@@ -6,7 +6,6 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.event.FlowEventHandler;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
@@ -33,8 +32,6 @@ public class FlowProcessTest {
     @Autowired
     private FlowProcessExecApiImpl flowProcessExecApi;
 
-    @Autowired
-    private FlowEventHandler flowEventHandler;
 
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
@@ -48,11 +45,6 @@ public class FlowProcessTest {
         testToFlowChain(84076905441918976L);
     }
 
-    @Test
-    public void testSimple1() throws IOException {
-//        FlowProcessDO flowProcessDO = flowProcessRepository.findById(84076905441918976L);
-        flowEventHandler.onProcessUpdate(84076905441918976L);
-    }
 
     @Test
     public void testSimple2() throws IOException {

@@ -1,14 +1,10 @@
 package com.cmsr.onebase.module.flow.context.graph.nodes;
 
-import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @Author：huangjie
@@ -70,39 +66,6 @@ public class StartTimeNodeData extends NodeData implements Serializable {
     private String triggerDate;
 
     private String triggerTime;
-
-    //
-    private Optional<LocalDateTime> startLocalDateTime;
-    private Optional<LocalDateTime> endLocalDateTime;
-
-    private void init() {
-        if (startLocalDateTime != null || endLocalDateTime != null) {
-            return;
-        }
-        startTime = StringUtils.trimToNull(startTime);
-        if (StringUtils.isNotEmpty(startTime)) {
-            startLocalDateTime = Optional.of(LocalDateTime.parse(startTime, JsonGraphConstant.DATE_TIME_FORMATTER));
-        } else {
-            startLocalDateTime = Optional.empty();
-        }
-        endTime = StringUtils.trimToNull(endTime);
-        if (StringUtils.isNotEmpty(endTime)) {
-            endLocalDateTime = Optional.of(LocalDateTime.parse(endTime, JsonGraphConstant.DATE_TIME_FORMATTER));
-        } else {
-            endLocalDateTime = Optional.empty();
-        }
-    }
-
-    public boolean isCurrentTimeInRange() {
-        init();
-        if (startLocalDateTime.isPresent() && LocalDateTime.now().isBefore(startLocalDateTime.get())) {
-            return false;
-        }
-        if (endLocalDateTime.isPresent() && LocalDateTime.now().isAfter(endLocalDateTime.get())) {
-            return false;
-        }
-        return true;
-    }
 
     public String createCronExpression() {
         if (REPEAT_TYPE_DAY.equalsIgnoreCase(repeatType)) {
