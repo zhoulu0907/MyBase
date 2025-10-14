@@ -110,10 +110,8 @@ public class Graph {
         for (GraphNode node : nodes) {
             // 处理过滤条件中的字段类型
             processFilterConditionsForDataType(node.getData().getFilterCondition(), fieldInfoMap);
-
             // 处理节点数据中的字段类型
             processFieldsForDataType(node.getData().getFields(), fieldInfoMap);
-
             // 递归处理子节点
             recursionUpdateFieldDataType(node.getBlocks(), fieldInfoMap);
         }
