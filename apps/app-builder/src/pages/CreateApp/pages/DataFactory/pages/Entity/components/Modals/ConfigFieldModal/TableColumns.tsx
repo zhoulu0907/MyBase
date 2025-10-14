@@ -46,7 +46,7 @@ interface TableColumnsProps {
 
 // 列配置类型
 interface ColumnConfig {
-  title: string;
+  title: string | React.ReactNode;
   dataIndex: string;
   width?: number;
   ellipsis?: boolean;
@@ -69,7 +69,12 @@ const TableColumns = ({
 }: TableColumnsProps): ColumnConfig[] => {
   return [
     {
-      title: '字段名称',
+      title: (
+        <>
+          <span className={styles['required-dot']}>*</span>
+          <span>字段名称</span>
+        </>
+      ),
       dataIndex: 'fieldName',
       width: 175,
       align: 'center',
@@ -91,7 +96,12 @@ const TableColumns = ({
         )
     },
     {
-      title: '展示名称',
+      title: (
+        <>
+          <span className={styles['required-dot']}>*</span>
+          <span>展示名称</span>
+        </>
+      ),
       dataIndex: 'displayName',
       width: 175,
       align: 'center',
@@ -109,7 +119,12 @@ const TableColumns = ({
         )
     },
     {
-      title: '数据类型',
+      title: (
+        <>
+          <span className={styles['required-dot']}>*</span>
+          <span>数据类型</span>
+        </>
+      ),
       dataIndex: 'fieldType',
       width: 140,
       align: 'center',
@@ -268,8 +283,10 @@ const TableColumns = ({
             record.constraints.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE);
 
         if (hasConstraints) {
-          const lengthStatus = record.constraints?.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE ? '已开启' : '未开启';
-          const regexStatus = record.constraints?.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE ? '已开启' : '未开启';
+          const lengthStatus =
+            record.constraints?.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE ? '已开启' : '未开启';
+          const regexStatus =
+            record.constraints?.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE ? '已开启' : '未开启';
 
           return (
             <div className={styles['constraint-status']}>
