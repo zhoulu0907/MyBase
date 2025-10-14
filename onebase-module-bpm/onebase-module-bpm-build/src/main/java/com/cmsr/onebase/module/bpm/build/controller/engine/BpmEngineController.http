@@ -17,3 +17,7 @@ Content-Type: application/json
     }
 }
 
+### 请求 BpmEngineController /bpm/engine/test 接口 => 流程引擎测试
+GET {{baseUrl}}/bpm/engine/test
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

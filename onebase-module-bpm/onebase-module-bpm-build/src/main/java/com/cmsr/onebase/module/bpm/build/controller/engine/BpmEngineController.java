@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @Slf4j
 public class BpmEngineController {
-
     @PostMapping("/execute")
     @Operation(summary = "执行流程")
     @PreAuthorize("@ss.hasPermission('bpm:engine:execute')")
@@ -36,4 +35,4 @@ public class BpmEngineController {
         log.info("流程执行成功，流程ID：{}，结果：{}，耗时：{}ms", reqVO.getProcessId(), true, executionTime);
         return CommonResult.success(true);
     }
-    }
+}
