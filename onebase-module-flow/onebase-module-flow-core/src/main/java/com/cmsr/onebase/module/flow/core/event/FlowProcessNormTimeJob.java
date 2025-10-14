@@ -49,21 +49,14 @@ public class FlowProcessNormTimeJob implements MessageListener, ApplicationRunne
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
-    private RocketMQSlotManager slotManager;
-
     private PushConsumer consumer;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        slotManager = new RocketMQSlotManager();
-        slotManager.setSlotKey(RocketMQConstants.TIME_TOPIC_SLOT);
-        slotManager.setRedissonClient(redissonClient);
-        slotManager.afterPropertiesSet();
-        Integer slot = slotManager.getSlot();
         ClientConfiguration clientConfiguration = ClientConfiguration.newBuilder()
                 .setEndpoints(endpoints)
                 .build();
-        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_TIME_PREFIX + slot;
+        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_TIME_JOB_NORM;
         FilterExpression filterExpression = new FilterExpression(RocketMQConstants.NORMAL_TIME_MESSAGE_TAG);
         this.consumer = provider.newPushConsumerBuilder()
                 .setClientConfiguration(clientConfiguration)

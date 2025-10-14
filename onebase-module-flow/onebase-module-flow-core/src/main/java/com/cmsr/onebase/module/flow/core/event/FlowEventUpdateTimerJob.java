@@ -73,7 +73,7 @@ public class FlowEventUpdateTimerJob implements MessageListener, ApplicationRunn
         ClientConfiguration clientConfiguration = ClientConfiguration.newBuilder()
                 .setEndpoints(endpoints)
                 .build();
-        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_EVENT_PREFIX + "timer";
+        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_EVENT_JOB;
         FilterExpression filterExpression = new FilterExpression();
         this.consumer = provider.newPushConsumerBuilder()
                 .setClientConfiguration(clientConfiguration)

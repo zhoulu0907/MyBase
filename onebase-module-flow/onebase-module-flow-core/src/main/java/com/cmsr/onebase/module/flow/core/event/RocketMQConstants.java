@@ -21,11 +21,13 @@ public class RocketMQConstants {
      */
     public static final String CONSUMER_GROUP_EVENT_PREFIX = "flow-process-event-";
 
+    public static final String CONSUMER_GROUP_EVENT_JOB = "flow-process-event-job";
     /**
-     * 运行时定时任务consumer group前缀
+     * 运行时定时任务consumer group
      */
-    public static final String CONSUMER_GROUP_TIME_PREFIX = "flow-process-time-";
+    public static final String CONSUMER_GROUP_TIME_JOB_NORM = "flow-process-time-job-norm";
 
+    public static final String CONSUMER_GROUP_TIME_JOB_FLD = "flow-process-time-job-fld";
     /**
      * 流程事件slot key
      */
