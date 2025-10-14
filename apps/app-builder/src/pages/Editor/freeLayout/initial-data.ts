@@ -163,7 +163,7 @@ export const initialData = {
       type: 'startAPI',
       meta: {
         position: {
-          x: 150,
+          x: 200,
           y: 100
         }
       },
@@ -174,12 +174,16 @@ export const initialData = {
     },
     {
       id: 'node_0',
-      type: 'loop',
+      type: 'modal',
       meta: {
         position: {
-          x: 550,
-          y: 100
-        }
+          x: 200,
+          y: 250
+        },
+        defaultPorts: [
+          { type: 'output', location: 'bottom' },
+          { type: 'input', location: 'top' }
+        ]
       },
       data: {
         title: 'Condition',
@@ -209,9 +213,10 @@ export const initialData = {
       type: 'end',
       meta: {
         position: {
-          x: 1350,
-          y: 100
-        }
+          x: 200,
+          y: 400
+        },
+        defaultPorts: [{ type: 'input', location: 'top' }]
       },
       data: {
         title: 'End',
@@ -226,8 +231,7 @@ export const initialData = {
     },
     {
       sourceNodeID: 'node_0',
-      targetNodeID: 'end_0',
-      sourcePortID: 'if'
+      targetNodeID: 'end_0'
     }
   ]
 };

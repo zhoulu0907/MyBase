@@ -13,7 +13,7 @@ export const LoopNodeRegistry: FlowNodeRegistry = {
     description: '用于通过设置迭代次数和逻辑来重复执行一系列任务'
   },
   meta: {
-    expandable: false // disable expanded
+    expandable: false, // disable expanded
   },
   formMeta,
   canAdd(ctx, from) {

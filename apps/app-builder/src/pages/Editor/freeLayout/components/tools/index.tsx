@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { IconRedo, IconUndo } from '@douyinfe/semi-icons';
 import { IconButton, Tooltip } from '@douyinfe/semi-ui';
 import { usePlayground, usePlaygroundTools, useRefresh } from '@flowgram.ai/free-layout-editor';
+import { Button } from '@douyinfe/semi-ui';
 
 import { FitView } from './fit-view';
 import { Minimap } from './minimap';
@@ -11,7 +12,6 @@ import { MinimapSwitch } from './minimap-switch';
 // import { Run } from './run';
 import { Save } from './save';
 import { ToolContainer, ToolSection } from './styles';
-import { SwitchVertical } from './switch-vertical';
 import { ZoomSelect } from './zoom-select';
 
 export const Tools = () => {
@@ -28,7 +28,6 @@ export const Tools = () => {
   return (
     <ToolContainer className="fixed-demo-tools">
       <ToolSection>
-        <SwitchVertical />
         <ZoomSelect />
         <FitView fitView={tools.fitView} />
         <MinimapSwitch minimapVisible={minimapVisible} setMinimapVisible={setMinimapVisible} />
@@ -52,6 +51,7 @@ export const Tools = () => {
         </Tooltip>
         <Save disabled={playground.config.readonly} />
         {/* <Run /> */}
+        <Button onClick={() => tools.autoLayout()}>自动对齐</Button>
       </ToolSection>
     </ToolContainer>
   );

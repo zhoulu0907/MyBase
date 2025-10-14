@@ -14,7 +14,10 @@ export const StartApiNodeRegistry: FlowNodeRegistry = {
     selectable: false, // Start node cannot select
     copyDisable: true, // Start node cannot copy
     expandable: false, // disable expanded
-    addDisable: true // Start Node cannot be added
+    addDisable: true, // Start Node cannot be added
+    defaultPorts: [
+      { type: 'output', location: 'bottom' },
+    ]
   },
   info: {
     icon: iconStart,

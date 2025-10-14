@@ -3,12 +3,12 @@ import { useMemo } from 'react';
 import {
   ConstantKeys,
   FreeLayoutProps,
-  FlowLayoutDefault,
   FlowRendererKey,
   ShortcutsRegistry
 } from '@flowgram.ai/free-layout-editor';
 import { defaultFixedSemiMaterials } from '@flowgram.ai/fixed-semi-materials';
 import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
+import { createFreeSnapPlugin } from '@flowgram.ai/free-snap-plugin';
 import { debounce } from 'lodash-es';
 
 import { DragNode } from '../components';
@@ -92,10 +92,7 @@ export function useEditorProps(
       toNodeJSON(node, json) {
         return json;
       },
-      /**
-       * Set default layout
-       */
-      defaultLayout: FlowLayoutDefault.VERTICAL_FIXED_LAYOUT, // or FlowLayoutDefault.HORIZONTAL_FIXED_LAYOUT
+
       /**
        * Style config
        */
@@ -190,7 +187,8 @@ export function useEditorProps(
           'try-start-text': '尝试开始',
           'try-end-text': '尝试结束',
           'catch-text': '捕获错误'
-        }
+        },
+       
       },
       /**
        * Bind custom service
@@ -259,7 +257,15 @@ export function useEditorProps(
             overlayColor: 'rgba(255, 255, 255, 0)'
           },
           inactiveDebounceTime: 1
-        })
+        }),
+        // 自动对齐插件
+        createFreeSnapPlugin({
+          edgeColor: '#00B2B2',
+          alignColor: '#00B2B2',
+          edgeLineWidth: 1,
+          alignLineWidth: 1,
+          alignCrossWidth: 8,
+        }),
         // /**
         //  * Group plugin
         //  * 分组插件

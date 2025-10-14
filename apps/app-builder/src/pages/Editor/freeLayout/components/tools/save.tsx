@@ -13,12 +13,12 @@ export function Save(props: { disabled: boolean }) {
     setErrorCount(count);
   }, [clientContext]);
 
-  /**
-   * Validate all node and Save
-   */
+
   const onSave = useCallback(async () => {
     const allForms = clientContext.document.getAllNodes().map((node) => getNodeForm(node));
     await Promise.all(allForms.map(async (form) => form?.validate()));
+        console.log('看下这里信息，todo:保存拿到的是节点信息，没有相关的抽屉信息');
+
     console.log('>>>>> save data: ', clientContext.document.toJSON());
   }, [clientContext]);
 
