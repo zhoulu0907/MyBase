@@ -282,11 +282,26 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     // ========== 抽象方法定义 ==========
 
     /**
-     * 执行统一的数据处理流程
+     * 执行统一的数据处理流程（用于create操作）
      */
     public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Map<String, Object> data,
                                                String methodCode) {
-        log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，方法：" + methodCode);
+        return executeProcess(operationType, entityId, null, data, methodCode);
+    }
+
+    /**
+     * 执行统一的数据处理流程（用于update/delete/get操作）
+     *
+     * @param operationType 操作类型
+     * @param entityId 实体ID
+     * @param id 数据ID（update/delete/get操作必填）
+     * @param data 数据
+     * @param methodCode 方法代码
+     * @return 处理结果
+     */
+    public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Object id, Map<String, Object> data,
+                                               String methodCode) {
+        log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，数据ID：" + id + "，方法：" + methodCode);
 
         try {
             //1. 校验实体存在
@@ -297,6 +312,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
 
             //3. 初始化上下文
             ProcessContext context = initializeContext(operationType, entity, fields, data, methodCode);
+            context.setId(id); // 设置数据ID
 
 
             //4. 请求数据完整性校验（基础属性）
@@ -432,11 +448,29 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         Long entityId = context.getEntityId();
         Map<String, Object> data = context.getData();
         List<MetadataEntityFieldDO> fields = context.getFields();
+        Object id = context.getId();
+        OperationType operationType = context.getOperationType();
 
-        log.info("开始执行数据校验：entityId={}, 字段数量={}", entityId, fields.size());
+        log.info("开始执行数据校验：entityId={}, 操作类型={}, 字段数量={}", entityId, operationType.getDescription(), fields.size());
+
+        // 对于UPDATE操作，需要将ID添加到data中，以便唯一性校验时能够排除当前记录
+        Map<String, Object> dataForValidation = data;
+        if (operationType == OperationType.UPDATE && id != null) {
+            // 查找主键字段名
+            String primaryKeyField = fields.stream()
+                .filter(f -> f.getIsPrimaryKey() != null && f.getIsPrimaryKey() == 1)
+                .map(MetadataEntityFieldDO::getFieldName)
+                .findFirst()
+                .orElse("id");
+            
+            // 创建包含ID的临时数据副本用于校验
+            dataForValidation = new java.util.HashMap<>(data);
+            dataForValidation.put(primaryKeyField, id);
+            log.info("UPDATE操作：将ID[{}]添加到校验数据中，字段名：{}", id, primaryKeyField);
+        }
 
         // 使用校验管理器执行所有字段的校验
-        validationManager.validateEntity(entityId, fields, data);
+        validationManager.validateEntity(entityId, fields, dataForValidation);
 
         log.info("数据校验完成：entityId={}", entityId);
     }
@@ -576,6 +610,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     protected static class ProcessContext {
         private OperationType operationType;
         private Long entityId;
+        private Object id; // 数据ID，用于update/delete/get操作
         private Map<String, Object> data;
         private String methodCode;
         // 核心上下文字段

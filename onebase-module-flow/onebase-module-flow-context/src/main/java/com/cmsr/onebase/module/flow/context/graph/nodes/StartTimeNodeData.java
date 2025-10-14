@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ import java.util.Optional;
  * @Date：2025/9/9 13:55
  */
 @Data
-public class StartTimeNodeData extends NodeData {
+public class StartTimeNodeData extends NodeData implements Serializable {
     /**
      * 不重复
      */
@@ -49,8 +50,6 @@ public class StartTimeNodeData extends NodeData {
      * 自定义cron表达式
      */
     public static final String REPEAT_TYPE_CRON = "cron";
-
-    private String cronExpression;
 
     private String startTime;
 
@@ -106,28 +105,31 @@ public class StartTimeNodeData extends NodeData {
     }
 
     public String createCronExpression() {
-        if (REPEAT_TYPE_DAY.equals(repeatType)) {
+        if (REPEAT_TYPE_DAY.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
             cron.setMinuteAndHour(triggerTime);
             return cron.toCron();
         }
-        if (REPEAT_TYPE_WEEK.equals(repeatType)) {
+        if (REPEAT_TYPE_WEEK.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
             cron.setMinuteAndHour(triggerTime);
             cron.setWeek(repeatWeek);
             return cron.toCron();
         }
-        if (REPEAT_TYPE_MONTH.equals(repeatType)) {
+        if (REPEAT_TYPE_MONTH.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
             cron.setMinuteAndHour(triggerTime);
             cron.setDay(repeatDay);
             return cron.toCron();
         }
-        if (REPEAT_TYPE_YEAR.equals(repeatType)) {
+        if (REPEAT_TYPE_YEAR.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
             cron.setMinuteAndHour(triggerTime);
             cron.setDay(triggerDate);
             return cron.toCron();
+        }
+        if (REPEAT_TYPE_CRON.equalsIgnoreCase(repeatType)) {
+            return triggerTime;
         }
         throw new UnsupportedOperationException("不支持的定时类型: " + repeatType);
     }

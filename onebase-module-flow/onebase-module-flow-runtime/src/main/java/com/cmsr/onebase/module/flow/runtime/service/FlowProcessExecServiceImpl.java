@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
@@ -20,6 +21,8 @@ import com.google.common.collect.Sets;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,25 +66,62 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
         StartFormNodeData startFormNodeData = graphFlowCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
+        if (startFormNodeData == null) {
+            FormTriggerRespVO vo = formNotTriggerRespVO();
+            vo.setMessage("流程不存在");
+            return vo;
+        }
         List<Long> ids = extractFieldIds(startFormNodeData.getFilterCondition(), reqVO.getInputParams());
         Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap = getFieldInfoMap(ids);
         Map<String, Object> inputMap = convertInputParamsData(reqVO.getInputParams(), fieldInfoMap);
-        boolean isTrigger = true;
-        if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
-            OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
-            isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
+
+        try {
+            if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
+                boolean isTrigger = true;
+                if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
+                    OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
+                    isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
+                }
+                if (!isTrigger) {
+                    FormTriggerRespVO vo = formNotTriggerRespVO();
+                    vo.setMessage("表单不满足触发条件");
+                    return vo;
+                } else {
+                    ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
+                    return formTriggerRespVO(executorResult);
+                }
+            } else {
+                ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), reqVO.getExecutionUuid(), inputMap);
+                return formTriggerRespVO(executorResult);
+            }
+        } catch (Exception e) {
+            log.error("表单触发异常: {}", reqVO, e);
+            FormTriggerRespVO vo = formNotTriggerRespVO();
+            vo.setMessage("表单触发异常");
+            vo.setCause(ExceptionUtils.getRootCauseMessage(e));
+            return vo;
         }
-        if (!isTrigger) {
-            FormTriggerRespVO respVO = new FormTriggerRespVO();
-            respVO.setTriggered(0);
-            return respVO;
-        } else {
-            Map<String, Object> outputMap = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
-            FormTriggerRespVO respVO = new FormTriggerRespVO();
-            respVO.setTriggered(1);
-            respVO.setResult(outputMap);
-            return respVO;
-        }
+    }
+
+    private FormTriggerRespVO formNotTriggerRespVO() {
+        FormTriggerRespVO respVO = new FormTriggerRespVO();
+        respVO.setTriggered(false);
+        respVO.setExecutionEnd(true);
+        return respVO;
+    }
+
+    private FormTriggerRespVO formTriggerRespVO(ExecutorResult executorResult) {
+        FormTriggerRespVO respVO = new FormTriggerRespVO();
+        respVO.setTriggered(true);
+        respVO.setSuccess(executorResult.isSuccess());
+        respVO.setCode(executorResult.getCode());
+        respVO.setMessage(executorResult.getMessage());
+        respVO.setCause(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
+        respVO.setExecutionEnd(executorResult.isExecutionEnd());
+        respVO.setNodeType(executorResult.getExecutionEndNodeType());
+        respVO.setExecutionUuid(executorResult.getExecutionUuid());
+        respVO.setOutputParams(executorResult.getOutputParams());
+        return respVO;
     }
 
     /**
@@ -91,7 +131,6 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         Set<Long> ids1 = conditions.stream()
                 .flatMap(condition -> condition.getConditions().stream())
                 .map(ruleItem -> NumberUtils.toLong(ruleItem.getFieldId()))
-                .distinct()
                 .collect(Collectors.toSet());
         Set<Long> ids2 = inputParams.keySet();
         Set<Long> ids = Sets.newHashSet();

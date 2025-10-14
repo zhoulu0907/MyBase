@@ -18,8 +18,14 @@ public class ValidationChildNotEmptySaveReqVO {
     @NotNull(message = "字段ID不能为空")
     private Long fieldId;
 
-    @Schema(description = "是否启用(0/1)")
+    @Schema(description = "子实体ID")
+    private Long childEntityId;
+
+    @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;
+
+    @Schema(description = "最少行数", example = "1")
+    private Integer minRows;
 
     @Schema(description = "子表字段路径")
     private String childFieldPath;

@@ -4,11 +4,11 @@ import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
 import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -47,7 +47,7 @@ public class FlowProcessTimeJob {
         Long processId = NumberUtils.toLong(MapUtils.getString(jobParamsMap, JsonGraphConstant.PROCESS_ID));
         StartTimeNodeData startTimeNodeData = graphFlowCache.findStartTimeNodeDataByProcessId(processId);
         // 检查当前时间是否在设定的时间范围内
-        if (!startTimeNodeData.isCurrentTimeInRange()) {
+        if (startTimeNodeData != null && !startTimeNodeData.isCurrentTimeInRange()) {
             log.info("当前时间不在设定的时间范围内，跳过执行");
             return ExecuteResult.success("当前时间不在设定的时间范围内，跳过执行");
         } else {

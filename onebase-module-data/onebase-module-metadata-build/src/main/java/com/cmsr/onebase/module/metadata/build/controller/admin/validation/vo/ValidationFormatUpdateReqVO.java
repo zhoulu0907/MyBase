@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -50,4 +51,13 @@ public class ValidationFormatUpdateReqVO {
 
     @Schema(description = "弹窗类型", example = "SHORT")
     private String popType;
+    
+    /**
+     * 兼容性方法：为BeanUtils提供promptMessage字段的getter
+     * 优先返回popPrompt的值，如果popPrompt为空则返回promptMessage的值
+     */
+    @JsonProperty("promptMessage")  
+    public String getPromptMessage() {
+        return popPrompt != null ? popPrompt : promptMessage;
+    }
 }

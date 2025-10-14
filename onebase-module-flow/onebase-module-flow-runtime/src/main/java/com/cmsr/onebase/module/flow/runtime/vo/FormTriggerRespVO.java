@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.runtime.vo;
 
+import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -9,13 +10,23 @@ import java.util.Map;
 @Schema(description = "表单触发响应VO")
 public class FormTriggerRespVO {
 
-    @Schema(description = "执行ID，用于交互式执行中恢复需要恢复执行标志")
+    @Schema(description = "是否触发了执行")
+    private Boolean triggered;
+
+    private boolean success;
+
+    private String code;
+
+    private String message;
+
+    private String cause;
+
+    private boolean executionEnd;
+
     private String executionUuid;
 
-    @Schema(description = "是否触发了执行")
-    private Integer triggered;
+    private String nodeType;
 
-    @Schema(description = "执行结果")
-    private Map<String, Object> result;
+    private Map<String, Object> outputParams;
 
 }
