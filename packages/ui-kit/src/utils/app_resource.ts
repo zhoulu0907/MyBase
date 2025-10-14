@@ -128,6 +128,12 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       });
 
       loadPagesetResp.pages[index].components.push(...colComponents);
+
+      if (_page.id === curViewId.value) {
+        loadPagesetResp.pages[index].isLatestUpdated = 1;
+      } else {
+        loadPagesetResp.pages[index].isLatestUpdated = 0;
+      }
     } else if (_page.pageType === CATEGORY_TYPE.LIST) {
       console.log('listComponents: ', listComponents);
       loadPagesetResp.pages[index].components = listComponents.map((component) => {
