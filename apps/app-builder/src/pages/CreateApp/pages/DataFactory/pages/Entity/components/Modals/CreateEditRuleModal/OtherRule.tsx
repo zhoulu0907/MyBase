@@ -1,5 +1,5 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Form, Grid, Input, Message, Modal, Select } from '@arco-design/web-react';
+import { Form, Grid, Input, Message, Modal, Select, Space } from '@arco-design/web-react';
 import * as ruleService from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
@@ -57,9 +57,8 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
     if (handler) {
       const res = await handler(id);
-      console.log('getRuleById', res);
       if (res) {
-        form.setFieldsValue(res);
+        form.setFieldsValue({ ...res, popPrompt: res.promptMessage });
       }
     }
   };
@@ -243,39 +242,33 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
           <Grid.Row gutter={16}>
             <Grid.Col span={12}>
               <Form.Item label="最小长度" field="minLength" rules={[{ required: true, message: '请输入最小长度' }]}>
-                <Input placeholder="请输入最小长度" defaultValue={0} />
+                <Input placeholder="请输入最小长度" defaultValue="0" />
               </Form.Item>
             </Grid.Col>
             <Grid.Col span={12}>
               <Form.Item label="最大长度" field="maxLength" rules={[{ required: true, message: '请输入最大长度' }]}>
-                <Input placeholder="请输入最大长度" defaultValue={8000} />
+                <Input placeholder="请输入最大长度" defaultValue="8000" />
               </Form.Item>
             </Grid.Col>
           </Grid.Row>
         )}
 
         {ruleType === VALIDATION_TYPES.RANGE && (
-          <Grid.Row gutter={16}>
-            <Grid.Col span={10}>
-              <Form.Item label="范围区间" field="range" rules={[{ required: true, message: '请输入范围区间' }]}>
+          <Form.Item label="范围区间" required>
+            <Space align="center" className={styles['range-space']}>
+              <Form.Item field="minValue" rules={[{ required: true, message: '请输入范围区间' }]}>
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={4}>~</Grid.Col>
-            <Grid.Col span={10}>
-              <Form.Item field="range" rules={[{ required: true, message: '请输入范围区间' }]}>
+              <span>~</span>
+              <Form.Item field="maxValue" rules={[{ required: true, message: '请输入范围区间' }]}>
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
-            </Grid.Col>
-          </Grid.Row>
+            </Space>
+          </Form.Item>
         )}
 
         {ruleType === VALIDATION_TYPES.FORMAT && (
-          <Form.Item
-            label="正则表达式"
-            field="formatValidationType"
-            rules={[{ required: true, message: '请输入正则表达式' }]}
-          >
+          <Form.Item label="正则表达式" field="regex" rules={[{ required: true, message: '请输入正则表达式' }]}>
             <Input placeholder="请输入正则表达式" />
           </Form.Item>
         )}

@@ -1,7 +1,8 @@
-import { CreateFlowMgmtReq, ListFlowMgmtReq, RenameFlowMgmtReq, UpdateFlowMgmtDefinitionReq } from '../types/flow';
+import { CreateFlowMgmtReq, RenameFlowMgmtReq, UpdateFlowMgmtDefinitionReq } from '../types/flow';
+import { type PageParam } from '../types/common';
 import { flowService } from './clients';
 
-export const listFlowMgmt = (params: ListFlowMgmtReq) => {
+export const listFlowMgmt = (params: PageParam) => {
   return flowService.get('/mgmt/page', params);
 };
 

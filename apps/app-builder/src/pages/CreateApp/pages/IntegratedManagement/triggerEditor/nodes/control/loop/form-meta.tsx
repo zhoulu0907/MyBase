@@ -8,7 +8,7 @@ import { BreakMode } from '../../../components/const';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import {
   clearDataOriginNodeId,
   getDataNodeSource,
@@ -69,9 +69,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = async (changeValue: any, values: any) => {
     // 校验表单
-    validateNodeForm(form, payloadForm, false);
+    // validateNodeForm(form, payloadForm, false);
 
-    handlePropsOnChange(values);
+    // handlePropsOnChange(values);
   };
 
   const getInitData = () => {

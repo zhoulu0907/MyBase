@@ -1,6 +1,6 @@
 import iconInteraction from '@/assets/flow/nodes/nagivate.svg';
 import { type FlowNodeRegistry } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 

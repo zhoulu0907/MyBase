@@ -72,6 +72,7 @@ export interface ITableDataConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABLE_DATA;
+  advanced?: boolean;
 }
 
 export interface IRadioDataConfigType {
@@ -97,6 +98,7 @@ export interface IBooleanConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SWITCH_INPUT;
+  advanced?: boolean;
 }
 
 /**

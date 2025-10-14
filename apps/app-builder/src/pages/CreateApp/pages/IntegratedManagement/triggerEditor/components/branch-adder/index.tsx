@@ -1,5 +1,5 @@
 import { type FlowNodeEntity, useClientContext } from '@flowgram.ai/fixed-layout-editor';
-
+import { NodeType } from '@onebase/common';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { CaseNodeRegistry } from '../../nodes/control/case';
 import { CatchBlockNodeRegistry } from '../../nodes/control/catch-block';
@@ -20,7 +20,7 @@ export default function BranchAdder(props: PropsType) {
   function addBranch() {
     const block = operation.addBlock(
       node,
-      node.flowNodeType === 'switch' ? CaseNodeRegistry.onAdd!(ctx, node) : CatchBlockNodeRegistry.onAdd!(ctx, node),
+      node.flowNodeType === NodeType.SWITCH ? CaseNodeRegistry.onAdd!(ctx, node) : CatchBlockNodeRegistry.onAdd!(ctx, node),
       {
         index: 0
       }

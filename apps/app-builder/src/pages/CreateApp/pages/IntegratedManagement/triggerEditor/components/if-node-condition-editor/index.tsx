@@ -27,7 +27,7 @@ import {
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '../../nodes/const';
+import { NodeType } from '@onebase/common';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -36,6 +36,7 @@ const Option = Select.Option;
 const ALLOW_NODE_TYPES = [
   NodeType.DATA_QUERY,
   NodeType.DATA_ADD,
+  NodeType.DATA_CALC,
   NodeType.START_FORM,
   NodeType.START_ENTITY,
   NodeType.START_DATE_FIELD,
@@ -58,6 +59,35 @@ const opCodeOptions = [
   {
     label: '变量',
     value: FieldType.VARIABLES
+  }
+];
+
+const commonOperatorOptions = [
+  {
+    name: '等于',
+    value: VALIDATION_TYPE.EQUALS
+  },
+
+  {
+    name: '不等于',
+    value: VALIDATION_TYPE.NOT_EQUALS
+  },
+
+  {
+    name: '包含',
+    value: VALIDATION_TYPE.CONTAINS
+  },
+  {
+    name: '不包含',
+    value: VALIDATION_TYPE.NOT_CONTAINS
+  },
+  {
+    name: '为空',
+    value: VALIDATION_TYPE.IS_EMPTY
+  },
+  {
+    name: '不为空',
+    value: VALIDATION_TYPE.IS_NOT_EMPTY
   }
 ];
 
@@ -383,6 +413,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
         NodeType.DATA_QUERY,
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
+        NodeType.DATA_CALC,
         NodeType.LOOP
       ]),
     []
@@ -518,19 +549,29 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                               form.setFieldValue(item.field + '.value', undefined);
                                             }}
                                           >
-                                            {form.getFieldValue(item.field)?.fieldId &&
-                                              entityFieldValidationTypes &&
-                                              entityFieldValidationTypes
-                                                .find(
-                                                  (cc) =>
-                                                    cc.fieldId ==
-                                                    getSplitFieldId(form.getFieldValue(item.field).fieldId)
-                                                )
-                                                ?.validationTypes.map((operator: ValidationTypeItem) => (
+                                            {(() => {
+                                              const fieldId = form.getFieldValue(item.field)?.fieldId;
+                                              let options: ValidationTypeItem[] | undefined;
+                                              if (fieldId && entityFieldValidationTypes) {
+                                                const found = entityFieldValidationTypes.find(
+                                                  (cc) => cc.fieldId == getSplitFieldId(fieldId)
+                                                );
+                                                options = found?.validationTypes;
+                                              }
+                                              if (options && options.length > 0) {
+                                                return options.map((operator: ValidationTypeItem) => (
                                                   <Option key={operator.code} value={operator.code}>
                                                     {operator.name}
                                                   </Option>
-                                                ))}
+                                                ));
+                                              } else {
+                                                return commonOperatorOptions.map((operator) => (
+                                                  <Option key={operator.value} value={operator.value}>
+                                                    {operator.name}
+                                                  </Option>
+                                                ));
+                                              }
+                                            })()}
                                           </Select>
                                         </Form.Item>
                                       </Grid.Col>
@@ -593,7 +634,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                                                    ｆх编辑公式
+                                                    ƒx 编辑公式
                                                   </Button>
                                                 </Form.Item>
                                               )}

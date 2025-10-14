@@ -3,14 +3,14 @@
 import {
   type CreateApplicationReq,
   type DeleteApplicationReq,
-  type ListApplicationReq,
+  type GetApplicationReq,
   type UpdateApplicationNameReq,
-  type UpdateApplicationReq,
-  type GetApplicationReq
+  type UpdateApplicationReq
 } from '../types/application';
+import { type PageParam } from '../types/common';
 import { appService } from './clients';
 
-export const listApplication = (params: ListApplicationReq) => {
+export const listApplication = (params: PageParam) => {
   return appService.get('/application/page', params);
 };
 
@@ -33,4 +33,8 @@ export const updateApplicationName = (params: UpdateApplicationNameReq) => {
 export const deleteApplication = (params: DeleteApplicationReq) => {
   const { id, name } = params;
   return appService.post(`/application/delete?id=${id}&name=${name}`);
+};
+
+export const generateId = () => {
+  return appService.get('/application/id/generate');
 };

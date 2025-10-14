@@ -87,7 +87,7 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     setFuncPermission(res);
   };
 
-  const changeViewVisitPermission = (val: FunPermissionViewVisit.canVisit | FunPermissionViewVisit.notVisit) => {
+  const changeViewVisitPermission = async (val: FunPermissionViewVisit.canVisit | FunPermissionViewVisit.notVisit) => {
     const params: UpdatePagePermissionReq = {
       isPageAllowed: val,
       permissionReq: {
@@ -96,7 +96,17 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         roleId
       }
     };
-    updatePagePermission(params);
+    try {
+      await updatePagePermission(params);
+      // 立即更新表单值，确保 UI 显示正确
+      form.setFieldsValue({ isPageAllowed: val });
+      // 可选：重新拉取完整权限数据以保持一致性
+      await getApplicationPermission();
+    } catch (error) {
+      console.error('更新失败:', error);
+      // 回滚表单值
+      form.setFieldsValue({ isPageAllowed: !val });
+    }
   };
 
   const changeOperationPermission = async (values: any) => {

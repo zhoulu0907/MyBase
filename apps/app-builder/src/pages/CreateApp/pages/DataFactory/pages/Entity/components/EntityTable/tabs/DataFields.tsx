@@ -148,13 +148,6 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       render: (isRequired: boolean) => (isRequired ? '是' : '否')
     },
     {
-      title: '允许空值',
-      dataIndex: 'allowNull',
-      key: 'allowNull',
-      width: 90,
-      render: (allowNull: boolean) => (allowNull ? '是' : '否')
-    },
-    {
       title: '长度范围',
       dataIndex: 'dataLength',
       key: 'dataLength',
@@ -176,8 +169,9 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
               编辑
             </Button>
           )}
+          {/* 本期不支持删除 */}
           {record.isSystemField === FIELD_TYPE.CUSTOM && (
-            <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
+            <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)} disabled>
               删除
             </Button>
           )}

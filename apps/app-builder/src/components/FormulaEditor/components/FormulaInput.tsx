@@ -1,18 +1,19 @@
-import { Button, Space, Alert } from '@arco-design/web-react';
-import { IconCopy, IconBug } from '@arco-design/web-react/icon';
+import { Alert } from '@arco-design/web-react';
 import { useCallback, useRef, useEffect, useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView } from '@codemirror/view';
-import type { Variable, FunctionItem } from '../utils/types';
+import type { FunctionItem } from '../utils/types';
 import { placeholdersPlugin } from '../utils/placeholders';
 import styles from './FormulaInput.module.less';
+import { defaultExtenstion } from '../utils/defaultLine';
+import type { AppEntity } from '@onebase/app';
 
 interface FormulaInputProps {
   value: string;  // 当前公式的值
   onChange: (value: string) => void; // 公式变化时的回调函数
   onCopy: () => void; // 复制成功后的回调函数
   onDebug: () => void; // 调试按钮点击回调函数
-  filteredVariables: Variable[]; // 过滤后的变量列表
+  filteredVariables: AppEntity[]; // 过滤后的变量列表
   filteredFunctions: FunctionItem[];  // 过滤后的函数列表
   onEditorReady?: (editor: { insertAtPosition: (text: string, type?: string, position?: number) => void }) => void; // 编辑器就绪回调
 }
@@ -46,74 +47,74 @@ export function FormulaInput({
    * 
   */
   const insertAtPosition = useCallback(
-        (text: string, type?: string, position?: number) => {
-            // 获取编辑器实例
-            if (!updateRef.current || !updateRef.current.view) {
-                console.warn('编辑器实例未准备好');
-                return;
-            }
-            const view = updateRef.current.view;
-            const state = view.state;
-            const [range] = state?.selection?.ranges || [];
+    (text: string, type?: string, position?: number) => {
+      // 获取编辑器实例
+      if (!updateRef.current || !updateRef.current.view) {
+        console.warn('编辑器实例未准备好');
+        return;
+      }
+      const view = updateRef.current.view;
+      const state = view.state;
+      const [range] = state?.selection?.ranges || [];
 
-            // 根据类型格式化插入文本
-            let insertText = text;
-            if(type === 'var') {
-                // 如果已经是[[...]]格式，不再重复添加
-                if (!text.startsWith('[[') && !text.endsWith(']]')) {
-                    insertText = `[[${text}]]`;
-                }
-            } else if(type === 'fn') {
-                // 确保函数格式正确并包含括号
-                if (!text.startsWith('{{')) {
-                    // 提取函数名（去掉可能的括号）
-                    const funcName = text.includes('()') ? text.replace('()', '') : text;
-                    insertText = `{{${funcName}}}()`;
-                } else if (!text.includes('()')) {
-                    // 如果已经有{{}}但没有括号，添加括号
-                    insertText = `${text}()`;
-                }
-            }
+      // 根据类型格式化插入文本
+      let insertText = text;
+      if (type === 'var') {
+        // 如果已经是[[...]]格式，不再重复添加
+        if (!text.startsWith('[[') && !text.endsWith(']]')) {
+          insertText = `[[${text}]]`;
+        }
+      } else if (type === 'fn') {
+        // 确保函数格式正确并包含括号
+        if (!text.startsWith('{{')) {
+          // 提取函数名（去掉可能的括号）
+          const funcName = text.includes('()') ? text.replace('()', '') : text;
+          insertText = `{{${funcName}}}()`;
+        } else if (!text.includes('()')) {
+          // 如果已经有{{}}但没有括号，添加括号
+          insertText = `${text}()`;
+        }
+      }
 
-            // 确定插入位置
-            let insertFrom = range?.from || 0;
-            let insertTo = range?.to || insertFrom;
-            
-            // 如果指定了位置参数，则使用指定位置
-            if (typeof position === 'number' && position >= 0 && position <= state.doc.length) {
-                insertFrom = position;
-                insertTo = position;
-            }
+      // 确定插入位置
+      let insertFrom = range?.from || 0;
+      let insertTo = range?.to || insertFrom;
 
-            // 确定光标位置
-            let cursorPosition = insertFrom + insertText.length;
+      // 如果指定了位置参数，则使用指定位置
+      if (typeof position === 'number' && position >= 0 && position <= state.doc.length) {
+        insertFrom = position;
+        insertTo = position;
+      }
 
-            // 如果是函数类型，确保光标位于括号中间
-            if (type === 'fn') {
-                // 在最终的插入文本中查找左括号位置
-                const leftBracketPos = insertText.indexOf('(');
-                if (leftBracketPos !== -1) {
-                    // 将光标设置在括号中间
-                    cursorPosition = insertFrom + leftBracketPos + 1;
-                }
-            }
+      // 确定光标位置
+      let cursorPosition = insertFrom + insertText.length;
 
-            view.dispatch({
-                changes: {
-                    from: insertFrom,
-                    to: insertTo,
-                    insert: insertText,
-                },
-                selection: {
-                    anchor: cursorPosition,
-                }
-            });
+      // 如果是函数类型，确保光标位于括号中间
+      if (type === 'fn') {
+        // 在最终的插入文本中查找左括号位置
+        const leftBracketPos = insertText.indexOf('(');
+        if (leftBracketPos !== -1) {
+          // 将光标设置在括号中间
+          cursorPosition = insertFrom + leftBracketPos + 1;
+        }
+      }
 
-            // 聚焦并插入文本
-            view.focus();
+      view.dispatch({
+        changes: {
+          from: insertFrom,
+          to: insertTo,
+          insert: insertText,
+        },
+        selection: {
+          anchor: cursorPosition,
+        }
+      });
 
-        }, []
-    );
+      // 聚焦并插入文本
+      view.focus();
+
+    }, []
+  );
 
   /**
    * 检查公式的语法是否正确。
@@ -274,35 +275,31 @@ export function FormulaInput({
 
   // 自定义扩展
   const extensions = [
+    //设置首行-显示单行文本和两个按钮
+    defaultExtenstion(handleCopy, onDebug),
     EditorView.updateListener.of((update) => {
       updateRef.current = update;
     }),
     EditorView.lineWrapping,
+    //覆盖codemirror原本的样式
+    EditorView.baseTheme({
+        ".cm-gutterElement":{display: "none"},
+        ".cm-content": {padding: 0},
+        ".cm-gutters.cm-gutters-before": {borderRightWidth:0}
+      })
   ];
 
   return (
     <div className={styles.formulaInput}>
-      <div className={styles.label}>单行文本 =</div>
-      <div className={styles.inputWrapper}>
-        <CodeMirror
-          ref={editorRef}
-          value={value}
-          onChange={onChange}
-          height="200px"
-          placeholder="请输入公式或从左侧选择字段和函数"
-          className={styles.editor}
-          extensions={[placeholdersPlugin(), ...extensions]}
-        />
-        <Space className={styles.actions}>
-          <Button size="small" icon={<IconCopy />} onClick={handleCopy} className={styles.actionButton}>
-            复制
-          </Button>
-          <Button size="small" icon={<IconBug />} onClick={onDebug} className={styles.actionButton}>
-            调试
-          </Button>
-        </Space>
-      </div>
-
+      <CodeMirror
+        ref={editorRef}
+        value={value}
+        onChange={onChange}
+        height="200px"
+        placeholder="请输入公式或从左侧选择字段和函数"
+        className={styles.editor}
+        extensions={[placeholdersPlugin(), ...extensions]}
+      />
       {/* 错误提示 */}
       {errors.length > 0 && (
         <div className={styles.errorSection}>

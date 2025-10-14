@@ -2,13 +2,15 @@ import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/inter
 import { Collapse, Empty, Spin, Tag } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { getEntityRules } from '@onebase/app';
+import { validationTypeMap } from '../../../Modals/CreateEditRuleModal/rule';
 import styles from './DataRules.module.less';
 
 // 数据规则接口定义
 interface DataRule {
   id: string;
   rgName: string;
-  type: 'required' | 'range' | 'format' | 'custom';
+  validationType: string;
+  validationItems: string[];
   condition: {
     field: string;
     operator: string;
@@ -16,7 +18,7 @@ interface DataRule {
     minValue?: number;
     maxValue?: number;
   };
-  hint: string;
+  errorMessage: string;
   isActive: boolean;
 }
 
@@ -61,15 +63,13 @@ const DataRules: React.FC<DataRulesProps> = ({ node }) => {
 
   // 格式化条件显示
   const formatCondition = (rule: DataRule) => {
-    const { condition } = rule;
+    const { validationItems, validationType } = rule;
 
-    if (rule.type === 'required') {
-      return `【${condition?.field}】【${condition?.operator}】`;
-    } else if (rule.type === 'range') {
-      return `【${condition?.field}】【${condition?.operator}】【${condition?.minValue}】~【${condition?.maxValue}】`;
-    }
+    const cond = validationItems.map((item: string) => {
+      return `【${item}】【${validationTypeMap[validationType].slice(0, -2)}】`;
+    });
 
-    return `【${condition?.field}】【${condition?.operator}】`;
+    return cond;
   };
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const DataRules: React.FC<DataRulesProps> = ({ node }) => {
                     </div>
                     <div className={styles['hint-section']}>
                       <div className={styles.label}>提示:</div>
-                      <div className={styles.hint}>{rule.hint}</div>
+                      <div className={styles.hint}>{rule.errorMessage}</div>
                     </div>
                   </div>
                 </Collapse.Item>

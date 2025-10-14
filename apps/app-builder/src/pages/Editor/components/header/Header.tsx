@@ -7,6 +7,7 @@ import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { iconMap } from '@/components/CreateApp/const';
+import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
 import { useBasicEditorStore } from '@/store';
@@ -14,7 +15,6 @@ import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
-import DynamicIcon from '@/components/DynamicIcon';
 
 import {
   AppStatus,
@@ -36,6 +36,7 @@ import {
   useFormEditorSignal,
   useListEditorSignal,
   usePageEditorSignal,
+  usePageViewEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
@@ -82,6 +83,7 @@ export default function EditorHeader() {
   const [renameForm] = Form.useForm();
 
   const { clearCurComponentID } = usePageEditorSignal();
+  const { curViewId } = usePageViewEditorSignal;
 
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
@@ -191,7 +193,6 @@ export default function EditorHeader() {
         setAppStatus(appResp.appStatus);
       }
     }
-    console.log('appResp: ', appResp);
   };
 
   // 获取主表对应的主实体信息
@@ -201,7 +202,7 @@ export default function EditorHeader() {
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
 
-    console.log('entityWithChildren: ', entityWithChildren);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
 
     if (entityWithChildren) {
       setMainEntity({
@@ -228,16 +229,20 @@ export default function EditorHeader() {
 
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
+    console.log('curViewId: ', curViewId.value);
 
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,
       formComponents: formComponents.value,
+      formPageComponentSchemas: cloneDeep(formPageComponentSchemas.value),
+      fromColComponentsMap: cloneDeep(fromLayoutSubComponents.value),
+
       listComponents: listComponents.value,
-      formPageComponentSchemas: new Map(Object.entries(cloneDeep(formPageComponentSchemas.value))),
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
-      fromColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(fromLayoutSubComponents.value))) },
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
+
+    console.log('savePageSetParams: ', savePageSetParams);
 
     startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
   };

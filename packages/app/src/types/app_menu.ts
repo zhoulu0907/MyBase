@@ -4,15 +4,15 @@ export interface ListApplicationMenuReq {
 }
 
 export interface ApplicationMenu {
-    id: string;
-    parentId?: string;
-    menuCode: string;
-    menuSort: number;
-    menuType: number;
-    menuName: string;
-    menuIcon: string;
-    isVisible: number;
-    children: ApplicationMenu[];
+  id: string;
+  parentId?: string;
+  menuCode: string;
+  menuSort: number;
+  menuType: number;
+  menuName: string;
+  menuIcon: string;
+  isVisible: number;
+  children: ApplicationMenu[];
 }
 
 export enum MenuType {
@@ -30,16 +30,24 @@ export enum PageType {
   NORMAL = 1
 }
 
+export enum CATEGORY_TYPE {
+  NAVIGATE = 'navigate',
+  LAYOUT = 'layout',
+  FORM = 'form',
+  LIST = 'list',
+  SHOW = 'show'
+}
+
 export const RootParentPage = {
-    id: "0",
-    menuCode: "root",
-    parentId: "0",
-    menuSort: 0,
-    menuType: MenuType.GROUP,
-    menuName: "根目录",
-    menuIcon: "",
-    isVisible: 1,
-    children: [] as ApplicationMenu[]
+  id: '0',
+  menuCode: 'root',
+  parentId: '0',
+  menuSort: 0,
+  menuType: MenuType.GROUP,
+  menuName: '根目录',
+  menuIcon: '',
+  isVisible: 1,
+  children: [] as ApplicationMenu[]
 };
 
 export interface CreateApplicationMenuReq {
@@ -59,9 +67,18 @@ export interface UpdateApplicationMenuNameReq {
 }
 
 export interface UpdateApplicationMenuOrderReq {
-  id: string;
+  id?: string;
   parentId?: string;
-  ids: number[];
+  /**
+   * 菜单顺序树结构
+   */
+  menuTree?: MenuOrderNode[];
+}
+
+export interface MenuOrderNode {
+  id?: string;
+  children?: MenuOrderNode[];
+  [property: string]: any;
 }
 
 export interface UpdateApplicationMenuVisibleReq {

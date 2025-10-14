@@ -14,7 +14,7 @@ interface FieldDetail {
   fieldType: string;
   defaultValue: string;
   isUnique: boolean;
-  allowNull: boolean;
+  isRequired: boolean;
   constraints: string;
   isSystemField: number;
   entityId: string;
@@ -126,7 +126,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
         description: values.description,
         fieldType: values.fieldType,
         isSystemField: fieldDetail.isSystemField,
-        displayName: fieldDetail.displayName
+        displayName: values.displayName
       };
 
       await updateField(updateData);
@@ -173,7 +173,8 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
         className={styles['edit-field-drawer']}
         footer={
           <>
-            <Button type="text" status="danger" onClick={() => openDeleteModal()}>
+            {/* 本期不支持删除 */}
+            <Button type="text" status="danger" onClick={() => openDeleteModal()} disabled>
               删除
             </Button>
             <Space>
@@ -213,11 +214,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
               </Form.Item>
 
               <Form.Item label="数据类型" field="fieldType" rules={[{ required: true, message: '请选择数据类型' }]}>
-                <Select
-                  placeholder="请选择数据类型"
-                  options={fieldTypeOptions}
-                  disabled={fieldDetail.isSystemField === FIELD_TYPE.SYSTEM}
-                />
+                <Select placeholder="请选择数据类型" options={fieldTypeOptions} disabled />
               </Form.Item>
 
               <Form.Item label="字段描述" field="description">
@@ -241,8 +238,8 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
                 <Checkbox>设置为唯一字段</Checkbox>
               </Form.Item>
 
-              <Form.Item label="空值约束" field="allowNull" triggerPropName="checked">
-                <Checkbox>允许空值</Checkbox>
+              <Form.Item label="空值约束" field="isRequired" triggerPropName="checked">
+                <Checkbox>必填</Checkbox>
               </Form.Item>
 
               <Form.Item label="字段约束" field="constraints">

@@ -1,16 +1,16 @@
-import { STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
-import { cloneDeep } from 'lodash-es';
 
 import {
   COMPONENT_GROUP_NAME,
   EditRender,
   ENTITY_COMPONENT_TYPES,
+  getComponentConfig,
   getComponentSchema,
   getComponentWidth,
-  getComponentConfig,
   type GridItem,
   usePageEditorSignal
 } from '@onebase/ui-kit';
@@ -21,10 +21,8 @@ import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
 import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
-// import PrevIcon from '@/assets/images/prev_icon.svg';
 import NextIcon from '@/assets/images/next_icon.svg';
 import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
-// import NextActiveIcon from '@/assets/images/next_icon_active.svg';
 
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
@@ -32,13 +30,24 @@ import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import { COMPONENT_MAP } from '../panel/components/metadata/component_map';
 import 'react-grid-layout/css/styles.css';
+import { COMPONENT_MAP } from '../panel/components/metadata/component_map';
+import View from '../view';
 import styles from './index.module.less';
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
+  const [isFormEditor, setIsFormEditor] = useState(false);
+  const [pageSetId, setPageSetId] = useState('');
+
+  useEffect(() => {
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
+    }
+  }, []);
 
   useSignals();
 
@@ -71,6 +80,11 @@ export default function EditorWorkspace() {
     }
   }, [components]);
 
+  const hash = window.location.hash;
+  useEffect(() => {
+    setIsFormEditor(hash.includes(EDITOR_TYPES.FORM_EDITOR));
+  }, [hash]);
+
   // 取消隐藏组件
   const handleShowComponent = (componentId: string) => {
     const schema = pageComponentSchemas[componentId];
@@ -97,9 +111,7 @@ export default function EditorWorkspace() {
       const originalComp = pageComponentSchemas[oldId];
       if (!originalComp) return;
 
-      const schemaConfig = cloneDeep(
-        getComponentConfig(pageComponentSchemas[oldId], comp.type)
-      );
+      const schemaConfig = cloneDeep(getComponentConfig(pageComponentSchemas[oldId], comp.type));
 
       const schema = getComponentSchema(comp.type);
 
@@ -107,7 +119,7 @@ export default function EditorWorkspace() {
       schema.config.cpName = comp.displayName || '';
       schema.config.id = newId; // 使用新 ID
 
-      console.debug('newProps', schema, originalComp)
+      console.debug('newProps', schema, originalComp);
       const newProps = {
         id: newId,
         type: comp.type,
@@ -124,7 +136,7 @@ export default function EditorWorkspace() {
 
       // 2. 复制子组件结构
       if (layoutSubComponents[oldId]) {
-        const newSubComponents = layoutSubComponents[oldId].map(row =>
+        const newSubComponents = layoutSubComponents[oldId].map((row) =>
           row.map((item: any) => {
             // 为每个子组件创建新 ID
             const childNewId = idMap.get(item.id) || `${item.type}-${uuidv4()}`;
@@ -188,7 +200,8 @@ export default function EditorWorkspace() {
       collectDeleteIds(componentId);
 
       // 删除所有收集到的组件
-      idsToDelete.forEach((id: string) => { // 明确参数类型
+      idsToDelete.forEach((id: string) => {
+        // 明确参数类型
         delPageComponentSchemas(id);
         delLayoutSubComponents(id);
       });
@@ -204,25 +217,28 @@ export default function EditorWorkspace() {
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
-        {/* TODO 撤回重做 */}
-        <div className={styles.editorStepCtrl}>
-          <img className={styles.pageModeIcon} src={PrevActiveIcon} />
-          <img className={styles.pageModeIcon} src={NextIcon} />
-        </div>
-        <Divider type="vertical" />
-        <div className={styles.pageModeCtrl}>
-          {pageMode === 'pc' && (
-            <>
-              <img className={styles.pageModeIcon} src={PCActiveIcon} />
-              <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setPageMode('mobile')} />
-            </>
-          )}
-          {pageMode === 'mobile' && (
-            <>
-              <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setPageMode('pc')} />
-              <img className={styles.pageModeIcon} src={MobileActiveIcon} />
-            </>
-          )}
+        <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
+        <div className={styles.workspaceHeaderRight}>
+          {/* TODO 撤回重做 */}
+          <div className={styles.editorStepCtrl}>
+            <img className={styles.pageModeIcon} src={PrevActiveIcon} />
+            <img className={styles.pageModeIcon} src={NextIcon} />
+          </div>
+          <Divider type="vertical" />
+          <div className={styles.pageModeCtrl}>
+            {pageMode === 'pc' && (
+              <>
+                <img className={styles.pageModeIcon} src={PCActiveIcon} />
+                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setPageMode('mobile')} />
+              </>
+            )}
+            {pageMode === 'mobile' && (
+              <>
+                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setPageMode('pc')} />
+                <img className={styles.pageModeIcon} src={MobileActiveIcon} />
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -230,10 +246,10 @@ export default function EditorWorkspace() {
         className={styles.workspaceBody}
         id="workspace-body"
         onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
-          // 点击空白区域取消选中
-
           const target = e.target as HTMLElement;
           if (target.id === 'workspace-content') {
+            // 点击空白区域取消选中
+            console.log('点击空白区域取消选中');
             clearCurComponentID();
             setShowDeleteButton(false);
           }
@@ -262,7 +278,7 @@ export default function EditorWorkspace() {
 
                     schema.config.cpName = field.displayName;
                     schema.config.id = cpID;
-                    schema.config.dataField = [item.entityID, field.fieldId];
+                    schema.config.dataField = [item.entityId, field.fieldId];
                     schema.config.label.text = field.displayName;
                     const props = {
                       id: cpID,

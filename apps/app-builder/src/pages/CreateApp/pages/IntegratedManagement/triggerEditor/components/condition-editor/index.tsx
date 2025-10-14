@@ -26,7 +26,7 @@ import {
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '../../nodes/const';
+import { NodeType } from '@onebase/common';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -273,6 +273,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.DATA_QUERY,
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
+        NodeType.DATA_CALC,
         NodeType.LOOP
       ]),
     []
@@ -293,6 +294,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
         NodeType.DATA_ADD,
+        NodeType.DATA_CALC,
         NodeType.START_FORM,
         NodeType.START_ENTITY,
         NodeType.START_TIME,
@@ -498,7 +500,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                                                    ｆх编辑公式
+                                                    ƒx 编辑公式
                                                   </Button>
                                                 </Form.Item>
                                               )}

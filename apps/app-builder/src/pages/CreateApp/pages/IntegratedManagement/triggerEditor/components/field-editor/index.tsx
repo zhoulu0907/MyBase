@@ -17,7 +17,7 @@ import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, type AppEntityField, type ConditionField } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '../../nodes/const';
+import { NodeType } from '@onebase/common';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -127,7 +127,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
         NodeType.DATA_ADD,
         NodeType.DATA_QUERY,
         NodeType.DATA_QUERY_MULTIPLE,
-        NodeType.DATA_UPDATE
+        NodeType.DATA_UPDATE,
+        NodeType.DATA_CALC
       ]),
     []
   );
@@ -135,7 +136,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
   // 使用 useCallback 缓存函数，避免不必要的重新创建
   const getVariableOptions = useCallback(
     (nodeId: string, dataNodeId?: string): TreeSelectDataType[] => {
-      const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM];
+      const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM, NodeType.DATA_CALC];
 
       let nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
 

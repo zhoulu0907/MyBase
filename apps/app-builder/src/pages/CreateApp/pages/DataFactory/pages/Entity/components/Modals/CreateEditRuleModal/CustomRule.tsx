@@ -24,6 +24,7 @@ interface RuleFormValues {
   valueRules: ConditionRow[][];
   popPrompt: string;
   popType: string;
+  filterCondition?: ConditionRow[][];
 }
 
 interface CreateRuleModalProps {
@@ -52,8 +53,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
     operator: 'equals',
     valueType: 'custom',
     fieldValue: '',
-    logicOperator: 'AND',
-    logicType: 'CONDITION'
+    logicOperator: 'AND'
   });
 
   // 创建默认条件组
@@ -66,6 +66,18 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
       console.log('getRuleById', res);
       if (res) {
         form.setFieldsValue(res);
+
+        const conditions = res?.valueRules.map(item => {
+          return {
+            conditions: item.map(item => ({
+              fieldId: item.fieldId,
+              op: item.operator,
+              operatorType: item.valueType,
+              value: item.fieldValue
+            }))
+          };
+        });
+        form.setFieldValue('filterCondition', conditions);
       }
     } catch (error) {
       console.error('获取规则失败:', error);
@@ -191,25 +203,33 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
   const loadFieldOptions = async () => {
     const res = await getEntityFieldsWithChildren(entity.id);
     // 处理主表字段
-    const parentFields = (res?.parentFields || []).map((item: { displayName: string; fieldId: string }) => ({
-      label: item.displayName,
-      value: item.fieldId,
-      isParent: true
-    }));
+    const parentFields = [
+      {
+        key: res.entityId,
+        title: res.entityName,
+        children: res?.parentFields.map((item) => {
+          return {
+            key: item.fieldId,
+            title: item.displayName,
+            fieldType: item.fieldType
+          };
+        })
+      }
+    ];
 
     // 处理子表字段
     const childFields = (res?.childEntities || [])
       .flatMap((entity: { childFields: { displayName: string; fieldId: string }[] }) => entity?.childFields || [])
       .map((item: { displayName: string; fieldId: string }) => ({
-        label: item.displayName,
-        value: item.fieldId,
+        title: item.displayName,
+        key: item.fieldId,
         fieldType: item.fieldType
       }));
     const allFields = [...parentFields, ...childFields];
     setAllOptions(allFields);
     setParentOptions(parentFields);
 
-    getFieldCheckType(allFields.map((item) => item.value));
+    getFieldCheckType(res?.parentFields?.map((item) => item.fieldId));
   };
 
   // 批量获取字段可选校验类型
@@ -253,16 +273,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         >
           <Input placeholder="请输入规则名称" maxLength={50} showWordLimit />
         </Form.Item>
-
-        {/* <Form.Item label="校验类型" field="validationType" rules={[{ required: true, message: '请选择校验类型' }]}>
-          <Select onChange={handleValidationTypeChange} placeholder="请选择校验类型">
-            {validationTypeOptions.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item> */}
 
         <ConditionEditor
           nodeId={entity.id}

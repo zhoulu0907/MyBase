@@ -1,6 +1,6 @@
 import iconControl from '@/assets/flow/nodes/tryCatch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 

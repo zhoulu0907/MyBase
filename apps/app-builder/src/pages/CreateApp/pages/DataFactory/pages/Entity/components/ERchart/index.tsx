@@ -6,6 +6,7 @@ import DetailDrawer from '../Drawers/DetailDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
 import { FIELD_TYPE } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
+import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
 import { GridNodePositioner, performAutoLayout, SectionCollapseHandler } from './utils';
 import { useNewNodeStore } from '@/store/store_entity';
@@ -42,7 +43,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     const { newNodes } = useNewNodeStore();
     const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
-    const [zoom, setZoom] = useState(90);
+    const [zoom, setZoom] = useState(100);
 
     const graphRef = useRef<Graph | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -399,7 +400,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (
             target.closest('#collapse-icon') ||
             target.closest('#status-change-icon') ||
-            target.closest('#node-footer')
+            target.closest('#node-footer') ||
+            target.closest(`.${nodeStyles['field-section-content']}`)
           ) {
             e.stopPropagation();
             return;
@@ -429,7 +431,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (
             target.closest('#collapse-icon') ||
             target.closest('#status-change-icon') ||
-            target.closest('#node-footer')
+            target.closest('#node-footer') ||
+            target.closest(`.${nodeStyles['field-section-content']}`)
           ) {
             e.stopPropagation();
             return;
@@ -588,12 +591,12 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             max={150}
             min={60}
             step={5}
-            defaultValue={90}
+            defaultValue={100}
             className={styles['zoom-input']}
             value={zoom}
             onChange={(value) => changeZoom(value)}
           />
-          <Button type="outline" size="mini" onClick={() => changeZoom(90)}>
+          <Button type="outline" size="mini" onClick={() => changeZoom(100)}>
             重置
           </Button>
           <Button type="primary" size="mini" onClick={handleAutoLayout}>

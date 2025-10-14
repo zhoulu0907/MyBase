@@ -1,5 +1,6 @@
 import {
   CreatePageSetReq,
+  CreatePageViewParams,
   DeletePageSetReq,
   GetAppIdByPageSetIdReq,
   GetComponentListByPageIdReq,
@@ -7,6 +8,7 @@ import {
   GetPageMetadataReq,
   GetPageSetIdReq,
   GetPageSetMainMetaDataReq,
+  ListPageViewParams,
   LoadPageSetReq,
   SavePageSetReq
 } from '../types';
@@ -50,4 +52,12 @@ export const getPageMetadata = (params: GetPageMetadataReq) => {
 
 export const getComponentListByPageId = (params: GetComponentListByPageIdReq) => {
   return appService.post('/resource/component/list', params);
+};
+
+export const createPageView = (params: CreatePageViewParams) => {
+  return appService.post('/resource/page/view/create', params);
+};
+
+export const listPageView = (params: ListPageViewParams) => {
+  return appService.post('/resource/page/view/list', params);
 };

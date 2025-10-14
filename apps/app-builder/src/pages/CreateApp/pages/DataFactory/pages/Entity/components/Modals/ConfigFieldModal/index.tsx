@@ -11,7 +11,7 @@ import type { AutoNumberRule } from './types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import SortableTable from './SortableTable';
-import { arrayMove } from './utils';
+import { arrayMove, systemFieldsLength } from './utils';
 import styles from './index.module.less';
 
 interface FieldFormValues {
@@ -22,7 +22,7 @@ interface FieldFormValues {
   fieldType: string;
   defaultValue: string;
   isUnique: number;
-  allowNull: number;
+  isRequired: number;
   isSystemField: number;
   sortOrder?: number;
   isDeleted?: boolean;
@@ -54,9 +54,6 @@ const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE,
   ENTITY_FIELD_TYPE.AUTO_CODE.VALUE
 ];
-
-// 用于计算自定义字段index
-const systemFieldsLength = 10;
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
@@ -131,8 +128,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       description: '',
       fieldType: ENTITY_FIELD_TYPE.TEXT.VALUE,
       defaultValue: '',
-      isUnique: 1,
-      allowNull: 1,
+      isUnique: 0,
+      isRequired: 0,
       constraints: {
         lengthEnabled: 0,
         minLength: 0,
@@ -151,17 +148,17 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     form.setFieldsValue({ fields: newFields });
   };
 
-  const deleteField = (index: number) => {
-    const field = fields[index];
-    if (field.isSystemField === FIELD_TYPE.SYSTEM) {
+  const deleteField = (id: string) => {
+    const field = fields.find((f) => f.id === id);
+    if (field?.isSystemField === FIELD_TYPE.SYSTEM) {
       Message.error('系统字段不能删除');
       return;
     }
     let newFields;
-    if (field.id && field.id.startsWith('field-')) {
-      newFields = fields.filter((_, i) => i !== index);
+    if (id && id.startsWith('field-')) {
+      newFields = fields.filter((f) => f.id !== id);
     } else {
-      newFields = fields.map((field, i) => (i === index ? { ...field, isDeleted: true } : field));
+      newFields = fields.map((f) => (f.id === id ? { ...f, isDeleted: true } : f));
     }
 
     setFields(newFields);
@@ -170,7 +167,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const updateField = (index: number, updatedField: Partial<FieldFormValues>) => {
     setFields((prevFields) => {
-      const newFields = prevFields.map((field, i) => (i === index ? { ...field, ...updatedField } : field));
+      const data = form.getFieldsValue().fields[index];
+      const newFields = prevFields.map((field, i) => (i === index ? { ...field, ...data, ...updatedField } : field));
       form.setFieldsValue({ fields: newFields });
       return newFields;
     });
@@ -192,10 +190,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       const formValues = await form.validate();
       console.log('formValues', formValues);
 
-      const customFields = getCurrentTableData();
-      console.log('customFields', customFields);
+      // 获取最新数据，再进行过滤
+      const mergedFields = getCurrentTableData();
+      const nonSystemFields = mergedFields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
 
-      const fieldDataList = customFields.map((field: FieldFormValues) => {
+      const fieldDataList = nonSystemFields.map((field: FieldFormValues) => {
         const fieldData = {
           appId: curAppId,
           entityId: entity.entityId,
@@ -229,8 +228,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   const handleConfigConfirm = (fieldType: string, fieldId: string, configData: any) => {
     const fieldIndex = fields.findIndex((field) => field.id === fieldId);
     if (fieldIndex === -1) return;
-
-    // const isEnabled = configData.length > 0 ? 0 : 1;
 
     let fieldConfig = {};
     switch (fieldType) {
@@ -324,10 +321,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   // 将表单数据转换为表格数据
   const getCurrentTableData = (formFields?: Partial<FieldFormValues>) => {
     const formValues = form.getFieldsValue();
-    const fields = formFields || formValues.fields || [];
+    const formListFields = formFields || formValues.fields || [];
 
-    return activeFields.map((originalField, index) => {
-      const formField = fields[index];
+    return fields.map((originalField, index) => {
+      const formField = formListFields[index];
       if (formField) {
         return {
           ...originalField,
@@ -354,7 +351,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       confirmLoading={loading}
       style={{ width: 1400 }}
     >
-      <Form form={form} initialValues={{ fields: activeFields }} onSubmit={handleFinish}>
+      <Form form={form} initialValues={{ fields: activeFields }}>
         <Form.List field="fields">
           {() => {
             return (

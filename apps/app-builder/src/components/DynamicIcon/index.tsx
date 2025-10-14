@@ -5,6 +5,7 @@ interface DynamicIconProps extends IIconBase {
   theme?: 'outline' | 'filled' | 'two-tone' | 'multi-color';
   size?: number | string;
   fill?: string;
+  style?: React.CSSProperties;
 }
 
 const DynamicIcon = ({ IconComponent, ...rest }: DynamicIconProps) => {

@@ -39,7 +39,6 @@ const PlatformInfo: React.FC = () => {
 
   const getPlatformInfo = async () => {
     const res = await getPlatformInfoApi();
-    // console.log('platformInfo res:', res);
     if (res.id) {
       setLicenseInfo(res);
     }
@@ -161,9 +160,13 @@ const PlatformInfo: React.FC = () => {
       // 验证文件对象
       if (file && (file instanceof File || file instanceof Blob)) {
         
-        // 创建FormData并添加文件 - 确保参数名为"file"
         const formData = new FormData();
-        formData.append('file', file, file.name || 'license.lic.sm4');
+        if (file instanceof File) {
+          formData.append('file', file, file.name || 'license.lic.sm4');
+        } else {
+          // 对于 Blob 类型，使用固定文件名
+          formData.append('file', file, 'license.lic.sm4');
+        }
         
         setIsUploading(true);
         setLoading(true);

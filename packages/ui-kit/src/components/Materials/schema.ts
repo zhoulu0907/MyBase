@@ -29,7 +29,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.RELATED_FORM]: BasicSchema.XRelatedForm,
   [ALL_COMPONENT_TYPES.STATIC_TEXT]: BasicSchema.XStaticText,
   [ALL_COMPONENT_TYPES.RICH_TEXT]: BasicSchema.XRichText,
-  [ALL_COMPONENT_TYPES.CAROUSEL_F]: BasicSchema.XFCarousel,
+  [ALL_COMPONENT_TYPES.CAROUSEL_FORM]: BasicSchema.XCarouselForm,
   [ALL_COMPONENT_TYPES.SUB_TABLE]: BasicSchema.XSubTable,
   [ALL_COMPONENT_TYPES.DATA_SELECT]: BasicSchema.XDataSelect,
 
