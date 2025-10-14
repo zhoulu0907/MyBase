@@ -278,6 +278,7 @@ public class PageSetServiceImpl implements PageSetService {
             finalPageDO.setDetailViewMode(page.getDetailViewMode());
             finalPageDO.setIsDefaultEditViewMode(page.getIsDefaultEditViewMode());
             finalPageDO.setIsDefaultDetailViewMode(page.getIsDefaultDetailViewMode());
+            finalPageDO.setIsLastUpdated(page.getIsLastUpdated());
 
             pageDataRepository.update(finalPageDO);
 

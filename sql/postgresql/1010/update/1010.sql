@@ -6,3 +6,5 @@ ALTER TABLE public.app_resource_page ADD is_default_edit_view_mode int2 DEFAULT 
 COMMENT ON COLUMN public.app_resource_page.is_default_edit_view_mode IS '是否默认编辑视图';
 ALTER TABLE public.app_resource_page ADD is_default_detail_view_mode int2 DEFAULT 0 NOT NULL;
 COMMENT ON COLUMN public.app_resource_page.is_default_detail_view_mode IS '是否默认详情视图';
+ALTER TABLE public.app_resource_page ADD is_last_updated int2 DEFAULT 0 NOT NULL;
+COMMENT ON COLUMN public.app_resource_page.is_last_updated IS '最新更新的视图';

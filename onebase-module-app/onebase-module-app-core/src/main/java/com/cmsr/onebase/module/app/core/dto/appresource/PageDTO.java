@@ -21,7 +21,10 @@ public class PageDTO {
 
     private Integer isDefaultDetailViewMode;
 
+    private Integer isLastUpdated;
+
     private List<ComponentDTO> components;
 
     private Boolean created;
+
 }
