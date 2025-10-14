@@ -1,6 +1,7 @@
-import { Button, Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
+import TickSVG from '@/assets/images/tick.svg';
+import { Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
 import { IconDown, IconPlus } from '@arco-design/web-react/icon';
-import { ViewType, type PageView } from '@onebase/app';
+import { generateId, ViewType, type PageView } from '@onebase/app';
 import {
   createPageEditorSignal,
   useEditorSignalMap,
@@ -72,6 +73,11 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
           return (
             <Menu.Item key={id} onClick={() => handleSelectView(id)}>
               <div key={id} className={styles.dropItem}>
+                {view.id === curViewId.value ? (
+                  <img className={styles.dropItemIcon} src={TickSVG} alt="tick" />
+                ) : (
+                  <div style={{ width: '16px', height: '16px' }}></div>
+                )}
                 <div className={styles.dropItemLabel}>{view.pageName}</div>
                 <div>{showViewType(view)}</div>
               </div>
@@ -80,15 +86,10 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
         })}
 
         <Menu.Item key="addView">
-          <Button
-            type="text"
-            size="mini"
-            className={styles.addViewButton}
-            onClick={() => setCreateViewModalVisible(true)}
-          >
-            <IconPlus />
-            新增视图
-          </Button>
+          <div className={styles.addViewButton} onClick={() => setCreateViewModalVisible(true)}>
+            <IconPlus fontSize={14} style={{ marginRight: '2px', color: '#029e9e' }} />
+            <div>新增视图</div>
+          </div>
         </Menu.Item>
       </Menu>
     </div>
@@ -110,7 +111,9 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
         // });
 
         // 创建临时视图
-        const pageId = `${Date.now()}`;
+
+        const pageId = await generateId();
+        console.log('pageId: ', pageId);
         usePageViewEditorSignal.addPageView({
           id: pageId,
           pageName: createForm.getFieldValue('viewName'),
