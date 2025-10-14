@@ -128,8 +128,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       description: '',
       fieldType: ENTITY_FIELD_TYPE.TEXT.VALUE,
       defaultValue: '',
-      isUnique: 1,
-      isRequired: 1,
+      isUnique: 0,
+      isRequired: 0,
       constraints: {
         lengthEnabled: 0,
         minLength: 0,

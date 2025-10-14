@@ -22,8 +22,8 @@ interface EntityFormValues {
 
 // 实体类型(1:自建表，2:复用已有表)
 const entitySources = [
-  { label: '新建业务实体', value: 1 },
-  { label: '使用自有数据源中的数据表', value: 2 }
+  { label: '新建业务实体', value: '1' },
+  { label: '引用自有数据源中已有资产', value: '2' }
 ];
 
 const dsOptions: { label: string; value: string }[] = [];
@@ -119,10 +119,10 @@ const CreateEntityModal: React.FC<{
           </Form.Item>
         )}
 
-        {form.getFieldValue('source') === entitySources[1].value.toString() && (
+        {form.getFieldValue('source') === entitySources[1].value && (
           <>
             <Form.Item label="外部数据源" field="dsResource" rules={[{ required: true, message: '请选择外部数据源' }]}>
-              <Select placeholder="请选择自有数据源，可选已接入的外部数据源" options={dsOptions} />
+              <Select placeholder="请选择自有数据源" options={dsOptions} />
             </Form.Item>
 
             <Form.Item label="数据表" field="dsTable" rules={[{ required: true, message: '请选择数据表' }]}>
