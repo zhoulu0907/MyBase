@@ -1,4 +1,4 @@
-import { Graph } from '@antv/x6';
+import { Graph, Node as X6Node } from '@antv/x6';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
@@ -8,7 +8,13 @@ import { FIELD_TYPE } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
-import { GridNodePositioner, performAutoLayout, SectionCollapseHandler, toggleNodeShadow } from './utils';
+import {
+  GridNodePositioner,
+  performAutoLayout,
+  SectionCollapseHandler,
+  toggleNodeShadow,
+  toggleEdgeSelected
+} from './utils';
 import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
@@ -62,14 +68,17 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       getGraphPositon
     }));
 
-    const handleSectionCollapse = (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
-      if (!collapseHandlerRef.current) return;
+    const handleSectionCollapse = useCallback(
+      (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
+        if (!collapseHandlerRef.current) return;
 
-      const nodeData = data.nodes.find((n) => n.entityId === nodeId);
-      if (!nodeData) return;
+        const nodeData = data.nodes.find((n) => n.entityId === nodeId);
+        if (!nodeData) return;
 
-      collapseHandlerRef.current.handleSectionCollapse(nodeId, section, isCollapsed, nodeData);
-    };
+        collapseHandlerRef.current.handleSectionCollapse(nodeId, section, isCollapsed, nodeData);
+      },
+      [data]
+    );
 
     const portsItems = (nodeData: EntityNode, systemCollapsed: boolean = true) => {
       const items: object[] = [];
@@ -210,7 +219,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         onNodeAddRelation,
         onNodeAddMasterDetail,
         onFieldClick,
-        onStatusChange
+        onStatusChange,
+        handleSectionCollapse,
+        newNodes
       ]
     );
 
@@ -429,8 +440,21 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           }, 50);
         });
 
-        graphRef.current.on('edge:click', ({ e, x, y, edge, view }) => {
-          console.log('edge:click', e, x, y, edge, view);
+        // 记录当前选中边 id
+        let currentSelectedEdgeId: string | null = null;
+
+        graphRef.current.on('edge:click', ({ edge }) => {
+          // 取消已选中边
+          if (currentSelectedEdgeId && currentSelectedEdgeId !== edge.id) {
+            const prev = graphRef.current?.getCellById(currentSelectedEdgeId);
+            if (prev && prev.isEdge()) {
+              toggleEdgeSelected(prev, false);
+            }
+          }
+          // 选中当前边
+          toggleEdgeSelected(edge, true);
+          currentSelectedEdgeId = edge.id as string;
+
           onEdgeEdit?.(edge.data);
         });
 
@@ -490,6 +514,13 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             toggleNodeShadow(prev, false);
           }
           currentSelectedId = null;
+
+          // 清除选中边
+          const selectedEdge = currentSelectedEdgeId && graphRef.current?.getCellById(currentSelectedEdgeId);
+          if (selectedEdge && selectedEdge.isEdge()) {
+            toggleEdgeSelected(selectedEdge, false);
+          }
+          currentSelectedEdgeId = null;
         });
 
         graphRef.current.on('scale', ({ sx }) => {
@@ -592,9 +623,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
         // 更新节点位置
         newPositions.forEach(({ id, x, y }) => {
-          const node = graphRef.current?.getCellById(id);
-          if (node) {
-            node.position(x, y);
+          const cell = graphRef.current?.getCellById(id);
+          if (cell && cell.isNode()) {
+            (cell as X6Node).position(x, y);
 
             // 同步更新数据
             const nodeData = data.nodes.find((n) => n.entityId === id);
