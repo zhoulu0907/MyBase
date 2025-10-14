@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
@@ -237,4 +238,10 @@ public class JsonUtils {
         return JSONUtil.isTypeJSONObject(str);
     }
 
+    /**
+     * 创建一个新的ObjectNode对象
+     */
+    public static ObjectNode createObjectNode() {
+        return objectMapper.createObjectNode();
+    }
 }
