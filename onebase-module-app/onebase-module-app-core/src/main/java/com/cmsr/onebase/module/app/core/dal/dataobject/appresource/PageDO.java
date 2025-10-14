@@ -40,8 +40,8 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "is_default_detail_view_mode", columnDefinition = "INT(2)", comment = "是否默认详情视图")
     private Integer isDefaultDetailViewMode;
 
-    @Column(name = "is_last_updated", columnDefinition = "INT(2)", comment = "最新更新的视图")
-    private Integer isLastUpdated;
+    @Column(name = "is_latest_updated", columnDefinition = "INT(2)", comment = "最新更新的视图")
+    private Integer isLatestUpdated;
 
     /**
      * 页面标题
