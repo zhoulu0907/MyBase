@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * ER图字段VO
  *
@@ -48,4 +50,7 @@ public class ERFieldVO {
 
     @Schema(description = "排序顺序", example = "1")
     private Integer sortOrder;
+
+    @Schema(description = "字段选项列表（单/多选字段专用）")
+    private List<FieldOptionRespVO> options;
 }

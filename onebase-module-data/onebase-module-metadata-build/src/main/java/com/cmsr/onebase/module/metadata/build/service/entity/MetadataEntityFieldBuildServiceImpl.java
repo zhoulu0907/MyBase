@@ -1746,15 +1746,21 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 必填（与 isRequired 联动）
         if (entityField != null && entityField.getIsRequired() != null) {
-            // 原有的字段约束逻辑
-            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
-            req.setFieldId(fieldId);
-            req.setConstraintType("REQUIRED");
-            req.setIsEnabled(entityField.getIsRequired());
-            req.setPromptMessage(null);
-            req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            req.setAppId(entityField.getAppId());
-            fieldConstraintService.saveFieldConstraintConfig(req);
+            // 只有当 isRequired = 1 时才创建约束配置，为0时删除已有配置
+            if (entityField.getIsRequired() == 1) {
+                // 原有的字段约束逻辑
+                FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+                req.setFieldId(fieldId);
+                req.setConstraintType("REQUIRED");
+                req.setIsEnabled(entityField.getIsRequired());
+                req.setPromptMessage(null);
+                req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                req.setAppId(entityField.getAppId());
+                fieldConstraintService.saveFieldConstraintConfig(req);
+            } else {
+                // isRequired = 0 时删除已有的必填约束配置
+                fieldConstraintService.delete(fieldId, "REQUIRED");
+            }
             
             // 新增：同步到 MetadataValidationRequiredDO
             processRequiredValidation(fieldId, entityField);
@@ -1762,14 +1768,20 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 唯一（与 isUnique 联动）
         if (entityField != null && entityField.getIsUnique() != null) {
-            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
-            req.setFieldId(fieldId);
-            req.setConstraintType("UNIQUE");
-            req.setIsEnabled(entityField.getIsUnique());
-            req.setPromptMessage(null);
-            req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            req.setAppId(entityField.getAppId());
-            fieldConstraintService.saveFieldConstraintConfig(req);
+            // 只有当 isUnique = 1 时才创建约束配置，为0时删除已有配置
+            if (entityField.getIsUnique() == 1) {
+                FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+                req.setFieldId(fieldId);
+                req.setConstraintType("UNIQUE");
+                req.setIsEnabled(entityField.getIsUnique());
+                req.setPromptMessage(null);
+                req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                req.setAppId(entityField.getAppId());
+                fieldConstraintService.saveFieldConstraintConfig(req);
+            } else {
+                // isUnique = 0 时删除已有的唯一性约束配置
+                fieldConstraintService.delete(fieldId, "UNIQUE");
+            }
             
             // 新增：同步到 MetadataValidationUniqueDO
             processUniqueValidation(fieldId, entityField);
@@ -1807,7 +1819,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     rule.setItemType(ruleReq.getItemType());
                     rule.setItemOrder(ruleReq.getItemOrder());
                     rule.setFormat(ruleReq.getFormat());
-                    rule.setTextValue(ruleReq.getTextValue());
+                    
+                    // 兼容性处理：TEXT类型的规则项支持从format字段获取文本值
+                    String textValue = ruleReq.getTextValue();
+                    if ("TEXT".equalsIgnoreCase(ruleReq.getItemType()) && textValue == null && ruleReq.getFormat() != null) {
+                        textValue = ruleReq.getFormat();
+                    }
+                    rule.setTextValue(textValue);
+                    
                     rule.setRefFieldId(ruleReq.getRefFieldId());
                     // 使用新的枚举值：1-启用，0-禁用
                     rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
@@ -1824,9 +1843,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      */
     private void populateFieldRelatedData(MetadataEntityFieldDO field, EntityFieldRespVO vo) {
         // 填充选项信息
-        if ("SINGLE_SELECT".equalsIgnoreCase(field.getFieldType()) ||
+        if ("SELECT".equalsIgnoreCase(field.getFieldType()) ||
+            "SINGLE_SELECT".equalsIgnoreCase(field.getFieldType()) ||
             "MULTI_SELECT".equalsIgnoreCase(field.getFieldType()) ||
-            "PICKLIST".equalsIgnoreCase(field.getFieldType())) {
+            "PICKLIST".equalsIgnoreCase(field.getFieldType()) ||
+            "DATA_SELECTION".equalsIgnoreCase(field.getFieldType()) ||
+            "MULTI_USER".equalsIgnoreCase(field.getFieldType()) ||
+            "MULTI_DEPARTMENT".equalsIgnoreCase(field.getFieldType()) ||
+            "MULTI_DATA_SELECTION".equalsIgnoreCase(field.getFieldType())) {
             var options = fieldOptionService.listByFieldId(field.getId());
             if (options != null && !options.isEmpty()) {
                 List<FieldOptionRespVO> optionVOs = options.stream().map(o -> {

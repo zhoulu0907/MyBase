@@ -103,6 +103,9 @@ public class GlobalExceptionHandler {
         if (ex instanceof ServiceException) {
             return serviceExceptionHandler((ServiceException) ex);
         }
+        if (ex instanceof IllegalArgumentException) {
+            return illegalArgumentExceptionHandler(request, (IllegalArgumentException) ex);
+        }
         if (ex instanceof AccessDeniedException) {
             return accessDeniedExceptionHandler(request, (AccessDeniedException) ex);
         }
@@ -273,6 +276,19 @@ public class GlobalExceptionHandler {
             }
         }
         return CommonResult.error(ex.getCode(), ex.getMessage());
+    }
+
+    /**
+     * 处理 IllegalArgumentException 异常
+     * <p>
+     * 通常是业务参数校验失败，将具体的错误信息返回给前端
+     */
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public CommonResult<?> illegalArgumentExceptionHandler(HttpServletRequest req, IllegalArgumentException ex) {
+        log.warn("[illegalArgumentExceptionHandler][url({}) 参数校验失败: {}]", req.getRequestURI(), ex.getMessage());
+        // 将具体的错误信息放到 msg 中返回
+        String errorMessage = StrUtil.isNotBlank(ex.getMessage()) ? ex.getMessage() : "参数校验失败";
+        return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
     }
 
     /**
