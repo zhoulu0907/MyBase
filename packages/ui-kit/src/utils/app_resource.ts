@@ -321,9 +321,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图
     if (!curViewId.value) {
-      const newCurViewId = res.pages.find(
-        (item: PageView) => item.isDefaultEditViewMode || item.isDefaultDetailViewMode
-      )?.id;
+      let newCurViewId = res.pages.find((item: PageView) => item.isLatestUpdated)?.id;
+      if (!newCurViewId) {
+        newCurViewId = res.pages.find((item: PageView) => item.isDefaultEditViewMode)?.id;
+      }
 
       if (newCurViewId) {
         setCurViewId(newCurViewId);
