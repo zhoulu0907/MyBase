@@ -48,3 +48,9 @@ export enum FLOW_MODAL_TYPE {
   INFOR = 'infor', // 收集信息
   CUSTOM = 'custom'
 }
+
+// 弹窗取消后
+export enum FLOW_MODAL_CANCEL {
+  STOP = 0, // 事件终止
+  CONTINUE = 1, // 事件继续执行
+}

@@ -5,12 +5,7 @@ import { SortableContainer, SortableElement, SortableHandle } from 'react-sortab
 import { nanoid } from 'nanoid';
 import styles from './index.module.less';
 import { getFieldTypes, type SelectOption } from '@onebase/app';
-
-interface Field {
-  id: string;
-  fieldName?: string;
-  fieldType?: string;
-}
+import { type Field } from '../../typings';
 
 // 拖拽图标
 const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles.dragHandle} />);
@@ -38,7 +33,22 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
       width: '40%',
       render: (_: any, record: Field, index: number) => {
         return (
-          <Form.Item field={`fields[${index}].fieldName`} noStyle>
+          <Form.Item
+            field={`fields[${index}].fieldName`}
+            noStyle
+            rules={[
+              {
+                validator: (value, cb) => {
+                  const fields = form.getFieldValue('fields');
+                  const repeatFields = fields.filter((ele: Field) => ele.fieldName === value);
+                  if (repeatFields.length > 1) {
+                    return cb('字段名称不能重复');
+                  }
+                  return cb();
+                }
+              }
+            ]}
+          >
             <Input placeholder="请输入"></Input>
           </Form.Item>
         );
@@ -72,7 +82,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
           <Button
             onClick={() => removeRow(record.id)}
             type="text"
-            icon={<IconDelete style={{ fontSize: '15px', color: '#4E5969'}} />}
+            icon={<IconDelete style={{ fontSize: '15px', color: '#4E5969' }} />}
           ></Button>
         );
       }
