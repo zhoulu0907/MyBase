@@ -1,0 +1,37 @@
+package com.cmsr.onebase.dolphins.remote;
+
+import com.cmsr.onebase.dolphins.remote.model.HttpRestResult;
+import com.cmsr.onebase.dolphins.remote.model.PageInfo;
+import com.cmsr.onebase.dolphins.remote.model.taskinstance.TaskInstanceQueryResp;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+/**
+ * 任务实例相关 API（DolphinScheduler 3.3.1）
+ *
+ * @author matianyu
+ * @date 2025-10-15
+ */
+public interface TaskInstanceApi {
+
+    /**
+     * 分页查询任务实例
+     *
+     * GET /projects/{projectCode}/task-instance
+     *
+     * @param projectCode 项目编码
+     * @param pageNo 页码
+     * @param pageSize 每页大小
+     * @param processInstanceId 流程实例ID（可选）
+     * @return 分页结果
+     */
+    @GET("projects/{projectCode}/task-instance")
+    Call<HttpRestResult<PageInfo<TaskInstanceQueryResp>>> listTaskInstances(
+            @Path("projectCode") long projectCode,
+            @Query("pageNo") int pageNo,
+            @Query("pageSize") int pageSize,
+            @Query("processInstanceId") Long processInstanceId
+    );
+}
