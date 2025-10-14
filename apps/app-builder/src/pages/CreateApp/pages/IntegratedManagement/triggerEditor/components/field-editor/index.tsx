@@ -111,6 +111,12 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
     if (!conditionFields) return;
 
     conditionFields.forEach((field: ConditionField) => {
+      if (!fieldType) {
+        children.push({
+          key: `${nodeId}.${field.value}`,
+          title: field.label
+        });
+      }
       if (field?.fieldType === fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,

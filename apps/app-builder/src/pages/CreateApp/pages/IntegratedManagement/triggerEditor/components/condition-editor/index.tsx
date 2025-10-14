@@ -256,6 +256,12 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     if (!conditionFields) return;
 
     conditionFields.forEach((field: ConditionField) => {
+      if (!fieldType) {
+        children.push({
+          key: `${nodeId}.${field.value}`,
+          title: field.label
+        });
+      }
       if (field?.fieldType === fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
@@ -495,12 +501,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.VARIABLES && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <TreeSelect
-                                                    treeData={getVariableOptions(nodeId,item)}
+                                                    treeData={getVariableOptions(nodeId, item)}
                                                     triggerElement={(params) => {
                                                       return (
                                                         <Input
                                                           readOnly
-                                                          value={showTriggerElement(params, getVariableOptions(nodeId,item))}
+                                                          value={showTriggerElement(
+                                                            params,
+                                                            getVariableOptions(nodeId, item)
+                                                          )}
                                                         ></Input>
                                                       );
                                                     }}
