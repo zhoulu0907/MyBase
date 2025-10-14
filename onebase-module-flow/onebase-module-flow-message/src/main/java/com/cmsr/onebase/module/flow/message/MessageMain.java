@@ -73,8 +73,7 @@ public class MessageMain {
             inputParams.setTopic(TIME_TOPIC);
         }
         inputParams.setProcessId(Long.parseLong(cmd.getOptionValue("processId")));
-        inputParams.setJobType(cmd.getOptionValue("jobType"));
-        inputParams.setMessageTag(cmd.getOptionValue("msgTag"));
+        inputParams.setMsgTag(cmd.getOptionValue("msgTag"));
 
         return inputParams;
     }
@@ -93,10 +92,6 @@ public class MessageMain {
         Option processIdOption = new Option("p", "processId", true, "Process ID");
         processIdOption.setRequired(true);
         options.addOption(processIdOption);
-
-        Option jobTypeOption = new Option("p", "jobType", true, "Process ID");
-        jobTypeOption.setRequired(true);
-        options.addOption(jobTypeOption);
 
         Option msgTagOption = new Option("t", "msgTag", true, "Message tag");
         msgTagOption.setRequired(true);
@@ -158,13 +153,14 @@ public class MessageMain {
         // 构建消息体
         Map<String, Object> messageBody = new HashMap<>();
         messageBody.put("processId", inputParams.getProcessId());
-        messageBody.put("tag", inputParams.getMessageTag());
+        messageBody.put("msgTag", inputParams.getMsgTag());
         messageBody.put("time", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        // 发送消息
         String messageJson = GSON.toJson(messageBody);
         LOGGER.log(Level.INFO, "发送消息：" + messageJson);
         Message message = PROVIDER.newMessageBuilder()
                 .setTopic(inputParams.getTopic())
-                .setTag(inputParams.getMessageTag())
+                .setTag(inputParams.getMsgTag())
                 .setBody(messageJson.getBytes(StandardCharsets.UTF_8))
                 .build();
         return producer.send(message);

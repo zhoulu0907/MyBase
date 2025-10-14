@@ -13,9 +13,7 @@ public class InputParams {
 
     private Long processId;
 
-    private String jobType;
-
-    private String messageTag;
+    private String msgTag;
 
     public String getEndpoints() {
         return endpoints;
@@ -41,19 +39,11 @@ public class InputParams {
         this.processId = processId;
     }
 
-    public String getJobType() {
-        return jobType;
+    public String getMsgTag() {
+        return msgTag;
     }
 
-    public void setJobType(String jobType) {
-        this.jobType = jobType;
-    }
-
-    public String getMessageTag() {
-        return messageTag;
-    }
-
-    public void setMessageTag(String messageTag) {
-        this.messageTag = messageTag;
+    public void setMsgTag(String msgTag) {
+        this.msgTag = msgTag;
     }
 }

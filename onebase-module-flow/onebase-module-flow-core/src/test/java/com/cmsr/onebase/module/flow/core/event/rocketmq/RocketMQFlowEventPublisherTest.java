@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
  * @Author：huangjie
  * @Date：2025/10/11 13:45
  */
-class FlowEventPublisherImplTest {
+class RocketMQFlowEventPublisherTest {
 
     @Test
     void publishProcessUpdate() throws ClientException {

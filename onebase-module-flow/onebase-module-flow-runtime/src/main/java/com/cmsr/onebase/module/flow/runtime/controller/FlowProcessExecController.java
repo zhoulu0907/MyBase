@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.flow.core.event.FlowEventCacheUpdate;
+import com.cmsr.onebase.module.flow.core.event.FlowEventUpdateFlowCache;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -28,7 +28,7 @@ public class FlowProcessExecController {
     @Autowired
     private FlowProcessExecService flowProcessExecService;
 
-    private FlowEventCacheUpdate flowEventCacheUpdate;
+    private FlowEventUpdateFlowCache flowEventUpdateFlowCache;
 
     @GetMapping("/form/query")
     @Operation(summary = "查询页面触发列表")
@@ -47,14 +47,14 @@ public class FlowProcessExecController {
     @PostMapping("/flow-handler/update")
     @Operation(summary = "更新流程")
     public CommonResult<Boolean> updateProcess(@RequestParam("processId") Long processId) {
-        boolean result = flowEventCacheUpdate.onProcessUpdate(processId);
+        boolean result = flowEventUpdateFlowCache.onProcessUpdate(processId);
         return CommonResult.success(result);
     }
 
     @PostMapping("/flow-handler/delete")
     @Operation(summary = "删除流程")
     public CommonResult<Boolean> deleteProcess(@RequestParam("processId") Long processId) {
-        boolean result = flowEventCacheUpdate.onProcessDelete(processId);
+        boolean result = flowEventUpdateFlowCache.onProcessDelete(processId);
         return CommonResult.success(result);
     }
 

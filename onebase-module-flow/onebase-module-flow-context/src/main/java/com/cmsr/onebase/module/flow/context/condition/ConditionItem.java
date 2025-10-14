@@ -27,9 +27,4 @@ public class ConditionItem {
      */
     private Object value;
 
-    /**
-     * 在弹窗信息收集窗口中，字段的显示名称
-     * 显示名称
-     */
-    private String label;
 }

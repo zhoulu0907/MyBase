@@ -36,6 +36,7 @@ redisson:
   single-server-config:
     address: redis://10.0.104.38:6379
     database: 0
+
 liteflow:
   enable: true
   print-banner: false
