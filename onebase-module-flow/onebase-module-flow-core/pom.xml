@@ -44,11 +44,6 @@
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-spring-boot-starter</artifactId>
         </dependency>
-        <!-- SnailJob任务调度 -->
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-client-job-core</artifactId>
-        </dependency>
         <!-- RocketMQ消息队列 -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
