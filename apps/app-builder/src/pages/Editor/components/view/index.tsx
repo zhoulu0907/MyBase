@@ -104,16 +104,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     createForm
       .validate()
       .then(async () => {
-        // const res = await createPageView({
-        //   pageSetId: pageSetId,
-        //   viewType: createForm.getFieldValue('viewType'),
-        //   viewName: createForm.getFieldValue('viewName')
-        // });
-
         // 创建临时视图
-
         const pageId = await generateId();
-        console.log('pageId: ', pageId);
         usePageViewEditorSignal.addPageView({
           id: pageId,
           pageName: createForm.getFieldValue('viewName'),
