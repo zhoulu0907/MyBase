@@ -2,7 +2,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select, Switch, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { FLOW_MODAL_TYPE } from '@onebase/common';
+import { FLOW_MODAL_TYPE, FLOW_MODAL_CANCEL } from '@onebase/common';
 import { useEffect } from 'react';
 import CollectFields from '../../../components/collect-fields';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
@@ -108,8 +108,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Form.Item label="弹窗取消后" field="afterCancel">
               <Radio.Group>
-                <Radio value={0}>事件终止</Radio>
-                <Radio value={1}>事件继续执行</Radio>
+                <Radio value={FLOW_MODAL_CANCEL.STOP}>事件终止</Radio>
+                <Radio value={FLOW_MODAL_CANCEL.CONTINUE}>事件继续执行</Radio>
               </Radio.Group>
             </Form.Item>
 

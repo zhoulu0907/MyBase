@@ -16,7 +16,7 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { FLOW_MODAL_TYPE, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
+import { FLOW_MODAL_TYPE, FLOW_MODAL_CANCEL, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -121,6 +121,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             okText: res.outputParams.okText || '确认',
             cancelText: res.outputParams.cancelText || '取消',
             maskClosable: false,
+
             onOk: async () => {
               if (res.executionEnd) {
                 return;
@@ -133,7 +134,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               await triggerFlows(newParam);
             },
             onCancel: async () => {
-              if (res.executionEnd) {
+              // todo
+              console.log('关闭默认终止提醒',res.outputParams.closeWarn)
+              console.log('弹窗取消后提醒',res.outputParams.cancelWarn)
+              
+              // 事件结束 或者 弹窗取消后事件终止
+              if (res.executionEnd || res.outputParams.afterCancel === FLOW_MODAL_CANCEL.STOP) {
                 return;
               }
               const newParam = {
