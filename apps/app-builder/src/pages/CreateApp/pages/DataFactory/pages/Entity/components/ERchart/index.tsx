@@ -8,7 +8,7 @@ import { FIELD_TYPE } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
-import { GridNodePositioner, performAutoLayout, SectionCollapseHandler } from './utils';
+import { GridNodePositioner, performAutoLayout, SectionCollapseHandler, toggleNodeShadow } from './utils';
 import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
@@ -41,7 +41,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     ref
   ) => {
     const { newNodes } = useNewNodeStore();
-    const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
+    const [selectedNode] = useState<EntityNode | null>(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [zoom, setZoom] = useState(100);
 
@@ -129,7 +129,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     };
 
     const createAndAddNode = useCallback(
-      (positioner: any, nodeDatas: EntityNode[]) => {
+      (positioner: GridNodePositioner, nodeDatas: EntityNode[]) => {
         nodeDatas.forEach((nodeData) => {
           positioner.addNode({
             id: nodeData.entityId,
@@ -214,7 +214,16 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       ]
     );
 
-    const createAndAddEdge = (graph: Graph, edgeData: any) => {
+    const createAndAddEdge = (
+      graph: Graph,
+      edgeData: {
+        sourceEntityId: string;
+        sourceFieldId: string;
+        targetEntityId: string;
+        targetFieldId: string;
+        label?: string;
+      }
+    ) => {
       const edge = graph.createEdge({
         source: { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` },
         target: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` },
@@ -425,6 +434,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           onEdgeEdit?.(edge.data);
         });
 
+        // 记录当前选中节点 id
+        let currentSelectedId: string | null = null;
+
         graphRef.current.on('node:click', ({ e, node }) => {
           // 阻止折叠图标点击触发
           const target = e.target as HTMLElement;
@@ -445,7 +457,22 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             return;
           }
 
-          // 添加短暂延迟，确保不是拖拽操作
+          // 切换选中态阴影
+          const clickedId = node.id as string;
+
+          // 取消之前选中
+          if (currentSelectedId && currentSelectedId !== clickedId) {
+            const prev = graphRef.current?.getCellById(currentSelectedId);
+            if (prev && prev.isNode()) {
+              toggleNodeShadow(prev, false);
+            }
+          }
+
+          // 选中当前
+          toggleNodeShadow(node, true);
+          currentSelectedId = clickedId;
+
+          // 添加短暂延迟，确保不是拖拽操作，再触发编辑
           setTimeout(() => {
             if (!isDragging) {
               e.preventDefault();
@@ -453,6 +480,16 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
               onNodeEdit?.(node.getData().data);
             }
           }, 10);
+        });
+
+        // 点击画布空白处，取消选中
+        graphRef.current.on('blank:click', () => {
+          if (!currentSelectedId) return;
+          const prev = graphRef.current?.getCellById(currentSelectedId);
+          if (prev && prev.isNode()) {
+            toggleNodeShadow(prev, false);
+          }
+          currentSelectedId = null;
         });
 
         graphRef.current.on('scale', ({ sx }) => {
