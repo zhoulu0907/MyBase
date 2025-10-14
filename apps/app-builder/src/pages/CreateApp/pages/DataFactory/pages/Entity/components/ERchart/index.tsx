@@ -220,7 +220,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         target: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` },
         attrs: {
           line: {
-            stroke: '#39B85F',
+            stroke: 'rgba(var(--primary-6), 1)',
             strokeWidth: 2,
             targetMarker: { name: 'block', width: 12, height: 8 }
           }
@@ -238,7 +238,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                 attrs: {
                   label: {
                     text: edgeData.label,
-                    fill: '#39B85F',
+                    fill: 'rgba(var(--primary-6), 1)',
                     fontSize: 12,
                     textAnchor: 'middle',
                     textVerticalAnchor: 'middle'
@@ -315,7 +315,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                   shape: 'edge',
                   attrs: {
                     line: {
-                      stroke: '#39B85F',
+                      stroke: 'rgba(var(--primary-6), 1)',
                       strokeWidth: 2,
                       targetMarker: {
                         name: 'block',
@@ -357,7 +357,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (mode === 'edit') {
             node.setAttrs({
               body: {
-                stroke: '#39B85F',
+                stroke: 'rgba(var(--primary-6), 1)',
                 strokeWidth: 2
               }
             });
