@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.event.rocketmq;
 
+import com.cmsr.onebase.module.flow.core.event.FlowEventPublisherImpl;
 import org.apache.rocketmq.client.apis.ClientException;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ class RocketMQFlowEventPublisherTest {
 
     @Test
     void publishProcessUpdate() throws ClientException {
-        RocketMQFlowEventPublisher rocketMQFlowEventPublisher = new RocketMQFlowEventPublisher();
+        FlowEventPublisherImpl rocketMQFlowEventPublisher = new FlowEventPublisherImpl();
         rocketMQFlowEventPublisher.setEndpoints("10.0.104.38:8081");
         rocketMQFlowEventPublisher.afterPropertiesSet();
         rocketMQFlowEventPublisher.publishProcessUpdate(85486565251907584L);
