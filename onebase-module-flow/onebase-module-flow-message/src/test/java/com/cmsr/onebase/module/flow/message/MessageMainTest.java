@@ -7,7 +7,7 @@ package com.cmsr.onebase.module.flow.message;
 public class MessageMainTest {
 
     public static void main(String[] args) {
-        args = new String[]{"-endpoints", "10.0.104.38:8081", "-processId", "123456", "-tag", "test"};
+        args = new String[]{"-endpoints", "10.0.104.38:8081", "-processId", "123456", "-msgTag", "norm"};
         MessageMain.main(args);
     }
 

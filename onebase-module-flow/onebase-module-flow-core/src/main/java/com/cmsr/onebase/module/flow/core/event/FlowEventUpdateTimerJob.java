@@ -43,7 +43,7 @@ import java.util.TimeZone;
 @Setter
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowEventTimerJobUpdate implements MessageListener, ApplicationRunner, DisposableBean {
+public class FlowEventUpdateTimerJob implements MessageListener, ApplicationRunner, DisposableBean {
 
     private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 

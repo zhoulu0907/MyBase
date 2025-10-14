@@ -36,7 +36,7 @@ public class FlowMessage {
 
     private Long processId;
 
-    private String tag;
+    private String msgTag;
 
     private String time;
 }

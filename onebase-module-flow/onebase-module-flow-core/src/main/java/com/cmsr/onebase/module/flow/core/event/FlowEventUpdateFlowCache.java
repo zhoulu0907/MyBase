@@ -37,7 +37,7 @@ import java.util.Collections;
 @Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowEventCacheUpdate implements MessageListener, ApplicationRunner, DisposableBean {
+public class FlowEventUpdateFlowCache implements MessageListener, ApplicationRunner, DisposableBean {
 
     private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 
