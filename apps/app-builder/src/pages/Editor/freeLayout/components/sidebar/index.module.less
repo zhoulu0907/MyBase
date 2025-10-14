@@ -1,0 +1,28 @@
+.sidebar {
+  background: rgb(251, 251, 251);
+  height: 100%;
+  width: 800px;
+  box-sizing: border-box;
+  border-radius: 8px 0 0 8px;
+  border: 1px solid rgba(82, 100, 154, 0.13);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  .body {
+    box-sizing: border-box;
+    width: 100%;
+    height: calc(100vh - 124px);
+    overflow-x: hidden;
+    overflow-y: hidden;
+
+    /* 隐藏滚动条但保持滚动功能 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
+    }
+  }
+}
