@@ -1,6 +1,7 @@
-import { type FC } from 'react';
-import { Table, type TableColumnProps, Button, Input } from '@arco-design/web-react';
+import { useState, type FC } from 'react';
+import { Table, type TableColumnProps, Button } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
+import DetailPop from './DetailPop'
 
 const WillDo:FC = () => {
     const columns: TableColumnProps[] = [
@@ -43,7 +44,7 @@ const WillDo:FC = () => {
             dataIndex: 'op',
             align: 'center',
             render: (_, record) => (
-                <Button type='text' status='success'>详情</Button>
+                <Button type='text' status='success' onClick={() => {handleDetailPage(record)}}>详情</Button>
             ),
         },
     ];
@@ -76,12 +77,18 @@ const WillDo:FC = () => {
             email2: 'bbbample.com',
         },
     ];
+    let [detailPopVisible, setPopVisible] = useState(false)
+    function handleDetailPage(row:any) {
+        console.log('click to detail page === row ===', row)
+        setPopVisible(true)
+    }
     return <section className='page-content-rgt'>
         <div className='table-title-box'>
             <b>待我处理</b>
             <TableSearch />
         </div>
         <Table columns={columns} data={data} />
+        {detailPopVisible && <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible}/>}
     </section>
 }
 
