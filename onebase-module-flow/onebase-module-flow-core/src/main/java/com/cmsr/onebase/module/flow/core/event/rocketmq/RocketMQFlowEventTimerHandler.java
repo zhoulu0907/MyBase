@@ -1,6 +1,8 @@
-package com.cmsr.onebase.module.flow.core.event;
+package com.cmsr.onebase.module.flow.core.event.rocketmq;
 
+import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
@@ -11,6 +13,7 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
+import com.cmsr.onebase.module.flow.core.event.FlowEvent;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
 import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
@@ -24,7 +27,6 @@ import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.consumer.MessageListener;
 import org.apache.rocketmq.client.apis.consumer.PushConsumer;
 import org.apache.rocketmq.client.apis.message.MessageView;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -32,8 +34,9 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.TimeZone;
+import java.util.Set;
 
 /**
  * @Author：huangjie
@@ -43,7 +46,7 @@ import java.util.TimeZone;
 @Setter
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowEventTimerJobUpdate implements MessageListener, ApplicationRunner, DisposableBean {
+public class RocketMQFlowEventTimerHandler implements MessageListener, ApplicationRunner {
 
     private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 
@@ -52,7 +55,7 @@ public class FlowEventTimerJobUpdate implements MessageListener, ApplicationRunn
     private String endpoints;
 
     @Setter
-    private String topic = RocketMQConstants.EVENT_TOPIC;
+    private String topic = RocketMQConstants.TOPIC;
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;
@@ -73,7 +76,7 @@ public class FlowEventTimerJobUpdate implements MessageListener, ApplicationRunn
         ClientConfiguration clientConfiguration = ClientConfiguration.newBuilder()
                 .setEndpoints(endpoints)
                 .build();
-        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_EVENT_PREFIX + "timer";
+        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_PREFIX + "timer";
         FilterExpression filterExpression = new FilterExpression();
         this.consumer = provider.newPushConsumerBuilder()
                 .setClientConfiguration(clientConfiguration)
@@ -133,10 +136,15 @@ public class FlowEventTimerJobUpdate implements MessageListener, ApplicationRunn
 
     private JobCreateRequest consumerSettingParams(StartTimeNodeData startTimeNodeData) {
         JobCreateRequest jobCreateRequest = new JobCreateRequest();
-        jobCreateRequest.setStartTime(startTimeNodeData.getStartTime().trim());
-        jobCreateRequest.setEndTime(startTimeNodeData.getEndTime().trim());
-        jobCreateRequest.setCrontab(startTimeNodeData.createCronExpression().trim());
-        jobCreateRequest.setTimezoneId(TimeZone.getDefault().getID());
+        if (startTimeNodeData.getRepeatType().equals(StartTimeNodeData.REPEAT_TYPE_NONE)) {
+            jobCreateRequest.setTriggerType(TriggerTypeEnum.POINT_IN_TIME);
+            LocalDateTime localDateTime = LocalDateTime.parse(startTimeNodeData.getTriggerDatetime(), JsonGraphConstant.DATE_TIME_FORMATTER);
+            jobCreateRequest.setTriggerTime(Set.of(localDateTime));
+        } else {
+            jobCreateRequest.setTriggerType(TriggerTypeEnum.CRON);
+            jobCreateRequest.setTriggerInterval(startTimeNodeData.createCronExpression());
+        }
+        jobCreateRequest.setExecutorInfo(JobClient.JOB_EXECUTOR_INFO_TIME);
         return jobCreateRequest;
     }
 
@@ -160,10 +168,9 @@ public class FlowEventTimerJobUpdate implements MessageListener, ApplicationRunn
 
     private JobCreateRequest consumerSettingParams(StartDateFieldNodeData startDateFieldNodeData) {
         JobCreateRequest jobCreateRequest = new JobCreateRequest();
-        jobCreateRequest.setStartTime("2010-10-01 00:00:00");
-        jobCreateRequest.setEndTime("2050-12-30 23:59:59");
-        jobCreateRequest.setCrontab(startDateFieldNodeData.createCronExpression());
-        jobCreateRequest.setTimezoneId(TimeZone.getDefault().getID());
+        jobCreateRequest.setTriggerType(TriggerTypeEnum.CRON);
+        jobCreateRequest.setTriggerInterval(startDateFieldNodeData.createCronExpression());
+        jobCreateRequest.setExecutorInfo(JobClient.JOB_EXECUTOR_INFO_DATE_FIELD);
         return jobCreateRequest;
     }
 
@@ -189,12 +196,5 @@ public class FlowEventTimerJobUpdate implements MessageListener, ApplicationRunn
         jobClient.deleteJob(flowProcessDateFieldDO.getJobId());
         flowProcessDateFieldDO.setJobId("0");
         flowProcessDateFieldRepository.update(flowProcessDateFieldDO);
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        if (consumer != null) {
-            consumer.close();
-        }
     }
 }

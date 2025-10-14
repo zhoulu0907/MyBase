@@ -1,10 +1,11 @@
-package com.cmsr.onebase.module.flow.core.event;
+package com.cmsr.onebase.module.flow.core.event.rocketmq;
 
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
-import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
-import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
+import com.cmsr.onebase.module.flow.core.event.FlowEvent;
+import com.cmsr.onebase.module.flow.core.event.FlowEventHandler;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
@@ -12,8 +13,6 @@ import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.consumer.MessageListener;
 import org.apache.rocketmq.client.apis.consumer.PushConsumer;
 import org.apache.rocketmq.client.apis.message.MessageView;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -25,13 +24,12 @@ import java.util.Collections;
 
 /**
  * @Author：huangjie
- * @Date：2025/9/3 14:35
+ * @Date：2025/10/10 10:19
  */
-@Setter
 @Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowProcessNormTimeJob implements MessageListener, ApplicationRunner, DisposableBean {
+public class RocketMQFlowEventHandler implements MessageListener, ApplicationRunner {
 
     private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 
@@ -40,31 +38,26 @@ public class FlowProcessNormTimeJob implements MessageListener, ApplicationRunne
     private String endpoints;
 
     @Setter
-    private String topic = RocketMQConstants.TIME_TOPIC;
+    private String topic = RocketMQConstants.TOPIC;
 
     @Setter
     @Autowired
-    private RedissonClient redissonClient;
-
-    @Autowired
-    private FlowProcessExecutor flowProcessExecutor;
-
     private RocketMQSlotManager slotManager;
+
+    @Setter
+    @Autowired
+    private FlowEventHandler flowEventHandler;
 
     private PushConsumer consumer;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        slotManager = new RocketMQSlotManager();
-        slotManager.setSlotKey(RocketMQConstants.TIME_TOPIC_SLOT);
-        slotManager.setRedissonClient(redissonClient);
-        slotManager.afterPropertiesSet();
-        Integer slot = slotManager.getSlot();
         ClientConfiguration clientConfiguration = ClientConfiguration.newBuilder()
                 .setEndpoints(endpoints)
                 .build();
-        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_TIME_PREFIX + slot;
-        FilterExpression filterExpression = new FilterExpression(RocketMQConstants.NORMAL_TIME_MESSAGE_TAG);
+        Integer slot = slotManager.getSlot();
+        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_PREFIX + slot;
+        FilterExpression filterExpression = new FilterExpression();
         this.consumer = provider.newPushConsumerBuilder()
                 .setClientConfiguration(clientConfiguration)
                 .setConsumerGroup(consumerGroup)
@@ -76,21 +69,16 @@ public class FlowProcessNormTimeJob implements MessageListener, ApplicationRunne
     @Override
     public ConsumeResult consume(MessageView messageView) {
         try {
-            FlowMessage message = FlowMessage.decode(messageView.getBody());
-            log.info("FlowProcessNormTimeJob receive message: {}", message);
-            ExecutorResult executorResult = flowProcessExecutor.execute(message.getProcessId(), Collections.emptyMap());
-            log.error("执行流程结果：{}", executorResult);
+            FlowEvent event = FlowEvent.decode(messageView.getBody());
+            if (StringUtils.equalsIgnoreCase(event.getType(), FlowEvent.UPDATE)) {
+                flowEventHandler.onProcessUpdate(event.getProcessId());
+            } else if (StringUtils.equalsIgnoreCase(event.getType(), FlowEvent.DELETE)) {
+                flowEventHandler.onProcessDelete(event.getProcessId());
+            }
             return ConsumeResult.SUCCESS;
         } catch (Exception e) {
             log.error("处理RocketMQ消息异常：{}", e.getMessage(), e);
             return ConsumeResult.FAILURE;
-        }
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        if (consumer != null) {
-            consumer.close();
         }
     }
 

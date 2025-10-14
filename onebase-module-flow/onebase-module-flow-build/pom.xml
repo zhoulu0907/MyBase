@@ -18,6 +18,7 @@
     <properties>
         <js.version>23.0.9</js.version>
         <dom4j.version>2.2.0</dom4j.version>
+        <snail.version>1.7.2</snail.version>
     </properties>
     <dependencies>
         <!-- 依赖服务 -->

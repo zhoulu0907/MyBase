@@ -1,21 +1,23 @@
 package com.cmsr.onebase.module.flow.core.job;
 
+import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.Set;
+
 /**
- * {"startTime":"2025-10-14 00:00:00","endTime":"2125-10-14 00:00:00","crontab":"0 0 9 25 10 ? 2025","timezoneId":"Asia/Shanghai"}
- *
  * @Author：huangjie
  * @Date：2025/9/22 12:52
  */
 @Data
 public class JobCreateRequest {
 
-    private String startTime;
+    private TriggerTypeEnum triggerType;
 
-    private String endTime;
+    private String triggerInterval;
 
-    private String crontab;
+    private Set<LocalDateTime> triggerTime;
 
-    private String timezoneId;
+    private String executorInfo;
 }

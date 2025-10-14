@@ -1,7 +1,5 @@
 package com.cmsr.onebase.module.flow.core.event.rocketmq;
 
-import com.cmsr.onebase.module.flow.core.event.RocketMQConstants;
-import com.cmsr.onebase.module.flow.core.event.RocketMQSlotManager;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
@@ -22,7 +20,7 @@ public class RocketMQSlotManagerTest {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://10.0.104.38:6379");
         RedissonClient redissonClient = Redisson.create(config);
-        RMap<Object, Object> map = redissonClient.getMap(RocketMQConstants.EVENT_TOPIC_SLOT);
+        RMap<Object, Object> map = redissonClient.getMap(RocketMQSlotManager.MAP_KEY);
         for (Object key : map.keySet()) {
             Long value = (Long) map.get(key);
             //System.out.println(key + ":" + value);
@@ -43,6 +41,7 @@ public class RocketMQSlotManagerTest {
         int slot = slotManager.getSlot();
         System.out.println(slot);
     }
+
 
 
 }

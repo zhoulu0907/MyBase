@@ -1,5 +1,7 @@
-package com.cmsr.onebase.module.flow.core.event;
+package com.cmsr.onebase.module.flow.core.event.rocketmq;
 
+import com.cmsr.onebase.module.flow.core.event.FlowEvent;
+import com.cmsr.onebase.module.flow.core.event.FlowEventPublisher;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
@@ -8,7 +10,6 @@ import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.message.Message;
 import org.apache.rocketmq.client.apis.producer.Producer;
 import org.apache.rocketmq.client.apis.producer.SendReceipt;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class FlowEventPublisherImpl implements FlowEventPublisher, InitializingBean, DisposableBean {
+public class RocketMQFlowEventPublisher implements FlowEventPublisher, InitializingBean {
 
     private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 
@@ -28,7 +29,7 @@ public class FlowEventPublisherImpl implements FlowEventPublisher, InitializingB
     private String endpoints;
 
     @Setter
-    private String topic = RocketMQConstants.EVENT_TOPIC;
+    private String topic = RocketMQConstants.TOPIC;
 
     private Producer producer;
 
@@ -72,10 +73,4 @@ public class FlowEventPublisherImpl implements FlowEventPublisher, InitializingB
         }
     }
 
-    @Override
-    public void destroy() throws Exception {
-        if (producer != null) {
-            producer.close();
-        }
-    }
 }
