@@ -7,10 +7,10 @@ import { useEffect } from 'react';
 import CollectFields from '../../../components/collect-fields';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
-import { type FlowNodeJSON, type Field } from '../../../typings';
+import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
 import { updateModalOutputs } from './output';
-
+import type { ConditionField } from '@onebase/app';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -26,14 +26,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 校验表单
     // validateNodeForm(form, payloadForm, false);
     // handlePropsOnChange(values);
-    
+
     if (values.fields) {
-      const fields: Field[] = values.fields
-        .filter((item: any) => item && item.field && item.value && item.operatorType)
+      const fields: ConditionField[] = values.fields
+        .filter((item: any) => item && item.fieldName && item.fieldType)
         .map((item: any) => {
           return {
             label: item.fieldName,
-            value: item.fieldName,
+            value: item.id,
             fieldType: item.fieldType
           };
         });

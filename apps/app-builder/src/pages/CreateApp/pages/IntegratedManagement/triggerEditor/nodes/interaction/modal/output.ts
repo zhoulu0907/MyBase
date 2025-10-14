@@ -1,9 +1,9 @@
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
-import {type Field} from '../../../typings'
+import type { ConditionField } from '@onebase/app';
 
-export const updateModalOutputs = (nodeID: string, fields: Field[]) => {
+export const updateModalOutputs = (nodeID: string, conditionFields: ConditionField[]) => {
   const outputs = {
-    fields: fields
+    conditionFields: conditionFields
   };
 
   triggerNodeOutputSignal.addTriggerNodeOutput(nodeID, outputs);

@@ -89,7 +89,7 @@ const TriggerEditor = () => {
 
       // 初始化节点的输出
       Object.values(data).forEach((item: any) => {
-        if (item.output) {
+        if (item.id && item.output) {
           triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
         }
       });

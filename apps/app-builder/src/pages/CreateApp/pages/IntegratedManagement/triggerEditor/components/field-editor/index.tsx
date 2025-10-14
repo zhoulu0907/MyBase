@@ -128,7 +128,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
         NodeType.DATA_QUERY,
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
-        NodeType.DATA_CALC
+        NodeType.DATA_CALC,
+        NodeType.MODAL
       ]),
     []
   );
@@ -136,7 +137,13 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
   // 使用 useCallback 缓存函数，避免不必要的重新创建
   const getVariableOptions = useCallback(
     (nodeId: string, dataNodeId?: string): TreeSelectDataType[] => {
-      const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM, NodeType.DATA_CALC];
+      const nodeTypes = [
+        NodeType.DATA_QUERY,
+        NodeType.START_ENTITY,
+        NodeType.START_FORM,
+        NodeType.DATA_CALC,
+        NodeType.MODAL
+      ];
 
       let nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
 
@@ -171,7 +178,6 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
           options.push(treeNode);
         }
       });
-
       return options;
     },
     [nodesWithConditionFields]
