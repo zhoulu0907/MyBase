@@ -16,6 +16,7 @@
     "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",
+    "@onebase/ui-kit": "workspace:*",
     "axios": "^1.10.0",
     "crypto-js": "^4.2.0",
     "i18next": "^25.3.2",
