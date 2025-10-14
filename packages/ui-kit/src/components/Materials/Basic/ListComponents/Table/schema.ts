@@ -14,6 +14,7 @@ import {
   CONFIG_TYPES,
   PAGINATION_POSITION_OPTIONS,
   PAGINATION_POSITION_VALUES,
+  RedirectMethod,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
@@ -286,7 +287,7 @@ const XTable: XTableSchema = {
     searchItems: [],
     advancedRowRedirect: false,
     redirectPageId: '',
-    redirectMethod: ''
+    redirectMethod: RedirectMethod.DRAWER
   }
 };
 
