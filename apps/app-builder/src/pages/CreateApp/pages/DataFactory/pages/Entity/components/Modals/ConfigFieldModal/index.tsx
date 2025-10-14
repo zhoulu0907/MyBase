@@ -63,6 +63,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
   const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
+  // 手动错误显示：key 为 'fields.X.xxx'
+  const [externalErrors, setExternalErrors] = useState<Record<string, string>>({});
 
   const fieldTypeOptions = useFieldStore.getState().fieldTypes.map((item) => ({
     label: item.displayName,
@@ -79,6 +81,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     } else {
       // 关闭时重置表单
       form.resetFields();
+      setExternalErrors({});
     }
   }, [visible]);
 
@@ -215,9 +218,18 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       await batchSaveFields(params);
       Message.success('保存成功');
       setVisible(false);
+      setExternalErrors({});
       successCallback();
     } catch (error) {
-      console.error('保存字段失败:', error);
+      // 手动渲染错误
+      const errs = (error && (error as any).errors) || [];
+      const map: Record<string, string> = {};
+      if (typeof errs === 'object') {
+        Object.keys(errs).forEach((key: any) => {
+          if (key) map[key] = errs[key].message || '校验失败';
+        });
+      }
+      setExternalErrors(map);
     } finally {
       setLoading(false);
       // form.resetFields();
@@ -290,6 +302,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     setConfigPopoverVisible,
     setConstraintsPopoverVisible,
     renderFieldConfigContent,
+    externalErrors,
     getFieldIndex,
     deleteField,
     fields

@@ -39,6 +39,7 @@ interface TableColumnsProps {
   setConfigPopoverVisible: (id: string | null) => void;
   setConstraintsPopoverVisible: (id: string | null) => void;
   renderFieldConfigContent: (fieldType: string, fieldId: string) => React.ReactNode;
+  externalErrors: Record<string, string>;
   getFieldIndex: (fieldId: string, index: number) => number;
   deleteField: (id: string) => void;
   fields: FieldFormValues[];
@@ -64,6 +65,7 @@ const TableColumns = ({
   setConfigPopoverVisible,
   setConstraintsPopoverVisible,
   renderFieldConfigContent,
+  externalErrors,
   getFieldIndex,
   deleteField
 }: TableColumnsProps): ColumnConfig[] => {
@@ -86,6 +88,10 @@ const TableColumns = ({
             field={`fields.${getFieldIndex(record.id || '', index)}.fieldName`}
             rules={[...createFieldRules.fieldName]}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldName`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldName`]}
           >
             {/* 不可编辑 */}
             <Input
@@ -113,6 +119,10 @@ const TableColumns = ({
             field={`fields.${getFieldIndex(record.id || '', index)}.displayName`}
             rules={[...createFieldRules.displayName]}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.displayName`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.displayName`]}
           >
             <Input />
           </Form.Item>
@@ -134,6 +144,10 @@ const TableColumns = ({
             field={`fields.${getFieldIndex(record.id || '', index)}.fieldType`}
             rules={[{ required: true, message: '数据类型不能为空' }]}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldType`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldType`]}
           >
             <Select
               options={fieldTypeOptions}
@@ -194,6 +208,10 @@ const TableColumns = ({
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.description`}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.description`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.description`]}
           >
             <Input placeholder="请输入字段描述" />
           </Form.Item>
@@ -221,6 +239,10 @@ const TableColumns = ({
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.defaultValue`}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.defaultValue`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.defaultValue`]}
           >
             <Input />
           </Form.Item>
@@ -241,6 +263,10 @@ const TableColumns = ({
             triggerPropName="checked"
             normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
             formatter={(v) => v === CHECK_CONST.IS_TRUE || v === true}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.isUnique`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.isUnique`]}
           >
             <Checkbox />
           </Form.Item>
@@ -261,6 +287,10 @@ const TableColumns = ({
             triggerPropName="checked"
             normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
             formatter={(v) => v === CHECK_CONST.IS_TRUE || v === true}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.isRequired`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.isRequired`]}
           >
             <Checkbox />
           </Form.Item>
