@@ -23,6 +23,10 @@ export const createPageViewEditorSignal = () => {
     pageViews.value = {};
   };
 
+  const updatePageViewName = (id: string, name: string) => {
+    pageViews.value[id].pageName = name;
+  };
+
   const updatePageView = (pageView: PageView) => {
     if (pageView.isDefaultDetailViewMode) {
       const updatedPageViews = Object.fromEntries(
@@ -60,6 +64,7 @@ export const createPageViewEditorSignal = () => {
     addPageView,
     clearPageViews,
     updatePageView,
+    updatePageViewName,
     setPageViews,
 
     curViewId,

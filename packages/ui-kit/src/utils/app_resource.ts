@@ -129,6 +129,9 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
 
       loadPagesetResp.pages[index].components.push(...colComponents);
 
+      //   更新视图名称
+      loadPagesetResp.pages[index].pageName = pageViews.value[_page.id]?.pageName;
+
       if (_page.id === curViewId.value) {
         loadPagesetResp.pages[index].isLatestUpdated = 1;
       } else {

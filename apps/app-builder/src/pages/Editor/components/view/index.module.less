@@ -6,10 +6,22 @@
   gap: 8px;
 
   .viewTitle {
-    font-size: 14px;
-    font-weight: 400px;
-    line-height: 22px;
-    color: #4e5969;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    .viewTitleText {
+      font-size: 14px;
+      font-weight: 400px;
+      line-height: 22px;
+      color: #4e5969;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }
 
