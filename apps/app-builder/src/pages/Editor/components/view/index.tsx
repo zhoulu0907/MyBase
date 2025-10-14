@@ -1,6 +1,6 @@
 import TickSVG from '@/assets/images/tick.svg';
 import { Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
-import { IconDown, IconPlus } from '@arco-design/web-react/icon';
+import { IconDown, IconEdit, IconPlus } from '@arco-design/web-react/icon';
 import { generateId, ViewType, type PageView } from '@onebase/app';
 import {
   createPageEditorSignal,
@@ -23,11 +23,12 @@ interface ViewProps {
 const View: React.FC<ViewProps> = ({ pageSetId }) => {
   useSignals();
 
-  const { pageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
+  const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
   const [dropListVisible, setDropListVisible] = useState(false);
+  const [editViewName, setEditViewName] = useState(false);
 
   const { pageComponentSchemas, components, layoutSubComponents } = usePageEditorSignal();
 
@@ -138,7 +139,24 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
 
   return (
     <div className={styles.viewWrapper}>
-      <div className={styles.viewTitle}>{pageViews.value[curViewId.value]?.pageName}</div>
+      {editViewName ? (
+        <Input
+          size="small"
+          autoFocus
+          defaultValue={pageViews.value[curViewId.value]?.pageName}
+          onChange={(e: any) => {
+            updatePageViewName(curViewId.value, e);
+          }}
+          onPressEnter={() => setEditViewName(false)}
+          onBlur={() => setEditViewName(false)}
+          style={{ maxWidth: '200px' }}
+        />
+      ) : (
+        <div className={styles.viewTitle} onClick={() => setEditViewName(true)}>
+          <div className={styles.viewTitleText}>{pageViews.value[curViewId.value]?.pageName}</div> <IconEdit />
+        </div>
+      )}
+
       <Dropdown
         droplist={dropList}
         position="bl"
