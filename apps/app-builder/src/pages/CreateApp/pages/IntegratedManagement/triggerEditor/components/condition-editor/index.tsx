@@ -256,13 +256,12 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     if (!conditionFields) return;
 
     conditionFields.forEach((field: ConditionField) => {
-      if (!fieldType) {
+      if (!fieldType || !field.fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
-          title: field.label
+          title: field.label,
         });
-      }
-      if (field?.fieldType === fieldType) {
+      }else if (field?.fieldType === fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
           title: field.label
