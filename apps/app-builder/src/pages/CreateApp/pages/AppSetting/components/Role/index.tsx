@@ -16,6 +16,8 @@ import {
 } from '@onebase/app';
 import styles from './index.module.less';
 import { debounce } from 'lodash-es';
+import DynamicIcon from '@/components/DynamicIcon';
+import { menuIconList } from '@/components/MenuIcon/const';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -68,7 +70,6 @@ const RoleInfo = (props: IProps) => {
   const handleSelectMenu = async (value: string) => {
     setActiveTab('1');
     setActiveMenuId(value);
-    console.log('选择菜单获取权限数据 value:', value);
     // await getApplicationPermission(value);
   };
 
@@ -93,8 +94,14 @@ const RoleInfo = (props: IProps) => {
       const hasChildren = menu.children && menu.children.length > 0;
       if (!hasChildren) {
         return (
-          <MenuItem key={menu.id}>
-            <i className={`iconfont ${menu.menuIcon}`} style={{ marginRight: 4 }} />
+          <MenuItem key={menu.id} style={{ display: 'flex', alignItems: 'center' }}>
+            <DynamicIcon
+              IconComponent={menuIconList.find(icon => icon.code === menu.menuIcon)?.icon}
+              theme="outline"
+              size="18"
+              fill={menu.id === activeMenuId ? 'rgb(var(--primary-6))' : '#333'}
+              style={{ marginRight: 4 }}
+            />
             {menu.menuName}
           </MenuItem>
         );

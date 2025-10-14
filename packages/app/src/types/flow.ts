@@ -79,14 +79,14 @@ export interface SelectOption {
   value: string;
 }
 
-// 弹窗类型
-export enum MODAL_TYPE {
-  CONFIRM = 'confirm',
-  INFOR = 'infor',
-  CUSTOM = 'custom'
-}
-
 export enum CAL_TYPE {
   FORMULA = 'FORMULA',
   DATASUMMARY = 'DATASUMMARY'
+}
+
+// 触发事件
+export enum TRIGGER_EVENTS {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete'
 }

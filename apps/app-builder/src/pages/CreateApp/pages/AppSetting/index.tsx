@@ -2,6 +2,8 @@ import appPermissionSVG from '@/assets/images/app_auth.svg';
 import appPermissionActiveSVG from '@/assets/images/app_auth_active.svg';
 import baseSettingSVG from '@/assets/images/base_setting.svg';
 import baseSettingActiveSVG from '@/assets/images/base_setting_active.svg';
+import appReleaseSVG from '@/assets/images/app_release.svg';
+import appReleaseActiveSVG from '@/assets/images/app_release_active.svg';
 import { type Options } from '@/components/CreateApp/const';
 import { Button, Form, Layout, Menu, Message } from '@arco-design/web-react';
 import { IconMenuFold } from '@arco-design/web-react/icon';
@@ -17,6 +19,7 @@ import AppPermission from './components/AppPermission';
 import BasicSetting from './components/BasicSetting';
 import { useAppStore } from '@/store/store_app';
 import styles from './index.module.less';
+import AppReleasePage from '../AppRelease';
 
 const MenuItem = Menu.Item;
 const Sider = Layout.Sider;
@@ -25,7 +28,7 @@ const Footer = Layout.Footer;
 
 const AppSettingPage: FC = () => {
   const [form] = Form.useForm();
-  const { curAppId } = useAppStore();
+  const { curAppId, curAppInfo, setCurAppInfo } = useAppStore();
 
   const [appData, setAppData] = useState<Application>();
   const [activeTab, setActiveTab] = useState('baseSetting');
@@ -79,8 +82,15 @@ const AppSettingPage: FC = () => {
         const res = await updateApplication(params);
         if (res) {
           Message.success('保存成功');
+          setCurAppInfo({
+            ...curAppInfo,
+            iconName: iconName || '',
+            iconColor: iconColor || '',
+            appName: appName || '--'
+          });
         }
       } catch (_error) {
+        console.error('保存失败 _error:', _error);
       } finally {
         setSaveLoading(false);
       }
@@ -114,11 +124,20 @@ const AppSettingPage: FC = () => {
                 />
                 应用权限
               </MenuItem>
+              <MenuItem key="appRelease" style={{ display: 'flex' }}>
+                <img
+                  src={activeTab === 'appRelease' ? appReleaseActiveSVG : appReleaseSVG}
+                  alt="应用发布"
+                  style={{ marginRight: 16 }}
+                />
+                应用发布
+              </MenuItem>
             </Menu>
           </Sider>
           <Content className={styles.content}>
             {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
             {activeTab === 'appPermission' && <AppPermission />}
+            {activeTab === 'appRelease' && <AppReleasePage />}
           </Content>
         </Layout>
         {activeTab === 'baseSetting' && (

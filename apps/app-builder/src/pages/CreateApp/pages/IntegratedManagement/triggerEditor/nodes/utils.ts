@@ -1,5 +1,5 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
+import type { FlowNodeJSON, FlowNodeEntity } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
   getEntityFields,
@@ -8,7 +8,7 @@ import {
   type EntityFieldValidationTypes
 } from '@onebase/app';
 import { v4 as uuidv4 } from 'uuid';
-import { NodeType } from './const';
+import { NodeType } from '@onebase/common';
 
 export const generateNodeId = (nodeType: NodeType) => {
   const uuid = uuidv4().replaceAll('-', '');
@@ -312,4 +312,31 @@ export const getEntityFieldListV2 = async (
     const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
     setValidationTypes(newValidationTypes);
   }
+};
+
+// 判断是否在循环节点内
+export const getIsLoop = (element: FlowNodeEntity): boolean => {
+  if (element.flowNodeType === NodeType.LOOP) {
+    return true;
+  } else if (element.flowNodeType === 'root') {
+    return false;
+  } else if (element.parent) {
+    return getIsLoop(element.parent);
+  }
+  return false;
+};
+
+// 判断节点是否包含循环节点
+export const getHasLoop = (nodes: any[]): boolean => {
+  let hasLoop = false;
+  for (let ele of nodes) {
+    if (ele.type === NodeType.LOOP) {
+      hasLoop = true;
+      return hasLoop;
+    }
+    if (ele.blocks?.length) {
+      hasLoop = getHasLoop(ele.blocks);
+    }
+  }
+  return hasLoop;
 };

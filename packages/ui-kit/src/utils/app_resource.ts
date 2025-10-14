@@ -1,24 +1,39 @@
 import { Message } from '@arco-design/web-react';
 import {
+  CATEGORY_TYPE,
+  listPageView,
   loadPageSet,
+  PageView,
   savePageSet,
+  SavePageSetReq,
   type ComponentConfig,
   type LoadPageSetReq,
-  type PageSet,
-  type SavePageSetReq
+  type PageSet
 } from '@onebase/app';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP, EditConfig, LAYOUT_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from 'src/components';
-import { useFormEditorSignal, useListEditorSignal } from 'src/signals';
+import { pagesRuntimeSignal } from '@onebase/common';
+import { cloneDeep } from 'lodash-es';
+import {
+  COMPONENT_TYPE_DISPLAY_NAME_MAP,
+  EditConfig,
+  FORM_COMPONENT_TYPES,
+  LAYOUT_COMPONENT_TYPES
+} from 'src/components';
+import {
+  createPageEditorSignal,
+  useEditorSignalMap,
+  useFormEditorSignal,
+  useListEditorSignal,
+  usePageViewEditorSignal
+} from 'src/signals';
 
 export interface SavePageSetParams {
   pageSetId: string;
   formComponents: any[];
+  formPageComponentSchemas: { [key: string]: EditConfig };
+  fromColComponentsMap: { [key: string]: any[][] };
+
   listComponents: any[];
-  formPageComponentSchemas: Map<string, EditConfig>;
   listPageComponentSchemas: Map<string, EditConfig>;
-  fromColComponentsMap: {
-    colComponents: Map<string, any[][]>;
-  };
   listColComponentsMap: {
     colComponents: Map<string, any[][]>;
   };
@@ -35,29 +50,56 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
     pageSetId
   } = params;
 
-  console.log('formComponents: ', formComponents);
-  console.log('formPageComponentSchemas: ', formPageComponentSchemas);
-  console.log('listComponents: ', listComponents);
-  console.log('listPageComponentSchemas: ', listPageComponentSchemas);
+  const { curViewId, pageViews } = usePageViewEditorSignal;
+
+  //   最新的表单配置保存到useEditorSignalMap中
+  useEditorSignalMap.get(curViewId.value)!.setComponents(formComponents);
+  useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(formPageComponentSchemas);
+  useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(fromColComponentsMap);
+
+  // 过滤出 pageViews 中 created 为 true 的元素
+  const createdPageViews = Object.entries(pageViews.value)
+    .filter(([_, view]) => view.created === true)
+    .map(([_, view]) => ({ ...view, created: true, components: [] }));
 
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
   const loadPagesetResp = await loadPageSet(loadPageSetReq);
-  console.log('res: ', loadPagesetResp);
 
+  // 补充到已有的结果中
+  loadPagesetResp.pages.push(...createdPageViews);
+
+  // 给每个页面赋值组件
   loadPagesetResp.pages.forEach((_page: PageSet, index: number) => {
-    if (_page.pageType === 'form') {
-      // console.log('formComponentsSchemas: ', formPageComponentSchemas);
+    if (_page.pageType === CATEGORY_TYPE.FORM) {
+      const components = useEditorSignalMap.get(_page.id)!.components.value;
 
-      loadPagesetResp.pages[index].components = formComponents.map((component) => {
-        console.log('component: ', component);
-        console.log('formPageComponentSchemas: ', formPageComponentSchemas);
+      const pageComponentSchemas = new Map(
+        Object.entries(cloneDeep(useEditorSignalMap.get(_page.id)!.pageComponentSchemas.value))
+      );
+
+      const layoutSubComponentsMap = new Map(
+        Object.entries(cloneDeep(useEditorSignalMap.get(_page.id)!.layoutSubComponents.value))
+      );
+
+      console.log(loadPagesetResp.pages[index]);
+      loadPagesetResp.pages[index] = {
+        ...loadPagesetResp.pages[index],
+        detailViewMode: pageViews.value[_page.id]?.detailViewMode,
+        editViewMode: pageViews.value[_page.id]?.editViewMode,
+        isDefaultDetailViewMode: pageViews.value[_page.id]?.isDefaultDetailViewMode,
+        isDefaultEditViewMode: pageViews.value[_page.id]?.isDefaultEditViewMode
+      };
+
+      loadPagesetResp.pages[index].components = components.map((component) => {
+        // console.log('component: ', component);
+        // console.log('formPageComponentSchemas: ', formPageComponentSchemas);
         return {
           componentCode: component.id,
           componentType: component.type,
-          config: JSON.stringify(formPageComponentSchemas.get(component.id)?.config),
-          editData: JSON.stringify(formPageComponentSchemas.get(component.id)?.editData),
+          config: JSON.stringify(pageComponentSchemas.get(component.id)?.config),
+          editData: JSON.stringify(pageComponentSchemas.get(component.id)?.editData),
           parentCode: '',
           blockIndex: 0,
           containerIndex: 0
@@ -66,8 +108,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       // console.log('loadPagesetResp.pages[index].components: ', loadPagesetResp.pages[index].components);
 
       const colComponents: any[] = [];
-      console.log(fromColComponentsMap.colComponents);
-      fromColComponentsMap.colComponents.forEach((cols: any[][], parentCode: string) => {
+      layoutSubComponentsMap.forEach((cols: any[][], parentCode: string) => {
         console.log(parentCode, ': cols: ', cols);
 
         cols &&
@@ -76,8 +117,8 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
               colComponents.push({
                 componentCode: component.id,
                 componentType: component.type,
-                config: JSON.stringify(formPageComponentSchemas.get(component.id)?.config),
-                editData: JSON.stringify(formPageComponentSchemas.get(component.id)?.editData),
+                config: JSON.stringify(pageComponentSchemas.get(component.id)?.config),
+                editData: JSON.stringify(pageComponentSchemas.get(component.id)?.editData),
                 parentCode: parentCode,
                 blockIndex: index,
                 containerIndex: colIndex
@@ -87,7 +128,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       });
 
       loadPagesetResp.pages[index].components.push(...colComponents);
-    } else if (_page.pageType === 'list') {
+    } else if (_page.pageType === CATEGORY_TYPE.LIST) {
       console.log('listComponents: ', listComponents);
       loadPagesetResp.pages[index].components = listComponents.map((component) => {
         return {
@@ -148,10 +189,14 @@ export interface LoadPageSetParams {
 export async function startLoadPageSet(params: LoadPageSetParams) {
   const { pageSetId } = params;
 
+  const { setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
+
   const {
     setComponents: setFormComponents,
     setPageComponentSchemas: setFromPageComponentSchemas,
-    setLayoutSubComponents: setFromLayoutSubComponents
+    loadPageComponentSchemas: loadFormPageComponentSchemas,
+    setLayoutSubComponents: setFromLayoutSubComponents,
+    loadLayoutSubComponents: loadFormLayoutSubComponents
   } = useFormEditorSignal;
 
   const {
@@ -160,11 +205,18 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setLayoutSubComponents: setListLayoutSubComponents
   } = useListEditorSignal;
 
+  const { setCurPage } = pagesRuntimeSignal;
+
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
   const pageSet = await loadPageSet(loadPageSetReq);
-  console.log('res: ', pageSet);
+  setCurPage(pageSet);
+  console.log('载入页面集数据: ', pageSet);
+
+  pageSet.pages.forEach((page: PageSet) => {
+    useEditorSignalMap.set(page.id, createPageEditorSignal());
+  });
 
   pageSet.pages.forEach((page: PageSet) => {
     let newComponents: any[] = [];
@@ -180,13 +232,19 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
           type: component.componentType,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType] || ''
         });
+
         newPageComponentSchemas.set(component.componentCode, {
           config: JSON.parse(component.config),
           editData: JSON.parse(component.editData)
         });
       }
 
-      const layoutList: string[] = [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT, FORM_COMPONENT_TYPES.SUB_TABLE, LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT, LAYOUT_COMPONENT_TYPES.TABS_LAYOUT];
+      const layoutList: string[] = [
+        LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT,
+        FORM_COMPONENT_TYPES.SUB_TABLE,
+        LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT,
+        LAYOUT_COMPONENT_TYPES.TABS_LAYOUT
+      ];
 
       // 载入布局组件的列数初始化
       if (layoutList.includes(component.componentType)) {
@@ -219,9 +277,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType] || ''
           };
         }
-        if (page.pageType === 'form') {
-          setFromLayoutSubComponents(component.parentCode, colComponents as any[][]);
-        } else if (page.pageType === 'list') {
+        if (page.pageType === CATEGORY_TYPE.FORM) {
+          useEditorSignalMap.get(page.id)!.setLayoutSubComponents(component.parentCode, colComponents as any[][]);
+        } else if (page.pageType === CATEGORY_TYPE.LIST) {
           setListLayoutSubComponents(component.parentCode, colComponents as any[][]);
         }
 
@@ -232,20 +290,41 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       }
     });
 
-    //   console.log(page.pageType,": newComponents: ", newComponents);
-    //   console.log(page.pageType,": newPageComponentSchemas: ", newPageComponentSchemas);
-    //   console.log(page.pageType,": newColComponentsMap: ", newColComponentsMap);
+    if (page.pageType === CATEGORY_TYPE.FORM) {
+      useEditorSignalMap.get(page.id)!.setComponents(newComponents);
 
-    if (page.pageType === 'form') {
-      setFormComponents(newComponents);
       newPageComponentSchemas.forEach((config, componentId) => {
-        setFromPageComponentSchemas(componentId, config);
+        useEditorSignalMap.get(page.id)!.setPageComponentSchemas(componentId, config);
       });
-    } else if (page.pageType === 'list') {
+    } else if (page.pageType === CATEGORY_TYPE.LIST) {
       setListComponents(newComponents);
       newPageComponentSchemas.forEach((config, componentId) => {
         setListPageComponentSchemas(componentId, config);
       });
     }
   });
+
+  // 载入视图
+  const res = await listPageView({
+    pageSetId: pageSetId
+  });
+
+  if (res && res.pages) {
+    // 如果没有视图选中，就选中默认视图
+    if (!curViewId.value) {
+      const newCurViewId = res.pages.find(
+        (item: PageView) => item.isDefaultEditViewMode || item.isDefaultDetailViewMode
+      )?.id;
+
+      if (newCurViewId) {
+        setCurViewId(newCurViewId);
+        setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);
+        loadFormPageComponentSchemas(useEditorSignalMap.get(newCurViewId)!.pageComponentSchemas.value);
+        loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
+      }
+    }
+
+    setPageViews(res.pages);
+    console.log('载入视图: ', res.pages);
+  }
 }

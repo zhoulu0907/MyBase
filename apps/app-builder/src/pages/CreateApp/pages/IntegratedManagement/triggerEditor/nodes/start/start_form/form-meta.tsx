@@ -9,6 +9,7 @@ import {
   getFieldCheckTypeApi,
   getPageListByAppId,
   getPageMetadata,
+  TRIGGER_EVENTS,
   type AppEntityField,
   type ComponentConfig,
   type ConditionField,
@@ -75,11 +76,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const handleTriggerRangeChange = (value: string) => {
-    payloadForm.clearFields(['fieldId', 'triggerEvents']);
+    payloadForm.clearFields(['fieldId', 'recordTriggerEvents', 'fieldTriggerEvents']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      triggerEvents: undefined,
+      recordTriggerEvents: undefined,
+      fieldTriggerEvents: undefined,
       filterCondition: []
     });
   };
@@ -251,7 +253,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               {triggerRange === TriggerRange.Record && (
                 <Form.Item
                   label="触发事件"
-                  field="triggerEvents"
+                  field="recordTriggerEvents"
                   layout="vertical"
                   rules={[{ required: true, message: '请选择触发事件' }]}
                 >
@@ -260,15 +262,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                     options={[
                       {
                         label: '记录创建',
-                        value: 'create'
+                        value: TRIGGER_EVENTS.CREATE
                       },
                       {
                         label: '记录修改',
-                        value: 'update'
+                        value: TRIGGER_EVENTS.UPDATE
                       },
                       {
                         label: '记录删除',
-                        value: 'delete'
+                        value: TRIGGER_EVENTS.DELETE
                       }
                     ]}
                   />
@@ -278,7 +280,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               {triggerRange === TriggerRange.Field && (
                 <Form.Item
                   label="触发事件"
-                  field="triggerEvents"
+                  field="fieldTriggerEvents"
                   layout="vertical"
                   rules={[{ required: true, message: '请选择触发事件' }]}
                 >

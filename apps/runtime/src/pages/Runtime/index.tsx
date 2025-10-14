@@ -142,16 +142,13 @@ const Runtime: React.FC = () => {
           {/* <Sider style={{ width: 225 }}> */}
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
-              <Input
-                style={{
-                  width: 120,
-                  border: '1px solid #dedede',
-                  borderRadius: 3
-                }}
-                allowClear
-                suffix={<IconSearch />}
-                placeholder={t('app.searchPlaceHolder')}
-              />
+              <div className={styles.siderHeaderInput}>
+                <Input
+                  allowClear
+                  suffix={<IconSearch />}
+                  placeholder={t('app.searchPlaceHolder')}
+                />
+              </div>
             </div>
             <Tree
               blockNode

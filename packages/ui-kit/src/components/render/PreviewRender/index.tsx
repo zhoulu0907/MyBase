@@ -24,10 +24,16 @@ interface PreviewRenderProps {
 
   runtime: boolean;
 
-  toCreatePage?: Function;
+  showFromPageData?: Function;
 }
 
-const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime, toCreatePage }) => {
+const PreviewRender: React.FC<PreviewRenderProps> = ({
+  cpId,
+  cpType,
+  pageComponentSchema,
+  runtime,
+  showFromPageData
+}) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
@@ -96,7 +102,13 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
         return (
-          <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} toCreatePage={toCreatePage} />
+          <ListComp.XTable
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            showFromPageData={showFromPageData}
+          />
         );
       case LIST_COMPONENT_TYPES.CALENDAR:
         return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;

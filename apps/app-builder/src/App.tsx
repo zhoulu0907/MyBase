@@ -1,6 +1,4 @@
 import { Message } from '@arco-design/web-react';
-import '@arco-design/web-react/dist/css/arco.css';
-import '@arco-themes/react-cyansu-ob03/index.less';
 import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import { EditorPage } from './pages/Editor';

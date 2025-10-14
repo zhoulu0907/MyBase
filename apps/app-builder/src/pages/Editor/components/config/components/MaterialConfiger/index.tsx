@@ -1,11 +1,11 @@
+import { ICON_Map_By_Type } from '@/components/MaterialCard/icons';
 import { useI18n } from '@/hooks/useI18n';
 import { Tabs } from '@arco-design/web-react';
 import { usePageEditorSignal } from '@onebase/ui-kit';
 import Advanced from './Advanced';
 import Attributes from './Attributes';
-import TabTitle from './components/TabTitle';
-import { ICON_Map_By_Type } from '@/components/MaterialCard/icons';
 import styles from './index.module.less';
+import TabTitle from './TabTitle';
 
 const TabPane = Tabs.TabPane;
 
@@ -31,12 +31,10 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
       <div className={styles.componentInfo}>
         <Tabs defaultActiveTab="attributes" type="line" size="default">
           <TabPane key="attributes" title={<TabTitle title={t('editor.attribute')} />}>
-            <div style={{ width: '270px', height: '100%' }}>
-              <Attributes cpID={cpID} />
-            </div>
+            <Attributes cpID={cpID} />
           </TabPane>
           <TabPane key="advanced" title={<TabTitle title={t('editor.advanced')} />}>
-            <Advanced />
+            <Advanced cpID={cpID} />
           </TabPane>
         </Tabs>
       </div>

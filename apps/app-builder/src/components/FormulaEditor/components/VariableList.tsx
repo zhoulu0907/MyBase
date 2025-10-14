@@ -1,19 +1,20 @@
-import { Input, List, Tag, Button } from '@arco-design/web-react';
-import { IconSearch, IconFolder, IconSwap } from '@arco-design/web-react/icon';
-import { useCallback } from 'react';
+import { Input, List, Tag, Button, Dropdown, Menu } from '@arco-design/web-react';
+import { IconFolder, IconSearch } from '@arco-design/web-react/icon';
+import { useCallback, useState, type ReactNode } from 'react';
 import LightText from './LightText';
-import type { Variable } from '../utils/types';
 import styles from './VariableList.module.less';
+import type { AppEntity, AppEntityField } from '@onebase/app';
+import { cloneDeep } from 'lodash-es';
 
 interface VariableListProps {
-  variables: Variable[]; //变量数组，包含所有可展示的变量
+  variables: AppEntity[]; //变量数组，包含所有可展示的变量
   searchValue: string;  // 搜索框的值，用于过滤变量列表
   onSearchChange: (value: string) => void; // 搜索框值变化回调，用于更新搜索值
-  onInsertVariable: (variable: Variable) => void;  // 插入变量回调，用于将选中的变量插入到公式编辑器中
+  onInsertVariable: (variable: AppEntityField) => void;  // 插入变量回调，用于将选中的变量插入到公式编辑器中
 }
 
 export function VariableList({ variables, searchValue, onSearchChange, onInsertVariable }: VariableListProps) {
-
+  const [filteredVariables, setFilteredVariables] = useState<AppEntity[]>(variables);
   /**
    * 处理搜索框值变化
    * @param value - 搜索框输入的值
@@ -30,7 +31,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
    * @param variable - 点击的变量项
    */
   const handleVariableClick = useCallback(
-    (variable: Variable) => {
+    (variable: AppEntityField) => {
       onInsertVariable(variable);
     },
     [onInsertVariable]
@@ -43,59 +44,76 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
    */
   const getTypeColor = useCallback((type: string) => {
     const colorMap: Record<string, string> = {
-      文本: 'blue',
-      用户: 'green',
-      时间戳: 'orange',
-      地址: 'purple'
+      TEXT: 'blue',
+      NUMBER: 'green',
+      VARCHAR: 'orange',
+      INT: 'purple',
+      TIMESTAMP: 'pink'
     };
     return colorMap[type] || 'default';
   }, []);
 
-  return (
-    <div className={styles.variableList}>
-      <div className={styles.searchSection}>
-        <Input
-          prefix={<IconSearch />}
-          placeholder="搜索变量"
-          value={searchValue}
-          onChange={handleSearchChange}
-          className={styles.searchInput}
-        />
-      </div>
+  //点击字段列表中的切换按钮调用该函数
+  const handleChangeVariables = (entityId: string) => {
+    const copyVariables = cloneDeep(variables);
+    const selectedVariable = copyVariables?.filter(item => item.entityId === entityId) || [];
+    setFilteredVariables(selectedVariable);
+  }
 
+  //渲染当前的变量列表
+  const variablesList = (): ReactNode => {
+    if (!variables.length) return null;
+    return (
+      <div style={{minWidth: '120px'}}>
+        <Menu onClickMenuItem={(key: string)=>{
+          handleChangeVariables(key)
+        }}>
+          {variables.map((item) => {
+            return <Menu.Item key={item.entityId}>{item.entityName}</Menu.Item>
+          })}
+        </Menu>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <Input
+        prefix={<IconSearch />}
+        placeholder="搜索变量"
+        value={searchValue}
+        onChange={handleSearchChange}
+        className={styles.searchInput}
+      />
       <div className={styles.categorySection}>
         <div className={styles.categoryHeader}>
-          <div className={styles.categoryTitle}>
+          <Dropdown.Button type='text' position='bl' triggerProps={{autoAlignPopupWidth: true}} droplist={variablesList()} icon={<Button type='text' color='success'>切换</Button>}>
             <IconFolder className={styles.categoryIcon} />
-            <span>订单管理</span>
-          </div>
-          <Button type="text" size="small" icon={<IconSwap />} className={styles.switchButton}>
-            切换
-          </Button>
+            <span className={styles.categoryEntityName}>{filteredVariables[0].entityName}</span>
+          </Dropdown.Button>
         </div>
-      </div>
-
-      <div className={styles.listSection}>
         <List
-          dataSource={variables}
+          size='small'
+          className={styles.listSection}
+          dataSource={filteredVariables[0].fields}
           render={(variable) => (
             <List.Item
-              key={variable.value}
+              key={variable.fieldId}
               className={styles.variableItem}
               onClick={() => handleVariableClick(variable)}
             >
               <div className={styles.variableInfo}>
                 <div className={styles.variableName}>
-                  <LightText text={variable.name} searchValue={searchValue} />
+                  <LightText text={variable.fieldName} searchValue={searchValue} />
                 </div>
-                <Tag color={getTypeColor(variable.type)} size="small">
-                  {variable.type}
+                <Tag color={getTypeColor(variable.fieldType)} size="small">
+                  {variable.fieldType}
                 </Tag>
               </div>
             </List.Item>
           )}
         />
       </div>
-    </div>
+    </>
   );
 }
