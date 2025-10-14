@@ -33,7 +33,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         .map((item: any) => {
           return {
             label: item.fieldName,
-            value: item.id,
+            value: item.fieldName,
             fieldType: item.fieldType
           };
         });
