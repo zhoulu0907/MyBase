@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -51,4 +52,13 @@ public class ValidationFormatSaveReqVO {
     @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "规则组名称不能为空")
     private String rgName;
+    
+    /**
+     * 兼容性方法：为BeanUtils提供promptMessage字段的getter
+     * 优先返回popPrompt的值，如果popPrompt为空则返回promptMessage的值
+     */
+    @JsonProperty("promptMessage")
+    public String getPromptMessage() {
+        return popPrompt != null ? popPrompt : promptMessage;
+    }
 }

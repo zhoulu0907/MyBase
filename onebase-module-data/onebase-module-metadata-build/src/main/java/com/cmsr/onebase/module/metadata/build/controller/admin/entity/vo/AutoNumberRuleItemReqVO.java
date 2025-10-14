@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,7 @@ public class AutoNumberRuleItemReqVO {
     private String format;
 
     @Schema(description = "固定文本值(固定文本类型使用)", example = "ORDER")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String textValue;
 
     @Schema(description = "引用字段ID(字段引用类型使用)", example = "123")

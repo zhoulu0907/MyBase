@@ -214,6 +214,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         updateObj.setEntityId(existing.getEntityId());
         updateObj.setAppId(existing.getAppId());
         updateObj.setGroupId(targetGroupId);
+        
         formatRepository.update(updateObj);
     }
 
