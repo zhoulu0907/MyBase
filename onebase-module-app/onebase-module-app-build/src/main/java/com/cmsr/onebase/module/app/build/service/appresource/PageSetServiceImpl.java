@@ -252,6 +252,7 @@ public class PageSetServiceImpl implements PageSetService {
 
                 PageDO pageDO = PageUtils.initPage(savePageSetReqVO.getId(), pageName, routerPath, pageType,
                         openViewMode);
+                pageDO.setId(page.getId());
 
                 pageDO = pageDataRepository.insert(pageDO);
 
