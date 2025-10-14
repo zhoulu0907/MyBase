@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.build.controller.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
@@ -25,7 +26,6 @@ public class AppApplicationController {
 
     @Resource
     private AppApplicationService appApplicationService;
-
 
     @GetMapping("/page")
     @Operation(summary = "获得应用列表")
@@ -69,4 +69,12 @@ public class AppApplicationController {
         appApplicationService.deleteApplication(id, name);
         return CommonResult.success(true);
     }
+
+    @GetMapping("/id/generate")
+    @Operation(summary = "发号器")
+    public CommonResult<Long> generateId() {
+
+        return CommonResult.success(appApplicationService.generateId());
+    }
+
 }
