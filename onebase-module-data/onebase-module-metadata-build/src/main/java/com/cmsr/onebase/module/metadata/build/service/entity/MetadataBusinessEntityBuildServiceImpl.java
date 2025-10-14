@@ -13,11 +13,14 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EREntit
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERFieldVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERRelationshipVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.SimpleEntityRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldOptionRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataSystemFieldsDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
+import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataBusinessEntityRepository;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
@@ -72,6 +75,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
     private MetadataAppAndDatasourceCoreService metadataAppAndDatasourceCoreService;
+    @Resource
+    private MetadataEntityFieldOptionBuildService fieldOptionService;
 
     // 系统字段缓存，避免频繁查询数据库
     private volatile List<MetadataSystemFieldsDO> systemFieldsCache = null;
@@ -799,6 +804,33 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 // 手动设置 fieldId，因为数据库实体中是 id，而 VO 中是 fieldId
                 result.setFieldId(field.getId());
             });
+            
+            // 填充选项信息（单选、多选字段）
+            if ("SELECT".equalsIgnoreCase(field.getFieldType()) ||
+                "SINGLE_SELECT".equalsIgnoreCase(field.getFieldType()) ||
+                "MULTI_SELECT".equalsIgnoreCase(field.getFieldType()) ||
+                "PICKLIST".equalsIgnoreCase(field.getFieldType()) ||
+                "DATA_SELECTION".equalsIgnoreCase(field.getFieldType()) ||
+                "MULTI_USER".equalsIgnoreCase(field.getFieldType()) ||
+                "MULTI_DEPARTMENT".equalsIgnoreCase(field.getFieldType()) ||
+                "MULTI_DATA_SELECTION".equalsIgnoreCase(field.getFieldType())) {
+                List<MetadataEntityFieldOptionDO> options = fieldOptionService.listByFieldId(field.getId());
+                if (options != null && !options.isEmpty()) {
+                    List<FieldOptionRespVO> optionVOs = options.stream().map(o -> {
+                        FieldOptionRespVO item = new FieldOptionRespVO();
+                        item.setId(o.getId() != null ? String.valueOf(o.getId()) : null);
+                        item.setFieldId(o.getFieldId());
+                        item.setOptionLabel(o.getOptionLabel());
+                        item.setOptionValue(o.getOptionValue());
+                        item.setOptionOrder(o.getOptionOrder());
+                        item.setIsEnabled(o.getIsEnabled());
+                        item.setDescription(o.getDescription());
+                        return item;
+                    }).toList();
+                    erField.setOptions(optionVOs);
+                }
+            }
+            
             erFields.add(erField);
         }
 

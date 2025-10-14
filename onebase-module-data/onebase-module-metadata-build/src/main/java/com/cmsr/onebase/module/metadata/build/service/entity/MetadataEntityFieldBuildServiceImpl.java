@@ -675,7 +675,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
                 
                 // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
-                if (maxLength != null && !maxLength.equals(origin.getDataLength())) {
+                // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
+                boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
+                    (item.getConstraints().getLengthEnabled() != null || 
+                     item.getConstraints().getMinLength() != null || 
+                     item.getConstraints().getMaxLength() != null ||
+                     StringUtils.hasText(item.getConstraints().getLengthPrompt()));
+                if (maxLength != null && !maxLength.equals(origin.getDataLength()) && !hasConstraintsLengthConfig) {
                     processLengthValidation(fieldId, full);
                 }
             }
@@ -757,7 +763,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     }
                     
                     // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
-                    if (maxLength != null && !maxLength.equals(existingField.getDataLength())) {
+                    // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
+                    boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
+                        (item.getConstraints().getLengthEnabled() != null || 
+                         item.getConstraints().getMinLength() != null || 
+                         item.getConstraints().getMaxLength() != null ||
+                         StringUtils.hasText(item.getConstraints().getLengthPrompt()));
+                    if (maxLength != null && !maxLength.equals(existingField.getDataLength()) && !hasConstraintsLengthConfig) {
                         processLengthValidation(fieldId, full);
                     }
                     
@@ -815,7 +827,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
                 
                 // 特别处理：对于新增字段，如果设置了 dataLength，需要同步到 MetadataValidationLengthDO
-                if (maxLength != null && maxLength > 0) {
+                // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
+                boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
+                    (item.getConstraints().getLengthEnabled() != null || 
+                     item.getConstraints().getMinLength() != null || 
+                     item.getConstraints().getMaxLength() != null ||
+                     StringUtils.hasText(item.getConstraints().getLengthPrompt()));
+                if (maxLength != null && maxLength > 0 && !hasConstraintsLengthConfig) {
                     processLengthValidation(fieldId, toCreate);
                 }
             }
@@ -1728,15 +1746,21 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 必填（与 isRequired 联动）
         if (entityField != null && entityField.getIsRequired() != null) {
-            // 原有的字段约束逻辑
-            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
-            req.setFieldId(fieldId);
-            req.setConstraintType("REQUIRED");
-            req.setIsEnabled(entityField.getIsRequired());
-            req.setPromptMessage(null);
-            req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            req.setAppId(entityField.getAppId());
-            fieldConstraintService.saveFieldConstraintConfig(req);
+            // 只有当 isRequired = 1 时才创建约束配置，为0时删除已有配置
+            if (entityField.getIsRequired() == 1) {
+                // 原有的字段约束逻辑
+                FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+                req.setFieldId(fieldId);
+                req.setConstraintType("REQUIRED");
+                req.setIsEnabled(entityField.getIsRequired());
+                req.setPromptMessage(null);
+                req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                req.setAppId(entityField.getAppId());
+                fieldConstraintService.saveFieldConstraintConfig(req);
+            } else {
+                // isRequired = 0 时删除已有的必填约束配置
+                fieldConstraintService.delete(fieldId, "REQUIRED");
+            }
             
             // 新增：同步到 MetadataValidationRequiredDO
             processRequiredValidation(fieldId, entityField);
@@ -1744,14 +1768,20 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 唯一（与 isUnique 联动）
         if (entityField != null && entityField.getIsUnique() != null) {
-            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
-            req.setFieldId(fieldId);
-            req.setConstraintType("UNIQUE");
-            req.setIsEnabled(entityField.getIsUnique());
-            req.setPromptMessage(null);
-            req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            req.setAppId(entityField.getAppId());
-            fieldConstraintService.saveFieldConstraintConfig(req);
+            // 只有当 isUnique = 1 时才创建约束配置，为0时删除已有配置
+            if (entityField.getIsUnique() == 1) {
+                FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+                req.setFieldId(fieldId);
+                req.setConstraintType("UNIQUE");
+                req.setIsEnabled(entityField.getIsUnique());
+                req.setPromptMessage(null);
+                req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                req.setAppId(entityField.getAppId());
+                fieldConstraintService.saveFieldConstraintConfig(req);
+            } else {
+                // isUnique = 0 时删除已有的唯一性约束配置
+                fieldConstraintService.delete(fieldId, "UNIQUE");
+            }
             
             // 新增：同步到 MetadataValidationUniqueDO
             processUniqueValidation(fieldId, entityField);
@@ -1789,7 +1819,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     rule.setItemType(ruleReq.getItemType());
                     rule.setItemOrder(ruleReq.getItemOrder());
                     rule.setFormat(ruleReq.getFormat());
-                    rule.setTextValue(ruleReq.getTextValue());
+                    
+                    // 兼容性处理：TEXT类型的规则项支持从format字段获取文本值
+                    String textValue = ruleReq.getTextValue();
+                    if ("TEXT".equalsIgnoreCase(ruleReq.getItemType()) && textValue == null && ruleReq.getFormat() != null) {
+                        textValue = ruleReq.getFormat();
+                    }
+                    rule.setTextValue(textValue);
+                    
                     rule.setRefFieldId(ruleReq.getRefFieldId());
                     // 使用新的枚举值：1-启用，0-禁用
                     rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
@@ -1806,9 +1843,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      */
     private void populateFieldRelatedData(MetadataEntityFieldDO field, EntityFieldRespVO vo) {
         // 填充选项信息
-        if ("SINGLE_SELECT".equalsIgnoreCase(field.getFieldType()) ||
+        if ("SELECT".equalsIgnoreCase(field.getFieldType()) ||
+            "SINGLE_SELECT".equalsIgnoreCase(field.getFieldType()) ||
             "MULTI_SELECT".equalsIgnoreCase(field.getFieldType()) ||
-            "PICKLIST".equalsIgnoreCase(field.getFieldType())) {
+            "PICKLIST".equalsIgnoreCase(field.getFieldType()) ||
+            "DATA_SELECTION".equalsIgnoreCase(field.getFieldType()) ||
+            "MULTI_USER".equalsIgnoreCase(field.getFieldType()) ||
+            "MULTI_DEPARTMENT".equalsIgnoreCase(field.getFieldType()) ||
+            "MULTI_DATA_SELECTION".equalsIgnoreCase(field.getFieldType())) {
             var options = fieldOptionService.listByFieldId(field.getId());
             if (options != null && !options.isEmpty()) {
                 List<FieldOptionRespVO> optionVOs = options.stream().map(o -> {
@@ -1961,12 +2003,15 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     saveReqVO.setMinLength(null); // 最小长度默认为null，允许为空
                     saveReqVO.setIsEnabled(1); // 启用长度校验
                     
-                    // rg_name可以用display_name+field_name+长度进行拼接
-                    String rgName = String.format("%s%s长度校验-LENGTH",
-                        entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
-                        entityField.getFieldName() != null ? entityField.getFieldName() : "");
+                    // 使用统一的规则组命名方法
+                    String rgName = buildLengthRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
-                    String promptMsg = String.format("字段长度不能超过%d个字符", entityField.getDataLength());
+                    
+                    // 生成默认提示语：{字段展示名称}长度不能超过X个字符
+                    String fieldDisplayName = entityField.getDisplayName() != null && !entityField.getDisplayName().trim().isEmpty() 
+                        ? entityField.getDisplayName() 
+                        : (entityField.getFieldName() != null ? entityField.getFieldName() : "字段");
+                    String promptMsg = String.format("%s长度不能超过%d个字符", fieldDisplayName, entityField.getDataLength());
                     saveReqVO.setPromptMessage(promptMsg);
                     // 设置popPrompt确保errorMessage字段能正确返回
                     saveReqVO.setPopPrompt(promptMsg);
@@ -2026,7 +2071,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // rg_name可以用display_name+field_name+必填校验进行拼接
                     String rgName = buildRequiredRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
-                    String promptMsg = "此字段为必填项";
+                    
+                    // 生成默认提示语：{字段展示名称}为必填项
+                    String fieldDisplayName = entityField.getDisplayName() != null && !entityField.getDisplayName().trim().isEmpty() 
+                        ? entityField.getDisplayName() 
+                        : (entityField.getFieldName() != null ? entityField.getFieldName() : "此字段");
+                    String promptMsg = fieldDisplayName + "为必填项";
                     saveReqVO.setPromptMessage(promptMsg);
                     // 设置popPrompt确保errorMessage字段能正确返回
                     saveReqVO.setPopPrompt(promptMsg);
@@ -2085,7 +2135,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // rg_name可以用display_name+field_name+唯一校验进行拼接
                     String rgName = buildUniqueRuleGroupName(fieldId);
                     saveReqVO.setRgName(rgName);
-                    String promptMsg = "此字段值必须唯一";
+                    
+                    // 生成默认提示语：{字段展示名称}必须唯一
+                    String fieldDisplayName = entityField.getDisplayName() != null && !entityField.getDisplayName().trim().isEmpty() 
+                        ? entityField.getDisplayName() 
+                        : (entityField.getFieldName() != null ? entityField.getFieldName() : "此字段");
+                    String promptMsg = fieldDisplayName + "必须唯一";
                     saveReqVO.setPromptMessage(promptMsg);
                     // 设置popPrompt确保errorMessage字段能正确返回
                     saveReqVO.setPopPrompt(promptMsg);
@@ -2104,12 +2159,113 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
     }
 
+    /**
+     * 构建规则组名称
+     * 格式：校验类型-字段展示名称-实体展示名称
+     * 例如：必填校验-姓名-学生信息表
+     *
+     * @param fieldId 字段ID
+     * @param validationType 校验类型（REQUIRED/UNIQUE/LENGTH/RANGE/FORMAT/CHILD_NOT_EMPTY/SELF_DEFINED）
+     * @return 规则组名称
+     */
+    private String buildRuleGroupName(Long fieldId, String validationType) {
+        try {
+            // 获取字段信息
+            DefaultConfigStore cs = new DefaultConfigStore();
+            cs.and("id", fieldId);
+            MetadataEntityFieldDO field = metadataEntityFieldRepository.findOne(cs);
+            if (field == null) {
+                log.warn("构建规则组名称失败，字段不存在: fieldId={}", fieldId);
+                return getValidationTypeName(validationType) + "-未知字段-未知实体";
+            }
+            
+            // 获取实体信息
+            MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(field.getEntityId());
+            
+            // 字段展示名称，优先使用displayName，如果为空则使用fieldName
+            String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty() 
+                ? field.getDisplayName() 
+                : (field.getFieldName() != null ? field.getFieldName() : "未知字段");
+            
+            // 实体展示名称，优先使用displayName，如果为空则使用tableName
+            String entityDisplayName = "未知实体";
+            if (entity != null) {
+                entityDisplayName = entity.getDisplayName() != null && !entity.getDisplayName().trim().isEmpty()
+                    ? entity.getDisplayName()
+                    : (entity.getTableName() != null ? entity.getTableName() : "未知实体");
+            }
+            
+            // 校验类型中文名称
+            String validationTypeName = getValidationTypeName(validationType);
+            
+            // 拼接成最终的规则组名称
+            return String.format("%s-%s-%s", validationTypeName, fieldDisplayName, entityDisplayName);
+        } catch (Exception e) {
+            log.error("构建规则组名称时发生异常，字段ID: {}, 校验类型: {}, 错误: {}", fieldId, validationType, e.getMessage(), e);
+            return getValidationTypeName(validationType) + "-未知字段-未知实体";
+        }
+    }
+    
+    /**
+     * 获取校验类型的中文名称
+     *
+     * @param validationType 校验类型英文标识
+     * @return 校验类型中文名称
+     */
+    private String getValidationTypeName(String validationType) {
+        if (validationType == null) {
+            return "未知校验";
+        }
+        
+        switch (validationType.toUpperCase()) {
+            case "REQUIRED":
+                return "必填校验";
+            case "UNIQUE":
+                return "唯一校验";
+            case "LENGTH":
+            case "LENGTH_RANGE":
+                return "长度校验";
+            case "RANGE":
+                return "范围校验";
+            case "FORMAT":
+            case "REGEX":
+                return "格式校验";
+            case "CHILD_NOT_EMPTY":
+                return "子表空行校验";
+            case "SELF_DEFINED":
+            case "CUSTOM":
+                return "自定义校验";
+            default:
+                return validationType + "校验";
+        }
+    }
+
     private String buildRequiredRuleGroupName(Long fieldId) {
-        return "字段约束-REQUIRED-" + fieldId;
+        return buildRuleGroupName(fieldId, "REQUIRED");
     }
 
     private String buildUniqueRuleGroupName(Long fieldId) {
-        return "字段约束-UNIQUE-" + fieldId;
+        return buildRuleGroupName(fieldId, "UNIQUE");
+    }
+
+    private String buildLengthRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "LENGTH");
+    }
+
+    private String buildRangeRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "RANGE");
+    }
+
+    private String buildFormatRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "FORMAT");
+    }
+
+    private String buildChildNotEmptyRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "CHILD_NOT_EMPTY");
+    }
+
+    private String buildSelfDefinedRuleGroupName(Long fieldId) {
+        return buildRuleGroupName(fieldId, "SELF_DEFINED");
     }
 
 }

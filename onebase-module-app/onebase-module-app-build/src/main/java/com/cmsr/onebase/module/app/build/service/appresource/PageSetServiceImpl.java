@@ -252,6 +252,7 @@ public class PageSetServiceImpl implements PageSetService {
 
                 PageDO pageDO = PageUtils.initPage(savePageSetReqVO.getId(), pageName, routerPath, pageType,
                         openViewMode);
+                pageDO.setId(page.getId());
 
                 pageDO = pageDataRepository.insert(pageDO);
 
@@ -278,6 +279,7 @@ public class PageSetServiceImpl implements PageSetService {
             finalPageDO.setDetailViewMode(page.getDetailViewMode());
             finalPageDO.setIsDefaultEditViewMode(page.getIsDefaultEditViewMode());
             finalPageDO.setIsDefaultDetailViewMode(page.getIsDefaultDetailViewMode());
+            finalPageDO.setIsLatestUpdated(page.getIsLatestUpdated());
 
             pageDataRepository.update(finalPageDO);
 
