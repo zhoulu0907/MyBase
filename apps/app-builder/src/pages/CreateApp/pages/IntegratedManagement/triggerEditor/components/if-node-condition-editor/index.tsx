@@ -405,13 +405,13 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     if (!conditionFields) return;
 
     conditionFields.forEach((field: ConditionField) => {
-      if (!fieldType) {
+      if (!fieldType || !field.fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
-          title: field.label
+          title: field.label,
+          fieldType: field.fieldType
         });
-      }
-      if (field?.fieldType === fieldType) {
+      }else if (field?.fieldType === fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
           title: field.label
