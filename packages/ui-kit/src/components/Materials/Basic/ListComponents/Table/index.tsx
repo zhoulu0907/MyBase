@@ -212,6 +212,10 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
 
   // 行点击事件
   const handleRowClick = (record: any) => {
+    if (!runtime) {
+      return;
+    }
+
     if (advancedRowRedirect) {
       if (redirectMethod === RedirectMethod.DRAWER) {
         // 打开抽屉显示详情
