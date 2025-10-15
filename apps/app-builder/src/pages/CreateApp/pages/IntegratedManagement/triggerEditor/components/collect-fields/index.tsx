@@ -5,6 +5,7 @@ import { SortableContainer, SortableElement, SortableHandle } from 'react-sortab
 import { nanoid } from 'nanoid';
 import styles from './index.module.less';
 import { type Field } from '../../typings';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 
 // 拖拽图标
 const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles.dragHandle} />);
@@ -89,7 +90,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
   ];
 
   const fieldTypeOptions = [
-    {label:'文本',value:'TEXT'},
+    {label:ENTITY_FIELD_TYPE.TEXT.LABEL,value: ENTITY_FIELD_TYPE.TEXT.VALUE},
   ];
 
   useEffect(() => {
@@ -114,7 +115,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
     const temp = {
       id: nanoid(),
       fieldName: undefined,
-      fieldType: 'TEXT'
+      fieldType: ENTITY_FIELD_TYPE.TEXT.VALUE
     };
     const newtableData = [...newData, temp];
     setTableData(newtableData);

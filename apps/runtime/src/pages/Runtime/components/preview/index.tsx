@@ -441,6 +441,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           </div>
         </Drawer>
       </div>
+
+      {/* 信息收集弹窗 */}
       <Modal
         visible={infoModalVisibel}
         title={outputParams.modalTitle}
