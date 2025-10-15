@@ -233,6 +233,7 @@ const DataPermissionModal = (props: IProps) => {
   return (
     <>
       <Modal
+        style={{ width: '750px' }}
         className={styles.dataPermissionModal}
         title={<div className={styles.dataPermissionModalTitle}>{status === 'create' ? '添加' : '编辑'}数据权限组</div>}
         visible={modalVisible}
