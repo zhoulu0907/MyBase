@@ -10,7 +10,7 @@ import {
   usePageViewEditorSignal
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styles from './index.module.less';
 
 const { useForm } = Form;
@@ -24,10 +24,6 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
   useSignals();
 
   const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
-
-  useEffect(() => {
-    console.log('curViewId: ', curViewId.value);
-  }, [curViewId.value]);
 
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
