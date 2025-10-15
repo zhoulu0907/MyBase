@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
+import com.cmsr.onebase.module.flow.context.ContextProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import lombok.Setter;
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Setter
 @Component
-public class ContextProviderImpl implements InitializingBean {
+public class ContextProviderImpl implements ContextProvider, InitializingBean {
 
     public static final String EXECUTE_CONTEXT = "executeContext:";
     public static final String VARIABLE_CONTEXT = "variableContext:";
