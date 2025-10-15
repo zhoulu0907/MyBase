@@ -36,7 +36,7 @@ public class FlowTimerJobHandler implements TimerJobService, ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        RRemoteService remoteService = redissonClient.getRemoteService();
+        RRemoteService remoteService = redissonClient.getRemoteService(TimerJobService.KEY_PREFIX_TIMER);
         remoteService.register(TimerJobService.class, this, 12);
     }
 
