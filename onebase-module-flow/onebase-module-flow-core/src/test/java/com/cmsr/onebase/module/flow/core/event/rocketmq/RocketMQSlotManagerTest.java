@@ -22,7 +22,7 @@ public class RocketMQSlotManagerTest {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://10.0.104.38:6379");
         RedissonClient redissonClient = Redisson.create(config);
-        RMap<Object, Object> map = redissonClient.getMap(RocketMQConstants.EVENT_TOPIC_SLOT);
+        RMap<Object, Object> map = redissonClient.getMap(RocketMQConstants.CHANGE_EVENTS_CONSUMER_GROUP_SLOT);
         for (Object key : map.keySet()) {
             Long value = (Long) map.get(key);
             //System.out.println(key + ":" + value);

@@ -46,7 +46,7 @@ public class FlowEventUpdateFlowCache implements MessageListener, ApplicationRun
     private String endpoints;
 
     @Setter
-    private String topic = RocketMQConstants.EVENT_TOPIC;
+    private String topic = RocketMQConstants.CHANGE_EVENTS_TOPIC;
 
     @Setter
     @Autowired
@@ -67,14 +67,14 @@ public class FlowEventUpdateFlowCache implements MessageListener, ApplicationRun
     @Override
     public void run(ApplicationArguments args) throws Exception {
         slotManager = new RocketMQSlotManager();
-        slotManager.setSlotKey(RocketMQConstants.EVENT_TOPIC_SLOT);
+        slotManager.setSlotKey(RocketMQConstants.CHANGE_EVENTS_CONSUMER_GROUP_SLOT);
         slotManager.setRedissonClient(redissonClient);
         slotManager.afterPropertiesSet();
         Integer slot = slotManager.getSlot();
         ClientConfiguration clientConfiguration = ClientConfiguration.newBuilder()
                 .setEndpoints(endpoints)
                 .build();
-        String consumerGroup = RocketMQConstants.CONSUMER_GROUP_EVENT_PREFIX + slot;
+        String consumerGroup = RocketMQConstants.CHANGE_EVENTS_CONSUMER_GROUP_PREFIX + slot;
         FilterExpression filterExpression = new FilterExpression();
         this.consumer = provider.newPushConsumerBuilder()
                 .setClientConfiguration(clientConfiguration)
