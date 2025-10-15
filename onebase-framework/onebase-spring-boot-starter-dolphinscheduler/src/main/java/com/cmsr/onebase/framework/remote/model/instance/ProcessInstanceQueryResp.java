@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.remote.model.instance;
+package com.cmsr.onebase.framework.remote.model.instance;
 
 /**
  * 流程实例查询响应

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.remote.model.process;
+package com.cmsr.onebase.framework.remote.model.process;
 
 /**
  * 流程定义简要信息

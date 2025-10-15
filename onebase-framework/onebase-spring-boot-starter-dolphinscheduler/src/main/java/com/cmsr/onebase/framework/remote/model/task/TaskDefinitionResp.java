@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.remote.model.task;
+package com.cmsr.onebase.framework.remote.model.task;
 
 /**
  * 任务定义信息（简要）

@@ -1,10 +1,10 @@
-package com.cmsr.onebase.dolphins.core;
+package com.cmsr.onebase.framework.core;
 
-import com.cmsr.onebase.dolphins.remote.InstanceApi;
-import com.cmsr.onebase.dolphins.remote.ScheduleApi;
-import com.cmsr.onebase.dolphins.remote.TaskApi;
-import com.cmsr.onebase.dolphins.remote.TaskInstanceApi;
-import com.cmsr.onebase.dolphins.remote.WorkflowApi;
+import com.cmsr.onebase.framework.remote.InstanceApi;
+import com.cmsr.onebase.framework.remote.ScheduleApi;
+import com.cmsr.onebase.framework.remote.TaskApi;
+import com.cmsr.onebase.framework.remote.TaskInstanceApi;
+import com.cmsr.onebase.framework.remote.WorkflowApi;
 import jakarta.annotation.Resource;
 
 /**

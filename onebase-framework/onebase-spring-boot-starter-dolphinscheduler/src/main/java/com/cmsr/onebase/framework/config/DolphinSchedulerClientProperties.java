@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.config;
+package com.cmsr.onebase.framework.config;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

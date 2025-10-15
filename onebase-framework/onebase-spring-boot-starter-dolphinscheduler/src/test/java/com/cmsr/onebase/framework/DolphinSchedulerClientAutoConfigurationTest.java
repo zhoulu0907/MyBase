@@ -1,7 +1,7 @@
-package com.cmsr.onebase.dolphins;
+package com.cmsr.onebase.framework;
 
-import com.cmsr.onebase.dolphins.config.DolphinSchedulerClientAutoConfiguration;
-import com.cmsr.onebase.dolphins.remote.ScheduleApi;
+import com.cmsr.onebase.framework.config.DolphinSchedulerClientAutoConfiguration;
+import com.cmsr.onebase.framework.remote.ScheduleApi;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.assertj.core.api.Assertions;
