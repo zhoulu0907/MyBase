@@ -70,7 +70,7 @@ public class DolphinSchedulerClientAutoConfiguration {
                 .connectTimeout(props.getConnectTimeout().toMillis(), TimeUnit.MILLISECONDS)
                 .readTimeout(props.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS)
                 .writeTimeout(props.getWriteTimeout().toMillis(), TimeUnit.MILLISECONDS)
-                .addInterceptor(new TokenInterceptor(props.getHeaderName(), props.getToken()))
+                .addInterceptor(new TokenInterceptor(props.getToken()))
                 .addInterceptor(logging)
                 .build();
     }

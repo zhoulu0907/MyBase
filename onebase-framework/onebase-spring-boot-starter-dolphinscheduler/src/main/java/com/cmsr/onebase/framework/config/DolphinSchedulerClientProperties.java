@@ -30,10 +30,6 @@ public class DolphinSchedulerClientProperties {
     @NotBlank(message = "dolphinscheduler token 不能为空")
     private String token;
 
-    /** Token 所在的请求头名，默认 token */
-    @NotBlank
-    private String headerName = "token";
-
     /** 连接超时 */
     @NotNull
     private Duration connectTimeout = Duration.ofSeconds(5);
@@ -72,14 +68,6 @@ public class DolphinSchedulerClientProperties {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public String getHeaderName() {
-        return headerName;
-    }
-
-    public void setHeaderName(String headerName) {
-        this.headerName = headerName;
     }
 
     public Duration getConnectTimeout() {

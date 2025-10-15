@@ -14,11 +14,10 @@ import java.io.IOException;
  */
 public class TokenInterceptor implements Interceptor {
 
-    private final String headerName;
+    private static final String HEADER_NAME = "token";
     private final String token;
 
-    public TokenInterceptor(String headerName, String token) {
-        this.headerName = headerName;
+    public TokenInterceptor(String token) {
         this.token = token;
     }
 
@@ -26,7 +25,7 @@ public class TokenInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
         Request withToken = original.newBuilder()
-                .header(headerName, token)
+                .header(HEADER_NAME, token)
                 .build();
         return chain.proceed(withToken);
     }
