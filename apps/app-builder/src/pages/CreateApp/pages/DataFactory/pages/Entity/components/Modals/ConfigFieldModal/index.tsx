@@ -339,7 +339,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     const formListFields = formFields || formValues.fields || [];
 
     return fields.map((originalField, index) => {
-      const formField = formListFields[index];
+      // 通过 id 匹配表单数据
+      const formField = formListFields.find(f => f?.id === originalField.id) || formListFields[index];
       if (formField) {
         return {
           ...originalField,
