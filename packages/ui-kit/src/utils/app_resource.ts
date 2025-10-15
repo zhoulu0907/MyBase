@@ -200,7 +200,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
   const { setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
 
-  const { setCurPage, setEditPageViewId } = pagesRuntimeSignal;
+  const { setCurPage, setEditPageViewId, editPageViewId } = pagesRuntimeSignal;
 
   const {
     setComponents: setFormComponents,
@@ -320,23 +320,22 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图
-    if (!curViewId.value) {
-      let newCurViewId = res.pages.find((item: PageView) => item.isLatestUpdated)?.id;
-      if (!newCurViewId) {
-        newCurViewId = res.pages.find((item: PageView) => item.isDefaultEditViewMode)?.id;
-      }
 
-      if (newCurViewId) {
-        setCurViewId(newCurViewId);
-        setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);
-        loadFormPageComponentSchemas(useEditorSignalMap.get(newCurViewId)!.pageComponentSchemas.value);
-        loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
-      }
+    let newCurViewId = res.pages.find((item: PageView) => item.isLatestUpdated == 1)?.id;
+    if (!newCurViewId) {
+      newCurViewId = res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.id;
+    }
+    if (newCurViewId) {
+      setCurViewId(newCurViewId);
+      setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);
+      loadFormPageComponentSchemas(useEditorSignalMap.get(newCurViewId)!.pageComponentSchemas.value);
+      loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
     }
 
+    console.log('载入视图: ', res.pages);
     setPageViews(res.pages);
     // 设置默认编辑视图
-    setEditPageViewId(res.pages.find((item: PageView) => item.isDefaultEditViewMode)?.id);
-    console.log('载入视图: ', res.pages);
+    setEditPageViewId(res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.id);
+    console.log('设置默认编辑视图: ', editPageViewId.value);
   }
 }

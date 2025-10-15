@@ -195,11 +195,8 @@ const PageManagerPage: FC = () => {
   };
 
   const getEntityList = async () => {
-    // TODO(mickey): 等xiaoyi完成后 写活
-    // const appId: string = '1';
     const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
-    console.log(res);
     const entityOptions = res.map((entity) => ({
       label: entity.entityName,
       value: entity.entityId

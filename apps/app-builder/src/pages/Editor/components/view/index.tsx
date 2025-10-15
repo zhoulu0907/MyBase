@@ -10,7 +10,7 @@ import {
   usePageViewEditorSignal
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 const { useForm } = Form;
@@ -24,6 +24,10 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
   useSignals();
 
   const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
+
+  useEffect(() => {
+    console.log('curViewId: ', curViewId.value);
+  }, [curViewId.value]);
 
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
@@ -139,7 +143,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
 
   // 表单名称为空时 置为原来的值
   let oldPageViewName = '';
-  const pageViewNameBlur = (e:any) => {
+  const pageViewNameBlur = (e: any) => {
     if (e.currentTarget.value === '') {
       updatePageViewName(curViewId.value, oldPageViewName);
     }
