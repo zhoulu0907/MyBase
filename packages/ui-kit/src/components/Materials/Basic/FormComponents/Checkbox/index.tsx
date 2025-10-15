@@ -1,4 +1,4 @@
-import { Checkbox, Form, Tag } from '@arco-design/web-react';
+import { Checkbox, Form, Space, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
@@ -40,7 +40,6 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
         labelCol={{
           style: { width: labelColSpan, flex: 'unset' }
         }}
-        triggerPropName="checked"
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -50,11 +49,11 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>
+          <Space>
             {fieldValue && defaultValue && fieldValue.map((ele: any) => <Tag>
               {defaultValue.find((e: any) => e.value === ele)?.label}
             </Tag>)}
-          </div>
+          </Space>
         ) : (
           <CheckboxGroup
             defaultValue={defaultValue?.filter((op) => op.chosen).map((op) => op.value)}
