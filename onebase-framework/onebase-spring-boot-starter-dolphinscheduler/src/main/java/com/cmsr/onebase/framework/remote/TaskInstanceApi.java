@@ -34,4 +34,28 @@ public interface TaskInstanceApi {
             @Query("pageSize") int pageSize,
             @Query("processInstanceId") Long processInstanceId
     );
+
+    /**
+     * 分页查询任务实例（复用 plural 路径）
+     * GET /projects/{projectCode}/task-instances
+     */
+    @GET("projects/{projectCode}/task-instances")
+    Call<HttpRestResult<PageInfo<TaskInstanceQueryResp>>> page(
+            @Path("projectCode") long projectCode,
+            @Query("pageNo") int pageNo,
+            @Query("pageSize") int pageSize,
+            @Query("processInstanceId") Long processInstanceId
+    );
+
+    /**
+     * 查询任务实例日志
+     * GET /log/{projectCode}/detail?taskInstanceId=&skipLineNum=&limit=
+     */
+    @GET("log/{projectCode}/detail")
+    Call<HttpRestResult<Object>> queryLog(
+            @Path("projectCode") long projectCode,
+            @Query("taskInstanceId") long taskInstanceId,
+            @Query("skipLineNum") int skipLineNum,
+            @Query("limit") int limit
+    );
 }
