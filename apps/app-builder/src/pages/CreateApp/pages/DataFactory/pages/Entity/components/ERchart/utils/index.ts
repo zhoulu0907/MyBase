@@ -1,5 +1,6 @@
 import { SectionCollapseHandler } from './sectionCollapseHandler';
 import { GridNodePositioner } from './nodePositioner';
 import { performAutoLayout } from './autoLayout';
+import { toggleNodeShadow, toggleEdgeSelected } from './toggle';
 
-export { SectionCollapseHandler, GridNodePositioner, performAutoLayout };
+export { SectionCollapseHandler, GridNodePositioner, performAutoLayout, toggleNodeShadow, toggleEdgeSelected };

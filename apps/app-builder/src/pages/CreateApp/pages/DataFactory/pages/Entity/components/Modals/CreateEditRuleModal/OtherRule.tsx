@@ -83,7 +83,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     if (handler) {
       const res = await handler(id);
       if (res) {
-        form.setFieldsValue({ ...res, popPrompt: res.promptMessage });
+        form.setFieldsValue({ ...res, popPrompt: res.promptMessage, regex: res.formatValue });
       }
     }
   };

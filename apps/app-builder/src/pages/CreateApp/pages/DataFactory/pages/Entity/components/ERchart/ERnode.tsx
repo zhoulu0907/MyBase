@@ -15,6 +15,7 @@ interface X6NodeProps {
 // 节点数据接口
 interface NodeData {
   data: EntityNode;
+  selected?: boolean;
   onNodeEdit?: (data: Partial<EntityNode>) => void;
   onNodeAdd?: () => void;
   onNodeDelete?: (id: string) => void;
@@ -33,6 +34,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   });
   // 从 node 的 data 中获取节点数据
   const nodeData = (node.getData() as NodeData)?.data;
+  const isSelected = Boolean((node.getData() as NodeData)?.selected);
   const { newNodes } = useNewNodeStore();
 
   const { fieldTypes } = useFieldStore();
@@ -149,7 +151,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   };
 
   return (
-    <div className={styles['node-content']}>
+    <div className={`${styles['node-content']} ${isSelected ? styles['node-selected'] : ''}`}>
       {/* 节点头部 */}
       <div className={styles['node-header']}>
         <IconSync className={styles['refresh-icon']} onClick={handleRefresh} />

@@ -39,6 +39,7 @@ interface TableColumnsProps {
   setConfigPopoverVisible: (id: string | null) => void;
   setConstraintsPopoverVisible: (id: string | null) => void;
   renderFieldConfigContent: (fieldType: string, fieldId: string) => React.ReactNode;
+  externalErrors: Record<string, string>;
   getFieldIndex: (fieldId: string, index: number) => number;
   deleteField: (id: string) => void;
   fields: FieldFormValues[];
@@ -46,7 +47,7 @@ interface TableColumnsProps {
 
 // 列配置类型
 interface ColumnConfig {
-  title: string;
+  title: string | React.ReactNode;
   dataIndex: string;
   width?: number;
   ellipsis?: boolean;
@@ -64,12 +65,18 @@ const TableColumns = ({
   setConfigPopoverVisible,
   setConstraintsPopoverVisible,
   renderFieldConfigContent,
+  externalErrors,
   getFieldIndex,
   deleteField
 }: TableColumnsProps): ColumnConfig[] => {
   return [
     {
-      title: '字段名称',
+      title: (
+        <>
+          <span className={styles['required-dot']}>*</span>
+          <span>字段名称</span>
+        </>
+      ),
       dataIndex: 'fieldName',
       width: 175,
       align: 'center',
@@ -81,6 +88,10 @@ const TableColumns = ({
             field={`fields.${getFieldIndex(record.id || '', index)}.fieldName`}
             rules={[...createFieldRules.fieldName]}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldName`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldName`]}
           >
             {/* 不可编辑 */}
             <Input
@@ -91,7 +102,12 @@ const TableColumns = ({
         )
     },
     {
-      title: '展示名称',
+      title: (
+        <>
+          <span className={styles['required-dot']}>*</span>
+          <span>展示名称</span>
+        </>
+      ),
       dataIndex: 'displayName',
       width: 175,
       align: 'center',
@@ -103,13 +119,22 @@ const TableColumns = ({
             field={`fields.${getFieldIndex(record.id || '', index)}.displayName`}
             rules={[...createFieldRules.displayName]}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.displayName`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.displayName`]}
           >
             <Input />
           </Form.Item>
         )
     },
     {
-      title: '数据类型',
+      title: (
+        <>
+          <span className={styles['required-dot']}>*</span>
+          <span>数据类型</span>
+        </>
+      ),
       dataIndex: 'fieldType',
       width: 140,
       align: 'center',
@@ -119,6 +144,10 @@ const TableColumns = ({
             field={`fields.${getFieldIndex(record.id || '', index)}.fieldType`}
             rules={[{ required: true, message: '数据类型不能为空' }]}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldType`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldType`]}
           >
             <Select
               options={fieldTypeOptions}
@@ -179,6 +208,10 @@ const TableColumns = ({
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.description`}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.description`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.description`]}
           >
             <Input placeholder="请输入字段描述" />
           </Form.Item>
@@ -206,6 +239,10 @@ const TableColumns = ({
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.defaultValue`}
             className={styles['field-form-item']}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.defaultValue`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.defaultValue`]}
           >
             <Input />
           </Form.Item>
@@ -226,6 +263,10 @@ const TableColumns = ({
             triggerPropName="checked"
             normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
             formatter={(v) => v === CHECK_CONST.IS_TRUE || v === true}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.isUnique`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.isUnique`]}
           >
             <Checkbox />
           </Form.Item>
@@ -246,6 +287,10 @@ const TableColumns = ({
             triggerPropName="checked"
             normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
             formatter={(v) => v === CHECK_CONST.IS_TRUE || v === true}
+            validateStatus={
+              externalErrors[`fields.${getFieldIndex(record.id || '', index)}.isRequired`] ? 'error' : undefined
+            }
+            help={externalErrors[`fields.${getFieldIndex(record.id || '', index)}.isRequired`]}
           >
             <Checkbox />
           </Form.Item>
@@ -268,8 +313,10 @@ const TableColumns = ({
             record.constraints.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE);
 
         if (hasConstraints) {
-          const lengthStatus = record.constraints?.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE ? '已开启' : '未开启';
-          const regexStatus = record.constraints?.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE ? '已开启' : '未开启';
+          const lengthStatus =
+            record.constraints?.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE ? '已开启' : '未开启';
+          const regexStatus =
+            record.constraints?.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE ? '已开启' : '未开启';
 
           return (
             <div className={styles['constraint-status']}>

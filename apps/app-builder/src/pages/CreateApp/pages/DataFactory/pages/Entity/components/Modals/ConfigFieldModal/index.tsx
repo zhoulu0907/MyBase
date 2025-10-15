@@ -63,6 +63,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
   const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
+  const [externalErrors, setExternalErrors] = useState<Record<string, string>>({});
 
   const fieldTypeOptions = useFieldStore.getState().fieldTypes.map((item) => ({
     label: item.displayName,
@@ -79,6 +80,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     } else {
       // 关闭时重置表单
       form.resetFields();
+      setExternalErrors({});
     }
   }, [visible]);
 
@@ -215,9 +217,18 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       await batchSaveFields(params);
       Message.success('保存成功');
       setVisible(false);
+      setExternalErrors({});
       successCallback();
     } catch (error) {
-      console.error('保存字段失败:', error);
+      // 手动渲染错误
+      const errs = (error && (error as any).errors) || [];
+      const map: Record<string, string> = {};
+      if (typeof errs === 'object') {
+        Object.keys(errs).forEach((key: any) => {
+          if (key) map[key] = errs[key].message || '校验失败';
+        });
+      }
+      setExternalErrors(map);
     } finally {
       setLoading(false);
       // form.resetFields();
@@ -290,6 +301,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     setConfigPopoverVisible,
     setConstraintsPopoverVisible,
     renderFieldConfigContent,
+    externalErrors,
     getFieldIndex,
     deleteField,
     fields
@@ -297,11 +309,14 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   // 处理拖拽排序
   const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+    // 获取最新输入的数据
+    const currentFields = getCurrentTableData();
+
     // 仅对自定义且未删除字段进行排序
-    const active = fields.filter((f) => !f.isDeleted && f.isSystemField === FIELD_TYPE.CUSTOM);
+    const active = currentFields.filter((f) => !f.isDeleted && f.isSystemField === FIELD_TYPE.CUSTOM);
     const reorderedActive = arrayMove([...active], oldIndex, newIndex);
 
-    const newFields = [...fields];
+    const newFields = [...currentFields];
     let pointer = 0;
     for (let i = 0; i < newFields.length; i += 1) {
       const cur = newFields[i];
@@ -324,7 +339,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     const formListFields = formFields || formValues.fields || [];
 
     return fields.map((originalField, index) => {
-      const formField = formListFields[index];
+      // 通过 id 匹配表单数据
+      const formField = formListFields.find(f => f?.id === originalField.id) || formListFields[index];
       if (formField) {
         return {
           ...originalField,
