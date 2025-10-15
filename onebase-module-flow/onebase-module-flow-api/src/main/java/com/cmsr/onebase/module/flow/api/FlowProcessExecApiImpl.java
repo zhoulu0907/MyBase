@@ -31,11 +31,9 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionExecutor expressionExecutor;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {

@@ -46,13 +46,12 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionExecutor expressionExecutor;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
     @Autowired
     private MetadataEntityFieldApi metadataEntityFieldApi;
+
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {

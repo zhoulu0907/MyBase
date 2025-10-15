@@ -7,7 +7,6 @@ import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
-import com.google.common.collect.Maps;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
 import lombok.Setter;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -76,7 +76,7 @@ public class FlowProcessExecutor {
         if (variableContext == null) {
             throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
         }
-        variableContext.setOutputParams(Maps.newHashMap());
+        variableContext.setOutputParams(new HashMap<>());
         ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
         if (executeContext == null) {
             throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
