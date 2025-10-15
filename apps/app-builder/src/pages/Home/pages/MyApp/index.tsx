@@ -1,3 +1,5 @@
+import { useI18n } from '@/hooks/useI18n';
+import { useAppStore } from '@/store/store_app';
 import {
   Avatar,
   Button,
@@ -12,13 +14,6 @@ import {
   Tag
 } from '@arco-design/web-react';
 import { IconCheckCircle, IconEmpty, IconLeft, IconSearch, IconSettings } from '@arco-design/web-react/icon';
-import dayjs from 'dayjs';
-import { debounce, sample } from 'lodash-es';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getCommonPaginationList } from '@onebase/common';
-import { useI18n } from '@/hooks/useI18n';
-import { useAppStore } from '@/store/store_app';
 import {
   createApplication,
   deleteApplication,
@@ -29,6 +24,11 @@ import {
   type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
+import { getCommonPaginationList } from '@onebase/common';
+import dayjs from 'dayjs';
+import { debounce, sample } from 'lodash-es';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import appDeleteSVG from '@/assets/images/app_delete.svg';
 import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
@@ -529,6 +529,7 @@ const MyAppPage: React.FC = () => {
         }
         confirmLoading={true}
         onCancel={() => setCreateVisible(false)}
+        style={{ width: '1300px' }}
         className={styles.createAppModal}
       >
         <div className={styles.createAppWrapper}>
