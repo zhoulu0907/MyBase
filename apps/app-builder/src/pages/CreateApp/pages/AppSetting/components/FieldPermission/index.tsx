@@ -5,6 +5,7 @@ import {
   updateFieldPermission,
   RoleAllFieldPermission,
   FieldRead,
+  Visibility,
   FieldEdit,
   FieldDownloadable,
   type AuthFieldVO,
@@ -235,17 +236,19 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             onChange={(value) => {
               const changeField = Object.entries(value);
               const getChangeFieldKey = changeField[0];
-              console.log('getChangeFieldKey:', getChangeFieldKey);
               const getChangeFieldValue = Object.values(value)[0];
               const getChangeFieldName = getChangeFieldKey[0].trim().split('.');
+              const changeFieldAuthFields = getChangeFieldName.length > 0 ? getChangeFieldName[0] : '';
+              const changeFieldId = getChangeFieldName.length > 1 ? getChangeFieldName[1] : '';
+              const changeFieldValueName = getChangeFieldName.length > 2 ? getChangeFieldName[2] : '';
 
-              if (getChangeFieldName[0] === 'authFields') {
+              if (changeFieldAuthFields === 'authFields') {
                 const updateField = fieldPermission?.map((field) => {
-                  if (field.fieldId === getChangeFieldName[1]) {
+                  if (field.fieldId === changeFieldId) {
                     return {
                       ...field,
                       isCanRead: Number(getChangeFieldValue) || field.isCanRead,
-                      [getChangeFieldName[2]]: Number(getChangeFieldValue)
+                      [changeFieldValueName]: Number(getChangeFieldValue)
                     };
                   }
                   return field;
@@ -253,17 +256,17 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
                 setFieldPermission(updateField);
 
-                const modifiedField = updateField?.filter((field) => field.fieldId === getChangeFieldName[1]) || [];
+                const modifiedField = updateField?.filter((field) => field.fieldId === changeFieldId) || [];
                 updateFieldsPermission(
                   modifiedField,
                   isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission
                 );
-              } else if (getChangeFieldName[0] === 'operationPermissions') {
+              } else if (changeFieldAuthFields === 'operationPermissions') {
                 const updateField = operationConfig?.map((field) => {
-                  if (field.fieldId === getChangeFieldName[1]) {
+                  if (field.fieldId === changeFieldId) {
                     return {
                       ...field,
-                      [getChangeFieldName[2]]: Number(getChangeFieldValue)
+                      [changeFieldValueName]: Number(getChangeFieldValue)
                     };
                   }
                   return field;
@@ -271,7 +274,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
                 setOperationConfig(updateField);
 
-                const modifiedField = updateField?.filter((field) => field.fieldId === getChangeFieldName[1]) || [];
+                const modifiedField = updateField?.filter((field) => field.fieldId === changeFieldId) || [];
                 updateFieldsPermission(
                   modifiedField,
                   isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission
@@ -308,7 +311,9 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                 style={{
                   marginTop: 12,
                   visibility:
-                    isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission ? 'visible' : 'hidden'
+                    isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission
+                      ? Visibility.visible
+                      : Visibility.hidden
                 }}
               >
                 <div className={styles.table}>
@@ -377,7 +382,9 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                 shouldUpdate
                 style={{
                   visibility:
-                    isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission ? 'visible' : 'hidden'
+                    isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission
+                      ? Visibility.visible
+                      : Visibility.hidden
                 }}
               >
                 <div className={styles.table}>
