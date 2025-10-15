@@ -1,4 +1,4 @@
-import { Form, Select,Tag } from '@arco-design/web-react';
+import { Form, Select, Tag } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
@@ -47,7 +47,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {fieldValue && defaultValue && fieldValue.map((ele:any)=><Tag>
+            {fieldValue && defaultValue && fieldValue.map((ele: any) => <Tag>
               {defaultValue.find((e: any) => e.value === ele).label}
             </Tag>)}
           </div>
