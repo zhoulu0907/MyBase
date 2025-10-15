@@ -362,27 +362,27 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: getComponentWidth(
-                          useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id],
-                          cp.type
-                        )
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        runtime={true}
-                        showFromPageData={() => {}}
-                      />
-                    </div>
-                  )}
+                      <div
+                        key={cp.id}
+                        className={styles.componentItem}
+                        style={{
+                          width: getComponentWidth(
+                            useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id],
+                            cp.type
+                          )
+                        }}
+                      >
+                        <PreviewRender
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          pageComponentSchema={
+                            useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id]
+                          }
+                          runtime={true}
+                          showFromPageData={() => { }}
+                        />
+                      </div>
+                    )}
                 </Fragment>
               ))}
             </Form>
