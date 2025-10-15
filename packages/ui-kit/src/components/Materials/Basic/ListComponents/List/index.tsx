@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XListConfig } from './schema';
 
-const XList = memo((props: XListConfig & { runtime?: boolean }) => {
+const XList = memo((props: XListConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, runtime = true } = props;
 
   return (

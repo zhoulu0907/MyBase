@@ -1,14 +1,14 @@
-import { memo, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Message, Upload } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
+import { nanoid } from 'nanoid';
+import { memo, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputFileUploadConfig } from './schema';
 import '../index.css';
+import type { XInputFileUploadConfig } from './schema';
 
-const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean }) => {
+const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
@@ -31,11 +31,11 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -43,10 +43,12 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
   };
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`}
+        field={
+          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`
+        }
         layout={layout}
         tooltip={tooltip}
         rules={[{ required: verify?.required }]}
