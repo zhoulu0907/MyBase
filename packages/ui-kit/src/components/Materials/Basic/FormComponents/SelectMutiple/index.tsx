@@ -47,9 +47,11 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            { fieldValue && defaultValue &&
+            <span style={{paddingRight:'4px'}}>
+              { fieldValue && defaultValue &&
                 fieldValue.map((ele: any) => <>{defaultValue.find((e: any) => e.value === ele).label}</>)
-            }
+              }
+            </span>
           </div>
         ) : (
           <Select
