@@ -52,6 +52,12 @@ const DataPermissionModal = (props: IProps) => {
     handleModalCancel
   } = props;
 
+  type Member = {
+    key: string;
+    name: string;
+    department: string;
+  };
+
   const [form] = Form.useForm();
   const Option = Select.Option;
 
@@ -63,8 +69,8 @@ const DataPermissionModal = (props: IProps) => {
   // 部门用户信息
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
-  const [deptData, setDeptData] = useState<any>();
-  const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
+  const [deptData, setDeptData] = useState<Member>();
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
 
   useEffect(() => {
     if (!modalVisible && !initialFormValues.id) {
@@ -170,7 +176,8 @@ const DataPermissionModal = (props: IProps) => {
   );
 
   // 添加成员/部门
-  const handleAddScope = async (scopeSpecified: any[]) => {
+  const handleAddScope = async (scopeSpecified: Member[]) => {
+    console.log('scopeSpecified', scopeSpecified);
     // 更新已选择的成员状态
     setSelectedMembers(scopeSpecified);
     form.setFieldValue('scopeValue', scopeSpecified);
@@ -188,7 +195,8 @@ const DataPermissionModal = (props: IProps) => {
     form.setFieldValue('scopeValue', newScopeValue);
   };
 
-  const handleUpdateSelectedMembers = (members: any[]) => {
+  const handleUpdateSelectedMembers = (members: Member[]) => {
+    console.log('members', members);
     setSelectedMembers(members);
 
     // 同时更新scopeValue字段

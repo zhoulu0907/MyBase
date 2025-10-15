@@ -123,3 +123,135 @@ export interface GetDeptUserReq {
    */
   roleId: string;
 }
+
+/**
+ * 返回数据
+ *
+ * DeptAndUsersRespDTO
+ */
+export interface DeptAndUsersRespDTO {
+    /**
+     * 当前部门信息
+     */
+    deptInfo?: DeptRespDTO;
+    /**
+     * 下级部门列表
+     */
+    deptList?: DeptRespDTO[];
+    /**
+     * 当前部门下直属用户列表
+     */
+    userList?: AdminUserRespDTO[];
+}
+
+/**
+ * 当前部门信息
+ *
+ * DeptRespDTO
+ *
+ * com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO
+ */
+export interface DeptRespDTO {
+    /**
+     * 部门编号
+     */
+    id?: number;
+    /**
+     * 管理员的用户编号
+     */
+    leaderUserId?: number;
+    /**
+     * 部门名称
+     */
+    name?: string;
+    /**
+     * 父部门编号
+     */
+    parentId?: number;
+    /**
+     * 参见 CommonStatusEnum 枚举
+     * 部门状态
+     */
+    status?: number;
+}
+
+/**
+ * AdminUserRespDTO
+ */
+export interface AdminUserRespDTO {
+    /**
+     * 用户头像
+     */
+    avatar?: string;
+    /**
+     * 部门编号
+     */
+    deptId?: number;
+    /**
+     * 部门名称
+     */
+    deptName?: string;
+    /**
+     * 用户邮箱
+     */
+    email?: string;
+    /**
+     * 用户 ID
+     */
+    id?: number;
+    /**
+     * 手机号码
+     */
+    mobile?: string;
+    /**
+     * 用户昵称
+     */
+    nickname?: string;
+    /**
+     * 参见 CommonStatusEnum 枚举
+     * 帐号状态
+     */
+    status?: number;
+}
+
+/**
+ * 返回数据
+ *
+ * PageResultAuthRoleUsersPageRespVO
+ */
+export interface PageResultAuthRoleUsersPageRespVO {
+    /**
+     * 数据
+     */
+    list?: AuthRoleUsersPageRespVO[];
+    /**
+     * 总量
+     */
+    total?: number;
+}
+
+/**
+ * AuthRoleUsersPageRespVO
+ */
+export interface AuthRoleUsersPageRespVO {
+    /**
+     * 部门名称
+     */
+    deptName?: string;
+    /**
+     * 用户邮箱
+     */
+    email?: string;
+    /**
+     * 用户ID
+     */
+    id?: number;
+    /**
+     * 手机号码
+     */
+    mobile?: string;
+    /**
+     * 用户名
+     */
+    nickname?: string;
+}

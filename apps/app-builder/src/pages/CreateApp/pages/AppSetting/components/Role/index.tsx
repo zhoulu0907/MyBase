@@ -12,7 +12,8 @@ import {
   MenuType,
   type Role,
   type ApplicationMenu,
-  type ListApplicationMenuReq
+  type ListApplicationMenuReq,
+  type AuthRoleUsersPageRespVO
 } from '@onebase/app';
 import styles from './index.module.less';
 import { debounce } from 'lodash-es';
@@ -27,7 +28,7 @@ const InputSearch = Input.Search;
 
 interface IProps {
   roleInfo: Role | undefined;
-  memberList?: any[];
+  memberList?: AuthRoleUsersPageRespVO[];
   memberTotal?: number;
 }
 
@@ -49,7 +50,9 @@ const RoleInfo = (props: IProps) => {
     const isAdmin = roleInfo?.roleType === RoleType.ADMIN;
     const type = isAdmin ? 'members' : 'permission';
     setManagerType(type);
-    !isAdmin && getApplicationMenu();
+    if (!isAdmin) {
+      getApplicationMenu();
+    }
   }, [roleInfo]);
 
   /* 获取菜单 */
@@ -78,10 +81,7 @@ const RoleInfo = (props: IProps) => {
     setOpenKeys(keys);
   };
 
-  const firstGroupIndex = menuList?.findIndex((menu: ApplicationMenu) => menu.menuType === MenuType.GROUP); // 第一个菜单为分组时的索引
-  const firstGroupCode = (firstGroupIndex === 0 && menuList?.[firstGroupIndex]?.id) || ''; // 第一个菜单为分组时的code
-
-  const findFirstPage: any = (nodes: ApplicationMenu[]) =>
+  const findFirstPage: ApplicationMenu = (nodes: ApplicationMenu[]) =>
     nodes?.reduce((found, node) => {
       if (found) return found;
       if (Number(node.menuType) === MenuType.PAGE) return node;
@@ -96,7 +96,7 @@ const RoleInfo = (props: IProps) => {
         return (
           <MenuItem key={menu.id} style={{ display: 'flex', alignItems: 'center' }}>
             <DynamicIcon
-              IconComponent={menuIconList.find(icon => icon.code === menu.menuIcon)?.icon}
+              IconComponent={menuIconList.find((icon) => icon.code === menu.menuIcon)?.icon}
               theme="outline"
               size="18"
               fill={menu.id === activeMenuId ? 'rgb(var(--primary-6))' : '#333'}
@@ -169,19 +169,21 @@ const RoleInfo = (props: IProps) => {
                 </div>
               </div>
 
-              <div className={styles.right}>
-                <Tabs defaultActiveTab="1" destroyOnHide activeTab={activeTab} onChange={setActiveTab}>
-                  <TabPane key="1" title="功能权限">
-                    <FuncPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo?.id!} />
-                  </TabPane>
-                  <TabPane key="2" title="数据权限">
-                    <DataPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo?.id!} />
-                  </TabPane>
-                  <TabPane key="3" title="字段权限">
-                    <FieldPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo?.id!} />
-                  </TabPane>
-                </Tabs>
-              </div>
+              {roleInfo && roleInfo.id && (
+                <div className={styles.right}>
+                  <Tabs defaultActiveTab="1" destroyOnHide activeTab={activeTab} onChange={setActiveTab}>
+                    <TabPane key="1" title="功能权限">
+                      <FuncPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo.id} />
+                    </TabPane>
+                    <TabPane key="2" title="数据权限">
+                      <DataPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo.id} />
+                    </TabPane>
+                    <TabPane key="3" title="字段权限">
+                      <FieldPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo.id} />
+                    </TabPane>
+                  </Tabs>
+                </div>
+              )}
             </div>
           )}
         </>
