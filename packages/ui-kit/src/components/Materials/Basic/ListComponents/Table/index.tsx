@@ -16,7 +16,7 @@ import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { RedirectMethod } from '../../../constants';
 import type { XTableConfig } from './schema';
 import DynamicIcon from '@/components/DynamicIcon';
-import { iconMap } from './const';
+import { iconMap } from '@/utils/const';
 import './index.css';
 
 const leftPanelWidth = 318;
@@ -25,7 +25,7 @@ const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
-const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean}) => {
+const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean }) => {
   const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
   const { runtime = true, showFromPageData, showAddBtn = true } = props;
 
@@ -209,7 +209,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
       filters: queryData
     };
 
-    if(sortByObject?.fieldName){
+    if (sortByObject?.fieldName) {
       req.sortField = sortByObject.fieldName;
       req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
     }
