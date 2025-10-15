@@ -82,10 +82,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   }, [menuId]);
 
   useEffect(() => {
-    console.log('mainMetaDataFields: ', mainMetaDataFields);
-  }, [mainMetaDataFields]);
-
-  useEffect(() => {
     if (editTargetId && mainMetaData && mainMetaDataFields.length > 0) {
       handleGetData(mainMetaData, editTargetId);
     }
