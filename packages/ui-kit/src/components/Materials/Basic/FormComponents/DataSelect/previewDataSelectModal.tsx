@@ -35,7 +35,7 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
     <Modal
         className="filterDataModal"
         getPopupContainer={() => document.querySelector('[class*="previewPage"]') || document.body}
-        style={{top: 50}}
+        style={{top: 50, width: '900px'}}
         title={<span className="modalTitleLeft">选择数据</span>} 
         visible={visible}
         onCancel={onCancel}
@@ -47,16 +47,16 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
       >
         <div className="popupContainer">
             <div className="content">
-                {fastFilters.length > 0 && (
+                {/* {fastFilters.length > 0 && (
                     <div className="leftTree">
                         <Tree treeData={treeData}></Tree>
                     </div>
-                )}
+                )} */}
                 <div className="rightFlexTable">
-                    <XTable {...tableConfig} />
+                    <XTable {...tableConfig} isConfig={true}/>
                 </div>
             </div>
-             <div className='bottomDiv'>
+             {/* <div className='bottomDiv'>
                 <Pagination
                     total={3}
                     current={1}
@@ -67,7 +67,7 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
                     pageSizeChangeResetCurrent={false}
                     style={{ justifyContent: 'flex-end' }}
                     />
-            </div>
+            </div> */}
         </div>
       </Modal>
   )

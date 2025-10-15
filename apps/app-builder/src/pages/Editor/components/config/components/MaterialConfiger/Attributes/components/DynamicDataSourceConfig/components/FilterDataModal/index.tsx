@@ -1,45 +1,72 @@
-import { Modal } from '@arco-design/web-react';
-import React, { useEffect } from 'react';
+import { Form, Modal } from '@arco-design/web-react';
+import React, { useEffect, useState } from 'react';
 
-import type { ConditionField, EntityFieldValidationTypes } from '@onebase/app';
+import { getFieldCheckTypeApi } from '@onebase/app';
 import styles from '../../index.module.less';
+import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
 
 interface FilterDataModalProps {
   visible: boolean;
+  item: any;
+  configs: any;
   onCancel: any;
+  onOk: any;
 }
 
-// mock up
-const dataFilters: ConditionField[] = [
-  { label: '标题', value: 'title', fieldType: 'string' },
-  { label: '单行文本', value: 'singleText', fieldType: 'string' },
-  { label: '提交时间', value: 'submitTime', fieldType: 'string' },
-  { label: '多行文本', value: 'multiText', fieldType: 'string' },
-  { label: '单选按钮组', value: 'radioGroup', fieldType: 'string' }
-];
+const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, configs, onCancel, onOk }) => {
+  const [payloadForm] = Form.useForm();
+  const [dataFilters, setDataFilters] = useState<any[]>([]);
+  const [validationTypes, setValidationTypes] = useState<any[]>([]);
 
-const filterFieldCheckType: EntityFieldValidationTypes[] = [
-  { fieldId: 'a', fieldTypeCode: 'a', validationTypes: [] },
-  { fieldId: 'b', fieldTypeCode: 'b', validationTypes: [] },
-  { fieldId: 'c', fieldTypeCode: 'c', validationTypes: [] },
-  { fieldId: 'd', fieldTypeCode: 'd', validationTypes: [] }
-];
-
-const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, onCancel }) => {
-  // todo
   useEffect(() => {
     if (visible) {
+      initialData();
     }
   }, [visible]);
+
+  const initialData = async () => {
+    const [dataFilters, fieldIds] = (configs['displayFieldsOptions'] as any[]).reduce(
+      (acc, item: any) => {
+        const [dataFilters, fieldIds] = acc;
+        dataFilters.push({
+          key: item.fieldId,
+          title: item.displayName,
+          fieldType: item.fieldType
+        });
+        fieldIds.push(item.fieldId);
+        return acc;
+      },
+      [[], []]
+    );
+    setDataFilters([
+      {
+        key: configs[item.key].entityId,
+        title: configs[item.key].entityName,
+        children: dataFilters
+      }
+    ]);
+    if (fieldIds?.length) {
+      const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+      setValidationTypes(newValidationTypes);
+    }
+    payloadForm.setFieldValue('filterCondition', configs['filterCondition']);
+  };
+
+  const handleOkModal = () => {
+    const data = payloadForm.getFieldValue('filterCondition');
+    console.log(data);
+    onOk(data);
+  };
 
   return (
     <>
       <Modal
         className={styles.filterDataModal}
+        style={{ width: '800px' }}
         title={<span className={styles.modalTitleLeft}>添加过滤条件</span>}
         visible={visible}
         onCancel={onCancel}
-        onOk={onCancel}
+        onOk={handleOkModal}
         autoFocus={false}
         focusLock={true}
         escToExit={false}
@@ -47,12 +74,17 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, onCancel }) 
       >
         <div className={styles.popupContainer}>
           <span className={styles.titleSpan}>添加过滤条件来限定可选数据范围</span>
-          {/* 添加过滤条件 */}
-          {/* <ConditionEditor
-            data={[]}
-            fields={dataFilters}
-            entityFieldValidationTypes={filterFieldCheckType}
-          /> */}
+          <Form layout="vertical" form={payloadForm}>
+            {/* 添加过滤条件 */}
+            <ConditionEditor
+              nodeId={configs[item.key].entityId}
+              label="添加过滤条件"
+              required
+              form={payloadForm}
+              fields={dataFilters}
+              entityFieldValidationTypes={validationTypes}
+            />
+          </Form>
         </div>
       </Modal>
     </>
