@@ -236,7 +236,7 @@ const PageManagerPage: FC = () => {
 
   const triggerRename = () => {
     setVisibleRenameForm(true);
-    setTitle(t('createApp.renamePage'));
+    setTitle(t('createApp.rename'));
   };
 
   const triggerCreate = (formType: string) => {
