@@ -41,6 +41,7 @@ public class FlowDateFieldJobHandler implements DateFieldJobService, Application
     public void run(ApplicationArguments args) throws Exception {
         RRemoteService remoteService = redissonClient.getRemoteService(DateFieldJobService.KEY_PREFIX_FLD);
         remoteService.register(DateFieldJobService.class, this, 12);
+        log.info("注册DateFieldJobService成功: {}", DateFieldJobService.KEY_PREFIX_FLD);
     }
 
     @Override

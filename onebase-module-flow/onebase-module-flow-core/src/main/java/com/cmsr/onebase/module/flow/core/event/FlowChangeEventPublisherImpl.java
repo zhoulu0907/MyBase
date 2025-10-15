@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class FlowEventPublisherImpl implements FlowEventPublisher, InitializingBean, DisposableBean {
+public class FlowChangeEventPublisherImpl implements FlowChangeEventPublisher, InitializingBean, DisposableBean {
 
     private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 
@@ -48,7 +48,7 @@ public class FlowEventPublisherImpl implements FlowEventPublisher, InitializingB
     public void publishProcessUpdate(Long processId) {
         Message message = provider.newMessageBuilder()
                 .setTopic(topic)
-                .setBody(FlowEvent.encode(FlowEvent.UPDATE, processId))
+                .setBody(FlowChangeEvent.encode(FlowChangeEvent.UPDATE, processId))
                 .build();
         try {
             SendReceipt sendReceipt = producer.send(message);
@@ -62,7 +62,7 @@ public class FlowEventPublisherImpl implements FlowEventPublisher, InitializingB
     public void publishProcessDelete(Long processId) {
         Message message = provider.newMessageBuilder()
                 .setTopic(topic)
-                .setBody(FlowEvent.encode(FlowEvent.DELETE, processId))
+                .setBody(FlowChangeEvent.encode(FlowChangeEvent.DELETE, processId))
                 .build();
         try {
             SendReceipt sendReceipt = producer.send(message);
