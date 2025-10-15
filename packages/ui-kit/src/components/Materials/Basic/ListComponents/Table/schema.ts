@@ -17,6 +17,7 @@ import {
   CONFIG_TYPES,
   PAGINATION_POSITION_OPTIONS,
   PAGINATION_POSITION_VALUES,
+  RedirectMethod,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
@@ -187,6 +188,14 @@ export interface XTableConfig extends ICommonBaseType {
    * 可选值: 'hidden' | 'disabled'
    */
   advancedButtonPermission?: TSelectDefaultType<TButtonSelectKeyType>;
+
+  /**
+   * 排序
+  */
+  sortByObject?: {
+    fieldName: TTextDefaultType;
+    sortBy: TNumberDefaultType;
+  }
 }
 
 export interface OperationButtonConfig {
@@ -339,7 +348,7 @@ const XTable: XTableSchema = {
     searchItems: [],
     advancedRowRedirect: false,
     redirectPageId: '',
-    redirectMethod: '',
+    redirectMethod: RedirectMethod.DRAWER,
 
     // 操作按钮
     operationButton: [

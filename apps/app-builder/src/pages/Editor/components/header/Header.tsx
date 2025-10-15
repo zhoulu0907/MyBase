@@ -21,6 +21,7 @@ import {
   ENTITY_TYPE,
   getAppIdByPageSetId,
   getApplication,
+  getDatasourceList,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
   updateApplicationMenu,
@@ -44,6 +45,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
+import { useResourceStore } from '@/store/store_resource';
 
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -108,6 +110,7 @@ export default function EditorHeader() {
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
 
   const { curAppId, setCurAppId } = useAppStore();
+  const { setCurDataSourceId } = useResourceStore();
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('');
@@ -192,6 +195,19 @@ export default function EditorHeader() {
       if (appResp.appStatusText) {
         setAppStatus(appResp.appStatus);
       }
+    }
+
+    // 获取数据源ID
+    const params = {
+      appId: appId
+    };
+    const res = await getDatasourceList(params);
+    if (res?.length > 0) {
+      const dataSource = res?.[0];
+      // 将数据源ID存储到store中
+      setCurDataSourceId(dataSource.id.toString());
+    } else {
+      console.warn('getAppResources - 未获取到数据源列表');
     }
   };
 

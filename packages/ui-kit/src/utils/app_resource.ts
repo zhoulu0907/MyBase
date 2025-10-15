@@ -128,6 +128,15 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       });
 
       loadPagesetResp.pages[index].components.push(...colComponents);
+
+      //   更新视图名称
+      loadPagesetResp.pages[index].pageName = pageViews.value[_page.id]?.pageName;
+
+      if (_page.id === curViewId.value) {
+        loadPagesetResp.pages[index].isLatestUpdated = 1;
+      } else {
+        loadPagesetResp.pages[index].isLatestUpdated = 0;
+      }
     } else if (_page.pageType === CATEGORY_TYPE.LIST) {
       console.log('listComponents: ', listComponents);
       loadPagesetResp.pages[index].components = listComponents.map((component) => {
@@ -191,6 +200,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
   const { setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
 
+  const { setCurPage, setEditPageViewId, editPageViewId } = pagesRuntimeSignal;
+
   const {
     setComponents: setFormComponents,
     setPageComponentSchemas: setFromPageComponentSchemas,
@@ -204,8 +215,6 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setPageComponentSchemas: setListPageComponentSchemas,
     setLayoutSubComponents: setListLayoutSubComponents
   } = useListEditorSignal;
-
-  const { setCurPage } = pagesRuntimeSignal;
 
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
@@ -311,20 +320,22 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图
-    if (!curViewId.value) {
-      const newCurViewId = res.pages.find(
-        (item: PageView) => item.isDefaultEditViewMode || item.isDefaultDetailViewMode
-      )?.id;
 
-      if (newCurViewId) {
-        setCurViewId(newCurViewId);
-        setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);
-        loadFormPageComponentSchemas(useEditorSignalMap.get(newCurViewId)!.pageComponentSchemas.value);
-        loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
-      }
+    let newCurViewId = res.pages.find((item: PageView) => item.isLatestUpdated == 1)?.id;
+    if (!newCurViewId) {
+      newCurViewId = res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.id;
+    }
+    if (newCurViewId) {
+      setCurViewId(newCurViewId);
+      setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);
+      loadFormPageComponentSchemas(useEditorSignalMap.get(newCurViewId)!.pageComponentSchemas.value);
+      loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
     }
 
-    setPageViews(res.pages);
     console.log('载入视图: ', res.pages);
+    setPageViews(res.pages);
+    // 设置默认编辑视图
+    setEditPageViewId(res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.id);
+    console.log('设置默认编辑视图: ', editPageViewId.value);
   }
 }

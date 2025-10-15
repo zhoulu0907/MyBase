@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XCalendarConfig } from './schema';
 
-const XCalendar = memo((props: XCalendarConfig & { runtime?: boolean }) => {
+const XCalendar = memo((props: XCalendarConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, runtime = true } = props;
 
   return (

@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
-import { nanoid } from 'nanoid';
-import { ReactSortable } from 'react-sortablejs';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
+import { nanoid } from 'nanoid';
+import { useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
 
-import { Layout, Message, Table, Button, Popconfirm, Form, Grid } from '@arco-design/web-react';
+import { Button, Form, Layout, Message, Popconfirm, Table } from '@arco-design/web-react';
 import { getComponentConfig } from 'src/components/Materials/schema';
 import EditRender from 'src/components/render/EditRender';
-import DragableTable from './dragableTable';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { COMPONENT_GROUP_NAME } from 'src/utils/const';
-import { STATUS_OPTIONS, STATUS_VALUES, LAYOUT_VALUES, LAYOUT_OPTIONS } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { getComponentSchema } from '../../../schema';
-import { type XSubTableConfig } from './schema';
+import DragableTable from './dragableTable';
 import './index.css';
+import { type XSubTableConfig } from './schema';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -22,7 +22,7 @@ const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
-const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { colCount, id, runtime = true, label, layout, tooltip, labelColSpan = 100, status, verify } = props;
 
   useSignals();
@@ -51,7 +51,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
       dataIndex: 'index',
       align: 'center',
       width: 65,
-      render: (_: any, __: any, rowIndex: number) => rowIndex + 1,
+      render: (_: any, __: any, rowIndex: number) => rowIndex + 1
     };
     const operation = {
       id: 'operation',
@@ -75,13 +75,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
             </Button>
           </Popconfirm>
         </div>
-      ),
-    }
+      )
+    };
 
     const copyData = [...colComponents[0]];
 
-    const customData = copyData.map(comp => {
-
+    const customData = copyData.map((comp) => {
       const { id: cpID, type: itemType, displayName } = comp;
 
       const schemaConfig = getComponentConfig(pageComponentSchemas[cpID], itemType);
@@ -102,7 +101,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
             display: false
           },
           status
-        },
+        }
       };
 
       setPageComponentSchemas(cpID, props);
@@ -111,7 +110,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
         const defaultData = [{ [comp.id]: '', key: nanoid() }];
         setTableData(defaultData);
       } else if (tableData.length === 1) {
-        setTableData(prev => {
+        setTableData((prev) => {
           // 创建第一个对象的副本并添加新字段
           const updatedFirstItem = { ...prev[0], [comp.id]: '' };
           // 创建新数组，替换第一个元素
@@ -131,7 +130,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
             <EditRender runtime={runtime} cpId={comp.id} cpType={comp.type} pageComponentSchema={props} />
           </div>
         )
-      }
+      };
     });
 
     const newColumns = [index, ...customData, operation];
@@ -150,18 +149,18 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
   // 复制
   const handleCopy = (record: any) => {
     Message.success('复制成功');
-    setTableData(prev => [...prev, { ...record, key: nanoid() }]);
+    setTableData((prev) => [...prev, { ...record, key: nanoid() }]);
   };
 
   // 删除
   const handleDelete = (key: string) => {
-    setTableData(prev => prev.filter(item => item.key !== key));
+    setTableData((prev) => prev.filter((item) => item.key !== key));
     Message.success('删除成功');
   };
 
   // 新增
   const handleAdd = () => {
-    setTableData(prev => [...prev, { ...tableData[0], key: nanoid() }]);
+    setTableData((prev) => [...prev, { ...tableData[0], key: nanoid() }]);
   };
 
   return (
@@ -186,8 +185,21 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
             }}
             onAdd={(e) => {
               // 允许拖入的组件
-              const validata = ['XInputText', 'XInputTextArea', 'XInputNumber', 'XDatePicker', 'XRadio', 'XCheckbox', 'XSelectOne', 'XSelectMutiple', 'XImgUpload', 'XFileUpload', 'XUserSelect', 'XDeptSelect'];
-              console.debug("onAdd", e.item.getAttribute('data-cp-type'));
+              const validata = [
+                'XInputText',
+                'XInputTextArea',
+                'XInputNumber',
+                'XDatePicker',
+                'XRadio',
+                'XCheckbox',
+                'XSelectOne',
+                'XSelectMutiple',
+                'XImgUpload',
+                'XFileUpload',
+                'XUserSelect',
+                'XDeptSelect'
+              ];
+              console.debug('onAdd', e.item.getAttribute('data-cp-type'));
 
               const cpID = e.item.id || e.item.getAttribute('data-cp-id');
               console.log(`拖入组件${id}内， 索引为${index}， 拖入组件为 ${cpID}`);
@@ -245,14 +257,14 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
             fallbackOnBody={true}
             swapThreshold={0.65}
             className="content"
-          // onStart={(e) => {
-          //   console.log('onStart', e);
-          //   const cpID = e.item.getAttribute('data-id') || '';
-          //   setCurComponentID(cpID);
-          //   const curComponentSchema = pageComponentSchemas[cpID] || {};
-          //   setCurComponentSchema(curComponentSchema);
-          //   setShowDeleteButton(true);
-          // }}
+            // onStart={(e) => {
+            //   console.log('onStart', e);
+            //   const cpID = e.item.getAttribute('data-id') || '';
+            //   setCurComponentID(cpID);
+            //   const curComponentSchema = pageComponentSchemas[cpID] || {};
+            //   setCurComponentSchema(curComponentSchema);
+            //   setShowDeleteButton(true);
+            // }}
           >
             <Form.Item
               label={label.display && label.text}
@@ -274,21 +286,46 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
                 opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
               }}
             >
-              <div style={{
-                width: '100%',
-                minHeight: 130,
-                display: 'flex',
-                alignItems: 'center',
-                maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0) + 2}px)`,
-              }}>
-                {
-                  runtime ? <Table columns={columns} data={tableData} scroll={{ x: 'max-content' }} style={{ width: `calc(100% - ${LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0}px)` }} /> :
-                    <DragableTable id={id} status={status} columns={columns} data={tableData} runtime={runtime} setColumns={setColumns} />
-                }
+              <div
+                style={{
+                  width: '100%',
+                  minHeight: 130,
+                  display: 'flex',
+                  alignItems: 'center',
+                  maxWidth: runtime
+                    ? '100%'
+                    : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0) + 2}px)`
+                }}
+              >
+                {runtime ? (
+                  <Table
+                    columns={columns}
+                    data={tableData}
+                    scroll={{ x: 'max-content' }}
+                    style={{
+                      width: `calc(100% - ${LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0}px)`
+                    }}
+                  />
+                ) : (
+                  <DragableTable
+                    id={id}
+                    status={status}
+                    columns={columns}
+                    data={tableData}
+                    runtime={runtime}
+                    setColumns={setColumns}
+                  />
+                )}
               </div>
-              <Button type='outline' icon={<IconPlus />} style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }} onClick={handleAdd}>新增一项</Button>
+              <Button
+                type="outline"
+                icon={<IconPlus />}
+                style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
+                onClick={handleAdd}
+              >
+                新增一项
+              </Button>
             </Form.Item>
-
           </ReactSortable>
         </div>
       ))}

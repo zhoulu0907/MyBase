@@ -5,12 +5,12 @@ import { nanoid } from 'nanoid';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputUserSelectConfig } from './schema';
 import '../index.css';
+import type { XInputUserSelectConfig } from './schema';
 
 const Option = Select.Option;
 
-const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean }) => {
+const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime } = props;
   const [userData, setUserData] = useState<UserVO[]>([]);
   // 分页
@@ -70,10 +70,12 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
   };
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${nanoid()}`}
+        field={
+          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${nanoid()}`
+        }
         layout={layout}
         tooltip={tooltip}
         labelCol={{
