@@ -93,10 +93,12 @@ public class RPCMain {
                     .expectResultWithin(15, TimeUnit.MINUTES);
             String result;
             if (inputParams.getJobType().equalsIgnoreCase("timer")) {
+                LOGGER.log(Level.INFO, "调用服务: " + TimerJobService.KEY_PREFIX_TIMER);
                 RRemoteService remoteService = redisson.getRemoteService(TimerJobService.KEY_PREFIX_TIMER);
                 TimerJobService timerJobService = remoteService.get(TimerJobService.class, options);
                 result = timerJobService.call(inputParams.getProcessId());
             } else if (inputParams.getJobType().equalsIgnoreCase("fld")) {
+                LOGGER.log(Level.INFO, "调用服务: " + DateFieldJobService.KEY_PREFIX_FLD);
                 RRemoteService remoteService = redisson.getRemoteService(DateFieldJobService.KEY_PREFIX_FLD);
                 DateFieldJobService dateFieldJobService = remoteService.get(DateFieldJobService.class, options);
                 result = dateFieldJobService.call(inputParams.getProcessId());

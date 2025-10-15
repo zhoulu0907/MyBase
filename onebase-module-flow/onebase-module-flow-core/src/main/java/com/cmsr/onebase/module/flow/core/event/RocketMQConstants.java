@@ -26,4 +26,13 @@ public class RocketMQConstants {
      */
     public static final String CHANGE_EVENTS_CONSUMER_GROUP_SLOT = "flow:process:consumer:group:change:events";
 
+
+    public static final String JOB_EVENTS_TOPIC_TIMER = "flow_process_job_events_timer";
+
+    public static final String JOB_EVENTS_TOPIC_FLD = "flow_process_job_events_fld";
+
+
+    public static final String CONSUMER_GROUP_DEFAULT = "group_default";
+
+
 }
