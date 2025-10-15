@@ -4,7 +4,6 @@ import { IconDelete, IconDragDotVertical, IconPlusCircle } from '@arco-design/we
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { nanoid } from 'nanoid';
 import styles from './index.module.less';
-import { getFieldTypes, type SelectOption } from '@onebase/app';
 import { type Field } from '../../typings';
 
 // 拖拽图标
@@ -89,7 +88,9 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
     }
   ];
 
-  const [fieldTypeOptions, setFieldTypeOptions] = useState<SelectOption[]>([]);
+  const fieldTypeOptions = [
+    {label:'文本',value:'TEXT'},
+  ];
 
   useEffect(() => {
     init();
@@ -98,14 +99,6 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
   const init = async () => {
     setTableData(data || []);
     form.setFieldValue('fields', data || []);
-    // 获取字段类型下拉列表
-    const res = await getFieldTypes();
-    setFieldTypeOptions(
-      res.map((item: any) => ({
-        label: item.displayName,
-        value: item.fieldType
-      }))
-    );
   };
 
   // 删除
@@ -121,7 +114,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
     const temp = {
       id: nanoid(),
       fieldName: undefined,
-      fieldType: undefined
+      fieldType: 'TEXT'
     };
     const newtableData = [...newData, temp];
     setTableData(newtableData);
