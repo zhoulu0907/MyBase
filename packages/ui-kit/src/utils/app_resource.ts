@@ -200,6 +200,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
   const { setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
 
+  const { setCurPage, setEditPageViewId } = pagesRuntimeSignal;
+
   const {
     setComponents: setFormComponents,
     setPageComponentSchemas: setFromPageComponentSchemas,
@@ -213,8 +215,6 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setPageComponentSchemas: setListPageComponentSchemas,
     setLayoutSubComponents: setListLayoutSubComponents
   } = useListEditorSignal;
-
-  const { setCurPage } = pagesRuntimeSignal;
 
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
@@ -335,6 +335,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     }
 
     setPageViews(res.pages);
+    // 设置默认编辑视图
+    setEditPageViewId(res.pages.find((item: PageView) => item.isDefaultEditViewMode)?.id);
     console.log('载入视图: ', res.pages);
   }
 }

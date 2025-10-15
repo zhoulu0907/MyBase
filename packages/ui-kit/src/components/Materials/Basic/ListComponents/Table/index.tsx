@@ -24,6 +24,8 @@ const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
 const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function }) => {
+  const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
+
   const { runtime = true, showFromPageData } = props;
 
   const {
@@ -113,11 +115,14 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
   }, [finalColumns, tablePageNo, metaData]);
 
   const handleCreate = () => {
+    console.log('点击新增');
+
+    console.log('runtime: ', runtime);
     if (!runtime) {
       return;
     }
 
-    showFromPageData?.();
+    showFromPageData?.(null, true);
   };
 
   // 查询
@@ -211,10 +216,13 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
       if (redirectMethod === RedirectMethod.DRAWER) {
         // 打开抽屉显示详情
         console.log(redirectPageId);
-        pagesRuntimeSignal.setDrawerVisible(true);
-        redirectPageId && pagesRuntimeSignal.setDrawerPageId(redirectPageId);
+        setDrawerVisible(true);
+        redirectPageId && setDrawerPageId(redirectPageId);
 
         handleEdit(record.id, false);
+        if (runtime) {
+          redirectPageId && setDetailPageViewId(redirectPageId);
+        }
       } else if (redirectMethod === RedirectMethod.NEW_TAB) {
         // 打开新的标签页
       }

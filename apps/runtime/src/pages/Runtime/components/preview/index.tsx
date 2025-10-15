@@ -16,7 +16,7 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { FLOW_MODAL_TYPE, FLOW_MODAL_CANCEL, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
+import { FLOW_MODAL_CANCEL, FLOW_MODAL_TYPE, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -47,7 +47,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
-  const { curPage, drawerVisible, setDrawerVisible, drawerPageId } = pagesRuntimeSignal;
+  const { curPage, drawerVisible, setDrawerVisible, drawerPageId, editPageViewId, detailPageViewId } =
+    pagesRuntimeSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
@@ -135,9 +136,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             },
             onCancel: async () => {
               // todo
-              console.log('关闭默认终止提醒',res.outputParams.closeWarn)
-              console.log('弹窗取消后提醒',res.outputParams.cancelWarn)
-              
+              console.log('关闭默认终止提醒', res.outputParams.closeWarn);
+              console.log('弹窗取消后提醒', res.outputParams.cancelWarn);
+
               // 事件结束 或者 弹窗取消后事件终止
               if (res.executionEnd || res.outputParams.afterCancel === FLOW_MODAL_CANCEL.STOP) {
                 return;
@@ -248,7 +249,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
 
     form.resetFields();
-    if (id) {
+    if (id && id !== '') {
       console.log('edit row id: ', id);
       setEditTargetId(id);
       if (mainMetaData) {
@@ -318,20 +319,26 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
-            {formComponents.value.map((cp: GridItem) => (
+            {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
-                {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
-                      width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
+                      width: getComponentWidth(
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                        cp.type
+                      )
                     }}
                   >
                     <PreviewRender
                       cpId={cp.id}
                       cpType={cp.type}
-                      pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                      pageComponentSchema={
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                      }
                       runtime={true}
                       showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
@@ -364,16 +371,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         >
           <div className={styles.content}>
             <Form layout="inline" form={form}>
-              {useEditorSignalMap.get(drawerPageId.value)?.components.value.map((cp: GridItem) => (
+              {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
                 <Fragment key={cp.id}>
-                  {useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                  {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                     <div
                       key={cp.id}
                       className={styles.componentItem}
                       style={{
                         width: getComponentWidth(
-                          useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id],
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
                           cp.type
                         )
                       }}
@@ -382,7 +389,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                         cpId={cp.id}
                         cpType={cp.type}
                         pageComponentSchema={
-                          useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id]
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
                         }
                         runtime={true}
                         showFromPageData={() => {}}

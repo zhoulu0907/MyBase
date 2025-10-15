@@ -59,6 +59,14 @@ export const createPageViewEditorSignal = () => {
     curViewId.value = '';
   };
 
+  const getDefaultEditPageViewId = () => {
+    return Object.values(pageViews.value).find((pv) => pv.isDefaultEditViewMode == 1)?.id;
+  };
+
+  const getDefaultDetailPageViewId = () => {
+    return Object.values(pageViews.value).find((pv) => pv.isDefaultDetailViewMode == 1)?.id;
+  };
+
   return {
     pageViews,
     addPageView,
@@ -66,6 +74,9 @@ export const createPageViewEditorSignal = () => {
     updatePageView,
     updatePageViewName,
     setPageViews,
+
+    getDefaultEditPageViewId,
+    getDefaultDetailPageViewId,
 
     curViewId,
     setCurViewId,
