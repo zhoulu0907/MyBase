@@ -1,12 +1,11 @@
 import { Button, Form, Modal, Select, Switch, Radio, Tooltip, Space, InputNumber, Divider, Grid, Typography, Input, Popconfirm } from '@arco-design/web-react';
 import type { PageView } from '@onebase/app';
-import { RedirectMethod, TableOperationButton, TableOperationButtonStyle, usePageViewEditorSignal } from '@onebase/ui-kit';
+import { RedirectMethod, TableOperationButton, TableOperationButtonStyle, usePageViewEditorSignal, iconMap, operationIcon, iconColorList } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import { IconDragDotVertical, IconExclamationCircle, IconEdit } from '@arco-design/web-react/icon';
 import { IconEditStroked } from '@douyinfe/semi-icons';
 import DynamicIcon from '@/components/DynamicIcon';
-import { iconMap, operationIcon, iconColorList } from './const';
 import checkIcon from '@/assets/images/check_icon.svg';
 import styles from '../../index.module.less';
 
