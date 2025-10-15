@@ -63,7 +63,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
   const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
-  // 手动错误显示：key 为 'fields.X.xxx'
   const [externalErrors, setExternalErrors] = useState<Record<string, string>>({});
 
   const fieldTypeOptions = useFieldStore.getState().fieldTypes.map((item) => ({
@@ -310,11 +309,14 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   // 处理拖拽排序
   const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+    // 获取最新输入的数据
+    const currentFields = getCurrentTableData();
+
     // 仅对自定义且未删除字段进行排序
-    const active = fields.filter((f) => !f.isDeleted && f.isSystemField === FIELD_TYPE.CUSTOM);
+    const active = currentFields.filter((f) => !f.isDeleted && f.isSystemField === FIELD_TYPE.CUSTOM);
     const reorderedActive = arrayMove([...active], oldIndex, newIndex);
 
-    const newFields = [...fields];
+    const newFields = [...currentFields];
     let pointer = 0;
     for (let i = 0; i < newFields.length; i += 1) {
       const cur = newFields[i];
