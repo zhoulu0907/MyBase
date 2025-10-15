@@ -3,7 +3,7 @@ onebase:
     client:
       enabled: true
       # DolphinScheduler 基础地址，必须以 / 结尾，例如：http://127.0.0.1:12345/dolphinscheduler/
-      baseUrl: http://10.0.104.33:12345/dolphinscheduler/
+      baseUrl: http://10.0.104.33:12345/dolphinscheduler/v2/
       # 访问认证 token
       token: 85806d2d33502cef3036fb30b320e5f5
       # 超时与日志
