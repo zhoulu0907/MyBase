@@ -1,5 +1,5 @@
 import { Form, Message, Upload } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
@@ -70,7 +70,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
       >
         <Upload
           imagePreview
-          limit={status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? fieldValue.length : (
+          limit={(status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue ? fieldValue?.length : (
             verify?.maxCount === -1 ? undefined : verify?.maxCount
           )}
           accept="image/*"
@@ -78,7 +78,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           beforeUpload={async (file) => {
             const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
             const fileSize = file.size / 1024;
-
             if (fileSize > fileSizeLimit) {
               Message.warning('文件大小超出限制');
               return false;
@@ -104,7 +103,9 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
               });
             }
           }}
-          showUploadList
+          showUploadList={{
+            removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
+          }}
           style={{
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
