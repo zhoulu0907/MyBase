@@ -5,10 +5,13 @@ import {
   statusConfig,
   tableMetaDataConfig,
   widthConfig,
+  tableButtonPermissionConfig,
+  tableOperationConfig,
   type ICommonBaseType,
   type TPagePositionSelectKeyType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+  type TWidthSelectKeyType,
+  type TButtonSelectKeyType,
 } from '../../../common';
 import {
   CONFIG_TYPES,
@@ -18,7 +21,11 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  BUTTON_OPTIONS,
+  BUTTON_VALUES,
+  RedirectMethod,
+  TableOperationButton
 } from '../../../constants';
 import type {
   IBooleanConfigType,
@@ -34,7 +41,9 @@ import type {
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  ITableButtonConfigType,
+  ITableOperationConfigType,
 } from '../../../types';
 
 export interface XTableSchema {
@@ -52,13 +61,20 @@ export type TXTableEditData = Array<
   | ITablePageSizeConfigType
   | ITableDataConfigType
   | INumberConfigType
+  | ITableButtonConfigType<TButtonSelectKeyType>
+  | ITableOperationConfigType
 >;
 
 export interface XTableConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 默认值
@@ -146,19 +162,52 @@ export interface XTableConfig extends ICommonBaseType {
   labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
 
-  /*
+  /**
    * 行点击跳转
    */
   advancedRowRedirect?: TBooleanDefaultType;
   redirectPageId?: TTextDefaultType;
   redirectMethod?: TTextDefaultType;
+
+  /**
+   * 操作按钮显示方式：图标、文字、图标+文字
+   * 可选值: 'icon' | 'text' | 'all'
+   */
+  operationButtonShowType?: TTextDefaultType;
+
+  /**
+   * 收入“更多”菜单：数字输入框，默认为4，可输入[1,20]的整数
+   */
+  operationButtonCollpaseNumber?: TNumberDefaultType;
+
+  operationButton: OperationButtonConfig[];
+
+  /**
+   * 按钮权限配置
+   * 按钮状态：隐藏、置灰
+   * 可选值: 'hidden' | 'disabled'
+   */
+  advancedButtonPermission?: TSelectDefaultType<TButtonSelectKeyType>;
+
   /**
    * 排序
-   */
+  */
   sortByObject?: {
     fieldName: TTextDefaultType;
     sortBy: TNumberDefaultType;
   }
+}
+
+export interface OperationButtonConfig {
+  type: string;
+  buttonName: string;
+  buttonIcon: string;
+  iconColor: string;
+  redirectPageId?: string;
+  redirectMethod?: string;
+  confirmText?: string;
+  deletedAction?: string;
+  display: boolean;
 }
 
 const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
@@ -268,11 +317,16 @@ const XTable: XTableSchema = {
       name: '行点击跳转',
       type: CONFIG_TYPES.TABLE_DATA,
       advanced: true
-    }
+    },
+    tableOperationConfig,
+    tableButtonPermissionConfig,
   ],
   config: {
     ...baseDefault,
-    label: '',
+    label: {
+      text: '表格',
+      display: false,
+    },
     stripe: true,
     border: true,
     borderCell: true,
@@ -294,7 +348,33 @@ const XTable: XTableSchema = {
     searchItems: [],
     advancedRowRedirect: false,
     redirectPageId: '',
-    redirectMethod: RedirectMethod.DRAWER
+    redirectMethod: RedirectMethod.DRAWER,
+
+    // 操作按钮
+    operationButton: [
+      {
+        type: TableOperationButton.EDIT,
+        buttonName: '编辑',
+        buttonIcon: 'edit',
+        iconColor: '#C9CDD4',
+        redirectPageId: '',
+        redirectMethod: RedirectMethod.NEW_TAB,
+        display: true
+      },
+      {
+        type: TableOperationButton.DELETE,
+        buttonName: '删除',
+        buttonIcon: 'delete',
+        iconColor: '#F53F3F',
+        confirmText: '确定删除？删除后不可恢复',
+        deletedAction: RedirectMethod.REFRESH,
+        display: true
+      },
+    ],
+
+    operationButtonShowType: 'all',
+    operationButtonCollpaseNumber: 4,
+    advancedButtonPermission: BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN]
   }
 };
 

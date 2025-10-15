@@ -84,7 +84,10 @@ export const CONFIG_TYPES = {
   IMAGE: 'Image',
   FILE: 'File',
   // 折叠面板展开状态
-  COLLAPSED: 'Collapsed'
+  COLLAPSED: 'Collapsed',
+
+  TABLE_OPERATION: 'TableOperation',
+  TABLE_BUTTON: 'advancedButtonPermission'
 } as const;
 
 // 状态选项常量
@@ -257,5 +260,33 @@ export const COLLAPSED_VALUES = {
 // 表格的行点击跳转方式
 export enum RedirectMethod {
   DRAWER = 'drawer',
-  NEW_TAB = 'newTab'
+  NEW_TAB = 'newTab',
+  CURRENT_TAB = 'currentTab',
+  MODAL = 'modal',
+  REFRESH = 'refresh',
+  PROMPT_JUMP = 'promptJump'
+}
+
+// 内容对齐方式
+export const BUTTON_OPTIONS = {
+  HIDDEN: '隐藏',
+  DISABLED: '置灰'
+} as const;
+
+export const BUTTON_VALUES = {
+  [BUTTON_OPTIONS.HIDDEN]: 'hidden',
+  [BUTTON_OPTIONS.DISABLED]: 'disabled',
+} as const;
+
+// 表格操作按钮
+export enum TableOperationButton {
+  EDIT = 'edit',
+  DELETE = 'delete'
+}
+
+// 按钮展示
+export enum TableOperationButtonStyle {
+  ICON = 'icon',
+  TEXT = 'text',
+  ALL = 'all'
 }

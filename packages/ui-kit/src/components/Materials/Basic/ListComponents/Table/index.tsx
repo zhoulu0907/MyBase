@@ -1,7 +1,7 @@
-import { Button, Form, Input, Message, Popconfirm, Table } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, BUTTON_OPTIONS, BUTTON_VALUES, TableOperationButton, TableOperationButtonStyle } from '../../../constants';
 
 import {
   dataMethodDelete,
@@ -14,8 +14,10 @@ import {
 import { pagesRuntimeSignal } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { RedirectMethod } from '../../../constants';
-import './index.css';
 import type { XTableConfig } from './schema';
+import DynamicIcon from '@/components/DynamicIcon';
+import { iconMap } from '@/utils/const';
+import './index.css';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -23,7 +25,7 @@ const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
-const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean}) => {
+const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean }) => {
   const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
   const { runtime = true, showFromPageData, showAddBtn = true } = props;
 
@@ -48,7 +50,11 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     sortByObject,
     advancedRowRedirect,
     redirectPageId,
-    redirectMethod
+    redirectMethod,
+    operationButton,
+    advancedButtonPermission,
+    // operationButtonCollpaseNumber,
+    operationButtonShowType,
   } = props;
 
   const [finalColumns, setFinalColumns] = useState<any[]>();
@@ -64,30 +70,82 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     dataIndex: 'op',
     fixed: null,
     width: '110px',
-    render: (_: any, record: any) => (
-      <>
-        <Button
-          type="text"
-          style={{ marginRight: 5 }}
-          icon={<IconEdit />}
-          onClick={(event) => {
-            handleEdit(record.id, true);
-            event.stopPropagation();
-          }}
-        />
-        <Popconfirm
-          focusLock
-          title="确认删除"
-          content="确定要删除这条数据吗？"
-          onOk={(event) => {
-            handleDelete(record.id);
-            event.stopPropagation();
-          }}
-        >
-          <Button status="danger" type="text" icon={<IconDelete />} />
-        </Popconfirm>
-      </>
-    )
+    render: (_: any, record: any) => {
+      if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN]) return;
+      const isDisabled = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED];
+      return (
+        <Space>
+          {
+            operationButton?.map((opearate, index) => (
+              <Tooltip content="无操作权限" key={index}>
+                {(opearate.type === TableOperationButton.EDIT && opearate.display) && (
+                  <div
+                    style={{ whiteSpace: 'nowrap', opacity: isDisabled ? .5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer', pointerEvents: isDisabled ? 'none' : 'auto' }}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (redirectMethod === RedirectMethod.DRAWER) {
+                        // 打开抽屉显示详情
+                        console.log(redirectPageId);
+                        pagesRuntimeSignal.setDrawerVisible(true);
+                        redirectPageId && pagesRuntimeSignal.setDrawerPageId(redirectPageId);
+
+                        handleEdit(record.id, false);
+                      } else if (redirectMethod === RedirectMethod.NEW_TAB) {
+                      } else if (redirectMethod === RedirectMethod.CURRENT_TAB) {
+                      } else if (redirectMethod === RedirectMethod.MODAL) {
+                      }
+                    }}>
+                    {<>
+                      {(operationButtonShowType === TableOperationButtonStyle.ICON || operationButtonShowType === TableOperationButtonStyle.ALL) && <DynamicIcon
+                        IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                        theme="outline"
+                        size="16"
+                        fill={opearate.iconColor}
+                        style={{
+                          marginRight: 4
+                        }}
+                      />}
+                      {(operationButtonShowType === TableOperationButtonStyle.TEXT || operationButtonShowType === TableOperationButtonStyle.ALL) && opearate.buttonName}
+                    </>
+                    }
+                  </div>
+                )}
+
+                {(opearate.type === TableOperationButton.DELETE && opearate.display) && (
+                  <div style={{ whiteSpace: 'nowrap', opacity: isDisabled ? .5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer', pointerEvents: isDisabled ? 'none' : 'auto' }}>
+                    <Popconfirm
+                      focusLock
+                      title="确认删除"
+                      content={opearate.confirmText}
+                      onOk={(event) => {
+                        event.stopPropagation();
+                        handleDelete(record.id);
+                        if (opearate.deletedAction === RedirectMethod.REFRESH) {
+                          handlePage();
+                        } else if (opearate.deletedAction === RedirectMethod.PROMPT_JUMP) {
+                          // todo
+                        }
+                      }}
+                    >
+                      {(operationButtonShowType === TableOperationButtonStyle.ICON || operationButtonShowType === TableOperationButtonStyle.ALL) && <DynamicIcon
+                        IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                        theme="outline"
+                        size="16"
+                        fill={opearate.iconColor}
+                        style={{
+                          marginRight: 4
+                        }}
+                      />}
+                      {(operationButtonShowType === TableOperationButtonStyle.TEXT || operationButtonShowType === TableOperationButtonStyle.ALL) && opearate.buttonName}
+                    </Popconfirm>
+                  </div>
+                )}
+              </Tooltip>
+            ))
+          }
+        </Space>
+      )
+    }
   };
 
   useEffect(() => {
@@ -151,7 +209,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
       filters: queryData
     };
 
-    if(sortByObject?.fieldName){
+    if (sortByObject?.fieldName) {
       req.sortField = sortByObject.fieldName;
       req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
     }
@@ -308,7 +366,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
       </div>
       <div>
         <Form.Item
-          label={label}
+          label={label.display && label.text}
           layout={'vertical'}
           style={{
             width: '100%',
