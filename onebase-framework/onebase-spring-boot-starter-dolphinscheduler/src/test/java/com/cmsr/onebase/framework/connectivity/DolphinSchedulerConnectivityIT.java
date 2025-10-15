@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.connectivity;
 
-import com.cmsr.onebase.framework.remote.model.HttpRestResult;
+import com.cmsr.onebase.framework.remote.dto.HttpRestResultDTO;
 import jakarta.annotation.Resource;
 import okhttp3.OkHttpClient;
 import org.junit.jupiter.api.Assumptions;
@@ -41,9 +41,9 @@ public class DolphinSchedulerConnectivityIT {
         Assumptions.assumeTrue(enableLiveConnectivityTest, "未开启 live 连通性测试，跳过，该开关见 onebase.dolphinscheduler.client.enable-live-connectivity-test");
 
         HealthApi api = retrofit.create(HealthApi.class);
-        Response<HttpRestResult<Object>> resp = api.getCurrentUser().execute();
+        Response<HttpRestResultDTO<Object>> resp = api.getCurrentUser().execute();
         assertTrue(resp.isSuccessful(), "HTTP 请求失败，code=" + resp.code());
-        HttpRestResult<Object> body = resp.body();
+        HttpRestResultDTO<Object> body = resp.body();
         assertNotNull(body, "响应体为空");
         // DolphinScheduler 通用成功码通常为 0
         assertEquals(0, body.getCode(), "业务响应码非成功，msg=" + body.getMsg());

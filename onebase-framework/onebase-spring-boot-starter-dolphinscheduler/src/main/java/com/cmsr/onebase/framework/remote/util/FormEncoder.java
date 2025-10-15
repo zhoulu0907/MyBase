@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.remote.util;
 
-import com.cmsr.onebase.framework.remote.model.process.ProcessDefineParam;
-import com.cmsr.onebase.framework.remote.model.schedule.ScheduleDefineParam;
+import com.cmsr.onebase.framework.remote.dto.process.ProcessDefineParamDTO;
+import com.cmsr.onebase.framework.remote.dto.schedule.ScheduleDefineParamDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,7 +15,7 @@ public final class FormEncoder {
 
     private FormEncoder() {}
 
-    public static Map<String, String> encode(ProcessDefineParam p, ObjectMapper mapper) {
+    public static Map<String, String> encode(ProcessDefineParamDTO p, ObjectMapper mapper) {
         Map<String, String> form = new HashMap<>();
         if (p == null) {
             return form;
@@ -26,25 +26,32 @@ public final class FormEncoder {
         putJson(form, "taskRelationJson", p.getTaskRelationJson(), mapper);
         put(form, "tenantCode", p.getTenantCode());
         put(form, "description", p.getDescription());
-        put(form, "executionType", p.getExecutionType());
+        if (p.getExecutionType() != null) {
+            form.put("executionType", p.getExecutionType().name());
+        }
         putJson(form, "globalParams", p.getGlobalParams(), mapper);
         put(form, "timeout", p.getTimeout());
         return form;
     }
 
-    public static Map<String, String> encode(ScheduleDefineParam p, ObjectMapper mapper) {
+    public static Map<String, String> encode(ScheduleDefineParamDTO p, ObjectMapper mapper) {
         Map<String, String> form = new HashMap<>();
         if (p == null) {
             return form;
         }
         putJson(form, "schedule", p.getSchedule(), mapper);
-        put(form, "failureStrategy", p.getFailureStrategy());
-        put(form, "warningType", p.getWarningType());
-        put(form, "processInstancePriority", p.getProcessInstancePriority());
+        if (p.getFailureStrategy() != null) {
+            form.put("failureStrategy", p.getFailureStrategy().name());
+        }
+        if (p.getWarningType() != null) {
+            form.put("warningType", p.getWarningType().name());
+        }
+        if (p.getProcessInstancePriority() != null) {
+            form.put("processInstancePriority", p.getProcessInstancePriority().name());
+        }
         put(form, "warningGroupId", p.getWarningGroupId());
         put(form, "workerGroup", p.getWorkerGroup());
         put(form, "environmentCode", p.getEnvironmentCode());
-        // 注意 DS 3.3.1 字段名称为 workflowDefinitionCode
         if (p.getWorkflowDefinitionCode() != null) {
             form.put("workflowDefinitionCode", String.valueOf(p.getWorkflowDefinitionCode()));
         }
@@ -66,4 +73,3 @@ public final class FormEncoder {
         }
     }
 }
-

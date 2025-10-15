@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.remote;
 
-import com.cmsr.onebase.framework.remote.model.HttpRestResult;
-import com.cmsr.onebase.framework.remote.model.task.TaskDefinitionResp;
+import com.cmsr.onebase.framework.remote.dto.HttpRestResultDTO;
+import com.cmsr.onebase.framework.remote.dto.task.TaskDefinitionRespDTO;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -23,9 +23,9 @@ public interface TaskApi {
      *
      * @param projectCode 项目编码
      * @param processDefinitionCode 流程定义编码
-     * @return 结果（为简化，此处返回字符串或后续补充模型）
+     * @return 任务定义列表
      */
     @GET("projects/{projectCode}/task-definition/list-by-process-definition-code/{processDefinitionCode}")
-    Call<HttpRestResult<List<TaskDefinitionResp>>> listByProcessDefinitionCode(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<List<TaskDefinitionRespDTO>>> listByProcessDefinitionCode(@Path("projectCode") long projectCode,
                                                                               @Path("processDefinitionCode") long processDefinitionCode);
 }
