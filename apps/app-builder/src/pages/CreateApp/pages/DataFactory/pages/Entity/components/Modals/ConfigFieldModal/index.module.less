@@ -32,6 +32,11 @@
     }
   }
 
+  .required-dot {
+    color: rgb(var(--danger-5));
+    margin-right: 2px;
+  }
+
   .drag-handle {
     cursor: move;
     color: #999;
@@ -107,12 +112,13 @@
 /* 字段表单项样式 */
 .field-form-item {
   margin: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
   gap: 4px;
   min-height: 56px;
+  margin-bottom: 0 !important;
   .arco-form-item-wrapper > .arco-form-message {
     white-space: nowrap !important;
   }

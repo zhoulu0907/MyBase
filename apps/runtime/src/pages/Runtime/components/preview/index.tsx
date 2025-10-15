@@ -1,4 +1,4 @@
-import { Button, Drawer, Form, Message, Modal } from '@arco-design/web-react';
+import { Button, Drawer, Form, Input, Message, Modal } from '@arco-design/web-react';
 import {
   CATEGORY_TYPE,
   dataMethodData,
@@ -16,7 +16,7 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { FLOW_MODAL_TYPE, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
+import { FLOW_MODAL_CANCEL, FLOW_MODAL_TYPE, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -25,7 +25,6 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   useEditorSignalMap,
-  useFormEditorSignal,
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
@@ -43,11 +42,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = Form.useForm();
 
-  const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
+  //   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
-  const { curPage, drawerVisible, setDrawerVisible, drawerPageId } = pagesRuntimeSignal;
+  const { curPage, drawerVisible, setDrawerVisible, editPageViewId, detailPageViewId } = pagesRuntimeSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
@@ -78,14 +77,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useEffect(() => {
     if (menuId) {
       handleGetPageSetId(menuId);
+      setEditTargetId('');
     }
   }, [menuId]);
 
-  //   useEffect(() => {
-  //     if (editTargetId && mainMetaData) {
-  //       handleGetData(mainMetaData, editTargetId);
-  //     }
-  //   }, [editTargetId, mainMetaData]);
+  useEffect(() => {
+    if (editTargetId && mainMetaData && mainMetaDataFields.length > 0) {
+      handleGetData(mainMetaData, editTargetId);
+    }
+  }, [editTargetId, mainMetaData, mainMetaDataFields]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -99,7 +99,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const handleGetPageSetId = async (menuId: string) => {
     const req: GetPageSetIdReq = { menuId: menuId };
     const res = await getPageSetId(req);
-    console.log('res', res);
     setPageSetId(res);
   };
 
@@ -107,9 +106,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     startLoadPageSet({ pageSetId: pageSetId });
   };
 
+  // 信息收集弹窗
+  const [infoModalVisibel, setInfoModalVisibel] = useState(false);
+  const [outputParams, setOutputParams] = useState({
+    modalTitle: '',
+    modalType: '',
+    fields: [],
+    arrange: 1,
+    okText: '',
+    cancelText: ''
+  });
+  const [infoForm] = Form.useForm();
+  let flowParam: any = {};
+  let flowRespon: any = {};
+
   // 流程多次触发
-  const triggerFlows = async (param: any) => {
-    const res = await triggerFlowExecForm(param);
+  const triggerFlows = async () => {
+    const res = await triggerFlowExecForm(flowParam);
+    flowRespon = res;
     if (res?.success) {
       // 弹窗
       if (res.nodeType === NodeType.MODAL) {
@@ -125,23 +139,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               if (res.executionEnd) {
                 return;
               }
-              const newParam = {
-                processId: param.processId,
+              flowParam = {
+                processId: flowParam.processId,
                 executionUuid: res.executionUuid || '',
-                inputParams: param.inputParams
+                inputParams: flowParam.inputParams
               };
-              await triggerFlows(newParam);
+              await triggerFlows();
             },
-            onCancel: async () => {
-              if (res.executionEnd) {
-                return;
-              }
-              const newParam = {
-                processId: param.processId,
-                executionUuid: res.executionUuid || '',
-                inputParams: param.inputParams
-              };
-              await triggerFlows(newParam);
+            onCancel: () => {
+              infoCancel();
             }
           });
         }
@@ -149,6 +155,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         // 信息收集
         if (res.outputParams?.modalType === FLOW_MODAL_TYPE.INFOR) {
           // todo
+          // setOutputParams({ ...outputParams, ...res.outputParams });
+          // setInfoModalVisibel(true);
         }
       }
 
@@ -157,6 +165,42 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       }
     }
   };
+
+  // 收集信息弹窗 确定按钮
+  const cofirmInfoModal = async () => {
+    if (flowRespon.executionEnd) {
+      return;
+    }
+    flowParam = {
+      processId: flowParam.processId,
+      executionUuid: flowRespon.executionUuid || '',
+      inputParams: flowParam.inputParams,
+      collectInfo: infoForm.getFieldsValue()
+    };
+    await triggerFlows();
+  };
+  const infoCancel = async () => {
+    // todo
+    console.log('关闭默认终止提醒', flowRespon.outputParams.closeWarn);
+    console.log('弹窗取消后提醒', flowRespon.outputParams.cancelWarn);
+
+    // 事件结束 或者 弹窗取消后事件终止
+    if (flowRespon.executionEnd || flowRespon.outputParams.afterCancel === FLOW_MODAL_CANCEL.STOP) {
+      return;
+    }
+    flowParam = {
+      processId: flowParam.processId,
+      executionUuid: flowRespon.executionUuid || '',
+      inputParams: flowParam.inputParams
+    };
+    await triggerFlows();
+  };
+  // 收集信息弹窗 取消按钮
+  const cancaelInfoModal = () => {
+    setInfoModalVisibel(false);
+    infoCancel();
+  };
+
   const submitForm = async () => {
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
@@ -178,7 +222,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
     const pageId = curFormPage?.id;
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
-
     if (editTargetId) {
       const req: UpdateMethodParams = {
         entityId: mainMetaData,
@@ -190,12 +233,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
       for (let ele of updateFlows) {
-        const param = {
+        flowParam = {
           processId: ele.processId,
           executionUuid: '',
           inputParams: formData
         };
-        await triggerFlows(param);
+        await triggerFlows();
       }
 
       if (res) {
@@ -213,12 +256,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
       for (let ele of createFlows) {
-        const param = {
+        flowParam = {
           processId: ele.processId,
           executionUuid: '',
           inputParams: formData
         };
-        await triggerFlows(param);
+        await triggerFlows();
       }
 
       if (res) {
@@ -237,17 +280,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
-    if (toFormPage) {
-      setPageType(EDITOR_TYPES.FORM_EDITOR);
+    form.resetFields();
+    if (id === editTargetId) {
+      console.log(666666);
+      handleGetData(mainMetaData, id);
     }
 
-    form.resetFields();
-    if (id) {
+    if (id && id !== '') {
       console.log('edit row id: ', id);
       setEditTargetId(id);
-      if (mainMetaData) {
-        handleGetData(mainMetaData, id);
-      }
+    }
+
+    if (toFormPage) {
+      setPageType(EDITOR_TYPES.FORM_EDITOR);
     }
   };
 
@@ -258,7 +303,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     };
     const res = await dataMethodData(req);
     console.log(res);
-    console.log(res.data);
 
     // 遍历 res.data，将数据回填到表单
     if (res && res.data) {
@@ -269,6 +313,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       // 只处理第一个数据对象（通常为单条数据）
       const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
+
       if (dataItem && typeof dataItem === 'object') {
         const formValues: Record<string, any> = {};
         Object.entries(dataItem).forEach(([fieldName, value]) => {
@@ -312,20 +357,26 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
-            {formComponents.value.map((cp: GridItem) => (
+            {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
-                {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
-                      width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
+                      width: getComponentWidth(
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                        cp.type
+                      )
                     }}
                   >
                     <PreviewRender
                       cpId={cp.id}
                       cpType={cp.type}
-                      pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                      pageComponentSchema={
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                      }
                       runtime={true}
                       showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
@@ -358,16 +409,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         >
           <div className={styles.content}>
             <Form layout="inline" form={form}>
-              {useEditorSignalMap.get(drawerPageId.value)?.components.value.map((cp: GridItem) => (
+              {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
                 <Fragment key={cp.id}>
-                  {useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                  {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                     <div
                       key={cp.id}
                       className={styles.componentItem}
                       style={{
                         width: getComponentWidth(
-                          useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id],
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
                           cp.type
                         )
                       }}
@@ -376,9 +427,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                         cpId={cp.id}
                         cpType={cp.type}
                         pageComponentSchema={
-                          useEditorSignalMap.get(drawerPageId.value)?.pageComponentSchemas.value[cp.id]
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
                         }
                         runtime={true}
+                        detailMode={true}
                         showFromPageData={() => {}}
                       />
                     </div>
@@ -389,6 +441,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           </div>
         </Drawer>
       </div>
+
+      {/* 信息收集弹窗 */}
+      <Modal
+        visible={infoModalVisibel}
+        title={outputParams.modalTitle}
+        okText={outputParams.okText}
+        cancelText={outputParams.cancelText}
+        onOk={cofirmInfoModal}
+        onCancel={cancaelInfoModal}
+      >
+        <Form layout="inline" form={infoForm}>
+          {outputParams.fields.map((cp: any) => (
+            <Form.Item key={cp.id} label={cp.fieldName} field={cp.fieldName}>
+              <Input placeholder="请输入" />
+            </Form.Item>
+          ))}
+        </Form>
+      </Modal>
     </div>
   );
 };

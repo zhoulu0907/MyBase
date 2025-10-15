@@ -19,6 +19,7 @@ const openTypeOptions = [
   { label: '新页签', value: RedirectMethod.NEW_TAB }
 ];
 
+const advancedRowRedirect = 'advancedRowRedirect';
 const redirectPageId = 'redirectPageId';
 const redirectMethod = 'redirectMethod';
 
@@ -32,10 +33,20 @@ const AdvancedTableConfig: React.FC<AdvancedTableConfigProps> = ({
   useSignals();
 
   const { pageViews } = usePageViewEditorSignal;
+
   useEffect(() => {
-    console.log(configs);
-    console.log(item);
-    console.log(pageViews.value);
+    // console.log(configs);
+    // console.log(item);
+    // console.log(pageViews.value);
+
+    const hasPageView = pageViews.value[configs.redirectPageId]?.detailViewMode == 1;
+    if (!hasPageView) {
+      handleMultiPropsChange([
+        { key: advancedRowRedirect, value: false },
+        { key: redirectPageId, value: '' },
+        { key: redirectMethod, value: RedirectMethod.DRAWER }
+      ]);
+    }
   }, []);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -94,15 +105,25 @@ const AdvancedTableConfig: React.FC<AdvancedTableConfigProps> = ({
           size="small"
           checked={configs[item.key]}
           onChange={(value) => {
-            console.log(value);
-            handlePropsChange(item.key, value);
-
             if (!value) {
               handleMultiPropsChange([
                 { key: item.key, value: value },
                 { key: redirectPageId, value: '' },
                 { key: redirectMethod, value: '' }
               ]);
+            } else {
+              // 开启行点击跳转 选择默认视图
+              console.log(pageViews.value);
+              const defaultView = (Object.values(pageViews.value) as PageView[]).find(
+                (item: PageView) => item.isDefaultDetailViewMode
+              );
+              if (defaultView) {
+                handleMultiPropsChange([
+                  { key: item.key, value: value },
+                  { key: redirectPageId, value: defaultView.id },
+                  { key: redirectMethod, value: RedirectMethod.DRAWER }
+                ]);
+              }
             }
           }}
         />
@@ -122,8 +143,12 @@ const AdvancedTableConfig: React.FC<AdvancedTableConfigProps> = ({
       >
         <div style={{ width: '100%', textAlign: 'right' }}>
           <Button type="secondary" onClick={handleOpenModal}>
-            {configs[redirectPageId] ? pageViews.value[configs[redirectPageId]]?.pageName : '请选择视图'}
-            <IconEdit style={{ marginLeft: '8px' }} />
+            <div className={styles.rowNavBtn}>
+              <div className={styles.rowNavBtnText}>
+                {configs[redirectPageId] ? pageViews.value[configs[redirectPageId]]?.pageName : '请选择视图'}
+              </div>
+              <IconEdit style={{ marginLeft: '8px' }} />
+            </div>
           </Button>
         </div>
       </Form.Item>
@@ -138,9 +163,9 @@ const AdvancedTableConfig: React.FC<AdvancedTableConfigProps> = ({
             rules={[{ required: true, message: '请选择跳转页面' }]}
           >
             <Select
-              // TODO(mickey): id保存完之后需要替换
+              style={{ width: '230px' }}
               options={(Object.values(pageViews.value) as PageView[])
-                .filter((item: PageView) => item.detailViewMode)
+                .filter((item: PageView) => item.detailViewMode == 1)
                 .map((item: PageView) => ({
                   label: item.pageName,
                   value: item.id

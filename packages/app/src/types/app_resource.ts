@@ -81,4 +81,6 @@ export interface PageView {
 
   // 是否是新增的视图
   created?: boolean;
+  //   是否最新更新的视图
+  isLatestUpdated?: number;
 }

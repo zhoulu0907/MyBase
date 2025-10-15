@@ -127,6 +127,8 @@
 
 .dropdownRenderCommon {
   padding: 8px;
+  max-height: 250px;
+  .hideScrollbarCommon;
 
   .headerCheckbox {
     margin-bottom: 8px;
@@ -178,8 +180,6 @@
 }
 
 .fillingRuleSettingsModal {
-  width: 600px;
-
   .modalTitleLeft {
     display: block;
     text-align: left;
@@ -234,6 +234,10 @@
         flex: 1;
       }
 
+      .fieldInput[disabled] {
+        -webkit-text-fill-color: #000;
+      }
+
       .fieldSpan {
         margin: 0 8px;
         color: #1d2129;
@@ -263,15 +267,14 @@
 }
 
 .filterDataModal {
-  width: 600px;
-
   .modalTitleLeft {
     display: block;
     text-align: left;
   }
 
   .popupContainer {
-    min-height: 320px;
+    height: 400px;
+    .hideScrollbarCommon;
 
     .titleSpan {
       .titleSpanCommon;

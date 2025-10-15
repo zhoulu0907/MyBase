@@ -27,7 +27,6 @@ const CreateFieldModal: React.FC<{
   const [form] = Form.useForm<FieldFormValues>();
   // 提交
   const handleFinish = () => {
-    // TODO: 提交表单数据
     form.validate().then(async (values) => {
       const res = await createField({
         entityId: entity.entityId,

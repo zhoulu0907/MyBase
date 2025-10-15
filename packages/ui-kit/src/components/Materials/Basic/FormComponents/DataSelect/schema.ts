@@ -137,7 +137,10 @@ export interface XDataSelectConfig extends ICommonBaseType {
   /**
    * 选择的数据源
    */
-  selectedDataSource?: TTextDefaultType;
+  selectedDataSource?: {
+    entityId: TTextDefaultType,
+    entityName: TTextDefaultType
+  };
 
    /**
    * 选择的数据源 属性类型待定
@@ -147,9 +150,13 @@ export interface XDataSelectConfig extends ICommonBaseType {
     label: TTextDefaultType;
     value: TTextDefaultType;
   }[];
-  fillFormField: TBooleanDefaultType;
+  displayFieldsOptions: any[];
+  fillFormFieldOptions: any[];
+  fillRuleSetting: any[];
+  dataFields: any[];
   selectDataFields: TTextDefaultType[];
   filterData: TBooleanDefaultType;
+  filterCondition: any[],
   sortDataRule: TTextDefaultType[];
   operationAuth: TBooleanDefaultType;
   fastFilter: TBooleanDefaultType;
@@ -209,14 +216,21 @@ const XDataSelect: XDataSelectSchema = {
       required: false,
       noRepeat: false
     },
-    selectedDataSource: '',
+    selectedDataSource: {
+      entityId: '',
+      entityName: ''
+    },
 
     // 选择数据属性 待定
     isSetted: false,
     displayFields: [],
-    fillFormField: false,
+    displayFieldsOptions: [],
+    fillFormFieldOptions: [],
+    fillRuleSetting: [],
+    dataFields: [],
     selectDataFields: [],
     filterData: false,
+    filterCondition: [],
     sortDataRule: [],
     operationAuth: false,
     fastFilter: false,
@@ -240,7 +254,11 @@ const XDataSelect: XDataSelectSchema = {
         labelColSpan: 100,
         defaultValue: [],
         columns: [],
-        searchItems: []}
+        searchItems: [],
+        sortByObject: {
+          fieldName: '',
+          sortBy: 1
+        }}
   }
 };
 

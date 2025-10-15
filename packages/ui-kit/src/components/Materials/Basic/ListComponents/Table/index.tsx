@@ -23,8 +23,9 @@ const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
-const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function }) => {
-  const { runtime = true, showFromPageData } = props;
+const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean}) => {
+  const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
+  const { runtime = true, showFromPageData, showAddBtn = true } = props;
 
   const {
     label,
@@ -44,6 +45,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     showOpearate,
     fixedOpearate,
     labelColSpan,
+    sortByObject,
     advancedRowRedirect,
     redirectPageId,
     redirectMethod
@@ -102,7 +104,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
       opearate.fixed = fixedOpearate ? 'right' : null;
       setFinalColumns([...(columns as any), opearate]);
     } else {
-      setFinalColumns((pre) => pre?.filter((v) => v.dataIndex !== 'op'));
+      setFinalColumns(() => columns?.filter((v) => v.dataIndex !== 'op'));
     }
   }, [showOpearate, columns, fixedOpearate]);
 
@@ -110,14 +112,17 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     if (finalColumns && metaData) {
       handlePage();
     }
-  }, [finalColumns, tablePageNo, metaData]);
+  }, [finalColumns, tablePageNo, metaData, sortByObject]);
 
   const handleCreate = () => {
+    console.log('点击新增');
+
+    console.log('runtime: ', runtime);
     if (!runtime) {
       return;
     }
 
-    showFromPageData?.();
+    showFromPageData?.(null, true);
   };
 
   // 查询
@@ -145,6 +150,11 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
       pageSize: pageSize || 10,
       filters: queryData
     };
+
+    if(sortByObject?.fieldName){
+      req.sortField = sortByObject.fieldName;
+      req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
+    }
     const res = await dataMethodPage(req);
 
     const mainMetaData = await getEntityFieldsWithChildren(metaData);
@@ -207,14 +217,20 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
 
   // 行点击事件
   const handleRowClick = (record: any) => {
+    if (!runtime) {
+      return;
+    }
+
     if (advancedRowRedirect) {
       if (redirectMethod === RedirectMethod.DRAWER) {
         // 打开抽屉显示详情
-        console.log(redirectPageId);
-        pagesRuntimeSignal.setDrawerVisible(true);
-        redirectPageId && pagesRuntimeSignal.setDrawerPageId(redirectPageId);
+        setDrawerVisible(true);
+        redirectPageId && setDrawerPageId(redirectPageId);
 
         handleEdit(record.id, false);
+        if (runtime) {
+          redirectPageId && setDetailPageViewId(redirectPageId);
+        }
       } else if (redirectMethod === RedirectMethod.NEW_TAB) {
         // 打开新的标签页
       }
@@ -276,9 +292,9 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
               </Button>
             </>
           ) : null}
-          <Button type="primary" onClick={handleCreate}>
+          {showAddBtn && <Button type="primary" onClick={handleCreate}>
             新增
-          </Button>
+          </Button>}
           {/* <Button
             type="outline"
             style={{

@@ -18,6 +18,15 @@ export const createPagesRuntimeSignal = () => {
     drawerPageId.value = newDrawerPageId;
   };
 
+  const editPageViewId = signal<string>('');
+  const setEditPageViewId = (newEditPageViewId: string) => {
+    editPageViewId.value = newEditPageViewId;
+  };
+  const detailPageViewId = signal<string>('');
+  const setDetailPageViewId = (newDetailPageViewId: string) => {
+    detailPageViewId.value = newDetailPageViewId;
+  };
+
   return {
     curPage,
     setCurPage,
@@ -26,7 +35,13 @@ export const createPagesRuntimeSignal = () => {
     setDrawerVisible,
 
     drawerPageId,
-    setDrawerPageId
+    setDrawerPageId,
+
+    editPageViewId,
+    setEditPageViewId,
+
+    detailPageViewId,
+    setDetailPageViewId
   };
 };
 

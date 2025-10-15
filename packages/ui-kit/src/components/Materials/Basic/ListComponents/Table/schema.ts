@@ -14,6 +14,7 @@ import {
   CONFIG_TYPES,
   PAGINATION_POSITION_OPTIONS,
   PAGINATION_POSITION_VALUES,
+  RedirectMethod,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
@@ -151,6 +152,13 @@ export interface XTableConfig extends ICommonBaseType {
   advancedRowRedirect?: TBooleanDefaultType;
   redirectPageId?: TTextDefaultType;
   redirectMethod?: TTextDefaultType;
+  /**
+   * 排序
+   */
+  sortByObject?: {
+    fieldName: TTextDefaultType;
+    sortBy: TNumberDefaultType;
+  }
 }
 
 const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
@@ -286,7 +294,7 @@ const XTable: XTableSchema = {
     searchItems: [],
     advancedRowRedirect: false,
     redirectPageId: '',
-    redirectMethod: ''
+    redirectMethod: RedirectMethod.DRAWER
   }
 };
 

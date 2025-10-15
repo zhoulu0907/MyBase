@@ -5,10 +5,10 @@ import { nanoid } from 'nanoid';
 import { memo, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputImgUploadConfig } from './schema';
 import '../index.css';
+import type { XInputImgUploadConfig } from './schema';
 
-const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) => {
+const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, runtime = true } = props;
 
   const [_imgUrl, setImgUrl] = useState<string>('');
@@ -19,11 +19,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -31,10 +31,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
   };
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`}
+        field={
+          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`
+        }
         layout={layout}
         tooltip={tooltip}
         labelCol={{

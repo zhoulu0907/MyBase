@@ -1,6 +1,7 @@
-import { Button, Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
-import { IconDown, IconPlus } from '@arco-design/web-react/icon';
-import { ViewType, type PageView } from '@onebase/app';
+import TickSVG from '@/assets/images/tick.svg';
+import { Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
+import { IconDown, IconEdit, IconPlus } from '@arco-design/web-react/icon';
+import { generateId, ViewType, type PageView } from '@onebase/app';
 import {
   createPageEditorSignal,
   useEditorSignalMap,
@@ -22,11 +23,12 @@ interface ViewProps {
 const View: React.FC<ViewProps> = ({ pageSetId }) => {
   useSignals();
 
-  const { pageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
+  const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
   const [dropListVisible, setDropListVisible] = useState(false);
+  const [editViewName, setEditViewName] = useState(false);
 
   const { pageComponentSchemas, components, layoutSubComponents } = usePageEditorSignal();
 
@@ -72,6 +74,11 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
           return (
             <Menu.Item key={id} onClick={() => handleSelectView(id)}>
               <div key={id} className={styles.dropItem}>
+                {view.id === curViewId.value ? (
+                  <img className={styles.dropItemIcon} src={TickSVG} alt="tick" />
+                ) : (
+                  <div style={{ width: '16px', height: '16px' }}></div>
+                )}
                 <div className={styles.dropItemLabel}>{view.pageName}</div>
                 <div>{showViewType(view)}</div>
               </div>
@@ -80,15 +87,10 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
         })}
 
         <Menu.Item key="addView">
-          <Button
-            type="text"
-            size="mini"
-            className={styles.addViewButton}
-            onClick={() => setCreateViewModalVisible(true)}
-          >
-            <IconPlus />
-            新增视图
-          </Button>
+          <div className={styles.addViewButton} onClick={() => setCreateViewModalVisible(true)}>
+            <IconPlus fontSize={14} style={{ marginRight: '2px', color: '#029e9e' }} />
+            <div>新增视图</div>
+          </div>
         </Menu.Item>
       </Menu>
     </div>
@@ -103,14 +105,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     createForm
       .validate()
       .then(async () => {
-        // const res = await createPageView({
-        //   pageSetId: pageSetId,
-        //   viewType: createForm.getFieldValue('viewType'),
-        //   viewName: createForm.getFieldValue('viewName')
-        // });
-
         // 创建临时视图
-        const pageId = `${Date.now()}`;
+        const pageId = await generateId();
         usePageViewEditorSignal.addPageView({
           id: pageId,
           pageName: createForm.getFieldValue('viewName'),
@@ -141,9 +137,39 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
       });
   };
 
+  // 表单名称为空时 置为原来的值
+  let oldPageViewName = '';
+  const pageViewNameBlur = (e: any) => {
+    if (e.currentTarget.value === '') {
+      updatePageViewName(curViewId.value, oldPageViewName);
+    }
+    setEditViewName(false);
+    oldPageViewName = '';
+  };
+
   return (
     <div className={styles.viewWrapper}>
-      <div className={styles.viewTitle}>{pageViews.value[curViewId.value]?.pageName}</div>
+      {editViewName ? (
+        <Input
+          size="small"
+          autoFocus
+          defaultValue={pageViews.value[curViewId.value]?.pageName}
+          onChange={(e: any) => {
+            updatePageViewName(curViewId.value, e);
+          }}
+          onPressEnter={pageViewNameBlur}
+          onBlur={pageViewNameBlur}
+          onFocus={(e) => {
+            oldPageViewName = e.currentTarget.value;
+          }}
+          style={{ maxWidth: '200px' }}
+        />
+      ) : (
+        <div className={styles.viewTitle} onClick={() => setEditViewName(true)}>
+          <div className={styles.viewTitleText}>{pageViews.value[curViewId.value]?.pageName}</div> <IconEdit />
+        </div>
+      )}
+
       <Dropdown
         droplist={dropList}
         position="bl"

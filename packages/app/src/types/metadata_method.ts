@@ -13,7 +13,9 @@ export interface PageMethodParam {
     entityId: string;
     pageNo: number;
     pageSize: number;
-    filters?: any
+    filters?: any;
+    sortField?: string;
+    sortDirection?: string;
 }
 
 export interface DeleteMethodParam {
