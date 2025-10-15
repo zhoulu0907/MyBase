@@ -270,6 +270,10 @@ export interface AuthFieldVO {
    */
   fieldId: string;
   /**
+   * 字段类型
+   */
+  fieldType: string;
+  /**
    * 主键Id
    */
   id: string;
