@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/store_app';
 import { Layout, Menu, Tooltip } from '@arco-design/web-react';
-import { IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
+import { IconBook, IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import DataSourcePage from './pages/DataSource';
 import EntityPage from './pages/Entity';
+import DataDictPage from './pages/DataDict';
 
 const DataFactoryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('check-entity');
@@ -61,6 +62,11 @@ const DataFactoryPage: React.FC = () => {
               <IconShareAlt />
             </Tooltip>
           </Menu.Item>
+          <Menu.Item key="data-dict">
+            <Tooltip content="数据字典" position="right">
+              <IconBook />
+            </Tooltip>
+          </Menu.Item>
         </Menu>
       </Layout.Sider>
 
@@ -68,6 +74,7 @@ const DataFactoryPage: React.FC = () => {
       <Layout.Content className={styles['content']}>
         {activeTab === 'data-source' && <DataSourcePage />}
         {activeTab === 'check-entity' && <EntityPage />}
+        {activeTab === 'data-dict' && <DataDictPage />}
       </Layout.Content>
     </Layout>
   );
