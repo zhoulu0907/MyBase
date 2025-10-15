@@ -1,9 +1,9 @@
-import { memo } from 'react';
 import { Card } from '@arco-design/web-react';
+import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XInfoNoticeConfig } from './schema';
 
-const XInfoNotice = memo((props: XInfoNoticeConfig & { runtime?: boolean }) => {
+const XInfoNotice = memo((props: XInfoNoticeConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, content, runtime = true } = props;
 
   return (

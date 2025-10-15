@@ -25,16 +25,16 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     detailMode
   } = props;
 
+  const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
+
+  const fieldValue = Form.useWatch(fieldId, form);
 
   useEffect(() => {
     if (dataField.length > 0) {
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
-
-  const { form } = Form.useFormContext();
-  const fieldValue = Form.useWatch(fieldId, form);
 
   return (
     <div className="formWrapper">

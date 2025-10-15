@@ -1,14 +1,14 @@
-import { memo } from 'react';
 import { Form, TimePicker } from '@arco-design/web-react';
+import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputTimePickerConfig } from './schema';
 import '../index.css';
+import type { XInputTimePickerConfig } from './schema';
 
-const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean }) => {
+const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
         layout={layout}
@@ -24,13 +24,17 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean })
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {
-          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
-            <TimePicker defaultValue={defaultValue} style={{
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
+          <div>{defaultValue || '--'}</div>
+        ) : (
+          <TimePicker
+            defaultValue={defaultValue}
+            style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'
-            }} />
-        }
+            }}
+          />
+        )}
       </Form.Item>
     </div>
   );

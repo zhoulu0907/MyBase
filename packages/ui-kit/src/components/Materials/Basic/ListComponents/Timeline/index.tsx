@@ -5,7 +5,7 @@ import { type XTimelineConfig } from './schema';
 
 const TimelineItem = Timeline.Item;
 
-const XTimeline = memo((props: XTimelineConfig & { runtime?: boolean }) => {
+const XTimeline = memo((props: XTimelineConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, runtime = true } = props;
 
   return (

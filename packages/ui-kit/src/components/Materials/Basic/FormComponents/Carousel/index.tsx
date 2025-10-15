@@ -1,9 +1,9 @@
-import { memo } from 'react';
 import { Carousel, Form } from '@arco-design/web-react';
+import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import { type XCarouselConfig } from './schema';
 import '../index.css';
 import './index.css';
+import { type XCarouselConfig } from './schema';
 
 const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
   const {
@@ -21,7 +21,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
   } = props;
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
         layout={layout}
