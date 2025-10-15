@@ -5,7 +5,7 @@ package com.cmsr.onebase.module.flow.core.event;
  * @Date：2025/9/5 9:31
  */
 
-public interface FlowEventPublisher {
+public interface FlowChangeEventPublisher {
 
     void publishProcessUpdate(Long processId);
 

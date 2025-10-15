@@ -1,12 +1,14 @@
 package com.cmsr.onebase.module.flow.core.job;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.job.DateFieldJobService;
 import com.cmsr.onebase.module.flow.context.job.TimerJobService;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.redisson.api.RRemoteService;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,7 @@ public class FlowTimerJobHandler implements TimerJobService, ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         RRemoteService remoteService = redissonClient.getRemoteService(TimerJobService.KEY_PREFIX_TIMER);
         remoteService.register(TimerJobService.class, this, 12);
+        log.info("注册FlowTimerJobHandler成功: {}", TimerJobService.KEY_PREFIX_TIMER);
     }
 
     @Override
@@ -51,8 +54,7 @@ public class FlowTimerJobHandler implements TimerJobService, ApplicationRunner {
             log.error("处理RocketMQ消息异常：{}", e.getMessage(), e);
             ExecutorResult executorResult = new ExecutorResult();
             executorResult.setSuccess(false);
-            executorResult.setMessage(e.getMessage());
-            executorResult.setCause(e);
+            executorResult.setMessage(ExceptionUtils.getMessage(e));
             return "fail:" + JsonUtils.toJsonString(executorResult);
         }
     }

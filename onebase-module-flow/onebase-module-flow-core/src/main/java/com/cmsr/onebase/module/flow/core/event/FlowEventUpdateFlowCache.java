@@ -87,10 +87,10 @@ public class FlowEventUpdateFlowCache implements MessageListener, ApplicationRun
     @Override
     public ConsumeResult consume(MessageView messageView) {
         try {
-            FlowEvent event = FlowEvent.decode(messageView.getBody());
-            if (StringUtils.equalsIgnoreCase(event.getType(), FlowEvent.UPDATE)) {
+            FlowChangeEvent event = FlowChangeEvent.decode(messageView.getBody());
+            if (StringUtils.equalsIgnoreCase(event.getType(), FlowChangeEvent.UPDATE)) {
                 onProcessUpdate(event.getProcessId());
-            } else if (StringUtils.equalsIgnoreCase(event.getType(), FlowEvent.DELETE)) {
+            } else if (StringUtils.equalsIgnoreCase(event.getType(), FlowChangeEvent.DELETE)) {
                 onProcessDelete(event.getProcessId());
             }
             return ConsumeResult.SUCCESS;

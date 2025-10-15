@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.redisson.api.RRemoteService;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ public class FlowDateFieldJobHandler implements DateFieldJobService, Application
     public void run(ApplicationArguments args) throws Exception {
         RRemoteService remoteService = redissonClient.getRemoteService(DateFieldJobService.KEY_PREFIX_FLD);
         remoteService.register(DateFieldJobService.class, this, 12);
+        log.info("注册DateFieldJobService成功: {}", DateFieldJobService.KEY_PREFIX_FLD);
     }
 
     @Override
@@ -53,8 +55,7 @@ public class FlowDateFieldJobHandler implements DateFieldJobService, Application
             log.error("处理RocketMQ消息异常：{}", e.getMessage(), e);
             ExecutorResult executorResult = new ExecutorResult();
             executorResult.setSuccess(false);
-            executorResult.setMessage(e.getMessage());
-            executorResult.setCause(e);
+            executorResult.setMessage(ExceptionUtils.getMessage(e));
             return "fail:" + JsonUtils.toJsonString(executorResult);
         }
     }

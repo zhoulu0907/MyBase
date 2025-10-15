@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
-import com.cmsr.onebase.module.flow.core.event.FlowEventPublisher;
+import com.cmsr.onebase.module.flow.core.event.FlowChangeEventPublisher;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -13,13 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @Setter
 @SpringBootTest(classes = OneBaseServerApplication.class)
-public class FlowEventTest {
+public class FlowChangeEventTest {
 
     @Autowired
-    private FlowEventPublisher flowEventPublisher;
+    private FlowChangeEventPublisher flowChangeEventPublisher;
 
     @Test
     public void test() {
-        flowEventPublisher.publishProcessUpdate(84076905441918976L);
+        flowChangeEventPublisher.publishProcessUpdate(84076905441918976L);
     }
 }

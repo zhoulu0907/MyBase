@@ -11,9 +11,9 @@ import java.nio.charset.StandardCharsets;
  * @Date：2025/10/10 12:44
  */
 @Data
-public class FlowEvent {
+public class FlowChangeEvent {
 
-    public static FlowEvent decode(ByteBuffer body) {
+    public static FlowChangeEvent decode(ByteBuffer body) {
         if (body == null || body.remaining() <= 0) {
             throw new IllegalArgumentException("ByteBuffer cannot be null or empty");
         }
@@ -26,17 +26,17 @@ public class FlowEvent {
             // 将字节数组转换为JSON字符串
             String jsonString = new String(bytes, StandardCharsets.UTF_8);
             // 使用Jackson解析JSON字符串为FlowEvent对象
-            FlowEvent event = JsonUtils.parseObject(jsonString, FlowEvent.class);
+            FlowChangeEvent event = JsonUtils.parseObject(jsonString, FlowChangeEvent.class);
             // 重置position以便其他操作可以重新读取
             body.position(position);
             return event;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to parse FlowEvent from JSON ByteBuffer", e);
+            throw new IllegalArgumentException("Failed to parse FlowChangeEvent from JSON ByteBuffer", e);
         }
     }
 
     public static byte[] encode(String type, Long processId) {
-        FlowEvent event = new FlowEvent();
+        FlowChangeEvent event = new FlowChangeEvent();
         event.setType(type);
         event.setProcessId(processId);
         return JsonUtils.toJsonByte(event);
