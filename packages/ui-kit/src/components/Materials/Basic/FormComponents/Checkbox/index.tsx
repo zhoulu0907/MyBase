@@ -1,4 +1,4 @@
-import { Checkbox, Form } from '@arco-design/web-react';
+import { Checkbox, Form, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
@@ -25,21 +25,16 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
   } = props;
 
   const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
+
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`
 
   const fieldValue = Form.useWatch(fieldId, form);
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
 
   return (
     <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`}
+        field={fieldId}
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -56,10 +51,9 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {defaultValue
-              ?.filter((op) => op.chosen)
-              .map((op) => op.label)
-              .join('，') || '--'}
+            {fieldValue && defaultValue && fieldValue.map((ele: any) => <Tag>
+              {defaultValue.find((e: any) => e.value === ele)?.label}
+            </Tag>)}
           </div>
         ) : (
           <CheckboxGroup
