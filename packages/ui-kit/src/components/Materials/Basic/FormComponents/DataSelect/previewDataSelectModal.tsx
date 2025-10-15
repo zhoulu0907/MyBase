@@ -53,7 +53,7 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
                     </div>
                 )} */}
                 <div className="rightFlexTable">
-                    <XTable {...tableConfig} isConfig={true}/>
+                    <XTable {...tableConfig} showAddBtn={false}/>
                 </div>
             </div>
              {/* <div className='bottomDiv'>

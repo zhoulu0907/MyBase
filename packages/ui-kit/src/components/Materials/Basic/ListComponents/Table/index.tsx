@@ -23,9 +23,9 @@ const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
-const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, isConfig?: boolean}) => {
+const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean}) => {
   const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
-  const { runtime = true, showFromPageData, isConfig } = props;
+  const { runtime = true, showFromPageData, showAddBtn = true } = props;
 
   const {
     label,
@@ -289,7 +289,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
               </Button>
             </>
           ) : null}
-          {!isConfig && <Button type="primary" onClick={handleCreate}>
+          {showAddBtn && <Button type="primary" onClick={handleCreate}>
             新增
           </Button>}
           {/* <Button

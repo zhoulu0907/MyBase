@@ -13,6 +13,11 @@ interface FilterDataModalProps {
   onOk: any;
 }
 
+const PROPSNAME = {
+  DISPLAYFIELDSOPTIONS: 'displayFieldsOptions',
+  FILTERCONDITION: 'filterCondition'
+};
+
 const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, configs, onCancel, onOk }) => {
   const [payloadForm] = Form.useForm();
   const [dataFilters, setDataFilters] = useState<any[]>([]);
@@ -25,7 +30,7 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, config
   }, [visible]);
 
   const initialData = async () => {
-    const [dataFilters, fieldIds] = (configs['displayFieldsOptions'] as any[]).reduce(
+    const [dataFilters, fieldIds] = (configs[PROPSNAME.DISPLAYFIELDSOPTIONS] as any[]).reduce(
       (acc, item: any) => {
         const [dataFilters, fieldIds] = acc;
         dataFilters.push({
@@ -49,12 +54,11 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, config
       const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
       setValidationTypes(newValidationTypes);
     }
-    payloadForm.setFieldValue('filterCondition', configs['filterCondition']);
+    payloadForm.setFieldValue(PROPSNAME.FILTERCONDITION, configs[PROPSNAME.FILTERCONDITION]);
   };
 
   const handleOkModal = () => {
-    const data = payloadForm.getFieldValue('filterCondition');
-    console.log(data);
+    const data = payloadForm.getFieldValue(PROPSNAME.FILTERCONDITION);
     onOk(data);
   };
 

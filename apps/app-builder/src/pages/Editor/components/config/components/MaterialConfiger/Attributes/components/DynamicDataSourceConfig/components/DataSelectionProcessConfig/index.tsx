@@ -221,7 +221,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                 {...tableConfig}
                 columns={tableHeader}
                 runtime={true}
-                isConfig={true}
+                showAddBtn={false}
               />
             </div>
           </div>
