@@ -86,15 +86,15 @@ public class FlowEventUpdateTimerJob implements MessageListener, ApplicationRunn
     @Override
     public ConsumeResult consume(MessageView messageView) {
         try {
-            FlowEvent event = FlowEvent.decode(messageView.getBody());
+            FlowChangeEvent event = FlowChangeEvent.decode(messageView.getBody());
             FlowProcessDO flowProcessDO = flowProcessRepository.findById(event.getProcessId());
             if (flowProcessDO == null) {
                 log.warn("流程不存在：{}", event.getProcessId());
                 return ConsumeResult.SUCCESS;
             }
-            if (StringUtils.equalsIgnoreCase(event.getType(), FlowEvent.UPDATE)) {
+            if (StringUtils.equalsIgnoreCase(event.getType(), FlowChangeEvent.UPDATE)) {
                 startJob(flowProcessDO);
-            } else if (StringUtils.equalsIgnoreCase(event.getType(), FlowEvent.DELETE)) {
+            } else if (StringUtils.equalsIgnoreCase(event.getType(), FlowChangeEvent.DELETE)) {
                 deleteJob(flowProcessDO);
             }
             return ConsumeResult.SUCCESS;

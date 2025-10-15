@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.job;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.job.DateFieldJobService;
 import com.cmsr.onebase.module.flow.context.job.TimerJobService;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
@@ -39,6 +40,7 @@ public class FlowTimerJobHandler implements TimerJobService, ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         RRemoteService remoteService = redissonClient.getRemoteService(TimerJobService.KEY_PREFIX_TIMER);
         remoteService.register(TimerJobService.class, this, 12);
+        log.info("注册FlowTimerJobHandler成功: {}", TimerJobService.KEY_PREFIX_TIMER);
     }
 
     @Override
