@@ -24,6 +24,9 @@ interface PreviewRenderProps {
 
   runtime: boolean;
 
+  // 详情视图
+  detailMode?: boolean;
+
   showFromPageData?: Function;
 }
 
@@ -32,6 +35,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   cpType,
   pageComponentSchema,
   runtime,
+  detailMode,
   showFromPageData
 }) => {
   // 获取组件配置
@@ -41,7 +45,9 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   const renderComponent = () => {
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
-        return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return (
+          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+        );
       case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
         return <FormComp.XInputTextArea cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.INPUT_EMAIL:

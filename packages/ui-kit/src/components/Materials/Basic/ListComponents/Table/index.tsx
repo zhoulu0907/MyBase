@@ -215,7 +215,6 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     if (advancedRowRedirect) {
       if (redirectMethod === RedirectMethod.DRAWER) {
         // 打开抽屉显示详情
-        console.log(redirectPageId);
         setDrawerVisible(true);
         redirectPageId && setDrawerPageId(redirectPageId);
 
