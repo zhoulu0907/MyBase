@@ -23,10 +23,9 @@ const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
-const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function }) => {
+const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean}) => {
   const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
-
-  const { runtime = true, showFromPageData } = props;
+  const { runtime = true, showFromPageData, showAddBtn = true } = props;
 
   const {
     label,
@@ -46,6 +45,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     showOpearate,
     fixedOpearate,
     labelColSpan,
+    sortByObject,
     advancedRowRedirect,
     redirectPageId,
     redirectMethod
@@ -104,7 +104,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
       opearate.fixed = fixedOpearate ? 'right' : null;
       setFinalColumns([...(columns as any), opearate]);
     } else {
-      setFinalColumns((pre) => pre?.filter((v) => v.dataIndex !== 'op'));
+      setFinalColumns(() => columns?.filter((v) => v.dataIndex !== 'op'));
     }
   }, [showOpearate, columns, fixedOpearate]);
 
@@ -112,7 +112,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     if (finalColumns && metaData) {
       handlePage();
     }
-  }, [finalColumns, tablePageNo, metaData]);
+  }, [finalColumns, tablePageNo, metaData, sortByObject]);
 
   const handleCreate = () => {
     console.log('点击新增');
@@ -150,6 +150,11 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
       pageSize: pageSize || 10,
       filters: queryData
     };
+
+    if(sortByObject?.fieldName){
+      req.sortField = sortByObject.fieldName;
+      req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
+    }
     const res = await dataMethodPage(req);
 
     const mainMetaData = await getEntityFieldsWithChildren(metaData);
@@ -287,9 +292,9 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
               </Button>
             </>
           ) : null}
-          <Button type="primary" onClick={handleCreate}>
+          {showAddBtn && <Button type="primary" onClick={handleCreate}>
             新增
-          </Button>
+          </Button>}
           {/* <Button
             type="outline"
             style={{

@@ -152,6 +152,13 @@ export interface XTableConfig extends ICommonBaseType {
   advancedRowRedirect?: TBooleanDefaultType;
   redirectPageId?: TTextDefaultType;
   redirectMethod?: TTextDefaultType;
+  /**
+   * 排序
+   */
+  sortByObject?: {
+    fieldName: TTextDefaultType;
+    sortBy: TNumberDefaultType;
+  }
 }
 
 const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
