@@ -149,11 +149,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setPageType(EDITOR_TYPES.LIST_EDITOR);
   };
 
-  const toCreatePage = (id: string) => {
+  const showFromPageData = (id: string) => {
     setPageType(EDITOR_TYPES.FORM_EDITOR);
     form.resetFields();
 
-    if (id) {
+    if (id === editTargetId) {
+      handleGetData(mainMetaData, id);
+    }
+
+    if (id && id !== '') {
       console.log('edit row id: ', id);
       setEditTargetId(id);
     }
@@ -211,7 +215,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     cpType={cp.type}
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
-                    toCreatePage={toCreatePage}
+                    showFromPageData={showFromPageData}
                   />
                 </div>
               )}
@@ -235,7 +239,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                       cpType={cp.type}
                       pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                       runtime={runtime}
-                      toCreatePage={() => {
+                      showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
                     />

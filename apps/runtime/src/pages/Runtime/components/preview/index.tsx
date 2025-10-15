@@ -25,7 +25,6 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   useEditorSignalMap,
-  useFormEditorSignal,
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
@@ -43,7 +42,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = Form.useForm();
 
-  const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
+  //   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
@@ -82,11 +81,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
   }, [menuId]);
 
-  //   useEffect(() => {
-  //     if (editTargetId && mainMetaData) {
-  //       handleGetData(mainMetaData, editTargetId);
-  //     }
-  //   }, [editTargetId, mainMetaData]);
+  useEffect(() => {
+    if (editTargetId && mainMetaData && mainMetaDataFields.length > 0) {
+      handleGetData(mainMetaData, editTargetId);
+    }
+  }, [editTargetId, mainMetaData, mainMetaDataFields]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -263,17 +262,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
-    if (toFormPage) {
-      setPageType(EDITOR_TYPES.FORM_EDITOR);
+    form.resetFields();
+    if (id === editTargetId) {
+      handleGetData(mainMetaData, id);
     }
 
-    form.resetFields();
     if (id && id !== '') {
       console.log('edit row id: ', id);
       setEditTargetId(id);
-      if (mainMetaData) {
-        handleGetData(mainMetaData, id);
-      }
+    }
+
+    if (toFormPage) {
+      setPageType(EDITOR_TYPES.FORM_EDITOR);
     }
   };
 
@@ -284,7 +284,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     };
     const res = await dataMethodData(req);
     console.log(res);
-    console.log(res.data);
 
     // 遍历 res.data，将数据回填到表单
     if (res && res.data) {
@@ -295,6 +294,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       // 只处理第一个数据对象（通常为单条数据）
       const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
+
       if (dataItem && typeof dataItem === 'object') {
         const formValues: Record<string, any> = {};
         Object.entries(dataItem).forEach(([fieldName, value]) => {
@@ -411,6 +411,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                           useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
                         }
                         runtime={true}
+                        detailMode={true}
                         showFromPageData={() => {}}
                       />
                     </div>
