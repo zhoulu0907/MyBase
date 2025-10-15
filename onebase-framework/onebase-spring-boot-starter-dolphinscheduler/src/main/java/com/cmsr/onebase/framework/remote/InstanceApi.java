@@ -1,10 +1,10 @@
 package com.cmsr.onebase.framework.remote;
 
-import com.cmsr.onebase.framework.remote.model.HttpRestResult;
-import com.cmsr.onebase.framework.remote.model.PageInfo;
-import com.cmsr.onebase.framework.remote.model.instance.ProcessInstanceCreateParam;
-import com.cmsr.onebase.framework.remote.model.instance.ProcessInstanceRunParam;
-import com.cmsr.onebase.framework.remote.model.instance.ProcessInstanceQueryResp;
+import com.cmsr.onebase.framework.remote.dto.HttpRestResultDTO;
+import com.cmsr.onebase.framework.remote.dto.PageInfoDTO;
+import com.cmsr.onebase.framework.remote.dto.instance.ProcessInstanceCreateParamDTO;
+import com.cmsr.onebase.framework.remote.dto.instance.ProcessInstanceQueryRespDTO;
+import com.cmsr.onebase.framework.remote.dto.instance.ProcessInstanceRunParamDTO;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -27,8 +27,8 @@ public interface InstanceApi {
      * @return 执行结果
      */
     @POST("projects/{projectCode}/executors/start-process-instance")
-    Call<HttpRestResult<Object>> start(@Path("projectCode") long projectCode,
-                                       @Body ProcessInstanceCreateParam body);
+    Call<HttpRestResultDTO<Object>> start(@Path("projectCode") long projectCode,
+                                       @Body ProcessInstanceCreateParamDTO body);
 
     /**
      * 分页查询流程实例（weaksloth: /process-instances）
@@ -41,7 +41,7 @@ public interface InstanceApi {
      * @return 分页结果
      */
     @GET("projects/{projectCode}/process-instances")
-    Call<HttpRestResult<PageInfo<ProcessInstanceQueryResp>>> page(
+    Call<HttpRestResultDTO<PageInfoDTO<ProcessInstanceQueryRespDTO>>> page(
             @Path("projectCode") long projectCode,
             @Query("pageNo") int pageNo,
             @Query("pageSize") int pageSize,
@@ -57,8 +57,8 @@ public interface InstanceApi {
      * @return 结果
      */
     @POST("projects/{projectCode}/executors/execute")
-    Call<HttpRestResult<String>> execute(@Path("projectCode") long projectCode,
-                                         @Body ProcessInstanceRunParam body);
+    Call<HttpRestResultDTO<String>> execute(@Path("projectCode") long projectCode,
+                                         @Body ProcessInstanceRunParamDTO body);
 
     /**
      * 删除流程实例
@@ -69,6 +69,6 @@ public interface InstanceApi {
      * @return 结果
      */
     @DELETE("projects/{projectCode}/process-instances/{processInstanceId}")
-    Call<HttpRestResult<String>> delete(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<String>> delete(@Path("projectCode") long projectCode,
                                         @Path("processInstanceId") long processInstanceId);
 }

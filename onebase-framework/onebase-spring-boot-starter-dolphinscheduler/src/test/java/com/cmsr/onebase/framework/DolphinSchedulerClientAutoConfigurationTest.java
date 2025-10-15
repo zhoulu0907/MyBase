@@ -36,7 +36,8 @@ public class DolphinSchedulerClientAutoConfigurationTest {
             server.enqueue(new MockResponse()
                     .setResponseCode(200)
                     .addHeader("Content-Type", "application/json")
-                    .setBody("{\"code\":0,\"msg\":\"success\",\"data\":[]}"));
+                    .setBody("{\"code\":0,\"msg\":\"success\",\"data\":{\"total\":0,\"records\":[]}}")
+            );
             server.start();
 
             String base = server.url("/").toString();
@@ -54,7 +55,8 @@ public class DolphinSchedulerClientAutoConfigurationTest {
                 Assertions.assertThat(context).hasNotFailed();
                 ScheduleApi scheduleApi = context.getBean(ScheduleApi.class);
                 try {
-                    scheduleApi.list(1L).execute();
+                    // 使用分页查询接口，验证 Retrofit wiring 是否正常
+                    scheduleApi.getByWorkflowCode(1L, 1, 10, null).execute();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

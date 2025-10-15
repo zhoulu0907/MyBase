@@ -1,8 +1,7 @@
 package com.cmsr.onebase.framework.remote;
 
-import com.cmsr.onebase.framework.remote.model.HttpRestResult;
-import com.cmsr.onebase.framework.remote.model.PageInfo;
-import com.cmsr.onebase.framework.remote.model.taskinstance.TaskInstanceQueryResp;
+import com.cmsr.onebase.framework.remote.dto.HttpRestResultDTO;
+import com.cmsr.onebase.framework.remote.dto.PageInfoDTO;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -28,7 +27,7 @@ public interface TaskInstanceApi {
      * @return 分页结果
      */
     @GET("projects/{projectCode}/task-instance")
-    Call<HttpRestResult<PageInfo<TaskInstanceQueryResp>>> listTaskInstances(
+    Call<HttpRestResultDTO<PageInfoDTO<com.cmsr.onebase.framework.remote.dto.taskinstance.TaskInstanceQueryRespDTO>>> listTaskInstances(
             @Path("projectCode") long projectCode,
             @Query("pageNo") int pageNo,
             @Query("pageSize") int pageSize,
@@ -40,7 +39,7 @@ public interface TaskInstanceApi {
      * GET /projects/{projectCode}/task-instances
      */
     @GET("projects/{projectCode}/task-instances")
-    Call<HttpRestResult<PageInfo<TaskInstanceQueryResp>>> page(
+    Call<HttpRestResultDTO<PageInfoDTO<com.cmsr.onebase.framework.remote.dto.taskinstance.TaskInstanceQueryRespDTO>>> page(
             @Path("projectCode") long projectCode,
             @Query("pageNo") int pageNo,
             @Query("pageSize") int pageSize,
@@ -52,7 +51,7 @@ public interface TaskInstanceApi {
      * GET /log/{projectCode}/detail?taskInstanceId=&skipLineNum=&limit=
      */
     @GET("log/{projectCode}/detail")
-    Call<HttpRestResult<Object>> queryLog(
+    Call<HttpRestResultDTO<Object>> queryLog(
             @Path("projectCode") long projectCode,
             @Query("taskInstanceId") long taskInstanceId,
             @Query("skipLineNum") int skipLineNum,

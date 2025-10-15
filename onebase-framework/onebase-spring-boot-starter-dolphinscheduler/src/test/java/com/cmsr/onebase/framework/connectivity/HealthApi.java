@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.connectivity;
 
-import com.cmsr.onebase.framework.remote.model.HttpRestResult;
+import com.cmsr.onebase.framework.remote.dto.HttpRestResultDTO;
 import retrofit2.Call;
 import retrofit2.http.GET;
 
@@ -20,5 +20,5 @@ public interface HealthApi {
      * @return 当前登录用户信息
      */
     @GET("users/get-user-info")
-    Call<HttpRestResult<Object>> getCurrentUser();
+    Call<HttpRestResultDTO<Object>> getCurrentUser();
 }

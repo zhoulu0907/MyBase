@@ -1,9 +1,9 @@
 package com.cmsr.onebase.framework.remote;
 
-import com.cmsr.onebase.framework.remote.model.HttpRestResult;
-import com.cmsr.onebase.framework.remote.model.PageInfo;
-import com.cmsr.onebase.framework.remote.model.schedule.ScheduleDefineParam;
-import com.cmsr.onebase.framework.remote.model.schedule.ScheduleInfoResp;
+import com.cmsr.onebase.framework.remote.dto.HttpRestResultDTO;
+import com.cmsr.onebase.framework.remote.dto.PageInfoDTO;
+import com.cmsr.onebase.framework.remote.dto.schedule.ScheduleDefineParamDTO;
+import com.cmsr.onebase.framework.remote.dto.schedule.ScheduleInfoRespDTO;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -26,47 +26,47 @@ public interface ScheduleApi {
 
     /** 创建调度（JSON） */
     @POST("projects/{projectCode}/schedules")
-    Call<HttpRestResult<ScheduleInfoResp>> create(@Path("projectCode") long projectCode,
-                                                  @Body ScheduleDefineParam body);
+    Call<HttpRestResultDTO<ScheduleInfoRespDTO>> create(@Path("projectCode") long projectCode,
+                                                  @Body ScheduleDefineParamDTO body);
 
     /** 创建调度（FORM） */
     @FormUrlEncoded
     @POST("projects/{projectCode}/schedules")
-    Call<HttpRestResult<ScheduleInfoResp>> createForm(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<ScheduleInfoRespDTO>> createForm(@Path("projectCode") long projectCode,
                                                       @FieldMap Map<String, String> form);
 
     /** 查询项目下所有调度（可按 workflow 过滤） */
     @GET("projects/{projectCode}/schedules")
-    Call<HttpRestResult<PageInfo<ScheduleInfoResp>>> getByWorkflowCode(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<PageInfoDTO<ScheduleInfoRespDTO>>> getByWorkflowCode(@Path("projectCode") long projectCode,
                                                                        @Query("pageNo") int pageNo,
                                                                        @Query("pageSize") int pageSize,
                                                                        @Query("processDefinitionCode") Long processDefinitionCode);
 
     /** 更新调度（JSON） */
     @PUT("projects/{projectCode}/schedules/{scheduleId}")
-    Call<HttpRestResult<ScheduleInfoResp>> update(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<ScheduleInfoRespDTO>> update(@Path("projectCode") long projectCode,
                                                   @Path("scheduleId") long scheduleId,
-                                                  @Body ScheduleDefineParam body);
+                                                  @Body ScheduleDefineParamDTO body);
 
     /** 更新调度（FORM） */
     @FormUrlEncoded
     @PUT("projects/{projectCode}/schedules/{scheduleId}")
-    Call<HttpRestResult<ScheduleInfoResp>> updateForm(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<ScheduleInfoRespDTO>> updateForm(@Path("projectCode") long projectCode,
                                                       @Path("scheduleId") long scheduleId,
                                                       @FieldMap Map<String, String> form);
 
     /** 上线调度 */
     @POST("projects/{projectCode}/schedules/{scheduleId}/online")
-    Call<HttpRestResult<String>> online(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<String>> online(@Path("projectCode") long projectCode,
                                         @Path("scheduleId") long scheduleId);
 
     /** 下线调度 */
     @POST("projects/{projectCode}/schedules/{scheduleId}/offline")
-    Call<HttpRestResult<String>> offline(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<String>> offline(@Path("projectCode") long projectCode,
                                          @Path("scheduleId") long scheduleId);
 
     /** 删除调度 */
     @DELETE("projects/{projectCode}/schedules/{scheduleId}")
-    Call<HttpRestResult<String>> delete(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<String>> delete(@Path("projectCode") long projectCode,
                                         @Path("scheduleId") long scheduleId);
 }

@@ -1,10 +1,10 @@
 package com.cmsr.onebase.framework.remote;
 
-import com.cmsr.onebase.framework.remote.model.HttpRestResult;
-import com.cmsr.onebase.framework.remote.model.PageInfo;
-import com.cmsr.onebase.framework.remote.model.process.ProcessDefineParam;
-import com.cmsr.onebase.framework.remote.model.process.ProcessDefineResp;
-import com.cmsr.onebase.framework.remote.model.process.ProcessReleaseParam;
+import com.cmsr.onebase.framework.remote.dto.HttpRestResultDTO;
+import com.cmsr.onebase.framework.remote.dto.PageInfoDTO;
+import com.cmsr.onebase.framework.remote.dto.process.ProcessDefineParamDTO;
+import com.cmsr.onebase.framework.remote.dto.process.ProcessDefineRespDTO;
+import com.cmsr.onebase.framework.remote.dto.process.ProcessReleaseParamDTO;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -31,7 +31,7 @@ public interface WorkflowApi {
      * GET /projects/{projectCode}/workflow-definition
      */
     @GET("projects/{projectCode}/workflow-definition")
-    Call<HttpRestResult<PageInfo<ProcessDefineResp>>> page(
+    Call<HttpRestResultDTO<PageInfoDTO<ProcessDefineRespDTO>>> page(
             @Path("projectCode") long projectCode,
             @Query("pageNo") int pageNo,
             @Query("pageSize") int pageSize,
@@ -43,8 +43,8 @@ public interface WorkflowApi {
      * POST /projects/{projectCode}/workflow-definition
      */
     @POST("projects/{projectCode}/workflow-definition")
-    Call<HttpRestResult<ProcessDefineResp>> create(@Path("projectCode") long projectCode,
-                                                   @Body ProcessDefineParam body);
+    Call<HttpRestResultDTO<ProcessDefineRespDTO>> create(@Path("projectCode") long projectCode,
+                                                   @Body ProcessDefineParamDTO body);
 
     /**
      * 创建流程定义（x-www-form-urlencoded 提交）
@@ -52,7 +52,7 @@ public interface WorkflowApi {
      */
     @FormUrlEncoded
     @POST("projects/{projectCode}/workflow-definition")
-    Call<HttpRestResult<ProcessDefineResp>> createForm(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<ProcessDefineRespDTO>> createForm(@Path("projectCode") long projectCode,
                                                        @FieldMap Map<String, String> form);
 
     /**
@@ -60,9 +60,9 @@ public interface WorkflowApi {
      * PUT /projects/{projectCode}/process-definition/{processDefinitionCode}
      */
     @PUT("projects/{projectCode}/process-definition/{processDefinitionCode}")
-    Call<HttpRestResult<ProcessDefineResp>> update(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<ProcessDefineRespDTO>> update(@Path("projectCode") long projectCode,
                                                    @Path("processDefinitionCode") long processDefinitionCode,
-                                                   @Body ProcessDefineParam body);
+                                                   @Body ProcessDefineParamDTO body);
 
     /**
      * 更新流程定义（x-www-form-urlencoded 提交）
@@ -70,7 +70,7 @@ public interface WorkflowApi {
      */
     @FormUrlEncoded
     @PUT("projects/{projectCode}/process-definition/{processDefinitionCode}")
-    Call<HttpRestResult<ProcessDefineResp>> updateForm(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<ProcessDefineRespDTO>> updateForm(@Path("projectCode") long projectCode,
                                                        @Path("processDefinitionCode") long processDefinitionCode,
                                                        @FieldMap Map<String, String> form);
 
@@ -79,7 +79,7 @@ public interface WorkflowApi {
      * DELETE /projects/{projectCode}/workflow-definition/{processDefinitionCode}
      */
     @DELETE("projects/{projectCode}/workflow-definition/{processDefinitionCode}")
-    Call<HttpRestResult<String>> delete(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<String>> delete(@Path("projectCode") long projectCode,
                                         @Path("processDefinitionCode") long processDefinitionCode);
 
     /**
@@ -87,16 +87,16 @@ public interface WorkflowApi {
      * POST /projects/{projectCode}/workflow-definition/{code}/release
      */
     @POST("projects/{projectCode}/workflow-definition/{code}/release")
-    Call<HttpRestResult<String>> release(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<String>> release(@Path("projectCode") long projectCode,
                                          @Path("code") long processCode,
-                                         @Body ProcessReleaseParam body);
+                                         @Body ProcessReleaseParamDTO body);
 
     /**
      * 生成任务编码
      * GET /projects/{projectCode}/task-definition/gen-task-codes?genNum=
      */
     @GET("projects/{projectCode}/task-definition/gen-task-codes")
-    Call<HttpRestResult<List<Long>>> generateTaskCodes(@Path("projectCode") long projectCode,
+    Call<HttpRestResultDTO<List<Long>>> generateTaskCodes(@Path("projectCode") long projectCode,
                                                        @Query("genNum") int genNum);
 
     /**
@@ -104,5 +104,5 @@ public interface WorkflowApi {
      * GET /projects/{projectCode}/process-definition/list
      */
     @GET("projects/{projectCode}/process-definition/list")
-    Call<HttpRestResult<List<ProcessDefineResp>>> listDefinitions(@Path("projectCode") long projectCode);
+    Call<HttpRestResultDTO<List<ProcessDefineRespDTO>>> listDefinitions(@Path("projectCode") long projectCode);
 }
