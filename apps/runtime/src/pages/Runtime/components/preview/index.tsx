@@ -118,10 +118,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     cancelText: ''
   });
   const [infoForm] = Form.useForm();
+  let flowParam: any = {};
+  let flowRespon: any = {};
 
   // 流程多次触发
-  const triggerFlows = async (param: any) => {
-    const res = await triggerFlowExecForm(param);
+  const triggerFlows = async () => {
+    const res = await triggerFlowExecForm(flowParam);
+    flowRespon = res;
     if (res?.success) {
       // 弹窗
       if (res.nodeType === NodeType.MODAL) {
@@ -133,33 +136,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             okText: res.outputParams.okText || '确认',
             cancelText: res.outputParams.cancelText || '取消',
             maskClosable: false,
-
             onOk: async () => {
               if (res.executionEnd) {
                 return;
               }
-              const newParam = {
-                processId: param.processId,
+              flowParam = {
+                processId: flowParam.processId,
                 executionUuid: res.executionUuid || '',
-                inputParams: param.inputParams
+                inputParams: flowParam.inputParams
               };
-              await triggerFlows(newParam);
+              await triggerFlows();
             },
-            onCancel: async () => {
-              // todo
-              console.log('关闭默认终止提醒', res.outputParams.closeWarn);
-              console.log('弹窗取消后提醒', res.outputParams.cancelWarn);
-
-              // 事件结束 或者 弹窗取消后事件终止
-              if (res.executionEnd || res.outputParams.afterCancel === FLOW_MODAL_CANCEL.STOP) {
-                return;
-              }
-              const newParam = {
-                processId: param.processId,
-                executionUuid: res.executionUuid || '',
-                inputParams: param.inputParams
-              };
-              await triggerFlows(newParam);
+            onCancel: () => {
+              infoCancel();
             }
           });
         }
@@ -167,8 +156,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         // 信息收集
         if (res.outputParams?.modalType === FLOW_MODAL_TYPE.INFOR) {
           // todo
-          setOutputParams({ ...outputParams, ...res.outputParams });
-          setInfoModalVisibel(true);
+          // setOutputParams({ ...outputParams, ...res.outputParams });
+          // setInfoModalVisibel(true);
         }
       }
 
@@ -178,9 +167,39 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
   };
 
-  // 收集信息弹窗关闭
-  const cancaelModal = () => {
+  // 收集信息弹窗 确定按钮
+  const cofirmInfoModal = async () => {
+    if (flowRespon.executionEnd) {
+      return;
+    }
+    flowParam = {
+      processId: flowParam.processId,
+      executionUuid: flowRespon.executionUuid || '',
+      inputParams: flowParam.inputParams,
+      collectInfo: infoForm.getFieldsValue()
+    };
+    await triggerFlows();
+  };
+  const infoCancel = async () => {
+    // todo
+    console.log('关闭默认终止提醒', flowRespon.outputParams.closeWarn);
+    console.log('弹窗取消后提醒', flowRespon.outputParams.cancelWarn);
+
+    // 事件结束 或者 弹窗取消后事件终止
+    if (flowRespon.executionEnd || flowRespon.outputParams.afterCancel === FLOW_MODAL_CANCEL.STOP) {
+      return;
+    }
+    flowParam = {
+      processId: flowParam.processId,
+      executionUuid: flowRespon.executionUuid || '',
+      inputParams: flowParam.inputParams
+    };
+    await triggerFlows();
+  };
+  // 收集信息弹窗 取消按钮
+  const cancaelInfoModal = () => {
     setInfoModalVisibel(false);
+    infoCancel();
   };
 
   const submitForm = async () => {
@@ -215,12 +234,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
       for (let ele of updateFlows) {
-        const param = {
+        flowParam = {
           processId: ele.processId,
           executionUuid: '',
           inputParams: formData
         };
-        await triggerFlows(param);
+        await triggerFlows();
       }
 
       if (res) {
@@ -238,12 +257,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
       for (let ele of createFlows) {
-        const param = {
+        flowParam = {
           processId: ele.processId,
           executionUuid: '',
           inputParams: formData
         };
-        await triggerFlows(param);
+        await triggerFlows();
       }
 
       if (res) {
@@ -427,12 +446,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         title={outputParams.modalTitle}
         okText={outputParams.okText}
         cancelText={outputParams.cancelText}
-        onCancel={cancaelModal}
+        onOk={cofirmInfoModal}
+        onCancel={cancaelInfoModal}
       >
         <Form layout="inline" form={infoForm}>
           {outputParams.fields.map((cp: any) => (
             <Form.Item key={cp.id} label={cp.fieldName} field={cp.fieldName}>
-              <Input></Input>
+              <Input placeholder="请输入" />
             </Form.Item>
           ))}
         </Form>
