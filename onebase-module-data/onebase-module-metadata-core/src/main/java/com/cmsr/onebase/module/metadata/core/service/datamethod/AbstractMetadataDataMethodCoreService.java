@@ -545,7 +545,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * 7. 数据编号
      */
     protected void generateDataNumber(ProcessContext context) {
-
+        // 处理自动编号字段
+        processAutoNumberFields(context.getFields(), context.getProcessedData());
     }
 
     /**
