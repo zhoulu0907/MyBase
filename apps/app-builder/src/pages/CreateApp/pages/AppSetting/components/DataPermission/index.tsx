@@ -111,6 +111,9 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     const addDisabled = res.authDataGroups.map((field: AuthDataGroupVO) => ({
       ...field
     }));
+    // 后端返回默认权限组
+    // setDataPermission(addDisabled);
+    // 前端生成默认权限组
     setDataPermission((prevDataPermission) => {
       // 保留第一个默认权限组，将获取到的数据添加到后面
       const defaultPermission = prevDataPermission[0];
@@ -598,14 +601,16 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     onOk={() => {
                       handleDelete(perm.id!);
                     }}
+                    disabled={DataPermission.length <= 1}
                   >
                     <IconDelete
                       style={{
                         fontSize: 20,
-                        color: '#F53F3F',
+                        color: DataPermission.length <= 1 ? '#C9CDD4' : '#F53F3F',
                         marginLeft: 10,
-                        cursor: 'pointer'
+                        cursor: DataPermission.length <= 1 ? 'not-allowed' : 'pointer'
                       }}
+                      // disabled={!perm.id}
                     />
                   </Popconfirm>
                 </div>
