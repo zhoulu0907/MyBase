@@ -1,4 +1,4 @@
-import { Button, Drawer, Form, Message, Modal } from '@arco-design/web-react';
+import { Button, Drawer, Form, Input, Message, Modal } from '@arco-design/web-react';
 import {
   CATEGORY_TYPE,
   dataMethodData,
@@ -108,6 +108,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     startLoadPageSet({ pageSetId: pageSetId });
   };
 
+  // 信息收集弹窗
+  const [infoModalVisibel, setInfoModalVisibel] = useState(false);
+  const [outputParams, setOutputParams] = useState({
+    modalTitle: '',
+    modalType: '',
+    fields: [],
+    arrange: 1,
+    okText: '',
+    cancelText: ''
+  });
+  const [infoForm] = Form.useForm();
+
   // 流程多次触发
   const triggerFlows = async (param: any) => {
     const res = await triggerFlowExecForm(param);
@@ -156,6 +168,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         // 信息收集
         if (res.outputParams?.modalType === FLOW_MODAL_TYPE.INFOR) {
           // todo
+          setOutputParams({ ...outputParams, ...res.outputParams });
+          setInfoModalVisibel(true);
         }
       }
 
@@ -164,6 +178,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       }
     }
   };
+
+  // 收集信息弹窗关闭
+  const cancaelModal = () => {
+    setInfoModalVisibel(false);
+  };
+
   const submitForm = async () => {
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
@@ -185,7 +205,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
     const pageId = curFormPage?.id;
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
-
     if (editTargetId) {
       const req: UpdateMethodParams = {
         entityId: mainMetaData,
@@ -402,6 +421,21 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           </div>
         </Drawer>
       </div>
+      <Modal
+        visible={infoModalVisibel}
+        title={outputParams.modalTitle}
+        okText={outputParams.okText}
+        cancelText={outputParams.cancelText}
+        onCancel={cancaelModal}
+      >
+        <Form layout="inline" form={infoForm}>
+          {outputParams.fields.map((cp: any) => (
+            <Form.Item key={cp.id} label={cp.fieldName} field={cp.fieldName}>
+              <Input></Input>
+            </Form.Item>
+          ))}
+        </Form>
+      </Modal>
     </div>
   );
 };
