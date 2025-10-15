@@ -356,7 +356,11 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
             trigger="click"
             droplist={
               <Menu>
-                <Menu.Item key="DATE" onClick={() => addRule('DATE')}>
+                <Menu.Item
+                  key="DATE"
+                  onClick={() => addRule('DATE')}
+                  disabled={rules.filter((rule) => rule.itemType === 'DATE')?.length > 1}
+                >
                   创建时间
                 </Menu.Item>
                 <Menu.Item key="TEXT" onClick={() => addRule('TEXT')}>
