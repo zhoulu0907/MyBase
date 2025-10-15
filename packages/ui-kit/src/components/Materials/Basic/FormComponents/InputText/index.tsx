@@ -1,12 +1,12 @@
 import { Form, Input } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import { type XInputTextConfig } from './schema';
 
-const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
+const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
@@ -21,16 +21,26 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
     bgColor,
     labelColSpan = 0,
     maxLength,
-    runtime = true
+    runtime = true,
+    detailMode
   } = props;
+
+  const [fieldId, setFieldId] = useState('');
+
+  useEffect(() => {
+    if (dataField.length > 0) {
+      setFieldId(dataField[dataField.length - 1]);
+    }
+  }, [dataField]);
+
+  const { form } = Form.useFormContext();
+  const fieldValue = Form.useWatch(fieldId, form);
 
   return (
     <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`
-        }
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -44,8 +54,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div>{defaultValue || '--'}</div>
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+          <div>{fieldValue || '--'}</div>
         ) : (
           <Input
             defaultValue={defaultValue}
