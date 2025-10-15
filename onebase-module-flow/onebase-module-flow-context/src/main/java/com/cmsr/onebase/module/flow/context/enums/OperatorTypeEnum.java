@@ -20,20 +20,12 @@ public enum OperatorTypeEnum {
         this.desc = desc;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
     public static OperatorTypeEnum getByCode(String code) {
         if (StringUtils.isEmpty(code)) {
             return null;
         }
         for (OperatorTypeEnum value : OperatorTypeEnum.values()) {
-            if (value.getCode().equalsIgnoreCase(code)) {
+            if (value.code.equalsIgnoreCase(code)) {
                 return value;
             }
         }

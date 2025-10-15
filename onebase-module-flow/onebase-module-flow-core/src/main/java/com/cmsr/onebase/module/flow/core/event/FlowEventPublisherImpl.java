@@ -28,7 +28,7 @@ public class FlowEventPublisherImpl implements FlowEventPublisher, InitializingB
     private String endpoints;
 
     @Setter
-    private String topic = RocketMQConstants.EVENT_TOPIC;
+    private String topic = RocketMQConstants.CHANGE_EVENTS_TOPIC;
 
     private Producer producer;
 
