@@ -29,6 +29,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     runtime = true,
     detailMode
   } = props;
+
   const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
 
@@ -39,6 +40,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
+
   return (
     <div className="formWrapper">
       <Form.Item
