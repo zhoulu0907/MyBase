@@ -40,6 +40,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
         labelCol={{
           style: { width: labelColSpan, flex: 'unset' }
         }}
+        triggerPropName="checked"
         wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{

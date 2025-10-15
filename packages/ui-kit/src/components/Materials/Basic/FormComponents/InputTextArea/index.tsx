@@ -58,10 +58,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
           { required: verify?.required },
           {
             validator: (value, callback) => {
-              if (minLength !== 0 && value.length < minLength) {
+              if (minLength !== 0 && value && value.length < minLength) {
                 callback(`字数不能小于${minLength}`);
               }
-              if (maxLength !== 0 && value.length > maxLength) {
+              if (maxLength !== 0 && value && value.length > maxLength) {
                 callback(`字数不能大于${maxLength}`);
               }
             }
