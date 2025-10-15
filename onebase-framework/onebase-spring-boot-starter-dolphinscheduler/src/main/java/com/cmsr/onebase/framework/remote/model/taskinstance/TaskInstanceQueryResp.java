@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.remote.model.taskinstance;
+package com.cmsr.onebase.framework.remote.model.taskinstance;
 
 /**
  * 任务实例查询响应

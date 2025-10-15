@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.remote.model;
+package com.cmsr.onebase.framework.remote.model;
 
 /**
  * 通用 HTTP 响应包装模型

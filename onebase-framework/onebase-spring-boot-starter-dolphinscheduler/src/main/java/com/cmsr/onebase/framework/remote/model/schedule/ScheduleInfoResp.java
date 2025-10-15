@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.remote.model.schedule;
+package com.cmsr.onebase.framework.remote.model.schedule;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

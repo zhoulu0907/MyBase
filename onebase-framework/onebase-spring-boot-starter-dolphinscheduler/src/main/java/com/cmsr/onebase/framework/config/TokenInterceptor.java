@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.config;
+package com.cmsr.onebase.framework.config;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;

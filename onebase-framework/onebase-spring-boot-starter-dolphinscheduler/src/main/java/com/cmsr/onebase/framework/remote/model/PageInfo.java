@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.remote.model;
+package com.cmsr.onebase.framework.remote.model;
 
 import java.util.List;
 

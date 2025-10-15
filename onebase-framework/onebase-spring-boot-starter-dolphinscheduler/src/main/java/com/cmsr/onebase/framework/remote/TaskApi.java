@@ -1,6 +1,6 @@
-package com.cmsr.onebase.dolphins.remote;
+package com.cmsr.onebase.framework.remote;
 
-import com.cmsr.onebase.dolphins.remote.model.HttpRestResult;
+import com.cmsr.onebase.framework.remote.model.HttpRestResult;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;

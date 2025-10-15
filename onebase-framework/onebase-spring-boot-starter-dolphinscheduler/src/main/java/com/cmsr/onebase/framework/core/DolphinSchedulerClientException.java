@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.core;
+package com.cmsr.onebase.framework.core;
 
 /**
  * DolphinScheduler 客户端异常
