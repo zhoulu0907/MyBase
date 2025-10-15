@@ -15,6 +15,7 @@ export interface AutoNumberRule {
   initialValue: number;
   resetCycle: string;
   nextRecordStartValue?: number;
+  startValue?: number;
   rules: AutoNumberRuleItem[];
 }
 

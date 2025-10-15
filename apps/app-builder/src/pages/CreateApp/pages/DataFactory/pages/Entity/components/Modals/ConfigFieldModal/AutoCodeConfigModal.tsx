@@ -47,6 +47,7 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
     console.log('useEffect', visible, initialConfig, form);
     if (visible && initialConfig) {
       const values = {
+        initialValue: initialConfig.startValue,
         numberMode: initialConfig.mode || 'FIXED_DIGITS',
         digitWidth: initialConfig.digitWidth || 4,
         overflowContinue: initialConfig.overflowContinue || 1,
