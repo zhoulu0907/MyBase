@@ -5,9 +5,7 @@ import com.cmsr.onebase.framework.remote.ScheduleApi;
 import com.cmsr.onebase.framework.remote.TaskApi;
 import com.cmsr.onebase.framework.remote.TaskInstanceApi;
 import com.cmsr.onebase.framework.remote.WorkflowApi;
-import com.cmsr.onebase.framework.remote.dto.process.ProcessReleaseParamDTO;
 import jakarta.annotation.Resource;
-import retrofit2.Response;
 
 /**
  * DolphinScheduler 客户端门面，聚合各 OpenAPI 接口
@@ -60,9 +58,7 @@ public class DolphinSchedulerClient {
      *
      * @return TaskInstanceApi
      */
-    public TaskInstanceApi taskInstance() {
-        return taskInstanceApi;
-    }
+    public TaskInstanceApi taskInstance() { return taskInstanceApi; }
 
     /**
      * 获取任务定义相关 API
@@ -73,17 +69,4 @@ public class DolphinSchedulerClient {
         return taskApi;
     }
 
-    /**
-     * 便捷：上线工作流（封装 release ONLINE）
-     */
-    public Response<?> onlineWorkflow(long projectCode, long workflowCode) throws java.io.IOException {
-        return workflowApi.release(projectCode, workflowCode, ProcessReleaseParamDTO.online()).execute();
-    }
-
-    /**
-     * 便捷：下线工作流（封装 release OFFLINE）
-     */
-    public Response<?> offlineWorkflow(long projectCode, long workflowCode) throws java.io.IOException {
-        return workflowApi.release(projectCode, workflowCode, ProcessReleaseParamDTO.offline()).execute();
-    }
 }
