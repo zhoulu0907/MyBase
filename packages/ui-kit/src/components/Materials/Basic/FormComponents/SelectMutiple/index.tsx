@@ -1,6 +1,8 @@
-import { Form, Select } from '@arco-design/web-react';
+import { Form, Select, Space, Tag } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { nanoid } from 'nanoid';
 import '../index.css';
 import type { XInputSelectMutipleConfig } from './schema';
 
@@ -20,20 +22,16 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
   } = props;
 
   const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
+
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`
 
   const fieldValue = Form.useWatch(fieldId, form);
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
 
   return (
     <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
+        field={fieldId}
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -48,7 +46,11 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{/* {defaultValue.find((item: any) => item.value == fieldValue)?.label || '--'} */}</div>
+          <Space wrap>
+            {fieldValue && defaultValue && fieldValue.map((ele: any) => <Tag>
+              {defaultValue.find((e: any) => e.value === ele)?.label}
+            </Tag>)}
+          </Space>
         ) : (
           <Select
             mode="multiple"
