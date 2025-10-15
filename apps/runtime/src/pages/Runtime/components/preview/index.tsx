@@ -46,8 +46,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
-  const { curPage, drawerVisible, setDrawerVisible, drawerPageId, editPageViewId, detailPageViewId } =
-    pagesRuntimeSignal;
+  const { curPage, drawerVisible, setDrawerVisible, editPageViewId, detailPageViewId } = pagesRuntimeSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
@@ -78,6 +77,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useEffect(() => {
     if (menuId) {
       handleGetPageSetId(menuId);
+      setEditTargetId('');
     }
   }, [menuId]);
 
@@ -99,7 +99,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const handleGetPageSetId = async (menuId: string) => {
     const req: GetPageSetIdReq = { menuId: menuId };
     const res = await getPageSetId(req);
-    console.log('res', res);
     setPageSetId(res);
   };
 
@@ -283,6 +282,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
     form.resetFields();
     if (id === editTargetId) {
+      console.log(666666);
       handleGetData(mainMetaData, id);
     }
 

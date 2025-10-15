@@ -139,7 +139,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
 
   // 表单名称为空时 置为原来的值
   let oldPageViewName = '';
-  const pageViewNameBlur = (e:any) => {
+  const pageViewNameBlur = (e: any) => {
     if (e.currentTarget.value === '') {
       updatePageViewName(curViewId.value, oldPageViewName);
     }
