@@ -284,7 +284,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             formValues[fieldID] = value;
           }
         });
-        console.log('formValues: ', formValues);
         form.setFieldsValue(formValues);
       }
     }
