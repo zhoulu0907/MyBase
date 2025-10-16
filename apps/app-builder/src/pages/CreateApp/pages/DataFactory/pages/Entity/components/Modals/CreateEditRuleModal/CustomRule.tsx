@@ -283,149 +283,15 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
           entityFieldValidationTypes={filterFieldCheckType}
         />
 
-        {/* 条件设置 */}
-        {/* <Form.Item noStyle shouldUpdate>
-          {(values) => {
-            if (isConditionSettingVisible()) {
-              const valueRules = values.valueRules || [];
-
-              return (
-                <Form.Item label="条件设置" field="valueRules">
-                  <div className={styles.conditionSettingContainer}>
-                    {valueRules.map((group, groupIndex) => (
-                      <div key={groupIndex} className={styles.conditionGroup}>
-                        {groupIndex > 0 && (
-                          <div className={styles.conditionLogicOperatorDivider}>
-                            <span className={styles.logicOperatorLabel}>或者</span>
-                          </div>
-                        )}
-
-                        <div className={styles.conditionGroupContent}>
-                          {group.map((condition, conditionIndex) => (
-                            <div key={conditionIndex} className={styles.conditionRow}>
-                              <Space size="small" align="start">
-                                <Select
-                                  placeholder="请选择字段"
-                                  value={condition.fieldId}
-                                  onChange={(value) => updateConditionRow(groupIndex, conditionIndex, 'fieldId', value)}
-                                  style={{ width: 200 }}
-                                  options={leftFieldOptions}
-                                />
-
-                                <Select
-                                  placeholder="请选择操作符"
-                                  value={condition.operator}
-                                  onChange={(value) =>
-                                    updateConditionRow(groupIndex, conditionIndex, 'operator', value)
-                                  }
-                                  style={{ width: 120 }}
-                                  // options={
-                                  //   fieldOperatorMapping[condition.fieldId]?.map(operator => ({
-                                  //     value: operator,
-                                  //     label: operatorOptions[operator],
-                                  //   })) || []
-                                  // }
-                                  options={operatorOptions}
-                                />
-
-                                <Select
-                                  placeholder="请选择值类型"
-                                  value={condition.valueType}
-                                  onChange={(value) =>
-                                    updateConditionRow(groupIndex, conditionIndex, 'valueType', value)
-                                  }
-                                  style={{ width: 100 }}
-                                  options={valueTypeOptions}
-                                />
-
-                                {condition.valueType === 'custom' && (
-                                  <Input
-                                    placeholder="请输入值"
-                                    value={condition.fieldValue}
-                                    onChange={(value) =>
-                                      updateConditionRow(groupIndex, conditionIndex, 'fieldValue', value)
-                                    }
-                                    style={{ width: 150 }}
-                                  />
-                                )}
-
-                                {condition.valueType === 'fieldId' && (
-                                  <Select
-                                    placeholder="请选择字段"
-                                    value={condition.fieldValue}
-                                    onChange={(value) =>
-                                      updateConditionRow(groupIndex, conditionIndex, 'fieldValue', value)
-                                    }
-                                    style={{ width: 150 }}
-                                    options={rightFieldOptions}
-                                  />
-                                )}
-
-                                <Button
-                                  type="text"
-                                  status="danger"
-                                  size="mini"
-                                  icon={<IconDelete />}
-                                  onClick={() => removeConditionRow(groupIndex, conditionIndex)}
-                                  className={styles.deleteConditionBtn}
-                                />
-                              </Space>
-                            </div>
-                          ))}
-
-                          <div className={styles['add-condition-buttons']}>
-                            <Button
-                              type="dashed"
-                              size="small"
-                              icon={<IconPlus />}
-                              onClick={() => addAndCondition(groupIndex)}
-                              className={styles.addAndBtn}
-                            >
-                              并且
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    <div className={styles.addOrButtonContainer}>
-                      <Button
-                        type="dashed"
-                        size="small"
-                        icon={<IconPlus />}
-                        onClick={addOrCondition}
-                        className={styles.addOrBtn}
-                      >
-                        或者
-                      </Button>
-                    </div>
-                  </div>
-                </Form.Item>
-              );
-            }
-            return null;
-          }}
-        </Form.Item> */}
-
-        {/* 验证失败提示语 */}
-        {/* <Form.Item label="验证失败提示语" field="popType">
-          <Radio.Group
-            defaultValue={'SHORT'}
-            options={[
-              { label: '短提示框', value: 'SHORT' },
-              { label: '长提示框', value: 'LONG' }
-            ]}
-          />
-        </Form.Item> */}
-        <Form.Item label="弹窗提示" field="popPrompt">
-          <Input
-            placeholder="请输入校验不通过后的弹窗提示语"
-            maxLength={200}
-            rules={[
-              { required: true, message: '请输入弹窗提示语' },
-              { max: 200, message: '弹窗提示语不能超过200个字符' }
-            ]}
-          />
+        <Form.Item
+          label="弹窗提示"
+          field="popPrompt"
+          rules={[
+            { required: true, message: '请输入弹窗提示语' },
+            { max: 200, message: '弹窗提示语不能超过200个字符' }
+          ]}
+        >
+          <Input placeholder="请输入校验不通过后的弹窗提示语" maxLength={200} />
         </Form.Item>
       </Form>
     </Modal>
