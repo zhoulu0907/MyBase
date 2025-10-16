@@ -39,7 +39,7 @@ public class FormulaEngineController {
     @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
     public CommonResult<FormulaExecuteRespVO> executeFormula(@Valid @RequestBody FormulaExecuteReqVO reqVO) {
         long startTime = System.currentTimeMillis();
-
+        log.info("############: "+reqVO.getFormula());
         Object result = formulaEngineService.executeFormulaWithParams(reqVO.getFormula(), reqVO.getParameters());
 
         long executionTime = System.currentTimeMillis() - startTime;

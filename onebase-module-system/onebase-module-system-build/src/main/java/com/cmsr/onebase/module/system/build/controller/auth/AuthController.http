@@ -67,3 +67,16 @@ tenant-id: {{adminTenantId}}
 GET {{baseUrl}}/system/list-menus
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+
+### 请求 /reset-password 接口 => 失败
+POST {{baseUrl}}/system/auth/reset-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "userId": "544417214451814400",
+  "password": "admin125"
+}
