@@ -3,9 +3,9 @@ package com.cmsr.onebase.framework.config;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
+import lombok.Data;
 
 /**
  * DolphinScheduler 客户端配置属性
@@ -13,7 +13,7 @@ import java.time.Duration;
  * @author matianyu
  * @date 2025-10-15
  */
-@Validated
+@Data
 @ConfigurationProperties(prefix = "onebase.dolphinscheduler.client")
 public class DolphinSchedulerClientProperties {
 
@@ -48,68 +48,4 @@ public class DolphinSchedulerClientProperties {
 
     /** 是否启用真实连通性测试（仅测试环境使用） */
     private boolean enableLiveConnectivityTest = false;
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public Duration getConnectTimeout() {
-        return connectTimeout;
-    }
-
-    public void setConnectTimeout(Duration connectTimeout) {
-        this.connectTimeout = connectTimeout;
-    }
-
-    public Duration getReadTimeout() {
-        return readTimeout;
-    }
-
-    public void setReadTimeout(Duration readTimeout) {
-        this.readTimeout = readTimeout;
-    }
-
-    public Duration getWriteTimeout() {
-        return writeTimeout;
-    }
-
-    public void setWriteTimeout(Duration writeTimeout) {
-        this.writeTimeout = writeTimeout;
-    }
-
-    public String getLogLevel() {
-        return logLevel;
-    }
-
-    public void setLogLevel(String logLevel) {
-        this.logLevel = logLevel;
-    }
-
-    public boolean isEnableLiveConnectivityTest() {
-        return enableLiveConnectivityTest;
-    }
-
-    public void setEnableLiveConnectivityTest(boolean enableLiveConnectivityTest) {
-        this.enableLiveConnectivityTest = enableLiveConnectivityTest;
-    }
 }
