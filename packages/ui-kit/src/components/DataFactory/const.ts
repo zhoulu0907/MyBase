@@ -21,7 +21,6 @@ export const ENTITY_FIELD_TYPE = {
   URL: { VALUE: 'URL', LABEL: '网址链接' },
   ADDRESS: { VALUE: 'ADDRESS', LABEL: '详细地址' },
   NUMBER: { VALUE: 'NUMBER', LABEL: '通用数字' },
-  CURRENCY: { VALUE: 'CURRENCY', LABEL: '货币金额' },
   DATE: { VALUE: 'DATE', LABEL: '日期' },
   DATETIME: { VALUE: 'DATETIME', LABEL: '日期时间' },
   TIME: { VALUE: 'TIME', LABEL: '时间' },
