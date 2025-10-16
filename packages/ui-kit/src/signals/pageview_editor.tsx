@@ -1,4 +1,4 @@
-import { PageView } from '@onebase/app';
+import { PageView, ViewType } from '@onebase/app';
 import { signal } from '@preact/signals-react';
 
 export const createPageViewEditorSignal = () => {
@@ -67,6 +67,18 @@ export const createPageViewEditorSignal = () => {
     return Object.values(pageViews.value).find((pv) => pv.isDefaultDetailViewMode == 1)?.id;
   };
 
+  const getPageViewType = (id: string) => {
+    const pageView = pageViews.value[id];
+    if (pageView.editViewMode == 1 && pageView.detailViewMode == 1) {
+      return ViewType.MIX;
+    } else if (pageView.editViewMode == 1) {
+      return ViewType.EDIT;
+    } else if (pageView.detailViewMode == 1) {
+      return ViewType.DETAIL;
+    }
+    return ViewType.UNKNOWN;
+  };
+
   return {
     pageViews,
     addPageView,
@@ -77,6 +89,7 @@ export const createPageViewEditorSignal = () => {
 
     getDefaultEditPageViewId,
     getDefaultDetailPageViewId,
+    getPageViewType,
 
     curViewId,
     setCurViewId,
