@@ -46,6 +46,9 @@ public class DolphinSchedulerClientProperties {
     @NotBlank
     private String logLevel = "BASIC";
 
+    /** 是否启用真实连通性测试（仅测试环境使用） */
+    private boolean enableLiveConnectivityTest = false;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -100,5 +103,13 @@ public class DolphinSchedulerClientProperties {
 
     public void setLogLevel(String logLevel) {
         this.logLevel = logLevel;
+    }
+
+    public boolean isEnableLiveConnectivityTest() {
+        return enableLiveConnectivityTest;
+    }
+
+    public void setEnableLiveConnectivityTest(boolean enableLiveConnectivityTest) {
+        this.enableLiveConnectivityTest = enableLiveConnectivityTest;
     }
 }
