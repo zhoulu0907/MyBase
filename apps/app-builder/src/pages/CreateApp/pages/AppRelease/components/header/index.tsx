@@ -44,7 +44,7 @@ const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appStatus, currentVer
             <Typography.Text className={styles.statusDescription}>
               {appStatus != AppStatus.DEVELOPING
                 ? '应用已发布,您可以将下方链接发布给企业成员进行访问'
-                : '应用未发布,请点击右侧按钮发布应用'}
+                : '应用仍在开发中，预览应用可查看页面，无法提交数据'}
             </Typography.Text>
           </div>
         </div>
