@@ -39,7 +39,7 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
 
     public String createCronExpression() {
         Cron cron = new Cron();
-        cron.setMinuteAndHour(dailyExecTime);
+        cron.setHourAndMinute(dailyExecTime);
         return cron.toCron();
     }
 

@@ -120,7 +120,7 @@ public class FlowChangeEventCacheHandler implements MessageListener, Application
         }
     }
 
-    private void onApplicationDelete(Long applicationId) {
+    public void onApplicationDelete(Long applicationId) {
         graphFlowCache.delete(applicationId);
     }
 
@@ -139,7 +139,7 @@ public class FlowChangeEventCacheHandler implements MessageListener, Application
         return "删除：" + oldProcessIds + "，添加：" + flowProcessDOS.stream().map(FlowProcessDO::getId).toList();
     }
 
-    public boolean onProcessUpdate(FlowProcessDO processDO) {
+    private boolean onProcessUpdate(FlowProcessDO processDO) {
         log.info("处理流程更新事件：{}", processDO.getId());
         JsonGraph jsonGraph = JsonGraphBuilder.build(processDO.getProcessDefinition());
         String flowChain = jsonGraph.toFlowChain();
@@ -150,7 +150,7 @@ public class FlowChangeEventCacheHandler implements MessageListener, Application
         return true;
     }
 
-    public boolean onProcessDelete(Long applicationId, Long processId) {
+    private String onProcessDelete(Long applicationId, Long processId) {
         log.info("发布流程删除事件：{}", processId);
         String chainId = FlowUtils.toFlowChainId(processId);
         FlowBus.removeChain(chainId);
