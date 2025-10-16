@@ -33,7 +33,7 @@ public class FlowProcessVO implements Serializable {
 
     @Schema(description = "流程状态：0-禁用，1-启用", required = true, example = "1")
     @NotNull(message = "流程状态不能为空")
-    private Integer processStatus;
+    private Integer enableStatus;
 
     @Schema(description = "流程描述", example = "这是一个审批流程")
     @Size(max = 500, message = "流程描述长度不能超过500个字符")

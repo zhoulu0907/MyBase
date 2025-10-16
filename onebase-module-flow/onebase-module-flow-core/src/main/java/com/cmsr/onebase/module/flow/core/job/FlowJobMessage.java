@@ -40,4 +40,6 @@ public class FlowJobMessage {
 
     private String time;
 
+    private String uuid;
+
 }
