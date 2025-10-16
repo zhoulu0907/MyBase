@@ -3,36 +3,37 @@ import {
   baseDefault,
   labelColSpanConfig,
   statusConfig,
-  tableMetaDataConfig,
-  widthConfig,
   tableButtonPermissionConfig,
+  tableMetaDataConfig,
   tableOperationConfig,
+  widthConfig,
   type ICommonBaseType,
+  type TButtonSelectKeyType,
   type TPagePositionSelectKeyType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType,
-  type TButtonSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
+  BUTTON_OPTIONS,
+  BUTTON_VALUES,
   CONFIG_TYPES,
   PAGINATION_POSITION_OPTIONS,
   PAGINATION_POSITION_VALUES,
   RedirectMethod,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  TableOperationButton,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  BUTTON_OPTIONS,
-  BUTTON_VALUES,
-  RedirectMethod,
-  TableOperationButton
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
   IBooleanConfigType,
   ILabelConfigType,
   INumberConfigType,
   IStatusConfigType,
+  ITableButtonConfigType,
   ITableDataConfigType,
+  ITableOperationConfigType,
   ITablePagePositionConfigType,
   ITablePageSizeConfigType,
   ITextConfigType,
@@ -41,9 +42,7 @@ import type {
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
-  TTextDefaultType,
-  ITableButtonConfigType,
-  ITableOperationConfigType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XTableSchema {
@@ -191,11 +190,11 @@ export interface XTableConfig extends ICommonBaseType {
 
   /**
    * 排序
-  */
+   */
   sortByObject?: {
     fieldName: TTextDefaultType;
     sortBy: TNumberDefaultType;
-  }
+  };
 }
 
 export interface OperationButtonConfig {
@@ -319,13 +318,13 @@ const XTable: XTableSchema = {
       advanced: true
     },
     tableOperationConfig,
-    tableButtonPermissionConfig,
+    tableButtonPermissionConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '表格',
-      display: false,
+      display: false
     },
     stripe: true,
     border: true,
@@ -369,7 +368,7 @@ const XTable: XTableSchema = {
         confirmText: '确定删除？删除后不可恢复',
         deletedAction: RedirectMethod.REFRESH,
         display: true
-      },
+      }
     ],
 
     operationButtonShowType: 'all',
