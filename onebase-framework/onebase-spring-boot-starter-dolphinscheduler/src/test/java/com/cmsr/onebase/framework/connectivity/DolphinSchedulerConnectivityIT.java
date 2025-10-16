@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.connectivity;
 
+import com.cmsr.onebase.framework.config.DolphinSchedulerClientAutoConfiguration;
 import com.cmsr.onebase.framework.remote.dto.HttpRestResultDTO;
 import jakarta.annotation.Resource;
 import okhttp3.OkHttpClient;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * 注意：该测试将读取 src/test/resources/application.yml 中的 baseUrl 与 token。
  */
-@SpringBootTest
+@SpringBootTest(classes = DolphinSchedulerClientAutoConfiguration.class)
 public class DolphinSchedulerConnectivityIT {
     private static final Logger logger = LoggerFactory.getLogger(DolphinSchedulerConnectivityIT.class);
 

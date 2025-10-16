@@ -92,6 +92,18 @@
             <artifactId>mockwebserver</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 显式引入 JUnit5 平台 Launcher，修复 IDE 运行用例时的解析/运行时依赖问题 -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- 显式引入 JUnit Jupiter 聚合（engine + api），便于 IDE 运行器解析 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
