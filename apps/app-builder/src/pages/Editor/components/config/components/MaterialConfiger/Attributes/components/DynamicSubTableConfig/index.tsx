@@ -154,7 +154,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                   // handlePropsChange(componentKey, newList);
                 }}
               >
-                添加一项4
+                添加一项
               </Button>
             </div>
           )}
