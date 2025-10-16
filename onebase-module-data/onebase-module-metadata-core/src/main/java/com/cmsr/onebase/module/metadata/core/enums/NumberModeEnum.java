@@ -21,7 +21,12 @@ public enum NumberModeEnum {
     /**
      * 指定位数编号
      */
-    FIXED_DIGIT("FIXED_DIGIT", "指定位数编号");
+    FIXED_DIGIT("FIXED_DIGIT", "指定位数编号"),
+    
+    /**
+     * 指定位数编号（兼容旧数据）
+     */
+    FIXED_DIGITS("FIXED_DIGITS", "指定位数编号");
 
     /**
      * 模式编码

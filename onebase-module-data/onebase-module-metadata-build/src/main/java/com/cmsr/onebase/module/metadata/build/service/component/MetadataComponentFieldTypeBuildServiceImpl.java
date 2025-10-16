@@ -99,6 +99,9 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
             case "VARCHAR":
                 return "VARCHAR(" + (dataLength != null && dataLength > 0 ? dataLength : 255) + ")";
             case "TEXT":
+            case "LONGVARCHAR":
+                // LONGVARCHAR 类型映射为 TEXT，用于存储较长的文本数据
+                // 包括：单选列表、多选列表、结构化对象、数组列表、文件、图片、地理位置、用户多选、部门多选、数据多选等
                 return "TEXT";
             case "TIMESTAMP":
                 return "TIMESTAMP";
