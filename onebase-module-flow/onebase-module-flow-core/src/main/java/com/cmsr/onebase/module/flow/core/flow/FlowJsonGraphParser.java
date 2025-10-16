@@ -35,6 +35,7 @@ import java.util.List;
 public class FlowJsonGraphParser extends ClassXmlFlowELParser {
 
     public static final String LINE_BREAK = "\n";
+
     @Autowired
     private FlowProcessRepository flowProcessRepository;
 
@@ -76,7 +77,7 @@ public class FlowJsonGraphParser extends ClassXmlFlowELParser {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String xml = buffer.toString();//document.asXML();
+        String xml = buffer.toString();
         log.info("flow xml: {}", xml);
         return xml;
     }

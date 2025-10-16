@@ -35,7 +35,7 @@ public class JsonGraphBuilder {
             loopDeepMap.put(node.getId(), 0);
         }
         if (!(StringUtils.equals(node.getType(), "loop")) && MapUtils.isNotEmpty(loopDeepMap)) {
-            node.getData().setIsInLoop(Boolean.TRUE);
+            node.getData().setInLoop(Boolean.TRUE);
             node.getData().setInLoopDepth(loopDeepMap);
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {

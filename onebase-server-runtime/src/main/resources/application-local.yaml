@@ -78,15 +78,5 @@ liteflow:
   enable: true
   print-banner: true
   rule-source: el_xml:com.cmsr.onebase.module.flow.core.flow.FlowJsonGraphParser
-snail-job:
-  server:
-    host: 10.0.104.38
-    port: 17888
-  namespace: 764d604ec6fc45f68cd92514c40e9e1a
-  group: flow-process
-  token: SJ_Wyz3dmsdbDOkDujOTSSoBjGQP1BMsVnj
-  openapiV2: true
-  openapi:
-    host: 10.0.104.38
-    port: 19088
-    https: false
+rocketmq:
+  endpoints: 10.0.104.38:8081

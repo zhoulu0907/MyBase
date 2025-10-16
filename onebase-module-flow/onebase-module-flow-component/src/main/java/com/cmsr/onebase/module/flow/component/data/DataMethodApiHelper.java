@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.flow.component.data;
 
-import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
-import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
 import com.cmsr.onebase.module.flow.context.condition.SortItem;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
+import com.cmsr.onebase.module.flow.context.express.AndExpression;
+import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.OrderDto;
@@ -27,23 +28,23 @@ public class DataMethodApiHelper {
      *
      * @return 转换后的条件DTO列表
      */
-    public static List<List<ConditionDTO>> processFilterCondition(List<ConditionItem> conditionItems) {
-        if (conditionItems == null || conditionItems.isEmpty()) {
+    public static List<List<ConditionDTO>> processFilterCondition(OrExpression orExpression) {
+        if (orExpression == null || orExpression.getAndExpressions() == null || orExpression.getAndExpressions().isEmpty()) {
             return null;
         }
         List<List<ConditionDTO>> conditionDTtoSS = new ArrayList<>();
-        for (ConditionItem conditionItem : conditionItems) {
+        for (AndExpression andExpressions : orExpression.getAndExpressions()) {
             List<ConditionDTO> conditionDtoS = new ArrayList<>();
-            for (RuleItem ruleItem : conditionItem.getConditions()) {
+            for (ExpressionItem expressionItem : andExpressions.getExpressionItems()) {
                 ConditionDTO conditionDTO = new ConditionDTO();
-                conditionDTO.setFieldId(NumberUtils.toLong(ruleItem.getFieldId()));
-                conditionDTO.setOperator(ruleItem.getOp());
-                if (ruleItem.getValue() == null) {
+                conditionDTO.setFieldId(NumberUtils.toLong(expressionItem.getKey()));
+                conditionDTO.setOperator(expressionItem.getOp().name());
+                if (expressionItem.getValue() == null) {
                     conditionDTO.setFieldValue(null);
-                } else if (ruleItem.getValue() instanceof List l) {
+                } else if (expressionItem.getValue() instanceof List l) {
                     conditionDTO.setFieldValue(l);
                 } else {
-                    conditionDTO.setFieldValue(List.of(ruleItem.getValue().toString()));
+                    conditionDTO.setFieldValue(List.of(expressionItem.getValue().toString()));
                 }
                 conditionDtoS.add(conditionDTO);
             }

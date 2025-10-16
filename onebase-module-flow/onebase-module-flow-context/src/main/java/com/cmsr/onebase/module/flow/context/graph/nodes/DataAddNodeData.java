@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.flow.context.graph.nodes;
 
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  * @Date：2025/9/29 22:10
  */
 @Data
-public class DataAddNodeData extends NodeData {
+public class DataAddNodeData extends NodeData implements Serializable {
 
     private String addType;
 
@@ -21,5 +22,5 @@ public class DataAddNodeData extends NodeData {
 
     private String dataNodeId;
 
-    private List<RuleItem> fields;
+    private List<ConditionItem> fields;
 }

@@ -26,4 +26,6 @@ public interface AppApplicationService {
 
     void deleteApplication(Long id,String name);
 
+    Long generateId();
+
  }

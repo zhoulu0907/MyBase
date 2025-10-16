@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 
+import com.cmsr.onebase.module.flow.context.FieldTypeProvider;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
@@ -10,13 +11,15 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import lombok.Setter;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Author：huangjie
@@ -32,11 +35,17 @@ public class GraphFlowCache {
 
     private ConcurrentHashMap<Long, StartFormNodeData> startFormNodeDataCache = new ConcurrentHashMap<>();
 
-    private CopyOnWriteArrayList<StartEntityNodeData> startEntityNodeDataCache = new CopyOnWriteArrayList<>();
+    private ConcurrentHashMap<Long, StartEntityNodeData> startEntityNodeDataCache = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
 
+    @Setter
+    @Autowired
+    private ObjectProvider<FieldTypeProvider> objectProvider;
+
     public void update(Long processId, JsonGraph jsonGraph) {
+        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
+        fieldTypeProvider.completeFieldType(jsonGraph);
         Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
         JsonGraphNode startNode = jsonGraph.getStartNode();
@@ -45,11 +54,12 @@ public class GraphFlowCache {
             startTimeNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_FORM)) {
             StartFormNodeData nodeData = (StartFormNodeData) startNode.getData();
+            nodeData.setProcessId(processId);
             startFormNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_ENTITY)) {
             StartEntityNodeData nodeData = (StartEntityNodeData) startNode.getData();
             nodeData.setProcessId(processId);
-            startEntityNodeDataCache.add(nodeData);
+            startEntityNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_DATE_FIELD)) {
             StartDateFieldNodeData nodeData = (StartDateFieldNodeData) startNode.getData();
             nodeData.setProcessId(processId);
@@ -62,24 +72,34 @@ public class GraphFlowCache {
         startTimeNodeDataCache.remove(processId);
         startFormNodeDataCache.remove(processId);
         startDateFieldNodeDataCache.remove(processId);
-        startEntityNodeDataCache.removeIf(startEntityNodeData -> startEntityNodeData.getEntityId().equals(processId));
+        startEntityNodeDataCache.remove(processId);
     }
 
-    public Map<String, NodeData> getNodeData(Long processId) {
+    public Map<String, NodeData> findNodeData(Long processId) {
         return flowNodeDataCache.get(processId);
     }
 
-    public StartTimeNodeData getStartTimeNodeData(Long processId) {
+    public StartTimeNodeData findStartTimeNodeDataByProcessId(Long processId) {
         return startTimeNodeDataCache.get(processId);
     }
 
-    public StartFormNodeData getStartFormNodeData(Long processId) {
+    public StartFormNodeData findStartFormNodeDataByProcessId(Long processId) {
         return startFormNodeDataCache.get(processId);
     }
 
-    public List<StartEntityNodeData> getStartEntityNodeData(Long entityId) {
-        return startEntityNodeDataCache.stream()
+    public StartDateFieldNodeData findStartDateFieldNodeDataByProcessId(Long processId) {
+        return startDateFieldNodeDataCache.get(processId);
+    }
+
+    public List<StartEntityNodeData> findStartEntityNodeDataByEntityId(Long entityId) {
+        return startEntityNodeDataCache.values().stream()
                 .filter(startEntityNodeData -> startEntityNodeData.getEntityId().equals(entityId))
+                .toList();
+    }
+
+    public List<StartFormNodeData> findStartFormNodeDataByPageId(Long pageId) {
+        return startFormNodeDataCache.values().stream()
+                .filter(startFormNodeData -> startFormNodeData.getPageId().equals(pageId))
                 .toList();
     }
 

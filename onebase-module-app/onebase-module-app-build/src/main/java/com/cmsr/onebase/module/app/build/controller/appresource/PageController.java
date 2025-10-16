@@ -1,6 +1,12 @@
 package com.cmsr.onebase.module.app.build.controller.appresource;
 
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.util.PageUtils;
 import com.cmsr.onebase.module.app.build.vo.appresource.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageViewDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @ClassName PageController
@@ -63,5 +70,25 @@ public class PageController {
         GetMetadataByPageIdRespVO getMetadataByPageIdRespVO = new GetMetadataByPageIdRespVO();
         getMetadataByPageIdRespVO.setMetadata(metadata);
         return CommonResult.success(getMetadataByPageIdRespVO);
+    }
+
+    @PostMapping("/view/create")
+    @Operation(summary = "创建视图")
+    public CommonResult<Boolean> createPageView(@RequestBody CreatePageViewReqVO createPageViewReqVO) {
+        CreatePageViewDTO createPageViewDTO = BeanUtils.toBean(createPageViewReqVO, CreatePageViewDTO.class);
+        pageService.createPageView(createPageViewDTO);
+
+        return CommonResult.success(true);
+    }
+
+    @PostMapping("/view/list")
+    @Operation(summary = "视图列表")
+    public CommonResult<ListPageViewRespVO> listPageView(@RequestBody ListPageViewReqVO listPageViewReqVO) {
+        List<PageDTO> pages = pageService.listPageView(listPageViewReqVO.getPageSetId());
+
+        ListPageViewRespVO listPageViewRespVO = new ListPageViewRespVO();
+        listPageViewRespVO.setPages(pages);
+
+        return CommonResult.success(listPageViewRespVO);
     }
 }

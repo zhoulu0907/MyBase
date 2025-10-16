@@ -5,19 +5,20 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
+import com.cmsr.onebase.module.metadata.core.util.JdbcTypeConvertor;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.framework.common.express.OpEnum;
-import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
+
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 字段值处理工具类
  * 用于处理字段值的类型转换、验证和格式化
- * 
+ *
  * @author bty418
  * @date 2025-09-24
  */
@@ -27,7 +28,7 @@ public class FieldValueUtil {
     /**
      * 处理条件值
      * 根据操作符和字段类型转换条件值
-     * 
+     *
      * @param operator 操作符
      * @param fieldValues 条件值列表
      * @param field 字段信息
@@ -45,7 +46,7 @@ public class FieldValueUtil {
 
         // 解析操作符为枚举
         OpEnum opEnum = OperatorUtil.parseOperator(operator);
-        
+
         // 根据操作符类型处理条件值
         switch (opEnum) {
             case EQUALS:
@@ -105,7 +106,7 @@ public class FieldValueUtil {
     /**
      * 转换字段值类型
      * 使用JdbcTypeConvertor进行业务实体字段到JDBC类型的转换
-     * 
+     *
      * @param value 原始值
      * @param field 字段信息
      * @return 转换后的值
@@ -124,7 +125,7 @@ public class FieldValueUtil {
 
     /**
      * 根据字段类型推断JDBC类型
-     * 
+     *
      * @param fieldType 字段类型
      * @return JDBC类型
      */
@@ -162,7 +163,7 @@ public class FieldValueUtil {
     /**
      * 格式化字段值用于显示
      * 将Object类型的字段值转换为适合显示的格式
-     * 
+     *
      * @param fieldValue 字段值
      * @param fieldType 字段类型
      * @return 格式化后的值
@@ -178,7 +179,7 @@ public class FieldValueUtil {
 
     /**
      * 验证字段值的有效性
-     * 
+     *
      * @param fieldValue 字段值
      * @param field 字段信息
      * @return 是否有效
@@ -259,7 +260,7 @@ public class FieldValueUtil {
         }
         if (value instanceof String) {
             String str = ((String) value).toLowerCase();
-            return "true".equals(str) || "false".equals(str) || 
+            return "true".equals(str) || "false".equals(str) ||
                    "1".equals(str) || "0".equals(str) ||
                    "yes".equals(str) || "no".equals(str);
         }
@@ -280,7 +281,7 @@ public class FieldValueUtil {
         if (value instanceof String) {
             // 简单的日期格式检查，实际项目中可以用更严格的日期解析
             String str = (String) value;
-            return str.matches("\\d{4}-\\d{2}-\\d{2}.*") || 
+            return str.matches("\\d{4}-\\d{2}-\\d{2}.*") ||
                    str.matches("\\d{4}/\\d{2}/\\d{2}.*");
         }
         return false;

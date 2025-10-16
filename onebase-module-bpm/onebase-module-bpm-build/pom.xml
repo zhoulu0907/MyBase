@@ -24,6 +24,13 @@
             <version>${revision}</version>
         </dependency>
 
+        <!-- 流程引擎ORM模块 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-bpm-engine-orm</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

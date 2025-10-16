@@ -103,6 +103,29 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         data.setEntityId(field.getEntityId());
         data.setAppId(field.getAppId());
         data.setGroupId(groupId);
+        
+        // 设置默认值
+        if (data.getIsEnabled() == null) {
+            data.setIsEnabled(1); // 默认启用
+        }
+        if (data.getIncludeMin() == null) {
+            data.setIncludeMin(1); // 默认包含最小边界
+        }
+        if (data.getIncludeMax() == null) {
+            data.setIncludeMax(1); // 默认包含最大边界
+        }
+        
+        // 根据传入的值自动判断范围类型
+        if (data.getRangeType() == null) {
+            if (data.getMinValue() != null || data.getMaxValue() != null) {
+                data.setRangeType("NUMBER");
+            } else if (data.getMinDate() != null || data.getMaxDate() != null) {
+                data.setRangeType("DATE");
+            } else {
+                // 默认为数值类型
+                data.setRangeType("NUMBER");
+            }
+        }
 
         // 保存范围校验规则
         rangeRepository.upsert(data);

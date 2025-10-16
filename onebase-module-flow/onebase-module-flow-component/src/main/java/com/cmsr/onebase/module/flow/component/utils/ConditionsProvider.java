@@ -1,16 +1,28 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
-import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
+
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
+import com.cmsr.onebase.module.flow.context.enums.OpEnum;
+import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
+import com.cmsr.onebase.module.flow.context.express.AndExpression;
+import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.yomahub.liteflow.core.NodeComponent;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 
 /**
  * @Author：huangjie
@@ -18,6 +30,7 @@ import java.util.List;
  */
 @Component
 public class ConditionsProvider {
+
 
     /**
      * 格式化条件，把其规范为表达式能执行的。左值是合法的变量名称，右值是具体的值或者表达式。
@@ -31,49 +44,97 @@ public class ConditionsProvider {
      * @param inLoopDepth
      * @return
      */
-    public List<ConditionItem> formatForExpression(NodeComponent nodeComponent, List<ConditionItem> conditions, InLoopDepth inLoopDepth) {
-        if (conditions != null) {
-            for (ConditionItem condition : conditions) {
-                formatRuleItemsForExpression(nodeComponent, condition.getConditions(), inLoopDepth);
+    public OrExpression formatConditionsForExpression(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, List<Conditions> conditions) {
+        OrExpression orExpression = ConditionsSupport.convertToOrExpresses(conditions);
+        if (orExpression == null) {
+            return null;
+        }
+        for (AndExpression andExpression : ListUtils.emptyIfNull(orExpression.getAndExpressions())) {
+            for (ExpressionItem expressionItem : ListUtils.emptyIfNull(andExpression.getExpressionItems())) {
+                formatRuleItemForExpression(nodeComponent, variableContext, inLoopDepth, expressionItem);
             }
         }
-        return conditions;
+        return orExpression;
     }
 
-    public List<RuleItem> formatRuleItemsForExpression(NodeComponent nodeComponent, List<RuleItem> ruleItems, InLoopDepth inLoopDepth) {
-        if (ruleItems != null) {
-            for (RuleItem ruleItem : ruleItems) {
-                formatRuleItemForExpression(nodeComponent, inLoopDepth, ruleItem);
+    /**
+     * 格式化条件，把其规范为值。左值是合法的变量名称，右值是具体的值。
+     * 主要工作！如果右值是表达式，提取相关的值。
+     *
+     * @param conditions
+     * @param variableContext
+     * @return
+     */
+    public OrExpression formatConditionsForValue(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, List<Conditions> conditions) {
+        OrExpression orExpression = ConditionsSupport.convertToOrExpresses(conditions);
+        for (AndExpression andExpression : orExpression.getAndExpressions()) {
+            for (ExpressionItem expressionItem : andExpression.getExpressionItems()) {
+                formatRuleItemForValue(nodeComponent, variableContext, inLoopDepth, expressionItem);
             }
         }
-        return ruleItems;
+        return orExpression;
     }
 
-    public RuleItem formatRuleItemForExpression(NodeComponent nodeComponent, InLoopDepth inLoopDepth, RuleItem ruleItem) {
-        String fieldId = ruleItem.getFieldId();
-        ruleItem.setFieldId(formatFieldIdForExpression(nodeComponent, inLoopDepth, fieldId));
-        OperatorTypeEnum operatorTypeEnum = OperatorTypeEnum.getByCode(ruleItem.getOperatorType());
-        if (operatorTypeEnum == OperatorTypeEnum.VALUE) {
-            // do nothing
-        } else if (operatorTypeEnum == OperatorTypeEnum.VARIABLE) {
-            String valueExp = formatValueForExpression(nodeComponent, inLoopDepth, ruleItem.getValue().toString());
-            ruleItem.setValue(valueExp);
-        } else if (operatorTypeEnum == OperatorTypeEnum.FORMULA) {
+    public List<ExpressionItem> formatConditionItemsForValue(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, List<ConditionItem> conditionItems) {
+        List<ExpressionItem> expressionItems = new ArrayList<>();
+        for (ConditionItem conditionItem : conditionItems) {
+            ExpressionItem expressionItem = ConditionsSupport.convertToExpressesItem(conditionItem);
+            formatRuleItemForValue(nodeComponent, variableContext, inLoopDepth, expressionItem);
+            expressionItems.add(expressionItem);
+        }
+        return expressionItems;
+    }
+
+    private void formatRuleItemForExpression(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, ExpressionItem expressionItem) {
+        String fieldId = formatFieldIdForExpression(nodeComponent, inLoopDepth, expressionItem.getKey().toString());
+        expressionItem.setKey(fieldId);
+        if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
+            formatExpressionItemValue(expressionItem);
+        } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
+            Object value = formatValueForExpression(nodeComponent, inLoopDepth, expressionItem.getValue().toString());
+            expressionItem.setValue(value);
+        } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
             //TODO 公式
         }
-        return ruleItem;
     }
 
-    public RuleItem formatRuleItemForExpression(int index, RuleItem ruleItem) {
-        OperatorTypeEnum operatorTypeEnum = OperatorTypeEnum.getByCode(ruleItem.getOperatorType());
-        if (operatorTypeEnum == OperatorTypeEnum.VALUE) {
-            // do nothing
-        } else if (operatorTypeEnum == OperatorTypeEnum.VARIABLE) {
-            String valueExp = formatValueForExpression(ruleItem.getValue().toString(), index);
-            ruleItem.setValue(valueExp);
+
+    private void formatRuleItemForValue(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, ExpressionItem expressionItem) {
+        // 转换值
+        if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
+            formatExpressionItemValue(expressionItem);
+        } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
+            String valueExp = formatValueForExpression(nodeComponent, inLoopDepth, expressionItem.getValue().toString());
+            Object value = variableContext.getVariableByExpression(valueExp);
+            expressionItem.setValue(value);
+        } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
+            //TODO 公式
         }
-        return ruleItem;
     }
+
+
+    public ExpressionItem formatConditionItemForValue(int index, VariableContext variableContext, ConditionItem conditionItem) {
+        ExpressionItem expressionItem = ConditionsSupport.convertToExpressesItem(conditionItem);
+        if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
+            formatExpressionItemValue(expressionItem);
+        } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
+            String valueExp = formatValueForExpression(conditionItem.getValue().toString(), index);
+            Object value = variableContext.getVariableByExpression(valueExp);
+            expressionItem.setValue(value);
+        } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
+            //TODO 公式
+        }
+        return expressionItem;
+    }
+
+    private void formatExpressionItemValue(ExpressionItem expressionItem) {
+        if (expressionItem.getOp() == OpEnum.RANGE && expressionItem.getJdbcType() == JdbcTypeEnum.DATE) {
+            String begin = MapUtils.getString((Map) expressionItem.getValue(), "begin");
+            String end = MapUtils.getString((Map) expressionItem.getValue(), "end");
+            expressionItem.setValue(List.of(begin, end));
+        }
+    }
+
 
     private String formatFieldIdForExpression(NodeComponent nodeComponent, InLoopDepth inLoopDepth, String exp) {
         if (NumberUtils.isParsable(exp)) {
@@ -96,52 +157,10 @@ public class ConditionsProvider {
         return exp;
     }
 
-    public String formatValueForExpression(String exp, int index) {
+    private String formatValueForExpression(String exp, int index) {
         String[] split = StringUtils.split(exp, '.');
         return split[0] + "[" + index + "]." + split[1];
     }
 
-    /**
-     * 格式化条件，把其规范为值。左值是合法的变量名称，右值是具体的值。
-     * 主要工作！如果右值是表达式，提取相关的值。
-     *
-     * @param conditions
-     * @param variableContext
-     * @return
-     */
-    public List<ConditionItem> formatForValue(List<ConditionItem> conditions, VariableContext variableContext) {
-        if (conditions != null) {
-            for (ConditionItem conditionItem : conditions) {
-                formatRuleItemsForValue(conditionItem.getConditions(), variableContext);
-            }
-        }
-        return conditions;
-    }
-
-    public List<RuleItem> formatRuleItemsForValue(List<RuleItem> ruleItems, VariableContext variableContext) {
-        if (ruleItems != null) {
-            for (RuleItem ruleItem : ruleItems) {
-                formatRuleItemForValue(ruleItem, variableContext);
-            }
-        }
-        return ruleItems;
-    }
-
-    public RuleItem formatRuleItemForValue(RuleItem ruleItem, VariableContext variableContext) {
-        Object value = convertValue(ruleItem.getOperatorType(), ruleItem.getValue(), variableContext);
-        ruleItem.setValue(value);
-        return ruleItem;
-    }
-
-    private Object convertValue(String operatorType, Object value, VariableContext variableContext) {
-        OperatorTypeEnum operatorTypeEnum = OperatorTypeEnum.getByCode(operatorType);
-        if (operatorTypeEnum == OperatorTypeEnum.VALUE) {
-            return value;
-        } else if (operatorTypeEnum == OperatorTypeEnum.VARIABLE) {
-            return variableContext.getVariableByExpression(value.toString());
-        } else {
-            return value;
-        }
-    }
 
 }

@@ -1,12 +1,13 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataUpdateNodeData;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
@@ -30,7 +31,7 @@ import java.util.Map;
 @Slf4j
 @Setter
 @LiteflowComponent("dataUpdate")
-public class DataUpdateNodeComponent extends NormalNodeComponent {
+public class DataUpdateNodeComponent extends SkippableNodeComponent {
 
     @Autowired
     private DataMethodApi dataMethodApi;
@@ -47,31 +48,30 @@ public class DataUpdateNodeComponent extends NormalNodeComponent {
         DataUpdateNodeData nodeData = (DataUpdateNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         //
-        List<ConditionItem> conditionItems = nodeData.getFilterCondition();
-        conditionItems = conditionsProvider.formatForExpression(this, conditionItems, inLoopDepth);
-        conditionItems = conditionsProvider.formatForValue(conditionItems, variableContext);
-        //
-        List<RuleItem> ruleItems = nodeData.getFields();
-
         UpdateDataReqDTO reqDTO = new UpdateDataReqDTO();
         if (nodeData.getMainEntityId() != null) {
             reqDTO.setEntityId(nodeData.getMainEntityId());
         } else {
             reqDTO.setEntityId(nodeData.getSubEntityId());
         }
-        reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(conditionItems));
-        reqDTO.setData(buildSingleReqData(ruleItems, inLoopDepth, variableContext));
+        //
+        List<Conditions> conditions = nodeData.getFilterCondition();
+        OrExpression orExpression = conditionsProvider.formatConditionsForValue(this, variableContext, inLoopDepth, conditions);
+        reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
+        //
+        List<ConditionItem> fields = nodeData.getFields();
+        reqDTO.setData(buildSingleReqData(fields, inLoopDepth, variableContext));
+        //
         List<List<EntityFieldDataRespDTO>> respDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.updateData(reqDTO));
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(respDTOSS));
     }
 
-    private List<Map<Long, Object>> buildSingleReqData(List<RuleItem> ruleItems, InLoopDepth inLoopDepth, VariableContext variableContext) {
+    private List<Map<Long, Object>> buildSingleReqData(List<ConditionItem> conditionItems, InLoopDepth inLoopDepth, VariableContext variableContext) {
         List<Map<Long, Object>> reqData = new ArrayList<>();
-        ruleItems = conditionsProvider.formatRuleItemsForExpression(this, ruleItems, inLoopDepth);
-        ruleItems = conditionsProvider.formatRuleItemsForValue(ruleItems, variableContext);
+        conditionsProvider.formatConditionItemsForValue(this, variableContext, inLoopDepth, conditionItems);
         Map<Long, Object> data = new HashMap<>();
-        for (RuleItem ruleItem : ruleItems) {
-            data.put(NumberUtils.toLong(ruleItem.getFieldId()), ruleItem.getValue());
+        for (ConditionItem conditionItem : conditionItems) {
+            data.put(NumberUtils.toLong(conditionItem.getFieldId()), conditionItem.getValue());
         }
         reqData.add(data);
         return reqData;

@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.flow.context.graph.nodes;
 
-import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
-import org.apache.commons.jexl3.JexlExpression;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,22 +12,28 @@ import java.util.List;
  * @Date：2025/9/9 11:05
  */
 @Data
-public class StartFormNodeData extends NodeData {
+public class StartFormNodeData extends NodeData implements Serializable {
 
-    private String triggerUserType;
+    /**
+     * 流程ID，后补充
+     */
+    private Long processId;
 
-    private String triggerUserValue;
+    private String triggerRange;
+
+    private List<String> recordTriggerEvents;
+
+    private String fieldTriggerEvents;
 
     private Long pageId;
 
-    private Long fieldId;
-
-    private List<String> triggerEvents;
-
-    private List<ConditionItem> filterCondition;
-
     /**
-     * 缓存的表达式
+     * 前端组件的Id，所以是字符串
      */
-    private JexlExpression compiledExpression;
+    private String fieldId;
+
+    private Boolean isChildTriggerAllowed;
+
+    private List<Conditions> filterCondition;
+
 }

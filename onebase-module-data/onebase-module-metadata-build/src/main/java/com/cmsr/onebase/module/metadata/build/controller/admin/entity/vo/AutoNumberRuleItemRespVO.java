@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -28,6 +29,7 @@ public class AutoNumberRuleItemRespVO {
     private Integer itemOrder;
 
     @Schema(description = "格式化规则", example = "yyyyMMdd")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String format;
 
     @Schema(description = "固定文本值", example = "ORDER")
@@ -47,4 +49,16 @@ public class AutoNumberRuleItemRespVO {
 
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;
+    
+    /**
+     * 兼容性方法：为TEXT类型的规则项提供format字段
+     * 当itemType为TEXT时，返回textValue作为format值以保持兼容性
+     */
+    @JsonProperty("format")
+    public String getFormatForCompatibility() {
+        if ("TEXT".equalsIgnoreCase(this.itemType) && this.textValue != null) {
+            return this.textValue;
+        }
+        return this.format;
+    }
 }

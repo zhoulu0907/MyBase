@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.formula.build.controller.formula.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -24,12 +25,8 @@ public class FormulaExecuteRespVO {
     /**
      * 执行时间（毫秒）
      */
+    @JsonIgnore
     private Long executionTime;
-
-    /**
-     * 是否使用了缓存
-     */
-    private Boolean fromCache = false;
 
     public static FormulaExecuteRespVO success(Object result, Long executionTime) {
         FormulaExecuteRespVO vo = new FormulaExecuteRespVO();

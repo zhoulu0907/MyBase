@@ -1,11 +1,12 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
-import com.cmsr.onebase.module.flow.context.condition.RuleItem;
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataAddNodeData;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
@@ -30,7 +31,7 @@ import java.util.Map;
 @Slf4j
 @Setter
 @LiteflowComponent("dataAdd")
-public class DataAddNodeComponent extends NormalNodeComponent {
+public class DataAddNodeComponent extends SkippableNodeComponent {
 
     @Autowired
     private DataMethodApi dataMethodApi;
@@ -52,12 +53,12 @@ public class DataAddNodeComponent extends NormalNodeComponent {
             throw new IllegalArgumentException("实体ID不能为空");
         }
         boolean batchType = nodeData.getBatchType();
-        List<RuleItem> ruleItems = nodeData.getFields();
+        List<ConditionItem> conditionItems = nodeData.getFields();
         List<Map<Long, Object>> reqData;
         if (batchType) {
-            reqData = buildBatchReqData(nodeData, variableContext, ruleItems);
+            reqData = buildBatchReqData(nodeData, variableContext, conditionItems);
         } else {
-            reqData = buildSingleReqData(ruleItems, inLoopDepth, variableContext);
+            reqData = buildSingleReqData(conditionItems, inLoopDepth, variableContext);
         }
 
         if (CollectionUtils.isEmpty(reqData)) {
@@ -77,29 +78,26 @@ public class DataAddNodeComponent extends NormalNodeComponent {
         }
     }
 
-    private List<Map<Long, Object>> buildSingleReqData(List<RuleItem> ruleItems, InLoopDepth inLoopDepth, VariableContext variableContext) {
+    private List<Map<Long, Object>> buildSingleReqData(List<ConditionItem> conditionItems, InLoopDepth inLoopDepth, VariableContext variableContext) {
         List<Map<Long, Object>> reqData = new ArrayList<>();
-        ruleItems = conditionsProvider.formatRuleItemsForExpression(this, ruleItems, inLoopDepth);
-        ruleItems = conditionsProvider.formatRuleItemsForValue(ruleItems, variableContext);
+        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(this, variableContext, inLoopDepth, conditionItems);
         Map<Long, Object> data = new HashMap<>();
-        for (RuleItem ruleItem : ruleItems) {
-            data.put(NumberUtils.toLong(ruleItem.getFieldId()), ruleItem.getValue());
+        for (ExpressionItem expressionItem : expressionItems) {
+            data.put(NumberUtils.toLong(expressionItem.getKey().toString()), expressionItem.getValue());
         }
         reqData.add(data);
         return reqData;
     }
 
-    private List<Map<Long, Object>> buildBatchReqData(DataAddNodeData nodeData, VariableContext variableContext, List<RuleItem> ruleItems) {
+    private List<Map<Long, Object>> buildBatchReqData(DataAddNodeData nodeData, VariableContext variableContext, List<ConditionItem> conditionItems) {
         String dataNodeId = nodeData.getDataNodeId();
         int dataSize = variableContext.getVariableSizeByTag(dataNodeId);
         List<Map<Long, Object>> reqData = new ArrayList<>();
-
         for (int i = 0; i < dataSize; i++) {
             Map<Long, Object> data = new HashMap<>();
-            for (RuleItem ruleItem : ruleItems) {
-                ruleItem = conditionsProvider.formatRuleItemForExpression(i, ruleItem);
-                ruleItem = conditionsProvider.formatRuleItemForValue(ruleItem, variableContext);
-                data.put(NumberUtils.toLong(ruleItem.getFieldId()), ruleItem.getValue());
+            for (ConditionItem conditionItem : conditionItems) {
+                ExpressionItem expressionItem = conditionsProvider.formatConditionItemForValue(i, variableContext, conditionItem);
+                data.put(NumberUtils.toLong(expressionItem.getKey().toString()), expressionItem.getValue());
             }
             reqData.add(data);
         }

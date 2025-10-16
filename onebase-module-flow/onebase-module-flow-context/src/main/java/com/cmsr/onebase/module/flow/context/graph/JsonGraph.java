@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.flow.context.graph;
 
 import com.cmsr.onebase.module.flow.context.graph.nodes.IfBlockNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.SwitchCaseNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.SwitchConditionNodeData;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,19 +52,19 @@ public class JsonGraph {
 
     private String nodeDefine(int deep, JsonGraphNode node) {
         if (StringUtils.equalsAny(node.getType(),
-                "startForm", "startEntity", "startTime", "startDateField", "startAPI", "startBPM",
-                "end",
-                "log",
-                "dataQuery", "dataQueryMultiple", "dataAdd", "dataDelete", "dataUpdate")) {
+                "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate",
+                "modal",
+                "startDateField", "startForm", "startEntity", "startTime", "startAPI", "startBPM",
+                "end", "log")) {
             return toDefine(node);
-        } else if (StringUtils.equals(node.getType(), "loop")) {
-            return loopNodeDefine(deep, node);
-        } else if (StringUtils.equals(node.getType(), "switch")) {
-            return switchNodeDefine(deep, node);
-        } else if (StringUtils.equals(node.getType(), "ifCase")) {
-            return ifCaseNodeDefine(deep, node);
         } else if (StringUtils.equals(node.getType(), "ifBlock")) {
             return ifBlockNodeDefine(deep, node);
+        } else if (StringUtils.equals(node.getType(), "ifCase")) {
+            return ifCaseNodeDefine(deep, node);
+        } else if (StringUtils.equals(node.getType(), "loop")) {
+            return loopNodeDefine(deep, node);
+        } else if (StringUtils.equals(node.getType(), "switchCondition")) {
+            return switchNodeDefine(deep, node);
         }
         throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }
@@ -76,17 +78,26 @@ public class JsonGraph {
     }
 
     private String switchNodeDefine(int deep, JsonGraphNode node) {
+        SwitchConditionNodeData switchConditionNodeData = (SwitchConditionNodeData) node.getData();
         StringBuilder define = new StringBuilder();
-        define.append("SWITCH(").append(toDefine(node)).append(".TO(");
-        for (JsonGraphNode caseDefaultNode : node.getBlocks()) {
-            if (Objects.equals(caseDefaultNode.getType(), "case")) {
-                define.append(NEW_LINE).append(switchCaseNodeDefine(deep + 1, caseDefaultNode)).append(",");
+        define.append("SWITCH(").append(toDefine(node)).append(").TO( ");
+        int caseCount = 0;
+        for (JsonGraphNode switchCaseNode : node.getBlocks()) {
+            if (Objects.equals(switchCaseNode.getType(), "switchCase")) {
+                if (caseCount > 0) {
+                    define.append(",");
+                }
+                SwitchCaseNodeData switchCaseNodeData = (SwitchCaseNodeData) switchCaseNode.getData();
+                switchConditionNodeData.addCase(switchCaseNode.getId(), switchCaseNodeData.getFilterCondition());
+                define.append(NEW_LINE).append(switchCaseNodeDefine(deep + 1, switchCaseNode));
+                caseCount++;
             }
         }
-        define.append(NEW_LINE).append(")");
-        for (JsonGraphNode caseDefaultNode : node.getBlocks()) {
-            if (Objects.equals(caseDefaultNode.getType(), "caseDefault")) {
-                define.append(switchDefaultNodeDefine(deep + 1, caseDefaultNode));
+        define.append(NEW_LINE).append(" )");
+        for (JsonGraphNode switchCaseNode : node.getBlocks()) {
+            if (Objects.equals(switchCaseNode.getType(), "switchDefault")) {
+                switchConditionNodeData.setDefaultId(switchCaseNode.getId());
+                define.append(switchDefaultNodeDefine(deep + 1, switchCaseNode));
             }
         }
         return define.toString();

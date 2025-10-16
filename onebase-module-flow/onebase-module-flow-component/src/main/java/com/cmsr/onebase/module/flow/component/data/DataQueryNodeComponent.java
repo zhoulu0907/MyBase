@@ -1,11 +1,12 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
-import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataQueryNodeData;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
@@ -27,7 +28,7 @@ import java.util.List;
 @Slf4j
 @Setter
 @LiteflowComponent("dataQuery")
-public class DataQueryNodeComponent extends NormalNodeComponent {
+public class DataQueryNodeComponent extends SkippableNodeComponent {
 
     @Autowired
     private DataMethodApi dataMethodApi;
@@ -44,20 +45,17 @@ public class DataQueryNodeComponent extends NormalNodeComponent {
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         // 转换成数据方法参数
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
-        if (StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
-            List<ConditionItem> conditionItems = nodeData.getFilterCondition();
-            conditionItems = conditionsProvider.formatForExpression(this, conditionItems, inLoopDepth);
-            conditionItems = conditionsProvider.formatForValue(conditionItems, variableContext);
-            // 数据方法参数
-            if (nodeData.getMainEntityId() != null) {
-                reqDTO.setEntityId(nodeData.getMainEntityId());
-            } else {
-                reqDTO.setEntityId(nodeData.getSubEntityId());
-            }
-            reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(conditionItems));
+        if (nodeData.getMainEntityId() != null) {
+            reqDTO.setEntityId(nodeData.getMainEntityId());
+        } else {
+            reqDTO.setEntityId(nodeData.getSubEntityId());
+        }
+        if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
+            List<Conditions> conditions = nodeData.getFilterCondition();
+            OrExpression orExpression = conditionsProvider.formatConditionsForValue(this, variableContext, inLoopDepth, conditions);
+            reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
         reqDTO.setOrderDtos(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));
-
         reqDTO.setNum(1);
         List<List<EntityFieldDataRespDTO>> fieldDataRespDTOS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOS)) {

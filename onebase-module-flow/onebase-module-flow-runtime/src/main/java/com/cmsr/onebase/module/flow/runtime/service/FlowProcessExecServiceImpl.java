@@ -1,26 +1,28 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
-import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
-import com.cmsr.onebase.module.flow.context.condition.Condition;
-import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
-import com.cmsr.onebase.module.flow.context.express.OrExpresses;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessFormRepository;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessFormDO;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -40,16 +43,7 @@ import java.util.stream.Collectors;
 public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Autowired
-    private FlowProcessRepository flowProcessRepository;
-
-    @Autowired
-    private FlowProcessFormRepository flowProcessFormRepository;
-
-    @Autowired
     private GraphFlowCache graphFlowCache;
-
-    @Autowired
-    private ExpressionExecutor expressionExecutor;
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
@@ -57,50 +51,91 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Autowired
     private MetadataEntityFieldApi metadataEntityFieldApi;
 
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
+
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
-        List<Long> processIds = flowProcessFormRepository.findByPageId(pageId)
-                .stream().map(FlowProcessFormDO::getProcessId).toList();
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByIds(processIds);
-        return null;
+        List<StartFormNodeData> startFormNodeDataList = graphFlowCache.findStartFormNodeDataByPageId(pageId);
+        return startFormNodeDataList.stream()
+                .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
+                .toList();
     }
 
 
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
-        StartFormNodeData startFormNodeData = graphFlowCache.getStartFormNodeData(reqVO.getProcessId());
-        List<Long> ids = extractFieldIds(startFormNodeData.getFilterCondition());
+        StartFormNodeData startFormNodeData = graphFlowCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
+        if (startFormNodeData == null) {
+            FormTriggerRespVO vo = formNotTriggerRespVO();
+            vo.setMessage("流程不存在");
+            return vo;
+        }
+        List<Long> ids = extractFieldIds(startFormNodeData.getFilterCondition(), reqVO.getInputParams());
         Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap = getFieldInfoMap(ids);
         Map<String, Object> inputMap = convertInputParamsData(reqVO.getInputParams(), fieldInfoMap);
 
-        OrExpresses orExpresses = Condition.convertToOrExpresses(startFormNodeData.getFilterCondition());
-        if (startFormNodeData.getCompiledExpression() == null) {
-            JexlExpression compileExpression = expressionExecutor.compileExpression(orExpresses);
-            startFormNodeData.setCompiledExpression(compileExpression);
+        try {
+            if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
+                boolean isTrigger = true;
+                if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
+                    OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
+                    isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
+                }
+                if (!isTrigger) {
+                    FormTriggerRespVO vo = formNotTriggerRespVO();
+                    vo.setMessage("表单不满足触发条件");
+                    return vo;
+                } else {
+                    ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
+                    return formTriggerRespVO(executorResult);
+                }
+            } else {
+                ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), reqVO.getExecutionUuid(), inputMap);
+                return formTriggerRespVO(executorResult);
+            }
+        } catch (Exception e) {
+            log.error("表单触发异常: {}", reqVO, e);
+            FormTriggerRespVO vo = formNotTriggerRespVO();
+            vo.setMessage("表单触发异常");
+            vo.setCause(ExceptionUtils.getRootCauseMessage(e));
+            return vo;
         }
-        boolean isTrigger = expressionExecutor.evaluate(startFormNodeData.getCompiledExpression(), inputMap);
-        if (!isTrigger) {
-            FormTriggerRespVO respVO = new FormTriggerRespVO();
-            respVO.setTriggered(0);
-            return respVO;
-        } else {
-            Map<String, Object> outputMap = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
-            FormTriggerRespVO respVO = new FormTriggerRespVO();
-            respVO.setTriggered(1);
-            respVO.setResult(outputMap);
-            return respVO;
-        }
+    }
+
+    private FormTriggerRespVO formNotTriggerRespVO() {
+        FormTriggerRespVO respVO = new FormTriggerRespVO();
+        respVO.setTriggered(false);
+        respVO.setExecutionEnd(true);
+        return respVO;
+    }
+
+    private FormTriggerRespVO formTriggerRespVO(ExecutorResult executorResult) {
+        FormTriggerRespVO respVO = new FormTriggerRespVO();
+        respVO.setTriggered(true);
+        respVO.setSuccess(executorResult.isSuccess());
+        respVO.setCode(executorResult.getCode());
+        respVO.setMessage(executorResult.getMessage());
+        respVO.setCause(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
+        respVO.setExecutionEnd(executorResult.isExecutionEnd());
+        respVO.setNodeType(executorResult.getExecutionEndNodeType());
+        respVO.setExecutionUuid(executorResult.getExecutionUuid());
+        respVO.setOutputParams(executorResult.getOutputParams());
+        return respVO;
     }
 
     /**
      * 从条件列表中收集所有字段ID
      */
-    private List<Long> extractFieldIds(List<ConditionItem> conditions) {
-        return conditions.stream()
+    private List<Long> extractFieldIds(List<Conditions> conditions, Map<Long, String> inputParams) {
+        Set<Long> ids1 = conditions.stream()
                 .flatMap(condition -> condition.getConditions().stream())
                 .map(ruleItem -> NumberUtils.toLong(ruleItem.getFieldId()))
-                .distinct()
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+        Set<Long> ids2 = inputParams.keySet();
+        Set<Long> ids = Sets.newHashSet();
+        ids.addAll(ids1);
+        ids.addAll(ids2);
+        return Lists.newArrayList(ids);
     }
 
     /**
@@ -156,9 +191,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private Map<Long, EntityFieldJdbcTypeRespDTO> getFieldInfoMap(List<Long> fieldIds) {
         EntityFieldJdbcTypeReqDTO reqDTO = new EntityFieldJdbcTypeReqDTO();
         reqDTO.setFieldIds(fieldIds);
-
         List<EntityFieldJdbcTypeRespDTO> fieldJdbcTypes = metadataEntityFieldApi.getFieldJdbcTypes(reqDTO);
-
         return fieldJdbcTypes.stream()
                 .collect(Collectors.toMap(EntityFieldJdbcTypeRespDTO::getFieldId, info -> info));
     }

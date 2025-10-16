@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.flow.component.start;
 
+import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
-import com.yomahub.liteflow.core.NodeComponent;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @LiteflowComponent("startForm")
-public class StartFormNodeComponent extends NodeComponent {
+public class StartFormNodeComponent extends SkippableNodeComponent {
     @Override
     public void process() throws Exception {
         log.info("StartFormNodeComponent process");

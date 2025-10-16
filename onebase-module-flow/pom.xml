@@ -15,6 +15,7 @@
         <module>onebase-module-flow-runtime</module>
         <module>onebase-module-flow-component</module>
         <module>onebase-module-flow-context</module>
+        <module>onebase-module-flow-rpc</module>
     </modules>
     <artifactId>onebase-module-flow</artifactId>
     <packaging>pom</packaging>
