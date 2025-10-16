@@ -15,29 +15,29 @@ const mockVariables: AppEntities = {
           fieldId: "001", fieldName: "订单编号", fieldType: "BIGINT", isSystemField: 1, displayName: "订单编号"
         },
         {
-          fieldId: "002", fieldName: "制单人", fieldType: "VARCHAR", isSystemField: 1, displayName: "制单人"
+          fieldId: "AAA", fieldName: "制单人", fieldType: "VARCHAR", isSystemField: 1, displayName: "制单人"
         },
         {
-          fieldId: "003", fieldName: "发货地址", fieldType: "TEXT", isSystemField: 1, displayName: "发货地址"
+          fieldId: "上海市浦东新区云桥路", fieldName: "发货地址", fieldType: "TEXT", isSystemField: 1, displayName: "发货地址"
         },
         {
-          fieldId: "004", fieldName: "下单日期", fieldType: "DECIMAL", isSystemField: 1, displayName: "下单日期"
+          fieldId: "2024-01-22", fieldName: "下单日期", fieldType: "DECIMAL", isSystemField: 1, displayName: "下单日期"
         },
         {
-          fieldId: "005", fieldName: "联系电话", fieldType: "NUMBER", isSystemField: 1, displayName: "联系电话"
+          fieldId: "12381282828", fieldName: "联系电话", fieldType: "NUMBER", isSystemField: 1, displayName: "联系电话"
         },
         {
-          fieldId: "005", fieldName: "客户信息-主键", fieldType: "TIMESTAMP", isSystemField: 1, displayName: "客户信息-主键"
+          fieldId: "", fieldName: "客户信息-主键", fieldType: "TIMESTAMP", isSystemField: 1, displayName: "客户信息-主键"
         }
       ]
     },
     {
       entityId: '2', entityName: '其他管理', entityType: '主表', fields: [
         {
-          fieldId: "001", fieldName: "测试1", fieldType: "BIGINT", isSystemField: 1, displayName: "测试1"
+          fieldId: 1, fieldName: "测试A", fieldType: "BIGINT", isSystemField: 1, displayName: "测试1"
         },
         {
-          fieldId: "002", fieldName: "测试2", fieldType: "INT", isSystemField: 1, displayName: "测试2"
+          fieldId: 2, fieldName: "测试B", fieldType: "INT", isSystemField: 1, displayName: "测试2"
         }
       ]
     }
@@ -180,16 +180,34 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     })
     return variablesMapping;
   }
+
+  /**
+   * 对现在的公式去掉{{id.}}和[[id.]]只保留函数名和变量名
+   * @returns 返回简化后的公式模版
+   */
+  const formattedFormula = () => {
+   const newFormula =  formula.replace(/(\[\[.+?\]\]|\{\{.+?\}\})/g, (match) => {
+      let content;
+      if(match.startsWith("{{")) {
+        content = match.slice(2, -2);
+        content = content.replace(/^[^.]+\./, '');
+      }else {
+        content = match.slice(2, -2)
+        content = content.replace(/^[^\.]+\.(.+)$/, '$1,');
+      }
+      return content;
+    })
+    return newFormula.replace(/,(?=\s*\))/g, '');
+  }
   /**
    * 点击确认之后计算
    */
   const handleConfirm = useCallback(async() => {
     setLoading(true);
-    const newFormula = formula.replace(/\{\{\d+\.(\w+)\}\}/g, '$1');
-    const templateFormula = newFormula.replace(/\[\[\d+\.([^\]]+)\]\]\s*/g, '$1, ').replace(/, \s*(?=\))/,"");
-    const selectedVariables = retrieveAllVariables(newFormula);
+    const newFormula = formattedFormula();
+    const selectedVariables = retrieveAllVariables(formula);
     const newFormulaData:formulaParams = {
-      formula: templateFormula,
+      formula: newFormula,
       parameters: selectedVariables
     }
       try {
