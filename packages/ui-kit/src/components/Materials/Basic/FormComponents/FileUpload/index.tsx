@@ -1,8 +1,8 @@
 import { Form, Message, Upload } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
@@ -20,7 +20,8 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     verify,
     layout,
     labelColSpan = 0,
-    runtime = true
+    runtime = true,
+    detailMode
   } = props;
 
   const [_fileUrl, setFileUrl] = useState<string>('');
@@ -42,13 +43,29 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     return res;
   };
 
+  const { form } = Form.useFormContext();
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`
+  const fieldValue = Form.useWatch(fieldId, form)
+
+ useEffect(()=>{
+    let flag = false;
+    const newFieldValue=  (fieldValue || []).map((ele:any)=>{
+      if(ele.url !== ele.response){
+        flag = true;
+        return {...ele,url:ele.response}
+      }
+      return {...ele}
+    })
+    if(flag){
+      form.setFieldValue(fieldId,newFieldValue)
+    }
+  },[fieldValue])
+
   return (
     <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`
-        }
+        field={fieldId}
         layout={layout}
         tooltip={tooltip}
         rules={[{ required: verify?.required }]}
@@ -61,15 +78,17 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        triggerPropName='fileList'
       >
         <Upload
-          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
+          limit={(status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue ? fieldValue?.length : (
+            verify?.maxCount === -1 ? undefined : verify?.maxCount
+          )}
           accept={verify?.fileFormat}
           listType={listType}
           beforeUpload={async (file) => {
             const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
             const fileSize = file.size / 1024;
-
             if (fileSize > fileSizeLimit) {
               Message.warning('文件大小超出限制');
               return false;
@@ -98,6 +117,9 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
           style={{
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
+          }}
+          showUploadList={{
+            removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
           }}
         >
           {listType == 'picture-card' && (
