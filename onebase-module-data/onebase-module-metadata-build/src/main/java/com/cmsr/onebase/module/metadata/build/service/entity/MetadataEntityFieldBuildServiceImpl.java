@@ -554,6 +554,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             datasource = metadataDatasourceBuildService.getDatasource(businessEntity.getDatasourceId());
         }
 
+        // 1.5 校验本次提交的字段名是否有重复
+        validateFieldNameDuplicationInBatch(reqVO.getItems());
+
         // 2. 先删除
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             if (Boolean.TRUE.equals(item.getIsDeleted())) {
@@ -2266,6 +2269,48 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     private String buildSelfDefinedRuleGroupName(Long fieldId) {
         return buildRuleGroupName(fieldId, "SELF_DEFINED");
+    }
+
+    /**
+     * 校验批量提交的字段中是否有重复的字段名
+     * 
+     * @param items 待保存的字段列表
+     * @throws IllegalArgumentException 如果存在重复的字段名
+     */
+    private void validateFieldNameDuplicationInBatch(List<EntityFieldUpsertItemVO> items) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        // 统计非删除状态的字段名
+        Map<String, Integer> fieldNameCountMap = new HashMap<>();
+        List<String> duplicateFieldNames = new ArrayList<>();
+
+        for (EntityFieldUpsertItemVO item : items) {
+            // 跳过删除的字段
+            if (Boolean.TRUE.equals(item.getIsDeleted())) {
+                continue;
+            }
+
+            String fieldName = item.getFieldName();
+            if (fieldName == null || fieldName.trim().isEmpty()) {
+                continue;
+            }
+
+            // 统计字段名出现次数
+            fieldNameCountMap.put(fieldName, fieldNameCountMap.getOrDefault(fieldName, 0) + 1);
+
+            // 如果出现次数大于1，说明重复了
+            if (fieldNameCountMap.get(fieldName) > 1 && !duplicateFieldNames.contains(fieldName)) {
+                duplicateFieldNames.add(fieldName);
+            }
+        }
+
+        // 如果有重复的字段名，抛出异常
+        if (!duplicateFieldNames.isEmpty()) {
+            String duplicateNames = String.join("、", duplicateFieldNames);
+            throw new IllegalArgumentException("字段名称重复，同一个实体内字段名称必须唯一：" + duplicateNames);
+        }
     }
 
 }

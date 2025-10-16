@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
  * 范围校验 Service 实现
  */
@@ -40,6 +43,9 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
 
         // 转换DO为VO
         ValidationRangeRespVO respVO = BeanUtils.toBean(rangeDO, ValidationRangeRespVO.class);
+
+        // 格式化数值，最多保留4位小数
+        formatDecimalValues(respVO, rangeDO);
 
         // 获取规则组名称
         var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
@@ -182,6 +188,10 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")"); }
         MetadataValidationRangeDO rangeDO = list.get(0);
         ValidationRangeRespVO respVO = BeanUtils.toBean(rangeDO, ValidationRangeRespVO.class);
+        
+        // 格式化数值，最多保留4位小数
+        formatDecimalValues(respVO, rangeDO);
+        
         var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
         if (ruleGroup != null) { respVO.setRgName(ruleGroup.getRgName()); }
         return respVO;
@@ -197,5 +207,37 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         Long groupId = rangeDO.getGroupId();
         rangeRepository.deleteById(rangeDO.getId());
         if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
+    }
+
+    /**
+     * 格式化范围校验响应VO中的数值字段，最多保留4位小数
+     * 
+     * @param respVO 响应VO对象
+     * @param rangeDO 范围校验DO对象
+     */
+    private void formatDecimalValues(ValidationRangeRespVO respVO, MetadataValidationRangeDO rangeDO) {
+        if (rangeDO.getMinValue() != null) {
+            respVO.setMinValue(formatBigDecimal(rangeDO.getMinValue()));
+        }
+        if (rangeDO.getMaxValue() != null) {
+            respVO.setMaxValue(formatBigDecimal(rangeDO.getMaxValue()));
+        }
+    }
+
+    /**
+     * 格式化BigDecimal为字符串，最多保留4位小数，去除尾部无意义的0
+     * 
+     * @param value BigDecimal值
+     * @return 格式化后的字符串
+     */
+    private String formatBigDecimal(BigDecimal value) {
+        if (value == null) {
+            return null;
+        }
+        // 保留4位小数，使用HALF_UP舍入模式（四舍五入）
+        BigDecimal scaled = value.setScale(4, RoundingMode.HALF_UP);
+        // 使用stripTrailingZeros去除尾部的0，然后转为字符串
+        // 使用toPlainString避免科学计数法
+        return scaled.stripTrailingZeros().toPlainString();
     }
 }
