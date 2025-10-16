@@ -61,7 +61,7 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
   };
 
   return (
-    <div className={styles['field-type-config']}>
+    <div className={styles.fieldTypeConfig}>
       <h4>选项配置</h4>
       <Select value={optionType} onChange={setOptionType} style={{ width: '100%', marginBottom: 16 }}>
         <Select.Option value="custom">自定义</Select.Option>
@@ -70,12 +70,12 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
 
       <div>
         {options.map((option, index) => (
-          <div key={index} className={styles['option-item']}>
+          <div key={index} className={styles.optionItem}>
             <Input
               value={option.optionLabel}
               onChange={(value) => updateOption(index, value)}
               placeholder="请输入选项内容"
-              className={styles['option-input']}
+              className={styles.optionInput}
             />
             {options.length > 1 && index > 1 && (
               <Button
@@ -83,18 +83,18 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
                 status="danger"
                 icon={<IconDelete />}
                 onClick={() => removeOption(index)}
-                className={styles['delete-btn']}
+                className={styles.deleteBtn}
               />
             )}
           </div>
         ))}
       </div>
 
-      <Button type="dashed" icon={<IconPlus />} onClick={addOption} className={styles['add-option-btn']}>
+      <Button type="dashed" icon={<IconPlus />} onClick={addOption} className={styles.addOptionBtn}>
         新增选项
       </Button>
 
-      <div className={styles['field-type-config-footer']}>
+      <div className={styles.fieldTypeConfigFooter}>
         <Button type="outline" size="small" onClick={handleCancel}>
           取消
         </Button>
@@ -240,14 +240,14 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
     switch (rule.itemType) {
       case 'SEQUENCE': {
         return (
-          <div className={styles['rule-content']}>
-            <IconDragDotVertical className={styles['drag-handle']} />
-            <span className={styles['rule-label']}>自动编号:</span>
+          <div className={styles.ruleContent}>
+            <IconDragDotVertical className={styles.dragHandle} />
+            <span className={styles.ruleLabel}>自动编号:</span>
             <Input
               value={displayText}
               readOnly
-              className={styles['rule-input']}
-              suffix={<IconEdit onClick={() => editRule(rule.id || '')} className={styles['edit-btn']} />}
+              className={styles.ruleInput}
+              suffix={<IconEdit onClick={() => editRule(rule.id || '')} className={styles.editBtn} />}
             />
             <Button
               type="text"
@@ -255,7 +255,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
               disabled={rules.length === 1}
-              className={styles['rule-action-btn']}
+              className={styles.ruleActionBtn}
             />
           </div>
         );
@@ -263,13 +263,13 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
 
       case 'DATE':
         return (
-          <div className={styles['rule-content']}>
-            <IconDragDotVertical className={styles['drag-handle']} />
-            <span className={styles['rule-label']}>创建时间:</span>
+          <div className={styles.ruleContent}>
+            <IconDragDotVertical className={styles.dragHandle} />
+            <span className={styles.ruleLabel}>创建时间:</span>
             <Select
               value={(rule.config.dateFormat as string) || '年月日'}
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, dateFormat: value } })}
-              className={styles['rule-input']}
+              className={styles.ruleInput}
             >
               {dataOptions.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
@@ -283,21 +283,21 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
               disabled={rules.length === 1}
-              className={styles['rule-action-btn']}
+              className={styles.ruleActionBtn}
             />
           </div>
         );
 
       case 'TEXT':
         return (
-          <div className={styles['rule-content']}>
-            <IconDragDotVertical className={styles['drag-handle']} />
-            <span className={styles['rule-label']}>固定字符:</span>
+          <div className={styles.ruleContent}>
+            <IconDragDotVertical className={styles.dragHandle} />
+            <span className={styles.ruleLabel}>固定字符:</span>
             <Input
               value={(rule.config.fixedText as string) || ''}
               placeholder="请输入内容"
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fixedText: value } })}
-              className={styles['rule-input']}
+              className={styles.ruleInput}
             />
             <Button
               type="text"
@@ -305,19 +305,19 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
               disabled={rules.length === 1}
-              className={styles['rule-action-btn']}
+              className={styles.ruleActionBtn}
             />
           </div>
         );
 
       case 'FIELD_REF':
         return (
-          <div className={styles['rule-content']}>
-            <IconDragDotVertical className={styles['drag-handle']} />
-            <span className={styles['rule-label']}>表单字段:</span>
+          <div className={styles.ruleContent}>
+            <IconDragDotVertical className={styles.dragHandle} />
+            <span className={styles.ruleLabel}>表单字段:</span>
             <Cascader
               placeholder="请选择字段"
-              className={styles['rule-input']}
+              className={styles.ruleInput}
               options={fields}
               onChange={(value) =>
                 updateRule(rule.id!, { config: { ...rule.config, fieldName: value[value.length - 1] } })
@@ -329,7 +329,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
               disabled={rules.length === 1}
-              className={styles['rule-action-btn']}
+              className={styles.ruleActionBtn}
             />
           </div>
         );
@@ -341,9 +341,9 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
 
   return (
     <>
-      <div className={styles['field-type-config']}>
+      <div className={styles.fieldTypeConfig}>
         <h4>自动编号规则</h4>
-        <div className={styles['rule-items']}>
+        <div className={styles.ruleConfigItems}>
           <ReactSortable list={rules} setList={(newList) => setRules(newList as AutoCodeRule[])} animation={200}>
             {rules.map((rule) => (
               <div key={rule.id}>{renderRuleConfig(rule)}</div>
@@ -351,7 +351,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
           </ReactSortable>
         </div>
 
-        <div className={styles['add-rule-dropdown']}>
+        <div className={styles.addRuleDropdown}>
           <Dropdown
             trigger="click"
             droplist={
@@ -372,13 +372,13 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               </Menu>
             }
           >
-            <Button type="dashed" icon={<IconPlus />} className={styles['add-rule-btn']}>
+            <Button type="dashed" icon={<IconPlus />} className={styles.addRuleBtn}>
               添加规则
             </Button>
           </Dropdown>
         </div>
 
-        <div className={styles['field-type-config-footer']}>
+        <div className={styles.fieldTypeConfigFooter}>
           <Button type="outline" size="small" onClick={handleCancel}>
             取消
           </Button>

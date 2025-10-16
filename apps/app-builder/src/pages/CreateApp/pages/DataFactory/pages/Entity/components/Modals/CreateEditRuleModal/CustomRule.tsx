@@ -252,7 +252,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
 
   return (
     <Modal
-      className={styles['create-rule-modal']}
+      className={styles.createRuleModal}
       title={`${editRule ? '编辑' : '添加'}规则`}
       visible={visible}
       onOk={handleFinish}
@@ -262,7 +262,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
       confirmLoading={loading}
       style={{ width: 610 }}
     >
-      <Form form={form} layout="vertical" className={styles['rule-form']}>
+      <Form form={form} layout="vertical">
         <Form.Item
           label="规则名称"
           field="rgName"
@@ -291,18 +291,18 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
 
               return (
                 <Form.Item label="条件设置" field="valueRules">
-                  <div className={styles['condition-setting-container']}>
+                  <div className={styles.conditionSettingContainer}>
                     {valueRules.map((group, groupIndex) => (
-                      <div key={groupIndex} className={styles['condition-group']}>
+                      <div key={groupIndex} className={styles.conditionGroup}>
                         {groupIndex > 0 && (
-                          <div className={styles['condition-logicOperator-divider']}>
-                            <span className={styles['logicOperator-label']}>或者</span>
+                          <div className={styles.conditionLogicOperatorDivider}>
+                            <span className={styles.logicOperatorLabel}>或者</span>
                           </div>
                         )}
 
-                        <div className={styles['condition-group-content']}>
+                        <div className={styles.conditionGroupContent}>
                           {group.map((condition, conditionIndex) => (
-                            <div key={conditionIndex} className={styles['condition-row']}>
+                            <div key={conditionIndex} className={styles.conditionRow}>
                               <Space size="small" align="start">
                                 <Select
                                   placeholder="请选择字段"
@@ -367,7 +367,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
                                   size="mini"
                                   icon={<IconDelete />}
                                   onClick={() => removeConditionRow(groupIndex, conditionIndex)}
-                                  className={styles['delete-condition-btn']}
+                                  className={styles.deleteConditionBtn}
                                 />
                               </Space>
                             </div>
@@ -379,7 +379,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
                               size="small"
                               icon={<IconPlus />}
                               onClick={() => addAndCondition(groupIndex)}
-                              className={styles['add-and-btn']}
+                              className={styles.addAndBtn}
                             >
                               并且
                             </Button>
@@ -388,13 +388,13 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
                       </div>
                     ))}
 
-                    <div className={styles['add-or-button-container']}>
+                    <div className={styles.addOrButtonContainer}>
                       <Button
                         type="dashed"
                         size="small"
                         icon={<IconPlus />}
                         onClick={addOrCondition}
-                        className={styles['add-or-btn']}
+                        className={styles.addOrBtn}
                       >
                         或者
                       </Button>

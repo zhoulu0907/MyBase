@@ -120,7 +120,7 @@ const CreateRelationModal: React.FC<{
 
   return (
     <Modal
-      className={styles['create-relation-modal']}
+      className={styles.createRelationModal}
       title="添加关联关系"
       visible={visible}
       onOk={handleFinish}
@@ -128,8 +128,8 @@ const CreateRelationModal: React.FC<{
       okText="确认"
       cancelText="取消"
     >
-      <Form form={form} onSubmit={handleFinish} layout="vertical" className={styles['relation-form']}>
-        <div className={styles['relation-form-container']}>
+      <Form form={form} onSubmit={handleFinish} layout="vertical" className={styles.relationForm}>
+        <div className={styles.relationFormContainer}>
           {/* 本表 */}
           <Grid.Row gutter={16}>
             <Grid.Col span={12}>
@@ -147,7 +147,7 @@ const CreateRelationModal: React.FC<{
                 />
               </Form.Item>
             </Grid.Col>
-            <Grid.Col span={12} className={styles['form-item-bottom']}>
+            <Grid.Col span={12} className={styles.formItemBottom}>
               <Form.Item field="sourceFieldId" rules={[{ required: true, message: '请选择字段' }]}>
                 <Select placeholder="请选择字段" options={leftFieldOptions} />
               </Form.Item>
@@ -180,7 +180,7 @@ const CreateRelationModal: React.FC<{
                 />
               </Form.Item>
             </Grid.Col>
-            <Grid.Col span={12} className={styles['form-item-bottom']}>
+            <Grid.Col span={12} className={styles.formItemBottom}>
               <Form.Item field="targetFieldId" rules={[{ required: true, message: '请选择字段' }]}>
                 <Select placeholder="请选择字段" options={rightFieldOptions} />
               </Form.Item>

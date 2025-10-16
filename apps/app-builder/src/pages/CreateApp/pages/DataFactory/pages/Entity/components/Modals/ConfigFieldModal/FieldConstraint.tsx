@@ -62,13 +62,13 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
   };
 
   return (
-    <div className={styles['field-constraint-config']}>
+    <div className={styles.fieldConstraintConfig}>
       <h4>字段约束</h4>
 
       <Form form={form} initialValues={initialValues} layout="vertical">
         {/* 长度范围配置 */}
-        <div className={styles['constraint-section']}>
-          <div className={styles['constraint-header']}>
+        <div className={styles.constraintSection}>
+          <div className={styles.constraintHeader}>
             <span>长度范围</span>
             <Form.Item
               field="lengthEnabled"
@@ -86,9 +86,9 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
           <Form.Item shouldUpdate noStyle>
             {(values: FieldConstraintConfig) =>
               values.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE && (
-                <div className={styles['constraint-content']}>
-                  <div className={styles['constraint-row']}>
-                    <label className={styles['required-label']}>*最小长度</label>
+                <div className={styles.constraintContent}>
+                  <div className={styles.constraintRow}>
+                    <label className={styles.requiredLabel}>*最小长度</label>
                     <Form.Item
                       field="minLength"
                       rules={[{ required: true, message: '请填写最小长度' }]}
@@ -98,8 +98,8 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
                     </Form.Item>
                   </div>
 
-                  <div className={styles['constraint-row']}>
-                    <label className={styles['required-label']}>*最大长度</label>
+                  <div className={styles.constraintRow}>
+                    <label className={styles.requiredLabel}>*最大长度</label>
                     <Form.Item
                       field="maxLength"
                       rules={[{ required: true, message: '请填写最大长度' }]}
@@ -109,7 +109,7 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
                     </Form.Item>
                   </div>
 
-                  <div className={styles['constraint-row']}>
+                  <div className={styles.constraintRow}>
                     <label>提示信息</label>
                     <Form.Item field="lengthPrompt" style={{ marginBottom: 0 }}>
                       <Input placeholder="请输入提示信息" style={{ width: '200px' }} />
@@ -122,8 +122,8 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
         </div>
 
         {/* 正则校验配置 */}
-        <div className={styles['constraint-section']}>
-          <div className={styles['constraint-header']}>
+        <div className={styles.constraintSection}>
+          <div className={styles.constraintHeader}>
             <span>正则校验</span>
             <Form.Item
               field="regexEnabled"
@@ -141,9 +141,9 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
           <Form.Item shouldUpdate noStyle>
             {(values: FieldConstraintConfig) =>
               values.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE && (
-                <div className={styles['constraint-content']}>
-                  <div className={styles['constraint-row']}>
-                    <label className={styles['required-label']}>*正则校验</label>
+                <div className={styles.constraintContent}>
+                  <div className={styles.constraintRow}>
+                    <label className={styles.requiredLabel}>*正则校验</label>
                     <Form.Item
                       field="regexPattern"
                       rules={[{ required: true, message: '请输入正则表达式' }]}
@@ -153,7 +153,7 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
                     </Form.Item>
                   </div>
 
-                  <div className={styles['constraint-row']}>
+                  <div className={styles.constraintRow}>
                     <label>提示信息</label>
                     <Form.Item field="regexPrompt" style={{ marginBottom: 0 }}>
                       <Input placeholder="请输入提示信息" style={{ width: '200px' }} />
@@ -166,7 +166,7 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
         </div>
 
         {/* 操作按钮 */}
-        <div className={styles['field-constraint-footer']}>
+        <div className={styles.fieldConstraintFooter}>
           <Button type="outline" size="small" onClick={onCancel}>
             取消
           </Button>

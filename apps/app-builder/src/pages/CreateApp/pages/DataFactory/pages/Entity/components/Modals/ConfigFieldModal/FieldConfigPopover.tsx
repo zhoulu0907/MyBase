@@ -22,7 +22,7 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = ({
   fields
 }) => {
   return (
-    <div className={styles['field-config-popover']}>
+    <div className={styles.fieldConfigPopover}>
       {/* 根据字段类型渲染对应的配置组件 */}
       {fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE && (
         <PicklistConfig
