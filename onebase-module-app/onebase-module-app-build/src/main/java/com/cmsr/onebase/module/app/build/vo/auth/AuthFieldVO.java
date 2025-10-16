@@ -25,9 +25,12 @@ public class AuthFieldVO {
     private Integer isCanRead = NumberUtils.INTEGER_ONE;
 
     @Schema(description = "是否可编辑")
-    private Integer isCanEdit = NumberUtils.INTEGER_ZERO;
+    private Integer isCanEdit = NumberUtils.INTEGER_ONE;
 
     @Schema(description = "是否可下载")
-    private Integer isCanDownload = NumberUtils.INTEGER_ZERO;
+    private Integer isCanDownload = NumberUtils.INTEGER_ONE;
+
+    @Schema(description = "字段类型", example = "STRING")
+    private String fieldType;
 
 }
