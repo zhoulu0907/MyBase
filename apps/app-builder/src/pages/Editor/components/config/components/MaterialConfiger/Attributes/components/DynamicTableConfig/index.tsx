@@ -96,7 +96,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   }, [fieldList, searchItemsConfig]);
 
   // todo 暂时不能在表格展示的数据类型
-  const hiddenFieldType = [
+  const hiddenFieldTypes = [
     ENTITY_FIELD_TYPE.SELECT.VALUE,
     ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE,
     ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE,
@@ -121,7 +121,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const res = await getEntityFields({ entityId });
     console.log('fieldList res: ', res);
     res.forEach((item: MetadataEntityField) => {
-      if (item.fieldType && hiddenFieldType.includes(item.fieldType)) {
+      if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
         item.disabled = true;
       }
     });
