@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.event;
+package com.cmsr.onebase.module.flow.core.enums;
 
 /**
  * @Author：huangjie
@@ -24,6 +24,15 @@ public class RocketMQConstants {
     /**
      * 流程事件slot key
      */
-    public static final String CHANGE_EVENTS_CONSUMER_GROUP_SLOT = "flow:process:consumer:group:change:events";
+    public static final String CHANGE_EVENTS_CONSUMER_GROUP_SLOT = "flow:consumer:group:change:slot";
+
+
+    public static final String JOB_EVENTS_TOPIC = "flow_process_job_events";
+
+
+    public static final String CONSUMER_GROUP_DEFAULT = "group_default";
+
+
+    public static final String JOB_EVENTS_RESULT = "flow:process:job:result:";
 
 }
