@@ -3,8 +3,6 @@ import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/we
 import {
   deleteDataGroup,
   FieldType,
-  // getEntityFieldsWithChildren
-  // getAppEntities,
   getDataPermission,
   getEntityById,
   getEntityFields,
@@ -15,17 +13,13 @@ import {
   IsOperable,
   loadPageSet,
   updateDataGroupPermission,
-  // type ConditionField,
   type AppEntityField,
   type AuthDataFilterVO,
-  // type AppEntities,
-  // type AppEntityField,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
   type EntityFieldValidationTypes,
+  type ValidationTypeItem,
   type EntityWithChildren,
-  // type GetPageSetIdReq
-  // type FilterFieldCheckType,
   type GetPermissionReq,
   type LoadPageSetReq,
   type ScopeTypeOption,
@@ -117,6 +111,9 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     const addDisabled = res.authDataGroups.map((field: AuthDataGroupVO) => ({
       ...field
     }));
+    // 后端返回默认权限组
+    // setDataPermission(addDisabled);
+    // 前端生成默认权限组
     setDataPermission((prevDataPermission) => {
       // 保留第一个默认权限组，将获取到的数据添加到后面
       const defaultPermission = prevDataPermission[0];
@@ -134,7 +131,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const permToEdit = DataPermission.find((perm) => perm.id === id);
       if (permToEdit) {
         // 创建编辑数据对象
-        const editingData: any = { ...permToEdit };
+        const editingData: AuthDataGroupVO = { ...permToEdit };
         // 处理数据过滤条件
         if (permToEdit.dataFilters) {
           // 将后端数据格式转换为condition-editor组件需要的格式
@@ -174,7 +171,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const scopeTypeResq = await getScopeTypeApi();
       await SetDataPermissionScopeType(scopeTypeResq);
     } catch (error) {
-      console.log('获取权限范围失败 error:', error);
+      console.error('获取权限范围失败 error:', error);
     }
   };
 
@@ -184,7 +181,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       // getEntityInfoById(resq);
       loadPageSetForId({ id: resq });
     } catch (error) {
-      console.log('获取数据集id失败 error:', error);
+      console.error('获取数据集id失败 error:', error);
     }
   };
 
@@ -195,7 +192,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       getViewDataEntity(resq.mainMetadata);
       getEntityInfoById(resq.mainMetadata);
     } catch (error) {
-      console.log('载入数据集获取id失败 error:', error);
+      console.error('载入数据集获取id失败 error:', error);
     }
   };
 
@@ -207,7 +204,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       getDataPermissionFields(resq.id);
       getDataPermissionRoles(resq.id);
     } catch (error) {
-      console.log('获取数据集详细信息 error:', error);
+      console.error('获取数据集详细信息 error:', error);
     }
   };
 
@@ -222,7 +219,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       //   field.fieldId = field.id;
       // });
     } catch (error) {
-      console.log('获取数据集详细信息 error:', error);
+      console.error('获取数据集详细信息 error:', error);
     }
   };
 
@@ -241,7 +238,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
       // 添加父表字段
       if (entityData.parentFields && entityData.parentFields.length > 0) {
-        entityData.parentFields.forEach((field) => {
+        entityData.parentFields.forEach((field: AppEntityField) => {
           if (field.fieldId && field.fieldName) {
             mainEntityNode.children?.push({
               key: `entity-${entityData.entityId}.${field.fieldId}`, // 关键：使用 "父节点ID.字段ID" 格式
@@ -258,6 +255,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     // 添加子表实体
     if (entityData.childEntities && entityData.childEntities.length > 0) {
       entityData.childEntities.forEach((child: any) => {
+        console.log('添加子表实体 child:', child);
         if (child.childEntityId && child.childEntityName) {
           const childEntityNode: TreeSelectDataType = {
             key: `child-${child.childEntityId}`,
@@ -293,13 +291,13 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     try {
       const entityFieldsResq = await getEntityFields({ entityId, isSystemField: 0 });
       // entityFieldsResq 返回的数据 是 id 但是 appEntityField 中 是 fieldID
-      entityFieldsResq.forEach((field: any) => {
+      entityFieldsResq.forEach((field: AppEntityField) => {
         field.fieldId = field.id;
       });
 
       // 批量获取字段可选校验类型
       const getFieldCheckTypeParams: string[] = [];
-      entityFieldsResq.forEach((item: any) => {
+      entityFieldsResq.forEach((item: AppEntityField) => {
         if (item.fieldId) {
           getFieldCheckTypeParams.push(item.fieldId);
         }
@@ -324,7 +322,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     try {
       const dataPermissionRoles = await getEntityFields({ entityId, isPerson: 1 });
       // 将获取到的数据转换为正确的格式
-      const formattedData = dataPermissionRoles.map((item: any) => ({
+      const formattedData = dataPermissionRoles.map((item: AuthDataPermissionPersonVO) => ({
         PersonId: item.id,
         fieldName: item.fieldName,
         displayName: item.displayName,
@@ -341,9 +339,10 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const getFieldCheckType = async (fieldIds: string[]) => {
     try {
       const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
+      // console.log('批量获取字段可选校验了类型 fieldCheckTypeResq:', fieldCheckTypeResq);
       setFilterFieldCheckType(fieldCheckTypeResq);
     } catch (error) {
-      console.log('批量获取字段可选校验类型 error:', error);
+      console.error('批量获取字段可选校验类型 error:', error);
     }
   };
 
@@ -352,7 +351,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
    * @param values 原始表单数据
    * @param submitData 处理后的提交数据
    */
-  const processScopeLevelData = (values: AuthDataGroupVO, submitData: any) => {
+  const processScopeLevelData = (values: AuthDataGroupVO, submitData: AuthDataGroupVO) => {
     // 如果选择的是指定成员或者指定部门，将数据转为JSON字符串给scopeValue
     if (values.scopeLevel === 'specifiedPerson' || values.scopeLevel === 'specifiedDepartment') {
       if (values.scopeValue && values.scopeValue.length > 0) {
@@ -361,7 +360,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     }
   };
 
-  const processDataFilters = (values: any, submitData: any) => {
+  const processDataFilters = (values: AuthDataGroupVO, submitData: AuthDataGroupVO) => {
     // 使用新添加的转换方法来处理filterCondition
     if (values.filterCondition) {
       submitData.dataFilters = convertConditionDataToBackendFormat(values.filterCondition);
@@ -377,17 +376,16 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (!Array.isArray(filterCondition) || filterCondition.length === 0) {
       return [];
     }
-
     const result: Array<AuthDataFilterVO[]> = [];
 
-    filterCondition.forEach((orGroup, groupIndex) => {
+    filterCondition.forEach((orGroup) => {
       if (!orGroup || !Array.isArray(orGroup.conditions)) {
         return;
       }
 
       const convertedGroup: AuthDataFilterVO[] = [];
 
-      orGroup.conditions.forEach((andCondition: any, conditionIndex: number) => {
+      orGroup.conditions.forEach((andCondition: any) => {
         if (!andCondition) {
           return;
         }
@@ -489,7 +487,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             value: value
           };
         });
-
+        console.log('前端展示需要的数据 convertedConditions:', convertedConditions);
         result.push({
           conditions: convertedConditions
         });
@@ -499,7 +497,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
 
   // 添加这个方法到 DataPermission 组件中
-  const getVariable = (value: any, fieldValueType: string) => {
+  const getVariable = (value: string, fieldValueType: string) => {
     if (value === null || value === undefined) return '';
 
     // 如果是变量类型（variables），尝试解析为字段名
@@ -603,14 +601,16 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     onOk={() => {
                       handleDelete(perm.id!);
                     }}
+                    disabled={DataPermission.length <= 1}
                   >
                     <IconDelete
                       style={{
                         fontSize: 20,
-                        color: '#F53F3F',
+                        color: DataPermission.length <= 1 ? '#C9CDD4' : '#F53F3F',
                         marginLeft: 10,
-                        cursor: 'pointer'
+                        cursor: DataPermission.length <= 1 ? 'not-allowed' : 'pointer'
                       }}
+                      // disabled={!perm.id}
                     />
                   </Popconfirm>
                 </div>
@@ -639,16 +639,17 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     {perm.dataFilters && perm.dataFilters.length > 0 && (
                       <>
                         且
-                        {perm.dataFilters.map((group, groupIndex: number) => (
+                        {perm.dataFilters.map((group: AuthDataFilterVO, groupIndex: number) => (
                           <span key={`groupIndex-${groupIndex}`}>
-                            {group.map((filter) => (
+                            {group.map((filter: AuthDataFilterVO) => (
                               <Tag color="#E8FFEA" style={{ color: '#00B42A', margin: '0 4px' }} key={filter.id}>
                                 {filter.fieldName}
                                 {/* {filter.fieldOperator} */}{' '}
                                 {filterFieldCheckType
                                   .find((item) => item.fieldId === filter.fieldId + '')
-                                  ?.validationTypes?.find((type) => type.code === filter.fieldOperator)?.name ||
-                                  filter.fieldOperator}{' '}
+                                  ?.validationTypes?.find(
+                                    (type: ValidationTypeItem) => type.code === filter.fieldOperator
+                                  )?.name || filter.fieldOperator}{' '}
                                 {filter.fieldOperator !== 'IS_EMPTY' && filter.fieldOperator !== 'IS_NOT_EMPTY' && (
                                   <>
                                     {filter.fieldValueType

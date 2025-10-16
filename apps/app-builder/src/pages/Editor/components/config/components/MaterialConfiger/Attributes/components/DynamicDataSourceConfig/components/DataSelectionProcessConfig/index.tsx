@@ -43,61 +43,21 @@ const maxFastFilterCount = 3;
 
 const SUB_ATTR_KEY = {
   DEFAULTVALUE: 'defaultValue',
+  DATAFIELDS: 'dataFields',
   SELECTDATAFIELDS: 'selectDataFields',
   FILTERDATA: 'filterData',
+  FILTERCONDITION: 'filterCondition',
   SORTDATARULE: 'sortDataRule',
   OPERATIONAUTH: 'operationAuth',
   FASTFILTER: 'fastFilter',
   DYNAMICTABLECONFIG: 'dynamicTableConfig',
-  COLUMNS: 'columns'
+  COLUMNS: 'columns',
+  SORTBYOBJECT: 'sortByObject'
 };
-
-function countSelectedLeaf(selected: string[], options: any[]): number {
-  let count = 0;
-  for (const opt of options) {
-    if (opt.children) {
-      count += countSelectedLeaf(selected, opt.children);
-    } else if (selected.includes(opt.value)) {
-      count += 1;
-    }
-  }
-  return count;
-}
-
-//mockup
-const defaultOptions = [
-  {
-    value: 1,
-    label: '提交时间'
-  },
-  {
-    value: 2,
-    label: '更新时间'
-  }
-];
 
 const sortOptions = [
   { value: 1, label: '升序' },
   { value: 2, label: '降序' }
-];
-
-const initialDisplayFieldOptions = [
-  { label: '标题', value: 'title', id: 1 },
-  { label: '单行文本', value: 'singleText', id: 2 },
-  { label: '提交时间', value: 'submitTime', id: 3 },
-  { label: '多行文本', value: 'multiText', id: 4 },
-  { label: '单选按钮组', value: 'radioGroup', id: 5 },
-  { label: '提交人', value: 'submitter', id: 6 },
-  { label: '更新时间', value: 'updateTime', id: 7 },
-  {
-    label: '子表单',
-    value: 'subTable',
-    id: 8,
-    children: [
-      { label: '成员单选', value: 'member', id: 81 },
-      { label: '图片', value: 'image', id: 82 }
-    ]
-  }
 ];
 
 const fastFilterOptions = [
@@ -127,78 +87,112 @@ const treeData = [
 const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   visible,
   setVisible,
-  handlePropsChange,
   item,
   configs,
-  id
+  id,
+  handlePropsChange
 }) => {
   const tableConfig = configs[SUB_ATTR_KEY.DYNAMICTABLECONFIG];
   const [filterDataVisible, setFilterDataVisible] = useState(false); //添加过滤条件popup
 
-  const [sortFieldValue, setSortFieldValue] = useState<number>();
-  const [sortValue, setSortValue] = useState<number>(1);
+  const [displayFieldOptions, setDisplayFieldOptions] = useState(configs[SUB_ATTR_KEY.DATAFIELDS]);
+  const [selected, setSelected] = useState(configs[SUB_ATTR_KEY.SELECTDATAFIELDS]);
+  const [tableHeader, setTableHeader] = useState<any[]>(tableConfig[SUB_ATTR_KEY.COLUMNS]); // table header
+
+  const [filterCondition, setFilterCondition] = useState(configs[SUB_ATTR_KEY.FILTERCONDITION]);
+
+  const [sortFieldValue, setSortFieldValue] = useState<string>(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT].fieldName);
+  const [sortValue, setSortValue] = useState<number>(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT].sortBy);
 
   const [isFastFilter, setIsFastFilter] = useState<boolean>(false);
   const [fastFilters, setFastFilters] = useState<any[]>([]);
 
-  const [displayFieldOptions, setDisplayFieldOptions] = useState(initialDisplayFieldOptions);
-  const [selected, setSelected] = useState([
-    'title',
-    'singleText',
-    'submitTime',
-    'multiText',
-    'radioGroup',
-    'submitter'
-  ]);
-  const [tableHeader, setTableHeader] = useState<any[]>(tableConfig[SUB_ATTR_KEY.COLUMNS]); // table header
-  const [tableDataSource, setTableDataSource] = useState([]); // table data source
+  // const sortType = 'normal';
 
-  const sortType = 'normal';
+  // const droplist = (
+  //   <Menu className={styles.hideScrollbarCommon} onClickMenuItem={(key) => handleSelectFastFilter(key)}>
+  //     {fastFilterOptions.map((opt) => (
+  //       <Menu.Item key={opt.value} disabled={fastFilters.includes(opt)}>
+  //         {opt.label}
+  //       </Menu.Item>
+  //     ))}
+  //   </Menu>
+  // );
 
-  const droplist = (
-    <Menu className={styles.hideScrollbarCommon} onClickMenuItem={(key) => handleSelectFastFilter(key)}>
-      {fastFilterOptions.map((opt) => (
-        <Menu.Item key={opt.value} disabled={fastFilters.includes(opt)}>
-          {opt.label}
-        </Menu.Item>
-      ))}
-    </Menu>
-  );
+  useEffect(() => {
+    if (visible) {
+      setDisplayFieldOptions(configs[SUB_ATTR_KEY.DATAFIELDS]);
+      setSelected(configs[SUB_ATTR_KEY.SELECTDATAFIELDS]);
+    }
+  }, [visible]);
 
   useEffect(() => {
     handleOptionsChange();
   }, [displayFieldOptions, selected]);
 
   const handleOptionsChange = () => {
-    const header = displayFieldOptions
-      .map((option: any) => {
-        if (selected.includes(option.value)) {
-          return {
-            title: option.label,
-            dataIndex: option.value
-          };
-        }
-      })
-      .filter(Boolean);
+    const header = displayFieldOptions.reduce((fields: any[], option: any) => {
+      if (selected.includes(option.fieldName)) {
+        fields.push({
+          title: option.displayName,
+          dataIndex: option.fieldName
+        });
+      }
+      return fields;
+    }, []);
     setTableHeader(header);
     tableConfig.columns = header;
     handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
   };
 
-  // 获取叶子节点
-  const leafCount = countSelectedLeaf(selected, displayFieldOptions);
-
-  const handleSelectFastFilter = (key: any) => {
-    if (fastFilters.length === maxFastFilterCount) {
-      Message.warning('最多添加三个分组字段');
-    } else {
-      const obj: any = fastFilterOptions.find((opt) => opt.value === key);
-      if (obj?.label !== '提交人') {
-        obj.sortType = 'normal';
-      }
-      setFastFilters([...fastFilters, obj]);
-    }
+  const handleDisplayFieldOptions = (value: any) => {
+    setDisplayFieldOptions(value);
+    handlePropsChange(SUB_ATTR_KEY.DATAFIELDS, value);
   };
+
+  const handleSelectedChange = (value: any) => {
+    setSelected(value);
+    handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, value);
+  };
+
+  const handlSortFieldValueChange = (value: string) => {
+    const sortBy = value ? sortValue : 1;
+    tableConfig.sortByObject = {
+      fieldName: value,
+      sortBy: sortBy
+    };
+
+    setSortFieldValue(value);
+    setSortValue(sortBy);
+    handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
+  };
+
+  const handleSortValueChange = (value: number) => {
+    setSortValue(value);
+    tableConfig.sortByObject = {
+      fieldName: sortFieldValue,
+      sortBy: value
+    };
+    handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
+  };
+
+  const handleOKModal = (values: any) => {
+    handlePropsChange(SUB_ATTR_KEY.FILTERCONDITION, values);
+    setFilterCondition(values);
+    setFilterDataVisible(false);
+  };
+
+  // const handleSelectFastFilter = (key: any) => {
+  //   if (fastFilters.length === maxFastFilterCount) {
+  //     Message.warning('最多添加三个分组字段');
+  //   } else {
+  //     const obj: any = fastFilterOptions.find((opt) => opt.value === key);
+  //     if (obj?.label !== '提交人') {
+  //       obj.sortType = 'normal';
+  //     }
+  //     setFastFilters([...fastFilters, obj]);
+  //   }
+  // };
 
   return (
     <>
@@ -221,7 +215,14 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
               </div>
             )}
             <div className={styles.rightFlexTable}>
-              <ListComp.XTable cpName={id} id={id} {...tableConfig} columns={tableHeader} />
+              <ListComp.XTable
+                cpName={id}
+                id={id}
+                {...tableConfig}
+                columns={tableHeader}
+                runtime={true}
+                showAddBtn={false}
+              />
             </div>
           </div>
           <div className={styles.rightColumn}>
@@ -238,18 +239,18 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
               <FormItem label="选择数据时的显示字段">
                 <Select
                   value={selected}
-                  onChange={setSelected}
+                  onChange={(e) => handleSelectedChange(e)}
                   placeholder="设置显示字段"
                   getPopupContainer={(node) => node.parentNode as HTMLElement}
-                  renderFormat={() => `显示 ${leafCount} 个字段`}
+                  renderFormat={() => (selected.length > 0 ? `显示 ${selected.length} 个字段` : '设置显示字段')}
                   dropdownRender={() => (
                     <div className={styles.dropdownRender}>
                       <DropdownRender
                         selected={selected}
-                        setSelected={setSelected}
+                        setSelected={handleSelectedChange}
                         displayFieldOptions={displayFieldOptions}
                         handleOptionsChange={handleOptionsChange}
-                        setDisplayFieldOptions={setDisplayFieldOptions}
+                        setDisplayFieldOptions={handleDisplayFieldOptions}
                       />
                     </div>
                   )}
@@ -257,23 +258,29 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
               </FormItem>
               <FormItem label="数据过滤">
                 <Button type="secondary" long onClick={() => setFilterDataVisible(true)}>
-                  添加过滤条件
+                  {filterCondition.length > 0 ? '已添加过滤条件' : '添加过滤条件'}
                 </Button>
-                <FilterDataModal visible={filterDataVisible} onCancel={() => setFilterDataVisible(false)} />
+                <FilterDataModal
+                  visible={filterDataVisible}
+                  item={item}
+                  configs={configs}
+                  onCancel={() => setFilterDataVisible(false)}
+                  onOk={(values: any) => handleOKModal(values)}
+                />
               </FormItem>
               <FormItem label="数据排序规则">
                 <Grid.Row gutter={8}>
                   <Grid.Col span={sortFieldValue ? 18 : 24}>
                     <Select
-                      defaultValue={sortFieldValue}
-                      onChange={setSortFieldValue}
+                      value={sortFieldValue}
+                      onChange={(e) => handlSortFieldValueChange(e)}
                       placeholder="请选择"
                       getPopupContainer={(node) => node.parentNode as HTMLElement}
                       allowClear
                     >
-                      {defaultOptions.map((option) => (
-                        <Option key={option.value} value={option.value}>
-                          {option.label}
+                      {displayFieldOptions.map((option: any) => (
+                        <Option key={option.fieldName} value={option.fieldName}>
+                          {option.displayName}
                         </Option>
                       ))}
                     </Select>
@@ -282,7 +289,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                     <Grid.Col span={6}>
                       <Select
                         defaultValue={sortValue}
-                        onChange={setSortValue}
+                        onChange={(e) => handleSortValueChange(e)}
                         placeholder="请选择"
                         getPopupContainer={(node) => node.parentNode as HTMLElement}
                       >
@@ -296,13 +303,13 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                   )}
                 </Grid.Row>
               </FormItem>
-              <FormItem label="操作权限">
+              {/* <FormItem label="操作权限">
                 <Checkbox defaultChecked>允许新增数据源表数据</Checkbox>
                 <Tooltip content="成员需要有数据源表的添加权限，才可新增数据">
                   <IconQuestionCircleFill className={styles.iconQuestionCircleFill} />
                 </Tooltip>
-              </FormItem>
-              <FormItem label="快捷筛选" layout="horizontal" className={styles.switchLabel}>
+              </FormItem> */}
+              {/* <FormItem label="快捷筛选" layout="horizontal" className={styles.switchLabel}>
                 <Switch className={styles.switchButton} onChange={(value) => setIsFastFilter(value)} />
               </FormItem>
               {!isFastFilter ? (
@@ -360,7 +367,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                     ))}
                   </ReactSortable>
                 </FormItem>
-              )}
+              )} */}
             </Form>
           </div>
         </div>

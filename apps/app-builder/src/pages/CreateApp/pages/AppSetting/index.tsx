@@ -36,7 +36,9 @@ const AppSettingPage: FC = () => {
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
 
   useEffect(() => {
-    curAppId && getApplicationData();
+    if (curAppId) {
+      getApplicationData();
+    }
   }, [curAppId]);
 
   const getApplicationData = async () => {

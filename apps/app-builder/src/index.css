@@ -20,3 +20,7 @@
 .menuTree .arco-tree-node-switcher {
   display: none;
 }
+
+.buttonShowInput .arco-input-inner-wrapper {
+  background-color: #fff;
+}

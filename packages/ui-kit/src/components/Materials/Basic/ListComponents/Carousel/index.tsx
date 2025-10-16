@@ -1,9 +1,9 @@
-import { memo } from 'react';
 import { Carousel } from '@arco-design/web-react';
+import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XCarouselConfig } from './schema';
 
-const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
+const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, runtime = true } = props;
 
   const imageSrc = [
@@ -26,7 +26,8 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
     >
       {imageSrc.map((src, index) => (
         <div key={index}>
-          <img src={src} style={{ width: '100%' }} />{runtime}
+          <img src={src} style={{ width: '100%' }} />
+          {runtime}
         </div>
       ))}
     </Carousel>

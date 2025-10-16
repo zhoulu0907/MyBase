@@ -35,7 +35,6 @@ import {
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
-import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -72,7 +71,6 @@ interface Options {
 }
 
 const PageManagerPage: FC = () => {
-
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -197,11 +195,8 @@ const PageManagerPage: FC = () => {
   };
 
   const getEntityList = async () => {
-    // TODO(mickey): 等xiaoyi完成后 写活
-    // const appId: string = '1';
     const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
-    console.log(res);
     const entityOptions = res.map((entity) => ({
       label: entity.entityName,
       value: entity.entityId
@@ -238,6 +233,7 @@ const PageManagerPage: FC = () => {
 
   const triggerRename = () => {
     setVisibleRenameForm(true);
+    setTitle(t('createApp.rename'));
   };
 
   const triggerCreate = (formType: string) => {

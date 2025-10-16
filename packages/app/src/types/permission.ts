@@ -270,6 +270,10 @@ export interface AuthFieldVO {
    */
   fieldId: string;
   /**
+   * 字段类型
+   */
+  fieldType: string;
+  /**
    * 主键Id
    */
   id: string;
@@ -448,4 +452,13 @@ export enum FieldEdit {
 export enum FieldDownloadable {
   notDownloadable,
   canDownloadable
+}
+
+/**
+ * 枚举 字段可见性
+ * @enum
+ */
+export enum Visibility {
+  visible,
+  hidden
 }

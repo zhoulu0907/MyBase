@@ -1,13 +1,13 @@
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Message, Radio, Tag } from '@arco-design/web-react';
-import { IconMindMapping, IconNav, IconCopy } from '@arco-design/web-react/icon';
+import { IconCopy, IconMindMapping, IconNav } from '@arco-design/web-react/icon';
 import { getDatasourceList } from '@onebase/app';
+import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import EntityTable from '../components/EntityTable';
 import styles from '../index.module.less';
 import { EntityERContainer } from './EntityERContainer';
-import dayjs from 'dayjs';
 
 interface DatasourceRecord {
   id: number;
@@ -27,6 +27,12 @@ export const CheckEntityPage: React.FC = () => {
   const [dsData, setDsData] = useState<DatasourceRecord | null>(null);
   const { curAppId } = useAppStore();
   const { setCurDataSourceId } = useResourceStore();
+
+  useEffect(() => {
+    if (curAppId) {
+      getAppResources();
+    }
+  }, [curAppId]);
 
   const getAppResources = async () => {
     try {
@@ -55,12 +61,6 @@ export const CheckEntityPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (curAppId) {
-      getAppResources();
-    }
-  }, [curAppId]);
-
   return (
     <div className={styles['entity-page']}>
       <div className={styles['entity-page-header']}>
@@ -79,6 +79,7 @@ export const CheckEntityPage: React.FC = () => {
         <div className={styles['entity-page-header-right']}>
           <Radio.Group
             type="button"
+            // TODO(xiaoyi): 1. ER图命名和table大小写不一致， ER字符串多处用到 需要抽象出来
             defaultValue="ER"
             style={{ marginLeft: 10 }}
             onChange={(value) => {
@@ -96,6 +97,7 @@ export const CheckEntityPage: React.FC = () => {
       </div>
 
       {activeTab === 'ER' && (
+        // TODO(xiaoyi): styles.xxx 全局修改下
         <div className={styles['entity-page-content']}>
           <EntityERContainer
             refreshEntityList={refreshEntityList}

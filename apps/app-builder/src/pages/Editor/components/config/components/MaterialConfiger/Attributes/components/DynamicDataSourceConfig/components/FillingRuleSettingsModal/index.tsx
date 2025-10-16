@@ -1,41 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Dropdown, Input, Menu, Modal, Select, Space } from '@arco-design/web-react';
+import { v4 as uuidv4 } from 'uuid';
 
 import styles from '../../index.module.less';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { COMPONENT_TYPE_DISPLAY_NAME_MAP, getComponentSchema, usePageEditorSignal } from '@onebase/ui-kit';
+import { COMPONENT_MAP } from '@/pages/Editor/components/panel/components/metadata/component_map';
 
 interface FillingRuleSettingsModalProps {
   visible: boolean;
   fieldOptions: Array<any>;
+  selectRule: any[];
   onCancel: any;
   onOk: any;
 }
 
 const Option = Select.Option;
 
-// 具体看实际数据结构
-function flattenOptions(options: any, parentLabel = '', parentValue = '') {
-  let result: any[] = [];
-  options.forEach((opt: any) => {
-    if (opt.children) {
-      result = result.concat(
-        flattenOptions(
-          opt.children,
-          parentLabel ? `${parentLabel}.${opt.label}` : opt.label,
-          parentValue ? `${parentValue}.${opt.value}` : opt.value
-        )
-      );
-    } else {
-      result.push({
-        label: parentLabel ? `${parentLabel}.${opt.label}` : opt.label,
-        value: parentValue ? `${parentValue}.${opt.value}` : opt.value
-      });
-    }
-  });
-  return result;
-}
-
-// mock up
 const fillToOptions = [
   {
     value: 1,
@@ -50,65 +31,194 @@ const fillToOptions = [
 const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
   visible,
   fieldOptions,
+  selectRule,
   onCancel,
   onOk
 }) => {
+  const { setCurComponentSchema, setPageComponentSchemas, components, setComponents, setShowDeleteButton } =
+    usePageEditorSignal();
+
   const [selected, setSelected] = useState<string[]>([]);
   const [fillOption, setFillOption] = useState<number>(1);
   const [isToNextStep, setIsToNextStep] = useState<boolean>(false);
+  const [refactFieldOptions, setRefactFieldOptions] = useState<any[]>([]);
+  const [selectedObject, setSelectedObject] = useState<any[]>([]);
 
-  // todo
   useEffect(() => {
-    if (visible) {
-      // setSelected([]);
-      // setFillOption(1);
-      // setIsToNextStep(false);
-    }
-  }, [visible]);
+    const refactFieldOptions = [...fieldOptions].reduce((newOptions, item) => {
+      const cpType = COMPONENT_MAP[item.fieldType];
+      const targetComponents = components.filter((item) => item.type === cpType);
+      newOptions.push({
+        ...item,
+        targetComponents,
+        cpType
+      });
+      return newOptions;
+    }, []);
+    setRefactFieldOptions(refactFieldOptions);
 
-  const flatFieldOptions = flattenOptions(fieldOptions);
+    if (selectRule.length > 0) {
+      const selected = selectRule.map((item) => item.fieldId);
+      setSelected(selected);
+      setIsToNextStep(true);
+      setFillOption(2);
+    }
+  }, [fieldOptions, selectRule]);
+
+  useEffect(() => {
+    const usedComponentIDs = new Set();
+    const selectedObject = [...selected].reduce((newSelects: any, select) => {
+      const option = refactFieldOptions.find((field) => field.fieldId === select);
+      if (!option) return newSelects;
+
+      // 当前优先选 componentID
+      let componentID =
+        selectRule.find((rule) => rule.fieldId === select)?.componentID || option.targetComponents?.[0]?.id;
+
+      // 如果已被用过，则找同类型未用过的
+      if (componentID && usedComponentIDs.has(componentID)) {
+        const other = option.targetComponents?.find((tc: any) => !usedComponentIDs.has(tc.id));
+        componentID = other ? other.id : undefined;
+      }
+
+      // 标记已用
+      if (componentID) usedComponentIDs.add(componentID);
+
+      return [
+        ...newSelects,
+        {
+          fieldId: option.fieldId,
+          displayName: option.displayName,
+          targetComponents: option.targetComponents,
+          cpType: option.cpType,
+          selectComponentID: componentID
+        }
+      ];
+    }, []);
+    setSelectedObject(selectedObject);
+  }, [selected]);
+
+  const handleOnCancel = () => {
+    if (selectRule.length === 0) reset();
+    onCancel();
+  };
+
+  // 全选/半选逻辑
+  const allValues = refactFieldOptions.map((opt) => opt.fieldId);
+  const isAllChecked = selected.length === allValues.length;
+  const isIndeterminate = selected.length > 0 && selected.length < allValues.length;
+
+  const handleSaveToExistFields = () => {
+    const result = selectedObject.reduce((acc, item) => {
+      if (item.selectComponentID) {
+        acc.push({
+          fieldId: item.fieldId,
+          selectComponentID: item.selectComponentID
+        });
+      }
+      return acc;
+    }, []);
+    if (result.length === 0) reset();
+    onOk(result);
+  };
+
+  const handleComChange = (index: number, value: string) => {
+    setSelectedObject((prev) =>
+      prev.map((item, i) => {
+        if (i === index) {
+          // 当前项赋新值
+          return { ...item, selectComponentID: value };
+        }
+        // 其他项如果有重复则置空
+        if (item.selectComponentID === value) {
+          return { ...item, selectComponentID: undefined };
+        }
+        return item;
+      })
+    );
+  };
+
+  const onSubmit = () => {
+    if (fillOption === 1) {
+      const fillRuleSetting = addNewComponents();
+      onOk(fillRuleSetting);
+    } else {
+      !isToNextStep ? setIsToNextStep(true) : handleSaveToExistFields();
+    }
+  };
+
+  const addNewComponents = () => {
+    const [newComponents, fillRuleSetting] = selectedObject.reduce(
+      ([newComponents, fillRuleSetting], item) => {
+        const displayName = COMPONENT_TYPE_DISPLAY_NAME_MAP[item.cpType];
+        const cpID = `${item.cpType}-${uuidv4()}`;
+        const schema = getComponentSchema(item.cpType as any);
+        schema.config.cpName = displayName;
+        schema.config.id = cpID;
+        schema.config.label.text = displayName;
+        const props = {
+          id: cpID,
+          type: item.cpType,
+          ...schema
+        };
+
+        setPageComponentSchemas(cpID!, props);
+        setCurComponentSchema(props);
+        setShowDeleteButton(false);
+        newComponents.push({
+          displayName: displayName,
+          id: cpID,
+          selected: false,
+          type: item.cpType
+        });
+        fillRuleSetting.push({
+          fieldId: item.fieldId,
+          componentID: cpID
+        });
+        return [newComponents, fillRuleSetting];
+      },
+      [[], []]
+    );
+    setComponents([...components, ...newComponents]);
+    return fillRuleSetting;
+  };
+
+  const reset = () => {
+    setSelected([]);
+    setFillOption(1);
+    setIsToNextStep(false);
+  };
+
   const droplist = (
     <Menu
       style={{ maxHeight: 320 }}
       className={styles.hideScrollbarCommon}
       onClickMenuItem={(key) => setSelected([...selected, key])}
     >
-      {flatFieldOptions.map((opt) => (
-        <Menu.Item key={opt.value} disabled={selected.includes(opt.value)}>
-          {opt.label}
+      {refactFieldOptions.map((opt) => (
+        <Menu.Item key={opt.fieldId} disabled={selected.includes(opt.fieldId)}>
+          {opt.displayName}
         </Menu.Item>
       ))}
     </Menu>
   );
 
-  // 全选/半选逻辑
-  const allValues = flatFieldOptions.map((opt) => opt.value);
-  const isAllChecked = selected.length === allValues.length;
-  const isIndeterminate = selected.length > 0 && selected.length < allValues.length;
-
-  const onSubmit = () => {
-    if (fillOption === 1) {
-      onOk(selected);
-    } else {
-      !isToNextStep ? setIsToNextStep(true) : onOk(selected); //todo
-    }
-  };
-
   return (
     <>
       <Modal
         className={styles.fillingRuleSettingsModal}
+        style={{ width: '600px' }}
         title={<span className={styles.modalTitleLeft}>填充规则设置</span>}
         visible={visible}
-        onCancel={onCancel}
+        onCancel={handleOnCancel}
         autoFocus={false}
         focusLock={true}
         escToExit={false}
         maskClosable={false}
         footer={
           <>
-            <Button onClick={onCancel}>取消</Button>
-            <Button onClick={onSubmit} type="primary">
+            <Button onClick={handleOnCancel}>取消</Button>
+            <Button onClick={onSubmit} type="primary" disabled={selected.length === 0 && fillOption === 1}>
               {fillOption === 1 ? '确定' : !isToNextStep ? '下一步' : '完成'}
             </Button>
           </>
@@ -128,15 +238,15 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
               </Checkbox>
               <div className={styles.checkboxGroup}>
                 <Space direction="vertical" size={8}>
-                  {flatFieldOptions.map((opt) => (
+                  {refactFieldOptions.map((opt) => (
                     <Checkbox
-                      key={opt.value}
-                      checked={selected.includes(opt.value)}
+                      key={opt.fieldId}
+                      checked={selected.includes(opt.fieldId)}
                       onChange={(checked) =>
-                        setSelected(checked ? [...selected, opt.value] : selected.filter((v) => v !== opt.value))
+                        setSelected(checked ? [...selected, opt.fieldId] : selected.filter((v) => v !== opt.fieldId))
                       }
                     >
-                      {opt.label}
+                      {opt.displayName}
                     </Checkbox>
                   ))}
                 </Space>
@@ -175,29 +285,20 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
               </Button>
             </Dropdown>
 
-            {selected.map((item, index) => (
-              <div className={styles.fieldItemDiv} key={item}>
-                <Input
-                  readOnly
-                  disabled
-                  className={styles.fieldInput}
-                  value={flatFieldOptions.find((field) => field.value === item).label}
-                />
+            {selectedObject.map((item, index) => (
+              <div className={styles.fieldItemDiv} key={item.fieldId}>
+                <Input readOnly disabled className={styles.fieldInput} value={item.displayName} />
                 <span className={styles.fieldSpan}>的值填充到</span>
                 {/* 目标字段 */}
                 <Select
                   className={styles.fieldSelect}
-                  // value={item.to}
-                  // onChange={v => handleChange(idx, v)}
-                  // options={fieldOptions.map(opt => ({
-                  //   label: (
-                  //     <span style={{ display: "flex", alignItems: "center" }}>
-                  //       {opt.icon}
-                  //       <span style={{ marginLeft: 8 }}>{opt.label}</span>
-                  //     </span>
-                  //   ),
-                  //   value: opt.value,
-                  // }))}
+                  placeholder="请选择字段"
+                  value={item.selectComponentID}
+                  onChange={(v) => handleComChange(index, v)}
+                  options={item.targetComponents.map((opt: any) => ({
+                    label: opt.displayName,
+                    value: opt.id
+                  }))}
                 />
                 {/* 删除按钮 */}
                 <Button

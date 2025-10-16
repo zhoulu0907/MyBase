@@ -64,7 +64,17 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                           field={item.field + '.field'}
                           rules={[
                             { required: true, message: '请输入字段' },
-                            { match: /^[_a-zA-Z0-9\u4E00-\u9FA5]*$/, message: '字段不符合填写要求' }
+                            { match: /^[_a-zA-Z0-9\u4E00-\u9FA5]*$/, message: '字段不符合填写要求' },
+                            {
+                              validator: (value, cb) => {
+                                const fields = form.getFieldValue('calRules');
+                                const repeatFields = fields.filter((ele: any) => ele.field === value);
+                                if (repeatFields.length > 1) {
+                                  return cb('字段名称不能重复');
+                                }
+                                return cb();
+                              }
+                            }
                           ]}
                         >
                           <Input placeholder="请输入字段名称" onChange={(_value) => {}} />

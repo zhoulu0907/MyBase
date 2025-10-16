@@ -20,7 +20,9 @@ import {
   TABS_POSITION_OPTIONS,
   TABS_POSITION_VALUES,
   COLLAPSED_OPTIONS,
-  COLLAPSED_VALUES
+  COLLAPSED_VALUES,
+  BUTTON_OPTIONS,
+  BUTTON_VALUES
 } from './constants';
 import type {
   IAlignConfigType,
@@ -46,7 +48,9 @@ import type {
   ITabsPositionConfigType,
   IImageConfigType,
   IFileConfigType,
-  ICollapsedConfigType
+  ICollapsedConfigType,
+  ITableButtonConfigType,
+  ITableOperationConfigType,
 } from './types';
 
 export interface ICommonBaseType {
@@ -485,4 +489,31 @@ export const collapsedConfig: ICollapsedConfigType<TCollapsedSelectKeyType> = {
       value: COLLAPSED_VALUES[COLLAPSED_OPTIONS.COLLAPSED]
     }
   ]
+};
+
+export type TButtonSelectKeyType = (typeof BUTTON_VALUES)[keyof typeof BUTTON_VALUES];
+export const tableButtonPermissionConfig: ITableButtonConfigType<TButtonSelectKeyType> = {
+  key: 'advancedButtonPermission',
+  name: '按钮权限配置',
+  type: CONFIG_TYPES.TABLE_BUTTON,
+  advanced: true,
+  range: [
+    {
+      key: BUTTON_OPTIONS.HIDDEN,
+      text: BUTTON_OPTIONS.HIDDEN,
+      value: BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN]
+    },
+    {
+      key: BUTTON_OPTIONS.DISABLED,
+      text: BUTTON_OPTIONS.DISABLED,
+      value: BUTTON_VALUES[BUTTON_OPTIONS.DISABLED]
+    }
+  ]
+};
+
+export const tableOperationConfig: ITableOperationConfigType = {
+  key: 'tableOperation',
+  name: '操作栏配置',
+  type: CONFIG_TYPES.TABLE_OPERATION,
+  advanced: true,
 };

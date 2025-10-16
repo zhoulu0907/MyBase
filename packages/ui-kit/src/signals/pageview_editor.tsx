@@ -23,6 +23,10 @@ export const createPageViewEditorSignal = () => {
     pageViews.value = {};
   };
 
+  const updatePageViewName = (id: string, name: string) => {
+    pageViews.value[id].pageName = name;
+  };
+
   const updatePageView = (pageView: PageView) => {
     if (pageView.isDefaultDetailViewMode) {
       const updatedPageViews = Object.fromEntries(
@@ -36,7 +40,7 @@ export const createPageViewEditorSignal = () => {
 
     if (pageView.isDefaultEditViewMode) {
       const updatedPageViews = Object.fromEntries(
-        Object.entries(pageViews.value).map(([id, pv]) => [id, { ...pv, isDefaultDetailViewMode: 0 }])
+        Object.entries(pageViews.value).map(([id, pv]) => [id, { ...pv, isDefaultEditViewMode: 0 }])
       );
       pageViews.value = {
         ...updatedPageViews,
@@ -55,12 +59,24 @@ export const createPageViewEditorSignal = () => {
     curViewId.value = '';
   };
 
+  const getDefaultEditPageViewId = () => {
+    return Object.values(pageViews.value).find((pv) => pv.isDefaultEditViewMode == 1)?.id;
+  };
+
+  const getDefaultDetailPageViewId = () => {
+    return Object.values(pageViews.value).find((pv) => pv.isDefaultDetailViewMode == 1)?.id;
+  };
+
   return {
     pageViews,
     addPageView,
     clearPageViews,
     updatePageView,
+    updatePageViewName,
     setPageViews,
+
+    getDefaultEditPageViewId,
+    getDefaultDetailPageViewId,
 
     curViewId,
     setCurViewId,

@@ -14,7 +14,8 @@ import {
   type CreateRoleReq,
   type DeleteRoleReq,
   type RenameRoleReq,
-  type GerRoleUserReq
+  type GerRoleUserReq,
+  type AuthRoleUsersPageRespVO
 } from '@onebase/app';
 import RoleInfo from '../Role';
 import InputRoleName from './inputRoleName';
@@ -36,7 +37,7 @@ const AppPermission: FC = () => {
   const [roleList, setRoleList] = useState<Role[]>([]);
   const [addRole, setAddRole] = useState<boolean>(false);
   const [updateRoleId, setUpdateRoleId] = useState<string>('');
-  const [memberList, setMemberList] = useState<any[]>([]);
+  const [memberList, setMemberList] = useState<AuthRoleUsersPageRespVO[]>([]);
   const [memberTotal, setMemberTotal] = useState<number>(0);
   const [hoveredRoleId, setHoveredRoleId] = useState<string>(''); // 新增状态用于跟踪鼠标悬停的角色ID
 
@@ -72,8 +73,6 @@ const AppPermission: FC = () => {
         pageSize: 10
       };
       const res = await getRoleUser(params);
-      console.log('获取用户角色成员成功:', res);
-      // setMemberList(res.data || []);
       setMemberList(res.list || []);
       setMemberTotal(res.total);
     } catch (error) {
@@ -82,7 +81,6 @@ const AppPermission: FC = () => {
   };
 
   const handleSelectmenu = (val: string) => {
-    console.log('应用权限选择菜单 val:', val);
     if (val === 'add') {
       setAddRole(true);
       return;
@@ -102,7 +100,6 @@ const AppPermission: FC = () => {
   // 回车新建自定义角色
   const handlePressEnter = async (e: any) => {
     const name = e.target.value;
-    console.log('回车创建新角色 name:', name);
     if (!name) return;
     /* 角色重命名 */
     if (updateRoleId) {
@@ -124,7 +121,9 @@ const AppPermission: FC = () => {
       setActiveTab(res.id);
       Message.success('角色创建成功');
       await getRoleList();
-    } catch (error) {}
+    } catch (error) {
+      console.error('创建角色失败 error:', error);
+    }
   };
 
   /* 角色重命名 */
@@ -140,7 +139,9 @@ const AppPermission: FC = () => {
       setUpdateRoleId('');
       Message.success('角色重命名成功');
       await getRoleList();
-    } catch (error) {}
+    } catch (error) {
+      console.error('角色重命名失败 error:', error);
+    }
   };
 
   /* 删除角色 */
@@ -162,68 +163,70 @@ const AppPermission: FC = () => {
   return (
     <div className={styles.AppPermission}>
       <div className={styles.left}>
-        <Menu className={styles.menu} defaultSelectedKeys={[adminData?.id!]} onClickMenuItem={handleSelectmenu}>
-          {
-            <div className={styles.user} key={adminData?.id}>
-              <label>管理员角色</label>
-              <MenuItem key={adminData?.id || ''}>
-                <IconUser />
-                {adminData?.roleName}
-              </MenuItem>
-            </div>
-          }
-          <div>
-            <label>用户角色</label>
-            {roleList
-              ?.filter((role) => role.roleType !== RoleType.ADMIN)
-              .map((role) => {
-                return (
-                  <MenuItem
-                    className={styles.menuItem}
-                    key={role.id}
-                    onMouseEnter={() => setHoveredRoleId(role.id)} // 鼠标进入时设置hoveredRoleId
-                    onMouseLeave={() => setHoveredRoleId('')} // 鼠标离开时清空hoveredRoleId
-                  >
-                    <div className={styles.custom}>
-                      <IconUser className={styles.userIcon} />
-                      {updateRoleId === role.id ? (
-                        <InputRoleName
-                          defaultValue={role.roleName}
-                          onPressEnter={handlePressEnter}
-                          onBlur={(e) => {
-                            handlePressEnter(e);
-                            setUpdateRoleId('');
-                          }}
-                        />
-                      ) : (
-                        <>
-                          {role.roleName}
-                          {role.roleType === RoleType.CUSTOM && (
-                            <IconEdit
-                              onClick={() => setUpdateRoleId(role.id)}
-                              className={styles.editIcon}
-                              style={{
-                                opacity: hoveredRoleId === role.id ? EditOpacity.show : EditOpacity.hide,
-                                transition: 'opacity 0.2s'
-                              }}
-                            />
-                          )}
-                        </>
-                      )}
-                    </div>
-                    <Popconfirm
-                      focusLock
-                      title="删除角色"
-                      content="确定要删除这个角色吗？"
-                      onOk={() => handleDeleteRole(role.id)}
+        {adminData && adminData?.id && (
+          <Menu className={styles.menu} defaultSelectedKeys={[adminData.id]} onClickMenuItem={handleSelectmenu}>
+            {
+              <div className={styles.user} key={adminData?.id}>
+                <label>管理员角色</label>
+                <MenuItem key={adminData?.id || ''}>
+                  <IconUser />
+                  {adminData?.roleName}
+                </MenuItem>
+              </div>
+            }
+            <div>
+              <label>用户角色</label>
+              {roleList
+                ?.filter((role) => role.roleType !== RoleType.ADMIN)
+                .map((role) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItem}
+                      key={role.id}
+                      onMouseEnter={() => setHoveredRoleId(role.id)} // 鼠标进入时设置hoveredRoleId
+                      onMouseLeave={() => setHoveredRoleId('')} // 鼠标离开时清空hoveredRoleId
                     >
-                      {role.roleType === RoleType.CUSTOM && <IconClose className={styles.deleteIcon} />}
-                    </Popconfirm>
-                  </MenuItem>
-                );
-              })}
-          </div>
-        </Menu>
+                      <div className={styles.custom}>
+                        <IconUser className={styles.userIcon} />
+                        {updateRoleId === role.id ? (
+                          <InputRoleName
+                            defaultValue={role.roleName}
+                            onPressEnter={handlePressEnter}
+                            onBlur={(e) => {
+                              handlePressEnter(e);
+                              setUpdateRoleId('');
+                            }}
+                          />
+                        ) : (
+                          <>
+                            {role.roleName}
+                            {role.roleType === RoleType.CUSTOM && (
+                              <IconEdit
+                                onClick={() => setUpdateRoleId(role.id)}
+                                className={styles.editIcon}
+                                style={{
+                                  opacity: hoveredRoleId === role.id ? EditOpacity.show : EditOpacity.hide,
+                                  transition: 'opacity 0.2s'
+                                }}
+                              />
+                            )}
+                          </>
+                        )}
+                      </div>
+                      <Popconfirm
+                        focusLock
+                        title="删除角色"
+                        content="确定要删除这个角色吗？"
+                        onOk={() => handleDeleteRole(role.id)}
+                      >
+                        {role.roleType === RoleType.CUSTOM && <IconClose className={styles.deleteIcon} />}
+                      </Popconfirm>
+                    </MenuItem>
+                  );
+                })}
+            </div>
+          </Menu>
+        )}
         {addRole && (
           <div style={{ padding: '0 8px' }}>
             <InputRoleName

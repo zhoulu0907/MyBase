@@ -1,15 +1,19 @@
-import { Button, Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
-import { IconDown, IconPlus } from '@arco-design/web-react/icon';
-import { ViewType, type PageView } from '@onebase/app';
+import CopySVG from '@/assets/images/copy.svg';
+import TickSVG from '@/assets/images/tick.svg';
+import { Dropdown, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react';
+import { IconDown, IconEdit, IconPlus } from '@arco-design/web-react/icon';
+import { generateId, ViewType, type PageView } from '@onebase/app';
 import {
   createPageEditorSignal,
   useEditorSignalMap,
   useFormEditorSignal,
   usePageEditorSignal,
-  usePageViewEditorSignal
+  usePageViewEditorSignal,
+  type EditConfig
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import styles from './index.module.less';
 
 const { useForm } = Form;
@@ -22,11 +26,12 @@ interface ViewProps {
 const View: React.FC<ViewProps> = ({ pageSetId }) => {
   useSignals();
 
-  const { pageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
+  const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
   const [dropListVisible, setDropListVisible] = useState(false);
+  const [editViewName, setEditViewName] = useState(false);
 
   const { pageComponentSchemas, components, layoutSubComponents } = usePageEditorSignal();
 
@@ -54,8 +59,111 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
     useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
 
-    setCurViewId(id);
+    // 切换到新视图
+    switchToView(id);
+  };
 
+  const handleCopyView = async (e: React.MouseEvent<HTMLImageElement>, id: string) => {
+    e.stopPropagation();
+    console.log('copy view: ', id);
+
+    // 保存当前配置到editorSignalMap
+    useEditorSignalMap.get(curViewId.value)!.setComponents(components);
+    useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
+    useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
+
+    const view = pageViews.value[id];
+    if (!view) {
+      return;
+    }
+
+    const newId = await generateId();
+    const newView = {
+      ...view,
+      id: newId,
+      pageName: view.pageName + '-副本'
+    };
+
+    const oldComponents = useEditorSignalMap.get(id)?.components.value;
+    const newComponents = [] as EditConfig[];
+    const oldPageComponentSchemas = useEditorSignalMap.get(id)?.pageComponentSchemas.value;
+    const newPageComponentSchemas = {} as { [key: string]: EditConfig };
+    const oldLayoutSubComponents = useEditorSignalMap.get(id)?.layoutSubComponents.value;
+    const newLayoutSubComponents = {} as { [key: string]: any[][] };
+
+    // 创建一个 string-string 的 map
+    const idMap: { [key: string]: string } = {};
+
+    // 替换 pageComponentSchemas 的 id
+    Object.entries(oldPageComponentSchemas).forEach(([id, schema]) => {
+      const cpType = `${id.split('-')[0]}`;
+      const newCpID = cpType + '-' + uuidv4();
+      const newSchema = {
+        ...(schema as EditConfig),
+        id: newCpID
+      } as EditConfig;
+      newSchema.config.id = newCpID;
+
+      newPageComponentSchemas[newCpID] = newSchema;
+      idMap[id] = newCpID;
+    });
+
+    // 替换 components 的 id
+    oldComponents.forEach((component: EditConfig) => {
+      const newCpID = idMap[component.id];
+      const newComponent = {
+        ...component,
+        id: newCpID
+      } as EditConfig;
+      newComponents.push(newComponent);
+    });
+
+    // 替换 layoutSubComponents 的 id
+    Object.entries(oldLayoutSubComponents).forEach(([id, subComponents]) => {
+      if (!idMap[id]) {
+        return;
+      }
+
+      const newCpID = idMap[id];
+      const newSubComponents = [] as EditConfig[][];
+      console.log('subComponents: ', subComponents);
+
+      for (const block of subComponents as EditConfig[][]) {
+        const newBlock = [] as EditConfig[];
+        for (const subComponent of block) {
+          const newSubComponent = {
+            ...subComponent,
+            id: idMap[subComponent.id]
+          } as EditConfig;
+          newBlock.push(newSubComponent);
+        }
+        newSubComponents.push(newBlock);
+      }
+      newLayoutSubComponents[newCpID] = newSubComponents;
+    });
+
+    console.log('oldComponents: ', oldComponents);
+    console.log('oldPageComponentSchemas: ', oldPageComponentSchemas);
+    console.log('oldLayoutSubComponents: ', oldLayoutSubComponents);
+    console.log('--------------------------------');
+    console.log('newComponents: ', newComponents);
+    console.log('newPageComponentSchemas: ', newPageComponentSchemas);
+    console.log('newLayoutSubComponents: ', newLayoutSubComponents);
+
+    // 创建视图副本
+    usePageViewEditorSignal.addPageView(newView);
+    // 复制组件
+    useEditorSignalMap.set(newId, createPageEditorSignal());
+    useEditorSignalMap.get(newId)!.setComponents(newComponents);
+    useEditorSignalMap.get(newId)!.loadPageComponentSchemas(newPageComponentSchemas);
+    useEditorSignalMap.get(newId)!.loadLayoutSubComponents(newLayoutSubComponents);
+
+    // 切换到新视图
+    switchToView(newId);
+  };
+
+  const switchToView = (id: string) => {
+    setCurViewId(id);
     useFormEditorSignal.setComponents(useEditorSignalMap.get(id)!.components.value);
     useFormEditorSignal.loadPageComponentSchemas(useEditorSignalMap.get(id)!.pageComponentSchemas.value);
     useFormEditorSignal.loadLayoutSubComponents(useEditorSignalMap.get(id)!.layoutSubComponents.value);
@@ -72,23 +180,26 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
           return (
             <Menu.Item key={id} onClick={() => handleSelectView(id)}>
               <div key={id} className={styles.dropItem}>
+                {view.id === curViewId.value ? (
+                  <img className={styles.dropItemIcon} src={TickSVG} alt="tick" />
+                ) : (
+                  <div style={{ width: '16px', height: '16px' }}></div>
+                )}
                 <div className={styles.dropItemLabel}>{view.pageName}</div>
-                <div>{showViewType(view)}</div>
+                <div className={styles.dropItemType}>
+                  <div>{showViewType(view)}</div>
+                  <img className={styles.copyIcon} src={CopySVG} alt="copy" onClick={(e) => handleCopyView(e, id)} />
+                </div>
               </div>
             </Menu.Item>
           );
         })}
 
         <Menu.Item key="addView">
-          <Button
-            type="text"
-            size="mini"
-            className={styles.addViewButton}
-            onClick={() => setCreateViewModalVisible(true)}
-          >
-            <IconPlus />
-            新增视图
-          </Button>
+          <div className={styles.addViewButton} onClick={() => setCreateViewModalVisible(true)}>
+            <IconPlus fontSize={14} style={{ marginRight: '2px', color: '#029e9e' }} />
+            <div>新增视图</div>
+          </div>
         </Menu.Item>
       </Menu>
     </div>
@@ -103,14 +214,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     createForm
       .validate()
       .then(async () => {
-        // const res = await createPageView({
-        //   pageSetId: pageSetId,
-        //   viewType: createForm.getFieldValue('viewType'),
-        //   viewName: createForm.getFieldValue('viewName')
-        // });
-
         // 创建临时视图
-        const pageId = `${Date.now()}`;
+        const pageId = await generateId();
         usePageViewEditorSignal.addPageView({
           id: pageId,
           pageName: createForm.getFieldValue('viewName'),
@@ -134,16 +239,48 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
         useEditorSignalMap.set(pageId, createPageEditorSignal());
 
         setCreateViewModalVisible(false);
-        // setCurViewId(pageId);
+
+        // 切换到新视图
+        switchToView(pageId);
       })
       .catch((e) => {
         console.log(e.errors);
       });
   };
 
+  // 表单名称为空时 置为原来的值
+  let oldPageViewName = '';
+  const pageViewNameBlur = (e: any) => {
+    if (e.currentTarget.value === '') {
+      updatePageViewName(curViewId.value, oldPageViewName);
+    }
+    setEditViewName(false);
+    oldPageViewName = '';
+  };
+
   return (
     <div className={styles.viewWrapper}>
-      <div className={styles.viewTitle}>{pageViews.value[curViewId.value]?.pageName}</div>
+      {editViewName ? (
+        <Input
+          size="small"
+          autoFocus
+          defaultValue={pageViews.value[curViewId.value]?.pageName}
+          onChange={(e: any) => {
+            updatePageViewName(curViewId.value, e);
+          }}
+          onPressEnter={pageViewNameBlur}
+          onBlur={pageViewNameBlur}
+          onFocus={(e) => {
+            oldPageViewName = e.currentTarget.value;
+          }}
+          style={{ maxWidth: '200px' }}
+        />
+      ) : (
+        <div className={styles.viewTitle} onClick={() => setEditViewName(true)}>
+          <div className={styles.viewTitleText}>{pageViews.value[curViewId.value]?.pageName}</div> <IconEdit />
+        </div>
+      )}
+
       <Dropdown
         droplist={dropList}
         position="bl"

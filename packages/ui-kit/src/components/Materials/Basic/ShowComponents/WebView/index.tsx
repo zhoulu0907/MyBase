@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XWebViewConfig } from './schema';
 
-const XWebView = memo((props: XWebViewConfig & { runtime?: boolean }) => {
+const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, title, webViewUrl, runtime = true } = props;
 
   const [iframeError, setIframeError] = useState(false);
