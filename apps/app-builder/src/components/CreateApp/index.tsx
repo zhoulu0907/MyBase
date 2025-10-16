@@ -1,5 +1,5 @@
 import { Form, Grid, Input, Popconfirm, Select, type FormInstance } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   createApplicationTag,
@@ -25,6 +25,7 @@ import styles from './index.module.less';
 import DynamicIcon from '../DynamicIcon';
 
 type AppStatus = 'create' | 'update';
+type CloseReason = 'confirm' | 'cancel' | 'outside' | 'esc';
 interface IProps {
   form: FormInstance;
   readonly data?: Application;
@@ -44,6 +45,13 @@ const CreateApp = (props: IProps) => {
   const [iconName, setIconName] = useState<Application['iconName']>();
   const [iconColor, setIconColor] = useState<Application['iconColor']>();
   const [themeColor, setThemeColor] = useState<Application['themeColor']>('#4FAE7B'); // 应用主题色
+
+  // Bug S25029301301-591
+  const initialRef = useRef<{
+    iconName: Application['iconName'] | null;
+    iconColor: Application['iconColor'] | undefined;
+  } | null>(null);
+  const actionRef = useRef<CloseReason | null>(null);
 
   useEffect(() => {
     listAppTagReq();
@@ -68,6 +76,7 @@ const CreateApp = (props: IProps) => {
         setThemeColor(data.themeColor);
         setIconName(data.iconName);
         setIconColor(data.iconColor);
+        initialRef.current = { iconName: data.iconName, iconColor: data.iconColor };
       }
     }
   }, [data, status]);
@@ -127,6 +136,15 @@ const CreateApp = (props: IProps) => {
       })
     );
     form.setFieldsValue({ tagIds: normalized });
+  };
+
+  const handleOnCancel = (visible?: boolean) => {
+    const reason = actionRef.current ?? 'outside';
+    if (status !== 'create' && !visible && reason !== 'confirm') {
+      setIconName(initialRef.current?.iconName);
+      setIconColor(initialRef.current?.iconColor);
+    }
+    actionRef.current = null;
   };
 
   return (
@@ -211,6 +229,7 @@ const CreateApp = (props: IProps) => {
                 position="bl"
                 okText="确认"
                 onOk={() => {
+                  actionRef.current = 'confirm';
                   form.setFieldsValue({
                     ...form.getFieldsValue(),
                     iconName,
@@ -218,8 +237,11 @@ const CreateApp = (props: IProps) => {
                   });
                 }}
                 onCancel={() => {
-                  setIconName('');
-                  setIconColor('');
+                  actionRef.current = 'cancel';
+                  handleOnCancel();
+                }}
+                onVisibleChange={(visible) => {
+                  handleOnCancel(visible);
                 }}
                 style={{ maxWidth: '381px' }}
                 content={
