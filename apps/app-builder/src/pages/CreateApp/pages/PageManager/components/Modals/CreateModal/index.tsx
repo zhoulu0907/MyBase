@@ -56,7 +56,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       autoFocus={false}
       focusLock={true}
       unmountOnExit={true}
-      // className={styles.createModal}
+      className={styles.createModal}
       footer={
         <div style={{ textAlign: 'right', visibility: !visibleMenuIcon ? 'visible' : 'hidden' }}>
           <Button type="default" onClick={handleCloseModal} style={{ marginRight: 12 }}>
@@ -67,9 +67,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
           </Button>
         </div>
       }
-      style={{
-        width: 700
-      }}
     >
       <div className={styles.createContainer}>
         <Form

@@ -35,7 +35,7 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
 
   return (
     <Modal
-      // className={styles.renameModal}
+      className={styles.renameModal}
       title={title}
       visible={visible}
       onOk={handleRename}
@@ -54,9 +54,6 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
           </Button>
         </div>
       }
-      style={{
-        width: 700
-      }}
     >
       <div className={styles.renameContainer}>
         <Form
