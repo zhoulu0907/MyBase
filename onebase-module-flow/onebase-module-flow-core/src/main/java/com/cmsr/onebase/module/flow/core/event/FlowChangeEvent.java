@@ -35,10 +35,10 @@ public class FlowChangeEvent {
         }
     }
 
-    public static byte[] encode(String type, Long processId) {
+    public static byte[] encode(String type, Long applicationId) {
         FlowChangeEvent event = new FlowChangeEvent();
         event.setType(type);
-        event.setProcessId(processId);
+        event.setApplicationId(applicationId);
         return JsonUtils.toJsonByte(event);
     }
 
@@ -48,7 +48,7 @@ public class FlowChangeEvent {
 
     private String type;
 
-    private Long processId;
+    private Long applicationId;
 
 
 }

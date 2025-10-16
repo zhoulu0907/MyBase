@@ -46,28 +46,28 @@ public class FlowChangeEventPublisherImpl implements FlowChangeEventPublisher, I
     }
 
     @Override
-    public void publishProcessUpdate(Long processId) {
+    public void publishApplicationUpdate(Long applicationId) {
         Message message = provider.newMessageBuilder()
                 .setTopic(topic)
-                .setBody(FlowChangeEvent.encode(FlowChangeEvent.UPDATE, processId))
+                .setBody(FlowChangeEvent.encode(FlowChangeEvent.UPDATE, applicationId))
                 .build();
         try {
             SendReceipt sendReceipt = producer.send(message);
-            log.info("发送publishProcessUpdate RocketMQ消息成功：{}", sendReceipt.getMessageId());
+            log.info("发送应用更新MQ消息成功：{}", sendReceipt.getMessageId());
         } catch (ClientException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void publishProcessDelete(Long processId) {
+    public void publishApplicationDelete(Long applicationId) {
         Message message = provider.newMessageBuilder()
                 .setTopic(topic)
-                .setBody(FlowChangeEvent.encode(FlowChangeEvent.DELETE, processId))
+                .setBody(FlowChangeEvent.encode(FlowChangeEvent.DELETE, applicationId))
                 .build();
         try {
             SendReceipt sendReceipt = producer.send(message);
-            log.info("发送publishProcessDelete RocketMQ消息成功：{}", sendReceipt.getMessageId());
+            log.info("发送应用删除MQ消息成功：{}", sendReceipt.getMessageId());
         } catch (ClientException e) {
             throw new RuntimeException(e);
         }

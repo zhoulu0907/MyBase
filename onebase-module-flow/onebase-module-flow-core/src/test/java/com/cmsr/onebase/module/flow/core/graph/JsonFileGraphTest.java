@@ -22,7 +22,7 @@ public class JsonFileGraphTest {
         System.out.println(jsonGraph.toFlowChain());
 
         GraphFlowCache graphFlowCache = new GraphFlowCache();
-        graphFlowCache.update(1L, jsonGraph);
+        graphFlowCache.update(1L, 1L, jsonGraph);
     }
 
     @Test

@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 class RocketMQFlowChangeEventPublisherTest {
 
     @Test
-    void publishProcessUpdate() throws ClientException {
+    void publishFlowUpdate() throws ClientException {
         FlowChangeEventPublisherImpl rocketMQFlowEventPublisher = new FlowChangeEventPublisherImpl();
         rocketMQFlowEventPublisher.setEndpoints("10.0.104.38:8081");
         rocketMQFlowEventPublisher.afterPropertiesSet();
-        rocketMQFlowEventPublisher.publishProcessUpdate(85486565251907584L);
+        rocketMQFlowEventPublisher.publishApplicationUpdate(85486565251907584L);
     }
 
     @Test
