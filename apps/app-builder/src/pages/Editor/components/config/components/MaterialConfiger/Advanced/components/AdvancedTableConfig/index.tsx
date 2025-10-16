@@ -142,12 +142,15 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
   };
 
   const handleOpenButtonModal = (value: any) => {
+    const defaultView = (Object.values(pageViews.value) as PageView[]).find(
+      (item: PageView) => item.isDefaultDetailViewMode
+    );
     setModalButtonVisible(value.type);
     operationForm.setFieldsValue({
       buttonName: value.buttonName,
       buttonIcon: value.buttonIcon,
       iconColor: value.iconColor,
-      redirectPageId: value.redirectPageId,
+      redirectPageId: defaultView?.id,
       redirectMethod: value.redirectMethod,
       confirmText: value.confirmText,
       deletedAction: value.deletedAction
@@ -180,7 +183,6 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
 
   const handleOnButtonModal = () => {
     operationForm.validate().then((values) => {
-      console.log('values', values)
       try {
         const newData = [...configs[operationButton]];
         const newValue = newData.map((op: OperationButtonConfig) => op.type === modalButtonVisible ? ({
@@ -189,7 +191,9 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
           buttonIcon: values.buttonIcon,
           iconColor: values.iconColor,
           confirmText: values.confirmText,
-          deletedAction: values.deletedAction
+          deletedAction: values.deletedAction,
+          redirectPageId: values.redirectPageId,
+          redirectMethod: values.redirectMethod
         }) : op);
         handlePropsChange(operationButton, newValue);
       } catch (e: any) {
@@ -381,7 +385,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
             <Select
               style={{ width: '230px' }}
               options={(Object.values(pageViews.value) as PageView[])
-                .filter((item: PageView) => item.detailViewMode == 1)
+                .filter((item: PageView) => item.detailViewMode === 1)
                 .map((item: PageView) => ({
                   label: item.pageName,
                   value: item.id
@@ -504,17 +508,16 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                   layout="vertical"
                   label="跳转页面"
                   field={redirectPageId}
-                  style={{ flex: 1, width: '100%' }}
+                  style={{ flex: 1 }}
                   rules={[{ required: true, message: '请选择跳转页面' }]}
                 >
                   <Select
                     options={(Object.values(pageViews.value) as PageView[])
-                      .filter((item: PageView) => item.detailViewMode)
+                      .filter((item: PageView) => item.detailViewMode === 1)
                       .map((item: PageView) => ({
                         label: item.pageName,
                         value: item.id
                       }))}
-                    style={{ width: '100%' }}
                   />
                 </Form.Item>
               </Col>
