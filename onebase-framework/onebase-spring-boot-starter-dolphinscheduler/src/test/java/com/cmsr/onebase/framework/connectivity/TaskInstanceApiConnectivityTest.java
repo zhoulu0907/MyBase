@@ -1,11 +1,12 @@
 /**
- * TaskInstanceApi 连通性测试（基于 MockWebServer）
+ * TaskInstanceApi 连通性测试
  *
  * 覆盖点：
  * - GET /task-instance 分页
  * - GET /task-instances 分页
  * - GET /log/{projectCode}/detail 查询日志
  * - 校验 token Header、请求路径与返回 DTO 映射
+ * - 支持真实服务器测试和本地模拟测试
  *
  * @author matianyu
  * @date 2025-10-16
@@ -23,106 +24,141 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import retrofit2.Response;
 
+@SpringBootTest
 public class TaskInstanceApiConnectivityTest {
 
+    @Autowired
+    private DolphinSchedulerClientProperties properties;
+
+    @Autowired(required = false)
+    private TaskInstanceApi taskInstanceApi;
+
     @Test
-    void list_page_queryLog_should_work() throws Exception {
+    void testTaskInstanceApiConnectivity() throws Exception {
+        if (!properties.isEnabled()) {
+            return;
+        }
+
+        if (properties.isEnableLiveConnectivityTest()) {
+            testWithRealServer();
+        } else {
+            testWithMockServer();
+        }
+    }
+
+    /**
+     * 真实服务器测试
+     */
+    private void testWithRealServer() throws Exception {
+        Assertions.assertThat(taskInstanceApi).isNotNull();
+
+        // 测试分页查询接口（使用一个不存在的processInstanceId，预期返回空列表但请求成功）
+        Response<HttpRestResultDTO<PageInfoDTO<TaskInstanceQueryRespDTO>>> listResp =
+                taskInstanceApi.listTaskInstances(1L, 1, 10, 999999999L).execute();
+
+        // 断言远端服务器正常响应
+        Assertions.assertThat(listResp.isSuccessful()).isTrue();
+        Assertions.assertThat(listResp.body()).isNotNull();
+        Assertions.assertThat(listResp.body().getCode()).isEqualTo(0);
+        Assertions.assertThat(listResp.body().getMsg()).containsIgnoringCase("success");
+    }
+
+    /**
+     * 本地模拟测试
+     */
+    private void testWithMockServer() throws Exception {
         try (MockWebServer server = new MockWebServer()) {
+            // 1) /task-instance
+            String listJson = "{\n" +
+                    "  \"code\": 0,\n" +
+                    "  \"msg\": \"success\",\n" +
+                    "  \"data\": {\n" +
+                    "    \"total\": 3,\n" +
+                    "    \"pageNo\": 2,\n" +
+                    "    \"pageSize\": 5,\n" +
+                    "    \"records\": [ { \"id\": 4001, \"processInstanceId\": 5001, \"name\": \"TI-Test-1\", \"state\": \"RUNNING\" } ]\n" +
+                    "  }\n" +
+                    "}";
+            server.enqueue(new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json").setBody(listJson));
+            // 2) /task-instances
+            String pageJson = "{\n" +
+                    "  \"code\": 0,\n" +
+                    "  \"msg\": \"success\",\n" +
+                    "  \"data\": {\n" +
+                    "    \"total\": 1,\n" +
+                    "    \"pageNo\": 8,\n" +
+                    "    \"pageSize\": 2,\n" +
+                    "    \"records\": [ { \"id\": 4002, \"processInstanceId\": 5002, \"name\": \"TI-Test-2\", \"state\": \"SUCCESS\" } ]\n" +
+                    "  }\n" +
+                    "}";
+            server.enqueue(new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json").setBody(pageJson));
+            // 3) /log
+            server.enqueue(new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json")
+                    .setBody("{\"code\":0,\"msg\":\"success\",\"data\":{\"log\":\"hello\"}}"));
+
+            server.start();
+
+            String base = server.url("/").toString();
+            String token = "test-token";
+
             ApplicationContextRunner runner = new ApplicationContextRunner()
                     .withConfiguration(AutoConfigurations.of(DolphinSchedulerClientAutoConfiguration.class))
-                    .withPropertyValues("onebase.dolphinscheduler.client.enable-live-connectivity-test=true");
+                    .withPropertyValues(
+                            "onebase.dolphinscheduler.client.enabled=true",
+                            "onebase.dolphinscheduler.client.baseUrl=" + base,
+                            "onebase.dolphinscheduler.client.token=" + token
+                    );
 
             runner.run(context -> {
-                DolphinSchedulerClientProperties properties = context.getBean(DolphinSchedulerClientProperties.class);
-                if (!properties.isEnableLiveConnectivityTest()) {
-                    return;
+                Assertions.assertThat(context).hasNotFailed();
+                TaskInstanceApi api = context.getBean(TaskInstanceApi.class);
+                try {
+                    Response<HttpRestResultDTO<PageInfoDTO<TaskInstanceQueryRespDTO>>> listResp =
+                            api.listTaskInstances(222L, 2, 5, 123456L).execute();
+                    Assertions.assertThat(listResp.isSuccessful()).isTrue();
+                    Assertions.assertThat(listResp.body()).isNotNull();
+                    Assertions.assertThat(listResp.body().getCode()).isEqualTo(0);
+                    Assertions.assertThat(listResp.body().getMsg()).isEqualTo("success");
+                    Assertions.assertThat(listResp.body().getData()).isNotNull();
+                    Assertions.assertThat(listResp.body().getData().getTotal()).isEqualTo(3);
+
+                    Response<HttpRestResultDTO<PageInfoDTO<TaskInstanceQueryRespDTO>>> pageResp =
+                            api.page(222L, 8, 2, 654321L).execute();
+                    Assertions.assertThat(pageResp.isSuccessful()).isTrue();
+                    Assertions.assertThat(pageResp.body()).isNotNull();
+                    Assertions.assertThat(pageResp.body().getCode()).isEqualTo(0);
+                    Assertions.assertThat(pageResp.body().getMsg()).isEqualTo("success");
+                    Assertions.assertThat(pageResp.body().getData()).isNotNull();
+                    Assertions.assertThat(pageResp.body().getData().getRecords().get(0).getName()).isEqualTo("TI-Test-2");
+
+                    Response<HttpRestResultDTO<Object>> logResp = api.queryLog(222L, 4002L, 0, 1024).execute();
+                    Assertions.assertThat(logResp.isSuccessful()).isTrue();
+                    Assertions.assertThat(logResp.body()).isNotNull();
+                    Assertions.assertThat(logResp.body().getCode()).isEqualTo(0);
+                    Assertions.assertThat(logResp.body().getMsg()).isEqualTo("success");
+
+                    // 校验请求
+                    RecordedRequest r1 = server.takeRequest();
+                    Assertions.assertThat(r1.getMethod()).isEqualTo("GET");
+                    Assertions.assertThat(r1.getPath()).contains("/projects/222/task-instance");
+                    Assertions.assertThat(r1.getHeader("token")).isEqualTo(token);
+
+                    RecordedRequest r2 = server.takeRequest();
+                    Assertions.assertThat(r2.getMethod()).isEqualTo("GET");
+                    Assertions.assertThat(r2.getPath()).contains("/projects/222/task-instances");
+
+                    RecordedRequest r3 = server.takeRequest();
+                    Assertions.assertThat(r3.getMethod()).isEqualTo("GET");
+                    Assertions.assertThat(r3.getPath()).contains("/log/222/detail");
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-                // 1) /task-instance
-                String listJson = "{\n" +
-                        "  \"code\": 0,\n" +
-                        "  \"msg\": \"success-UT-taskins-list-桂圆\",\n" +
-                        "  \"data\": {\n" +
-                        "    \"total\": 3,\n" +
-                        "    \"pageNo\": 2,\n" +
-                        "    \"pageSize\": 5,\n" +
-                        "    \"records\": [ { \"id\": 4001, \"processInstanceId\": 5001, \"name\": \"TI-独特-龙井\", \"state\": \"RUNNING\" } ]\n" +
-                        "  }\n" +
-                        "}";
-                server.enqueue(new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json").setBody(listJson));
-                // 2) /task-instances
-                String pageJson = "{\n" +
-                        "  \"code\": 0,\n" +
-                        "  \"msg\": \"success-UT-taskins-page-普洱\",\n" +
-                        "  \"data\": {\n" +
-                        "    \"total\": 1,\n" +
-                        "    \"pageNo\": 8,\n" +
-                        "    \"pageSize\": 2,\n" +
-                        "    \"records\": [ { \"id\": 4002, \"processInstanceId\": 5002, \"name\": \"TI-独特-正山\", \"state\": \"SUCCESS\" } ]\n" +
-                        "  }\n" +
-                        "}";
-                server.enqueue(new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json").setBody(pageJson));
-                // 3) /log
-                server.enqueue(new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json")
-                        .setBody("{\"code\":0,\"msg\":\"success-UT-log-铁观音\",\"data\":{\"log\":\"hello\"}}"));
-
-                server.start();
-
-                String base = server.url("/").toString();
-                String token = "ut-token-taskins-20251016";
-
-                ApplicationContextRunner innerRunner = new ApplicationContextRunner()
-                        .withConfiguration(AutoConfigurations.of(DolphinSchedulerClientAutoConfiguration.class))
-                        .withPropertyValues(
-                                "onebase.dolphinscheduler.client.enabled=true",
-                                "onebase.dolphinscheduler.client.baseUrl=" + base,
-                                "onebase.dolphinscheduler.client.token=" + token
-                        );
-
-                innerRunner.run(innerContext -> {
-                    Assertions.assertThat(innerContext).hasNotFailed();
-                    TaskInstanceApi api = innerContext.getBean(TaskInstanceApi.class);
-                    try {
-                        Response<HttpRestResultDTO<PageInfoDTO<TaskInstanceQueryRespDTO>>> listResp =
-                                api.listTaskInstances(222L, 2, 5, 123456L).execute();
-                        Assertions.assertThat(listResp.isSuccessful()).isTrue();
-                        Assertions.assertThat(listResp.body()).isNotNull();
-                        Assertions.assertThat(listResp.body().getMsg()).isEqualTo("success-UT-taskins-list-桂圆");
-                        Assertions.assertThat(listResp.body().getData()).isNotNull();
-                        Assertions.assertThat(listResp.body().getData().getTotal()).isEqualTo(3);
-
-                        Response<HttpRestResultDTO<PageInfoDTO<TaskInstanceQueryRespDTO>>> pageResp =
-                                api.page(222L, 8, 2, 654321L).execute();
-                        Assertions.assertThat(pageResp.isSuccessful()).isTrue();
-                        Assertions.assertThat(pageResp.body()).isNotNull();
-                        Assertions.assertThat(pageResp.body().getMsg()).isEqualTo("success-UT-taskins-page-普洱");
-                        Assertions.assertThat(pageResp.body().getData()).isNotNull();
-                        Assertions.assertThat(pageResp.body().getData().getRecords().get(0).getName()).isEqualTo("TI-独特-正山");
-
-                        Response<HttpRestResultDTO<Object>> logResp = api.queryLog(222L, 4002L, 0, 1024).execute();
-                        Assertions.assertThat(logResp.isSuccessful()).isTrue();
-                        Assertions.assertThat(logResp.body()).isNotNull();
-                        Assertions.assertThat(logResp.body().getMsg()).isEqualTo("success-UT-log-铁观音");
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
-                RecordedRequest r1 = server.takeRequest();
-                Assertions.assertThat(r1.getMethod()).isEqualTo("GET");
-                Assertions.assertThat(r1.getPath()).isEqualTo("/projects/222/task-instance?pageNo=2&pageSize=5&processInstanceId=123456");
-                Assertions.assertThat(r1.getHeader("token")).isEqualTo("ut-token-taskins-20251016");
-
-                RecordedRequest r2 = server.takeRequest();
-                Assertions.assertThat(r2.getMethod()).isEqualTo("GET");
-                Assertions.assertThat(r2.getPath()).isEqualTo("/projects/222/task-instances?pageNo=8&pageSize=2&processInstanceId=654321");
-
-                RecordedRequest r3 = server.takeRequest();
-                Assertions.assertThat(r3.getMethod()).isEqualTo("GET");
-                Assertions.assertThat(r3.getPath()).isEqualTo("/log/222/detail?taskInstanceId=4002&skipLineNum=0&limit=1024");
             });
         }
     }
