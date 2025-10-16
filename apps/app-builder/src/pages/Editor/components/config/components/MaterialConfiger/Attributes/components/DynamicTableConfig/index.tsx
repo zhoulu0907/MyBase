@@ -67,7 +67,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }
     if (subEntities) {
       newEntityList.push(
-        ...subEntities.entities.map((entity:any) => ({
+        ...subEntities.entities.map((entity: any) => ({
           entityId: entity.entityId,
           entityName: entity.entityName
         }))
@@ -187,7 +187,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => {}}
+                setList={() => { }}
                 group={{
                   name: 'table-col-item'
                 }}
