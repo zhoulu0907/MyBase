@@ -119,7 +119,7 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                 type="outline"
                 onClick={() => {
                   const newLabel = '新选项';
-                  const newValue = _fields[_fields.length - 1].field;
+                  const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${selectKey}[0]`;
                   const newList = [
                     ...selectOptionsConfig,
                     { label: item.displayName || newLabel, value: item.fieldName || newValue }
