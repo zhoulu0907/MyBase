@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -56,6 +57,7 @@ public class DolphinSchedulerClientAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "onebase.dolphinscheduler.client", name = {"baseUrl", "token"})
     public OkHttpClient dolphinsOkHttpClient() {
         HttpLoggingInterceptor.Level level = HttpLoggingInterceptor.Level.BASIC;
         try {
@@ -84,7 +86,11 @@ public class DolphinSchedulerClientAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "onebase.dolphinscheduler.client", name = {"baseUrl", "token"})
     public Retrofit dolphinsRetrofit(OkHttpClient okHttpClient, ObjectMapper objectMapper) {
+        if (props.getBaseUrl() == null) {
+            throw new DolphinSchedulerClientException("baseUrl 未配置");
+        }
         if (!props.getBaseUrl().endsWith("/")) {
             throw new DolphinSchedulerClientException("baseUrl 必须以 / 结尾，例如：http://host:port/dolphinscheduler/");
         }
@@ -98,36 +104,42 @@ public class DolphinSchedulerClientAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(Retrofit.class)
     public WorkflowApi workflowApi(Retrofit retrofit) {
         return retrofit.create(WorkflowApi.class);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(Retrofit.class)
     public InstanceApi instanceApi(Retrofit retrofit) {
         return retrofit.create(InstanceApi.class);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(Retrofit.class)
     public ScheduleApi scheduleApi(Retrofit retrofit) {
         return retrofit.create(ScheduleApi.class);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(Retrofit.class)
     public TaskInstanceApi taskInstanceApi(Retrofit retrofit) {
         return retrofit.create(TaskInstanceApi.class);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(Retrofit.class)
     public TaskApi taskApi(Retrofit retrofit) {
         return retrofit.create(TaskApi.class);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(Retrofit.class)
     public DolphinSchedulerClient dolphinSchedulerClient() {
         return new DolphinSchedulerClient();
     }
