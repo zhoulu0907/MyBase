@@ -23,15 +23,15 @@ public class PageUtils {
         pageDO.setPageType(pageType);
 
         if (openViewMode) {
-            pageDO.setDetailViewMode(true);
-            pageDO.setEditViewMode(true);
-            pageDO.setIsDefaultDetailViewMode(true);
-            pageDO.setIsDefaultEditViewMode(true);
+            pageDO.setDetailViewMode(1);
+            pageDO.setEditViewMode(1);
+            pageDO.setIsDefaultDetailViewMode(1);
+            pageDO.setIsDefaultEditViewMode(1);
         }else{
-            pageDO.setDetailViewMode(false);
-            pageDO.setEditViewMode(false);
-            pageDO.setIsDefaultDetailViewMode(false);
-            pageDO.setIsDefaultEditViewMode(false);
+            pageDO.setDetailViewMode(0);
+            pageDO.setEditViewMode(0);
+            pageDO.setIsDefaultDetailViewMode(0);
+            pageDO.setIsDefaultEditViewMode(0);
         }
 
         return pageDO;

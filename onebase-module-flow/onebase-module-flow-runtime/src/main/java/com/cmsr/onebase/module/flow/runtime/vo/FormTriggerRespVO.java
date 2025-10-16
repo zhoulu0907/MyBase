@@ -25,6 +25,8 @@ public class FormTriggerRespVO {
 
     private String executionUuid;
 
+    private String nodeType;
+
     private Map<String, Object> outputParams;
 
 }

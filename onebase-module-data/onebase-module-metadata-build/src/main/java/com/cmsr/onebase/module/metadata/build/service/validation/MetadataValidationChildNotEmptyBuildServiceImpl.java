@@ -6,15 +6,20 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptyUpdateReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChildNotEmptyRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+
+import java.util.List;
 
 /**
  * 子表非空校验 Service 实现
@@ -25,6 +30,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Resource private MetadataValidationChildNotEmptyRepository childNotEmptyRepository; // 自身仓库
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
     @Resource private MetadataEntityFieldBuildService entityFieldService; // 其他服务
+    @Resource private MetadataEntityRelationshipRepository entityRelationshipRepository; // 实体关系仓库
 
     @Override
     public MetadataValidationChildNotEmptyDO getByFieldId(Long fieldId) {
@@ -145,11 +151,30 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
+        // 获取子实体ID
+        Long childEntityId = vo.getChildEntityId();
+        if (childEntityId == null) {
+            // 如果前端没有传递子实体ID，则根据字段ID查找
+            childEntityId = getChildEntityIdByFieldId(vo.getFieldId());
+            if (childEntityId == null) {
+                throw new IllegalArgumentException("无法找到字段对应的子实体关系，请检查字段ID是否正确或是否已建立主子关系，字段ID: " + vo.getFieldId());
+            }
+        }
+
         // 转换VO为DO并设置必要字段
         MetadataValidationChildNotEmptyDO data = BeanUtils.toBean(vo, MetadataValidationChildNotEmptyDO.class);
         data.setEntityId(field.getEntityId());
         data.setAppId(field.getAppId());
         data.setGroupId(groupId);
+        data.setChildEntityId(childEntityId);
+        
+        // 设置默认值
+        if (data.getIsEnabled() == null) {
+            data.setIsEnabled(1); // 默认启用
+        }
+        if (data.getMinRows() == null) {
+            data.setMinRows(1); // 默认最少1行
+        }
 
         // 保存子表非空校验规则
         childNotEmptyRepository.upsert(data);
@@ -197,5 +222,26 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
         childNotEmptyRepository.deleteByFieldId(fieldId);
+    }
+
+    /**
+     * 根据字段ID获取子实体ID
+     *
+     * @param fieldId 字段ID
+     * @return 子实体ID，如果未找到关系则返回null
+     */
+    private Long getChildEntityIdByFieldId(Long fieldId) {
+        // 根据sourceFieldId查找实体关系
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, String.valueOf(fieldId));
+        
+        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
+        
+        if (relationships.isEmpty()) {
+            return null;
+        }
+        
+        // 返回第一个关系的目标实体ID（子实体ID）
+        return relationships.get(0).getTargetEntityId();
     }
 }

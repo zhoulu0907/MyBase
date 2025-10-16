@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
-import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
@@ -46,13 +46,12 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionExecutor expressionExecutor;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
     @Autowired
     private MetadataEntityFieldApi metadataEntityFieldApi;
+
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
@@ -95,9 +94,10 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 return formTriggerRespVO(executorResult);
             }
         } catch (Exception e) {
-            log.error("表单触发异常", e);
+            log.error("表单触发异常: {}", reqVO, e);
             FormTriggerRespVO vo = formNotTriggerRespVO();
-            vo.setMessage(e.getMessage());
+            vo.setMessage("表单触发异常");
+            vo.setCause(ExceptionUtils.getRootCauseMessage(e));
             return vo;
         }
     }
@@ -117,6 +117,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         respVO.setMessage(executorResult.getMessage());
         respVO.setCause(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
         respVO.setExecutionEnd(executorResult.isExecutionEnd());
+        respVO.setNodeType(executorResult.getExecutionEndNodeType());
         respVO.setExecutionUuid(executorResult.getExecutionUuid());
         respVO.setOutputParams(executorResult.getOutputParams());
         return respVO;

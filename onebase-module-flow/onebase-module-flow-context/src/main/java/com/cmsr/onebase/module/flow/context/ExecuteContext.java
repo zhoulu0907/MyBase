@@ -35,10 +35,14 @@ public class ExecuteContext implements Serializable {
     @Setter
     private volatile boolean executeEnd = false;
 
+    @Setter
+    @Getter
+    private volatile String executionEndNodeType;
+
     // 上次执行结束节点
     @Setter
     @Getter
-    private volatile String executionEndTag;
+    private volatile String executionEndNodeTag;
 
     @Setter
     @Getter
@@ -64,16 +68,16 @@ public class ExecuteContext implements Serializable {
         return nodeDataMap.get(nodeTag);
     }
 
-    public void restExecutionEndTag() {
-        this.executionEndTag = null;
+    public void restExecutionEndNodeTag() {
+        this.executionEndNodeTag = null;
     }
 
-    public boolean isExecutionEndTagEmpty() {
-        return executionEndTag == null;
+    public boolean isExecutionEndNodeTagEmpty() {
+        return executionEndNodeTag == null;
     }
 
-    public boolean executionEndTagEquals(String tag) {
-        return executionEndTag != null && executionEndTag.equals(tag);
+    public boolean isExecutionEndNodeTagEquals(String tag) {
+        return executionEndNodeTag != null && executionEndNodeTag.equals(tag);
     }
 
     public void restExecutionUuid() {

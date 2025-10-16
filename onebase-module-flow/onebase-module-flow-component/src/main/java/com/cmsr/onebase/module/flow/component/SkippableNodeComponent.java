@@ -42,25 +42,25 @@ public abstract class SkippableNodeComponent extends NodeComponent {
         
         if (executeContext.isDebugMode()) {
             // 调试模式下的处理逻辑
-            if (executeContext.isExecutionEndTagEmpty()) {
+            if (executeContext.isExecutionEndNodeTagEmpty()) {
                 // 如果执行结束标签为空，则执行当前节点并结束后续流程
                 return NodeActionEnum.DO_PROCESS_AND_DO_END;
-            } else if (!executeContext.isExecutionEndTagEmpty() && !executeContext.executionEndTagEquals(tag)) {
+            } else if (!executeContext.isExecutionEndNodeTagEmpty() && !executeContext.isExecutionEndNodeTagEquals(tag)) {
                 // 如果执行结束标签不为空且不等于当前节点标签，则跳过当前节点
                 return NodeActionEnum.DO_SKIP;
-            } else if (!executeContext.isExecutionEndTagEmpty() && executeContext.executionEndTagEquals(tag)) {
+            } else if (!executeContext.isExecutionEndNodeTagEmpty() && executeContext.isExecutionEndNodeTagEquals(tag)) {
                 // 如果执行结束标签不为空且等于当前节点标签，则重置状态，便于后续节点执行
                 return NodeActionEnum.DO_RESET;
             }
         } else {
             // 非调试模式下的处理逻辑
-            if (executeContext.isExecutionEndTagEmpty()) {
+            if (executeContext.isExecutionEndNodeTagEmpty()) {
                 // 如果执行结束标签为空，则正常执行当前节点
                 return NodeActionEnum.DO_PROCESS;
-            } else if (!executeContext.isExecutionEndTagEmpty() && !executeContext.executionEndTagEquals(tag)) {
+            } else if (!executeContext.isExecutionEndNodeTagEmpty() && !executeContext.isExecutionEndNodeTagEquals(tag)) {
                 // 如果执行结束标签不为空且不等于当前节点标签，则跳过当前节点
                 return NodeActionEnum.DO_SKIP;
-            } else if (!executeContext.isExecutionEndTagEmpty() && executeContext.executionEndTagEquals(tag)) {
+            } else if (!executeContext.isExecutionEndNodeTagEmpty() && executeContext.isExecutionEndNodeTagEquals(tag)) {
                 // 如果执行结束标签不为空且等于当前节点标签，则重置重置状态，便于后续节点执行
                 return NodeActionEnum.DO_RESET;
             }

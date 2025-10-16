@@ -1,56 +1,18 @@
 package com.cmsr.onebase.module.flow.context;
 
-import lombok.Setter;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
 /**
  * @Author：huangjie
  * @Date：2025/10/11 21:33
  */
-@Setter
-@Component
-public class ContextProvider implements InitializingBean {
 
-    public static final String EXECUTE_CONTEXT = "executeContext:";
-    public static final String VARIABLE_CONTEXT = "variableContext:";
+public interface ContextProvider {
 
-    @Autowired
-    private RedisConnectionFactory redisConnectionFactory;
+    void storeExecuteContext(String executionUuid, ExecuteContext executeContext);
 
-    private RedisTemplate<String, Object> redisTemplate;
+    void storeVariableContext(String executionUuid, VariableContext variableContext);
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.redisTemplate = new RedisTemplate<>();
-        this.redisTemplate.setConnectionFactory(redisConnectionFactory);
-        this.redisTemplate.setKeySerializer(new StringRedisSerializer());
-        this.redisTemplate.afterPropertiesSet();
-    }
+    ExecuteContext restoreExecuteContext(String executionUuid);
 
-    public void storeExecuteContext(String executionUuid, ExecuteContext executeContext) throws IOException {
-        redisTemplate.opsForValue().set(EXECUTE_CONTEXT + executionUuid, executeContext, 1, TimeUnit.HOURS);
-    }
-
-    public void storeVariableContext(String executionUuid, VariableContext variableContext) throws IOException {
-        redisTemplate.opsForValue().set(VARIABLE_CONTEXT + executionUuid, variableContext, 1, TimeUnit.HOURS);
-    }
-
-    public ExecuteContext restoreExecuteContext(String executionUuid) throws IOException, ClassNotFoundException {
-        ExecuteContext deserialize = (ExecuteContext) redisTemplate.opsForValue().get(EXECUTE_CONTEXT + executionUuid);
-        return deserialize;
-    }
-
-    public VariableContext restoreVariableContext(String executionUuid) throws IOException, ClassNotFoundException {
-        VariableContext deserialize = (VariableContext) redisTemplate.opsForValue().get(VARIABLE_CONTEXT + executionUuid);
-        return deserialize;
-    }
+    VariableContext restoreVariableContext(String executionUuid);
 
 }

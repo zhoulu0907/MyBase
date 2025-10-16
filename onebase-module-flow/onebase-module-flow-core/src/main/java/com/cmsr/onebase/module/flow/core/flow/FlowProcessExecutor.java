@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.flow.core.flow;
 import com.cmsr.onebase.module.flow.context.ContextProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
-import com.google.common.collect.Maps;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
 import lombok.Setter;
@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,13 +36,19 @@ public class FlowProcessExecutor {
     private ContextProvider contextProvider;
 
     public ExecutorResult execute(Long processId, Map<String, Object> inputParams) {
+        Map<String, NodeData> nodeData = graphFlowCache.findNodeData(processId);
+        if (nodeData == null) {
+            throw new IllegalArgumentException("流程不存在: " + processId);
+        }
         String chainId = FlowUtils.toFlowChainId(processId);
+        // 变量上下文
         VariableContext variableContext = new VariableContext();
         variableContext.setInputParams(inputParams);
-
+        // 执行上下文
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setProcessId(processId);
-        executeContext.setNodeDataMap(graphFlowCache.findNodeData(processId));
+        executeContext.setNodeDataMap(nodeData);
+        // 执行流程
         LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
         variableContext = response.getContextBean(VariableContext.class);
         executeContext = response.getContextBean(ExecuteContext.class);
@@ -57,16 +64,23 @@ public class FlowProcessExecutor {
         executorResult.setCause(response.getCause());
         executorResult.setExecutionEnd(executeContext.isExecuteEnd());
         executorResult.setExecutionUuid(executeContext.getExecutionUuid());
-        executorResult.setExecutionEndTag(executeContext.getExecutionEndTag());
+        executorResult.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
+        executorResult.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
         executorResult.setOutputParams(variableContext.getOutputParams());
         return executorResult;
     }
 
-    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputMap) throws Exception {
+    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputMap) {
         String chainId = FlowUtils.toFlowChainId(processId);
         VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
-        variableContext.setOutputParams(Maps.newHashMap());
+        if (variableContext == null) {
+            throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
+        }
+        variableContext.setOutputParams(new HashMap<>());
         ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
+        if (executeContext == null) {
+            throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
+        }
         LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
         variableContext = response.getContextBean(VariableContext.class);
         executeContext = response.getContextBean(ExecuteContext.class);

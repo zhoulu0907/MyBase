@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -157,20 +158,71 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     }
 
     /**
-     * 转换DataRow为Map
+     * 转换DataRow为Map，并对JSON字段进行反序列化
      */
     protected Map<String, Object> convertDataRowToMap(DataRow dataRow, List<MetadataEntityFieldDO> fields) {
         Map<String, Object> resultMap = new HashMap<>();
 
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
+            String fieldType = field.getFieldType();
             Object value = dataRow.get(fieldName);
+            
             if (value != null) {
-                resultMap.put(fieldName, value);
+                // 对需要JSON反序列化的字段进行处理
+                if (needsJsonDeserialization(fieldType, value)) {
+                    try {
+                        // 尝试将JSON字符串反序列化为对象
+                        Object deserializedValue = JsonUtils.parseObject(value.toString(), Object.class);
+                        resultMap.put(fieldName, deserializedValue);
+                        log.debug("字段 {} (类型: {}) 的值已从JSON反序列化", fieldName, fieldType);
+                    } catch (Exception e) {
+                        // 反序列化失败时，保持原值
+                        log.debug("字段 {} 的JSON反序列化失败，保持原值: {}", fieldName, e.getMessage());
+                        resultMap.put(fieldName, value);
+                    }
+                } else {
+                    resultMap.put(fieldName, value);
+                }
             }
         }
 
         return resultMap;
+    }
+
+    /**
+     * 判断字段类型是否需要JSON反序列化
+     * 
+     * @param fieldType 字段类型
+     * @param fieldValue 字段值
+     * @return 是否需要反序列化
+     */
+    private boolean needsJsonDeserialization(String fieldType, Object fieldValue) {
+        if (fieldType == null || fieldValue == null) {
+            return false;
+        }
+        
+        // 只有当值是字符串类型时才考虑反序列化
+        if (!(fieldValue instanceof String)) {
+            return false;
+        }
+        
+        String upperFieldType = fieldType.toUpperCase();
+        
+        // 字段类型包含以下关键字的需要JSON反序列化
+        boolean isComplexType = upperFieldType.contains("MULTI") ||        // 多选类型
+                                upperFieldType.contains("ADDRESS") ||       // 地址类型
+                                upperFieldType.contains("FILE") ||          // 文件附件
+                                upperFieldType.contains("ATTACHMENT") ||    // 附件
+                                upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.equals("JSONB") ||           // JSONB类型
+                                upperFieldType.equals("JSON");              // JSON类型
+        
+        // 判断字符串值是否像JSON（以{或[开头）
+        String strValue = fieldValue.toString().trim();
+        boolean looksLikeJson = strValue.startsWith("{") || strValue.startsWith("[");
+        
+        return isComplexType && looksLikeJson;
     }
 
     /**
@@ -282,11 +334,26 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     // ========== 抽象方法定义 ==========
 
     /**
-     * 执行统一的数据处理流程
+     * 执行统一的数据处理流程（用于create操作）
      */
     public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Map<String, Object> data,
                                                String methodCode) {
-        log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，方法：" + methodCode);
+        return executeProcess(operationType, entityId, null, data, methodCode);
+    }
+
+    /**
+     * 执行统一的数据处理流程（用于update/delete/get操作）
+     *
+     * @param operationType 操作类型
+     * @param entityId 实体ID
+     * @param id 数据ID（update/delete/get操作必填）
+     * @param data 数据
+     * @param methodCode 方法代码
+     * @return 处理结果
+     */
+    public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Object id, Map<String, Object> data,
+                                               String methodCode) {
+        log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，数据ID：" + id + "，方法：" + methodCode);
 
         try {
             //1. 校验实体存在
@@ -297,6 +364,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
 
             //3. 初始化上下文
             ProcessContext context = initializeContext(operationType, entity, fields, data, methodCode);
+            context.setId(id); // 设置数据ID
 
 
             //4. 请求数据完整性校验（基础属性）
@@ -432,11 +500,29 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         Long entityId = context.getEntityId();
         Map<String, Object> data = context.getData();
         List<MetadataEntityFieldDO> fields = context.getFields();
+        Object id = context.getId();
+        OperationType operationType = context.getOperationType();
 
-        log.info("开始执行数据校验：entityId={}, 字段数量={}", entityId, fields.size());
+        log.info("开始执行数据校验：entityId={}, 操作类型={}, 字段数量={}", entityId, operationType.getDescription(), fields.size());
+
+        // 对于UPDATE操作，需要将ID添加到data中，以便唯一性校验时能够排除当前记录
+        Map<String, Object> dataForValidation = data;
+        if (operationType == OperationType.UPDATE && id != null) {
+            // 查找主键字段名
+            String primaryKeyField = fields.stream()
+                .filter(f -> f.getIsPrimaryKey() != null && f.getIsPrimaryKey() == 1)
+                .map(MetadataEntityFieldDO::getFieldName)
+                .findFirst()
+                .orElse("id");
+            
+            // 创建包含ID的临时数据副本用于校验
+            dataForValidation = new java.util.HashMap<>(data);
+            dataForValidation.put(primaryKeyField, id);
+            log.info("UPDATE操作：将ID[{}]添加到校验数据中，字段名：{}", id, primaryKeyField);
+        }
 
         // 使用校验管理器执行所有字段的校验
-        validationManager.validateEntity(entityId, fields, data);
+        validationManager.validateEntity(entityId, fields, dataForValidation);
 
         log.info("数据校验完成：entityId={}", entityId);
     }
@@ -459,7 +545,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * 7. 数据编号
      */
     protected void generateDataNumber(ProcessContext context) {
-
+        // 处理自动编号字段
+        processAutoNumberFields(context.getFields(), context.getProcessedData());
     }
 
     /**
@@ -576,6 +663,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     protected static class ProcessContext {
         private OperationType operationType;
         private Long entityId;
+        private Object id; // 数据ID，用于update/delete/get操作
         private Map<String, Object> data;
         private String methodCode;
         // 核心上下文字段
