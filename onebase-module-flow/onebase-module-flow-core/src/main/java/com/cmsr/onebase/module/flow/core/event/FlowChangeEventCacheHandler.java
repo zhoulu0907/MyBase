@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.RocketMQConstants;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
@@ -12,7 +13,6 @@ import com.yomahub.liteflow.builder.el.LiteFlowChainELBuilder;
 import com.yomahub.liteflow.flow.FlowBus;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
@@ -30,6 +30,8 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @Author：huangjie
@@ -38,7 +40,7 @@ import java.util.Collections;
 @Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowEventUpdateFlowCache implements MessageListener, ApplicationRunner, DisposableBean {
+public class FlowChangeEventCacheHandler implements MessageListener, ApplicationRunner, DisposableBean {
 
     private final ClientServiceProvider provider = ClientServiceProvider.loadService();
 
@@ -61,12 +63,14 @@ public class FlowEventUpdateFlowCache implements MessageListener, ApplicationRun
     @Autowired
     private GraphFlowCache graphFlowCache;
 
+
     private RocketMQSlotManager slotManager;
 
     private PushConsumer consumer;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        initAllProcess();
         slotManager = new RocketMQSlotManager();
         slotManager.setSlotKey(RocketMQConstants.CHANGE_EVENTS_CONSUMER_GROUP_SLOT);
         slotManager.setRedissonClient(redissonClient);
@@ -85,14 +89,29 @@ public class FlowEventUpdateFlowCache implements MessageListener, ApplicationRun
                 .build();
     }
 
+    private void initAllProcess() {
+        //TODO 这里要用 TenantUtils.executeIgnore 去查询，但这个没有拆分出来，会导致依赖问题。
+        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus());
+        for (FlowProcessDO flowProcessDO : flowProcessDOS) {
+            try {
+                onProcessUpdate(flowProcessDO);
+                log.info("加载flowProcess流程成功：{}", flowProcessDO.getId());
+            } catch (Exception e) {
+                log.error("初始化flowProcessDO异常：{}, {}", flowProcessDO, e.getMessage(), e);
+            }
+        }
+    }
+
     @Override
     public ConsumeResult consume(MessageView messageView) {
         try {
             FlowChangeEvent event = FlowChangeEvent.decode(messageView.getBody());
-            if (StringUtils.equalsIgnoreCase(event.getType(), FlowChangeEvent.UPDATE)) {
-                onProcessUpdate(event.getProcessId());
-            } else if (StringUtils.equalsIgnoreCase(event.getType(), FlowChangeEvent.DELETE)) {
-                onProcessDelete(event.getProcessId());
+            Long applicationId = event.getApplicationId();
+            if (event.getType().equals(FlowChangeEvent.UPDATE)) {
+                onApplicationChange(applicationId);
+            }
+            if (event.getType().equals(FlowChangeEvent.DELETE)) {
+                onApplicationDelete(applicationId);
             }
             return ConsumeResult.SUCCESS;
         } catch (Exception e) {
@@ -101,28 +120,42 @@ public class FlowEventUpdateFlowCache implements MessageListener, ApplicationRun
         }
     }
 
-    public boolean onProcessUpdate(Long processId) {
-        log.info("处理流程更新事件：{}", processId);
-        FlowProcessDO processDO = flowProcessRepository.findById(processId);
-        if (processDO == null) {
-            log.warn("流程不存在：{}", processId);
-            return false;
+    private void onApplicationDelete(Long applicationId) {
+        graphFlowCache.delete(applicationId);
+    }
+
+    public String onApplicationChange(Long applicationId) {
+        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
+        Set<Long> oldProcessIds = graphFlowCache.findFlowByApplicationId(applicationId);
+        for (FlowProcessDO flowProcessDO : flowProcessDOS) {
+            oldProcessIds.remove(flowProcessDO.getId());
         }
+        for (Long processId : oldProcessIds) {
+            onProcessDelete(applicationId, processId);
+        }
+        for (FlowProcessDO flowProcessDO : flowProcessDOS) {
+            onProcessUpdate(flowProcessDO);
+        }
+        return "删除：" + oldProcessIds + "，添加：" + flowProcessDOS.stream().map(FlowProcessDO::getId).toList();
+    }
+
+    public boolean onProcessUpdate(FlowProcessDO processDO) {
+        log.info("处理流程更新事件：{}", processDO.getId());
         JsonGraph jsonGraph = JsonGraphBuilder.build(processDO.getProcessDefinition());
         String flowChain = jsonGraph.toFlowChain();
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
-        graphFlowCache.update(processDO.getId(), jsonGraph);
+        graphFlowCache.update(processDO.getApplicationId(), processDO.getId(), jsonGraph);
         return true;
     }
 
-    public boolean onProcessDelete(Long processId) {
+    public boolean onProcessDelete(Long applicationId, Long processId) {
         log.info("发布流程删除事件：{}", processId);
         String chainId = FlowUtils.toFlowChainId(processId);
         FlowBus.removeChain(chainId);
         //
-        graphFlowCache.delete(processId);
+        graphFlowCache.delete(applicationId, processId);
         return true;
     }
 

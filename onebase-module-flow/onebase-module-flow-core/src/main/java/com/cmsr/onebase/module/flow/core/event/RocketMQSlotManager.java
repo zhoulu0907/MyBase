@@ -6,6 +6,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
