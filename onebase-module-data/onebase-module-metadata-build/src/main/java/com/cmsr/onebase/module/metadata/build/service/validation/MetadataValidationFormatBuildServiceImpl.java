@@ -49,10 +49,11 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         respVO.setIgnoreCase(formatDO.getFlags() != null && formatDO.getFlags().contains("i") ? 1 : 0); // flags -> ignoreCase
         respVO.setAppId(formatDO.getAppId() != null ? String.valueOf(formatDO.getAppId()) : null); // Long -> String
 
-        // 获取规则组名称
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
 
         return respVO;
@@ -72,8 +73,12 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         respVO.setIgnoreCase(formatDO.getFlags() != null && formatDO.getFlags().contains("i") ? 1 : 0); // flags -> ignoreCase
         respVO.setAppId(formatDO.getAppId() != null ? String.valueOf(formatDO.getAppId()) : null); // Long -> String
         
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
-        if (ruleGroup != null) { respVO.setRgName(ruleGroup.getRgName()); }
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        }
         return respVO;
     }
 

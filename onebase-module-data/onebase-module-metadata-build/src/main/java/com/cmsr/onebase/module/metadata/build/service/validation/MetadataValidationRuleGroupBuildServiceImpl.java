@@ -573,7 +573,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     }
 
     /**
-     * 根据字段ID获取字段名称
+     * 根据字段ID获取字段显示名称
      */
     private String getFieldNameById(Long fieldId) {
         if (fieldId == null) {
@@ -581,11 +581,11 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         }
 
         try {
-            // 使用 entityFieldRepository 查询字段信息
+            // 使用 entityFieldRepository 查询字段信息，返回displayName而不是fieldName
             var fieldDO = entityFieldRepository.findById(fieldId);
-            return fieldDO != null ? fieldDO.getFieldName() : null;
+            return fieldDO != null ? fieldDO.getDisplayName() : null;
         } catch (Exception e) {
-            log.error("根据字段ID获取字段名称失败，fieldId: {}", fieldId, e);
+            log.error("根据字段ID获取字段显示名称失败，fieldId: {}", fieldId, e);
             return null;
         }
     }
