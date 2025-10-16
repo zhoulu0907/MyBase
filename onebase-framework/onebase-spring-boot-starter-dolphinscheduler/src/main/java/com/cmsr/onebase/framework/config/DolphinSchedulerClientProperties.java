@@ -1,0 +1,51 @@
+package com.cmsr.onebase.framework.config;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.time.Duration;
+import lombok.Data;
+
+/**
+ * DolphinScheduler 客户端配置属性
+ *
+ * @author matianyu
+ * @date 2025-10-15
+ */
+@Data
+@ConfigurationProperties(prefix = "onebase.dolphinscheduler.client")
+public class DolphinSchedulerClientProperties {
+
+    /** 是否启用自动装配 */
+    private boolean enabled = true;
+
+    /**
+     * DolphinScheduler 服务基础地址，必须以 / 结尾，例如：http://127.0.0.1:12345/dolphinscheduler/
+     */
+    @NotBlank(message = "dolphinscheduler baseUrl 不能为空")
+    private String baseUrl;
+
+    /** 认证 Token */
+    @NotBlank(message = "dolphinscheduler token 不能为空")
+    private String token;
+
+    /** 连接超时 */
+    @NotNull
+    private Duration connectTimeout = Duration.ofSeconds(5);
+
+    /** 读取超时 */
+    @NotNull
+    private Duration readTimeout = Duration.ofSeconds(30);
+
+    /** 写入超时 */
+    @NotNull
+    private Duration writeTimeout = Duration.ofSeconds(30);
+
+    /** 日志级别：NONE/BASIC/HEADERS/BODY */
+    @NotBlank
+    private String logLevel = "BASIC";
+
+    /** 是否启用真实连通性测试（仅测试环境使用） */
+    private boolean enableLiveConnectivityTest = false;
+}
