@@ -80,103 +80,104 @@ const XTable = memo(
       width: '110px',
       render: (_: any, record: any) => {
         if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
-        const isDisabled = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED];
+        const isDisabled = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
         return (
           <Space>
-            {operationButton?.map((opearate, index) => (
-              <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
-                {opearate.type === TableOperationButton.EDIT && opearate.display && (
-                  <div
-                    style={{
-                      whiteSpace: 'nowrap',
-                      opacity: isDisabled ? 0.5 : 1,
-                      cursor: isDisabled ? 'not-allowed' : 'pointer',
-                      pointerEvents: isDisabled ? 'none' : 'auto'
-                    }}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (redirectMethod === RedirectMethod.DRAWER) {
-                        // 打开抽屉显示详情
-                        console.log(redirectPageId);
-                        pagesRuntimeSignal.setDrawerVisible(true);
-                        redirectPageId && pagesRuntimeSignal.setDrawerPageId(redirectPageId);
-
-                        handleEdit(record.id, false);
-                      } else if (redirectMethod === RedirectMethod.NEW_TAB) {
-                        // todo
-                      } else if (redirectMethod === RedirectMethod.CURRENT_TAB) {
-                      } else if (redirectMethod === RedirectMethod.MODAL) {
-                      }
-                    }}
-                  >
-                    {
-                      <>
-                        {(operationButtonShowType === TableOperationButtonStyle.ICON ||
-                          operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                          <DynamicIcon
-                            IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                            theme="outline"
-                            size="16"
-                            fill={opearate.iconColor}
-                            style={{
-                              marginRight: 4
-                            }}
-                          />
-                        )}
-                        {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
-                          operationButtonShowType === TableOperationButtonStyle.ALL) &&
-                          opearate.buttonName}
-                      </>
-                    }
-                  </div>
-                )}
-
-                {opearate.type === TableOperationButton.DELETE && opearate.display && (
-                  <div
-                    style={{
-                      whiteSpace: 'nowrap',
-                      opacity: isDisabled ? 0.5 : 1,
-                      cursor: isDisabled ? 'not-allowed' : 'pointer',
-                      pointerEvents: isDisabled ? 'none' : 'auto'
-                    }}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                    }}
-                  >
-                    <Popconfirm
-                      focusLock
-                      title="确认删除"
-                      content={opearate.confirmText}
-                      onOk={(event) => {
+            {
+              operationButton?.map((opearate, index) => (
+                <Tooltip content={!hasOperationPermission && "无操作权限"} key={index}>
+                  {(opearate.type === TableOperationButton.EDIT && opearate.display) && (
+                    <div
+                      style={{
+                        whiteSpace: 'nowrap',
+                        opacity: isDisabled ? 0.5 : 1,
+                        cursor: isDisabled ? 'not-allowed' : 'pointer',
+                        pointerEvents: isDisabled ? 'none' : 'auto'
+                      }}
+                      onClick={(event) => {
                         event.stopPropagation();
-                        handleDelete(record.id);
-                        if (opearate.deletedAction === RedirectMethod.REFRESH) {
-                          handlePage();
-                        } else if (opearate.deletedAction === RedirectMethod.PROMPT_JUMP) {
+                        if (redirectMethod === RedirectMethod.DRAWER) {
+                          // 打开抽屉显示详情
+                          console.log(redirectPageId);
+                          pagesRuntimeSignal.setDrawerVisible(true);
+                          redirectPageId && pagesRuntimeSignal.setDrawerPageId(redirectPageId);
+
+                          handleEdit(record.id, false);
+                        } else if (redirectMethod === RedirectMethod.NEW_TAB) {
                           // todo
+                        } else if (redirectMethod === RedirectMethod.CURRENT_TAB) {
+                        } else if (redirectMethod === RedirectMethod.MODAL) {
                         }
                       }}
                     >
-                      {(operationButtonShowType === TableOperationButtonStyle.ICON ||
-                        operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                        <DynamicIcon
-                          IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                          theme="outline"
-                          size="16"
-                          fill={opearate.iconColor}
-                          style={{
-                            marginRight: 4
-                          }}
-                        />
-                      )}
-                      {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
-                        operationButtonShowType === TableOperationButtonStyle.ALL) &&
-                        opearate.buttonName}
-                    </Popconfirm>
-                  </div>
-                )}
-              </Tooltip>
-            ))}
+                      {
+                        <>
+                          {(operationButtonShowType === TableOperationButtonStyle.ICON ||
+                            operationButtonShowType === TableOperationButtonStyle.ALL) && (
+                              <DynamicIcon
+                                IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                                theme="outline"
+                                size="16"
+                                fill={opearate.iconColor}
+                                style={{
+                                  marginRight: 4
+                                }}
+                              />
+                            )}
+                          {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
+                            operationButtonShowType === TableOperationButtonStyle.ALL) &&
+                            opearate.buttonName}
+                        </>
+                      }
+                    </div>
+                  )}
+
+                  {opearate.type === TableOperationButton.DELETE && opearate.display && (
+                    <div
+                      style={{
+                        whiteSpace: 'nowrap',
+                        opacity: isDisabled ? 0.5 : 1,
+                        cursor: isDisabled ? 'not-allowed' : 'pointer',
+                        pointerEvents: isDisabled ? 'none' : 'auto'
+                      }}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                      }}
+                    >
+                      <Popconfirm
+                        focusLock
+                        title="确认删除"
+                        content={opearate.confirmText}
+                        onOk={(event) => {
+                          event.stopPropagation();
+                          handleDelete(record.id);
+                          if (opearate.deletedAction === RedirectMethod.REFRESH) {
+                            handlePage();
+                          } else if (opearate.deletedAction === RedirectMethod.PROMPT_JUMP) {
+                            // todo
+                          }
+                        }}
+                      >
+                        {(operationButtonShowType === TableOperationButtonStyle.ICON ||
+                          operationButtonShowType === TableOperationButtonStyle.ALL) && (
+                            <DynamicIcon
+                              IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                              theme="outline"
+                              size="16"
+                              fill={opearate.iconColor}
+                              style={{
+                                marginRight: 4
+                              }}
+                            />
+                          )}
+                        {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
+                          operationButtonShowType === TableOperationButtonStyle.ALL) &&
+                          opearate.buttonName}
+                      </Popconfirm>
+                    </div>
+                  )}
+                </Tooltip>
+              ))}
           </Space>
         );
       }
@@ -296,7 +297,6 @@ const XTable = memo(
       if (res) {
         Message.success('删除成功');
       }
-      handlePage();
     };
 
     const handleEdit = (id: string, toFormPage: boolean) => {
