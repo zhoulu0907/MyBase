@@ -133,7 +133,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 type="outline"
                 onClick={() => {
                   const newLabel = '新选项';
-                  const newValue = _fields[_fields.length - 1].field;
+                  const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${checkboxKey}[0]`;
                   const newList = [
                     ...checkboxConfig,
                     { label: item.displayName || newLabel, value: item.fieldName || newValue }

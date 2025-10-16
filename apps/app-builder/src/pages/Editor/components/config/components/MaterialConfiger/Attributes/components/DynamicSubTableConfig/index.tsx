@@ -143,7 +143,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 disabled
                 onClick={() => {
                   const newLabel = '新选项';
-                  const newValue = _fields[_fields.length - 1].field;
+                  const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${componentKey}[0]`;
                   const newList = [
                     ...allComponents,
                     { label: item.displayName || newLabel, value: item.fieldName || newValue }
@@ -154,7 +154,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                   // handlePropsChange(componentKey, newList);
                 }}
               >
-                添加一项
+                添加一项4
               </Button>
             </div>
           )}
