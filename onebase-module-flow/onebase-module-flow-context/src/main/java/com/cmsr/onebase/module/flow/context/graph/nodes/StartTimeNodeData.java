@@ -107,25 +107,30 @@ public class StartTimeNodeData extends NodeData implements Serializable {
     public String createCronExpression() {
         if (REPEAT_TYPE_DAY.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
-            cron.setMinuteAndHour(triggerTime);
+            cron.setHourAndMinute(triggerTime);
             return cron.toCron();
         }
         if (REPEAT_TYPE_WEEK.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
-            cron.setMinuteAndHour(triggerTime);
-            cron.setWeek(repeatWeek);
+            cron.setWeeks(repeatWeek);
+            cron.setHourAndMinute(triggerTime);
             return cron.toCron();
         }
         if (REPEAT_TYPE_MONTH.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
-            cron.setMinuteAndHour(triggerTime);
-            cron.setDay(repeatDay);
+            cron.setDays(repeatDay);
+            cron.setHourAndMinute(triggerTime);
             return cron.toCron();
         }
         if (REPEAT_TYPE_YEAR.equalsIgnoreCase(repeatType)) {
             Cron cron = new Cron();
-            cron.setMinuteAndHour(triggerTime);
-            cron.setDay(triggerDate);
+            cron.setMonthAndDay(triggerDate);
+            cron.setHourAndMinute(triggerTime);
+            return cron.toCron();
+        }
+        if (REPEAT_TYPE_NONE.equalsIgnoreCase(repeatType)) {
+            Cron cron = new Cron();
+            cron.setDateTime(triggerTime);
             return cron.toCron();
         }
         if (REPEAT_TYPE_CRON.equalsIgnoreCase(repeatType)) {

@@ -44,6 +44,7 @@ public class ModalNodeComponent extends SkippableNodeComponent {
             this.setIsEnd(true);
         }
         if (nodeActionEnum == NodeActionEnum.DO_RESET) {
+            variableContext.putNodeVariables(this.getTag(), variableContext.getUuidFiles());
             executeContext.restExecutionUuid();
             executeContext.restExecutionEndNodeTag();
         }
@@ -55,10 +56,13 @@ public class ModalNodeComponent extends SkippableNodeComponent {
         outputParams.put("modalType", nodeData.getModalType());
         outputParams.put("cancelWarn", nodeData.getCancelWarn());
         outputParams.put("modalTitle", nodeData.getModalTitle());
+        outputParams.put("okText", nodeData.getOkText());
         outputParams.put("cancelText", nodeData.getCancelText());
         outputParams.put("title", nodeData.getTitle());
         outputParams.put("prompt", nodeData.getPrompt());
         outputParams.put("afterCancel", nodeData.getAfterCancel());
+        outputParams.put("arrange", nodeData.getArrange());
+        outputParams.put("fields", nodeData.getFields());
         return outputParams;
     }
 
