@@ -536,44 +536,31 @@ const PageManagerPage: FC = () => {
                 padding: '0 8px'
               }}
               allowDrop={(info: any) => {
-                const dragNode = info.dragNode;
-                const dropNode = info.dropNode;
-                const dropPosition = info.dropPosition;
-                const dragType = dragNode?.props?.menuType;
-                const dropType = dropNode.props?.menuType;
+                const { dragNode, dropNode, dropPosition } = info;
 
-                if (dragType === MenuType.PAGE) {
-                  if (dropType === MenuType.PAGE && dropPosition === 0) {
-                    // 页面节点不能拖入页面节点内部
-                    return false;
-                  }
-                  // 页面节点允许拖入分组内部或页面节点前后
-                  return true;
-                }
-                return true;
+                const dragParent = dragNode?.props?.parentKey;
+                const dropParent = dropNode?.props?.parentKey;
+                const sameParent = dragParent === dropParent;
+
+                // 仅允许同级间上下移动
+                return sameParent && dropPosition !== 0;
               }}
               onDrop={async (info: any) => {
-                // console.log('info', info)
                 const dragNode = info.dragNode;
                 const dropNode = info.dropNode;
                 const dropPosition = info.dropPosition;
+                const dropNodeParent = findParentNode(treeData!, dropNode.key);
 
                 moveNode(dragNode, dropNode, dropPosition);
-
-                const dropNodeParent = findParentNode(treeData!, dropNode.key);
 
                 // 生成接口参数
                 const payload: UpdateApplicationMenuOrderReq = {
                   id: dragNode.key,
-                  parentId:
-                    dropNode.props.menuType === MenuType.GROUP && dropPosition === 0
-                      ? dropNodeParent?.key || dropNode.key
-                      : '0', // 拖到谁的下面
+                  parentId: dropNodeParent?.key || '0',
                   menuTree: buildMenuTree(treeData!)
                 };
 
                 console.debug('✅ 更新后的参数:', payload);
-
                 await updateApplicationMenuOrder(payload);
               }}
             />
