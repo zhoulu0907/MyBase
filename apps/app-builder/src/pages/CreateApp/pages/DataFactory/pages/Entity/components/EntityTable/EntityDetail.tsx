@@ -1,11 +1,11 @@
+import type { EntityListItem, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Tabs } from '@arco-design/web-react';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './EntityDetail.module.less';
 import DataFields from './tabs/DataFields';
 import DataMethods from './tabs/DataMethods';
 import DataRules from './tabs/DataRules';
 import Relations from './tabs/Relations';
-import type { EntityNode, EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 
 interface EntityDetailProps {
   entity: EntityNode;
@@ -13,6 +13,7 @@ interface EntityDetailProps {
 }
 
 const EntityDetail: React.FC<EntityDetailProps> = ({ entity, reloadList }) => {
+  // TODO(xiaoyi): 1. 改成常量
   const [activeTab, setActiveTab] = useState('fields');
 
   // 当实体变化时，重置到第一个标签页

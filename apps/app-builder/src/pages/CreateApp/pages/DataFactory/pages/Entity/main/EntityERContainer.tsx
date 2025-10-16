@@ -1,13 +1,13 @@
-import type { EdgeData, EntityERProps, EntityNode, Entity } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import type { EdgeData, Entity, EntityERProps, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
-import { useResourceStore } from '@/store/store_resource';
 import { useNewNodeStore } from '@/store/store_entity';
+import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { useModalManager, MODAL_TYPE } from '../hooks/useModalManager';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
+import { MODAL_TYPE, useModalManager } from '../hooks/useModalManager';
 // import FieldDetailDrawer from '../components/Drawers/FieldDetailDrawer';
 import ERchart from '../components/ERchart';
 import CreateEntityModal from '../components/Modals/CreateEntityModal';
@@ -229,7 +229,7 @@ export const EntityERContainer: React.FC<{
       />
       <Button
         type="primary"
-        className={styles['entity-page-create-button']}
+        className={styles.entityPageCreateButton}
         onClick={() => {
           openModal(MODAL_TYPE.CREATE_ENTITY);
         }}
