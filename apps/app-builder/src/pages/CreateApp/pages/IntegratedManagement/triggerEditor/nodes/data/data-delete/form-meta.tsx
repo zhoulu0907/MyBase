@@ -319,9 +319,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = async (_changeValue: any, values: any) => {
     // 校验表单
-    validateNodeForm(form, payloadForm, false);
+    // validateNodeForm(form, payloadForm, false);
 
-    handlePropsOnChange(values);
+    // handlePropsOnChange(values);
   };
 
   const getInitData = () => {
@@ -344,7 +344,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Input disabled />
             </Form.Item>
 
-            <Form.Item label="查询方式" field="dataType" required>
+            <Form.Item label="删除方式" field="dataType" required>
               <Radio.Group direction="vertical" onChange={handleDataTypeChange}>
                 <Radio value={DATA_SOURCE_TYPE.FORM}>删除主表数据</Radio>
                 <Radio value={DATA_SOURCE_TYPE.SUBFORM}>删除子表数据</Radio>

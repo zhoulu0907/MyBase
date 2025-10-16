@@ -26,7 +26,7 @@ import {
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '../../nodes/const';
+import { NodeType } from '@onebase/common';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -250,15 +250,23 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   const processConditionFields = (
     nodeId: string,
     conditionFields: ConditionField[],
-    children: TreeSelectDataType[]
+    children: TreeSelectDataType[],
+    fieldType?: string
   ): void => {
     if (!conditionFields) return;
 
     conditionFields.forEach((field: ConditionField) => {
-      children.push({
-        key: `${nodeId}.${field.value}`,
-        title: field.label
-      });
+      if (!fieldType || !field.fieldType) {
+        children.push({
+          key: `${nodeId}.${field.value}`,
+          title: field.label,
+        });
+      }else if (field?.fieldType === fieldType) {
+        children.push({
+          key: `${nodeId}.${field.value}`,
+          title: field.label
+        });
+      }
     });
   };
 
@@ -273,14 +281,16 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.DATA_QUERY,
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
-        NodeType.LOOP
+        NodeType.DATA_CALC,
+        NodeType.LOOP,
+        NodeType.MODAL
       ]),
     []
   );
 
   // 使用 useCallback 缓存函数，避免不必要的重新创建
   const getVariableOptions = useCallback(
-    (nodeId: string): TreeSelectDataType[] => {
+    (nodeId: string, item: any): TreeSelectDataType[] => {
       if (nodeId == undefined || nodeId == '') {
         if (variableOptions) {
           return variableOptions;
@@ -293,14 +303,23 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
         NodeType.DATA_ADD,
+        NodeType.DATA_CALC,
         NodeType.START_FORM,
         NodeType.START_ENTITY,
         NodeType.START_TIME,
         NodeType.START_DATE_FIELD,
         NodeType.START_API,
         NodeType.START_BPM,
-        NodeType.LOOP
+        NodeType.LOOP,
+        NodeType.MODAL
       ];
+
+      const fieldId = form.getFieldValue(item.field + '.fieldId');
+      let targetField: any = {};
+      for (let ele of fields) {
+        targetField = ele?.children?.find((element) => element.key == fieldId);
+      }
+      const fieldType = targetField?.fieldType;
 
       const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
       const options: TreeSelectDataType[] = [];
@@ -322,7 +341,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
         // 统一处理 conditionFields
         if (nodeOutput.conditionFields && treeNode.children) {
-          processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children);
+          processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children, fieldType);
         }
 
         // 只有当有子字段时才添加到选项中
@@ -333,7 +352,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
       return options;
     },
-    [nodesWithConditionFields, variableOptions]
+    [nodesWithConditionFields, variableOptions, fields]
   );
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
@@ -481,12 +500,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.VARIABLES && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <TreeSelect
-                                                    treeData={getVariableOptions(nodeId)}
+                                                    treeData={getVariableOptions(nodeId, item)}
                                                     triggerElement={(params) => {
                                                       return (
                                                         <Input
                                                           readOnly
-                                                          value={showTriggerElement(params, getVariableOptions(nodeId))}
+                                                          value={showTriggerElement(
+                                                            params,
+                                                            getVariableOptions(nodeId, item)
+                                                          )}
                                                         ></Input>
                                                       );
                                                     }}

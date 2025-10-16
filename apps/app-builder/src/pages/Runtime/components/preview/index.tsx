@@ -12,16 +12,16 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
+import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
   PreviewRender,
   startLoadPageSet,
-  useFormEditorSignal,
-  useListEditorSignal,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  useEditorSignalMap,
+  useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -38,9 +38,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   useSignals();
 
-  const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
-
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+
+  const { editPageViewId } = pagesRuntimeSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
@@ -62,7 +62,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setMainMetaData(mainMetaData);
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-    console.log('entityWithChildren: ', entityWithChildren);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
 
     setMainMetaDataFields(entityWithChildren.parentFields);
   };
@@ -70,14 +70,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useEffect(() => {
     if (menuId) {
       handleGetPageSetId(menuId);
+      setEditTargetId('');
     }
   }, [menuId]);
 
+  // 仅在 mainMetaData 或 mainMetaDataFields 变化且存在 editTargetId 时重新获取数据
   useEffect(() => {
-    if (editTargetId && mainMetaData) {
+    if (editTargetId && mainMetaData && mainMetaDataFields) {
       handleGetData(mainMetaData, editTargetId);
     }
-  }, [editTargetId, mainMetaData]);
+  }, [mainMetaDataFields, mainMetaData]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -91,7 +93,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const handleGetPageSetId = async (menuId: string) => {
     const req: GetPageSetIdReq = { menuId: menuId };
     const res = await getPageSetId(req);
-    console.log('res', res);
     setPageSetId(res);
   };
 
@@ -149,13 +150,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setPageType(EDITOR_TYPES.LIST_EDITOR);
   };
 
-  const toCreatePage = (id: string) => {
+  const showFromPageData = (id: string) => {
     setPageType(EDITOR_TYPES.FORM_EDITOR);
     form.resetFields();
 
-    if (id) {
+    if (id && id !== '') {
       console.log('edit row id: ', id);
       setEditTargetId(id);
+      // 直接获取数据，避免依赖状态变化触发
+      if (mainMetaData) {
+        handleGetData(mainMetaData, id);
+      }
     }
   };
 
@@ -166,7 +171,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     };
     const res = await dataMethodData(req);
     console.log(res);
-    console.log(res.data);
 
     // 遍历 res.data，将数据回填到表单
     if (res && res.data) {
@@ -198,7 +202,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
           listComponents.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
-              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                 <div
                   key={cp.id}
                   className={styles.componentItem}
@@ -211,34 +215,44 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     cpType={cp.type}
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
-                    toCreatePage={toCreatePage}
+                    showFromPageData={showFromPageData}
                   />
-                </div>}
+                </div>
+              )}
             </Fragment>
           ))}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
-            {formComponents.value.map((cp: GridItem) => (
+            {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
+              // {formComponents.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
-                {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                {/* {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && ( */}
+                {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
-                      width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
+                      width: getComponentWidth(
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                        cp.type
+                      )
                     }}
                   >
                     <PreviewRender
                       cpId={cp.id}
                       cpType={cp.type}
-                      pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                      pageComponentSchema={
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                      }
                       runtime={runtime}
-                      toCreatePage={() => {
+                      showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
                     />
-                  </div>}
+                  </div>
+                )}
               </Fragment>
             ))}
 

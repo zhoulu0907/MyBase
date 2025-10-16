@@ -145,7 +145,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
 
   return (
     <div>
-      <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={295}>
+      <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={270}>
         <div className={styles.rightHeader}>
           <div className={styles.title}></div>
 

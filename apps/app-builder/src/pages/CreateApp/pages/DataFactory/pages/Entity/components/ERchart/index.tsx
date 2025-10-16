@@ -1,4 +1,4 @@
-import { Graph } from '@antv/x6';
+import { Graph, Node as X6Node } from '@antv/x6';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
@@ -6,8 +6,15 @@ import DetailDrawer from '../Drawers/DetailDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
 import { FIELD_TYPE } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
+import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
-import { GridNodePositioner, performAutoLayout, SectionCollapseHandler } from './utils';
+import {
+  GridNodePositioner,
+  performAutoLayout,
+  SectionCollapseHandler,
+  toggleNodeShadow,
+  toggleEdgeSelected
+} from './utils';
 import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
@@ -40,9 +47,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     ref
   ) => {
     const { newNodes } = useNewNodeStore();
-    const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
+    const [selectedNode] = useState<EntityNode | null>(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
-    const [zoom, setZoom] = useState(90);
+    const [zoom, setZoom] = useState(100);
 
     const graphRef = useRef<Graph | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -61,14 +68,17 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       getGraphPositon
     }));
 
-    const handleSectionCollapse = (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
-      if (!collapseHandlerRef.current) return;
+    const handleSectionCollapse = useCallback(
+      (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
+        if (!collapseHandlerRef.current) return;
 
-      const nodeData = data.nodes.find((n) => n.entityId === nodeId);
-      if (!nodeData) return;
+        const nodeData = data.nodes.find((n) => n.entityId === nodeId);
+        if (!nodeData) return;
 
-      collapseHandlerRef.current.handleSectionCollapse(nodeId, section, isCollapsed, nodeData);
-    };
+        collapseHandlerRef.current.handleSectionCollapse(nodeId, section, isCollapsed, nodeData);
+      },
+      [data]
+    );
 
     const portsItems = (nodeData: EntityNode, systemCollapsed: boolean = true) => {
       const items: object[] = [];
@@ -128,7 +138,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     };
 
     const createAndAddNode = useCallback(
-      (positioner: any, nodeDatas: EntityNode[]) => {
+      (positioner: GridNodePositioner, nodeDatas: EntityNode[]) => {
         nodeDatas.forEach((nodeData) => {
           positioner.addNode({
             id: nodeData.entityId,
@@ -209,17 +219,28 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         onNodeAddRelation,
         onNodeAddMasterDetail,
         onFieldClick,
-        onStatusChange
+        onStatusChange,
+        handleSectionCollapse,
+        newNodes
       ]
     );
 
-    const createAndAddEdge = (graph: Graph, edgeData: any) => {
+    const createAndAddEdge = (
+      graph: Graph,
+      edgeData: {
+        sourceEntityId: string;
+        sourceFieldId: string;
+        targetEntityId: string;
+        targetFieldId: string;
+        label?: string;
+      }
+    ) => {
       const edge = graph.createEdge({
         source: { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` },
         target: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` },
         attrs: {
           line: {
-            stroke: '#39B85F',
+            stroke: 'rgba(var(--primary-6), 1)',
             strokeWidth: 2,
             targetMarker: { name: 'block', width: 12, height: 8 }
           }
@@ -237,7 +258,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                 attrs: {
                   label: {
                     text: edgeData.label,
-                    fill: '#39B85F',
+                    fill: 'rgba(var(--primary-6), 1)',
                     fontSize: 12,
                     textAnchor: 'middle',
                     textVerticalAnchor: 'middle'
@@ -314,7 +335,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                   shape: 'edge',
                   attrs: {
                     line: {
-                      stroke: '#39B85F',
+                      stroke: 'rgba(var(--primary-6), 1)',
                       strokeWidth: 2,
                       targetMarker: {
                         name: 'block',
@@ -356,7 +377,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (mode === 'edit') {
             node.setAttrs({
               body: {
-                stroke: '#39B85F',
+                stroke: 'rgba(var(--primary-6), 1)',
                 strokeWidth: 2
               }
             });
@@ -399,7 +420,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (
             target.closest('#collapse-icon') ||
             target.closest('#status-change-icon') ||
-            target.closest('#node-footer')
+            target.closest('#node-footer') ||
+            target.closest(`.${nodeStyles['field-section-content']}`)
           ) {
             e.stopPropagation();
             return;
@@ -418,10 +440,26 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           }, 50);
         });
 
-        graphRef.current.on('edge:click', ({ e, x, y, edge, view }) => {
-          console.log('edge:click', e, x, y, edge, view);
+        // 记录当前选中边 id
+        let currentSelectedEdgeId: string | null = null;
+
+        graphRef.current.on('edge:click', ({ edge }) => {
+          // 取消已选中边
+          if (currentSelectedEdgeId && currentSelectedEdgeId !== edge.id) {
+            const prev = graphRef.current?.getCellById(currentSelectedEdgeId);
+            if (prev && prev.isEdge()) {
+              toggleEdgeSelected(prev, false);
+            }
+          }
+          // 选中当前边
+          toggleEdgeSelected(edge, true);
+          currentSelectedEdgeId = edge.id as string;
+
           onEdgeEdit?.(edge.data);
         });
+
+        // 记录当前选中节点 id
+        let currentSelectedId: string | null = null;
 
         graphRef.current.on('node:click', ({ e, node }) => {
           // 阻止折叠图标点击触发
@@ -429,7 +467,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (
             target.closest('#collapse-icon') ||
             target.closest('#status-change-icon') ||
-            target.closest('#node-footer')
+            target.closest('#node-footer') ||
+            target.closest(`.${nodeStyles['field-section-content']}`)
           ) {
             e.stopPropagation();
             return;
@@ -442,7 +481,22 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             return;
           }
 
-          // 添加短暂延迟，确保不是拖拽操作
+          // 切换选中态阴影
+          const clickedId = node.id as string;
+
+          // 取消之前选中
+          if (currentSelectedId && currentSelectedId !== clickedId) {
+            const prev = graphRef.current?.getCellById(currentSelectedId);
+            if (prev && prev.isNode()) {
+              toggleNodeShadow(prev, false);
+            }
+          }
+
+          // 选中当前
+          toggleNodeShadow(node, true);
+          currentSelectedId = clickedId;
+
+          // 添加短暂延迟，确保不是拖拽操作，再触发编辑
           setTimeout(() => {
             if (!isDragging) {
               e.preventDefault();
@@ -450,6 +504,23 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
               onNodeEdit?.(node.getData().data);
             }
           }, 10);
+        });
+
+        // 点击画布空白处，取消选中
+        graphRef.current.on('blank:click', () => {
+          if (!currentSelectedId) return;
+          const prev = graphRef.current?.getCellById(currentSelectedId);
+          if (prev && prev.isNode()) {
+            toggleNodeShadow(prev, false);
+          }
+          currentSelectedId = null;
+
+          // 清除选中边
+          const selectedEdge = currentSelectedEdgeId && graphRef.current?.getCellById(currentSelectedEdgeId);
+          if (selectedEdge && selectedEdge.isEdge()) {
+            toggleEdgeSelected(selectedEdge, false);
+          }
+          currentSelectedEdgeId = null;
         });
 
         graphRef.current.on('scale', ({ sx }) => {
@@ -552,9 +623,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
         // 更新节点位置
         newPositions.forEach(({ id, x, y }) => {
-          const node = graphRef.current?.getCellById(id);
-          if (node) {
-            node.position(x, y);
+          const cell = graphRef.current?.getCellById(id);
+          if (cell && cell.isNode()) {
+            (cell as X6Node).position(x, y);
 
             // 同步更新数据
             const nodeData = data.nodes.find((n) => n.entityId === id);
@@ -588,12 +659,12 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             max={150}
             min={60}
             step={5}
-            defaultValue={90}
+            defaultValue={100}
             className={styles['zoom-input']}
             value={zoom}
             onChange={(value) => changeZoom(value)}
           />
-          <Button type="outline" size="mini" onClick={() => changeZoom(90)}>
+          <Button type="outline" size="mini" onClick={() => changeZoom(100)}>
             重置
           </Button>
           <Button type="primary" size="mini" onClick={handleAutoLayout}>

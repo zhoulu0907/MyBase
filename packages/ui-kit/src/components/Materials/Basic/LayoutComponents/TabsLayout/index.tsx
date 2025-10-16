@@ -1,25 +1,25 @@
-import { useState, useEffect, memo } from 'react';
-import { Tabs, Divider } from '@arco-design/web-react';
+import { Divider, Tabs } from '@arco-design/web-react';
+import { cloneDeep } from 'lodash-es';
+import { memo, useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
-import { cloneDeep } from 'lodash-es';
 
+import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import {
   COMPONENT_GROUP_NAME,
   EditRender,
+  getComponentConfig,
   getComponentSchema,
   getComponentWidth,
-  getComponentConfig,
   type GridItem,
   usePageEditorSignal
 } from '@/index';
 import { useSignals } from '@preact/signals-react/runtime';
-import CompDeleteIcon from '@/assets/images/app_delete.svg';
-import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
-import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XTabsLayoutConfig } from './schema';
 import './index.css';
+import type { XTabsLayoutConfig } from './schema';
 
 const TabPane = Tabs.TabPane;
 
@@ -28,7 +28,7 @@ const rightPanelWidth = 310;
 const canvasPaddingWidth = 40;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth;
 
-const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean }) => {
+const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { id, defaultValue = [], type, colCount, tabPosition, runtime = true } = props;
   useSignals();
 
@@ -43,7 +43,7 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean }) => {
     layoutSubComponents,
     setLayoutSubComponents,
     showDeleteButton,
-    setShowDeleteButton,
+    setShowDeleteButton
   } = usePageEditorSignal();
 
   const [activeTab, setActiveTab] = useState('1');
@@ -86,7 +86,6 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean }) => {
 
   // 复制组件
   const handleCopyComponent = (comp: any, originId: string, index: number = 0) => {
-
     // ID 映射表，记录旧 ID 到新 ID 的映射
     const idMap = new Map<string, string>();
     idMap.set(originId, comp.id);
@@ -100,9 +99,7 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean }) => {
       if (!originalComp) return;
 
       // 深拷贝组件配置
-      const schemaConfig = cloneDeep(
-        getComponentConfig(pageComponentSchemas[oldId], comp.type)
-      );
+      const schemaConfig = cloneDeep(getComponentConfig(pageComponentSchemas[oldId], comp.type));
       const schema = getComponentSchema(comp.type);
 
       schema.config = schemaConfig;
@@ -125,8 +122,8 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean }) => {
 
       // 2. 复制子组件结构
       if (layoutSubComponents[oldId]) {
-        const newSubComponents = layoutSubComponents[oldId].map(row =>
-          row.map(item => {
+        const newSubComponents = layoutSubComponents[oldId].map((row) =>
+          row.map((item) => {
             // 为每个子组件创建新 ID
             const childNewId = idMap.get(item.id) || `${item.type}-${uuidv4()}`;
 
@@ -197,145 +194,151 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean }) => {
   };
 
   return (
-    <Tabs className='XTabsLayout' activeTab={activeTab} type={type} tabPosition={tabPosition} onClickTab={(e) => setActiveTab(e)} style={{
-      maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth}px)`,
-    }}>
-      {
-        defaultValue?.map((tab, index) => (
-          <TabPane key={tab.key} title={tab.title} style={{ padding: 0 }}>
-            <div className="item" key={index}>
-              <ReactSortable
-                id={`workspace-content-${id}`}
-                className="content"
-                list={colComponents[index]}
-                setList={(newList) => {
-                  colComponents[index] = newList;
-                }}
-                onAdd={(e) => {
-                  // 允许拖入的组件
-                  console.debug("onAdd", e.item.getAttribute('data-cp-type'));
+    <Tabs
+      className="XTabsLayout"
+      activeTab={activeTab}
+      type={type}
+      tabPosition={tabPosition}
+      onClickTab={(e) => setActiveTab(e)}
+      style={{
+        maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth}px)`
+      }}
+    >
+      {defaultValue?.map((tab, index) => (
+        <TabPane key={tab.key} title={tab.title} style={{ padding: 0 }}>
+          <div className="item" key={index}>
+            <ReactSortable
+              id={`workspace-content-${id}`}
+              className="content"
+              list={colComponents[index]}
+              setList={(newList) => {
+                colComponents[index] = newList;
+              }}
+              onAdd={(e) => {
+                // 允许拖入的组件
+                console.debug('onAdd', e.item.getAttribute('data-cp-type'));
 
-                  let cpID = e.item.id || e.item.getAttribute('data-cp-id');
-                  const itemType = e.item.getAttribute('data-cp-type');
-                  const itemDisplayName = e.item.getAttribute('data-cp-displayname');
+                let cpID = e.item.id || e.item.getAttribute('data-cp-id');
+                const itemType = e.item.getAttribute('data-cp-type');
+                const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-                  const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
-                  const schema = getComponentSchema(itemType as any);
+                const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
+                const schema = getComponentSchema(itemType as any);
 
-                  schema.config = schemaConfig;
-                  schema.config.cpName = itemDisplayName;
-                  schema.config.id = cpID;
+                schema.config = schemaConfig;
+                schema.config.cpName = itemDisplayName;
+                schema.config.id = cpID;
 
-                  const props = {
-                    id: cpID,
-                    type: itemType,
-                    ...schema
-                  };
+                const props = {
+                  id: cpID,
+                  type: itemType,
+                  ...schema
+                };
 
-                  setCurComponentID(cpID!);
-                  setCurComponentSchema(props);
-                  setPageComponentSchemas(cpID!, props);
-                  setShowDeleteButton(false);
-                }}
-                onRemove={(e) => {
-                  const cpID = e.item.getAttribute('data-cp-id');
-                  console.log(`删除组件${id}内， 索引为， 删除组件为 ${cpID}`);
-                }}
-                group={{
-                  name: COMPONENT_GROUP_NAME
-                }}
-                sort={true}
-                forceFallback={true}
-                animation={150}
-                fallbackOnBody={true}
-                swapThreshold={0.65}
-                onStart={(e) => {
-                  console.log('onStart', e);
-                  const cpID = e.item.getAttribute('data-id') || '';
-                  setCurComponentID(cpID);
-                  const curComponentSchema = pageComponentSchemas[cpID] || {};
-                  setCurComponentSchema(curComponentSchema);
-                  setShowDeleteButton(true);
-                }}
-              >
-                {colComponents[index]?.map((cp: GridItem) => (
-                  <div
-                    key={cp.id}
-                    data-cp-type={cp.type}
-                    data-cp-displayname={cp.displayName}
-                    data-cp-id={cp.id}
-                    className='componentItem'
-                    style={{
-                      width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
-                      borderColor: curComponentID === cp.id ? '#009E9E' : 'transparent',
-                      borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
-                    }}
-                    onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                      e.stopPropagation();
-                      setCurComponentID(cp.id);
-                      const curComponentSchema = pageComponentSchemas[cp.id];
-                      setCurComponentSchema(curComponentSchema);
-                      setShowDeleteButton(true);
-                    }}
-                  >
-                    <EditRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      runtime={false}
-                      pageComponentSchema={pageComponentSchemas[cp.id]}
-                    />
+                setCurComponentID(cpID!);
+                setCurComponentSchema(props);
+                setPageComponentSchemas(cpID!, props);
+                setShowDeleteButton(false);
+              }}
+              onRemove={(e) => {
+                const cpID = e.item.getAttribute('data-cp-id');
+                console.log(`删除组件${id}内， 索引为， 删除组件为 ${cpID}`);
+              }}
+              group={{
+                name: COMPONENT_GROUP_NAME
+              }}
+              sort={true}
+              forceFallback={true}
+              animation={150}
+              fallbackOnBody={true}
+              swapThreshold={0.65}
+              onStart={(e) => {
+                console.log('onStart', e);
+                const cpID = e.item.getAttribute('data-id') || '';
+                setCurComponentID(cpID);
+                const curComponentSchema = pageComponentSchemas[cpID] || {};
+                setCurComponentSchema(curComponentSchema);
+                setShowDeleteButton(true);
+              }}
+            >
+              {colComponents[index]?.map((cp: GridItem) => (
+                <div
+                  key={cp.id}
+                  data-cp-type={cp.type}
+                  data-cp-displayname={cp.displayName}
+                  data-cp-id={cp.id}
+                  className="componentItem"
+                  style={{
+                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
+                    borderColor: curComponentID === cp.id ? '#009E9E' : 'transparent',
+                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
+                  }}
+                  onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                    e.stopPropagation();
+                    setCurComponentID(cp.id);
+                    const curComponentSchema = pageComponentSchemas[cp.id];
+                    setCurComponentSchema(curComponentSchema);
+                    setShowDeleteButton(true);
+                  }}
+                >
+                  <EditRender
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    runtime={false}
+                    pageComponentSchema={pageComponentSchemas[cp.id]}
+                  />
 
-                    {/* 操作按钮 */}
-                    {curComponentID === cp.id && showDeleteButton && (
-                      <div className='operationArea'>
-                        {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                          <>
-                            <div
-                              className='copyButton'
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                console.debug('取消隐藏组件: ', cp);
-                                handleShowComponent(cp.id);
-                              }}
-                            >
-                              <img src={CompShowIcon} alt="component show" />
-                            </div>
-                            <Divider className='divider' type="vertical" />
-                          </>
-                        )}
+                  {/* 操作按钮 */}
+                  {curComponentID === cp.id && showDeleteButton && (
+                    <div className="operationArea">
+                      {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <>
+                          <div
+                            className="copyButton"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.debug('取消隐藏组件: ', cp);
+                              handleShowComponent(cp.id);
+                            }}
+                          >
+                            <img src={CompShowIcon} alt="component show" />
+                          </div>
+                          <Divider className="divider" type="vertical" />
+                        </>
+                      )}
 
-                        <div
-                          className='copyButton'
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log('复制组件: ', cp);
-                            handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
-                          }}
-                        >
-                          <img src={CompCopyIcon} alt="component copy" />
-                        </div>
-
-                        <Divider className='divider' type="vertical" />
-                        <div
-                          className='deleteButton'
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log('删除组件: ', cp.id);
-                            handleDeleteComponent(cp.id);
-                          }}
-                        >
-                          <img src={CompDeleteIcon} alt="component delete" />
-                        </div>
+                      <div
+                        className="copyButton"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('复制组件: ', cp);
+                          handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
+                        }}
+                      >
+                        <img src={CompCopyIcon} alt="component copy" />
                       </div>
-                    )}
-                  </div>
-                ))}
-              </ReactSortable>
-            </div>
-          </TabPane>
-        ))
-      }
-      /</Tabs>
+
+                      <Divider className="divider" type="vertical" />
+                      <div
+                        className="deleteButton"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('删除组件: ', cp.id);
+                          handleDeleteComponent(cp.id);
+                        }}
+                      >
+                        <img src={CompDeleteIcon} alt="component delete" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </ReactSortable>
+          </div>
+        </TabPane>
+      ))}
+      /
+    </Tabs>
   );
 });
 

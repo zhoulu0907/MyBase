@@ -4,6 +4,7 @@ export * from './app_version';
 export * from './application';
 export * from './flow';
 export * from './metadata_dataresource';
+export * from './trigger_flow';
 export * from './metadata_entity';
 export * from './metadata_method';
 export * from './metadata_validation';

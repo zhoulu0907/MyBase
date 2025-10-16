@@ -6,3 +6,21 @@
 .react-grid-item.react-grid-placeholder {
   background: lightblue !important;
 }
+
+/* tab下划线隐藏 */
+.createAppTabs {
+  .arco-tabs-header {
+    .arco-tabs-header-ink {
+      display: none;
+    }
+  }
+}
+
+/* 菜单隐藏样式 */
+.menuTree .arco-tree-node-switcher {
+  display: none;
+}
+
+.buttonShowInput .arco-input-inner-wrapper {
+  background-color: #fff;
+}

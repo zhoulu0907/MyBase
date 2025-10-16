@@ -1,6 +1,6 @@
 import iconControl from '@/assets/flow/nodes/switch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import { formMeta } from './form-meta';
 
 export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
@@ -11,7 +11,7 @@ export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
    * 分支节点需要继承自 block
    * Branch nodes need to inherit from 'block'
    */
-  extend: 'case',
+  extend: NodeType.CASE,
   meta: {
     copyDisable: true,
     addDisable: true,

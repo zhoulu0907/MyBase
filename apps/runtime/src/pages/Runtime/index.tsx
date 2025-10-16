@@ -1,7 +1,13 @@
 import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
-import { listApplicationMenu, MenuType, VisibleType, type ApplicationMenu, type ListApplicationMenuReq } from '@onebase/app';
+import {
+  listApplicationMenu,
+  MenuType,
+  VisibleType,
+  type ApplicationMenu,
+  type ListApplicationMenuReq
+} from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
@@ -136,16 +142,13 @@ const Runtime: React.FC = () => {
           {/* <Sider style={{ width: 225 }}> */}
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
-              <Input
-                style={{
-                  width: 120,
-                  border: '1px solid #dedede',
-                  borderRadius: 3
-                }}
-                allowClear
-                suffix={<IconSearch />}
-                placeholder={t('createApp.searchPlaceHolder')}
-              />
+              <div className={styles.siderHeaderInput}>
+                <Input
+                  allowClear
+                  suffix={<IconSearch />}
+                  placeholder={t('app.searchPlaceHolder')}
+                />
+              </div>
             </div>
             <Tree
               blockNode

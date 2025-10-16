@@ -24,13 +24,13 @@ interface HeaderProps {
 }
 
 // tabs标题顺序，获取当前选型卡下标；
-const tabsList = ['data-factory', 'page-manager', 'integrated-management', 'app-setting', 'app-release'];
+const tabsList = ['data-factory', 'page-manager', 'integrated-management', 'app-setting'];
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useI18n();
-  const { curAppId, setCurAppId } = useAppStore();
+  const { curAppId, setCurAppId, curAppInfo, setCurAppInfo } = useAppStore();
 
   // Tab 切换
   // 根据当前路径设置 activeTab
@@ -39,19 +39,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (pathname.includes('onebase/create-app/integrated-management')) return 'integrated-management';
     if (pathname.includes('onebase/create-app/data-factory')) return 'data-factory';
     if (pathname.includes('onebase/create-app/app-setting')) return 'app-setting';
-    if (pathname.includes('onebase/create-app/app-release')) return 'app-release';
     return 'page-manager';
   };
   const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
-  const [appName, setAppName] = useState('未命名应用');
-  const [appIcon, setAppIcon] = useState('');
-  const [iconColor, setIconColor] = useState('');
-  const [appStatus, setAppStatus] = useState(0);
-  const [activeIndex, setActiveIndex] = useState(tabsList.findIndex(tab => location.pathname.includes(tab)));
+  const [activeIndex, setActiveIndex] = useState(tabsList.findIndex((tab) => location.pathname.includes(tab)));
 
   useEffect(() => {
     setActiveTab(getTabKeyFromPath(location.pathname));
-    setActiveIndex(tabsList.findIndex(tab => location.pathname.includes(tab)));
+    setActiveIndex(tabsList.findIndex((tab) => location.pathname.includes(tab)));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -69,18 +64,12 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     };
     const appResp = await getApplication(appReq);
     if (appResp) {
-      if (appResp.iconName) {
-        setAppIcon(appResp.iconName);
-      }
-      if (appResp.iconColor) {
-        setIconColor(appResp.iconColor);
-      }
-      if (appResp.appName) {
-        setAppName(appResp.appName);
-      }
-      if (appResp.appStatus) {
-        setAppStatus(appResp.appStatus);
-      }
+      setCurAppInfo({
+        iconName: appResp.iconName || '',
+        iconColor: appResp.iconColor || '',
+        appName: appResp.appName || '--',
+        appStatus: appResp.appStatus || 0
+      });
     }
   };
 
@@ -128,25 +117,25 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             <img src={AppIconSVG} alt="application icon" />
           </div>
 
-          <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
+          <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo?.iconColor }}>
             <DynamicIcon
-              IconComponent={iconMap[appIcon as keyof typeof iconMap]}
+              IconComponent={iconMap[curAppInfo?.iconName as keyof typeof iconMap]}
               theme="outline"
               size="14"
               fill="#F2F3F5"
             />
           </div>
-          <div className={styles.appName}>{appName}</div>
+          <div className={styles.appName}>{curAppInfo?.appName}</div>
 
-          {appStatus == AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
-
-          {appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}
-          {appStatus == AppStatus.EDITING_AFTER_PUBLISH && (
+          {curAppInfo?.appStatus === AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
+          {curAppInfo?.appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}
+          {curAppInfo?.appStatus == AppStatus.EDITING_AFTER_PUBLISH && (
             <div className={styles.appStatusEditAfterPublished}>已发布</div>
           )}
         </div>
 
         <Tabs
+          className="createAppTabs"
           type="line"
           activeTab={activeTab}
           onChange={(key) => {
@@ -164,20 +153,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               case 'app-setting':
                 navigate(`/onebase/create-app/app-setting?appId=${curAppId}`);
                 break;
-              case 'app-release':
-                navigate(`/onebase/create-app/app-release?appId=${curAppId}`);
-                break;
               default:
                 break;
             }
           }}
           size="large"
-          inkBarSize={{
-            width: 0,
-            height: 0
-          }}
           renderTabTitle={(tabTitle, info) => {
-            const currentIndex = tabsList.findIndex(tab => tab === info.key);
+            const currentIndex = tabsList.findIndex((tab) => tab === info.key);
             const tabBg = () => {
               if (info.isActive) {
                 if (info.key === tabsList[0]) {
@@ -191,28 +173,32 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                 if (currentIndex >= activeIndex) return;
                 return info.key === tabsList[0] ? TabFirstBgSVG : TabMiddleBgSVG;
               }
-            }
+            };
             return (
-              <span style={{
-                position: 'relative'
-              }}>
+              <span
+                style={{
+                  position: 'relative'
+                }}
+              >
                 {tabTitle}
-                <img src={tabBg()} style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: -1
-                }} />
+                <img
+                  src={tabBg()}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: -1
+                  }}
+                />
               </span>
-            )
+            );
           }}
         >
           <Tabs.TabPane key="data-factory" title={t('createApp.dataFactory')} />
           <Tabs.TabPane key="page-manager" title={t('createApp.pageManager')} />
           <Tabs.TabPane key="integrated-management" title={t('createApp.integratedManagement')} />
-          <Tabs.TabPane key="app-setting" title={t('createApp.appSetting')} />
-          <Tabs.TabPane key="app-release" title={t('createApp.appRelease')} />
+          <Tabs.TabPane key="app-setting" title={t('createApp.appRelease')} />
         </Tabs>
 
         <div className={styles.userInfo}>

@@ -1,5 +1,5 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Form, Grid, Input, Message, Modal, Select } from '@arco-design/web-react';
+import { Form, Grid, Input, Message, Modal, Select, Space } from '@arco-design/web-react';
 import * as ruleService from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
@@ -24,6 +24,31 @@ interface CreateRuleModalProps {
   ruleType: string;
   editRule: Partial<RuleFormValues> | null;
 }
+
+const REGEX_LIST = [
+  { label: '手机号码', value: '^1[3-9]\d{9}$' },
+  { label: '电话号码', value: '^(\d{3,4}-)?\d{7,8}$' },
+  { label: '邮箱格式', value: "^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$" },
+  { label: '大写字母', value: '[A-Z]+' },
+  { label: '小写字母', value: '[a-z]+' },
+  { label: '8位字母数字', value: '^[a-zA-Z0-9]{8}$' },
+  { label: '8位数字', value: '^\d{8}$' },
+  { label: '数字', value: '^\d+$' },
+  { label: '邮编', value: '^\d{6}$' },
+  { label: '身份证号（18位）', value: '^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9Xx])$' }
+];
+
+const REGEX_OPTIONS = REGEX_LIST.map((item) => {
+  return {
+    label: (
+      <>
+        <span>{item.label}</span>
+        <span className={styles['regex']}>{item.value}</span>
+      </>
+    ),
+    value: item.value
+  };
+});
 
 const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   visible,
@@ -57,9 +82,8 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
     if (handler) {
       const res = await handler(id);
-      console.log('getRuleById', res);
       if (res) {
-        form.setFieldsValue(res);
+        form.setFieldsValue({ ...res, popPrompt: res.promptMessage, regex: res.formatValue });
       }
     }
   };
@@ -243,40 +267,48 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
           <Grid.Row gutter={16}>
             <Grid.Col span={12}>
               <Form.Item label="最小长度" field="minLength" rules={[{ required: true, message: '请输入最小长度' }]}>
-                <Input placeholder="请输入最小长度" defaultValue={0} />
+                <Input placeholder="请输入最小长度" defaultValue="0" />
               </Form.Item>
             </Grid.Col>
             <Grid.Col span={12}>
               <Form.Item label="最大长度" field="maxLength" rules={[{ required: true, message: '请输入最大长度' }]}>
-                <Input placeholder="请输入最大长度" defaultValue={8000} />
+                <Input placeholder="请输入最大长度" defaultValue="8000" />
               </Form.Item>
             </Grid.Col>
           </Grid.Row>
         )}
 
         {ruleType === VALIDATION_TYPES.RANGE && (
-          <Grid.Row gutter={16}>
-            <Grid.Col span={10}>
-              <Form.Item label="范围区间" field="range" rules={[{ required: true, message: '请输入范围区间' }]}>
+          <Form.Item label="范围区间" required>
+            <Space align="center" className={styles['range-space']}>
+              <Form.Item field="minValue" rules={[{ required: true, message: '请输入范围区间' }]}>
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={4}>~</Grid.Col>
-            <Grid.Col span={10}>
-              <Form.Item field="range" rules={[{ required: true, message: '请输入范围区间' }]}>
+              <span>~</span>
+              <Form.Item field="maxValue" rules={[{ required: true, message: '请输入范围区间' }]}>
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
-            </Grid.Col>
-          </Grid.Row>
+            </Space>
+          </Form.Item>
         )}
 
         {ruleType === VALIDATION_TYPES.FORMAT && (
-          <Form.Item
-            label="正则表达式"
-            field="formatValidationType"
-            rules={[{ required: true, message: '请输入正则表达式' }]}
-          >
-            <Input placeholder="请输入正则表达式" />
+          <Form.Item label="正则表达式" field="regex" rules={[{ required: true, message: '请输入正则表达式' }]}>
+            <Select
+              placeholder="请输入正则表达式"
+              options={REGEX_OPTIONS}
+              allowCreate
+              filterOption
+              labelInValue
+              onChange={(value) => {
+                console.log('onchange', value);
+                if (typeof value === 'string') {
+                  form.setFieldValue('regex', value);
+                } else if (value && typeof value === 'object' && 'value' in value) {
+                  form.setFieldValue('regex', value.value);
+                }
+              }}
+            />
           </Form.Item>
         )}
 

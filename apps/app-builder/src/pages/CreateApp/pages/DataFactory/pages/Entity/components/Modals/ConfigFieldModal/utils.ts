@@ -132,3 +132,6 @@ export const arrayMove = (array: any[], from: number, to: number) => {
     ...item
   }));
 };
+
+// 用于计算自定义字段index
+export const systemFieldsLength = 10;

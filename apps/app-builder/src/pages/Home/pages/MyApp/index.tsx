@@ -1,3 +1,5 @@
+import { useI18n } from '@/hooks/useI18n';
+import { useAppStore } from '@/store/store_app';
 import {
   Avatar,
   Button,
@@ -12,13 +14,6 @@ import {
   Tag
 } from '@arco-design/web-react';
 import { IconCheckCircle, IconEmpty, IconLeft, IconSearch, IconSettings } from '@arco-design/web-react/icon';
-import dayjs from 'dayjs';
-import { debounce, sample } from 'lodash-es';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import { useI18n } from '@/hooks/useI18n';
-import { useAppStore } from '@/store/store_app';
 import {
   createApplication,
   deleteApplication,
@@ -27,20 +22,25 @@ import {
   type CreateApplicationReq,
   type DatasourceSaveReqDTO,
   type DeleteApplicationReq,
-  type ListApplicationReq
+  type PageParam
 } from '@onebase/app';
+import { getCommonPaginationList } from '@onebase/common';
+import dayjs from 'dayjs';
+import { debounce, sample } from 'lodash-es';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import appDeleteSVG from '@/assets/images/app_delete.svg';
 import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
 import CreateApp from '@/components/CreateApp';
-import { type Options, iconMap } from '@/components/CreateApp/const';
+import { iconMap, type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
-import { PermissionButton } from '@/components/PermissionControl';
 import DynamicIcon from '@/components/DynamicIcon';
+import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
+import { hasPermission /* UserPermissionManager */ } from '@/utils/permission';
 import TagModal from './components/tagModal';
 import {
   appOptions,
@@ -121,7 +121,7 @@ const MyAppPage: React.FC = () => {
 
   const getApplicationList = async () => {
     setLoading(true);
-    const req: ListApplicationReq = {
+    const req: PageParam = {
       pageNo,
       pageSize: pageSize || 8,
       name,
@@ -129,10 +129,12 @@ const MyAppPage: React.FC = () => {
       orderByTime,
       status: status === '' ? null : Number(status)
     };
-    const res = await listApplication(req);
-    setDataList(res.list || []);
-    setTotal(res.total || 0);
-    setLoading(false);
+    const res = await getCommonPaginationList(listApplication, req, setPageNo);
+    if (res) {
+      setDataList(res.list || []);
+      setTotal(res.total || 0);
+      setLoading(false);
+    }
   };
 
   const debouncedUpdate = useCallback(
@@ -245,11 +247,6 @@ const MyAppPage: React.FC = () => {
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
-        {/* <div className={styles.myAppWelcome}>
-          Hi {UserPermissionManager.getUserPermissionInfo()?.user.nickname || '用户'}
-          ，您好！
-        </div> */}
-
         <PermissionButton
           permission={ACTIONS.CREATE}
           type="default"
@@ -532,6 +529,7 @@ const MyAppPage: React.FC = () => {
         }
         confirmLoading={true}
         onCancel={() => setCreateVisible(false)}
+        style={{ width: '1300px' }}
         className={styles.createAppModal}
       >
         <div className={styles.createAppWrapper}>

@@ -170,7 +170,8 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
       </Form>
 
       <div className={styles.formActions}>
-        <Button type="text" status="danger" onClick={() => openDeleteModal()}>
+        {/* 本期不支持删除 */}
+        <Button type="text" status="danger" onClick={() => openDeleteModal()} disabled>
           删除
         </Button>
         <Space>
@@ -178,7 +179,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
           <Button
             type="primary"
             onClick={() => {
-              onSave({ ...form.getFieldsValue(), id: node.entityId });
+              onSave({ ...form.getFieldsValue(), id: node.id || node.entityId });
               successCallback?.();
             }}
           >

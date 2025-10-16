@@ -16,13 +16,13 @@ import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import { getPrecedingNodes, validateNodeForm } from '../../utils';
 import { updateDataAddOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
-const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY];
+const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY, NodeType.DATA_CALC];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -185,9 +185,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = async (changeValue: any, values: any) => {
     // 校验表单
-    validateNodeForm(form, payloadForm, false);
-
-    handlePropsOnChange(values);
+    // validateNodeForm(form, payloadForm, false);
+    // handlePropsOnChange(values);
   };
 
   return (
@@ -233,7 +232,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   向
                 </Grid.Col>
                 <Grid.Col span={19}>
-                  <Form.Item field="mainEntityId" disabled={!addType}>
+                  <Form.Item field="mainEntityId" disabled={!addType} rules={[{ required: true, message: '请选择' }]}>
                     <Select onChange={handleMainEntityIdChange} allowClear>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -256,7 +255,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   向
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="mainEntityId" disabled={!addType}>
+                  <Form.Item field="mainEntityId" disabled={!addType} rules={[{ required: true, message: '请选择' }]}>
                     <Select allowClear onChange={handleMainEntityIdChange}>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -270,7 +269,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subEntityId" disabled={!mainEntityId}>
+                  <Form.Item field="subEntityId" disabled={!mainEntityId} rules={[{ required: true, message: '请选择' }]}>
                     <Select allowClear onChange={handleSubEntityIdChange}>
                       {subEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>

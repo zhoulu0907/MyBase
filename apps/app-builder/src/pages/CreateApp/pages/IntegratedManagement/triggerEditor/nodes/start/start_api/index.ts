@@ -1,6 +1,6 @@
-import iconStart from '@/assets/flow/nodes/start.svg';
+import iconStart from '@/assets/flow/nodes/startApi.svg';
 import { type FlowNodeRegistry } from '../../../typings';
-import { NodeType } from '../../const';
+import { NodeType } from '@onebase/common';
 import { formMeta } from './form-meta';
 
 export const StartApiNodeRegistry: FlowNodeRegistry = {

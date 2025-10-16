@@ -38,7 +38,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.AUTO_CODE]: '自动编号',
   [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
   [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
-  [FORM_COMPONENT_TYPES.CAROUSEL_F]: '轮播图',
+  [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: '轮播图',
   [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
   [FORM_COMPONENT_TYPES.DATA_SELECT]: '选择数据',
 
@@ -85,7 +85,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.TABS_LAYOUT],
-          icon: 'col_layout_cp.svg', // todo
+          icon: 'tabs_layout_cp.svg',
           category: 'base'
         },
         {
@@ -93,7 +93,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT],
-          icon: 'col_layout_cp.svg', // todo
+          icon: 'colpase_layout_cp.svg',
           category: 'base'
         }
       ]
@@ -270,10 +270,10 @@ const allTemplate = {
           category: 'base'
         },
         {
-          type: FORM_COMPONENT_TYPES.CAROUSEL_F,
+          type: FORM_COMPONENT_TYPES.CAROUSEL_FORM,
           h: 36,
           w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_F],
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_FORM],
           icon: 'carousel_cp.svg',
           category: 'base'
         },
@@ -343,7 +343,7 @@ const allTemplate = {
           h: 48,
           w: 68,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LIST_COMPONENT_TYPES.CAROUSEL],
-          icon: 'display_image_cp.svg',
+          icon: 'carousel_cp.svg',
           category: 'base'
         },
         {
@@ -421,7 +421,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.PLACEHOLDER],
-          icon: 'divider_cp.svg',
+          icon: 'placeholder_cp.svg',
           category: 'base'
         }
       ]

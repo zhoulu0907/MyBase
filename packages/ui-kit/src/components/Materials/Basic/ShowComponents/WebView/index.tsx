@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XWebViewConfig } from './schema';
 
-const XWebView = memo((props: XWebViewConfig & { runtime?: boolean }) => {
+const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, title, webViewUrl, runtime = true } = props;
 
   const [iframeError, setIframeError] = useState(false);
@@ -29,7 +29,8 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean }) => {
           alignItems: 'center',
           justifyContent: 'center',
           border: '1px solid #e0e0e0',
-          borderRadius: '4px',
+          borderRadius: '8px',
+          boxSizing: 'border-box',
           backgroundColor: '#f5f5f5'
         }}
       >
@@ -55,7 +56,8 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean }) => {
     <div
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
-        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'unset'
+        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'flex',
+        flexDirection: 'column'
       }}
     >
       {title}
@@ -65,7 +67,8 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean }) => {
           width: '100%',
           height: '400px', // 设置固定高度，避免 auto 导致的问题
           border: '1px solid #e0e0e0',
-          borderRadius: '4px'
+          borderRadius: '8px',
+          boxSizing: 'border-box'
         }}
         title="WebView"
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"

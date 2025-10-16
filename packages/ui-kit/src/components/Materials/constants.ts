@@ -85,6 +85,9 @@ export const CONFIG_TYPES = {
   FILE: 'File',
   // 折叠面板展开状态
   COLLAPSED: 'Collapsed',
+
+  TABLE_OPERATION: 'TableOperation',
+  TABLE_BUTTON: 'advancedButtonPermission'
 } as const;
 
 // 状态选项常量
@@ -225,7 +228,7 @@ export const TABS_TYPE_OPTIONS = {
   CARD_GUTTER: 'card-gutter',
   TEXT: 'text',
   ROUNDED: 'rounded',
-  CAPSULE: 'capsule',
+  CAPSULE: 'capsule'
 } as const;
 
 // 页签位置常量
@@ -243,7 +246,6 @@ export const TABS_POSITION_VALUES = {
   [TABS_POSITION_OPTIONS.RIGHT]: 'right'
 } as const;
 
-
 // 折叠选项常量
 export const COLLAPSED_OPTIONS = {
   EXPOSED: '展开',
@@ -252,5 +254,39 @@ export const COLLAPSED_OPTIONS = {
 
 export const COLLAPSED_VALUES = {
   [COLLAPSED_OPTIONS.EXPOSED]: 'exposed',
-  [COLLAPSED_OPTIONS.COLLAPSED]: 'collapsed',
+  [COLLAPSED_OPTIONS.COLLAPSED]: 'collapsed'
 } as const;
+
+// 表格的行点击跳转方式
+export enum RedirectMethod {
+  DRAWER = 'drawer',
+  NEW_TAB = 'newTab',
+  CURRENT_TAB = 'currentTab',
+  MODAL = 'modal',
+  REFRESH = 'refresh',
+  PROMPT_JUMP = 'promptJump'
+}
+
+// 内容对齐方式
+export const BUTTON_OPTIONS = {
+  HIDDEN: '隐藏',
+  DISABLED: '置灰'
+} as const;
+
+export const BUTTON_VALUES = {
+  [BUTTON_OPTIONS.HIDDEN]: 'hidden',
+  [BUTTON_OPTIONS.DISABLED]: 'disabled',
+} as const;
+
+// 表格操作按钮
+export enum TableOperationButton {
+  EDIT = 'edit',
+  DELETE = 'delete'
+}
+
+// 按钮展示
+export enum TableOperationButtonStyle {
+  ICON = 'icon',
+  TEXT = 'text',
+  ALL = 'all'
+}

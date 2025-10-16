@@ -64,7 +64,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = (changeValue: any, values: any) => {
-    handlePropsOnChange(values);
+    // handlePropsOnChange(values);
   };
 
   return (
@@ -193,8 +193,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                       { required: true, message: '请选择触发时间' },
                       {
                         validator: (value, callback) => {
-                          console.log(isValidCron(value));
-                          if (!isValidCron(value)) {
+                          console.log(isValidCron(value, { seconds: true }));
+                          if (!isValidCron(value, { seconds: true })) {
                             return callback('请输入正确的cron表达式');
                           }
                         }

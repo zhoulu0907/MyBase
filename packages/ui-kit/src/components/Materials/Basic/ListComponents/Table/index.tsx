@@ -1,7 +1,7 @@
-import { Button, Form, Input, Table, Popconfirm, Message } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, BUTTON_OPTIONS, BUTTON_VALUES, TableOperationButton, TableOperationButtonStyle } from '../../../constants';
 
 import {
   dataMethodDelete,
@@ -11,17 +11,23 @@ import {
   type DeleteMethodParam,
   type PageMethodParam
 } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
-import './index.css';
+import { RedirectMethod } from '../../../constants';
 import type { XTableConfig } from './schema';
+import DynamicIcon from '@/components/DynamicIcon';
+import { iconMap } from '@/utils/const';
+import './index.css';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
 const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
-const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: Function }) => {
-  const { runtime = true, toCreatePage } = props;
+
+const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean }) => {
+  const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
+  const { runtime = true, showFromPageData, showAddBtn = true } = props;
 
   const {
     label,
@@ -40,7 +46,15 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     showTotal,
     showOpearate,
     fixedOpearate,
-    labelColSpan
+    labelColSpan,
+    sortByObject,
+    advancedRowRedirect,
+    redirectPageId,
+    redirectMethod,
+    operationButton,
+    advancedButtonPermission,
+    // operationButtonCollpaseNumber,
+    operationButtonShowType,
   } = props;
 
   const [finalColumns, setFinalColumns] = useState<any[]>();
@@ -56,32 +70,82 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     dataIndex: 'op',
     fixed: null,
     width: '110px',
-    render: (_: any, record: any) => (
-      <>
-        <Button
-          type="text"
-          style={{ marginRight: 5 }}
-          icon={<IconEdit />}
-          onClick={() => {
-            handleEdit(record.id);
-          }}
-        />
-        <Popconfirm
-          focusLock
-          title='确认删除'
-          content='确定要删除这条数据吗？'
-          onOk={() => {
-            handleDelete(record.id);
-          }}
-        >
-          <Button
-            status="danger"
-            type="text"
-            icon={<IconDelete />}
-          />
-        </Popconfirm>
-      </>
-    )
+    render: (_: any, record: any) => {
+      if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN]) return;
+      const isDisabled = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED];
+      return (
+        <Space>
+          {
+            operationButton?.map((opearate, index) => (
+              <Tooltip content="无操作权限" key={index}>
+                {(opearate.type === TableOperationButton.EDIT && opearate.display) && (
+                  <div
+                    style={{ whiteSpace: 'nowrap', opacity: isDisabled ? .5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer', pointerEvents: isDisabled ? 'none' : 'auto' }}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (redirectMethod === RedirectMethod.DRAWER) {
+                        // 打开抽屉显示详情
+                        console.log(redirectPageId);
+                        pagesRuntimeSignal.setDrawerVisible(true);
+                        redirectPageId && pagesRuntimeSignal.setDrawerPageId(redirectPageId);
+
+                        handleEdit(record.id, false);
+                      } else if (redirectMethod === RedirectMethod.NEW_TAB) {
+                      } else if (redirectMethod === RedirectMethod.CURRENT_TAB) {
+                      } else if (redirectMethod === RedirectMethod.MODAL) {
+                      }
+                    }}>
+                    {<>
+                      {(operationButtonShowType === TableOperationButtonStyle.ICON || operationButtonShowType === TableOperationButtonStyle.ALL) && <DynamicIcon
+                        IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                        theme="outline"
+                        size="16"
+                        fill={opearate.iconColor}
+                        style={{
+                          marginRight: 4
+                        }}
+                      />}
+                      {(operationButtonShowType === TableOperationButtonStyle.TEXT || operationButtonShowType === TableOperationButtonStyle.ALL) && opearate.buttonName}
+                    </>
+                    }
+                  </div>
+                )}
+
+                {(opearate.type === TableOperationButton.DELETE && opearate.display) && (
+                  <div style={{ whiteSpace: 'nowrap', opacity: isDisabled ? .5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer', pointerEvents: isDisabled ? 'none' : 'auto' }}>
+                    <Popconfirm
+                      focusLock
+                      title="确认删除"
+                      content={opearate.confirmText}
+                      onOk={(event) => {
+                        event.stopPropagation();
+                        handleDelete(record.id);
+                        if (opearate.deletedAction === RedirectMethod.REFRESH) {
+                          handlePage();
+                        } else if (opearate.deletedAction === RedirectMethod.PROMPT_JUMP) {
+                          // todo
+                        }
+                      }}
+                    >
+                      {(operationButtonShowType === TableOperationButtonStyle.ICON || operationButtonShowType === TableOperationButtonStyle.ALL) && <DynamicIcon
+                        IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                        theme="outline"
+                        size="16"
+                        fill={opearate.iconColor}
+                        style={{
+                          marginRight: 4
+                        }}
+                      />}
+                      {(operationButtonShowType === TableOperationButtonStyle.TEXT || operationButtonShowType === TableOperationButtonStyle.ALL) && opearate.buttonName}
+                    </Popconfirm>
+                  </div>
+                )}
+              </Tooltip>
+            ))
+          }
+        </Space>
+      )
+    }
   };
 
   useEffect(() => {
@@ -98,7 +162,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       opearate.fixed = fixedOpearate ? 'right' : null;
       setFinalColumns([...(columns as any), opearate]);
     } else {
-      setFinalColumns((pre) => pre?.filter((v) => v.dataIndex !== 'op'));
+      setFinalColumns(() => columns?.filter((v) => v.dataIndex !== 'op'));
     }
   }, [showOpearate, columns, fixedOpearate]);
 
@@ -106,29 +170,33 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     if (finalColumns && metaData) {
       handlePage();
     }
-  }, [finalColumns, tablePageNo, metaData]);
+  }, [finalColumns, tablePageNo, metaData, sortByObject]);
 
   const handleCreate = () => {
+    console.log('点击新增');
+
+    console.log('runtime: ', runtime);
     if (!runtime) {
       return;
     }
 
-    toCreatePage?.();
+    showFromPageData?.(null, true);
   };
 
   // 查询
   const handleSearch = () => {
     queryData = form.getFieldsValue();
     setTablePageNo(1);
-    handlePage()
-  }
+    handlePage();
+  };
+
   // 重置
   const handleReset = () => {
     form.resetFields();
     queryData = {};
     setTablePageNo(1);
-    handlePage()
-  }
+    handlePage();
+  };
 
   const handlePage = async () => {
     if (!runtime) {
@@ -140,6 +208,11 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       pageSize: pageSize || 10,
       filters: queryData
     };
+
+    if (sortByObject?.fieldName) {
+      req.sortField = sortByObject.fieldName;
+      req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
+    }
     const res = await dataMethodPage(req);
 
     const mainMetaData = await getEntityFieldsWithChildren(metaData);
@@ -150,7 +223,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       //   console.log(item);
       const newItem = item.data;
       Object.entries(newItem).forEach(([key, value]) => {
-        console.log(key, value);
+        // console.log(key, value);
         // 优化：减少重复查找，提升可读性和性能
         if (Array.isArray(mainMetaData?.parentFields)) {
           const field = mainMetaData.parentFields.find(
@@ -192,12 +265,34 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     handlePage();
   };
 
-  const handleEdit = (id: string) => {
+  const handleEdit = (id: string, toFormPage: boolean) => {
     if (!runtime) {
       return;
     }
 
-    toCreatePage?.(id);
+    showFromPageData?.(id, toFormPage);
+  };
+
+  // 行点击事件
+  const handleRowClick = (record: any) => {
+    if (!runtime) {
+      return;
+    }
+
+    if (advancedRowRedirect) {
+      if (redirectMethod === RedirectMethod.DRAWER) {
+        // 打开抽屉显示详情
+        setDrawerVisible(true);
+        redirectPageId && setDrawerPageId(redirectPageId);
+
+        handleEdit(record.id, false);
+        if (runtime) {
+          redirectPageId && setDetailPageViewId(redirectPageId);
+        }
+      } else if (redirectMethod === RedirectMethod.NEW_TAB) {
+        // 打开新的标签页
+      }
+    }
   };
 
   const [form] = Form.useForm();
@@ -245,11 +340,19 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
         </Form>
 
         <div className="tableHeaderButton">
-          <Button type="primary" onClick={handleSearch}>查询</Button>
-          <Button type="primary" onClick={handleReset}>重置</Button>
-          <Button type="primary" onClick={handleCreate}>
+          {searchItems?.length ? (
+            <>
+              <Button type="primary" onClick={handleSearch}>
+                查询
+              </Button>
+              <Button type="primary" onClick={handleReset}>
+                重置
+              </Button>
+            </>
+          ) : null}
+          {showAddBtn && <Button type="primary" onClick={handleCreate}>
             新增
-          </Button>
+          </Button>}
           {/* <Button
             type="outline"
             style={{
@@ -263,7 +366,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       </div>
       <div>
         <Form.Item
-          label={label}
+          label={label.display && label.text}
           layout={'vertical'}
           style={{
             width: '100%',
@@ -275,6 +378,13 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
             <Table
               scroll={{
                 x: 'max-content'
+              }}
+              onRow={(record, index) => {
+                return {
+                  onClick: (event) => {
+                    handleRowClick(record);
+                  }
+                };
               }}
               border={border}
               borderCell={borderCell}

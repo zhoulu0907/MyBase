@@ -3,21 +3,16 @@ import { Button, Checkbox, Form, Input, Modal, Select, Tag } from '@arco-design/
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconEdit } from '@arco-design/web-react/icon';
 import {
-  // DataOperationEnum,
   getDeptUser,
   IsOperable,
-  // type AppEntity,
   type AppEntityField,
   type AuthDataFilterVO,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
-  // type Condition,
   type ConditionField,
   type EntityFieldValidationTypes,
-  // type FilterFieldCheckType,
   type GetDeptUserReq,
   type ScopeTypeOption
-  // type RoleAddUserReq
 } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
@@ -31,7 +26,6 @@ interface IProps {
   initialFormValues: AuthDataGroupVO;
   modalVisible: boolean;
   status: 'create' | 'edit';
-  // appEntity: AppEntity;
   dataPermissionEntityName: string;
   dataPermissionPerson: AuthDataPermissionPersonVO[];
   appEntityFields: AppEntityField[];
@@ -40,7 +34,6 @@ interface IProps {
   variableOptions: TreeSelectDataType[];
   handleModalSubmit: (values: AuthDataGroupVO) => void;
   handleModalCancel: () => void;
-  // changeEntity: (params: { entityId: string }) => void;
 }
 
 const DataPermissionModal = (props: IProps) => {
@@ -49,7 +42,6 @@ const DataPermissionModal = (props: IProps) => {
     initialFormValues,
     modalVisible,
     status,
-    // appEntity,
     dataPermissionEntityName,
     dataPermissionPerson,
     appEntityFields,
@@ -60,21 +52,25 @@ const DataPermissionModal = (props: IProps) => {
     handleModalCancel
   } = props;
 
+  type Member = {
+    key: string;
+    name: string;
+    department: string;
+  };
+
   const [form] = Form.useForm();
   const Option = Select.Option;
 
-  // const [entitySelected, setEntitySelected] = useState<boolean>(false);
   const [checkAll, setCheckAll] = useState<boolean>(!!initialFormValues.isOperable); // 操作权限
   const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
-  // const [conditionData, setConditionData] = useState<Condition[]>([]);
   const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
   const [scopeType, setScopeType] = useState('');
 
   // 部门用户信息
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
-  const [deptData, setDeptData] = useState<any>();
-  const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
+  const [deptData, setDeptData] = useState<Member>();
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
 
   useEffect(() => {
     if (!modalVisible && !initialFormValues.id) {
@@ -82,6 +78,16 @@ const DataPermissionModal = (props: IProps) => {
     }
   }, [modalVisible]);
 
+  useEffect(() => {
+    if (!modalVisible) {
+      // 无论新建还是编辑，关闭时都重置
+      form.resetFields();
+      setScopeType('');
+      setDataFilters([]);
+      setSelectedMembers([]);
+      setCheckAll(true);
+    }
+  }, [modalVisible]);
   useEffect(() => {
     // 将 appEntityFields 转换为 ConditionField 格式
     const convertedFields = appEntityFields.map((field) => ({
@@ -170,7 +176,8 @@ const DataPermissionModal = (props: IProps) => {
   );
 
   // 添加成员/部门
-  const handleAddScope = async (scopeSpecified: any[]) => {
+  const handleAddScope = async (scopeSpecified: Member[]) => {
+    console.log('scopeSpecified', scopeSpecified);
     // 更新已选择的成员状态
     setSelectedMembers(scopeSpecified);
     form.setFieldValue('scopeValue', scopeSpecified);
@@ -188,7 +195,8 @@ const DataPermissionModal = (props: IProps) => {
     form.setFieldValue('scopeValue', newScopeValue);
   };
 
-  const handleUpdateSelectedMembers = (members: any[]) => {
+  const handleUpdateSelectedMembers = (members: Member[]) => {
+    console.log('members', members);
     setSelectedMembers(members);
 
     // 同时更新scopeValue字段
@@ -211,6 +219,7 @@ const DataPermissionModal = (props: IProps) => {
       console.log('提交数据 values:', values);
       values.isOperable = checkAll ? IsOperable.allowed : IsOperable.notAllowed;
       handleModalSubmit(values);
+      handleModalCancel();
     } catch (error) {
       console.log('提交数据失败 error:', error);
     }
@@ -224,6 +233,7 @@ const DataPermissionModal = (props: IProps) => {
   return (
     <>
       <Modal
+        style={{ width: '750px' }}
         className={styles.dataPermissionModal}
         title={<div className={styles.dataPermissionModalTitle}>{status === 'create' ? '添加' : '编辑'}数据权限组</div>}
         visible={modalVisible}
