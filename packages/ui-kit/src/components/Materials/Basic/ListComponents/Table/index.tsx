@@ -72,7 +72,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     width: '110px',
     render: (_: any, record: any) => {
       if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
-      const isDisabled = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED];
+      const isDisabled = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
       return (
         <Space>
           {
@@ -263,7 +263,6 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     if (res) {
       Message.success('删除成功');
     }
-    handlePage();
   };
 
   const handleEdit = (id: string, toFormPage: boolean) => {
