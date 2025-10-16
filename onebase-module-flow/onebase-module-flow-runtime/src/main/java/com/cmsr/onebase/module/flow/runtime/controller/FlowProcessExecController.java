@@ -54,9 +54,9 @@ public class FlowProcessExecController {
 
     @PostMapping("/flow-handler/delete")
     @Operation(summary = "删除流程")
-    public CommonResult<Boolean> deleteProcess(@RequestParam("applicationId") Long applicationId) {
-        flowChangeEventCacheHandler.onApplicationDelete(applicationId);
-        return CommonResult.success(Boolean.TRUE);
+    public CommonResult<String> deleteProcess(@RequestParam("applicationId") Long applicationId) {
+        String result = flowChangeEventCacheHandler.onApplicationDelete(applicationId);
+        return CommonResult.success(result);
     }
 
 
