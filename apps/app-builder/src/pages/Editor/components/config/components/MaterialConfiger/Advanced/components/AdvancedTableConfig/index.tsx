@@ -313,20 +313,15 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                       <IconDragDotVertical style={{ cursor: 'grab', color: '#86909c' }} />
                       <Typography.Text>{op.buttonName}</Typography.Text>
                       {
-                        <div onClick={() => {
-                          handleOpenButtonModal(op)
-                        }}>
-                          <DynamicIcon
-                            IconComponent={iconMap[op.buttonIcon as keyof typeof iconMap]}
-                            theme="outline"
-                            size="16"
-                            fill={op.iconColor}
-                            style={{
-                              margin: 'auto',
-                              cursor: 'pointer'
-                            }}
-                          />
-                        </div>
+                        <DynamicIcon
+                          IconComponent={iconMap[op.buttonIcon as keyof typeof iconMap]}
+                          theme="outline"
+                          size="16"
+                          fill={op.iconColor}
+                          style={{
+                            margin: 'auto'
+                          }}
+                        />
                       }
                     </Space>
                   </Grid.Col>
@@ -451,11 +446,11 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                     setBtnIcon(defaultIcon?.buttonIcon);
                     setBtnIconColor(defaultIcon?.iconColor);
                   }}
-                  style={{ width: 500 }}
+                  style={{ width: 365, maxWidth: 500 }}
                   content={
                     <>
                       <div className={styles.avatarWrapper}>
-                        {operationIcon.map((icon, index) => (
+                        {operationIcon.map((icon: string, index: number) => (
                           <div
                             className={styles.avatar}
                             key={index}
@@ -472,7 +467,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                         ))}
                       </div>
                       <div className={styles.avatarColor}>
-                        {iconColorList.map((color, index) => (
+                        {iconColorList.map((color: string, index: number) => (
                           <div
                             className={styles.color}
                             key={index}

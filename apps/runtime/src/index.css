@@ -8,6 +8,6 @@
 }
 
 /* 菜单隐藏样式 */
-.arco-tree-node-switcher {
+.menuTree .arco-tree-node-switcher {
   display: none;
 }

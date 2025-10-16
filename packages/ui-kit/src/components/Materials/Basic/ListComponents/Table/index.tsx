@@ -1,6 +1,5 @@
-import { Button, Form, Input, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
-import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
+import { Button, Form, Input, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES, BUTTON_OPTIONS, BUTTON_VALUES, TableOperationButton, TableOperationButtonStyle } from '../../../constants';
 
 import {
@@ -28,6 +27,7 @@ const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth 
 const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData?: Function, showAddBtn?: boolean }) => {
   const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
   const { runtime = true, showFromPageData, showAddBtn = true } = props;
+  const hasOperationPermission = true;
 
   const {
     label,
@@ -71,13 +71,13 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
     fixed: null,
     width: '110px',
     render: (_: any, record: any) => {
-      if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN]) return;
+      if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
       const isDisabled = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED];
       return (
         <Space>
           {
             operationButton?.map((opearate, index) => (
-              <Tooltip content="无操作权限" key={index}>
+              <Tooltip content={!hasOperationPermission && "无操作权限"} key={index}>
                 {(opearate.type === TableOperationButton.EDIT && opearate.display) && (
                   <div
                     style={{ whiteSpace: 'nowrap', opacity: isDisabled ? .5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer', pointerEvents: isDisabled ? 'none' : 'auto' }}
@@ -91,6 +91,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; showFromPageData
 
                         handleEdit(record.id, false);
                       } else if (redirectMethod === RedirectMethod.NEW_TAB) {
+                        // todo
                       } else if (redirectMethod === RedirectMethod.CURRENT_TAB) {
                       } else if (redirectMethod === RedirectMethod.MODAL) {
                       }
