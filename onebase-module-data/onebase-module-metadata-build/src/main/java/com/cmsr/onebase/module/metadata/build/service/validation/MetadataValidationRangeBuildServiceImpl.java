@@ -47,10 +47,11 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         // 格式化数值，最多保留4位小数
         formatDecimalValues(respVO, rangeDO);
 
-        // 获取规则组名称
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
 
         return respVO;
@@ -192,8 +193,12 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         // 格式化数值，最多保留4位小数
         formatDecimalValues(respVO, rangeDO);
         
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
-        if (ruleGroup != null) { respVO.setRgName(ruleGroup.getRgName()); }
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        }
         return respVO;
     }
 
