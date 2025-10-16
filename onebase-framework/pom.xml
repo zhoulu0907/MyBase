@@ -19,7 +19,6 @@
         <module>onebase-spring-boot-starter-protection</module>
         <module>onebase-spring-boot-starter-rpc</module>
         <module>onebase-spring-boot-starter-excel</module>
-        <module>onebase-spring-boot-starter-express</module>
         <module>onebase-spring-boot-starter-test</module>
         <module>onebase-spring-boot-starter-biz-tenant</module>
         <module>onebase-project-base</module>
@@ -37,5 +36,6 @@
         如果是业务组件，Maven 名字会包含 biz
     </description>
     <url>https://cmsr.com</url>
+
 
 </project>

@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDOInterface;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -27,7 +28,7 @@ import java.util.Optional;
  * @date 2025-08-07
  */
 @Slf4j
-public class DataRepository<T extends BaseDO> {
+public class DataRepository<T extends BaseDOInterface> {
 
     static {
         // ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
@@ -58,7 +59,7 @@ public class DataRepository<T extends BaseDO> {
      * @param clazz 实体类
      * @return 表名
      */
-    private String getTableName(Class<? extends BaseDO> clazz) {
+    private String getTableName(Class<? extends BaseDOInterface> clazz) {
         jakarta.persistence.Table annotation = clazz.getAnnotation(jakarta.persistence.Table.class);
         return annotation != null ? annotation.name() : clazz.getSimpleName().toLowerCase();
     }

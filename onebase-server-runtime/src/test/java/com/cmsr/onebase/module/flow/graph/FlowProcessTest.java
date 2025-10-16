@@ -3,9 +3,10 @@ package com.cmsr.onebase.module.flow.graph;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Map;
+
 
 /**
  * @Author：huangjie
@@ -29,24 +32,31 @@ public class FlowProcessTest {
     @Autowired
     private FlowProcessExecApiImpl flowProcessExecApi;
 
+
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
         String json = flowProcessDO.getProcessDefinition();
-        JsonGraph jsonGraph = JsonGraph.of(json);
+        JsonGraph jsonGraph = JsonGraphBuilder.build(json);
         System.out.println(jsonGraph.toFlowChain());
     }
 
     @Test
     public void testSimple() throws IOException {
-        testToFlowChain(48344014469300224L);
+        testToFlowChain(84076905441918976L);
     }
+
 
     @Test
     public void testSimple2() throws IOException {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setEntityId(46999363287089152L);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        reqDTO.setChangedFieldIds(List.of(46999569445519360L));
+        reqDTO.setFieldData(Map.of(
+                "46999569445519360", "6年级3班",
+                "50026937276661762", LocalDate.now(),
+                "50028191407505411", 30
+        ));
+        //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
         flowProcessExecApi.entityTrigger(reqDTO);
     }
 }

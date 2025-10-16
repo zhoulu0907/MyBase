@@ -4,15 +4,15 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.dal.database.*;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessEntityDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessFormDO;
-import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
+import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
-import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
@@ -182,6 +182,10 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         validateFlowProcessExist(id);
         // 删除流程
         flowProcessRepository.deleteById(id);
+        flowProcessDateFieldRepository.deleteByProcessId(id);
+        flowProcessEntityRepository.deleteByProcessId(id);
+        flowProcessFormRepository.deleteByProcessId(id);
+        flowProcessTimeRepository.deleteByProcessId(id);
     }
 
 

@@ -20,7 +20,7 @@ public enum AuthOperationEnum {
 
     EXPORT("export", "导出"),
 
-    SHARE("share", "所有权限");
+    SHARE("share", "分享");
 
     private String operation;
 

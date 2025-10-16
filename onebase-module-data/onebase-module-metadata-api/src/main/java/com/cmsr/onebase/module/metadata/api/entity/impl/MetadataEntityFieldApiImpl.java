@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldIdsReqDTO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
@@ -88,30 +89,8 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         // DO -> DTO 映射，并补充 entityDisplayName 与 tableName
         List<EntityFieldRespDTO> result = new ArrayList<>(filtered.size());
         for (MetadataEntityFieldDO f : filtered) {
-            EntityFieldRespDTO dto = new EntityFieldRespDTO();
-            dto.setId(f.getId());
-            dto.setEntityId(f.getEntityId());
-            dto.setEntityDisplayName(entityDisplayName);
-            dto.setTableName(tableName);
-            dto.setFieldName(f.getFieldName());
-            dto.setDisplayName(f.getDisplayName());
-            dto.setFieldType(f.getFieldType());
-            dto.setDecimalPlaces(f.getDecimalPlaces());
-            dto.setDefaultValue(f.getDefaultValue());
-            dto.setDescription(f.getDescription());
-            dto.setIsRequired(f.getIsRequired());
-            dto.setIsUnique(f.getIsUnique());
-            dto.setIsSystemField(f.getIsSystemField());
-            dto.setIsPrimaryKey(f.getIsPrimaryKey());
-            dto.setSortOrder(f.getSortOrder());
-            dto.setFieldCode(f.getFieldCode());
-            dto.setRunMode(f.getRunMode());
-            dto.setAppId(f.getAppId());
-            dto.setCreateTime(f.getCreateTime());
-            dto.setUpdateTime(f.getUpdateTime());
-            result.add(dto);
+            result.add(convertToRespDTO(f, entityDisplayName, tableName));
         }
-
         return result;
     }
 
@@ -137,6 +116,68 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         }
         
         return result;
+    }
+
+    @Override
+    public List<EntityFieldRespDTO> getEntityFieldsByIds(@Valid @RequestBody EntityFieldIdsReqDTO reqDTO) {
+        List<Long> fieldIds = reqDTO != null ? reqDTO.getFieldIds() : null;
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByIds(fieldIds);
+        if (fields == null || fields.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // 按 entityId 分组，批量获取实体信息减少重复查询
+        Map<Long, List<MetadataEntityFieldDO>> groupByEntity = new java.util.HashMap<>();
+        for (MetadataEntityFieldDO f : fields) {
+            if (f.getEntityId() == null) { continue; }
+            groupByEntity.computeIfAbsent(f.getEntityId(), k -> new ArrayList<>()).add(f);
+        }
+        Map<Long, MetadataBusinessEntityDO> entityCache = new java.util.HashMap<>();
+        List<EntityFieldRespDTO> result = new ArrayList<>(fields.size());
+        for (MetadataEntityFieldDO f : fields) {
+            MetadataBusinessEntityDO entity = null;
+            if (f.getEntityId() != null) {
+                entity = entityCache.computeIfAbsent(f.getEntityId(), id -> metadataBusinessEntityCoreService.getBusinessEntity(id));
+            }
+            String entityDisplayName = entity != null ? entity.getDisplayName() : null;
+            String tableName = entity != null ? entity.getTableName() : null;
+            result.add(convertToRespDTO(f, entityDisplayName, tableName));
+        }
+        return result;
+    }
+
+    /**
+     * DO -> DTO 转换公共方法，便于多处复用
+     * @param f 字段DO
+     * @param entityDisplayName 实体显示名称
+     * @param tableName 表名
+     * @return EntityFieldRespDTO
+     */
+    private EntityFieldRespDTO convertToRespDTO(MetadataEntityFieldDO f, String entityDisplayName, String tableName) {
+        EntityFieldRespDTO dto = new EntityFieldRespDTO();
+        dto.setId(f.getId());
+        dto.setEntityId(f.getEntityId());
+        dto.setEntityDisplayName(entityDisplayName);
+        dto.setTableName(tableName);
+        dto.setFieldName(f.getFieldName());
+        dto.setDisplayName(f.getDisplayName());
+        dto.setFieldType(f.getFieldType());
+        dto.setDecimalPlaces(f.getDecimalPlaces());
+        dto.setDefaultValue(f.getDefaultValue());
+        dto.setDescription(f.getDescription());
+        dto.setIsRequired(f.getIsRequired());
+        dto.setIsUnique(f.getIsUnique());
+        dto.setIsSystemField(f.getIsSystemField());
+        dto.setIsPrimaryKey(f.getIsPrimaryKey());
+        dto.setSortOrder(f.getSortOrder());
+        dto.setFieldCode(f.getFieldCode());
+        dto.setRunMode(f.getRunMode());
+        dto.setAppId(f.getAppId());
+        dto.setCreateTime(f.getCreateTime());
+        dto.setUpdateTime(f.getUpdateTime());
+        return dto;
     }
 
 }

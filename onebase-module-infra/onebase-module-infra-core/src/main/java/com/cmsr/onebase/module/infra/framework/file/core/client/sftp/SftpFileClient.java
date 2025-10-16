@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client.sftp;
 
-import com.cmsr.onebase.framework.common.tools.core.io.FileUtil;
-import com.cmsr.onebase.framework.common.tools.extra.ssh.Sftp;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.extra.ssh.Sftp;
 import com.cmsr.onebase.framework.common.util.io.FileUtils;
 import com.cmsr.onebase.module.infra.framework.file.core.client.AbstractFileClient;
 

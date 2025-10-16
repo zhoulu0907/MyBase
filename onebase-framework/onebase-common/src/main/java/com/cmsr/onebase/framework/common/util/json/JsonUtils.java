@@ -1,20 +1,27 @@
 package com.cmsr.onebase.framework.common.util.json;
 
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.tools.json.JSONUtil;
+
+import cn.hutool.json.JSONUtil;
+import com.cmsr.onebase.framework.common.util.json.databind.TimestampLocalDateTimeDeserializer;
+import com.cmsr.onebase.framework.common.util.json.databind.TimestampLocalDateTimeSerializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +35,12 @@ public class JsonUtils {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     static {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Long.class, ToStringSerializer.instance);
+        module.addSerializer(Long.TYPE, ToStringSerializer.instance);
+        module.addSerializer(BigInteger.class, ToStringSerializer.instance);
+        module.addSerializer(LocalDateTime.class, TimestampLocalDateTimeSerializer.INSTANCE);
+        module.addDeserializer(LocalDateTime.class, TimestampLocalDateTimeDeserializer.INSTANCE);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL); // 忽略 null 值
@@ -61,7 +74,7 @@ public class JsonUtils {
     }
 
     public static <T> T parseObject(String text, Class<T> clazz) {
-        if (StrUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return null;
         }
         try {
@@ -73,7 +86,7 @@ public class JsonUtils {
     }
 
     public static <T> T parseObject(String text, String path, Class<T> clazz) {
-        if (StrUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return null;
         }
         try {
@@ -87,7 +100,7 @@ public class JsonUtils {
     }
 
     public static <T> T parseObject(String text, Type type) {
-        if (StrUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return null;
         }
         try {
@@ -108,14 +121,14 @@ public class JsonUtils {
      * @return 对象
      */
     public static <T> T parseObject2(String text, Class<T> clazz) {
-        if (StrUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return null;
         }
         return JSONUtil.toBean(text, clazz);
     }
 
     public static <T> T parseObject(byte[] bytes, Class<T> clazz) {
-        if (ArrayUtil.isEmpty(bytes)) {
+        if (ArrayUtils.isEmpty(bytes)) {
             return null;
         }
         try {
@@ -151,7 +164,7 @@ public class JsonUtils {
     }
 
     public static <T> List<T> parseArray(String text, Class<T> clazz) {
-        if (StrUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return new ArrayList<>();
         }
         try {
@@ -163,7 +176,7 @@ public class JsonUtils {
     }
 
     public static <T> List<T> parseArray(String text, String path, Class<T> clazz) {
-        if (StrUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return null;
         }
         try {

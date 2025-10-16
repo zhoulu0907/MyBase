@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.module.system.dal.database.*;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;

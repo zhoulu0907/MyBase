@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.framework.operatelog.core;
 
-import com.cmsr.onebase.framework.common.tools.core.convert.Convert;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.mzt.logapi.service.IParseFunction;

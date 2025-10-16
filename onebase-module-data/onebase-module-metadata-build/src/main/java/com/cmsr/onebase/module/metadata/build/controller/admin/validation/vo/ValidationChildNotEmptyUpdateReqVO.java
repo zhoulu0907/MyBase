@@ -15,8 +15,8 @@ import lombok.Data;
 @Data
 public class ValidationChildNotEmptyUpdateReqVO {
 
-    @Schema(description = "主键ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "主键ID不能为空")
+    @Schema(description = "规则组ID（前端传入的id即校验规则组ID，用于定位唯一该类型校验记录）", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @NotNull(message = "规则组ID不能为空")
     private Long id;
 
     @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户信息校验")

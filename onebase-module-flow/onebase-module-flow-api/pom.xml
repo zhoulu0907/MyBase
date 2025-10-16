@@ -26,25 +26,28 @@
             <artifactId>onebase-module-flow-core</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- Web 相关 -->
         <dependency>
             <groupId>org.springdoc</groupId> <!-- 接口文档：使用最新版本的 Swagger 模型 -->
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <!-- 参数校验 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
             <optional>true</optional>
         </dependency>
-
-        <!-- RPC 远程调用相关 -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <optional>true</optional>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-component</artifactId>
+            <version>${revision}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

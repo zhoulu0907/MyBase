@@ -27,6 +27,18 @@
             <version>${revision}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-bpm-engine-orm</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <!-- OneBase框架依赖 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-common</artifactId>
+        </dependency>
+
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -50,27 +62,17 @@
             <artifactId>onebase-spring-boot-starter-rpc</artifactId>
         </dependency>
 
-        <!-- Test 测试相关 -->
+        <!-- 通用工具类 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <artifactId>onebase-common</artifactId>
         </dependency>
 
-        <!-- 公式引擎相关 -->
-<!--        <dependency>-->
-<!--            <groupId>org.graalvm.polyglot</groupId>-->
-<!--            <artifactId>polyglot</artifactId>-->
-<!--        </dependency>-->
+        <!-- Jackson JSON处理库 -->
         <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
-        </dependency>
-
 
     </dependencies>
     <build>

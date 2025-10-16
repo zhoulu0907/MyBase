@@ -19,6 +19,11 @@ public enum ResetCycleEnum {
     NEVER("NEVER", "不重置"),
 
     /**
+     * 不重置（兼容旧数据）
+     */
+    NONE("NONE", "不重置"),
+
+    /**
      * 每日重置
      */
     DAILY("DAILY", "每日重置"),

@@ -16,10 +16,6 @@
         flow 模块，自动化工作流管理
     </description>
     <properties>
-        <liteflow.version>2.13.2</liteflow.version>
-        <js.version>23.0.9</js.version>
-        <dom4j.version>2.2.0</dom4j.version>
-        <snail.version>1.7.2</snail.version>
     </properties>
     <dependencies>
         <!-- 依赖服务 -->
@@ -27,6 +23,12 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-core</artifactId>
             <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-component</artifactId>
+            <version>${revision}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -38,13 +40,11 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
-
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-orm</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-redis</artifactId>
@@ -59,17 +59,14 @@
         <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-spring-boot-starter</artifactId>
-            <version>${liteflow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-script-groovy</artifactId>
-            <version>${liteflow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-script-javascript</artifactId>
-            <version>${liteflow.version}</version>
         </dependency>
         <dependency>
             <groupId>org.graalvm.js</groupId>
@@ -82,24 +79,6 @@
         <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
-            <version>${dom4j.version}</version>
-        </dependency>
-        <!-- SnailJob任务调度 -->
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-client-starter</artifactId>
-            <version>1.7.2</version>
-        </dependency>
-        <!-- snail job -->
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-client-starter</artifactId>
-            <version>${snail.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-client-job-core</artifactId>
-            <version>${snail.version}</version>
         </dependency>
         <!-- Test 测试相关 -->
         <dependency>

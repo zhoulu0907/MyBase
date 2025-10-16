@@ -3,13 +3,27 @@ package com.cmsr.onebase.module.app.build.service.app;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.module.app.build.service.AppCommonService;
+import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.app.build.util.AppUtils;
+import com.cmsr.onebase.module.app.build.util.VersionUtils;
+import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
+import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
+import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
+import com.cmsr.onebase.module.app.build.vo.auth.AuthRoleAddUserReqVO;
+import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
@@ -26,6 +40,7 @@ import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefau
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -41,7 +56,11 @@ import java.util.List;
 @Setter
 @Service
 @Validated
+@Slf4j
 public class AppApplicationServiceImpl implements AppApplicationService {
+
+    @Resource
+    private UidGenerator uidGenerator;
 
     @Resource
     private AppApplicationRepository applicationRepository;
@@ -69,6 +88,13 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Resource
     private MetadataDatasourceApi metadataDatasourceApi;
+
+    @Resource
+    private AppAuthRoleUserRepository appAuthRoleUserRepository;
+
+    @Resource
+    private AppAuthRoleRepository appAuthRoleRepository;
+
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -205,6 +231,13 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         versionResourceRepository.deleteByApplicationId(id);
     }
 
+    @Override
+    public Long generateId() {
+        Long uid = uidGenerator.getUID();
+        log.info("Generator id: {}", uid);
+        return uid;
+    }
+
 
     /**
      * 检查 ApplicationDO 表 code 码是否重复，重复跑出异常
@@ -235,5 +268,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
     }
+
+
 
 }

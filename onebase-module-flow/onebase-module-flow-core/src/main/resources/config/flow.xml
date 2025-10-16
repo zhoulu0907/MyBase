@@ -1,0 +1,5 @@
+<flow>
+    <chain name="no_op_chain">
+        SER(noop);
+    </chain>
+</flow>

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.excel.core.convert;
 
-import com.cmsr.onebase.framework.common.tools.core.convert.Convert;
+import cn.hutool.core.convert.Convert;
 import com.cmsr.onebase.framework.dict.core.DictFrameworkUtils;
 import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
 import com.alibaba.excel.converters.Converter;

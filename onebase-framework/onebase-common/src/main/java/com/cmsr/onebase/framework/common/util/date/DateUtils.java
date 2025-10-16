@@ -1,15 +1,11 @@
 package com.cmsr.onebase.framework.common.util.date;
 
 
-import com.cmsr.onebase.framework.common.tools.core.date.LocalDateTimeUtil;
-
 import java.time.*;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
  * 时间工具类
- *
  */
 public class DateUtils {
 
@@ -70,42 +66,6 @@ public class DateUtils {
         return now.isAfter(time);
     }
 
-    /**
-     * 创建指定时间
-     *
-     * @param year  年
-     * @param mouth 月
-     * @param day   日
-     * @return 指定时间
-     */
-    public static Date buildTime(int year, int mouth, int day) {
-        return buildTime(year, mouth, day, 0, 0, 0);
-    }
-
-    /**
-     * 创建指定时间
-     *
-     * @param year   年
-     * @param mouth  月
-     * @param day    日
-     * @param hour   小时
-     * @param minute 分钟
-     * @param second 秒
-     * @return 指定时间
-     */
-    public static Date buildTime(int year, int mouth, int day,
-                                 int hour, int minute, int second) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, mouth - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, day);
-        calendar.set(Calendar.HOUR_OF_DAY, hour);
-        calendar.set(Calendar.MINUTE, minute);
-        calendar.set(Calendar.SECOND, second);
-        calendar.set(Calendar.MILLISECOND, 0); // 一般情况下，都是 0 毫秒
-        return calendar.getTime();
-    }
-
     public static Date max(Date a, Date b) {
         if (a == null) {
             return b;
@@ -133,17 +93,8 @@ public class DateUtils {
      * @return 是否
      */
     public static boolean isToday(LocalDateTime date) {
-        return LocalDateTimeUtil.isSameDay(date, LocalDateTime.now());
+        return LocalDateTime.now().toLocalDate().equals(date.toLocalDate());
     }
 
-    /**
-     * 是否昨天
-     *
-     * @param date 日期
-     * @return 是否
-     */
-    public static boolean isYesterday(LocalDateTime date) {
-        return LocalDateTimeUtil.isSameDay(date, LocalDateTime.now().minusDays(1));
-    }
 
 }

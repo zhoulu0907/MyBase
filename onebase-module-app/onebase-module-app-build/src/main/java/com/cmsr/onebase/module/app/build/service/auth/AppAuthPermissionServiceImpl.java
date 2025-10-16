@@ -8,18 +8,23 @@ import com.cmsr.onebase.module.app.core.dal.database.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthOperationEnum;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthPermissionScopeEnum;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthOperationVO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldIdsReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.api.validation.MetadataPermitApi;
 import com.cmsr.onebase.module.metadata.api.validation.dto.PermitRefOtftRespDTO;
+import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,36 +78,126 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //
         AuthDetailFunctionPermissionVO functionPermissionVO = new AuthDetailFunctionPermissionVO();
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
-        // 页面权限
-        if (authPermissionDO != null) {
+        if(null == authPermissionDO ){
+            authPermissionDO =AuthDefaultFactory.createAuthPermissionDO(reqVO);
+            authPermissionDO.setApplicationId(reqVO.getApplicationId());
+            authPermissionDO.setRoleId(reqVO.getRoleId());
+            authPermissionDO.setMenuId(reqVO.getMenuId());
+
             functionPermissionVO.setIsPageAllowed(authPermissionDO.getIsPageAllowed());
+
+            List<AuthOperationDO> aolist = AuthDefaultFactory.createAuthOperationDOList(reqVO);
+            List<AuthOperationVO> aovlist = BeanUtils.toBean(aolist,AuthOperationVO.class);
+
+            functionPermissionVO.setAuthOperations(aovlist);
+
+            AuthDetailViewVO authDetailViewVO = new AuthDetailViewVO();
+            authDetailViewVO.setIsAllViewsAllowed(authPermissionDO.getIsAllViewsAllowed());
+
+            List<AuthViewVO> avlist = Collections.emptyList();
+            authDetailViewVO.setAuthViews(avlist);
+            functionPermissionVO.setAuthViewVO(authDetailViewVO);
         }
+        // 页面权限
+        functionPermissionVO.setIsPageAllowed(authPermissionDO.getIsPageAllowed());
         // 操作权限
         functionPermissionVO.setAuthOperations(queryAuthOperations(reqVO));
+
         // 视图权限
         AuthDetailViewVO authDetailViewVO = new AuthDetailViewVO();
-        if (authPermissionDO != null) {
-            authDetailViewVO.setIsAllViewsAllowed(authPermissionDO.getIsAllViewsAllowed());
-        }
+        authDetailViewVO.setIsAllViewsAllowed(authPermissionDO.getIsAllViewsAllowed());
         authDetailViewVO.setAuthViews(queryAuthViews(reqVO));
         functionPermissionVO.setAuthViewVO(authDetailViewVO);
+
         return functionPermissionVO;
     }
+
 
     @Override
     public AuthDetailDataPermissionVO getDataPermission(AuthPermissionReqVO reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
         appCommonService.validateRoleExist(reqVO.getRoleId());
-        MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
         //数据权限
         List<AuthDataGroupVO> authDataGroupVOS = queryAuthDataGroups(reqVO);
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
-        //字段辅助信息
-//        List<AuthFieldInfoVO> authFieldInfoVOS = queryFieldsInfo(menuDO.getEntityId());
-//        dataPermissionVO.setFieldInfo(authFieldInfoVOS);
+        //补充全部的字段名称属性
+        completeFilesName(authDataGroupVOS);
+
         return dataPermissionVO;
+    }
+
+    public AuthDetailDataPermissionVO getDataPermissionNew(AuthPermissionReqVO reqVO) {
+        appCommonService.validateApplicationExist(reqVO.getApplicationId());
+        appCommonService.validateRoleExist(reqVO.getRoleId());
+        //
+        AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
+        //数据权限
+        List<AuthDataGroupVO> authDataGroupVOS = new ArrayList<AuthDataGroupVO>();
+
+        List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
+        if(authDataGroupDOS.isEmpty()){
+            authDataGroupDOS = AuthDefaultFactory.createListAuthDataGroupDOList(reqVO);
+        }
+        authDataGroupVOS = BeanUtils.toBean(authDataGroupDOS, AuthDataGroupVO.class);
+
+        for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
+            MenuDO menuDO = appMenuRepository.findById(reqVO.getMenuId());
+            authDataGroupVO.setEntityId(menuDO.getEntityId());
+            //TODO 获取实体名称
+            authDataGroupVO.setEntityName("");
+            List<AuthDataFilterDO> dataFilterDOS = authDataFilterRepository.findByGroupId(authDataGroupVO.getId());
+            List<AuthDataFilterVO> dataFilterVOS = BeanUtils.toBean(dataFilterDOS, AuthDataFilterVO.class);
+            List<List<AuthDataFilterVO>> dataFilters = groupAndOrder(dataFilterVOS);
+            authDataGroupVO.setDataFilters(dataFilters);
+        }
+
+        dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
+//        补充全部的字段名称属性
+        completeFilesName(authDataGroupVOS);
+
+        return dataPermissionVO;
+    }
+
+    private void completeFilesName(List<AuthDataGroupVO> authDataGroupVOS) {
+        EntityFieldIdsReqDTO reqDTO = getEntityFieldIdsReqDTO(authDataGroupVOS);
+        List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldsByIds(reqDTO);
+        Map<Long, EntityFieldRespDTO> fieldId2EntityFieldRespDTO = entityFieldRespDTOS.stream().collect(Collectors.toMap(EntityFieldRespDTO::getId, field -> field));
+        //补充字段名称属性
+        for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
+            EntityFieldRespDTO entityFieldRespDTO = fieldId2EntityFieldRespDTO.get(authDataGroupVO.getScopeFieldId());
+            if (entityFieldRespDTO != null) {
+                authDataGroupVO.setScopeFieldName(entityFieldRespDTO.getDisplayName());
+            } else {
+                authDataGroupVO.setScopeFieldName("未知字段");
+            }
+            for (List<AuthDataFilterVO> dataFilterVOs : ListUtils.emptyIfNull(authDataGroupVO.getDataFilters())) {
+                for (AuthDataFilterVO dataFilterVO : ListUtils.emptyIfNull(dataFilterVOs)) {
+                    EntityFieldRespDTO fieldRespDTO = fieldId2EntityFieldRespDTO.get(dataFilterVO.getFieldId());
+                    if (fieldRespDTO != null) {
+                        dataFilterVO.setFieldName(fieldRespDTO.getDisplayName());
+                    } else {
+                        dataFilterVO.setFieldName("未知字段");
+                    }
+                }
+            }
+        }
+    }
+
+    private EntityFieldIdsReqDTO getEntityFieldIdsReqDTO(List<AuthDataGroupVO> authDataGroupVOS) {
+        Set<Long> fieldIds = new HashSet<>();
+        for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
+            fieldIds.add(authDataGroupVO.getScopeFieldId());
+            for (List<AuthDataFilterVO> dataFilterVOs : ListUtils.emptyIfNull(authDataGroupVO.getDataFilters())) {
+                for (AuthDataFilterVO dataFilterVO : ListUtils.emptyIfNull(dataFilterVOs)) {
+                    fieldIds.add(dataFilterVO.getFieldId());
+                }
+            }
+        }
+        EntityFieldIdsReqDTO reqDTO = new EntityFieldIdsReqDTO();
+        reqDTO.setFieldIds(Lists.newArrayList(fieldIds));
+        return reqDTO;
     }
 
     @Override
@@ -113,9 +208,12 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //
         AuthDetailFieldPermissionVO fieldPermissionVO = new AuthDetailFieldPermissionVO();
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
-        if (authPermissionDO != null) {
-            fieldPermissionVO.setIsAllFieldsAllowed(authPermissionDO.getIsAllFieldsAllowed());
+        if(null == authPermissionDO){
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO);
         }
+
+        fieldPermissionVO.setIsAllFieldsAllowed(authPermissionDO.getIsAllFieldsAllowed());
+
         fieldPermissionVO.setAuthFields(queryAuthFields(menuDO.getEntityId(), reqVO));
         return fieldPermissionVO;
     }
@@ -210,10 +308,15 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateField(AuthUpdateFieldReqVO reqVO) {
+        // IsAllFieldsAllowed 1 所有字段内容可操作   0 自定义权限
         if (reqVO.getIsAllFieldsAllowed() != null) {
             AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
-            authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllFieldsAllowed());
-            authPermissionRepository.update(authPermissionDO);
+            if (null == authPermissionDO ){
+                authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq().getApplicationId(),reqVO.getPermissionReq().getRoleId(), reqVO.getPermissionReq().getMenuId());
+            }else{
+                authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllFieldsAllowed());
+                authPermissionRepository.update(authPermissionDO);
+            }
         }
         if (reqVO.getAuthField() != null) {
             AuthFieldVO authField = reqVO.getAuthField();
@@ -288,6 +391,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private List<AuthDataGroupVO> queryAuthDataGroups(AuthPermissionReqVO reqVO) {
         List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
+        if(authDataGroupDOS.isEmpty()){
+            authDataGroupDOS = AuthDefaultFactory.createListAuthDataGroupDOList(reqVO);
+        }
         List<AuthDataGroupVO> authDataGroupVOS = BeanUtils.toBean(authDataGroupDOS, AuthDataGroupVO.class);
         for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
             MenuDO menuDO = appMenuRepository.findById(reqVO.getMenuId());
@@ -301,20 +407,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         }
         return authDataGroupVOS;
     }
-
-//    private List<AuthFieldInfoVO> queryFieldsInfo(Long entityId) {
-//        List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
-//        List<PermitRefOtftRespDTO> permitRefOtftRespDTOS = metadataPermitApi.getPermitRefOtftList();
-//        List<AuthFieldInfoVO> authFieldInfoVOS = entityFieldRespDTOS.stream().map(field -> {
-//            AuthFieldInfoVO authFieldInfoVO = new AuthFieldInfoVO();
-//            authFieldInfoVO.setFieldId(Long.valueOf(field.getId())); //TODO 强转
-//            authFieldInfoVO.setFieldDisplayName(field.getDisplayName());
-//            authFieldInfoVO.setFieldType(field.getFieldType());
-//            authFieldInfoVO.setOperatorMap(queryAuthFieldInfoVOOperator(field.getFieldType(), permitRefOtftRespDTOS));
-//            return authFieldInfoVO;
-//        }).toList();
-//        return authFieldInfoVOS;
-//    }
 
     private List<AuthFieldInfoVO.Operator> queryAuthFieldInfoVOOperator(String fieldTypeCode, List<PermitRefOtftRespDTO> permitRefOtftRespDTOS) {
         return permitRefOtftRespDTOS.stream()
@@ -363,6 +455,8 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             AuthFieldVO authFieldVO = new AuthFieldVO();
             authFieldVO.setFieldId(entityField.getId());
             authFieldVO.setFieldDisplayName(entityField.getDisplayName());
+            authFieldVO.setFieldType(entityField.getFieldType());
+
             if (authFieldDO != null) {
                 authFieldVO.setId(authFieldDO.getId());
                 authFieldVO.setIsCanRead(authFieldDO.getIsCanRead());
@@ -418,6 +512,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
     private List<AuthDataFilterVO> formatAuthDataFilterVO(List<List<AuthDataFilterVO>> authDataFilters) {
+        if (CollectionUtils.isEmpty(authDataFilters)) {
+            return Collections.emptyList();
+        }
         for (int i = 0; i < authDataFilters.size(); i++) {
             List<AuthDataFilterVO> authDataFilterVOS = authDataFilters.get(i);
             for (int j = 0; j < authDataFilterVOS.size(); j++) {

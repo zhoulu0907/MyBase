@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.core.dto.appresource;
 
 import java.util.List;
 
+import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data
@@ -12,5 +13,18 @@ public class PageDTO {
 
     private String pageType;
 
+    private Integer editViewMode;
+
+    private Integer detailViewMode;
+
+    private Integer isDefaultEditViewMode;
+
+    private Integer isDefaultDetailViewMode;
+
+    private Integer isLatestUpdated;
+
     private List<ComponentDTO> components;
+
+    private Boolean created;
+
 }

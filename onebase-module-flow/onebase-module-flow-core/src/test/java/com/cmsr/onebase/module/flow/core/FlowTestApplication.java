@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow;
+package com.cmsr.onebase.module.flow.core;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

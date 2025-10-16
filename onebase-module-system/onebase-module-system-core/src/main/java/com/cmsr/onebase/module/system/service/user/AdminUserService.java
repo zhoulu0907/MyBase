@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.service.user;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
@@ -53,9 +53,9 @@ public interface AdminUserService {
     void updateUser(@Valid UserUpdateReqVO updateReqVO);
 
     /**
-     * 修改用户管理员状态
+     * 修改用户管理员类型
      *
-     * @param adminType 修改管理员状态
+     * @param adminType 修改管理员类型
      * @param id    用户编号
      */
     void updateAdminType(Long id,  Integer adminType);

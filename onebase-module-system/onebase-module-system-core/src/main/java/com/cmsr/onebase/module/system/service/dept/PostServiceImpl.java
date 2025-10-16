@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.vo.post.PostPageReqVO;
 import com.cmsr.onebase.module.system.vo.post.PostSaveReqVO;

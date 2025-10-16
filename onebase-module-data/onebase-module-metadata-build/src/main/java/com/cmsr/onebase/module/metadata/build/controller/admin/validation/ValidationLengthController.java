@@ -57,16 +57,16 @@ public class ValidationLengthController {
     }
 
     @GetMapping("/get")
-    @Operation(summary = "根据主键ID获取长度校验")
-    @Parameter(name = "id", description = "长度校验规则主键ID", required = true)
+    @Operation(summary = "根据规则组ID获取长度校验")
+    @Parameter(name = "id", description = "规则组ID (兼容字段: 前端传的就是组ID)", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:query')")
     public CommonResult<ValidationLengthRespVO> get(@RequestParam("id") Long id) {
         return success(lengthService.getById(id));
     }
 
     @PostMapping("/delete")
-    @Operation(summary = "按主键ID删除长度校验")
-    @Parameter(name = "id", description = "长度校验规则主键ID", required = true)
+    @Operation(summary = "按规则组ID删除长度校验")
+    @Parameter(name = "id", description = "规则组ID (兼容字段: 前端传的就是组ID)", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:delete')")
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         lengthService.deleteById(id);

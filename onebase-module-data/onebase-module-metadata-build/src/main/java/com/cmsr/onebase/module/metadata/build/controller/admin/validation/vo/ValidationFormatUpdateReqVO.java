@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,8 +16,8 @@ import lombok.Data;
 @Data
 public class ValidationFormatUpdateReqVO {
 
-    @Schema(description = "主键ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "主键ID不能为空")
+    @Schema(description = "规则组ID（前端传入的id即校验规则组ID，用于定位唯一该类型校验记录）", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @NotNull(message = "规则组ID不能为空")
     private Long id;
 
     @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户信息校验")
@@ -50,4 +51,13 @@ public class ValidationFormatUpdateReqVO {
 
     @Schema(description = "弹窗类型", example = "SHORT")
     private String popType;
+    
+    /**
+     * 兼容性方法：为BeanUtils提供promptMessage字段的getter
+     * 优先返回popPrompt的值，如果popPrompt为空则返回promptMessage的值
+     */
+    @JsonProperty("promptMessage")  
+    public String getPromptMessage() {
+        return popPrompt != null ? popPrompt : promptMessage;
+    }
 }

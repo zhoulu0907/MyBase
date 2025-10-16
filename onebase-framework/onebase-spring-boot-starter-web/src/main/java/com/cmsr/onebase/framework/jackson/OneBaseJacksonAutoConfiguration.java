@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.jackson;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.json.databind.TimestampLocalDateTimeDeserializer;
 import com.cmsr.onebase.framework.common.util.json.databind.TimestampLocalDateTimeSerializer;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -36,6 +37,9 @@ public class OneBaseJacksonAutoConfiguration {
                     .deserializerByType(LocalDate.class, LocalDateDeserializer.INSTANCE)
                     .serializerByType(LocalDateTime.class, TimestampLocalDateTimeSerializer.INSTANCE)
                     .deserializerByType(LocalDateTime.class, TimestampLocalDateTimeDeserializer.INSTANCE)
+                    .failOnEmptyBeans(false)
+                    .failOnUnknownProperties(false)
+                    .serializationInclusion(JsonInclude.Include.NON_NULL)
                     .modules(new JavaTimeModule())
                     .timeZone(TimeZone.getDefault());
         };

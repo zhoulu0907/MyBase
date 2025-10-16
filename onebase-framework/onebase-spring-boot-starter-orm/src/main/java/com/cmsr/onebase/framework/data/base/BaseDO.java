@@ -2,10 +2,10 @@ package com.cmsr.onebase.framework.data.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
-import lombok.Data;
-import lombok.experimental.SuperBuilder;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaseDO implements Serializable {
+public class BaseDO implements BaseDOInterface, Serializable {
 
     public static final String ID = "id";
     public static final String CREATE_TIME = "create_time";

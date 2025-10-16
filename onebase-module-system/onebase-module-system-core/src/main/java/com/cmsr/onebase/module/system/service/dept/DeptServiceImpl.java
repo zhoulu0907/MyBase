@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.vo.dept.*;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
@@ -99,6 +99,11 @@ public class DeptServiceImpl implements DeptService {
         if (getChildDeptCount(id) > 0) {
             throw exception(DEPT_EXITS_CHILDREN);
         }
+        // 如果一个部门有用户，则不能删除
+        List<AdminUserDO> userListByDeptIds = adminUserService.getUserListByDeptIds(Collections.singleton(id));
+        if (CollectionUtils.isNotEmpty(userListByDeptIds)) {
+            throw exception(DEPT_DEL_FAILD_EXISTS_USERS);
+        }
         // 删除部门
         deptDataRepository.deleteById(id);
     }
@@ -173,6 +178,9 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public DeptDO getDept(Long id) {
+        if (id == null) {
+            return null;
+        }
         return deptDataRepository.findById(id);
     }
 

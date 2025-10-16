@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.vo.user;
 
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.validation.Mobile;
 import com.cmsr.onebase.module.system.framework.operatelog.core.DeptParseFunction;
 import com.cmsr.onebase.module.system.framework.operatelog.core.PostParseFunction;

@@ -5,7 +5,7 @@ import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;

@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.system.build.controller.auth;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;

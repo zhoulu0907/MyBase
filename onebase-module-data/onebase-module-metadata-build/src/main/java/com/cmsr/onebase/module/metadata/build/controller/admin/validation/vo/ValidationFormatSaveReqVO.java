@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,14 +20,19 @@ public class ValidationFormatSaveReqVO {
     @NotNull(message = "字段ID不能为空")
     private Long fieldId;
 
-    @Schema(description = "是否启用(0/1)")
+    @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;
 
-    @Schema(description = "格式类型")
-    private String formatType;
+    @Schema(description = "格式代码：TEXT/EMAIL/MOBILE/ID_CARD/URL/IP/REGEX", example = "TEXT")
+    @JsonAlias({"formatType", "formatValidationType"})
+    private String formatCode;
 
     @Schema(description = "正则表达式")
-    private String regex;
+    @JsonAlias("regex")
+    private String regexPattern;
+
+    @Schema(description = "正则标志位：i/m/s等", example = "i")
+    private String flags;
 
     @Schema(description = "提示信息")
     private String promptMessage;
@@ -45,4 +52,13 @@ public class ValidationFormatSaveReqVO {
     @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "规则组名称不能为空")
     private String rgName;
+    
+    /**
+     * 兼容性方法：为BeanUtils提供promptMessage字段的getter
+     * 优先返回popPrompt的值，如果popPrompt为空则返回promptMessage的值
+     */
+    @JsonProperty("promptMessage")
+    public String getPromptMessage() {
+        return popPrompt != null ? popPrompt : promptMessage;
+    }
 }

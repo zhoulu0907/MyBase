@@ -1,7 +1,6 @@
-package com.cmsr.onebase.module.flow.graph;
+package com.cmsr.onebase.module.flow.core.graph;
 
-import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
@@ -19,11 +18,11 @@ public class JsonFileGraphTest {
         ClassPathResource resource = new ClassPathResource("graphjson/" + fileName);
         String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
-        JsonGraph jsonGraph = JsonGraph.of(json);
+        JsonGraph jsonGraph = JsonGraphBuilder.build(json);
         System.out.println(jsonGraph.toFlowChain());
 
         GraphFlowCache graphFlowCache = new GraphFlowCache();
-        graphFlowCache.update(1L, jsonGraph);
+        graphFlowCache.update(1L, 1L, jsonGraph);
     }
 
     @Test

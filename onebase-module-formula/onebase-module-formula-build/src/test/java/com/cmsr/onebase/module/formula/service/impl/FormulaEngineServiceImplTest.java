@@ -227,11 +227,6 @@ class FormulaEngineServiceImplTest {
         assertEquals(result1, result2);
         assertEquals(15.0, result1);
 
-        // 清理缓存
-        formulaEngineService.clearCache();
-
-        // 验证清理成功（这里只是调用，实际缓存效果需要集成测试验证）
-        assertDoesNotThrow(() -> formulaEngineService.clearCache());
     }
 
     @Test

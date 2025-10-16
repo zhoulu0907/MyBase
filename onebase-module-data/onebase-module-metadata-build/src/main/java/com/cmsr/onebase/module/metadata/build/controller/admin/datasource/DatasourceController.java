@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.datasource;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.*;
-import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.build.service.datasource.vo.ColumnQueryVO;
@@ -35,8 +34,6 @@ public class DatasourceController {
 
     @Resource
     private MetadataDatasourceBuildService datasourceBuildService;
-    @Resource
-    private ModelMapper modelMapper;
 
     @PostMapping("/types")
     @Operation(summary = "获取所有支持的数据源类型")
@@ -96,8 +93,7 @@ public class DatasourceController {
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<DatasourceRespVO> getDatasource(@RequestParam("id") Long id) {
         MetadataDatasourceDO datasource = datasourceBuildService.getDatasource(id);
-        DatasourceRespVO respVO = modelMapper.map(datasource, DatasourceRespVO.class);
-        return success(respVO);
+        return success(datasourceBuildService.buildDatasourceRespVO(datasource));
     }
 
     @PostMapping("/page")
@@ -107,9 +103,7 @@ public class DatasourceController {
         PageResult<MetadataDatasourceDO> pageResult = datasourceBuildService.getDatasourcePage(pageReqVO);
         PageResult<DatasourceRespVO> convertedResult = new PageResult<>();
         convertedResult.setTotal(pageResult.getTotal());
-        convertedResult.setList(pageResult.getList().stream()
-                .map(datasource -> modelMapper.map(datasource, DatasourceRespVO.class))
-                .toList());
+    convertedResult.setList(datasourceBuildService.buildDatasourceRespVOList(pageResult.getList()));
         return success(convertedResult);
     }
 
@@ -119,22 +113,14 @@ public class DatasourceController {
     public CommonResult<List<DatasourceRespVO>> getDatasourceList(@Valid @RequestBody DatasourceListReqVO reqVO) {
         List<MetadataDatasourceDO> list;
 
-        // 添加调试日志
-        System.out.println("DEBUG: 接收到的请求参数 - appId: " + reqVO.getAppId());
-
         // 根据是否传入appId来决定查询方式
         if (reqVO.getAppId() != null && !reqVO.getAppId().trim().isEmpty()) {
-            System.out.println("DEBUG: 使用appId查询，appId: " + reqVO.getAppId());
             list = datasourceBuildService.getDatasourceListByAppId(Long.valueOf(reqVO.getAppId()));
         } else {
-            System.out.println("DEBUG: 查询所有数据源");
             list = datasourceBuildService.getDatasourceList();
         }
 
-        System.out.println("DEBUG: 查询结果数量: " + list.size());
-        List<DatasourceRespVO> respList = list.stream()
-                .map(datasource -> modelMapper.map(datasource, DatasourceRespVO.class))
-                .toList();
+        List<DatasourceRespVO> respList = datasourceBuildService.buildDatasourceRespVOList(list);
         return success(respList);
     }
 
@@ -144,8 +130,7 @@ public class DatasourceController {
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<DatasourceRespVO> getDatasourceByCode(@RequestParam("code") String code) {
         MetadataDatasourceDO datasource = datasourceBuildService.getDatasourceByCode(code);
-        DatasourceRespVO respVO = modelMapper.map(datasource, DatasourceRespVO.class);
-        return success(respVO);
+        return success(datasourceBuildService.buildDatasourceRespVO(datasource));
     }
 
     @PostMapping("/test-connection")

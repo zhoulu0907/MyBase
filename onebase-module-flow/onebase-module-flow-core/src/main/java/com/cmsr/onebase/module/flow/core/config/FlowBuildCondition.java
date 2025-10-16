@@ -17,7 +17,7 @@ public class FlowBuildCondition implements Condition {
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
         Environment environment = context.getEnvironment();
         if (!environment.getProperty("liteflow.enable", Boolean.class, false)) {
-            log.info("liteflow.enable=false, 启用流程构建环境");
+            log.debug("liteflow.enable=false, 启用流程构建环境");
             return true;
         } else {
             return false;

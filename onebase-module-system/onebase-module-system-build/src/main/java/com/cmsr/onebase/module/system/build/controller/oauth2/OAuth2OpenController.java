@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.system.build.controller.oauth2;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.http.HttpUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;

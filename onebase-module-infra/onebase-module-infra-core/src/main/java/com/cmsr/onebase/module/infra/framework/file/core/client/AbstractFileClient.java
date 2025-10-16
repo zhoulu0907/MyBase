@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client;
 
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**

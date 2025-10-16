@@ -1,3 +1,18 @@
+/* 自定义函数区域开始 */
+function GETUSER() {
+  return {name:"张三", id: 18}
+}
+function GET_NAME(user) {
+  return user.name
+}
+
+// 函数导出区域开始
+exports.GETUSER = GETUSER;
+exports.GET_NAME = GET_NAME;
+// 函数导出区域结束
+
+/* 自定义函数区域结束 */
+
 /* @formulajs/formulajs v4.5.3 */
 function _createForOfIteratorHelper(r, e) {
   var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -10830,4 +10845,16 @@ function _typeof(o) {
   exports.Z = Z;
   exports.ZTEST = ZTEST;
   exports.utils = utils;
+
+  exports.ADD = ADD;
+  exports.DIVIDE = DIVIDE;
+  exports.EQ = EQ;
+  exports.GT = GT;
+  exports.GTE = GTE;
+  exports.LT = LT;
+  exports.LTE = LTE;
+  exports.MINUS = MINUS;
+  exports.MULTIPLY = MULTIPLY;
+  exports.NE = NE;
+  exports.POW = POW;
 }));

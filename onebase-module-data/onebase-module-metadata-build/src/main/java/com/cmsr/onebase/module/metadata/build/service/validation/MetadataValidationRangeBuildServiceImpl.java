@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
  * 范围校验 Service 实现
  */
@@ -41,10 +44,14 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         // 转换DO为VO
         ValidationRangeRespVO respVO = BeanUtils.toBean(rangeDO, ValidationRangeRespVO.class);
 
-        // 获取规则组名称
+        // 格式化数值，最多保留4位小数
+        formatDecimalValues(respVO, rangeDO);
+
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
 
         return respVO;
@@ -103,6 +110,29 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         data.setEntityId(field.getEntityId());
         data.setAppId(field.getAppId());
         data.setGroupId(groupId);
+        
+        // 设置默认值
+        if (data.getIsEnabled() == null) {
+            data.setIsEnabled(1); // 默认启用
+        }
+        if (data.getIncludeMin() == null) {
+            data.setIncludeMin(1); // 默认包含最小边界
+        }
+        if (data.getIncludeMax() == null) {
+            data.setIncludeMax(1); // 默认包含最大边界
+        }
+        
+        // 根据传入的值自动判断范围类型
+        if (data.getRangeType() == null) {
+            if (data.getMinValue() != null || data.getMaxValue() != null) {
+                data.setRangeType("NUMBER");
+            } else if (data.getMinDate() != null || data.getMaxDate() != null) {
+                data.setRangeType("DATE");
+            } else {
+                // 默认为数值类型
+                data.setRangeType("NUMBER");
+            }
+        }
 
         // 保存范围校验规则
         rangeRepository.upsert(data);
@@ -112,52 +142,38 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(ValidationRangeUpdateReqVO reqVO) {
-        // 查询是否存在
-        MetadataValidationRangeDO existingDO = rangeRepository.findById(reqVO.getId());
-        Assert.notNull(existingDO, "当前范围校验规则不存在");
-
-        // 查询字段信息
+        // 约定：reqVO.id 为 groupId
+        Long groupIdParam = reqVO.getId();
+        Assert.notNull(groupIdParam, "规则组ID不能为空");
+        var list = rangeRepository.findByGroupId(groupIdParam);
+        Assert.notEmpty(list, "当前范围校验规则不存在(组ID=" + groupIdParam + ")");
+        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + groupIdParam + ")"); }
+        MetadataValidationRangeDO existingDO = list.get(0);
         MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
         Assert.notNull(entityFieldDO, "字段不存在");
-
-        // 处理规则组：先查找，不存在则创建；若存在但被其他字段复用，则新建
-        Long groupId = null;
-        var existingGroup = ruleGroupService.getByName(reqVO.getRgName());
-        boolean needCreateGroup = false;
-        if (existingGroup != null) {
-            var groupRangeList = rangeRepository.findByGroupId(existingGroup.getId());
-            boolean reused = groupRangeList.stream().anyMatch(u -> !u.getFieldId().equals(existingDO.getFieldId()));
-            if (reused) {
-                needCreateGroup = true;
-            } else {
-                groupId = existingGroup.getId();
-            }
-        } else {
-            needCreateGroup = true;
+        Long targetGroupId = groupIdParam; // 不迁移组，但同步组配置
+        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        if (groupDO != null) {
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(groupDO.getId());
+            updateGroupVO.setRgName(groupDO.getRgName());
+            updateGroupVO.setRgDesc(groupDO.getRgDesc());
+            updateGroupVO.setRgStatus(groupDO.getRgStatus());
+            updateGroupVO.setValidationType(groupDO.getValidationType());
+            updateGroupVO.setEntityId(groupDO.getEntityId());
+            if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(reqVO.getPopPrompt()); needGroupUpdate = true; }
+            if (reqVO.getValMethod() != null && !reqVO.getValMethod().equals(groupDO.getValMethod())) { updateGroupVO.setValMethod(reqVO.getValMethod()); needGroupUpdate = true; }
+            if (reqVO.getPopType() != null && !reqVO.getPopType().equals(groupDO.getPopType())) { updateGroupVO.setPopType(reqVO.getPopType()); needGroupUpdate = true; }
+            if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
         }
-        if (needCreateGroup) {
-            ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
-            groupVO.setRgName(reqVO.getRgName());
-            groupVO.setRgDesc("自动创建的规则组：" + reqVO.getRgName());
-            groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
-            groupVO.setValMethod(reqVO.getValMethod());
-            groupVO.setPopPrompt(reqVO.getPopPrompt());
-            groupVO.setPopType(reqVO.getPopType());
-            groupVO.setValidationType("RANGE");
-            groupVO.setEntityId(entityFieldDO.getEntityId());
-            groupId = ruleGroupService.createValidationRuleGroup(groupVO);
-        }
-        Assert.notNull(groupId, "规则组ID未正确生成");
-
-        // 转换为DO对象并保留必要字段
         MetadataValidationRangeDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRangeDO.class);
+        updateDO.setId(existingDO.getId());
         updateDO.setFieldId(existingDO.getFieldId());
         updateDO.setEntityId(existingDO.getEntityId());
         updateDO.setAppId(existingDO.getAppId());
-        updateDO.setGroupId(groupId);
-
-        // 执行更新
-        rangeRepository.update(updateDO); // 使用update而不是upsert，避免主键冲突
+        updateDO.setGroupId(targetGroupId);
+        rangeRepository.update(updateDO);
     }
 
     @Override
@@ -168,44 +184,65 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
 
     @Override
     public ValidationRangeRespVO getById(Long id) {
-        MetadataValidationRangeDO rangeDO = rangeRepository.findById(id);
-        if (rangeDO == null) {
-            var group = ruleGroupService.getValidationRuleGroup(id);
-            if (group != null) {
-                var list = rangeRepository.findByGroupId(group.getId());
-                if (!list.isEmpty()) {
-                    rangeDO = list.get(0);
-                }
-            }
-            if (rangeDO == null) {
-                return null;
-            }
-        }
-
-        // 转换DO为VO
+        var list = rangeRepository.findByGroupId(id);
+        if (list.isEmpty()) { return null; }
+        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")"); }
+        MetadataValidationRangeDO rangeDO = list.get(0);
         ValidationRangeRespVO respVO = BeanUtils.toBean(rangeDO, ValidationRangeRespVO.class);
-
-        // 查询并设置规则组名称
-        if (rangeDO.getGroupId() != null) {
-            var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
-            if (ruleGroup != null) {
-                respVO.setRgName(ruleGroup.getRgName());
-            }
+        
+        // 格式化数值，最多保留4位小数
+        formatDecimalValues(respVO, rangeDO);
+        
+        // 获取规则组信息，包括提示语等字段
+        var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
-
         return respVO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        // 先获取要删除的记录
-        MetadataValidationRangeDO rangeDO = rangeRepository.findById(id);
-        if (rangeDO == null) {
-            return; // 记录不存在，直接返回
-        }
+        var list = rangeRepository.findByGroupId(id);
+        if (list.isEmpty()) { return; }
+        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")"); }
+        MetadataValidationRangeDO rangeDO = list.get(0);
+        Long groupId = rangeDO.getGroupId();
+        rangeRepository.deleteById(rangeDO.getId());
+        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
+    }
 
-        // 删除范围校验记录
-        rangeRepository.deleteById(id);
+    /**
+     * 格式化范围校验响应VO中的数值字段，最多保留4位小数
+     * 
+     * @param respVO 响应VO对象
+     * @param rangeDO 范围校验DO对象
+     */
+    private void formatDecimalValues(ValidationRangeRespVO respVO, MetadataValidationRangeDO rangeDO) {
+        if (rangeDO.getMinValue() != null) {
+            respVO.setMinValue(formatBigDecimal(rangeDO.getMinValue()));
+        }
+        if (rangeDO.getMaxValue() != null) {
+            respVO.setMaxValue(formatBigDecimal(rangeDO.getMaxValue()));
+        }
+    }
+
+    /**
+     * 格式化BigDecimal为字符串，最多保留4位小数，去除尾部无意义的0
+     * 
+     * @param value BigDecimal值
+     * @return 格式化后的字符串
+     */
+    private String formatBigDecimal(BigDecimal value) {
+        if (value == null) {
+            return null;
+        }
+        // 保留4位小数，使用HALF_UP舍入模式（四舍五入）
+        BigDecimal scaled = value.setScale(4, RoundingMode.HALF_UP);
+        // 使用stripTrailingZeros去除尾部的0，然后转为字符串
+        // 使用toPlainString避免科学计数法
+        return scaled.stripTrailingZeros().toPlainString();
     }
 }
