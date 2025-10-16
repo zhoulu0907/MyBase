@@ -20,6 +20,6 @@ public class FlowChangeEventTest {
 
     @Test
     public void test() {
-        flowChangeEventPublisher.publishProcessUpdate(84076905441918976L);
+        flowChangeEventPublisher.publishApplicationUpdate(84076905441918976L);
     }
 }
