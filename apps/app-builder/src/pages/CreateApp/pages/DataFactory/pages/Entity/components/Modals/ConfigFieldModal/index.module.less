@@ -164,48 +164,42 @@
     }
   }
 
-  .ruleItems {
-    padding: 12px;
-    border-radius: 6px;
-    background-color: #fafafa;
+  .ruleContent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
 
-    .ruleContent {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
+    .dragHandle {
+      cursor: move;
+      color: #999;
+    }
 
-      .dragHandle {
-        cursor: move;
-        color: #999;
-      }
+    .dragHandle:hover {
+      color: #666;
+    }
 
-      .dragHandle:hover {
-        color: #666;
-      }
+    .ruleLabel {
+      min-width: 65px;
+      font-size: 14px;
+      color: #333;
+    }
 
-      .ruleLabel {
-        min-width: 65px;
-        font-size: 14px;
-        color: #333;
-      }
+    .ruleInput {
+      // flex: 1;
+      width: 155px;
+    }
 
-      .ruleInput {
-        // flex: 1;
-        width: 155px;
-      }
+    .editBtn {
+      color: #999;
+      cursor: pointer;
+    }
 
-      .editBtn {
-        color: #999;
-        cursor: pointer;
-      }
+    .ruleActionBtn {
+      color: #ff4d4f;
 
-      .ruleActionBtn {
-        color: #ff4d4f;
-
-        &:hover {
-          background-color: #fff2f0;
-        }
+      &:hover {
+        background-color: #fff2f0;
       }
     }
   }
