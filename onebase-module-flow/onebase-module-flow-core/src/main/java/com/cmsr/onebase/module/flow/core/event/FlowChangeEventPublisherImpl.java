@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.event;
 
+import com.cmsr.onebase.module.flow.core.enums.RocketMQConstants;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.apis.ClientConfiguration;

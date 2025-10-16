@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RocketMQSlotManager implements InitializingBean {
 
-    private final int MAX_INSTANCES = 100;
+    private final int MAX_INSTANCES = 20;
 
     private final long EXPIRATION_THRESHOLD_MS = 90 * 1000;
 
