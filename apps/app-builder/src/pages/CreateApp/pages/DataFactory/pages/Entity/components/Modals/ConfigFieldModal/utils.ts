@@ -72,11 +72,8 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
  */
 export const findFieldPath = (fieldId: string, fields: unknown[]): string[] => {
   if (!fieldId || !fields || fields.length === 0) {
-    console.log('findFieldPath: invalid input', { fieldId, fieldsLength: fields?.length });
     return [];
   }
-
-  console.log('findFieldPath: searching for fieldId', fieldId, 'in fields:', fields);
 
   for (const entity of fields) {
     if (entity && typeof entity === 'object' && 'children' in entity) {

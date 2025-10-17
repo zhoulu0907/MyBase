@@ -236,7 +236,6 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   };
 
   const renderRuleConfig = (rule: AutoCodeRule) => {
-    console.log('rule', rule);
     switch (rule.itemType) {
       case 'SEQUENCE': {
         return (
@@ -321,7 +320,6 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               options={fields}
               value={findFieldPath(rule.config.fieldName as string, fields)}
               onChange={(value) => {
-                console.log('value', value);
                 updateRule(rule.id!, {
                   config: {
                     ...rule.config,
