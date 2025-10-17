@@ -1,15 +1,15 @@
 package com.cmsr.onebase.module.etl.build.controller.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.etl.build.controller.datasource.vo.DataFactoryDatasourceReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.DataFactoryDatasourceService;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,9 +29,25 @@ public class DataFactoryDatasourceController {
         return CommonResult.success(supportedDatabaseTypes);
     }
 
-//    @PostMapping("/create")
-//    @Operation(summary = "创建数据源")
-//    public CommonResult createDataFactoryDatasource() {
-//        return CommonResult.success();
-//    }
+    @PostMapping("/ping")
+    @Operation(summary = "测试数据源连接")
+    public CommonResult<Boolean> testConnection(@Valid @RequestBody DataFactoryDatasourceReqVO requestVO) {
+        Boolean connected = dataFactoryDatasourceService.pingDatasource(requestVO);
+        return CommonResult.success(connected);
+    }
+
+    @PostMapping("/create")
+    @Operation(summary = "创建数据源")
+//    @PreAuthorize("@ss.hasPermission('datafactory:datasource:create')")
+    public CommonResult<Long> createDataFactoryDatasource(@Valid @RequestBody DataFactoryDatasourceReqVO requestVO) {
+        Long datasourceId = dataFactoryDatasourceService.createDatasource(requestVO);
+        return CommonResult.success(datasourceId);
+    }
+
+    @PostMapping("/update")
+    @Operation(summary = "更新数据源")
+    public CommonResult<Boolean> updateDataFactoryDatasource(@Valid @RequestBody DataFactoryDatasourceReqVO requestVO) {
+        dataFactoryDatasourceService.updateDatasource(requestVO);
+        return CommonResult.success(Boolean.TRUE);
+    }
 }
