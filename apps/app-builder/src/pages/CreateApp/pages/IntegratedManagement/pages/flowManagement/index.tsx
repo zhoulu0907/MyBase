@@ -73,27 +73,13 @@ const FlowManagementPage: React.FC = () => {
   }, [curAppId]);
 
   useEffect(() => {
-    pageSize && curAppId && getFlowMgmtList();
-  }, [pageNo, pageSize, curAppId]);
-
-  useEffect(() => {
-    pageSize &&
-      curAppId &&
-      debouncedSearch(curAppId, searchFlowProcessName, searchFlowProccessStatus, searchTriggerType);
-  }, [searchFlowProcessName, searchFlowProccessStatus, searchTriggerType]);
+    pageSize && curAppId && getFlowMgmtList(searchFlowProcessName, searchFlowProccessStatus, searchTriggerType);
+  }, [pageNo, pageSize, curAppId, searchFlowProcessName, searchFlowProccessStatus, searchTriggerType]);
 
   const debouncedSearch = useCallback(
-    debounce(
-      (
-        appId: string,
-        processName: string,
-        processStatus: ProcessStatus | undefined,
-        triggerType: TriggerType | undefined
-      ) => {
-        getFlowMgmtList(appId, processName, processStatus, triggerType);
-      },
-      500
-    ),
+    debounce((processName: string, processStatus: ProcessStatus | undefined, triggerType: TriggerType | undefined) => {
+      getFlowMgmtList(processName, processStatus, triggerType);
+    }, 500),
     []
   );
 
@@ -185,7 +171,7 @@ const FlowManagementPage: React.FC = () => {
         }
       };
 
-      const res = await updateFlowMgmt(req);
+      await updateFlowMgmt(req);
       setModalVisible('');
       getFlowMgmtList();
     } catch (error: any) {
@@ -196,24 +182,30 @@ const FlowManagementPage: React.FC = () => {
   };
 
   const handleDeleteFlow = async (id: string) => {
-    const res = await deleteFlowMgmt(id);
-    getFlowMgmtList();
+    try {
+      await deleteFlowMgmt(id);
+    } catch (error: any) {
+      console.error('删除流程失败:', error.errors);
+    } finally {
+      getFlowMgmtList();
+    }
   };
 
   const getFlowMgmtList = async (
-    appId?: string,
+    // appId?: string,
     processName?: string,
     processStatus?: ProcessStatus,
     triggerType?: TriggerType
   ) => {
     setLoading(true);
+
     const req: PageParam = {
-      applicationId: appId ? appId : curAppId,
+      applicationId: curAppId,
       pageNo: pageNo,
       pageSize: pageSize || 8,
-      processName: processName ? processName : searchFlowProcessName,
-      processStatus: processStatus ? processStatus : searchFlowProccessStatus,
-      triggerType: triggerType ? triggerType : searchTriggerType
+      processName: processName,
+      processStatus: processStatus,
+      triggerType: triggerType
     };
     const res = await getCommonPaginationList(listFlowMgmt, req, setPageNo);
     if (res) {
@@ -324,7 +316,7 @@ const FlowManagementPage: React.FC = () => {
             <div className={styles.tableContainer}>
               {flowMgmtList?.map((item, index) => (
                 <FlowCard
-                  key={index}
+                  key={`flow-${index}`}
                   data={item}
                   handleEdit={handleEditFlow}
                   handleDelete={handleDeleteFlow}

@@ -23,17 +23,8 @@ import { FlowNodeRegistries } from './nodes';
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
 
-  const {
-    setNodeId,
-    nodeId,
-    setFlowId,
-    flowId,
-    // setPageId,
-    setNodeData,
-    setAllNodeData,
-    setMainEntities,
-    setSubEntities
-  } = triggerEditorSignal;
+  const { setNodeId, nodeId, setFlowId, setNodeData, setAllNodeData, setMainEntities, setSubEntities } =
+    triggerEditorSignal;
 
   const [initData, setInitData] = useState<FlowDocumentJSON>();
   const sidebarContainerRef = useRef<HTMLDivElement>(null);

@@ -24,10 +24,10 @@ import {
   type EntityFieldValidationTypes,
   type ValidationTypeItem
 } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '@onebase/common';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -137,10 +137,6 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     getFieldOptions(nodeId);
   }, []);
 
-  useEffect(() => {
-    // console.log('filterCondition:  ', filterCondition);
-  }, [filterCondition]);
-
   const getFieldOptions = async (nodeId: string) => {
     const newFieldOptions = getVariableOptions(nodeId);
     setFieldOptions(newFieldOptions);
@@ -191,7 +187,6 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                         second !== null &&
                         second <= first
                       ) {
-                        // callback('第二个值必须大于第一个值');
                         callback();
                         return;
                       }
@@ -201,7 +196,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                 }
               ]}
             >
-              {(list, {}) => {
+              {(list) => {
                 return (
                   <div className={styles.inputNumberWrapper}>
                     {list.map((item) => {
@@ -296,7 +291,6 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
   const getEntityFieldValidationTypes = (nodeId: string): string[] => {
     const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
-    // console.log('nodes: ', nodes);
 
     const fieldIds: string[] = [];
 
@@ -411,7 +405,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           title: field.label,
           fieldType: field.fieldType
         });
-      }else if (field?.fieldType === fieldType) {
+      } else if (field?.fieldType === fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
           title: field.label

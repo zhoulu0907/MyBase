@@ -11,18 +11,18 @@ import {
 import { sample } from 'lodash-es';
 
 import appIconEditSVG from '@/assets/images/app_edit_white.svg';
+import previewSVG from '@/assets/images/app_preview.svg';
 import appTypeSVG from '@/assets/images/app_type_selected_icon.svg';
 import arrowSVG from '@/assets/images/arrow_icon.svg';
+import checkIcon from '@/assets/images/check_icon.svg';
 import classicModeSVG from '@/assets/images/classic_mode_icon.svg';
 import databaseSVG from '@/assets/images/database_icon.svg';
 import formSVG from '@/assets/images/form_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
 import tickSVG from '@/assets/images/tick_icon.svg';
-import previewSVG from '@/assets/images/app_preview.svg';
-import checkIcon from '@/assets/images/check_icon.svg';
+import DynamicIcon from '../DynamicIcon';
 import { appIcon, appIconColor, appThemeColor, iconMap, type Options } from './const';
 import styles from './index.module.less';
-import DynamicIcon from '../DynamicIcon';
 
 type AppStatus = 'create' | 'update';
 type CloseReason = 'confirm' | 'cancel' | 'outside' | 'esc';
@@ -267,7 +267,7 @@ const CreateApp = (props: IProps) => {
                       {appIconColor.map((color, index) => (
                         <div
                           className={styles.color}
-                          key={index}
+                          key={`color-${index}`}
                           style={{ backgroundColor: color }}
                           onClick={() => setIconColor(color)}
                         >
