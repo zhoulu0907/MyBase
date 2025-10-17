@@ -31,14 +31,13 @@ import java.util.Optional;
  * 4. 完整业务流（创建→查询→更新→分页→列表→授权相关→删除）
  *
  * 运行前准备：
- * - 在 src/test/resources/application-test.yml 配置 onebase.dolphinscheduler.baseUrl 与 token
+ * - 在 src/test/resources/application.yml 配置 onebase.dolphinscheduler.baseUrl 与 token
  * - 如需跑授权相关接口，请设置 test.user-id（可在 yml 或 -Dtest.user-id=xxx 注入）
  *
  * 提示：接口返回结构通常包含 code/msg/data，成功 code 多为 0。
  */
 @Slf4j
 @SpringBootTest
-@ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProjectApiTest {
