@@ -4,7 +4,7 @@ import { Button, Checkbox, Form, Input, Popover, Select, Space, Tooltip } from '
 import { IconSelectAll, IconSettings, IconEdit } from '@arco-design/web-react/icon';
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
-import { systemFieldsLength } from './utils';
+import { systemFieldsLength } from './utils/utils';
 import styles from './index.module.less';
 
 interface FieldFormValues {
@@ -168,6 +168,7 @@ const TableColumns = ({
             {(values) => {
               // 配置按钮仅在自动编号、单选、多选类型时显示
               const fieldType = values.fields[index + systemFieldsLength]?.fieldType;
+              console.log('values', values, fieldType);
               if (!FIELD_TYPES_NEED_CONFIG.includes(fieldType)) {
                 return null;
               }

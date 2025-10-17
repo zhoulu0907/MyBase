@@ -1,3 +1,5 @@
+import type { AUTO_CODE_RULE_TYPE } from './const';
+
 // 创建自动编号规则返回值
 export interface AutoNumberRuleResponce {
   mode?: string;
@@ -21,7 +23,11 @@ export interface AutoNumberRule {
 
 export interface AutoNumberRuleItem {
   id?: string;
-  itemType: 'SEQUENCE' | 'DATE' | 'TEXT' | 'FIELD_REF';
+  itemType:
+    | typeof AUTO_CODE_RULE_TYPE.SEQUENCE
+    | typeof AUTO_CODE_RULE_TYPE.DATE
+    | typeof AUTO_CODE_RULE_TYPE.TEXT
+    | typeof AUTO_CODE_RULE_TYPE.FIELD_REF;
   itemOrder?: number;
   isEnabled?: number;
   format?: string;
@@ -30,7 +36,11 @@ export interface AutoNumberRuleItem {
 
 export interface AutoCodeRule {
   id?: string;
-  itemType: 'SEQUENCE' | 'DATE' | 'TEXT' | 'FIELD_REF';
+  itemType:
+    | typeof AUTO_CODE_RULE_TYPE.SEQUENCE
+    | typeof AUTO_CODE_RULE_TYPE.DATE
+    | typeof AUTO_CODE_RULE_TYPE.TEXT
+    | typeof AUTO_CODE_RULE_TYPE.FIELD_REF;
   config: Record<string, unknown>;
 }
 
