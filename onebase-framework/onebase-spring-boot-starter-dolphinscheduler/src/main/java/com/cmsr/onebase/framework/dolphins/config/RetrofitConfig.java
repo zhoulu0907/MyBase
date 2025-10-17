@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.dolphins.api.TaskApi;
 import com.cmsr.onebase.framework.dolphins.api.TaskInstanceApi;
 import com.cmsr.onebase.framework.dolphins.api.WorkflowApi;
 import com.cmsr.onebase.framework.dolphins.api.WorkflowInstanceApi;
+import com.cmsr.onebase.framework.dolphins.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.dolphins.interceptor.AuthenticationInterceptor;
 import com.cmsr.onebase.framework.dolphins.interceptor.ErrorHandlingInterceptor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -189,6 +190,28 @@ public class RetrofitConfig {
     @Bean
     public WorkflowInstanceApi workflowInstanceApi(Retrofit retrofit) {
         return retrofit.create(WorkflowInstanceApi.class);
+    }
+
+    /**
+     * 创建聚合客户端 DolphinSchedulerClient Bean
+     *
+     * @param projectApi ProjectApi
+     * @param workflowApi WorkflowApi
+     * @param scheduleApi ScheduleApi
+     * @param taskApi TaskApi
+     * @param taskInstanceApi TaskInstanceApi
+     * @param workflowInstanceApi WorkflowInstanceApi
+     * @return DolphinSchedulerClient 实例
+     */
+    @Bean
+    public DolphinSchedulerClient dolphinSchedulerClient(
+            ProjectApi projectApi,
+            WorkflowApi workflowApi,
+            ScheduleApi scheduleApi,
+            TaskApi taskApi,
+            TaskInstanceApi taskInstanceApi,
+            WorkflowInstanceApi workflowInstanceApi) {
+        return new DolphinSchedulerClient(projectApi, workflowApi, scheduleApi, taskApi, taskInstanceApi, workflowInstanceApi);
     }
 
     /**
