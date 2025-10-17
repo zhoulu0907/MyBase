@@ -98,6 +98,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [conditionFieldsForEditor, node.id]);
 
+  const offsetFiledId = Form.useWatch('offsetFiledId', payloadForm);
+
+  const offsetFiledIdChange = ()=>{
+    payloadForm.clearFields(['offsetUnit']);
+  }
+
   return (
     <>
       <FormHeader />
@@ -132,6 +138,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   rules={[{ required: true, message: '请选择基准日期字段' }]}
                 >
                   <Select
+                    onChange={offsetFiledIdChange}
                     options={conditionFieldsData.children
                       ?.filter(
                         (item) =>
@@ -165,12 +172,17 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Grid.Col>
               <Grid.Col span={4}>
                 <Form.Item field="offsetUnit">
+                  {/* 根据基准日期类型 选择不同的下拉选项 */}
                   <Select
-                    options={[
-                      { label: '天', value: 'day' },
-                      { label: '小时', value: 'hour' },
-                      { label: '分钟', value: 'minute' }
-                    ]}
+                    options={
+                      conditionFieldsData.children?.find((item) => item.key === offsetFiledId)?.fieldType ==
+                      ENTITY_FIELD_TYPE.DATETIME.VALUE
+                        ? [
+                            { label: '小时', value: 'hour' },
+                            { label: '分钟', value: 'minute' }
+                          ]
+                        : [{ label: '天', value: 'day' }]
+                    }
                   />
                 </Form.Item>
               </Grid.Col>
