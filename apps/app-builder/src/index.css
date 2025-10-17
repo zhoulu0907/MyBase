@@ -10,9 +10,29 @@
 /* tab下划线隐藏 */
 .createAppTabs {
   .arco-tabs-header {
+    display: flex;
+    gap: 10px;
+
     .arco-tabs-header-ink {
       display: none;
     }
+  }
+
+  .arco-tabs-header-title {
+    .arco-tabs-header-title-text {
+      color: #272e3b;
+      font-weight: 400;
+    }
+    &:hover .arco-tabs-header-title-text {
+      &::before {
+        background-color: transparent;
+      }
+    }
+  }
+
+  .arco-tabs-header-title-active .arco-tabs-header-title-text {
+    font-weight: 500;
+    color: rgb(var(--primary-6));
   }
 }
 

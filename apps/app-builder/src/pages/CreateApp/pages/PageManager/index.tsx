@@ -216,7 +216,7 @@ const PageManagerPage: FC = () => {
             src={CreatePageIcon}
             beforeInjection={(svg) => {
               svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
-              svg.setAttribute('fill', 'rgb(var(--primary-6))');
+              svg.setAttribute('fill', '#4E5969');
               svg.setAttribute('width', '16px');
               svg.setAttribute('height', '16px');
             }}
@@ -238,7 +238,7 @@ const PageManagerPage: FC = () => {
             src={CreateGroupIcon}
             beforeInjection={(svg) => {
               svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
-              svg.setAttribute('fill', 'rgb(var(--primary-6))');
+              svg.setAttribute('fill', '#4E5969');
               svg.setAttribute('width', '16px');
               svg.setAttribute('height', '16px');
             }}

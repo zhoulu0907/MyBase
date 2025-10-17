@@ -216,7 +216,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             trigger="click"
             position="bl"
           >
-            <IconMoreVertical width={16} height={16} onClick={(e) => e.stopPropagation()} />
+            <IconMoreVertical className={styles.moreIcon} onClick={(e) => e.stopPropagation()} />
           </Dropdown>
         </div>
       )}
