@@ -1,49 +1,13 @@
-import { Message, Modal, Grid } from '@arco-design/web-react';
-import { getFormulaById, getFormulaFunctionSimpleList, type AppEntities, type AppEntity, type AppEntityField, executeFormula, type formulaParams} from '@onebase/app';
+import { Message, Modal, Grid, Spin } from '@arco-design/web-react';
+import { getFormulaById, getFormulaFunctionSimpleList, type VariablesEntity, executeFormula, type formulaParams, getEntityListByApp, getEntityFields, type ChildEntityField } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormulaInput, FunctionList, InfoPanel, VariableList } from './components';
 import styles from './index.module.less';
 import type { FormulaEditorProps, FunctionItem, info } from './utils/types';
+import { useAppStore } from '@/store';
+
 const Row = Grid.Row;
 const Col = Grid.Col;
-// 模拟数据
-const mockVariables: AppEntities = {
-  entities: [
-    {
-      entityId: '1', entityName: '订单管理', entityType: '主表', fields: [
-        {
-          fieldId: "001", fieldName: "订单编号", fieldType: "BIGINT", isSystemField: 1, displayName: "订单编号"
-        },
-        {
-          fieldId: "AAA", fieldName: "制单人", fieldType: "VARCHAR", isSystemField: 1, displayName: "制单人"
-        },
-        {
-          fieldId: "上海市浦东新区云桥路", fieldName: "发货地址", fieldType: "TEXT", isSystemField: 1, displayName: "发货地址"
-        },
-        {
-          fieldId: "2024-01-22", fieldName: "下单日期", fieldType: "DECIMAL", isSystemField: 1, displayName: "下单日期"
-        },
-        {
-          fieldId: "12381282828", fieldName: "联系电话", fieldType: "NUMBER", isSystemField: 1, displayName: "联系电话"
-        },
-        {
-          fieldId: "", fieldName: "客户信息-主键", fieldType: "TIMESTAMP", isSystemField: 1, displayName: "客户信息-主键"
-        }
-      ]
-    },
-    {
-      entityId: '2', entityName: '其他管理', entityType: '主表', fields: [
-        {
-          fieldId: 1, fieldName: "测试A", fieldType: "BIGINT", isSystemField: 1, displayName: "测试1"
-        },
-        {
-          fieldId: 2, fieldName: "测试B", fieldType: "INT", isSystemField: 1, displayName: "测试2"
-        }
-      ]
-    }
-  ]
-};
-
 /**
  * 公式编辑器
  * @param visible - 编辑器是否可见
@@ -59,10 +23,47 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const [funcList, setFuncList] = useState<FunctionItem[]>([]);
   const editorRef = useRef<{ insertAtPosition: (text: string, type: string, position?: number) => void } | null>(null);
   const [info, setInfo] = useState<info | null>(null);
+  const [variables, setVariables] = useState<VariablesEntity[]>([])
+  const { curAppId } = useAppStore();
 
   useEffect(() => {
     setFormula(initialFormula);
   }, [initialFormula]);
+
+  useEffect(() => {
+    curAppId && retrievedEntityListByApp();
+  }, [curAppId])
+  /**
+   * 获取变量一级列表
+   */
+  const retrievedEntityListByApp = async () => {
+    try {
+      const res: VariablesEntity[] = await getEntityListByApp(curAppId);
+      if (res.length > 0) {
+        const result = await Promise.all(res.map(async (item) => {
+          try {
+            if (!item.fields?.length) {
+              const childEntityList = await getEntityFields({
+                entityId: item.entityId
+              });
+              return {
+                ...item,
+                fields: [...item.fields || [], ...childEntityList]
+              }
+            } else {
+              return item;
+            }
+          } catch (error) {
+            console.log("加载二级实体列表失败:", error)
+          }
+        }))
+        console.log("result", result)
+        setVariables(result as any);
+      }
+    } catch (error) {
+      console.error('加载变量列表失败:', error);
+    }
+  };
 
   /**
    * 初始化函数列表
@@ -92,15 +93,15 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 过滤变量列表
    * 根据变量名称或类型是否包含搜索关键词（不区分大小写）
    */
-  const filteredVariables:AppEntity[] = useMemo(() => {
-    if (!variableSearch) return mockVariables?.entities || [];
-   const newFields = mockVariables?.entities?.[0]?.fields?.filter(
+  const filteredVariables: VariablesEntity[] = useMemo(() => {
+    if (!variableSearch) return variables || [];
+    const newFields = variables?.[0]?.fields?.filter(
       (v) =>
         v.fieldName.toLowerCase().includes(variableSearch.toLowerCase()) ||
         v.fieldName.toLowerCase().includes(variableSearch.toLowerCase())
     ) || [];
-    mockVariables.entities[0].fields = newFields;
-    return mockVariables.entities
+    variables[0].fields = newFields;
+    return variables
   }, [variableSearch]);
 
   /**
@@ -120,13 +121,13 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 插入变量到公式
    * @param variable - 要插入的变量
    */
-  const handleInsertVariable = useCallback((variable: AppEntityField) => {
+  const handleInsertVariable = useCallback((variable: ChildEntityField) => {
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
-      editorRef.current.insertAtPosition(`[[${variable.fieldId}.${variable.fieldName}]]`, 'var');
+      editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.displayName}]]`, 'var');
     } else {
       // 降级处理：直接添加到末尾
-      setFormula((prev) => prev + variable.fieldName);
+      setFormula((prev) => prev + variable.displayName);
     }
   }, []);
 
@@ -159,38 +160,16 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   }, [formula]);
 
   /**
-   * 调试公式
-   */
-  const handleDebug = useCallback(() => {
-    console.log('调试公式:', formula);
-    Message.info('公式调试信息已输出到控制台');
-  }, [formula]);
-
-  const retrieveAllVariables = (formulaData: string) => {
-    const regex = /\[\[(.*?)\]\]/g;
-    const copyFormulaData = formulaData;
-    const matches = [...copyFormulaData.matchAll(regex)];
-    const variablesMapping: {[key: string]: string} = {};
-    matches.forEach((match) => {
-      const temp = match[1].split(".");
-      const fieldId = temp[0] || "";
-      const fieldName = temp[1] || ""; 
-      variablesMapping[fieldName] = fieldId;
-    })
-    return variablesMapping;
-  }
-
-  /**
    * 对现在的公式去掉{{id.}}和[[id.]]只保留函数名和变量名
    * @returns 返回简化后的公式模版
    */
   const formattedFormula = () => {
-   const newFormula =  formula.replace(/(\[\[.+?\]\]|\{\{.+?\}\})/g, (match) => {
+    const newFormula = formula.replace(/(\[\[.+?\]\]|\{\{.+?\}\})/g, (match) => {
       let content;
-      if(match.startsWith("{{")) {
+      if (match.startsWith("{{")) {
         content = match.slice(2, -2);
         content = content.replace(/^[^.]+\./, '');
-      }else {
+      } else {
         content = match.slice(2, -2)
         content = content.replace(/^[^\.]+\.(.+)$/, '$1,');
       }
@@ -198,27 +177,54 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     })
     return newFormula.replace(/,(?=\s*\))/g, '');
   }
+
+  /**
+   * 根据formula生成paramters信息{[变量名称]: fieldId}
+   * @param formulaData 
+   * @returns 
+   */
+  const retrieveAllVariables = (formulaData: string) => {
+    const regex = /\[\[(.*?)\]\]/g;
+    const copyFormulaData = formulaData;
+    const matches = [...copyFormulaData.matchAll(regex)];
+    const variablesMapping: { [key: string]: string } = {};
+    matches.forEach((match) => {
+      const temp = match[1].split(".");
+      const fieldId = temp[0] || "";
+      const fieldName = temp[1] || "";
+      variablesMapping[fieldName] = fieldId;
+    })
+    return variablesMapping;
+  }
+
   /**
    * 点击确认之后计算
    */
-  const handleConfirm = useCallback(async() => {
+  const handleConfirm = useCallback(async () => {
+    await handleDebug();
+    onConfirm(formula);
+  }, [formula, onConfirm, onCancel]);
+
+  /**
+   * 调试公式
+   */
+  const handleDebug = useCallback(async () => {
     setLoading(true);
     const newFormula = formattedFormula();
     const selectedVariables = retrieveAllVariables(formula);
-    const newFormulaData:formulaParams = {
+    const newFormulaData: formulaParams = {
       formula: newFormula,
       parameters: selectedVariables
     }
-      try {
-        const executedData = await executeFormula(newFormulaData);
-        console.log("executedData",executedData.data);
-        onConfirm(formula);
-      } catch (error) {
-        onCancel();
-      } finally {
-        setLoading(false);
-      }
-  }, [formula, onConfirm, onCancel]);
+    try {
+      await executeFormula(newFormulaData);
+      Message.info('公式调试成功');
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }, [formula]);
 
   /**
    * 公式编辑器准备就绪
@@ -254,30 +260,35 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       maskClosable={false}
       onOk={handleConfirm}
       confirmLoading={loading}
+      okButtonProps={{
+        disabled: !formula
+      }}
     >
       {/* 内容区域 */}
       <div className={styles.contentWrapper}>
         {/* 公式编辑区 */}
-        <FormulaInput
-          value={formula}
-          onChange={setFormula}
-          onCopy={handleCopy}
-          onDebug={handleDebug}
-          filteredVariables={filteredVariables}
-          filteredFunctions={filteredFunctions}
-          onEditorReady={handleEditorReady}
-        />
+        <Spin loading={loading} style={{ display: 'block', marginTop: 8, }}>
+          <FormulaInput
+            value={formula}
+            onChange={setFormula}
+            onCopy={handleCopy}
+            onDebug={handleDebug}
+            filteredVariables={filteredVariables}
+            filteredFunctions={filteredFunctions}
+            onEditorReady={handleEditorReady}
+          />
+        </Spin>
         {/* 底部面板（变量名称/函数公式/函数概要） */}
         <Row>
-          <Col xs={2} sm={4} md={6} lg={8} xl={10} xxl={8}>
+          <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
             <VariableList
-              variables={filteredVariables}
+              variables={variables}
               searchValue={variableSearch}
               onSearchChange={setVariableSearch}
               onInsertVariable={handleInsertVariable}
             />
           </Col>
-          <Col xs={20} sm={16} md={12} lg={8} xl={4} xxl={8}>
+          <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
             <FunctionList
               functions={functionSearch ? filteredFunctions : funcList}
               searchValue={functionSearch}
@@ -285,10 +296,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
               onChooseFunction={handleChooseFunction}
             />
           </Col>
-         {info && 
-          <Col xs={2} sm={4} md={6} lg={8} xl={10} xxl={8}>
-            <InfoPanel info={info} />
-          </Col>}
+          {info &&
+            <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
+              <InfoPanel info={info} />
+            </Col>}
         </Row>
       </div>
     </Modal>

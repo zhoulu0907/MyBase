@@ -6,14 +6,14 @@ import type { FunctionItem } from '../utils/types';
 import { placeholdersPlugin } from '../utils/placeholders';
 import styles from './FormulaInput.module.less';
 import { defaultExtenstion } from '../utils/defaultLine';
-import type { AppEntity } from '@onebase/app';
+import type { VariablesEntity } from '@onebase/app';
 
 interface FormulaInputProps {
   value: string;  // 当前公式的值
   onChange: (value: string) => void; // 公式变化时的回调函数
   onCopy: () => void; // 复制成功后的回调函数
   onDebug: () => void; // 调试按钮点击回调函数
-  filteredVariables: AppEntity[]; // 过滤后的变量列表
+  filteredVariables: VariablesEntity[]; // 过滤后的变量列表
   filteredFunctions: FunctionItem[];  // 过滤后的函数列表
   onEditorReady?: (editor: { insertAtPosition: (text: string, type?: string, position?: number) => void }) => void; // 编辑器就绪回调
 }
@@ -276,7 +276,7 @@ export function FormulaInput({
   // 自定义扩展
   const extensions = [
     //设置首行-显示单行文本和两个按钮
-    defaultExtenstion(handleCopy, onDebug),
+    defaultExtenstion(handleCopy, onDebug, value),
     EditorView.updateListener.of((update) => {
       updateRef.current = update;
     }),

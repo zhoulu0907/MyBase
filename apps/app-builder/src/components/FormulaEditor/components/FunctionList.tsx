@@ -1,5 +1,5 @@
-import { Input, List, Button, Menu } from '@arco-design/web-react';
-import { IconSearch, IconCheck, IconDown } from '@arco-design/web-react/icon';
+import { Input, Menu } from '@arco-design/web-react';
+import { IconSearch } from '@arco-design/web-react/icon';
 import LightText from './LightText';
 import { useCallback, useState } from 'react';
 import type { FunctionItem } from '../utils/types';
@@ -7,7 +7,6 @@ import styles from './FunctionList.module.less';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
-const MenuItemGroup = Menu.ItemGroup;
 
 interface FunctionListProps {
   functions: FunctionItem[];//函数项数组，包含所有可展示的函数

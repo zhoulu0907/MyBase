@@ -44,6 +44,39 @@ export interface AppEntity {
   fields: AppEntityField[];
 }
 
+export interface VariablesEntity {
+  entityId: string; // 实体ID
+  entityName: string; // 实体名称
+  tableName: string;
+  fields?: ChildEntityField[];
+}
+
+export interface ChildEntityField {
+  appId: string;
+  description: string;
+  displayName: string;
+  entityId: string;
+  fieldType: string;
+  fieldCode: string;
+  fieldName: string;
+  id: string;
+  isUnique: number;
+  isRequired: number;
+  isSystemField: number;
+  sortOrder?: number;
+  status?: boolean;
+  runMode?: boolean;
+  constraints?: {
+    lengthEnabled: number;
+    minLength: number;
+    maxLength: number;
+    lengthPrompt: string;
+    regexEnabled: number;
+    regexPattern: string;
+    regexPrompt: string;
+  };
+}
+
 export interface ChildEntity {
   childEntityCode: string;
   childEntityId: string;
