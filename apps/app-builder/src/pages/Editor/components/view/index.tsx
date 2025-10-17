@@ -81,6 +81,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     const newView = {
       ...view,
       id: newId,
+      isDefaultEditViewMode: 0,
+      isDefaultDetailViewMode: 0,
       pageName: view.pageName + '-副本'
     };
 
