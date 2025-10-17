@@ -10,8 +10,8 @@ import FieldConfigPopover from './FieldConfigPopover';
 import styles from './index.module.less';
 import SortableTable from './SortableTable';
 import TableColumns from './TableColumns';
-import type { AutoNumberRule } from './types';
-import { arrayMove, systemFieldsLength } from './utils';
+import type { AutoNumberRule } from './utils/types';
+import { arrayMove, systemFieldsLength } from './utils/utils';
 
 interface FieldFormValues {
   id?: string;
@@ -74,7 +74,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       // 获取实体字段列表
       loadEntityFields();
 
-      // 获取实体字段配置列表
+      // 获取实体及子表字段列表
       loadEntityFieldsWithChildren();
     } else {
       // 关闭时重置表单
