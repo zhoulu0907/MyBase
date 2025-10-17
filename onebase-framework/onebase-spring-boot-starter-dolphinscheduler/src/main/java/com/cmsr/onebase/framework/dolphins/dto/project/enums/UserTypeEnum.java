@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.dolphins.enums;
+package com.cmsr.onebase.framework.dolphins.dto.project.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
