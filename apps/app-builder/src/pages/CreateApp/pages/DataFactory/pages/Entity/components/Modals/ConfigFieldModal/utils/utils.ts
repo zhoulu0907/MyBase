@@ -1,4 +1,4 @@
-import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, AUTO_CODE_RULE_TYPE } from './const';
+import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, AUTO_CODE_RULE_TYPE, DIGIT_DEFAULT } from './const';
 import type { AutoNumberRule, AutoNumberRuleItem, AutoCodeRule } from './types';
 
 /**
@@ -12,7 +12,7 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
     return {
       isEnabled: 1,
       numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-      digitWidth: 4,
+      digitWidth: DIGIT_DEFAULT,
       overflowContinue: 1,
       initialValue: 1,
       resetCycle: AUTO_CODE_RESET_CYCLE.NONE,
@@ -44,7 +44,7 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
     return {
       isEnabled: 1,
       numberMode: (config.numberMode as string) || AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-      digitWidth: (config.digitWidth as number) || 4,
+      digitWidth: (config.digitWidth as number) || DIGIT_DEFAULT,
       overflowContinue: config.continueIncrement ? 1 : 0,
       initialValue: (config.startValue as number) || 1,
       resetCycle:
@@ -60,7 +60,7 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
   return {
     isEnabled: 1,
     numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-    digitWidth: 4,
+    digitWidth: DIGIT_DEFAULT,
     overflowContinue: 1,
     initialValue: 1,
     resetCycle: AUTO_CODE_RESET_CYCLE.NONE,
@@ -141,7 +141,7 @@ export const convertAutoNumberRuleToAutoCodeComp = (
 
     switch (rule.itemType) {
       case AUTO_CODE_RULE_TYPE.DATE:
-        autoCodeRule.config = { dateFormat: rule.format || '年月日' };
+        autoCodeRule.config = { dateFormat: rule.format || DATE_FORMAT_DEFAULT };
         break;
       case AUTO_CODE_RULE_TYPE.TEXT:
         autoCodeRule.config = { fixedText: rule.format || '' };

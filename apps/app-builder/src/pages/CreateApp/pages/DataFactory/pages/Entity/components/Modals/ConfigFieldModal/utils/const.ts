@@ -19,3 +19,12 @@ export const AUTO_CODE_RESET_CYCLE = {
   MONTHLY: 'MONTHLY',
   YEARLY: 'YEARLY'
 } as const;
+
+export const DIGIT_DEFAULT = 4;
+export const DATE_FORMAT_DEFAULT = '年月日';
+
+// TODO 待确认后补充
+export const RULE_ENABLED = {
+  ENABLE: 1,
+  DISABLE: 0
+} as const;

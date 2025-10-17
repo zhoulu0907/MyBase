@@ -5,8 +5,18 @@ import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
 import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './utils/types';
-import { convertAutoCodeCompoToAutoNumberRule, convertAutoNumberRuleToAutoCodeComp, findFieldPath } from './utils';
-import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, AUTO_CODE_RULE_TYPE } from './utils/const';
+import {
+  convertAutoCodeCompoToAutoNumberRule,
+  convertAutoNumberRuleToAutoCodeComp,
+  findFieldPath
+} from './utils/utils';
+import {
+  AUTO_CODE_NUMBER_MODE,
+  AUTO_CODE_RESET_CYCLE,
+  AUTO_CODE_RULE_TYPE,
+  DATE_FORMAT_DEFAULT,
+  DIGIT_DEFAULT
+} from './utils/const';
 
 // 选项配置组件
 interface OptionConfigProps {
@@ -147,7 +157,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
         itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
         config: {
           numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-          digitWidth: 4,
+          digitWidth: DIGIT_DEFAULT,
           continueIncrement: true,
           startValue: 1,
           nextRecordStartValue: false,
@@ -157,7 +167,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
       {
         id: 'rule-2',
         itemType: AUTO_CODE_RULE_TYPE.DATE,
-        config: { dateFormat: '年月日' }
+        config: { dateFormat: DATE_FORMAT_DEFAULT }
       },
       {
         id: 'rule-3',
@@ -267,7 +277,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
             <IconDragDotVertical className={styles.dragHandle} />
             <span className={styles.ruleLabel}>创建时间:</span>
             <Select
-              value={(rule.config.dateFormat as string) || '年月日'}
+              value={(rule.config.dateFormat as string) || DATE_FORMAT_DEFAULT}
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, dateFormat: value } })}
               className={styles.ruleInput}
             >

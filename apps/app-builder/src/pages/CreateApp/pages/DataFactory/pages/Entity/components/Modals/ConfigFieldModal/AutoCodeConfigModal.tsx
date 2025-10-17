@@ -3,7 +3,7 @@ import { Modal, Radio, InputNumber, Checkbox, Select, Form, Tooltip } from '@arc
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import type { AutoNumberRule, AutoNumberRuleResponce } from './utils/types';
-import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE } from './utils/const';
+import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, DIGIT_DEFAULT } from './utils/const';
 
 interface AutoCodeConfigModalProps {
   visible: boolean;
@@ -24,7 +24,7 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
   const initialValues = {
     isEnabled: 1,
     numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-    digitWidth: 4,
+    digitWidth: DIGIT_DEFAULT,
     overflowContinue: 1,
     initialValue: 1,
     resetCycle: AUTO_CODE_RESET_CYCLE.NONE,
@@ -50,7 +50,7 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
       const values = {
         initialValue: initialConfig.startValue,
         numberMode: initialConfig.mode || AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-        digitWidth: initialConfig.digitWidth || 4,
+        digitWidth: initialConfig.digitWidth || DIGIT_DEFAULT,
         overflowContinue: initialConfig.overflowContinue || 1,
         resetCycle: initialConfig.resetCycle || AUTO_CODE_RESET_CYCLE.NONE,
         nextRecordStartValue: initialConfig?.nextRecordStartValue || 1
