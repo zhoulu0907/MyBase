@@ -1,5 +1,7 @@
 package com.cmsr.onebase.framework.dolphins.dto.workflow.request;
 
+import com.cmsr.onebase.framework.dolphins.dto.workflow.enums.ExecutionTypeEnum;
+import com.cmsr.onebase.framework.dolphins.dto.workflow.enums.ReleaseStateEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -40,7 +42,7 @@ public class WorkflowCreateRequestDTO {
      * 发布状态(ONLINE/OFFLINE,默认OFFLINE)
      */
     @JsonProperty("releaseState")
-    private String releaseState;
+    private ReleaseStateEnum releaseState;
 
     /**
      * 全局参数(JSON格式)
@@ -64,5 +66,5 @@ public class WorkflowCreateRequestDTO {
      * 执行类型(PARALLEL并行/SERIAL_WAIT串行等待/SERIAL_DISCARD串行丢弃/SERIAL_PRIORITY串行优先,默认PARALLEL)
      */
     @JsonProperty("executionType")
-    private String executionType;
+    private ExecutionTypeEnum executionType;
 }
