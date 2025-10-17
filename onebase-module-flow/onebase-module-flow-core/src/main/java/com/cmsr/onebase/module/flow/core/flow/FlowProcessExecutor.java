@@ -70,12 +70,13 @@ public class FlowProcessExecutor {
         return executorResult;
     }
 
-    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputMap) {
+    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> uuidFiles) {
         String chainId = FlowUtils.toFlowChainId(processId);
         VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
         if (variableContext == null) {
             throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
         }
+        variableContext.setUuidFiles(uuidFiles);
         variableContext.setOutputParams(new HashMap<>());
         ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
         if (executeContext == null) {

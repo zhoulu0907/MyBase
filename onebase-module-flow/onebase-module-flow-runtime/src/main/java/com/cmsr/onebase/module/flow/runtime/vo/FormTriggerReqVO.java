@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.flow.runtime.vo;
 
+import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,5 +23,7 @@ public class FormTriggerReqVO {
 
     @Schema(description = "输入参数，表单数据，用于条件过滤")
     private Map<Long, String> inputParams;
+
+    private List<ModalNodeData.Field> inputFields;
 
 }
