@@ -18,9 +18,11 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @Table(name = "bpm_flow_skip")
 public class FlowSkip extends BaseEntity implements Skip {
+    /** 定义ID */
+    public static final String DEFINITION_ID = "definition_id";
 
     /** 流程定义ID */
-    @Column(name = "definition_id", nullable = false)
+    @Column(name = DEFINITION_ID, nullable = false)
     private Long definitionId;
 
     /** 当前节点编码 */

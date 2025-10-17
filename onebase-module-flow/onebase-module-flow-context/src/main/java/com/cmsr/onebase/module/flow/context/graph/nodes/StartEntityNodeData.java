@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  * @Date：2025/9/9 13:46
  */
 @Data
-public class StartEntityNodeData extends NodeData {
+public class StartEntityNodeData extends NodeData implements Serializable {
 
     private Long processId;
 

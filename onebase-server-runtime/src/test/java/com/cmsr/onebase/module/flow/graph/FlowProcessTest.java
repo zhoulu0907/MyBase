@@ -6,8 +6,9 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.event.FlowEventHandler;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
+import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
+import com.cmsr.onebase.module.flow.core.job.FlowJobMessageHandler;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ public class FlowProcessTest {
     private FlowProcessExecApiImpl flowProcessExecApi;
 
     @Autowired
-    private FlowEventHandler flowEventHandler;
+    private FlowJobMessageHandler flowJobMessageHandler;
 
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
@@ -48,11 +49,6 @@ public class FlowProcessTest {
         testToFlowChain(84076905441918976L);
     }
 
-    @Test
-    public void testSimple1() throws IOException {
-//        FlowProcessDO flowProcessDO = flowProcessRepository.findById(84076905441918976L);
-        flowEventHandler.onProcessUpdate(84076905441918976L);
-    }
 
     @Test
     public void testSimple2() throws IOException {
@@ -66,5 +62,13 @@ public class FlowProcessTest {
         ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
         flowProcessExecApi.entityTrigger(reqDTO);
+    }
+
+    @Test
+    public void testSimple3() throws IOException {
+        FlowJobMessage jobMessage = new FlowJobMessage();
+        jobMessage.setJobType("fld");
+        jobMessage.setProcessId(89995954500108288L);
+        flowJobMessageHandler.executeFlow(jobMessage);
     }
 }

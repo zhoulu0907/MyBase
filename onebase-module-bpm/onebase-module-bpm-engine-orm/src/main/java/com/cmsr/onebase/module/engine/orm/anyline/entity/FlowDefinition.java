@@ -74,7 +74,7 @@ public class FlowDefinition extends BaseEntity implements Definition {
     /**
      * 流程版本
      */
-    @Column(name = "version", length = 20)
+    @Column(name = "version", length = 20, nullable = false)
     private String version;
 
 

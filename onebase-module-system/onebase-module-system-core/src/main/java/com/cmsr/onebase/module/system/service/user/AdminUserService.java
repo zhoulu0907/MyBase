@@ -53,9 +53,9 @@ public interface AdminUserService {
     void updateUser(@Valid UserUpdateReqVO updateReqVO);
 
     /**
-     * 修改用户管理员状态
+     * 修改用户管理员类型
      *
-     * @param adminType 修改管理员状态
+     * @param adminType 修改管理员类型
      * @param id    用户编号
      */
     void updateAdminType(Long id,  Integer adminType);

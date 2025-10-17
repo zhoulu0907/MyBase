@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import lombok.Setter;
@@ -30,11 +31,9 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionExecutor expressionExecutor;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {
@@ -68,8 +67,14 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
                     return EntityTriggerRespDTO.SUCCESS;
                 }
             }
-            flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
-            return EntityTriggerRespDTO.SUCCESS;
+            ExecutorResult executorResult = flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
+            EntityTriggerRespDTO resp = new EntityTriggerRespDTO();
+            resp.setSuccess(executorResult.isSuccess());
+            resp.setCode(executorResult.getCode());
+            resp.setMessage(executorResult.getMessage());
+            resp.setCause(executorResult.getCause());
+            resp.setExecutionEnd(executorResult.isExecutionEnd());
+            return resp;
         } catch (Exception e) {
             log.error("entityTrigger failed, {}, {}", entityTriggerReqDTO, startEntityNodeData, e);
             return new EntityTriggerRespDTO(false, e);

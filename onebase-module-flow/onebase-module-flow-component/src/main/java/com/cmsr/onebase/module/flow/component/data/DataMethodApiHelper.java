@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.data;
 
-import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.context.condition.SortItem;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
@@ -22,6 +22,7 @@ import java.util.Map;
  * @Date：2025/9/23 16:53
  */
 public class DataMethodApiHelper {
+
 
     /**
      * 处理过滤条件

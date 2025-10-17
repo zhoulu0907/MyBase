@@ -206,13 +206,17 @@ public abstract class WarmDaoImpl<T extends RootEntity & BaseDOInterface> implem
                 // 获取字段名
                 String fieldName = field.getName();
 
-                // 获取 @Column 注解的 name 属性，如果没有则使用字段名
-                Column column = field.getAnnotation(Column.class);
-                String columnName = column != null && !column.name().isEmpty() ? column.name() : fieldName;
+                // 获取 @Column 注解的 name 属性，如果没有则说明非数据库字段
+                Column columnAnno = field.getAnnotation(Column.class);
+
+                if (columnAnno == null) {
+                    continue;
+                }
+
+                String columnName = !columnAnno.name().isEmpty() ? columnAnno.name() : fieldName;
 
                 // 添加等值条件
                 configs.and(Compare.EQUAL, columnName, value);
-
             } catch (IllegalAccessException e) {
                 log.warn("无法访问字段: {}", field.getName(), e);
             }

@@ -4,16 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 /**
  * @Author：huangjie
  * @Date：2025/9/29 12:02
  */
 @ToString
-public class NodeData {
+public class NodeData implements Serializable {
 
     @Getter
     @Setter
-    private Boolean isInLoop;
+    private Boolean inLoop;
 
     @Setter
     private InLoopDepth inLoopDepth;

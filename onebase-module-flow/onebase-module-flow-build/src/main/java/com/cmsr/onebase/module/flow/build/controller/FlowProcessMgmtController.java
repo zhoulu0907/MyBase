@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.service.FlowProcessMgmtService;
 import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
+import com.cmsr.onebase.module.flow.core.utils.CronUtils;
 import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -106,5 +107,22 @@ public class FlowProcessMgmtController {
         }
         flowProcessMgmtService.batchDelete(ids);
         return CommonResult.success(true);
+    }
+
+    @GetMapping("/cron-parse")
+    @Operation(summary = "cron表达式解析")
+    public CommonResult<CronParseRespVO> cronParse(@RequestParam String cron) {
+        CronParseRespVO cronParseRespVO = new CronParseRespVO();
+        if (CronUtils.isValid(cron)) {
+            cronParseRespVO.setValid(true);
+            try {
+                cronParseRespVO.setNext(CronUtils.nextExecuteTime(cron, 5));
+            } catch (Exception e) {
+                cronParseRespVO.setValid(false);
+            }
+        } else {
+            cronParseRespVO.setValid(false);
+        }
+        return CommonResult.success(cronParseRespVO);
     }
 }

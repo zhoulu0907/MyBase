@@ -1,0 +1,13 @@
+package com.cmsr.onebase.module.flow.context;
+
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/10/14 18:17
+ */
+public interface FieldTypeProvider {
+
+    void completeFieldType(JsonGraph jsonGraph);
+
+}

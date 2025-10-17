@@ -2,13 +2,17 @@ package com.cmsr.onebase.module.flow.context.graph;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
+ * InLoopDepth里面存储的是节点在loop循环的层次
+ *
+ *
  * @Author：huangjie
  * @Date：2025/9/28 17:52
  */
-public class InLoopDepth extends HashMap<String, Integer> {
+public class InLoopDepth extends HashMap<String, Integer> implements Serializable {
 
     public static final InLoopDepth EMPTY_LOOP_DEPTH = new InLoopDepth();
 

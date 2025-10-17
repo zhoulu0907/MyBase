@@ -4,6 +4,8 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowInstance;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowInstanceRepository;
 import jakarta.annotation.Resource;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.dromara.warm.flow.core.orm.dao.FlowInstanceDao;
 
 import java.util.List;
@@ -26,8 +28,10 @@ public class FlowInstanceDaoImpl extends WarmDaoImpl<FlowInstance> implements Fl
 
     @Override
     public List<FlowInstance> getByDefIds(List<Long> defIds) {
-        // todo 待处理
-        return null;
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.in(FlowInstance.DEFINITION_ID, defIds);
+
+        return getRepository().findAllByConfig(configStore);
     }
 
     @Override

@@ -1,12 +1,13 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
-import com.cmsr.onebase.framework.common.express.JdbcTypeEnum;
-import com.cmsr.onebase.framework.common.express.OpEnum;
-import com.cmsr.onebase.framework.common.express.OperatorTypeEnum;
+
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
+import com.cmsr.onebase.module.flow.context.enums.OpEnum;
+import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;

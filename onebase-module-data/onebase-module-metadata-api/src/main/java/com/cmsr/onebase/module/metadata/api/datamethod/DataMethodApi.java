@@ -19,6 +19,8 @@ public interface DataMethodApi {
 
     /**
      * 根据条件查询实体字段数据
+     * 支持 andConditionDTO 和 conditionDTO 的组合查询
+     * andConditionDTO 中的条件与 conditionDTO 中的每个条件组都是 AND 关系
      *
      * @param reqDTO 查询请求参数
      * @return 字段数据列表

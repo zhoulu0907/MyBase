@@ -1,11 +1,14 @@
 package com.cmsr.onebase.module.flow.context;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Author：huangjie
  * @Date：2025/9/23 15:54
  */
-public class VariableContext {
+public class VariableContext implements Serializable {
 
     private static JexlEngine jexl = new JexlBuilder().create();
 
@@ -25,9 +28,19 @@ public class VariableContext {
 
     private Map<String, Object> outputParams = Collections.emptyMap();
 
+    @Getter
+    @Setter
+    private Map<String, Object> uuidFiles = Collections.emptyMap();
+
     public void setInputParams(Map<String, Object> inputParams) {
         if (inputParams != null) {
             this.inputParams = inputParams;
+        }
+    }
+
+    public void setOutputParams(Map<String, Object> outputParams) {
+        if (outputParams != null) {
+            this.outputParams = outputParams;
         }
     }
 
