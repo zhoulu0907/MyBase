@@ -1,6 +1,6 @@
 import { menuEditorSignal } from '@/store/singals/menu_editor';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
-import { IconDragDotVertical, IconEyeInvisible, IconSettings } from '@arco-design/web-react/icon';
+import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
 import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
@@ -195,7 +195,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             theme="outline"
             size="18"
             fill={curMenuId.value === menuID ? 'rgb(var(--primary-6))' : '#333'}
-            style={{ marginRight: 4 }}
+            style={{ marginRight: 16 }}
           />
           {label}
         </div>
@@ -206,7 +206,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </div>
       )}
       {showOption && (
-        <div className={styles.dropdownContainer}>
+        <div className={styles.dropdownContainer} style={{ marginRight: isGroup ? 22 : 12 }}>
           <Dropdown
             popupVisible={popupVisible}
             onVisibleChange={(visible) => {
@@ -216,9 +216,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             trigger="click"
             position="bl"
           >
-            <IconSettings onClick={(e) => e.stopPropagation()} />
+            <IconMoreVertical width={16} height={16} onClick={(e) => e.stopPropagation()} />
           </Dropdown>
-          <IconDragDotVertical style={{ cursor: 'move' }} />
         </div>
       )}
     </div>
