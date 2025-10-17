@@ -28,6 +28,10 @@ public enum JdbcTypeEnum {
         this.code = code;
     }
 
+    public String getCode() {
+        return code;
+    }
+
     /**
      * 根据字符串值获取对应的枚举实例
      *
