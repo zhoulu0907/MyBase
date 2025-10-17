@@ -11,7 +11,12 @@ export interface ListItemProps {
 
 const ListItem: React.FC<ListItemProps> = ({ title, active = false, onClick, children }) => {
   return (
-    <div className={`${s.listItem} ${active ? s.active : ''}`} onClick={onClick}>
+    <div
+      className={`${s.listItem} ${active ? s.active : ''}`}
+      onClick={() => {
+        onClick && onClick();
+      }}
+    >
       <div className={s.listItemTitle}>
         <Typography.Ellipsis showTooltip>{title}</Typography.Ellipsis>
       </div>

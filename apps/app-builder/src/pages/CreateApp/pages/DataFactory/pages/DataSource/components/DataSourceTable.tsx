@@ -1,10 +1,10 @@
 import { useAppStore } from '@/store/store_app';
 import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
-// import { IconPlus } from '@arco-design/web-react/icon';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasource, getDatasourcePage, type DatasourceSaveReqVO } from '@onebase/app';
 import { useEffect, useState } from 'react';
-import EditDsDrawer from './EditDsDrawer';
 import styles from '../index.module.less';
+import EditDsDrawer from './EditDsDrawer';
 
 // 数据源记录类型
 interface DatasourceRecord {
@@ -169,16 +169,17 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
     <div>
       <div className={styles.operationHeader}>
         <div className={styles.operationHeaderLeft}>数据源管理</div>
-        {/* 本期隐藏，后续开放 */}
-        {/* <Button
+
+        <Button
           type="primary"
+          hidden={true}
           onClick={() => {
             handlePageType('create-ds');
           }}
         >
           <IconPlus />
           创建数据源
-        </Button> */}
+        </Button>
       </div>
       <Table
         columns={columns}

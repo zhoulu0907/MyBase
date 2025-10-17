@@ -184,7 +184,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const cancelSubmitForm = () => {
     console.log('取消提交');
-    // form.resetFields();
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
     setDetailMode(true);

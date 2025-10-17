@@ -37,7 +37,7 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
           theme="outline"
           size="18"
           fill={curMenuId.value === menuID ? 'rgb(var(--primary-6))' : '#333'}
-          style={{ marginRight: 4 }}
+          style={{ marginRight: 16 }}
         />
         {label}
       </div>

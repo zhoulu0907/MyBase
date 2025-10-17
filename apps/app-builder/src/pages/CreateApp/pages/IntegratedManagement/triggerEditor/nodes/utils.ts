@@ -1,5 +1,5 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import type { FlowNodeJSON, FlowNodeEntity } from '@flowgram.ai/fixed-layout-editor';
+import type { FlowNodeEntity, FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
   getEntityFields,
@@ -7,8 +7,8 @@ import {
   type ConditionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
-import { v4 as uuidv4 } from 'uuid';
 import { NodeType } from '@onebase/common';
+import { v4 as uuidv4 } from 'uuid';
 
 export const generateNodeId = (nodeType: NodeType) => {
   const uuid = uuidv4().replaceAll('-', '');
@@ -163,11 +163,6 @@ export function getPrecedingNodes(
         // 在当前节点的下游blocks中
         const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
         nodes.push(...blocks);
-      } else {
-        // console.log('ele: ', ele);
-        // // 如果不包含 不向下递归搜索
-        // const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
-        // nodes.push(...blocks);
       }
     } else {
       // 不包含blocks的节点
@@ -339,4 +334,21 @@ export const getHasLoop = (nodes: any[]): boolean => {
     }
   }
   return hasLoop;
+};
+
+export const searchNodeById = (nodeId: string, nodes: any[]) => {
+  let node: any = undefined;
+  for (let item of nodes) {
+    if (item.id === nodeId) {
+      node = item;
+      break;
+    }
+    if (item.blocks?.length) {
+      node = searchNodeById(nodeId, item.blocks);
+      if (node !== undefined) {
+        break;
+      }
+    }
+  }
+  return node;
 };

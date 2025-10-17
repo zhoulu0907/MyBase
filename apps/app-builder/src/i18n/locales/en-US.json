@@ -147,9 +147,9 @@
     "saved": "Saved, not published"
   },
   "createApp": {
-    "pageManager": "Page Manager",
-    "integratedManagement": "Integrated Management",
-    "dataFactory": "Data Factory",
+    "pageManager": "Page Design",
+    "integratedManagement": "Logic Control",
+    "dataFactory": "Data Modeling",
     "appSetting": "App Setting",
     "appRelease": "App Release",
     "preview": "Preview",
@@ -159,6 +159,7 @@
     "createGroup": "Create Group",
     "rename": "Rename Page",
     "copyPage": "Copy Page",
-    "searchPlaceHolder": "Search Page Or Group"
+    "searchPlaceHolder": "Search Page Or Group",
+    "editPage": "Edit Page"
   }
 }

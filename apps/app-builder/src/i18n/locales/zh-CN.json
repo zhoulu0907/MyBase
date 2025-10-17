@@ -147,9 +147,9 @@
     "saved": "已保存，未发布"
   },
   "createApp": {
-    "pageManager": "页面管理",
-    "integratedManagement": "集成自动化",
-    "dataFactory": "数据资产",
+    "pageManager": "页面设计",
+    "integratedManagement": "逻辑控制",
+    "dataFactory": "数据建模",
     "appSetting": "应用设置",
     "appRelease": "应用发布",
     "preview": "预览",
@@ -159,6 +159,7 @@
     "createGroup": "新建分组",
     "rename": "重命名",
     "copyPage": "复制页面",
-    "searchPlaceHolder": "搜索分组或页面"
+    "searchPlaceHolder": "搜索分组或页面",
+    "editPage": "编辑页面"
   }
 }

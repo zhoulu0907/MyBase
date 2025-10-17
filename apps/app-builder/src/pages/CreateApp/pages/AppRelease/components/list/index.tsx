@@ -61,10 +61,6 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
     console.log('启用版本:', record);
   };
 
-  // const handleCompareVersion = (record: VersionRecord) => {
-  //   console.log('版本比对:', record);
-  // };
-
   const handleAccessVersion = (record: VersionRecord) => {
     console.log('访问版本:', record);
   };

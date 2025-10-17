@@ -1,33 +1,11 @@
-import {
-  Button,
-  Checkbox,
-  Drawer,
-  Dropdown,
-  Form,
-  Grid,
-  Input,
-  Menu,
-  Message,
-  Radio,
-  Select,
-  Switch,
-  Tooltip,
-  Tree
-} from '@arco-design/web-react';
+import { Button, Drawer, Form, Grid, Input, Radio, Select, Tree } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 
-import {
-  IconCaretDown,
-  IconDelete,
-  IconDragDotVertical,
-  IconPlus,
-  IconQuestionCircleFill
-} from '@arco-design/web-react/icon';
-import { ReactSortable } from 'react-sortablejs';
+import { IconCaretDown } from '@arco-design/web-react/icon';
 import { ListComp } from '@onebase/ui-kit';
 
-import styles from '../../index.module.less';
 import type { DynamicSelectDataSourceConfigProps } from '../..';
+import styles from '../../index.module.less';
 import DropdownRender from '../DropdownRender';
 import FilterDataModal from '../FilterDataModal';
 
