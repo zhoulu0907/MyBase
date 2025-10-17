@@ -39,6 +39,12 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 continue;
             }
 
+            // 跳过自动编号字段，自动编号字段不进行必填等任何校验
+            if (autoNumberService.hasAutoNumber(field.getId())) {
+                log.debug("字段[{}]是自动编号字段，跳过校验", field.getFieldName());
+                continue;
+            }
+
             // 校验必填字段 - 使用新的枚举值：1-是，0-否
             if (BooleanStatusEnum.isYes(field.getIsRequired()) &&
                     (data.get(field.getFieldName()) == null || String.valueOf(data.get(field.getFieldName())).trim().isEmpty())) {
