@@ -1,6 +1,5 @@
 import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
-import { ReactSVG } from 'react-svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
@@ -39,22 +38,17 @@ import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import styles from './index.module.less';
-import { IconArrowDownRight } from '@douyinfe/semi-icons';
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
 const Sider = Layout.Sider;
 const Content = Layout.Content;
-
-const iconStyle = {
-  marginRight: 8,
-  transform: 'translateY(5px)'
-};
 
 /**
  * 树形数据节点接口
@@ -618,10 +612,7 @@ const PageManagerPage: FC = () => {
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                        <Button
-                          type="primary"
-                          onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}
-                        >
+                        <Button type="primary" onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}>
                           {t('common.edit')}
                         </Button>
                       </div>
