@@ -10,6 +10,7 @@ import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -45,6 +46,7 @@ public class ModalNodeComponent extends SkippableNodeComponent {
         }
         if (nodeActionEnum == NodeActionEnum.DO_RESET) {
             variableContext.putNodeVariables(this.getTag(), variableContext.getUuidFiles());
+            variableContext.setUuidFiles(Collections.emptyMap());
             executeContext.restExecutionUuid();
             executeContext.restExecutionEndNodeTag();
         }
