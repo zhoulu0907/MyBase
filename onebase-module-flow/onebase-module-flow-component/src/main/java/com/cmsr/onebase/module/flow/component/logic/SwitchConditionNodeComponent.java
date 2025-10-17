@@ -26,8 +26,7 @@ public class SwitchConditionNodeComponent extends NodeSwitchComponent {
     @Autowired
     private ConditionsProvider conditionsProvider;
 
-    @Autowired
-    private ExpressionExecutor expressionExecutor;
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public String processSwitch() throws Exception {

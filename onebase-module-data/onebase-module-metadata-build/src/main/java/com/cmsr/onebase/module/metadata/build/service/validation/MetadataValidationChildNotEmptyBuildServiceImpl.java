@@ -47,11 +47,12 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         // 转换为 VO
         ValidationChildNotEmptyRespVO respVO = BeanUtils.toBean(validationDO, ValidationChildNotEmptyRespVO.class);
 
-        // 获取规则组名称
+        // 获取规则组信息，包括提示语等字段
         if (validationDO.getGroupId() != null) {
             MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroup(validationDO.getGroupId());
             if (ruleGroup != null) {
                 respVO.setRgName(ruleGroup.getRgName());
+                respVO.setPromptMessage(ruleGroup.getPopPrompt());
             }
         }
 
@@ -77,11 +78,12 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         // 转换为 VO
         ValidationChildNotEmptyRespVO respVO = BeanUtils.toBean(validationDO, ValidationChildNotEmptyRespVO.class);
 
-        // 获取规则组名称
+        // 获取规则组信息，包括提示语等字段
         if (validationDO.getGroupId() != null) {
             MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroup(validationDO.getGroupId());
             if (ruleGroup != null) {
                 respVO.setRgName(ruleGroup.getRgName());
+                respVO.setPromptMessage(ruleGroup.getPopPrompt());
             }
         }
 

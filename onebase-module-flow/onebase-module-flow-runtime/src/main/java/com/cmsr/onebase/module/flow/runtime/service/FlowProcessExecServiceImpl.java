@@ -1,11 +1,13 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
-import com.cmsr.onebase.framework.common.express.JdbcTypeConvertor;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
@@ -21,16 +23,14 @@ import com.google.common.collect.Sets;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -46,13 +46,12 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionExecutor expressionExecutor;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
     @Autowired
     private MetadataEntityFieldApi metadataEntityFieldApi;
+
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
@@ -71,10 +70,15 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             vo.setMessage("流程不存在");
             return vo;
         }
-        List<Long> ids = extractFieldIds(startFormNodeData.getFilterCondition(), reqVO.getInputParams());
-        Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap = getFieldInfoMap(ids);
-        Map<String, Object> inputMap = convertInputParamsData(reqVO.getInputParams(), fieldInfoMap);
-
+        Map<String, Object> inputMap = Collections.emptyMap();
+        if (MapUtils.isNotEmpty(reqVO.getInputParams())) {
+            List<Long> ids = extractFieldIds(startFormNodeData.getFilterCondition(), reqVO.getInputParams());
+            Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap = getFieldInfoMap(ids);
+            inputMap = convertInputParamsData(reqVO.getInputParams(), fieldInfoMap);
+        }
+        if (CollectionUtils.isNotEmpty(reqVO.getInputFields())) {
+            inputMap = convertInputFieldsData(reqVO.getInputFields());
+        }
         try {
             if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
                 boolean isTrigger = true;
@@ -101,6 +105,16 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             vo.setCause(ExceptionUtils.getRootCauseMessage(e));
             return vo;
         }
+    }
+
+    private Map<String, Object> convertInputFieldsData(List<ModalNodeData.Field> inputFields) {
+        Map<String, Object> result = new HashMap<>();
+        for (ModalNodeData.Field field : inputFields) {
+            FieldTypeEnum fieldTypeEnum = FieldTypeEnum.getByName(field.getFieldType());
+            Object value = JdbcTypeConvertor.convert(fieldTypeEnum.getJdbcType().getCode(), field.getValue());
+            result.put(field.getId(), value);
+        }
+        return result;
     }
 
     private FormTriggerRespVO formNotTriggerRespVO() {

@@ -26,8 +26,7 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
     @Autowired
     private ConditionsProvider conditionsProvider;
 
-    @Autowired
-    private ExpressionExecutor expressionExecutor;
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public boolean processBoolean() throws Exception {
