@@ -27,7 +27,7 @@ Content-Type: application/json
 
 {
     "formula": "CEILING(订单编号，AVERAGEA(发货地址，联系电话))",
-    "parameters": {"订单编号":"001"，"发货地址":"003""联系电话":"005"}
+    "parameters": {"订单编号":"001","发货地址":"003","联系电话":"005"}
 }
 
 
