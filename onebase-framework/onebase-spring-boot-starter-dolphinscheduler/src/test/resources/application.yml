@@ -7,8 +7,6 @@ onebase:
     readTimeout: 30s
     writeTimeout: 30s
     logLevel: BODY
-    retryEnabled: true
-    maxRetries: 3
 test:
   user-id: 1
 

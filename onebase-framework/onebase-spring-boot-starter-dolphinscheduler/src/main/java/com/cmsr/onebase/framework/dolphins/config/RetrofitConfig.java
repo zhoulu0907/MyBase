@@ -76,47 +76,44 @@ public class RetrofitConfig {
             builder.addInterceptor(loggingInterceptor);
         }
 
-        // 配置重试
-        if (properties.isRetryEnabled()) {
-            builder.addInterceptor(chain -> {
-                okhttp3.Request request = chain.request();
-                okhttp3.Response response = null;
-                Exception lastException = null;
-                int tryCount = 0;
-                
-                while (tryCount < properties.getMaxRetries()) {
-                    try {
-                        response = chain.proceed(request);
-                        if (response.isSuccessful()) {
-                            return response;
-                        }
-                        // 响应不成功时，如果还有重试次数，关闭当前响应并重试
-                        if (tryCount < properties.getMaxRetries() - 1) {
-                            response.close();
-                            response = null;
-                        }
-                        tryCount++;
-                    } catch (Exception e) {
-                        lastException = e;
-                        // 异常时也要关闭响应
-                        if (response != null) {
-                            response.close();
-                            response = null;
-                        }
-                        tryCount++;
-                        if (tryCount >= properties.getMaxRetries()) {
-                            throw e;
-                        }
+        // 配置重试（固定启用，最大重试3次）
+        builder.addInterceptor(chain -> {
+            okhttp3.Request request = chain.request();
+            okhttp3.Response response = null;
+            int tryCount = 0;
+            final int maxRetries = 3;
+
+            while (tryCount < maxRetries) {
+                try {
+                    response = chain.proceed(request);
+                    if (response.isSuccessful()) {
+                        return response;
+                    }
+                    // 响应不成功时，如果还有重试次数，关闭当前响应并重试
+                    if (tryCount < maxRetries - 1) {
+                        response.close();
+                        response = null;
+                    }
+                    tryCount++;
+                } catch (Exception e) {
+                    // 异常时也要关闭响应
+                    if (response != null) {
+                        response.close();
+                        response = null;
+                    }
+                    tryCount++;
+                    if (tryCount >= maxRetries) {
+                        throw e;
                     }
                 }
-                
-                // 所有重试失败后，如果有响应则返回最后一次的响应，否则抛出异常
-                if (response != null) {
-                    return response;
-                }
-                throw new RuntimeException("请求失败且无可用响应");
-            });
-        }
+            }
+
+            // 所有重试失败后，如果有响应则返回最后一次的响应，否则抛出异常
+            if (response != null) {
+                return response;
+            }
+            throw new RuntimeException("请求失败且无可用响应");
+        });
 
         return builder.build();
     }
