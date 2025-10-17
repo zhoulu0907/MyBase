@@ -20,6 +20,10 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
@@ -99,6 +103,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     private MetadataValidationUniqueBuildService validationUniqueService;
     @Resource
     private MetadataValidationLengthBuildService validationLengthService;
+    @Resource
+    private MetadataValidationRequiredRepository validationRequiredRepository;
+    @Resource
+    private MetadataValidationUniqueRepository validationUniqueRepository;
+    @Resource
+    private MetadataValidationLengthRepository validationLengthRepository;
+    @Resource
+    private MetadataValidationFormatRepository validationFormatRepository;
 
     @Resource
     private ModelMapper modelMapper;
@@ -687,6 +699,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (maxLength != null && !maxLength.equals(origin.getDataLength()) && !hasConstraintsLengthConfig) {
                     processLengthValidation(fieldId, full);
                 }
+                
+                // 校验：同一实体的同一字段的同一种校验类型只能有一条生效的规则
+                validateValidationRuleUniqueness(fieldId, origin.getEntityId());
             }
         }
 
@@ -776,6 +791,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         processLengthValidation(fieldId, full);
                     }
                     
+                    // 校验：同一实体的同一字段的同一种校验类型只能有一条生效的规则
+                    validateValidationRuleUniqueness(fieldId, existingField.getEntityId());
+                    
                     continue; // 跳过新增逻辑
                 }
 
@@ -839,6 +857,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (maxLength != null && maxLength > 0 && !hasConstraintsLengthConfig) {
                     processLengthValidation(fieldId, toCreate);
                 }
+                
+                // 校验：同一实体的同一字段的同一种校验类型只能有一条生效的规则
+                validateValidationRuleUniqueness(fieldId, toCreate.getEntityId());
             }
         }
 
@@ -1685,8 +1706,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             }
         }
 
-        // 处理约束
-        if (constraints != null) {
+        // 处理约束 - 修复：只有当 constraints 不为空对象时才执行删除和处理
+        // 空对象判断：所有字段都为 null 时视为空对象，不应该删除现有约束
+        if (constraints != null && !isConstraintsEmpty(constraints)) {
             fieldConstraintService.deleteByFieldId(fieldId);
             processFieldConstraints(fieldId, entityField, constraints);
         }
@@ -1695,6 +1717,26 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (autoNumber != null) {
             processAutoNumberConfig(fieldId, entityField, autoNumber);
         }
+    }
+    
+    /**
+     * 判断 FieldConstraintRespVO 是否为空对象
+     * 
+     * @param constraints 约束对象
+     * @return true-空对象（所有字段都为null），false-有实际内容
+     */
+    private boolean isConstraintsEmpty(FieldConstraintRespVO constraints) {
+        if (constraints == null) {
+            return true;
+        }
+        // 检查所有字段是否都为 null
+        return constraints.getLengthEnabled() == null
+            && constraints.getMinLength() == null
+            && constraints.getMaxLength() == null
+            && constraints.getLengthPrompt() == null
+            && constraints.getRegexEnabled() == null
+            && constraints.getRegexPattern() == null
+            && constraints.getRegexPrompt() == null;
     }
 
     /**
@@ -2311,6 +2353,82 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             String duplicateNames = String.join("、", duplicateFieldNames);
             throw new IllegalArgumentException("字段名称重复，同一个实体内字段名称必须唯一：" + duplicateNames);
         }
+    }
+
+    /**
+     * 校验字段的校验规则唯一性
+     * 规则：同一实体的同一字段的同一种校验类型，只能存在一条生效的校验规则
+     * 
+     * @param fieldId 字段ID
+     * @param entityId 实体ID
+     * @throws IllegalArgumentException 如果校验规则违反唯一性约束
+     */
+    private void validateValidationRuleUniqueness(Long fieldId, Long entityId) {
+        if (fieldId == null || entityId == null) {
+            return;
+        }
+
+        // 获取字段信息用于错误提示
+        DefaultConfigStore cs = new DefaultConfigStore();
+        cs.and("id", fieldId);
+        MetadataEntityFieldDO field = metadataEntityFieldRepository.findOne(cs);
+        String fieldDisplayName = field != null && field.getDisplayName() != null 
+            ? field.getDisplayName() 
+            : (field != null && field.getFieldName() != null ? field.getFieldName() : "未知字段");
+
+        // 检查必填校验规则
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO> requiredList = 
+            validationRequiredRepository.findByFieldId(fieldId);
+        long enabledRequiredCount = requiredList.stream()
+            .filter(r -> r.getIsEnabled() != null && r.getIsEnabled() == 1)
+            .count();
+        if (enabledRequiredCount > 1) {
+            throw new IllegalArgumentException(String.format(
+                "字段【%s】存在多条生效的必填校验规则，同一字段的同一种校验类型只能有一条生效规则", 
+                fieldDisplayName
+            ));
+        }
+
+        // 检查唯一性校验规则
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO> uniqueList = 
+            validationUniqueRepository.findByFieldId(fieldId);
+        long enabledUniqueCount = uniqueList.stream()
+            .filter(u -> u.getIsEnabled() != null && u.getIsEnabled() == 1)
+            .count();
+        if (enabledUniqueCount > 1) {
+            throw new IllegalArgumentException(String.format(
+                "字段【%s】存在多条生效的唯一性校验规则，同一字段的同一种校验类型只能有一条生效规则", 
+                fieldDisplayName
+            ));
+        }
+
+        // 检查长度校验规则
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO> lengthList = 
+            validationLengthRepository.findByFieldId(fieldId);
+        long enabledLengthCount = lengthList.stream()
+            .filter(l -> l.getIsEnabled() != null && l.getIsEnabled() == 1)
+            .count();
+        if (enabledLengthCount > 1) {
+            throw new IllegalArgumentException(String.format(
+                "字段【%s】存在多条生效的长度校验规则，同一字段的同一种校验类型只能有一条生效规则", 
+                fieldDisplayName
+            ));
+        }
+
+        // 检查格式校验规则
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO> formatList = 
+            validationFormatRepository.findByFieldId(fieldId);
+        long enabledFormatCount = formatList.stream()
+            .filter(f -> f.getIsEnabled() != null && f.getIsEnabled() == 1)
+            .count();
+        if (enabledFormatCount > 1) {
+            throw new IllegalArgumentException(String.format(
+                "字段【%s】存在多条生效的格式校验规则，同一字段的同一种校验类型只能有一条生效规则", 
+                fieldDisplayName
+            ));
+        }
+
+        log.debug("字段【{}】(ID: {})的校验规则唯一性检查通过", fieldDisplayName, fieldId);
     }
 
 }
