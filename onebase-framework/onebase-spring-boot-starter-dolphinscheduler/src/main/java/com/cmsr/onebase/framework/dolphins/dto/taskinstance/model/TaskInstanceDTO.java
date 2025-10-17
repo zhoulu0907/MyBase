@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.dolphins.dto.task.enums.TaskPriorityEnum;
 import com.cmsr.onebase.framework.dolphins.dto.task.enums.TaskExecuteTypeEnum;
 import com.cmsr.onebase.framework.dolphins.dto.task.enums.FlagEnum;
 import com.cmsr.onebase.framework.dolphins.dto.task.model.TaskDefinitionDTO;
+import com.cmsr.onebase.framework.dolphins.dto.taskinstance.enums.AlertFlagEnum;
 import com.cmsr.onebase.framework.dolphins.dto.taskinstance.enums.TaskInstanceStateEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -84,7 +85,7 @@ public class TaskInstanceDTO {
     private Integer retryTimes;
 
     @JsonProperty("alertFlag")
-    private FlagEnum alertFlag;
+    private AlertFlagEnum alertFlag;
 
     @JsonProperty("workflowInstance")
     private WorkflowInstanceDTO workflowInstance;

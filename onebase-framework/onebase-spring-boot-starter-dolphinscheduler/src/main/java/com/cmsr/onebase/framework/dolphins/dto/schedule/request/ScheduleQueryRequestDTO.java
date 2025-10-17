@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.dolphins.dto.schedule.request;
 
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.ReleaseStateEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -45,5 +46,5 @@ public class ScheduleQueryRequestDTO {
      * 发布状态(ONLINE/OFFLINE,可选)
      */
     @JsonProperty("releaseState")
-    private String releaseState;
+    private ReleaseStateEnum releaseState;
 }
