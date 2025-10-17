@@ -343,8 +343,6 @@ const PageManagerPage: FC = () => {
       parentId: copyForm.getFieldValue('parentId') === RootParentPage.id ? '' : copyForm.getFieldValue('parentId')
     };
 
-    // console.log('req: ', req);
-
     const res = await copyApplicationMenu(req);
     if (res) {
       Message.success('复制成功');

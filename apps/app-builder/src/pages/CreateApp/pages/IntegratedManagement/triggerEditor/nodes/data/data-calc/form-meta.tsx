@@ -35,17 +35,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
 
-  // 表单内容改变
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
   const onValuesChange = async (_changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-
-    // handlePropsOnChange(values);
-
     clearDataOriginNodeId(node.id);
 
     if (values.calRules) {

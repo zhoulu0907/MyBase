@@ -2,7 +2,8 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select, Switch, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { FLOW_MODAL_TYPE, FLOW_MODAL_CANCEL } from '@onebase/common';
+import type { ConditionField } from '@onebase/app';
+import { FLOW_MODAL_CANCEL, FLOW_MODAL_TYPE } from '@onebase/common';
 import { useEffect } from 'react';
 import CollectFields from '../../../components/collect-fields';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
@@ -10,7 +11,6 @@ import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
 import { updateModalOutputs } from './output';
-import type { ConditionField } from '@onebase/app';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -24,8 +24,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = async (changeValue: any, values: any) => {
     // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-    // handlePropsOnChange(values);
 
     if (values.fields) {
       const fields: ConditionField[] = values.fields
@@ -39,10 +37,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         });
       updateModalOutputs(node.id, fields);
     }
-  };
-  // 表单内容改变
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
   };
 
   // 弹窗类型改变

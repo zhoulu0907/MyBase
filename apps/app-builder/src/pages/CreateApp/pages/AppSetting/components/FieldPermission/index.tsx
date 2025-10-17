@@ -1,20 +1,20 @@
-import { useEffect, useState, type FC } from 'react';
-import { Radio, Checkbox, Divider, Grid, Form, Empty } from '@arco-design/web-react';
+import { Checkbox, Divider, Empty, Form, Grid, Radio } from '@arco-design/web-react';
 import {
-  getFieldPermission,
-  updateFieldPermission,
-  RoleAllFieldPermission,
-  FieldRead,
-  Visibility,
-  FieldEdit,
   FieldDownloadable,
+  FieldEdit,
+  FieldRead,
+  getFieldPermission,
+  RoleAllFieldPermission,
+  updateFieldPermission,
+  Visibility,
   type AuthFieldVO,
   type GetPermissionReq,
   type UpdateFieldPermissionReq
 } from '@onebase/app';
+import { useEffect, useState, type FC } from 'react';
 
-import styles from './index.module.less';
 import { IconAttachment, IconEmpty } from '@arco-design/web-react/icon';
+import styles from './index.module.less';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -297,11 +297,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               <Radio value={RoleAllFieldPermission.AllFieldPermissionAllow}>所有字段内容可操作</Radio>
               <Radio value={RoleAllFieldPermission.FieldCustomFieldPermission}>自定义权限</Radio>
             </RadioGroup>
-            {showEmpty && (
-              <>
-                <Empty description="暂无数据" />
-              </>
-            )}
+            {showEmpty && <Empty description="暂无数据" />}
             {fieldPermission && fieldPermission.length > 0 && (
               <Form.Item
                 field="authFields"

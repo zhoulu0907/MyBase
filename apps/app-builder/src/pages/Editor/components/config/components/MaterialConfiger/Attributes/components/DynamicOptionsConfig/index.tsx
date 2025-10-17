@@ -93,7 +93,6 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                           handlePropsChange(selectKey, newList);
                         }}
                         className={styles.tableColumnItemInput}
-                        // TODO(mickey): 国际化
                         placeholder={'新选项'}
                       />
                       <Button

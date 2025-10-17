@@ -209,7 +209,6 @@ export function useEditorProps(
           // fitView all nodes
           ctx.tools.fitView();
         }, 10);
-        // console.log(ctx.document.toString(true)); // Get the document tree
       },
       /**
        * Playground dispose

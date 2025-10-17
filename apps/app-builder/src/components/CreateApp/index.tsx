@@ -159,15 +159,15 @@ const CreateApp = (props: IProps) => {
           <div className={styles.modeSpec}>
             <span>
               <img src={tickSVG} alt="Mode Characteristics" />
-              开箱即用的数据资产管理
+              {'开箱即用的数据资产管理'}
             </span>
             <span>
               <img src={tickSVG} alt="Mode Characteristics" />
-              拖拽搭建业务表单
+              {'拖拽搭建业务表单'}
             </span>
             <span>
               <img src={tickSVG} alt="Mode Characteristics" />
-              覆盖表单应用开发基础需求
+              {'覆盖表单应用开发基础需求'}
             </span>
           </div>
         </div>
@@ -192,7 +192,7 @@ const CreateApp = (props: IProps) => {
         </div>
         <div className={styles.row}>
           <div className={styles.subtitle}>预览图</div>
-          <img className={styles.previewImg} src={previewSVG} alt="preview image" />
+          <img className={styles.previewImg} src={previewSVG} alt="previewImage" />
         </div>
       </div>
 

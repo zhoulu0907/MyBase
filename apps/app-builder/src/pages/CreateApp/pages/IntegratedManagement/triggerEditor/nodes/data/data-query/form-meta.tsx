@@ -15,6 +15,7 @@ import {
   type EntityFieldValidationTypes,
   type MetadataEntityPair
 } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useMemo, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
@@ -22,7 +23,6 @@ import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '@onebase/common';
 import { clearDataOriginNodeId, getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
 import { updateDataQueryOutputs } from './output';
 
@@ -424,17 +424,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [conditionFieldsForEditor, node.id]);
 
-  // 表单内容改变
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (_changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-    // handlePropsOnChange(values);
-  };
-
   const getInitData = () => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
   };
@@ -444,13 +433,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form
-            form={payloadForm}
-            layout="vertical"
-            onValuesChange={onValuesChange}
-            initialValues={getInitData()}
-            requiredSymbol={{ position: 'end' }}
-          >
+          <Form form={payloadForm} layout="vertical" initialValues={getInitData()} requiredSymbol={{ position: 'end' }}>
             <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>

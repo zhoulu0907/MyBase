@@ -36,7 +36,6 @@ const Right: React.FC = () => {
     // 如果已经登录了就自动跳转到首页
     if (TokenManager.isTokenValid()) {
       navigate('/onebase/platform-info');
-      return;
     }
   });
 
