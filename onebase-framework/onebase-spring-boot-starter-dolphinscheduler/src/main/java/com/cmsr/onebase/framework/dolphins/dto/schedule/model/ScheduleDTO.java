@@ -1,5 +1,9 @@
 package com.cmsr.onebase.framework.dolphins.dto.schedule.model;
 
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.FailureStrategyEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.ReleaseStateEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.WarningTypeEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.WorkflowInstancePriorityEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -74,13 +78,13 @@ public class ScheduleDTO {
      * 失败策略(END/CONTINUE)
      */
     @JsonProperty("failureStrategy")
-    private String failureStrategy;
+    private FailureStrategyEnum failureStrategy;
 
     /**
      * 告警类型(NONE/SUCCESS/FAILURE/ALL)
      */
     @JsonProperty("warningType")
-    private String warningType;
+    private WarningTypeEnum warningType;
 
     /**
      * 创建时间
@@ -110,7 +114,7 @@ public class ScheduleDTO {
      * 发布状态(OFFLINE/ONLINE)
      */
     @JsonProperty("releaseState")
-    private String releaseState;
+    private ReleaseStateEnum releaseState;
 
     /**
      * 告警组ID
@@ -122,7 +126,7 @@ public class ScheduleDTO {
      * 工作流实例优先级(HIGHEST/HIGH/MEDIUM/LOW/LOWEST)
      */
     @JsonProperty("workflowInstancePriority")
-    private String workflowInstancePriority;
+    private WorkflowInstancePriorityEnum workflowInstancePriority;
 
     /**
      * Worker组

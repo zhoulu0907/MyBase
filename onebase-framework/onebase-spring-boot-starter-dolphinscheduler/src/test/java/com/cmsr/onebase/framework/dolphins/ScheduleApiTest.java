@@ -2,6 +2,8 @@ package com.cmsr.onebase.framework.dolphins;
 
 import com.cmsr.onebase.framework.dolphins.api.ScheduleApi;
 import com.cmsr.onebase.framework.dolphins.config.DolphinSchedulerProperties;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.FailureStrategyEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.ReleaseStateEnum;
 import com.cmsr.onebase.framework.dolphins.dto.schedule.model.ScheduleDTO;
 import com.cmsr.onebase.framework.dolphins.dto.schedule.request.ScheduleCreateRequestDTO;
 import com.cmsr.onebase.framework.dolphins.dto.schedule.request.ScheduleQueryRequestDTO;
@@ -115,8 +117,8 @@ public class ScheduleApiTest {
         req.setStartTime("2025-10-17 00:00:00");
         req.setEndTime("2026-10-17 00:00:00");
         req.setTimezoneId("Asia/Shanghai");
-        req.setFailureStrategy("CONTINUE");
-        req.setReleaseState("OFFLINE");
+        req.setFailureStrategy(FailureStrategyEnum.CONTINUE);
+        req.setReleaseState(ReleaseStateEnum.OFFLINE);
 
         Response<ScheduleCreateResponseDTO> resp = scheduleApi.createSchedule(req).execute();
 
@@ -176,7 +178,7 @@ public class ScheduleApiTest {
         req.setStartTime("2025-10-17 00:00:00");
         req.setEndTime("2026-10-17 00:00:00");
         req.setTimezoneId("Asia/Shanghai");
-        req.setFailureStrategy("END");
+        req.setFailureStrategy(FailureStrategyEnum.END);
 
         Response<ScheduleUpdateResponseDTO> resp = scheduleApi.updateSchedule(testScheduleId, req).execute();
 

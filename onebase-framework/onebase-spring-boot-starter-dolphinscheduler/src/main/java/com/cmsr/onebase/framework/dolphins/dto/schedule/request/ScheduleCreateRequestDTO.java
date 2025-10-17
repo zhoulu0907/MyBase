@@ -1,5 +1,9 @@
 package com.cmsr.onebase.framework.dolphins.dto.schedule.request;
 
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.FailureStrategyEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.ReleaseStateEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.WarningTypeEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.WorkflowInstancePriorityEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -55,19 +59,19 @@ public class ScheduleCreateRequestDTO {
      * 失败策略(CONTINUE/END,默认CONTINUE)
      */
     @JsonProperty("failureStrategy")
-    private String failureStrategy;
+    private FailureStrategyEnum failureStrategy;
 
     /**
      * 发布状态(ONLINE/OFFLINE,默认OFFLINE)
      */
     @JsonProperty("releaseState")
-    private String releaseState;
+    private ReleaseStateEnum releaseState;
 
     /**
      * 告警类型(NONE/SUCCESS/FAILURE/ALL,默认NONE)
      */
     @JsonProperty("warningType")
-    private String warningType;
+    private WarningTypeEnum warningType;
 
     /**
      * 告警组ID(默认0)
@@ -79,7 +83,7 @@ public class ScheduleCreateRequestDTO {
      * 工作流实例优先级(HIGHEST/HIGH/MEDIUM/LOW/LOWEST,默认MEDIUM)
      */
     @JsonProperty("workflowInstancePriority")
-    private String workflowInstancePriority;
+    private WorkflowInstancePriorityEnum workflowInstancePriority;
 
     /**
      * Worker组名称
