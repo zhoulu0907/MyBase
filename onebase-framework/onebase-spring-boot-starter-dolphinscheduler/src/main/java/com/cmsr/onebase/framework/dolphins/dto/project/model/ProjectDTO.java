@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.dolphins.dto.model;
+package com.cmsr.onebase.framework.dolphins.dto.project.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;

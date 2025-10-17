@@ -1,19 +1,17 @@
-package com.cmsr.onebase.framework.dolphins.dto.response;
+package com.cmsr.onebase.framework.dolphins.dto.project.response;
 
-import com.cmsr.onebase.framework.dolphins.dto.model.ProjectDTO;
+import com.cmsr.onebase.framework.dolphins.dto.project.model.ProjectDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.List;
-
 /**
- * 项目列表响应 DTO
+ * 项目更新响应 DTO
  *
  * @author matianyu
  * @date 2025-01-17
  */
 @Data
-public class ProjectListResponseDTO {
+public class ProjectUpdateResponseDTO {
 
     /**
      * 响应码
@@ -28,10 +26,10 @@ public class ProjectListResponseDTO {
     private String msg;
 
     /**
-     * 项目列表数据
+     * 项目数据
      */
     @JsonProperty("data")
-    private List<ProjectDTO> data;
+    private ProjectDTO data;
 
     /**
      * 是否成功

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.dolphins.dto.model;
+package com.cmsr.onebase.framework.dolphins.dto.project.model;
 
 import com.cmsr.onebase.framework.dolphins.enums.UserTypeEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.dolphins.dto.request;
+package com.cmsr.onebase.framework.dolphins.dto.project.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;

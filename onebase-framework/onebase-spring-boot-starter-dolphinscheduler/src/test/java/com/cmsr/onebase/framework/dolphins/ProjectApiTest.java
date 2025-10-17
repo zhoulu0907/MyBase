@@ -1,17 +1,16 @@
 package com.cmsr.onebase.framework.dolphins;
 
 import com.cmsr.onebase.framework.dolphins.api.ProjectApi;
-import com.cmsr.onebase.framework.dolphins.dto.model.ProjectDTO;
-import com.cmsr.onebase.framework.dolphins.dto.request.ProjectCreateRequestDTO;
-import com.cmsr.onebase.framework.dolphins.dto.request.ProjectUpdateRequestDTO;
-import com.cmsr.onebase.framework.dolphins.dto.response.*;
+import com.cmsr.onebase.framework.dolphins.dto.project.model.ProjectDTO;
+import com.cmsr.onebase.framework.dolphins.dto.project.request.ProjectCreateRequestDTO;
+import com.cmsr.onebase.framework.dolphins.dto.project.request.ProjectUpdateRequestDTO;
+import com.cmsr.onebase.framework.dolphins.dto.project.response.*;
 import com.cmsr.onebase.framework.dolphins.config.DolphinSchedulerProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import retrofit2.Response;
 
 import org.junit.jupiter.api.TestInstance;

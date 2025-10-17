@@ -1,17 +1,17 @@
-package com.cmsr.onebase.framework.dolphins.dto.response;
+package com.cmsr.onebase.framework.dolphins.dto.project.response;
 
-import com.cmsr.onebase.framework.dolphins.dto.model.ProjectDTO;
+import com.cmsr.onebase.framework.dolphins.dto.project.model.ProjectDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
- * 项目更新响应 DTO
+ * 项目创建响应 DTO
  *
  * @author matianyu
  * @date 2025-01-17
  */
 @Data
-public class ProjectUpdateResponseDTO {
+public class ProjectCreateResponseDTO {
 
     /**
      * 响应码
