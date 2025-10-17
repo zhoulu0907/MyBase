@@ -108,7 +108,7 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
         isVisible: 1,
         menuCode: "icopied",
         menuIcon: "icopied-icon",
-        menuName: "我抄送的",
+        menuName: "抄送我的",
         menuSort: 4,
         menuType: 1,
         parentId: "0"

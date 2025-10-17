@@ -1,5 +1,5 @@
 import { useRef, useState, type FC } from 'react';
-import { Drawer, Grid, Tag, Button, Popconfirm } from '@arco-design/web-react';
+import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web-react';
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit} from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg'
 import DetailTable from './DetailTable'
@@ -15,7 +15,7 @@ interface PageProps {
 }
 
 const DetailPage:FC<PageProps> = ({detailPopVisible=false, setPopVisible}) => {
-    let [drawWidth, setDrawWidth] = useState<number | string>(1060)
+    let [drawWidth, setDrawWidth] = useState<string>('66.66%')
     let [isShowRight, setIsShowRight] = useState(true)
 
     let confirmRef = useRef<any>(null)
@@ -24,7 +24,7 @@ const DetailPage:FC<PageProps> = ({detailPopVisible=false, setPopVisible}) => {
         if (type === 'FULLSCREEN') {
             setDrawWidth('100%')
         } else {
-            setDrawWidth(1060)
+            setDrawWidth('66.66%')
         }
     }
     function renderTitle() {
@@ -119,9 +119,9 @@ const DetailPage:FC<PageProps> = ({detailPopVisible=false, setPopVisible}) => {
                             </div>
                             <DetailStep />
                         </div>) : 
-                        (<div className='expend-sp-box' onClick={() => setIsShowRight(true)}>
+                        (<Tooltip position='lt' trigger='hover' content='展开审批记录'><div className='expend-sp-box' onClick={() => setIsShowRight(true)}>
                             <img src={ExpendSp} alt='' />
-                        </div>)
+                        </div></Tooltip>)
                     }
                 </div>
             </div>

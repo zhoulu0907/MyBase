@@ -1,9 +1,9 @@
 import { useState, type FC } from 'react';
-import { Table, type TableColumnProps, Button } from '@arco-design/web-react';
+import { Table, type TableColumnProps, Button, Link } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
 
-const WillDo:FC = () => {
+const IDone:FC = () => {
     const columns: TableColumnProps[] = [
         {
             title: '流程标题',
@@ -12,17 +12,27 @@ const WillDo:FC = () => {
         {
             title: '发起人',
             dataIndex: 'salary',
+            render: (val, record) => (
+                <span className='flex-bw-center'>
+                    <img src="/src/assets/images/avatar.svg" />{val}
+                </span>
+            ),
         },
         {
-            title: '当前节点状态',
+            title: '处理操作',
             dataIndex: 'address',
+            render: (val, record) => {
+                if (record.key === '1') {
+                    return <Link status='success'>{val}</Link>
+                } else if (record.key === '2') {
+                    return <Link status='error'>{val}</Link>
+                } else {
+                    return <Link status='warning'>{val}</Link>
+                }
+            },
         },
         {
-            title: '表单摘要',
-            dataIndex: 'email1',
-        },
-        {
-            title: '到达时间',
+            title: '处理时间',
             dataIndex: 'email',
             defaultSortOrder: 'ascend',
             sorter: (a, b) => {
@@ -34,10 +44,6 @@ const WillDo:FC = () => {
                 }
                 return 0;
             },
-        },
-        {
-            title: '发起时间',
-            dataIndex: 'email2',
         },
         {
             title: '操作',
@@ -87,9 +93,9 @@ const WillDo:FC = () => {
             <b>我已处理</b>
             <TableSearch uiConfig={{hasInput: true, hasFilter: true, hasSort: true, hasBatch: false}}/>
         </div>
-        <Table columns={columns} data={data} />
+        <Table className='task-tb-box created-tb' columns={columns} data={data} />
         {detailPopVisible && <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible}/>}
     </section>
 }
 
-export default WillDo;
+export default IDone;

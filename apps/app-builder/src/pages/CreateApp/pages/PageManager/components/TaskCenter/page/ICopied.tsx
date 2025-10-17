@@ -1,11 +1,17 @@
 import { useState, type FC } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Link } from '@arco-design/web-react';
+import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
 import '../taskSide.less'
-import BatchApproveModal from '../modal/batchApprove';
 
-const WillDo:FC = () => {
+const radioList = [
+    {label: '未读', value: '0'},
+    {label: '已读', value: '1'},
+    {label: '全部', value: 'all'}
+]
+let defaultCheck = 'all'
+
+const ICopied:FC = () => {
     const columns: TableColumnProps[] = [
         {
             title: '流程标题',
@@ -21,13 +27,17 @@ const WillDo:FC = () => {
             ),
         },
         {
-            title: '当前节点状态',
-            dataIndex: 'address',
-            render: (val, record) => <Tag color='blue' size='medium'>{val}</Tag>,
-        },
-        {
-            title: '表单摘要',
-            dataIndex: 'email1',
+            title: '流程状态',
+            dataIndex: 'email2',
+            render: (val, record) => {
+                if (record.key === '1') {
+                    return <Tag color='green' size='medium'>{val}</Tag>
+                } else if (record.key === '2') {
+                    return <Tag color='blue' size='medium'>{val}</Tag>
+                } else {
+                    return <Tag color='gray' size='medium'>{val}</Tag>
+                }
+            },
         },
         {
             title: '到达时间',
@@ -42,11 +52,6 @@ const WillDo:FC = () => {
                 }
                 return 0;
             },
-        },
-        {
-            title: '发起时间',
-            dataIndex: 'email2',
-            render: (val, record) => <Link status='warning'>{val}</Link>
         },
         {
             title: '操作',
@@ -86,49 +91,42 @@ const WillDo:FC = () => {
             email2: 'bbbample.com',
         },
     ];
-    let [tbRowSelection, setTbRowSelection] = useState<any>()
-    const [selectedRowKeys, setSelectedRowKeys] = useState<any>();
-
     let [detailPopVisible, setPopVisible] = useState(false)
-    let [approveVisible, setApproveVisible] = useState(false)
 
-    function handleBatchClick(hasRowCheck: boolean) {
-        console.log('batch click!', hasRowCheck)
-        if (hasRowCheck) {
-            setTbRowSelection({
-                type: 'checkbox',
-                selectedRowKeys,
-                onChange: (selectedKeys:Array<string>, selectedRows:Array<any>) => {
-                    console.log('onChange:', selectedKeys, selectedRows);
-                    setSelectedRowKeys(selectedRowKeys);
-                }
-            })
-        } else {
-            setTbRowSelection(undefined)
-        }
+    function CreatedRadioChange(val:string) {
+        console.log('radio ====', val)
     }
 
     function handleDetailPage(row:any) {
         console.log('click to detail page === row ===', row)
         setPopVisible(true)
     }
+
     return <section className='page-content-rgt'>
         <div className='table-title-box'>
-            <b>待我处理</b>
-            <TableSearch  uiConfig={{hasInput: true, hasFilter: true, hasSort: true, hasBatch: true}} batchEvent={handleBatchClick}/>
-        </div>
-        {tbRowSelection && <div className='flex-bw-center title-batch-box'>
-            <span>已选中3/20条</span>
-            <div className='batch-btns'>
-                <Button type='outline' onClick={() => setTbRowSelection(undefined)}>取消操作</Button>
-                <Button type='outline'>批量拒绝</Button>
-                <Button type='primary'>批量同意</Button>
+            <div>
+                <b style={{marginRight: '8px'}}>抄送我的</b>
+                <Radio.Group defaultValue={defaultCheck} onChange={CreatedRadioChange} name='button-radio-group' className='created-radio-group'>
+                    {radioList.map((item) => {
+                        return (
+                        <Radio key={item.value} value={item.value}>
+                            {({ checked }) => {
+                                return (
+                                    <Button key={item.value} type='text' className={`${checked ? 'rdo-checked' : ''}`}>
+                                        {item.label}
+                                    </Button>
+                                );
+                            }}
+                        </Radio>
+                        );
+                    })}
+                </Radio.Group>
             </div>
-        </div>}
-        <Table className='task-tb-box' rowKey='name' rowSelection={tbRowSelection} columns={columns} data={data} />
+            <TableSearch uiConfig={{hasInput: true, hasFilter: true, hasSort: true, hasBatch: false}}/>
+        </div>
+        <Table className='task-tb-box' columns={columns} data={data} />
         {detailPopVisible && <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible}/>}
-        {approveVisible && <BatchApproveModal approveVisible={approveVisible} setApproveVisible={setApproveVisible}/>}
     </section>
 }
 
-export default WillDo;
+export default ICopied;

@@ -1,6 +1,8 @@
 import { type FC } from 'react';
 import WillDo from './page/WillDo';
 import Done from './page/Done'
+import ICreated from './page/ICreated';
+import ICopied from './page/ICopied';
 
 const TaskCenterPage:FC<any> = ({curMenuId}) => {
     function renderPage() {
@@ -9,9 +11,9 @@ const TaskCenterPage:FC<any> = ({curMenuId}) => {
         } else if (curMenuId === 'TASK-ihavedone') {
             return <Done />
         } else if (curMenuId === 'TASK-icreated') {
-            return <section>123</section>
+            return <ICreated />
         } else if (curMenuId === 'TASK-icopied') {
-            return <section>123</section>
+            return <ICopied />
         } else if (curMenuId === 'TASK-taskproxy') {
             return <section>123</section>
         } else {

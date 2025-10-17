@@ -153,8 +153,22 @@
         }
     }
 }
+.task-tb-box {
+    .arco-table-cell .flex-bw-center {
+        justify-content: flex-start;
+        & > img {
+            margin-right: 6px;
+        }
+    }
+    &.created-tb {
+        .arco-link-is-warning {
+            color: #86909c;
+        }
+    }
+}
 // 抽屉详情页
 .draw-detail-pop {
+    min-width: 1060px;
     background-color: rgba(242, 243, 245, 1);
     .arco-drawer-content {
         padding: 0;
@@ -197,7 +211,7 @@
         color: rgba(134, 144, 156, 1);
     }
     .expend-sp-box {
-        position: absolute; right: 0; top: 0; 
+        position: fixed; right: 0; top: 130px; 
         border-color: rgba(201, 205, 212, 1);
         border-width: 1px;
         border-style: solid;
@@ -369,6 +383,24 @@
             }
             .sp-options {
                 color: rgba(134, 144, 156, 1);
+            }
+        }
+    }
+}
+// 各个page 特殊的样式
+.created-radio-group {
+    .arco-btn-text {
+        color: rgba(78, 89, 105, 1);
+        &.rdo-checked {
+            color: rgb(var(--primary-6));
+        }
+    }
+    .arco-radio {
+        margin: 0 2px; padding: 0;
+        & + .arco-radio {
+            &::before {
+                content: ''; position: absolute; height: 50%; left: -2px; top: 25%;
+                width: 2px; border-left: 1px solid rgba(78, 89, 105, 1);
             }
         }
     }

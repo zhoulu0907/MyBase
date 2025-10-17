@@ -3,7 +3,7 @@ import { Input, Dropdown, Menu, Button, InputTag, Select, DatePicker, Divider } 
 import tbSort from '@/assets/images/task_center/tb-sort.svg'
 import tbBatch from '@/assets/images/task_center/tb-batch.svg'
 import tbFilter from '@/assets/images/task_center/tb-filter.svg'
-import { IconCheck} from '@arco-design/web-react/icon';
+import { IconCheck } from '@arco-design/web-react/icon';
 import '../taskSide.less'
 
 const Option = Select.Option;
