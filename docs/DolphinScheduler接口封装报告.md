@@ -150,48 +150,60 @@
 
 ## 🎯 使用建议
 
-### 项目集成方式
+### 项目集成方式（推荐：统一客户端 DolphinSchedulerClient）
 
-```java
-// 1. 在 pom.xml 中引入依赖
+```xml
+<!-- 1. 在 pom.xml 中引入依赖 -->
 <dependency>
     <groupId>com.cmsr.onebase</groupId>
     <artifactId>onebase-spring-boot-starter-dolphinscheduler</artifactId>
 </dependency>
+```
 
-// 2. 在配置文件中配置 DolphinScheduler 连接信息
-// application.yml
+```yaml
+# 2. 在配置文件中配置 DolphinScheduler 连接信息（application.yml）
 onebase:
   dolphinscheduler:
-    url: http://dolphinscheduler-api:12345/dolphinscheduler/v2/
+    baseUrl: http://dolphinscheduler-api:12345/dolphinscheduler/v2/
     token: your-token-here
-
-// 3. 直接注入使用
-@Resource
-private ProjectApi projectApi;
-
-@Resource
-private WorkflowApi workflowApi;
-
-@Resource
-private TaskApi taskApi;
-
-@Resource
-private TaskInstanceApi taskInstanceApi;
-
-@Resource
-private ScheduleApi scheduleApi;
-
-@Resource
-private WorkflowInstanceApi workflowInstanceApi;
+    # 可选：超时与日志级别
+    connectTimeout: 5s
+    readTimeout: 30s
+    writeTimeout: 30s
+    # 日志级别：NONE / BASIC / HEADERS / BODY
+    logLevel: BASIC
 ```
+
+```java
+// 3. 统一注入并使用聚合客户端
+import jakarta.annotation.Resource;
+import com.cmsr.onebase.framework.dolphins.client.DolphinSchedulerClient;
+
+@Resource
+private DolphinSchedulerClient dolphins;
+
+// 示例：创建项目
+// dolphins.project().createProject(requestDto);
+
+// 示例：发布工作流定义
+// dolphins.workflow().releaseWorkflowDefinition(projectCode, workflowCode, 1);
+
+// 示例：创建/更新定时调度
+// dolphins.schedule().createSchedule(req);
+// dolphins.schedule().updateSchedule(id, req);
+
+// 示例：查询任务实例分页
+// dolphins.taskInstance().queryTaskListPaging(projectCode, pageNo, pageSize, ...);
+```
+
+> 说明：仍然保留对单个 Api 接口 Bean 的直接注入能力，但推荐通过 `DolphinSchedulerClient` 统一访问，减少注入数量、提升可维护性。
 
 ### 典型使用场景
 
-1. **创建调度任务**：ProjectApi → WorkflowApi → ScheduleApi
-2. **查询任务执行状态**：TaskInstanceApi
-3. **管理工作流**：WorkflowApi + TaskApi
-4. **控制工作流实例**：WorkflowInstanceApi（暂停/停止/重跑/恢复/删除/查询）
+1. **创建调度任务**：`dolphins.project()` → `dolphins.workflow()` → `dolphins.schedule()`  
+2. **查询任务执行状态**：`dolphins.taskInstance()`  
+3. **管理工作流**：`dolphins.workflow()` + `dolphins.task()`  
+4. **控制工作流实例**：`dolphins.workflowInstance()`（暂停/停止/重跑/恢复/删除/查询）
 
 ---
 
@@ -200,6 +212,7 @@ private WorkflowInstanceApi workflowInstanceApi;
 - 所有接口均基于 DolphinScheduler 3.3.1 版本的 API v2
 - 项目位置：`onebase-framework/onebase-spring-boot-starter-dolphinscheduler`
 - 支持自动配置和依赖注入，开箱即用
+- 新增聚合客户端：`DolphinSchedulerClient`（包名：`com.cmsr.onebase.framework.dolphins.client`）
 - 包含完整的异常处理和认证拦截器
 
 ---
