@@ -41,6 +41,13 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
     }
 
     /**
+     * 功能权限校验
+     */
+    protected void validatePermission(ProcessContext context) {
+
+    }
+
+    /**
      * 数据校验
      * @param context
      */

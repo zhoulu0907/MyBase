@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
+import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -288,60 +291,64 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，方法：" + methodCode);
 
         try {
-            //1. 校验实体存在
+            // 校验实体存在
             MetadataBusinessEntityDO entity = validateEntityExists(entityId);
 
-            //2. 校验字段列表存在
+            // 校验字段列表存在
             List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
 
-            //3. 初始化上下文
+            //1. 初始化上下文【新增、更新、删除、查询操作都需要此步骤】
             ProcessContext context = initializeContext(operationType, entity, fields, data, methodCode);
 
-
-            //4. 请求数据完整性校验（基础属性）
+            // 请求数据完整性校验（基础属性）【新增、更新操作需要此步骤】
             validateDataIntegrity(data, fields);
 
-            //5. 处理数据并设置默认值
+            // 处理数据并设置默认值
             Map<String, Object> processedData = processDataAndSetDefaults(data, fields);
-
             context.setProcessedData(processedData);
             context.setId(id);
 
-            // 6. 功能权限校验
+            // 2. 功能权限校验【新增、更新、删除、查询操作都需要此步骤】
             validatePermission(context);//todo 暂未实现
 
-            // 7. 数据标准化与补全
+            // 3. 数据标准化与补全【新增、更新、删除、查询操作都需要此步骤】
             standardizeData(context);//todo 暂未实现
 
-            // 8. 初步数据校验------数据校验规则 ----核心功能!!!
-            validateData(context);//todo 暂未实现
+            // 4.数据权限校验【更新、删除操作都需要此步骤】
 
-            // 目标记录存在性校验
+            // 5. 初步数据校验------数据校验规则 ----核心功能!!!【新增、更新、删除、查询操作都需要此步骤】
+            validateData(context);
+
+            // 6.目标记录存在性校验【更新、删除操作都需要此步骤】
             checkDataExistence(context);
 
-            // 9. 唯一性校验和条件校验
-            validateUniqueness(context);//todo 暂未实现
+            // 唯一性校验和条件校验【插入操作需要，第5步已做】
+            // validateUniqueness(context);
 
-            // 10. 前置自动化工作流触发
+            // 7. 前置自动化工作流触发【新增、更新、删除操作需要此步骤，查询操作不需要】
             executePreWorkflow(context);//暂未实现
 
-            // 11. 数据编号
+            // 数据编号【只有新增操作需要此步骤】
             generateDataNumber(context);//todo 暂未实现
 
-            // 12. 数据存储
+            // 8. 数据存储【新增、更新、删除操作（级联删除在本方法内部实现）需要此步骤，查询操作不需要】
             storeData(context);//todo 实现了create的方法
 
+            //数据权限校验拼接【只有查询操作需要此步骤】
+
+            //【只有查询操作需要此步骤】
             optimizeQueryConditions(context);
 
+            //【只有查询操作需要此步骤】
             queryData(context);
 
-            // 13. 后置自动化工作流触发
+            // 9. 后置自动化工作流触发【新增、更新、删除操作需要此步骤，查询操作不需要】
             executePostWorkflow(context);//todo 暂未实现
 
-            // 14. 结果格式化
+            // 10. 结果格式化【新增、更新、删除、查询操作都需要此步骤】
             Map<String, Object> result = formatResult(context);// 已实现
 
-            // 15. 日志记录
+            // 11. 日志记录【新增、更新、删除、查询操作都需要此步骤】
             logProcess(context);
 
             return result;
@@ -420,8 +427,14 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * 2. 功能权限校验
      */
     protected void validatePermission(ProcessContext context) {
-
-        //todo
+        Boolean hasPermission = false;
+        hasPermission = false;
+        LoginUser user = SecurityFrameworkUtils.getLoginUser();
+//        List list = SecurityFrameworkUtils.getLoginUser().getScopes();
+        if(!hasPermission){
+            log.info("checkPermission failed.");
+            throw exception(GlobalErrorCodeConstants.APP_PERM_CHECK_ERROR);
+        }
     }
 
     /**
