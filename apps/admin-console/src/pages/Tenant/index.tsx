@@ -1,38 +1,38 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { formatTimestamp, generateTimestampString } from '@/utils/date';
 import {
-  Table,
   Button,
-  Input,
-  Select,
-  Modal,
-  Message,
-  Space,
-  Typography,
-  Radio,
   Form,
+  Input,
   InputNumber,
+  Message,
+  Modal,
+  Radio,
+  Select,
+  Space,
   Switch,
+  Table,
   Tag,
-  Tooltip
+  Tooltip,
+  Typography
 } from '@arco-design/web-react';
 import { IconCopy, IconSearch } from '@arco-design/web-react/icon';
-import styles from './index.module.less'
-import {
-  getPlatformTenantListApi,
-  getPlatformInfoApi,
-  addPlatformTenantApi,
-  updatePlatformTenantApi,
-  getCreateTenantCountApi,
-  getPlatformTenantAdminListApi,
-  PlatformTenantStatus,
-  getOtherTenantCountApi,
-  getTenantUserCountApi,
-  type PlatformTenantInfo,
-  type CreateTenantParams,
-  type UpdateTenantParams
-} from "@onebase/platform-center";
 import { getBackendURL } from '@onebase/common';
-import { formatTimestamp, generateTimestampString } from '@/utils/date';
+import {
+  addPlatformTenantApi,
+  getCreateTenantCountApi,
+  getOtherTenantCountApi,
+  getPlatformInfoApi,
+  getPlatformTenantAdminListApi,
+  getPlatformTenantListApi,
+  getTenantUserCountApi,
+  PlatformTenantStatus,
+  updatePlatformTenantApi,
+  type CreateTenantParams,
+  type PlatformTenantInfo,
+  type UpdateTenantParams
+} from '@onebase/platform-center';
+import React, { useEffect, useState } from 'react';
+import styles from './index.module.less';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -55,11 +55,11 @@ const TenantManagement: React.FC = () => {
   const [tenantLimit, setTenantLimit] = useState<number>(10000); // 租户数量限制
   const [otherTenantCount, setOtherTenantCount] = useState<number>(0); // 其他租户分配数
   const [tenantUserCount, setTenantUserCount] = useState<number>(0); // 租户下用户数
-  const [adminList, setAdminList] = useState<{id: string, nickname: string, username: string, mobile: string}[]>([])
+  const [adminList, setAdminList] = useState<{ id: string; nickname: string; username: string; mobile: string }[]>([]);
   const [confirmText, setConfirmText] = useState('');
-  const [total, setTotal] = useState(0) 
+  const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const [form] = useForm();
 
   // 获取租户列表
@@ -73,7 +73,7 @@ const TenantManagement: React.FC = () => {
         keywords: keywordSearch // 添加关键词搜索参数
       });
       setTenantList(resp.list);
-      setTotal(resp.total)
+      setTotal(resp.total);
     } catch (error: any) {
       console.error(error);
       Message.error(error.message || '获取租户列表失败');
@@ -101,88 +101,88 @@ const TenantManagement: React.FC = () => {
     setCurrentPage(1); // 重置到第一页
   };
 
-   // 处理搜索输入变化（即时更新输入框）
+  // 处理搜索输入变化（即时更新输入框）
   const handleSearchInputChange = (value: string) => {
     setSearchInputValue(value);
-    
+
     // 清除之前的定时器
     if (searchDebounceTimer) {
       clearTimeout(searchDebounceTimer);
     }
-    
+
     // 设置新的定时器
     const timer = setTimeout(() => {
       // 这里不需要再设置状态，因为 setKeywordSearch 已经在上面执行了
       setKeywordSearch(value);
       setCurrentPage(1); // 重置到第一页
     }, 500); // 500ms 防抖延迟
-    
+
     setSearchDebounceTimer(timer);
   };
 
   // 获取Tenant参数
   const getTenantData = () => {
-    getPlatformAdminList()
-    getAllocatable()
-    getLicenseLimit()
-  }
+    getPlatformAdminList();
+    getAllocatable();
+    getLicenseLimit();
+  };
 
   // 获取license总数
   const getLicenseLimit = async () => {
     try {
       const licenseResp = await getPlatformInfoApi();
-      if(licenseResp) {
-        setTenantLimit(licenseResp.userLimit)
+      if (licenseResp) {
+        setTenantLimit(licenseResp.userLimit);
       }
     } catch (error) {
       console.error('Error fetching getLicenseLimit:', error);
     }
-  }
+  };
 
   // 获取可分配数量
   const getAllocatable = async () => {
     try {
       const resp = await getCreateTenantCountApi();
-      if(resp) {
+      if (resp) {
         setAllocatableLicense(resp);
       }
     } catch (error) {
       console.error('Error fetching allocatable:', error);
     }
-  }
+  };
 
   // 获取其他租户数量
-  const getOtherTenantCount = async (id?: string) => { 
+  const getOtherTenantCount = async (id?: string) => {
     try {
       const resp = await getOtherTenantCountApi(id);
-      if(resp) {
+      if (resp) {
         setOtherTenantCount(resp);
       }
     } catch (error) {
       console.error('Error fetching otherTenantCount:', error);
     }
-  }
+  };
   // 获取用户数量
   const getTenantUserCount = async (id: string) => {
     try {
       const resp = await getTenantUserCountApi(id);
-      if(resp) {
+      if (resp) {
         setTenantUserCount(resp);
       }
     } catch (error) {
       console.error('Error fetching tenantUserCount:', error);
     }
-  }
+  };
 
   // 获取管理员列表
-  const getPlatformAdminList = async () => { 
+  const getPlatformAdminList = async () => {
     try {
-      const adminListResp = await getPlatformTenantAdminListApi()
-      setAdminList(adminListResp)
+      const adminListResp = await getPlatformTenantAdminListApi();
+      setAdminList(adminListResp);
     } catch (error) {
       console.error('Error fetching adminList:', error);
     }
-  }
+  };
   // 打开新建弹窗
   const handleCreate = () => {
     setCurrentTenant(null);
@@ -191,19 +191,19 @@ const TenantManagement: React.FC = () => {
       status: PlatformTenantStatus.enabled,
       admin: undefined
     });
-    getTenantData()
-    getOtherTenantCount()
+    getTenantData();
+    getOtherTenantCount();
     setModalVisible(true);
     setIsNewTenant(true);
   };
 
-   // 生成租户编码
+  // 生成租户编码
   const generateTenantCode = () => {
     const timestamp = generateTimestampString();
     return `tenant_${timestamp}`;
   };
 
-   // 打开编辑弹窗
+  // 打开编辑弹窗
   const handleEdit = (record: PlatformTenantInfo) => {
     const tenant: PlatformTenantInfo = {
       id: record.id.toString(),
@@ -214,19 +214,20 @@ const TenantManagement: React.FC = () => {
       adminUserName: record.adminUserName,
       createTime: record.createTime,
       status: record.status,
-      tenantCode: record.tenantCode,
+      tenantCode: record.tenantCode
     };
     setCurrentTenant(tenant);
     setOriginalAdmin(record.adminNickName || record.adminUserName);
-    
+
     form.setFieldsValue({
       tenantName: record.name,
       tenantCode: record.tenantCode,
       admin: record.adminNickName,
       allocatedCount: record.accountCount,
       nickName: record.adminNickName,
-      status: record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
-      website: record.website,
+      status:
+        record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
+      website: record.website
     });
     getTenantData();
     getTenantUserCount(record.id.toString());
@@ -244,10 +245,11 @@ const TenantManagement: React.FC = () => {
 
       // 检查分配人数（仅在创建租户或更新租户且状态为启用时检查）
       const allocatedCount = values.allocatedCount;
-      const isStatusChangeToDisabled = currentTenant && 
-        form.getFieldValue('status') === PlatformTenantStatus.disabled && 
+      const isStatusChangeToDisabled =
+        currentTenant &&
+        form.getFieldValue('status') === PlatformTenantStatus.disabled &&
         currentTenant.status === PlatformTenantStatus.enabled;
-      
+
       // 只有在不是从启用改为禁用的情况下才检查人数限制
       if (!isStatusChangeToDisabled) {
         // 允许分配的人数
@@ -267,14 +269,14 @@ const TenantManagement: React.FC = () => {
         setModalLoading(false); // 重置加载状态
         return;
       }
-      
+
       if (currentTenant) {
         // 更新租户
         await updateTenant(values);
       } else {
         // 创建租户
         await createTenant(values);
-      }      
+      }
     } catch (error) {
       console.error('表单验证失败:', error);
       setModalLoading(false); // 重置加载状态
@@ -291,13 +293,13 @@ const TenantManagement: React.FC = () => {
       const originalAdminId = currentTenant?.adminUserName || ''; // 原始 contactName 是 username
 
       // 根据 id 查找管理员
-      const selectedAdmin = adminList.find(admin => admin.id === newAdminId);
+      const selectedAdmin = adminList.find((admin) => admin.id === newAdminId);
       const adminUsername = selectedAdmin ? selectedAdmin.username : '';
       const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
       const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
-      
+
       // 构建更新参数
-      if(currentTenant?.id) {
+      if (currentTenant?.id) {
         const updateParams: UpdateTenantParams = {
           id: currentTenant.id,
           name: values.tenantName,
@@ -308,7 +310,7 @@ const TenantManagement: React.FC = () => {
           adminMobile: newAdminId !== originalAdminId ? adminMobile : '',
           status: values.status,
           accountCount: values.allocatedCount,
-          website: values.website,
+          website: values.website
         };
         // 调用 updatePlatformTenantApi
         await updatePlatformTenantApi(updateParams);
@@ -334,7 +336,7 @@ const TenantManagement: React.FC = () => {
   const createTenant = async (values: any) => {
     try {
       // 根据 id 查找管理员
-      const selectedAdmin = adminList.find(admin => admin.id === values.admin);
+      const selectedAdmin = adminList.find((admin) => admin.id === values.admin);
       const adminUsername = selectedAdmin ? selectedAdmin.username : '';
       const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
       const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
@@ -347,14 +349,13 @@ const TenantManagement: React.FC = () => {
         adminMobile: adminMobile,
         status: values.status,
         accountCount: values.allocatedCount,
-        website: values.website,
+        website: values.website
       };
       await addPlatformTenantApi(newTenantData);
       setCurrentPage(1);
       getPlatformTenantList();
       Message.success('创建租户成功');
       setModalVisible(false);
-
     } catch (error: any) {
       console.error('创建租户失败:', error);
       Message.error('创建租户失败');
@@ -379,7 +380,6 @@ const TenantManagement: React.FC = () => {
     } else {
       // 编辑时关闭所有弹窗
       setConfirmDisableVisible(false);
-      // setModalVisible(false);
     }
   };
 
@@ -425,7 +425,6 @@ const TenantManagement: React.FC = () => {
     document.body.removeChild(textArea);
   };
 
-
   // 表格列定义
   const columns = [
     {
@@ -437,10 +436,10 @@ const TenantManagement: React.FC = () => {
       title: '租户编码',
       dataIndex: 'tenantCode',
       sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => {
-      const timestampA = parseInt(a.tenantCode.replace('tenant_', ''), 10);
-      const timestampB = parseInt(b.tenantCode.replace('tenant_', ''), 10);
-      return timestampA - timestampB;
-    }
+        const timestampA = parseInt(a.tenantCode.replace('tenant_', ''), 10);
+        const timestampB = parseInt(b.tenantCode.replace('tenant_', ''), 10);
+        return timestampA - timestampB;
+      }
     },
     {
       title: '分配的人员数量',
@@ -459,18 +458,21 @@ const TenantManagement: React.FC = () => {
         const domainPrefix = getDomainPrefix();
         const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${record.id}/${text}/`;
         const displayUrl = simplifyUrl(fullUrl);
-        
+
         return (
           <Space className={styles.urlWrapper}>
-            <Tooltip position='tl' content={fullUrl}>
+            <Tooltip position="tl" content={fullUrl}>
               <Text className={styles.fullUrl} onClick={() => handleClick(fullUrl)}>
                 {displayUrl}
               </Text>
             </Tooltip>
-            <IconCopy className={styles.copyIcon} onClick={(e) => {
-              e.stopPropagation();
-              copyToClipboard(fullUrl);
-            }}/>
+            <IconCopy
+              className={styles.copyIcon}
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(fullUrl);
+              }}
+            />
           </Space>
         );
       }
@@ -478,16 +480,15 @@ const TenantManagement: React.FC = () => {
     {
       title: '创建时间',
       dataIndex: 'createTime',
-      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
-      render: (text: string) => (
-        <div>{formatTimestamp(text)}</div>
-      )
+      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) =>
+        new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
+      render: (text: string) => <div>{formatTimestamp(text)}</div>
     },
     {
       title: '状态',
       dataIndex: 'status',
       render: (status: number) => (
-        <Tag color={ status === PlatformTenantStatus.enabled ? 'green' : 'gray' }>
+        <Tag color={status === PlatformTenantStatus.enabled ? 'green' : 'gray'}>
           {status === PlatformTenantStatus.enabled ? '启用' : '禁用'}
         </Tag>
       )
@@ -515,17 +516,17 @@ const TenantManagement: React.FC = () => {
       console.error(error);
     }
   };
-  
+
   // 获取当前环境的域名前缀
   const getDomainPrefix = () => {
     // 检查全局配置
-      try {
-        const url = new URL(getBackendURL());
-        return `${url.protocol}//${url.host}`;
-      } catch (e) {
-        console.error('解析BASE_URL失败:', e);
-      }
-    
+    try {
+      const url = new URL(getBackendURL());
+      return `${url.protocol}//${url.host}`;
+    } catch (e) {
+      console.error('解析BASE_URL失败:', e);
+    }
+
     // 检查环境变量
     if (import.meta.env.VITE_API_BASE_URL) {
       try {
@@ -535,7 +536,7 @@ const TenantManagement: React.FC = () => {
         console.error('解析VITE_API_BASE_URL失败:', e);
       }
     }
-    
+
     // 返回默认值
     return 'http://localhost:9524';
   };
@@ -546,7 +547,6 @@ const TenantManagement: React.FC = () => {
       const urlObj = new URL(url);
       const host = urlObj.host;
       const protocol = urlObj.protocol;
-      // const pathname = urlObj.pathname;
       const hash = urlObj.hash;
 
       // 如果主机名很短，直接返回
@@ -581,7 +581,7 @@ const TenantManagement: React.FC = () => {
             style={{ width: 300 }}
             allowClear
             value={searchInputValue}
-            onChange={value => handleSearchInputChange(value)}
+            onChange={(value) => handleSearchInputChange(value)}
             // searchButton
             suffix={<IconSearch />}
           />
@@ -594,7 +594,7 @@ const TenantManagement: React.FC = () => {
         columns={columns}
         data={tenantList}
         loading={loading}
-        rowClassName={(record) => record.status === PlatformTenantStatus.enabled ? 'enabled-row' : ''}
+        rowClassName={(record) => (record.status === PlatformTenantStatus.enabled ? 'enabled-row' : '')}
         pagination={{
           current: currentPage,
           pageSize: 10,
@@ -603,7 +603,7 @@ const TenantManagement: React.FC = () => {
           onChange: handlePageChange
         }}
       />
-      
+
       {/* 新建/修改弹窗 */}
       <Modal
         title={currentTenant ? '修改租户' : '新建租户'}
@@ -653,10 +653,10 @@ const TenantManagement: React.FC = () => {
           >
             <InputNumber placeholder="请输入分配人员数量" min={1} />
           </Form.Item>
-          
+
           {/* 访问地址 */}
-          <Form.Item 
-            label="访问地址" 
+          <Form.Item
+            label="访问地址"
             field="website"
             rules={[{ required: true, message: '请输入访问地址' }]}
             validateTrigger={['onBlur']}
@@ -678,10 +678,11 @@ const TenantManagement: React.FC = () => {
                 if (!checked) {
                   setConfirmDisableVisible(true);
                 } else if (currentTenant && currentTenant.status === PlatformTenantStatus.disabled) {
-                  setTenantList(tenantList.map(item => 
-                    item.id === currentTenant.id ? { ...item, status: PlatformTenantStatus.enabled } : item
-                  ));
-                  // Message.success('已启用租户');
+                  setTenantList(
+                    tenantList.map((item) =>
+                      item.id === currentTenant.id ? { ...item, status: PlatformTenantStatus.enabled } : item
+                    )
+                  );
                 }
               }}
             />

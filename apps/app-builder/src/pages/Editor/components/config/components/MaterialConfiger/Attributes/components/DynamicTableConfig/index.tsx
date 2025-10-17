@@ -95,7 +95,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
 
-  // todo 暂时不能在表格展示的数据类型
+  // 暂时不能在表格展示的数据类型
   const hiddenFieldTypes = [
     ENTITY_FIELD_TYPE.SELECT.VALUE,
     ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE,
@@ -113,7 +113,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
     ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE,
     ENTITY_FIELD_TYPE.RADIO.VALUE,
-    ENTITY_FIELD_TYPE.CHECKBOX.VALUE,
+    ENTITY_FIELD_TYPE.CHECKBOX.VALUE
   ];
 
   // 获取字段列表
@@ -146,9 +146,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       disabled: item.disabled,
       id: item.id
     }));
-
-    // console.log('configs[columnsKey]: ', configs[columnsKey]);
-    // console.log('newColumns: ', newColumns);
 
     setColumnsConfig(newColumns);
     handlePropsChange(columnsKey, newColumns);
@@ -187,7 +184,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -242,7 +239,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         handlePropsChange(columnsKey, newList);
                       }}
                       className={styles.tableColumnItemInput}
-                      // TODO(mickey): 国际化
                       placeholder={`请输入第${idx + 1}项`}
                     />
                     <InputNumber
@@ -260,7 +256,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         setColumnsConfig(newList);
                         handlePropsChange(columnsKey, newList);
                       }}
-                      // TODO(mickey): 国际化
                       placeholder="宽度"
                     />
                     <Checkbox
@@ -268,7 +263,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                       onChange={(e) => {
                         const newList = [...columnsConfig];
                         if (newList[idx].width === undefined) {
-                          // TODO(mickey): 国际化
                           Message.error('请先设置宽度');
                           return;
                         }

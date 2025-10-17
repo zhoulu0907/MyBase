@@ -3,7 +3,6 @@ import IconBranch from '@/assets/images/edit_branch_icon.svg';
 import IconLayoutActive from '@/assets/images/edit_layout_active_icon.svg';
 import IconLayout from '@/assets/images/edit_layout_icon.svg';
 import { Tabs, Tooltip } from '@arco-design/web-react';
-// import { IconLeft, IconRight } from '@arco-design/web-react/icon';
 import { EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import MaterialContainer from './components/material';
@@ -15,7 +14,6 @@ const PANNEL_KEYS = ['material', 'metadata'] as const;
 type PannelKey = (typeof PANNEL_KEYS)[number];
 
 export default function EditorPanel() {
-  // const [showDrawer, setShowDrawer] = useState(true);
   const [activeTab, setActiveTab] = useState<EditorType>(EDITOR_TYPES.FORM_EDITOR);
   const [activeLeftTabKey, setActiveLeftTabKey] = useState<PannelKey>('material');
   const [childCollapsed, setChildCollapsed] = useState<PannelKey | string | undefined>('material');

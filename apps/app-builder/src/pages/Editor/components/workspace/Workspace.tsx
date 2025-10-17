@@ -303,8 +303,6 @@ export default function EditorWorkspace() {
             setComponents(newList);
           }}
           onAdd={(e) => {
-            // console.log('onAdd', e);
-
             let cpID = e.item.id || e.item.getAttribute('data-cp-id');
             const itemType = e.item.getAttribute('data-cp-type');
             const itemDisplayName = e.item.getAttribute('data-cp-displayname');
@@ -363,7 +361,6 @@ export default function EditorWorkspace() {
           forceFallback={true}
           className={styles.workspaceContent}
           onStart={(e) => {
-            // console.log('onStart', e);
             const cpID = e.item.getAttribute('data-cp-id') || '';
             setCurComponentID(cpID);
             const curComponentSchema = pageComponentSchemas[cpID] || {};
@@ -400,8 +397,6 @@ export default function EditorWorkspace() {
 
                   setCurComponentSchema(curComponentSchema);
 
-                  // console.log('当前组件的ID: ', cp.id);
-                  // console.log('当前组件的配置: ', curComponentSchema);
                   setShowDeleteButton(true);
                 }}
               >

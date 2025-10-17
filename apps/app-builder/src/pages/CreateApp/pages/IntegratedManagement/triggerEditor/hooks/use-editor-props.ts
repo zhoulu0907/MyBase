@@ -11,14 +11,11 @@ import { defaultFixedSemiMaterials } from '@flowgram.ai/fixed-semi-materials';
 import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
 import { debounce } from 'lodash-es';
 
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { DragNode } from '../components';
 import { BaseNode } from '../components/base-node';
 import BranchAdder from '../components/branch-adder';
 import NodeAdder from '../components/node-adder';
-// import { SelectorBoxPopover } from '../components/selector-box-popover';
-// import { createClipboardPlugin, createVariablePanelPlugin } from '../plugins';
-// import { GroupBoxHeader, GroupNode } from '../plugins/group-plugin';
-import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { CustomService } from '../services';
 import { shortcutGetter } from '../shortcuts';
 import { type FlowNodeRegistry } from '../typings';
@@ -130,21 +127,8 @@ export function useEditorProps(
         /**
          * Callback when drag drop
          */
-        onDrop: (ctx, dropData) => {
-          // console.log(
-          //   '>>> onDrop: ',
-          //   dropData.dropNode.id,
-          //   dropData.dragNodes.map(n => n.id),
-          // );
-        },
-        canDrop: (ctx, dropData) =>
-          // console.log(
-          //   '>>> canDrop: ',
-          //   dropData.isBranch,
-          //   dropData.dropNode.id,
-          //   dropData.dragNodes.map(n => n.id),
-          // );
-          true
+        onDrop: (ctx, dropData) => {},
+        canDrop: (ctx, dropData) => true
       },
       /**
        * Redo/Undo enable
@@ -225,7 +209,6 @@ export function useEditorProps(
           // fitView all nodes
           ctx.tools.fitView();
         }, 10);
-        // console.log(ctx.document.toString(true)); // Get the document tree
       },
       /**
        * Playground dispose

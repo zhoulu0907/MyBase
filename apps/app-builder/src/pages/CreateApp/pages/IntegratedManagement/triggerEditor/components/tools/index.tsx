@@ -7,8 +7,6 @@ import { usePlayground, usePlaygroundTools, useRefresh } from '@flowgram.ai/fixe
 import { FitView } from './fit-view';
 import { Minimap } from './minimap';
 import { MinimapSwitch } from './minimap-switch';
-// import { Readonly } from './readonly';
-// import { Run } from './run';
 import { Save } from './save';
 import { ToolContainer, ToolSection } from './styles';
 import { SwitchVertical } from './switch-vertical';
