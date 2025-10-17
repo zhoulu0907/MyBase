@@ -1,6 +1,6 @@
 import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   listApplicationMenu,
   MenuType,
@@ -162,7 +162,7 @@ const Runtime: React.FC = () => {
               className={`menuTree ${styles.tree}`}
               showLine={false}
               icons={{
-                switcherIcon: null,
+                switcherIcon: <IconDown />,
                 dragIcon: null
               }}
               actionOnClick={'expand'}
@@ -170,7 +170,10 @@ const Runtime: React.FC = () => {
                 width: '200px',
                 overflow: 'hidden',
                 boxSizing: 'border-box',
-                padding: '0 8px'
+                padding: '4px 8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4
               }}
             />
           </Sider>

@@ -1,8 +1,8 @@
 import { Button, Form, Input, Space } from '@arco-design/web-react';
 import { IconCopy, IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
+import { nanoid } from 'nanoid';
 import React, { useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { nanoid } from 'nanoid';
 import styles from '../../index.module.less';
 const FormItem = Form.Item;
 
@@ -14,7 +14,13 @@ export interface DynamicTabsConfigProps {
   id: string;
 }
 
-const DynamicTabsConfig: React.FC<DynamicTabsConfigProps> = ({ handlePropsChange, handleMultiPropsChange, item, configs, id }) => {
+const DynamicTabsConfig: React.FC<DynamicTabsConfigProps> = ({
+  handlePropsChange,
+  handleMultiPropsChange,
+  item,
+  configs,
+  id
+}) => {
   const componentKey = 'defaultValue';
 
   const [tabsConfig, setTabsConfig] = useState<any[]>(configs[componentKey] || []);
@@ -27,7 +33,7 @@ const DynamicTabsConfig: React.FC<DynamicTabsConfigProps> = ({ handlePropsChange
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={tabsConfig}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -74,7 +80,6 @@ const DynamicTabsConfig: React.FC<DynamicTabsConfigProps> = ({ handlePropsChange
                           handlePropsChange(componentKey, newList);
                         }}
                         className={styles.tableColumnItemInput}
-                        // TODO(mickey): 国际化
                         placeholder={'页签组件标题名称'}
                       />
                       <IconDragDotVertical
@@ -122,17 +127,14 @@ const DynamicTabsConfig: React.FC<DynamicTabsConfigProps> = ({ handlePropsChange
                 onClick={() => {
                   const newTitle = '新标签';
                   const newKey = nanoid();
-                  const newList = [
-                    ...tabsConfig,
-                    { title: newTitle, key: newKey }
-                  ];
+                  const newList = [...tabsConfig, { title: newTitle, key: newKey }];
                   add({ title: newTitle, key: newKey });
                   setTabsConfig(newList);
                   handlePropsChange(componentKey, newList);
                   handleMultiPropsChange([
                     { key: componentKey, value: newList },
                     { key: 'colCount', value: newList.length }
-                  ])
+                  ]);
                 }}
               >
                 添加一项

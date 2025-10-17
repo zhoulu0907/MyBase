@@ -1,11 +1,9 @@
 import { useI18n } from '@/hooks/useI18n';
 import { formatTimestamp } from '@/utils/date';
 import {
-  Button,
   Card,
   Descriptions,
   Message,
-  Modal,
   Space,
   Spin,
   Table,
@@ -22,8 +20,8 @@ import {
   type LicenseInfoList
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
 import LicenseDetailModal from './components/LicenseDetailModal/index.tsx';
+import styles from './index.module.less';
 
 const { Title, Text } = Typography;
 
@@ -44,7 +42,7 @@ const PlatformInfo: React.FC = () => {
     }
   };
 
-   const getPlatformInfoList = async (pageNo: number = 1, pageSize: number = 10) => {
+  const getPlatformInfoList = async (pageNo: number = 1, pageSize: number = 10) => {
     try {
       const res = await getPlatFormInfoListApi({ pageNo, pageSize });
       if (res && Array.isArray(res.list)) {
@@ -68,9 +66,8 @@ const PlatformInfo: React.FC = () => {
     const fetchData = async () => {
       setPageLoading(true);
       try {
-        await getPlatformInfoList(pagination.current, pagination.pageSize),
-        await getPlatformInfo()
-      } catch(error) {
+        (await getPlatformInfoList(pagination.current, pagination.pageSize), await getPlatformInfo());
+      } catch (error) {
         console.error('上传跳转报错', error);
       } finally {
         setPageLoading(false);
@@ -133,19 +130,18 @@ const PlatformInfo: React.FC = () => {
 
   // 处理文件上传变化
   const handleFileUploadChange = async (fileList: any[]) => {
-    
     // 防止重复上传
     if (isUploading) {
       return;
     }
-    
+
     // 只处理最新上传的文件，不累积处理
     if (fileList.length > 0) {
       const latestFile = fileList[fileList.length - 1];
-      
+
       // 获取原始文件对象 - 关键修正
       let file = null;
-      
+
       // 尝试多种方式获取文件对象
       if (latestFile.originFile) {
         file = latestFile.originFile;
@@ -156,10 +152,9 @@ const PlatformInfo: React.FC = () => {
       } else if (latestFile.raw) {
         file = latestFile.raw;
       }
-      
+
       // 验证文件对象
       if (file && (file instanceof File || file instanceof Blob)) {
-        
         const formData = new FormData();
         if (file instanceof File) {
           formData.append('file', file, file.name || 'license.lic.sm4');
@@ -167,19 +162,19 @@ const PlatformInfo: React.FC = () => {
           // 对于 Blob 类型，使用固定文件名
           formData.append('file', file, 'license.lic.sm4');
         }
-        
+
         setIsUploading(true);
         setLoading(true);
-        
+
         try {
           // 调用上传接口
           await uploadPlatformLicenseApi(formData);
           Message.success(t('platformInfo.uploadSuccess'));
-          
+
           // 重新获取列表数据
           await Promise.all([getPlatformInfoList(), getPlatformInfo()]);
         } catch (error: any) {
-          Message.error("上传license失败");
+          Message.error('上传license失败');
           console.error('上传license失败', error);
         } finally {
           setIsUploading(false);
@@ -210,13 +205,13 @@ const PlatformInfo: React.FC = () => {
     try {
       const pageNo = paginationInfo.current || 1;
       const pageSize = paginationInfo.pageSize || 10;
-      
+
       // 如果页面大小改变，重置到第一页
       const actualPageNo = pageSize !== pagination.pageSize ? 1 : pageNo;
-      
+
       await getPlatformInfoList(actualPageNo, pageSize);
-      
-      setPagination(prev => ({
+
+      setPagination((prev) => ({
         ...prev,
         current: actualPageNo,
         pageSize: pageSize
@@ -254,7 +249,7 @@ const PlatformInfo: React.FC = () => {
               </div>
               <div className={styles.createdAt}>
                 <Text type="secondary">
-                  {t('platformInfo.createdAt')}：{formatTimestamp(licenseInfo?.createTime)  || '--'}
+                  {t('platformInfo.createdAt')}：{formatTimestamp(licenseInfo?.createTime) || '--'}
                 </Text>
               </div>
             </div>

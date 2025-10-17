@@ -117,7 +117,7 @@ export default function Adder(props: { from: FlowNodeEntity; to?: FlowNodeEntity
             }}
             style={{
               backgroundColor: '#fff',
-              color: '#3370ff',
+              color: 'rgb(var(--primary-6))',
               borderRadius: 15
             }}
           />

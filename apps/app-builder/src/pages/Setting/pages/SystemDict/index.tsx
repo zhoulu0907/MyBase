@@ -1,4 +1,6 @@
 import InfoPanel from '@/components/InfoPanel';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-data-table';
 import DictList from '@/pages/Setting/pages/SystemDict/components/dict-list';
 import { Divider, Empty, Layout, Message, Modal, Space } from '@arco-design/web-react';
@@ -19,8 +21,6 @@ import { useEffect, useState } from 'react';
 import DictDataModal from './components/dict-data-modal';
 import DictModal from './components/dict-modal';
 import styles from './index.module.less';
-import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { PermissionButton as Button } from '@/components/PermissionControl';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -47,8 +47,6 @@ export default function SystemDictPage() {
   const [editItem, setEditItem] = useState<DictData | null>(null);
 
   useEffect(() => {
-    // console.log('activeDictId:', activeDictId);
-    // console.log('showEmpty:', showEmpty);
     console.log('!activeDictId || activeDictId:', !activeDictId || showEmpty);
     if (!activeDictId) {
       setShowEmpty(false);
@@ -155,8 +153,6 @@ export default function SystemDictPage() {
   );
 
   const handleDictSelect = (id: number | undefined) => {
-    // console.log('handleDictSelect id:', id);
-    // console.log('handleDictSelect !activeDictId || activeDictId:', !activeDictId || showEmpty);
     setActiveDictId(id);
     setCurrentPage(1);
     setShowEmpty(false);

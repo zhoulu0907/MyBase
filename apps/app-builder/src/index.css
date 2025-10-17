@@ -10,15 +10,56 @@
 /* tab下划线隐藏 */
 .createAppTabs {
   .arco-tabs-header {
+    display: flex;
+    gap: 10px;
+
     .arco-tabs-header-ink {
       display: none;
     }
   }
+
+  .arco-tabs-header-title {
+    .arco-tabs-header-title-text {
+      color: #272e3b;
+      font-weight: 400;
+    }
+    &:hover .arco-tabs-header-title-text {
+      &::before {
+        background-color: transparent;
+      }
+    }
+  }
+
+  .arco-tabs-header-title-active .arco-tabs-header-title-text {
+    font-weight: 500;
+    color: rgb(var(--primary-6));
+  }
 }
 
 /* 菜单隐藏样式 */
-.menuTree .arco-tree-node-switcher {
-  display: none;
+.menuTree {
+  .arco-tree-node-switcher {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+
+    .arco-tree-node-icon-hover:hover::before {
+      background-color: transparent;
+    }
+  }
+  .arco-tree-node-title {
+    padding: 0;
+    margin: 0;
+  }
+  .arco-tree-node {
+    padding: 0;
+  }
 }
 
 .buttonShowInput .arco-input-inner-wrapper {

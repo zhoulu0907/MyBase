@@ -11,12 +11,12 @@ import {
   type ConditionField,
   type MetadataEntityPair
 } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { useEffect, useState } from 'react';
 import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '@onebase/common';
 import { getPrecedingNodes, validateNodeForm } from '../../utils';
 import { updateDataAddOutputs } from './output';
 
@@ -179,16 +179,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     payloadForm.clearFields(['dataNodeId', 'fields']);
   };
 
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-    // handlePropsOnChange(values);
-  };
-
   return (
     <>
       <FormHeader />
@@ -197,7 +187,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onValuesChange={onValuesChange}
             requiredSymbol={{ position: 'end' }}
             layout="vertical"
           >
@@ -269,7 +258,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subEntityId" disabled={!mainEntityId} rules={[{ required: true, message: '请选择' }]}>
+                  <Form.Item
+                    field="subEntityId"
+                    disabled={!mainEntityId}
+                    rules={[{ required: true, message: '请选择' }]}
+                  >
                     <Select allowClear onChange={handleSubEntityIdChange}>
                       {subEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>

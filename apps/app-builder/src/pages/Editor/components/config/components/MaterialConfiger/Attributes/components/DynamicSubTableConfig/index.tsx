@@ -2,11 +2,11 @@
 import { Button, Form, Input, Space } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus } from '@arco-design/web-react/icon';
 // import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
+import { usePageEditorSignal } from '@onebase/ui-kit';
+import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { usePageEditorSignal } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
-import { nanoid } from 'nanoid';
 const FormItem = Form.Item;
 
 export interface DynamicCheckboxConfigProps {
@@ -19,25 +19,22 @@ export interface DynamicCheckboxConfigProps {
 const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePropsChange, item, configs, id }) => {
   const componentKey = 'subTable';
 
-  const {
-    pageComponentSchemas,
-    layoutSubComponents,
-    setLayoutSubComponents
-  } = usePageEditorSignal();
+  const { pageComponentSchemas, layoutSubComponents, setLayoutSubComponents } = usePageEditorSignal();
 
   const [allComponents, setAllComponents] = useState<any[]>(layoutSubComponents[id]?.[0] || []);
 
-
   useEffect(() => {
-    if (id && layoutSubComponents[id])
-      setAllComponents(layoutSubComponents[id]?.[0]);
+    if (id && layoutSubComponents[id]) setAllComponents(layoutSubComponents[id]?.[0]);
   }, [id, layoutSubComponents, pageComponentSchemas]);
 
-  console.debug({
-    pageComponentSchemas,
-    allComponents,
-    configs,
-  }, layoutSubComponents[id]);
+  console.debug(
+    {
+      pageComponentSchemas,
+      allComponents,
+      configs
+    },
+    layoutSubComponents[id]
+  );
 
   return (
     <>
@@ -47,7 +44,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={allComponents}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -103,7 +100,6 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                           setLayoutSubComponents(id, [newList]);
                         }}
                         className={styles.tableColumnItemInput}
-                        // TODO(mickey): 国际化
                         placeholder={'子组件表头名称'}
                       />
                       <Button
