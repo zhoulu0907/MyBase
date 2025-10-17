@@ -9,6 +9,14 @@ import styles from './index.module.less';
 import DynamicIcon from '@/components/DynamicIcon';
 import { menuIconList } from '@/components/MenuIcon/const';
 import { useSignals } from '@preact/signals-react/runtime';
+import EditIcon from '@/assets/images/edit_menu_icon.svg';
+import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
+import HiddenIcon from '@/assets/images/eye_off_icon.svg';
+import VisibleIcon from '@/assets/images/eye_on_icon.svg';
+import CopyIcon from '@/assets/images/copy_comp_icon.svg';
+import DeleteMenuIcon from '@/assets/images/app_delete.svg';
+import CreateGroupIcon from '@/assets/images/addfolder.svg';
+import CreatePageIcon from '@/assets/images/addpage.svg';
 
 const MenuItem = Menu.Item;
 
@@ -69,16 +77,19 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
     <Menu style={{ padding: '10px 5px', maxHeight: 'none' }}>
       {!isGroup && (
         <MenuItem
+          className={styles.menuContent}
           key="edit"
           onClick={(e) => {
             e.stopPropagation();
             handleEditPageSet();
           }}
         >
-          {'编辑'}
+          <img src={EditIcon} alt='编辑' />
+          编辑
         </MenuItem>
       )}
       <MenuItem
+        className={styles.menuContent}
         key="rename"
         onClick={(e) => {
           e.stopPropagation();
@@ -90,19 +101,23 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           renameForm.setFieldValue('menuIcon', menuIcon);
         }}
       >
-        {'重命名'}
+        <img src={RenameIcon} alt='重命名' />
+        重命名
       </MenuItem>
       <MenuItem
+        className={styles.menuContent}
         key="visible"
         onClick={(e) => {
           e.stopPropagation();
           triggerHide(menuID, isVisible);
         }}
       >
+        {isVisible === VisibleType.HIDDEN ? <img src={VisibleIcon} alt='隐藏' /> : <img src={HiddenIcon} alt='取消隐藏' />}
         {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
       </MenuItem>
       {!isGroup && (
         <MenuItem
+          className={styles.menuContent}
           key="copy"
           onClick={(e) => {
             e.stopPropagation();
@@ -112,11 +127,13 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             copyForm.setFieldValue('menuId', menuID);
           }}
         >
-          {'复制'}
+          <img src={CopyIcon} alt='复制' />
+          复制
         </MenuItem>
       )}
       {isGroup && (
         <MenuItem
+          className={styles.menuContent}
           key="createPage"
           onClick={(e) => {
             e.stopPropagation();
@@ -125,12 +142,14 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             createForm.setFieldValue('parentId', menuID);
           }}
         >
-          {'新建页面'}
+          <img src={CreatePageIcon} alt='新建页面' />
+          新建页面
         </MenuItem>
       )}
 
       {isGroup && (
         <MenuItem
+          className={styles.menuContent}
           key="createGroup"
           onClick={(e) => {
             e.stopPropagation();
@@ -139,11 +158,13 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             createForm.setFieldValue('parentId', menuID);
           }}
         >
-          {'新建分组'}
+          <img src={CreateGroupIcon} alt='新建分组' />
+          新建分组
         </MenuItem>
       )}
 
       <MenuItem
+        className={styles.menuContent}
         key="delete"
         onClick={(e) => {
           e.stopPropagation();
@@ -151,7 +172,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         }}
         style={{ color: 'red' }}
       >
-        {'删除'}
+        <img src={DeleteMenuIcon} alt='删除' />
+        删除
       </MenuItem>
     </Menu>
   );
@@ -206,7 +228,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </div>
       )}
       {showOption && (
-        <div className={styles.dropdownContainer} style={{ marginRight: isGroup ? 22 : 12 }}>
+        <div className={styles.dropdownContainer} style={{ marginRight: isGroup ? 26 : 0 }}>
           <Dropdown
             popupVisible={popupVisible}
             onVisibleChange={(visible) => {
