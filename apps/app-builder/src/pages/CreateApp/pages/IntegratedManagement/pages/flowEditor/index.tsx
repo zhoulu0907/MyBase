@@ -58,7 +58,7 @@ const FlowEditorPage: React.FC = () => {
     const params = {
       id: flowId.value || '',
       processDefinition: JSON.stringify({ nodes: processDefinitionJson }),
-      processStatus: type === 'save' ? ProcessStatus.ORIGINAL : ProcessStatus.ENABLED
+      enableStatus: type === 'save' ? ProcessStatus.ORIGINAL : ProcessStatus.ENABLED
     };
 
     console.log('params', params);
