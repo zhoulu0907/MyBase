@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.dolphins.config;
 
 import com.cmsr.onebase.framework.dolphins.api.ProjectApi;
+import com.cmsr.onebase.framework.dolphins.api.TaskApi;
 import com.cmsr.onebase.framework.dolphins.interceptor.AuthenticationInterceptor;
 import com.cmsr.onebase.framework.dolphins.interceptor.ErrorHandlingInterceptor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -136,6 +137,14 @@ public class RetrofitConfig {
     @Bean
     public ProjectApi projectApi(Retrofit retrofit) {
         return retrofit.create(ProjectApi.class);
+    }
+
+    /**
+     * 创建 TaskApi Bean
+     */
+    @Bean
+    public TaskApi taskApi(Retrofit retrofit) {
+        return retrofit.create(TaskApi.class);
     }
 
     /**
