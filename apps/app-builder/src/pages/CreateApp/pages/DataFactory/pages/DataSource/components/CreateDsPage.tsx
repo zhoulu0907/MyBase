@@ -30,8 +30,6 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
   const [form] = Form.useForm<DataSourceFormValues>();
   const [testing, setTesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  // 移除未使用的状态
-  // const [isInternal, setIsInternal] = useState(false);
   const isInternal = false;
   const [formValues, setFormValues] = useState<Partial<DataSourceFormValues>>({});
 

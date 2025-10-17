@@ -1,5 +1,5 @@
 // import { useAppEntityStore } from '@/store/store_entity';
-import { Button, Form, Input, Checkbox, Space, Message } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, Message, Space } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 // import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
@@ -107,7 +107,6 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                           handlePropsChange(checkboxKey, newList);
                         }}
                         className={styles.tableColumnItemInput}
-                        // TODO(mickey): 国际化
                         placeholder={'新选项'}
                       />
                       <Button

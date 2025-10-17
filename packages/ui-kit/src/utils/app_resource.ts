@@ -93,8 +93,6 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       };
 
       loadPagesetResp.pages[index].components = components.map((component) => {
-        // console.log('component: ', component);
-        // console.log('formPageComponentSchemas: ', formPageComponentSchemas);
         return {
           componentCode: component.id,
           componentType: component.type,
@@ -105,7 +103,6 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
           containerIndex: 0
         } as ComponentConfig;
       });
-      // console.log('loadPagesetResp.pages[index].components: ', loadPagesetResp.pages[index].components);
 
       const colComponents: any[] = [];
       layoutSubComponentsMap.forEach((cols: any[][], parentCode: string) => {

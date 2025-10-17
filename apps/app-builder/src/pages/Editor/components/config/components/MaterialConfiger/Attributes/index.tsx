@@ -113,9 +113,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       layout: curComponentSchema.layout
     };
 
-    // console.log(curComponentSchema.config);
-    // console.log(newCurComponentSchema.config);
-
     setCurComponentSchema(newCurComponentSchema);
     setPageComponentSchemas(cpID, newCurComponentSchema);
   };
@@ -142,9 +139,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       },
       layout: curComponentSchema.layout
     };
-
-    // console.log(curComponentSchema.config);
-    // console.log(newCurComponentSchema.config);
 
     setCurComponentSchema(newCurComponentSchema);
     setPageComponentSchemas(cpID, newCurComponentSchema);

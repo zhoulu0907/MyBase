@@ -1,25 +1,25 @@
-import { useState, useEffect, type FC } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Menu, Popconfirm, Message, Empty } from '@arco-design/web-react';
-import { IconEdit, IconPlus, IconUser, IconClose } from '@arco-design/web-react/icon';
+import { Empty, Menu, Message, Popconfirm } from '@arco-design/web-react';
+import { IconClose, IconEdit, IconPlus, IconUser } from '@arco-design/web-react/icon';
 import {
-  listRole,
   createRole,
   deleteRole,
-  RoleType,
-  renameRole,
   getRoleUser,
-  type Role,
-  type ListRoleReq,
+  listRole,
+  renameRole,
+  RoleType,
+  type AuthRoleUsersPageRespVO,
   type CreateRoleReq,
   type DeleteRoleReq,
-  type RenameRoleReq,
   type GerRoleUserReq,
-  type AuthRoleUsersPageRespVO
+  type ListRoleReq,
+  type RenameRoleReq,
+  type Role
 } from '@onebase/app';
+import { useEffect, useState, type FC } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import RoleInfo from '../Role';
-import InputRoleName from './inputRoleName';
 import styles from './index.module.less';
+import InputRoleName from './inputRoleName';
 
 const MenuItem = Menu.Item;
 
@@ -93,10 +93,6 @@ const AppPermission: FC = () => {
     }
   };
 
-  // 失焦创建角色
-  // const onBlur = () => {
-  //   handlePressEnter();
-  // };
   // 回车新建自定义角色
   const handlePressEnter = async (e: any) => {
     const name = e.target.value;

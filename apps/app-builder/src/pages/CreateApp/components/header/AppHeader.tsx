@@ -2,9 +2,11 @@ import AppIconSVG from '@/assets/images/app_icon.svg';
 import AvatarSVG from '@/assets/images/avatar.svg';
 import TabMiddleBgSVG from '@/assets/images/tab_bg.svg';
 import TabFirstBgSVG from '@/assets/images/tab_first_bg.svg';
-import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
 import TabFirstSelectBgSVG from '@/assets/images/tab_first_select_bg.svg';
 import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
+import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
+import { iconMap } from '@/components/CreateApp/const';
+import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';
@@ -13,8 +15,6 @@ import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app'
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { iconMap } from '@/components/CreateApp/const';
-import DynamicIcon from '@/components/DynamicIcon';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -210,7 +210,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <img src={AvatarSVG} />
+              <img src={AvatarSVG} alt="avatar" />
             </div>
           </Dropdown>
         </div>

@@ -59,14 +59,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [cronValue, setCronValue] = useState('* * * * *');
   const [monthlyType, setMonthlyType] = useState('specified');
 
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = (changeValue: any, values: any) => {
-    // handlePropsOnChange(values);
-  };
-
   return (
     <>
       <FormHeader />
@@ -75,7 +67,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onValuesChange={onValuesChange}
             layout="vertical"
             requiredSymbol={{ position: 'end' }}
           >
