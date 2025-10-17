@@ -20,7 +20,7 @@ public class PageFlowProcessReqVO extends PageParam {
     private String processName;
 
     @Schema(description = "流程状态：0-禁用，1-启用", example = "1")
-    private Integer processStatus;
+    private Integer enableStatus;
 
     @Schema(description = "触发类型", example = "manual")
     private String triggerType;
