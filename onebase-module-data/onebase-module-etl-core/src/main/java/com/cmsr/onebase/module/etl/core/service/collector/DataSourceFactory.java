@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 public class DataSourceFactory {
-    private static final String PARAM_PATTERN = "\\{([^{}:]+)(:[^{}]+)?\\}";
+    private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
 
     public DataSource constructDataSource(DataFactoryDatasourceDO datasourceDO) {
         // 1. 获取数据库类型
@@ -88,8 +88,7 @@ public class DataSourceFactory {
         }
 
         StringBuffer sb = new StringBuffer();
-        Pattern regexPattern = Pattern.compile(PARAM_PATTERN);
-        Matcher matcher = regexPattern.matcher(jdbcTemplate);
+        Matcher matcher = PARAM_PATTERN.matcher(jdbcTemplate);
         while (matcher.find()) {
             String propertyName = matcher.group(1);
             Object property = connectionProperties.get(propertyName);
