@@ -30,7 +30,11 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
       itemType: rule.itemType,
       itemOrder: index + 1,
       isEnabled: 1,
-      format: rule.config?.dateFormat || rule.config?.fixedText || rule.config?.fieldName || ''
+      format:
+        (rule.config?.dateFormat as string) ||
+        (rule.config?.fixedText as string) ||
+        (rule.config?.fieldName as string) ||
+        ''
     }));
 
   // 如果有 SEQUENCE 规则，使用其配置；否则使用默认配置
@@ -61,11 +65,47 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
 };
 
 /**
+ * 根据字段ID找到完整的路径
+ * @param fieldId 字段ID
+ * @param fields 字段选项数据
+ * @returns 完整路径数组
+ */
+export const findFieldPath = (fieldId: string, fields: unknown[]): string[] => {
+  if (!fieldId || !fields || fields.length === 0) {
+    console.log('findFieldPath: invalid input', { fieldId, fieldsLength: fields?.length });
+    return [];
+  }
+
+  console.log('findFieldPath: searching for fieldId', fieldId, 'in fields:', fields);
+
+  for (const entity of fields) {
+    if (entity && typeof entity === 'object' && 'children' in entity) {
+      const entityWithChildren = entity as { value: string; children?: { value: string }[] };
+
+      if (entityWithChildren.children) {
+        for (const field of entityWithChildren.children) {
+          if (field.value === fieldId) {
+            return [entityWithChildren.value, field.value];
+          }
+        }
+      }
+    }
+  }
+
+  console.log('findFieldPath: no match found for fieldId', fieldId);
+  return [];
+};
+
+/**
  * 将 AutoNumberRule 对象格式转换为自动编号组件数组格式
  * @param autoNumberRule AutoNumberRule 对象格式
+ * @param fields 字段选项数据（用于查找字段路径）
  * @returns 转换后的自动编号组件数组格式
  */
-export const convertAutoNumberRuleToAutoCodeComp = (autoNumberRule: AutoNumberRule): AutoCodeRule[] => {
+export const convertAutoNumberRuleToAutoCodeComp = (
+  autoNumberRule: AutoNumberRule,
+  fields?: unknown[]
+): AutoCodeRule[] => {
   if (!autoNumberRule) {
     return [];
   }
@@ -102,11 +142,16 @@ export const convertAutoNumberRuleToAutoCodeComp = (autoNumberRule: AutoNumberRu
       case 'TEXT':
         autoCodeRule.config = { fixedText: rule.format || '' };
         break;
-      case 'FIELD_REF':
-        autoCodeRule.config = { fieldName: rule.format || '' };
+      case 'FIELD_REF': {
+        const fieldPath = fields ? findFieldPath(rule.format || '', fields) : rule.format ? [rule.format] : [];
+        autoCodeRule.config = {
+          fieldName: rule.format || '',
+          fieldPath: fieldPath
+        };
         break;
+      }
       default:
-        autoCodeRule.config = {};
+        autoCodeRule.config = { format: '' };
     }
 
     rules.push(autoCodeRule);
@@ -115,7 +160,7 @@ export const convertAutoNumberRuleToAutoCodeComp = (autoNumberRule: AutoNumberRu
   return rules;
 };
 
-const arrayMoveMutate = (array: any[], from: number, to: number) => {
+const arrayMoveMutate = (array: unknown[], from: number, to: number) => {
   const startIndex = to < 0 ? array.length + to : to;
 
   if (startIndex >= 0 && startIndex < array.length) {
@@ -124,13 +169,16 @@ const arrayMoveMutate = (array: any[], from: number, to: number) => {
   }
 };
 
-export const arrayMove = (array: any[], from: number, to: number) => {
+export const arrayMove = (array: unknown[], from: number, to: number) => {
   array = [...array];
   arrayMoveMutate(array, from, to);
 
-  return array.map((item, index) => ({
-    ...item
-  }));
+  return array.map((item) => {
+    if (item && typeof item === 'object') {
+      return { ...item };
+    }
+    return item;
+  });
 };
 
 // 用于计算自定义字段index

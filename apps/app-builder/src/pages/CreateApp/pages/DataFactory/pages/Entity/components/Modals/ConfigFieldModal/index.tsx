@@ -75,7 +75,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       // 获取实体字段列表
       loadEntityFields();
 
-      // 获取实体字段配置列表
+      // 获取实体及子表字段列表
       loadEntityFieldsWithChildren();
     } else {
       // 关闭时重置表单

@@ -4,8 +4,8 @@ import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-desig
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
-import type { AutoNumberRule, AutoCodeRule } from './types';
-import { convertAutoCodeCompoToAutoNumberRule, convertAutoNumberRuleToAutoCodeComp } from './utils';
+import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './types';
+import { convertAutoCodeCompoToAutoNumberRule, convertAutoNumberRuleToAutoCodeComp, findFieldPath } from './utils';
 
 // 选项配置组件
 interface OptionConfigProps {
@@ -136,7 +136,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
     console.log('initialConfig', initialConfig);
     if (initialConfig) {
       // 如果传入的是 AutoNumberRule 格式，转换为数组格式
-      return convertAutoNumberRuleToAutoCodeComp(initialConfig);
+      return convertAutoNumberRuleToAutoCodeComp(initialConfig, fields);
     }
 
     // 默认规则
@@ -166,7 +166,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
       {
         id: 'rule-4',
         itemType: 'FIELD_REF',
-        config: { fieldName: '' }
+        config: { fieldName: '', fieldPath: [] }
       }
     ];
   };
@@ -201,9 +201,8 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   };
 
   const handleAutoCodeConfigConfirm = (config: AutoNumberRule) => {
-    console.log('config', config);
-    updateRule(editingRuleId, { config: config });
-    setDisplayText(getDisplayText(config));
+    updateRule(editingRuleId, { config: config as unknown as Record<string, unknown> });
+    setDisplayText(getDisplayText(config as unknown as AutoCodeRule['config']));
     setEditingRuleId('');
   };
 
@@ -237,6 +236,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   };
 
   const renderRuleConfig = (rule: AutoCodeRule) => {
+    console.log('rule', rule);
     switch (rule.itemType) {
       case 'SEQUENCE': {
         return (
@@ -319,9 +319,17 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               placeholder="请选择字段"
               className={styles.ruleInput}
               options={fields}
-              onChange={(value) =>
-                updateRule(rule.id!, { config: { ...rule.config, fieldName: value[value.length - 1] } })
-              }
+              value={findFieldPath(rule.config.fieldName as string, fields)}
+              onChange={(value) => {
+                console.log('value', value);
+                updateRule(rule.id!, {
+                  config: {
+                    ...rule.config,
+                    fieldName: value[value.length - 1],
+                    fieldPath: value
+                  }
+                });
+              }}
             />
             <Button
               type="text"
@@ -344,7 +352,11 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
       <div className={styles.fieldTypeConfig}>
         <h4>自动编号规则</h4>
         <div className={styles.ruleConfigItems}>
-          <ReactSortable list={rules} setList={(newList) => setRules(newList as AutoCodeRule[])} animation={200}>
+          <ReactSortable
+            list={rules as unknown as any[]}
+            setList={(newList) => setRules(newList as AutoCodeRule[])}
+            animation={200}
+          >
             {rules.map((rule) => (
               <div key={rule.id}>{renderRuleConfig(rule)}</div>
             ))}
@@ -393,7 +405,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
         visible={autoCodeModalVisible}
         onVisibleChange={setAutoCodeModalVisible}
         onConfirm={handleAutoCodeConfigConfirm}
-        initialConfig={rules.find((rule) => rule.itemType === 'SEQUENCE')?.config}
+        initialConfig={rules.find((rule) => rule.itemType === 'SEQUENCE')?.config as unknown as AutoNumberRuleResponce}
       />
     </>
   );

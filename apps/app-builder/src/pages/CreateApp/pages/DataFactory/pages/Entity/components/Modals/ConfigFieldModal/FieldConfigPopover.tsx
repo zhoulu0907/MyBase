@@ -43,7 +43,7 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = ({
       {fieldType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE && (
         <AutoCodeConfig
           onConfirm={(rules) => onConfirm(ENTITY_FIELD_TYPE.AUTO_CODE.VALUE, fieldId, rules)}
-          initialConfig={field?.autoNumber}
+          initialConfig={field?.autoNumberConfig}
           onCancel={() => onCancel(ENTITY_FIELD_TYPE.AUTO_CODE.VALUE)}
           fields={fields}
         />
