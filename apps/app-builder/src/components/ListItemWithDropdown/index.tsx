@@ -13,7 +13,12 @@ export interface ListItemWithDropdownProps {
 
 const ListItemWithDropdown: React.FC<ListItemWithDropdownProps> = ({ title, droplist, active = false, onClick }) => {
   return (
-    <div className={`list-item-with-dropdown${active ? ' active' : ''}`} onClick={onClick}>
+    <div
+      className={`list-item-with-dropdown${active ? ' active' : ''}`}
+      onClick={() => {
+        onClick && onClick();
+      }}
+    >
       <div className="list-item-with-dropdown__title">
         <Typography.Ellipsis showTooltip>{title}</Typography.Ellipsis>
       </div>

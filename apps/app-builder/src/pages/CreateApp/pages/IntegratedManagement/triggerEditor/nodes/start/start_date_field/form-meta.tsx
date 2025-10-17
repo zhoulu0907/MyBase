@@ -98,14 +98,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [conditionFieldsForEditor, node.id]);
 
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = (changeValue: any, values: any) => {
-    // handlePropsOnChange(values);
-  };
-
   return (
     <>
       <FormHeader />
@@ -116,7 +108,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             layout="vertical"
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             requiredSymbol={{ position: 'end' }}
-            onValuesChange={onValuesChange}
           >
             <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />

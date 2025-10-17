@@ -32,7 +32,9 @@ const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
 const XTable = memo(
-  (props: XTableConfig & { runtime?: boolean; showFromPageData?: Function; showAddBtn?: boolean }) => {
+  (
+    props: XTableConfig & { runtime?: boolean; showFromPageData?: Function; showAddBtn?: boolean; refresh?: number }
+  ) => {
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
@@ -62,7 +64,8 @@ const XTable = memo(
       operationButton,
       advancedButtonPermission,
       // operationButtonCollpaseNumber,
-      operationButtonShowType
+      operationButtonShowType,
+      refresh
     } = props;
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
@@ -80,7 +83,8 @@ const XTable = memo(
       width: '110px',
       render: (_: any, record: any) => {
         if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
-        const isDisabled = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED];
+        const isDisabled =
+          advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
         return (
           <Space>
             {operationButton?.map((opearate, index) => (
@@ -91,22 +95,12 @@ const XTable = memo(
                       whiteSpace: 'nowrap',
                       opacity: isDisabled ? 0.5 : 1,
                       cursor: isDisabled ? 'not-allowed' : 'pointer',
-                      pointerEvents: isDisabled ? 'none' : 'auto'
+                      pointerEvents: isDisabled ? 'none' : 'auto',
+                      zIndex: 10
                     }}
                     onClick={(event) => {
                       event.stopPropagation();
-                      if (redirectMethod === RedirectMethod.DRAWER) {
-                        // 打开抽屉显示详情
-                        console.log(redirectPageId);
-                        pagesRuntimeSignal.setDrawerVisible(true);
-                        redirectPageId && pagesRuntimeSignal.setDrawerPageId(redirectPageId);
-
-                        handleEdit(record.id, false);
-                      } else if (redirectMethod === RedirectMethod.NEW_TAB) {
-                        // todo
-                      } else if (redirectMethod === RedirectMethod.CURRENT_TAB) {
-                      } else if (redirectMethod === RedirectMethod.MODAL) {
-                      }
+                      handleEdit(record.id, true);
                     }}
                   >
                     {
@@ -137,7 +131,8 @@ const XTable = memo(
                       whiteSpace: 'nowrap',
                       opacity: isDisabled ? 0.5 : 1,
                       cursor: isDisabled ? 'not-allowed' : 'pointer',
-                      pointerEvents: isDisabled ? 'none' : 'auto'
+                      pointerEvents: isDisabled ? 'none' : 'auto',
+                      zIndex: 10
                     }}
                     onClick={(event) => {
                       event.stopPropagation();
@@ -181,6 +176,12 @@ const XTable = memo(
         );
       }
     };
+
+    useEffect(() => {
+      if (refresh) {
+        handlePage();
+      }
+    }, [refresh]);
 
     useEffect(() => {
       if (Object.keys(columns as any).length) {
@@ -254,10 +255,8 @@ const XTable = memo(
       const { list, total } = res;
 
       const newTableData = (list || []).map((item: any) => {
-        //   console.log(item);
         const newItem = item.data;
         Object.entries(newItem).forEach(([key, value]) => {
-          // console.log(key, value);
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
             const field = mainMetaData.parentFields.find(
@@ -296,7 +295,6 @@ const XTable = memo(
       if (res) {
         Message.success('删除成功');
       }
-      handlePage();
     };
 
     const handleEdit = (id: string, toFormPage: boolean) => {

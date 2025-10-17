@@ -53,12 +53,22 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
   const [editTargetId, setEditTargetId] = useState('');
 
+  // 当前时间戳
+  const [detailMode, setDetailMode] = useState(true);
+  const [refresh, setRefresh] = useState(Date.now());
+
   useEffect(() => {
     const appId = getHashQueryParam('appId');
     if (appId) {
       setAppId(appId);
     }
   }, [window.location.hash]);
+
+  useEffect(() => {
+    if (drawerVisible.value) {
+      setDetailMode(true);
+    }
+  }, [drawerVisible.value]);
 
   // 获取主表字段
   const getMainMetaData = async (pageSetId: string) => {
@@ -229,7 +239,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodUpdate(req);
       console.log(res);
 
-      const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
+      const updateFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE)
+      );
       for (let ele of updateFlows) {
         flowParam = {
           processId: ele.processId,
@@ -243,6 +255,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         Message.success('更新成功');
       }
       setEditTargetId('');
+      setDrawerVisible(false);
+      setRefresh(Date.now());
     } else {
       const req: InsertMethodParams = {
         entityId: mainMetaData,
@@ -252,7 +266,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodInsert(req);
       console.log(res);
 
-      const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
+      const createFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
+      );
       for (let ele of createFlows) {
         flowParam = {
           processId: ele.processId,
@@ -272,9 +288,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const cancelSubmitForm = () => {
     console.log('取消提交');
-    form.resetFields();
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
+    setDetailMode(true);
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
@@ -326,6 +342,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     return res;
   };
 
+  const toEditMode = () => {
+    setDetailMode(false);
+  };
+
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
@@ -346,6 +366,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
                     showFromPageData={showFromPageData}
+                    refresh={refresh}
                   />
                 </div>
               )}
@@ -398,7 +419,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         {/* 右侧详情抽屉 */}
         <Drawer
           width={600}
-          title={<span>详情</span>}
+          title={
+            <div className={styles.drawerTitle}>
+              <div>详情</div>
+              {detailMode && (
+                <Button type="primary" onClick={() => toEditMode()}>
+                  编辑
+                </Button>
+              )}
+            </div>
+          }
           visible={drawerVisible.value}
           placement="right"
           onCancel={() => setDrawerVisible(false)}
@@ -427,13 +457,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                           useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
                         }
                         runtime={true}
-                        detailMode={true}
+                        detailMode={detailMode}
                         showFromPageData={() => {}}
                       />
                     </div>
                   )}
                 </Fragment>
               ))}
+
+              {!detailMode && (
+                <div className={styles.footer}>
+                  <Button type="primary" onClick={submitForm}>
+                    更新
+                  </Button>
+                  <Button type="default" onClick={cancelSubmitForm}>
+                    取消
+                  </Button>
+                </div>
+              )}
             </Form>
           </div>
         </Drawer>

@@ -50,7 +50,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap>
-            {fieldValue && defaultValue && fieldValue.map((ele: any) => <Tag>
+            {fieldValue && defaultValue && fieldValue.map((ele: any, index: number) => <Tag key={index}>
               {defaultValue.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>

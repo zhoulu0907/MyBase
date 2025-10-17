@@ -101,7 +101,6 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
                           handlePropsChange(radioKey, newList);
                         }}
                         className={styles.tableColumnItemInput}
-                        // TODO(mickey): 国际化
                         placeholder={'新选项'}
                       />
                       <Button

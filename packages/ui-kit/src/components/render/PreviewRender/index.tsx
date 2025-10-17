@@ -28,6 +28,8 @@ interface PreviewRenderProps {
   detailMode?: boolean;
 
   showFromPageData?: Function;
+
+  refresh?: number;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -36,7 +38,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   pageComponentSchema,
   runtime,
   detailMode,
-  showFromPageData
+  showFromPageData,
+  refresh
 }) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
@@ -258,6 +261,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             showFromPageData={showFromPageData}
+            refresh={refresh}
           />
         );
       case LIST_COMPONENT_TYPES.CALENDAR:

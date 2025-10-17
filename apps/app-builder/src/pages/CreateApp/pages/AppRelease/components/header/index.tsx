@@ -20,9 +20,9 @@ const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appStatus, currentVer
         <div className={styles.statusInfo}>
           <div className={styles.statusIcon}>
             <div className={styles.iconWrapper}>
-              {appStatus === AppStatus.DEVELOPING && <img src={EditingIcon} />}
-              {appStatus === AppStatus.PUBLISHED && <img src={ReleaseIcon} />}
-              {appStatus === AppStatus.EDITING_AFTER_PUBLISH && <img src={ReleaseIcon} />}
+              {appStatus === AppStatus.DEVELOPING && <img src={EditingIcon} alt="" />}
+              {appStatus === AppStatus.PUBLISHED && <img src={ReleaseIcon} alt="" />}
+              {appStatus === AppStatus.EDITING_AFTER_PUBLISH && <img src={ReleaseIcon} alt="" />}
             </div>
           </div>
           <div className={styles.statusText}>
@@ -57,13 +57,13 @@ const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appStatus, currentVer
           </div>
           <Button
             type={appStatus != AppStatus.DEVELOPING ? 'outline' : 'primary'}
-            status={appStatus != AppStatus.DEVELOPING ? 'danger' : 'success'}
+            status={appStatus != AppStatus.DEVELOPING ? 'danger' : 'default'}
             icon={
-              appStatus != AppStatus.DEVELOPING ? (
-                <img className={styles.releaseBtnIcon} src={ReleaseBtnDownIcon} />
-              ) : (
-                <img className={styles.releaseBtnIcon} src={ReleaseBtnUpIcon} />
-              )
+              <img
+                className={styles.releaseBtnIcon}
+                src={appStatus != AppStatus.DEVELOPING ? ReleaseBtnDownIcon : ReleaseBtnUpIcon}
+                alt=""
+              />
             }
             onClick={onReleaseToggle}
           >

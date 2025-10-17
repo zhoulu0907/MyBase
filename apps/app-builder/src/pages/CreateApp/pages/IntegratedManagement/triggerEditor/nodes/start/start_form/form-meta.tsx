@@ -157,10 +157,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
 
-  const onValuesChange = (changeValue: any, values: any) => {
-    // handlePropsOnChange(values);
-  };
-
   return (
     <>
       <FormHeader />
@@ -173,7 +169,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             }}
             layout="vertical"
             requiredSymbol={{ position: 'end' }}
-            onValuesChange={onValuesChange}
           >
             <Grid.Row>
               <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>

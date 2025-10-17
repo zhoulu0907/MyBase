@@ -1,19 +1,19 @@
-import { useClientContext } from '@flowgram.ai/fixed-layout-editor';
-import { useCallback, useContext, useMemo, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Dropdown, Menu } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretLeft, IconClose, IconMore } from '@arco-design/web-react/icon';
+import { useClientContext } from '@flowgram.ai/fixed-layout-editor';
+import { NodeType } from '@onebase/common';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { NodeRenderContext } from '../../context';
 import { useIsSidebar } from '../../hooks';
+import { NodeTypeName } from '../../nodes/const';
 import { clearDataOriginNodeId } from '../../nodes/utils';
 import { FlowCommandId } from '../../shortcuts/constants';
 import { type FlowNodeRegistry } from '../../typings';
+import styles from './index.module.less';
 import { TitleInput } from './title-input';
 import { getIcon } from './utils';
-import { NodeTypeName } from '../../nodes/const';
-import { NodeType } from '@onebase/common';
-import styles from './index.module.less';
 
 function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void }) {
   const { updateTitleEdit } = props;
@@ -82,7 +82,7 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
 
 export function FormHeader() {
   const { node, expanded, startDrag, toggleExpand, readonly } = useContext(NodeRenderContext);
-  const [titleEdit, updateTitleEdit] = useState<boolean>(false);
+  const [titleEdit, setTitleEdit] = useState<boolean>(false);
 
   const { setNodeId } = triggerEditorSignal;
   const isSidebar = useIsSidebar();
@@ -116,7 +116,7 @@ export function FormHeader() {
         }}
       >
         {getIcon(node)}
-        <TitleInput isSidebar={isSidebar} readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
+        <TitleInput isSidebar={isSidebar} readonly={readonly} titleEdit={titleEdit} updateTitleEdit={setTitleEdit} />
         {getNodeTypeNameTag()}
         {node.renderData.expandable && !isSidebar && (
           <Button
@@ -128,7 +128,7 @@ export function FormHeader() {
         )}
         {readonly ? undefined : (
           <div className={styles.operation}>
-            <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={updateTitleEdit} />}>
+            <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={setTitleEdit} />}>
               <Button size="mini" type="secondary" icon={<IconMore />} onClick={(e: Event) => e.stopPropagation()} />
             </Dropdown>
           </div>

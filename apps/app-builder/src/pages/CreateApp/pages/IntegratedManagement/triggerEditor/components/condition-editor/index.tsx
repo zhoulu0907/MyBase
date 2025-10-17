@@ -23,10 +23,10 @@ import {
   type EntityFieldValidationTypes,
   type ValidationTypeItem
 } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '@onebase/common';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -83,7 +83,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   // 过滤为空的条件
   useEffect(() => {
-    // console.log('filterCondition:  ', filterCondition);
     if (Array.isArray(filterCondition)) {
       filterCondition.forEach((item: any, index: number) => {
         if (Array.isArray(item.conditions)) {
@@ -96,14 +95,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
       form.setFieldValue('filterCondition', filterCondition);
     }
   }, []);
-
-  useEffect(() => {
-    // console.log('entityFieldValidationTypes:  ', entityFieldValidationTypes);
-  }, [entityFieldValidationTypes]);
-
-  useEffect(() => {
-    // console.log('filterCondition:  ', filterCondition);
-  }, [filterCondition]);
 
   const StaticValueComponent = (fieldName: string, fieldId: string, op: string) => {
     const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldId == fieldId);
@@ -143,7 +134,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                         second !== null &&
                         second <= first
                       ) {
-                        // callback('第二个值必须大于第一个值');
                         callback();
                         return;
                       }
@@ -153,7 +143,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                 }
               ]}
             >
-              {(list, {}) => {
+              {(list) => {
                 return (
                   <div className={styles.inputNumberWrapper}>
                     {list.map((item) => {
@@ -259,9 +249,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
       if (!fieldType || !field.fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
-          title: field.label,
+          title: field.label
         });
-      }else if (field?.fieldType === fieldType) {
+      } else if (field?.fieldType === fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
           title: field.label
