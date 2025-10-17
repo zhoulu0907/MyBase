@@ -1,4 +1,4 @@
-package com.cmsr.onebase.etl.core.dal.dataobject;
+package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Table;
@@ -8,15 +8,15 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@Table(name = "metadata_table")
+@Table(name = "datafactory_schema")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MetadataTableDO extends TenantBaseDO {
+public class DataFactorySchemaDO extends TenantBaseDO {
 
-    public MetadataTableDO setId(Long id) {
+    public DataFactorySchemaDO setId(Long id) {
         super.setId(id);
         return this;
     }
@@ -25,7 +25,7 @@ public class MetadataTableDO extends TenantBaseDO {
 
     private String fqnHash;
 
-    private String tableName;
+    private String schemaName;
 
     private String displayName;
 
