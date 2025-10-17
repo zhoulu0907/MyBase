@@ -7,6 +7,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -15,6 +16,11 @@ import java.util.List;
  */
 @Data
 public class StartDateFieldNodeData extends NodeData implements Serializable {
+
+    public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 
     private Long processId;
 
@@ -63,7 +69,7 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
      * @param triggerTime
      * @return
      */
-    public List<LocalDateTime> calculateOffTime(LocalDateTime triggerTime) {
+    public List<String> calculateOffTime(LocalDateTime triggerTime) {
         if (triggerTime == null || offsetValue == null || offsetUnit == null || offsetMode == null) {
             throw new IllegalArgumentException("参数错误");
         }
@@ -106,10 +112,10 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
         LocalDateTime startTime = resultTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
         //resultTime 设置 时分秒为 23:59:59
         LocalDateTime endTime = resultTime.withHour(23).withMinute(59).withSecond(59).withNano(999_999_999);
-        return List.of(startTime, endTime);
+        return List.of(startTime.format(TIMESTAMP_FORMATTER), endTime.format(TIMESTAMP_FORMATTER));
     }
 
-    public LocalDate calculateOffTime(LocalDate triggerTime) {
+    public String calculateOffTime(LocalDate triggerTime) {
         if (triggerTime == null || offsetValue == null || offsetUnit == null || offsetMode == null) {
             throw new IllegalArgumentException("参数错误");
         }
@@ -122,7 +128,7 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
         } else {
             resultTime = triggerTime;
         }
-        return resultTime;
+        return resultTime.format(DATE_FORMATTER);
     }
 
 }

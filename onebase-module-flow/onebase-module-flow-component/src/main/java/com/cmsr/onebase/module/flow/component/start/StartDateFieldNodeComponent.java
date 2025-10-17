@@ -7,10 +7,12 @@ import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
+import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,10 +59,32 @@ public class StartDateFieldNodeComponent extends NodeComponent {
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
         reqDTO.setEntityId(nodeData.getEntityId());
         if (fieldJdbcType == JdbcTypeEnum.TIMESTAMP) {
-            nodeData.calculateOffTime(LocalDateTime.now());
-        }
-        if (fieldJdbcType == JdbcTypeEnum.DATE) {
-            nodeData.calculateOffTime(LocalDate.now());
+            List<String> values = nodeData.calculateOffTime(LocalDateTime.now());
+            List<ConditionDTO> andConditionDTO = new ArrayList<>();
+            {
+                ConditionDTO conditionDTO = new ConditionDTO();
+                conditionDTO.setFieldId(nodeData.getOffsetFiledId());
+                conditionDTO.setOperator(OpEnum.GREATER_EQUALS.name());
+                conditionDTO.setFieldValue(List.of(values.get(0)));
+                andConditionDTO.add(conditionDTO);
+            }
+            {
+                ConditionDTO conditionDTO = new ConditionDTO();
+                conditionDTO.setFieldId(nodeData.getOffsetFiledId());
+                conditionDTO.setOperator(OpEnum.LESS_EQUALS.name());
+                conditionDTO.setFieldValue(List.of(values.get(1)));
+                andConditionDTO.add(conditionDTO);
+            }
+            reqDTO.setAndConditionDTO(andConditionDTO);
+        } else if (fieldJdbcType == JdbcTypeEnum.DATE) {
+            String value = nodeData.calculateOffTime(LocalDate.now());
+            List<ConditionDTO> andConditionDTO = new ArrayList<>();
+            ConditionDTO conditionDTO = new ConditionDTO();
+            conditionDTO.setFieldId(nodeData.getOffsetFiledId());
+            conditionDTO.setOperator(OpEnum.EQUALS.name());
+            conditionDTO.setFieldValue(List.of(value));
+            andConditionDTO.add(conditionDTO);
+            reqDTO.setAndConditionDTO(andConditionDTO);
         }
 
         if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
@@ -77,7 +102,7 @@ public class StartDateFieldNodeComponent extends NodeComponent {
     private JdbcTypeEnum queryFieldType(Long filedId) {
         EntityFieldJdbcTypeReqDTO reqDTO = new EntityFieldJdbcTypeReqDTO();
         reqDTO.setFieldIds(List.of(filedId));
-        List<EntityFieldJdbcTypeRespDTO> respDTOS = metadataEntityFieldApi.getFieldJdbcTypes(reqDTO);
+        List<EntityFieldJdbcTypeRespDTO> respDTOS = TenantUtils.executeIgnore(() -> metadataEntityFieldApi.getFieldJdbcTypes(reqDTO));
         if (CollectionUtils.isNotEmpty(respDTOS)) {
             EntityFieldJdbcTypeRespDTO respDTO = respDTOS.get(0);
             return JdbcTypeEnum.getByCode(respDTO.getJdbcType());
