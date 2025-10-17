@@ -1,16 +1,17 @@
-package com.cmsr.onebase.framework.dolphins.dto.response;
+package com.cmsr.onebase.framework.dolphins.dto.project.response;
 
+import com.cmsr.onebase.framework.dolphins.dto.project.model.ProjectDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
- * 项目删除响应 DTO
+ * 项目分页响应 DTO
  *
  * @author matianyu
  * @date 2025-01-17
  */
 @Data
-public class ProjectDeleteResponseDTO {
+public class ProjectPageResponseDTO {
 
     /**
      * 响应码
@@ -25,10 +26,10 @@ public class ProjectDeleteResponseDTO {
     private String msg;
 
     /**
-     * 删除结果（布尔值）
+     * 分页数据
      */
     @JsonProperty("data")
-    private Boolean data;
+    private PageInfoDTO<ProjectDTO> data;
 
     /**
      * 是否成功

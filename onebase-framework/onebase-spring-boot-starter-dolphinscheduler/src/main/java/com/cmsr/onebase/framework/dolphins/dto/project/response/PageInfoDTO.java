@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.dolphins.dto.response;
+package com.cmsr.onebase.framework.dolphins.dto.project.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

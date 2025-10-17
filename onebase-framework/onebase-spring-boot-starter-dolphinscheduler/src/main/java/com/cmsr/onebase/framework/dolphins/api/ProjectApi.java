@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.dolphins.api;
 
-import com.cmsr.onebase.framework.dolphins.dto.request.ProjectCreateRequestDTO;
-import com.cmsr.onebase.framework.dolphins.dto.request.ProjectUpdateRequestDTO;
-import com.cmsr.onebase.framework.dolphins.dto.response.*;
+import com.cmsr.onebase.framework.dolphins.dto.project.request.ProjectCreateRequestDTO;
+import com.cmsr.onebase.framework.dolphins.dto.project.request.ProjectUpdateRequestDTO;
+import com.cmsr.onebase.framework.dolphins.dto.project.response.*;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -41,7 +41,7 @@ public interface ProjectApi {
      */
     @PUT("projects/{code}")
     Call<ProjectUpdateResponseDTO> updateProject(@Path("code") Long code,
-                                                  @Body ProjectUpdateRequestDTO body);
+                                                 @Body ProjectUpdateRequestDTO body);
 
     /**
      * 通过编码删除项目

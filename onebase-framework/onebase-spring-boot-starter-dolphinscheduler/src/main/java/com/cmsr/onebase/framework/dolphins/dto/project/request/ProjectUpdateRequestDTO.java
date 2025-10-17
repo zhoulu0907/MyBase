@@ -1,17 +1,17 @@
-package com.cmsr.onebase.framework.dolphins.dto.request;
+package com.cmsr.onebase.framework.dolphins.dto.project.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * 项目创建请求 DTO
+ * 项目更新请求 DTO
  *
  * @author matianyu
  * @date 2025-01-17
  */
 @Data
-public class ProjectCreateRequestDTO {
+public class ProjectUpdateRequestDTO {
 
     /**
      * 项目名称
