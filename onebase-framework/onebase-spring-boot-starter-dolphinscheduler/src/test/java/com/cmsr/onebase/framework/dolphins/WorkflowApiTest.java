@@ -1,6 +1,8 @@
 package com.cmsr.onebase.framework.dolphins;
 
 import com.cmsr.onebase.framework.dolphins.api.WorkflowApi;
+import com.cmsr.onebase.framework.dolphins.dto.workflow.enums.ExecutionTypeEnum;
+import com.cmsr.onebase.framework.dolphins.dto.workflow.enums.ReleaseStateEnum;
 import com.cmsr.onebase.framework.dolphins.dto.workflow.model.WorkflowDefinitionDTO;
 import com.cmsr.onebase.framework.dolphins.dto.workflow.request.WorkflowCreateRequestDTO;
 import com.cmsr.onebase.framework.dolphins.dto.workflow.request.WorkflowQueryRequestDTO;
@@ -134,8 +136,8 @@ public class WorkflowApiTest {
         req.setProjectCode(testProjectCode);
         req.setName("test-workflow-" + System.currentTimeMillis());
         req.setDescription("集成测试创建的工作流");
-        req.setReleaseState("OFFLINE");
-        req.setExecutionType("PARALLEL");
+        req.setReleaseState(ReleaseStateEnum.OFFLINE);
+        req.setExecutionType(ExecutionTypeEnum.PARALLEL);
 
         Response<WorkflowCreateResponseDTO> resp = workflowApi.createWorkflow(req).execute();
 
@@ -216,7 +218,7 @@ public class WorkflowApiTest {
         WorkflowUpdateRequestDTO req = new WorkflowUpdateRequestDTO();
         req.setName("test-workflow-updated-" + System.currentTimeMillis());
         req.setDescription("集成测试更新的工作流");
-        req.setExecutionType("PARALLEL");
+        req.setExecutionType(ExecutionTypeEnum.PARALLEL);
 
         Response<WorkflowUpdateResponseDTO> resp = workflowApi.updateWorkflow(testWorkflowCode, req).execute();
 
