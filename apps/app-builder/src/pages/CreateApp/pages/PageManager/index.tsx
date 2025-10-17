@@ -1,5 +1,6 @@
 import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
+import { ReactSVG } from 'react-svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
@@ -8,7 +9,7 @@ import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
-import { IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
   createApplicationMenu,
@@ -43,6 +44,7 @@ import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import styles from './index.module.less';
+import { IconArrowDownRight } from '@douyinfe/semi-icons';
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -214,8 +216,19 @@ const PageManagerPage: FC = () => {
           setTitle(t('createApp.createPage'));
         }}
       >
-        <img src={CreatePageIcon} style={iconStyle} />
-        {t('createApp.createPage')}
+        <div className={styles.createItem}>
+          <ReactSVG
+            className={styles.customSvg}
+            src={CreatePageIcon}
+            beforeInjection={(svg) => {
+              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+              svg.setAttribute('fill', 'rgb(var(--primary-6))');
+              svg.setAttribute('width', '16px');
+              svg.setAttribute('height', '16px');
+            }}
+          />
+          {t('createApp.createPage')}
+        </div>
       </MenuItem>
       <MenuItem
         key="group"
@@ -225,8 +238,19 @@ const PageManagerPage: FC = () => {
           setTitle(t('createApp.createGroup'));
         }}
       >
-        <img src={CreateGroupIcon} style={iconStyle} />
-        {t('createApp.createGroup')}
+        <div className={styles.createItem}>
+          <ReactSVG
+            className={styles.customSvg}
+            src={CreateGroupIcon}
+            beforeInjection={(svg) => {
+              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+              svg.setAttribute('fill', 'rgb(var(--primary-6))');
+              svg.setAttribute('width', '16px');
+              svg.setAttribute('height', '16px');
+            }}
+          />
+          {t('createApp.createGroup')}
+        </div>
       </MenuItem>
     </Menu>
   );
@@ -492,124 +516,125 @@ const PageManagerPage: FC = () => {
   return (
     <div className={styles.pageManagerPage}>
       <Layout style={{ height: '100%' }}>
-        <Layout>
-          <Sider className={styles.sider}>
-            <div className={styles.siderTitle}>
-              所有页面
-              <Dropdown droplist={createMenuDropList} trigger="click" position="bl">
-                <Button type="text" icon={<IconPlus />} style={{ padding: 6 }}>
-                  新建
-                </Button>
-              </Dropdown>
+        <Sider className={styles.sider} style={{ width: 220 }}>
+          <div className={styles.siderTitle}>
+            所有页面
+            <Dropdown droplist={createMenuDropList} trigger="click" position="bl">
+              <Button type="text" icon={<IconPlus />} style={{ padding: 6 }}>
+                新建
+              </Button>
+            </Dropdown>
+          </div>
+          <div className={styles.siderHeader}>
+            <div className={styles.siderHeaderInput}>
+              <Input
+                allowClear
+                suffix={<IconSearch />}
+                placeholder={t('createApp.searchPlaceHolder')}
+                onChange={debouncedSearch}
+              />
             </div>
-            <div className={styles.siderHeader}>
-              <div className={styles.siderHeaderInput}>
-                <Input
-                  allowClear
-                  suffix={<IconSearch />}
-                  placeholder={t('createApp.searchPlaceHolder')}
-                  onChange={debouncedSearch}
+          </div>
+
+          <Tree
+            blockNode
+            draggable
+            selectedKeys={[curMenu?.id!]}
+            treeData={treeData}
+            className={`menuTree ${styles.tree}`}
+            showLine={false}
+            icons={{
+              switcherIcon: <IconDown />,
+              dragIcon: null
+            }}
+            expandedKeys={expandedKeys}
+            onExpand={setExpandedKeys}
+            actionOnClick={'expand'}
+            style={{
+              width: '220px',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              padding: '4px 8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }}
+            allowDrop={(info: any) => {
+              const { dragNode, dropNode, dropPosition } = info;
+
+              const dragParent = dragNode?.props?.parentKey;
+              const dropParent = dropNode?.props?.parentKey;
+              const sameParent = dragParent === dropParent;
+
+              // 仅允许同级间上下移动
+              return sameParent && dropPosition !== 0;
+            }}
+            onDrop={async (info: any) => {
+              const dragNode = info.dragNode;
+              const dropNode = info.dropNode;
+              const dropPosition = info.dropPosition;
+              const dropNodeParent = findParentNode(treeData!, dropNode.key);
+
+              moveNode(dragNode, dropNode, dropPosition);
+
+              // 生成接口参数
+              const payload: UpdateApplicationMenuOrderReq = {
+                id: dragNode.key,
+                parentId: dropNodeParent?.key || '0',
+                menuTree: buildMenuTree(treeData!)
+              };
+
+              console.debug('✅ 更新后的参数:', payload);
+              await updateApplicationMenuOrder(payload);
+            }}
+          />
+        </Sider>
+        <Content className={styles.content}>
+          {showGuide ? (
+            <div className={styles.guide}>
+              <div
+                className={styles.guideImg}
+                style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}
+              >
+                <div
+                  className={styles.guideButton}
+                  onClick={() => {
+                    setTitle(t('createApp.createPage'));
+                    setVisibleCreateForm('page');
+                  }}
                 />
               </div>
             </div>
-
-            <Tree
-              blockNode
-              draggable
-              selectedKeys={[curMenu?.id!]}
-              treeData={treeData}
-              className={`menuTree ${styles.tree}`}
-              showLine={false}
-              icons={{
-                switcherIcon: null,
-                dragIcon: null
-              }}
-              expandedKeys={expandedKeys}
-              onExpand={setExpandedKeys}
-              actionOnClick={'expand'}
-              style={{
-                width: '200px',
-                overflow: 'hidden',
-                boxSizing: 'border-box',
-                padding: '0 8px'
-              }}
-              allowDrop={(info: any) => {
-                const { dragNode, dropNode, dropPosition } = info;
-
-                const dragParent = dragNode?.props?.parentKey;
-                const dropParent = dropNode?.props?.parentKey;
-                const sameParent = dragParent === dropParent;
-
-                // 仅允许同级间上下移动
-                return sameParent && dropPosition !== 0;
-              }}
-              onDrop={async (info: any) => {
-                const dragNode = info.dragNode;
-                const dropNode = info.dropNode;
-                const dropPosition = info.dropPosition;
-                const dropNodeParent = findParentNode(treeData!, dropNode.key);
-
-                moveNode(dragNode, dropNode, dropPosition);
-
-                // 生成接口参数
-                const payload: UpdateApplicationMenuOrderReq = {
-                  id: dragNode.key,
-                  parentId: dropNodeParent?.key || '0',
-                  menuTree: buildMenuTree(treeData!)
-                };
-
-                console.debug('✅ 更新后的参数:', payload);
-                await updateApplicationMenuOrder(payload);
-              }}
-            />
-          </Sider>
-          <Content className={styles.content}>
-            {showGuide ? (
-              <div className={styles.guide}>
-                <div
-                  className={styles.guideImg}
-                  style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}
-                >
-                  <div
-                    className={styles.guideButton}
-                    onClick={() => {
-                      setTitle(t('createApp.createPage'));
-                      setVisibleCreateForm('page');
-                    }}
-                  />
+          ) : (
+            <>
+              {searchResult ? (
+                <div className={styles.contentEmpty}>
+                  <IconEmpty fontSize={56} />
+                  暂无数据
                 </div>
-              </div>
-            ) : (
-              <>
-                {searchResult ? (
-                  <div className={styles.contentEmpty}>
-                    <IconEmpty fontSize={56} />
-                    暂无数据
-                  </div>
-                ) : (
-                  <>
-                    {curMenu?.id && (
-                      <>
-                        <div className={styles.contentHeader}>
-                          <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                          <Button
-                            type="primary"
-                            onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}
-                          >
-                            {t('common.edit')}
-                          </Button>
-                        </div>
-                        <div className={styles.contentBody}>
-                          <PreviewContainer menuId={curMenu?.id} runtime={true} />
-                        </div>
-                      </>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-          </Content>
-        </Layout>
+              ) : (
+                <>
+                  {curMenu?.id && (
+                    <>
+                      <div className={styles.contentHeader}>
+                        <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                        <Button
+                          type="primary"
+                          onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}
+                        >
+                          {t('common.edit')}
+                        </Button>
+                      </div>
+                      <div className={styles.contentBody}>
+                        <PreviewContainer menuId={curMenu?.id} runtime={true} />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </Content>
       </Layout>
 
       {/* 重命名弹窗 */}
