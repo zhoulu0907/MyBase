@@ -357,7 +357,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   return (
     <Modal
-      className={styles['config-field-modal']}
+      className={styles.configFieldModal}
       title="字段配置"
       visible={visible}
       onOk={handleFinish}
@@ -371,11 +371,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         <Form.List field="fields">
           {() => {
             return (
-              <div className={styles['field-config-container']} id="field-config-container">
+              <div className={styles.fieldConfigContainer} id="field-config-container">
                 <SortableTable data={activeFields} columns={columns} onSort={handleSort} />
 
-                <div className={styles['add-field-section']}>
-                  <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles['add-field-button']}>
+                <div className={styles.addFieldSection}>
+                  <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles.addFieldButton}>
                     新增字段
                   </Button>
                 </div>
