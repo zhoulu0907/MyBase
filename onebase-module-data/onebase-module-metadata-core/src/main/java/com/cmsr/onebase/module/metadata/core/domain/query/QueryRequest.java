@@ -19,6 +19,12 @@ public class QueryRequest {
     private Long entityId;
     
     /**
+     * 全局AND条件列表，这些条件会与所有 conditionGroups 形成 AND 关系
+     * 最终逻辑：(andConditions[0] AND andConditions[1] AND ...) AND ((group1) OR (group2) OR ...)
+     */
+    private List<QueryCondition> andConditions;
+    
+    /**
      * 查询条件组：外层为OR关系，内层为AND关系
      */
     private List<List<QueryCondition>> conditionGroups;
