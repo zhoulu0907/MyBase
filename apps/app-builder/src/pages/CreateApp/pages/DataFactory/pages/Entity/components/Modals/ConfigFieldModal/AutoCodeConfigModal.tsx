@@ -47,6 +47,7 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
     console.log('useEffect', visible, initialConfig, form);
     if (visible && initialConfig) {
       const values = {
+        initialValue: initialConfig.startValue,
         numberMode: initialConfig.mode || 'FIXED_DIGITS',
         digitWidth: initialConfig.digitWidth || 4,
         overflowContinue: initialConfig.overflowContinue || 1,
@@ -68,10 +69,10 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
       onCancel={handleCancel}
       okText="确定"
       cancelText="取消"
-      className={styles['auto-number-config-modal']}
+      className={styles.autoNumberConfigModal}
       style={{ width: 500 }}
     >
-      <Form form={form} layout="horizontal" className={styles['auto-number-config-form']} labelAlign="left">
+      <Form form={form} layout="horizontal" className={styles.autoNumberConfigForm} labelAlign="left">
         <Form.Item label="编号方式" field="numberMode" rules={[{ required: true, message: '请选择编号方式' }]}>
           <Radio.Group>
             <Radio value="NATURAL">自然数编号</Radio>
@@ -92,9 +93,9 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
               <InputNumber min={2} max={5} style={{ width: 120 }} placeholder="请输入位数" />
             </Form.Item>
 
-            <Form.Item label="" field="overflowContinue" className={styles['checkbox-with-help']}>
+            <Form.Item label="" field="overflowContinue" className={styles.checkboxWithHelp}>
               <Checkbox>编号超出位数后继续递增</Checkbox>
-              <IconQuestionCircle className={styles['help-icon']} />
+              <IconQuestionCircle className={styles.helpIcon} />
             </Form.Item>
           </>
         )}
@@ -103,7 +104,7 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
           label={
             <span>
               开始值
-              <IconQuestionCircle className={styles['help-icon']} />
+              <IconQuestionCircle className={styles.helpIcon} />
             </span>
           }
           field="initialValue"
@@ -115,10 +116,10 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
           <InputNumber min={1} style={{ width: 120 }} placeholder="请输入开始值" />
         </Form.Item>
 
-        <Form.Item label="" field="nextRecordStartValue" className={styles['checkbox-with-help']}>
+        <Form.Item label="" field="nextRecordStartValue" className={styles.checkboxWithHelp}>
           <Checkbox>下一条记录以修改后的开始值编号</Checkbox>
           <Tooltip content="请设置下一条记录的编号，设置的编号不得小于开始值，未设置时默认使用初始值。">
-            <IconQuestionCircle className={styles['help-icon']} />
+            <IconQuestionCircle className={styles.helpIcon} />
           </Tooltip>
         </Form.Item>
 

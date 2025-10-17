@@ -239,7 +239,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodUpdate(req);
       console.log(res);
 
-      const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
+      const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
       for (let ele of updateFlows) {
         flowParam = {
           processId: ele.processId,
@@ -264,7 +264,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodInsert(req);
       console.log(res);
 
-      const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
+      const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
       for (let ele of createFlows) {
         flowParam = {
           processId: ele.processId,

@@ -102,7 +102,7 @@ const AppSettingPage: FC = () => {
   return (
     <div className={styles.appSettingPage}>
       <Layout style={{ height: '100%' }}>
-        <Layout>
+        <Layout className={styles.settingContent}>
           <Sider
             collapsible
             collapsed={collapsed}

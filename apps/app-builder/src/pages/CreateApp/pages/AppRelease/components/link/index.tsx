@@ -24,7 +24,7 @@ const AppAccessLink: React.FC<AppAccessLinkProps> = ({ accessUrl }) => {
 
   return (
     <Card className={styles.appAccessLink}>
-      <Typography.Title heading={5} className={styles.title}>
+      <Typography.Title heading={5} className={styles.title} style={{ marginTop: '0' }}>
         应用访问链接
       </Typography.Title>
 

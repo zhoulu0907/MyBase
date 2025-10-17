@@ -113,7 +113,7 @@ const CreateMasterDetailModal: React.FC<{
 
   return (
     <Modal
-      className={styles['create-master-detail-modal']}
+      className={styles.createMasterDetailModal}
       title="添加主子关系"
       visible={visible}
       onOk={handleFinish}
@@ -122,7 +122,7 @@ const CreateMasterDetailModal: React.FC<{
       cancelText="取消"
       confirmLoading={loading}
     >
-      <Form form={form} layout="vertical" className={styles['master-detail-form']}>
+      <Form form={form} layout="vertical">
         {/* 主表选择 */}
         <Form.Item label="主表" required>
           <Form.Item field="parentEntityId" rules={[{ required: true, message: '请选择主表' }]}>

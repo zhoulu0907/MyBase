@@ -468,7 +468,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             target.closest('#collapse-icon') ||
             target.closest('#status-change-icon') ||
             target.closest('#node-footer') ||
-            target.closest(`.${nodeStyles['field-section-content']}`)
+            target.closest(`.${nodeStyles.fieldSectionContent}`)
           ) {
             e.stopPropagation();
             return;
@@ -647,11 +647,11 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     };
 
     return (
-      <div className={styles['entity-er-container']}>
-        <div ref={containerRef} className={styles['graph-container']} />
+      <div className={styles.entityERContainer}>
+        <div ref={containerRef} className={styles.graphContainer} />
 
         {/* 工具栏 */}
-        <div className={styles['toolbar']}>
+        <div className={styles.toolbar}>
           <InputNumber
             mode="button"
             size="mini"
@@ -660,7 +660,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             min={60}
             step={5}
             defaultValue={100}
-            className={styles['zoom-input']}
+            className={styles.zoomInput}
             value={zoom}
             onChange={(value) => changeZoom(value)}
           />

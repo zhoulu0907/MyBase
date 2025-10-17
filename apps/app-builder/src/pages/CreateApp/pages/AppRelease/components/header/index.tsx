@@ -57,7 +57,7 @@ const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appStatus, currentVer
           </div>
           <Button
             type={appStatus != AppStatus.DEVELOPING ? 'outline' : 'primary'}
-            status={appStatus != AppStatus.DEVELOPING ? 'danger' : 'success'}
+            status={appStatus != AppStatus.DEVELOPING ? 'danger' : 'default'}
             icon={
               appStatus != AppStatus.DEVELOPING ? (
                 <img className={styles.releaseBtnIcon} src={ReleaseBtnDownIcon} />

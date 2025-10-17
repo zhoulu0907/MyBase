@@ -20,8 +20,13 @@ interface DatasourceRecord {
   creator: string;
   createTime: string;
 }
-export const CheckEntityPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('ER');
+
+const PAGE_TYPE = {
+  ER_CHART: 'ER_CHART',
+  ENTITY_TABLE: 'ENTITY_TABLE'
+};
+export const EntityPageHeader: React.FC = () => {
+  const [activeTab, setActiveTab] = useState(PAGE_TYPE.ER_CHART);
   const [refreshEntityList, setRefreshEntityList] = useState(false);
   const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
   const [dsData, setDsData] = useState<DatasourceRecord | null>(null);
@@ -62,43 +67,41 @@ export const CheckEntityPage: React.FC = () => {
   };
 
   return (
-    <div className={styles['entity-page']}>
-      <div className={styles['entity-page-header']}>
-        <div className={styles['entity-page-header-left']}>
-          <span className={styles['entity-page-header-left-name']}>{dsData?.datasourceName}</span>
-          <Tag className={styles['entity-page-header-left-tag']}>
+    <div className={styles.entityPage}>
+      <div className={styles.entityPageHeader}>
+        <div className={styles.entityPageHeaderLeft}>
+          <span className={styles.entityPageHeaderLeftName}>{dsData?.datasourceName}</span>
+          <Tag className={styles.entityPageHeaderLeftTag}>
             数据源编码：{dsData?.code}{' '}
-            <IconCopy onClick={() => handleCopy(dsData?.code)} className={styles['copy-icon']} fontSize={16} />
+            <IconCopy onClick={() => handleCopy(dsData?.code)} className={styles.copyIcon} fontSize={16} />
           </Tag>
-          <Tag className={styles['entity-page-header-left-tag']}>创建人：{dsData?.creator}</Tag>
-          <Tag className={styles['entity-page-header-left-tag']}>
+          <Tag className={styles.entityPageHeaderLeftTag}>创建人：{dsData?.creator}</Tag>
+          <Tag className={styles.entityPageHeaderLeftTag}>
             创建时间：{dayjs(dsData?.createTime).format('YYYY-MM-DD HH:mm:ss')}
           </Tag>
         </div>
 
-        <div className={styles['entity-page-header-right']}>
+        <div className={styles.entityPageHeaderRight}>
           <Radio.Group
             type="button"
-            // TODO(xiaoyi): 1. ER图命名和table大小写不一致， ER字符串多处用到 需要抽象出来
-            defaultValue="ER"
+            defaultValue={PAGE_TYPE.ER_CHART}
             style={{ marginLeft: 10 }}
             onChange={(value) => {
               setActiveTab(value);
             }}
           >
-            <Radio value="ER">
+            <Radio value={PAGE_TYPE.ER_CHART}>
               <IconMindMapping />
             </Radio>
-            <Radio value="table">
+            <Radio value={PAGE_TYPE.ENTITY_TABLE}>
               <IconNav />
             </Radio>
           </Radio.Group>
         </div>
       </div>
 
-      {activeTab === 'ER' && (
-        // TODO(xiaoyi): styles.xxx 全局修改下
-        <div className={styles['entity-page-content']}>
+      {activeTab === PAGE_TYPE.ER_CHART && (
+        <div className={styles.entityPageContent}>
           <EntityERContainer
             refreshEntityList={refreshEntityList}
             setRefreshEntityList={setRefreshEntityList}
@@ -108,8 +111,8 @@ export const CheckEntityPage: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'table' && (
-        <div className={styles['entity-page-content']}>
+      {activeTab === PAGE_TYPE.ENTITY_TABLE && (
+        <div className={styles.entityPageContent}>
           <EntityTable />
         </div>
       )}

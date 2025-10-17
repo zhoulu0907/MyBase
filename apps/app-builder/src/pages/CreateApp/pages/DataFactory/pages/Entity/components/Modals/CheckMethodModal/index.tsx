@@ -25,15 +25,15 @@ const CheckMethodModal: React.FC<{
 
   return (
     <Modal
-      className={styles['check-method-modal']}
+      className={styles.checkMethodModal}
       title="查看数据方法"
       visible={visible}
       footer={false}
       onCancel={() => setVisible(false)}
     >
-      <div className={styles['check-method-modal-content']}>
-        <div className={styles['check-method-modal-content-header']}>
-          <div className={styles['check-method-modal-content-header-title']}>{methodData?.methodName}</div>
+      <div className={styles.checkMethodModalContent}>
+        <div className={styles.checkMethodModalContentHeader}>
+          <div className={styles.checkMethodModalContentHeaderTitle}>{methodData?.methodName}</div>
         </div>
       </div>
     </Modal>
