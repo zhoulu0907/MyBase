@@ -9,11 +9,8 @@ onebase:
     logLevel: BODY
     retryEnabled: true
     maxRetries: 3
-
-  # 兼容旧版自动配置读取的键名（如老测试类）
-  dolphins:
-    baseUrl: http://10.0.104.33:12345/dolphinscheduler/v2/
-    token: 85806d2d33502cef3036fb30b320e5f5
+test:
+  user-id: 1
 
 # Spring Boot 配置
 spring:
