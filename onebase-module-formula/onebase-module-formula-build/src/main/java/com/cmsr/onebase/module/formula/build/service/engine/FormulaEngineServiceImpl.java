@@ -258,6 +258,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     private String loadFormulaJsScript() {
         try {
             ClassPathResource resource = new ClassPathResource("js/formula.js");
+            // ClassPathResource resource = new ClassPathResource("js/formula_test.js");
             return new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("加载Formula.js脚本失败", e);
