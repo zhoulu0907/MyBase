@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.dolphins.dto.project.model;
 
-import com.cmsr.onebase.framework.dolphins.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.dolphins.dto.project.enums.UserTypeEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
