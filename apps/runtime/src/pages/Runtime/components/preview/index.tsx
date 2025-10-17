@@ -179,11 +179,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     if (flowRespon.executionEnd) {
       return;
     }
+    const infoFormData = infoForm.getFieldsValue();
+    const inputFields = outputParams.fields.map((item:any)=>{
+      return {...item, value:infoFormData[item.fieldName]}
+    })
     flowParam = {
       processId: flowParam.processId,
       executionUuid: flowRespon.executionUuid || '',
       inputParams: flowParam.inputParams,
-      collectInfo: infoForm.getFieldsValue()
+      inputFields
     };
     await triggerFlows();
   };
