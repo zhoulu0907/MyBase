@@ -11,10 +11,13 @@ const maxFileSizeMB = 50
 
 const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
     const [form] = Form.useForm();
+    const [imgUpList, setImgUpList] = useState<any>()
+
     useImperativeHandle(ref, () => ({
         childMethod: () => {
-            console.log('子组件方法被调用', form);
+            console.log('子组件方法被调用', form, form.getFields());
             // 子组件逻辑
+            form.setFieldValue('name', 12312313)
         }
     }));
     const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
@@ -33,8 +36,36 @@ const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
         const res = await uploadFile(formData, progressAdapter);
         return res;
     };
+
+    function handleTestClick() {
+        form.setFieldValue('name', '12222')
+        form.setFieldValue(
+            'name2', [{
+                uid: '1',
+                name: '20200717-103937.png',
+                url: 'http://10.0.104.38:9000/onebase/20251014/test - 副本_1760424759764.gif',
+                response: "http://10.0.104.38:9000/onebase/20251014/test - 副本_1760424759764.gif",
+                status: 'done',
+                percent: 100,
+            }]
+        )
+        form.setFieldValue(
+            'name3', [{
+                uid: '2',
+                name: '123.docx',
+                url: 'http://10.0.104.38:9000/onebase/20251014/123.docx',
+                response: "http://10.0.104.38:9000/onebase/20251014/123.docx"
+            }]
+        )
+        setImgUpList([{
+            uid: '1',
+            name: '20200717-103937.png',
+            url: 'http://10.0.104.38:9000/onebase/20251014/test - 副本_1760424759764.gif'
+        }])
+        console.log(form.getFieldsValue(), imgUpList)
+    }
     return <section className='detail-confirm-page'>
-        <Form layout="vertical">
+        <Form form={form} layout="vertical">
             <div className='form-item-title'>审批意见</div>
             <FormItem field='name' rules={[{ required: true, message: '审批意见必填' }]}>
                 <Input.TextArea
@@ -144,6 +175,7 @@ const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
                 />
             </FormItem>
         </Form>
+        <div onClick={handleTestClick}>sdfsdfsfdsdf</div>
     </section>
 })
 

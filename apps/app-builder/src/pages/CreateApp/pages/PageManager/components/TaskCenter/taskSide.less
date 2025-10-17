@@ -1,28 +1,4 @@
-.sortable-line {
-    width: 184px;
-    .task-sortable-menu {
-        flex: 1;
-        display: flex; justify-content: space-between;
-        height: 40px;
-        padding-left: 2px;
-        &:hover {
-            background-color: rgba(244, 244, 244, 1);
-            border-radius: var(--border-radius-small);
-        }
-        .left-part, .right-part {
-            display: flex; align-items: center;
-        }
-        .left-part {
-            max-width: 115px; 
-        }
-        .right-part {
-            margin-right: 8px;
-        }
-    }
-    .sort-menu-img {
-        width: 16px; margin-right: 10px;
-    }
-}
+// 左侧五个任务菜单样式
 .task-center-box {
     width: 200px; 
     overflow: hidden; 
@@ -31,17 +7,93 @@
     .move-box-ul, .move-box-ul > li {
         list-style: none; margin: 0; padding: 0;
     }
+    .ineedtodo-icon, .ihavedone-icon, .icreated-icon, .icopied-icon, .taskproxy-icon {
+        width: 16px; height: 16px; display: inline-block;
+    }
+    .arco-tree-node-title {
+        left: -8px;
+        ._menuName_1buax_8 {
+            display: flex; align-items: center;
+        }
+    }
+    .ineedtodo-icon {
+        background: url(../../../../../../assets/images/task_center/willdo.svg) no-repeat center;
+    }
+    .ihavedone-icon {
+        background: url(../../../../../../assets/images/task_center/idone.svg) no-repeat center;
+    }
+    .icreated-icon {
+        background: url(../../../../../../assets/images/task_center/icreated.svg) no-repeat center;
+    }
+    .icopied-icon {
+        background: url(../../../../../../assets/images/task_center/icopied.svg) no-repeat center;
+    }
+    .taskproxy-icon {
+        background: url(../../../../../../assets/images/task_center/taskproxy.svg) no-repeat center;
+    }
+    .arco-tree-node-title-text {
+        margin-right: 20px;
+        display: block;
+    }
+    .arco-tree-node-drag-icon {
+        top: 9px; color: #333;
+    }
+    .arco-tree-node-selected {
+        .arco-tree-node-drag-icon {
+            color: rgb(var(--primary-6));
+        }
+        .ineedtodo-icon {
+            background: url(../../../../../../assets/images/task_center/willdo-on.svg) no-repeat center;
+        }
+        .ihavedone-icon {
+            background: url(../../../../../../assets/images/task_center/idone-on.svg) no-repeat center;
+        }
+        .icreated-icon {
+            background: url(../../../../../../assets/images/task_center/icreated-on.svg) no-repeat center;
+        }
+        .icopied-icon {
+            background: url(../../../../../../assets/images/task_center/icopied-on.svg) no-repeat center;
+        }
+        .taskproxy-icon {
+            background: url(../../../../../../assets/images/task_center/taskproxy-on.svg) no-repeat center;
+        }
+    }
+    .menu-hidden {
+        ._menuName_1buax_8 {
+            opacity: 0.5;
+        }
+    }
 }
-
+// 右侧页面内容
 .page-content-rgt {
     padding: 16px;
+    .flex-bw-center {
+        display: flex; align-items: center; justify-content: space-between;
+    }
     .table-title-box {
         margin-bottom: 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
+    .title-batch-box {
+        margin-top: -8px; margin-bottom: 24px;
+        .arco-btn-outline:nth-child(2) {
+            margin-right: 16px; margin-left: 32px;
+        }
+        .arco-btn-outline {
+            border-color: rgba(134, 144, 156, 1); color: rgba(134, 144, 156, 1);
+        }
+    }
+    .batch-btns {
+        position: relative;
+        &::before {
+            display: block; content: '';
+            position: absolute; left: 104px; height: 70%; top: 15%; width: 2px; border-left: 1px solid rgba(134, 144, 156, 1);
+        }
+    }
 }
+// 表格、表格筛选区域
 .title-rgt-tb-search {
     display: flex;
     align-items: center;
@@ -101,7 +153,7 @@
         }
     }
 }
-
+// 抽屉详情页
 .draw-detail-pop {
     background-color: rgba(242, 243, 245, 1);
     .arco-drawer-content {

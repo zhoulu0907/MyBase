@@ -41,7 +41,7 @@ import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import styles from './index.module.less';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide'
-import TaskCenterPage from './components/TaskCenter/page/TaskCenterPage'
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage'
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;

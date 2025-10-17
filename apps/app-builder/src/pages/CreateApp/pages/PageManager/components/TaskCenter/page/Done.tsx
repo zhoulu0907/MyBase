@@ -2,7 +2,6 @@ import { useState, type FC } from 'react';
 import { Table, type TableColumnProps, Button } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
-import '../taskSide.less'
 
 const WillDo:FC = () => {
     const columns: TableColumnProps[] = [
@@ -78,45 +77,17 @@ const WillDo:FC = () => {
             email2: 'bbbample.com',
         },
     ];
-    let [tbRowSelection, setTbRowSelection] = useState<any>()
-    const [selectedRowKeys, setSelectedRowKeys] = useState<any>();
-
     let [detailPopVisible, setPopVisible] = useState(false)
-
-    function handleBatchClick(hasRowCheck: boolean) {
-        console.log('batch click!', hasRowCheck)
-        if (hasRowCheck) {
-            setTbRowSelection({
-                type: 'checkbox',
-                selectedRowKeys,
-                onChange: (selectedKeys:Array<string>, selectedRows:Array<any>) => {
-                    console.log('onChange:', selectedKeys, selectedRows);
-                    setSelectedRowKeys(selectedRowKeys);
-                }
-            })
-        } else {
-            setTbRowSelection(undefined)
-        }
-    }
-
     function handleDetailPage(row:any) {
         console.log('click to detail page === row ===', row)
         setPopVisible(true)
     }
     return <section className='page-content-rgt'>
         <div className='table-title-box'>
-            <b>待我处理</b>
-            <TableSearch  uiConfig={{hasInput: true, hasFilter: true, hasSort: true, hasBatch: true}} batchEvent={handleBatchClick}/>
+            <b>我已处理</b>
+            <TableSearch uiConfig={{hasInput: true, hasFilter: true, hasSort: true, hasBatch: false}}/>
         </div>
-        {tbRowSelection && <div className='flex-bw-center title-batch-box'>
-            <span>已选中3/20条</span>
-            <div className='batch-btns'>
-                <Button type='outline' onClick={() => setTbRowSelection(undefined)}>取消操作</Button>
-                <Button type='outline'>批量拒绝</Button>
-                <Button type='primary'>批量同意</Button>
-            </div>
-        </div>}
-        <Table rowKey='name' rowSelection={tbRowSelection} columns={columns} data={data} />
+        <Table columns={columns} data={data} />
         {detailPopVisible && <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible}/>}
     </section>
 }

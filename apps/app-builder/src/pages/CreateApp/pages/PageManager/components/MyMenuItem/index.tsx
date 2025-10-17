@@ -24,16 +24,16 @@ interface MenuItemProps {
   label: string;
   menuIcon: string;
   isGroup: boolean;
-  onClick: () => void;
-  triggerCreate: (formType: string) => void;
-  triggerRename: () => void;
-  triggerCopy: () => void;
-  triggerHide: (menuID: string, isVisible: number) => void;
-  triggerDelete: (menuID: string) => void;
+  onClick?: () => void;
+  triggerCreate?: (formType: string) => void;
+  triggerRename?: () => void;
+  triggerCopy?: () => void;
+  triggerHide?: (menuID: string, isVisible: number) => void;
+  triggerDelete?: (menuID: string) => void;
   maxWidth: number;
-  renameForm: FormInstance;
-  copyForm: FormInstance;
-  createForm: FormInstance;
+  renameForm?: FormInstance;
+  copyForm?: FormInstance;
+  createForm?: FormInstance;
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
@@ -72,7 +72,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           {'编辑'}
         </MenuItem>
       )}
-      <MenuItem
+      {(renameForm && triggerRename) && <MenuItem
         key="rename"
         onClick={(e) => {
           e.stopPropagation();
@@ -85,8 +85,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         }}
       >
         {'重命名'}
-      </MenuItem>
-      <MenuItem
+      </MenuItem>}
+      {(triggerHide) && <MenuItem
         key="visible"
         onClick={(e) => {
           e.stopPropagation();
@@ -94,8 +94,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         }}
       >
         {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
-      </MenuItem>
-      {!isGroup && (
+      </MenuItem>}
+      {(!isGroup && copyForm && triggerCopy) && (
         <MenuItem
           key="copy"
           onClick={(e) => {
@@ -109,7 +109,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           {'复制'}
         </MenuItem>
       )}
-      {isGroup && (
+      {(isGroup && createForm && triggerCreate) && (
         <MenuItem
           key="createPage"
           onClick={(e) => {
@@ -123,7 +123,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </MenuItem>
       )}
 
-      {isGroup && (
+      {(isGroup && createForm && triggerCreate)  && (
         <MenuItem
           key="createGroup"
           onClick={(e) => {
@@ -146,7 +146,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       >
         {'隐藏'}
       </MenuItem> */}
-      <MenuItem
+      {triggerDelete && <MenuItem
         key="delete"
         onClick={(e) => {
           e.stopPropagation();
@@ -155,7 +155,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         style={{ color: 'red' }}
       >
         {'删除'}
-      </MenuItem>
+      </MenuItem>}
     </Menu>
   );
 
@@ -176,7 +176,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
   return (
     <div
-      className={styles.myMenuItem}
+      className={`${styles.myMenuItem} ${isVisible === VisibleType.HIDDEN ? 'menu-hidden' : ''}`}
       onContextMenu={(e) => {
         // 支持右键弹出菜单
         setPopupVisible(true);

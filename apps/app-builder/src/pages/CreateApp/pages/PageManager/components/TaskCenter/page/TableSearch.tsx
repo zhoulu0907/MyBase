@@ -1,4 +1,4 @@
-import React, { useState, type FC } from 'react';
+import { useState, type FC } from 'react';
 import { Input, Dropdown, Menu, Button, InputTag, Select, DatePicker, Divider } from '@arco-design/web-react';
 import tbSort from '@/assets/images/task_center/tb-sort.svg'
 import tbBatch from '@/assets/images/task_center/tb-batch.svg'
@@ -9,7 +9,7 @@ import '../taskSide.less'
 const Option = Select.Option;
 const { RangePicker } = DatePicker;
 
-const TableSearch:FC = () => {
+const TableSearch:FC<any> = ({uiConfig={hasInput: true, hasFilter: true, hasSort: true, hasBatch: true}, batchEvent}) => {
     let [sortCheck, setSortCheck] = useState<string>('')
     function handleSortItem(key: string) {
         setSortCheck(key)
@@ -22,8 +22,8 @@ const TableSearch:FC = () => {
         console.log('onChange: ', dateString, date);
     }
     return <div className='title-rgt-tb-search'>
-        <Input.Search allowClear placeholder='输入内容查询' style={{ width: 230, height: 32 }} />
-        <Dropdown
+        {uiConfig?.hasInput && <Input.Search allowClear placeholder='输入内容查询' style={{ width: 230, height: 32 }} />}
+        {uiConfig?.hasFilter && <Dropdown
             position="br" 
             droplist={
                 <section className='tb-filter-box arco-dropdown-menu'>
@@ -115,8 +115,8 @@ const TableSearch:FC = () => {
                 </section>
             }>
             <p><img src={tbFilter} alt='' />筛选</p>
-        </Dropdown>
-        <Dropdown
+        </Dropdown>}
+        {uiConfig?.hasSort && <Dropdown
             position="bottom"
             droplist={
                 <Menu onClickMenuItem={(key) => handleSortItem(key)}>
@@ -125,8 +125,8 @@ const TableSearch:FC = () => {
                 </Menu>
             }>
             <p><img src={tbSort} alt='' />排序</p>
-        </Dropdown>
-        <p><img src={tbBatch} alt='' />批量审批</p>
+        </Dropdown>}
+        {uiConfig?.hasBatch && <p onClick={() => {typeof batchEvent === 'function' && batchEvent(true)}}><img src={tbBatch} alt='' />批量审批</p>}
     </div>
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FC } from 'react';
-import { Tree } from '@arco-design/web-react';
+import { Tree, Form } from '@arco-design/web-react';
 import {
   MenuType,
   type ApplicationMenu,
@@ -7,6 +7,8 @@ import {
 import MyMenuItem from '../MyMenuItem';
 import { IconSettings, IconDragDotVertical } from '@arco-design/web-react/icon';
 // import willdoIcon from '@/assets/images/task_center/willdo.svg'
+import RenameForm from './modal/renameForm'
+
 import './taskSide.less'
 
 const TreeNode = Tree.Node;
@@ -25,13 +27,14 @@ interface ComProps {
   styles_tree: any;
 }
 const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
-  const [curMenu2, setCurMenu2] = useState<ApplicationMenu>();
-  const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
+  const [curMenu2, setCurMenu2] = useState<ApplicationMenu | any>();
+  // const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
+
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
   const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
-    return menus.map((menu) => ({
-      key: menu.id,
+    return menus.map((menu, idx) => ({
+      key: menu.id + '-' + idx,
       title: (
         <MyMenuItem
           showOption={showOption}
@@ -40,43 +43,36 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
-          isGroup={menu.menuType == MenuType.GROUP}
+          isGroup={true}
           maxWidth={maxWidth}
           label={menu.menuName}
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
-              setCurMenu2(menu);
-              setCurMenu(menu);
+              let _menu = {
+                ...menu,
+                _key: menu.id + '-' + idx
+              };
+              setCurMenu2(_menu);
+              setCurMenu(_menu);
             }
-            setActiveMenu(menu);
-          } } 
-          triggerCreate={function (formType: string): void {
-            throw new Error('Function not implemented.');
-          } } 
-          triggerRename={function (): void {
-            throw new Error('Function not implemented.');
-          } } 
-          triggerCopy={function (): void {
-            throw new Error('Function not implemented.');
-          } } 
-          triggerHide={function (menuID: string, isVisible: number): void {
-            throw new Error('Function not implemented.');
-          } } 
-          triggerDelete={function (menuID: string): void {
-            throw new Error('Function not implemented.');
-          } } 
-          renameForm={undefined} 
-          copyForm={undefined}
-          createForm={undefined}        
+            // setActiveMenu(menu);
+          } }
+          triggerRename = {() => setVisibleRenameForm(true)}
+          triggerHide = {() => triggerHide(menu.id, idx, menu.isVisible)}
+          renameForm = {renameForm}
         />
       ),
-      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth, showOption) : []
+      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - 25, showOption) : []
     }));
   };
   const [treeData, setTreeData] = useState<TreeNode[]>();
 
-  useEffect(() => {
-    let res:any = [
+  // 重命名弹窗
+  const [renameForm] = Form.useForm();
+  const [visibleRenameForm, setVisibleRenameForm] = useState(false);
+
+  function getMenuArr() {
+    return [
       {
         id: "TASK-ineedtodo",
         isVisible: 1,
@@ -88,25 +84,75 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
         parentId: "0"
       },
       {
-        id: "TASK-ineedtodo2",
+        id: "TASK-ihavedone",
         isVisible: 1,
-        menuCode: "ineedtodo2",
-        menuIcon: "ineedtodo-icon2",
-        menuName: "待我处理2",
+        menuCode: "ihavedone",
+        menuIcon: "ihavedone-icon",
+        menuName: "我已处理",
         menuSort: 2,
+        menuType: 1,
+        parentId: "0"
+      },
+      {
+        id: "TASK-icreated",
+        isVisible: 1,
+        menuCode: "icreated",
+        menuIcon: "icreated-icon",
+        menuName: "我创建的",
+        menuSort: 3,
+        menuType: 1,
+        parentId: "0"
+      },
+      {
+        id: "TASK-icopied",
+        isVisible: 1,
+        menuCode: "icopied",
+        menuIcon: "icopied-icon",
+        menuName: "我抄送的",
+        menuSort: 4,
+        menuType: 1,
+        parentId: "0"
+      },
+      {
+        id: "TASK-taskproxy",
+        isVisible: 1,
+        menuCode: "taskproxy",
+        menuIcon: "taskproxy-icon",
+        menuName: "流程代理",
+        menuSort: 5,
         menuType: 1,
         parentId: "0"
       }
     ];
+  }
+  function handleRename() {
+    console.log('handle re name function.')
+  }
+  // 更新应用菜单可见性  显示/隐藏
+  function triggerHide(menuId: string | number, arrIdx: number, isVisible: number) {
+    console.log('trigger hide ===', menuId, arrIdx)
+    let res:Array<any> = getMenuArr()
+    res[arrIdx].isVisible = isVisible === 0 ? 1 : 0;
     const treeData = convertMenuToTreeData(res, 155, true);
     setTreeData(treeData);
+  }
+
+  useEffect(() => {
+    let res:Array<any> = getMenuArr()
+    const _treeData = convertMenuToTreeData(res, 155, true);
+    setTreeData(_treeData);
   }, [])
+
+  // useEffect(() => {
+  //   console.log(curMenu2)
+  // }, [curMenu2])
   
   return <section className='task-center-box'>
     <Tree
       blockNode
       draggable={true}
-      selectedKeys={[curMenu2?.id!]}
+      selectable
+      selectedKeys={[curMenu2?._key]}
       treeData={treeData}
       className={styles_tree}
       showLine={false}
@@ -115,6 +161,81 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
         dragIcon: <IconDragDotVertical/>
       }}
       actionOnClick={'expand'}
+      onDrop={({ dragNode, dropNode, dropPosition }: any) => {
+        const loop = (data: Array<TreeNode>, key: string, callback: Function) => {
+            data.some((item: TreeNode, index: number, arr: Array<any>) => {
+              if (item.key === key) {
+                callback(item, index, arr);
+                return true;
+              }
+
+              if (item.children) {
+                return loop(item.children, key, callback);
+              }
+            });
+          };
+
+          const data = treeData? [...treeData] : [];
+          let dragItem:TreeNode | any;
+          loop(data, dragNode.props._key, (item: TreeNode, index: number, arr: Array<any>) => {
+            arr.splice(index, 1);
+            dragItem = item;
+            dragItem.className = 'tree-node-dropover';
+          });
+
+          if (dropPosition === 0) {
+            loop(data, dropNode.props._key, (item: TreeNode, index: number, arr: Array<any>) => {
+              item.children = item.children || [];
+              item.children.push(dragItem);
+            });
+          } else {
+            loop(data, dropNode.props._key, (item: TreeNode, index: number, arr: Array<any>) => {
+              arr.splice(dropPosition < 0 ? index : index + 1, 0, dragItem);
+            });
+          }
+
+          setTreeData([...data]);
+          setTimeout(() => {
+            dragItem.className = '';
+            setTreeData([...data]);
+          }, 1000);
+          // let drop_key_arr = dropNode.key.split('-');
+          // if (drop_key_arr.length === 3) {
+          //   dropPosition = drop_key_arr[2] - 0 + 1;
+          // }
+          // const tree_data:TreeNode[] = treeData ? [...treeData] : [];
+          // let drag_item:any;
+          // tree_data.some((item, index) => {
+          //     if (item.key === dragNode.props._key) {
+          //       tree_data.splice(index, 1);
+          //       drag_item = item;
+          //       drag_item.className = 'tree-node-dropover';
+          //       return true;
+          //     }
+          //     if (item.children) {
+          //       // 不考虑
+          //       return false;
+          //     }
+          // });
+          // setTreeData([...tree_data]);
+          // let dragTimer = setTimeout(() => {
+          //   clearTimeout(dragTimer)
+          //   drag_item.className = '';
+          //   tree_data?.splice(dropPosition, 0, drag_item)
+          //   let new_tree_data: Array<any> = [];
+          //   console.log('tree_data ========', tree_data)
+          //   if (tree_data) {
+          //     new_tree_data = tree_data.map((item: TreeNode, idx:number) => {
+          //       let key_arr = item.key.split('-');
+          //       key_arr[2] = idx + '';
+          //       item.key = key_arr.join('-');
+          //       return item;
+          //     })
+          //   }
+          //   console.log('new_tree_data ========', new_tree_data)
+          //   setTreeData(new_tree_data);
+          // }, 300);
+      }}
       style={{
         width: '200px',
         overflow: 'hidden',
@@ -122,6 +243,11 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
         padding: '0 8px'
       }}
     />
+    <RenameForm
+        visible={visibleRenameForm}
+        handleRename={handleRename}
+        setVisible={setVisibleRenameForm}
+        form={renameForm}/>
   </section>
 }
 
