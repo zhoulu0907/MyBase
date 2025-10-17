@@ -1,5 +1,7 @@
 package com.cmsr.onebase.framework.dolphins.dto.taskinstance.request;
 
+import com.cmsr.onebase.framework.dolphins.dto.taskinstance.enums.TaskExecuteTypeEnum;
+import com.cmsr.onebase.framework.dolphins.dto.taskinstance.enums.TaskInstanceStateEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -52,7 +54,7 @@ public class TaskInstanceQueryRequestDTO {
 
     /** 运行状态 */
     @JsonProperty("stateType")
-    private String stateType;
+    private TaskInstanceStateEnum stateType;
 
     /** 运行主机IP */
     @JsonProperty("host")
@@ -68,5 +70,6 @@ public class TaskInstanceQueryRequestDTO {
 
     /** 任务执行类型 */
     @JsonProperty("taskExecuteType")
-    private String taskExecuteType;
+    private TaskExecuteTypeEnum taskExecuteType;
 }
+

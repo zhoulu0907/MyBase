@@ -60,8 +60,9 @@ public class WorkflowInstanceQueryRequestDTO {
     private String endDate;
 
     /**
-     * 状态
+     * 状态(状态码,非枚举)
      */
     @JsonProperty("state")
     private Integer state;
 }
+

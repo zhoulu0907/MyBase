@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.dolphins.dto.workflow.request;
 
+import com.cmsr.onebase.framework.dolphins.dto.workflow.enums.ReleaseStateEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -42,11 +43,12 @@ public class WorkflowQueryRequestDTO {
      * 发布状态(可选: ONLINE/OFFLINE)
      */
     @JsonProperty("releaseState")
-    private String releaseState;
+    private ReleaseStateEnum releaseState;
 
     /**
      * 调度发布状态(可选: ONLINE/OFFLINE)
      */
     @JsonProperty("scheduleReleaseState")
-    private String scheduleReleaseState;
+    private ReleaseStateEnum scheduleReleaseState;
 }
+
