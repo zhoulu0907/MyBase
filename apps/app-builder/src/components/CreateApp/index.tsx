@@ -44,7 +44,7 @@ const CreateApp = (props: IProps) => {
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
   const [iconName, setIconName] = useState<Application['iconName']>();
   const [iconColor, setIconColor] = useState<Application['iconColor']>();
-  const [themeColor, setThemeColor] = useState<Application['themeColor']>('#4FAE7B'); // 应用主题色
+  const [themeColor, setThemeColor] = useState<Application['themeColor']>('#009E9E'); // 应用主题色
 
   // Bug S25029301301-591
   const initialRef = useRef<{
