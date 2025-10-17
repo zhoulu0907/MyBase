@@ -4,7 +4,7 @@ export const PasteIcon = styled.div`
   position: absolute;
   width: 15px;
   height: 15px;
-  color: #3370ff;
+  color: rgb(var(--primary-6));
   display: flex;
   justify-content: center;
   align-items: center;

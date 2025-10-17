@@ -1,8 +1,6 @@
 import { useCallback, useContext } from 'react';
-
 import { ConfigProvider } from '@douyinfe/semi-ui';
 import { FlowNodeEntity, useNodeRender } from '@flowgram.ai/fixed-layout-editor';
-
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { NodeRenderContext, SidebarContext } from '../../context';
 import styles from './index.module.less';
@@ -62,10 +60,9 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
            * isBlockIcon: 整个 condition 分支的 头部节点
            * isBlockOrderIcon: 分支的第一个节点
            */
-          ...(nodeRender.isBlockOrderIcon || nodeRender.isBlockIcon ? {} : {}),
           ...nodeRender.node.getNodeRegistry().meta.style,
           opacity: nodeRender.dragging ? 0.3 : 1,
-          outline: form?.getValueIn('invalid') ? '1px solid red' : 'none'
+          outline: form?.getValueIn('invalid') ? '1px solid rgb(var(--red-6))' : 'none'
         }}
       >
         <NodeRenderContext.Provider value={nodeRender}>{form?.render()}</NodeRenderContext.Provider>
