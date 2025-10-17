@@ -15,4 +15,7 @@ public interface DataFactoryErrorCodeConstants {
     ErrorCode DATASOURCE_NOT_EXIST                  = new ErrorCode(110201, "数据源不存在");
     ErrorCode DATASOURCE_CODE_DUPLICATE             = new ErrorCode(110202, "数据源编码重复");
     ErrorCode DATASOURCE_PROPERTY_INSUFFICIENT      = new ErrorCode(110203, "数据源信息不齐全");
+
+    // 元数据采集异常
+    ErrorCode METADATA_EMPTY                        = new ErrorCode(110501, "目标元数据信息不存在");
 }
