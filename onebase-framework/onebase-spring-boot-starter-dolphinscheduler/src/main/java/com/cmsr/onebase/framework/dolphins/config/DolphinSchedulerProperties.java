@@ -51,16 +51,6 @@ public class DolphinSchedulerProperties {
     private LogLevel logLevel = LogLevel.BASIC;
 
     /**
-     * 是否启用重试，默认 true
-     */
-    private boolean retryEnabled = true;
-
-    /**
-     * 最大重试次数，默认 3 次
-     */
-    private int maxRetries = 3;
-
-    /**
      * 日志级别枚举
      */
     public enum LogLevel {
