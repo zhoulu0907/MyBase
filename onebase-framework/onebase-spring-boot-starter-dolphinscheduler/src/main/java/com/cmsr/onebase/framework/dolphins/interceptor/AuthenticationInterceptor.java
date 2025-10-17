@@ -28,6 +28,8 @@ public class AuthenticationInterceptor implements Interceptor {
         // 添加 token 到请求头
         Request newRequest = originalRequest.newBuilder()
                 .header("token", properties.getToken())
+                // 明确声明期望返回 JSON，避免部分服务端因缺少 Accept 误判返回 415
+                .header("Content-Type", "application/json")
                 .build();
         
         return chain.proceed(newRequest);
