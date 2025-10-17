@@ -335,3 +335,20 @@ export const getHasLoop = (nodes: any[]): boolean => {
   }
   return hasLoop;
 };
+
+export const searchNodeById = (nodeId: string, nodes: any[]) => {
+  let node: any = undefined;
+  for (let item of nodes) {
+    if (item.id === nodeId) {
+      node = item;
+      break;
+    }
+    if (item.blocks?.length) {
+      node = searchNodeById(nodeId, item.blocks);
+      if (node !== undefined) {
+        break;
+      }
+    }
+  }
+  return node;
+};

@@ -1,9 +1,9 @@
-import { Button } from '@arco-design/web-react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { validateNodeForm } from '../../nodes/utils';
+import { Button } from '@arco-design/web-react';
 import { getNodeForm, useClientContext } from '@flowgram.ai/fixed-layout-editor';
-import styles from './index.module.less';
 import { NodeType } from '@onebase/common';
+import { searchNodeById, validateNodeForm } from '../../nodes/utils';
+import styles from './index.module.less';
 
 export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
   const { nodeId, nodeData, nodes, setNodeId, setNodeData } = triggerEditorSignal;
@@ -27,8 +27,8 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
       const formInfo = nodeInfo.props.form.getFieldsValue();
       console.log('formInfo', formInfo);
       let param = { ...nodeData.value[nodeId.value], ...formInfo };
-      const curNode = nodes.value.find((ele) => ele.id === nodeId.value);
-      if (curNode.type === NodeType.MODAL) {
+      const curNode = searchNodeById(nodeId.value, nodes.value);
+      if (curNode && curNode.type === NodeType.MODAL) {
         const fields = nodeInfo.props.form.getFieldValue('fields');
         param = { ...param, fields };
       }
