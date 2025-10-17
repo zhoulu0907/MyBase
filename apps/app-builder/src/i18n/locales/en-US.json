@@ -159,6 +159,7 @@
     "createGroup": "Create Group",
     "rename": "Rename Page",
     "copyPage": "Copy Page",
-    "searchPlaceHolder": "Search Page Or Group"
+    "searchPlaceHolder": "Search Page Or Group",
+    "editPage": "Edit Page"
   }
 }

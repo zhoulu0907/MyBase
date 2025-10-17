@@ -38,6 +38,10 @@
 
 /* 菜单隐藏样式 */
 .menuTree {
+  .arco-tree-node-is-leaf .arco-tree-node-switcher {
+    display: none;
+  }
+
   .arco-tree-node-switcher {
     position: absolute;
     right: 0;
