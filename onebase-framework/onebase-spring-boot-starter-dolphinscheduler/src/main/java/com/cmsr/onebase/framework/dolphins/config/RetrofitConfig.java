@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.dolphins.api.ScheduleApi;
 import com.cmsr.onebase.framework.dolphins.api.TaskApi;
 import com.cmsr.onebase.framework.dolphins.api.TaskInstanceApi;
 import com.cmsr.onebase.framework.dolphins.api.WorkflowApi;
+import com.cmsr.onebase.framework.dolphins.api.WorkflowInstanceApi;
 import com.cmsr.onebase.framework.dolphins.interceptor.AuthenticationInterceptor;
 import com.cmsr.onebase.framework.dolphins.interceptor.ErrorHandlingInterceptor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -180,6 +181,14 @@ public class RetrofitConfig {
     @Bean
     public ScheduleApi scheduleApi(Retrofit retrofit) {
         return retrofit.create(ScheduleApi.class);
+    }
+
+    /**
+     * 创建 WorkflowInstanceApi Bean
+     */
+    @Bean
+    public WorkflowInstanceApi workflowInstanceApi(Retrofit retrofit) {
+        return retrofit.create(WorkflowInstanceApi.class);
     }
 
     /**
