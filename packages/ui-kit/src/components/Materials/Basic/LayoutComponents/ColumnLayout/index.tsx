@@ -181,25 +181,9 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
             id={`workspace-content-${id}-${index}`}
             list={colComponents[index]}
             setList={(newList) => {
-              // 使用函数式更新确保状态更新的原子性
-              //   setColComponentsMap(id, (prevColumns: any[][]) => {
-              //     const updatedColumns = [...(prevColumns || [])];
-              //     updatedColumns[index] = newList;
-              //     return updatedColumns;
-              //   });
-
-              //   const updatecolComponents = colComponents;
-              //   updatecolComponents[index] = newList;
-              //   setLayoutSubComponents(id, updatecolComponents);
               colComponents[index] = newList;
             }}
             onAdd={(e) => {
-              // console.log("onAdd", e);
-
-              // console.log("e.item.id", e.item.getAttribute('data-cp-id'))
-              // console.log("e.item.getAttribute('data-cp-type')", e.item.getAttribute('data-cp-type'))
-              // console.log("e.item.getAttribute('data-cp-displayname')", e.item.getAttribute('data-cp-displayname'))
-
               const cpID = e.item.id || e.item.getAttribute('data-cp-id');
               console.log(`拖入组件${id}内， 索引为${index}， 拖入组件为 ${cpID}`);
               const itemType = e.item.getAttribute('data-cp-type');

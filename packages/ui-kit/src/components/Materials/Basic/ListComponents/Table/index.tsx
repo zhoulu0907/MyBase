@@ -255,10 +255,8 @@ const XTable = memo(
       const { list, total } = res;
 
       const newTableData = (list || []).map((item: any) => {
-        //   console.log(item);
         const newItem = item.data;
         Object.entries(newItem).forEach(([key, value]) => {
-          // console.log(key, value);
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
             const field = mainMetaData.parentFields.find(
