@@ -32,10 +32,10 @@ interface TriggerFlowRes {
 
 const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
   let curFlowIndex = 0;
-  let flowRespon: any = {};
   // 信息收集弹窗
   const [infoForm] = Form.useForm();
   const [infoModalVisibel, setInfoModalVisibel] = useState(false);
+  const [flowRespon, setFlowRespon] = useState<any>({});
   const [outputParams, setOutputParams] = useState({
     modalTitle: '',
     modalType: '',
@@ -58,7 +58,6 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
       inputFields
     };
     const res: TriggerFlowRes = await triggerFlowExecForm(param);
-    debugger;
 
     if (res.success) {
       if (res.executionEnd) {
@@ -89,18 +88,21 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
       cancelText: res.outputParams.cancelText || '取消',
       maskClosable: false,
       escToExit: false,
+      unmountOnExit: true,
       onOk: async () => {
         const executionUuid = res.executionUuid || '';
+        console.log('二次确认executionUuid', executionUuid);
         await executeSingleFlow(executionUuid);
       },
       onCancel: async () => {
         // 弹窗取消后事件终止
         if (res.outputParams.afterCancel === FLOW_MODAL_CANCEL.STOP) {
           curFlowIndex++;
-          await executeSingleFlow('');
+          await executeSingleFlow();
           return;
         }
         const executionUuid = res.executionUuid || '';
+        console.log('二次确认取消executionUuid', executionUuid);
         await executeSingleFlow(executionUuid);
       }
     });
@@ -108,7 +110,8 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
 
   // 打开信息收集弹窗
   const collectInfoModalFlow = async (res: TriggerFlowRes) => {
-    flowRespon = res;
+    setFlowRespon(res);
+    console.log('flowRespon', flowRespon);
     setInfoModalVisibel(true);
     setOutputParams({ ...outputParams, ...res.outputParams });
   };
@@ -121,17 +124,20 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
       return { ...item, value: infoFormData[item.fieldName] };
     });
     const executionUuid = flowRespon.executionUuid || '';
+    console.log('收集信息executionUuid', flowRespon);
     await executeSingleFlow(executionUuid, inputFields);
   };
   // 收集信息弹窗 取消按钮
   const cancaelInfoModal = async () => {
     setInfoModalVisibel(false);
-    if (flowRespon.outputParams.afterCancel === FLOW_MODAL_CANCEL.STOP) {
+    if (flowRespon.outputParams?.afterCancel === FLOW_MODAL_CANCEL.STOP) {
       curFlowIndex++;
       await executeSingleFlow('');
       return;
     }
     const executionUuid = flowRespon.executionUuid || '';
+    console.log('收集信息取消', flowRespon);
+
     await executeSingleFlow(executionUuid);
   };
 
@@ -150,17 +156,21 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
         cancelText={outputParams.cancelText}
         onOk={cofirmInfoModal}
         onCancel={cancaelInfoModal}
+        unmountOnExit
+        escToExit={false}
+        maskClosable={false}
+        style={{ width: 600 }}
       >
-        <Form layout="inline" form={infoForm}>
-          {outputParams.fields.map((cp: any) => (
-            <Grid.Row gutter={12}>
-              <Grid.Col span={outputParams.arrange === 2 ? 12 : 24}>
-                <Form.Item key={cp.id} label={cp.fieldName} field={cp.fieldName}>
+        <Form layout="vertical" form={infoForm}>
+          <Grid.Row gutter={12}>
+            {outputParams.fields.map((cp: any) => (
+              <Grid.Col span={outputParams.arrange === 2 ? 12 : 24} key={cp.id}>
+                <Form.Item label={cp.fieldName} field={cp.fieldName}>
                   <Input placeholder="请输入" />
                 </Form.Item>
               </Grid.Col>
-            </Grid.Row>
-          ))}
+            ))}
+          </Grid.Row>
         </Form>
       </Modal>
     </>
