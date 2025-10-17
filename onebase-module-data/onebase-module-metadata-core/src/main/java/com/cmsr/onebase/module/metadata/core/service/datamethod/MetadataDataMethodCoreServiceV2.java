@@ -13,6 +13,6 @@ public interface MetadataDataMethodCoreServiceV2 {
      * @param methodCode
      * @return
      */
-    Map<String, Object> executeProcess(AbstractMetadataDataMethodCoreService.OperationType operationType, Long entityId, Map<String, Object> data,
+    Map<String, Object> executeProcess(AbstractMetadataDataMethodCoreService.OperationType operationType, Long entityId, Object id, Map<String, Object> data,
                                        String methodCode);
 }

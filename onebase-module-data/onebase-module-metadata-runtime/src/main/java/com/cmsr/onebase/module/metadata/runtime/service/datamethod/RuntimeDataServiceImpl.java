@@ -96,8 +96,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         // 将 filters 的 field_id -> value 转换为 field_name -> value
         Map<String, Object> filtersByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getFilters());
 
-    // 允许 sortField 传字段ID：如果是数字则转换为字段名
-    String sortField = convertSortFieldToName(reqVO.getEntityId(), reqVO.getSortField());
+        // 允许 sortField 传字段ID：如果是数字则转换为字段名
+        String sortField = convertSortFieldToName(reqVO.getEntityId(), reqVO.getSortField());
 
         // 调用core模块的基础服务
         PageResult<Map<String, Object>> pageResult = coreDataMethodService.getDataPage(

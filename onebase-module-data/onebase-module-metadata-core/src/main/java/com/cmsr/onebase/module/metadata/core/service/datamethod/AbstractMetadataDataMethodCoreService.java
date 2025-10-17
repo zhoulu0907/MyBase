@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -284,7 +283,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     /**
      * 执行统一的数据处理流程
      */
-    public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Map<String, Object> data,
+    public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Object id, Map<String, Object> data,
                                                String methodCode) {
         log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，方法：" + methodCode);
 
@@ -306,6 +305,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             Map<String, Object> processedData = processDataAndSetDefaults(data, fields);
 
             context.setProcessedData(processedData);
+            context.setId(id);
 
             // 6. 功能权限校验
             validatePermission(context);//todo 暂未实现
@@ -315,6 +315,9 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
 
             // 8. 初步数据校验------数据校验规则 ----核心功能!!!
             validateData(context);//todo 暂未实现
+
+            // 目标记录存在性校验
+            checkDataExistence(context);
 
             // 9. 唯一性校验和条件校验
             validateUniqueness(context);//todo 暂未实现
@@ -327,6 +330,10 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
 
             // 12. 数据存储
             storeData(context);//todo 实现了create的方法
+
+            optimizeQueryConditions(context);
+
+            queryData(context);
 
             // 13. 后置自动化工作流触发
             executePostWorkflow(context);//todo 暂未实现
@@ -442,6 +449,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     }
 
     /**
+     * 数据存在性校验
+     */
+    protected  void checkDataExistence(ProcessContext context){
+
+    }
+
+    /**
      * 5. 唯一性校验和条件校验
      */
     protected void validateUniqueness(ProcessContext context) {
@@ -500,6 +514,23 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
 
         }); // TenantUtils.executeIgnore 闭合
 
+    }
+
+    /**
+     * 优化查询条件
+     */
+    protected void optimizeQueryConditions(ProcessContext context){
+
+    }
+
+    /**
+     * 查询数据
+     *
+     * @return
+     */
+    protected Map<String, Object> queryData(ProcessContext context){
+
+        return null;
     }
 
 
@@ -576,6 +607,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     protected static class ProcessContext {
         private OperationType operationType;
         private Long entityId;
+        private Object id;//数据记录id
         private Map<String, Object> data;
         private String methodCode;
         // 核心上下文字段
