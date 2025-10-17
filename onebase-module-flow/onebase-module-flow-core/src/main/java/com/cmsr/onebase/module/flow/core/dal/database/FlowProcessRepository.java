@@ -42,9 +42,9 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public List<FlowProcessDO> findAllByPublishStatus(Integer status) {
+    public List<FlowProcessDO> findAllByEnableStatus(Integer status) {
         DefaultConfigStore configs = new DefaultConfigStore();
-        configs.eq("publish_status", status);
+        configs.eq("enable_status", status);
         return findAllByConfig(configs);
     }
 

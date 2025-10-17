@@ -13,6 +13,8 @@
         <module>onebase-module-bpm-runtime</module>
         <module>onebase-module-bpm-api</module>
         <module>onebase-module-bpm-core</module>
+        <module>onebase-module-bpm-engine-core</module>
+        <module>onebase-module-bpm-engine-orm</module>
     </modules>
     <artifactId>onebase-module-bpm</artifactId>
     <packaging>pom</packaging>

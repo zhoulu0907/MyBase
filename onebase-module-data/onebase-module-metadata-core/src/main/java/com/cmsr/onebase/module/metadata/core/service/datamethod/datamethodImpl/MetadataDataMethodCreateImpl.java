@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
@@ -161,7 +162,75 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         // 处理自动编号字段
         processAutoNumberFields(fields, processedData);
 
+        // 处理复杂类型字段（数组、对象等）的JSON序列化
+        processComplexTypeFields(fields, processedData);
+
         return processedData;
+    }
+
+    /**
+     * 处理复杂类型字段的JSON序列化
+     * 对于数组和对象类型的字段值，需要序列化为JSON字符串存储到数据库
+     *
+     * @param fields 字段列表
+     * @param processedData 待处理的数据
+     */
+    private void processComplexTypeFields(List<MetadataEntityFieldDO> fields, Map<String, Object> processedData) {
+        for (MetadataEntityFieldDO field : fields) {
+            String fieldName = field.getFieldName();
+            String fieldType = field.getFieldType();
+            
+            if (fieldName == null || fieldType == null) {
+                continue;
+            }
+            
+            Object fieldValue = processedData.get(fieldName);
+            if (fieldValue == null) {
+                continue;
+            }
+            
+            // 判断是否需要JSON序列化的字段类型
+            if (needsJsonSerialization(fieldType, fieldValue)) {
+                try {
+                    // 将复杂对象序列化为JSON字符串
+                    String jsonString = JsonUtils.toJsonString(fieldValue);
+                    processedData.put(fieldName, jsonString);
+                    log.debug("字段 {} (类型: {}) 的值已序列化为JSON: {}", fieldName, fieldType, jsonString);
+                } catch (Exception e) {
+                    log.error("字段 {} 的值序列化为JSON失败: {}", fieldName, e.getMessage(), e);
+                    // 序列化失败时，保持原值
+                }
+            }
+        }
+    }
+
+    /**
+     * 判断字段类型是否需要JSON序列化
+     * 
+     * @param fieldType 字段类型
+     * @param fieldValue 字段值
+     * @return 是否需要序列化
+     */
+    private boolean needsJsonSerialization(String fieldType, Object fieldValue) {
+        if (fieldType == null) {
+            return false;
+        }
+        
+        String upperFieldType = fieldType.toUpperCase();
+        
+        // 字段类型包含以下关键字的需要JSON序列化
+        boolean isComplexType = upperFieldType.contains("MULTI") ||        // 多选类型
+                                upperFieldType.contains("ADDRESS") ||       // 地址类型
+                                upperFieldType.contains("FILE") ||          // 文件附件
+                                upperFieldType.contains("ATTACHMENT") ||    // 附件
+                                upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.equals("JSONB") ||           // JSONB类型
+                                upperFieldType.equals("JSON");              // JSON类型
+        
+        // 同时判断值是否为复杂对象（List或Map）
+        boolean isComplexValue = fieldValue instanceof List || fieldValue instanceof Map;
+        
+        return isComplexType && isComplexValue;
     }
 
 

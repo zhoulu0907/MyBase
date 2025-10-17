@@ -42,11 +42,18 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
 
         // 转换DO为VO
         ValidationFormatRespVO respVO = BeanUtils.toBean(formatDO, ValidationFormatRespVO.class);
+        
+        // 手动映射字段名不匹配的属性
+        respVO.setFormatType(formatDO.getFormatCode());        // formatCode -> formatType
+        respVO.setFormatValue(formatDO.getRegexPattern());     // regexPattern -> formatValue
+        respVO.setIgnoreCase(formatDO.getFlags() != null && formatDO.getFlags().contains("i") ? 1 : 0); // flags -> ignoreCase
+        respVO.setAppId(formatDO.getAppId() != null ? String.valueOf(formatDO.getAppId()) : null); // Long -> String
 
-        // 获取规则组名称
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
 
         return respVO;
@@ -59,8 +66,19 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")"); }
         MetadataValidationFormatDO formatDO = list.get(0);
         ValidationFormatRespVO respVO = BeanUtils.toBean(formatDO, ValidationFormatRespVO.class);
+        
+        // 手动映射字段名不匹配的属性
+        respVO.setFormatType(formatDO.getFormatCode());        // formatCode -> formatType
+        respVO.setFormatValue(formatDO.getRegexPattern());     // regexPattern -> formatValue
+        respVO.setIgnoreCase(formatDO.getFlags() != null && formatDO.getFlags().contains("i") ? 1 : 0); // flags -> ignoreCase
+        respVO.setAppId(formatDO.getAppId() != null ? String.valueOf(formatDO.getAppId()) : null); // Long -> String
+        
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
-        if (ruleGroup != null) { respVO.setRgName(ruleGroup.getRgName()); }
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        }
         return respVO;
     }
 

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 
+import com.cmsr.onebase.module.flow.context.FieldTypeProvider;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
@@ -10,12 +11,20 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import lombok.Setter;
+import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @Author：huangjie
@@ -24,6 +33,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Conditional(FlowRuntimeCondition.class)
 public class GraphFlowCache {
+
+
+    private HashSetValuedHashMap<Long, Long> applicationFlowCache = new HashSetValuedHashMap<>();
+
+    private final ReadWriteLock applicationFlowCacheLock = new ReentrantReadWriteLock();
 
     private ConcurrentHashMap<Long, Map<String, NodeData>> flowNodeDataCache = new ConcurrentHashMap<>();
 
@@ -35,7 +49,13 @@ public class GraphFlowCache {
 
     private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
 
-    public void update(Long processId, JsonGraph jsonGraph) {
+    @Setter
+    @Autowired
+    private ObjectProvider<FieldTypeProvider> objectProvider;
+
+    public void update(Long applicationId, Long processId, JsonGraph jsonGraph) {
+        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
+        fieldTypeProvider.completeFieldType(jsonGraph);
         Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
         JsonGraphNode startNode = jsonGraph.getStartNode();
@@ -55,14 +75,27 @@ public class GraphFlowCache {
             nodeData.setProcessId(processId);
             startDateFieldNodeDataCache.put(processId, nodeData);
         }
+        applicationFlowCacheLock.writeLock().lock();
+        try {
+            applicationFlowCache.put(applicationId, processId);
+        } finally {
+            applicationFlowCacheLock.writeLock().unlock();
+        }
     }
 
-    public void delete(Long processId) {
+    public void delete(Long applicationId, Long processId) {
         flowNodeDataCache.remove(processId);
         startTimeNodeDataCache.remove(processId);
         startFormNodeDataCache.remove(processId);
         startDateFieldNodeDataCache.remove(processId);
         startEntityNodeDataCache.remove(processId);
+        //删除这个要加锁
+        applicationFlowCacheLock.writeLock().lock();
+        try {
+            applicationFlowCache.removeMapping(applicationId, processId);
+        } finally {
+            applicationFlowCacheLock.writeLock().unlock();
+        }
     }
 
     public Map<String, NodeData> findNodeData(Long processId) {
@@ -93,4 +126,22 @@ public class GraphFlowCache {
                 .toList();
     }
 
+    public Set<Long> findFlowByApplicationId(Long applicationId) {
+        applicationFlowCacheLock.readLock().lock();
+        try {
+            Set<Long> ids = applicationFlowCache.get(applicationId);
+            Set<Long> result = new HashSet<>();
+            result.addAll(ids);
+            return result;
+        } finally {
+            applicationFlowCacheLock.readLock().unlock();
+        }
+    }
+
+    public void delete(Long applicationId) {
+        Set<Long> flowIds = findFlowByApplicationId(applicationId);
+        for (Long flowId : flowIds) {
+            delete(applicationId, flowId);
+        }
+    }
 }

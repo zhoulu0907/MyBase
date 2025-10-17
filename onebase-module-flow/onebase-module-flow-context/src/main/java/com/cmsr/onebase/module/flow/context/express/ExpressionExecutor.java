@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow.context.express;
 
-import com.cmsr.onebase.framework.common.express.JdbcTypeEnum;
-import lombok.extern.slf4j.Slf4j;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
@@ -9,7 +8,6 @@ import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,8 +23,6 @@ import java.util.*;
  * @Author：huangjie
  * @Date：2025/9/16 21:11
  */
-@Slf4j
-@Component
 public class ExpressionExecutor {
 
     public static final String VAR_PREFIX = "var_";
@@ -52,8 +48,7 @@ public class ExpressionExecutor {
             Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {
-            log.error("条件评估失败: {}", orExpression, e);
-            return false;
+            throw new RuntimeException(e);
         }
     }
 
@@ -129,18 +124,11 @@ public class ExpressionExecutor {
      * @return 表达式字符串
      */
     private String buildExpressItemExpression(ExpressionItem expressionItem) {
-        try {
-            if (expressionItem == null || expressionItem.getKey() == null || expressionItem.getOp() == null) {
-                return "true";
-            }
-            String expression = buildExpression(expressionItem);
-            log.debug("构建表达式项: key={}, operator={} -> {}", expressionItem.getKey(), expressionItem.getOp(), expression);
-            return expression;
-        } catch (Exception e) {
-            log.error("表达式项构建失败: {}", expressionItem, e);
-            // 返回false表达式，确保整个条件不会因为单个表达式失败而崩溃
-            return "false";
+        if (expressionItem == null || expressionItem.getKey() == null || expressionItem.getOp() == null) {
+            return "true";
         }
+        String expression = buildExpression(expressionItem);
+        return expression;
     }
 
     private String formatItemKey(String key) {

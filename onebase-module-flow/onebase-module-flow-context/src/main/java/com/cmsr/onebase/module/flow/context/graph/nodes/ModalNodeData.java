@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -20,6 +21,8 @@ public class ModalNodeData extends NodeData implements Serializable {
 
     private String modalTitle;
 
+    private String okText;
+
     private String cancelText;
 
     private String title;
@@ -28,5 +31,20 @@ public class ModalNodeData extends NodeData implements Serializable {
 
     private Integer afterCancel;
 
+    private Integer arrange;
 
+    private List<Field> fields;
+
+    @Data
+    public static class Field implements Serializable {
+
+        private String id;
+
+        private String fieldName;
+
+        private String fieldType;
+
+        private String value;
+
+    }
 }

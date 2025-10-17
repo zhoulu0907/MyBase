@@ -120,8 +120,14 @@ public class JsonGraph {
     private String ifCaseNodeDefine(int deep, JsonGraphNode node) {
         List<JsonGraphNode> blocks = node.getBlocks();
         //
-        JsonGraphNode trueNode = blocks.stream().filter(jsonGraphNode -> ((IfBlockNodeData) jsonGraphNode.getData()).isValue() == true).findFirst().get();
-        JsonGraphNode falseNode = blocks.stream().filter(jsonGraphNode -> ((IfBlockNodeData) jsonGraphNode.getData()).isValue() == false).findFirst().get();
+        JsonGraphNode trueNode = blocks.stream()
+                .filter(jsonGraphNode -> ((IfBlockNodeData) jsonGraphNode.getData()).isValue() == true)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("ifBlock节点下没有true分支"));
+        JsonGraphNode falseNode = blocks.stream()
+                .filter(jsonGraphNode -> ((IfBlockNodeData) jsonGraphNode.getData()).isValue() == false)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("ifBlock节点下没有false分支"));
         //
         StringBuilder define = new StringBuilder();
         define.append("IF(").append(toDefine(node)).append(",");

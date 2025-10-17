@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -157,20 +158,71 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     }
 
     /**
-     * 转换DataRow为Map
+     * 转换DataRow为Map，并对JSON字段进行反序列化
      */
     protected Map<String, Object> convertDataRowToMap(DataRow dataRow, List<MetadataEntityFieldDO> fields) {
         Map<String, Object> resultMap = new HashMap<>();
 
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
+            String fieldType = field.getFieldType();
             Object value = dataRow.get(fieldName);
+            
             if (value != null) {
-                resultMap.put(fieldName, value);
+                // 对需要JSON反序列化的字段进行处理
+                if (needsJsonDeserialization(fieldType, value)) {
+                    try {
+                        // 尝试将JSON字符串反序列化为对象
+                        Object deserializedValue = JsonUtils.parseObject(value.toString(), Object.class);
+                        resultMap.put(fieldName, deserializedValue);
+                        log.debug("字段 {} (类型: {}) 的值已从JSON反序列化", fieldName, fieldType);
+                    } catch (Exception e) {
+                        // 反序列化失败时，保持原值
+                        log.debug("字段 {} 的JSON反序列化失败，保持原值: {}", fieldName, e.getMessage());
+                        resultMap.put(fieldName, value);
+                    }
+                } else {
+                    resultMap.put(fieldName, value);
+                }
             }
         }
 
         return resultMap;
+    }
+
+    /**
+     * 判断字段类型是否需要JSON反序列化
+     * 
+     * @param fieldType 字段类型
+     * @param fieldValue 字段值
+     * @return 是否需要反序列化
+     */
+    private boolean needsJsonDeserialization(String fieldType, Object fieldValue) {
+        if (fieldType == null || fieldValue == null) {
+            return false;
+        }
+        
+        // 只有当值是字符串类型时才考虑反序列化
+        if (!(fieldValue instanceof String)) {
+            return false;
+        }
+        
+        String upperFieldType = fieldType.toUpperCase();
+        
+        // 字段类型包含以下关键字的需要JSON反序列化
+        boolean isComplexType = upperFieldType.contains("MULTI") ||        // 多选类型
+                                upperFieldType.contains("ADDRESS") ||       // 地址类型
+                                upperFieldType.contains("FILE") ||          // 文件附件
+                                upperFieldType.contains("ATTACHMENT") ||    // 附件
+                                upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.equals("JSONB") ||           // JSONB类型
+                                upperFieldType.equals("JSON");              // JSON类型
+        
+        // 判断字符串值是否像JSON（以{或[开头）
+        String strValue = fieldValue.toString().trim();
+        boolean looksLikeJson = strValue.startsWith("{") || strValue.startsWith("[");
+        
+        return isComplexType && looksLikeJson;
     }
 
     /**
@@ -493,7 +545,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * 7. 数据编号
      */
     protected void generateDataNumber(ProcessContext context) {
-
+        // 处理自动编号字段
+        processAutoNumberFields(context.getFields(), context.getProcessedData());
     }
 
     /**
