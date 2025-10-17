@@ -73,7 +73,7 @@ const TableColumns = ({
     {
       title: (
         <>
-          <span className={styles['required-dot']}>*</span>
+          <span className={styles.requiredDot}>*</span>
           <span>字段名称</span>
         </>
       ),
@@ -82,12 +82,12 @@ const TableColumns = ({
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
-          <span className={styles['system-field']}>{value as string}</span>
+          <span className={styles.systemField}>{value as string}</span>
         ) : (
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.fieldName`}
             rules={[...createFieldRules.fieldName]}
-            className={styles['field-form-item']}
+            className={styles.fieldFormItem}
             validateStatus={
               externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldName`] ? 'error' : undefined
             }
@@ -104,7 +104,7 @@ const TableColumns = ({
     {
       title: (
         <>
-          <span className={styles['required-dot']}>*</span>
+          <span className={styles.requiredDot}>*</span>
           <span>展示名称</span>
         </>
       ),
@@ -113,12 +113,12 @@ const TableColumns = ({
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
-          <span className={styles['system-field']}>{value as string}</span>
+          <span className={styles.systemField}>{value as string}</span>
         ) : (
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.displayName`}
             rules={[...createFieldRules.displayName]}
-            className={styles['field-form-item']}
+            className={styles.fieldFormItem}
             validateStatus={
               externalErrors[`fields.${getFieldIndex(record.id || '', index)}.displayName`] ? 'error' : undefined
             }
@@ -131,7 +131,7 @@ const TableColumns = ({
     {
       title: (
         <>
-          <span className={styles['required-dot']}>*</span>
+          <span className={styles.requiredDot}>*</span>
           <span>数据类型</span>
         </>
       ),
@@ -143,7 +143,7 @@ const TableColumns = ({
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.fieldType`}
             rules={[{ required: true, message: '数据类型不能为空' }]}
-            className={styles['field-form-item']}
+            className={styles.fieldFormItem}
             validateStatus={
               externalErrors[`fields.${getFieldIndex(record.id || '', index)}.fieldType`] ? 'error' : undefined
             }
@@ -160,7 +160,7 @@ const TableColumns = ({
             />
           </Form.Item>
           <Form.Item
-            className={styles['field-form-item']}
+            className={styles.fieldFormItem}
             shouldUpdate={(prev, next) =>
               prev.fields[index + systemFieldsLength]?.fieldType !== next.fields[index + systemFieldsLength]?.fieldType
             }
@@ -203,11 +203,11 @@ const TableColumns = ({
       ellipsis: true,
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === 1 ? (
-          <span className={styles['system-field']}>{value as string}</span>
+          <span className={styles.systemField}>{value as string}</span>
         ) : (
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.description`}
-            className={styles['field-form-item']}
+            className={styles.fieldFormItem}
             validateStatus={
               externalErrors[`fields.${getFieldIndex(record.id || '', index)}.description`] ? 'error' : undefined
             }
@@ -224,7 +224,7 @@ const TableColumns = ({
       align: 'center',
       ellipsis: true,
       render: (value: unknown) => (
-        <span className={styles['system-field']}>{FIELD_TYPE_LABEL[value as keyof typeof FIELD_TYPE_LABEL]}</span>
+        <span className={styles.systemField}>{FIELD_TYPE_LABEL[value as keyof typeof FIELD_TYPE_LABEL]}</span>
       )
     },
     {
@@ -234,11 +234,11 @@ const TableColumns = ({
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
-          <span className={styles['system-field']}>-</span>
+          <span className={styles.systemField}>-</span>
         ) : (
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.defaultValue`}
-            className={styles['field-form-item']}
+            className={styles.fieldFormItem}
             validateStatus={
               externalErrors[`fields.${getFieldIndex(record.id || '', index)}.defaultValue`] ? 'error' : undefined
             }
@@ -255,11 +255,11 @@ const TableColumns = ({
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
-          <span className={styles['system-field']}>-</span>
+          <span className={styles.systemField}>-</span>
         ) : (
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.isUnique`}
-            className={styles['field-form-item']}
+            className={styles.fieldFormItem}
             triggerPropName="checked"
             normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
             formatter={(v) => v === CHECK_CONST.IS_TRUE || v === true}
@@ -279,11 +279,11 @@ const TableColumns = ({
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
-          <span className={styles['system-field']}>-</span>
+          <span className={styles.systemField}>-</span>
         ) : (
           <Form.Item
             field={`fields.${getFieldIndex(record.id || '', index)}.isRequired`}
-            className={styles['field-form-item']}
+            className={styles.fieldFormItem}
             triggerPropName="checked"
             normalize={(v) => (v ? CHECK_CONST.IS_TRUE : CHECK_CONST.IS_FALSE)}
             formatter={(v) => v === CHECK_CONST.IS_TRUE || v === true}
@@ -303,7 +303,7 @@ const TableColumns = ({
       align: 'center',
       render: (value: unknown, record: FieldFormValues) => {
         if (record.isSystemField === FIELD_TYPE.SYSTEM) {
-          return <span className={styles['system-field']}>-</span>;
+          return <span className={styles.systemField}>-</span>;
         }
 
         // 检查是否有约束配置 - 基于字段的原始数据
@@ -319,8 +319,8 @@ const TableColumns = ({
             record.constraints?.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE ? '已开启' : '未开启';
 
           return (
-            <div className={styles['constraint-status']}>
-              <div className={styles['constraint-info']}>
+            <div className={styles.constraintStatus}>
+              <div className={styles.constraintInfo}>
                 <div>{lengthStatus}长度范围约束</div>
                 <div>{regexStatus}正则表达式验证</div>
               </div>
@@ -335,7 +335,7 @@ const TableColumns = ({
                   size="mini"
                   icon={<IconEdit />}
                   onClick={() => setConstraintsPopoverVisible(record.id || null)}
-                  className={styles['edit-constraint-btn']}
+                  className={styles.editConstraintBtn}
                 ></Button>
               </Popover>
             </div>

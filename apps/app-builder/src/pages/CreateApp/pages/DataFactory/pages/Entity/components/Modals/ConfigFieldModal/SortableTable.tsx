@@ -5,7 +5,7 @@ import { SortableContainer, SortableElement, SortableHandle } from 'react-sortab
 import styles from './index.module.less';
 
 // 拖拽手柄组件
-const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles['drag-handle']} />);
+const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles.dragHandle} />);
 
 // 可排序的表格行组件
 const SortableTableRow = SortableElement(
@@ -58,7 +58,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
             container = document.querySelector(`#field-config-container table tbody`);
             return (container as HTMLElement) || document.body;
           }}
-          helperClass="sortable-helper"
+          helperClass="sortableHelper"
           {...props}
         />
       ),
@@ -78,7 +78,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
       data={data}
       columns={columns}
       pagination={false}
-      className={styles['field-config-table']}
+      className={styles.fieldConfigTable}
       rowKey="id"
       components={components}
     />
