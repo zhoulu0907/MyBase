@@ -7,7 +7,7 @@ import { useFieldStore } from '@/store/store_field';
 import { Button, Form, Message, Modal } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
-import type { AutoNumberRule } from './types';
+import type { AutoNumberRule } from './utils/types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import SortableTable from './SortableTable';

@@ -4,8 +4,9 @@ import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-desig
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
-import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './types';
+import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './utils/types';
 import { convertAutoCodeCompoToAutoNumberRule, convertAutoNumberRuleToAutoCodeComp, findFieldPath } from './utils';
+import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, AUTO_CODE_RULE_TYPE } from './utils/const';
 
 // 选项配置组件
 interface OptionConfigProps {
@@ -143,29 +144,29 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
     return [
       {
         id: 'rule-1',
-        itemType: 'SEQUENCE',
+        itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
         config: {
-          numberMode: 'FIXED_DIGITS',
+          numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
           digitWidth: 4,
           continueIncrement: true,
           startValue: 1,
           nextRecordStartValue: false,
-          resetCycle: 'NONE'
+          resetCycle: AUTO_CODE_RESET_CYCLE.NONE
         }
       },
       {
         id: 'rule-2',
-        itemType: 'DATE',
+        itemType: AUTO_CODE_RULE_TYPE.DATE,
         config: { dateFormat: '年月日' }
       },
       {
         id: 'rule-3',
-        itemType: 'TEXT',
+        itemType: AUTO_CODE_RULE_TYPE.TEXT,
         config: { fixedText: '' }
       },
       {
         id: 'rule-4',
-        itemType: 'FIELD_REF',
+        itemType: AUTO_CODE_RULE_TYPE.FIELD_REF,
         config: { fieldName: '', fieldPath: [] }
       }
     ];
@@ -176,9 +177,9 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   const autoCodeConfig = rules[0].config;
 
   const getDisplayText = (config: AutoCodeRule['config']) => {
-    const numberingMethodText = config.numberMode === 'NATURAL' ? '自然数编号' : '指定位数编号';
+    const numberingMethodText = config.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
     const digitsText = config.digitWidth ? `${config.digitWidth}位数` : '';
-    const resetText = config.resetCycle === 'NONE' ? '不自动重置' : '自动重置';
+    const resetText = config.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
     return `${numberingMethodText},${digitsText},${resetText}`;
   };
 
@@ -237,7 +238,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
 
   const renderRuleConfig = (rule: AutoCodeRule) => {
     switch (rule.itemType) {
-      case 'SEQUENCE': {
+      case AUTO_CODE_RULE_TYPE.SEQUENCE: {
         return (
           <div className={styles.ruleContent}>
             <IconDragDotVertical className={styles.dragHandle} />
@@ -260,7 +261,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
         );
       }
 
-      case 'DATE':
+      case AUTO_CODE_RULE_TYPE.DATE:
         return (
           <div className={styles.ruleContent}>
             <IconDragDotVertical className={styles.dragHandle} />
@@ -287,7 +288,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
           </div>
         );
 
-      case 'TEXT':
+      case AUTO_CODE_RULE_TYPE.TEXT:
         return (
           <div className={styles.ruleContent}>
             <IconDragDotVertical className={styles.dragHandle} />
@@ -309,7 +310,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
           </div>
         );
 
-      case 'FIELD_REF':
+      case AUTO_CODE_RULE_TYPE.FIELD_REF:
         return (
           <div className={styles.ruleContent}>
             <IconDragDotVertical className={styles.dragHandle} />
@@ -367,16 +368,16 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
             droplist={
               <Menu>
                 <Menu.Item
-                  key="DATE"
-                  onClick={() => addRule('DATE')}
-                  disabled={rules.filter((rule) => rule.itemType === 'DATE')?.length > 1}
+                  key={AUTO_CODE_RULE_TYPE.DATE}
+                  onClick={() => addRule(AUTO_CODE_RULE_TYPE.DATE)}
+                  disabled={rules.filter((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.DATE)?.length > 1}
                 >
                   创建时间
                 </Menu.Item>
-                <Menu.Item key="TEXT" onClick={() => addRule('TEXT')}>
+                <Menu.Item key={AUTO_CODE_RULE_TYPE.TEXT} onClick={() => addRule(AUTO_CODE_RULE_TYPE.TEXT)}>
                   固定字符
                 </Menu.Item>
-                <Menu.Item key="FIELD_REF" onClick={() => addRule('FIELD_REF')}>
+                <Menu.Item key={AUTO_CODE_RULE_TYPE.FIELD_REF} onClick={() => addRule(AUTO_CODE_RULE_TYPE.FIELD_REF)}>
                   表单字段
                 </Menu.Item>
               </Menu>
@@ -403,7 +404,10 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
         visible={autoCodeModalVisible}
         onVisibleChange={setAutoCodeModalVisible}
         onConfirm={handleAutoCodeConfigConfirm}
-        initialConfig={rules.find((rule) => rule.itemType === 'SEQUENCE')?.config as unknown as AutoNumberRuleResponce}
+        initialConfig={
+          rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)
+            ?.config as unknown as AutoNumberRuleResponce
+        }
       />
     </>
   );
