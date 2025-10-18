@@ -295,6 +295,7 @@ const XTable = memo(
       if (res) {
         Message.success('删除成功');
       }
+      handlePage();
     };
 
     const handleEdit = (id: string, toFormPage: boolean) => {

@@ -35,13 +35,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputRadioSchema {
@@ -96,7 +96,7 @@ export interface XInputRadioConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue: { label: string; value: any;[property: string]: any; }[];
+  defaultValue: { label: string; value: any; [property: string]: any }[];
 
   /**
    * 字段宽度
@@ -108,7 +108,7 @@ export interface XInputRadioConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -168,7 +168,7 @@ const XRadio: XInputRadioSchema = {
     ...baseDefault,
     label: {
       text: '单选框',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
@@ -177,15 +177,15 @@ const XRadio: XInputRadioSchema = {
     defaultValue: [
       {
         label: '选项一',
-        value: '1'
+        value: '选项一'
       },
       {
         label: '选项二',
-        value: '2'
+        value: '选项二'
       },
       {
         label: '选项三',
-        value: '3'
+        value: '选项三'
       }
     ],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
