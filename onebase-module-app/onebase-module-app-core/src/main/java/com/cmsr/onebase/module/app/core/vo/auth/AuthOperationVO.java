@@ -22,6 +22,6 @@ public class AuthOperationVO {
     private String displayName;
 
     @Schema(description = "是否允许")
-    private Integer isAllowed = NumberUtils.INTEGER_ONE;
+    private Integer isAllowed;
 
 }

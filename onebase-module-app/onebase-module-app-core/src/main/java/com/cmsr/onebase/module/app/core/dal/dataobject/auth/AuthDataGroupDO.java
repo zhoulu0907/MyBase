@@ -31,6 +31,9 @@ public class AuthDataGroupDO extends TenantBaseDO {
     @Column(name = "description", length = 256, comment = "描述")
     private String description;
 
+    @Column(name = "scope_tags", nullable = false, comment = "权限标签")
+    private String scopeTags;
+
     @Column(name = "scope_field_id", nullable = false, comment = "字段id")
     private Long scopeFieldId;
 

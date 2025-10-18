@@ -25,7 +25,4 @@ public class AuthUpdateFieldReqVO   {
     @Schema(description = "字段权限，修改单个字段")
     private AuthFieldVO authField;
 
-    @Schema(description = "字段权限列表，同时修改多个字段")
-    private List<AuthFieldVO> authFields;
-
 }
