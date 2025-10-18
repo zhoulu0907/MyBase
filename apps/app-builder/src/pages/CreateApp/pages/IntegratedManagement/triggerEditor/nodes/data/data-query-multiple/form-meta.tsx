@@ -23,7 +23,7 @@ import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { clearDataOriginNodeId, getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
+import { getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
 import { updateDataQueryMultipleOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [
@@ -82,22 +82,23 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   mainEntityId: undefined,
+    //   subEntityId: undefined,
+    //   dataNodeId: undefined,
+    //   sortBy: [],
+    //   filterCondition: []
+    // });
+
+    // clearDataOriginNodeId(node.id);
 
     setMainEntityList([]);
     setSubEntityList([]);
     setDataNodeList([]);
     setValidationTypes([]);
-
-    clearDataOriginNodeId(node.id);
 
     getEntityList(curDataType);
   };
@@ -224,19 +225,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'dataNodeId', 'filterCondition', 'sortBy']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subEntityId: undefined,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   subEntityId: undefined,
+    //   dataNodeId: undefined,
+    //   sortBy: [],
+    //   filterCondition: []
+    // });
+
+    // clearDataOriginNodeId(node.id);
+
     setSubEntityList([]);
     setDataNodeList([]);
     setValidationTypes([]);
-
-    clearDataOriginNodeId(node.id);
 
     const fieldIds: string[] = [];
 
@@ -296,33 +299,35 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const handleSubEntityIdChange = (_curSubEntityId: string) => {
     payloadForm.clearFields(['dataNodeId', 'filterCondition', 'sortBy']);
 
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   dataNodeId: undefined,
+    //   sortBy: [],
+    //   filterCondition: []
+    // });
 
-    clearDataOriginNodeId(node.id);
+    // clearDataOriginNodeId(node.id);
   };
 
   const handleDateNodeSourceChange = async (dataNodeId: string) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   mainEntityId: undefined,
+    //   subEntityId: undefined,
+    //   sortBy: [],
+    //   filterCondition: []
+    // });
+
+    // clearDataOriginNodeId(node.id);
 
     setMainEntityList([]);
     setSubEntityList([]);
     setValidationTypes([]);
-
-    clearDataOriginNodeId(node.id);
 
     const fieldIds: string[] = [];
 
@@ -351,11 +356,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const handleFilterTypeChange = (_value: FILTER_TYPE) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      filterCondition: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   filterCondition: []
+    // });
 
     payloadForm.clearFields(['filterCondition']);
   };
