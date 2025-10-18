@@ -42,10 +42,6 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
     setSelectedFields(fields);
   }, [form, fieldList]);
 
-  useEffect(() => {
-    console.log('fields2333333333333: ', fieldList);
-  }, [fieldList]);
-
   const StaticValueComponent = (fieldName: string, fieldId: string) => {
     const targetField = fieldList.find((cc) => cc.fieldId == fieldId);
 
