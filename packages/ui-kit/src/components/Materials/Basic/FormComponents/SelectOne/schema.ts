@@ -34,13 +34,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputSelectOneSchema {
@@ -109,7 +109,7 @@ export interface XInputSelectOneConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     noRepeat: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -172,7 +172,7 @@ const XSelectOne: XInputSelectOneSchema = {
     ...baseDefault,
     label: {
       text: '下拉单选',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
@@ -181,15 +181,15 @@ const XSelectOne: XInputSelectOneSchema = {
     defaultValue: [
       {
         label: '选项一',
-        value: '1'
+        value: '选项一'
       },
       {
         label: '选项二',
-        value: '2'
+        value: '选项二'
       },
       {
         label: '选项三',
-        value: '3'
+        value: '选项三'
       }
     ],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],

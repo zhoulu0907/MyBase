@@ -1,4 +1,5 @@
-import { Button, Drawer, Form, Input, Message, Modal } from '@arco-design/web-react';
+import ExecuteFlows from '@/utils/flow';
+import { Button, Drawer, Form, Message } from '@arco-design/web-react';
 import {
   CATEGORY_TYPE,
   dataMethodData,
@@ -9,14 +10,13 @@ import {
   getPageSetMetaData,
   queryFlowExecForm,
   TRIGGER_EVENTS,
-  triggerFlowExecForm,
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { FLOW_MODAL_CANCEL, FLOW_MODAL_TYPE, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
+import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -31,7 +31,6 @@ import {
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
-import ExecuteFlows from '@/utils/flow';
 
 interface PreviewProps {
   menuId: string;
@@ -141,6 +140,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const pageId = curFormPage?.id;
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
     setInputParams(formData);
+
+    console.log('editTargetId: ', editTargetId);
+
     if (editTargetId) {
       const req: UpdateMethodParams = {
         entityId: mainMetaData,

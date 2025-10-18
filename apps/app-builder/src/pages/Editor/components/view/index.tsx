@@ -128,7 +128,6 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
 
       const newCpID = idMap[id];
       const newSubComponents = [] as EditConfig[][];
-      console.log('subComponents: ', subComponents);
 
       for (const block of subComponents as EditConfig[][]) {
         const newBlock = [] as EditConfig[];
@@ -143,14 +142,6 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
       }
       newLayoutSubComponents[newCpID] = newSubComponents;
     });
-
-    console.log('oldComponents: ', oldComponents);
-    console.log('oldPageComponentSchemas: ', oldPageComponentSchemas);
-    console.log('oldLayoutSubComponents: ', oldLayoutSubComponents);
-    console.log('--------------------------------');
-    console.log('newComponents: ', newComponents);
-    console.log('newPageComponentSchemas: ', newPageComponentSchemas);
-    console.log('newLayoutSubComponents: ', newLayoutSubComponents);
 
     // 创建视图副本
     usePageViewEditorSignal.addPageView(newView);
