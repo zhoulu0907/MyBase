@@ -15,9 +15,9 @@ import {
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, type AppEntityField, type ConditionField } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '@onebase/common';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -39,10 +39,12 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
   const fields = Form.useWatch('fields', form);
 
   useEffect(() => {
-    setSelectedFields(form.getFieldValue('fields'));
+    setSelectedFields(fields);
   }, [form, fieldList]);
 
-  useEffect(() => {}, [fields]);
+  useEffect(() => {
+    console.log('fields2333333333333: ', fieldList);
+  }, [fieldList]);
 
   const StaticValueComponent = (fieldName: string, fieldId: string) => {
     const targetField = fieldList.find((cc) => cc.fieldId == fieldId);
@@ -114,9 +116,9 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
       if (!fieldType || !field.fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
-          title: field.label,
+          title: field.label
         });
-      }else if (field?.fieldType === fieldType) {
+      } else if (field?.fieldType === fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
           title: field.label

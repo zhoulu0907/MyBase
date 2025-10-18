@@ -128,6 +128,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             title: res.entityName,
             children: fields
           });
+
+          if (nodeData.updateType === DATA_SOURCE_TYPE.FORM) {
+            setFieldDataList(res.parentFields);
+          }
         }
 
         if (res.childEntities) {
@@ -152,6 +156,22 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
           const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
           setValidationTypes(newValidationTypes);
+
+          if (nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
+            const newFieldDataList: any[] = [];
+
+            subFields
+              .find((item) => item.key == nodeData.subEntityId)
+              ?.children?.forEach((item) => {
+                newFieldDataList.push({
+                  fieldId: item.key,
+                  displayName: item.title,
+                  fieldType: item.fieldType
+                });
+              }) || [];
+
+            setFieldDataList(newFieldDataList);
+          }
         }
       }
     }
