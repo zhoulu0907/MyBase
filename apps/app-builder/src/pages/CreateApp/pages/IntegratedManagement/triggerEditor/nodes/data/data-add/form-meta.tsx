@@ -85,13 +85,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 新增方式变更
   const handleDataTypeChange = (curAddType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'dataNodeId', 'fields']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      fields: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   mainEntityId: undefined,
+    //   subEntityId: undefined,
+    //   fields: []
+    // });
     setMainEntityList([]);
     setSubEntityList([]);
     setFieldDataList([]);
@@ -116,12 +117,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 主表数据变更
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'dataNodeId', 'fields']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subEntityId: undefined,
-      fields: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   subEntityId: undefined,
+    //   fields: []
+    // });
 
     setFieldDataList([]);
 
@@ -143,11 +145,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 子表数据变更
   const handleSubEntityIdChange = (curSubEntityId: string) => {
     payloadForm.clearFields(['dataNodeId', 'fields']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      fields: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   fields: []
+    // });
 
     setFieldDataList([]);
     getFieldList(curSubEntityId);
