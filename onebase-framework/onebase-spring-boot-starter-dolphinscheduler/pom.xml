@@ -109,6 +109,12 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 新增：JUnit 平台 Suite（包含 API+Engine），用于聚合运行测试用例 -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
