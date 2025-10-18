@@ -270,12 +270,16 @@ const XTable = memo(
               }
             }
 
+            // 多选字段回显 逗号分割
             const multiSelectField = mainMetaData.parentFields.find(
               (field: AppEntityField) =>
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
             );
             if (multiSelectField && newItem[key]) {
-              newItem[key] = newItem[key].map((item: string) => item).join(', ');
+              if (Array.isArray(newItem[key])) {
+                newItem[key] =
+                  newItem[key].length > 1 ? newItem[key].map((item: string) => item).join(', ') : newItem[key];
+              }
             }
           }
         });

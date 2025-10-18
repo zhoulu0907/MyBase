@@ -97,7 +97,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
   // 暂时不能在表格展示的数据类型
   const hiddenFieldTypes = [
-    // ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE,
     ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE,
     ENTITY_FIELD_TYPE.RELATION.VALUE,
     ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
