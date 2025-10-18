@@ -25,4 +25,11 @@ public class DataFactoryTableRepository extends DataRepository<DataFactoryTableD
         return tableList.stream()
                 .collect(Collectors.toMap(DataFactoryTableDO::getTableName, table -> table));
     }
+
+    public void deleteAllByDatasourceId(Long datasourceId) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("datasource_id", datasourceId);
+
+        deleteByConfig(cs);
+    }
 }

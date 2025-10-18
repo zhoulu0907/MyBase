@@ -4,7 +4,10 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.controller.datasource.vo.DataFactoryDatasourceReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
+import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryCatalogRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryDatasourceRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.DataFactorySchemaRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.DataFactoryErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.service.collector.MetadataCollectorService;
@@ -17,6 +20,7 @@ import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +30,16 @@ import java.util.Map;
 public class DataFactoryDatasourceServiceImpl implements DataFactoryDatasourceService {
 
     @Resource
-    private DataFactoryDatasourceRepository dataFactoryDatasourceRepository;
+    private DataFactoryDatasourceRepository datasourceRepository;
+
+    @Resource
+    private DataFactoryCatalogRepository catalogRepository;
+
+    @Resource
+    private DataFactorySchemaRepository schemaRepository;
+
+    @Resource
+    private DataFactoryTableRepository tableRepository;
 
     @Resource
     private MetadataCollectorService metadataCollectorService;
@@ -79,7 +92,7 @@ public class DataFactoryDatasourceServiceImpl implements DataFactoryDatasourceSe
 
         DataFactoryDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, DataFactoryDatasourceDO.class);
         datasourceDO.setId(null);
-        datasourceDO = dataFactoryDatasourceRepository.insert(datasourceDO);
+        datasourceDO = datasourceRepository.insert(datasourceDO);
         return datasourceDO.getId();
     }
 
@@ -89,16 +102,40 @@ public class DataFactoryDatasourceServiceImpl implements DataFactoryDatasourceSe
         validDatasourceTypeSupported(requestVO.getDatasourceType());
 
         DataFactoryDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, DataFactoryDatasourceDO.class);
-        dataFactoryDatasourceRepository.update(datasourceDO);
+        datasourceRepository.update(datasourceDO);
+    }
+
+    @Override
+    public void deleteDatasource(Long datasourceId) {
+        DataFactoryDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
+
+        deleteAllRelated(datasourceId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    private void deleteAllRelated(Long datasourceId) {
+        tableRepository.deleteAllByDatasourceId(datasourceId);
+        schemaRepository.deleteAllByDatasourceId(datasourceId);
+        catalogRepository.deleteAllByDatasourceId(datasourceId);
+        datasourceRepository.deleteById(datasourceId);
+    }
+
+    @Override
+    public void executeMetadataCollectJob(Long datasourceId) {
+        // TODO: write records to database.
+        metadataCollectorService.doCollection(datasourceId);
     }
 
     private void validDatasourceCodeDuplicate(String datasourceCode, Long datasourceId) {
         if (datasourceId == null) {
-            if (dataFactoryDatasourceRepository.findOneByDatasourceCode(datasourceCode) != null) {
+            if (datasourceRepository.findOneByDatasourceCode(datasourceCode) != null) {
                 throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
             }
         } else {
-            if (dataFactoryDatasourceRepository.findOneByDatasourceCodeAndIdNe(datasourceCode, datasourceId) != null) {
+            if (datasourceRepository.findOneByDatasourceCodeAndIdNe(datasourceCode, datasourceId) != null) {
                 throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
             }
         }

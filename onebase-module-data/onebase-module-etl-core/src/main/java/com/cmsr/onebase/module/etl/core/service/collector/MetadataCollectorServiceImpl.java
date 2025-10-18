@@ -51,9 +51,8 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
     }
 
     @Override
-    public boolean doCollection(DataFactoryDatasourceDO datasourceDO) {
-        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO);
-        Long datasourceId = datasourceDO.getId();
+    public void doCollection(Long datasourceId) {
+        DataSource datasource = dataSourceFactory.constructDataSource(datasourceId);
         try {
             AnylineService<?> temporary = ServiceProxy.temporary(datasource);
             // Catalog
@@ -89,7 +88,9 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
             Map<String, DataFactoryTableDO> tableDOs = tableRepository.findAllByCatalogIdAndSchemaIdAndDatasourceId(datasourceId, catalogId, schemaId);
             for (Table table : tables.values()) {
                 String tableName = table.getName();
-                DataFactoryTableDO newTableDO = DataFactoryTableDO.convert(datasourceId, catalogId, schemaId, table);
+                // 重新获取一遍，由于Anyline .tables()方法会忽略列(Column)
+                Table tableDetailed = temporary.metadata().table(tableName);
+                DataFactoryTableDO newTableDO = DataFactoryTableDO.convert(datasourceId, catalogId, schemaId, tableDetailed);
                 if (tableDOs.containsKey(tableName)) {
                     DataFactoryTableDO oldTableDO = tableDOs.get(tableName);
                     DataFactoryTableDO.applyChanges(oldTableDO, newTableDO);
@@ -98,7 +99,6 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                     tableRepository.insert(newTableDO);
                 }
             }
-            return true;
         } catch (Exception ex) {
             log.error("元数据采集时发生异常", ex);
             throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.METADATA_COLLECT_FAILED);

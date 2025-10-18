@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,14 +22,19 @@ public class DataFactoryDatasourceDO extends TenantBaseDO {
         return this;
     }
 
+    @Column(name = "datasource_code")
     private String datasourceCode;
 
+    @Column(name = "datasource_name")
     private String datasourceName;
 
+    @Column(name = "datasource_type")
     private String datasourceType;
 
+    @Column(name = "config")
     private String config;
 
+    @Column(name = "app_id")
     private Long appId;
 
 }

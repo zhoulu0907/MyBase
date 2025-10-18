@@ -24,4 +24,11 @@ public class DataFactorySchemaRepository extends DataRepository<DataFactorySchem
 
         return findOne(cs);
     }
+
+    public void deleteAllByDatasourceId(Long datasourceId) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("datasource_id", datasourceId);
+
+        deleteByConfig(cs);
+    }
 }

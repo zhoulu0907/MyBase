@@ -2,8 +2,10 @@ package com.cmsr.onebase.module.etl.core.service.collector;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.DataFactoryErrorCodeConstants;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ClassUtils;
@@ -24,6 +26,9 @@ import java.util.regex.Pattern;
 public class DataSourceFactory {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
 
+    @Resource
+    private DataFactoryDatasourceRepository datasourceRepository;
+
     public DataSource constructDataSource(DataFactoryDatasourceDO datasourceDO) {
         // 1. 获取数据库类型
         String databaseType = datasourceDO.getDatasourceType();
@@ -43,6 +48,14 @@ public class DataSourceFactory {
                 username,
                 password
         );
+    }
+
+    public DataSource constructDataSource(Long datasourceId) {
+        DataFactoryDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
+        return constructDataSource(datasourceDO);
     }
 
     private DatabaseType parseDatabaseType(String databaseType) {

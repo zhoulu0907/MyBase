@@ -29,7 +29,10 @@ public class MetaTable {
 
     public static MetaTable convert(Table table) {
         MetaTable metaTable = new MetaTable();
-        metaTable.setFullyQualifiedName(table.getName());
+        metaTable.setFullyQualifiedName(String.join(".",
+                table.getCatalogName(),
+                table.getSchemaName(),
+                table.getName()));
         metaTable.setKeyword(table.keyword());
         metaTable.setBaseType(table.getType());
         metaTable.setComment(table.getComment());

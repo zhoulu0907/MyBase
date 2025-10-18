@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.MetaCatalog;
+import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,15 +26,28 @@ public class DataFactoryCatalogDO extends TenantBaseDO {
         return this;
     }
 
+    @Column(name = "datasource_id")
     private Long datasourceId;
 
+    @Column(name = "fqn_hash")
     private String fqnHash;
 
+    @Column(name = "catalog_name")
     private String catalogName;
 
+    @Column(name = "display_name")
     private String displayName;
 
-    private MetaCatalog metaInfo;
+    @Column(name = "meta_info")
+    private String metaInfo;
+
+    public MetaCatalog getMetaInfo() {
+        return JsonUtils.parseObject(metaInfo, MetaCatalog.class);
+    }
+
+    public void setMetaInfo(MetaCatalog metaInfo) {
+        this.metaInfo = JsonUtils.toJsonString(metaInfo);
+    }
 
     public static DataFactoryCatalogDO convert(Long datasourceId, Catalog catalog) {
         DataFactoryCatalogDO catalogDO = new DataFactoryCatalogDO();

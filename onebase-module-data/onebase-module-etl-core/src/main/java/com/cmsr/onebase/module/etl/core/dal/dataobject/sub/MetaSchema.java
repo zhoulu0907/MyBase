@@ -14,7 +14,9 @@ public class MetaSchema {
 
     public static MetaSchema convert(Schema schema) {
         MetaSchema metaSchema = new MetaSchema();
-        metaSchema.setFullyQualifiedName(schema.getName());
+        metaSchema.setFullyQualifiedName(String.join(",",
+                schema.getCatalogName(),
+                schema.getName()));
         metaSchema.setKeyword(schema.keyword());
         metaSchema.setComment(schema.getComment());
 
