@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject.sub;
 
 import lombok.Data;
+import org.anyline.metadata.Column;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 public class MetaColumn {
@@ -78,4 +80,93 @@ public class MetaColumn {
      */
     private Object defaultValue;
 
+//    private Integer status;
+
+    public static MetaColumn convert(Column column) {
+        MetaColumn metaColumn = new MetaColumn();
+        String columnName = column.getName();
+        metaColumn.setFullyQualifiedName(String.join(".",
+                column.getCatalogName(),
+                column.getSchemaName(),
+                column.getTableName(),
+                columnName));
+        metaColumn.setKeyword(column.keyword());
+        String comment = column.getComment();
+        metaColumn.setComment(comment);
+        if (StringUtils.isNotBlank(comment)) {
+            metaColumn.setDisplayName(comment);
+        } else {
+            metaColumn.setDisplayName(columnName);
+        }
+        metaColumn.setName(columnName);
+        metaColumn.setOriginType(column.getOriginType());
+        metaColumn.setCompatibleType(column.getTypeName());
+        metaColumn.setPosition(column.getPosition());
+        metaColumn.setNullable(column.getNullable());
+        metaColumn.setIgnoreLength(column.ignoreLength());
+        metaColumn.setLength(column.getLength());
+        metaColumn.setIgnorePrecision(column.ignorePrecision());
+        metaColumn.setPrecision(column.getPrecision());
+        metaColumn.setIgnoreScale(column.ignoreScale());
+        metaColumn.setScale(column.getScale());
+        metaColumn.setPrimary(column.isPrimaryKey());
+        metaColumn.setUnique(column.isUnique());
+        metaColumn.setDefaultValue(column.getDefaultValue());
+//        metaColumn.setStatus(MetadataChange.ADD.getAffectLevel());
+
+        return metaColumn;
+    }
+
+    public static void applyChanges(MetaColumn oldMeta, MetaColumn newMeta) {
+        String oldDisplayName = oldMeta.getDisplayName();
+        String oldName = oldMeta.getName();
+        String oldComment = oldMeta.getComment();
+
+        if (!StringUtils.equals(oldDisplayName, oldName) && !StringUtils.equals(oldDisplayName, oldComment)) {
+            newMeta.setDisplayName(oldDisplayName);
+        }
+    }
+
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (other instanceof MetaColumn oColumn) {
+            // basic compare
+            if (StringUtils.equals(this.fullyQualifiedName, oColumn.fullyQualifiedName) &&
+                    StringUtils.equals(this.comment, oColumn.comment) &&
+                    StringUtils.equals(this.name, oColumn.name) &&
+                    StringUtils.equals(this.originType, oColumn.originType) &&
+                    StringUtils.equals(this.compatibleType, oColumn.compatibleType) &&
+                    this.position == oColumn.position &&
+                    this.nullable == oColumn.nullable &&
+                    this.primary == oColumn.primary &&
+                    this.unique == oColumn.unique
+            ) {
+                return false;
+            }
+            if (this.ignoreLength != oColumn.ignoreLength) {
+                return false;
+            }
+            if (this.ignoreLength == 0 && this.length != oColumn.length) {
+                return false;
+            }
+            if (this.ignorePrecision != oColumn.ignorePrecision) {
+                return false;
+            }
+            if (this.ignorePrecision == 0 && this.precision != oColumn.precision) {
+                return false;
+            }
+            if (this.ignoreScale != oColumn.ignoreScale) {
+                return false;
+            }
+            if (this.ignoreScale == 0 && this.scale != oColumn.scale) {
+                return false;
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

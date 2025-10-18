@@ -15,9 +15,11 @@ public class DataFactoryCatalogRepository extends DataRepository<DataFactoryCata
         super(DataFactoryCatalogDO.class);
     }
 
-    public DataFactoryCatalogDO findOneByFqnHash(String fqnHash) {
+    public DataFactoryCatalogDO findOneByNameAndDatasourceId(Long datasourceId, String catalogName) {
         ConfigStore cs = new DefaultConfigStore();
-        cs.eq("fqn_hash", fqnHash);
+        cs.eq("datasource_id", datasourceId);
+        cs.eq("catalog_name", catalogName);
+
         return findOne(cs);
     }
 }

@@ -18,4 +18,5 @@ public interface DataFactoryErrorCodeConstants {
 
     // 元数据采集异常
     ErrorCode METADATA_EMPTY                        = new ErrorCode(110501, "目标元数据信息不存在");
+    ErrorCode METADATA_COLLECT_FAILED               = new ErrorCode(110502, "元数据采集失败");
 }
