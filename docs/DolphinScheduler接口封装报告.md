@@ -1,6 +1,6 @@
 # DolphinScheduler 接口封装实现报告
 
-> 生成时间：2025-10-17  
+> 生成时间：2025-10-18  
 > 项目模块：onebase-spring-boot-starter-dolphinscheduler  
 > 基于版本：DolphinScheduler 3.3.1 API v2
 
@@ -49,13 +49,13 @@
 
 #### 接口列表
 
-| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 |
-|------|---------|----------|----------|----------|
-| 1 | POST | `/workflows` | createWorkflow | 创建工作流定义 |
-| 2 | GET | `/workflows/{code}` | queryWorkflowByCode | 通过编码查询工作流定义 |
-| 3 | PUT | `/workflows/{code}` | updateWorkflow | 更新工作流定义 |
-| 4 | DELETE | `/workflows/{code}` | deleteWorkflow | 删除工作流定义 |
-| 5 | POST | `/workflows/query` | queryWorkflowListPaging | 分页查询工作流定义列表 |
+| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 | 变更记录 |
+|------|---------|----------|----------|----------|---------|
+| 1 | POST | `/workflows` | createWorkflow | 创建工作流定义 | - |
+| 2 | GET | `/workflows/{code}` | getWorkflow | 通过编码查询工作流定义 | ✅ 2025-10-18 重命名（原 queryWorkflowByCode） |
+| 3 | PUT | `/workflows/{code}` | updateWorkflow | 更新工作流定义 | - |
+| 4 | DELETE | `/workflows/{code}` | deleteWorkflow | 删除工作流定义 | - |
+| 5 | POST | `/workflows/query` | filterWorkflows | 分页查询工作流定义列表 | ✅ 2025-10-18 重命名（原 queryWorkflowListPaging） |
 
 ---
 
@@ -67,13 +67,13 @@
 
 #### 接口列表
 
-| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 |
-|------|---------|----------|----------|----------|
-| 1 | POST | `/schedules` | createSchedule | 创建定时调度 |
-| 2 | GET | `/schedules/{id}` | queryScheduleById | 通过ID查询定时调度 |
-| 3 | PUT | `/schedules/{id}` | updateSchedule | 更新定时调度 |
-| 4 | DELETE | `/schedules/{id}` | deleteSchedule | 删除定时调度 |
-| 5 | POST | `/schedules/filter` | queryScheduleListPaging | 分页查询定时调度列表 |
+| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 | 变更记录 |
+|------|---------|----------|----------|----------|---------|
+| 1 | POST | `/schedules` | createSchedule | 创建定时调度 | - |
+| 2 | GET | `/schedules/{id}` | getSchedule | 通过ID查询定时调度 | ✅ 2025-10-18 重命名（原 queryScheduleById） |
+| 3 | PUT | `/schedules/{id}` | updateSchedule | 更新定时调度 | - |
+| 4 | DELETE | `/schedules/{id}` | deleteSchedule | 删除定时调度 | - |
+| 5 | POST | `/schedules/filter` | filterSchedule | 分页查询定时调度列表 | ✅ 2025-10-18 重命名（原 queryScheduleListPaging） |
 
 ---
 
