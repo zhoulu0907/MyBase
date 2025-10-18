@@ -40,7 +40,7 @@ export const clearDataOriginNodeId = (nodeId: string) => {
             .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
             .filter((c: any) => c.value && !c.value.startsWith(nodeId));
           if (newConditions.length > 0) {
-            newFilterCondition.push(newConditions);
+            newFilterCondition.push({ conditions: newConditions });
           }
         }
       }
@@ -56,7 +56,6 @@ export const clearDataOriginNodeId = (nodeId: string) => {
 };
 
 // 判断bolcks 是否包含当前节点
-
 const enum JudgeStatus {
   NO_FOUND = 0,
   // 在blocks的第一层中找到了目标节点
