@@ -73,7 +73,7 @@ public class WorkflowApiTest {
         queryReq.setPageNo(1);
         queryReq.setPageSize(1);
         
-        Response<WorkflowPageResponseDTO> resp = workflowApi.queryWorkflowListPaging(queryReq).execute();
+        Response<WorkflowPageResponseDTO> resp = workflowApi.filterWorkflows(queryReq).execute();
         
         // 只要能收到HTTP响应就说明服务可达
         Assertions.assertNotNull(resp, "应该能收到响应");
@@ -91,13 +91,13 @@ public class WorkflowApiTest {
      */
     @Test
     @Order(1)
-    public void test_01_queryWorkflowListPaging() throws Exception {
+    public void test_01_filterWorkflows() throws Exception {
         WorkflowQueryRequestDTO queryReq = new WorkflowQueryRequestDTO();
         queryReq.setPageNo(1);
         queryReq.setPageSize(10);
         // 可选参数留空,查询所有
         
-        Response<WorkflowPageResponseDTO> resp = workflowApi.queryWorkflowListPaging(queryReq).execute();
+        Response<WorkflowPageResponseDTO> resp = workflowApi.filterWorkflows(queryReq).execute();
 
         // HTTP层面验证
         Assertions.assertNotNull(resp, "HTTP 响应不能为空");
@@ -172,11 +172,11 @@ public class WorkflowApiTest {
      */
     @Test
     @Order(3)
-    public void test_03_queryWorkflowByCode() throws Exception {
+    public void test_03_getWorkflow() throws Exception {
         // 测试参数 - 请根据实际环境修改
         Long testWorkflowCode = 1L;
 
-        Response<WorkflowQueryResponseDTO> resp = workflowApi.queryWorkflowByCode(testWorkflowCode).execute();
+        Response<WorkflowQueryResponseDTO> resp = workflowApi.getWorkflow(testWorkflowCode).execute();
 
         // HTTP层面验证
         Assertions.assertNotNull(resp, "HTTP 响应不能为空");

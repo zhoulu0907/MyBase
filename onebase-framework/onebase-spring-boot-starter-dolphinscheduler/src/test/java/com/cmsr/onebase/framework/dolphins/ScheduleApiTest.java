@@ -69,7 +69,7 @@ public class ScheduleApiTest {
         queryReq.setPageNo(1);
         queryReq.setPageSize(1);
 
-        Response<SchedulePageResponseDTO> resp = scheduleApi.queryScheduleListPaging(queryReq).execute();
+        Response<SchedulePageResponseDTO> resp = scheduleApi.filterSchedule(queryReq).execute();
 
         Assertions.assertNotNull(resp, "应该能收到响应");
         Assertions.assertEquals(200, resp.code(), "HTTP状态应为200");
@@ -82,12 +82,12 @@ public class ScheduleApiTest {
 
     @Test
     @Order(1)
-    public void test_01_queryScheduleListPaging() throws Exception {
+    public void test_01_filterSchedule() throws Exception {
         ScheduleQueryRequestDTO queryReq = new ScheduleQueryRequestDTO();
         queryReq.setPageNo(1);
         queryReq.setPageSize(10);
 
-        Response<SchedulePageResponseDTO> resp = scheduleApi.queryScheduleListPaging(queryReq).execute();
+        Response<SchedulePageResponseDTO> resp = scheduleApi.filterSchedule(queryReq).execute();
 
         Assertions.assertNotNull(resp, "HTTP 响应不能为空");
         Assertions.assertEquals(200, resp.code(), "HTTP 状态应为200");
@@ -143,11 +143,11 @@ public class ScheduleApiTest {
 
     @Test
     @Order(3)
-    public void test_03_queryScheduleById() throws Exception {
+    public void test_03_getSchedule() throws Exception {
         // 请根据实际情况调整，如果 create 未成功，则此ID需要配置为系统中存在的ID
         Integer testScheduleId = createdScheduleId != null ? createdScheduleId : 1;
 
-        Response<ScheduleQueryResponseDTO> resp = scheduleApi.queryScheduleById(testScheduleId).execute();
+        Response<ScheduleQueryResponseDTO> resp = scheduleApi.getSchedule(testScheduleId).execute();
 
         Assertions.assertNotNull(resp, "HTTP 响应不能为空");
         Assertions.assertEquals(200, resp.code(), "HTTP 状态应为200");

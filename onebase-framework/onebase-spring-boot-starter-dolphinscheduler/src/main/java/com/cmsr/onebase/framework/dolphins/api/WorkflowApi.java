@@ -41,7 +41,7 @@ public interface WorkflowApi {
      * @return 工作流定义信息
      */
     @GET("workflows/{code}")
-    Call<WorkflowQueryResponseDTO> queryWorkflowByCode(
+    Call<WorkflowQueryResponseDTO> getWorkflow(
             @Path("code") Long code);
 
     /**
@@ -82,6 +82,6 @@ public interface WorkflowApi {
      */
     @POST("workflows/query")
     @Headers("Content-Type: application/json")
-    Call<WorkflowPageResponseDTO> queryWorkflowListPaging(
+    Call<WorkflowPageResponseDTO> filterWorkflows(
             @Body WorkflowQueryRequestDTO body);
 }
