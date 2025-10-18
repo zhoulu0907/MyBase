@@ -259,15 +259,23 @@ const XTable = memo(
         Object.entries(newItem).forEach(([key, value]) => {
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
-            const field = mainMetaData.parentFields.find(
+            const dataField = mainMetaData.parentFields.find(
               (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE
             );
-            if (field && newItem[key]) {
+            if (dataField && newItem[key]) {
               // 仅当字段类型为日期且有值时格式化
               const dateValue = new Date(newItem[key]);
               if (!isNaN(dateValue.getTime())) {
                 newItem[key] = dateValue.toLocaleDateString();
               }
+            }
+
+            const multiSelectField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
+            );
+            if (multiSelectField && newItem[key]) {
+              newItem[key] = newItem[key].map((item: string) => item).join(', ');
             }
           }
         });
@@ -277,6 +285,7 @@ const XTable = memo(
           key: item.data.id
         };
       });
+      console.log('newTableData: ', newTableData);
 
       setTableData(newTableData);
       setTableTotal(total);
@@ -286,7 +295,7 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
-      console.log(id);
+      console.log('删除数据 id: ', id);
       const req: DeleteMethodParam = {
         entityId: metaData,
         id: id
