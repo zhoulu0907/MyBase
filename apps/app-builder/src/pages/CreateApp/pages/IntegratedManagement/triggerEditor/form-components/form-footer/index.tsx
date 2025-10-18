@@ -34,7 +34,8 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
 
       //   针对有变更的节点，需要清空下游节点的依赖
       switch (curNode.type) {
-        case NodeType.DATA_QUERY_MULTIPLE || NodeType.DATA_QUERY: {
+        case NodeType.DATA_QUERY_MULTIPLE:
+        case NodeType.DATA_QUERY: {
           if (
             originalNodeData.dataType != formInfo.dataType ||
             originalNodeData.mainEntityId != formInfo.mainEntityId ||
@@ -46,6 +47,30 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
 
           break;
         }
+
+        case NodeType.DATA_ADD: {
+          if (
+            originalNodeData.addType != formInfo.addType ||
+            originalNodeData.mainEntityId != formInfo.mainEntityId ||
+            originalNodeData.subEntityId != formInfo.subEntityId ||
+            originalNodeData.dataNodeId != formInfo.dataNodeId
+          ) {
+            clearDataOriginNodeId(nodeId.value);
+          }
+          break;
+        }
+
+        case NodeType.DATA_DELETE: {
+          if (
+            originalNodeData.dataType != formInfo.dataType ||
+            originalNodeData.mainEntityId != formInfo.mainEntityId ||
+            originalNodeData.subEntityId != formInfo.subEntityId
+          ) {
+            clearDataOriginNodeId(nodeId.value);
+          }
+          break;
+        }
+
         // TODO(chenyongqiang): 补充其他节点类型
 
         default:
