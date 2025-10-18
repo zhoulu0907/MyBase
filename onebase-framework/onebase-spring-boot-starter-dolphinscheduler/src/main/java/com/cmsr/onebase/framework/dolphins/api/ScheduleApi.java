@@ -45,7 +45,7 @@ public interface ScheduleApi {
      * @return 定时调度信息
      */
     @GET("schedules/{id}")
-    Call<ScheduleQueryResponseDTO> queryScheduleById(
+    Call<ScheduleQueryResponseDTO> getSchedule(
             @Path("id") Integer id);
 
     /**
@@ -86,6 +86,6 @@ public interface ScheduleApi {
      */
     @POST("schedules/filter")
     @Headers("Content-Type: application/json")
-    Call<SchedulePageResponseDTO> queryScheduleListPaging(
+    Call<SchedulePageResponseDTO> filterSchedule(
             @Body ScheduleQueryRequestDTO body);
 }

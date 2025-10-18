@@ -1,6 +1,11 @@
 package com.cmsr.onebase.framework.dolphins.dto.taskinstance.model;
 
+import com.cmsr.onebase.framework.dolphins.dto.task.enums.FlagEnum;
 import com.cmsr.onebase.framework.dolphins.dto.task.enums.TaskPriorityEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.FailureStrategyEnum;
+import com.cmsr.onebase.framework.dolphins.dto.schedule.enums.WarningTypeEnum;
+import com.cmsr.onebase.framework.dolphins.dto.workflowinstance.enums.CommandTypeEnum;
+import com.cmsr.onebase.framework.dolphins.dto.workflowinstance.enums.TaskDependTypeEnum;
 import com.cmsr.onebase.framework.dolphins.dto.taskinstance.enums.WorkflowInstanceStateEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,8 +46,11 @@ public class WorkflowInstanceDTO {
     @JsonProperty("stateDescList")
     private List<StateDescDTO> stateDescList;
 
+    /**
+     * 容错标识
+     */
     @JsonProperty("recovery")
-    private String recovery;
+    private FlagEnum recovery;
 
     @JsonProperty("startTime")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -64,24 +72,36 @@ public class WorkflowInstanceDTO {
     @JsonProperty("workflowDefinition")
     private Object workflowDefinition;
 
+    /**
+     * 命令类型
+     */
     @JsonProperty("commandType")
-    private String commandType;
+    private CommandTypeEnum commandType;
 
     @JsonProperty("commandParam")
     private String commandParam;
 
+    /**
+     * 任务依赖类型
+     */
     @JsonProperty("taskDependType")
-    private String taskDependType;
+    private TaskDependTypeEnum taskDependType;
 
     @JsonProperty("maxTryTimes")
     @Deprecated
     private Integer maxTryTimes;
 
+    /**
+     * 失败策略
+     */
     @JsonProperty("failureStrategy")
-    private String failureStrategy;
+    private FailureStrategyEnum failureStrategy;
 
+    /**
+     * 告警类型
+     */
     @JsonProperty("warningType")
-    private String warningType;
+    private WarningTypeEnum warningType;
 
     @JsonProperty("warningGroupId")
     private Integer warningGroupId;
@@ -112,8 +132,11 @@ public class WorkflowInstanceDTO {
     @JsonProperty("queue")
     private String queue;
 
+    /**
+     * 是否子工作流
+     */
     @JsonProperty("isSubWorkflow")
-    private String isSubWorkflow;
+    private FlagEnum isSubWorkflow;
 
     @JsonProperty("locations")
     private String locations;
@@ -153,8 +176,11 @@ public class WorkflowInstanceDTO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime restartTime;
 
+    /**
+     * 补数时的命令类型
+     */
     @JsonProperty("cmdTypeIfComplement")
-    private String cmdTypeIfComplement;
+    private CommandTypeEnum cmdTypeIfComplement;
 
     @JsonProperty("complementData")
     private Boolean complementData;
