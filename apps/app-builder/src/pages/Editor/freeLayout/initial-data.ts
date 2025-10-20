@@ -14,7 +14,8 @@ export const initialData: FlowDocumentJSON = {
         position: {
           x: 180,
           y: 100
-        }
+        },
+        defaultPorts: [{ type: 'output', location: 'bottom' }]
       },
       data: {
         title: '开始'
@@ -22,12 +23,16 @@ export const initialData: FlowDocumentJSON = {
     },
     {
       id: 'node_0',
-      type: 'custom',
+      type: 'condition',
       meta: {
         position: {
           x: 180,
           y: 300
-        }
+        },
+        defaultPorts: [
+          { type: 'output', location: 'bottom' },
+          { type: 'input', location: 'top' }
+        ]
       },
       data: {
         title: '抄送人'
@@ -40,7 +45,8 @@ export const initialData: FlowDocumentJSON = {
         position: {
           x: 180,
           y: 500
-        }
+        },
+        defaultPorts: [{ type: 'input', location: 'top' }]
       },
       data: {
         title: '结束'
