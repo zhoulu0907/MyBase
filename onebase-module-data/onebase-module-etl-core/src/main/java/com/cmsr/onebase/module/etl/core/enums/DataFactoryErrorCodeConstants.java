@@ -17,6 +17,7 @@ public interface DataFactoryErrorCodeConstants {
     ErrorCode DATASOURCE_PROPERTY_INSUFFICIENT      = new ErrorCode(110203, "数据源信息不齐全");
 
     // 元数据采集异常
-    ErrorCode METADATA_EMPTY                        = new ErrorCode(110501, "目标元数据信息不存在");
-    ErrorCode METADATA_COLLECT_FAILED               = new ErrorCode(110502, "元数据采集失败");
+    ErrorCode INVALID_COLLECT_STATUS                = new ErrorCode(110501, "无效的采集状态");
+    ErrorCode METADATA_EMPTY                        = new ErrorCode(110502, "目标元数据信息不存在");
+    ErrorCode METADATA_COLLECT_FAILED               = new ErrorCode(110503, "元数据采集失败");
 }

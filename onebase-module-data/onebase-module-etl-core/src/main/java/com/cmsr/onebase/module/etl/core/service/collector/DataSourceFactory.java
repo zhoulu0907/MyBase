@@ -2,14 +2,17 @@ package com.cmsr.onebase.module.etl.core.service.collector;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.DataFactoryErrorCodeConstants;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -24,25 +27,44 @@ import java.util.regex.Pattern;
 public class DataSourceFactory {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
 
-    public DataSource constructDataSource(DataFactoryDatasourceDO datasourceDO) {
+    @Resource
+    private DataFactoryDatasourceRepository datasourceRepository;
+
+    public DataSource constructDataSource(DataFactoryDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
         String databaseType = datasourceDO.getDatasourceType();
         DatabaseType dbType = parseDatabaseType(databaseType);
         // 2. 创建DataSource
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
         String jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);
-        Driver declaredDriver = getDeclaredDriverInstance(dbType);
+//        Driver declaredDriver = getDeclaredDriverInstance(dbType);
         String username = (String) connectionProperties.get("username");
         String password = (String) connectionProperties.get("password");
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_PROPERTY_INSUFFICIENT);
         }
-        return new SimpleDriverDataSource(
-                declaredDriver,
-                jdbcConnection,
-                username,
-                password
-        );
+        if (oneshot) {
+            return new DriverManagerDataSource(
+                    jdbcConnection,
+                    username,
+                    password
+            );
+        } else {
+            return new SingleConnectionDataSource(
+                    jdbcConnection,
+                    username,
+                    password,
+                    false
+            );
+        }
+    }
+
+    public DataSource constructDataSource(Long datasourceId, boolean oneshot) {
+        DataFactoryDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
+        return constructDataSource(datasourceDO, oneshot);
     }
 
     private DatabaseType parseDatabaseType(String databaseType) {

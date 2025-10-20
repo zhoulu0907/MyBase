@@ -27,15 +27,17 @@ public class MetaTable {
 //     */
 //    private Integer status;
 
-    public static MetaTable convert(Table table) {
+    public static MetaTable convert(Table table, Map<String, Column> columnList) {
         MetaTable metaTable = new MetaTable();
-        metaTable.setFullyQualifiedName(table.getName());
+        metaTable.setFullyQualifiedName(String.join(".",
+                table.getCatalogName(),
+                table.getSchemaName(),
+                table.getName()));
         metaTable.setKeyword(table.keyword());
         metaTable.setBaseType(table.getType());
         metaTable.setComment(table.getComment());
 
         List<MetaColumn> columns = Lists.newArrayList();
-        Map<String, Column> columnList = table.getColumns();
         columnList.forEach((key, column) -> {
             columns.add(MetaColumn.convert(column));
         });
