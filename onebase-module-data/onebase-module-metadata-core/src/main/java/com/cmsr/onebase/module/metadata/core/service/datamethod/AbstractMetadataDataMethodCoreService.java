@@ -210,11 +210,17 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         String upperFieldType = fieldType.toUpperCase();
         
         // 字段类型包含以下关键字的需要JSON反序列化
-        boolean isComplexType = upperFieldType.contains("MULTI") ||        // 多选类型
+        boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
+                                upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
                                 upperFieldType.contains("ADDRESS") ||       // 地址类型
                                 upperFieldType.contains("FILE") ||          // 文件附件
                                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                                 upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
+                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
+                                upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
+                                upperFieldType.contains("GEO") ||           // 地理位置（简写）
                                 upperFieldType.equals("JSONB") ||           // JSONB类型
                                 upperFieldType.equals("JSON");              // JSON类型
         
@@ -545,8 +551,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * 7. 数据编号
      */
     protected void generateDataNumber(ProcessContext context) {
-        // 处理自动编号字段
-        processAutoNumberFields(context.getFields(), context.getProcessedData());
+        // 只有在创建操作时才处理自动编号字段
+        if (context.getOperationType() == OperationType.CREATE) {
+            processAutoNumberFields(context.getFields(), context.getProcessedData());
+            log.info("新增操作：已触发自动编号规则");
+        } else {
+            log.debug("非新增操作（{}），跳过自动编号规则", context.getOperationType().getDescription());
+        }
     }
 
     /**
