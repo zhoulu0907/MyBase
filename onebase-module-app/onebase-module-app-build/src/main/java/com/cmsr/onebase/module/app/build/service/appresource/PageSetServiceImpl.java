@@ -294,7 +294,9 @@ public class PageSetServiceImpl implements PageSetService {
                 componentDO.setPageId(finalPageDO.getId());
                 componentDOs.add(componentDO);
             });
-            componentDataRepository.insertBatch(componentDOs);
+            if (!componentDOs.isEmpty()) {
+                componentDataRepository.insertBatch(componentDOs);
+            }
         });
 
         return true;
