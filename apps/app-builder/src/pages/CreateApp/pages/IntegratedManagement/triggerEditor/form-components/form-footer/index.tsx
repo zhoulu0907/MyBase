@@ -32,68 +32,70 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
       let param = { ...nodeData.value[nodeId.value], ...formInfo };
       const curNode = searchNodeById(nodeId.value, nodes.value);
 
-      //   针对有变更的节点，需要清空下游节点的依赖
-      switch (curNode.type) {
-        case NodeType.DATA_QUERY_MULTIPLE:
-        case NodeType.DATA_QUERY: {
-          if (
-            originalNodeData.dataType != formInfo.dataType ||
-            originalNodeData.mainEntityId != formInfo.mainEntityId ||
-            originalNodeData.subEntityId != formInfo.subEntityId ||
-            originalNodeData.dataNodeId != formInfo.dataNodeId
-          ) {
-            clearDataOriginNodeId(nodeId.value);
+      if (originalNodeData) {
+        //   针对有变更的节点，需要清空下游节点的依赖
+        switch (curNode.type) {
+          case NodeType.DATA_QUERY_MULTIPLE:
+          case NodeType.DATA_QUERY: {
+            if (
+              originalNodeData.dataType != formInfo.dataType ||
+              originalNodeData.mainEntityId != formInfo.mainEntityId ||
+              originalNodeData.subEntityId != formInfo.subEntityId ||
+              originalNodeData.dataNodeId != formInfo.dataNodeId
+            ) {
+              clearDataOriginNodeId(nodeId.value);
+            }
+
+            break;
           }
 
-          break;
-        }
-
-        case NodeType.DATA_ADD: {
-          if (
-            originalNodeData.addType != formInfo.addType ||
-            originalNodeData.mainEntityId != formInfo.mainEntityId ||
-            originalNodeData.subEntityId != formInfo.subEntityId ||
-            originalNodeData.dataNodeId != formInfo.dataNodeId
-          ) {
-            clearDataOriginNodeId(nodeId.value);
+          case NodeType.DATA_ADD: {
+            if (
+              originalNodeData.addType != formInfo.addType ||
+              originalNodeData.mainEntityId != formInfo.mainEntityId ||
+              originalNodeData.subEntityId != formInfo.subEntityId ||
+              originalNodeData.dataNodeId != formInfo.dataNodeId
+            ) {
+              clearDataOriginNodeId(nodeId.value);
+            }
+            break;
           }
-          break;
-        }
 
-        case NodeType.DATA_DELETE: {
-          if (
-            originalNodeData.dataType != formInfo.dataType ||
-            originalNodeData.mainEntityId != formInfo.mainEntityId ||
-            originalNodeData.subEntityId != formInfo.subEntityId
-          ) {
-            clearDataOriginNodeId(nodeId.value);
+          case NodeType.DATA_DELETE: {
+            if (
+              originalNodeData.dataType != formInfo.dataType ||
+              originalNodeData.mainEntityId != formInfo.mainEntityId ||
+              originalNodeData.subEntityId != formInfo.subEntityId
+            ) {
+              clearDataOriginNodeId(nodeId.value);
+            }
+            break;
           }
-          break;
-        }
 
-        case NodeType.DATA_UPDATE: {
-          if (
-            originalNodeData.updateType != formInfo.updateType ||
-            originalNodeData.mainEntityId != formInfo.mainEntityId ||
-            originalNodeData.subEntityId != formInfo.subEntityId ||
-            originalNodeData.dataNodeId != formInfo.dataNodeId
-          ) {
-            clearDataOriginNodeId(nodeId.value);
+          case NodeType.DATA_UPDATE: {
+            if (
+              originalNodeData.updateType != formInfo.updateType ||
+              originalNodeData.mainEntityId != formInfo.mainEntityId ||
+              originalNodeData.subEntityId != formInfo.subEntityId ||
+              originalNodeData.dataNodeId != formInfo.dataNodeId
+            ) {
+              clearDataOriginNodeId(nodeId.value);
+            }
+            break;
           }
-          break;
-        }
 
-        case NodeType.DATA_CALC: {
-          if (originalNodeData.calType != formInfo.calType) {
-            clearDataOriginNodeId(nodeId.value);
+          case NodeType.DATA_CALC: {
+            if (originalNodeData.calType != formInfo.calType) {
+              clearDataOriginNodeId(nodeId.value);
+            }
+            break;
           }
-          break;
+
+          // TODO(chenyongqiang): 补充其他节点类型
+
+          default:
+            break;
         }
-
-        // TODO(chenyongqiang): 补充其他节点类型
-
-        default:
-          break;
       }
 
       if (curNode && curNode.type === NodeType.MODAL) {
