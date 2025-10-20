@@ -16,14 +16,13 @@ export const EndNodeRegistry: FlowNodeRegistry = {
     nodePanelVisible: false,
     defaultPorts: [{ type: 'input' }],
     size: {
-      width: 360,
-      height: 211,
-    },
+      width: 73,
+      height: 29
+    }
   },
   info: {
-    icon: iconEnd,
-    description:
-      'The final node of the workflow, used to return the result information after the workflow is run.',
+    icon: '',
+    description: 'The final node of the workflow, used to return the result information after the workflow is run.'
   },
   /**
    * Render node via formMeta
@@ -34,5 +33,5 @@ export const EndNodeRegistry: FlowNodeRegistry = {
    */
   canAdd() {
     return false;
-  },
+  }
 };
