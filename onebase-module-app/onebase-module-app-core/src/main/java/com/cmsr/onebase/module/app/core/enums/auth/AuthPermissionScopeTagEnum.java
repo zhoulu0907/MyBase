@@ -12,9 +12,9 @@ public enum AuthPermissionScopeTagEnum {
     ALL_DATA("allData", "全部数据"),
     
     /**
-     * 本人提交（默认勾选）
+     * 本人提交
      */
-    OWN_SUBMIT("ownSubmit", "本人提交（默认勾选）"),
+    OWN_SUBMIT("ownSubmit", "本人提交"),
     
     /**
      * 本部门提交

@@ -21,6 +21,8 @@ public interface AppAuthPermissionService {
 
     void updateOperation(AuthUpdateOperationReqVO reqVO);
 
+    void updateView(AuthUpdateViewReqVO reqVO);
+
     void updateDataGroup(AuthUpdateDataGroupReqVO reqVO);
 
     void deleteDataGroup(Long id);
@@ -28,4 +30,6 @@ public interface AppAuthPermissionService {
     void updateField(AuthUpdateFieldReqVO reqVO);
 
     List<AuthPermissionScope> getPermissionScope();
+
+
 }

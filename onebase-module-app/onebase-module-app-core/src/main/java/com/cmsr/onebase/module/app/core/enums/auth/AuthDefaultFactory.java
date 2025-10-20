@@ -17,7 +17,7 @@ public class AuthDefaultFactory {
     //应用 AuthPermissionDO
     public static AuthPermissionDO createAuthPermissionDO(AuthPermissionReqVO reqVO) {
         AuthPermissionDO ap = new AuthPermissionDO();
-        ap.setId(0L);
+        ap.setId(null);
         ap.setApplicationId(reqVO.getApplicationId());
         ap.setRoleId(reqVO.getRoleId());
         ap.setMenuId(reqVO.getMenuId());
@@ -39,7 +39,7 @@ public class AuthDefaultFactory {
     //数据组权限 authDataGroupDOS
     public static AuthDataGroupDO createAuthDataGroupDO(AuthPermissionReqVO reqVO) {
         AuthDataGroupDO adg = new AuthDataGroupDO();
-        adg.setId(0L);
+        adg.setId(null);
         adg.setApplicationId(reqVO.getApplicationId());
         adg.setRoleId(reqVO.getRoleId());
         adg.setMenuId(reqVO.getMenuId());

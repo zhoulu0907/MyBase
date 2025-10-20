@@ -16,4 +16,10 @@ public class AuthDetailDataPermissionVO {
     @Schema(description = "数据访问权限")
     private List<AuthDataGroupVO> authDataGroups;
 
+    @Schema(description = "数据权限范围字段")
+    private List<EntityFieldVO> scopeFields;
+
+    @Schema(description = "数据权限范围字段")
+    private List<EntityFieldVO> dataFilterFields;
+
 }

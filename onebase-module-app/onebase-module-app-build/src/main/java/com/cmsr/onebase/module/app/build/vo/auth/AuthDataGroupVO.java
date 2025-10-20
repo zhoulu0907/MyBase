@@ -31,9 +31,6 @@ public class AuthDataGroupVO {
     @Schema(description = "权限范围字段id")
     private Long scopeFieldId;
 
-    @Schema(description = "权限范围字段名称")
-    private String scopeFieldName;
-
     @Schema(description = "权限范围")
     private String scopeLevel;
 

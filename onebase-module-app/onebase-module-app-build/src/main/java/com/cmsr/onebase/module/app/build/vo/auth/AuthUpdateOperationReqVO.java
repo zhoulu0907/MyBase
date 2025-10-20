@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author：huangjie
  * @Date：2025/8/20 15:42
@@ -18,6 +20,6 @@ public class AuthUpdateOperationReqVO {
     private AuthPermissionReqVO permissionReq;
 
     @Schema(description = "操作权限列表")
-    private String operationTags;
+    private List<String> operationTags;
 
 }
