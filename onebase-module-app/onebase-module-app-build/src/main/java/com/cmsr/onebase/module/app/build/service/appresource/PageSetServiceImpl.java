@@ -287,12 +287,14 @@ public class PageSetServiceImpl implements PageSetService {
             componentDataRepository.deleteComponentByPageId(finalPageDO.getId());
 
             // 插入新的component
+            List<ComponentDO> componentDOs = new ArrayList<>();
             page.getComponents().forEach(component -> {
                 ComponentDO componentDO = BeanUtils.toBean(component, ComponentDO.class);
                 componentDO.setInTable(false);
                 componentDO.setPageId(finalPageDO.getId());
-                componentDataRepository.insert(componentDO);
+                componentDOs.add(componentDO);
             });
+            componentDataRepository.insertBatch(componentDOs);
         });
 
         return true;
