@@ -7,8 +7,8 @@ package com.cmsr.onebase.module.flow.core.event;
 
 public interface FlowChangeEventPublisher {
 
-    void publishProcessUpdate(Long processId);
+    void publishApplicationUpdate(Long applicationId);
 
-    void publishProcessDelete(Long processId);
+    void publishApplicationDelete(Long applicationId);
 
 }

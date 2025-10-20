@@ -91,6 +91,9 @@ public class GlobalExceptionHandler {
         if (ex instanceof ValidationException) {
             return validationException((ValidationException) ex);
         }
+        if (ex instanceof HttpMessageNotReadableException) {
+            return methodArgumentTypeInvalidFormatExceptionHandler((HttpMessageNotReadableException) ex);
+        }
         if (ex instanceof NoHandlerFoundException) {
             return noHandlerFoundExceptionHandler((NoHandlerFoundException) ex);
         }
@@ -105,6 +108,9 @@ public class GlobalExceptionHandler {
         }
         if (ex instanceof IllegalArgumentException) {
             return illegalArgumentExceptionHandler(request, (IllegalArgumentException) ex);
+        }
+        if (ex instanceof IllegalStateException) {
+            return illegalStateExceptionHandler(request, (IllegalStateException) ex);
         }
         if (ex instanceof AccessDeniedException) {
             return accessDeniedExceptionHandler(request, (AccessDeniedException) ex);
@@ -173,19 +179,49 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理 SpringMVC 请求参数类型错误
+     * 处理 SpringMVC 请求参数类型错误和JSON格式错误
      * <p>
      * 例如说，接口上设置了 @RequestBody实体中 xx 属性类型为 Integer，结果传递 xx 参数类型为 String
+     * 或者JSON格式错误，包含非法字符、格式不正确等
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public CommonResult<?> methodArgumentTypeInvalidFormatExceptionHandler(HttpMessageNotReadableException ex) {
         log.warn("[methodArgumentTypeInvalidFormatExceptionHandler]", ex);
+        
+        // 处理具体的JSON格式类型错误
         if (ex.getCause() instanceof InvalidFormatException) {
             InvalidFormatException invalidFormatException = (InvalidFormatException) ex.getCause();
             return CommonResult.error(BAD_REQUEST.getCode(), String.format("请求参数类型错误:%s", invalidFormatException.getValue()));
-        } else {
-            return defaultExceptionHandler(ServletUtils.getRequest(), ex);
         }
+        
+        // 处理JSON解析异常（如格式错误、非法字符等）
+        if (ex.getCause() instanceof com.fasterxml.jackson.core.JsonParseException) {
+            com.fasterxml.jackson.core.JsonParseException parseException = (com.fasterxml.jackson.core.JsonParseException) ex.getCause();
+            String errorMsg = parseException.getOriginalMessage();
+            // 提取更友好的错误信息
+            if (errorMsg != null && errorMsg.contains("Illegal unquoted character")) {
+                return CommonResult.error(BAD_REQUEST.getCode(), "JSON格式错误：请求参数中包含非法字符（如未转义的换行符或特殊字符），请检查参数格式");
+            } else if (errorMsg != null && errorMsg.contains("Unexpected character")) {
+                return CommonResult.error(BAD_REQUEST.getCode(), "JSON格式错误：请求参数包含意外的字符，请检查JSON格式");
+            } else {
+                return CommonResult.error(BAD_REQUEST.getCode(), String.format("JSON格式错误：%s", errorMsg != null ? errorMsg : "请求参数格式不正确"));
+            }
+        }
+        
+        // 处理其他JSON映射异常
+        if (ex.getCause() instanceof com.fasterxml.jackson.databind.JsonMappingException) {
+            com.fasterxml.jackson.databind.JsonMappingException mappingException = (com.fasterxml.jackson.databind.JsonMappingException) ex.getCause();
+            return CommonResult.error(BAD_REQUEST.getCode(), String.format("JSON映射错误：%s", mappingException.getOriginalMessage()));
+        }
+        
+        // 其他HTTP消息不可读异常，返回通用的JSON格式错误提示
+        String message = ex.getMessage();
+        if (message != null && message.contains("JSON")) {
+            return CommonResult.error(BAD_REQUEST.getCode(), "JSON格式错误：请求参数格式不正确，请检查JSON格式");
+        }
+        
+        // 其他未知类型的异常
+        return CommonResult.error(BAD_REQUEST.getCode(), "请求参数格式错误：无法解析请求体");
     }
 
     /**
@@ -288,6 +324,19 @@ public class GlobalExceptionHandler {
         log.warn("[illegalArgumentExceptionHandler][url({}) 参数校验失败: {}]", req.getRequestURI(), ex.getMessage());
         // 将具体的错误信息放到 msg 中返回
         String errorMessage = StrUtil.isNotBlank(ex.getMessage()) ? ex.getMessage() : "参数校验失败";
+        return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
+    }
+
+    /**
+     * 处理 IllegalStateException 异常
+     * <p>
+     * 通常是业务状态校验失败，将具体的错误信息返回给前端
+     */
+    @ExceptionHandler(value = IllegalStateException.class)
+    public CommonResult<?> illegalStateExceptionHandler(HttpServletRequest req, IllegalStateException ex) {
+        log.warn("[illegalStateExceptionHandler][url({}) 状态校验失败: {}]", req.getRequestURI(), ex.getMessage());
+        // 将具体的错误信息放到 msg 中返回
+        String errorMessage = StrUtil.isNotBlank(ex.getMessage()) ? ex.getMessage() : "状态校验失败";
         return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
     }
 

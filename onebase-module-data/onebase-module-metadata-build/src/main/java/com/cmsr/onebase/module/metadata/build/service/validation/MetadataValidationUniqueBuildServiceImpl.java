@@ -47,10 +47,11 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         // 转换DO为VO
         ValidationUniqueRespVO respVO = BeanUtils.toBean(uniqueDO, ValidationUniqueRespVO.class);
 
-        // 获取规则组名称
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(uniqueDO.getGroupId());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
 
         return respVO;
@@ -189,8 +190,13 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条唯一性校验规则(组ID=" + id + ")"); }
         MetadataValidationUniqueDO uniqueDO = list.get(0);
         ValidationUniqueRespVO respVO = BeanUtils.toBean(uniqueDO, ValidationUniqueRespVO.class);
+        
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(uniqueDO.getGroupId());
-        if (ruleGroup != null) { respVO.setRgName(ruleGroup.getRgName()); }
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        }
         return respVO;
     }
 

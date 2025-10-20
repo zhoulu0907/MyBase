@@ -7,6 +7,8 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
+import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
+import com.cmsr.onebase.module.flow.core.job.FlowJobMessageHandler;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,8 @@ public class FlowProcessTest {
     @Autowired
     private FlowProcessExecApiImpl flowProcessExecApi;
 
+    @Autowired
+    private FlowJobMessageHandler flowJobMessageHandler;
 
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
@@ -58,5 +62,13 @@ public class FlowProcessTest {
         ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
         flowProcessExecApi.entityTrigger(reqDTO);
+    }
+
+    @Test
+    public void testSimple3() throws IOException {
+        FlowJobMessage jobMessage = new FlowJobMessage();
+        jobMessage.setJobType("fld");
+        jobMessage.setProcessId(89995954500108288L);
+        flowJobMessageHandler.executeFlow(jobMessage);
     }
 }
