@@ -183,4 +183,7 @@ public interface ErrorCodeConstants {
     ErrorCode LICENSE_DECRYPT_ERROR = new ErrorCode(1_002_029_003, "文件解析失败，文件可能已损坏或不是有效的凭证文件");
     ErrorCode LICENSE_CREATE_ERROR = new ErrorCode(1_002_029_004, "License凭证生成失败");
 
+    // ========== 应用授权企业表 1-002-030-000 ==========
+    ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "应用授权企业表不存在");
+
 }
