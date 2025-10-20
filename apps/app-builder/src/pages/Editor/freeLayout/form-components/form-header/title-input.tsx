@@ -32,12 +32,7 @@ export function TitleInput(props: {
         {({ field: { value, onChange }, fieldState }: FieldRenderProps<string>) => (
           <div style={{ height: 24 }}>
             {titleEditing ? (
-              <Input
-                value={value}
-                onChange={onChange}
-                ref={ref}
-                onBlur={() => updateTitleEdit(false)}
-              />
+              <Input value={value} onChange={onChange} ref={ref} onBlur={() => updateTitleEdit(false)} />
             ) : (
               <Text ellipsis={{ showTooltip: true }}>{value}</Text>
             )}

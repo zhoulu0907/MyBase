@@ -15,7 +15,6 @@ export const Header = styled.div`
   border-radius: 8px 8px 0 0;
   cursor: move;
 
-  background: linear-gradient(#f2f2ff 0%, rgb(251, 251, 251) 100%);
   overflow: hidden;
 
   padding: 8px;

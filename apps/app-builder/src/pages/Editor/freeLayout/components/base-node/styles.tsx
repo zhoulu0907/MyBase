@@ -9,9 +9,10 @@ import { IconInfoCircle } from '@douyinfe/semi-icons';
 export const NodeWrapperStyle = styled.div`
   align-items: flex-start;
   background-color: #fff;
-  border: 1px solid rgba(6, 7, 9, 0.15);
   border-radius: 8px;
-  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.04), 0 4px 12px 0 rgba(0, 0, 0, 0.02);
+  box-shadow:
+    0 4px 4px 0 rgba(0, 0, 0, 0.15),
+    0 4px 4px 0 rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -33,7 +34,7 @@ export const ErrorIcon = () => (
       top: -6,
       zIndex: 1,
       background: 'white',
-      borderRadius: 8,
+      borderRadius: 8
     }}
   />
 );

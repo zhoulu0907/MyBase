@@ -125,13 +125,13 @@ export function FormHeader() {
             onClick={handleExpand}
           />
         )}
-        {readonly ? undefined : (
+        {/* {readonly ? undefined : (
           <div className={styles.operation}>
             <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={updateTitleEdit} />}>
               <Button size="mini" type="secondary" icon={<IconMore />} onClick={(e: Event) => e.stopPropagation()} />
             </Dropdown>
           </div>
-        )}
+        )} */}
         {/* 如果是在sidebar中，则显示关闭按钮 */}
         {isSidebar && <Button type="text" icon={<IconClose />} size="small" onClick={handleClose} />}
       </div>
