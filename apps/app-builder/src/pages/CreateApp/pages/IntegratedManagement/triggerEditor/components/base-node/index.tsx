@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { NodeRenderContext } from '../../context';
 import styles from './index.module.less';
 import { ErrorIcon } from './styles';
+import { NodeType } from '@onebase/common';
 
 export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
   /**
@@ -40,9 +41,10 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
         onMouseEnter={nodeRender.onMouseEnter}
         onMouseLeave={nodeRender.onMouseLeave}
         className={
+          // if-block 样式 没有边框 阴影
           nodeRender.activated && !form?.getValueIn('invalid')
-            ? `${styles.baseNodeStyle} ${styles.activated}`
-            : styles.baseNodeStyle
+            ? `${styles.baseNodeStyle} ${styles.activated} ${nodeRender.type === NodeType.IF_BLOCK ? styles.noShadow : ''}`
+            : `${styles.baseNodeStyle} ${nodeRender.type === NodeType.IF_BLOCK ? styles.noShadow : ''}`
         }
         onClick={() => {
           if (nodeRender.dragging) {
