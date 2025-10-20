@@ -1,10 +1,14 @@
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
+import { injectable, inject } from '@flowgram.ai/free-layout-editor';
 import {
-    FreeLayoutPluginContext,
-    FlowDocument,
-    inject,
-    injectable,
-    Playground,
-    SelectionService,
+  FreeLayoutPluginContext,
+  SelectionService,
+  Playground,
+  WorkflowDocument,
 } from '@flowgram.ai/free-layout-editor';
 
 /**
@@ -29,13 +33,13 @@ import {
  */
 @injectable()
 export class CustomService {
-  @inject(FreeLayoutPluginContext) ctx!: FreeLayoutPluginContext;
+  @inject(FreeLayoutPluginContext) ctx: FreeLayoutPluginContext;
 
-  @inject(SelectionService) selectionService!: SelectionService;
+  @inject(SelectionService) selectionService: SelectionService;
 
-  @inject(Playground) playground!: Playground;
+  @inject(Playground) playground: Playground;
 
-  @inject(FlowDocument) document!: FlowDocument;
+  @inject(WorkflowDocument) document: WorkflowDocument;
 
   save() {
     console.log(this.document.toJSON());

@@ -1,147 +1,71 @@
-import { useClientContext } from '@flowgram.ai/free-layout-editor';
-import { useCallback, useContext, useMemo, useState } from 'react';
-import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
-import { Button, Dropdown, Menu } from '@arco-design/web-react';
-import { IconCaretDown, IconCaretLeft, IconClose, IconMore } from '@arco-design/web-react/icon';
-import { NodeRenderContext } from '../../context';
-import { useIsSidebar } from '../../hooks';
-import { clearDataOriginNodeId } from '../../nodes/utils';
-import { FlowCommandId } from '../../shortcuts/constants';
-import { type FlowNodeRegistry } from '../../typings';
-import { TitleInput } from './title-input';
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
+import { useContext, useState } from 'react';
+
+import { useClientContext, CommandService } from '@flowgram.ai/free-layout-editor';
+import { Button } from '@douyinfe/semi-ui';
+import { IconClose, IconSmallTriangleDown, IconSmallTriangleLeft } from '@douyinfe/semi-icons';
+
+import { toggleLoopExpanded } from '../../utils';
+import { FlowCommandId } from '../../shortcuts';
+import { useIsSidebar, useNodeRenderContext } from '../../hooks';
+import { SidebarContext } from '../../context';
+import { NodeMenu } from '../../components/node-menu';
 import { getIcon } from './utils';
-import { NodeType, NodeTypeName } from '../../nodes/const';
-import styles from './index.module.less';
-
-function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void }) {
-  const { updateTitleEdit } = props;
-  const { node, deleteNode } = useContext(NodeRenderContext);
-  const clientContext = useClientContext();
-  const registry = node.getNodeRegistry<FlowNodeRegistry>();
-
-  const handleCopy = useCallback(
-    (e: React.MouseEvent) => {
-      clientContext.playground.commandService.executeCommand(FlowCommandId.COPY, node);
-      e.stopPropagation(); // Disable clicking prevents the sidebar from opening
-    },
-    [clientContext, node]
-  );
-
-  const handleDelete = useCallback(
-    (e: React.MouseEvent) => {
-      console.log('delete node: ', node.id);
-
-      // 删除相关应用的节点配置
-      clearDataOriginNodeId(node.id);
-
-      triggerEditorSignal.setNodeId(undefined);
-      triggerEditorSignal.deleteNodeData(node.id);
-
-      triggerNodeOutputSignal.removeTriggerNodeOutput(node.id);
-
-      deleteNode();
-      e.stopPropagation(); // Disable clicking prevents the sidebar from opening
-    },
-    [clientContext, node]
-  );
-
-  const handleEditTitle = useCallback(() => {
-    updateTitleEdit(true);
-  }, [updateTitleEdit]);
-
-  const deleteDisabled = useMemo(() => {
-    if (registry.canDelete) {
-      return !registry.canDelete(clientContext, node);
-    }
-    return registry.meta!.deleteDisable;
-  }, [registry, node]);
-
-  return (
-    <Menu>
-      <Menu.Item
-        key="editTitle"
-        onClick={(e: Event) => {
-          e.stopPropagation();
-
-          handleEditTitle();
-        }}
-      >
-        编辑节点
-      </Menu.Item>
-      <Menu.Item key="copy" onClick={handleCopy} disabled={registry.meta!.copyDisable === true}>
-        复制
-      </Menu.Item>
-      <Menu.Item key="delete" onClick={handleDelete} disabled={deleteDisabled}>
-        删除
-      </Menu.Item>
-    </Menu>
-  );
-}
+import { TitleInput } from './title-input';
+import { Header, Operators } from './styles';
 
 export function FormHeader() {
-  const { node, expanded, startDrag, toggleExpand, readonly } = useContext(NodeRenderContext);
+  const { node, expanded, toggleExpand, readonly } = useNodeRenderContext();
   const [titleEdit, updateTitleEdit] = useState<boolean>(false);
-
-  const { setNodeId } = triggerEditorSignal;
+  const ctx = useClientContext();
+  const { setNodeId } = useContext(SidebarContext);
   const isSidebar = useIsSidebar();
-  const handleExpand = (e: Event) => {
+  const handleExpand = (e: React.MouseEvent) => {
     toggleExpand();
+    // 折叠 loop 子节点
+    if (node.flowNodeType === 'loop') {
+      toggleLoopExpanded(node);
+    }
     e.stopPropagation(); // Disable clicking prevents the sidebar from opening
+  };
+  const handleDelete = () => {
+    ctx.get<CommandService>(CommandService).executeCommand(FlowCommandId.DELETE, [node]);
   };
   const handleClose = () => {
     setNodeId(undefined);
   };
 
-  const getNodeTypeNameTag = () => {
-    if (!node.flowNodeType || isSidebar) {
-      return null;
-    }
-    const nodeTypeName = NodeTypeName[node.flowNodeType as keyof typeof NodeTypeName];
-    if (node.flowNodeType === NodeType.START_FORM) {
-      return <div className={styles.orangeTag}>{nodeTypeName}</div>;
-    }
-    return <div className={styles.tag}>{nodeTypeName}</div>;
-  };
-
   return (
-    <div className={styles.nodeHeader}>
-      <div
-        className={styles.content}
-        onMouseDown={(e) => {
-          // trigger drag node
-          startDrag(e);
-          e.stopPropagation();
-        }}
-      >
-        {getIcon(node)}
-        <TitleInput isSidebar={isSidebar} readonly={readonly} titleEdit={titleEdit} updateTitleEdit={updateTitleEdit} />
-        {getNodeTypeNameTag()}
-        {node.renderData.expandable && !isSidebar && (
-          <Button
-            type="secondary"
-            icon={expanded ? <IconCaretDown /> : <IconCaretLeft />}
-            size="small"
-            onClick={handleExpand}
-          />
-        )}
-        {readonly ? undefined : (
-          <div className={styles.operation}>
-            <Dropdown trigger="hover" position="br" droplist={<DropdownContent updateTitleEdit={updateTitleEdit} />}>
-              <Button size="mini" type="secondary" icon={<IconMore />} onClick={(e: Event) => e.stopPropagation()} />
-            </Dropdown>
-          </div>
-        )}
-        {/* 如果是在sidebar中，则显示关闭按钮 */}
-        {isSidebar && <Button type="text" icon={<IconClose />} size="small" onClick={handleClose} />}
-      </div>
-      {/* 如果不是在sidebar中，则显示节点id */}
-      {!isSidebar && (
-        <div className={styles.footer}>
-          <span>ID:</span>
-          <span style={{ paddingLeft: '12px' }}>{node.id}</span>
-        </div>
+    <Header>
+      {getIcon(node)}
+      <TitleInput readonly={readonly} updateTitleEdit={updateTitleEdit} titleEdit={titleEdit} />
+      {node.renderData.expandable && !isSidebar && (
+        <Button
+          type="primary"
+          icon={expanded ? <IconSmallTriangleDown /> : <IconSmallTriangleLeft />}
+          size="small"
+          theme="borderless"
+          onClick={handleExpand}
+        />
       )}
-    </div>
+      {readonly ? undefined : (
+        <Operators>
+          <NodeMenu node={node} deleteNode={handleDelete} updateTitleEdit={updateTitleEdit} />
+        </Operators>
+      )}
+      {isSidebar && (
+        <Button
+          type="primary"
+          icon={<IconClose />}
+          size="small"
+          theme="borderless"
+          onClick={handleClose}
+        />
+      )}
+    </Header>
   );
 }

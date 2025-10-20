@@ -1,10 +1,15 @@
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
 import { Field } from '@flowgram.ai/free-layout-editor';
 import { DynamicValueInput, PromptEditorWithVariables } from '@flowgram.ai/form-materials';
 
-import { useNodeRenderContext } from '../../hooks';
-import { type JsonSchema } from '../../typings';
-import { Feedback } from '../feedback';
 import { FormItem } from '../form-item';
+import { Feedback } from '../feedback';
+import type { JsonSchema } from '../../typings';
+import { useNodeRenderContext } from '../../hooks';
 
 export function FormInputs() {
   const { readonly } = useNodeRenderContext();

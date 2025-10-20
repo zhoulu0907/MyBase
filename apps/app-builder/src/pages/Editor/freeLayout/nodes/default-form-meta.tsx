@@ -1,21 +1,57 @@
-import { FeedbackLevel, type FormMeta, type FormRenderProps, ValidateTrigger } from '@flowgram.ai/free-layout-editor';
-import { autoRenameRefEffect, provideJsonSchemaOutputs, syncVariableTitle } from '@flowgram.ai/form-materials';
-import { FormContent, FormHeader, FormInputs, FormOutputs } from '../form-components';
-import { type FlowNodeJSON } from '../typings';
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
 
-export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => (
+import { type FormRenderProps, type FormMeta, ValidateTrigger } from '@flowgram.ai/free-layout-editor';
+import {
+  autoRenameRefEffect,
+  provideJsonSchemaOutputs,
+  syncVariableTitle,
+  DisplayOutputs,
+  validateFlowValue,
+  validateWhenVariableSync,
+  listenRefSchemaChange,
+} from '@flowgram.ai/form-materials';
+import { Divider } from '@douyinfe/semi-ui';
+
+import type { FlowNodeJSON } from '../typings';
+import { FormHeader, FormContent, FormInputs } from '../form-components';
+
+export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => (
   <>
     <FormHeader />
     <FormContent>
       <FormInputs />
-      <FormOutputs />
+      <Divider />
+      <DisplayOutputs displayFromScope />
     </FormContent>
   </>
 );
 
-export const defaultFormMeta: FormMeta<FlowNodeJSON['data']> = {
+export const defaultFormMeta: FormMeta<FlowNodeJSON> = {
   render: renderForm,
   validateTrigger: ValidateTrigger.onChange,
+  /**
+   * Supported writing as:
+   * 1: validate as options: { title: () => {} , ... }
+   * 2: validate as dynamic function: (values,  ctx) => ({ title: () => {}, ... })
+   */
+  validate: {
+    title: ({ value }) => (value ? undefined : 'Title is required'),
+    'inputsValues.*': ({ value, context, formValues, name }) => {
+      const valuePropertyKey = name.replace(/^inputsValues\./, '');
+      const required = formValues.inputs?.required || [];
+
+      return validateFlowValue(value, {
+        node: context.node,
+        required: required.includes(valuePropertyKey),
+        errorMessages: {
+          required: `${valuePropertyKey} is required`,
+        },
+      });
+    },
+  },
   /**
    * Initialize (fromJSON) data transformation
    * 初始化(fromJSON) 数据转换
@@ -30,28 +66,12 @@ export const defaultFormMeta: FormMeta<FlowNodeJSON['data']> = {
    * @param ctx
    */
   formatOnSubmit: (value, ctx) => value,
-  /**
-   * Supported writing as:
-   * 1: validate as options: { title: () => {} , ... }
-   * 2: validate as dynamic function: (values,  ctx) => ({ title: () => {}, ... })
-   */
-  validate: {
-    title: ({ value }) => (value ? undefined : 'Title is required'),
-    'inputsValues.*': ({ value, context, formValues, name }) => {
-      const valuePropetyKey = name.replace(/^inputsValues\./, '');
-      const required = formValues.inputs?.required || [];
-      if (required.includes(valuePropetyKey) && (value === '' || value === undefined || value?.content === '')) {
-        return {
-          message: `${valuePropetyKey} is required`,
-          level: FeedbackLevel.Error // Error || Warning
-        };
-      }
-      return undefined;
-    }
-  },
   effect: {
     title: syncVariableTitle,
     outputs: provideJsonSchemaOutputs,
-    inputsValues: autoRenameRefEffect
-  }
+    inputsValues: [...autoRenameRefEffect, ...validateWhenVariableSync({ scope: 'public' })],
+    'inputsValues.*': listenRefSchemaChange((params) => {
+      console.log(`[${params.context.node.id}][${params.name}] Schema Of Ref Updated`);
+    }),
+  },
 };

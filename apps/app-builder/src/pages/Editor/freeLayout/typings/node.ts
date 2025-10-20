@@ -1,13 +1,20 @@
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
 import {
-    FreeLayoutPluginContext,
-    FlowNodeEntity,
-    type FlowNodeJSON as FlowNodeJSONDefault,
-    type FlowNodeMeta as FlowNodeMetaDefault,
-    FlowNodeRegistry as FlowNodeRegistryDefault,
+  type WorkflowNodeJSON as FlowNodeJSONDefault,
+  type WorkflowNodeRegistry as FlowNodeRegistryDefault,
+  FreeLayoutPluginContext,
+  FlowNodeEntity,
+  type WorkflowEdgeJSON,
+  type WorkflowNodeMeta,
 } from '@flowgram.ai/free-layout-editor';
-import { type IFlowValue } from '@flowgram.ai/form-materials';
+import type { IFlowValue } from '@flowgram.ai/form-materials';
 
 import { type JsonSchema } from './json-schema';
+import { WorkflowNodeType } from '../nodes';
 
 /**
  * You can customize the data of the node, and here you can use JsonSchema to define the input and output of the node
@@ -42,25 +49,29 @@ export interface FlowNodeJSON extends FlowNodeJSONDefault {
  * You can customize your own node meta
  * 你可以自定义节点的meta
  */
-export interface FlowNodeMeta extends FlowNodeMetaDefault {
-  sidebarDisable?: boolean;
-  style?: React.CSSProperties;
+export interface FlowNodeMeta extends WorkflowNodeMeta {
+  sidebarDisabled?: boolean;
+  nodePanelHidden?: boolean;
+  wrapperStyle?: React.CSSProperties;
+  onlyInContainer?: WorkflowNodeType;
 }
+
 /**
  * You can customize your own node registry
  * 你可以自定义节点的注册器
  */
 export interface FlowNodeRegistry extends FlowNodeRegistryDefault {
-  meta?: FlowNodeMeta;
-  info: {
+  meta: FlowNodeMeta;
+  info?: {
     icon: string;
     description: string;
   };
-  canAdd?: (ctx: FreeLayoutPluginContext, from: FlowNodeEntity) => boolean;
+  canAdd?: (ctx: FreeLayoutPluginContext) => boolean;
   canDelete?: (ctx: FreeLayoutPluginContext, from: FlowNodeEntity) => boolean;
-  onAdd?: (ctx: FreeLayoutPluginContext, from: FlowNodeEntity) => FlowNodeJSON;
+  onAdd?: (ctx: FreeLayoutPluginContext) => FlowNodeJSON;
 }
 
-export type FlowDocumentJSON = {
+export interface FlowDocumentJSON {
   nodes: FlowNodeJSON[];
-};
+  edges: WorkflowEdgeJSON[];
+}

@@ -3,7 +3,7 @@ import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Message } from '@arco-design/web-react';
 import { ProcessStatus, updateFlowMgmtDefinition } from '@onebase/app';
 import React from 'react';
-import FlowEditor from '../../freeLayout/index';
+import {FlowEditor} from '../../freeLayout/index';
 import styles from './index.module.less';
 
 /**

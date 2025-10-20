@@ -1,8 +1,13 @@
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
 import React, { useCallback } from 'react';
 
 import { DisplaySchemaTag } from '@flowgram.ai/form-materials';
+import { Typography, Tooltip } from '@douyinfe/semi-ui';
 
-import { Tooltip, Typography } from '@arco-design/web-react';
 import './index.css';
 
 const { Text } = Typography;
@@ -10,11 +15,13 @@ const { Text } = Typography;
 interface FormItemProps {
   children: React.ReactNode;
   name: string;
-  type: string;
+  type?: string;
   required?: boolean;
   description?: string;
   labelWidth?: number;
+  labelStyle?: React.CSSProperties;
   vertical?: boolean;
+  style?: React.CSSProperties;
 }
 export function FormItem({
   children,
@@ -23,15 +30,17 @@ export function FormItem({
   description,
   type,
   labelWidth,
-  vertical
+  labelStyle,
+  vertical,
+  style,
 }: FormItemProps): JSX.Element {
   const renderTitle = useCallback(
     (showTooltip?: boolean) => (
       <div style={{ width: '0', display: 'flex', flex: '1' }}>
         <Text style={{ width: '100%' }} ellipsis={{ showTooltip: !!showTooltip }}>
           {name}
+          {required && <span style={{ color: '#f93920', paddingLeft: '2px' }}>*</span>}
         </Text>
-        {required && <span style={{ color: '#f93920', paddingLeft: '2px' }}>*</span>}
       </div>
     ),
     []
@@ -49,8 +58,9 @@ export function FormItem({
           ? { flexDirection: 'column' }
           : {
               justifyContent: 'center',
-              alignItems: 'center'
-            })
+              alignItems: 'center',
+            }),
+        ...style,
       }}
     >
       <div
@@ -59,20 +69,23 @@ export function FormItem({
           alignItems: 'center',
           color: 'var(--semi-color-text-0)',
           width: labelWidth || 118,
+          minWidth: labelWidth || 118,
+          maxWidth: labelWidth || 118,
           position: 'relative',
           display: 'flex',
           columnGap: 4,
-          flexShrink: 0
+          flexShrink: 0,
+          ...labelStyle,
         }}
       >
-        <DisplaySchemaTag value={{ type }} />
+        {type && <DisplaySchemaTag value={{ type }} />}
         {description ? <Tooltip content={description}>{renderTitle()}</Tooltip> : renderTitle(true)}
       </div>
 
       <div
         style={{
           flexGrow: 1,
-          minWidth: 0
+          minWidth: 0,
         }}
       >
         {children}

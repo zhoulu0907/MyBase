@@ -1,7 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
 
-import { Badge, Button } from '@douyinfe/semi-ui';
-import { FlowNodeEntity, getNodeForm, useClientContext } from '@flowgram.ai/free-layout-editor';
+import { useState, useEffect, useCallback } from 'react';
+
+import { useClientContext, getNodeForm, FlowNodeEntity } from '@flowgram.ai/free-layout-editor';
+import { Button, Badge } from '@douyinfe/semi-ui';
 
 export function Save(props: { disabled: boolean }) {
   const [errorCount, setErrorCount] = useState(0);
@@ -13,19 +18,19 @@ export function Save(props: { disabled: boolean }) {
     setErrorCount(count);
   }, [clientContext]);
 
-
+  /**
+   * Validate all node and Save
+   */
   const onSave = useCallback(async () => {
     const allForms = clientContext.document.getAllNodes().map((node) => getNodeForm(node));
     await Promise.all(allForms.map(async (form) => form?.validate()));
-        console.log('看下这里信息，todo:保存拿到的是节点信息，没有相关的抽屉信息');
-
     console.log('>>>>> save data: ', clientContext.document.toJSON());
   }, [clientContext]);
 
+  /**
+   * Listen single node validate
+   */
   useEffect(() => {
-    /**
-     * Listen single node validate
-     */
     const listenSingleNodeValidate = (node: FlowNodeEntity) => {
       const form = getNodeForm(node);
       if (form) {
@@ -34,20 +39,32 @@ export function Save(props: { disabled: boolean }) {
       }
     };
     clientContext.document.getAllNodes().map((node) => listenSingleNodeValidate(node));
-    const dispose = clientContext.document.onNodeCreate(({ node }) => listenSingleNodeValidate(node));
+    const dispose = clientContext.document.onNodeCreate(({ node }) =>
+      listenSingleNodeValidate(node)
+    );
     return () => dispose.dispose();
   }, [clientContext]);
+
   if (errorCount === 0) {
     return (
-      <Button disabled={props.disabled} onClick={onSave}>
-        保存
+      <Button
+        disabled={props.disabled}
+        onClick={onSave}
+        style={{ backgroundColor: 'rgba(171,181,255,0.3)', borderRadius: '8px' }}
+      >
+        Save
       </Button>
     );
   }
   return (
     <Badge count={errorCount} position="rightTop" type="danger">
-      <Button type="danger" disabled={props.disabled} onClick={onSave}>
-        保存
+      <Button
+        type="danger"
+        disabled={props.disabled}
+        onClick={onSave}
+        style={{ backgroundColor: 'rgba(255, 179, 171, 0.3)', borderRadius: '8px' }}
+      >
+          Save
       </Button>
     </Badge>
   );

@@ -1,5 +1,10 @@
-import { useService } from '@flowgram.ai/free-layout-editor';
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
 import { FlowMinimapService, MinimapRender } from '@flowgram.ai/minimap-plugin';
+import { useService } from '@flowgram.ai/free-layout-editor';
 
 import { MinimapContainer } from './styles';
 
@@ -19,13 +24,13 @@ export const Minimap = ({ visible }: { visible?: boolean }) => {
           top: 'unset',
           right: 'unset',
           bottom: 'unset',
-          left: 'unset'
+          left: 'unset',
         }}
         inactiveStyle={{
           opacity: 1,
           scale: 1,
           translateX: 0,
-          translateY: 0
+          translateY: 0,
         }}
       />
     </MinimapContainer>

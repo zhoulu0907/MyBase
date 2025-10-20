@@ -1,33 +1,32 @@
-import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Drawer } from '@arco-design/web-react';
-import { PlaygroundEntityContext, useClientContext, useRefresh } from '@flowgram.ai/free-layout-editor';
-import { useSignals } from '@preact/signals-react/runtime';
-import { startTransition, useEffect, useMemo } from 'react';
-import { IsSidebarContext } from '../../context';
-import type { FlowNodeMeta } from '../../typings';
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
+import { useCallback, useContext, useEffect, useMemo, startTransition } from 'react';
+
+import {
+  PlaygroundEntityContext,
+  useRefresh,
+  useClientContext,
+} from '@flowgram.ai/free-layout-editor';
+import { SideSheet } from '@douyinfe/semi-ui';
+
+import { type FlowNodeMeta } from '../../typings';
+import { SidebarContext, IsSidebarContext } from '../../context';
 import { SidebarNodeRenderer } from './sidebar-node-renderer';
 
-export interface SidebarRendererProps {
-  refWrapper: React.RefObject<HTMLDivElement>;
-}
-
-export const SidebarRenderer = (props: SidebarRendererProps) => {
-  const { refWrapper } = props;
-  useSignals();
-
-  const { nodeId, setNodeId } = triggerEditorSignal;
+export const SidebarRenderer = () => {
+  const { nodeId, setNodeId } = useContext(SidebarContext);
   const { selection, playground, document } = useClientContext();
   const refresh = useRefresh();
-
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     // Sidebar delayed closing
     startTransition(() => {
       setNodeId(undefined);
     });
-  };
-
-  const node = nodeId.value ? document.getNode(nodeId.value) : undefined;
-
+  }, []);
+  const node = nodeId ? document.getNode(nodeId) : undefined;
   /**
    * Listen readonly
    */
@@ -59,21 +58,21 @@ export const SidebarRenderer = (props: SidebarRendererProps) => {
    * Close when node disposed
    */
   useEffect(() => {
-    console.log('Node disposed: ', node?.id);
-    if (node?.id) {
+    if (node) {
       const toDispose = node.onDispose(() => {
         setNodeId(undefined);
       });
       return () => toDispose.dispose();
     }
+    return () => {};
   }, [node]);
 
   const visible = useMemo(() => {
     if (!node) {
       return false;
     }
-    const { sidebarDisable = false } = node.getNodeMeta<FlowNodeMeta>();
-    return !sidebarDisable;
+    const { sidebarDisabled = false } = node.getNodeMeta<FlowNodeMeta>();
+    return !sidebarDisabled;
   }, [node]);
 
   if (playground.config.readonly) {
@@ -90,27 +89,25 @@ export const SidebarRenderer = (props: SidebarRendererProps) => {
     ) : null;
 
   return (
-    <Drawer
+    <SideSheet
       mask={false}
       visible={visible}
       onCancel={handleClose}
       closable={false}
-      unmountOnExit={true}
-      width={800}
+      motion={false}
+      width={500}
       headerStyle={{
-        display: 'none'
+        display: 'none',
       }}
       bodyStyle={{
-        padding: 0
+        padding: 0,
       }}
-      getPopupContainer={() => refWrapper && refWrapper?.current!}
-      footer={null}
       style={{
         background: 'none',
-        boxShadow: 'none'
+        boxShadow: 'none',
       }}
     >
       <IsSidebarContext.Provider value={true}>{content}</IsSidebarContext.Provider>
-    </Drawer>
+    </SideSheet>
   );
 };

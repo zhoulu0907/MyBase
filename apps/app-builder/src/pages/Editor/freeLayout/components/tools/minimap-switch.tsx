@@ -1,23 +1,25 @@
-import { IconGridRectangle } from '@douyinfe/semi-icons';
-import { IconButton, Tooltip } from '@douyinfe/semi-ui';
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
 
-export const MinimapSwitch = (props: { minimapVisible: boolean; setMinimapVisible: (visible: boolean) => void }) => {
+import { Tooltip, IconButton } from '@douyinfe/semi-ui';
+
+import { UIIconMinimap } from './styles';
+
+export const MinimapSwitch = (props: {
+  minimapVisible: boolean;
+  setMinimapVisible: (visible: boolean) => void;
+}) => {
   const { minimapVisible, setMinimapVisible } = props;
 
   return (
-    <Tooltip content="缩略图">
+    <Tooltip content="Minimap">
       <IconButton
+        type="tertiary"
         theme="borderless"
-        icon={
-          <IconGridRectangle
-            style={{
-              color: minimapVisible ? undefined : '#060709cc'
-            }}
-          />
-        }
-        onClick={() => {
-          setMinimapVisible(Boolean(!minimapVisible));
-        }}
+        icon={<UIIconMinimap visible={minimapVisible} />}
+        onClick={() => setMinimapVisible(!minimapVisible)}
       />
     </Tooltip>
   );
