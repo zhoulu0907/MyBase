@@ -108,13 +108,20 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
         //数据权限
-        List<AuthDataGroupVO> authDataGroupVOS;
+
 
         List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
         if (CollectionUtils.isEmpty(authDataGroupDOS)) {
             authDataGroupDOS = AuthDefaultFactory.createListAuthDataGroupDOList(reqVO);
         }
-        authDataGroupVOS = BeanUtils.toBean(authDataGroupDOS, AuthDataGroupVO.class);
+        List<AuthDataGroupVO> authDataGroupVOS = authDataGroupDOS.stream().map(authDataGroupDO -> {
+            AuthDataGroupVO authDataGroupVO = BeanUtils.toBean(authDataGroupDO, AuthDataGroupVO.class);
+            authDataGroupVO.setScopeTags(JsonUtils.parseObject(authDataGroupDO.getScopeTags(), new TypeReference<List<String>>() {
+            }));
+            authDataGroupVO.setOperationTags(JsonUtils.parseObject(authDataGroupDO.getOperationTags(), new TypeReference<List<String>>() {
+            }));
+            return authDataGroupVO;
+        }).toList();
 
         for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
             List<AuthDataFilterDO> dataFilterDOS = authDataFilterRepository.findByGroupId(authDataGroupVO.getId());
@@ -212,20 +219,18 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authDataGroupDO.setRoleId(reqVO.getPermissionReq().getRoleId());
             authDataGroupDO.setMenuId(reqVO.getPermissionReq().getMenuId());
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
+            authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
+            authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
             authDataGroupRepository.insert(authDataGroupDO);
-            List<AuthDataFilterVO> authDataFilterVOS = formatAuthDataFilterVO(reqVO.getAuthDataGroup().getDataFilters());
-            if (CollectionUtils.isNotEmpty(authDataFilterVOS)) {
-                List<AuthDataFilterDO> dataFilterDOS = authDataFilterVOS.stream().map(v -> {
-                    AuthDataFilterDO filterDO = BeanUtils.toBean(v, AuthDataFilterDO.class);
-                    filterDO.setGroupId(authDataGroupDO.getId());
-                    return filterDO;
-                }).toList();
-                authDataFilterRepository.insertBatch(dataFilterDOS);
-            }
+            //
+            updateAuthDataFilter(dataGroupId, reqVO.getAuthDataGroup().getDataFilters());
         } else {
             AuthDataGroupDO authDataGroupDO = authDataGroupRepository.findById(dataGroupId);
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
+            authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
+            authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
             authDataGroupRepository.update(authDataGroupDO);
+            //
             updateAuthDataFilter(dataGroupId, reqVO.getAuthDataGroup().getDataFilters());
         }
     }

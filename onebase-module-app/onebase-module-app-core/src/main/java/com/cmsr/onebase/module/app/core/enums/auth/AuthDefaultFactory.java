@@ -43,7 +43,8 @@ public class AuthDefaultFactory {
         adg.setApplicationId(reqVO.getApplicationId());
         adg.setRoleId(reqVO.getRoleId());
         adg.setMenuId(reqVO.getMenuId());
-        adg.setScopeTags(AuthPermissionScopeTagEnum.OWN_SUBMIT.getCode());
+        adg.setScopeTags(JsonUtils.toJsonString(List.of(AuthPermissionScopeTagEnum.OWN_SUBMIT.getCode())));
+        adg.setOperationTags(JsonUtils.toJsonString(List.of(AuthOperationEnum.EDIT, AuthOperationEnum.DELETE)));
         return adg;
     }
 

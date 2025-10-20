@@ -26,7 +26,7 @@ public class AuthDataGroupVO {
     private String description;
 
     @Schema(description = "权限范围标签")
-    private String scopeTags;
+    private List<String> scopeTags;
 
     @Schema(description = "权限范围字段id")
     private Long scopeFieldId;
@@ -37,8 +37,8 @@ public class AuthDataGroupVO {
     @Schema(description = "权限范围值")
     private String scopeValue;
 
-    @Schema(description = "是否可以操作")
-    private Integer isOperable;
+    @Schema(description = "操作标签")
+    private List<String> operationTags;
 
     @Schema(description = "数据权限组对应的数据过滤条件")
     private List<List<AuthDataFilterVO>> dataFilters;
