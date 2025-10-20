@@ -14,6 +14,7 @@ import { debounce } from 'lodash-es';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { DragNode } from '../components';
 import { BaseNode } from '../components/base-node';
+import { CollapseNode } from '../components/collapse-node';
 import BranchAdder from '../components/branch-adder';
 import NodeAdder from '../components/node-adder';
 import { CustomService } from '../services';
@@ -165,7 +166,8 @@ export function useEditorProps(
           ...defaultFixedSemiMaterials,
           [FlowRendererKey.ADDER]: NodeAdder, // Node Add Button
           [FlowRendererKey.BRANCH_ADDER]: BranchAdder, // Branch Add Button
-          [FlowRendererKey.DRAG_NODE]: DragNode // Component in node dragging
+          [FlowRendererKey.DRAG_NODE]: DragNode, // Component in node dragging
+          [FlowRendererKey.COLLAPSE]: CollapseNode // 条件、分支、循环  收起/展示
         },
         renderDefaultNode: BaseNode, // node render
         renderTexts: {
