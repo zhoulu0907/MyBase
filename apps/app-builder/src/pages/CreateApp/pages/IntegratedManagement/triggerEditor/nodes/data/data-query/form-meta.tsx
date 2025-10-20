@@ -83,18 +83,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
 
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   mainEntityId: undefined,
-    //   subEntityId: undefined,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-    // clearDataOriginNodeId(node.id);
-
     setMainEntityList([]);
     setSubEntityList([]);
     setDataNodeList([]);
@@ -226,17 +214,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'dataNodeId', 'filterCondition', 'sortBy']);
 
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   subEntityId: undefined,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-    // clearDataOriginNodeId(node.id);
-
     setSubEntityList([]);
     setDataNodeList([]);
     setValidationTypes([]);
@@ -298,31 +275,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleSubEntityIdChange = (_curSubEntityId: string) => {
     payloadForm.clearFields(['dataNodeId', 'filterCondition', 'sortBy']);
-
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-    // clearDataOriginNodeId(node.id);
   };
 
   const handleDateNodeSourceChange = async (dataNodeId: string) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   mainEntityId: undefined,
-    //   subEntityId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-    // clearDataOriginNodeId(node.id);
 
     setMainEntityList([]);
     setSubEntityList([]);
@@ -355,13 +311,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const handleFilterTypeChange = (_value: FILTER_TYPE) => {
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   filterCondition: []
-    // });
-
     payloadForm.clearFields(['filterCondition']);
   };
 
@@ -419,15 +368,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     return [];
   }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId, dataNodeEntityFields]);
-
-  // 使用 useEffect 更新条件字段状态和输出，避免在渲染过程中直接更新状态
-  useEffect(() => {
-    setConditionFields(conditionFieldsForEditor);
-    // 只在有实际数据时才更新 triggerNodeOutputSignal，避免初始化时载入空数据
-    if (conditionFieldsForEditor.length > 0) {
-      updateDataQueryOutputs(node.id, conditionFieldsForEditor);
-    }
-  }, [conditionFieldsForEditor, node.id]);
 
   const getInitData = () => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
