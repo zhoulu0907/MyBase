@@ -225,11 +225,17 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         String upperFieldType = fieldType.toUpperCase();
         
         // 字段类型包含以下关键字的需要JSON序列化
-        boolean isComplexType = upperFieldType.contains("MULTI") ||        // 多选类型
+        boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
+                                upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
                                 upperFieldType.contains("ADDRESS") ||       // 地址类型
                                 upperFieldType.contains("FILE") ||          // 文件附件
                                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                                 upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
+                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
+                                upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
+                                upperFieldType.contains("GEO") ||           // 地理位置（简写）
                                 upperFieldType.equals("JSONB") ||           // JSONB类型
                                 upperFieldType.equals("JSON");              // JSON类型
         
