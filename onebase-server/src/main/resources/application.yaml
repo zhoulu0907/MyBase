@@ -7,7 +7,7 @@ spring:
 
   main:
     allow-circular-references: true # 允许循环依赖，因为项目是三层架构，无法避免这个情况。
-#    allow-bean-definition-overriding: false # 允许 Bean 覆盖，例如说 Feign 等会存在重复定义的服务
+  #    allow-bean-definition-overriding: false # 允许 Bean 覆盖，例如说 Feign 等会存在重复定义的服务
 
   # Servlet 配置
   servlet:
@@ -68,6 +68,17 @@ spring:
     redis:
       repositories:
         enabled: false # 项目未使用到 Spring Data Redis 的 Repository，所以直接禁用，保证启动速度
+
+--- #################### Spring线程池配置 ####################
+spring:
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 30
+        queue-capacity: 10
+        keep-alive: 300
+        thread-name-prefix: onebase-executor-
 
 --- #################### 验证码相关配置 ####################
 
@@ -139,3 +150,13 @@ debug: false
 easy:
   trans:
     enabled: false
+
+anyline:
+  is-debug: false
+  is-log-sql: false
+  is-log-slow-sql: false
+  is-log-sql-time: false
+  is-log-sql-warn: false
+  is-log-sql-param: false
+  is-log-sql-when-error: true
+  is-log-sql-param-when-error: true

@@ -29,4 +29,6 @@ public interface DataFactoryDatasourceService {
     void deleteDatasource(Long datasourceId);
 
     void executeMetadataCollectJob(Long datasourceId);
+
+    Boolean preCheckCollectStatus(Long id);
 }

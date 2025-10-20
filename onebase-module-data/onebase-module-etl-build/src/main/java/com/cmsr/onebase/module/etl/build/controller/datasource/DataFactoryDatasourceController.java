@@ -51,6 +51,12 @@ public class DataFactoryDatasourceController {
         return CommonResult.success(Boolean.TRUE);
     }
 
+    @PostMapping("/collect/precheck")
+    public CommonResult<Boolean> precheckCollectStatus(@RequestParam("id") Long id) {
+        Boolean runnable = dataFactoryDatasourceService.preCheckCollectStatus(id);
+        return CommonResult.success(runnable);
+    }
+
     @PostMapping("/collect")
     @Operation(summary = "采集元数据信息")
     public CommonResult<Boolean> runMetadataCollect(@RequestParam("id") Long id) {

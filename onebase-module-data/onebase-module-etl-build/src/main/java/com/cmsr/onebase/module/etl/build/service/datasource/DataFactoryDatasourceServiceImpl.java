@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryDatasourceReposi
 import com.cmsr.onebase.module.etl.core.dal.database.DataFactorySchemaRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
+import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.DataFactoryErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.service.collector.MetadataCollectorService;
 import com.google.common.collect.Lists;
@@ -125,8 +126,22 @@ public class DataFactoryDatasourceServiceImpl implements DataFactoryDatasourceSe
 
     @Override
     public void executeMetadataCollectJob(Long datasourceId) {
-        // TODO: write records to database.
-        metadataCollectorService.doCollection(datasourceId);
+        // 托管给MetadataCollectorService
+        metadataCollectorService.submitCollectJob(datasourceId);
+    }
+
+    @Override
+    public Boolean preCheckCollectStatus(Long id) {
+        DataFactoryDatasourceDO datasourceDO = datasourceRepository.findById(id);
+        // 1. 检查数据源是否存在
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
+        if (datasourceDO.getCollectStatus() == CollectStatus.RUNNING) {
+            // 1. 检查任务状态
+
+        }
+        return Boolean.TRUE;
     }
 
     private void validDatasourceCodeDuplicate(String datasourceCode, Long datasourceId) {

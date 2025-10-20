@@ -27,7 +27,7 @@ public class MetaTable {
 //     */
 //    private Integer status;
 
-    public static MetaTable convert(Table table) {
+    public static MetaTable convert(Table table, Map<String, Column> columnList) {
         MetaTable metaTable = new MetaTable();
         metaTable.setFullyQualifiedName(String.join(".",
                 table.getCatalogName(),
@@ -38,7 +38,6 @@ public class MetaTable {
         metaTable.setComment(table.getComment());
 
         List<MetaColumn> columns = Lists.newArrayList();
-        Map<String, Column> columnList = table.getColumns();
         columnList.forEach((key, column) -> {
             columns.add(MetaColumn.convert(column));
         });

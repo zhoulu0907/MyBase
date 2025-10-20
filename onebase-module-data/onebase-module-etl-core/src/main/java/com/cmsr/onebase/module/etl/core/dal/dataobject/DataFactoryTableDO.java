@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.MetaTable;
+import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 @Table(name = "datafactory_table")
 @Data
@@ -54,7 +57,9 @@ public class DataFactoryTableDO extends TenantBaseDO {
         this.metaInfo = JsonUtils.toJsonString(metaInfo);
     }
 
-    public static DataFactoryTableDO convert(Long datasourceId, Long catalogId, Long schemaId, org.anyline.metadata.Table table) {
+    public static DataFactoryTableDO convert(Long datasourceId, Long catalogId, Long schemaId,
+                                             org.anyline.metadata.Table table,
+                                             Map<String, org.anyline.metadata.Column> columns) {
         DataFactoryTableDO tableDO = new DataFactoryTableDO();
         tableDO.setDatasourceId(datasourceId);
         tableDO.setCatalogId(catalogId);
@@ -67,7 +72,7 @@ public class DataFactoryTableDO extends TenantBaseDO {
         } else {
             tableDO.setDisplayName(name);
         }
-        MetaTable metaTable = MetaTable.convert(table);
+        MetaTable metaTable = MetaTable.convert(table, columns);
         tableDO.setMetaInfo(metaTable);
 
         return tableDO;

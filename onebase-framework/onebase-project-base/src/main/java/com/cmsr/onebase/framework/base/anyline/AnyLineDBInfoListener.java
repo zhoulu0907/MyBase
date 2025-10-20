@@ -21,6 +21,7 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
+import org.anyline.util.ConfigTable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -215,7 +216,9 @@ public class AnyLineDBInfoListener implements DMListener {
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
         boolean shouldIgnore = isTableTenantIgnored(prepare) || TenantContextHolder.isIgnore();
-        log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (ConfigTable.IS_DEBUG) {
+            log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
+        }
         if (!shouldIgnore) {
             configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
         }
@@ -352,7 +355,9 @@ public class AnyLineDBInfoListener implements DMListener {
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
         // 加入租户标志
         boolean shouldIgnore = isTableTenantIgnored(dest.getName());
-        log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (ConfigTable.IS_DEBUG) {
+            log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
+        }
         if (!shouldIgnore) {
             configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }

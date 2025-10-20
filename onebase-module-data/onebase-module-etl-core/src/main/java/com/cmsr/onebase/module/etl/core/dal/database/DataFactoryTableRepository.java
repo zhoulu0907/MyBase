@@ -21,6 +21,9 @@ public class DataFactoryTableRepository extends DataRepository<DataFactoryTableD
 
     public Map<String, DataFactoryTableDO> findAllByCatalogIdAndSchemaIdAndDatasourceId(Long datasourceId, Long catalogId, Long schemaId) {
         ConfigStore cs = new DefaultConfigStore();
+        cs.eq("datasource_id", datasourceId);
+        cs.eq("catalog_id", catalogId);
+        cs.eq("schema_id", schemaId);
         List<DataFactoryTableDO> tableList = findAllByConfig(cs);
         return tableList.stream()
                 .collect(Collectors.toMap(DataFactoryTableDO::getTableName, table -> table));

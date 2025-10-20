@@ -6,5 +6,5 @@ public interface MetadataCollectorService {
 
     boolean testConnection(DataFactoryDatasourceDO datasourceDO);
 
-    void doCollection(Long datasourceId);
+    void submitCollectJob(Long datasourceId);
 }
