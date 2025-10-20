@@ -81,6 +81,15 @@ public class AppAuthPermissionController {
         return CommonResult.success(true);
     }
 
+    /**
+     * 更新字段权限
+     */
+    @PostMapping("/update-view")
+    @Operation(summary = "更新字段权限")
+    public CommonResult<Boolean> updateView(@Valid @RequestBody AuthUpdateViewReqVO reqVO) {
+        authPermissionService.updateView(reqVO);
+        return CommonResult.success(true);
+    }
 
     /**
      * 更新数据组权限
@@ -111,5 +120,6 @@ public class AppAuthPermissionController {
         authPermissionService.updateField(reqVO);
         return CommonResult.success(true);
     }
+
 
 }

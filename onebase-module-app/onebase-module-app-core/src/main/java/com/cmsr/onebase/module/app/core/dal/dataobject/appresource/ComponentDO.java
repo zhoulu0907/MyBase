@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 public class ComponentDO extends TenantBaseDO {
 
     public static final String PAGE_ID = "page_id";
+    public static final String COMPONENT_INDEX = "component_index";
 
     /**
      * 组件编码
@@ -64,5 +65,11 @@ public class ComponentDO extends TenantBaseDO {
      */
     @Column(name = "container_index", columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "容器索引")
     private Integer containerIndex;
+
+    /**
+     * 组件索引
+     */
+    @Column(name = "component_index", columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "组件索引")
+    private Integer componentIndex;
 
 }
