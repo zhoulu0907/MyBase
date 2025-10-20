@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.MetaSchema;
+import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,17 +26,31 @@ public class DataFactorySchemaDO extends TenantBaseDO {
         return this;
     }
 
+    @Column(name = "datasource_id")
     private Long datasourceId;
 
+    @Column(name = "catalog_id")
     private Long catalogId;
 
+    @Column(name = "fqn_hash")
     private String fqnHash;
 
+    @Column(name = "schema_name")
     private String schemaName;
 
+    @Column(name = "display_name")
     private String displayName;
 
-    private MetaSchema metaInfo;
+    @Column(name = "meta_info")
+    private String metaInfo;
+
+    public MetaSchema getMetaInfo() {
+        return JsonUtils.parseObject(metaInfo, MetaSchema.class);
+    }
+
+    public void setMetaInfo(MetaSchema metaInfo) {
+        this.metaInfo = JsonUtils.toJsonString(metaInfo);
+    }
 
     public static DataFactorySchemaDO convert(Long datasourceId, Long catalogId, Schema schema) {
         DataFactorySchemaDO schemaDO = new DataFactorySchemaDO();

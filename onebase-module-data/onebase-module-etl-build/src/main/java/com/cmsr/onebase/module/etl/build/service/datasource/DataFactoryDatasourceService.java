@@ -25,4 +25,10 @@ public interface DataFactoryDatasourceService {
     Long createDatasource(DataFactoryDatasourceReqVO requestVO);
 
     void updateDatasource(DataFactoryDatasourceReqVO requestVO);
+
+    void deleteDatasource(Long datasourceId);
+
+    void executeMetadataCollectJob(Long datasourceId);
+
+    Boolean preCheckCollectStatus(Long id);
 }

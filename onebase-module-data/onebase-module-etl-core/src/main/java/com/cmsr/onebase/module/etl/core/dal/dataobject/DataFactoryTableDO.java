@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.MetaTable;
+import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
+import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +12,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 @Table(name = "datafactory_table")
 @Data
@@ -23,21 +28,38 @@ public class DataFactoryTableDO extends TenantBaseDO {
         return this;
     }
 
+    @Column(name = "datasource_id")
     private Long datasourceId;
 
+    @Column(name = "catalog_id")
     private Long catalogId;
 
+    @Column(name = "schema_id")
     private Long schemaId;
 
+    @Column(name = "fqn_hash")
     private String fqnHash;
 
+    @Column(name = "table_name")
     private String tableName;
 
+    @Column(name = "display_name")
     private String displayName;
 
-    private MetaTable metaInfo;
+    @Column(name = "meta_info")
+    private String metaInfo;
 
-    public static DataFactoryTableDO convert(Long datasourceId, Long catalogId, Long schemaId, org.anyline.metadata.Table table) {
+    public MetaTable getMetaInfo() {
+        return JsonUtils.parseObject(metaInfo, MetaTable.class);
+    }
+
+    public void setMetaInfo(MetaTable metaInfo) {
+        this.metaInfo = JsonUtils.toJsonString(metaInfo);
+    }
+
+    public static DataFactoryTableDO convert(Long datasourceId, Long catalogId, Long schemaId,
+                                             org.anyline.metadata.Table table,
+                                             Map<String, org.anyline.metadata.Column> columns) {
         DataFactoryTableDO tableDO = new DataFactoryTableDO();
         tableDO.setDatasourceId(datasourceId);
         tableDO.setCatalogId(catalogId);
@@ -50,8 +72,8 @@ public class DataFactoryTableDO extends TenantBaseDO {
         } else {
             tableDO.setDisplayName(name);
         }
-        MetaTable metaCatalog = MetaTable.convert(table);
-        tableDO.setMetaInfo(metaCatalog);
+        MetaTable metaTable = MetaTable.convert(table, columns);
+        tableDO.setMetaInfo(metaTable);
 
         return tableDO;
     }

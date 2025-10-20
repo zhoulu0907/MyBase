@@ -50,4 +50,24 @@ public class DataFactoryDatasourceController {
         dataFactoryDatasourceService.updateDatasource(requestVO);
         return CommonResult.success(Boolean.TRUE);
     }
+
+    @PostMapping("/collect/precheck")
+    public CommonResult<Boolean> precheckCollectStatus(@RequestParam("id") Long id) {
+        Boolean runnable = dataFactoryDatasourceService.preCheckCollectStatus(id);
+        return CommonResult.success(runnable);
+    }
+
+    @PostMapping("/collect")
+    @Operation(summary = "采集元数据信息")
+    public CommonResult<Boolean> runMetadataCollect(@RequestParam("id") Long id) {
+        dataFactoryDatasourceService.executeMetadataCollectJob(id);
+        return CommonResult.success(Boolean.TRUE);
+    }
+
+    @PostMapping("/delete")
+    @Operation(summary = "删除数据源")
+    public CommonResult<Boolean> deleteDataFactoryDatasource(@RequestParam("id") Long id) {
+
+        return CommonResult.success(Boolean.TRUE);
+    }
 }

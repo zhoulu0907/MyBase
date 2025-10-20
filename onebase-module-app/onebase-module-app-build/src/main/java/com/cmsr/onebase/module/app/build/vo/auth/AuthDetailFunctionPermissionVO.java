@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.build.vo.auth;
 
-import com.cmsr.onebase.module.app.core.vo.auth.AuthOperationVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -18,7 +17,7 @@ public class AuthDetailFunctionPermissionVO {
     private Integer isPageAllowed = 0;
 
     @Schema(description = "操作权限")
-    private List<AuthOperationVO> authOperations;
+    private List<String> authOperationTags;
 
     @Schema(description = "实体访问权限")
     private AuthDetailViewVO authViewVO;
