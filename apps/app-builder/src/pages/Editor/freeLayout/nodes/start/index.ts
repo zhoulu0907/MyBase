@@ -17,14 +17,13 @@ export const StartNodeRegistry: FlowNodeRegistry = {
     nodePanelVisible: false,
     defaultPorts: [{ type: 'output' }],
     size: {
-      width: 360,
-      height: 211,
-    },
+      width: 73,
+      height: 29
+    }
   },
   info: {
-    icon: iconStart,
-    description:
-      'The starting node of the workflow, used to set the information needed to initiate the workflow.',
+    icon: '',
+    description: 'The starting node of the workflow, used to set the information needed to initiate the workflow.'
   },
   /**
    * Render node via formMeta
@@ -35,5 +34,5 @@ export const StartNodeRegistry: FlowNodeRegistry = {
    */
   canAdd() {
     return false;
-  },
+  }
 };

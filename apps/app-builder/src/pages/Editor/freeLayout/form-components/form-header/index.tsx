@@ -43,7 +43,7 @@ export function FormHeader() {
     <Header>
       {getIcon(node)}
       <TitleInput readonly={readonly} updateTitleEdit={updateTitleEdit} titleEdit={titleEdit} />
-      {node.renderData.expandable && !isSidebar && (
+      {/* {node.renderData.expandable && !isSidebar && (
         <Button
           type="primary"
           icon={expanded ? <IconSmallTriangleDown /> : <IconSmallTriangleLeft />}
@@ -58,14 +58,8 @@ export function FormHeader() {
         </Operators>
       )}
       {isSidebar && (
-        <Button
-          type="primary"
-          icon={<IconClose />}
-          size="small"
-          theme="borderless"
-          onClick={handleClose}
-        />
-      )}
+        <Button type="primary" icon={<IconClose />} size="small" theme="borderless" onClick={handleClose} />
+      )} */}
     </Header>
   );
 }
