@@ -150,8 +150,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
             <Button type="text" size="mini" onClick={() => handleEdit(record)}>
               编辑
             </Button>
-            {/* 本期不支持删除 */}
-            <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record)} disabled>
+            <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record)}>
               删除
             </Button>
           </Space>
