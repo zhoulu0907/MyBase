@@ -71,6 +71,25 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           break;
         }
 
+        case NodeType.DATA_UPDATE: {
+          if (
+            originalNodeData.updateType != formInfo.updateType ||
+            originalNodeData.mainEntityId != formInfo.mainEntityId ||
+            originalNodeData.subEntityId != formInfo.subEntityId ||
+            originalNodeData.dataNodeId != formInfo.dataNodeId
+          ) {
+            clearDataOriginNodeId(nodeId.value);
+          }
+          break;
+        }
+
+        case NodeType.DATA_CALC: {
+          if (originalNodeData.calType != formInfo.calType) {
+            clearDataOriginNodeId(nodeId.value);
+          }
+          break;
+        }
+
         // TODO(chenyongqiang): 补充其他节点类型
 
         default:

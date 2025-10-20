@@ -73,14 +73,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const handleDataTypeChange = (curUpdateType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'fields']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      filterCondition: [],
-      fields: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   mainEntityId: undefined,
+    //   subEntityId: undefined,
+    //   filterCondition: [],
+    //   fields: []
+    // });
 
     setMainEntityList([]);
     setSubEntityList([]);
@@ -197,13 +198,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     payloadForm.clearFields(['subEntityId', 'filterCondition', 'fields']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subEntityId: undefined,
-      fields: [],
-      filterCondition: []
-    });
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   subEntityId: undefined,
+    //   fields: [],
+    //   filterCondition: []
+    // });
     setSubEntityList([]);
     setValidationTypes([]);
     setFieldDataList([]);
@@ -274,12 +275,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     clearDataOriginNodeId(node.id);
 
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      fields: [],
-      filterCondition: []
-    });
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   fields: [],
+    //   filterCondition: []
+    // });
 
     const newFieldDataList: any[] = [];
 

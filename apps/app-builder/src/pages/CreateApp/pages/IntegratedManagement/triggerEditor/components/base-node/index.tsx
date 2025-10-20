@@ -51,7 +51,6 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
             return;
           }
           console.log('onClick', nodeRender.node.id);
-          console.log('onClick', nodeRender);
           setNodeId(nodeRender.node.id);
         }}
         style={{

@@ -22,13 +22,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleCalTypeChange = (curCalType: CAL_TYPE) => {
     payloadForm.clearFields(['calRules']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      calRules: []
-    });
+    // TODO(mickey): remove
+    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    // triggerEditorSignal.setNodeData(node.id, {
+    //   ...nodeData,
+    //   calRules: []
+    // });
 
-    clearDataOriginNodeId(node.id);
+    // clearDataOriginNodeId(node.id);
   };
 
   useEffect(() => {
