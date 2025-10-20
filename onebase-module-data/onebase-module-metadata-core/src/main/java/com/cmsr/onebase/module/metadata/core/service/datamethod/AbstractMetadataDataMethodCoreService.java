@@ -316,7 +316,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
                     }
                 }
             } catch (Exception e) {
-                // 自动编号生成失败不应该阻塞整个数据创建过程，记录警告日志
+                // 如果字段是必填的（数据库NOT NULL约束），自动编号生成失败应该抛出异常
+                if (BooleanStatusEnum.isYes(field.getIsRequired())) {
+                    log.error("必填字段 {} 自动编号生成失败: {}", field.getFieldName(), e.getMessage(), e);
+                    throw new ServiceException(ErrorCodeConstants.AUTONUMBER_GENERATE_FAILED, 
+                        "字段[" + field.getDisplayName() + "]自动编号生成失败: " + e.getMessage());
+                }
+                // 非必填字段，自动编号生成失败不应该阻塞整个数据创建过程，记录警告日志
                 log.warn("为字段 " + field.getFieldName() + " 生成自动编号失败: " + e.getMessage());
             }
         }
