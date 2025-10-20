@@ -1,4 +1,5 @@
-import { Button, Drawer, Form, Input, Message, Modal } from '@arco-design/web-react';
+import ExecuteFlows from '@/utils/flow';
+import { Button, Drawer, Form, Message } from '@arco-design/web-react';
 import {
   CATEGORY_TYPE,
   dataMethodData,
@@ -9,14 +10,13 @@ import {
   getPageSetMetaData,
   queryFlowExecForm,
   TRIGGER_EVENTS,
-  triggerFlowExecForm,
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { FLOW_MODAL_CANCEL, FLOW_MODAL_TYPE, getHashQueryParam, NodeType, pagesRuntimeSignal } from '@onebase/common';
+import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -42,8 +42,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = Form.useForm();
 
-  //   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
-
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const { curPage, drawerVisible, setDrawerVisible, editPageViewId, detailPageViewId } = pagesRuntimeSignal;
@@ -55,12 +53,22 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
   const [editTargetId, setEditTargetId] = useState('');
 
+  // 当前时间戳
+  const [detailMode, setDetailMode] = useState(true);
+  const [refresh, setRefresh] = useState(Date.now());
+
   useEffect(() => {
     const appId = getHashQueryParam('appId');
     if (appId) {
       setAppId(appId);
     }
   }, [window.location.hash]);
+
+  useEffect(() => {
+    if (drawerVisible.value) {
+      setDetailMode(true);
+    }
+  }, [drawerVisible.value]);
 
   // 获取主表字段
   const getMainMetaData = async (pageSetId: string) => {
@@ -85,7 +93,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     if (editTargetId && mainMetaData && mainMetaDataFields.length > 0) {
       handleGetData(mainMetaData, editTargetId);
     }
-  }, [editTargetId, mainMetaData, mainMetaDataFields]);
+  }, [mainMetaData, mainMetaDataFields]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -107,99 +115,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   // 信息收集弹窗
-  const [infoModalVisibel, setInfoModalVisibel] = useState(false);
-  const [outputParams, setOutputParams] = useState({
-    modalTitle: '',
-    modalType: '',
-    fields: [],
-    arrange: 1,
-    okText: '',
-    cancelText: ''
-  });
-  const [infoForm] = Form.useForm();
-  let flowParam: any = {};
-  let flowRespon: any = {};
-
-  // 流程多次触发
-  const triggerFlows = async () => {
-    const res = await triggerFlowExecForm(flowParam);
-    flowRespon = res;
-    if (res?.success) {
-      // 弹窗
-      if (res.nodeType === NodeType.MODAL) {
-        // 二次确认
-        if (res.outputParams?.modalType === FLOW_MODAL_TYPE.CONFIRM) {
-          Modal.confirm({
-            title: res.outputParams.modalTitle || '确认',
-            content: res.outputParams.prompt || '',
-            okText: res.outputParams.okText || '确认',
-            cancelText: res.outputParams.cancelText || '取消',
-            maskClosable: false,
-            onOk: async () => {
-              if (res.executionEnd) {
-                return;
-              }
-              flowParam = {
-                processId: flowParam.processId,
-                executionUuid: res.executionUuid || '',
-                inputParams: flowParam.inputParams
-              };
-              await triggerFlows();
-            },
-            onCancel: () => {
-              infoCancel();
-            }
-          });
-        }
-
-        // 信息收集
-        if (res.outputParams?.modalType === FLOW_MODAL_TYPE.INFOR) {
-          // todo
-          // setOutputParams({ ...outputParams, ...res.outputParams });
-          // setInfoModalVisibel(true);
-        }
-      }
-
-      if (res.executionEnd) {
-        return;
-      }
-    }
-  };
-
-  // 收集信息弹窗 确定按钮
-  const cofirmInfoModal = async () => {
-    if (flowRespon.executionEnd) {
-      return;
-    }
-    flowParam = {
-      processId: flowParam.processId,
-      executionUuid: flowRespon.executionUuid || '',
-      inputParams: flowParam.inputParams,
-      collectInfo: infoForm.getFieldsValue()
-    };
-    await triggerFlows();
-  };
-  const infoCancel = async () => {
-    // todo
-    console.log('关闭默认终止提醒', flowRespon.outputParams.closeWarn);
-    console.log('弹窗取消后提醒', flowRespon.outputParams.cancelWarn);
-
-    // 事件结束 或者 弹窗取消后事件终止
-    if (flowRespon.executionEnd || flowRespon.outputParams.afterCancel === FLOW_MODAL_CANCEL.STOP) {
-      return;
-    }
-    flowParam = {
-      processId: flowParam.processId,
-      executionUuid: flowRespon.executionUuid || '',
-      inputParams: flowParam.inputParams
-    };
-    await triggerFlows();
-  };
-  // 收集信息弹窗 取消按钮
-  const cancaelInfoModal = () => {
-    setInfoModalVisibel(false);
-    infoCancel();
-  };
+  const [flows, setFlows] = useState<any[]>([]);
+  const [inputParams, setInputParams] = useState<any>({});
 
   const submitForm = async () => {
     const fields = form.getFieldsValue();
@@ -222,6 +139,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
     const pageId = curFormPage?.id;
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
+    setInputParams(formData);
+
+    console.log('editTargetId: ', editTargetId);
+
     if (editTargetId) {
       const req: UpdateMethodParams = {
         entityId: mainMetaData,
@@ -231,20 +152,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodUpdate(req);
       console.log(res);
 
-      const updateFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE));
-      for (let ele of updateFlows) {
-        flowParam = {
-          processId: ele.processId,
-          executionUuid: '',
-          inputParams: formData
-        };
-        await triggerFlows();
-      }
-
+      const updateFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE)
+      );
+      setFlows(updateFlows);
       if (res) {
         Message.success('更新成功');
       }
       setEditTargetId('');
+      setDrawerVisible(false);
+      setRefresh(Date.now());
     } else {
       const req: InsertMethodParams = {
         entityId: mainMetaData,
@@ -254,15 +171,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const res = await dataMethodInsert(req);
       console.log(res);
 
-      const createFlows = (flowRes || []).filter((ele: any) => ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE));
-      for (let ele of createFlows) {
-        flowParam = {
-          processId: ele.processId,
-          executionUuid: '',
-          inputParams: formData
-        };
-        await triggerFlows();
-      }
+      const createFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
+      );
+      setFlows(createFlows);
 
       if (res) {
         Message.success('创建成功');
@@ -274,21 +186,20 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const cancelSubmitForm = () => {
     console.log('取消提交');
-    form.resetFields();
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
+    setDetailMode(true);
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
     form.resetFields();
-    if (id === editTargetId) {
-      console.log(666666);
-      handleGetData(mainMetaData, id);
-    }
 
     if (id && id !== '') {
       console.log('edit row id: ', id);
       setEditTargetId(id);
+      if (mainMetaData) {
+        handleGetData(mainMetaData, id);
+      }
     }
 
     if (toFormPage) {
@@ -329,6 +240,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     return res;
   };
 
+  const toEditMode = () => {
+    setDetailMode(false);
+  };
+
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
@@ -349,6 +264,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
                     showFromPageData={showFromPageData}
+                    refresh={refresh}
                   />
                 </div>
               )}
@@ -401,7 +317,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         {/* 右侧详情抽屉 */}
         <Drawer
           width={600}
-          title={<span>详情</span>}
+          title={
+            <div className={styles.drawerTitle}>
+              <div>详情</div>
+              {detailMode && (
+                <Button type="primary" onClick={() => toEditMode()}>
+                  编辑
+                </Button>
+              )}
+            </div>
+          }
           visible={drawerVisible.value}
           placement="right"
           onCancel={() => setDrawerVisible(false)}
@@ -430,35 +355,31 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                           useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
                         }
                         runtime={true}
-                        detailMode={true}
+                        detailMode={detailMode}
                         showFromPageData={() => {}}
                       />
                     </div>
                   )}
                 </Fragment>
               ))}
+
+              {!detailMode && (
+                <div className={styles.footer}>
+                  <Button type="primary" onClick={submitForm}>
+                    更新
+                  </Button>
+                  <Button type="default" onClick={cancelSubmitForm}>
+                    取消
+                  </Button>
+                </div>
+              )}
             </Form>
           </div>
         </Drawer>
       </div>
 
       {/* 信息收集弹窗 */}
-      <Modal
-        visible={infoModalVisibel}
-        title={outputParams.modalTitle}
-        okText={outputParams.okText}
-        cancelText={outputParams.cancelText}
-        onOk={cofirmInfoModal}
-        onCancel={cancaelInfoModal}
-      >
-        <Form layout="inline" form={infoForm}>
-          {outputParams.fields.map((cp: any) => (
-            <Form.Item key={cp.id} label={cp.fieldName} field={cp.fieldName}>
-              <Input placeholder="请输入" />
-            </Form.Item>
-          ))}
-        </Form>
-      </Modal>
+      <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
     </div>
   );
 };

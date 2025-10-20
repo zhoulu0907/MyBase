@@ -25,10 +25,11 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
 
   useEffect(() => {
     menuIcon && form.setFieldValue('menuIcon', menuIcon);
+
+    return () => setMenuIcon('');
   }, [menuIcon]);
 
   const handleCloseModal = () => {
-    setMenuIcon('');
     setVisible(false);
   };
 

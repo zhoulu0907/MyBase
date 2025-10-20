@@ -1,14 +1,11 @@
-import { Form, Grid, Select, Switch } from '@arco-design/web-react';
+import { Form, Switch } from '@arco-design/web-react';
 import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import AdvancedTableConfig from './components/AdvancedTableConfig';
 import styles from './index.module.less';
 
-const Row = Grid.Row;
-const Col = Grid.Col;
 const FormItem = Form.Item;
-const Option = Select.Option;
 
 interface AdvancedProps {
   cpID: string;
@@ -34,9 +31,6 @@ const Advanced = ({ cpID }: AdvancedProps) => {
       },
       layout: curComponentSchema.layout
     };
-
-    // console.log(curComponentSchema.config);
-    // console.log(newCurComponentSchema.config);
 
     setCurComponentSchema(newCurComponentSchema);
     setPageComponentSchemas(cpID, newCurComponentSchema);
@@ -64,9 +58,6 @@ const Advanced = ({ cpID }: AdvancedProps) => {
       },
       layout: curComponentSchema.layout
     };
-
-    // console.log(curComponentSchema.config);
-    // console.log(newCurComponentSchema.config);
 
     setCurComponentSchema(newCurComponentSchema);
     setPageComponentSchemas(cpID, newCurComponentSchema);
@@ -108,7 +99,6 @@ const Advanced = ({ cpID }: AdvancedProps) => {
                     wrapperCol={{
                       span: 1
                     }}
-                    layout="horizontal"
                     className={styles.formItem}
                   >
                     {item.type === CONFIG_TYPES.SWITCH_INPUT && (

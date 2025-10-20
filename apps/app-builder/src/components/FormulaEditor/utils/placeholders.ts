@@ -140,7 +140,6 @@ export const placeholdersPlugin = (
       //初始化 decorations，使用 combinedMatcher 创建初始装饰
       constructor(view: EditorView) {
         this.decorations = combinedMatcher.createDeco(view);
-        // console.log('view', view, this.decorations);
       }
 
       //当编辑器内容发生变化时，更新 decorations，使用 combinedMatcher 重新创建装饰

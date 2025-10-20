@@ -1,9 +1,9 @@
-import { Button } from '@arco-design/web-react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { validateNodeForm } from '../../nodes/utils';
+import { Button } from '@arco-design/web-react';
 import { getNodeForm, useClientContext } from '@flowgram.ai/fixed-layout-editor';
-import styles from './index.module.less';
 import { NodeType } from '@onebase/common';
+import { clearDataOriginNodeId, searchNodeById, validateNodeForm } from '../../nodes/utils';
+import styles from './index.module.less';
 
 export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
   const { nodeId, nodeData, nodes, setNodeId, setNodeData } = triggerEditorSignal;
@@ -24,11 +24,60 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         validateNodeForm(form, nodeInfo.props.form, false);
       }
       // 获取表单数据
+      const originalNodeData = nodeData.value[nodeId.value];
       const formInfo = nodeInfo.props.form.getFieldsValue();
+      console.log('original nodeData: ', originalNodeData);
       console.log('formInfo', formInfo);
+
       let param = { ...nodeData.value[nodeId.value], ...formInfo };
-      const curNode = nodes.value.find((ele) => ele.id === nodeId.value);
-      if (curNode.type === NodeType.MODAL) {
+      const curNode = searchNodeById(nodeId.value, nodes.value);
+
+      //   针对有变更的节点，需要清空下游节点的依赖
+      switch (curNode.type) {
+        case NodeType.DATA_QUERY_MULTIPLE:
+        case NodeType.DATA_QUERY: {
+          if (
+            originalNodeData.dataType != formInfo.dataType ||
+            originalNodeData.mainEntityId != formInfo.mainEntityId ||
+            originalNodeData.subEntityId != formInfo.subEntityId ||
+            originalNodeData.dataNodeId != formInfo.dataNodeId
+          ) {
+            clearDataOriginNodeId(nodeId.value);
+          }
+
+          break;
+        }
+
+        case NodeType.DATA_ADD: {
+          if (
+            originalNodeData.addType != formInfo.addType ||
+            originalNodeData.mainEntityId != formInfo.mainEntityId ||
+            originalNodeData.subEntityId != formInfo.subEntityId ||
+            originalNodeData.dataNodeId != formInfo.dataNodeId
+          ) {
+            clearDataOriginNodeId(nodeId.value);
+          }
+          break;
+        }
+
+        case NodeType.DATA_DELETE: {
+          if (
+            originalNodeData.dataType != formInfo.dataType ||
+            originalNodeData.mainEntityId != formInfo.mainEntityId ||
+            originalNodeData.subEntityId != formInfo.subEntityId
+          ) {
+            clearDataOriginNodeId(nodeId.value);
+          }
+          break;
+        }
+
+        // TODO(chenyongqiang): 补充其他节点类型
+
+        default:
+          break;
+      }
+
+      if (curNode && curNode.type === NodeType.MODAL) {
         const fields = nodeInfo.props.form.getFieldValue('fields');
         param = { ...param, fields };
       }
@@ -54,6 +103,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
       }
       setNodeData(nodeId.value, param);
     }
+
     setNodeId(undefined);
   };
 

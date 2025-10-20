@@ -36,7 +36,9 @@ const AppSettingPage: FC = () => {
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
 
   useEffect(() => {
-    curAppId && getApplicationData();
+    if (curAppId) {
+      getApplicationData();
+    }
   }, [curAppId]);
 
   const getApplicationData = async () => {
@@ -100,7 +102,7 @@ const AppSettingPage: FC = () => {
   return (
     <div className={styles.appSettingPage}>
       <Layout style={{ height: '100%' }}>
-        <Layout>
+        <Layout className={styles.settingContent}>
           <Sider
             collapsible
             collapsed={collapsed}

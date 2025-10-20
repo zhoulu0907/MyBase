@@ -1,10 +1,13 @@
 import circleSVG from '@/assets/images/circle.svg';
+import defaultTemplateDetailSVG from '@/assets/images/default_template_detail.svg';
+import defaultTemplateEditSVG from '@/assets/images/default_template_edit.svg';
+import defaultTemplateThumbSVG from '@/assets/images/default_template_thumb.svg';
 import tickBlackSVG from '@/assets/images/tick_black.svg';
 import tickGreenSVG from '@/assets/images/tick_green.svg';
-import { Button, Checkbox, Form, Space, Tag } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Image, Space, Tag } from '@arco-design/web-react';
 import { usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 const { useForm } = Form;
@@ -19,6 +22,8 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
 
   const { pageViews, curViewId, updatePageView } = usePageViewEditorSignal;
   const [form] = useForm();
+
+  const [previewTemplateImageVisible, setPreviewTemplateImageVisible] = useState(false);
 
   useEffect(() => {
     if (curViewId.value) {
@@ -188,6 +193,21 @@ const ViewConfiger = ({}: ViewConfigerProps) => {
               )}
             </div>
           )}
+
+          <div className={styles.itemLabel}>视图布局</div>
+          <div className={styles.templateWrapper}>
+            <Image
+              src={defaultTemplateThumbSVG}
+              alt="默认模板"
+              onClick={() => setPreviewTemplateImageVisible(true)}
+              preview={false}
+            />
+            <Image.Preview
+              src={editViewMode == 1 ? defaultTemplateEditSVG : defaultTemplateDetailSVG}
+              visible={previewTemplateImageVisible}
+              onVisibleChange={setPreviewTemplateImageVisible}
+            />
+          </div>
 
           <Form.Item field="isDefaultEditViewMode" triggerPropName="checked" hidden>
             <Checkbox disabled></Checkbox>

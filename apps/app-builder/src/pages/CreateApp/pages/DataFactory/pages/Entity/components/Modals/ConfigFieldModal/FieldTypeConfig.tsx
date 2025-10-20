@@ -4,8 +4,19 @@ import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-desig
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
-import type { AutoNumberRule, AutoCodeRule } from './types';
-import { convertAutoCodeCompoToAutoNumberRule, convertAutoNumberRuleToAutoCodeComp } from './utils';
+import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './utils/types';
+import {
+  convertAutoCodeCompoToAutoNumberRule,
+  convertAutoNumberRuleToAutoCodeComp,
+  findFieldPath
+} from './utils/utils';
+import {
+  AUTO_CODE_NUMBER_MODE,
+  AUTO_CODE_RESET_CYCLE,
+  AUTO_CODE_RULE_TYPE,
+  DATE_FORMAT_DEFAULT,
+  DIGIT_DEFAULT
+} from './utils/const';
 
 // 选项配置组件
 interface OptionConfigProps {
@@ -61,7 +72,7 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
   };
 
   return (
-    <div className={styles['field-type-config']}>
+    <div className={styles.fieldTypeConfig}>
       <h4>选项配置</h4>
       <Select value={optionType} onChange={setOptionType} style={{ width: '100%', marginBottom: 16 }}>
         <Select.Option value="custom">自定义</Select.Option>
@@ -70,12 +81,12 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
 
       <div>
         {options.map((option, index) => (
-          <div key={index} className={styles['option-item']}>
+          <div key={index} className={styles.optionItem}>
             <Input
               value={option.optionLabel}
               onChange={(value) => updateOption(index, value)}
               placeholder="请输入选项内容"
-              className={styles['option-input']}
+              className={styles.optionInput}
             />
             {options.length > 1 && index > 1 && (
               <Button
@@ -83,18 +94,18 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
                 status="danger"
                 icon={<IconDelete />}
                 onClick={() => removeOption(index)}
-                className={styles['delete-btn']}
+                className={styles.deleteBtn}
               />
             )}
           </div>
         ))}
       </div>
 
-      <Button type="dashed" icon={<IconPlus />} onClick={addOption} className={styles['add-option-btn']}>
+      <Button type="dashed" icon={<IconPlus />} onClick={addOption} className={styles.addOptionBtn}>
         新增选项
       </Button>
 
-      <div className={styles['field-type-config-footer']}>
+      <div className={styles.fieldTypeConfigFooter}>
         <Button type="outline" size="small" onClick={handleCancel}>
           取消
         </Button>
@@ -136,37 +147,37 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
     console.log('initialConfig', initialConfig);
     if (initialConfig) {
       // 如果传入的是 AutoNumberRule 格式，转换为数组格式
-      return convertAutoNumberRuleToAutoCodeComp(initialConfig);
+      return convertAutoNumberRuleToAutoCodeComp(initialConfig, fields);
     }
 
     // 默认规则
     return [
       {
         id: 'rule-1',
-        itemType: 'SEQUENCE',
+        itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
         config: {
-          numberMode: 'FIXED_DIGITS',
-          digitWidth: 4,
+          numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
+          digitWidth: DIGIT_DEFAULT,
           continueIncrement: true,
           startValue: 1,
           nextRecordStartValue: false,
-          resetCycle: 'NONE'
+          resetCycle: AUTO_CODE_RESET_CYCLE.NONE
         }
       },
       {
         id: 'rule-2',
-        itemType: 'DATE',
-        config: { dateFormat: '年月日' }
+        itemType: AUTO_CODE_RULE_TYPE.DATE,
+        config: { dateFormat: DATE_FORMAT_DEFAULT }
       },
       {
         id: 'rule-3',
-        itemType: 'TEXT',
+        itemType: AUTO_CODE_RULE_TYPE.TEXT,
         config: { fixedText: '' }
       },
       {
         id: 'rule-4',
-        itemType: 'FIELD_REF',
-        config: { fieldName: '' }
+        itemType: AUTO_CODE_RULE_TYPE.FIELD_REF,
+        config: { fieldName: '', fieldPath: [] }
       }
     ];
   };
@@ -176,9 +187,9 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   const autoCodeConfig = rules[0].config;
 
   const getDisplayText = (config: AutoCodeRule['config']) => {
-    const numberingMethodText = config.numberMode === 'NATURAL' ? '自然数编号' : '指定位数编号';
+    const numberingMethodText = config.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
     const digitsText = config.digitWidth ? `${config.digitWidth}位数` : '';
-    const resetText = config.resetCycle === 'NONE' ? '不自动重置' : '自动重置';
+    const resetText = config.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
     return `${numberingMethodText},${digitsText},${resetText}`;
   };
 
@@ -201,9 +212,8 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   };
 
   const handleAutoCodeConfigConfirm = (config: AutoNumberRule) => {
-    console.log('config', config);
-    updateRule(editingRuleId, { config: config });
-    setDisplayText(getDisplayText(config));
+    updateRule(editingRuleId, { config: config as unknown as Record<string, unknown> });
+    setDisplayText(getDisplayText(config as unknown as AutoCodeRule['config']));
     setEditingRuleId('');
   };
 
@@ -238,16 +248,16 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
 
   const renderRuleConfig = (rule: AutoCodeRule) => {
     switch (rule.itemType) {
-      case 'SEQUENCE': {
+      case AUTO_CODE_RULE_TYPE.SEQUENCE: {
         return (
-          <div className={styles['rule-content']}>
-            <IconDragDotVertical className={styles['drag-handle']} />
-            <span className={styles['rule-label']}>自动编号:</span>
+          <div className={styles.ruleContent}>
+            <IconDragDotVertical className={styles.dragHandle} />
+            <span className={styles.ruleLabel}>自动编号:</span>
             <Input
               value={displayText}
               readOnly
-              className={styles['rule-input']}
-              suffix={<IconEdit onClick={() => editRule(rule.id || '')} className={styles['edit-btn']} />}
+              className={styles.ruleInput}
+              suffix={<IconEdit onClick={() => editRule(rule.id || '')} className={styles.editBtn} />}
             />
             <Button
               type="text"
@@ -255,21 +265,21 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
               disabled={rules.length === 1}
-              className={styles['rule-action-btn']}
+              className={styles.ruleActionBtn}
             />
           </div>
         );
       }
 
-      case 'DATE':
+      case AUTO_CODE_RULE_TYPE.DATE:
         return (
-          <div className={styles['rule-content']}>
-            <IconDragDotVertical className={styles['drag-handle']} />
-            <span className={styles['rule-label']}>创建时间:</span>
+          <div className={styles.ruleContent}>
+            <IconDragDotVertical className={styles.dragHandle} />
+            <span className={styles.ruleLabel}>创建时间:</span>
             <Select
-              value={(rule.config.dateFormat as string) || '年月日'}
+              value={(rule.config.dateFormat as string) || DATE_FORMAT_DEFAULT}
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, dateFormat: value } })}
-              className={styles['rule-input']}
+              className={styles.ruleInput}
             >
               {dataOptions.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
@@ -283,21 +293,21 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
               disabled={rules.length === 1}
-              className={styles['rule-action-btn']}
+              className={styles.ruleActionBtn}
             />
           </div>
         );
 
-      case 'TEXT':
+      case AUTO_CODE_RULE_TYPE.TEXT:
         return (
-          <div className={styles['rule-content']}>
-            <IconDragDotVertical className={styles['drag-handle']} />
-            <span className={styles['rule-label']}>固定字符:</span>
+          <div className={styles.ruleContent}>
+            <IconDragDotVertical className={styles.dragHandle} />
+            <span className={styles.ruleLabel}>固定字符:</span>
             <Input
               value={(rule.config.fixedText as string) || ''}
               placeholder="请输入内容"
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fixedText: value } })}
-              className={styles['rule-input']}
+              className={styles.ruleInput}
             />
             <Button
               type="text"
@@ -305,23 +315,30 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
               disabled={rules.length === 1}
-              className={styles['rule-action-btn']}
+              className={styles.ruleActionBtn}
             />
           </div>
         );
 
-      case 'FIELD_REF':
+      case AUTO_CODE_RULE_TYPE.FIELD_REF:
         return (
-          <div className={styles['rule-content']}>
-            <IconDragDotVertical className={styles['drag-handle']} />
-            <span className={styles['rule-label']}>表单字段:</span>
+          <div className={styles.ruleContent}>
+            <IconDragDotVertical className={styles.dragHandle} />
+            <span className={styles.ruleLabel}>表单字段:</span>
             <Cascader
               placeholder="请选择字段"
-              className={styles['rule-input']}
+              className={styles.ruleInput}
               options={fields}
-              onChange={(value) =>
-                updateRule(rule.id!, { config: { ...rule.config, fieldName: value[value.length - 1] } })
-              }
+              value={findFieldPath(rule.config.fieldName as string, fields)}
+              onChange={(value) => {
+                updateRule(rule.id!, {
+                  config: {
+                    ...rule.config,
+                    fieldName: value[value.length - 1],
+                    fieldPath: value
+                  }
+                });
+              }}
             />
             <Button
               type="text"
@@ -329,7 +346,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
               disabled={rules.length === 1}
-              className={styles['rule-action-btn']}
+              className={styles.ruleActionBtn}
             />
           </div>
         );
@@ -341,44 +358,48 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
 
   return (
     <>
-      <div className={styles['field-type-config']}>
+      <div className={styles.fieldTypeConfig}>
         <h4>自动编号规则</h4>
-        <div className={styles['rule-items']}>
-          <ReactSortable list={rules} setList={(newList) => setRules(newList as AutoCodeRule[])} animation={200}>
+        <div className={styles.ruleConfigItems}>
+          <ReactSortable
+            list={rules as unknown as any[]}
+            setList={(newList) => setRules(newList as AutoCodeRule[])}
+            animation={200}
+          >
             {rules.map((rule) => (
               <div key={rule.id}>{renderRuleConfig(rule)}</div>
             ))}
           </ReactSortable>
         </div>
 
-        <div className={styles['add-rule-dropdown']}>
+        <div className={styles.addRuleDropdown}>
           <Dropdown
             trigger="click"
             droplist={
               <Menu>
                 <Menu.Item
-                  key="DATE"
-                  onClick={() => addRule('DATE')}
-                  disabled={rules.filter((rule) => rule.itemType === 'DATE')?.length > 1}
+                  key={AUTO_CODE_RULE_TYPE.DATE}
+                  onClick={() => addRule(AUTO_CODE_RULE_TYPE.DATE)}
+                  disabled={rules.filter((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.DATE)?.length > 1}
                 >
                   创建时间
                 </Menu.Item>
-                <Menu.Item key="TEXT" onClick={() => addRule('TEXT')}>
+                <Menu.Item key={AUTO_CODE_RULE_TYPE.TEXT} onClick={() => addRule(AUTO_CODE_RULE_TYPE.TEXT)}>
                   固定字符
                 </Menu.Item>
-                <Menu.Item key="FIELD_REF" onClick={() => addRule('FIELD_REF')}>
+                <Menu.Item key={AUTO_CODE_RULE_TYPE.FIELD_REF} onClick={() => addRule(AUTO_CODE_RULE_TYPE.FIELD_REF)}>
                   表单字段
                 </Menu.Item>
               </Menu>
             }
           >
-            <Button type="dashed" icon={<IconPlus />} className={styles['add-rule-btn']}>
+            <Button type="dashed" icon={<IconPlus />} className={styles.addRuleBtn}>
               添加规则
             </Button>
           </Dropdown>
         </div>
 
-        <div className={styles['field-type-config-footer']}>
+        <div className={styles.fieldTypeConfigFooter}>
           <Button type="outline" size="small" onClick={handleCancel}>
             取消
           </Button>
@@ -393,7 +414,10 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
         visible={autoCodeModalVisible}
         onVisibleChange={setAutoCodeModalVisible}
         onConfirm={handleAutoCodeConfigConfirm}
-        initialConfig={rules.find((rule) => rule.itemType === 'SEQUENCE')?.config}
+        initialConfig={
+          rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)
+            ?.config as unknown as AutoNumberRuleResponce
+        }
       />
     </>
   );

@@ -43,7 +43,7 @@ const REGEX_OPTIONS = REGEX_LIST.map((item) => {
     label: (
       <>
         <span>{item.label}</span>
-        <span className={styles['regex']}>{item.value}</span>
+        <span className={styles.regexText}>{item.value}</span>
       </>
     ),
     value: item.value
@@ -219,7 +219,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
   return (
     <Modal
-      className={styles['create-rule-modal']}
+      className={styles.createRuleModal}
       title={`${editRule ? '编辑' : '新建'}数据规则-${validationTypeMap[ruleType]}`}
       visible={visible}
       onOk={handleFinish}
@@ -229,7 +229,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       confirmLoading={loading}
       style={{ width: 600 }}
     >
-      <Form form={form} layout="vertical" className={styles['rule-form']}>
+      <Form form={form} layout="vertical">
         <Form.Item
           label="规则名称"
           field="rgName"
@@ -280,7 +280,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
         {ruleType === VALIDATION_TYPES.RANGE && (
           <Form.Item label="范围区间" required>
-            <Space align="center" className={styles['range-space']}>
+            <Space align="center" className={styles.rangeSpace}>
               <Form.Item field="minValue" rules={[{ required: true, message: '请输入范围区间' }]}>
                 <Input placeholder="请输入范围区间" />
               </Form.Item>

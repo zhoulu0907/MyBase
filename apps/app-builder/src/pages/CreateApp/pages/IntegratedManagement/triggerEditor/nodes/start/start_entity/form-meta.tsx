@@ -17,7 +17,6 @@ import ConditionEditor from '../../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { validateNodeForm } from '../../utils';
 import { updateStartEntityOutputs } from './output';
 
 const Option = Select.Option;
@@ -138,13 +137,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
 
-  const onValuesChange = (changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-
-    // handlePropsOnChange(values);
-  };
-
   // 触发类型
   const handleTriggerTypeChange = () => {
     payloadForm.clearFields('triggerEvents');
@@ -164,7 +156,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             layout="vertical"
             requiredSymbol={{ position: 'end' }}
-            onValuesChange={onValuesChange}
           >
             <Grid.Row>
               <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>

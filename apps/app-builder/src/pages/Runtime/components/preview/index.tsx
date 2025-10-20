@@ -38,8 +38,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   useSignals();
 
-  //   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
-
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const { editPageViewId } = pagesRuntimeSignal;
@@ -76,11 +74,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
   }, [menuId]);
 
+  // 仅在 mainMetaData 或 mainMetaDataFields 变化且存在 editTargetId 时重新获取数据
   useEffect(() => {
     if (editTargetId && mainMetaData && mainMetaDataFields) {
       handleGetData(mainMetaData, editTargetId);
     }
-  }, [editTargetId, mainMetaDataFields, mainMetaData]);
+  }, [mainMetaDataFields, mainMetaData]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -155,13 +154,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setPageType(EDITOR_TYPES.FORM_EDITOR);
     form.resetFields();
 
-    if (id === editTargetId) {
-      handleGetData(mainMetaData, id);
-    }
-
     if (id && id !== '') {
       console.log('edit row id: ', id);
       setEditTargetId(id);
+      // 直接获取数据，避免依赖状态变化触发
+      if (mainMetaData) {
+        handleGetData(mainMetaData, id);
+      }
     }
   };
 
@@ -231,29 +230,29 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 {/* {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && ( */}
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                   STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                  <div
-                    key={cp.id}
-                    className={styles.componentItem}
-                    style={{
-                      width: getComponentWidth(
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                        cp.type
-                      )
-                    }}
-                  >
-                    <PreviewRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      pageComponentSchema={
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                      }
-                      runtime={runtime}
-                      showFromPageData={() => {
-                        setPageType(EDITOR_TYPES.FORM_EDITOR);
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: getComponentWidth(
+                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )
                       }}
-                    />
-                  </div>
-                )}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={runtime}
+                        showFromPageData={() => {
+                          setPageType(EDITOR_TYPES.FORM_EDITOR);
+                        }}
+                      />
+                    </div>
+                  )}
               </Fragment>
             ))}
 

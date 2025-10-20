@@ -2,12 +2,12 @@ import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { FilterEntityFields, getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 
 const FormItem = Form.Item;
-
 export interface DynamicTableConfigProps {
   handleMultiPropsChange: (updates: { key: string; value: string | number | boolean | any[] }[]) => void;
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -67,7 +67,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }
     if (subEntities) {
       newEntityList.push(
-        ...subEntities.entities.map((entity) => ({
+        ...subEntities.entities.map((entity: any) => ({
           entityId: entity.entityId,
           entityName: entity.entityName
         }))
@@ -79,31 +79,53 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
   // 设置允许的列
   useEffect(() => {
-    const res =
-      fieldList.some(
-        (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.fieldName)
-      );
+    const res = fieldList.some(
+      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.fieldName)
+    );
 
     setEnableAddColumn(res);
   }, [fieldList, columnsConfig]);
 
   // 设置允许的搜索项
   useEffect(() => {
-    const res =
-      fieldList.some(
-        (item: MetadataEntityField) => !searchItemsConfig.some((col: any) => col.value == item.fieldName)
-      );
+    const res = fieldList.some(
+      (item: MetadataEntityField) => !searchItemsConfig.some((col: any) => col.value == item.fieldName)
+    );
 
     setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
+
+  // 暂时不能在表格展示的数据类型
+  const hiddenFieldTypes = [
+    ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE,
+    ENTITY_FIELD_TYPE.RELATION.VALUE,
+    ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
+    ENTITY_FIELD_TYPE.ARRAY.VALUE,
+    ENTITY_FIELD_TYPE.FILE.VALUE,
+    ENTITY_FIELD_TYPE.IMAGE.VALUE,
+    ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
+    ENTITY_FIELD_TYPE.PASSWORD.VALUE,
+    ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
+    ENTITY_FIELD_TYPE.AGGREGATE.VALUE,
+    ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
+    ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
+    ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
+  ];
 
   // 获取字段列表
   const getFieldList = async () => {
     const res = await getEntityFields({ entityId });
     console.log('fieldList res: ', res);
+    res.forEach((item: MetadataEntityField) => {
+      if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
+        item.disabled = true;
+      }
+    });
 
     const newFieldList = res.filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
-    const newFieldListNotSystemField = res.filter((item: MetadataEntityField) => item.isSystemField !== 1);
+    const newFieldListNotSystemField = res.filter(
+      (item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled
+    );
 
     setFieldList(newFieldList);
 
@@ -117,11 +139,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
         configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
           ?.title || item.displayName,
       dataIndex: item.fieldName,
-      id: item.id,
+      disabled: item.disabled,
+      id: item.id
     }));
-
-    // console.log('configs[columnsKey]: ', configs[columnsKey]);
-    // console.log('newColumns: ', newColumns);
 
     setColumnsConfig(newColumns);
     handlePropsChange(columnsKey, newColumns);
@@ -160,7 +180,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -215,7 +235,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         handlePropsChange(columnsKey, newList);
                       }}
                       className={styles.tableColumnItemInput}
-                      // TODO(mickey): 国际化
                       placeholder={`请输入第${idx + 1}项`}
                     />
                     <InputNumber
@@ -233,7 +252,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         setColumnsConfig(newList);
                         handlePropsChange(columnsKey, newList);
                       }}
-                      // TODO(mickey): 国际化
                       placeholder="宽度"
                     />
                     <Checkbox
@@ -241,7 +259,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                       onChange={(e) => {
                         const newList = [...columnsConfig];
                         if (newList[idx].width === undefined) {
-                          // TODO(mickey): 国际化
                           Message.error('请先设置宽度');
                           return;
                         }
@@ -286,6 +303,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                       .map((item: MetadataEntityField) => (
                         <Menu.Item
                           key={item.fieldName}
+                          disabled={item?.disabled}
                           onClick={() => {
                             const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.fieldName }];
                             setColumnsConfig(newList);

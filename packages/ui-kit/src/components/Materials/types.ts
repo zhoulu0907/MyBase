@@ -393,3 +393,23 @@ export interface ICollapsedConfigType<KeyType> {
     value: KeyType;
   }>;
 }
+
+export interface ITableOperationConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_OPERATION;
+  advanced?: boolean;
+}
+
+// 按钮权限配置
+export interface ITableButtonConfigType<KeyType> {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_BUTTON;
+  advanced: boolean;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}

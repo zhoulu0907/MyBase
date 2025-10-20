@@ -68,7 +68,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
-          <img src={LogoSVG} />
+          <img src={LogoSVG} alt="logo" />
         </div>
 
         <div className={styles.userInfo}>

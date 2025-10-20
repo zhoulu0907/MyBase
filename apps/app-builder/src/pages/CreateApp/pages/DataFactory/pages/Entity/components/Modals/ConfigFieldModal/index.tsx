@@ -1,18 +1,17 @@
-import { batchSaveFields, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
-import React, { useEffect, useState } from 'react';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { useFieldStore } from '@/store/store_field';
 import { Button, Form, Message, Modal } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
-import type { AutoNumberRule } from './types';
+import { batchSaveFields, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
+import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
+import React, { useEffect, useState } from 'react';
 import FieldConfigPopover from './FieldConfigPopover';
-import TableColumns from './TableColumns';
-import SortableTable from './SortableTable';
-import { arrayMove, systemFieldsLength } from './utils';
 import styles from './index.module.less';
+import SortableTable from './SortableTable';
+import TableColumns from './TableColumns';
+import type { AutoNumberRule } from './utils/types';
+import { arrayMove, systemFieldsLength } from './utils/utils';
 
 interface FieldFormValues {
   id?: string;
@@ -75,7 +74,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       // 获取实体字段列表
       loadEntityFields();
 
-      // 获取实体字段配置列表
+      // 获取实体及子表字段列表
       loadEntityFieldsWithChildren();
     } else {
       // 关闭时重置表单
@@ -231,7 +230,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       setExternalErrors(map);
     } finally {
       setLoading(false);
-      // form.resetFields();
     }
   };
 
@@ -340,7 +338,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
     return fields.map((originalField, index) => {
       // 通过 id 匹配表单数据
-      const formField = formListFields.find(f => f?.id === originalField.id) || formListFields[index];
+      const formField = formListFields.find((f) => f?.id === originalField.id) || formListFields[index];
       if (formField) {
         return {
           ...originalField,
@@ -357,7 +355,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   return (
     <Modal
-      className={styles['config-field-modal']}
+      className={styles.configFieldModal}
       title="字段配置"
       visible={visible}
       onOk={handleFinish}
@@ -371,11 +369,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         <Form.List field="fields">
           {() => {
             return (
-              <div className={styles['field-config-container']} id="field-config-container">
+              <div className={styles.fieldConfigContainer} id="field-config-container">
                 <SortableTable data={activeFields} columns={columns} onSort={handleSort} />
 
-                <div className={styles['add-field-section']}>
-                  <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles['add-field-button']}>
+                <div className={styles.addFieldSection}>
+                  <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles.addFieldButton}>
                     新增字段
                   </Button>
                 </div>

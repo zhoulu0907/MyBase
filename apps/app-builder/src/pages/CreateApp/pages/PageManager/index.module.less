@@ -1,6 +1,6 @@
 @import '../../components/variables.less';
 
-@sider-width: 200px;
+@sider-width: 220px;
 @content-header-height: 48px;
 
 .pageManagerPage {
@@ -97,11 +97,38 @@
       .contentTitle {
         font-size: 18px;
       }
+
+      .editButton {
+        display: flex;
+        align-items: center;
+
+        & > img {
+          margin-right: 8px;
+          filter: brightness(0) invert(1);
+        }
+      }
     }
 
     .contentBody {
       width: 100%;
       height: calc(100vh - @header-height - @content-header-height);
+    }
+  }
+}
+
+.createItem {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #272e3b;
+
+  .customSvg {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+
+    div {
+      display: flex;
     }
   }
 }

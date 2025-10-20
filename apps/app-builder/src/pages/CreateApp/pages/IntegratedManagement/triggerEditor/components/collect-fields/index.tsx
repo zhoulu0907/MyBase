@@ -113,7 +113,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ data, form }) => {
   const addRow = () => {
     const newData = form.getFieldValue('fields');
     const temp = {
-      id: nanoid(),
+      id: nanoid().replace(/-/g,''),
       fieldName: undefined,
       fieldType: ENTITY_FIELD_TYPE.TEXT.VALUE
     };
