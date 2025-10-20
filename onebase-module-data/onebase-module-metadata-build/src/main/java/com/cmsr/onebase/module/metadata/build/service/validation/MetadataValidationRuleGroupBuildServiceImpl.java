@@ -97,8 +97,9 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createValidationRuleGroup(@Valid ValidationRuleGroupSaveReqVO createReqVO) {
-        // 校验规则组名称唯一性
-        validateRuleGroupNameUnique(null, createReqVO.getRgName());
+        // 移除规则组名称唯一性校验，允许不同字段使用相同的规则组名称
+        // 实际的唯一性由"每个实体的每个字段的每种校验类型只有一条生效的数据"来保证
+        // validateRuleGroupNameUnique(null, createReqVO.getRgName());
 
         // 插入校验规则分组
         MetadataValidationRuleGroupDO ruleGroup = BeanUtils.toBean(createReqVO, MetadataValidationRuleGroupDO.class);
@@ -124,8 +125,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         // 校验存在
         validateValidationRuleGroupExists(updateReqVO.getId());
 
-        // 校验规则组名称唯一性
-        validateRuleGroupNameUnique(updateReqVO.getId(), updateReqVO.getRgName());
+        // 移除规则组名称唯一性校验，允许不同字段使用相同的规则组名称
+        // validateRuleGroupNameUnique(updateReqVO.getId(), updateReqVO.getRgName());
 
         // 更新校验规则分组
         MetadataValidationRuleGroupDO updateObj = BeanUtils.toBean(updateReqVO, MetadataValidationRuleGroupDO.class);
@@ -277,7 +278,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
      *
      * @param id 校验规则分组编号（用于修改时排除自身）
      * @param rgName 规则组名称
+     * @deprecated 不再需要校验规则组名称唯一性，允许不同字段使用相同的规则组名称。
+     *             实际的唯一性由"每个实体的每个字段的每种校验类型只有一条生效的数据"来保证。
      */
+    @Deprecated
     private void validateRuleGroupNameUnique(Long id, String rgName) {
         if (!StringUtils.hasText(rgName)) {
             return;

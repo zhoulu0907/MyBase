@@ -45,6 +45,11 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
             if (BooleanStatusEnum.isYes(field.getIsPrimaryKey())) {
                 throw invalidParamException("不允许更新主键字段");
             }
+
+            // 不允许更新自动编号字段
+            if (autoNumberService.hasAutoNumber(field.getId())) {
+                throw invalidParamException("不允许更新自动编号字段[{}]", field.getDisplayName());
+            }
         }
     }
 

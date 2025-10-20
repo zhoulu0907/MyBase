@@ -67,6 +67,15 @@ public class DataMethodAssembler {
         queryRequest.setEntityId(reqDTO.getEntityId());
         queryRequest.setLimit(reqDTO.getNum());
 
+        // 转换全局 AND 条件
+        if (!CollectionUtils.isEmpty(reqDTO.getAndConditionDTO())) {
+            List<QueryCondition> andConditions = reqDTO.getAndConditionDTO().stream()
+                    .map(this::toQueryCondition)
+                    .filter(qc -> qc != null)
+                    .collect(Collectors.toList());
+            queryRequest.setAndConditions(andConditions);
+        }
+
         // 转换条件组
         if (!CollectionUtils.isEmpty(reqDTO.getConditionDTO())) {
             queryRequest.setConditionGroups(convertConditionGroups(reqDTO.getConditionDTO()));

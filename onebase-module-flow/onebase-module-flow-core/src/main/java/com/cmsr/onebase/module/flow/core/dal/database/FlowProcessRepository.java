@@ -32,8 +32,8 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         if (StringUtils.isNotEmpty(reqVO.getProcessName())) {
             configs.like("process_name", reqVO.getProcessName());
         }
-        if (reqVO.getProcessStatus() != null) {
-            configs.eq("process_status", reqVO.getProcessStatus());
+        if (reqVO.getEnableStatus() != null) {
+            configs.eq("enable_status", reqVO.getEnableStatus());
         }
         if (StringUtils.isNotEmpty(reqVO.getTriggerType())) {
             configs.eq("trigger_type", reqVO.getTriggerType());
