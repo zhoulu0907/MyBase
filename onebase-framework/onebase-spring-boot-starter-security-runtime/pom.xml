@@ -18,10 +18,10 @@
     <url>https://cmsr.com</url>
 
     <dependencies>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+        </dependency>-->
         <!-- 工具类相关 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
