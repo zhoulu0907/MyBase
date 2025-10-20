@@ -24,7 +24,6 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
-import { updateDataQueryMultipleOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [
   NodeType.DATA_QUERY_MULTIPLE,
@@ -505,7 +504,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             <Grid.Row>
-              <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
+              <Form.Item label="排序规则">
                 <SortByEditor
                   data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                   fields={conditionFields}
