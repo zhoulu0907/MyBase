@@ -149,6 +149,7 @@ export interface XDataSelectConfig extends ICommonBaseType {
   displayFields: {
     label: TTextDefaultType;
     value: TTextDefaultType;
+    dataValue?: TTextDefaultType;
   }[];
   displayFieldsOptions: any[];
   fillFormFieldOptions: any[];

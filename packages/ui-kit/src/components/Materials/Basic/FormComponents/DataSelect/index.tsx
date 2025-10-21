@@ -1,11 +1,12 @@
 import { Button, Form } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import PreviewDataSelectModal from './previewDataSelectModal';
 import { XDataSelectConfig } from './schema';
+import cloneDeep from 'lodash-es/cloneDeep';
 
 const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -19,18 +20,44 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     labelColSpan = 0,
     description,
     runtime,
-    displayFields
+    displayFields,
+    detailMode
   } = props;
 
+  const {form} = Form.useFormContext();
+  const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATA_SELECT}_${props.id}`;
+
   const [previewDataSelectVisible, setPreviewDataSelectVisible] = useState(false); //预览数据选择popup
+  const [initialSelectedId, setInitialSelectedId] = useState<string>('');
+  const [displayFieldsWithValue, setdisplayFieldsWithValue] = useState<any[]>([]);
+  const fieldValue = Form.useWatch(fieldName, form);
+
+  useEffect(() => {
+    if (runtime === true && fieldValue) {
+      setInitialSelectedId(fieldValue.selectID);
+      const map = new Map<string, string>();
+      for (const s of fieldValue.dataFields) {
+          if (s.value != null && s.dataValue !== undefined) map.set(s.value, s.dataValue);
+      }
+      const displayFieldsWithValue = [...displayFields].map(t => ({
+          ...t,
+          dataValue: map.has(t.value) ? map.get(t.value) : t.dataValue,
+      }));
+      setdisplayFieldsWithValue(displayFieldsWithValue);
+    } else {
+      setdisplayFieldsWithValue(cloneDeep(displayFields));
+    }
+  }, [fieldValue]);
+
+  useEffect(() => {
+    setdisplayFieldsWithValue(cloneDeep(displayFields));
+  }, [displayFields])
 
   return (
     <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATA_SELECT}_${nanoid()}`
-        }
+        field={fieldName}
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -45,7 +72,20 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           margin: '0px'
         }}
       >
-        <Button
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? 
+        (
+          <Button
+          type="secondary"
+          long
+          style={{
+            pointerEvents: 'none'
+          }}
+        >
+          {defaultValue}
+        </Button>
+        ) : 
+        (
+          <Button
           type="secondary"
           long
           style={{
@@ -55,21 +95,27 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         >
           {defaultValue}
         </Button>
-        <PreviewDataSelectModal
+        )}
+        
+      </Form.Item>
+      <PreviewDataSelectModal
           visible={previewDataSelectVisible}
           onCancel={() => setPreviewDataSelectVisible(false)}
           tableConfig={props.dynamicTableConfig}
+          displayFields={displayFieldsWithValue}
+          form={form}
+          fieldName={fieldName}
+          initialSelectedId = {initialSelectedId}
         />
-      </Form.Item>
       <div style={{ marginTop: '16px', background: '#f7f8fa' }}>
-        {displayFields.map((field) => (
+        {displayFieldsWithValue.map((field) => (
           <Form.Item
             key={field.label}
             label={field.label}
             labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
             wrapperCol={{ style: { flex: 1 } }}
           >
-            <span style={{ color: '#c9cdd4' }}>暂无内容</span>
+            <span style={{ color: '#c9cdd4' }}>{field.dataValue ?? '暂无内容'}</span>
           </Form.Item>
         ))}
       </div>
