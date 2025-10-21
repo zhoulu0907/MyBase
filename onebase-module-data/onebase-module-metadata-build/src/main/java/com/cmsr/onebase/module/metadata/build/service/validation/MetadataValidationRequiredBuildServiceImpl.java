@@ -222,14 +222,22 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         var list = requiredRepository.findByGroupId(id);
-        if (list.isEmpty()) { return; }
-        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")"); }
-        MetadataValidationRequiredDO requiredDO = list.get(0);
-        Long fieldId = requiredDO.getFieldId();
-        Long groupId = requiredDO.getGroupId();
-        requiredRepository.deleteById(requiredDO.getId());
-        if (fieldId != null) { syncFieldRequiredStatus(fieldId, false); }
-        if (groupId != null) { validationRuleGroupService.safeDeleteGroupDirect(groupId); }
+        
+        // 删除子表记录和同步字段状态
+        if (!list.isEmpty()) {
+            if (list.size() > 1) {
+                throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")");
+            }
+            MetadataValidationRequiredDO requiredDO = list.get(0);
+            Long fieldId = requiredDO.getFieldId();
+            requiredRepository.deleteById(requiredDO.getId());
+            if (fieldId != null) {
+                syncFieldRequiredStatus(fieldId, false);
+            }
+        }
+        
+        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        validationRuleGroupService.safeDeleteGroupDirect(id);
     }
     
     /**
