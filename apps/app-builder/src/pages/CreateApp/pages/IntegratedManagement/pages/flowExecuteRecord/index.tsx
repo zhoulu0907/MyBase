@@ -45,7 +45,7 @@ const FlowExecuteRecordPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (text, record) => (
-        <Tag color={record.status ? 'rgb(var(--primary-4))' : 'red'}>{record.status ? '成功' : '失败'}</Tag>
+        <Tag color={record.status ? 'green' : 'red'}>{record.status ? '成功' : '失败'}</Tag>
       )
     },
     {
@@ -249,7 +249,13 @@ const FlowExecuteRecordPage: React.FC = () => {
           </Grid.Row>
         </div>
         <div className={styles.table}>
-          <Table columns={columns} data={tableData} pagination={pagination} onChange={onChangeTable}></Table>
+          <Table
+            columns={columns}
+            data={tableData}
+            pagination={pagination}
+            onChange={onChangeTable}
+            border={false}
+          ></Table>
         </div>
       </div>
     </div>
