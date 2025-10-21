@@ -25,7 +25,6 @@ const SUB_ATTR_KEY = {
   SELECTDATAFIELDS: 'selectDataFields',
   FILTERDATA: 'filterData',
   FILTERCONDITION: 'filterCondition',
-  SORTDATARULE: 'sortDataRule',
   OPERATIONAUTH: 'operationAuth',
   FASTFILTER: 'fastFilter',
   DYNAMICTABLECONFIG: 'dynamicTableConfig',
@@ -101,6 +100,9 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
     if (visible) {
       setDisplayFieldOptions(configs[SUB_ATTR_KEY.DATAFIELDS]);
       setSelected(configs[SUB_ATTR_KEY.SELECTDATAFIELDS]);
+      setFilterCondition(configs[SUB_ATTR_KEY.FILTERCONDITION]);
+      setSortFieldValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.fieldName);
+      setSortValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.sortBy);
     }
   }, [visible]);
 
