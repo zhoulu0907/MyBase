@@ -21,7 +21,8 @@ const ATTR_KEY = {
   FILLRULESETTING: 'fillRuleSetting',
   DATAFIELDS: 'dataFields',
   SELECTDATAFIELDS: 'selectDataFields',
-  DYNAMICTABLECONFIG: 'dynamicTableConfig'
+  DYNAMICTABLECONFIG: 'dynamicTableConfig',
+  FILTERCONDITION: 'filterCondition'
 };
 
 export interface DynamicSelectDataSourceConfigProps {
@@ -87,9 +88,13 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
       entityName: dataSource.entityName
     };
     setSelectedDataSource(data);
-    // table元数据
+    // table元数据 初始化
     tableConfig.metaData = value;
     tableConfig.showOpearate = false;
+    tableConfig.sortByObject = {
+      fieldName: undefined,
+      sortBy: 1
+    };
 
     // 查找
     const displayFieldOptions = (fieldsMap.get(value) ?? []).filter(
@@ -97,14 +102,16 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     );
     setDisplayFieldOptions(displayFieldOptions);
 
-    // 去掉系统字段
+    // 去掉系统字段 和需要隐藏的字段
     const filteredFieldsData = (fieldsMap.get(value) ?? []).filter(
       (f: any) => !f.isSystemField && !hiddenFieldTypes.includes(f.fieldType)
     );
     setFilteredFieldsData(filteredFieldsData);
 
-    //显示在表单中
+    //reset 数据选择过程 显示在表单中 填充规则
+    setIsSetted(false);
     setSelected([]);
+    setSelectRule([]);
     const displayFields: any[] = [];
 
     // 选择数据时的显示字段 默认选中.  TODO
@@ -120,7 +127,11 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
       { key: ATTR_KEY.FILLFORMFIELDOPTIONS, value: filteredFieldsData },
       { key: ATTR_KEY.SELECTDATAFIELDS, value: selectedFields },
       { key: ATTR_KEY.DYNAMICTABLECONFIG, value: tableConfig },
-      { key: ATTR_KEY.DISPLAYFIELDS, value: displayFields }
+      { key: ATTR_KEY.DISPLAYFIELDS, value: displayFields },
+      // reset
+      { key: ATTR_KEY.IS_SETTED, value: false },
+      { key: ATTR_KEY.FILLRULESETTING, value: [] },
+      { key: ATTR_KEY.FILTERCONDITION, value: [] }
     ]);
   };
 
