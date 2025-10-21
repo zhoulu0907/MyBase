@@ -15,7 +15,7 @@ import './index.css';
 
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime } = props;
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime, detailMode} = props;
   const [userData, setUserData] = useState<UserVO[]>([]);
   // 分页
   const [pageNo, setPageNo] = useState<number>(1);
@@ -31,11 +31,19 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   const [currentSelectUser, setCurrentSelectUser] = useState<string>();
   const [currentSelectUserID, setCurrentSelectUserID] = useState<number>();
 
+  const fieldValue = Form.useWatch(fieldName, form);
+
   useEffect(() => {
     if (runtime === true && keywords === '') {
       getUserData('');
     }
   }, [keywords]);
+
+  useEffect(() => {
+    if (runtime === true && fieldValue) {
+      setCurrentSelectUser(fieldValue?.userName);
+    }
+  }, [fieldValue]);
 
   // 第一页的加载
   const debouncedSearch = useCallback(
@@ -83,6 +91,10 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     const user = userData.find((item) => item.id === value);
     setCurrentSelectUser(user?.nickname);
     setCurrentSelectUserID(value);
+    form.setFieldValue(fieldName, {
+      userID: value,
+      userName: user?.nickname
+    });
   }
 
   const handleRemove = (e: React.MouseEvent<SVGElement, MouseEvent>) => {
@@ -94,9 +106,13 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   }
 
   const handleOKModal = (user: any) => {
-    form.setFieldValue(fieldName, user.value);
+    // form.setFieldValue(fieldName, user.value);
     setCurrentSelectUser(user.name);
     setCurrentSelectUserID(user.value);
+    form.setFieldValue(fieldName, {
+      userID: user.value,
+      userName: user.name
+    });
     setAdvanceVisible(false);
   };
 
@@ -118,6 +134,9 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+          <div>{currentSelectUser || '--'}</div>
+        ) : (
         <Select
           placeholder="请选择"
           onPopupScroll={scrollHandler}
@@ -173,7 +192,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
                     <IconClose className='closeBtn'
                         onClick={(e) => {handleRemove(e)}}/>
                 </span>);
-          }}/>
+          }}/>)}
       </Form.Item>
       <AdvanceSelectModal  
           runtime={runtime}
