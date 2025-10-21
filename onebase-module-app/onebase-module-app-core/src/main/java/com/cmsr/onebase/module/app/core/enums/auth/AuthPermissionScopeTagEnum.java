@@ -24,7 +24,7 @@ public enum AuthPermissionScopeTagEnum {
     /**
      * 下级部门提交
      */
-    SUBORDINATE_DEPARTMENT_SUBMIT("subordinateDepartmentSubmit", "下级部门提交"),
+    SUB_DEPARTMENT_SUBMIT("subDepartmentSubmit", "下级部门提交"),
     
     /**
      * 自定义条件

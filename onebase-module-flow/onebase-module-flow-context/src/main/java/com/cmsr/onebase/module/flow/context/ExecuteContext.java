@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -17,6 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @ToString
 public class ExecuteContext implements Serializable {
+
+    @Setter
+    @Getter
+    private String traceId = UUID.randomUUID().toString();
 
     @Setter
     private Long processId;

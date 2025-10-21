@@ -1,11 +1,17 @@
 package com.cmsr.onebase.framework.security.runtime;
 
+import lombok.Data;
+
+import java.util.List;
+
 /**
  * @Author：huangjie
  * @Date：2025/10/18 14:54
  */
+@Data
 public class DataPermission {
 
+    private List<DataPermissionScopeTagEnum> scopTags;
 
     private Long scopeFieldId;
 
@@ -49,5 +55,17 @@ public class DataPermission {
      *     }
      */
     private String scopeValue;
+
+    /**
+     * 数据过滤条件
+     */
+    private List<List<DataPermissionFilter>> filters;
+
+
+    /**
+     * 操作标签 只有 编辑和删除两类值
+     */
+    private List<OperationEnum> operationTags;
+
 
 }
