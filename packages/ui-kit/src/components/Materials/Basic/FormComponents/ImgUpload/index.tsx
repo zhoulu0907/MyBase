@@ -1,15 +1,26 @@
 import { Form, Message, Upload } from '@arco-design/web-react';
-import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
+import { IconPlus, IconDelete, IconImage } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
+import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
+import './index.css';
 import type { XInputImgUploadConfig } from './schema';
 
 const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, runtime = true, detailMode } = props;
+  const {
+    label,
+    dataField,
+    status,
+    tooltip,
+    listType,
+    verify,
+    layout,
+    labelColSpan = 0,
+    runtime = true,
+    detailMode
+  } = props;
 
   const [_imgUrl, setImgUrl] = useState<string>('');
 
@@ -31,23 +42,23 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   };
   const { form } = Form.useFormContext();
 
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`
-  const fieldValue = Form.useWatch(fieldId, form)
+  const fieldId =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`;
+  const fieldValue = Form.useWatch(fieldId, form);
 
-  useEffect(()=>{
+  useEffect(() => {
     let flag = false;
-    const newFieldValue=  (fieldValue || []).map((ele:any)=>{
-      if(ele.url !== ele.response){
+    const newFieldValue = (fieldValue || []).map((ele: any) => {
+      if (ele.url !== ele.response) {
         flag = true;
-        return {...ele,url:ele.response}
+        return { ...ele, url: ele.response };
       }
-      return {...ele}
-    })
-    if(flag){
-      form.setFieldValue(fieldId,newFieldValue)
+      return { ...ele };
+    });
+    if (flag) {
+      form.setFieldValue(fieldId, newFieldValue);
     }
-  },[fieldValue])
-
+  }, [fieldValue]);
 
   return (
     <div className="formWrapper">
@@ -66,13 +77,17 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        triggerPropName='fileList'
+        triggerPropName="fileList"
       >
         <Upload
           imagePreview
-          limit={(status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue ? fieldValue?.length : (
-            verify?.maxCount === -1 ? undefined : verify?.maxCount
-          )}
+          limit={
+            (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
+              ? fieldValue?.length
+              : verify?.maxCount === -1
+                ? undefined
+                : verify?.maxCount
+          }
           accept="image/*"
           listType={listType}
           beforeUpload={async (file) => {
@@ -110,15 +125,35 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
+          drag
         >
-          {listType == 'picture-card' && (
-            <div className="arco-upload-trigger-picture">
-              <div className="arco-upload-trigger-picture-text">
-                <IconPlus />
-                <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动图片到框内上传</div>
+          <div className="uplaodTrigger">
+            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
+              <div className="uplaodTriggerText">
+                <div className="uplaodTriggerText-content">
+                  <IconImage />
+                  <span className='uplaodTriggerText-tips'>图片上传</span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
+              <div className="uplaodTriggerList">
+                <div className="uplaodTriggerList-content">
+                  <IconPlus />
+                  <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
+                  <div className="uplaodTriggerList-describe">单张图片大小上限{verify?.maxSize || 10}MB</div>
+                </div>
+              </div>
+            )}
+            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
+              <div className="uplaodTriggerPicture">
+                <div className="uplaodTriggerPicture-content">
+                  <IconImage />
+                  <div className='uplaodTriggerPicture-tips'>图片上传</div>
+                </div>
+              </div>
+            )}
+          </div>
         </Upload>
       </Form.Item>
     </div>

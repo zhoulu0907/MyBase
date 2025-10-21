@@ -24,7 +24,6 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
-import { updateDataQueryMultipleOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [
   NodeType.DATA_QUERY_MULTIPLE,
@@ -82,18 +81,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   mainEntityId: undefined,
-    //   subEntityId: undefined,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-
-    // clearDataOriginNodeId(node.id);
 
     setMainEntityList([]);
     setSubEntityList([]);
@@ -225,17 +212,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'dataNodeId', 'filterCondition', 'sortBy']);
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   subEntityId: undefined,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-
-    // clearDataOriginNodeId(node.id);
 
     setSubEntityList([]);
     setDataNodeList([]);
@@ -298,32 +274,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleSubEntityIdChange = (_curSubEntityId: string) => {
     payloadForm.clearFields(['dataNodeId', 'filterCondition', 'sortBy']);
-
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-
-    // clearDataOriginNodeId(node.id);
   };
 
   const handleDateNodeSourceChange = async (dataNodeId: string) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   mainEntityId: undefined,
-    //   subEntityId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-
-    // clearDataOriginNodeId(node.id);
 
     setMainEntityList([]);
     setSubEntityList([]);
@@ -356,13 +310,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const handleFilterTypeChange = (_value: FILTER_TYPE) => {
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   filterCondition: []
-    // });
-
     payloadForm.clearFields(['filterCondition']);
   };
 
@@ -419,15 +366,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     return [];
   }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId, dataNodeEntityFields]);
-
-  // 使用 useEffect 更新条件字段状态和输出，避免在渲染过程中直接更新状态
-  useEffect(() => {
-    setConditionFields(conditionFieldsForEditor);
-    // 只在有实际数据时才更新 triggerNodeOutputSignal，避免初始化时载入空数据
-    if (conditionFieldsForEditor.length > 0) {
-      updateDataQueryMultipleOutputs(node.id, conditionFieldsForEditor);
-    }
-  }, [conditionFieldsForEditor, node.id]);
 
   const getInitData = () => {
     return {
@@ -566,7 +504,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             <Grid.Row>
-              <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
+              <Form.Item label="排序规则">
                 <SortByEditor
                   data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                   fields={conditionFields}

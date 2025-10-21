@@ -1,0 +1,69 @@
+.uplaodTrigger{
+    color: #4E5969;
+}
+
+.uplaodTriggerText {
+    background-color: #F2F3F5;
+    padding: 4px 16px;
+    font-size: 16px;
+    line-height: 24px;
+    width: auto;
+    height: 32px;
+    box-sizing: border-box;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 2px;
+}
+.uplaodTriggerText-content {
+    display: flex;
+    align-items: center;
+}
+.uplaodTriggerText-tips {
+    font-size: 14px;
+    padding-left: 8px;
+    line-height: 24px;
+}
+
+.uplaodTriggerList {
+    width: 100%;
+    height: 204px;
+    padding: 16px;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F2F3F5;
+    border: 1px dashed #E5E6EB;
+    border-radius: 2px;
+    text-align: center;
+    font-size: 14px;
+}
+.uplaodTriggerList-tips {
+    margin: 16px 0 4px;
+    line-height: 22px;
+    color: #1D2129;
+}
+.uplaodTriggerList-describe {
+    color: #86909C;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+.uplaodTriggerPicture {
+    background-color: #F2F3F5;
+    padding: 16px 4px;
+    font-size: 14px;
+    width: 80px;
+    height: 80px;
+    box-sizing: border-box;
+    cursor: pointer;
+    border-radius: 2px;
+}
+.uplaodTriggerPicture-content {
+    text-align: center;
+}
+.uplaodTriggerPicture-tips {
+    line-height: 22px;
+    margin-top: 4px;
+}
