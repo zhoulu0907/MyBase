@@ -167,12 +167,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   };
 
   const updateField = (index: number, updatedField: Partial<FieldFormValues>) => {
-    setFields((prevFields) => {
-      const data = form.getFieldsValue().fields[index];
-      const newFields = prevFields.map((field, i) => (i === index ? { ...field, ...data, ...updatedField } : field));
-      form.setFieldsValue({ fields: newFields });
-      return newFields;
-    });
+    const customFields = getCurrentTableData();
+    customFields[index] = { ...customFields[index], ...updatedField };
+    setFields(customFields);
+    form.setFieldsValue({ fields: customFields });
   };
 
   // 获取字段在数组中的索引
