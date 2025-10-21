@@ -13,6 +13,9 @@ public class PageExecutionLogReqVO extends PageParam {
 
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "应用ID", example = "1")
+    private Long applicationId;
+
     @Schema(description = "流程ID", example = "1")
     private Long processId;
 
