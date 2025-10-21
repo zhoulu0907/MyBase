@@ -5,6 +5,8 @@ import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
@@ -12,12 +14,14 @@ import com.yomahub.liteflow.flow.LiteflowResponse;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.redisson.api.RList;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,16 +49,39 @@ public class FlowProcessExecutor {
     @Autowired
     private RedissonClient redissonClient;
 
+    @Autowired
+    private FlowExecutionLogRepository flowExecutionLogRepository;
+
     public ExecutorResult execute(String traceId, Long processId, Map<String, Object> inputParams) {
+        FlowExecutionLogDO flowExecutionLogDO = new FlowExecutionLogDO();
+        flowExecutionLogDO.setProcessId(processId);
+        flowExecutionLogDO.setStartTime(LocalDateTime.now());
         try {
-            return doExecute(traceId, processId, inputParams);
+            ExecutorResult executorResult = doExecute(traceId, processId, inputParams);
+            flowExecutionLogDO.setExecutionUuid(executorResult.getExecutionUuid());
+            if (executorResult.isSuccess()) {
+                flowExecutionLogDO.setExecutionResult("success");
+            } else {
+                flowExecutionLogDO.setExecutionResult("failed");
+            }
+            flowExecutionLogDO.setErrorMessage(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
+            //
+            return executorResult;
         } catch (Exception e) {
+            //打印日志
             log.error("执行流程异常: {}", traceId, e);
+            //处理执行日志
+            flowExecutionLogDO.setExecutionResult("failed");
+            flowExecutionLogDO.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
+            //执行结果对象
             ExecutorResult executorResult = new ExecutorResult();
             executorResult.setSuccess(false);
             executorResult.setMessage("执行流程异常");
             executorResult.setCause(e);
             return executorResult;
+        } finally {
+            flowExecutionLogDO.setEndTime(LocalDateTime.now());
+            flowExecutionLogRepository.insert(flowExecutionLogDO);
         }
     }
 
@@ -95,15 +122,37 @@ public class FlowProcessExecutor {
     }
 
     public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> uuidFiles) {
+        FlowExecutionLogDO flowExecutionLogDO = flowExecutionLogRepository.findByExecutionUuid(executionUuid);
+        if (flowExecutionLogDO == null) {
+            flowExecutionLogDO = new FlowExecutionLogDO();
+            flowExecutionLogDO.setProcessId(processId);
+            flowExecutionLogDO.setStartTime(LocalDateTime.now());
+        }
         try {
-            return doExecute(processId, executionUuid, uuidFiles);
+            ExecutorResult executorResult = doExecute(processId, executionUuid, uuidFiles);
+            flowExecutionLogDO.setExecutionUuid(executorResult.getExecutionUuid());
+            if (executorResult.isSuccess()) {
+                flowExecutionLogDO.setExecutionResult("success");
+            } else {
+                flowExecutionLogDO.setExecutionResult("failed");
+            }
+            flowExecutionLogDO.setErrorMessage(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
+            //
+            return executorResult;
         } catch (Exception e) {
             log.error("执行流程异常: {}", executionUuid, e);
+            //处理执行日志
+            flowExecutionLogDO.setExecutionResult("failed");
+            flowExecutionLogDO.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
+            //执行结果对象
             ExecutorResult executorResult = new ExecutorResult();
             executorResult.setSuccess(false);
             executorResult.setMessage("执行流程异常");
             executorResult.setCause(e);
             return executorResult;
+        } finally {
+            flowExecutionLogDO.setEndTime(LocalDateTime.now());
+            flowExecutionLogRepository.insert(flowExecutionLogDO);
         }
     }
 

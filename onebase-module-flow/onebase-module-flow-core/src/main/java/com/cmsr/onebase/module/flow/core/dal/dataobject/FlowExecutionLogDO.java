@@ -14,6 +14,9 @@ public class FlowExecutionLogDO extends BaseDO {
     @Column(name = "trigger_user_id")
     private Long triggerUserId;
 
+    @Column(name = "execution_uuid")
+    private String executionUuid;
+
     @Column(name = "process_id", nullable = false)
     private Long processId;
 
