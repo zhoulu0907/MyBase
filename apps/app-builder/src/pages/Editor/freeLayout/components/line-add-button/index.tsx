@@ -37,6 +37,7 @@ export const LineAddButton = (props: LineRenderProps) => {
   const { fromPort, toPort } = line;
 
   const onClick = useCallback(async () => {
+    
     // calculate the middle point of the line - 计算线条的中点位置
     const position = {
       x: (line.position.from.x + line.position.to.x) / 2,
@@ -57,7 +58,6 @@ export const LineAddButton = (props: LineRenderProps) => {
     if (!result) {
       return;
     }
-
     const { nodeType, nodeJSON } = result;
 
     // adjust position for the new node - 调整新节点的位置

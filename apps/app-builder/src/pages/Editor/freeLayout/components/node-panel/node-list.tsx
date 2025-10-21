@@ -8,57 +8,22 @@ import React, { type FC } from 'react';
 import styled from 'styled-components';
 import type { NodePanelRenderProps } from '@flowgram.ai/free-node-panel-plugin';
 import { useClientContext, WorkflowNodeEntity } from '@flowgram.ai/free-layout-editor';
-
+import { Collapse, Tabs, Layout, Input } from '@arco-design/web-react';
 import type { FlowNodeRegistry } from '../../typings';
 import { nodeRegistries } from '../../nodes';
-
-const NodeWrap = styled.div`
-  width: 100%;
-  height: 32px;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 19px;
-  padding: 0 15px;
-  &:hover {
-    background-color: hsl(252deg 62% 55% / 9%);
-    color: hsl(252 62% 54.9%);
-  }
-`;
-
-const NodeLabel = styled.div`
-  font-size: 12px;
-  margin-left: 10px;
-`;
-
-interface NodeProps {
-  label: string;
-  icon: JSX.Element;
-  onClick: React.MouseEventHandler<HTMLDivElement>;
-  disabled: boolean;
-}
-
-function Node(props: NodeProps) {
-  return (
-    <NodeWrap
-      data-testid={`demo-free-node-list-${props.label}`}
-      onClick={props.disabled ? undefined : props.onClick}
-      style={props.disabled ? { opacity: 0.3 } : {}}
-    >
-      <div style={{ fontSize: 14 }}>{props.icon}</div>
-      <NodeLabel>{props.label}</NodeLabel>
-    </NodeWrap>
-  );
-}
-
-const NodesWrap = styled.div`
-  max-height: 500px;
-  overflow: auto;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`;
+import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
+import './node-list.less';
+import approver from '../../assets/bpmLogo/approver.png';
+import executor_big from '../../assets/bpmLogo/executor_big.png';
+import ccto from '../../assets/bpmLogo/ccto.png';
+import conditional_branch from '../../assets/bpmLogo/conditional_branch.png';
+import parallel_branch from '../../assets/bpmLogo/parallel_branch.png';
+import sink_node from '../../assets/bpmLogo/sink_node.png';
+import automation from '../../assets/bpmLogo/automation.png';
+import subprocess from '../../assets/bpmLogo/subprocess.png';
+import task from '../../assets/bpmLogo/task.png';
+import wait from '../../assets/bpmLogo/wait.png';
+import message from '../../assets/bpmLogo/message .png';
 
 interface NodeListProps {
   onSelect: NodePanelRenderProps['onSelect'];
@@ -73,30 +38,94 @@ export const NodeList: FC<NodeListProps> = (props) => {
     onSelect({
       nodeType: registry.type as string,
       selectEvent: e,
-      nodeJSON: json,
+      nodeJSON: json
     });
   };
+
   return (
-    <NodesWrap style={{ width: 80 * 2 + 20 }}>
-      {nodeRegistries
-        .filter((register) => register.meta.nodePanelVisible !== false)
-        .filter((register) => {
-          if (register.meta.onlyInContainer) {
-            return register.meta.onlyInContainer === containerNode?.flowNodeType;
-          }
-          return true;
-        })
-        .map((registry) => (
-          <Node
-            key={registry.type}
-            disabled={!(registry.canAdd?.(context) ?? true)}
-            icon={
-              <img style={{ width: 10, height: 10, borderRadius: 4 }} src={registry.info?.icon} />
-            }
-            label={registry.type as string}
-            onClick={(e) => handleClick(e, registry)}
-          />
-        ))}
-    </NodesWrap>
+    <div className="nodeListnodesWrap">
+      <Collapse
+        defaultActiveKey={['1', '2', '3', '4']}
+        accordion={false}
+        bordered={false}
+        expandIconPosition="right"
+        expandIcon={<img src={IconCollapsedDown} alt="" />}
+      >
+        <Collapse.Item className="collapseItem" header="人工节点" name="1">
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={approver} alt="" />
+            </div>
+            审批人
+          </div>
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={executor_big} alt="" />
+            </div>
+            执行人
+          </div>
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={ccto} alt="" />
+            </div>
+            抄送人
+          </div>
+        </Collapse.Item>
+        <Collapse.Item className="collapseItem" header="分支节点" name="2">
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={conditional_branch} alt="" />
+            </div>
+            条件分支
+          </div>
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={parallel_branch} alt="" />
+            </div>
+            并行分支
+          </div>
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={sink_node} alt="" />
+            </div>
+            汇聚节点
+          </div>
+        </Collapse.Item>
+        <Collapse.Item className="collapseItem" header="逻辑节点" name="3">
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={subprocess} alt="" />
+            </div>
+            子流程
+          </div>
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={wait} alt="" />
+            </div>
+            等待
+          </div>
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={automation} alt="" />
+            </div>
+            自动化
+          </div>
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={task} alt="" />
+            </div>
+            任务
+          </div>
+        </Collapse.Item>
+        <Collapse.Item className="collapseItem" header="消息节点" name="4">
+          <div className="nodeItem">
+            <div className="nodeItemIcon">
+              <img src={message} alt="" />
+            </div>
+            消息通知
+          </div>
+        </Collapse.Item>
+      </Collapse>
+    </div>
   );
 };

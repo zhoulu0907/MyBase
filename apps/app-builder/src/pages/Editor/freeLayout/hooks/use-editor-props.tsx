@@ -353,7 +353,7 @@ export function useEditorProps(
         /**
          * ContextMenu plugin
          */
-        createContextMenuPlugin({}),
+        // createContextMenuPlugin({}),
         /**
          * Runtime plugin
          */
