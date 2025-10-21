@@ -79,4 +79,20 @@ public class TenantRespVO {
     @Schema(description = "已存在用户数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Integer existUserCount;
 
+
+    @Schema(description = "分配人员数量")
+    private Integer assignedUsers;
+
+    @Schema(description = "访问地址")
+    private String accessUrl;
+
+    @Schema(description = "saas功能是否开启默认0，开启1")
+    private Integer saasEnabled;
+
+    @Schema(description = "租户数量")
+    private Integer enterpriseCount;
+
+    @Schema(description = "用户logo")
+    private String logoUrl;
+
 }

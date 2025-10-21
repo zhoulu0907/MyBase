@@ -152,6 +152,7 @@ public class TenantServiceImpl implements TenantService {
         });
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createTenant(TenantInsertReqVO createReqVO) {
@@ -197,9 +198,16 @@ public class TenantServiceImpl implements TenantService {
             }
         }
 
-        // 创建租户
+        // 创建租户,默认数量为0
+
+        createReqVO.setEnterpriseCount(0);
+        createReqVO.setAppCount(0);
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
+        tenant.setSaasEnabled(createReqVO.getSaasEnabled()==null?0:createReqVO.getSaasEnabled());
+        tenant.setCreateTime(LocalDateTime.now());
+        tenant.setUpdateTime(LocalDateTime.now());
         tenant = tenantDataRepository.insert(tenant);
+
 
         // 创建租户的管理员1
         TenantDO finalTenant = tenant;
@@ -209,9 +217,11 @@ public class TenantServiceImpl implements TenantService {
             // 创建用户，并分配角色
             Long userId = createSystemUser(roleId, createReqVO);
             // 修改租户的管理员
-            TenantDO tenantDO = new TenantDO().setAdminUserId(userId);
-            tenantDO.setId(finalTenant.getId());
-            tenantDataRepository.update(tenantDO);
+            DataRow row = new DataRow();
+            row.put(TenantDO.ID, finalTenant.getId());
+            row.put(TenantDO.ADMIN_USER_ID, userId);
+            tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, finalTenant.getId()));
+
         });
         return tenant.getId();
     }
@@ -250,8 +260,12 @@ public class TenantServiceImpl implements TenantService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateTenant(@Valid TenantUpdateReqVO updateReqVO) {
+
         // 校验存在
         TenantDO tenant = validateUpdateTenant(updateReqVO.getId());
+        tenant.setSaasEnabled(0);
+        tenant.setEnterpriseCount(0);
+        tenant.setAppCount(0);
         // 校验租户名称是否重复
         validTenantNameDuplicate(updateReqVO.getName(), updateReqVO.getId());
         // 校验租户域名是否重复
@@ -304,6 +318,7 @@ public class TenantServiceImpl implements TenantService {
         if (updateObj.getStatus() != null) {
             row.put(TenantDO.STATUS, updateObj.getStatus());
         }
+
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
         // 修改租户管理员
         if (StringUtils.isNotBlank(updateReqVO.getAdminUserName())) {
@@ -465,6 +480,7 @@ public class TenantServiceImpl implements TenantService {
         Long appCountResult = appApplicationApi.countApplicationByTenantId(id);
         // Long 转 Integer
         tenantRespVO.setAppCount(appCountResult != null ? appCountResult.intValue() : 0);
+
         return tenantRespVO;
     }
 
@@ -494,6 +510,10 @@ public class TenantServiceImpl implements TenantService {
         List<TenantRespVO> tenantRespVOList = tenantDOPageResult.getList().stream()
                 .map(tenantDO -> {
                     TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
+                    tenantRespVO.setLogoUrl(tenantDO.getLogoUrl());
+                    tenantRespVO.setEnterpriseCount(tenantDO.getEnterpriseCount()==null?0:tenantDO.getEnterpriseCount());
+                    tenantRespVO.setAppCount(tenantDO.getAppCount()==null?0:tenantDO.getAppCount());
+                    tenantRespVO.setAccessUrl(tenantDO.getAccessUrl()==null?"":tenantDO.getAccessUrl());
                     // 设置联系人昵称
                     if (tenantDO.getAdminUserId() != null) {
                         tenantRespVO.setAdminNickName(finalUserNicknameMap.get(tenantDO.getAdminUserId()));
@@ -581,5 +601,19 @@ public class TenantServiceImpl implements TenantService {
 
     private boolean isTenantDisable() {
         return tenantProperties == null || Boolean.FALSE.equals(tenantProperties.getEnable());
+    }
+
+
+
+    @Override
+    public Long getOtherTenantEnterpriseCount(Long tenantId) {
+        // 查询当前租户下企业数量
+       return 0L;
+    }
+
+    @Override
+    public Long getOtherTenantApplicationCount(Long tenantId) {
+        // 查询当前租户下已分配应用数量
+        return 0L;
     }
 }

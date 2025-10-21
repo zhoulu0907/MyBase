@@ -39,4 +39,7 @@ public class TenantPageReqVO extends PageParam {
     @Schema(description = "关键词，模糊搜索使用")
     private String keyword;
 
+    @Schema(description = "管理员id")
+    private String adminUserId;
+
 }
