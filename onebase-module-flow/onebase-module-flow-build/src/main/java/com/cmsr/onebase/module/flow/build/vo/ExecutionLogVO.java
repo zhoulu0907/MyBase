@@ -41,6 +41,9 @@ public class ExecutionLogVO implements Serializable {
     @Schema(description = "结束时间")
     private LocalDateTime endTime;
 
+    @Schema(description = "执行时间，单位秒")
+    private String executionTime;
+
     @Schema(description = "执行结果")
     private String executionResult;
 
