@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.core.enums.RocketMQConstants;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -111,7 +112,7 @@ public class FlowJobMessageHandler implements MessageListener, ApplicationRunner
                 inputParams = createTimeInputParams(jobMessage);
             }
             log.info("处理流程消息: {}", jobMessage);
-            executorResult = flowProcessExecutor.execute(jobMessage.getProcessId(), inputParams);
+            executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), jobMessage.getProcessId(), inputParams);
             log.error("执行流程结果：{}", executorResult);
         } catch (Exception e) {
             log.error("处理流程消息异常：{}", e.getMessage(), e);

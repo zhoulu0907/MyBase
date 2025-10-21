@@ -36,4 +36,8 @@ public class RuntimeSecurityContext {
     public static List<DataPermission> getPageDataPermissions(Long pageId) {
         return null;
     }
+
+    public static List<FieldPermission> getPageFieldPermissions(Long pageId) {
+        return null;
+    }
 }
