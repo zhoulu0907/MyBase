@@ -239,6 +239,15 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationFormatDO recordToDelete = formatRepository.findRegexByFieldId(fieldId);
+        
+        // 删除格式校验记录
         formatRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
     }
 }

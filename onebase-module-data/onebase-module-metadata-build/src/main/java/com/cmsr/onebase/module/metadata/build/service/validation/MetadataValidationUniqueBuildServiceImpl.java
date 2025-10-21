@@ -177,7 +177,16 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationUniqueDO recordToDelete = uniqueRepository.findOneByFieldId(fieldId);
+        
+        // 删除唯一性校验记录
         uniqueRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
         
         // 同步更新字段的唯一性状态为非唯一
         syncFieldUniqueStatus(fieldId, false);
