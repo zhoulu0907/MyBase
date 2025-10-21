@@ -96,6 +96,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       title: '序号',
       dataIndex: 'index',
       key: 'index',
+      width: 80,
       render: (text: string, record: any, index: number) => index + 1 + (page.pageNo - 1) * page.pageSize
     },
     {
