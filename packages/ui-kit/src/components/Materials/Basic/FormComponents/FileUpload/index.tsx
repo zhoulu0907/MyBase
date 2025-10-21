@@ -1,10 +1,12 @@
-import { Form, Message, Upload } from '@arco-design/web-react';
-import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
+import { Form, Message, Upload, Progress, Modal } from '@arco-design/web-react';
+import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
+import { IconPlus, IconDelete, IconClose, IconEye, IconDownload, IconFileImage } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { downloadFileByUrl } from 'src/utils/downloadFile';
 import '../index.css';
 import type { XInputFileUploadConfig } from './schema';
 
@@ -44,22 +46,76 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
   };
 
   const { form } = Form.useFormContext();
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`
-  const fieldValue = Form.useWatch(fieldId, form)
+  const fieldId =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`;
+  const fieldValue = Form.useWatch(fieldId, form);
 
- useEffect(()=>{
+  useEffect(() => {
     let flag = false;
-    const newFieldValue=  (fieldValue || []).map((ele:any)=>{
-      if(ele.url !== ele.response){
+    const newFieldValue = (fieldValue || []).map((ele: any) => {
+      if (ele.url !== ele.response) {
         flag = true;
-        return {...ele,url:ele.response}
+        return { ...ele, url: ele.response };
       }
-      return {...ele}
-    })
-    if(flag){
-      form.setFieldValue(fieldId,newFieldValue)
+      return { ...ele };
+    });
+    if (flag) {
+      form.setFieldValue(fieldId, newFieldValue);
     }
-  },[fieldValue])
+  }, [fieldValue]);
+
+  // 自定义文件列表展示
+  const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
+    return (
+      <div className="uplaodList-text">
+        {filesList.map((file) => (
+          <div key={file.uid} className="uplaodList-text-item">
+            {/* todo  根据文件类型展示icon */}
+            <IconFileImage style={{fontSize:'40px'}} />
+            <div className="uplaodList-text-item-name">{file.name}</div>
+            {file.percent && file.percent !== 100 ? (
+              <div className="uplaodList-text-item-process">
+                <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
+                <IconClose
+                  className="uplaodList-text-item-process-close"
+                  onClick={() => {
+                    if (props.onRemove) {
+                      props.onRemove(file);
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="uplaodList-text-item-opera">
+                <IconEye
+                  onClick={() => {
+                    Modal.info({
+                      title: '预览',
+                      content: <img src={file.url} width="100%" alt="" />
+                    });
+                  }}
+                />
+                <IconDownload
+                  onClick={() => {
+                    if (file.url && file.name) {
+                      downloadFileByUrl(file.url, file.name);
+                    }
+                  }}
+                />
+                <IconDelete
+                  onClick={() => {
+                    if (props.onRemove) {
+                      props.onRemove(file);
+                    }
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="formWrapper">
@@ -78,12 +134,16 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        triggerPropName='fileList'
+        triggerPropName="fileList"
       >
         <Upload
-          limit={(status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue ? fieldValue?.length : (
-            verify?.maxCount === -1 ? undefined : verify?.maxCount
-          )}
+          limit={
+            (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
+              ? fieldValue?.length
+              : verify?.maxCount === -1
+                ? undefined
+                : verify?.maxCount
+          }
           accept={verify?.fileFormat}
           listType={listType}
           beforeUpload={async (file) => {
@@ -121,6 +181,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
           showUploadList={{
             removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
           }}
+          renderUploadList={renderUploadList}
         >
           {listType == 'picture-card' && (
             <div className="arco-upload-trigger-picture">
