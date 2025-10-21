@@ -1,6 +1,5 @@
-package com.cmsr.onebase.module.engine.orm.anyline.entity;
+package com.cmsr.onebase.framework.data.base;
 
-import com.cmsr.onebase.framework.data.base.BaseDOInterface;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -109,6 +108,67 @@ public class BaseEntity implements BaseDOInterface {
             return null;
         }
         return String.valueOf(createBy);
+    }
+
+    // =============== 以下实现get函数提供给Anyline的Listener使用 =================
+
+    public Long getIdByListener() {
+        return this.id;
+    }
+
+    public Long getCreatorByListener() {
+        return this.createBy;
+    }
+
+    public Long getUpdaterByListener() {
+        return this.updateBy;
+    }
+
+    public Long getDeletedByListener() {
+        return this.delFlag;
+    }
+
+    public Long getTenantIdByListener() {
+        return this.tenantId;
+    }
+
+    public LocalDateTime getCreateTimeByListener() {
+        return this.createTime;
+    }
+
+    public LocalDateTime getUpdateTimeByListener() {
+        return this.updateTime;
+    }
+
+    // =============== 以下实现set函数提供给Anyline的Listener使用 =================
+
+
+    public void setIdByListener(Long id) {
+        this.id = id;
+    }
+
+    public void setTenantIdByListener(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public void setDeletedByListener(Long delFlag) {
+        this.delFlag = delFlag;
+    }
+
+    public void setCreatorByListener(Long creator) {
+        this.createBy = creator;
+    }
+
+    public void setUpdaterByListener(Long updater) {
+        this.updateBy = updater;
+    }
+
+    public void setCreateTimeByListener(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public void setUpdateTimeByListener(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
     }
 
     /**

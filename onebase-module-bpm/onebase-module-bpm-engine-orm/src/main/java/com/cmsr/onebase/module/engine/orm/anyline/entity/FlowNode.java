@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.engine.orm.anyline.entity;
 
+import com.cmsr.onebase.framework.data.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
