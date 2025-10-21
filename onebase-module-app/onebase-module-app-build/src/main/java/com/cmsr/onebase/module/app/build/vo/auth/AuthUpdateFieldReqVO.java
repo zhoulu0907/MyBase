@@ -22,10 +22,7 @@ public class AuthUpdateFieldReqVO   {
     @Schema(description = "所有字段可操作，当下面情况必须传值：从全部到自定义，或从自定义到全部")
     private Integer isAllFieldsAllowed;
 
-    @Schema(description = "字段权限，修改单个字段")
-    private AuthFieldVO authField;
-
-    @Schema(description = "字段权限列表，同时修改多个字段")
+    @Schema(description = "要更新的字段权限字段")
     private List<AuthFieldVO> authFields;
 
 }

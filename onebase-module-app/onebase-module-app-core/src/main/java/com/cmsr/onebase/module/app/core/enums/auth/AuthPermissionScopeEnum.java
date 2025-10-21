@@ -10,56 +10,50 @@ public enum AuthPermissionScopeEnum {
     /**
      * 本人
      */
-    SELF("本人", "self"),
+    SELF("self", "本人"),
     
     /**
      * 本人及下属员工
      */
-    SELF_AND_SUBORDINATES("本人及下属员工", "selfAndSubordinates"),
+    SELF_AND_SUBORDINATES("selfAndSubordinates", "本人及下属员工"),
     
     /**
      * 当前员工所在主部门
      */
-    MAIN_DEPARTMENT("当前员工所在主部门", "mainDepartment"),
+    MAIN_DEPARTMENT("mainDepartment", "当前员工所在主部门"),
     
     /**
      * 当前员工所在主部门及下级部门
      */
-    MAIN_DEPARTMENT_AND_SUBS("当前员工所在主部门及下级部门", "mainDepartmentAndSubs"),
+    MAIN_DEPARTMENT_AND_SUBS("mainDepartmentAndSubs", "当前员工所在主部门及下级部门"),
     
     /**
      * 指定部门
      */
-    SPECIFIED_DEPARTMENT("指定部门", "specifiedDepartment"),
+    SPECIFIED_DEPARTMENT("specifiedDepartment", "指定部门"),
     
     /**
      * 指定人员
      */
-    SPECIFIED_PERSON("指定人员", "specifiedPerson"),
-    
-    /**
-     * 当前人员身份信息
-     */
-    IDENTITY_INFO("当前人员身份信息", "identityInfo"),
-    
-    /**
-     * 全部
-     */
-    ALL("全部", "all");
-    
+    SPECIFIED_PERSON("specifiedPerson", "指定人员"),
+
+    ;
+
+    private final String code;
     private final String label;
-    private final String value;
-    
-    AuthPermissionScopeEnum(String label, String value) {
+
+    AuthPermissionScopeEnum(String code, String label) {
+        this.code = code;
         this.label = label;
-        this.value = value;
     }
-    
+
+    public String getCode() {
+        return code;
+    }
+
     public String getLabel() {
         return label;
     }
     
-    public String getValue() {
-        return value;
-    }
+
 }

@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Setter
 @RestController
-@RequestMapping("/flow/exec")
+@RequestMapping("/flow/exec/")
 @Tag(name = "流程执行", description = "流程执行相关接口")
 @Validated
 public class FlowProcessExecController {

@@ -79,6 +79,9 @@
         <weixin-java.version>4.7.5.B</weixin-java.version>
         <!-- 公式引擎相关 -->
         <graalvm.version>23.0.9</graalvm.version>
+        <!-- HTTP 客户端相关 -->
+        <retrofit2.version>2.11.0</retrofit2.version>
+        <okhttp3.version>4.12.0</okhttp3.version>
     </properties>
 
     <dependencyManagement>
@@ -525,6 +528,11 @@
             </dependency>
             <dependency>
                 <groupId>org.anyline</groupId>
+                <artifactId>anyline-data-jdbc-mysql</artifactId>
+                <version>${anyline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.anyline</groupId>
                 <artifactId>anyline-data-jdbc-h2</artifactId>
                 <version>${anyline.version}</version>
             </dependency>
@@ -556,6 +564,48 @@
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
                 <version>${graalvm.version}</version>
+            </dependency>
+
+            <!-- Retrofit2 与 OkHttp 版本统一管理 -->
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>retrofit</artifactId>
+                <version>${retrofit2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>converter-jackson</artifactId>
+                <version>${retrofit2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>adapter-java8</artifactId>
+                <version>${retrofit2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>${okhttp3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>mockwebserver</artifactId>
+                <version>${okhttp3.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- 测试框架：统一 JUnit 平台与 Jupiter 版本（覆盖 Spring Boot 默认版本），解决 IDE 启动器 1.11.4 解析问题 -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.11.4</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
         </dependencies>

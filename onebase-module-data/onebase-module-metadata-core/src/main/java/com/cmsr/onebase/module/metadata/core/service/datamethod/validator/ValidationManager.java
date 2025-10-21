@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod.validator;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import java.util.logging.Logger;
@@ -13,6 +15,8 @@ import java.util.Map;
  * 
  * 负责协调各种校验服务的执行，统一管理校验流程
  *
+ * @author bty418
+ * @date 2025-10-17
  */
 @Component
 public class ValidationManager {
@@ -20,6 +24,9 @@ public class ValidationManager {
     private static final Logger log = Logger.getLogger(ValidationManager.class.getName());
 
     private final List<ValidationService> validationServices;
+    
+    @Resource
+    private AutoNumberService autoNumberService;
 
     public ValidationManager(List<ValidationService> validationServices) {
         this.validationServices = validationServices;
@@ -40,11 +47,17 @@ public class ValidationManager {
 
         log.fine("开始校验字段：entityId=" + entityId + ", fieldId=" + fieldId + ", fieldName=" + fieldName + ", fieldType=" + fieldType);
 
+        // 检查是否为自动编号字段，如果是则跳过所有校验
+        if (autoNumberService.hasAutoNumber(fieldId)) {
+            log.fine("字段" + fieldName + "是自动编号字段，跳过所有校验");
+            return;
+        }
+
         // 遍历所有校验服务，执行支持的校验
         for (ValidationService service : validationServices) {
             try {
                 // 检查是否支持该字段类型
-                if (service.supports(fieldType)) {//todo 这里需要确认，字段类型的枚举是什么？？
+                if (service.supports(fieldType)) {
                     log.fine("执行" + service.getValidationType() + "校验：fieldName=" + fieldName);
                     service.validate(entityId, fieldId, field, value, data);
                 }

@@ -125,6 +125,20 @@ function _typeof(o) {
     ref: ref,
     value: value
   });
+  var symbols = Object.freeze({
+    __proto__: null,
+    ADD: ADD,
+    DIVIDE: DIVIDE,
+    EQ: EQ,
+    GT: GT,
+    GTE: GTE,
+    LT: LT,
+    LTE: LTE,
+    MINUS: MINUS,
+    MULTIPLY: MULTIPLY,
+    NE: NE,
+    POW: POW
+  });
   var returnSerial = false;
   function useSerial() {
     returnSerial = true;
@@ -7516,20 +7530,6 @@ function _typeof(o) {
     }
     return POWER(base, exponent);
   }
-  var symbols = Object.freeze({
-    __proto__: null,
-    ADD: ADD,
-    DIVIDE: DIVIDE,
-    EQ: EQ,
-    GT: GT,
-    GTE: GTE,
-    LT: LT,
-    LTE: LTE,
-    MINUS: MINUS,
-    MULTIPLY: MULTIPLY,
-    NE: NE,
-    POW: POW
-  });
   var WEEK_STARTS = [ undefined, 0, 1, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 1, 2, 3, 4, 5, 6, 0 ];
   var WEEK_TYPES = [ [], [ 1, 2, 3, 4, 5, 6, 7 ], [ 7, 1, 2, 3, 4, 5, 6 ], [ 6, 0, 1, 2, 3, 4, 5 ], [], [], [], [], [], [], [], [ 7, 1, 2, 3, 4, 5, 6 ], [ 6, 7, 1, 2, 3, 4, 5 ], [ 5, 6, 7, 1, 2, 3, 4 ], [ 4, 5, 6, 7, 1, 2, 3 ], [ 3, 4, 5, 6, 7, 1, 2 ], [ 2, 3, 4, 5, 6, 7, 1 ], [ 1, 2, 3, 4, 5, 6, 7 ] ];
   var WEEKEND_TYPES = [ [], [ 6, 0 ], [ 0, 1 ], [ 1, 2 ], [ 2, 3 ], [ 3, 4 ], [ 4, 5 ], [ 5, 6 ], undefined, undefined, undefined, [ 0, 0 ], [ 1, 1 ], [ 2, 2 ], [ 3, 3 ], [ 4, 4 ], [ 5, 5 ], [ 6, 6 ] ];

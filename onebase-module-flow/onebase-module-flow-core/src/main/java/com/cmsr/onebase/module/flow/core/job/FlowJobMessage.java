@@ -36,7 +36,7 @@ public class FlowJobMessage {
 
     private Long processId;
 
-    private String msgType;
+    private String jobType;
 
     private String time;
 

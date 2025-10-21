@@ -38,4 +38,9 @@ public class ComponentDTO {
      * 容器索引
      */
     private Integer containerIndex;
+
+    /**
+     * 组件索引
+     */
+    private Integer componentIndex;
 }

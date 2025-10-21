@@ -1,0 +1,19 @@
+# 测试配置
+onebase:
+  dolphinscheduler:
+    baseUrl: http://10.0.104.33:12345/dolphinscheduler/v2/
+    token: 85806d2d33502cef3036fb30b320e5f5
+    connectTimeout: 5s
+    readTimeout: 30s
+    writeTimeout: 30s
+    logLevel: BODY
+test:
+  user-id: 1
+
+# Spring Boot 配置
+spring:
+  application:
+    name: dolphinscheduler-test
+  autoconfigure:
+    exclude:
+      - org.redisson.spring.starter.RedissonAutoConfigurationV2

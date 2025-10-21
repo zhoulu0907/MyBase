@@ -38,4 +38,13 @@ public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
         configs.eq("field_id", fieldId);
         return this.findOne(configs);
     }
+
+    public void deleteByQuery(AuthPermissionReqVO reqVO) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", reqVO.getApplicationId());
+        configs.eq("role_id", reqVO.getRoleId());
+        configs.eq("menu_id", reqVO.getMenuId());
+        this.deleteByConfig(configs);
+    }
+
 }
