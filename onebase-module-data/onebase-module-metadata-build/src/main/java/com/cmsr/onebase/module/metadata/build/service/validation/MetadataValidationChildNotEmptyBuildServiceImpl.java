@@ -216,6 +216,15 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationChildNotEmptyDO recordToDelete = childNotEmptyRepository.findOneByFieldId(fieldId);
+        
+        // 删除子表非空校验记录
         childNotEmptyRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
     }
 }

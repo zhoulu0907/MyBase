@@ -186,7 +186,16 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationRequiredDO recordToDelete = requiredRepository.findOneByFieldId(fieldId);
+        
+        // 删除必填校验记录
         requiredRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            validationRuleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
         
         // 同步更新字段的必填状态为非必填
         syncFieldRequiredStatus(fieldId, false);

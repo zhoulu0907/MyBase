@@ -179,7 +179,16 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationRangeDO recordToDelete = getByFieldId(fieldId);
+        
+        // 删除范围校验记录
         rangeRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
     }
 
     @Override
