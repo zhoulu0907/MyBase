@@ -1,10 +1,12 @@
 package com.cmsr.onebase.module.formula.demo;
 
 import com.cmsr.onebase.module.formula.build.config.FormulaEngineProperties;
+import com.cmsr.onebase.module.formula.build.service.dto.ContextData;
 import com.cmsr.onebase.module.formula.build.service.engine.FormulaEngineService;
 import com.cmsr.onebase.module.formula.build.service.engine.FormulaEngineServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +45,11 @@ public class FormulaFunctionDemo {
 
         try {
             // 运行executeFormulaWithParams测试用例
-            demo.demonstrateBasicParameterFormulas();
+            demo.testSumLeftFormulas();
+            // 新增：条件/日期/逻辑相关函数测试
+            demo.testConditionDateLogicFormulas();
+
+            demo.testMetaDataFormulas();
             log.info("\n=== executeFormulaWithParams测试完成 ===");
             log.info("所有测试用例执行完成！");
         } catch (Exception e) {
@@ -54,7 +60,7 @@ public class FormulaFunctionDemo {
     /**
      * 演示executeFormulaWithParams的基本参数传递功能
      */
-    public void demonstrateBasicParameterFormulas() {
+    public void testSumLeftFormulas() {
         log.info("\n=== executeFormulaWithParams基本参数测试 ===");
 
         try {
@@ -76,6 +82,130 @@ public class FormulaFunctionDemo {
             log.error("基本参数测试失败", e);
         }
     }
+    /**
+     * 条件汇总/计数与日期/逻辑函数验证
+     * 覆盖：SUMIF、SUMIFS、COUNTIFS、DAY、MONTH、DATEDIF、IF
+     *
+     * @author matianyu
+     * @date 2025-09-01
+     */
+    public void testMetaDataFormulas() {
+        log.info("\n=== 元数据函数测试（含ContextData解析） ===");
 
+        // 构造上下文数据：recordList
+        ContextData contextData = new ContextData();
+        contextData.setRecordList(new ArrayList<>());
 
+        Map<String, Object> r1 = new HashMap<>();
+        r1.put("id", 2);
+        r1.put("status", "完成");
+        r1.put("amount", 100);
+        contextData.getRecordList().add(r1);
+
+        Map<String, Object> r2 = new HashMap<>();
+        r2.put("id", 1);
+        r2.put("status", "未完成");
+        r2.put("amount", 50);
+        contextData.getRecordList().add(r2);
+
+        // COUNT：COUNT([$recordList.id]) => 2
+        String c1 = "COUNT($recordList.id)";
+        Object rc1 = formulaEngineService.executeFormulaWithParams(c1, new HashMap<>(), contextData);
+        log.info("COUNT: {} = {}", c1, rc1);
+
+        // SUMIF：id > 1 时累计 amount => 仅记录1，结果 100
+        String s1 = "SUMIF($recordList.id, \">1\", $recordList.amount)";
+        Object rs1 = formulaEngineService.executeFormulaWithParams(s1, new HashMap<>(), contextData);
+        log.info("SUMIF: {} = {}", s1, rs1);
+
+        // SUMIFS：id>=1 且 status=完成 时累计 amount => 100
+        String s2 = "SUMIFS($recordList.amount, $recordList.id, \">=1\", $recordList.status, \"=完成\")";
+        Object rs2 = formulaEngineService.executeFormulaWithParams(s2, new HashMap<>(), contextData);
+        log.info("SUMIFS: {} = {}", s2, rs2);
+
+        // COUNTIFS：status=完成 且 id>=1 => 1
+        String s3 = "COUNTIFS($recordList.status, \"=完成\", $recordList.id, \">=1\")";
+        Object rs3 = formulaEngineService.executeFormulaWithParams(s3, new HashMap<>(), contextData);
+        log.info("COUNTIFS: {} = {}", s3, rs3);
+
+        // DAY：取“日” => 15
+        String d1 = "DAY(DATEVALUE(\"2025-01-15\"))";
+        Object rd1 = formulaEngineService.executeFormulaWithParams(d1, new HashMap<>(), contextData);
+        log.info("DAY: {} = {}", d1, rd1);
+
+        // MONTH：取“月” => 7
+        String d2 = "MONTH(DATEVALUE(\"2025-07-25\"))";
+        Object rd2 = formulaEngineService.executeFormulaWithParams(d2, new HashMap<>(), contextData);
+        log.info("MONTH: {} = {}", d2, rd2);
+
+        // DATEDIF：日差 => 30
+        String d3 = "DATEDIF(DATEVALUE(\"2025-01-01\"), DATEVALUE(\"2025-01-31\"), \"D\")";
+        Object rd3 = formulaEngineService.executeFormulaWithParams(d3, new HashMap<>(), contextData);
+        log.info("DATEDIF: {} = {}", d3, rd3);
+
+        // IF：根据recordList的amount求和判断
+        String f1 = "IF(SUM($recordList.amount)>100, \"OK\", \"NO\")";
+        Object rf1 = formulaEngineService.executeFormulaWithParams(f1, new HashMap<>(), contextData);
+        log.info("IF: {} = {}", f1, rf1);
+    }
+
+    /**
+     * 条件汇总/计数与日期/逻辑函数验证
+     * 覆盖：SUMIF、SUMIFS、COUNTIFS、DAY、MONTH、DATEDIF、IF
+     *
+     * @author matianyu
+     * @date 2025-09-01
+     */
+    public void testConditionDateLogicFormulas() {
+        log.info("\n=== 条件/日期/逻辑函数测试 ===");
+
+        try {
+            // 1) SUMIF：对大于3的元素求和 => 4 + 5 = 9
+            String f1 = "SUMIF([1,2,3,4,5], \">3\")";
+            Object r1 = formulaEngineService.executeFormulaWithParams(f1, new HashMap<>());
+            log.info("SUMIF: {} = {}", f1, r1);
+
+            // 2) SUMIFS：多条件求和（按两个条件范围筛选）
+            // 条件：range1 >= 3 且 range2 < 4 => 命中索引3,4,5 -> sum_range 30+40+50=120
+            String f2 = "SUMIFS([10,20,30,40,50], [1,2,3,4,5], \">=3\", [5,4,3,2,1], \"<4\")";
+            Object r2 = formulaEngineService.executeFormulaWithParams(f2, new HashMap<>());
+            log.info("SUMIFS: {} = {}", f2, r2);
+
+            // 3) COUNTIFS：统计同时满足的次数 => “A”且数值>2 => 命中一次
+            String f3 = "COUNTIFS([\"A\",\"B\",\"A\",\"C\"], \"=A\", [1,5,3,2], \">2\")";
+            Object r3 = formulaEngineService.executeFormulaWithParams(f3, new HashMap<>());
+            log.info("COUNTIFS: {} = {}", f3, r3);
+
+            // 4) DAY：取日期中的“日”
+            String f4 = "DAY(DATEVALUE(\"2025-01-15\"))";
+            Object r4 = formulaEngineService.executeFormulaWithParams(f4, new HashMap<>());
+            log.info("DAY: {} = {}", f4, r4);
+
+            // 5) MONTH：取日期中的“月”
+            String f5 = "MONTH(DATEVALUE(\"2025-07-25\"))";
+            Object r5 = formulaEngineService.executeFormulaWithParams(f5, new HashMap<>());
+            log.info("MONTH: {} = {}", f5, r5);
+
+            // 6) DATEDIF：年/月/日差
+            String f6 = "DATEDIF(DATEVALUE(\"2024-01-01\"), DATEVALUE(\"2025-01-01\"), \"Y\")";
+            Object r6 = formulaEngineService.executeFormulaWithParams(f6, new HashMap<>());
+            log.info("DATEDIF-年差: {} = {}", f6, r6);
+
+            String f7 = "DATEDIF(DATEVALUE(\"2025-01-01\"), DATEVALUE(\"2025-07-01\"), \"M\")";
+            Object r7 = formulaEngineService.executeFormulaWithParams(f7, new HashMap<>());
+            log.info("DATEDIF-月差: {} = {}", f7, r7);
+
+            String f8 = "DATEDIF(DATEVALUE(\"2025-01-01\"), DATEVALUE(\"2025-01-31\"), \"D\")";
+            Object r8 = formulaEngineService.executeFormulaWithParams(f8, new HashMap<>());
+            log.info("DATEDIF-日差: {} = {}", f8, r8);
+
+            // 7) IF：基本逻辑判断
+            String f9 = "IF(SUM([1,2,3])>5, \"OK\", \"NO\")";
+            Object r9 = formulaEngineService.executeFormulaWithParams(f9, new HashMap<>());
+            log.info("IF: {} = {}", f9, r9);
+
+        } catch (Exception e) {
+            log.error("条件/日期/逻辑函数测试失败", e);
+        }
+    }
 }

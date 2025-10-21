@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.formula.build.service.engine;
 
 import com.cmsr.onebase.module.formula.build.config.FormulaEngineProperties;
+import com.cmsr.onebase.module.formula.build.service.dto.ContextData;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
@@ -15,6 +16,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -114,8 +120,10 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         return executeFormulaWithParams(formula, new HashMap<>());
     }
 
+
     @Override
     public Object executeFormulaWithParams(String formula, Map<String, Object> parameters) {
+
         if (!StringUtils.hasText(formula)) {
             throw new IllegalArgumentException("公式不能为空");
         }
@@ -187,6 +195,12 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             log.error("公式引擎执行异常", e);
             throw e;
         }
+    }
+    @Override
+    public Object executeFormulaWithParams(String formula, Map<String, Object> parameters, ContextData contextData) {
+        // 从contextData解析占位符并替换为可执行的JS数组字面量，再复用已有方法执行
+        String resolved = resolveFormulaWithContext(formula, contextData);
+        return executeFormulaWithParams(resolved, parameters);
     }
 
     @Override
@@ -287,6 +301,78 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
         return true;
+    }
+
+    /**
+     * 将ContextData中的数据注入公式
+     * 当前支持占位符：
+     *  - $recordList.fieldName  => 由ContextData.recordList提取该字段，替换为JS数组字面量，如 [1,2,"完成"]
+     *
+     * @param formula 原始公式
+     * @param contextData 上下文数据
+     * @return 已替换占位符的公式
+     */
+    private String resolveFormulaWithContext(String formula, ContextData contextData) {
+        if (contextData == null || !StringUtils.hasText(formula)) {
+            return formula;
+        }
+        // 仅支持解析 $recordList.xxx 模式
+        Pattern p = Pattern.compile("\\$recordList\\.([a-zA-Z_][\\w]*)");
+        Matcher m = p.matcher(formula);
+        Set<String> fields = new LinkedHashSet<>();
+        while (m.find()) {
+            fields.add(m.group(1));
+        }
+        if (fields.isEmpty()) {
+            return formula;
+        }
+
+        List<Map<String, Object>> recordList = contextData.getRecordList();
+        if (recordList == null) {
+            recordList = new ArrayList<>();
+        }
+
+        String resolved = formula;
+        for (String field : fields) {
+            List<Object> values = new ArrayList<>();
+            for (Map<String, Object> rec : recordList) {
+                Object v = rec != null ? rec.get(field) : null;
+                values.add(v);
+            }
+            String arrayLiteral = toJsArrayLiteral(values);
+            // 精确替换占位符
+            resolved = resolved.replace("$recordList." + field, arrayLiteral);
+        }
+        return resolved;
+    }
+
+    /**
+     * 将Java List转换为JS数组字面量字符串
+     * 规则：
+     *  - 字符串自动加引号并转义
+     *  - 数字/布尔/空值保持本型
+     */
+    private String toJsArrayLiteral(List<Object> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < list.size(); i++) {
+            Object v = list.get(i);
+            if (v == null) {
+                sb.append("null");
+            } else if (v instanceof Number || v instanceof Boolean) {
+                sb.append(String.valueOf(v));
+            } else {
+                // 统一按字符串处理并转义
+                String s = String.valueOf(v);
+                s = s.replace("\\", "\\\\").replace("\"", "\\\"");
+                sb.append("\"").append(s).append("\"");
+            }
+            if (i < list.size() - 1) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     /**
