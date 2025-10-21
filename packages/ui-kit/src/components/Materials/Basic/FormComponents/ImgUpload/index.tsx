@@ -1,4 +1,4 @@
-import { Form, Message, Upload, Progress, Modal, Card } from '@arco-design/web-react';
+import { Form, Message, Upload, Progress, Modal, Grid, Card } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
@@ -115,20 +115,72 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
       );
     }
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]) {
-      return <div className='uplaodList-list'>
-        {filesList.map((file) => (
-          <div key={file.uid} className="uplaodList-list-item"></div>
-        ))}
-      </div>
+      return (
+        <div className="uplaodList-list">
+          <Grid.Row gutter={4}>
+            {filesList.map((file) => (
+              <Grid.Col span={12} key={file.uid}>
+                <div className="uplaodList-list-item">
+                  <img className="uplaodList-list-item-img" src={file.url} alt="" />
+                  <div className="uplaodList-list-item-content">
+                    <div className="uplaodList-list-item-name">{file.name}</div>
+                    <div className="uplaodList-list-item-size">
+                      {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
+                    </div>
+                  </div>
+                  <IconClose
+                    className="uplaodList-list-item-close"
+                    onClick={() => {
+                      if (props.onRemove) {
+                        props.onRemove(file);
+                      }
+                    }}
+                  />
+                </div>
+                {file.percent && file.percent !== 100 ? (
+                  <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
+                ) : null}
+              </Grid.Col>
+            ))}
+          </Grid.Row>
+        </div>
+      );
     }
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) {
-      return <div className='uplaodList-card'>
-         {filesList.map((file) => (
-          <div key={file.uid} className="uplaodList-card-item">
-            
-          </div>
-        ))}
-      </div>
+      return (
+        <div className="uplaodList-card">
+          {filesList.map((file) => (
+            <Card
+              key={file.uid}
+              className="uplaodList-card-item"
+              cover={
+                <div className="uplaodList-card-item-img">
+                  <img src={file.url} alt="" />
+                </div>
+              }
+            >
+              <Card.Meta
+                title={<div className="uplaodList-card-item-name">{file.name}</div>}
+                description={
+                  <div className="uplaodList-card-item-footer">
+                    <div className="uplaodList-card-item-size">
+                      {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
+                    </div>
+                    <IconDelete
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        if (props.onRemove) {
+                          props.onRemove(file);
+                        }
+                      }}
+                    />
+                  </div>
+                }
+              />
+            </Card>
+          ))}
+        </div>
+      );
     }
     return <></>;
   };
@@ -217,7 +269,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <IconPlus />
                   <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
                   <div className="uplaodTriggerList-describe">
-                    最多可上传{verify?.maxCount || 1}张图片，单张图片大小不超过{verify?.maxSize || 10}MB
+                    最多可上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
+                    张图片，单张图片大小不超过{verify?.maxSize || 10}MB
                   </div>
                 </div>
               </div>
