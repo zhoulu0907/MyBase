@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -32,6 +33,8 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
         List<ExecutionLogVO> voList = pageResult.getList().stream().map(logDO -> {
             ExecutionLogVO logVO = BeanUtils.toBean(logDO, ExecutionLogVO.class);
             logVO.setProcessName(flowCommonService.getProcessName(logDO.getProcessId()));
+            Duration duration = Duration.between(logDO.getStartTime(), logDO.getEndTime());
+            logVO.setExecutionTime(toSecondsDouble(duration));
             return logVO;
         }).toList();
         return new PageResult<>(voList, pageResult.getTotal());
@@ -40,9 +43,18 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
     @Override
     public ExecutionLogVO getDetail(Long id) {
         FlowExecutionLogDO logDO = flowExecutionLogRepository.findById(id);
+        if (logDO == null) {
+            return null;
+        }
         ExecutionLogVO logVO = BeanUtils.toBean(logDO, ExecutionLogVO.class);
         logVO.setProcessName(flowCommonService.getProcessName(logDO.getProcessId()));
+        Duration duration = Duration.between(logDO.getStartTime(), logDO.getEndTime());
+        logVO.setExecutionTime(toSecondsDouble(duration));
         return logVO;
     }
 
+    private String toSecondsDouble(Duration duration) {
+        double v = duration.toNanos() / 1_000_000_000.0;
+        return String.format("%.2f", v);
+    }
 }
