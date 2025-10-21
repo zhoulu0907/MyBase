@@ -1,13 +1,5 @@
-/**
- * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
- * SPDX-License-Identifier: MIT
- */
-
-/**
- * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
- * SPDX-License-Identifier: MIT
- */
 import type { FormRenderProps, FormMeta } from '@flowgram.ai/free-layout-editor';
+
 import { Avatar } from '@douyinfe/semi-ui';
 
 import type { FlowNodeJSON } from '../../typings';
@@ -17,18 +9,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => (
   <>
     <div
       style={{
-        width: 60,
-        height: 60,
+        width: 73,
+        height: 29,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        background: '#ccc'
       }}
     >
       <Avatar
         shape="circle"
         style={{
-          width: 40,
-          height: 40,
+          width: 20,
+          height: 20,
           borderRadius: '50%',
           cursor: 'move'
         }}
