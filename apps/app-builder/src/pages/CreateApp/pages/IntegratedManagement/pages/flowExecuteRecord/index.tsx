@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Grid, Button, Table, Switch, type TableColumnProps } from '@arco-design/web-react';
+import { Space, Grid, Button, Table, Switch, Tag, type TableColumnProps } from '@arco-design/web-react';
 import { IconDownload, IconRefresh, IconArrowDown, IconArrowUp, IconMoreVertical } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 
@@ -20,54 +20,41 @@ const FlowExecuteRecordPage: React.FC = () => {
       dataIndex: 'flowName',
       key: 'flowName'
     },
+
     {
-      title: '触发类型',
-      dataIndex: 'triggerType',
-      key: 'triggerType'
-    },
-    {
-      title: '交互方式',
-      dataIndex: 'interactiveMethod',
-      key: 'interactiveMethod'
-    },
-    {
-      title: 'ID',
+      title: '执行id',
       dataIndex: 'id',
       key: 'id'
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime'
-    },
-    {
-      title: '最后执行',
-      dataIndex: 'lastExecuteTime',
-      key: 'lastExecuteTime'
-    },
-    {
-      title: '执行次数',
-      dataIndex: 'frequency',
-      key: 'frequency'
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (text, record) => <Switch checked={record.status} checkedText="已启用" uncheckedText="禁用" />
+      render: (text, record) => (
+        <Tag color={record.status ? 'rgb(var(--primary-4))' : 'red'}>{record.status ? '成功' : '失败'}</Tag>
+      )
+    },
+    {
+      title: '开始时间',
+      dataIndex: 'startTime',
+      key: 'startTime'
+    },
+    {
+      title: '结束时间',
+      dataIndex: 'endTime',
+      key: 'endTime'
+    },
+    {
+      title: '耗时',
+      dataIndex: 'frequency',
+      key: 'frequency'
     },
     {
       title: '操作',
       dataIndex: 'operation',
       key: 'operation',
-      width: 120,
-      render: (_, record) => (
-        <Space>
-          <div style={{ color: 'rgb(var(--primary-6))' }}>编辑</div>
-          <div style={{ color: 'rgb(var(--primary-6))' }}>调试</div>
-          <IconMoreVertical />
-        </Space>
-      )
+      width: 100,
+      render: (_, record) => <div style={{ color: 'rgb(var(--primary-6))' }}>详情</div>
     }
   ];
 
@@ -93,9 +80,9 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: '表单触发',
         interactiveMethod: '交互流执行',
         id: 'flowid-wudh-001',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       },
       {
@@ -103,19 +90,19 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: '界面触发',
         interactiveMethod: '交互流执行',
         id: 'flowid-wudh-002',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
-        status: true
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
+        status: false
       },
       {
         flowName: '这是一个流程名称',
         triggerType: '定时触发',
         interactiveMethod: '后台执行',
         id: 'flowid-wudh-003',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       },
       {
@@ -123,9 +110,9 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: 'API触发',
         interactiveMethod: '交互流执行',
         id: 'flowid-wudh-004',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       },
       {
@@ -133,9 +120,9 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: '界面触发',
         interactiveMethod: '交互流执行',
         id: 'flowid-wudh-005',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       },
       {
@@ -143,9 +130,9 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: '定时触发',
         interactiveMethod: '后台执行',
         id: 'flowid-wudh-006',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       },
       {
@@ -153,9 +140,9 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: '界面触发',
         interactiveMethod: '交互流执行',
         id: 'flowid-wudh-001',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       },
       {
@@ -163,9 +150,9 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: 'API触发',
         interactiveMethod: '交互流执行',
         id: 'flowid-wudh-004',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       },
       {
@@ -173,9 +160,9 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: '界面触发',
         interactiveMethod: '交互流执行',
         id: 'flowid-wudh-001',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       },
       {
@@ -183,9 +170,9 @@ const FlowExecuteRecordPage: React.FC = () => {
         triggerType: '表单触发',
         interactiveMethod: '交互流执行',
         id: 'flowid-wudh-002',
-        createTime: '2025-10-10 12:23:12',
-        lastExecuteTime: '10天前',
-        frequency: 2,
+        startTime: '2025-10-10 12:23:12',
+        endTime: '2025-10-10 12:23:14',
+        frequency: '2s',
         status: true
       }
     ];
