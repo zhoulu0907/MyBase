@@ -67,3 +67,43 @@
     line-height: 22px;
     margin-top: 4px;
 }
+
+.uplaodList-text {
+    width: 100%;
+}
+.uplaodList-text-item {
+    background-color: #F7F8FA;
+    padding: 8px 12px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+}
+.uplaodList-text-item-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 2px;
+    object-fit: cover;
+}
+.uplaodList-text-item-name {
+    margin: 0 8px;
+    font-size: 14px;
+    line-height: 22px;
+    color: #1D2129;
+}
+.uplaodList-text-item-process {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+.uplaodList-text-item-process-close {
+    margin-left: 4px;
+}
+.uplaodList-text-item-opera {
+    margin-left: auto;
+    text-align: right;
+    color: #86909C;
+}
+.uplaodList-text-item-opera svg {
+    margin-left: 8px;
+}

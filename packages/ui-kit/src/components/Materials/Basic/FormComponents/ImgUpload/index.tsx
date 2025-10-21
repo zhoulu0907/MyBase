@@ -1,7 +1,9 @@
-import { Form, Message, Upload } from '@arco-design/web-react';
-import { IconPlus, IconDelete, IconImage } from '@arco-design/web-react/icon';
+import { Form, Message, Upload, Progress, Modal, Card } from '@arco-design/web-react';
+import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
+import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
+import { downloadFileByUrl } from 'src/utils/downloadFile';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
@@ -59,6 +61,77 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
       form.setFieldValue(fieldId, newFieldValue);
     }
   }, [fieldValue]);
+
+  // 自定义文件列表展示
+  const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
+    if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]) {
+      return (
+        <div className="uplaodList-text">
+          {filesList.map((file) => (
+            <div key={file.uid} className="uplaodList-text-item">
+              <img className="uplaodList-text-item-img" src={file.url} alt="" />
+              <div className="uplaodList-text-item-name">{file.name}</div>
+              {file.percent && file.percent !== 100 ? (
+                <div className="uplaodList-text-item-process">
+                  <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
+                  <IconClose
+                    className="uplaodList-text-item-process-close"
+                    onClick={() => {
+                      if (props.onRemove) {
+                        props.onRemove(file);
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="uplaodList-text-item-opera">
+                  <IconEye
+                    onClick={() => {
+                      Modal.info({
+                        title: '预览',
+                        content: <img src={file.url} width="100%" alt="" />
+                      });
+                    }}
+                  />
+                  <IconDownload
+                    onClick={() => {
+                      if (file.url && file.name) {
+                        downloadFileByUrl(file.url, file.name);
+                      }
+                    }}
+                  />
+                  <IconDelete
+                    onClick={() => {
+                      if (props.onRemove) {
+                        props.onRemove(file);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]) {
+      return <div className='uplaodList-list'>
+        {filesList.map((file) => (
+          <div key={file.uid} className="uplaodList-list-item"></div>
+        ))}
+      </div>
+    }
+    if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) {
+      return <div className='uplaodList-card'>
+         {filesList.map((file) => (
+          <div key={file.uid} className="uplaodList-card-item">
+            
+          </div>
+        ))}
+      </div>
+    }
+    return <></>;
+  };
 
   return (
     <div className="formWrapper">
@@ -125,14 +198,16 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT]}
           drag
+          renderUploadList={renderUploadList}
         >
           <div className="uplaodTrigger">
             {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
               <div className="uplaodTriggerText">
                 <div className="uplaodTriggerText-content">
                   <IconImage />
-                  <span className='uplaodTriggerText-tips'>图片上传</span>
+                  <span className="uplaodTriggerText-tips">图片上传</span>
                 </div>
               </div>
             )}
@@ -141,7 +216,9 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 <div className="uplaodTriggerList-content">
                   <IconPlus />
                   <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
-                  <div className="uplaodTriggerList-describe">单张图片大小上限{verify?.maxSize || 10}MB</div>
+                  <div className="uplaodTriggerList-describe">
+                    最多可上传{verify?.maxCount || 1}张图片，单张图片大小不超过{verify?.maxSize || 10}MB
+                  </div>
                 </div>
               </div>
             )}
@@ -149,7 +226,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
               <div className="uplaodTriggerPicture">
                 <div className="uplaodTriggerPicture-content">
                   <IconImage />
-                  <div className='uplaodTriggerPicture-tips'>图片上传</div>
+                  <div className="uplaodTriggerPicture-tips">图片上传</div>
                 </div>
               </div>
             )}
