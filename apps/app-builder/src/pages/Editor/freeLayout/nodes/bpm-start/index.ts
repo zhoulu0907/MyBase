@@ -8,8 +8,8 @@ import iconStart from '../../assets/icon-start.jpg';
 import { formMeta } from './form-meta';
 import { WorkflowNodeType } from '../constants';
 
-export const BlockStartNodeRegistry: FlowNodeRegistry = {
-  type: WorkflowNodeType.BlockStart,
+export const BpmStartNodeRegistry: FlowNodeRegistry = {
+  type: WorkflowNodeType.BpmStart,
   meta: {
     isStart: true,
     deleteDisable: true,

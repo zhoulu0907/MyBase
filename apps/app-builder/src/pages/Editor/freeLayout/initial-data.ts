@@ -9,7 +9,7 @@ export const initialData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_0',
-      type: 'start',
+      type: 'bpm-start',
       meta: {
         position: {
           x: 180,

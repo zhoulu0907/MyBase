@@ -18,6 +18,8 @@ import { CodeNodeRegistry } from './code';
 import { BreakNodeRegistry } from './break';
 import { BlockStartNodeRegistry } from './block-start';
 import { BlockEndNodeRegistry } from './block-end';
+import { BpmStartNodeRegistry } from './bpm-start';
+
 export { WorkflowNodeType } from './constants';
 
 export const nodeRegistries: FlowNodeRegistry[] = [
@@ -28,11 +30,12 @@ export const nodeRegistries: FlowNodeRegistry[] = [
   LoopNodeRegistry,
   CommentNodeRegistry,
   BlockStartNodeRegistry,
+  BpmStartNodeRegistry,
   BlockEndNodeRegistry,
   HTTPNodeRegistry,
   CodeNodeRegistry,
   ContinueNodeRegistry,
   BreakNodeRegistry,
   VariableNodeRegistry,
-  GroupNodeRegistry,
+  GroupNodeRegistry
 ];
