@@ -158,7 +158,6 @@ export interface XDataSelectConfig extends ICommonBaseType {
   selectDataFields: TTextDefaultType[];
   filterData: TBooleanDefaultType;
   filterCondition: any[];
-  sortDataRule: TTextDefaultType[];
   operationAuth: TBooleanDefaultType;
   fastFilter: TBooleanDefaultType;
 
@@ -232,7 +231,6 @@ const XDataSelect: XDataSelectSchema = {
     selectDataFields: [],
     filterData: false,
     filterCondition: [],
-    sortDataRule: [],
     operationAuth: false,
     fastFilter: false,
     dynamicTableConfig: {
