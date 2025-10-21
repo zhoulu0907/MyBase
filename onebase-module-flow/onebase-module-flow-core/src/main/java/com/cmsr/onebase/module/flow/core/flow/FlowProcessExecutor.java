@@ -26,10 +26,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
- *
- *
  * @Author：huangjie
  * @Date：2025/9/11 14:32
  */
@@ -58,6 +57,9 @@ public class FlowProcessExecutor {
      * 执行新流程（基于traceId和输入参数）
      */
     public ExecutorResult execute(String traceId, Long processId, Map<String, Object> inputParams) {
+        if (!graphFlowCache.isProcessExist(processId)) {
+            return ExecutorResult.error("流程不存在: " + processId);
+        }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
         return executeWithLogging(() -> executeNewFlow(traceId, processId, inputParams), executionLog);
     }
@@ -66,6 +68,9 @@ public class FlowProcessExecutor {
      * 恢复执行流程（基于执行UUID）
      */
     public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputFields) {
+        if (!graphFlowCache.isProcessExist(processId)) {
+            return ExecutorResult.error("流程不存在: " + processId);
+        }
         FlowExecutionLogDO executionLog = findOrCreateExecutionLog(processId, executionUuid);
         return executeWithLogging(() -> resumeFlowExecution(processId, executionUuid, inputFields), executionLog);
     }
@@ -75,9 +80,7 @@ public class FlowProcessExecutor {
      */
     private ExecutorResult executeNewFlow(String traceId, Long processId, Map<String, Object> inputParams) {
         Map<String, NodeData> nodeData = graphFlowCache.findNodeData(processId);
-        if (nodeData == null) {
-            return ExecutorResult.error("流程不存在: " + processId);
-        }
+
         traceId = validateAndGenerateTraceId(traceId, processId);
 
         VariableContext variableContext = new VariableContext();
@@ -105,7 +108,7 @@ public class FlowProcessExecutor {
 
         ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
         if (executeContext == null) {
-            return ExecutorResult.error("执行上下文不存在: " + executionUuid);
+            return ExecutorResult.error("执行上下文不存在或已过期: " + executionUuid);
         }
 
         return executeFlow(processId, variableContext, executeContext);
@@ -127,9 +130,9 @@ public class FlowProcessExecutor {
     /**
      * 带日志记录的执行包装器
      */
-    private ExecutorResult executeWithLogging(FlowExecution execution, FlowExecutionLogDO executionLog) {
+    private ExecutorResult executeWithLogging(Supplier<ExecutorResult> execution, FlowExecutionLogDO executionLog) {
         try {
-            ExecutorResult result = execution.execute();
+            ExecutorResult result = execution.get();
 
             executionLog.setExecutionUuid(result.getExecutionUuid());
             executionLog.setExecutionResult(result.isSuccess() ? "success" : "failed");
@@ -214,13 +217,7 @@ public class FlowProcessExecutor {
         return result;
     }
 
-    /**
-     * 流程执行函数式接口
-     */
-    @FunctionalInterface
-    private interface FlowExecution {
-        ExecutorResult execute();
-    }
+    // 使用Java标准库中的Supplier<ExecutorResult>替代自定义的FlowExecution接口
 
 
 }
