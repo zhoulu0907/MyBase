@@ -56,7 +56,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
   //点击字段列表中的切换按钮调用该函数
   const handleChangeVariables = (entityId: string) => {
     const copyVariables = cloneDeep(variables);
-    const selectedVariable = copyVariables?.filter(item => item.entityId === entityId) || [];
+    const selectedVariable = copyVariables?.filter(item => item?.entityId === entityId) || [];
     setFilteredVariables(selectedVariable);
   }
 
@@ -64,12 +64,12 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
   const variablesList = (): ReactNode => {
     if (!variables.length) return null;
     return (
-      <div style={{minWidth: '120px'}}>
+      <div style={{minWidth: '200px', maxHeight:"215px", overflowY:"auto"}}>
         <Menu onClickMenuItem={(key: string)=>{
           handleChangeVariables(key)
         }}>
           {variables.map((item) => {
-            return <Menu.Item key={item.entityId}>{item?.entityName}</Menu.Item>
+            return <Menu.Item key={item?.entityId}>{item?.entityName}</Menu.Item>
           })}
         </Menu>
       </div>
@@ -87,7 +87,10 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
       />
       <div className={styles.categorySection}>
         <div className={styles.categoryHeader}>
-          <Dropdown.Button trigger={"hover"} type='text' position='bl' triggerProps={{autoAlignPopupWidth: true}} droplist={variablesList()} icon={<Button type='text' color='success'>切换</Button>}>
+          <Dropdown.Button trigger={"hover"} type='text' position='bl' 
+            triggerProps={{autoAlignPopupWidth: true}}
+            droplist={variablesList()} 
+            icon={<Button type='text' color='success'>切换</Button>}>
             <IconFolder className={styles.categoryIcon} />
             <span className={styles.categoryEntityName}>{filteredVariables?.[0]?.entityName || ""}</span>
           </Dropdown.Button>
@@ -96,18 +99,18 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
           size='small'
           className={styles.listSection}
           dataSource={filteredVariables?.[0]?.fields || []}
-          render={(variable) => (
+          render={(variable, index) => (
             <List.Item
-              key={variable.appId}
+              key={index}
               className={styles.variableItem}
               onClick={() => handleVariableClick(variable)}
             >
               <div className={styles.variableInfo}>
                 <div className={styles.variableName}>
-                  <LightText text={variable.displayName} searchValue={searchValue} />
+                  <LightText text={variable?.displayName} searchValue={searchValue} />
                 </div>
-                <Tag color={getTypeColor(variable.fieldType)} size="small">
-                  {variable.fieldType}
+                <Tag color={getTypeColor(variable?.fieldType)} size="small">
+                  {variable?.fieldType}
                 </Tag>
               </div>
             </List.Item>

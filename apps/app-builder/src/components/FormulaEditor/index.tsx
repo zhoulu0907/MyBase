@@ -1,11 +1,15 @@
 import { Message, Modal, Grid, Spin } from '@arco-design/web-react';
 import { getFormulaById, getFormulaFunctionSimpleList, type VariablesEntity, executeFormula, type formulaParams, getEntityListByApp, getEntityFields, type ChildEntityField } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { FormulaInput, FunctionList, InfoPanel, VariableList, DebuggedFormula } from './components';
 import styles from './index.module.less';
 import type { FormulaEditorProps, FunctionItem, info } from './utils/types';
 import { useAppStore } from '@/store';
 import { IconLeft } from '@arco-design/web-react/icon';
+import { NodeType } from '@onebase/common';
+import { getPrecedingNodes } from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/nodes/utils';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -38,11 +42,18 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   /**
    * 获取变量一级列表
    */
+  const nodeTypes = [
+    NodeType.DATA_QUERY,
+    NodeType.DATA_QUERY_MULTIPLE,
+    NodeType.DATA_CALC
+  ];
+
   const retrievedEntityListByApp = async () => {
+    const nodes = getPrecedingNodes(curAppId, triggerEditorSignal.nodes.value, nodeTypes);
     try {
       const res: VariablesEntity[] = await getEntityListByApp(curAppId);
       if (res.length > 0) {
-        const result = await Promise.all(res.map(async (item) => {
+        const result =  await Promise.all(res.map(async (item) => {
           try {
             if (!item.fields?.length) {
               const childEntityList = await getEntityFields({
@@ -59,6 +70,20 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
             console.log("加载二级实体列表失败:", error)
           }
         }))
+        nodes?.forEach(nodeItem => {
+          const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(nodeItem.id);
+          const newFields = nodeOutput?.conditionFields?.map((data:any) => {
+            return {
+              ...data,
+              displayName: data.label,
+              entityId: nodeItem.id,
+              appId: nodeItem.id,
+              fieldName: nodeItem.data?.title || "",
+              fieldType: "node",
+            }
+          })
+          result.push({entityName: nodeItem.data?.title, fields: newFields || [], entityId: nodeItem.id, tableName:""});
+        })
         console.log("result", result)
         setVariables(result as any);
       }
@@ -126,7 +151,12 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const handleInsertVariable = useCallback((variable: ChildEntityField) => {
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
-      editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.displayName}]]`, 'var');
+      //如果fieldtype是node 代表是节点， 需要传入的格式是$节点.字段
+      if(variable.fieldType === "node") {
+        editorRef.current.insertAtPosition(`[[${variable.appId}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
+      }else {
+        editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.displayName}]]`, 'var');
+      }
     } else {
       // 降级处理：直接添加到末尾
       setFormula((prev) => prev + variable.displayName);

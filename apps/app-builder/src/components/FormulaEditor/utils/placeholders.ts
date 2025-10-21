@@ -28,6 +28,10 @@ export const placeholdersPlugin = (
         const [textId, ...texts] = text.split('.');
         if (textId && texts.length) {
           this.text = texts.map((t) => t.split(':')[mode === 'code' ? 1 : 0]).join('.');
+          if(this.text.includes("$")) {
+            const textTemp = this.text.split(".");
+            this.text = textTemp[1];
+          }
           this.textId = textId;
           console.log('this.text', this.text, this.textId);
         }
