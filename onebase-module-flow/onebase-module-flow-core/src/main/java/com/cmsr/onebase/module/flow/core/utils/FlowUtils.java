@@ -10,7 +10,7 @@ public class FlowUtils {
 
     public static final int MAX_QUERY_CALL_COUNT = 10;
 
-    public static final Duration REDIS_TRACE_TIMEOUT = Duration.ofHours(1);
+    public static final Duration REDIS_TRACE_TIMEOUT = Duration.ofHours(4);
 
     public static String toFlowChainId(Long processId) {
         return "chain" + processId;

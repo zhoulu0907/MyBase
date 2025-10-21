@@ -58,6 +58,16 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
             }
         }
 
+        // 字典所有者类型过滤条件
+        if (reqVO.getDictOwnerType() != null && !reqVO.getDictOwnerType().trim().isEmpty()) {
+            configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_TYPE, reqVO.getDictOwnerType());
+        }
+
+        // 字典所有者ID过滤条件
+        if (reqVO.getDictOwnerId() != null) {
+            configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
+        }
+
         // 添加排序条件，按ID降序排列
         configs.order(DictTypeDO.ID, org.anyline.entity.Order.TYPE.DESC);
 
