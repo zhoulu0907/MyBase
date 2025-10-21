@@ -27,9 +27,9 @@ export const formMeta: FormMeta<FlowNodeJSON> = {
     'conditions.*': ({ value }) => {
       if (!value?.value) return 'Condition is required';
       return undefined;
-    },
+    }
   },
   effect: {
-    conditions: autoRenameRefEffect,
-  },
+    conditions: autoRenameRefEffect
+  }
 };

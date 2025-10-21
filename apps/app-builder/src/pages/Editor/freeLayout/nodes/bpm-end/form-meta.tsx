@@ -17,20 +17,22 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => (
   <>
     <div
       style={{
-        width: 60,
-        height: 60,
+        width: 74,
+        height: 30,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        background: 'rgba(78, 89, 105, 1)',
+        borderRadius: '15px'
       }}
     >
       <Avatar
         shape="circle"
         style={{
-          width: 40,
-          height: 40,
+          width: 20,
+          height: 20,
           borderRadius: '50%',
-          cursor: 'move',
+          cursor: 'move'
         }}
         alt="Icon"
         src={iconEnd}
@@ -40,5 +42,5 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => (
 );
 
 export const formMeta: FormMeta<FlowNodeJSON> = {
-  render: renderForm,
+  render: renderForm
 };

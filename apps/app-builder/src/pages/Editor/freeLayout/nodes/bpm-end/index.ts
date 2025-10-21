@@ -18,14 +18,14 @@ export const BpmEndNodeRegistry: FlowNodeRegistry = {
     nodePanelVisible: false,
     defaultPorts: [{ type: 'input' }],
     size: {
-      width: 100,
-      height: 100
+      width: 74,
+      height: 30
     },
     wrapperStyle: {
       minWidth: 'unset',
       width: '100%',
       borderWidth: 2,
-      borderRadius: 12,
+      borderRadius: 15,
       cursor: 'move'
     }
   },

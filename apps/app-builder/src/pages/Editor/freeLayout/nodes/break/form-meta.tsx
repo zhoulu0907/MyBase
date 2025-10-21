@@ -33,5 +33,5 @@ export const renderForm = () => {
 
 export const formMeta: FormMeta = {
   ...defaultFormMeta,
-  render: renderForm,
+  render: renderForm
 };

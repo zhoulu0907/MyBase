@@ -8,13 +8,13 @@ import {
   type FieldRenderProps,
   type FormRenderProps,
   type FormMeta,
-  ValidateTrigger,
+  ValidateTrigger
 } from '@flowgram.ai/free-layout-editor';
 import {
   DisplayOutputs,
   JsonSchemaEditor,
   provideJsonSchemaOutputs,
-  syncVariableTitle,
+  syncVariableTitle
 } from '@flowgram.ai/form-materials';
 
 import type { FlowNodeJSON, JsonSchema } from '../../typings';
@@ -32,10 +32,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => {
             name="outputs"
             render={({ field: { value, onChange } }: FieldRenderProps<JsonSchema>) => (
               <>
-                <JsonSchemaEditor
-                  value={value}
-                  onChange={(value) => onChange(value as JsonSchema)}
-                />
+                <JsonSchemaEditor value={value} onChange={(value) => onChange(value as JsonSchema)} />
               </>
             )}
           />
@@ -57,10 +54,10 @@ export const formMeta: FormMeta<FlowNodeJSON> = {
   render: renderForm,
   validateTrigger: ValidateTrigger.onChange,
   validate: {
-    title: ({ value }: { value: string }) => (value ? undefined : 'Title is required'),
+    title: ({ value }: { value: string }) => (value ? undefined : 'Title is required')
   },
   effect: {
     title: syncVariableTitle,
-    outputs: provideJsonSchemaOutputs,
-  },
+    outputs: provideJsonSchemaOutputs
+  }
 };
