@@ -15,7 +15,7 @@ import {
   type FormInstance
 } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
-import { IconDelete } from '@arco-design/web-react/icon';
+import { IconDelete, IconLaunch } from '@arco-design/web-react/icon';
 import {
   FieldType,
   VALIDATION_TYPE,
@@ -414,7 +414,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                           {(condition, { add: childAdd, remove: childRemove }) => {
                             return (
                               <div style={{ width: '100%' }}>
-                                {condition.map((item, childIndex) => {
+                                {condition.map((item: any, childIndex) => {
                                   return (
                                     // 字段id
                                     <Grid.Row key={item.key} gutter={8} align="center">
@@ -520,7 +520,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                                                    ƒx 编辑公式
+                                                    {form.getFieldValue(item.field + '.value') ? '已设置公式' : 'ƒx 编辑公式'}
+                                                    {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ""}
                                                   </Button>
                                                 </Form.Item>
                                               )}

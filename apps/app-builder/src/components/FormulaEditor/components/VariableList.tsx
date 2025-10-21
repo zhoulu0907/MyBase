@@ -69,7 +69,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
           handleChangeVariables(key)
         }}>
           {variables.map((item) => {
-            return <Menu.Item key={item.entityId}>{item.entityName}</Menu.Item>
+            return <Menu.Item key={item.entityId}>{item?.entityName}</Menu.Item>
           })}
         </Menu>
       </div>
@@ -89,13 +89,13 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
         <div className={styles.categoryHeader}>
           <Dropdown.Button trigger={"hover"} type='text' position='bl' triggerProps={{autoAlignPopupWidth: true}} droplist={variablesList()} icon={<Button type='text' color='success'>切换</Button>}>
             <IconFolder className={styles.categoryIcon} />
-            <span className={styles.categoryEntityName}>{filteredVariables[0].entityName}</span>
+            <span className={styles.categoryEntityName}>{filteredVariables?.[0]?.entityName || ""}</span>
           </Dropdown.Button>
         </div>
         <List
           size='small'
           className={styles.listSection}
-          dataSource={filteredVariables[0].fields}
+          dataSource={filteredVariables?.[0]?.fields || []}
           render={(variable) => (
             <List.Item
               key={variable.appId}

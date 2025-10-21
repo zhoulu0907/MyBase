@@ -1,10 +1,11 @@
 import { Message, Modal, Grid, Spin } from '@arco-design/web-react';
 import { getFormulaById, getFormulaFunctionSimpleList, type VariablesEntity, executeFormula, type formulaParams, getEntityListByApp, getEntityFields, type ChildEntityField } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FormulaInput, FunctionList, InfoPanel, VariableList } from './components';
+import { FormulaInput, FunctionList, InfoPanel, VariableList, DebuggedFormula } from './components';
 import styles from './index.module.less';
 import type { FormulaEditorProps, FunctionItem, info } from './utils/types';
 import { useAppStore } from '@/store';
+import { IconLeft } from '@arco-design/web-react/icon';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -16,14 +17,15 @@ const Col = Grid.Col;
  * @param initialFormula - 初始公式
  */
 export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '' }: FormulaEditorProps) {
-  const [formula, setFormula] = useState(initialFormula);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [formula, setFormula] = useState(initialFormula);  //公式的值
+  const [loading, setLoading] = useState<boolean>(false);  //当调用接口的时候显示加载中
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
-  const [funcList, setFuncList] = useState<FunctionItem[]>([]);
+  const [funcList, setFuncList] = useState<FunctionItem[]>([]); //公式编辑器中的函数列表展示
   const editorRef = useRef<{ insertAtPosition: (text: string, type: string, position?: number) => void } | null>(null);
   const [info, setInfo] = useState<info | null>(null);
-  const [variables, setVariables] = useState<VariablesEntity[]>([])
+  const [variables, setVariables] = useState<VariablesEntity[]>([]) //公式编辑器中的左侧变量列表展示
+  const [isDebugMode, setIsDebugMode] = useState<boolean>(false);
   const { curAppId } = useAppStore();
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
               });
               return {
                 ...item,
-                fields: [...item.fields || [], ...childEntityList]
+                fields: [...item.fields || [], ...childEntityList].reverse()
               }
             } else {
               return item;
@@ -203,6 +205,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const handleConfirm = useCallback(async () => {
     await handleDebug();
     onConfirm(formula);
+    setIsDebugMode(false);
   }, [formula, onConfirm, onCancel]);
 
   /**
@@ -245,12 +248,44 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     getFuncList();
   }, [visible]);
 
+  /**点击调试页面的返回按钮 */
+  const handleGoBack = () => {
+    setIsDebugMode(false);
+  }
+
+  const getAllRelatedVariables = () => {
+    const currentVariablesObj = retrieveAllVariables(formula);
+    const newVariablesData = Object.keys(currentVariablesObj)?.map(key => {
+      const index = variables.findIndex(data => data.entityId === key);
+      return {
+        fieldName: key,
+        fieldId: currentVariablesObj[key],
+        fieldType: index > 0 ? variables[index] : "TEXT"
+      }
+    })
+    return newVariablesData;
+  }
+
+  /**点击调试 */
+  const handleClickDebug = () => {
+    setIsDebugMode(true);
+  }
+
+  /**点击取消按钮 */
+  const handleCancel = () => {
+    setIsDebugMode(false);
+    onCancel();
+  }
+
+  const allRelatedVariables = getAllRelatedVariables();
+
   return (
     <Modal
       visible={visible}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       title={
         <div className={styles.formulaHeader}>
+          {isDebugMode && <IconLeft className={styles.goBack} onClick={handleGoBack}/>}
           <span className={styles.title}>公式编辑</span>
           <span className={styles.subtitle}>使用数学运算符编辑公式</span>
         </div>
@@ -272,35 +307,38 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
             value={formula}
             onChange={setFormula}
             onCopy={handleCopy}
-            onDebug={handleDebug}
+            onDebug={handleClickDebug}
             filteredVariables={filteredVariables}
             filteredFunctions={filteredFunctions}
             onEditorReady={handleEditorReady}
           />
         </Spin>
         {/* 底部面板（变量名称/函数公式/函数概要） */}
-        <Row>
-          <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
-            <VariableList
-              variables={variables}
-              searchValue={variableSearch}
-              onSearchChange={setVariableSearch}
-              onInsertVariable={handleInsertVariable}
-            />
-          </Col>
-          <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
-            <FunctionList
-              functions={functionSearch ? filteredFunctions : funcList}
-              searchValue={functionSearch}
-              onSearchChange={setFunctionSearch}
-              onChooseFunction={handleChooseFunction}
-            />
-          </Col>
-          {info &&
+        {isDebugMode ? 
+          <DebuggedFormula allRelatedVariables={allRelatedVariables} formula= {formattedFormula()}/> : 
+          <Row>
             <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
-              <InfoPanel info={info} />
-            </Col>}
-        </Row>
+              <VariableList
+                variables={variables}
+                searchValue={variableSearch}
+                onSearchChange={setVariableSearch}
+                onInsertVariable={handleInsertVariable}
+              />
+            </Col>
+            <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
+              <FunctionList
+                functions={functionSearch ? filteredFunctions : funcList}
+                searchValue={functionSearch}
+                onSearchChange={setFunctionSearch}
+                onChooseFunction={handleChooseFunction}
+              />
+            </Col>
+            {info &&
+              <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
+                <InfoPanel info={info} />
+              </Col>}
+          </Row>
+        }
       </div>
     </Modal>
   );
