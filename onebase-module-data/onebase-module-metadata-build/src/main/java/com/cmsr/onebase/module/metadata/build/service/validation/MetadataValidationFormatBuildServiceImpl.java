@@ -86,12 +86,18 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         var list = formatRepository.findByGroupId(id);
-        if (list.isEmpty()) { return; }
-        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")"); }
-        MetadataValidationFormatDO existing = list.get(0);
-        Long groupId = existing.getGroupId();
-        formatRepository.deleteById(existing.getId());
-        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
+        
+        // 删除子表记录
+        if (!list.isEmpty()) {
+            if (list.size() > 1) {
+                throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")");
+            }
+            MetadataValidationFormatDO existing = list.get(0);
+            formatRepository.deleteById(existing.getId());
+        }
+        
+        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        ruleGroupService.safeDeleteGroupDirect(id);
     }
 
     @Override
