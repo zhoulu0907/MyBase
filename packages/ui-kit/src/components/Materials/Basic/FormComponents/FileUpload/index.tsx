@@ -1,6 +1,6 @@
-import { Form, Message, Upload, Progress, Modal } from '@arco-design/web-react';
+import { Form, Message, Upload, Progress } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
-import { IconPlus, IconDelete, IconClose, IconEye, IconDownload, IconFileImage } from '@arco-design/web-react/icon';
+import { IconPlus, IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
@@ -66,12 +66,19 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
 
   // 自定义文件列表展示
   const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
+    const getFileIcon=(file:UploadItem)=>{
+      if(file?.name){
+        // todo  根据文件类型展示不同icon
+        const index = file.name.lastIndexOf('.');
+        const type = file.name.slice(index+1)
+      }
+      return <IconFile style={{fontSize:'40px'}} />
+    }
     return (
       <div className="uplaodList-text">
         {filesList.map((file) => (
           <div key={file.uid} className="uplaodList-text-item">
-            {/* todo  根据文件类型展示icon */}
-            <IconFileImage style={{fontSize:'40px'}} />
+            {getFileIcon(file)}
             <div className="uplaodList-text-item-name">{file.name}</div>
             {file.percent && file.percent !== 100 ? (
               <div className="uplaodList-text-item-process">
@@ -87,14 +94,6 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
               </div>
             ) : (
               <div className="uplaodList-text-item-opera">
-                <IconEye
-                  onClick={() => {
-                    Modal.info({
-                      title: '预览',
-                      content: <img src={file.url} width="100%" alt="" />
-                    });
-                  }}
-                />
                 <IconDownload
                   onClick={() => {
                     if (file.url && file.name) {
