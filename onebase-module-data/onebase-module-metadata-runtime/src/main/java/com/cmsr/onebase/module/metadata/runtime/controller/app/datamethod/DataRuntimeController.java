@@ -36,21 +36,21 @@ public class DataRuntimeController {
     @Operation(summary = "新增单条数据")
     @PermitAll
     public CommonResult<DynamicDataRespVO> createData(@Valid @RequestBody DynamicDataCreateReqVO reqVO) {
-        return success(runtimeDataService.createData(reqVO));
+        return success(runtimeDataService.createData(reqVO)).setMsg("数据新增成功");
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新单条数据")
     @PermitAll
     public CommonResult<DynamicDataRespVO> updateData(@Valid @RequestBody DynamicDataUpdateReqVO reqVO) {
-        return success(runtimeDataService.updateData(reqVO));
+        return success(runtimeDataService.updateData(reqVO)).setMsg("数据更新成功");
     }
 
     @PostMapping("/delete")
     @Operation(summary = "删除单条数据")
     @PermitAll
     public CommonResult<Boolean> deleteData(@Valid @RequestBody DynamicDataDeleteReqVO reqVO) {
-        return success(runtimeDataService.deleteData(reqVO));
+        return success(runtimeDataService.deleteData(reqVO)).setMsg("数据删除成功");
     }
 
     @PostMapping("/data")
