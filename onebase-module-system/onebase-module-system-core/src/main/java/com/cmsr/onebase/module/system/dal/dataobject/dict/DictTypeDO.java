@@ -28,11 +28,13 @@ import java.time.LocalDateTime;
 public class DictTypeDO extends BaseDO {
 
     // 字段名常量
-    public static final String NAME         = "name";
-    public static final String TYPE         = "type";
-    public static final String STATUS       = "status";
-    public static final String REMARK       = "remark";
-    public static final String DELETED_TIME = "deleted_time";
+    public static final String NAME             = "name";
+    public static final String TYPE             = "type";
+    public static final String STATUS           = "status";
+    public static final String REMARK           = "remark";
+    public static final String DICT_OWNER_TYPE  = "dict_owner_type";
+    public static final String DICT_OWNER_ID    = "dict_owner_id";
+    public static final String DELETED_TIME     = "deleted_time";
 
     /**
      * 字典名称
@@ -59,6 +61,22 @@ public class DictTypeDO extends BaseDO {
      */
     @Column(name = REMARK)
     private String remark;
+
+    /**
+     * 字典所有者类型
+     *
+     * 枚举 {@link com.cmsr.onebase.module.system.enums.dict.DictOwnerTypeEnum}
+     */
+    @Column(name = DICT_OWNER_TYPE)
+    private String dictOwnerType;
+
+    /**
+     * 字典所有者ID
+     * 
+     * 当dictOwnerType为app时，存储appId；为tenant时，存储tenantId
+     */
+    @Column(name = DICT_OWNER_ID)
+    private Long dictOwnerId;
 
     /**
      * 删除时间
