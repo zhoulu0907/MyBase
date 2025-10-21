@@ -10,13 +10,11 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import {
-  clearDataOriginNodeId,
   getDataNodeSource,
   getEntityFieldList,
   getPrecedingNodes,
   validateNodeForm
 } from '../../utils';
-import { updateLoopOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE];
 
@@ -55,11 +53,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     getEntityFieldList(originDataSource, handleSetConditionFields, () => {});
 
-    clearDataOriginNodeId(node.id);
   };
 
   const handleSetConditionFields = (conditionFields: ConditionField[]) => {
-    updateLoopOutputs(node.id, conditionFields);
+    console.log(conditionFields);
   };
 
   const getInitData = () => {
@@ -84,7 +81,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Grid.Col>
               <Grid.Col span={19}>
                 <Form.Item field="dataNodeId">
-                  <Select onChange={handleDateNodeSourceChange} allowClear>
+                  <Select allowClear>
                     {dataNodeList.map((item) => (
                       <Select.Option key={item.id} value={item.id}>
                         {item.data.title}

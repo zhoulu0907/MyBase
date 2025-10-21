@@ -151,7 +151,6 @@ const TableColumns = ({
           >
             <Select
               options={fieldTypeOptions}
-              disabled={record.isSystemField === FIELD_TYPE.SYSTEM || !record.id?.includes('field-')}
               style={{ width: 100 }}
               showSearch
               filterOption={(input, option) => {
@@ -168,7 +167,7 @@ const TableColumns = ({
             {(values) => {
               // 配置按钮仅在自动编号、单选、多选类型时显示
               const fieldType = values.fields[index + systemFieldsLength]?.fieldType;
-              console.log('values', values, fieldType);
+
               if (!FIELD_TYPES_NEED_CONFIG.includes(fieldType)) {
                 return null;
               }
@@ -370,13 +369,7 @@ const TableColumns = ({
       render: (value: unknown, record: FieldFormValues) => {
         return (
           record.isSystemField === FIELD_TYPE.CUSTOM && (
-            <Button
-              type="text"
-              status="danger"
-              size="mini"
-              onClick={() => deleteField(record.id || '')}
-              disabled={!record.id?.includes('field-')}
-            >
+            <Button type="text" status="danger" size="mini" onClick={() => deleteField(record.id || '')}>
               删除
             </Button>
           )

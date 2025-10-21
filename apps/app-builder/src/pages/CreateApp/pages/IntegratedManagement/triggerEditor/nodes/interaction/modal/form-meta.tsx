@@ -2,7 +2,6 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select, Switch, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import type { ConditionField } from '@onebase/app';
 import { FLOW_MODAL_CANCEL, FLOW_MODAL_TYPE } from '@onebase/common';
 import { useEffect } from 'react';
 import CollectFields from '../../../components/collect-fields';
@@ -10,7 +9,6 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
-import { updateModalOutputs } from './output';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -21,23 +19,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
-
-  const onValuesChange = async (changeValue: any, values: any) => {
-    // 校验表单
-
-    if (values.fields) {
-      const fields: ConditionField[] = values.fields
-        .filter((item: any) => item && item.fieldName && item.fieldType)
-        .map((item: any) => {
-          return {
-            label: item.fieldName,
-            value: item.fieldName,
-            fieldType: item.fieldType
-          };
-        });
-      updateModalOutputs(node.id, fields);
-    }
-  };
 
   // 弹窗类型改变
   const modalTypeChange = (value: string) => {
@@ -59,7 +40,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             layout="vertical"
             requiredSymbol={{ position: 'end' }}
-            onValuesChange={onValuesChange}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
           >
             <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>

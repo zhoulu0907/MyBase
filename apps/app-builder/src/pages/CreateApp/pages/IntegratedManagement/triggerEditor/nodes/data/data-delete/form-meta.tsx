@@ -22,7 +22,6 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
-import { updateDataDeleteOutputs } from './output';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -67,17 +66,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition']);
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   mainEntityId: undefined,
-    //   subEntityId: undefined,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-    // clearDataOriginNodeId(node.id);
 
     setMainEntityList([]);
     setSubEntityList([]);
@@ -169,17 +157,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'filterCondition']);
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   subEntityId: undefined,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-
-    // clearDataOriginNodeId(node.id);
 
     setSubEntityList([]);
     setValidationTypes([]);
@@ -241,27 +218,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleSubEntityIdChange = (_curSubEntityId: string) => {
     payloadForm.clearFields(['filterCondition']);
-
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   dataNodeId: undefined,
-    //   sortBy: [],
-    //   filterCondition: []
-    // });
-
-    // clearDataOriginNodeId(node.id);
   };
 
   const handleFilterTypeChange = (_value: FILTER_TYPE) => {
-    // TODO(mickey): remove
-    // const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    // triggerEditorSignal.setNodeData(node.id, {
-    //   ...nodeData,
-    //   filterCondition: []
-    // });
-
     payloadForm.clearFields(['filterCondition']);
   };
 
@@ -279,42 +238,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     return [];
   }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId]);
-
-  const conditionFieldsForEditor = useMemo((): ConditionField[] => {
-    if (dataType === DATA_SOURCE_TYPE.FORM) {
-      return (
-        (mainEntityFields.children || [])?.map((item) => ({
-          label: item.title as string,
-          value: item.key as string,
-          fieldType: item.fieldType
-        })) || []
-      );
-    }
-    if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
-      const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
-      if (curSubEntityFields) {
-        return (
-          (curSubEntityFields.children || [])?.map((item) => ({
-            label: item.title as string,
-            value: item.key as string,
-            fieldType: item.fieldType
-          })) || []
-        );
-      }
-
-      return [];
-    }
-
-    return [];
-  }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId]);
-
-  // 使用 useEffect 更新条件字段状态和输出，避免在渲染过程中直接更新状态
-  useEffect(() => {
-    // 只在有实际数据时才更新 triggerNodeOutputSignal，避免初始化时载入空数据
-    if (conditionFieldsForEditor.length > 0) {
-      updateDataDeleteOutputs(node.id);
-    }
-  }, [conditionFieldsForEditor, node.id]);
 
   const getInitData = () => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
