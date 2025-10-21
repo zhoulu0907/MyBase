@@ -8,30 +8,30 @@ import iconStart from '../../assets/icon-start.jpg';
 import { formMeta } from './form-meta';
 import { WorkflowNodeType } from '../constants';
 
-export const BpmStartNodeRegistry: FlowNodeRegistry = {
-  type: WorkflowNodeType.BpmStart,
+export const BpmEndNodeRegistry: FlowNodeRegistry = {
+  type: WorkflowNodeType.BpmEnd,
   meta: {
-    isStart: true,
+    isNodeEnd: true,
     deleteDisable: true,
     copyDisable: true,
     sidebarDisabled: true,
     nodePanelVisible: false,
-    defaultPorts: [{ type: 'output' }],
+    defaultPorts: [{ type: 'input' }],
     size: {
-      width: 74,
-      height: 29
+      width: 100,
+      height: 100
     },
     wrapperStyle: {
       minWidth: 'unset',
       width: '100%',
       borderWidth: 2,
-      borderRadius: 15,
+      borderRadius: 12,
       cursor: 'move'
     }
   },
   info: {
     icon: iconStart,
-    description: 'The starting node of the block.'
+    description: 'The final node of the block.'
   },
   /**
    * Render node via formMeta

@@ -40,7 +40,7 @@ export const initialData: FlowDocumentJSON = {
     },
     {
       id: 'end_0',
-      type: 'end',
+      type: 'bpm_end',
       meta: {
         position: {
           x: 180,
