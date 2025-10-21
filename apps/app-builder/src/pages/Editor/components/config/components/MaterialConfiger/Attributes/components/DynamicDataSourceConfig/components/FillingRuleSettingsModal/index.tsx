@@ -62,8 +62,23 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
       setSelected(selected);
       setIsToNextStep(true);
       setFillOption(2);
+    } else {
+      reset();
     }
   }, [fieldOptions, selectRule]);
+
+  useEffect(() => {
+    if (visible) {
+      if (selectRule.length > 0) {
+        const selected = selectRule.map((item) => item.fieldId);
+        setSelected(selected);
+        setIsToNextStep(true);
+        setFillOption(2);
+      } else {
+        reset();
+      }
+    }
+  }, [visible]);
 
   useEffect(() => {
     const usedComponentIDs = new Set();
