@@ -13,6 +13,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import FlowEditorPage from './pages/flowEditor';
 import FlowManagementPage from './pages/flowManagement';
+import FlowExecuteRecordPage from './pages/flowExecuteRecord';
 
 const MenuItem = Menu.Item;
 
@@ -41,7 +42,9 @@ const IntegratedManagementPage: React.FC = () => {
           <MenuItem key="debug">
             <IconPlayCircle /> 调试中心
           </MenuItem>
-          <MenuItem key="record">
+          <MenuItem key="record" 
+            onClick={() => navigate(`/onebase/create-app/integrated-management/flow-execute-record?appId=${curAppId}`)}
+          >
             <IconRefresh />
             执行记录
           </MenuItem>
@@ -51,7 +54,8 @@ const IntegratedManagementPage: React.FC = () => {
           </MenuItem>
         </Menu>
 
-        <div className={styles.title}>系统</div>
+        {/* 隐藏系统 */}
+        {/* <div className={styles.title}>系统</div>
         <Menu className={styles.menu}>
           <MenuItem key="setting">
             <IconSettings />
@@ -61,13 +65,14 @@ const IntegratedManagementPage: React.FC = () => {
             <IconQuestionCircle />
             帮助中心
           </MenuItem>
-        </Menu>
+        </Menu> */}
       </div>
       <div className={styles.content}>
         <Routes>
           <Route path="/" element={<FlowManagementPage />} />
           <Route path="flow-management" element={<FlowManagementPage />} />
           <Route path="flow-editor" element={<FlowEditorPage />} />
+          <Route path="flow-execute-record" element={<FlowExecuteRecordPage />} />
         </Routes>
       </div>
     </div>
