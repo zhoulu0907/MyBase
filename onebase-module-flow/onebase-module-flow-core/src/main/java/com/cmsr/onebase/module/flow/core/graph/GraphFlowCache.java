@@ -98,6 +98,10 @@ public class GraphFlowCache {
         }
     }
 
+    public boolean isProcessExist(Long processId) {
+        return flowNodeDataCache.containsKey(processId);
+    }
+
     public Map<String, NodeData> findNodeData(Long processId) {
         return flowNodeDataCache.get(processId);
     }
