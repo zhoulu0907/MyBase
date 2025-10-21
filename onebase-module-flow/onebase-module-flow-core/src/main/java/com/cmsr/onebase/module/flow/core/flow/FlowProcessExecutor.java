@@ -23,11 +23,13 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
+ *
+ *
  * @Author：huangjie
  * @Date：2025/9/11 14:32
  */
@@ -52,129 +54,138 @@ public class FlowProcessExecutor {
     @Autowired
     private FlowExecutionLogRepository flowExecutionLogRepository;
 
+    /**
+     * 执行新流程（基于traceId和输入参数）
+     */
     public ExecutorResult execute(String traceId, Long processId, Map<String, Object> inputParams) {
-        FlowExecutionLogDO flowExecutionLogDO = new FlowExecutionLogDO();
-        flowExecutionLogDO.setProcessId(processId);
-        flowExecutionLogDO.setStartTime(LocalDateTime.now());
-        try {
-            ExecutorResult executorResult = doExecute(traceId, processId, inputParams);
-            flowExecutionLogDO.setExecutionUuid(executorResult.getExecutionUuid());
-            if (executorResult.isSuccess()) {
-                flowExecutionLogDO.setExecutionResult("success");
-            } else {
-                flowExecutionLogDO.setExecutionResult("failed");
-            }
-            flowExecutionLogDO.setErrorMessage(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
-            //
-            return executorResult;
-        } catch (Exception e) {
-            //打印日志
-            log.error("执行流程异常: {}", traceId, e);
-            //处理执行日志
-            flowExecutionLogDO.setExecutionResult("failed");
-            flowExecutionLogDO.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
-            //执行结果对象
-            ExecutorResult executorResult = new ExecutorResult();
-            executorResult.setSuccess(false);
-            executorResult.setMessage("执行流程异常");
-            executorResult.setCause(e);
-            return executorResult;
-        } finally {
-            flowExecutionLogDO.setEndTime(LocalDateTime.now());
-            flowExecutionLogRepository.insert(flowExecutionLogDO);
-        }
+        FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
+        return executeWithLogging(() -> executeNewFlow(traceId, processId, inputParams), executionLog);
     }
 
-    private ExecutorResult doExecute(String traceId, Long processId, Map<String, Object> inputParams) {
+    /**
+     * 恢复执行流程（基于执行UUID）
+     */
+    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputFields) {
+        FlowExecutionLogDO executionLog = findOrCreateExecutionLog(processId, executionUuid);
+        return executeWithLogging(() -> resumeFlowExecution(processId, executionUuid, inputFields), executionLog);
+    }
+
+    /**
+     * 执行新流程的核心逻辑
+     */
+    private ExecutorResult executeNewFlow(String traceId, Long processId, Map<String, Object> inputParams) {
         Map<String, NodeData> nodeData = graphFlowCache.findNodeData(processId);
         if (nodeData == null) {
-            ExecutorResult executorResult = new ExecutorResult();
-            executorResult.setSuccess(false);
-            executorResult.setMessage("流程不存在");
-            return executorResult;
+            return ExecutorResult.error("流程不存在: " + processId);
         }
-        if (StringUtils.isEmpty(traceId)) {
-            traceId = FlowUtils.generateTraceId();
-        } else {
-            List<Long> callInvocation = queryCallInvocation(traceId, processId);
-            if (callInvocation.size() > FlowUtils.MAX_QUERY_CALL_COUNT) {
-                ExecutorResult executorResult = new ExecutorResult();
-                executorResult.setSuccess(false);
-                executorResult.setMessage("触发流程执行次数超阈值: [" + traceId + "][" + callInvocation + "]");
-                return executorResult;
-            }
-        }
-        // 变量上下文
+        traceId = validateAndGenerateTraceId(traceId, processId);
+
         VariableContext variableContext = new VariableContext();
         variableContext.setInputParams(inputParams);
-        // 执行上下文
+
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setTraceId(traceId);
         executeContext.setProcessId(processId);
         executeContext.setNodeDataMap(nodeData);
-        // 执行流程
-        String chainId = FlowUtils.toFlowChainId(processId);
-        LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
-        variableContext = response.getContextBean(VariableContext.class);
-        executeContext = response.getContextBean(ExecuteContext.class);
-        ExecutorResult executorResult = getExecutorResult(response, executeContext, variableContext);
-        return executorResult;
+
+        return executeFlow(processId, variableContext, executeContext);
     }
 
-    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> uuidFiles) {
-        FlowExecutionLogDO flowExecutionLogDO = flowExecutionLogRepository.findByExecutionUuid(executionUuid);
-        if (flowExecutionLogDO == null) {
-            flowExecutionLogDO = new FlowExecutionLogDO();
-            flowExecutionLogDO.setProcessId(processId);
-            flowExecutionLogDO.setStartTime(LocalDateTime.now());
-        }
-        try {
-            ExecutorResult executorResult = doExecute(processId, executionUuid, uuidFiles);
-            flowExecutionLogDO.setExecutionUuid(executorResult.getExecutionUuid());
-            if (executorResult.isSuccess()) {
-                flowExecutionLogDO.setExecutionResult("success");
-            } else {
-                flowExecutionLogDO.setExecutionResult("failed");
-            }
-            flowExecutionLogDO.setErrorMessage(ExceptionUtils.getRootCauseMessage(executorResult.getCause()));
-            //
-            return executorResult;
-        } catch (Exception e) {
-            log.error("执行流程异常: {}", executionUuid, e);
-            //处理执行日志
-            flowExecutionLogDO.setExecutionResult("failed");
-            flowExecutionLogDO.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
-            //执行结果对象
-            ExecutorResult executorResult = new ExecutorResult();
-            executorResult.setSuccess(false);
-            executorResult.setMessage("执行流程异常");
-            executorResult.setCause(e);
-            return executorResult;
-        } finally {
-            flowExecutionLogDO.setEndTime(LocalDateTime.now());
-            flowExecutionLogRepository.insert(flowExecutionLogDO);
-        }
-    }
-
-    private ExecutorResult doExecute(Long processId, String executionUuid, Map<String, Object> uuidFiles) {
-        String chainId = FlowUtils.toFlowChainId(processId);
+    /**
+     * 恢复流程执行的核心逻辑
+     */
+    private ExecutorResult resumeFlowExecution(Long processId, String executionUuid, Map<String, Object> inputFields) {
         VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
         if (variableContext == null) {
-            throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
+            return ExecutorResult.error("执行上下文不存在或已过期: " + executionUuid);
         }
-        variableContext.setUuidFiles(uuidFiles);
-        variableContext.setOutputParams(new HashMap<>());
+
+        variableContext.setInputFields(inputFields);
+        variableContext.setOutputParams(Collections.emptyMap());
+
         ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
         if (executeContext == null) {
-            throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
+            return ExecutorResult.error("执行上下文不存在: " + executionUuid);
         }
-        LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
-        variableContext = response.getContextBean(VariableContext.class);
-        executeContext = response.getContextBean(ExecuteContext.class);
-        ExecutorResult executorResult = getExecutorResult(response, executeContext, variableContext);
-        return executorResult;
+
+        return executeFlow(processId, variableContext, executeContext);
     }
 
+    /**
+     * 执行流程的公共逻辑
+     */
+    private ExecutorResult executeFlow(Long processId, VariableContext variableContext, ExecuteContext executeContext) {
+        String chainId = FlowUtils.toFlowChainId(processId);
+        LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
+
+        VariableContext updatedVariableContext = response.getContextBean(VariableContext.class);
+        ExecuteContext updatedExecuteContext = response.getContextBean(ExecuteContext.class);
+
+        return buildExecutorResult(response, updatedExecuteContext, updatedVariableContext);
+    }
+
+    /**
+     * 带日志记录的执行包装器
+     */
+    private ExecutorResult executeWithLogging(FlowExecution execution, FlowExecutionLogDO executionLog) {
+        try {
+            ExecutorResult result = execution.execute();
+
+            executionLog.setExecutionUuid(result.getExecutionUuid());
+            executionLog.setExecutionResult(result.isSuccess() ? "success" : "failed");
+            executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(result.getCause()));
+            return result;
+        } catch (Exception e) {
+            log.error("执行流程异常", e);
+            executionLog.setExecutionResult("failed");
+            executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
+            return ExecutorResult.error("执行流程异常", e);
+        } finally {
+            executionLog.setEndTime(LocalDateTime.now());
+            flowExecutionLogRepository.insert(executionLog);
+        }
+    }
+
+
+    /**
+     * 验证并生成traceId
+     */
+    private String validateAndGenerateTraceId(String traceId, Long processId) {
+        if (StringUtils.isEmpty(traceId)) {
+            return FlowUtils.generateTraceId();
+        }
+        List<Long> callInvocation = queryCallInvocation(traceId, processId);
+        if (callInvocation.size() > FlowUtils.MAX_QUERY_CALL_COUNT) {
+            throw new IllegalStateException("触发流程执行次数超阈值[" + traceId + "][" + callInvocation + "]");
+        }
+        return traceId;
+    }
+
+
+    /**
+     * 创建新的执行日志
+     */
+    private FlowExecutionLogDO createNewExecutionLog(Long processId) {
+        FlowExecutionLogDO log = new FlowExecutionLogDO();
+        log.setProcessId(processId);
+        log.setStartTime(LocalDateTime.now());
+        return log;
+    }
+
+    /**
+     * 查找或创建执行日志
+     */
+    private FlowExecutionLogDO findOrCreateExecutionLog(Long processId, String executionUuid) {
+        FlowExecutionLogDO log = flowExecutionLogRepository.findByExecutionUuid(executionUuid);
+        if (log == null) {
+            log = createNewExecutionLog(processId);
+        }
+        return log;
+    }
+
+    /**
+     * 查询调用次数
+     */
     private List<Long> queryCallInvocation(String traceId, Long processId) {
         if (StringUtils.isEmpty(traceId)) {
             throw new IllegalArgumentException("traceId is empty");
@@ -183,22 +194,32 @@ public class FlowProcessExecutor {
         RList<Long> list = redissonClient.getList(key);
         list.expire(FlowUtils.REDIS_TRACE_TIMEOUT);
         list.add(processId);
-        List<Long> result = new ArrayList<>(list);
+        return new ArrayList<>(list);
+    }
+
+    /**
+     * 构建执行结果
+     */
+    private static ExecutorResult buildExecutorResult(LiteflowResponse response, ExecuteContext executeContext, VariableContext variableContext) {
+        ExecutorResult result = new ExecutorResult();
+        result.setSuccess(response.isSuccess());
+        result.setCode(response.getCode());
+        result.setMessage(response.getMessage());
+        result.setCause(response.getCause());
+        result.setExecutionEnd(executeContext.isExecuteEnd());
+        result.setExecutionUuid(executeContext.getExecutionUuid());
+        result.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
+        result.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
+        result.setOutputParams(variableContext.getOutputParams());
         return result;
     }
 
-    private static ExecutorResult getExecutorResult(LiteflowResponse response, ExecuteContext executeContext, VariableContext variableContext) {
-        ExecutorResult executorResult = new ExecutorResult();
-        executorResult.setSuccess(response.isSuccess());
-        executorResult.setCode(response.getCode());
-        executorResult.setMessage(response.getMessage());
-        executorResult.setCause(response.getCause());
-        executorResult.setExecutionEnd(executeContext.isExecuteEnd());
-        executorResult.setExecutionUuid(executeContext.getExecutionUuid());
-        executorResult.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
-        executorResult.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
-        executorResult.setOutputParams(variableContext.getOutputParams());
-        return executorResult;
+    /**
+     * 流程执行函数式接口
+     */
+    @FunctionalInterface
+    private interface FlowExecution {
+        ExecutorResult execute();
     }
 
 

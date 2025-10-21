@@ -45,8 +45,8 @@ public class ModalNodeComponent extends SkippableNodeComponent {
             this.setIsEnd(true);
         }
         if (nodeActionEnum == NodeActionEnum.DO_RESET) {
-            variableContext.putNodeVariables(this.getTag(), variableContext.getUuidFiles());
-            variableContext.setUuidFiles(Collections.emptyMap());
+            variableContext.putNodeVariables(this.getTag(), variableContext.getInputFields());
+            variableContext.setInputFields(Collections.emptyMap());
             executeContext.restExecutionUuid();
             executeContext.restExecutionEndNodeTag();
         }
