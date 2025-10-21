@@ -182,6 +182,8 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
      * @param processedData 待处理的数据
      */
     private void processComplexTypeFields(List<MetadataEntityFieldDO> fields, Map<String, Object> processedData) {
+        log.info("开始处理复杂类型字段，字段数量: {}", fields.size());
+        
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
             String fieldType = field.getFieldType();
@@ -195,19 +197,27 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 continue;
             }
             
+            log.info("检查字段 {} (类型: {}), 值类型: {}, 值: {}", 
+                    fieldName, fieldType, fieldValue.getClass().getName(), fieldValue);
+            
             // 判断是否需要JSON序列化的字段类型
-            if (needsJsonSerialization(fieldType, fieldValue)) {
+            boolean needsSerialization = needsJsonSerialization(fieldType, fieldValue);
+            log.info("字段 {} 是否需要JSON序列化: {}", fieldName, needsSerialization);
+            
+            if (needsSerialization) {
                 try {
                     // 将复杂对象序列化为JSON字符串
                     String jsonString = JsonUtils.toJsonString(fieldValue);
                     processedData.put(fieldName, jsonString);
-                    log.debug("字段 {} (类型: {}) 的值已序列化为JSON: {}", fieldName, fieldType, jsonString);
+                    log.info("字段 {} (类型: {}) 的值已序列化为JSON: {}", fieldName, fieldType, jsonString);
                 } catch (Exception e) {
                     log.error("字段 {} 的值序列化为JSON失败: {}", fieldName, e.getMessage(), e);
                     // 序列化失败时，保持原值
                 }
             }
         }
+        
+        log.info("复杂类型字段处理完成，最终数据: {}", processedData);
     }
 
     /**
@@ -225,11 +235,17 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         String upperFieldType = fieldType.toUpperCase();
         
         // 字段类型包含以下关键字的需要JSON序列化
-        boolean isComplexType = upperFieldType.contains("MULTI") ||        // 多选类型
+        boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
+                                upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
                                 upperFieldType.contains("ADDRESS") ||       // 地址类型
                                 upperFieldType.contains("FILE") ||          // 文件附件
                                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                                 upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
+                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
+                                upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
+                                upperFieldType.contains("GEO") ||           // 地理位置（简写）
                                 upperFieldType.equals("JSONB") ||           // JSONB类型
                                 upperFieldType.equals("JSON");              // JSON类型
         
@@ -261,10 +277,30 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         TenantUtils.executeIgnore(() -> {
 
             // 7. 执行插入
-            if (log.isDebugEnabled()) {
-                log.debug("createData -> processedData before insert: {}", processedData);
-            }
+            log.info("准备插入数据，processedData: {}", processedData);
+            
+            // 打印每个字段的详细信息
+            processedData.forEach((key, value) -> {
+                if (value != null) {
+                    log.info("插入前字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
+                } else {
+                    log.info("插入前字段 {} 的值为null", key);
+                }
+            });
+            
             DataRow dataRow = new DataRow(processedData);
+            
+            // 检查DataRow中的数据
+            log.info("DataRow创建后的数据: {}", dataRow);
+            processedData.forEach((key, value) -> {
+                Object dataRowValue = dataRow.get(key);
+                if (dataRowValue != null) {
+                    log.info("DataRow中字段 {} 的值类型: {}, 值: {}", key, dataRowValue.getClass().getName(), dataRowValue);
+                } else {
+                    log.info("DataRow中字段 {} 的值为null", key);
+                }
+            });
+            
             Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
             log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
 

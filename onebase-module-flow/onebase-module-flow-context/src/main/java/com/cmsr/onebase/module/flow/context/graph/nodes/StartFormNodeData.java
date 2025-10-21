@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 public class StartFormNodeData extends NodeData implements Serializable {
 
+    private Long applicationId;
     /**
      * 流程ID，后补充
      */

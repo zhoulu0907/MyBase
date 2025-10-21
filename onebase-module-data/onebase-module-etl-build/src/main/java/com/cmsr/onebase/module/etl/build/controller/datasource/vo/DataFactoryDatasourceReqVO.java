@@ -32,6 +32,6 @@ public class DataFactoryDatasourceReqVO {
     private String config;
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "应用ID不能为空")
+//    @NotBlank(message = "应用ID不能为空")
     private Long appId;
 }

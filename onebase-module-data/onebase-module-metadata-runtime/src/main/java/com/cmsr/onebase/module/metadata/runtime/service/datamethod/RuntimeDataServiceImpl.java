@@ -32,8 +32,21 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
 
     @Override
     public DynamicDataRespVO createData(DynamicDataCreateReqVO reqVO) {
+        log.info("接收到创建数据请求，entityId: {}, 原始数据: {}", reqVO.getEntityId(), reqVO.getData());
+        
         // 将 field_id -> value 转换为 field_name -> value
         Map<String, Object> dataByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getData());
+        
+        log.info("字段ID映射为名称后的数据: {}", dataByName);
+        
+        // 打印每个字段值的类型
+        dataByName.forEach((key, value) -> {
+            if (value != null) {
+                log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
+            } else {
+                log.info("字段 {} 的值为null", key);
+            }
+        });
 
         // 调用core模块的基础服务
         Map<String, Object> resultData = coreDataMethodService.createData(
@@ -149,14 +162,37 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         if (idKeyMap == null || idKeyMap.isEmpty()) {
             return java.util.Collections.emptyMap();
         }
+        
+        // 获取实体的所有字段定义
         List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(entityId);
+        log.debug("实体[{}]共有{}个字段定义", entityId, fields.size());
+        
+        // 构建字段ID到字段名的映射
         Map<Long, String> idToName = fields.stream()
                 .filter(f -> f.getId() != null && f.getFieldName() != null)
                 .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName, (a,b) -> a));
+        
+        log.debug("字段ID到名称映射: {}", idToName);
+        log.debug("请求的字段数据(ID为key): {}", idKeyMap);
 
-        return idKeyMap.entrySet().stream()
-                .filter(e -> e.getKey() != null && idToName.containsKey(e.getKey()))
+        // 转换字段ID为字段名，并记录未匹配的字段
+        Map<String, Object> result = idKeyMap.entrySet().stream()
+                .filter(e -> {
+                    if (e.getKey() == null) {
+                        log.warn("发现null字段ID，已忽略");
+                        return false;
+                    }
+                    if (!idToName.containsKey(e.getKey())) {
+                        log.warn("字段ID[{}]在实体[{}]中不存在，已忽略该字段数据: {}", 
+                                e.getKey(), entityId, e.getValue());
+                        return false;
+                    }
+                    return true;
+                })
                 .collect(Collectors.toMap(e -> idToName.get(e.getKey()), Map.Entry::getValue, (a,b) -> b));
+        
+        log.debug("转换后的字段数据(名称为key): {}", result);
+        return result;
     }
 
     /**

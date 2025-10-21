@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;
@@ -91,7 +92,8 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                     vo.setMessage("表单不满足触发条件");
                     return vo;
                 } else {
-                    ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
+                    //TODO 增加调用的用户
+                    ExecutorResult executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), reqVO.getProcessId(), inputMap);
                     return formTriggerRespVO(executorResult);
                 }
             } else {
