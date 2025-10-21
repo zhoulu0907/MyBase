@@ -17,5 +17,6 @@ export enum WorkflowNodeType {
   Comment = 'comment',
   Continue = 'continue',
   Break = 'break',
-  BpmStart = 'bpm-start'
+  BpmStart = 'bpm-start',
+  BpmEnd = 'bpm-end'
 }
