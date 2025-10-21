@@ -1,19 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Grid, Button, Table, Switch, Tag, type TableColumnProps } from '@arco-design/web-react';
+import {
+  Space,
+  Grid,
+  Button,
+  Table,
+  Switch,
+  Tag,
+  type TableColumnProps,
+  type PaginationProps
+} from '@arco-design/web-react';
 import { IconDownload, IconRefresh, IconArrowDown, IconArrowUp, IconMoreVertical } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
+import { useAppStore } from '@/store';
 
 const FlowExecuteRecordPage: React.FC = () => {
+  const { curAppId } = useAppStore();
+
   const [cardList, setCardList] = useState<any[]>([]);
   const [tableData, setTableData] = useState<any[]>([]);
   // 分页器
-  const [pagination, setPagination] = useState({
-    showTotal: true,
+  const [pagination, setPagination] = useState<PaginationProps>({
     total: 10,
+    current: 1,
     pageSize: 10,
-    current: 1
+    showTotal: true,
+    sizeCanChange: true,
+    pageSizeChangeResetCurrent: true
   });
-  // 认证记录table结构
+  // 执行记录 table
   const columns: TableColumnProps[] = [
     {
       title: '流程名称',
@@ -184,6 +198,12 @@ const FlowExecuteRecordPage: React.FC = () => {
   //  刷新
   const updateRecords = () => {};
 
+  // 分页改变时的回调
+  const onChangeTable = (pagination: PaginationProps) => {
+    const { current, pageSize } = pagination;
+    setPagination((prev) => ({ ...prev, current, pageSize }));
+  };
+
   return (
     <div className={styles.flowExecuteRecordPage}>
       <div className={styles.content}>
@@ -229,7 +249,7 @@ const FlowExecuteRecordPage: React.FC = () => {
           </Grid.Row>
         </div>
         <div className={styles.table}>
-          <Table columns={columns} data={tableData} pagination={pagination}></Table>
+          <Table columns={columns} data={tableData} pagination={pagination} onChange={onChangeTable}></Table>
         </div>
       </div>
     </div>
