@@ -66,6 +66,7 @@ export interface ChildEntityField {
   sortOrder?: number;
   status?: boolean;
   runMode?: boolean;
+  value?: string;
   constraints?: {
     lengthEnabled: number;
     minLength: number;

@@ -153,7 +153,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       // 使用编辑器的插入方法，支持光标定位
       //如果fieldtype是node 代表是节点， 需要传入的格式是$节点.字段
       if(variable.fieldType === "node") {
-        editorRef.current.insertAtPosition(`[[${variable.appId}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
+        editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
       }else {
         editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.displayName}]]`, 'var');
       }
@@ -204,6 +204,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       } else {
         content = match.slice(2, -2)
         content = content.replace(/^[^\.]+\.(.+)$/, '$1,');
+        const temp = content.split("$");
+        if(temp[1]) {
+          content = `$${temp[1]}`
+        }
       }
       return content;
     })
@@ -222,9 +226,14 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     const variablesMapping: { [key: string]: string } = {};
     matches.forEach((match) => {
       const temp = match[1].split(".");
-      const fieldId = temp[0] || "";
-      const fieldName = temp[1] || "";
-      variablesMapping[fieldName] = fieldId;
+      if(temp.length === 4) {
+        variablesMapping[temp[2]] = temp[0];
+        variablesMapping[temp[3]] = temp[1];
+      }else {
+        const fieldId = temp[0] || "";
+        const fieldName = temp[1] || "";
+        variablesMapping[fieldName] = fieldId;
+      }
     })
     return variablesMapping;
   }
