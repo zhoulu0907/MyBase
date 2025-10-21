@@ -71,5 +71,4 @@ public class ComponentDO extends TenantBaseDO {
      */
     @Column(name = "component_index", columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "组件索引")
     private Integer componentIndex;
-
 }

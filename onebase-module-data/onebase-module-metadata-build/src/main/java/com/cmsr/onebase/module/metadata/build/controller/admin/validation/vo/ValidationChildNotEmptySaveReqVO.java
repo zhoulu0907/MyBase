@@ -14,21 +14,16 @@ import lombok.Data;
 @Data
 public class ValidationChildNotEmptySaveReqVO {
 
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "字段ID不能为空")
-    private Long fieldId;
+    @Schema(description = "父实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "父实体ID不能为空")
+    private Long entityId;
 
-    @Schema(description = "子实体ID")
+    @Schema(description = "子实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "子实体ID不能为空")
     private Long childEntityId;
 
     @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;
-
-    @Schema(description = "最少行数", example = "1")
-    private Integer minRows;
-
-    @Schema(description = "子表字段路径")
-    private String childFieldPath;
 
     @Schema(description = "提示信息")
     private String promptMessage;

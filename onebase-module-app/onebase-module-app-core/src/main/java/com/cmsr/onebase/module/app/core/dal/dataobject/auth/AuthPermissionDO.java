@@ -30,4 +30,8 @@ public class AuthPermissionDO extends TenantBaseDO {
 
     @Column(name = "is_all_fields_allowed", nullable = false, comment = "所有字段可操作")
     private Integer isAllFieldsAllowed;
+
+    @Column(name = "operation_tags", nullable = false, comment = "操作权限标签")
+    private String operationTags;
+
 }

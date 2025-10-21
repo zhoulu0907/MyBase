@@ -22,4 +22,11 @@ public class DataFactoryCatalogRepository extends DataRepository<DataFactoryCata
 
         return findOne(cs);
     }
+
+    public void deleteAllByDatasourceId(Long datasourceId) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("datasource_id", datasourceId);
+
+        deleteByConfig(cs);
+    }
 }

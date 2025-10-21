@@ -208,10 +208,46 @@ public class GlobalExceptionHandler {
             }
         }
         
-        // 处理其他JSON映射异常
+        // 处理JSON映射异常（如类型不匹配、字段缺失等）
         if (ex.getCause() instanceof com.fasterxml.jackson.databind.JsonMappingException) {
             com.fasterxml.jackson.databind.JsonMappingException mappingException = (com.fasterxml.jackson.databind.JsonMappingException) ex.getCause();
-            return CommonResult.error(BAD_REQUEST.getCode(), String.format("JSON映射错误：%s", mappingException.getOriginalMessage()));
+            String originalMessage = mappingException.getOriginalMessage();
+            
+            // 特殊处理 MismatchedInputException，提供更友好的错误提示
+            if (mappingException instanceof com.fasterxml.jackson.databind.exc.MismatchedInputException) {
+                com.fasterxml.jackson.databind.exc.MismatchedInputException mismatchException = 
+                    (com.fasterxml.jackson.databind.exc.MismatchedInputException) mappingException;
+                
+                // 获取目标类型名称
+                String targetType = mismatchException.getTargetType() != null ? 
+                    mismatchException.getTargetType().getSimpleName() : "对象";
+                
+                // 获取字段路径
+                String fieldPath = "";
+                if (mismatchException.getPath() != null && !mismatchException.getPath().isEmpty()) {
+                    fieldPath = mismatchException.getPath().stream()
+                        .map(ref -> ref.getFieldName() != null ? ref.getFieldName() : "[" + ref.getIndex() + "]")
+                        .reduce((a, b) -> a + "." + b)
+                        .orElse("");
+                }
+                
+                // 构造友好的错误提示
+                String errorMessage = "JSON数据格式错误";
+                if (StrUtil.isNotBlank(fieldPath)) {
+                    errorMessage += "，字段 [" + fieldPath + "]";
+                }
+                errorMessage += " 需要是 " + targetType + " 类型";
+                
+                // 针对Map类型的特殊提示
+                if (targetType.contains("Map") || targetType.contains("HashMap") || targetType.contains("LinkedHashMap")) {
+                    errorMessage += "，请确保该字段的值是一个JSON对象（用{}包裹），而不是字符串或其他类型";
+                }
+                
+                return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
+            }
+            
+            // 其他JSON映射异常
+            return CommonResult.error(BAD_REQUEST.getCode(), String.format("JSON映射错误：%s", originalMessage));
         }
         
         // 其他HTTP消息不可读异常，返回通用的JSON格式错误提示

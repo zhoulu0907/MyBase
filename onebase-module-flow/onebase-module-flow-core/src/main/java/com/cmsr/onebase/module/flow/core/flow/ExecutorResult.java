@@ -11,6 +11,8 @@ import java.util.Map;
 @Data
 public class ExecutorResult {
 
+    private Long logId;
+
     private boolean success;
 
     private String code;
