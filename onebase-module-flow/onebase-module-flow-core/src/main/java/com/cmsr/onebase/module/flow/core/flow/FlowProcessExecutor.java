@@ -10,11 +10,17 @@ import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RList;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,6 +28,7 @@ import java.util.Map;
  * @Date：2025/9/11 14:32
  */
 @Setter
+@Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
 public class FlowProcessExecutor {
@@ -35,25 +42,100 @@ public class FlowProcessExecutor {
     @Autowired
     private ContextProvider contextProvider;
 
-    public ExecutorResult execute(Long processId, Map<String, Object> inputParams) {
+    @Autowired
+    private RedissonClient redissonClient;
+
+    public ExecutorResult execute(String traceId, Long processId, Map<String, Object> inputParams) {
+        try {
+            return doExecute(traceId, processId, inputParams);
+        } catch (Exception e) {
+            log.error("执行流程异常: {}", traceId, e);
+            ExecutorResult executorResult = new ExecutorResult();
+            executorResult.setSuccess(false);
+            executorResult.setMessage("执行流程异常");
+            executorResult.setCause(e);
+            return executorResult;
+        }
+    }
+
+    private ExecutorResult doExecute(String traceId, Long processId, Map<String, Object> inputParams) {
         Map<String, NodeData> nodeData = graphFlowCache.findNodeData(processId);
         if (nodeData == null) {
-            throw new IllegalArgumentException("流程不存在: " + processId);
+            ExecutorResult executorResult = new ExecutorResult();
+            executorResult.setSuccess(false);
+            executorResult.setMessage("流程不存在");
+            return executorResult;
         }
-        String chainId = FlowUtils.toFlowChainId(processId);
+        if (StringUtils.isEmpty(traceId)) {
+            traceId = FlowUtils.generateTraceId();
+        } else {
+            List<Long> callInvocation = queryCallInvocation(traceId, processId);
+            if (callInvocation.size() > FlowUtils.MAX_QUERY_CALL_COUNT) {
+                ExecutorResult executorResult = new ExecutorResult();
+                executorResult.setSuccess(false);
+                executorResult.setMessage("触发流程执行次数超阈值: [" + traceId + "][" + callInvocation + "]");
+                return executorResult;
+            }
+        }
         // 变量上下文
         VariableContext variableContext = new VariableContext();
         variableContext.setInputParams(inputParams);
         // 执行上下文
         ExecuteContext executeContext = new ExecuteContext();
+        executeContext.setTraceId(traceId);
         executeContext.setProcessId(processId);
         executeContext.setNodeDataMap(nodeData);
         // 执行流程
+        String chainId = FlowUtils.toFlowChainId(processId);
         LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
         variableContext = response.getContextBean(VariableContext.class);
         executeContext = response.getContextBean(ExecuteContext.class);
         ExecutorResult executorResult = getExecutorResult(response, executeContext, variableContext);
         return executorResult;
+    }
+
+    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> uuidFiles) {
+        try {
+            return doExecute(processId, executionUuid, uuidFiles);
+        } catch (Exception e) {
+            log.error("执行流程异常: {}", executionUuid, e);
+            ExecutorResult executorResult = new ExecutorResult();
+            executorResult.setSuccess(false);
+            executorResult.setMessage("执行流程异常");
+            executorResult.setCause(e);
+            return executorResult;
+        }
+    }
+
+    private ExecutorResult doExecute(Long processId, String executionUuid, Map<String, Object> uuidFiles) {
+        String chainId = FlowUtils.toFlowChainId(processId);
+        VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
+        if (variableContext == null) {
+            throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
+        }
+        variableContext.setUuidFiles(uuidFiles);
+        variableContext.setOutputParams(new HashMap<>());
+        ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
+        if (executeContext == null) {
+            throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
+        }
+        LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
+        variableContext = response.getContextBean(VariableContext.class);
+        executeContext = response.getContextBean(ExecuteContext.class);
+        ExecutorResult executorResult = getExecutorResult(response, executeContext, variableContext);
+        return executorResult;
+    }
+
+    private List<Long> queryCallInvocation(String traceId, Long processId) {
+        if (StringUtils.isEmpty(traceId)) {
+            throw new IllegalArgumentException("traceId is empty");
+        }
+        String key = FlowUtils.toRedisTraceKey(traceId);
+        RList<Long> list = redissonClient.getList(key);
+        list.expire(FlowUtils.REDIS_TRACE_TIMEOUT);
+        list.add(processId);
+        List<Long> result = new ArrayList<>(list);
+        return result;
     }
 
     private static ExecutorResult getExecutorResult(LiteflowResponse response, ExecuteContext executeContext, VariableContext variableContext) {
@@ -70,21 +152,5 @@ public class FlowProcessExecutor {
         return executorResult;
     }
 
-    public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputMap) {
-        String chainId = FlowUtils.toFlowChainId(processId);
-        VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
-        if (variableContext == null) {
-            throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
-        }
-        variableContext.setOutputParams(new HashMap<>());
-        ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
-        if (executeContext == null) {
-            throw new IllegalArgumentException("执行上下文不存在: " + executionUuid);
-        }
-        LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
-        variableContext = response.getContextBean(VariableContext.class);
-        executeContext = response.getContextBean(ExecuteContext.class);
-        ExecutorResult executorResult = getExecutorResult(response, executeContext, variableContext);
-        return executorResult;
-    }
+
 }

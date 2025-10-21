@@ -6,6 +6,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 /**
+ * InLoopDepth里面存储的是节点在loop循环的层次
+ *
+ *
  * @Author：huangjie
  * @Date：2025/9/28 17:52
  */

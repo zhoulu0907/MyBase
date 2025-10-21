@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 public class ComponentDO extends TenantBaseDO {
 
     public static final String PAGE_ID = "page_id";
+    public static final String COMPONENT_INDEX = "component_index";
 
     /**
      * 组件编码

@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.core.enums.RocketMQConstants;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -85,26 +86,41 @@ public class FlowJobMessageHandler implements MessageListener, ApplicationRunner
 
     @Override
     public ConsumeResult consume(MessageView messageView) {
-        FlowJobMessage message = FlowJobMessage.decode(messageView.getBody());
-        String result;
+        FlowJobMessage jobMessage = FlowJobMessage.decode(messageView.getBody());
+        String result = "";
+        try {
+            ExecutorResult executorResult = executeFlow(jobMessage);
+            if (executorResult.isSuccess()) {
+                result = executorResult.isSuccess() ? "success:" : "fail:";
+                result = result + JsonUtils.toJsonString(executorResult);
+            } else {
+                result = "fail:" + ExceptionUtils.getRootCauseMessage(executorResult.getCause());
+            }
+        } finally {
+            redisTemplate.opsForValue().set(RocketMQConstants.JOB_EVENTS_RESULT + jobMessage.getUuid(), result, 120, TimeUnit.SECONDS);
+            return ConsumeResult.SUCCESS;
+        }
+    }
+
+    public ExecutorResult executeFlow(FlowJobMessage jobMessage) {
+        ExecutorResult executorResult;
         try {
             Map<String, Object> inputParams;
-            if (message.getMsgType().equals("fld")) {
-                inputParams = createDateFieldInputParams(message);
+            if (jobMessage.getJobType().equals("fld")) {
+                inputParams = createDateFieldInputParams(jobMessage);
             } else {
-                inputParams = createTimeInputParams(message);
+                inputParams = createTimeInputParams(jobMessage);
             }
-            log.info("接受到MQ消息: {}", message);
-            ExecutorResult executorResult = flowProcessExecutor.execute(message.getProcessId(), inputParams);
+            log.info("处理流程消息: {}", jobMessage);
+            executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), jobMessage.getProcessId(), inputParams);
             log.error("执行流程结果：{}", executorResult);
-            result = executorResult.isSuccess() ? "success:" : "fail:";
-            result = result + JsonUtils.toJsonString(executorResult);
         } catch (Exception e) {
-            log.error("处理MQ消息异常：{}", e.getMessage(), e);
-            result = "fail:" + ExceptionUtils.getRootCauseMessage(e);
+            log.error("处理流程消息异常：{}", e.getMessage(), e);
+            executorResult = new ExecutorResult();
+            executorResult.setSuccess(false);
+            executorResult.setCause(e);
         }
-        redisTemplate.opsForValue().set(RocketMQConstants.JOB_EVENTS_RESULT + message.getUuid(), result, 120, TimeUnit.SECONDS);
-        return ConsumeResult.SUCCESS;
+        return executorResult;
     }
 
     private Map<String, Object> createDateFieldInputParams(FlowJobMessage message) {
