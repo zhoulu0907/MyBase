@@ -50,8 +50,8 @@ public class FlowExecutionLogController {
 
     @GetMapping("/statistic-tody")
     @Operation(summary = "统计执行日志")
-    public CommonResult<Map<String, Integer>> statisticTody(@RequestParam("applicationId") Long applicationId) {
-        Map<String, Integer> result = flowExecutionLogService.statisticTody(applicationId);
+    public CommonResult<Map<String, Object>> statisticTody(@RequestParam("applicationId") Long applicationId) {
+        Map<String, Object> result = flowExecutionLogService.statisticTody(applicationId);
         return CommonResult.success(result);
     }
 }
