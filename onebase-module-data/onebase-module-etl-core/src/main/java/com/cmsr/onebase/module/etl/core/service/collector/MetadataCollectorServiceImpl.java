@@ -12,10 +12,7 @@ import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
-import org.anyline.metadata.Catalog;
-import org.anyline.metadata.Column;
-import org.anyline.metadata.Schema;
-import org.anyline.metadata.Table;
+import org.anyline.metadata.*;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,6 +123,20 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                     tableRepository.update(newTableDO);
                 } else {
                     tableRepository.insert(newTableDO);
+                }
+            }
+            Map<String, View> views = temporary.metadata().views();
+            for (View view : views.values()) {
+                String viewName = view.getName();
+                // 重新获取一遍，由于Anyline .views()方法会忽略列(Column)
+                Map<String, Column> viewColumn = temporary.metadata().columns(view);
+                DataFactoryTableDO newViewDO = DataFactoryTableDO.convert(datasourceId, catalogId, schemaId, view, viewColumn);
+                if (tableDOs.containsKey(viewName)) {
+                    DataFactoryTableDO oldViewDO = tableDOs.get(viewName);
+                    DataFactoryTableDO.applyChanges(oldViewDO, newViewDO);
+                    tableRepository.update(newViewDO);
+                } else {
+                    tableRepository.insert(newViewDO);
                 }
             }
             return true;
