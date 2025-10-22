@@ -5,7 +5,7 @@
 
 
 ### 请求 /create 接口 => 创建函数
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/excute/engine/executeFormula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -15,12 +15,12 @@ Content-Type: application/json
     "formula": "LEFT(paramA, length)",
     "parameters": {
         "paramA": "HELLO",
-        "length": 3
+        "length": 5
     }
 }
 
 ### 请求 /create 接口 => 创建函数
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/excute/engine/executeFormula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -31,7 +31,18 @@ Content-Type: application/json
 }
 
 ### 请求 /execute 接口 => 执行函数函数 获取人员信息
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/excute/engine/executeFormula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula": "GETUSER(id,name,'id')",
+  "parameters": {}
+}
+
+### 请求 /execute 接口 => 执行函数函数 获取人员信息
+POST {{baseUrl}}/formula/engine/executeFormula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -42,7 +53,7 @@ Content-Type: application/json
 }
 
 ### 请求 /create 接口 => 创建函数
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/excute/engine/executeFormula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -51,36 +62,23 @@ Content-Type: application/json
     "formula": "SUMIF(#X.A, >10, #X.B)"
 }
 
-### 请求 /execute 接口 => 执行函数函数 获取人员信息
-POST {{baseUrl}}/formula/engine/debugFormula
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+### 执行公式计算
+POST {{baseUrl}}/formula/excute/engine/executeFormula
 Content-Type: application/json
 
 {
-  "formula": "GETUSER(id,name,'name')",
-  "parameters": {}
+  "formula": "=SUM(A1:A10)",
+  "parameters": {
+    "A1": 10,
+    "A2": 20,
+    "A3": 30
+  }
 }
 
-### 请求 /execute 接口 => 执行函数函数 计数
-POST {{baseUrl}}/formula/engine/debugFormula
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+### 验证公式语法
+POST {{baseUrl}}/formula/excute/engine/validate
 Content-Type: application/json
 
 {
-  "formula": "COUNT($a.b, $b.c)",
-  "parameters": {"$a.b": 5, "$b.c": 6}
+  "formula": "=SUM(A1:A10)"
 }
-
-### 请求 /execute 接口 => 执行函数函数 计数
-POST {{baseUrl}}/formula/engine/debugFormula
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
-Content-Type: application/json
-
-{
-  "formula": "COUNT(abc,bcd)",
-  "parameters": {"abc": "5", "bcd": "6"}
-}
-
