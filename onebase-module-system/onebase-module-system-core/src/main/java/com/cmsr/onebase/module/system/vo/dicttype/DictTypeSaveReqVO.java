@@ -31,4 +31,10 @@ public class DictTypeSaveReqVO {
     @Schema(description = "备注", example = "快乐的备注")
     private String remark;
 
+    @Schema(description = "字典所有者类型（app-应用自定义字典，tenant-空间公共字典）", example = "tenant")
+    private String dictOwnerType;
+
+    @Schema(description = "字典所有者ID（应用ID或租户ID）", example = "1")
+    private Long dictOwnerId;
+
 }

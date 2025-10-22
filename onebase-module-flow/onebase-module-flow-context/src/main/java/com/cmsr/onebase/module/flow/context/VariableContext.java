@@ -30,7 +30,7 @@ public class VariableContext implements Serializable {
 
     @Getter
     @Setter
-    private Map<String, Object> uuidFiles = Collections.emptyMap();
+    private Map<String, Object> inputFields = Collections.emptyMap();
 
     public void setInputParams(Map<String, Object> inputParams) {
         if (inputParams != null) {

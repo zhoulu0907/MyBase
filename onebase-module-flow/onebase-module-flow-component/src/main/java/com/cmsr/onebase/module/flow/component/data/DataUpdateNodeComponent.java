@@ -49,6 +49,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         //
         UpdateDataReqDTO reqDTO = new UpdateDataReqDTO();
+        reqDTO.setTraceId(executeContext.getTraceId());
         if (nodeData.getMainEntityId() != null) {
             reqDTO.setEntityId(nodeData.getMainEntityId());
         } else {

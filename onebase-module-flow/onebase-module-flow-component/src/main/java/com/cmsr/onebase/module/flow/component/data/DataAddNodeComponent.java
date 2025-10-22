@@ -66,6 +66,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         }
         // 执行数据添加操作
         InsertDataReqDTO reqDTO = new InsertDataReqDTO();
+        reqDTO.setTraceId(executeContext.getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setData(reqData);
 

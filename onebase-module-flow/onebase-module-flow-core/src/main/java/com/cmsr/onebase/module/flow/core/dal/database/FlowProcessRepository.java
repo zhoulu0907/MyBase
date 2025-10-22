@@ -61,5 +61,15 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         return findAllByConfig(configs);
     }
 
+    public String findProcessNameById(Long id) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.columns("process_name");
+        configs.eq("id", id);
+        FlowProcessDO process = findOne(configs);
+        if (process != null) {
+            return process.getProcessName();
+        }
+        return null;
+    }
 
 }
