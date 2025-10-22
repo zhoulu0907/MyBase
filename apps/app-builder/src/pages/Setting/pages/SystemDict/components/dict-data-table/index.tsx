@@ -1,6 +1,5 @@
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import { Input, Pagination, Popconfirm, Table } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
 import { type DictData, StatusEnum } from '@onebase/platform-center';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
@@ -15,7 +14,7 @@ interface DictionaryTableProps {
   onPageSizeChange: (size: number) => void;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onAdd: () => void;
+  onBatchConfig: () => void;
   onEdit: (item: DictData) => void;
   onDelete: (id: number) => void;
   onUpdateStatus: (id: number, status: number) => void;
@@ -30,7 +29,7 @@ export default function DictionaryTable({
   onPageSizeChange,
   searchValue,
   onSearchChange,
-  onAdd,
+  onBatchConfig,
   onEdit,
   onDelete,
   onUpdateStatus
@@ -85,9 +84,8 @@ export default function DictionaryTable({
   return (
     <>
       <div className={s.tableHeader}>
-        <Button permission={ACTIONS.CREATE} type="primary" onClick={onAdd}>
-          <IconPlus />
-          添加
+        <Button permission={ACTIONS.CREATE} type="primary" onClick={onBatchConfig}>
+          字典值配置
         </Button>
         <Input.Search
           value={searchValue}

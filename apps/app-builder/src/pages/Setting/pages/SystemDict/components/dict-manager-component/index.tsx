@@ -21,6 +21,7 @@ import { debounce } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import DictDataModal from '@/pages/Setting/pages/SystemDict/components/dict-data-modal';
 import DictModal from '@/pages/Setting/pages/SystemDict/components/dict-modal';
+import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-config-modal';
 import styles from '../../index.module.less';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
@@ -49,6 +50,7 @@ export interface DictManagerConfig {
     updateDictData?: (data: DictData) => Promise<any>;
     deleteDictData?: (id: number) => Promise<any>;
     updateDictDataStatus?: (params: { id: number; status: number }) => Promise<any>;
+    batchConfigDictData?: (data: DictData[]) => Promise<any>;
   };
   // UI 配置
   ui?: {
@@ -138,7 +140,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   };
 
   // Tabs 相关状态
-  const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs.systemDictTab.key);
+  const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs.systemDictTab?.key || '');
 
   // 字典相关状态
   const [dictList, setDictList] = useState<DictItem[]>([]);
@@ -159,15 +161,17 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   const [dictDataModalVisible, setDictDataModalVisible] = useState(false);
   const [dictDataModalLoading, setDictDataModalLoading] = useState(false);
   const [editItem, setEditItem] = useState<DictData | null>(null);
+  const [batchConfigModalVisible, setBatchConfigModalVisible] = useState(false);
+  const [batchConfigLoading, setBatchConfigLoading] = useState(false);
 
   // 获取当前tab的配置
   const getCurrentTabConfig = () => {
-    if (activeTab === finalConfig.tabs.systemDictTab.key) {
+    if (activeTab === finalConfig.tabs.systemDictTab?.key) {
       return {
-        api: { ...finalConfig.api, ...finalConfig.tabs.systemDictTab.api },
-        permissions: { ...finalConfig.permissions, ...finalConfig.tabs.systemDictTab.permissions }
+        api: { ...finalConfig.api, ...finalConfig.tabs.systemDictTab?.api },
+        permissions: { ...finalConfig.permissions, ...finalConfig.tabs.systemDictTab?.permissions }
       };
-    } else if (activeTab === finalConfig.tabs.customDictTab.key) {
+    } else if (activeTab === finalConfig.tabs.customDictTab?.key) {
       return {
         api: { ...finalConfig.api, ...finalConfig.tabs.customDictTab.api },
         permissions: { ...finalConfig.permissions, ...finalConfig.tabs.customDictTab.permissions }
@@ -426,6 +430,80 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     });
   };
 
+  // 批量配置字典值
+  const handleBatchConfig = () => {
+    setBatchConfigModalVisible(true);
+  };
+
+  // 批量配置确认
+  const handleBatchConfigOk = async (values: any[]) => {
+    setBatchConfigLoading(true);
+    try {
+      if (!activeDict?.type) {
+        Message.error('请先选择字典');
+        return;
+      }
+
+      // 分离新增和更新的数据
+      const newItems = values.filter((item) => item.id.startsWith('temp-'));
+      const updateItems = values.filter((item) => !item.id.startsWith('temp-'));
+
+      // 处理新增
+      if (newItems.length > 0) {
+        const newData = newItems.map((item) => ({
+          dictType: activeDict.type,
+          label: item.label,
+          value: item.value,
+          status: item.status,
+          sort: item.sort,
+          remark: ''
+        }));
+
+        // 如果有批量创建API，使用批量API
+        if (currentTabConfig.api?.batchConfigDictData) {
+          await currentTabConfig.api?.batchConfigDictData(newData);
+        } else {
+          // 否则逐个创建
+          for (const data of newData) {
+            await currentTabConfig.api.createDictData(data);
+          }
+        }
+      }
+
+      // 处理更新
+      if (updateItems.length > 0) {
+        const updateData = updateItems.map((item) => ({
+          id: item.id,
+          dictType: activeDict.type,
+          label: item.label,
+          value: item.value,
+          status: item.status,
+          sort: item.sort,
+          remark: ''
+        }));
+
+        // 如果有批量更新API，使用批量API
+        if (currentTabConfig.api.batchUpdateDictData) {
+          await currentTabConfig.api.batchUpdateDictData(updateData);
+        } else {
+          // 否则逐个更新
+          for (const data of updateData) {
+            await currentTabConfig.api.updateDictData(data);
+          }
+        }
+      }
+
+      Message.success('批量配置成功');
+      setBatchConfigModalVisible(false);
+      loadTableData();
+    } catch (error) {
+      console.error('批量配置失败:', error);
+      Message.error('批量配置失败');
+    } finally {
+      setBatchConfigLoading(false);
+    }
+  };
+
   return (
     <div className={`${styles.systemDictPage} ${finalConfig.className}`} style={finalConfig.style}>
       {finalConfig.tabs.enabled ? (
@@ -468,10 +546,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                       onPageSizeChange={setPageSize}
                       searchValue={dictDataSearch}
                       onSearchChange={handleDictDataSearch}
-                      onAdd={() => {
-                        setDictDataModalVisible(true);
-                        setEditItem(null);
-                      }}
+                      onBatchConfig={handleBatchConfig}
                       onEdit={(item) => handleDictDataEdit(item)}
                       onDelete={(id) => handleDeleteDictData(id)}
                       onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
@@ -519,10 +594,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                       onPageSizeChange={setPageSize}
                       searchValue={dictDataSearch}
                       onSearchChange={handleDictDataSearch}
-                      onAdd={() => {
-                        setDictDataModalVisible(true);
-                        setEditItem(null);
-                      }}
+                      onBatchConfig={handleBatchConfig}
                       onEdit={(item) => handleDictDataEdit(item)}
                       onDelete={(id) => handleDeleteDictData(id)}
                       onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
@@ -571,10 +643,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                   onPageSizeChange={setPageSize}
                   searchValue={dictDataSearch}
                   onSearchChange={handleDictDataSearch}
-                  onAdd={() => {
-                    setDictDataModalVisible(true);
-                    setEditItem(null);
-                  }}
+                  onBatchConfig={handleBatchConfig}
                   onEdit={(item) => handleDictDataEdit(item)}
                   onDelete={(id) => handleDeleteDictData(id)}
                   onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
@@ -627,6 +696,14 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
           setEditItem(null);
         }}
         title={editItem ? '编辑字典值' : '添加字典值'}
+      />
+      <BatchConfigModal
+        visible={batchConfigModalVisible}
+        onCancel={() => setBatchConfigModalVisible(false)}
+        onOk={handleBatchConfigOk}
+        loading={batchConfigLoading}
+        initialValues={tableData}
+        dictType={activeDict?.type || ''}
       />
     </div>
   );
