@@ -162,6 +162,9 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
         for(MetadataEntityRelationshipDO relationshipDO: relationshipDOs) {
+            if("DELETE".equals(relationshipDO.getCascadeType())){
+                continue;
+            }
             if (relationshipDO.getRelationshipType().equals("MANY_TO_ONE")) {
                 log.info("被删除表和关联表是多对一关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
                 return;
@@ -172,7 +175,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                     return;
                 }
                 MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
-                if ("parent_id".equals(sourceFieldDO.getFieldName()) || sourceEntity.getTableName().contains("detail")) {
+                if ("parent_id".equals(sourceFieldDO.getFieldName())) {
                     log.info("被删除表是子表，表名：{}，无需对主表删除", sourceEntity.getTableName());
                     return;
                 }
@@ -234,6 +237,9 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
         for(MetadataEntityRelationshipDO relationshipDO: relationshipDOs) {
+            if("DELETE".equals(relationshipDO.getCascadeType())){
+                continue;
+            }
             if (relationshipDO.getRelationshipType().equals("ONE_TO_MANY")) {
                 log.info("关联表和被删除表是一对多关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
                 return;
@@ -244,7 +250,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                     return;
                 }
                 MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
-                if ("parent_id".equals(targetFieldDO.getFieldName()) || targetEntity.getTableName().contains("detail")) {
+                if ("parent_id".equals(targetFieldDO.getFieldName())) {
                     log.info("被删除表是子表，表名：{}，无需对主表删除", targetEntity.getTableName());
                     return;
                 }
