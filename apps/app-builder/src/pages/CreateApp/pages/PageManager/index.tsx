@@ -1,7 +1,7 @@
 import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
-import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
+import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { menuEditorSignal } from '@/store/singals/menu_editor';
@@ -613,7 +613,12 @@ const PageManagerPage: FC = () => {
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                        <Button className={styles.editButton} type="primary" icon={<img src={EditIcon} alt='编辑页面' />} onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}>
+                        <Button
+                          className={styles.editButton}
+                          type="primary"
+                          icon={<img src={EditIcon} alt="编辑页面" />}
+                          onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}
+                        >
                           {t('createApp.editPage')}
                         </Button>
                       </div>
