@@ -57,4 +57,9 @@ public enum AuthRoleTypeEnum {
     public static boolean isSystemRoleType(Integer value) {
         return SYSTEM_ADMIN.getValue().equals(value) || SYSTEM_USER.getValue().equals(value);
     }
+
+    public static boolean isSystemAdminRole(String code) {
+        return SYSTEM_ADMIN.getCode().equals(code);
+    }
+
 }

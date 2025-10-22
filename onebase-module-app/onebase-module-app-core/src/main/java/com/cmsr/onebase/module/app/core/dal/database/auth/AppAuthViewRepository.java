@@ -30,4 +30,22 @@ public class AppAuthViewRepository extends DataRepository<AuthViewDO> {
         return this.findAllByConfig(configs);
     }
 
+    public AuthViewDO findByQuery(AuthPermissionReqVO reqVO, Long viewId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", reqVO.getApplicationId());
+        configs.eq("role_id", reqVO.getRoleId());
+        configs.eq("menu_id", reqVO.getMenuId());
+        configs.eq("view_id", viewId);
+        return this.findOne(configs);
+    }
+
+    public void deleteByQuery(AuthPermissionReqVO reqVO) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", reqVO.getApplicationId());
+        configs.eq("role_id", reqVO.getRoleId());
+        configs.eq("menu_id", reqVO.getMenuId());
+        this.deleteByConfig(configs);
+    }
+
+
 }

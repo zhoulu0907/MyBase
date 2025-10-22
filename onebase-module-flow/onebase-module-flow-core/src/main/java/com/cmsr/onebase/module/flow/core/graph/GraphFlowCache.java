@@ -1,20 +1,27 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.FieldTypeProvider;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
-import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
-import com.cmsr.onebase.module.flow.core.graph.data.StartDateFieldNodeData;
-import com.cmsr.onebase.module.flow.core.graph.data.StartEntityNodeData;
-import com.cmsr.onebase.module.flow.core.graph.data.StartFormNodeData;
-import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
+import lombok.Setter;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -24,65 +31,109 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Conditional(FlowRuntimeCondition.class)
 public class GraphFlowCache {
 
-    private ConcurrentHashMap<Long, Map<String, Map<String, Object>>> flowNodeDataCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Long, Long> processApplicationCache = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<Long, Map<String, NodeData>> flowNodeDataCache = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Long, StartTimeNodeData> startTimeNodeDataCache = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Long, StartFormNodeData> startFormNodeDataCache = new ConcurrentHashMap<>();
 
-    private CopyOnWriteArrayList<StartEntityNodeData> startEntityNodeDataCache = new CopyOnWriteArrayList<>();
+    private ConcurrentHashMap<Long, StartEntityNodeData> startEntityNodeDataCache = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
 
-    public void update(Long processId, JsonGraph jsonGraph) {
-        Map<String, Map<String, Object>> flowNodeData = jsonGraph.getNodeData();
+    @Setter
+    @Autowired
+    private ObjectProvider<FieldTypeProvider> objectProvider;
+
+    public void update(Long applicationId, Long processId, JsonGraph jsonGraph) {
+        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
+        fieldTypeProvider.completeFieldType(jsonGraph);
+        Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
         JsonGraphNode startNode = jsonGraph.getStartNode();
         if (startNode.getType().equalsIgnoreCase(JsonGraphConstant.START_TIME)) {
-            StartTimeNodeData startTimeNodeData = new StartTimeNodeData();
-            JsonUtils.updateBean(startTimeNodeData, startNode.getData());
-            startTimeNodeDataCache.put(processId, startTimeNodeData);
+            StartTimeNodeData nodeData = (StartTimeNodeData) startNode.getData();
+            nodeData.setApplicationId(applicationId);
+            nodeData.setProcessId(processId);
+            startTimeNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_FORM)) {
-            StartFormNodeData startFormNodeData = new StartFormNodeData();
-            JsonUtils.updateBean(startFormNodeData, startNode.getData());
-            startFormNodeDataCache.put(processId, startFormNodeData);
+            StartFormNodeData nodeData = (StartFormNodeData) startNode.getData();
+            nodeData.setApplicationId(applicationId);
+            nodeData.setProcessId(processId);
+            startFormNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_ENTITY)) {
-            StartEntityNodeData startEntityNodeData = new StartEntityNodeData();
-            JsonUtils.updateBean(startEntityNodeData, startNode.getData());
-            startEntityNodeData.setProcessId(processId);
-            startEntityNodeDataCache.add(startEntityNodeData);
+            StartEntityNodeData nodeData = (StartEntityNodeData) startNode.getData();
+            nodeData.setApplicationId(applicationId);
+            nodeData.setProcessId(processId);
+            startEntityNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_DATE_FIELD)) {
-            StartDateFieldNodeData startDateFieldNodeData = new StartDateFieldNodeData();
-            JsonUtils.updateBean(startDateFieldNodeData, startNode.getData());
-            startDateFieldNodeData.setProcessId(processId);
-            startDateFieldNodeDataCache.put(processId, startDateFieldNodeData);
+            StartDateFieldNodeData nodeData = (StartDateFieldNodeData) startNode.getData();
+            nodeData.setApplicationId(applicationId);
+            nodeData.setProcessId(processId);
+            startDateFieldNodeDataCache.put(processId, nodeData);
         }
+        processApplicationCache.put(processId, applicationId);
     }
 
-    public void delete(Long processId) {
+    public void deleteByApplicationId(Long applicationId, Long processId) {
         flowNodeDataCache.remove(processId);
         startTimeNodeDataCache.remove(processId);
         startFormNodeDataCache.remove(processId);
         startDateFieldNodeDataCache.remove(processId);
-        startEntityNodeDataCache.removeIf(startEntityNodeData -> startEntityNodeData.getEntityId().equals(processId));
+        startEntityNodeDataCache.remove(processId);
+        processApplicationCache.remove(processId);
     }
 
-    public Map<String, Map<String, Object>> getNodeData(Long processId) {
+    public boolean isProcessExist(Long processId) {
+        return flowNodeDataCache.containsKey(processId);
+    }
+
+    public Map<String, NodeData> findNodeData(Long processId) {
         return flowNodeDataCache.get(processId);
     }
 
-    public StartTimeNodeData getStartTimeNodeData(Long processId) {
+    public StartTimeNodeData findStartTimeNodeDataByProcessId(Long processId) {
         return startTimeNodeDataCache.get(processId);
     }
 
-    public StartFormNodeData getStartFormNodeData(Long processId) {
+    public StartFormNodeData findStartFormNodeDataByProcessId(Long processId) {
         return startFormNodeDataCache.get(processId);
     }
 
-    public List<StartEntityNodeData> getStartEntityNodeData(Long entityId) {
-        return startEntityNodeDataCache.stream()
+    public StartDateFieldNodeData findStartDateFieldNodeDataByProcessId(Long processId) {
+        return startDateFieldNodeDataCache.get(processId);
+    }
+
+    public List<StartEntityNodeData> findStartEntityNodeDataByEntityId(Long entityId) {
+        return startEntityNodeDataCache.values().stream()
                 .filter(startEntityNodeData -> startEntityNodeData.getEntityId().equals(entityId))
                 .toList();
     }
 
+    public List<StartFormNodeData> findStartFormNodeDataByPageId(Long pageId) {
+        return startFormNodeDataCache.values().stream()
+                .filter(startFormNodeData -> startFormNodeData.getPageId().equals(pageId))
+                .toList();
+    }
+
+    public Set<Long> findProcessByApplicationId(Long applicationId) {
+        return processApplicationCache.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(applicationId))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<Long> deleteByApplicationId(Long applicationId) {
+        Set<Long> processIds = findProcessByApplicationId(applicationId);
+        for (Long processId : processIds) {
+            deleteByApplicationId(applicationId, processId);
+        }
+        return processIds;
+    }
+
+    public Long findApplicationByProcessId(Long processId) {
+        return processApplicationCache.get(processId);
+    }
 }

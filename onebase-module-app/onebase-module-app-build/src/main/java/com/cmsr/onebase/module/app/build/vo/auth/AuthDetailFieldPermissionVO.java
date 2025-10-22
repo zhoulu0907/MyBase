@@ -14,8 +14,12 @@ import java.util.List;
 public class AuthDetailFieldPermissionVO {
 
     @Schema(description = "所有字段可操作")
-    private Integer isAllFieldsAllowed = 0;
+    private Integer isAllFieldsAllowed;
 
     @Schema(description = "字段权限")
-    private List<AuthFieldVO> authFields;
+    private List<AuthFieldVO> authFieldsRD;
+
+    @Schema(description = "字段权限")
+    private List<AuthFieldVO> authFieldsDL;
+
 }

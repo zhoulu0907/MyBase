@@ -1,9 +1,14 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
+import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
+import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
+import com.cmsr.onebase.module.flow.context.graph.nodes.DataQueryNodeData;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
@@ -11,10 +16,10 @@ import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -23,27 +28,38 @@ import java.util.Map;
 @Slf4j
 @Setter
 @LiteflowComponent("dataQuery")
-public class DataQueryNodeComponent extends NormalNodeComponent {
+public class DataQueryNodeComponent extends SkippableNodeComponent {
 
     @Autowired
     private DataMethodApi dataMethodApi;
 
     @Autowired
-    private DataMethodApiHelper dataMethodApiHelper;
-
+    private ConditionsProvider conditionsProvider;
 
     @Override
     public void process() throws Exception {
         log.info("DataQueryNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         VariableContext variableContext = this.getContextBean(VariableContext.class);
-        Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
+        DataQueryNodeData nodeData = (DataQueryNodeData) executeContext.getNodeData(this.getTag());
+        InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         // 转换成数据方法参数
-        EntityFieldDataReqDTO reqDTO = dataMethodApiHelper.convertQueryReq(nodeData, variableContext);
+        EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
+        if (nodeData.getMainEntityId() != null) {
+            reqDTO.setEntityId(nodeData.getMainEntityId());
+        } else {
+            reqDTO.setEntityId(nodeData.getSubEntityId());
+        }
+        if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
+            List<Conditions> conditions = nodeData.getFilterCondition();
+            OrExpression orExpression = conditionsProvider.formatConditionsForValue(this, variableContext, inLoopDepth, conditions);
+            reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
+        }
+        reqDTO.setOrderDtos(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));
         reqDTO.setNum(1);
         List<List<EntityFieldDataRespDTO>> fieldDataRespDTOS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOS)) {
-            variableContext.putNodeVariables(this.getTag(), dataMethodApiHelper.convertToMap(fieldDataRespDTOS.get(0)));
+            variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToMap(fieldDataRespDTOS.get(0)));
         }
     }
 

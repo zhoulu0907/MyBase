@@ -32,8 +32,8 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         if (StringUtils.isNotEmpty(reqVO.getProcessName())) {
             configs.like("process_name", reqVO.getProcessName());
         }
-        if (reqVO.getProcessStatus() != null) {
-            configs.eq("process_status", reqVO.getProcessStatus());
+        if (reqVO.getEnableStatus() != null) {
+            configs.eq("enable_status", reqVO.getEnableStatus());
         }
         if (StringUtils.isNotEmpty(reqVO.getTriggerType())) {
             configs.eq("trigger_type", reqVO.getTriggerType());
@@ -42,9 +42,9 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public List<FlowProcessDO> findAllByPublishStatus(Integer status) {
+    public List<FlowProcessDO> findAllByEnableStatus(Integer status) {
         DefaultConfigStore configs = new DefaultConfigStore();
-        configs.eq("publish_status", status);
+        configs.eq("enable_status", status);
         return findAllByConfig(configs);
     }
 
@@ -61,5 +61,15 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         return findAllByConfig(configs);
     }
 
+    public String findProcessNameById(Long id) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.columns("process_name");
+        configs.eq("id", id);
+        FlowProcessDO process = findOne(configs);
+        if (process != null) {
+            return process.getProcessName();
+        }
+        return null;
+    }
 
 }

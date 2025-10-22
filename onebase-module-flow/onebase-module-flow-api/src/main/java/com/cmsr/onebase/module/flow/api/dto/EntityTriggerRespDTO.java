@@ -3,9 +3,6 @@ package com.cmsr.onebase.module.flow.api.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * @Author：huangjie
  * @Date：2025/9/19 10:59
@@ -14,19 +11,37 @@ import java.util.Map;
 @Schema(description = "实体操作触发响应DTO")
 public class EntityTriggerRespDTO {
 
-    public final static EntityTriggerRespDTO SUCCESS = new EntityTriggerRespDTO(true);
+    private String traceId;
 
     private boolean success;
 
-    private Exception exception;
+    private String code;
 
-    public EntityTriggerRespDTO(boolean success) {
+    private String message;
+
+    private Exception cause;
+
+    private boolean executionEnd;
+
+    public EntityTriggerRespDTO(String traceId) {
+        this.traceId = traceId;
+    }
+
+    public EntityTriggerRespDTO(String traceId, boolean success) {
+        this.traceId = traceId;
         this.success = success;
     }
 
-    public EntityTriggerRespDTO(boolean success, Exception exception) {
+    public EntityTriggerRespDTO(String traceId, boolean success, String message) {
+        this.traceId = traceId;
         this.success = success;
-        this.exception = exception;
+        this.message = message;
+    }
+
+    public EntityTriggerRespDTO(String traceId, boolean success, Exception cause) {
+        this.traceId = traceId;
+        this.success = success;
+        this.cause = cause;
     }
 
 }

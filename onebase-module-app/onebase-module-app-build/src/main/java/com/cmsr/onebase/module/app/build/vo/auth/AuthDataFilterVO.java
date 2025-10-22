@@ -23,9 +23,6 @@ public class AuthDataFilterVO {
     @Schema(description = "字段id")
     private Long fieldId;
 
-    @Schema(description = "字段名称")
-    private String fieldName;
-
     @Schema(description = "比较操作符号")
     private String fieldOperator;
 

@@ -20,7 +20,7 @@ public enum AuthOperationEnum {
 
     EXPORT("export", "导出"),
 
-    SHARE("share", "所有权限");
+    SHARE("share", "分享");
 
     private String operation;
 
@@ -34,7 +34,18 @@ public enum AuthOperationEnum {
         this.data = new Data(operation, label);
     }
 
-    public static List<Data> getData() {
+    public static List<String> getOperations() {
+        return List.of(
+                CREATE.operation,
+                EDIT.operation,
+                DELETE.operation,
+                IMPORT.operation,
+                EXPORT.operation,
+                SHARE.operation
+        );
+    }
+
+    public static List<Data> getDataList() {
         return List.of(
                 CREATE.data,
                 EDIT.data,

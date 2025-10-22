@@ -18,64 +18,27 @@
     <url>https://cmsr.com</url>
 
     <dependencies>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-common</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-app-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-
-        <!-- Spring 核心 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-
-        <!-- Web 相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-web</artifactId>
-        </dependency>
-        <!-- spring boot 配置所需依赖 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
+       <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-
-        <!-- RPC 远程调用相关 -->
+        </dependency>-->
         <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-rpc</artifactId>
-            <optional>true</optional>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
-
         <!-- 工具类相关 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>transmittable-thread-local</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Spring Boot 通用操作日志组件，基于注解实现 -->
-            <!-- 此组件解决的问题是：「谁」在「什么时间」对「什么」做了「什么事」 -->
-            <groupId>io.github.mouzt</groupId>
-            <artifactId>bizlog-sdk</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>

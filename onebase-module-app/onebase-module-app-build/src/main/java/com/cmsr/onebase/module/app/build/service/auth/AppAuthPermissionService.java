@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.app.build.service.auth;
 
 import com.cmsr.onebase.module.app.build.vo.auth.*;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
-import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -22,11 +21,15 @@ public interface AppAuthPermissionService {
 
     void updateOperation(AuthUpdateOperationReqVO reqVO);
 
+    void updateView(AuthUpdateViewReqVO reqVO);
+
     void updateDataGroup(AuthUpdateDataGroupReqVO reqVO);
 
     void deleteDataGroup(Long id);
 
-    void updateField(@Valid AuthUpdateFieldReqVO reqVO);
+    void updateField(AuthUpdateFieldReqVO reqVO);
 
     List<AuthPermissionScope> getPermissionScope();
+
+
 }

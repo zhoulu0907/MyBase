@@ -3,26 +3,20 @@ package com.cmsr.onebase.module.flow.api;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.express.ExpressionAssistant;
-import com.cmsr.onebase.module.flow.context.express.OrExpresses;
-import com.cmsr.onebase.module.flow.context.field.FieldExpressAssistant;
-import com.cmsr.onebase.module.flow.context.field.FieldInfo;
+import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
+import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
-import com.cmsr.onebase.module.flow.core.graph.data.StartEntityNodeData;
-import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -37,74 +31,60 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     private GraphFlowCache graphFlowCache;
 
     @Autowired
-    private ExpressionAssistant expressionAssistant;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
-    @Autowired
-    private FieldExpressAssistant fieldExpressAssistant;
 
-    @Autowired
-    private MetadataEntityFieldApi metadataEntityFieldApi;
+    private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
-    public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {
-        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.getStartEntityNodeData(entityTriggerReqDTO.getEntityId());
+    public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
+        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.findStartEntityNodeDataByEntityId(reqDTO.getEntityId());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
-            return EntityTriggerRespDTO.SUCCESS;
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "没有相应的流程");
         }
+        EntityTriggerRespDTO errorRespDTO = null;
         for (StartEntityNodeData startEntityNodeData : entityNodeDataList) {
-            EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(entityTriggerReqDTO, startEntityNodeData);
+            EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(reqDTO, startEntityNodeData);
             if (!entityTriggerRespDTO.isSuccess()) {
-                return entityTriggerRespDTO;
+                errorRespDTO = entityTriggerRespDTO;
             }
         }
-        return EntityTriggerRespDTO.SUCCESS;
+        if (errorRespDTO != null) {
+            return errorRespDTO;
+        } else {
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "执行结束");
+        }
     }
 
-    private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO, StartEntityNodeData startEntityNodeData) {
+    private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
         try {
-            if (!triggerEventContains(startEntityNodeData.getTriggerEvents(), entityTriggerReqDTO.getTriggerEvent())) {
-                return EntityTriggerRespDTO.SUCCESS;
+            if (!triggerEventContains(nodeData.getTriggerEvents(), reqDTO.getTriggerEvent())) {
+                return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "触发事件不匹配");
             }
-            if (!triggerFieldIdsContained(startEntityNodeData.getTriggerFieldIds(), entityTriggerReqDTO.getChangedFieldIds())) {
-                return EntityTriggerRespDTO.SUCCESS;
+            if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
+                OrExpression orExpression = ConditionsSupport.convertToOrExpresses(nodeData.getFilterCondition());
+                boolean isMatch = expressionExecutor.evaluate(orExpression, reqDTO.getFieldData());
+                if (!isMatch) {
+                    return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "触发条件不匹配");
+                }
             }
-            if (startEntityNodeData.getCompiledExpression() == null) {
-                List<Long> ids = fieldExpressAssistant.extractFieldIds(startEntityNodeData.getFilterCondition());
-                Map<Long, FieldInfo> fieldInfoMap = getFieldInfoMap(ids);
-                OrExpresses orExpresses = fieldExpressAssistant.convertToExpresses(startEntityNodeData.getFilterCondition(), fieldInfoMap);
-                Serializable compileExpression = expressionAssistant.compileExpression(orExpresses);
-                startEntityNodeData.setCompiledExpression(compileExpression);
-            }
-            boolean isTrigger = expressionAssistant.evaluate(startEntityNodeData.getCompiledExpression(), entityTriggerReqDTO.getFieldData());
-            if (!isTrigger) {
-                return EntityTriggerRespDTO.SUCCESS;
-            }
-            flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
-            return EntityTriggerRespDTO.SUCCESS;
+            ExecutorResult executorResult = flowProcessExecutor.execute(
+                    reqDTO.getTraceId(),
+                    nodeData.getProcessId(),
+                    reqDTO.getFieldData());
+            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setSuccess(executorResult.isSuccess());
+            respDTO.setCode(executorResult.getCode());
+            respDTO.setMessage(executorResult.getMessage());
+            respDTO.setCause(executorResult.getCause());
+            respDTO.setExecutionEnd(executorResult.isExecutionEnd());
+            return respDTO;
         } catch (Exception e) {
-            log.error("entityTrigger failed, {}, {}", entityTriggerReqDTO, startEntityNodeData, e);
-            return new EntityTriggerRespDTO(false, e);
+            log.error("entityTrigger failed, {}, {}", reqDTO, nodeData, e);
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), false, e);
         }
     }
 
-    private Map<Long, FieldInfo> getFieldInfoMap(List<Long> fieldIds) {
-        EntityFieldJdbcTypeReqDTO reqDTO = new EntityFieldJdbcTypeReqDTO();
-        reqDTO.setFieldIds(fieldIds);
-
-        List<EntityFieldJdbcTypeRespDTO> fieldJdbcTypes = metadataEntityFieldApi.getFieldJdbcTypes(reqDTO);
-
-        return fieldJdbcTypes.stream()
-                .collect(Collectors.toMap(EntityFieldJdbcTypeRespDTO::getFieldId, info -> {
-                    FieldInfo fieldInfo = new FieldInfo();
-                    fieldInfo.setFieldId(info.getFieldId());
-                    fieldInfo.setFieldName(info.getFieldName());
-                    fieldInfo.setJdbcType(info.getJdbcType());
-                    return fieldInfo;
-                }));
-    }
 
     /**
      * 检查 triggerEvents 列表是否包含 triggerEvent 的名称（忽略大小写）
@@ -120,25 +100,8 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         if (triggerEvent == null) {
             return false;
         }
-        String eventName = triggerEvent.getCode();
-        return triggerEvents.stream().anyMatch(event -> event.equalsIgnoreCase(eventName));
-    }
-
-    /**
-     * 检查 triggerFieldIds 列表是否包含 changedFieldIds 中的全部元素，即changedFieldIds是否是triggerFieldIds的子集
-     *
-     * @param triggerFieldIds
-     * @param changedFieldIds
-     * @return
-     */
-    private boolean triggerFieldIdsContained(List<Long> triggerFieldIds, List<Long> changedFieldIds) {
-        if (CollectionUtils.isEmpty(triggerFieldIds)) {
-            return true;
-        }
-        if (CollectionUtils.isNotEmpty(triggerFieldIds) && CollectionUtils.isEmpty(changedFieldIds)) {
-            return false;
-        }
-        return changedFieldIds.stream().allMatch(changedId -> triggerFieldIds.contains(changedId));
+        String eventCode = triggerEvent.getCode();
+        return triggerEvents.stream().anyMatch(event -> event.equalsIgnoreCase(eventCode));
     }
 
 

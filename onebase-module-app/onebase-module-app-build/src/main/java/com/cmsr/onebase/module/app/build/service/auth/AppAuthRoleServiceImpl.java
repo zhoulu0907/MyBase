@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.build.service.auth;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
@@ -89,6 +90,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     public void createDefaultRole(Long applicationId) {
         appCommonService.validateApplicationExist(applicationId);
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
         for (AuthRoleTypeEnum roleType : List.of(AuthRoleTypeEnum.SYSTEM_ADMIN, AuthRoleTypeEnum.SYSTEM_USER)) {
             AuthRoleDO authRoleDO = new AuthRoleDO();
             authRoleDO.setApplicationId(applicationId);
@@ -96,6 +98,12 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             authRoleDO.setRoleName(roleType.getName());
             authRoleDO.setRoleType(roleType.getValue());
             authRoleRepository.insert(authRoleDO);
+            if(!AuthRoleTypeEnum.isSystemAdminRole(roleType.getCode())){
+                AuthRoleUserDO entity = new AuthRoleUserDO();
+                entity.setUserId(userId);
+                entity.setRoleId(authRoleDO.getId());
+                appAuthRoleUserRepository.insert(entity);
+            }
         }
     }
 

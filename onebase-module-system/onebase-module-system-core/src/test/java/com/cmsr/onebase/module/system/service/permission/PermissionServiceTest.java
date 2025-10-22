@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.module.system.dal.database.*;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -18,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.utils.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -350,7 +350,7 @@ public class PermissionServiceTest {
         assertNotNull(result, "结果不应该为空");
         assertFalse(result.getAll(), "不应该有全部数据权限");
         assertFalse(result.getSelf(), "不应该只有自己的数据权限");
-//        assertTrue(CollectionUtils.isNotEmpty(result.getDeptIds()), "应该有部门权限");
+        assertTrue(CollUtil.isNotEmpty(result.getDeptIds()), "应该有部门权限");
         assertTrue(result.getDeptIds().contains(dept.getId()), "应该包含用户所在部门");
     }
 

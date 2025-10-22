@@ -1,0 +1,44 @@
+### 环境配置说明
+# 上面已设置默认的local环境变量，可直接运行
+# 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
+# 或者手动修改上面的@变量值
+
+
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/engine/execute
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+##
+{
+    "formula": "LEFT(paramA, length)",
+    "parameters": {
+        "paramA": "HELLO",
+        "length": 5
+    }
+}
+
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/engine/execute
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+    "formula": "CEILING(订单编号，AVERAGEA(发货地址，联系电话))",
+    "parameters": {"订单编号":"001"，"发货地址":"003""联系电话":"005"}
+}
+
+
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/engine/execute
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+    "formula": "SUMIF(#X.A, >10, #X.B)"
+}
+
+

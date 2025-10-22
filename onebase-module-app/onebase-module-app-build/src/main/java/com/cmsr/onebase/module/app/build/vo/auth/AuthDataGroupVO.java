@@ -25,26 +25,20 @@ public class AuthDataGroupVO {
     @Schema(description = "数据权限组描述")
     private String description;
 
-    @Schema(description = "业务实体Id")
-    private Long entityId;
+    @Schema(description = "权限范围标签")
+    private List<String> scopeTags;
 
-    @Schema(description = "业务实体名称")
-    private String entityName;
-
-    @Schema(description = "业务实体字段名称")
+    @Schema(description = "权限范围字段id")
     private Long scopeFieldId;
 
-    @Schema(description = "业务实体字段名称")
-    private String scopeFieldName;
-
-    @Schema(description = "业务实体字段对应的权限范围")
+    @Schema(description = "权限范围")
     private String scopeLevel;
 
-    @Schema(description = "业务实体字段对应的权限范围值")
+    @Schema(description = "权限范围值")
     private String scopeValue;
 
-    @Schema(description = "是否可以操作")
-    private Integer isOperable;
+    @Schema(description = "操作标签")
+    private List<String> operationTags;
 
     @Schema(description = "数据权限组对应的数据过滤条件")
     private List<List<AuthDataFilterVO>> dataFilters;

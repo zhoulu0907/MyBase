@@ -10,6 +10,7 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
@@ -93,6 +94,9 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Resource
     private UserRoleDataRepository userRoleDataRepository;
+
+    @Resource
+    private AppAuthRoleUserRepository appAuthRoleUserRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -250,7 +254,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void updateAdminType(Long id, Integer adminType) {
         // 校验正确性
         validateUserExists(id);
-        // 2.1 更新用户管理员状态
+        // 2.1 更新用户管理员类型
         adminUserDataRepository.update(new AdminUserDO().setId(id).setAdminType(adminType));
     }
 
@@ -348,7 +352,8 @@ public class AdminUserServiceImpl implements AdminUserService {
         permissionService.processUserDeleted(id);
         // 2.2 删除用户岗位
         userPostDataRepository.deleteByUserId(id);
-
+        // 2.2 删除用户角色
+        appAuthRoleUserRepository.deleteByUserId(id);
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
     }
@@ -753,10 +758,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         // 获取部门信息
-        DeptDO dept = null;
-        if (user.getDeptId() != null) {
-            dept = deptService.getDept(user.getDeptId());
-        }
+        DeptDO dept = deptService.getDept(user.getDeptId());
         // 获取用户角色信息
         Set<Long> roleIds = permissionService.getRoleIdsListByUserId(id);
         List<RoleDO> roles = new ArrayList<>();

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.sys;
 
+import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
-import com.yomahub.liteflow.core.NodeComponent;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -10,11 +10,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @LiteflowComponent("log")
-public class LogNodeComponent extends NodeComponent {
+public class LogNodeComponent extends SkippableNodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("LogNodeComponent process");
+        log.info("LogNodeComponent process: {}", this.getTag());
     }
 
 }

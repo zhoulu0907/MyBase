@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.formula.build.service.engine;
 
+import com.cmsr.onebase.module.formula.build.service.dto.ContextData;
+
 import java.util.Map;
 
 /**
@@ -27,6 +29,8 @@ public interface FormulaEngineService {
      */
     Object executeFormulaWithParams(String formula, Map<String, Object> parameters);
 
+    Object executeFormulaWithParams(String formula, Map<String, Object> parameters, ContextData context);
+
     /**
      * 验证公式语法
      *
@@ -42,8 +46,4 @@ public interface FormulaEngineService {
      */
     String[] getSupportedFunctions();
 
-    /**
-     * 清理缓存
-     */
-    void clearCache();
 }

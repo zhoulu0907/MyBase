@@ -1,12 +1,12 @@
 package com.cmsr.onebase.module.formula.build.service.engine;
 
 import com.cmsr.onebase.module.formula.build.config.FormulaEngineProperties;
+import com.cmsr.onebase.module.formula.build.service.dto.ContextData;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -31,7 +35,6 @@ import java.util.regex.Pattern;
 public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     private final FormulaEngineProperties properties;
-    private final Map<String, Object> compiledFormulaCache;
     private final String formulaJsScript;
     private final Pattern dangerousPatternRegex;
 
@@ -102,7 +105,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     public FormulaEngineServiceImpl(FormulaEngineProperties properties) {
         this.properties = properties;
-        this.compiledFormulaCache = new ConcurrentHashMap<>();
         this.dangerousPatternRegex = Pattern.compile(DANGEROUS_PATTERNS);
 
         // 加载Formula.js脚本
@@ -118,8 +120,10 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         return executeFormulaWithParams(formula, new HashMap<>());
     }
 
+
     @Override
     public Object executeFormulaWithParams(String formula, Map<String, Object> parameters) {
+
         if (!StringUtils.hasText(formula)) {
             throw new IllegalArgumentException("公式不能为空");
         }
@@ -192,6 +196,12 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             throw e;
         }
     }
+    @Override
+    public Object executeFormulaWithParams(String formula, Map<String, Object> parameters, ContextData contextData) {
+        // 从contextData解析占位符并替换为可执行的JS数组字面量，再复用已有方法执行
+        String resolved = resolveFormulaWithContext(formula, contextData);
+        return executeFormulaWithParams(resolved, parameters);
+    }
 
     @Override
     public boolean validateFormula(String formula) {
@@ -254,13 +264,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         return SUPPORTED_FUNCTIONS.clone();
     }
 
-    @Override
-    @CacheEvict(value = "formulaResults", allEntries = true)
-    public void clearCache() {
-        compiledFormulaCache.clear();
-        log.info("公式引擎缓存已清理");
-    }
-
     /**
      * 加载Formula.js脚本
      *
@@ -269,6 +272,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     private String loadFormulaJsScript() {
         try {
             ClassPathResource resource = new ClassPathResource("js/formula.js");
+            // ClassPathResource resource = new ClassPathResource("js/formula_test.js");
             return new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("加载Formula.js脚本失败", e);
@@ -297,6 +301,78 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
         return true;
+    }
+
+    /**
+     * 将ContextData中的数据注入公式
+     * 当前支持占位符：
+     *  - $recordList.fieldName  => 由ContextData.recordList提取该字段，替换为JS数组字面量，如 [1,2,"完成"]
+     *
+     * @param formula 原始公式
+     * @param contextData 上下文数据
+     * @return 已替换占位符的公式
+     */
+    private String resolveFormulaWithContext(String formula, ContextData contextData) {
+        if (contextData == null || !StringUtils.hasText(formula)) {
+            return formula;
+        }
+        // 仅支持解析 $recordList.xxx 模式
+        Pattern p = Pattern.compile("\\$recordList\\.([a-zA-Z_][\\w]*)");
+        Matcher m = p.matcher(formula);
+        Set<String> fields = new LinkedHashSet<>();
+        while (m.find()) {
+            fields.add(m.group(1));
+        }
+        if (fields.isEmpty()) {
+            return formula;
+        }
+
+        List<Map<String, Object>> recordList = contextData.getRecordList();
+        if (recordList == null) {
+            recordList = new ArrayList<>();
+        }
+
+        String resolved = formula;
+        for (String field : fields) {
+            List<Object> values = new ArrayList<>();
+            for (Map<String, Object> rec : recordList) {
+                Object v = rec != null ? rec.get(field) : null;
+                values.add(v);
+            }
+            String arrayLiteral = toJsArrayLiteral(values);
+            // 精确替换占位符
+            resolved = resolved.replace("$recordList." + field, arrayLiteral);
+        }
+        return resolved;
+    }
+
+    /**
+     * 将Java List转换为JS数组字面量字符串
+     * 规则：
+     *  - 字符串自动加引号并转义
+     *  - 数字/布尔/空值保持本型
+     */
+    private String toJsArrayLiteral(List<Object> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < list.size(); i++) {
+            Object v = list.get(i);
+            if (v == null) {
+                sb.append("null");
+            } else if (v instanceof Number || v instanceof Boolean) {
+                sb.append(String.valueOf(v));
+            } else {
+                // 统一按字符串处理并转义
+                String s = String.valueOf(v);
+                s = s.replace("\\", "\\\\").replace("\"", "\\\"");
+                sb.append("\"").append(s).append("\"");
+            }
+            if (i < list.size() - 1) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     /**

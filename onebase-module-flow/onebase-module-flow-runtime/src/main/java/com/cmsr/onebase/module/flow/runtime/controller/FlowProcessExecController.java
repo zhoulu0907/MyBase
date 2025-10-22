@@ -1,10 +1,11 @@
 package com.cmsr.onebase.module.flow.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.flow.core.event.FlowChangeEventCacheHandler;
+import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;
-import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Setter;
@@ -19,13 +20,16 @@ import java.util.List;
  */
 @Setter
 @RestController
-@RequestMapping("/flow/exec")
+@RequestMapping("/flow/exec/")
 @Tag(name = "流程执行", description = "流程执行相关接口")
 @Validated
 public class FlowProcessExecController {
 
     @Autowired
     private FlowProcessExecService flowProcessExecService;
+
+    @Autowired
+    private FlowChangeEventCacheHandler flowChangeEventCacheHandler;
 
     @GetMapping("/form/query")
     @Operation(summary = "查询页面触发列表")
@@ -40,5 +44,20 @@ public class FlowProcessExecController {
         FormTriggerRespVO result = flowProcessExecService.triggerForm(reqVO);
         return CommonResult.success(result);
     }
+
+    @PostMapping("/flow-handler/update")
+    @Operation(summary = "更新流程")
+    public CommonResult<String> updateProcess(@RequestParam("applicationId") Long applicationId) {
+        String result = flowChangeEventCacheHandler.onApplicationChange(applicationId);
+        return CommonResult.success(result);
+    }
+
+    @PostMapping("/flow-handler/delete")
+    @Operation(summary = "删除流程")
+    public CommonResult<String> deleteProcess(@RequestParam("applicationId") Long applicationId) {
+        String result = flowChangeEventCacheHandler.onApplicationDelete(applicationId);
+        return CommonResult.success(result);
+    }
+
 
 }
