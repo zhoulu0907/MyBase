@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -87,6 +88,8 @@ public class FlowProcessExecutor {
             return ExecutorResult.error("执行流程异常", e);
         } finally {
             executionLog.setEndTime(LocalDateTime.now());
+            Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
+            executionLog.setDurationTime(duration.toNanos());
             flowExecutionLogRepository.insert(executionLog);
         }
     }
@@ -136,6 +139,8 @@ public class FlowProcessExecutor {
             return ExecutorResult.error("执行流程异常", e);
         } finally {
             executionLog.setEndTime(LocalDateTime.now());
+            Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
+            executionLog.setDurationTime(duration.toNanos());
             flowExecutionLogRepository.insert(executionLog);
         }
     }

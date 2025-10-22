@@ -59,7 +59,6 @@ public class FlowExecutionLogRepository extends DataRepository<FlowExecutionLogD
                             from flow_execution_log
                             """, configs,
                     "group by execution_result");
-
             for (DataRow dataRow : dataSet) {
                 String key = dataRow.getString("result");
                 int value = dataRow.getInt("counts");
@@ -70,11 +69,13 @@ public class FlowExecutionLogRepository extends DataRepository<FlowExecutionLogD
         }
         {
             DataSet dataSet = this.querys("""
-                            select execution_result as result, count(*) as counts 
-                            from flow_execution_log
-                            """, configs,
-                    "group by execution_result");
+                    select avg( duration_time ) as avgs
+                    from flow_execution_log
+                    """, configs);
+            for (DataRow dataRow : dataSet) {
+                result.put("avgs", dataRow.getDouble("avgs"));
+            }
         }
-        return null;
+        return result;
     }
 }

@@ -7,10 +7,10 @@ import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.vo.PageExecutionLogReqVO;
 import lombok.Setter;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -34,8 +34,7 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
         List<ExecutionLogVO> voList = pageResult.getList().stream().map(logDO -> {
             ExecutionLogVO logVO = BeanUtils.toBean(logDO, ExecutionLogVO.class);
             logVO.setProcessName(flowCommonService.getProcessName(logDO.getProcessId()));
-            Duration duration = Duration.between(logDO.getStartTime(), logDO.getEndTime());
-            logVO.setExecutionTime(toSecondsDouble(duration));
+            logVO.setExecutionTime(toSecondsDouble(logDO.getDurationTime()));
             return logVO;
         }).toList();
         return new PageResult<>(voList, pageResult.getTotal());
@@ -49,18 +48,28 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
         }
         ExecutionLogVO logVO = BeanUtils.toBean(logDO, ExecutionLogVO.class);
         logVO.setProcessName(flowCommonService.getProcessName(logDO.getProcessId()));
-        Duration duration = Duration.between(logDO.getStartTime(), logDO.getEndTime());
-        logVO.setExecutionTime(toSecondsDouble(duration));
+        logVO.setExecutionTime(toSecondsDouble(logDO.getDurationTime()));
         return logVO;
     }
 
     @Override
     public Map<String, Object> statisticTody(Long applicationId) {
-       return flowExecutionLogRepository.statisticTodyByApplicationId(applicationId);
+        Map<String, Object> result = flowExecutionLogRepository.statisticTodyByApplicationId(applicationId);
+        double avgs = MapUtils.getDoubleValue(result, "avgs", 0);
+        result.put("avgs", toSecondsDouble(avgs));
+        return result;
     }
 
-    private String toSecondsDouble(Duration duration) {
-        double v = duration.toNanos() / 1_000_000_000.0;
+    private String toSecondsDouble(Long duration) {
+        if (duration == null) {
+            return "0.00";
+        }
+        double v = duration / 1_000_000_000.0;
+        return String.format("%.2f", v);
+    }
+
+    private String toSecondsDouble(double duration) {
+        double v = duration / 1_000_000_000.0;
         return String.format("%.2f", v);
     }
 }
