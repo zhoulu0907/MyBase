@@ -111,7 +111,6 @@ const FlowExecuteRecordPage: React.FC = () => {
       applicationId: appId
     };
     const statisticRes = await getFlowLogStatistic(statisticParam);
-
     const compareTotal = parseFloat((statisticRes?.compareTotal || '0.00%').replace('%', ''));
     const compareSuccess = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', ''));
     const compareFailed = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', ''));
@@ -122,21 +121,21 @@ const FlowExecuteRecordPage: React.FC = () => {
         name: '今日执行次数',
         frequency: statisticRes?.total || 0,
         type: compareTotal >= 0 ? 'rise' : 'decline',
-        value: statisticRes?.compareTotal || '0.00%',
+        value: compareTotal >= 0 ? compareTotal : -compareTotal,
         describe: '较昨日'
       },
       {
         name: '执行成功',
         frequency: statisticRes?.success || 0,
         type: compareSuccess >= 0 ? 'rise' : 'decline',
-        value: statisticRes?.compareSuccess || '0.00%',
+        value: compareSuccess >= 0 ? compareSuccess : -compareSuccess,
         describe: '较昨日'
       },
       {
         name: '执行失败',
         frequency: statisticRes?.faied || 0,
         type: compareFailed >= 0 ? 'rise' : 'decline',
-        value: statisticRes?.compareFailed || '0.00%',
+        value: compareFailed >= 0 ? compareFailed : -compareFailed,
         describe: '较昨日'
       },
       {
@@ -144,7 +143,7 @@ const FlowExecuteRecordPage: React.FC = () => {
         frequency: statisticRes?.avgs || 0,
         unit: 's',
         type: compareAvgs >= 0 ? 'rise' : 'decline',
-        value: statisticRes?.compareAvgs || '0.00%',
+        value: compareAvgs >= 0 ? compareAvgs : -compareAvgs,
         describe: '较昨日'
       }
     ];
@@ -223,7 +222,7 @@ const FlowExecuteRecordPage: React.FC = () => {
                         <IconArrowDown style={{ color: '#F53F3F' }} />
                       )}
                       <span style={{ padding: '0 4px', color: item.type === 'rise' ? '#24B28F' : '#F53F3F' }}>
-                        {item.value}
+                        {item.value}%
                       </span>
                       <span>{item.describe}</span>
                     </div>
