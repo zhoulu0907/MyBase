@@ -3,9 +3,9 @@ package com.cmsr.onebase.module.system.service.user;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
@@ -753,8 +753,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         // 获取部门信息
-        DeptDO dept = deptService.getDept(user.getDeptId());
-
+        DeptDO dept = null;
+        if (user.getDeptId() != null) {
+            dept = deptService.getDept(user.getDeptId());
+        }
         // 获取用户角色信息
         Set<Long> roleIds = permissionService.getRoleIdsListByUserId(id);
         List<RoleDO> roles = new ArrayList<>();

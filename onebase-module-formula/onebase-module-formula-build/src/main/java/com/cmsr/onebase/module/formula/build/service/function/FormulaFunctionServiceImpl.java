@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.formula.build.service.function;
 
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;

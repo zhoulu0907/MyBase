@@ -1,31 +1,27 @@
 package com.cmsr.onebase.module.system.service.dict;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_HAS_CHILDREN;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_NAME_DUPLICATE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_TYPE_DUPLICATE;
-
-import java.util.List;
-
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
-import org.springframework.stereotype.Service;
-
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.date.LocalDateTimeUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
-import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSaveReqVO;
 import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSaveReqVO;
 import com.google.common.annotations.VisibleForTesting;
-
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
  * 字典类型 Service 实现类
- *
  */
 @Service
 @Slf4j
@@ -61,7 +57,7 @@ public class DictTypeServiceImpl implements DictTypeService {
 
         // 插入字典类型
         DictTypeDO dictType = BeanUtils.toBean(createReqVO, DictTypeDO.class);
-        dictType.setDeletedTime(LocalDateTimeUtils.EMPTY); // 唯一索引，避免 null 值
+        dictType.setDeletedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())); // 唯一索引，避免 null 值
         dictTypeRepository.insert(dictType);
         return dictType.getId();
     }

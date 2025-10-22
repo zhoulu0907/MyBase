@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.common.enums;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.cmsr.onebase.framework.common.core.ArrayValuable;
-import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,8 +20,7 @@ public enum DateIntervalEnum implements ArrayValuable<Integer> {
     WEEK(2, "周"),
     MONTH(3, "月"),
     QUARTER(4, "季度"),
-    YEAR(5, "年")
-    ;
+    YEAR(5, "年");
 
     public static final Integer[] ARRAYS = Arrays.stream(values()).map(DateIntervalEnum::getInterval).toArray(Integer[]::new);
 

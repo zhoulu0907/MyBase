@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>onebase-dependencies</module>
-        <module>onebase-gateway</module>
         <module>onebase-framework</module>
         <!-- Server 主项目 -->
         <module>onebase-server</module>

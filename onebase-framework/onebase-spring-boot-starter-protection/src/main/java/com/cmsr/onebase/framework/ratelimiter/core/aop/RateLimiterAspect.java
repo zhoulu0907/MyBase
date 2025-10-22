@@ -2,7 +2,7 @@ package com.cmsr.onebase.framework.ratelimiter.core.aop;
 
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.ratelimiter.core.annotation.RateLimiter;
 import com.cmsr.onebase.framework.ratelimiter.core.keyresolver.RateLimiterKeyResolver;

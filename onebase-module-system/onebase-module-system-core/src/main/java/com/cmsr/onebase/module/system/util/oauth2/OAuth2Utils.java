@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.util.oauth2;
 
-import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.tools.core.date.LocalDateTimeUtil;
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.http.HttpUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 

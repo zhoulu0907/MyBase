@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.flow.component.data;
 
-import com.cmsr.onebase.framework.express.JdbcTypeConvertor;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
@@ -15,8 +14,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,24 +39,12 @@ public class DataQueryMultipleNodeComponent extends NormalNodeComponent {
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
         // 转换成数据方法参数
-        EntityFieldDataReqDTO reqDTO = dataMethodApiHelper.convert(nodeData, variableContext);
+        EntityFieldDataReqDTO reqDTO = dataMethodApiHelper.convertQueryReq(nodeData, variableContext);
         reqDTO.setNum(MapUtils.getInteger(nodeData, "maxCount", 500));
         List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOSS)) {
-            variableContext.putNodeVariables(this.getTag(), convert(fieldDataRespDTOSS));
+            variableContext.putNodeVariables(this.getTag(), dataMethodApiHelper.convertToListMap(fieldDataRespDTOSS));
         }
-    }
-
-    private List<Map<String, Object>> convert(List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS) {
-        List<Map<String, Object>> list = new ArrayList<>();
-        for (List<EntityFieldDataRespDTO> fieldDataRespDTOS : fieldDataRespDTOSS) {
-            Map<String, Object> map = new HashMap<>();
-            for (EntityFieldDataRespDTO dto : fieldDataRespDTOS) {
-                map.put(dto.getFieldName(), JdbcTypeConvertor.convert(dto.getJdbcType(), dto.getFieldValue()));
-            }
-            list.add(map);
-        }
-        return list;
     }
 
 }

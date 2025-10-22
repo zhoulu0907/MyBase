@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.common.validation;
 
-import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 
 import jakarta.validation.ConstraintValidator;
