@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bmp.api.dto;
+package com.cmsr.onebase.module.bpm.api.dto;
 
 import lombok.Data;
 
@@ -9,9 +9,14 @@ import lombok.Data;
  * @data 2025-10-21
  */
 @Data
-public class BpmDefinitionExtDto {
+public class BpmDefinitionExtDTO {
      /**
       * 流程版本备注
       */
     private String versionAlias;
+
+    /**
+     * 流程定义JSON，完整存储前端定义的JSON数据
+     */
+    private String bpmDefJson;
 }

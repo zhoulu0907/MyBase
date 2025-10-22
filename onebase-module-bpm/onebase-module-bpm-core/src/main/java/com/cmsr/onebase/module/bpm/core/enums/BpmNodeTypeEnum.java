@@ -25,7 +25,7 @@ public enum BpmNodeTypeEnum {
     /**
      * 每个审批流程都会默认拥有一个发起节点，该节点不可删除，可配置流程发起人所拥有的表单字段权限
      */
-    SUBMIT("submit", "提交", "流程提交"),
+    INITIATION("initiation", "发起", "流程发起"),
 
     // ============ 人工节点 ==================
 
@@ -155,7 +155,6 @@ public enum BpmNodeTypeEnum {
     public NodeType toWarmFlowNodeType() {
         switch (this) {
             case START:
-            case SUBMIT:
                 return NodeType.START;
             case END:
                 return NodeType.END;
@@ -164,10 +163,10 @@ public enum BpmNodeTypeEnum {
                 return NodeType.SERIAL;
             case PARALLEL:
                 // 并行分支对应并行网关
-                return NodeType.PARALLEL;
             case JOIN:
                 // 汇聚节点也对应并行网关
                 return NodeType.PARALLEL;
+            case INITIATION:
             case APPROVER:
             case CC:
             case EXECUTOR:
