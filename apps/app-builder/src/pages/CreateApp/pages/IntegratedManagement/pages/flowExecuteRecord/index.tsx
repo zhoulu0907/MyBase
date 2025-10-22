@@ -11,6 +11,7 @@ const FlowExecuteRecordPage: React.FC = () => {
 
   const [cardList, setCardList] = useState<any[]>([]);
   const [tableData, setTableData] = useState<any[]>([]);
+  const [tableLoading, setTableLoading] = useState<boolean>(false);
   // 分页器
   const [pagination, setPagination] = useState<PaginationProps>({
     total: 10,
@@ -36,9 +37,7 @@ const FlowExecuteRecordPage: React.FC = () => {
       title: '状态',
       dataIndex: 'executionResult',
       key: 'executionResult',
-      render: (text) => (
-        <Tag color={text === 'success' ? 'green' : 'red'}>{text === 'success' ? '成功' : '失败'}</Tag>
-      )
+      render: (text) => <Tag color={text === 'success' ? 'green' : 'red'}>{text === 'success' ? '成功' : '失败'}</Tag>
     },
     {
       title: '开始时间',
@@ -71,10 +70,10 @@ const FlowExecuteRecordPage: React.FC = () => {
   }, []);
 
   // 初始化获取数据
-  const getData = async (pagination: PaginationProps) => {
+  const getData = async (paginationConfig: PaginationProps) => {
     const appId = curAppId || getHashQueryParam('appId');
     // todo 接口查询数据
-    const { current, pageSize } = pagination;
+    const { current, pageSize } = paginationConfig;
     const newCardList = [
       { name: '今日执行次数', frequency: 44, type: 'rise', value: '12.8%', describe: '较昨日' },
       { name: '执行成功', frequency: 22, type: 'rise', value: '12.8%', describe: '较昨日' },
@@ -89,21 +88,33 @@ const FlowExecuteRecordPage: React.FC = () => {
       processId: '',
       appId
     };
-
+    setTableLoading(true);
     const tableRes = await getFlowLogPage(tableParam);
     setPagination((prev) => ({ ...prev, total: tableRes.total || 0 }));
     setTableData(tableRes.list);
+    setTableLoading(false);
   };
 
   // 导出记录
   const exportRecords = () => {};
   //  刷新
-  const updateRecords = () => {};
+  const updateRecords = () => {
+    const paginationConfig = {
+      total: 10,
+      current: 1,
+      pageSize: 10,
+      showTotal: true,
+      sizeCanChange: true,
+      pageSizeChangeResetCurrent: true
+    };
+    setPagination(paginationConfig);
+    getData(paginationConfig);
+  };
 
   // 分页改变时的回调
-  const onChangeTable = (pagination: PaginationProps) => {
-    const { current, pageSize } = pagination;
-    getData(pagination);
+  const onChangeTable = (paginationConfig: PaginationProps) => {
+    const { current, pageSize } = paginationConfig;
+    getData(paginationConfig);
     setPagination((prev) => ({ ...prev, current, pageSize }));
   };
 
@@ -155,6 +166,7 @@ const FlowExecuteRecordPage: React.FC = () => {
           <Table
             columns={columns}
             data={tableData}
+            loading={tableLoading}
             pagination={pagination}
             onChange={onChangeTable}
             border={false}
