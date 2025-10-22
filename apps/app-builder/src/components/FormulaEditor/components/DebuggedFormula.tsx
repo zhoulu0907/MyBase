@@ -27,9 +27,24 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
      try {
       const values = await form.validate();
       console.log('提交数据 values:', values);
+      let newValidFieldResult:{[key: string]: any}= {};
+      Object.keys(values)?.map(key => {
+        const fieldObj = values[key];
+        if(typeof fieldObj === "object") {
+          const fieldName = key + "." + Object.keys(fieldObj);
+          const fieldValue = Object.values(fieldObj);
+          newValidFieldResult[fieldName] = fieldValue.join("");
+        }else {
+          newValidFieldResult  = {
+            ...newValidFieldResult,
+            [key]: fieldObj
+          }
+        }
+        
+      })
       const data = await debugFormula({
         formula: formula,
-        parameters: values
+        parameters: newValidFieldResult
       });
       setDisplayValue(data.result);
       console.log(data,"data")

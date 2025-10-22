@@ -207,7 +207,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
         content = match.slice(2, -2)
         content = content.replace(/^[^\.]+\.(.+)$/, '$1,');
         const temp = content.split("$");
-        if (temp[1]) {
+        if (temp.length > 1) {
           content = `$${temp[1]}`
         }
       }
@@ -228,14 +228,16 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     const variablesMapping: { [key: string]: string } = {};
     matches.forEach((match) => {
       const temp = match[1].split(".");
-      if (temp.length > 2) {
-        variablesMapping[temp[2]] = temp[0];
-        variablesMapping[temp[3]] = temp[1];
+      let fieldName = "";
+      let fieldId = "";
+      if (temp.length > 3) {
+        fieldName = `${temp[2] + "." + temp[3]}`
+        fieldId = temp[1];
       } else {
-        const fieldId = temp[0] || "";
-        const fieldName = temp[1] || "";
-        variablesMapping[fieldName] = fieldId;
+        fieldId = temp[0] || "";
+        fieldName = temp[1] || "";
       }
+      variablesMapping[fieldName] = fieldId;
     })
     return variablesMapping;
   }
@@ -276,18 +278,19 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const getAllRelatedVariables = () => {
     const currentVariablesObj = retrieveAllVariables(formula);
     let newVariablesData: variableItem[] = [];
-    if(variables.length >0) {
+    if (variables.length > 0) {
       Object.keys(currentVariablesObj).forEach(key => {
+        let fieldType = "";
         variables.forEach(variable => {
           const fieldIndex = variable.fields?.findIndex(field => field.displayName === key);
-          if(fieldIndex !== -1 && !newVariablesData.some(item => item.fieldName === key)) {
-            const fieldType = variable?.fields?.[fieldIndex as number].fieldType;
-            newVariablesData.push({
-                fieldName: key,
-                fieldId: currentVariablesObj[key],
-                fieldType: fieldType || "TEXT"
-            })
+          if (fieldIndex !== -1 && !newVariablesData.some(item => item.fieldName === key)) {
+            fieldType = variable?.fields?.[fieldIndex as number].fieldType || "TEXT";
           }
+        })
+        newVariablesData.push({
+          fieldName: key,
+          fieldId: currentVariablesObj[key],
+          fieldType: fieldType
         })
       })
     }
@@ -330,13 +333,13 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       <div className={styles.contentWrapper}>
         {/* 公式编辑区 */}
         <FormulaInput
-            value={formula}
-            onChange={setFormula}
-            onCopy={handleCopy}
-            onDebug={handleClickDebug}
-            filteredVariables={filteredVariables}
-            filteredFunctions={filteredFunctions}
-            onEditorReady={handleEditorReady}
+          value={formula}
+          onChange={setFormula}
+          onCopy={handleCopy}
+          onDebug={handleClickDebug}
+          filteredVariables={filteredVariables}
+          filteredFunctions={filteredFunctions}
+          onEditorReady={handleEditorReady}
         />
         {/* 底部面板（变量名称/函数公式/函数概要） */}
         {isDebugMode ?
