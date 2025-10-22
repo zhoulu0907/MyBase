@@ -179,7 +179,7 @@ const XDatePicker: XInputDatePickerSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     dateType: DATE_VALUES[DATE_OPTIONS.DATE],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     labelColSpan: 100,
     verify: {

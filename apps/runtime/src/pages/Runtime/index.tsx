@@ -173,7 +173,7 @@ const Runtime: React.FC = () => {
                 padding: '4px 8px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 4
+                gap: 8
               }}
             />
           </Sider>

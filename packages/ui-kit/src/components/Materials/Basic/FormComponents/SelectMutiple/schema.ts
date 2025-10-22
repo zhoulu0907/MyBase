@@ -192,7 +192,7 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
         value: '选项三'
       }
     ],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     labelColSpan: 100,
     showSearch: true,
