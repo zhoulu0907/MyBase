@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -53,5 +54,6 @@ public class AutoNumberConfigRespVO {
     private LocalDateTime updateTime;
 
     @Schema(description = "规则项列表")
+    @JsonProperty("rules")
     private List<AutoNumberRuleItemRespVO> ruleItems;
 }

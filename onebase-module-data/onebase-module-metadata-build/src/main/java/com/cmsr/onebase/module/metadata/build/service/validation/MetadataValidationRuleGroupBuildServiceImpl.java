@@ -56,49 +56,50 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     // 注入各种校验类型的Service
     @Resource
     private MetadataValidationLengthBuildService lengthService;
-    
+
     @Resource
     private MetadataValidationRangeBuildService rangeService;
-    
+
     @Resource
     private MetadataValidationRequiredBuildService requiredService;
-    
+
     @Resource
     private MetadataValidationUniqueBuildService uniqueService;
-    
+
     @Resource
     private MetadataValidationFormatBuildService formatService;
-    
+
     @Resource
     private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
 
     // 注入各种校验Repository用于查询
     @Resource
     private MetadataValidationRequiredRepository requiredRepository;
-    
+
     @Resource
     private MetadataValidationLengthRepository lengthRepository;
-    
+
     @Resource
     private MetadataValidationUniqueRepository uniqueRepository;
-    
+
     @Resource
     private MetadataValidationRangeRepository rangeRepository;
-    
+
     @Resource
     private MetadataValidationFormatRepository formatRepository;
-    
+
     @Resource
     private MetadataValidationChildNotEmptyRepository childNotEmptyRepository;
-    
+
     @Resource
     private MetadataEntityFieldRepository entityFieldRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createValidationRuleGroup(@Valid ValidationRuleGroupSaveReqVO createReqVO) {
-        // 校验规则组名称唯一性
-        validateRuleGroupNameUnique(null, createReqVO.getRgName());
+        // 移除规则组名称唯一性校验，允许不同字段使用相同的规则组名称
+        // 实际的唯一性由"每个实体的每个字段的每种校验类型只有一条生效的数据"来保证
+        // validateRuleGroupNameUnique(null, createReqVO.getRgName());
 
         // 插入校验规则分组
         MetadataValidationRuleGroupDO ruleGroup = BeanUtils.toBean(createReqVO, MetadataValidationRuleGroupDO.class);
@@ -124,8 +125,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         // 校验存在
         validateValidationRuleGroupExists(updateReqVO.getId());
 
-        // 校验规则组名称唯一性
-        validateRuleGroupNameUnique(updateReqVO.getId(), updateReqVO.getRgName());
+        // 移除规则组名称唯一性校验，允许不同字段使用相同的规则组名称
+        // validateRuleGroupNameUnique(updateReqVO.getId(), updateReqVO.getRgName());
 
         // 更新校验规则分组
         MetadataValidationRuleGroupDO updateObj = BeanUtils.toBean(updateReqVO, MetadataValidationRuleGroupDO.class);
@@ -277,7 +278,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
      *
      * @param id 校验规则分组编号（用于修改时排除自身）
      * @param rgName 规则组名称
+     * @deprecated 不再需要校验规则组名称唯一性，允许不同字段使用相同的规则组名称。
+     *             实际的唯一性由"每个实体的每个字段的每种校验类型只有一条生效的数据"来保证。
      */
+    @Deprecated
     private void validateRuleGroupNameUnique(Long id, String rgName) {
         if (!StringUtils.hasText(rgName)) {
             return;
@@ -320,7 +324,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                 MetadataValidationRuleDefinitionDO ruleDO = modelMapper.map(singleRule, MetadataValidationRuleDefinitionDO.class);
                 ruleDO.setGroupId(groupId);
                 ruleDO.setParentRuleId(mainOrRuleId);
-                ruleDO.setLogicType("LOGIC");
+                ruleDO.setLogicType("CONDITION");
                 if (ruleDO.getStatus() == null) {
                     ruleDO.setStatus(StatusEnumUtil.ACTIVE);
                 }
@@ -341,6 +345,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     MetadataValidationRuleDefinitionDO ruleDO = modelMapper.map(conditionRule, MetadataValidationRuleDefinitionDO.class);
                     ruleDO.setGroupId(groupId);
                     ruleDO.setParentRuleId(andGroupRuleId);
+                    ruleDO.setLogicType("CONDITION");
                     if (ruleDO.getStatus() == null) {
                         ruleDO.setStatus(StatusEnumUtil.ACTIVE);
                     }
@@ -358,11 +363,11 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
      */
     public List<List<ValidationRuleDefinitionVO>> buildValueRulesStructure(Long groupId) {
         log.info("构建规则结构，groupId: {}", groupId);
-        
+
         // 获取该规则组下的所有规则定义
         List<MetadataValidationRuleDefinitionDO> allRules = validationRuleDefinitionService.getByGroupId(groupId);
         log.info("从数据库获取到规则定义数量: {}", allRules != null ? allRules.size() : 0);
-        
+
         if (allRules == null || allRules.isEmpty()) {
             log.info("规则组 {} 下没有规则定义，返回空列表", groupId);
             return new ArrayList<>();
@@ -427,10 +432,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
      */
     private void buildDerivedFieldsForSimpleVO(ValidationRuleGroupSimpleRespVO vo, Long groupId, String popPrompt) {
         log.info("开始构建派生字段，groupId: {}, popPrompt: {}", groupId, popPrompt);
-        
+
         // 设置错误消息，直接使用popPrompt，可能为null
         vo.setErrorMessage(popPrompt);
-        
+
         // 获取规则组详细信息
         MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupRepository.findById(groupId);
         if (ruleGroup == null) {
@@ -439,11 +444,11 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             vo.setValidationItems(new ArrayList<>());
             return;
         }
-        
+
         String validationType = ruleGroup.getValidationType();
         vo.setValidationType(validationType);
         log.info("设置validationType: {}", validationType);
-        
+
         // 根据校验类型获取关联的字段名称
         List<String> fieldNames = getFieldNamesByValidationType(groupId, validationType);
         vo.setValidationItems(fieldNames);
@@ -455,13 +460,13 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
      */
     private List<String> getFieldNamesByValidationType(Long groupId, String validationType) {
         List<String> fieldNames = new ArrayList<>();
-        
+
         if (validationType == null) {
             return fieldNames;
         }
-        
+
         log.info("查询字段名称：groupId={}, validationType={}", groupId, validationType);
-        
+
         try {
             switch (validationType) {
                 case "REQUIRED":
@@ -479,7 +484,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                         }
                     }
                     break;
-                    
+
                 case "LENGTH":
                     // 查询长度校验关联的字段
                     var lengthFields = lengthRepository.findByGroupId(groupId);
@@ -495,7 +500,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                         }
                     }
                     break;
-                    
+
                 case "UNIQUE":
                     // 查询唯一性校验关联的字段
                     var uniqueFields = uniqueRepository.findByGroupId(groupId);
@@ -511,7 +516,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                         }
                     }
                     break;
-                    
+
                 case "RANGE":
                     // 查询范围校验关联的字段
                     var rangeFields = rangeRepository.findByGroupId(groupId);
@@ -527,7 +532,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                         }
                     }
                     break;
-                    
+
                 case "FORMAT":
                     // 查询格式校验关联的字段
                     var formatFields = formatRepository.findByGroupId(groupId);
@@ -543,7 +548,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                         }
                     }
                     break;
-                    
+
                 case "CHILD_NOT_EMPTY":
                     // 查询子表非空校验关联的字段
                     var childNotEmptyFields = childNotEmptyRepository.findByGroupId(groupId);
@@ -559,32 +564,32 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                         }
                     }
                     break;
-                    
+
                 default:
                     log.warn("未知的校验类型: {}", validationType);
             }
         } catch (Exception e) {
             log.error("获取字段名称时发生错误，groupId: {}, validationType: {}", groupId, validationType, e);
         }
-        
+
         log.info("最终返回字段名称列表：{}", fieldNames);
         return fieldNames;
     }
 
     /**
-     * 根据字段ID获取字段名称
+     * 根据字段ID获取字段显示名称
      */
     private String getFieldNameById(Long fieldId) {
         if (fieldId == null) {
             return null;
         }
-        
+
         try {
-            // 使用 entityFieldRepository 查询字段信息
+            // 使用 entityFieldRepository 查询字段信息，返回displayName而不是fieldName
             var fieldDO = entityFieldRepository.findById(fieldId);
-            return fieldDO != null ? fieldDO.getFieldName() : null;
+            return fieldDO != null ? fieldDO.getDisplayName() : null;
         } catch (Exception e) {
-            log.error("根据字段ID获取字段名称失败，fieldId: {}", fieldId, e);
+            log.error("根据字段ID获取字段显示名称失败，fieldId: {}", fieldId, e);
             return null;
         }
     }

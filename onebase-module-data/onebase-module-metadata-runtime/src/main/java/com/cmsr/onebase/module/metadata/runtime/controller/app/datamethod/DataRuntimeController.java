@@ -29,28 +29,27 @@ public class DataRuntimeController {
     @Resource
     private RuntimeDataService runtimeDataService;
 
-    //todo 这里的五个接口之前和前端约定入参传的是 filed_name,现在需要统一改成传 field_id，map 中的可以我已经从 String 改成 Long 了，对应的 service 的代码逻辑也需要调整一下，请修改
 
 
     @PostMapping("/insert")
     @Operation(summary = "新增单条数据")
     @PermitAll
     public CommonResult<DynamicDataRespVO> createData(@Valid @RequestBody DynamicDataCreateReqVO reqVO) {
-        return success(runtimeDataService.createData(reqVO)).setMsg("数据新增成功");
+        return success(runtimeDataService.createData(reqVO));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新单条数据")
     @PermitAll
     public CommonResult<DynamicDataRespVO> updateData(@Valid @RequestBody DynamicDataUpdateReqVO reqVO) {
-        return success(runtimeDataService.updateData(reqVO)).setMsg("数据更新成功");
+        return success(runtimeDataService.updateData(reqVO));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "删除单条数据")
     @PermitAll
     public CommonResult<Boolean> deleteData(@Valid @RequestBody DynamicDataDeleteReqVO reqVO) {
-        return success(runtimeDataService.deleteData(reqVO)).setMsg("数据删除成功");
+        return success(runtimeDataService.deleteData(reqVO));
     }
 
     @PostMapping("/data")

@@ -55,8 +55,12 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         // 转换DO为VO
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
 
-        // 简化实现：暂时不设置规则组名称，专注于字段同步功能
-        // TODO: 如需要规则组名称，可以从requiredDO.getGroupId()查询获取
+        // 获取规则组信息，包括提示语等字段
+        var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        }
         
         return respVO;
     }
@@ -182,7 +186,16 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationRequiredDO recordToDelete = requiredRepository.findOneByFieldId(fieldId);
+        
+        // 删除必填校验记录
         requiredRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            validationRuleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
         
         // 同步更新字段的必填状态为非必填
         syncFieldRequiredStatus(fieldId, false);
@@ -195,8 +208,13 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")"); }
         MetadataValidationRequiredDO requiredDO = list.get(0);
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
+        
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
-        if (ruleGroup != null) { respVO.setRgName(ruleGroup.getRgName()); }
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        }
         return respVO;
     }
 
@@ -204,14 +222,22 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         var list = requiredRepository.findByGroupId(id);
-        if (list.isEmpty()) { return; }
-        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")"); }
-        MetadataValidationRequiredDO requiredDO = list.get(0);
-        Long fieldId = requiredDO.getFieldId();
-        Long groupId = requiredDO.getGroupId();
-        requiredRepository.deleteById(requiredDO.getId());
-        if (fieldId != null) { syncFieldRequiredStatus(fieldId, false); }
-        if (groupId != null) { validationRuleGroupService.safeDeleteGroupDirect(groupId); }
+        
+        // 删除子表记录和同步字段状态
+        if (!list.isEmpty()) {
+            if (list.size() > 1) {
+                throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")");
+            }
+            MetadataValidationRequiredDO requiredDO = list.get(0);
+            Long fieldId = requiredDO.getFieldId();
+            requiredRepository.deleteById(requiredDO.getId());
+            if (fieldId != null) {
+                syncFieldRequiredStatus(fieldId, false);
+            }
+        }
+        
+        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        validationRuleGroupService.safeDeleteGroupDirect(id);
     }
     
     /**

@@ -42,11 +42,18 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
 
         // 转换DO为VO
         ValidationFormatRespVO respVO = BeanUtils.toBean(formatDO, ValidationFormatRespVO.class);
+        
+        // 手动映射字段名不匹配的属性
+        respVO.setFormatType(formatDO.getFormatCode());        // formatCode -> formatType
+        respVO.setFormatValue(formatDO.getRegexPattern());     // regexPattern -> formatValue
+        respVO.setIgnoreCase(formatDO.getFlags() != null && formatDO.getFlags().contains("i") ? 1 : 0); // flags -> ignoreCase
+        respVO.setAppId(formatDO.getAppId() != null ? String.valueOf(formatDO.getAppId()) : null); // Long -> String
 
-        // 获取规则组名称
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
 
         return respVO;
@@ -59,8 +66,19 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")"); }
         MetadataValidationFormatDO formatDO = list.get(0);
         ValidationFormatRespVO respVO = BeanUtils.toBean(formatDO, ValidationFormatRespVO.class);
+        
+        // 手动映射字段名不匹配的属性
+        respVO.setFormatType(formatDO.getFormatCode());        // formatCode -> formatType
+        respVO.setFormatValue(formatDO.getRegexPattern());     // regexPattern -> formatValue
+        respVO.setIgnoreCase(formatDO.getFlags() != null && formatDO.getFlags().contains("i") ? 1 : 0); // flags -> ignoreCase
+        respVO.setAppId(formatDO.getAppId() != null ? String.valueOf(formatDO.getAppId()) : null); // Long -> String
+        
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
-        if (ruleGroup != null) { respVO.setRgName(ruleGroup.getRgName()); }
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        }
         return respVO;
     }
 
@@ -68,12 +86,18 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         var list = formatRepository.findByGroupId(id);
-        if (list.isEmpty()) { return; }
-        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")"); }
-        MetadataValidationFormatDO existing = list.get(0);
-        Long groupId = existing.getGroupId();
-        formatRepository.deleteById(existing.getId());
-        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
+        
+        // 删除子表记录
+        if (!list.isEmpty()) {
+            if (list.size() > 1) {
+                throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")");
+            }
+            MetadataValidationFormatDO existing = list.get(0);
+            formatRepository.deleteById(existing.getId());
+        }
+        
+        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        ruleGroupService.safeDeleteGroupDirect(id);
     }
 
     @Override
@@ -129,8 +153,50 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         data.setEntityId(field.getEntityId());
         data.setAppId(field.getAppId());
         data.setGroupId(groupId);
-        if (data.getFormatCode() == null) {
-            data.setFormatCode("REGEX");
+        
+        // 设置默认值
+        if (data.getIsEnabled() == null) {
+            data.setIsEnabled(1); // 默认启用
+        }
+        
+        // 处理格式代码和正则表达式的逻辑
+        if (data.getFormatCode() == null || data.getFormatCode().trim().isEmpty()) {
+            if (data.getRegexPattern() != null && !data.getRegexPattern().trim().isEmpty()) {
+                // 有正则表达式，设置为REGEX类型
+                data.setFormatCode("REGEX");
+            } else {
+                // 没有正则表达式，使用通用格式类型
+                data.setFormatCode("TEXT");
+            }
+        } else {
+            // 标准化格式代码
+            String formatCode = data.getFormatCode().trim().toUpperCase();
+            
+            // 支持的标准格式类型
+            switch (formatCode) {
+                case "EMAIL":
+                case "MOBILE":
+                case "ID_CARD":
+                case "URL":
+                case "IP":
+                case "TEXT":
+                    data.setFormatCode(formatCode);
+                    break;
+                case "REGEX":
+                    if (data.getRegexPattern() == null || data.getRegexPattern().trim().isEmpty()) {
+                        throw new IllegalArgumentException("当格式类型为REGEX时，必须提供正则表达式");
+                    }
+                    data.setFormatCode("REGEX");
+                    break;
+                default:
+                    // 不识别的格式类型，如果有正则表达式就当作REGEX，否则当作TEXT
+                    if (data.getRegexPattern() != null && !data.getRegexPattern().trim().isEmpty()) {
+                        data.setFormatCode("REGEX");
+                    } else {
+                        data.setFormatCode("TEXT");
+                    }
+                    break;
+            }
         }
 
         // 保存格式校验规则
@@ -172,12 +238,22 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         updateObj.setEntityId(existing.getEntityId());
         updateObj.setAppId(existing.getAppId());
         updateObj.setGroupId(targetGroupId);
+        
         formatRepository.update(updateObj);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationFormatDO recordToDelete = formatRepository.findRegexByFieldId(fieldId);
+        
+        // 删除格式校验记录
         formatRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
     }
 }

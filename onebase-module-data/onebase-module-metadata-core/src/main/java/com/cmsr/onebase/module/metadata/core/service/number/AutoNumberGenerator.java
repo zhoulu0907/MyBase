@@ -52,29 +52,53 @@ public class AutoNumberGenerator {
         List<MetadataAutoNumberRuleItemDO> ruleItems = ruleItemRepository
                 .listByConfig(config.getId());
         
+        // 3. 生成周期键
+        String periodKey = ruleEngine.generatePeriodKey(config.getResetCycle(), LocalDateTime.now());
+
+        // 4. 如果没有规则项，检查是否配置了 number_mode
         if (ruleItems.isEmpty()) {
+            // 如果配置了 NATURAL 或 FIXED_DIGIT/FIXED_DIGITS 模式，直接生成序号
+            if ("NATURAL".equals(config.getNumberMode()) 
+                    || "FIXED_DIGIT".equals(config.getNumberMode())
+                    || "FIXED_DIGITS".equals(config.getNumberMode())) {
+                Long sequence = stateManager.getNextSequence(config, periodKey);
+                String generatedNumber = ruleEngine.formatSequence(sequence, config.getDigitWidth(), config.getNumberMode());
+                log.debug("Generated auto number (no rules): {} for config: {}", generatedNumber, config.getId());
+                return generatedNumber;
+            }
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), 
                     "自动编号配置没有有效的规则项");
         }
 
-        // 3. 生成周期键
-        String periodKey = ruleEngine.generatePeriodKey(config.getResetCycle(), LocalDateTime.now());
-
-        // 4. 获取序号（仅在需要时获取，避免不必要的数据库锁）
-        Long sequence = null;
-        boolean needSequence = ruleItems.stream()
+        // 5. 检查是否需要序号
+        // 情况1：规则项中显式包含 SEQUENCE 类型
+        // 情况2：配置了 number_mode 但规则项中没有 SEQUENCE（需要自动添加序号）
+        boolean hasSequenceRule = ruleItems.stream()
                 .anyMatch(item -> AutoNumberItemTypeEnum.SEQUENCE.getCode().equals(item.getItemType()));
         
-        if (needSequence) {
+        boolean autoAppendSequence = !hasSequenceRule && 
+                ("NATURAL".equals(config.getNumberMode()) 
+                || "FIXED_DIGIT".equals(config.getNumberMode())
+                || "FIXED_DIGITS".equals(config.getNumberMode()));
+        
+        Long sequence = null;
+        if (hasSequenceRule || autoAppendSequence) {
             sequence = stateManager.getNextSequence(config, periodKey);
         }
 
-        // 5. 按规则项顺序执行生成
+        // 6. 按规则项顺序执行生成
         StringBuilder result = new StringBuilder();
         for (MetadataAutoNumberRuleItemDO ruleItem : ruleItems) {
             String itemResult = ruleEngine.executeRuleItem(ruleItem, contextData, sequence, 
                     config.getDigitWidth(), config.getNumberMode());
             result.append(itemResult);
+        }
+        
+        // 7. 如果配置了 number_mode 但规则项中没有 SEQUENCE，自动追加序号
+        if (autoAppendSequence && sequence != null) {
+            String sequenceStr = ruleEngine.formatSequence(sequence, config.getDigitWidth(), config.getNumberMode());
+            result.append(sequenceStr);
+            log.debug("Auto appended sequence: {} for config: {}", sequenceStr, config.getId());
         }
 
         String generatedNumber = result.toString();

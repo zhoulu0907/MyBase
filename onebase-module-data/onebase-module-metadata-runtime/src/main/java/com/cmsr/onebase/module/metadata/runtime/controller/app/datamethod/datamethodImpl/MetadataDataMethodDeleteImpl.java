@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl;
+package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
@@ -7,7 +7,6 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import jakarta.annotation.Resource;
@@ -16,8 +15,6 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -27,7 +24,6 @@ import java.util.Map;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
 
 @Slf4j
 @Component
@@ -54,7 +50,6 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
      * 根据id校验待更新的数据记录是否存在
      * @param context
      */
-    @Override
     protected void checkDataExistence(ProcessContext context) {
         MetadataBusinessEntityDO entity = context.getEntity();
         List<MetadataEntityFieldDO> fields = context.getFields();

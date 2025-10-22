@@ -9,6 +9,8 @@ import lombok.Data;
 
 @Data
 public class UpdateDataReqDTO {
+    @Schema(description = "链路ID")
+    private String traceId;
     /**
      * 实体ID
      */

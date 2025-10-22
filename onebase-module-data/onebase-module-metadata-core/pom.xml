@@ -101,6 +101,12 @@
             <artifactId>onebase-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+            <version>5.8.39</version>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- 工具类相关 -->
     <!-- 去除与 UI/邮件/第三方登录相关的运行期依赖，统一由上层应用引入 -->

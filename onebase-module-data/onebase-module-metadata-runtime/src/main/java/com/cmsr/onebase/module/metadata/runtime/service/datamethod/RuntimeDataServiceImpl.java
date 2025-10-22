@@ -8,6 +8,8 @@ import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -31,9 +33,23 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
     private MetadataEntityFieldCoreService metadataEntityFieldService;
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public DynamicDataRespVO createData(DynamicDataCreateReqVO reqVO) {
+        log.info("接收到创建数据请求，entityId: {}, 原始数据: {}, 子实体数据: {}", reqVO.getEntityId(), reqVO.getData(), reqVO.getSubEntities());
+
         // 将 field_id -> value 转换为 field_name -> value
         Map<String, Object> dataByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getData());
+
+        log.info("字段ID映射为名称后的数据: {}", dataByName);
+
+        // 打印每个字段值的类型
+        dataByName.forEach((key, value) -> {
+            if (value != null) {
+                log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
+            } else {
+                log.info("字段 {} 的值为null", key);
+            }
+        });
 
         // 调用core模块的基础服务
         Map<String, Object> resultData = coreDataMethodService.createData(
@@ -42,6 +58,44 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
             reqVO.getMethodCode()
         );
 
+        // 获取主表业务数据id，作为子表parent_id字段的值
+        Map<String,Object> map = (Map<String,Object>)resultData.get("data");
+        String parentId = (String)map.get("id");
+
+        // 处理子表插入数据
+        List<SubEntityVo> subEntities = reqVO.getSubEntities();
+        for(SubEntityVo subEntityVo: subEntities){
+            //子实体Id
+            Long subEntityId = subEntityVo.getSubEntityId();
+            //该子实体对应多条数据待插入
+            List<Map<Long,Object>> list  = subEntityVo.getSubData();
+            for(Map<Long,Object> data: list){
+                // 将 field_id -> value 转换为 field_name -> value
+                Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
+
+                subDataByName.put("parent_id",parentId);
+                log.info("字段ID映射为名称后的数据: {}", subDataByName);
+
+                // 打印每个字段值的类型
+                subDataByName.forEach((key, value) -> {
+                    if (value != null) {
+                        log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
+                    } else {
+                        log.info("字段 {} 的值为null", key);
+                    }
+                });
+
+                // 调用core模块的基础服务
+                Map<String, Object> subResultData = coreDataMethodService.createData(
+                        subEntityId,
+                        subDataByName,
+                        reqVO.getMethodCode()
+                );
+            }
+        }
+        if(resultData != null){
+            throw new RuntimeException();
+        }
         // 转换为VO
         return convertToDynamicDataRespVO(resultData);
     }
@@ -96,8 +150,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         // 将 filters 的 field_id -> value 转换为 field_name -> value
         Map<String, Object> filtersByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getFilters());
 
-        // 允许 sortField 传字段ID：如果是数字则转换为字段名
-        String sortField = convertSortFieldToName(reqVO.getEntityId(), reqVO.getSortField());
+    // 允许 sortField 传字段ID：如果是数字则转换为字段名
+    String sortField = convertSortFieldToName(reqVO.getEntityId(), reqVO.getSortField());
 
         // 调用core模块的基础服务
         PageResult<Map<String, Object>> pageResult = coreDataMethodService.getDataPage(
@@ -149,14 +203,37 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         if (idKeyMap == null || idKeyMap.isEmpty()) {
             return java.util.Collections.emptyMap();
         }
+        
+        // 获取实体的所有字段定义
         List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(entityId);
+        log.debug("实体[{}]共有{}个字段定义", entityId, fields.size());
+        
+        // 构建字段ID到字段名的映射
         Map<Long, String> idToName = fields.stream()
                 .filter(f -> f.getId() != null && f.getFieldName() != null)
                 .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName, (a,b) -> a));
+        
+        log.debug("字段ID到名称映射: {}", idToName);
+        log.debug("请求的字段数据(ID为key): {}", idKeyMap);
 
-        return idKeyMap.entrySet().stream()
-                .filter(e -> e.getKey() != null && idToName.containsKey(e.getKey()))
+        // 转换字段ID为字段名，并记录未匹配的字段
+        Map<String, Object> result = idKeyMap.entrySet().stream()
+                .filter(e -> {
+                    if (e.getKey() == null) {
+                        log.warn("发现null字段ID，已忽略");
+                        return false;
+                    }
+                    if (!idToName.containsKey(e.getKey())) {
+                        log.warn("字段ID[{}]在实体[{}]中不存在，已忽略该字段数据: {}", 
+                                e.getKey(), entityId, e.getValue());
+                        return false;
+                    }
+                    return true;
+                })
                 .collect(Collectors.toMap(e -> idToName.get(e.getKey()), Map.Entry::getValue, (a,b) -> b));
+        
+        log.debug("转换后的字段数据(名称为key): {}", result);
+        return result;
     }
 
     /**

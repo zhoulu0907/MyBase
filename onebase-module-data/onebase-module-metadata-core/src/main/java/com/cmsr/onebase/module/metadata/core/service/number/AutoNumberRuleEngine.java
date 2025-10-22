@@ -67,6 +67,8 @@ public class AutoNumberRuleEngine {
         switch (cycle) {
             case NEVER:
                 return "NEVER";
+            case NONE:
+                return "NONE";
             case DAILY:
                 return now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
             case MONTHLY:
@@ -119,14 +121,14 @@ public class AutoNumberRuleEngine {
     }
 
     /**
-     * 执行序号规则
+     * 格式化序号（公共方法）
      *
      * @param sequence   序号值
      * @param digitWidth 位数
      * @param numberMode 编号模式
      * @return 格式化后的序号字符串
      */
-    private String executeSequenceRule(Long sequence, Short digitWidth, String numberMode) {
+    public String formatSequence(Long sequence, Short digitWidth, String numberMode) {
         if (sequence == null) {
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), "序号值不能为空");
         }
@@ -138,6 +140,7 @@ public class AutoNumberRuleEngine {
                 // 自然数编号，直接返回数字
                 return String.valueOf(sequence);
             case FIXED_DIGIT:
+            case FIXED_DIGITS:
                 // 指定位数编号，用零填充
                 if (digitWidth == null || digitWidth <= 0) {
                     throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), "指定位数编号必须设置有效位数");
@@ -148,6 +151,18 @@ public class AutoNumberRuleEngine {
                 throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), 
                         "不支持的编号模式: " + numberMode);
         }
+    }
+
+    /**
+     * 执行序号规则
+     *
+     * @param sequence   序号值
+     * @param digitWidth 位数
+     * @param numberMode 编号模式
+     * @return 格式化后的序号字符串
+     */
+    private String executeSequenceRule(Long sequence, Short digitWidth, String numberMode) {
+        return formatSequence(sequence, digitWidth, numberMode);
     }
 
     /**
