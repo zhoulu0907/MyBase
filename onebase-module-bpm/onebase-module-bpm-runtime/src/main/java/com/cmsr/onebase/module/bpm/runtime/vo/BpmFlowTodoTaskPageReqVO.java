@@ -1,0 +1,42 @@
+package com.cmsr.onebase.module.bpm.runtime.vo;
+import com.cmsr.onebase.framework.common.pojo.PageParam;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
+
+import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
+
+@Schema(description = "流程 - 待办任务分页列表")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class BpmFlowTodoTaskPageReqVO extends PageParam {
+
+    @Schema(description = "流程标题，模糊匹配", example = "物品领用申请")
+    @Size(max = 200, message = "流程标题长度不能超过200个字符")
+    private String processTitle;
+
+    @Schema(description = "发起人，模糊匹配", example = "王少青")
+    @Size(max = 100, message = "发起人长度不能超过100个字符")
+    private String initiator;
+
+    @Schema(description = "表单摘要，模糊匹配", example = "铅笔")
+    @Size(max = 500, message = "表单摘要长度不能超过500个字符")
+    private String formSummary;
+
+    @Schema(description = "发起时间", example = "[2025-08-01 00:00:00,2025-08-18 23:59:59]")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    private LocalDateTime[] startTime;
+
+    @Schema(description = "节点名称，模糊匹配", example = "部门审批")
+    @Size(max = 100, message = "节点名称长度不能超过100个字符")
+    private String nodeName;
+
+    @Schema(description = "流程状态（0待提交 1审批中 2审批通过 4终止 5作废 6撤销 8已完成 9已退回 10失效 11拿回）", example = "1")
+    private String flowStatus;
+
+
+}
