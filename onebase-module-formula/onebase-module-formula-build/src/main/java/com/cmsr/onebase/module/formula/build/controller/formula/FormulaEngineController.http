@@ -31,3 +31,14 @@ Content-Type: application/json
 }
 
 
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/engine/execute
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+    "formula": "SUMIF(#X.A, >10, #X.B)"
+}
+
+

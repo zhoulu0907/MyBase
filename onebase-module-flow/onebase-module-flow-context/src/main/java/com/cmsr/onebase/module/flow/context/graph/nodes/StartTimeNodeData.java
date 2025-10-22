@@ -51,6 +51,15 @@ public class StartTimeNodeData extends NodeData implements Serializable {
      */
     public static final String REPEAT_TYPE_CRON = "cron";
 
+    /**
+     * 应用ID，后补充
+     */
+    private Long applicationId;
+    /**
+     * 流程ID，后补充
+     */
+    private Long processId;
+
     private String startTime;
 
     private String endTime;
@@ -71,38 +80,6 @@ public class StartTimeNodeData extends NodeData implements Serializable {
 
     private String triggerTime;
 
-    //
-    private Optional<LocalDateTime> startLocalDateTime;
-    private Optional<LocalDateTime> endLocalDateTime;
-
-    private void init() {
-        if (startLocalDateTime != null || endLocalDateTime != null) {
-            return;
-        }
-        startTime = StringUtils.trimToNull(startTime);
-        if (StringUtils.isNotEmpty(startTime)) {
-            startLocalDateTime = Optional.of(LocalDateTime.parse(startTime, JsonGraphConstant.DATE_TIME_FORMATTER));
-        } else {
-            startLocalDateTime = Optional.empty();
-        }
-        endTime = StringUtils.trimToNull(endTime);
-        if (StringUtils.isNotEmpty(endTime)) {
-            endLocalDateTime = Optional.of(LocalDateTime.parse(endTime, JsonGraphConstant.DATE_TIME_FORMATTER));
-        } else {
-            endLocalDateTime = Optional.empty();
-        }
-    }
-
-    public boolean isCurrentTimeInRange() {
-        init();
-        if (startLocalDateTime.isPresent() && LocalDateTime.now().isBefore(startLocalDateTime.get())) {
-            return false;
-        }
-        if (endLocalDateTime.isPresent() && LocalDateTime.now().isAfter(endLocalDateTime.get())) {
-            return false;
-        }
-        return true;
-    }
 
     public String createCronExpression() {
         if (REPEAT_TYPE_DAY.equalsIgnoreCase(repeatType)) {

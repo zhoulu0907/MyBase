@@ -45,6 +45,7 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         OrExpression orExpression = conditionsProvider.formatConditionsForValue(this, variableContext, inLoopDepth, conditions);
 
         DeleteDataReqDTO reqDTO = new DeleteDataReqDTO();
+        reqDTO.setTraceId(executeContext.getTraceId());
         reqDTO.setEntityId(nodeData.getMainEntityId());
         if (reqDTO.getEntityId() == null) {
             reqDTO.setEntityId(nodeData.getSubEntityId());

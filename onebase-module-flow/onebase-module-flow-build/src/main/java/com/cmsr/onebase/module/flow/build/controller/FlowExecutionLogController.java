@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * 流程管理 - 管理员控制器
  */
@@ -44,5 +46,12 @@ public class FlowExecutionLogController {
             return CommonResult.error(FlowErrorCodeConstants.LOG_NOT_EXIST);
         }
         return CommonResult.success(executionLogVO);
+    }
+
+    @GetMapping("/statistic-tody")
+    @Operation(summary = "统计执行日志")
+    public CommonResult<Map<String, Integer>> statisticTody(@RequestParam("applicationId") Long applicationId) {
+        Map<String, Integer> result = flowExecutionLogService.statisticTody(applicationId);
+        return CommonResult.success(result);
     }
 }
