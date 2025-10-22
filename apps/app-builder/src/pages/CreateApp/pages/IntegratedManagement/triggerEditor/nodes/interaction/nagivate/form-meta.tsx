@@ -109,7 +109,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             )}
 
-            <ParamField data={triggerEditorSignal.nodeData.value[node.id]?.fields || []} form={payloadForm} />
+            <ParamField data={triggerEditorSignal.nodeData.value[node.id]?.paramFields || []} form={payloadForm} />
 
             <Form.Item label="打开方式" field="openPageType" rules={[{ required: true, message: '请选择打开方式' }]}>
               <Radio.Group direction="vertical" onChange={handleOpenPageTypeChange}>
