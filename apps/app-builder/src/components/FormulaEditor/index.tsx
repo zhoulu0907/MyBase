@@ -278,15 +278,17 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     let newVariablesData: variableItem[] = [];
     if(variables.length >0) {
       Object.keys(currentVariablesObj).forEach(key => {
-        const variableIndex = variables.findIndex(data => data.variableId === currentVariablesObj[key]);
-        const fieldIndex = variables[variableIndex]?.fields?.findIndex(field => field.displayName === key);
-        if(fieldIndex !== -1) {
-          newVariablesData.push({
-              fieldName: key,
-              fieldId: currentVariablesObj[key],
-              fieldType: fieldIndex !== -1 ? variables[fieldIndex as any] : "TEXT"
-          })
-        }
+        variables.forEach(variable => {
+          const fieldIndex = variable.fields?.findIndex(field => field.displayName === key);
+          if(fieldIndex !== -1 && !newVariablesData.some(item => item.fieldName === key)) {
+            const fieldType = variable?.fields?.[fieldIndex as number].fieldType;
+            newVariablesData.push({
+                fieldName: key,
+                fieldId: currentVariablesObj[key],
+                fieldType: fieldType || "TEXT"
+            })
+          }
+        })
       })
     }
     return newVariablesData;
