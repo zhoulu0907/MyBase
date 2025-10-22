@@ -4,12 +4,12 @@ import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-desig
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
-import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './utils/types';
+import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './types';
 import {
   convertAutoCodeCompoToAutoNumberRule,
   convertAutoNumberRuleToAutoCodeComp,
   findFieldPath
-} from './utils/utils';
+} from './utils/transform';
 import {
   AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RESET_CYCLE,
@@ -144,7 +144,6 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
 }) => {
   // 初始化规则：如果传入的是 AutoNumberRule 格式，则转换为数组格式
   const getInitialRules = (): AutoCodeRule[] => {
-    console.log('initialConfig', initialConfig);
     if (initialConfig) {
       // 如果传入的是 AutoNumberRule 格式，转换为数组格式
       return convertAutoNumberRuleToAutoCodeComp(initialConfig, fields);
@@ -428,7 +427,7 @@ export const PicklistConfig: React.FC<{
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
   onConfirm: (options: string[]) => void;
-  initialOptions?: string[];
+  initialOptions?: { optionLabel: string; optionValue: string }[];
   onCancel?: () => void;
 }> = (props) => {
   return <OptionConfig {...props} />;
@@ -439,7 +438,7 @@ export const MultiPicklistConfig: React.FC<{
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
   onConfirm: (options: string[]) => void;
-  initialOptions?: string[];
+  initialOptions?: { optionLabel: string; optionValue: string }[];
   onCancel?: () => void;
 }> = (props) => {
   return <OptionConfig {...props} />;

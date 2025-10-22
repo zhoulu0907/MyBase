@@ -1,8 +1,9 @@
+import React from 'react';
 import { Table } from '@arco-design/web-react';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
-import React from 'react';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import styles from './index.module.less';
+import type { SortableTableProps } from './types';
 
 // 拖拽手柄组件
 const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles.dragHandle} />);
@@ -18,12 +19,6 @@ const SortableTableRow = SortableElement(
 const SortableTableBody = SortableContainer((props: { children: React.ReactNode; [key: string]: unknown }) => {
   return <tbody {...props} />;
 });
-
-interface SortableTableProps {
-  data: any[];
-  columns: any[];
-  onSort: ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => void;
-}
 
 const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) => {
   // 表格组件配置
@@ -54,8 +49,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
           useDragHandle
           onSortEnd={onSort}
           helperContainer={() => {
-            let container: Element | null = null;
-            container = document.querySelector(`#field-config-container table tbody`);
+            const container = document.querySelector(`#field-config-container table tbody`);
             return (container as HTMLElement) || document.body;
           }}
           helperClass="sortableHelper"
