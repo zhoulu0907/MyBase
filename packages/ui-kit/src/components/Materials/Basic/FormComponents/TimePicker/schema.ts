@@ -158,7 +158,7 @@ const XTimePicker: XInputTimePickerSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 100,
     saveWithHidden: false,
     verify: {

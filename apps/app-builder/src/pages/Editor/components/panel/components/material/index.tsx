@@ -199,8 +199,6 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                             forceFallback={true}
                             animation={150}
                             onClone={(e) => {
-                              // console.log('onClone', e);
-
                               // 每次拖拽组件到面板时重新分配ID
                               const cpType = e.item.getAttribute('data-cp-type');
                               e.item.id = `${cpType}-${uuidv4()}`;

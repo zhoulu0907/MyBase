@@ -1,9 +1,12 @@
-import { Input, List, Button } from '@arco-design/web-react';
-import { IconSearch, IconCheck, IconDown } from '@arco-design/web-react/icon';
+import { Input, Menu } from '@arco-design/web-react';
+import { IconSearch } from '@arco-design/web-react/icon';
 import LightText from './LightText';
 import { useCallback, useState } from 'react';
 import type { FunctionItem } from '../utils/types';
 import styles from './FunctionList.module.less';
+
+const MenuItem = Menu.Item;
+const SubMenu = Menu.SubMenu;
 
 interface FunctionListProps {
   functions: FunctionItem[];//函数项数组，包含所有可展示的函数
@@ -13,7 +16,7 @@ interface FunctionListProps {
 }
 
 export function FunctionList({ functions, searchValue, onSearchChange, onChooseFunction }: FunctionListProps) {
-
+  const functionCategoryList = ["常用函数"];
   //控制函数列表是否展开/折叠
   const [isExpanded, setIsExpanded] = useState(true);
   // 记录当前选中的函数ID，用于列表项的选中状态展示
@@ -51,6 +54,38 @@ export function FunctionList({ functions, searchValue, onSearchChange, onChooseF
     setIsExpanded(!isExpanded);
   }, [isExpanded]);
 
+  const getSubMenu = () => {
+    if(!functionCategoryList.length) return null;
+    return functionCategoryList.map((category,index) => {
+      return <SubMenu
+          key={index.toString()}
+          className={styles.categoryContent}
+          title = {
+            <span className={styles.categoryTitle}>{category}</span>
+          }>
+        {getMenuItem(index)}
+        </SubMenu>
+      }
+    )
+  }
+
+  const getMenuItem = (index: number) => {
+    if(!functions.length) return null;
+    return functions.map((func) => {
+      return <MenuItem 
+      key={`${index}_${func.id}`} 
+      onClick={() => handleFunctionClick(func)} 
+      className={`${styles.functionItem} ${selectedFunctionId === func.id ? styles.selected : ''}`}>
+      <div className={styles.functionInfo}>
+        <div className={styles.functionName}>
+          <LightText text={func.name} searchValue={searchValue} />
+        </div>
+        <div className={styles.functionDesc}>{func.summary}</div>
+      </div>
+      </MenuItem>
+    })
+  }
+
   return (
     <div className={styles.functionList}>
       <div className={styles.searchSection}>
@@ -62,43 +97,13 @@ export function FunctionList({ functions, searchValue, onSearchChange, onChooseF
           className={styles.searchInput}
         />
       </div>
-
-      <div className={styles.categorySection}>
-        <div className={styles.categoryHeader}>
-          <div className={styles.categoryTitle}>
-            <IconCheck className={styles.categoryIcon} />
-            {/* TODO: 需要根据类型显示 */}
-            <span>{functions[0]?.type}</span>
-          </div>
-          <Button
-            type="text"
-            size="small"
-            icon={isExpanded ? <IconDown /> : <IconDown style={{ transform: 'rotate(-90deg)' }} />}
-            onClick={toggleExpanded}
-            className={styles.expandButton}
-          />
-        </div>
-      </div>
-
       {isExpanded && (
         <div className={styles.listSection}>
-          <List
-            dataSource={functions}
-            render={(func) => (
-              <List.Item
-                key={func.id}
-                className={`${styles.functionItem} ${selectedFunctionId === func.id ? styles.selected : ''}`}
-                onClick={() => handleFunctionClick(func)}
-              >
-                <div className={styles.functionInfo}>
-                  <div className={styles.functionName}>
-                    <LightText text={func.name} searchValue={searchValue} />
-                  </div>
-                  <div className={styles.functionDesc}>{func.summary}</div>
-                </div>
-              </List.Item>
-            )}
-          />
+          <Menu
+            defaultOpenKeys={['0']}
+            defaultSelectedKeys={[`0_${functions[0]?.id}`]}>
+            {getSubMenu()}
+          </Menu>
         </div>
       )}
     </div>

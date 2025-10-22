@@ -1,5 +1,5 @@
-import React from 'react'
-import { Modal, Pagination, Tree } from '@arco-design/web-react';
+import React, { useEffect, useState } from 'react'
+import { FormInstance, Modal, Pagination, Tree } from '@arco-design/web-react';
 import { IconCaretDown } from '@arco-design/web-react/icon';
 
 import './index.css';
@@ -10,6 +10,10 @@ interface PreviewDataSelectModalProps {
   visible: boolean;
   onCancel: any;
   tableConfig: XTableConfig;
+  displayFields: any;
+  form: FormInstance;
+  fieldName: string;
+  initialSelectedId: string;
 }
 
 // mock up
@@ -30,7 +34,22 @@ const treeData = [
 
 const fastFilters = [1];
 
-const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible, onCancel, tableConfig }) => {
+const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible, onCancel, tableConfig,displayFields,form ,fieldName,initialSelectedId }) => {
+  //数据选择runtime下的单选数据功能
+  const [selectedId, setSelectedId] = useState<string | null>('');
+
+  useEffect(() => {
+    setSelectedId(initialSelectedId);
+  }, [initialSelectedId]);
+
+  const handleSelectData = (data: any) => {
+    setSelectedId(data ? data.id : null);
+    [...displayFields].forEach((field: any) => {
+      field.dataValue = data ? data[field.value] : null;
+    });
+    form.setFieldValue(fieldName, data ? {selectID: data.id, dataFields: displayFields} : '');
+  };
+    
   return (
     <Modal
         className="filterDataModal"
@@ -53,7 +72,8 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
                     </div>
                 )} */}
                 <div className="rightFlexTable">
-                    <XTable {...tableConfig} showAddBtn={false}/>
+                    <XTable {...tableConfig} showAddBtn={false}
+                      xTableSelectProps={{showSelect: true, selectedDataId: selectedId, setSelectData: handleSelectData}}/>
                 </div>
             </div>
              {/* <div className='bottomDiv'>

@@ -28,6 +28,12 @@ export const placeholdersPlugin = (
         const [textId, ...texts] = text.split('.');
         if (textId && texts.length) {
           this.text = texts.map((t) => t.split(':')[mode === 'code' ? 1 : 0]).join('.');
+          if(this.text.includes("$")) {
+            const textTemp = this.text.split("$");
+            if(textTemp[1]) {
+              this.text = `$${textTemp[1]}`
+            }
+          }
           this.textId = textId;
           console.log('this.text', this.text, this.textId);
         }
@@ -140,7 +146,6 @@ export const placeholdersPlugin = (
       //初始化 decorations，使用 combinedMatcher 创建初始装饰
       constructor(view: EditorView) {
         this.decorations = combinedMatcher.createDeco(view);
-        // console.log('view', view, this.decorations);
       }
 
       //当编辑器内容发生变化时，更新 decorations，使用 combinedMatcher 重新创建装饰

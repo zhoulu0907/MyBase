@@ -151,13 +151,13 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   };
 
   return (
-    <div className={`${styles['node-content']} ${isSelected ? styles['node-selected'] : ''}`}>
+    <div className={`${styles.nodeContent} ${isSelected ? styles.nodeSelected : ''}`}>
       {/* 节点头部 */}
-      <div className={styles['node-header']}>
-        <IconSync className={styles['refresh-icon']} onClick={handleRefresh} />
-        <span className={styles['node-title']}>
+      <div className={styles.nodeHeader}>
+        <IconSync className={styles.refreshIcon} onClick={handleRefresh} />
+        <span className={styles.nodeTitle}>
           {nodeData.entityName || '未命名实体'}
-          {newNodes.includes(nodeData.entityId) && <span className={styles['node-isNew']} />}
+          {newNodes.includes(nodeData.entityId) && <span className={styles.nodeIsNew} />}
         </span>
         <Switch
           checked={nodeData.status === ENTITY_STATUS.ENABLE}
@@ -182,37 +182,37 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             </Space>
           }
         >
-          <IconMoreVertical className={styles['more-icon']} />
+          <IconMoreVertical className={styles.moreIcon} />
         </Popover> */}
       </div>
 
       {/* 节点主体 */}
-      <div className={styles['node-body']}>
+      <div className={styles.nodeBody}>
         {/* 渲染系统字段 */}
         {systemFields?.length > 0 && (
-          <div className={styles['field-section']}>
-            <div className={styles['field-section-header']}>
-              <span className={styles['section-title']}>系统字段</span>
-              <span className={styles['section-count']}>({systemFields.length})</span>
+          <div className={styles.fieldSection}>
+            <div className={styles.fieldSectionHeader}>
+              <span className={styles.sectionTitle}>系统字段</span>
+              <span className={styles.sectionCount}>({systemFields.length})</span>
               <div
-                className={`${styles['collapse-icon']}`}
+                className={`${styles.collapseIcon}`}
                 id="collapse-icon"
                 onClick={(e) => handleToggleSection('system', e)}
               >
                 {nodeCollapsed.system ? <IconCaretDown /> : <IconCaretUp />}
               </div>
             </div>
-            <div className={`${styles['field-section-content']} ${nodeCollapsed.system ? styles['collapsed'] : ''}`}>
+            <div className={`${styles.fieldSectionContent} ${nodeCollapsed.system ? styles.collapsed : ''}`}>
               {systemFields.map((field, index) => (
                 <div
                   key={index}
-                  className={`${styles['field-item']} ${styles['system-field']} ${styles['clickable-field']}`}
+                  className={`${styles.fieldItem} ${styles.systemField} ${styles.clickableField}`}
                   onClick={(e) => handleFieldClick(field.fieldId, e)}
                 >
-                  <span className={styles['field-name']}>
+                  <span className={styles.fieldName}>
                     {SYSTEM_FIELD_MAP[field.fieldName as keyof typeof SYSTEM_FIELD_MAP] || field.fieldName}
                   </span>
-                  <span className={styles['field-type']}>
+                  <span className={styles.fieldType}>
                     {fieldTypes.find((item) => item.fieldType === field.fieldType)?.displayName || field.fieldType}
                   </span>
                 </div>
@@ -223,27 +223,27 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
 
         {/* 渲染自定义字段 */}
         {customFields?.length > 0 && (
-          <div className={styles['field-section']}>
-            <div className={styles['field-section-header']}>
-              <span className={styles['section-title']}>自定义字段</span>
-              <span className={styles['section-count']}>({customFields.length})</span>
+          <div className={styles.fieldSection}>
+            <div className={styles.fieldSectionHeader}>
+              <span className={styles.sectionTitle}>自定义字段</span>
+              <span className={styles.sectionCount}>({customFields.length})</span>
               <div
-                className={`${styles['collapse-icon']}`}
+                className={`${styles.collapseIcon}`}
                 id="collapse-icon"
                 onClick={(e) => handleToggleSection('custom', e)}
               >
                 {nodeCollapsed.custom ? <IconCaretDown /> : <IconCaretUp />}
               </div>
             </div>
-            <div className={`${styles['field-section-content']} ${nodeCollapsed.custom ? styles['collapsed'] : ''}`}>
+            <div className={`${styles.fieldSectionContent} ${nodeCollapsed.custom ? styles.collapsed : ''}`}>
               {customFields.map((field, index) => (
                 <div
                   key={index}
-                  className={`${styles['field-item']} ${styles['custom-field']} ${styles['clickable-field']}`}
+                  className={`${styles.fieldItem} ${styles.customField} ${styles.clickableField}`}
                   onClick={(e) => handleFieldClick(field.fieldId, e)}
                 >
-                  <span className={styles['field-name']}>{field.displayName}</span>
-                  <span className={styles['field-type']}>
+                  <span className={styles.fieldName}>{field.displayName}</span>
+                  <span className={styles.fieldType}>
                     {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]?.LABEL || field.fieldType}
                   </span>
                 </div>
@@ -255,7 +255,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
 
       {/* 节点底部 */}
       <div id="node-footer">
-        <Button type="text" onClick={handleAddField} className={styles['node-footer-button']}>
+        <Button type="text" onClick={handleAddField} className={styles.nodeFooterButton}>
           字段配置
         </Button>
         <Popover
@@ -272,7 +272,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             </Space>
           }
         >
-          <Button type="text" className={styles['node-footer-button']}>
+          <Button type="text" className={styles.nodeFooterButton}>
             添加关系
           </Button>
         </Popover>

@@ -5,7 +5,6 @@ import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-rea
 import { createEntity } from '@onebase/app';
 import React, { useState } from 'react';
 import styles from '../modal.module.less';
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { getNewNodePosition } from '../../ERchart/utils/nodePositionCalculator';
 import { useNewNodeStore } from '@/store/store_entity';
@@ -93,7 +92,7 @@ const CreateEntityModal: React.FC<{
 
   return (
     <Modal
-      className={styles['create-entity-modal']}
+      className={styles.createEntityModal}
       title="创建业务实体"
       visible={visible}
       onOk={handleFinish}
@@ -101,7 +100,7 @@ const CreateEntityModal: React.FC<{
       okText="创建"
       cancelText="取消"
     >
-      <Form form={form} layout="vertical" onSubmit={handleFinish} className={styles['entity-form']}>
+      <Form form={form} layout="vertical" onSubmit={handleFinish}>
         {dsResource !== DS_RESOURCE_TYPE.INTERNAL && (
           <Form.Item
             label="业务实体来源于"

@@ -41,3 +41,18 @@ export const renameFlowMgmt = (params: RenameFlowMgmtReq) => {
 export const updateFlowMgmtDefinition = (params: UpdateFlowMgmtDefinitionReq) => {
   return flowService.post('/mgmt/update-definition', params);
 };
+
+// 分页查询执行日志
+export const getFlowLogPage = (params: any) => {
+  return flowService.get('/log/page', params);
+};
+
+// 获取日志详情
+export const getFlowLogDetail = (params: any) => {
+  return flowService.get('/log/get', params);
+};
+
+// 统计执行日志
+export const getFlowLogStatistic = (params: any) => {
+  return flowService.get('/log/statistic-tody', params);
+};

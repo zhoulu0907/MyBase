@@ -7,13 +7,13 @@ import { SelectZoom } from './styles';
 
 export const ZoomSelect = () => {
   const tools = usePlaygroundTools({ maxZoom: 2, minZoom: 0.25 });
-  const [dropDownVisible, openDropDown] = useState(false);
+  const [dropDownVisible, setDropDownVisible] = useState(false);
   return (
     <Dropdown
       position="top"
       trigger="custom"
       visible={dropDownVisible}
-      onClickOutSide={() => openDropDown(false)}
+      onClickOutSide={() => setDropDownVisible(false)}
       render={
         <Dropdown.Menu>
           <Dropdown.Item onClick={() => tools.zoomin()}>Zoomin</Dropdown.Item>
@@ -26,7 +26,7 @@ export const ZoomSelect = () => {
         </Dropdown.Menu>
       }
     >
-      <SelectZoom onClick={() => openDropDown(true)}>{Math.floor(tools.zoom * 100)}%</SelectZoom>
+      <SelectZoom onClick={() => setDropDownVisible(true)}>{Math.floor(tools.zoom * 100)}%</SelectZoom>
     </Dropdown>
   );
 };

@@ -1,7 +1,7 @@
 import iconControl from '@/assets/flow/nodes/switch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
-import { formMeta } from './form-meta';
+import { defaultFormMeta } from '../../default-form-meta';
 
 export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
   type: NodeType.CASE_DEFAULT,
@@ -27,5 +27,5 @@ export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
     description: '默认分支'
   },
   canDelete: (ctx, node) => false,
-  formMeta
+  formMeta: defaultFormMeta,
 };

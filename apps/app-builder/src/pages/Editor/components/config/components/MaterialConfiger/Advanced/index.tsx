@@ -32,9 +32,6 @@ const Advanced = ({ cpID }: AdvancedProps) => {
       layout: curComponentSchema.layout
     };
 
-    // console.log(curComponentSchema.config);
-    // console.log(newCurComponentSchema.config);
-
     setCurComponentSchema(newCurComponentSchema);
     setPageComponentSchemas(cpID, newCurComponentSchema);
   };
@@ -61,9 +58,6 @@ const Advanced = ({ cpID }: AdvancedProps) => {
       },
       layout: curComponentSchema.layout
     };
-
-    // console.log(curComponentSchema.config);
-    // console.log(newCurComponentSchema.config);
 
     setCurComponentSchema(newCurComponentSchema);
     setPageComponentSchemas(cpID, newCurComponentSchema);

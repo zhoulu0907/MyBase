@@ -1,7 +1,7 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Form, Grid, Input, Message, Modal, Select, Space } from '@arco-design/web-react';
 import * as ruleService from '@onebase/app';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
 import { validationTypeMap, ruleTip, validationTypeList, VALIDATION_TYPES } from './rule.ts';
 import styles from '../modal.module.less';
@@ -11,9 +11,16 @@ interface RuleFormValues {
   validationType: string;
   formatValidationType?: string;
   rgName: string;
-  fieldId: string;
+  fieldId?: string;
+  childEntityId?: string;
   popPrompt: string;
   popType: string;
+  id?: string;
+  regex?: string;
+  minLength?: string;
+  maxLength?: string;
+  minValue?: string;
+  maxValue?: string;
 }
 
 interface CreateRuleModalProps {
@@ -43,7 +50,7 @@ const REGEX_OPTIONS = REGEX_LIST.map((item) => {
     label: (
       <>
         <span>{item.label}</span>
-        <span className={styles['regex']}>{item.value}</span>
+        <span className={styles.regexText}>{item.value}</span>
       </>
     ),
     value: item.value
@@ -61,8 +68,8 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   const { curAppId } = useAppStore();
   const [form] = Form.useForm<RuleFormValues>();
   const [loading, setLoading] = useState(false);
-  const [fieldOptions, setFieldOptions] = useState<any[]>([]);
-
+  const [fieldOptions, setFieldOptions] = useState<{ label: string; value: string }[]>([]);
+  const [childEntityOptions, setChildEntityOptions] = useState<{ label: string; value: string }[]>([]);
   // 监听校验类型变化，控制格式校验类型字段的显示
   const handleValidationTypeChange = (value: string) => {
     if (value !== 'format') {
@@ -70,23 +77,26 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     }
   };
 
-  const handleGetRuleById = async (id: string) => {
-    const ruleHandlers = {
-      [VALIDATION_TYPES.REQUIRED]: ruleService.getRequiredRuleById,
-      [VALIDATION_TYPES.UNIQUE]: ruleService.getUniqueRuleById,
-      [VALIDATION_TYPES.LENGTH]: ruleService.getLengthRuleById,
-      [VALIDATION_TYPES.RANGE]: ruleService.getRangeRuleById,
-      [VALIDATION_TYPES.FORMAT]: ruleService.getFormatRuleById,
-      [VALIDATION_TYPES.CHILD_NOT_EMPTY]: ruleService.getChildNotEmptyRuleById
-    };
-    const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
-    if (handler) {
-      const res = await handler(id);
-      if (res) {
-        form.setFieldsValue({ ...res, popPrompt: res.promptMessage, regex: res.formatValue });
+  const handleGetRuleById = useCallback(
+    async (id: string) => {
+      const ruleHandlers = {
+        [VALIDATION_TYPES.REQUIRED]: ruleService.getRequiredRuleById,
+        [VALIDATION_TYPES.UNIQUE]: ruleService.getUniqueRuleById,
+        [VALIDATION_TYPES.LENGTH]: ruleService.getLengthRuleById,
+        [VALIDATION_TYPES.RANGE]: ruleService.getRangeRuleById,
+        [VALIDATION_TYPES.FORMAT]: ruleService.getFormatRuleById,
+        [VALIDATION_TYPES.CHILD_NOT_EMPTY]: ruleService.getChildNotEmptyRuleById
+      };
+      const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
+      if (handler) {
+        const res = await handler(id);
+        if (res) {
+          form.setFieldsValue({ ...res, popPrompt: res.promptMessage, regex: res.formatValue });
+        }
       }
-    }
-  };
+    },
+    [form]
+  );
 
   const handleCreateRule = async (values: RuleFormValues) => {
     const params = {
@@ -110,8 +120,6 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     if (handler) {
       res = await handler(params);
     }
-
-    console.log('createRule', res);
 
     if (res) {
       Message.success('创建规则成功');
@@ -186,40 +194,40 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   };
 
   // 加载字段选项
-  const loadFieldOptions = async () => {
+  const loadFieldOptions = useCallback(async () => {
     const res = await ruleService.getEntityFieldsWithChildren(entity.id);
-    // 处理主表字段
-    const parentFields = (res?.parentFields || []).map((item: { displayName: string; fieldId: string }) => ({
-      label: item.displayName,
-      value: item.fieldId,
-      isParent: true
+
+    const parentFields = res.parentFields.map((field: { displayName: string; fieldId: string }) => ({
+      label: field.displayName,
+      value: field.fieldId
     }));
 
-    // 处理子表字段
-    const childFields = (res?.childEntities || [])
-      .flatMap((entity: { childFields: { displayName: string; fieldId: string }[] }) => entity?.childFields || [])
-      .map((item: { displayName: string; fieldId: string }) => ({
-        label: item.displayName,
-        value: item.fieldId
-      }));
-    const allFields = [...parentFields, ...childFields];
-    setFieldOptions(allFields);
-  };
+    const childEntities = res.childEntities.map((item: { childEntityName: string; childEntityId: string }) => ({
+      label: item.childEntityName,
+      value: item.childEntityId
+    }));
+    setChildEntityOptions(childEntities); // 子表字段选项
+    setFieldOptions(parentFields); // 子表选项
+  }, [entity.id, editRule, ruleType]);
 
   // 初始化表单数据
   useEffect(() => {
     if (visible) {
-      loadFieldOptions();
       form.setFieldValue('validationType', ruleType);
       if (editRule) {
-        handleGetRuleById(editRule?.id || '');
+        // 先加载字段选项，再获取规则数据
+        loadFieldOptions().then(() => {
+          handleGetRuleById(editRule?.id || '');
+        });
+      } else {
+        loadFieldOptions();
       }
     }
-  }, [visible, editRule]);
+  }, [visible, editRule, form, ruleType]);
 
   return (
     <Modal
-      className={styles['create-rule-modal']}
+      className={styles.createRuleModal}
       title={`${editRule ? '编辑' : '新建'}数据规则-${validationTypeMap[ruleType]}`}
       visible={visible}
       onOk={handleFinish}
@@ -229,7 +237,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       confirmLoading={loading}
       style={{ width: 600 }}
     >
-      <Form form={form} layout="vertical" className={styles['rule-form']}>
+      <Form form={form} layout="vertical">
         <Form.Item
           label="规则名称"
           field="rgName"
@@ -241,17 +249,33 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
           <Input placeholder="请输入规则名称" maxLength={50} showWordLimit />
         </Form.Item>
 
-        <Form.Item label="校验数据项" field="fieldId" rules={[{ required: true, message: '请选择校验数据项' }]}>
-          <Select
-            placeholder="请选择校验数据项"
-            options={fieldOptions}
-            showSearch
-            filterOption={(inputValue, option) =>
-              option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
-              option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
-            }
-          />
-        </Form.Item>
+        {ruleType !== VALIDATION_TYPES.CHILD_NOT_EMPTY && (
+          <Form.Item label="校验数据项" field="fieldId" rules={[{ required: true, message: '请选择校验数据项' }]}>
+            <Select
+              placeholder="请选择校验数据项"
+              options={fieldOptions}
+              showSearch
+              filterOption={(inputValue, option) =>
+                option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
+                option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
+              }
+            />
+          </Form.Item>
+        )}
+
+        {ruleType === VALIDATION_TYPES.CHILD_NOT_EMPTY && (
+          <Form.Item label="校验子表" field="childEntityId" rules={[{ required: true, message: '请选择校验子表' }]}>
+            <Select
+              options={childEntityOptions}
+              placeholder="请选择校验子表"
+              showSearch
+              filterOption={(inputValue, option) =>
+                option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
+                option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
+              }
+            />
+          </Form.Item>
+        )}
 
         <Form.Item label="校验类型" field="validationType" hidden>
           <Select onChange={handleValidationTypeChange} placeholder="请选择校验类型" disabled>
@@ -280,7 +304,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
         {ruleType === VALIDATION_TYPES.RANGE && (
           <Form.Item label="范围区间" required>
-            <Space align="center" className={styles['range-space']}>
+            <Space align="center" className={styles.rangeSpace}>
               <Form.Item field="minValue" rules={[{ required: true, message: '请输入范围区间' }]}>
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
@@ -301,7 +325,6 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
               filterOption
               labelInValue
               onChange={(value) => {
-                console.log('onchange', value);
                 if (typeof value === 'string') {
                   form.setFieldValue('regex', value);
                 } else if (value && typeof value === 'object' && 'value' in value) {

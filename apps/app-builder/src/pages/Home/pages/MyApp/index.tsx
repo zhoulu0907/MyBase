@@ -1,11 +1,12 @@
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import {
-  Avatar,
   Button,
   Divider,
+  Dropdown,
   Form,
   Input,
+  Menu,
   Message,
   Modal,
   Pagination,
@@ -13,7 +14,7 @@ import {
   Spin,
   Tag
 } from '@arco-design/web-react';
-import { IconCheckCircle, IconEmpty, IconLeft, IconSearch, IconSettings } from '@arco-design/web-react/icon';
+import { IconEmpty, IconLeft, IconMoreVertical, IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import {
   createApplication,
   deleteApplication,
@@ -30,8 +31,6 @@ import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import appDeleteSVG from '@/assets/images/app_delete.svg';
-import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
 import CreateApp from '@/components/CreateApp';
@@ -49,7 +48,8 @@ import {
   createTimeOptions,
   defaultTheme,
   statusOptions,
-  TagColor
+  TagColor,
+  ThemeColorMap
 } from './const';
 import styles from './index.module.less';
 
@@ -87,6 +87,10 @@ const MyAppPage: React.FC = () => {
 
   const createDatasourceRef = useRef<DataSourceHandle>(null);
   const appContainerRef = useRef<HTMLDivElement>(null);
+
+  // option dropdown
+  const [optionVisibleId, setOptionVisibleId] = useState('');
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!appContainerRef.current) return;
@@ -244,6 +248,51 @@ const MyAppPage: React.FC = () => {
     return baseUrl;
   };
 
+  const handleOptionVisibleChange = (v: boolean, id: string) => {
+    setOptionVisibleId(v ? id : '');
+  };
+
+  const clearTimer = () => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+  const startCloseTimer = (delay = 120) => {
+    clearTimer();
+    timerRef.current = window.setTimeout(() => {
+      setOptionVisibleId('');
+      timerRef.current = null;
+    }, delay);
+  };
+
+  const menu = (item: any) => {
+    return (
+      <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
+        <Menu.Item
+          key="1"
+          onClick={(e) => {
+            e.stopPropagation();
+            nagivateToAppPage(item.id);
+          }}
+        >
+          编辑
+        </Menu.Item>
+        <Menu.Item
+          key="2"
+          onClick={(e) => {
+            e.stopPropagation();
+            setDeleteApp(item);
+            setDeleteVisible(true);
+          }}
+        >
+          删除
+        </Menu.Item>
+        {/* <Menu.Item key="3">应用管理</Menu.Item> */}
+      </Menu>
+    );
+  };
+
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
@@ -349,13 +398,7 @@ const MyAppPage: React.FC = () => {
                 </div>
               )}
               {dataList?.map((item, index) => (
-                <div
-                  className={styles.myAppCard}
-                  key={index}
-                  onClick={() => {
-                    nagivateToDataFactory(item.id);
-                  }}
-                >
+                <div className={styles.myAppCard} key={index}>
                   <div className={styles.myAppCardTop}>
                     <div className={styles.myAppCardHeader}>
                       <div className={styles.myAppName}>
@@ -368,32 +411,61 @@ const MyAppPage: React.FC = () => {
                           />
                         </div>
                         <div className={styles.myAppCardInfo}>
-                          <div className={styles.myAppTitle}>{item.appName}</div>
-                          <div className={styles.myAppTime}>{dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
+                          <div className={styles.infoHeader}>
+                            <div className={styles.myAppTitle}>{item.appName}</div>
+                            {/* TODO */}
+                            <Tag
+                              color={TagColor[item.appStatus]}
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 400
+                              }}
+                            >
+                              SaaS模式
+                            </Tag>
+                          </div>
+                          <Tag
+                            color={TagColor[item.appStatus]}
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 400
+                            }}
+                          >
+                            {item.appStatusText}
+                          </Tag>
+                          <Divider type="vertical" style={{ margin: '0 4px 0 6px', height: '8px' }} />
+                          <span className={styles.versionNumber}>{item.versionNumber}</span>
                         </div>
                       </div>
-                      <Tag
-                        color={TagColor[item.appStatus]}
-                        icon={<IconCheckCircle style={{ color: TagColor[item.appStatus] }} />}
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 400
-                        }}
+                      <Dropdown
+                        droplist={menu(item)}
+                        trigger="click"
+                        position="bottom"
+                        popupVisible={optionVisibleId === item.id}
+                        onVisibleChange={(v) => handleOptionVisibleChange(v, item.id)}
+                        getPopupContainer={(node) => node.parentNode as HTMLElement}
                       >
-                        {item.appStatusText}
-                      </Tag>
+                        <Button
+                          type="text"
+                          className={styles.optionbtn}
+                          onPointerEnter={clearTimer}
+                          onPointerLeave={() => startCloseTimer(80)}
+                        >
+                          <IconMoreVertical style={{ color: '#272e3b' }} />
+                        </Button>
+                      </Dropdown>
                     </div>
 
                     <div className={styles.myAppCardBody}>
-                      <div className={styles.myAppDesc}>{item.description}</div>
+                      <div className={styles.myAppDesc}>{item.description ?? '该应用暂无介绍。'}</div>
                       <div className={styles.myAppTags}>
                         {item.tags?.map((tag: { id: string; tagName: string }) => (
                           <Tag
                             key={tag.id}
                             style={{
                               color: item.themeColor || defaultTheme,
-                              borderColor: item.themeColor || defaultTheme,
-                              backgroundColor: '#fff'
+                              height: '22px',
+                              backgroundColor: ThemeColorMap[item.themeColor ?? defaultTheme]
                             }}
                           >
                             {tag.tagName}
@@ -402,45 +474,17 @@ const MyAppPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <Divider style={{ margin: '12px 0', borderColor: '#F2F3F5' }} />
                   <div className={styles.myAppCardFooter}>
-                    <div className={styles.myAppCreator}>
-                      <Avatar
-                        size={24}
-                        style={{
-                          backgroundColor: randomColors[index]
-                        }}
-                      >
-                        {item.createUser?.slice(0, 1) || 'U'}
-                      </Avatar>
-                      <div className={styles.myAppCreatorName}>{item.createUser}</div>
-                    </div>
-
-                    <div className={styles.myAppOperate}>
-                      {hasPermission(ACTIONS.UPDATE) && (
-                        <img
-                          src={appEditSVG}
-                          alt="编辑"
-                          className={styles.operateIcon}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            nagivateToAppPage(item.id);
-                          }}
-                        />
-                      )}
-                      {hasPermission(ACTIONS.DELETE) && (
-                        <img
-                          src={appDeleteSVG}
-                          alt="删除"
-                          className={styles.operateIcon}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteApp(item);
-                            setDeleteVisible(true);
-                          }}
-                        />
-                      )}
-                    </div>
+                    <Button
+                      className={styles.footerBtn}
+                      type="outline"
+                      long
+                      onClick={() => {
+                        nagivateToDataFactory(item.id);
+                      }}
+                    >
+                      进入应用
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -509,7 +553,7 @@ const MyAppPage: React.FC = () => {
             ) : (
               <div>
                 <IconLeft style={{ cursor: 'pointer' }} onClick={() => setCreateType('app')} />
-                创建外部数据源
+                使用自有数据源
               </div>
             )}
           </div>

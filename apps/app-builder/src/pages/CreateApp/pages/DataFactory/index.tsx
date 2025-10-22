@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/store_app';
 import { Layout, Menu, Tooltip } from '@arco-design/web-react';
-import { IconBook, IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
+import { IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import DataSourcePage from './pages/DataSource';
 import EntityPage from './pages/Entity';

@@ -1,12 +1,35 @@
-import { Button, Form, Modal, Select, Switch, Radio, Tooltip, Space, InputNumber, Divider, Grid, Typography, Input, Popconfirm } from '@arco-design/web-react';
+import checkIcon from '@/assets/images/check_icon.svg';
+import DynamicIcon from '@/components/DynamicIcon';
+import {
+  Button,
+  Divider,
+  Form,
+  Grid,
+  Input,
+  InputNumber,
+  Modal,
+  Popconfirm,
+  Radio,
+  Select,
+  Space,
+  Switch,
+  Tooltip,
+  Typography
+} from '@arco-design/web-react';
+import { IconDragDotVertical, IconEdit, IconExclamationCircle } from '@arco-design/web-react/icon';
+import { IconEditStroked } from '@douyinfe/semi-icons';
 import type { PageView } from '@onebase/app';
-import { RedirectMethod, TableOperationButton, TableOperationButtonStyle, usePageViewEditorSignal, iconMap, operationIcon, iconColorList } from '@onebase/ui-kit';
+import {
+  iconColorList,
+  iconMap,
+  operationIcon,
+  RedirectMethod,
+  TableOperationButton,
+  TableOperationButtonStyle,
+  usePageViewEditorSignal
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
-import { IconDragDotVertical, IconExclamationCircle, IconEdit } from '@arco-design/web-react/icon';
-import { IconEditStroked } from '@douyinfe/semi-icons';
-import DynamicIcon from '@/components/DynamicIcon';
-import checkIcon from '@/assets/images/check_icon.svg';
 import styles from '../../index.module.less';
 
 const Row = Grid.Row;
@@ -51,7 +74,7 @@ const buttonIconOptions = [
   {
     label: '图标+文字',
     value: TableOperationButtonStyle.ALL
-  },
+  }
 ];
 
 // 按钮权限配置
@@ -103,10 +126,6 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
   const { pageViews } = usePageViewEditorSignal;
 
   useEffect(() => {
-    // console.log(configs);
-    // console.log(item);
-    // console.log(pageViews.value);
-
     const hasPageView = pageViews.value[configs.redirectPageId]?.detailViewMode == 1;
     if (!hasPageView) {
       handleMultiPropsChange([
@@ -131,7 +150,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
       setBtnIcon(defaultIcon?.buttonIcon);
       setBtnIconColor(defaultIcon?.iconColor);
     }
-  }, [modalButtonVisible,]);
+  }, [modalButtonVisible]);
 
   const handleOpenModal = () => {
     setModalVisible(true);
@@ -142,12 +161,15 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
   };
 
   const handleOpenButtonModal = (value: any) => {
+    const defaultView = (Object.values(pageViews.value) as PageView[]).find(
+      (item: PageView) => item.isDefaultDetailViewMode
+    );
     setModalButtonVisible(value.type);
     operationForm.setFieldsValue({
       buttonName: value.buttonName,
       buttonIcon: value.buttonIcon,
       iconColor: value.iconColor,
-      redirectPageId: value.redirectPageId,
+      redirectPageId: defaultView?.id,
       redirectMethod: value.redirectMethod,
       confirmText: value.confirmText,
       deletedAction: value.deletedAction
@@ -180,17 +202,22 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
 
   const handleOnButtonModal = () => {
     operationForm.validate().then((values) => {
-      console.log('values', values)
       try {
         const newData = [...configs[operationButton]];
-        const newValue = newData.map((op: OperationButtonConfig) => op.type === modalButtonVisible ? ({
-          ...op,
-          buttonName: values.buttonName,
-          buttonIcon: values.buttonIcon,
-          iconColor: values.iconColor,
-          confirmText: values.confirmText,
-          deletedAction: values.deletedAction
-        }) : op);
+        const newValue = newData.map((op: OperationButtonConfig) =>
+          op.type === modalButtonVisible
+            ? {
+                ...op,
+                buttonName: values.buttonName,
+                buttonIcon: values.buttonIcon,
+                iconColor: values.iconColor,
+                confirmText: values.confirmText,
+                deletedAction: values.deletedAction,
+                redirectPageId: values.redirectPageId,
+                redirectMethod: values.redirectMethod
+              }
+            : op
+        );
         handlePropsChange(operationButton, newValue);
       } catch (e: any) {
         console.error(e.errors);
@@ -273,104 +300,98 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
       </Form.Item>
 
       <div>操作栏配置</div>
-      <Form.Item
-        label='按钮显示方式'
-      >
-        <RadioGroup defaultValue={'all'} onChange={(value) => {
-          handlePropsChange('operationButtonShowType', value);
-        }}>
-          {
-            buttonIconOptions.map((button) => (
-              <Radio key={button.label} value={button.value}>
-                {button.label}
-              </Radio>
-            ))
-          }
+      <Form.Item label="按钮显示方式">
+        <RadioGroup
+          defaultValue={'all'}
+          onChange={(value) => {
+            handlePropsChange('operationButtonShowType', value);
+          }}
+        >
+          {buttonIconOptions.map((button) => (
+            <Radio key={button.label} value={button.value}>
+              {button.label}
+            </Radio>
+          ))}
         </RadioGroup>
       </Form.Item>
 
       <Form.Item>
         <div className={styles.buttonShowRule}>
           第
-          {<InputNumber
-            defaultValue={configs['operationButtonCollpaseNumber']}
-            className={`buttonShowInput ${styles.buttonInput}`}
-            size='mini'
-            min={1}
-            max={20}
-            onChange={(value) => handlePropsChange('operationButtonCollpaseNumber', +value)}
-          />}
+          {
+            <InputNumber
+              defaultValue={configs['operationButtonCollpaseNumber']}
+              className={`buttonShowInput ${styles.buttonInput}`}
+              size="mini"
+              min={1}
+              max={20}
+              onChange={(value) => handlePropsChange('operationButtonCollpaseNumber', +value)}
+            />
+          }
           个按钮开始收入“更多”菜单
         </div>
 
-        {
-          configs[operationButton].map((op: OperationButtonConfig, index: number) => (
-            <Fragment key={index}>
-              <div className={styles.buttonItem}>
-                <Grid.Row align="center">
-                  <Grid.Col span={16} flex='1' >
-                    <Space align='center'>
-                      <IconDragDotVertical style={{ cursor: 'grab', color: '#86909c' }} />
-                      <Typography.Text>{op.buttonName}</Typography.Text>
-                      {
-                        <div onClick={() => {
-                          handleOpenButtonModal(op)
-                        }}>
-                          <DynamicIcon
-                            IconComponent={iconMap[op.buttonIcon as keyof typeof iconMap]}
-                            theme="outline"
-                            size="16"
-                            fill={op.iconColor}
-                            style={{
-                              margin: 'auto',
-                              cursor: 'pointer'
-                            }}
-                          />
-                        </div>
-                      }
-                    </Space>
-                  </Grid.Col>
-
-                  <Grid.Col span={8} style={{ textAlign: 'right' }}>
-                    <Space align='center'>
-                      <IconEditStroked onClick={() => handleOpenButtonModal(op)} style={{ display: 'flex', color: '#86909c', cursor: 'pointer' }} />
-                      <Switch
-                        size='small'
-                        defaultChecked={op.display}
-                        onChange={(value) => {
-                          const newArr = [...configs[operationButton]];
-                          newArr[index] = { ...newArr[index], display: value };
-                          handlePropsChange(operationButton, newArr);
+        {configs[operationButton].map((op: OperationButtonConfig, index: number) => (
+          <Fragment key={index}>
+            <div className={styles.buttonItem}>
+              <Grid.Row align="center">
+                <Grid.Col span={16} flex="1">
+                  <Space align="center">
+                    <IconDragDotVertical style={{ cursor: 'grab', color: '#86909c' }} />
+                    <Typography.Text>{op.buttonName}</Typography.Text>
+                    {
+                      <DynamicIcon
+                        IconComponent={iconMap[op.buttonIcon as keyof typeof iconMap]}
+                        theme="outline"
+                        size="16"
+                        fill={op.iconColor}
+                        style={{
+                          margin: 'auto'
                         }}
                       />
-                    </Space>
-                  </Grid.Col>
-                </Grid.Row>
-              </div>
-              <Divider style={{ margin: 0 }} />
-            </Fragment>
-          ))
-        }
+                    }
+                  </Space>
+                </Grid.Col>
 
+                <Grid.Col span={8} style={{ textAlign: 'right' }}>
+                  <Space align="center">
+                    <IconEditStroked
+                      onClick={() => handleOpenButtonModal(op)}
+                      style={{ display: 'flex', color: '#86909c', cursor: 'pointer' }}
+                    />
+                    <Switch
+                      size="small"
+                      defaultChecked={op.display}
+                      onChange={(value) => {
+                        const newArr = [...configs[operationButton]];
+                        newArr[index] = { ...newArr[index], display: value };
+                        handlePropsChange(operationButton, newArr);
+                      }}
+                    />
+                  </Space>
+                </Grid.Col>
+              </Grid.Row>
+            </div>
+            <Divider style={{ margin: 0 }} />
+          </Fragment>
+        ))}
       </Form.Item>
 
-      <Form.Item label='按钮权限配置'>
-        <RadioGroup defaultValue={configs['advancedButtonPermission']} onChange={(value) => {
-          handlePropsChange('advancedButtonPermission', value);
-        }}>
-          {
-            buttonPermissionOptions.map((op, index) => (
-              <Radio
-                key={index}
-                value={op.value}
-              >
-                {op.label}
-                <Tooltip content={op.tips}>
-                  <IconExclamationCircle style={{ marginLeft: 4 }} />
-                </Tooltip>
-              </Radio>
-            ))
-          }
+      <Form.Item label="按钮权限配置">
+        <RadioGroup
+          defaultValue={configs['advancedButtonPermission']}
+          onChange={(value) => {
+            handlePropsChange('advancedButtonPermission', value);
+          }}
+        >
+          {buttonPermissionOptions.map((op, index) => (
+            <Radio key={index} value={op.value}>
+              {op.label}
+              <Tooltip content={op.tips}>
+                <IconExclamationCircle style={{ marginLeft: 4 }} />
+              </Tooltip>
+            </Radio>
+          ))}
         </RadioGroup>
       </Form.Item>
 
@@ -386,7 +407,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
             <Select
               style={{ width: '230px' }}
               options={(Object.values(pageViews.value) as PageView[])
-                .filter((item: PageView) => item.detailViewMode == 1)
+                .filter((item: PageView) => item.detailViewMode === 1)
                 .map((item: PageView) => ({
                   label: item.pageName,
                   value: item.id
@@ -406,7 +427,12 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
         </Form>
       </Modal>
 
-      <Modal title="操作按钮编辑" visible={!!modalButtonVisible} onCancel={handleCloseButtonModal} onOk={handleOnButtonModal}>
+      <Modal
+        title="操作按钮编辑"
+        visible={!!modalButtonVisible}
+        onCancel={handleCloseButtonModal}
+        onOk={handleOnButtonModal}
+      >
         <Form form={operationForm} className={styles.operationModal}>
           <Row gutter={24}>
             <Col span={12}>
@@ -422,7 +448,6 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
             </Col>
 
             <Col span={12}>
-
               <Form.Item field="iconColor" hidden>
                 <Input />
               </Form.Item>
@@ -433,7 +458,6 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                 style={{ flex: 1 }}
                 rules={[{ required: true, message: '请选择按钮图标' }]}
               >
-
                 <Popconfirm
                   icon={null}
                   title={null}
@@ -447,15 +471,17 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                     });
                   }}
                   onCancel={() => {
-                    const defaultIcon = configs[operationButton].find((op: OperationButtonConfig) => op.type === modalButtonVisible);
+                    const defaultIcon = configs[operationButton].find(
+                      (op: OperationButtonConfig) => op.type === modalButtonVisible
+                    );
                     setBtnIcon(defaultIcon?.buttonIcon);
                     setBtnIconColor(defaultIcon?.iconColor);
                   }}
-                  style={{ width: 500 }}
+                  style={{ width: 365, maxWidth: 500 }}
                   content={
                     <>
                       <div className={styles.avatarWrapper}>
-                        {operationIcon.map((icon, index) => (
+                        {operationIcon.map((icon: string, index: number) => (
                           <div
                             className={styles.avatar}
                             key={index}
@@ -466,13 +492,13 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                               IconComponent={iconMap[icon as keyof typeof iconMap]}
                               theme="outline"
                               size="24"
-                              fill='#4E5969'
+                              fill="#4E5969"
                             />
                           </div>
                         ))}
                       </div>
                       <div className={styles.avatarColor}>
-                        {iconColorList.map((color, index) => (
+                        {iconColorList.map((color: string, index: number) => (
                           <div
                             className={styles.color}
                             key={index}
@@ -502,24 +528,23 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
             </Col>
           </Row>
 
-          {modalButtonVisible === TableOperationButton.EDIT ?
+          {modalButtonVisible === TableOperationButton.EDIT ? (
             <Row gutter={24}>
               <Col span={12}>
                 <Form.Item
                   layout="vertical"
                   label="跳转页面"
                   field={redirectPageId}
-                  style={{ flex: 1, width: '100%' }}
+                  style={{ flex: 1 }}
                   rules={[{ required: true, message: '请选择跳转页面' }]}
                 >
                   <Select
                     options={(Object.values(pageViews.value) as PageView[])
-                      .filter((item: PageView) => item.detailViewMode)
+                      .filter((item: PageView) => item.detailViewMode === 1)
                       .map((item: PageView) => ({
                         label: item.pageName,
                         value: item.id
                       }))}
-                    style={{ width: '100%' }}
                   />
                 </Form.Item>
               </Col>
@@ -535,8 +560,8 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                   <Select defaultValue={RedirectMethod.NEW_TAB} options={openButtonTypeOptions}></Select>
                 </Form.Item>
               </Col>
-            </Row> :
-
+            </Row>
+          ) : (
             <Row gutter={24}>
               <Col span={12}>
                 <Form.Item
@@ -546,7 +571,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                   style={{ flex: 1 }}
                   rules={[{ required: true, message: '请输入二次确认文案' }]}
                 >
-                  <Input defaultValue='确定删除？删除后不可恢复' />
+                  <Input defaultValue="确定删除？删除后不可恢复" />
                 </Form.Item>
               </Col>
 
@@ -561,8 +586,8 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                   <Select defaultValue={RedirectMethod.REFRESH} options={openButtonActionOptions}></Select>
                 </Form.Item>
               </Col>
-            </Row>}
-
+            </Row>
+          )}
         </Form>
       </Modal>
     </>

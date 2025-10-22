@@ -8,17 +8,15 @@ import {
   getEntityFieldsWithChildren,
   getEntityListByApp,
   type AppEntityField,
-  type ConditionField,
   type MetadataEntityPair
 } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { useEffect, useState } from 'react';
 import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '@onebase/common';
 import { getPrecedingNodes, validateNodeForm } from '../../utils';
-import { updateDataAddOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
@@ -85,13 +83,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 新增方式变更
   const handleDataTypeChange = (curAddType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'dataNodeId', 'fields']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      fields: []
-    });
     setMainEntityList([]);
     setSubEntityList([]);
     setFieldDataList([]);
@@ -116,13 +107,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 主表数据变更
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'dataNodeId', 'fields']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subEntityId: undefined,
-      fields: []
-    });
-
     setFieldDataList([]);
 
     if (addType === DATA_SOURCE_TYPE.FORM) {
@@ -143,12 +127,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 子表数据变更
   const handleSubEntityIdChange = (curSubEntityId: string) => {
     payloadForm.clearFields(['dataNodeId', 'fields']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      fields: []
-    });
-
     setFieldDataList([]);
     getFieldList(curSubEntityId);
   };
@@ -158,35 +136,17 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (!mainDataSource) {
       return;
     }
-    const newConditionFields: ConditionField[] = [];
 
     const res = await getEntityFields({ entityId: mainDataSource });
     res.forEach((item: any) => {
       item.fieldId = item.id;
-
-      newConditionFields.push({
-        label: item.displayName,
-        value: item.id,
-        fieldType: item.fieldType
-      });
     });
 
-    updateDataAddOutputs(node.id, newConditionFields);
     setFieldDataList(res);
   };
 
   const handleBatchTypeChange = (value: boolean) => {
     payloadForm.clearFields(['dataNodeId', 'fields']);
-  };
-
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-    // handlePropsOnChange(values);
   };
 
   return (
@@ -197,7 +157,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onValuesChange={onValuesChange}
             requiredSymbol={{ position: 'end' }}
             layout="vertical"
           >
@@ -269,7 +228,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subEntityId" disabled={!mainEntityId} rules={[{ required: true, message: '请选择' }]}>
+                  <Form.Item
+                    field="subEntityId"
+                    disabled={!mainEntityId}
+                    rules={[{ required: true, message: '请选择' }]}
+                  >
                     <Select allowClear onChange={handleSubEntityIdChange}>
                       {subEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>

@@ -47,7 +47,7 @@ const CreateFieldModal: React.FC<{
 
   return (
     <Modal
-      className={styles['create-entity-modal']}
+      className={styles.createEntityModal}
       title="添加数据字段"
       visible={visible}
       onOk={handleFinish}
@@ -55,7 +55,7 @@ const CreateFieldModal: React.FC<{
       okText="创建"
       cancelText="取消"
     >
-      <Form form={form} layout="vertical" onSubmit={handleFinish} className={styles['entity-form']}>
+      <Form form={form} layout="vertical" onSubmit={handleFinish}>
         <Form.Item
           label="字段编码"
           field="fieldCode"

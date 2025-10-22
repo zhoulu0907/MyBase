@@ -2,21 +2,19 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import type { ConditionField } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import { BreakMode } from '../../../components/const';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '@onebase/common';
 import {
-  clearDataOriginNodeId,
   getDataNodeSource,
   getEntityFieldList,
   getPrecedingNodes,
   validateNodeForm
 } from '../../utils';
-import { updateLoopOutputs } from './output';
 
 const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE];
 
@@ -55,23 +53,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     getEntityFieldList(originDataSource, handleSetConditionFields, () => {});
 
-    clearDataOriginNodeId(node.id);
   };
 
   const handleSetConditionFields = (conditionFields: ConditionField[]) => {
-    updateLoopOutputs(node.id, conditionFields);
-  };
-
-  // 表单内容改变
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-
-    // handlePropsOnChange(values);
+    console.log(conditionFields);
   };
 
   const getInitData = () => {
@@ -83,13 +68,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form
-            form={payloadForm}
-            initialValues={getInitData()}
-            onValuesChange={onValuesChange}
-            layout="vertical"
-            requiredSymbol={{ position: 'end' }}
-          >
+          <Form form={payloadForm} initialValues={getInitData()} layout="vertical" requiredSymbol={{ position: 'end' }}>
             <Grid.Row>
               <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
                 <Input disabled />
@@ -102,7 +81,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Grid.Col>
               <Grid.Col span={19}>
                 <Form.Item field="dataNodeId">
-                  <Select onChange={handleDateNodeSourceChange} allowClear>
+                  <Select allowClear>
                     {dataNodeList.map((item) => (
                       <Select.Option key={item.id} value={item.id}>
                         {item.data.title}

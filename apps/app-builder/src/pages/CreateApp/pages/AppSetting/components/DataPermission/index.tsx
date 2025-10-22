@@ -18,12 +18,12 @@ import {
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
   type EntityFieldValidationTypes,
-  type ValidationTypeItem,
   type EntityWithChildren,
   type GetPermissionReq,
   type LoadPageSetReq,
   type ScopeTypeOption,
-  type UpdateDataGroupPermissionReq
+  type UpdateDataGroupPermissionReq,
+  type ValidationTypeItem
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
@@ -66,7 +66,6 @@ interface IProps {
 
 // 数据权限
 const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
-  // const [form] = Form.useForm();
   const [status, setStatus] = useState<'create' | 'edit'>('create');
   const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
@@ -339,7 +338,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const getFieldCheckType = async (fieldIds: string[]) => {
     try {
       const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
-      // console.log('批量获取字段可选校验了类型 fieldCheckTypeResq:', fieldCheckTypeResq);
       setFilterFieldCheckType(fieldCheckTypeResq);
     } catch (error) {
       console.error('批量获取字段可选校验类型 error:', error);
@@ -505,7 +503,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       // 假设 value 是类似 "entity-16935056057237504.29169768621965312" 的 key
       const key = String(value);
       const parts = key.split('.');
-      // const entityId = parts[0].replace('entity-', '');
       const fieldId = parts[1];
 
       // 查找对应的字段名（需要 appEntityFields 数据）

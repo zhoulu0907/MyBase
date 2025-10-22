@@ -8,8 +8,7 @@ import CaclRuleEditor from '../../../components/calc-rule-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { clearDataOriginNodeId, validateNodeForm } from '../../utils';
-import { updateDataCalcOutputs } from './output';
+import { validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -22,45 +21,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleCalTypeChange = (curCalType: CAL_TYPE) => {
     payloadForm.clearFields(['calRules']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      calRules: []
-    });
-
-    clearDataOriginNodeId(node.id);
   };
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
-
-  // 表单内容改变
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (_changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-
-    // handlePropsOnChange(values);
-
-    clearDataOriginNodeId(node.id);
-
-    if (values.calRules) {
-      const fields: ConditionField[] = values.calRules
-        .filter((item: any) => item && item.field && item.value && item.operatorType)
-        .map((item: any) => {
-          return {
-            label: item.field,
-            value: item.field,
-            fieldType: item.operatorType
-          };
-        });
-      updateDataCalcOutputs(node.id, fields);
-    }
-  };
 
   const getInitData = () => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
@@ -74,7 +39,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             layout="vertical"
-            onValuesChange={onValuesChange}
             initialValues={getInitData()}
             requiredSymbol={{ position: 'end' }}
           >

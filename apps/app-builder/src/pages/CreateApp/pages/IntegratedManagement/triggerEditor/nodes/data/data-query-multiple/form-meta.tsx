@@ -15,6 +15,7 @@ import {
   type EntityFieldValidationTypes,
   type MetadataEntityPair
 } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useMemo, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
@@ -22,9 +23,7 @@ import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '@onebase/common';
-import { clearDataOriginNodeId, getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
-import { updateDataQueryMultipleOutputs } from './output';
+import { getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
 
 const ALLOW_DATANODE_TYPES = [
   NodeType.DATA_QUERY_MULTIPLE,
@@ -82,22 +81,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
 
     setMainEntityList([]);
     setSubEntityList([]);
     setDataNodeList([]);
     setValidationTypes([]);
-
-    clearDataOriginNodeId(node.id);
 
     getEntityList(curDataType);
   };
@@ -224,19 +212,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'dataNodeId', 'filterCondition', 'sortBy']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subEntityId: undefined,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
+
     setSubEntityList([]);
     setDataNodeList([]);
     setValidationTypes([]);
-
-    clearDataOriginNodeId(node.id);
 
     const fieldIds: string[] = [];
 
@@ -295,34 +274,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleSubEntityIdChange = (_curSubEntityId: string) => {
     payloadForm.clearFields(['dataNodeId', 'filterCondition', 'sortBy']);
-
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
-
-    clearDataOriginNodeId(node.id);
   };
 
   const handleDateNodeSourceChange = async (dataNodeId: string) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'sortBy']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
 
     setMainEntityList([]);
     setSubEntityList([]);
     setValidationTypes([]);
-
-    clearDataOriginNodeId(node.id);
 
     const fieldIds: string[] = [];
 
@@ -351,12 +310,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const handleFilterTypeChange = (_value: FILTER_TYPE) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      filterCondition: []
-    });
-
     payloadForm.clearFields(['filterCondition']);
   };
 
@@ -414,27 +367,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     return [];
   }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId, dataNodeEntityFields]);
 
-  // 使用 useEffect 更新条件字段状态和输出，避免在渲染过程中直接更新状态
-  useEffect(() => {
-    setConditionFields(conditionFieldsForEditor);
-    // 只在有实际数据时才更新 triggerNodeOutputSignal，避免初始化时载入空数据
-    if (conditionFieldsForEditor.length > 0) {
-      updateDataQueryMultipleOutputs(node.id, conditionFieldsForEditor);
-    }
-  }, [conditionFieldsForEditor, node.id]);
-
-  // 表单内容改变
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (_changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-
-    // handlePropsOnChange(values);
-  };
-
   const getInitData = () => {
     return {
       // 初始值写前面,覆写放后面
@@ -448,13 +380,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form
-            form={payloadForm}
-            layout="vertical"
-            onValuesChange={onValuesChange}
-            initialValues={getInitData()}
-            requiredSymbol={{ position: 'end' }}
-          >
+          <Form form={payloadForm} layout="vertical" initialValues={getInitData()} requiredSymbol={{ position: 'end' }}>
             <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>
@@ -512,7 +438,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subEntityId" disabled={!mainEntityId} rules={[{ required: true, message: '请选择' }]}>
+                  <Form.Item
+                    field="subEntityId"
+                    disabled={!mainEntityId}
+                    rules={[{ required: true, message: '请选择' }]}
+                  >
                     <Select allowClear onChange={handleSubEntityIdChange}>
                       {subEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -574,7 +504,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             <Grid.Row>
-              <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
+              <Form.Item label="排序规则">
                 <SortByEditor
                   data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                   fields={conditionFields}

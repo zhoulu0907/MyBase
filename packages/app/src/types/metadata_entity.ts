@@ -31,6 +31,7 @@ export interface MetadataEntityField {
   appId: string;
   status: number;
   fieldCode?: string;
+  disabled?: boolean;
 }
 
 export interface AppEntities {
