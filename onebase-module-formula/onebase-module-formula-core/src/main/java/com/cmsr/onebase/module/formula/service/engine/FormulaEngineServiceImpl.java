@@ -2,12 +2,13 @@ package com.cmsr.onebase.module.formula.service.engine;
 
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
+import com.cmsr.onebase.module.formula.service.dto.ContextData;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.api.permission.RoleApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
-import com.cmsr.onebase.module.formula.service.dto.ContextData;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
@@ -18,7 +19,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -208,12 +208,14 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                         }
                     }
 
-                    Map.Entry<String, Map<String, Object>> stringMapEntry = replaceDotWithUnderscore(formula, parameters);
 
-                    // 根据公式类型注入相关参数
-                    formula = stringMapEntry.getKey();
-                    parameters = stringMapEntry.getValue();
+
                     enrichParametersWithUserInfo(formula, parameters);
+
+                    // 检查公式中是否包含$字符，如果包含则进行参数替换
+                    if (formula.contains("$")) {
+                        formula = replaceParametersInFormula(formula, parameters);
+                    }
 
                     // 5. 注入参数
                     injectParameters(context, parameters);
@@ -504,29 +506,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     }
 
     /**
-     * 将formula和parameters中的"."替换为下划线"_"
-     *
-     * @param formula 公式字符串
-     * @param parameters 参数映射
-     * @return 替换后的公式和参数
-     */
-    private Map.Entry<String, Map<String, Object>> replaceDotWithUnderscore(String formula, Map<String, Object> parameters) {
-        // 替换公式中的点
-        String replacedFormula = formula.replace(".", "_");
-        
-        // 替换参数键中的点
-        Map<String, Object> replacedParameters = new HashMap<>();
-        if (parameters != null) {
-            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                String replacedKey = entry.getKey().replace(".", "_");
-                replacedParameters.put(replacedKey, entry.getValue());
-            }
-        }
-        
-        return new AbstractMap.SimpleEntry<>(replacedFormula, replacedParameters);
-    }
-
-    /**
      * 根据公式类型丰富参数，注入用户、部门等信息
      *
      * @param formula 公式
@@ -623,5 +602,47 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             }
             return;
         }
+    }
+
+    /**
+     * 替换公式中的参数占位符
+     * 
+     * @param formula 包含$占位符的公式
+     * @param parameters 参数映射
+     * @return 替换占位符后的新公式
+     */
+    private String replaceParametersInFormula(String formula, Map<String, Object> parameters) {
+
+        String result = formula;
+        
+        // 处理复杂参数名（包含点号等特殊字符）
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            // 如果参数键包含在公式中
+            if (result.contains(key)) {
+                String replacement;
+                // 根据参数值的类型进行适当格式化
+                if (value instanceof String) {
+                    // 字符串需要加引号
+                    replacement = "\"" + value.toString() + "\"";
+                } else if (value instanceof Number || value instanceof Boolean) {
+                    // 数字和布尔值直接转换为字符串
+                    replacement = value.toString();
+                } else if (value == null) {
+                    // null值替换为JavaScript的null
+                    replacement = "null";
+                } else {
+                    // 其他类型也加引号处理
+                    replacement = "\"" + value.toString() + "\"";
+                }
+                
+                // 替换公式中的参数
+                result = result.replace(key, replacement);
+            }
+        }
+        
+        return result;
     }
 }

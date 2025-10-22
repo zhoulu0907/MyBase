@@ -42,6 +42,7 @@ public class FormulaEngineController {
     public CommonResult<FormulaExecuteRespVO> debugFormula(@Valid @RequestBody FormulaExecuteReqVO reqVO) {
         long startTime = System.currentTimeMillis();
         log.info("############: "+reqVO.getFormula());
+        log.info("############: "+reqVO.getParameters());
         Object result = formulaEngineService.executeFormulaWithParams(reqVO.getFormula(), reqVO.getParameters());
 
         long executionTime = System.currentTimeMillis() - startTime;

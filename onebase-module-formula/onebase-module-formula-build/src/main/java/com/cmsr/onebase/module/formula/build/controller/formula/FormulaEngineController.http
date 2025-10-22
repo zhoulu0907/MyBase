@@ -69,8 +69,8 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "formula": "COUNT($a.b, $b.c)",
-  "parameters": {"$a.b": 5, "$b.c": 6}
+  "formula": "COUNT($数据查询节点(多条).关联主表ID,$数据查询节点(多条).拥有部门ID)",
+  "parameters": {"$数据查询节点(多条).关联主表ID": 5, "$数据查询节点(多条).拥有部门ID": 6}
 }
 
 ### 请求 /execute 接口 => 执行函数函数 计数
@@ -80,7 +80,7 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "formula": "COUNT(abc,bcd)",
-  "parameters": {"abc": "5", "bcd": "6"}
+  "formula": "COUNT($abc,$bcd)",
+  "parameters": {"$abc": 5, "$bcd": 6}
 }
 
