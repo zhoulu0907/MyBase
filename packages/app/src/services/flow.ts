@@ -51,3 +51,8 @@ export const getFlowLogPage = (params: any) => {
 export const getFlowLogDetail = (params: any) => {
   return flowService.get('/log/get', params);
 };
+
+// 统计执行日志
+export const getFlowLogStatistic = (params: any) => {
+  return flowService.get('/log/statistic-tody', params);
+};

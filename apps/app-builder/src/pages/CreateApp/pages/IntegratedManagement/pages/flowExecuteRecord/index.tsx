@@ -3,7 +3,7 @@ import { Space, Grid, Button, Table, Tag, type TableColumnProps, type Pagination
 import { IconDownload, IconRefresh, IconArrowDown, IconArrowUp, IconMoreVertical } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { useAppStore } from '@/store';
-import { getFlowLogDetail, getFlowLogPage } from '@onebase/app';
+import { getFlowLogDetail, getFlowLogPage, getFlowLogStatistic } from '@onebase/app';
 import { getHashQueryParam, formatTimeYMDHMS } from '@onebase/common';
 
 interface ExecuteRecord {
@@ -14,13 +14,18 @@ interface ExecuteRecord {
   startTime: number;
   endTime: number;
   processId: string;
-  duration: string;
+  executionTime: string;
 }
 
 const FlowExecuteRecordPage: React.FC = () => {
   const { curAppId } = useAppStore();
 
-  const [cardList, setCardList] = useState<any[]>([]);
+  const [cardList, setCardList] = useState<any[]>([
+    { name: '今日执行次数', frequency: 0, type: 'rise', value: '0.00%', describe: '较昨日' },
+    { name: '执行成功', frequency: 0, type: 'rise', value: '0.00%', describe: '较昨日' },
+    { name: '执行失败', frequency: 0, type: 'rise', value: '0.00%', describe: '较昨日' },
+    { name: '平均执行时间', frequency: 0, unit: 's', type: 'rise', value: '0.00%', describe: '较昨日' }
+  ]);
   const [tableData, setTableData] = useState<ExecuteRecord[]>([]);
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   // 分页器
@@ -64,8 +69,9 @@ const FlowExecuteRecordPage: React.FC = () => {
     },
     {
       title: '耗时',
-      dataIndex: 'duration',
-      key: 'duration'
+      dataIndex: 'executionTime',
+      key: 'executionTime',
+      render: (text: string) => <div>{text ? text + 's' : ''}</div>
     },
     {
       title: '操作',
@@ -101,21 +107,54 @@ const FlowExecuteRecordPage: React.FC = () => {
   // 初始化获取数据
   const getData = async (paginationConfig: PaginationProps) => {
     const appId = curAppId || getHashQueryParam('appId');
-    // todo 接口查询数据
-    const { current, pageSize } = paginationConfig;
+    const statisticParam = {
+      applicationId: appId
+    };
+    const statisticRes = await getFlowLogStatistic(statisticParam);
+    const compareTotal = parseFloat((statisticRes?.compareTotal || '0.00%').replace('%', '')).toFixed(2);
+    const compareSuccess = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', '')).toFixed(2);
+    const compareFailed = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', '')).toFixed(2);
+    const compareAvgs = parseFloat((statisticRes?.compareAvgs || '0.00%').replace('%', '')).toFixed(2);
+
     const newCardList = [
-      { name: '今日执行次数', frequency: 44, type: 'rise', value: '12.8%', describe: '较昨日' },
-      { name: '执行成功', frequency: 22, type: 'rise', value: '12.8%', describe: '较昨日' },
-      { name: '执行失败', frequency: 22, type: 'rise', value: '12.8%', describe: '较昨日' },
-      { name: '平均执行时间', frequency: 12, unit: 's', type: 'rise', value: '12.8%', describe: '较昨日' }
+      {
+        name: '今日执行次数',
+        frequency: statisticRes?.total || 0,
+        type: compareTotal >= 0 ? 'rise' : 'decline',
+        value: compareTotal >= 0 ? compareTotal : -compareTotal,
+        describe: '较昨日'
+      },
+      {
+        name: '执行成功',
+        frequency: statisticRes?.success || 0,
+        type: compareSuccess >= 0 ? 'rise' : 'decline',
+        value: compareSuccess >= 0 ? compareSuccess : -compareSuccess,
+        describe: '较昨日'
+      },
+      {
+        name: '执行失败',
+        frequency: statisticRes?.faied || 0,
+        type: compareFailed >= 0 ? 'rise' : 'decline',
+        value: compareFailed >= 0 ? compareFailed : -compareFailed,
+        describe: '较昨日'
+      },
+      {
+        name: '平均执行时间',
+        frequency: statisticRes?.avgs || 0,
+        unit: 's',
+        type: compareAvgs >= 0 ? 'rise' : 'decline',
+        value: compareAvgs >= 0 ? compareAvgs : -compareAvgs,
+        describe: '较昨日'
+      }
     ];
     setCardList(newCardList);
 
+    const { current, pageSize } = paginationConfig;
     const tableParam = {
       pageNo: current,
       pageSize,
       processId: '',
-      appId
+      applicationId: appId
     };
     setTableLoading(true);
     const tableRes = await getFlowLogPage(tableParam);
@@ -182,7 +221,9 @@ const FlowExecuteRecordPage: React.FC = () => {
                       ) : (
                         <IconArrowDown style={{ color: '#F53F3F' }} />
                       )}
-                      <span style={{ padding: '0 4px', color: '#24B28F' }}>{item.value}</span>
+                      <span style={{ padding: '0 4px', color: item.type === 'rise' ? '#24B28F' : '#F53F3F' }}>
+                        {item.value}%
+                      </span>
                       <span>{item.describe}</span>
                     </div>
                   </div>
