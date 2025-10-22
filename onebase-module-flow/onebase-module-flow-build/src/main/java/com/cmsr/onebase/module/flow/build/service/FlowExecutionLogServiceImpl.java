@@ -55,7 +55,7 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
     }
 
     @Override
-    public Map<String, Integer> statisticTody(Long applicationId) {
+    public Map<String, Object> statisticTody(Long applicationId) {
        return flowExecutionLogRepository.statisticTodyByApplicationId(applicationId);
     }
 
