@@ -27,7 +27,7 @@ public class FormulaEngineApiImpl implements FormulaEngineApi {
     public CommonResult<FormulaExecuteRespDTO> executeFormula(FormulaExecuteReqDTO reqDTO) {
         long startTime = System.currentTimeMillis();
         log.info("############: "+reqDTO.getFormula());
-        Object result = formulaEngineService.executeFormulaWithParams(reqDTO.getFormula(), reqDTO.getParameters());
+        Object result = formulaEngineService.executeFormulaWithParamsForFlow(reqDTO.getFormula(), reqDTO.getParameters());
 
         long executionTime = System.currentTimeMillis() - startTime;
 

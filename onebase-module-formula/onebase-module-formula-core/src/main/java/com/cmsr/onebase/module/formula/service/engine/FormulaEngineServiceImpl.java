@@ -120,8 +120,8 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      */
     private static final String DANGEROUS_PATTERNS =
             "(?i)(\\beval\\b|\\bFunction\\b|\\bnew\\s+Function\\b|\\bimport\\b|\\brequire\\b|" +
-            "\\bprocess\\b|\\bsetTimeout\\b|\\bsetInterval\\b|\\bsetImmediate\\b|" +
-            "\\b__proto__\\b|\\bconstructor\\b|\\bprototype\\b)";
+                    "\\bprocess\\b|\\bsetTimeout\\b|\\bsetInterval\\b|\\bsetImmediate\\b|" +
+                    "\\b__proto__\\b|\\bconstructor\\b|\\bprototype\\b)";
 
     /**
      * 人员函数常量
@@ -170,7 +170,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
 
-
         // 创建GraalVM JavaScript上下文
         Context.Builder contextBuilder = Context.newBuilder("js")
                 .allowHostAccess(HostAccess.CONSTRAINED)
@@ -209,7 +208,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                     }
 
 
-
                     enrichParametersWithUserInfo(formula, parameters);
 
                     // 检查公式中是否包含$字符，如果包含则进行参数替换
@@ -239,7 +237,37 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
     }
 
+    @Override
+    public Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters) {
+        String resolved = resolveFormulaWithparameters(formula, parameters);
+        return executeFormulaWithParams(resolved, parameters);
+    }
 
+    private String resolveFormulaWithparameters(String formula, Map<String, Object> parameters) {
+        Collection<Object> values = parameters.values();
+        if (values != null && !values.isEmpty()) {
+            for (Object value : values) {
+                if (value instanceof List) {
+                    // List<?> list = (List<?>) value;
+                    // if (!list.isEmpty() && list.get(0) instanceof Map) {
+                    //     // 构造JS数组字面量
+                    //     String arrayLiteral = toJsArrayLiteral((List<Object>) value);
+                    //     // 精确替换参数占位符
+                    //     String key = null;
+                    //     for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                    //         if (entry.getValue() == value) {
+                    //             key = entry.getKey();
+                    //             break;
+                    //         }
+                    //     }
+                    //     if (key != null) {
+                    //         formula = formula.replace("$" + key, arrayLiteral);
+                    //     }
+                }
+            }
+        }
+        return formula;
+    }
 
     @Override
     public Object executeFormulaWithParams(String formula, Map<String, Object> parameters, ContextData contextData) {
@@ -340,7 +368,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
         // 检查是否包含恶意字符
         if (formula.contains("..") || formula.contains("//") ||
-            formula.contains("\\") || formula.contains("file:")) {
+                formula.contains("\\") || formula.contains("file:")) {
             log.warn("公式包含可疑字符：{}", formula);
             return false;
         }
@@ -351,9 +379,9 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     /**
      * 将ContextData中的数据注入公式
      * 当前支持占位符：
-     *  - $recordList.fieldName  => 由ContextData.recordList提取该字段，替换为JS数组字面量，如 [1,2,"完成"]
+     * - $recordList.fieldName  => 由ContextData.recordList提取该字段，替换为JS数组字面量，如 [1,2,"完成"]
      *
-     * @param formula 原始公式
+     * @param formula     原始公式
      * @param contextData 上下文数据
      * @return 已替换占位符的公式
      */
@@ -394,8 +422,8 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     /**
      * 将Java List转换为JS数组字面量字符串
      * 规则：
-     *  - 字符串自动加引号并转义
-     *  - 数字/布尔/空值保持本型
+     * - 字符串自动加引号并转义
+     * - 数字/布尔/空值保持本型
      */
     private String toJsArrayLiteral(List<Object> list) {
         StringBuilder sb = new StringBuilder();
@@ -423,7 +451,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     /**
      * 注入参数到JavaScript上下文
      *
-     * @param context JavaScript上下文
+     * @param context    JavaScript上下文
      * @param parameters 参数映射
      */
     private void injectParameters(Context context, Map<String, Object> parameters) {
@@ -443,30 +471,30 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      */
     private String wrapFormulaExecution(String formula) {
         return String.format(
-            "(function() { " +
-            "try { " +
-            "    // 创建module和exports对象来支持UMD模块加载" +
-            "    var module = { exports: {} }; " +
-            "    var exports = module.exports; " +
-            "    " +
-            "    // 重新执行FormulaJS库以获取exports对象" +
-            "    eval(arguments[0]); " +
-            "    " +
-            "    // 将所有函数暴露到全局作用域" +
-            "    for (var key in exports) { " +
-            "        if (typeof exports[key] === 'function') { " +
-            "            global[key] = exports[key]; " +
-            "        } " +
-            "    } " +
-            "    " +
-            "    // 执行用户公式" +
-            "    var result = %s; " +
-            "    return result; " +
-            "} catch (error) { " +
-            "    throw new Error('公式执行错误: ' + error.message); " +
-            "} " +
-            "})",
-            formula
+                "(function() { " +
+                        "try { " +
+                        "    // 创建module和exports对象来支持UMD模块加载" +
+                        "    var module = { exports: {} }; " +
+                        "    var exports = module.exports; " +
+                        "    " +
+                        "    // 重新执行FormulaJS库以获取exports对象" +
+                        "    eval(arguments[0]); " +
+                        "    " +
+                        "    // 将所有函数暴露到全局作用域" +
+                        "    for (var key in exports) { " +
+                        "        if (typeof exports[key] === 'function') { " +
+                        "            global[key] = exports[key]; " +
+                        "        } " +
+                        "    } " +
+                        "    " +
+                        "    // 执行用户公式" +
+                        "    var result = %s; " +
+                        "    return result; " +
+                        "} catch (error) { " +
+                        "    throw new Error('公式执行错误: ' + error.message); " +
+                        "} " +
+                        "})",
+                formula
         );
     }
 
@@ -508,7 +536,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     /**
      * 根据公式类型丰富参数，注入用户、部门等信息
      *
-     * @param formula 公式
+     * @param formula    公式
      * @param parameters 参数映射
      */
     private void enrichParametersWithUserInfo(String formula, Map<String, Object> parameters) {
@@ -606,20 +634,20 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     /**
      * 替换公式中的参数占位符
-     * 
-     * @param formula 包含$占位符的公式
+     *
+     * @param formula    包含$占位符的公式
      * @param parameters 参数映射
      * @return 替换占位符后的新公式
      */
     private String replaceParametersInFormula(String formula, Map<String, Object> parameters) {
 
         String result = formula;
-        
+
         // 处理复杂参数名（包含点号等特殊字符）
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
-            
+
             // 如果参数键包含在公式中
             if (result.contains(key)) {
                 String replacement;
@@ -637,12 +665,12 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                     // 其他类型也加引号处理
                     replacement = "\"" + value.toString() + "\"";
                 }
-                
+
                 // 替换公式中的参数
                 result = result.replace(key, replacement);
             }
         }
-        
+
         return result;
     }
 }
