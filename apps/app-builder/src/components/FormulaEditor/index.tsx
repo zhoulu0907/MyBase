@@ -53,7 +53,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     try {
       const res: any[] = await getEntityListByApp(curAppId);
       if (res.length > 0) {
-        const result =  await Promise.all(res.map(async (item) => {
+        const result = await Promise.all(res.map(async (item) => {
           try {
             if (!item.fields?.length) {
               const childEntityList = await getEntityFields({
@@ -61,7 +61,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
               });
               return {
                 ...item,
-                variableId:item.entityId,
+                variableId: item.entityId,
                 variableName: item.entityName,
                 fields: [...item.fields || [], ...childEntityList].reverse()
               }
@@ -74,7 +74,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
         }))
         nodes?.forEach(nodeItem => {
           const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(nodeItem.id);
-          const newFields = nodeOutput?.conditionFields?.map((data:any) => {
+          const newFields = nodeOutput?.conditionFields?.map((data: any) => {
             return {
               ...data,
               displayName: data.label,
@@ -85,7 +85,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
             }
           })
           const reverseNewFields = (newFields || []).reverse();
-          result.push({variableName: nodeItem.data?.title, fields: reverseNewFields, variableId: nodeItem.id, tableName:""});
+          result.push({ variableName: nodeItem.data?.title, fields: reverseNewFields, variableId: nodeItem.id, tableName: "" });
         })
         console.log("result", result)
         setVariables(result as any);
@@ -155,9 +155,9 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
       //如果fieldtype是node 代表是节点， 需要传入的格式是$节点.字段
-      if(variable.fieldType === "node") {
+      if (variable.fieldType === "node") {
         editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
-      }else {
+      } else {
         editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.displayName}]]`, 'var');
       }
     } else {
@@ -208,7 +208,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
         content = match.slice(2, -2)
         content = content.replace(/^[^\.]+\.(.+)$/, '$1,');
         const temp = content.split("$");
-        if(temp[1]) {
+        if (temp[1]) {
           content = `$${temp[1]}`
         }
       }
@@ -229,10 +229,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     const variablesMapping: { [key: string]: string } = {};
     matches.forEach((match) => {
       const temp = match[1].split(".");
-      if(temp.length > 2) {
+      if (temp.length > 2) {
         variablesMapping[temp[2]] = temp[0];
         variablesMapping[temp[3]] = temp[1];
-      }else {
+      } else {
         const fieldId = temp[0] || "";
         const fieldName = temp[1] || "";
         variablesMapping[fieldName] = fieldId;
@@ -245,7 +245,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 点击确认之后计算
    */
   const handleConfirm = useCallback(async () => {
-    await handleDebug();
+    // await handleDebug();
     onConfirm(formula);
     setIsDebugMode(false);
   }, [formula, onConfirm, onCancel]);
@@ -297,14 +297,20 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
 
   const getAllRelatedVariables = () => {
     const currentVariablesObj = retrieveAllVariables(formula);
-    const newVariablesData = Object.keys(currentVariablesObj)?.map(key => {
-      const index = variables.findIndex(data => data.variableId === key);
-      return {
-        fieldName: key,
-        fieldId: currentVariablesObj[key],
-        fieldType: index > 0 ? variables[index] : "TEXT"
-      }
-    })
+    let newVariablesData: { [key: string]: any } = [];
+    if(variables.length >0) {
+      Object.keys(currentVariablesObj).forEach(key => {
+        const variableIndex = variables.findIndex(data => data.variableId === currentVariablesObj[key]);
+        const fieldIndex = variables[variableIndex]?.fields?.findIndex(field => field.displayName === key);
+        if(fieldIndex !== -1) {
+          newVariablesData.push({
+              fieldName: key,
+              fieldId: currentVariablesObj[key],
+              fieldType: fieldIndex !== -1 ? variables[fieldIndex as any] : "TEXT"
+          })
+        }
+      })
+    }
     return newVariablesData;
   }
 
@@ -327,7 +333,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       onCancel={handleCancel}
       title={
         <div className={styles.formulaHeader}>
-          {isDebugMode && <IconLeft className={styles.goBack} onClick={handleGoBack}/>}
+          {isDebugMode && <IconLeft className={styles.goBack} onClick={handleGoBack} />}
           <span className={styles.title}>公式编辑</span>
           <span className={styles.subtitle}>使用数学运算符编辑公式</span>
         </div>
@@ -356,8 +362,8 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
           />
         </Spin>
         {/* 底部面板（变量名称/函数公式/函数概要） */}
-        {isDebugMode ? 
-          <DebuggedFormula allRelatedVariables={allRelatedVariables} formula= {formattedFormula()}/> : 
+        {isDebugMode ?
+          <DebuggedFormula allRelatedVariables={allRelatedVariables} formula={formattedFormula()} /> :
           <Row>
             <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
               <VariableList
