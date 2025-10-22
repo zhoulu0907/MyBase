@@ -5,7 +5,7 @@ import { IconSelectAll, IconSettings, IconEdit } from '@arco-design/web-react/ic
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
 import { systemFieldsLength } from './utils/transform';
-import { ModalPopover } from './components';
+import { ModalPopover } from '@/components/ModalPopover';
 import styles from './index.module.less';
 import type { FieldFormValues, ColumnConfig } from './types';
 import { CHECK_CONST } from './utils/const';

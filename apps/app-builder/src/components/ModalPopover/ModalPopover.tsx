@@ -3,28 +3,7 @@ import type { ReactElement } from 'react';
 import { Modal } from '@arco-design/web-react';
 import styles from './ModalPopover.module.less';
 
-export interface ModalPopoverProps {
-  /** 弹出层宽度 */
-  width?: string | number;
-  /** 触发元素 */
-  children: React.ReactElement;
-  /** 弹出层内容 */
-  content: React.ReactNode;
-  /** 是否可见 */
-  visible?: boolean;
-  /** 可见性变化回调 */
-  onVisibleChange?: (visible: boolean) => void;
-  /** 触发方式 */
-  trigger?: 'click';
-  /** 弹出层位置 */
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'auto';
-  /** 弹出层容器 */
-  getPopupContainer?: () => HTMLElement;
-  /** 是否在Modal中 */
-  inModal?: boolean;
-  /** 是否阻止事件冒泡 */
-  stopPropagation?: boolean;
-}
+import type { ModalPopoverProps } from './types';
 
 const ModalPopover: React.FC<ModalPopoverProps> = ({
   children,
