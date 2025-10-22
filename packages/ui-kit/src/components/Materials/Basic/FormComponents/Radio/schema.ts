@@ -188,7 +188,7 @@ const XRadio: XInputRadioSchema = {
         value: '选项三'
       }
     ],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 100,
     saveWithHidden: false,
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],

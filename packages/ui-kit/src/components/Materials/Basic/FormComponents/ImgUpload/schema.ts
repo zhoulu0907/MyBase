@@ -195,7 +195,7 @@ const XImgUpload: XInputImgUploadSchema = {
     defaultValue: '',
     uploadCompress: -1,
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     labelColSpan: 100,
     verify: {

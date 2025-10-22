@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Space,
-  Grid,
-  Button,
-  Table,
-  Switch,
-  Tag,
-  type TableColumnProps,
-  type PaginationProps
-} from '@arco-design/web-react';
+import { Space, Grid, Button, Table, Tag, type TableColumnProps, type PaginationProps } from '@arco-design/web-react';
 import { IconDownload, IconRefresh, IconArrowDown, IconArrowUp, IconMoreVertical } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { useAppStore } from '@/store';
+import { getFlowLogDetail, getFlowLogPage } from '@onebase/app';
+import { getHashQueryParam, formatTimeYMDHMS } from '@onebase/common';
 
 const FlowExecuteRecordPage: React.FC = () => {
   const { curAppId } = useAppStore();
@@ -31,32 +24,33 @@ const FlowExecuteRecordPage: React.FC = () => {
   const columns: TableColumnProps[] = [
     {
       title: '流程名称',
-      dataIndex: 'flowName',
-      key: 'flowName'
+      dataIndex: 'processName',
+      key: 'processName'
     },
-
     {
       title: '执行id',
-      dataIndex: 'id',
-      key: 'id'
+      dataIndex: 'executionUuid',
+      key: 'executionUuid'
     },
     {
       title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (text, record) => (
-        <Tag color={record.status ? 'green' : 'red'}>{record.status ? '成功' : '失败'}</Tag>
+      dataIndex: 'executionResult',
+      key: 'executionResult',
+      render: (text) => (
+        <Tag color={text === 'success' ? 'green' : 'red'}>{text === 'success' ? '成功' : '失败'}</Tag>
       )
     },
     {
       title: '开始时间',
       dataIndex: 'startTime',
-      key: 'startTime'
+      key: 'startTime',
+      render: (text: string) => <div>{formatTimeYMDHMS(text)}</div>
     },
     {
       title: '结束时间',
       dataIndex: 'endTime',
-      key: 'endTime'
+      key: 'endTime',
+      render: (text: string) => <div>{formatTimeYMDHMS(text)}</div>
     },
     {
       title: '耗时',
@@ -73,13 +67,14 @@ const FlowExecuteRecordPage: React.FC = () => {
   ];
 
   useEffect(() => {
-    getData();
+    getData(pagination);
   }, []);
 
   // 初始化获取数据
-  const getData = () => {
+  const getData = async (pagination: PaginationProps) => {
+    const appId = curAppId || getHashQueryParam('appId');
     // todo 接口查询数据
-    // mock数据
+    const { current, pageSize } = pagination;
     const newCardList = [
       { name: '今日执行次数', frequency: 44, type: 'rise', value: '12.8%', describe: '较昨日' },
       { name: '执行成功', frequency: 22, type: 'rise', value: '12.8%', describe: '较昨日' },
@@ -87,110 +82,17 @@ const FlowExecuteRecordPage: React.FC = () => {
       { name: '平均执行时间', frequency: 12, unit: 's', type: 'rise', value: '12.8%', describe: '较昨日' }
     ];
     setCardList(newCardList);
-    // mock数据
-    const newTabeleData = [
-      {
-        flowName: '这是一个流程名称',
-        triggerType: '表单触发',
-        interactiveMethod: '交互流执行',
-        id: 'flowid-wudh-001',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: '界面触发',
-        interactiveMethod: '交互流执行',
-        id: 'flowid-wudh-002',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: false
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: '定时触发',
-        interactiveMethod: '后台执行',
-        id: 'flowid-wudh-003',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: 'API触发',
-        interactiveMethod: '交互流执行',
-        id: 'flowid-wudh-004',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: '界面触发',
-        interactiveMethod: '交互流执行',
-        id: 'flowid-wudh-005',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: '定时触发',
-        interactiveMethod: '后台执行',
-        id: 'flowid-wudh-006',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: '界面触发',
-        interactiveMethod: '交互流执行',
-        id: 'flowid-wudh-001',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: 'API触发',
-        interactiveMethod: '交互流执行',
-        id: 'flowid-wudh-004',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: '界面触发',
-        interactiveMethod: '交互流执行',
-        id: 'flowid-wudh-001',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      },
-      {
-        flowName: '这是一个流程名称',
-        triggerType: '表单触发',
-        interactiveMethod: '交互流执行',
-        id: 'flowid-wudh-002',
-        startTime: '2025-10-10 12:23:12',
-        endTime: '2025-10-10 12:23:14',
-        frequency: '2s',
-        status: true
-      }
-    ];
-    setTableData(newTabeleData);
+
+    const tableParam = {
+      pageNo: current,
+      pageSize,
+      processId: '',
+      appId
+    };
+
+    const tableRes = await getFlowLogPage(tableParam);
+    setPagination((prev) => ({ ...prev, total: tableRes.total || 0 }));
+    setTableData(tableRes.list);
   };
 
   // 导出记录
@@ -201,6 +103,7 @@ const FlowExecuteRecordPage: React.FC = () => {
   // 分页改变时的回调
   const onChangeTable = (pagination: PaginationProps) => {
     const { current, pageSize } = pagination;
+    getData(pagination);
     setPagination((prev) => ({ ...prev, current, pageSize }));
   };
 
@@ -255,6 +158,7 @@ const FlowExecuteRecordPage: React.FC = () => {
             pagination={pagination}
             onChange={onChangeTable}
             border={false}
+            rowKey="id"
           ></Table>
         </div>
       </div>
