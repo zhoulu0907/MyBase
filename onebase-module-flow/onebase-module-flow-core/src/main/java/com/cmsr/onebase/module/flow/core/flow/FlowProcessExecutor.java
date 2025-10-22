@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
+import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
@@ -78,12 +79,12 @@ public class FlowProcessExecutor {
             //执行流程
             ExecutorResult result = executeFlow(processId, variableContext, executeContext);
             //处理结果到日志
-            executionLog.setExecutionResult(result.isSuccess() ? "success" : "failed");
+            executionLog.setExecutionResult(result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(result.getCause()));
             return result;
         } catch (Exception e) {
             log.error("执行流程异常", e);
-            executionLog.setExecutionResult("failed");
+            executionLog.setExecutionResult(ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
             return ExecutorResult.error("执行流程异常", e);
         } finally {
@@ -129,12 +130,12 @@ public class FlowProcessExecutor {
             //执行流程
             ExecutorResult result = executeFlow(processId, variableContext, executeContext);
             //处理结果到日志
-            executionLog.setExecutionResult(result.isSuccess() ? "success" : "failed");
+            executionLog.setExecutionResult(result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(result.getCause()));
             return result;
         } catch (Exception e) {
             log.error("执行流程异常", e);
-            executionLog.setExecutionResult("failed");
+            executionLog.setExecutionResult(ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
             return ExecutorResult.error("执行流程异常", e);
         } finally {
