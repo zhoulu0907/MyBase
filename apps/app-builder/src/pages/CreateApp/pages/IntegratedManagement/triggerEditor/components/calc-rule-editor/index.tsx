@@ -1,6 +1,6 @@
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { Button, Form, Grid, Input, Select, type FormInstance } from '@arco-design/web-react';
-import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { IconDelete, IconLaunch, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -19,7 +19,7 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
   const [formulaData, setFormulaData] = useState<string>('');
-
+ 
   const fields = Form.useWatch('calRules', form);
 
   useEffect(() => {}, [form]);
@@ -110,7 +110,8 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
                           <Form.Item field={item.field + '.value'}>
                             <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                              ｆх编辑公式
+                              {form.getFieldValue(item.field + '.value') ? '已设置公式' : 'ƒx 编辑公式'}
+                              {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ""}
                             </Button>
                           </Form.Item>
                         )}
