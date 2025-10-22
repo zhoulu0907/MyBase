@@ -111,10 +111,10 @@ const FlowExecuteRecordPage: React.FC = () => {
       applicationId: appId
     };
     const statisticRes = await getFlowLogStatistic(statisticParam);
-    const compareTotal = parseFloat((statisticRes?.compareTotal || '0.00%').replace('%', ''));
-    const compareSuccess = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', ''));
-    const compareFailed = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', ''));
-    const compareAvgs = parseFloat((statisticRes?.compareAvgs || '0.00%').replace('%', ''));
+    const compareTotal = parseFloat((statisticRes?.compareTotal || '0.00%').replace('%', '')).toFixed(2);
+    const compareSuccess = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', '')).toFixed(2);
+    const compareFailed = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', '')).toFixed(2);
+    const compareAvgs = parseFloat((statisticRes?.compareAvgs || '0.00%').replace('%', '')).toFixed(2);
 
     const newCardList = [
       {
