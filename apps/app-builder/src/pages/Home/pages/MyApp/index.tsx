@@ -553,7 +553,7 @@ const MyAppPage: React.FC = () => {
             ) : (
               <div>
                 <IconLeft style={{ cursor: 'pointer' }} onClick={() => setCreateType('app')} />
-                创建外部数据源
+                使用自有数据源
               </div>
             )}
           </div>
