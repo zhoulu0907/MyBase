@@ -70,7 +70,7 @@ export interface XSubTableConfig extends ICommonBaseType {
   /**
    * 数据字段
    */
-  dataField: TTextDefaultType[];
+  dataField: TTextDefaultType;
 
   /**
    * 描述信息（鼠标悬浮时显示）
@@ -150,7 +150,7 @@ const XSubTable: XSubTableSchema = {
       text: '子表单',
       display: true
     },
-    dataField: [],
+    dataField: '',
     tooltip: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 100,
@@ -162,7 +162,16 @@ const XSubTable: XSubTableSchema = {
       maxLength: '',
       allowNull: false
     },
-    columns: []
+    columns: [
+      {
+        title: '序号',
+        dataIndex: 'index'
+      },
+      {
+        title: '操作',
+        dataIndex: 'operation'
+      }
+    ]
   }
 };
 

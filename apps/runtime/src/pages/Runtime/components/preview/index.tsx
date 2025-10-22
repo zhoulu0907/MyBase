@@ -19,6 +19,7 @@ import {
 import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
+  FORM_COMPONENT_TYPES,
   getComponentWidth,
   PreviewRender,
   startLoadPageSet,
@@ -118,24 +119,36 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
+  // 提交表单
   const submitForm = async () => {
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
     console.log('mainMetaDataFields: ', mainMetaDataFields);
 
-    // TODO(mickey): 处理子表逻辑
-
     const formData = {} as any;
+    const subFormData = [] as any;
     Object.entries(fields).forEach(([key, value]) => {
       console.log('key: ', key, '   value: ', value);
+      // 处理主表逻辑
       const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldId == key);
       if (field) {
         console.log('field: ', field);
         formData[field.fieldId] = value;
       }
+
+      // 处理子表逻辑
+      if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
+        const subEntityId = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
+          ?.subTable;
+        subFormData.push({
+          subEntityId: subEntityId,
+          subData: value
+        });
+      }
     });
 
     console.log('formData:   ', formData);
+    console.log('subFormData:   ', subFormData);
 
     // 接口判断 页面触发
     const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
@@ -149,7 +162,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const req: UpdateMethodParams = {
         entityId: mainMetaData,
         id: editTargetId,
-        data: formData
+        data: formData,
+        subEntities: subFormData
       };
       const res = await dataMethodUpdate(req);
       console.log(res);
@@ -167,7 +181,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     } else {
       const req: InsertMethodParams = {
         entityId: mainMetaData,
-        data: formData
+        data: formData,
+        subEntities: subFormData
       };
 
       const res = await dataMethodInsert(req);
