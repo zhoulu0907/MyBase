@@ -15,5 +15,5 @@ public interface FlowExecutionLogService {
 
     ExecutionLogVO getDetail(Long id);
 
-    Map<String, Integer> statisticTody(Long applicationId);
+    Map<String, Object> statisticTody(Long applicationId);
 }
