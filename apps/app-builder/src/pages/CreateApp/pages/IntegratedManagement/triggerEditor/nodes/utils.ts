@@ -351,3 +351,35 @@ export const searchNodeById = (nodeId: string, nodes: any[]) => {
   }
   return node;
 };
+
+// 新增节点时 判断是否已有节点名称
+export const hasNodeTitle = (title: string, nodes: any[]): boolean => {
+  let hasTitle = false;
+  for (let ele of nodes) {
+    if (ele.data.title === title) {
+      hasTitle = true;
+      return hasTitle;
+    }
+    if (ele.blocks?.length) {
+      hasTitle = hasNodeTitle(title, ele.blocks);
+    }
+  }
+  return hasTitle;
+};
+
+// 新增节点时 返回未被命名的节点名称
+export const getNodeTitle = (title: string): string => {
+  if (!title) {
+    return '';
+  }
+  const nodes = triggerEditorSignal.nodes.value;
+  const hasTitle = hasNodeTitle(title, nodes);
+  if (hasTitle) {
+    let i = 0;
+    do {
+      i++;
+    } while (hasNodeTitle(`${title}_${i}`, nodes));
+    return `${title}_${i}`;
+  }
+  return title;
+};

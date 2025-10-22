@@ -1,4 +1,4 @@
-import { Button, Form, Input, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
@@ -31,9 +31,15 @@ const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
+type XTableSelectProps = {
+  showSelect: boolean;
+  selectedDataId: string | null;
+  setSelectData: (value: any) => void
+} 
+
 const XTable = memo(
   (
-    props: XTableConfig & { runtime?: boolean; showFromPageData?: Function; showAddBtn?: boolean; refresh?: number }
+    props: XTableConfig & { runtime?: boolean; showFromPageData?: Function; showAddBtn?: boolean; refresh?: number; xTableSelectProps?: XTableSelectProps }
   ) => {
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
@@ -199,7 +205,24 @@ const XTable = memo(
       } else {
         setFinalColumns(() => columns?.filter((v) => v.dataIndex !== 'op'));
       }
-    }, [showOpearate, columns, fixedOpearate]);
+
+      if(props?.xTableSelectProps?.showSelect && runtime) {
+        const checkboxColumnRender = {
+          title: '',
+          dataIndex: 'select',
+          width: 48,
+          render: (_: any, record: any) => (
+            <Checkbox
+              checked={props?.xTableSelectProps?.selectedDataId === record.id}
+              onChange={(checked: boolean) => {
+                props?.xTableSelectProps?.setSelectData(checked ? record : null);
+              }}
+            />
+          )
+        }
+        setFinalColumns([checkboxColumnRender, ...(columns as any)]);
+      }
+    }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
 
     useEffect(() => {
       if (finalColumns && metaData) {
@@ -279,6 +302,17 @@ const XTable = memo(
               if (Array.isArray(newItem[key])) {
                 newItem[key] =
                   newItem[key].length > 1 ? newItem[key].map((item: string) => item).join(', ') : newItem[key];
+              }
+            }
+
+            // 人员选择单选 TODO
+            const userSelectField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
+            );
+            if (userSelectField && newItem[key]) {
+              if (newItem[key]) {
+                newItem[key] = newItem[key].userName;
               }
             }
           }

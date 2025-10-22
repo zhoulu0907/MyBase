@@ -1,15 +1,28 @@
-import { Form, Message, Upload } from '@arco-design/web-react';
-import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
+import { Form, Message, Upload, Progress, Modal, Grid, Card } from '@arco-design/web-react';
+import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
+import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
+import { downloadFileByUrl } from 'src/utils/downloadFile';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
+import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
+import './index.css';
 import type { XInputImgUploadConfig } from './schema';
 
 const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, runtime = true, detailMode } = props;
+  const {
+    label,
+    dataField,
+    status,
+    tooltip,
+    listType,
+    verify,
+    layout,
+    labelColSpan = 0,
+    runtime = true,
+    detailMode
+  } = props;
 
   const [_imgUrl, setImgUrl] = useState<string>('');
 
@@ -31,23 +44,146 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   };
   const { form } = Form.useFormContext();
 
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`
-  const fieldValue = Form.useWatch(fieldId, form)
+  const fieldId =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`;
+  const fieldValue = Form.useWatch(fieldId, form);
 
-  useEffect(()=>{
+  useEffect(() => {
     let flag = false;
-    const newFieldValue=  (fieldValue || []).map((ele:any)=>{
-      if(ele.url !== ele.response){
+    const newFieldValue = (fieldValue || []).map((ele: any) => {
+      if (ele.url !== ele.response) {
         flag = true;
-        return {...ele,url:ele.response}
+        return { ...ele, url: ele.response };
       }
-      return {...ele}
-    })
-    if(flag){
-      form.setFieldValue(fieldId,newFieldValue)
+      return { ...ele };
+    });
+    if (flag) {
+      form.setFieldValue(fieldId, newFieldValue);
     }
-  },[fieldValue])
+  }, [fieldValue]);
 
+  // 自定义文件列表展示
+  const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
+    if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]) {
+      return (
+        <div className="uplaodList-text">
+          {filesList.map((file) => (
+            <div key={file.uid} className="uplaodList-text-item">
+              <img className="uplaodList-text-item-img" src={file.url} alt="" />
+              <div className="uplaodList-text-item-name">{file.name}</div>
+              {file.percent && file.percent !== 100 ? (
+                <div className="uplaodList-text-item-process">
+                  <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
+                  <IconClose
+                    className="uplaodList-text-item-process-close"
+                    onClick={() => {
+                      if (props.onRemove) {
+                        props.onRemove(file);
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="uplaodList-text-item-opera">
+                  <IconEye
+                    onClick={() => {
+                      Modal.info({
+                        title: '预览',
+                        content: <img src={file.url} width="100%" alt="" />
+                      });
+                    }}
+                  />
+                  <IconDownload
+                    onClick={() => {
+                      if (file.url && file.name) {
+                        downloadFileByUrl(file.url, file.name);
+                      }
+                    }}
+                  />
+                  <IconDelete
+                    onClick={() => {
+                      if (props.onRemove) {
+                        props.onRemove(file);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]) {
+      return (
+        <div className="uplaodList-list">
+          <Grid.Row gutter={4}>
+            {filesList.map((file) => (
+              <Grid.Col span={12} key={file.uid}>
+                <div className="uplaodList-list-item">
+                  <img className="uplaodList-list-item-img" src={file.url} alt="" />
+                  <div className="uplaodList-list-item-content">
+                    <div className="uplaodList-list-item-name">{file.name}</div>
+                    <div className="uplaodList-list-item-size">
+                      {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
+                    </div>
+                  </div>
+                  <IconClose
+                    className="uplaodList-list-item-close"
+                    onClick={() => {
+                      if (props.onRemove) {
+                        props.onRemove(file);
+                      }
+                    }}
+                  />
+                </div>
+                {file.percent && file.percent !== 100 ? (
+                  <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
+                ) : null}
+              </Grid.Col>
+            ))}
+          </Grid.Row>
+        </div>
+      );
+    }
+    if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) {
+      return (
+        <div className="uplaodList-card">
+          {filesList.map((file) => (
+            <Card
+              key={file.uid}
+              className="uplaodList-card-item"
+              cover={
+                <div className="uplaodList-card-item-img">
+                  <img src={file.url} alt="" />
+                </div>
+              }
+            >
+              <Card.Meta
+                title={<div className="uplaodList-card-item-name">{file.name}</div>}
+                description={
+                  <div className="uplaodList-card-item-footer">
+                    <div className="uplaodList-card-item-size">
+                      {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
+                    </div>
+                    <IconDelete
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        if (props.onRemove) {
+                          props.onRemove(file);
+                        }
+                      }}
+                    />
+                  </div>
+                }
+              />
+            </Card>
+          ))}
+        </div>
+      );
+    }
+    return <></>;
+  };
 
   return (
     <div className="formWrapper">
@@ -66,13 +202,17 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        triggerPropName='fileList'
+        triggerPropName="fileList"
       >
         <Upload
           imagePreview
-          limit={(status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue ? fieldValue?.length : (
-            verify?.maxCount === -1 ? undefined : verify?.maxCount
-          )}
+          limit={
+            (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
+              ? fieldValue?.length
+              : verify?.maxCount === -1
+                ? undefined
+                : verify?.maxCount
+          }
           accept="image/*"
           listType={listType}
           beforeUpload={async (file) => {
@@ -110,15 +250,40 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT]}
+          drag
+          renderUploadList={renderUploadList}
         >
-          {listType == 'picture-card' && (
-            <div className="arco-upload-trigger-picture">
-              <div className="arco-upload-trigger-picture-text">
-                <IconPlus />
-                <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动图片到框内上传</div>
+          <div className="uplaodTrigger">
+            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
+              <div className="uplaodTriggerText">
+                <div className="uplaodTriggerText-content">
+                  <IconImage />
+                  <span className="uplaodTriggerText-tips">图片上传</span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
+              <div className="uplaodTriggerList">
+                <div className="uplaodTriggerList-content">
+                  <IconPlus />
+                  <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
+                  <div className="uplaodTriggerList-describe">
+                    最多可上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
+                    张图片，单张图片大小不超过{verify?.maxSize || 10}MB
+                  </div>
+                </div>
+              </div>
+            )}
+            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
+              <div className="uplaodTriggerPicture">
+                <div className="uplaodTriggerPicture-content">
+                  <IconImage />
+                  <div className="uplaodTriggerPicture-tips">图片上传</div>
+                </div>
+              </div>
+            )}
+          </div>
         </Upload>
       </Form.Item>
     </div>

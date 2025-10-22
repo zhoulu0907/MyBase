@@ -202,7 +202,7 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     labelColSpan: 100,
     dateType: DATE_VALUES[DATE_OPTIONS.DATE],

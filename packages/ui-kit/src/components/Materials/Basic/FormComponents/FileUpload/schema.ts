@@ -208,7 +208,7 @@ const XFileUpload: XInputFileUploadSchema = {
     showPreview: false,
     showDownload: false,
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     labelColSpan: 100,
     verify: {

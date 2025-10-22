@@ -1,7 +1,9 @@
-import { Typography, Card } from '@arco-design/web-react';
+import { Typography } from '@arco-design/web-react';
 import styles from './InfoPanel.module.less';
 import type { info } from '../utils/types';
 import LightText from './LightText';
+
+const {Title, Paragraph}  = Typography;
 
 // 解析函数表达式中的参数并高亮显示，保留括号和逗号
 const renderParameters = (usage: string) => {
@@ -74,39 +76,33 @@ const renderParameters = (usage: string) => {
 export function InfoPanel({ info }: { info: info | null }) {
   return (
     <div className={styles.infoPanel}>
-      <Typography.Title className={styles.title} heading={5}>{info?.name}</Typography.Title>
+      <Typography.Title heading={6}>{info?.name}</Typography.Title>
       {
         info?.usage &&
-        <Card
-          title='用法'
-          bordered={false}
-        >
-          {/* 高亮函数名 */}
-          <LightText text={info?.name} searchValue={info?.name} color='#ff69b4' />
-          {/* 内部高亮标签 */}
-          {renderParameters(info.usage)}
-          <br />
-          {/* 函数简介 */}
-          {info?.summary}
-        </Card>
+        <Typography>
+          <Title heading={6}>用法:</Title>
+          <Paragraph>
+            {/* 高亮函数名 */}
+            <LightText text={info?.name} searchValue={info?.name} color='#ff69b4' />
+            {/* 内部高亮标签 */}
+            {renderParameters(info.usage)}
+            <br />
+            {/* 函数简介 */}
+            {info?.summary}
+          </Paragraph>
+        </Typography>
       }
 
       {
         info?.example &&
-        <Card
-          title='示例'
-          bordered={false}
-        >
-          {/* 高亮函数名 */}
-          <LightText text={info?.example} searchValue={info?.name} color='#ff69b4' />
-        </Card>
+        <Typography>
+          <Title heading={6}>示例:</Title>
+          <Paragraph>
+            {/* 高亮函数名 */}
+            <LightText text={info?.example} searchValue={info?.name} color='#ff69b4' />
+          </Paragraph>
+        </Typography>
       }
-
-      <div className={styles.tips}>
-        <Typography.Text type="secondary" className={styles.tipText}>
-          提示：点击字段或函数可自动插入到公式中
-        </Typography.Text>
-      </div>
     </div>
   );
 }

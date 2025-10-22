@@ -224,7 +224,7 @@ const XRelatedForm: XRelatedFormSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     color: '',
     bgColor: '',

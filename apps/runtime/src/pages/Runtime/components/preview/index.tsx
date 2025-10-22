@@ -123,6 +123,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('fields: ', fields);
     console.log('mainMetaDataFields: ', mainMetaDataFields);
 
+    // TODO(mickey): 处理子表逻辑
+
     const formData = {} as any;
     Object.entries(fields).forEach(([key, value]) => {
       console.log('key: ', key, '   value: ', value);
@@ -272,7 +274,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           ))}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
-          <Form layout="inline" form={form}>
+          <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
@@ -333,7 +335,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           footer={null}
         >
           <div className={styles.content}>
-            <Form layout="inline" form={form}>
+            <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
               {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==

@@ -149,6 +149,7 @@ export interface XDataSelectConfig extends ICommonBaseType {
   displayFields: {
     label: TTextDefaultType;
     value: TTextDefaultType;
+    dataValue?: TTextDefaultType;
   }[];
   displayFieldsOptions: any[];
   fillFormFieldOptions: any[];
@@ -157,7 +158,6 @@ export interface XDataSelectConfig extends ICommonBaseType {
   selectDataFields: TTextDefaultType[];
   filterData: TBooleanDefaultType;
   filterCondition: any[];
-  sortDataRule: TTextDefaultType[];
   operationAuth: TBooleanDefaultType;
   fastFilter: TBooleanDefaultType;
 
@@ -209,7 +209,7 @@ const XDataSelect: XDataSelectSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '选择数据',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 100,
     saveWithHidden: false,
     verify: {
@@ -231,7 +231,6 @@ const XDataSelect: XDataSelectSchema = {
     selectDataFields: [],
     filterData: false,
     filterCondition: [],
-    sortDataRule: [],
     operationAuth: false,
     fastFilter: false,
     dynamicTableConfig: {
