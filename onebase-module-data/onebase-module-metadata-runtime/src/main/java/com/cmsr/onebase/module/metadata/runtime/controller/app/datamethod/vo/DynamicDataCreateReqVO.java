@@ -5,6 +5,8 @@ import lombok.Data;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,4 +29,8 @@ public class DynamicDataCreateReqVO {
 
     @Schema(description = "方法编码（可选）")
     private String methodCode;
+
+    private Long childEntityId;
+
+    private List<Map<Long, Object>> childData;
 }
