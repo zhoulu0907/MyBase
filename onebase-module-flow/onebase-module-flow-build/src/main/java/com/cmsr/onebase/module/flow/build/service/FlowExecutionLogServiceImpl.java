@@ -11,6 +11,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -54,10 +55,62 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
 
     @Override
     public Map<String, Object> statisticTody(Long applicationId) {
-        Map<String, Object> result = flowExecutionLogRepository.statisticTodyByApplicationId(applicationId);
-        double avgs = MapUtils.getDoubleValue(result, "avgs", 0);
-        result.put("avgs", toSecondsDouble(avgs));
+        // 统计今天的数据
+        LocalDateTime today = LocalDateTime.now();
+        Map<String, Object> result = flowExecutionLogRepository.statisticByApplicationId(today, applicationId);
+        double todayAvgs = MapUtils.getDoubleValue(result, "avgs", 0);
+        result.put("avgs", toSecondsDouble(todayAvgs));
+        
+        // 统计昨天的数据
+        LocalDateTime yesterday = today.minusDays(1);
+        Map<String, Object> yesterdayResult = flowExecutionLogRepository.statisticByApplicationId(yesterday, applicationId);
+        double yesterdayAvgs = MapUtils.getDoubleValue(yesterdayResult, "avgs", 0);
+
+        // 将昨天的数据添加到结果中，添加前缀区分
+        result.put("yesterdayTotal", MapUtils.getInteger(yesterdayResult, "total", 0));
+        result.put("yesterdaySuccess", MapUtils.getInteger(yesterdayResult, "success", 0));
+        result.put("yesterdayFailed", MapUtils.getInteger(yesterdayResult, "failed", 0));
+        result.put("yesterdayAvgs", toSecondsDouble(yesterdayAvgs));
+        
+        // 计算环比值
+        int todayTotal = MapUtils.getInteger(result, "total", 0);
+        int yesterdayTotal = MapUtils.getInteger(yesterdayResult, "total", 0);
+        int todaySuccess = MapUtils.getInteger(result, "success", 0);
+        int yesterdaySuccess = MapUtils.getInteger(yesterdayResult, "success", 0);
+        int todayFailed = MapUtils.getInteger(result, "failed", 0);
+        int yesterdayFailed = MapUtils.getInteger(yesterdayResult, "failed", 0);
+        
+        // 计算环比百分比
+        result.put("compareTotal", calculatePercentage(todayTotal, yesterdayTotal));
+        result.put("compareSuccess", calculatePercentage(todaySuccess, yesterdaySuccess));
+        result.put("compareFailed", calculatePercentage(todayFailed, yesterdayFailed));
+        result.put("compareAvgs", calculatePercentage(todayAvgs, yesterdayAvgs));
+        
         return result;
+    }
+    
+    /**
+     * 计算环比百分比
+     * @param current 当前值
+     * @param previous 对比值
+     * @return 环比百分比，格式为字符串（带%符号）
+     */
+    private String calculatePercentage(double current, double previous) {
+        if (previous == 0) {
+            return current > 0 ? "100.00%" : "0.00%";
+        }
+        double percentage = ((current - previous) / previous) * 100;
+        return String.format("%.2f%%", percentage);
+    }
+    
+    /**
+     * 计算环比百分比（整数版本）
+     * @param current 当前值
+     * @param previous 对比值
+     * @return 环比百分比，格式为字符串（带%符号）
+     */
+    private String calculatePercentage(int current, int previous) {
+        return calculatePercentage((double) current, (double) previous);
     }
 
     private String toSecondsDouble(Long duration) {
