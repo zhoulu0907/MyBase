@@ -1,5 +1,5 @@
-import { Message, Modal, Grid, Spin } from '@arco-design/web-react';
-import { getFormulaById, getFormulaFunctionSimpleList, type VariablesList, executeFormula, type formulaParams, getEntityListByApp, getEntityFields, type ChildVariablesField } from '@onebase/app';
+import { Message, Modal, Grid } from '@arco-design/web-react';
+import { getFormulaById, getFormulaFunctionSimpleList, type VariablesList, type variableItem, getEntityListByApp, getEntityFields, type ChildVariablesField } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { FormulaInput, FunctionList, InfoPanel, VariableList, DebuggedFormula } from './components';
@@ -22,7 +22,6 @@ const Col = Grid.Col;
  */
 export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '' }: FormulaEditorProps) {
   const [formula, setFormula] = useState(initialFormula);  //公式的值
-  const [loading, setLoading] = useState<boolean>(false);  //当调用接口的时候显示加载中
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
   const [funcList, setFuncList] = useState<FunctionItem[]>([]); //公式编辑器中的函数列表展示
@@ -123,7 +122,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 过滤变量列表
    * 根据变量名称或类型是否包含搜索关键词（不区分大小写）
    */
-  const filteredVariables: VariablesEntity[] = useMemo(() => {
+  const filteredVariables: VariablesList[] = useMemo(() => {
     if (!variableSearch) return variables || [];
     const newFields = variables?.[0]?.fields?.filter(
       (v) =>
@@ -251,27 +250,6 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   }, [formula, onConfirm, onCancel]);
 
   /**
-   * 调试公式
-   */
-  const handleDebug = useCallback(async () => {
-    setLoading(true);
-    const newFormula = formattedFormula();
-    const selectedVariables = retrieveAllVariables(formula);
-    const newFormulaData: formulaParams = {
-      formula: newFormula,
-      parameters: selectedVariables
-    }
-    try {
-      await executeFormula(newFormulaData);
-      Message.info('公式调试成功');
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
-    }
-  }, [formula]);
-
-  /**
    * 公式编辑器准备就绪
    * @param editor - 编辑器实例
    */
@@ -297,7 +275,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
 
   const getAllRelatedVariables = () => {
     const currentVariablesObj = retrieveAllVariables(formula);
-    let newVariablesData: { [key: string]: any } = [];
+    let newVariablesData: variableItem[] = [];
     if(variables.length >0) {
       Object.keys(currentVariablesObj).forEach(key => {
         const variableIndex = variables.findIndex(data => data.variableId === currentVariablesObj[key]);
@@ -342,7 +320,6 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       className={styles.formulaEditor}
       maskClosable={false}
       onOk={handleConfirm}
-      confirmLoading={loading}
       okButtonProps={{
         disabled: !formula
       }}
@@ -350,8 +327,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       {/* 内容区域 */}
       <div className={styles.contentWrapper}>
         {/* 公式编辑区 */}
-        <Spin loading={loading} style={{ display: 'block', marginTop: 8, }}>
-          <FormulaInput
+        <FormulaInput
             value={formula}
             onChange={setFormula}
             onCopy={handleCopy}
@@ -359,15 +335,14 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
             filteredVariables={filteredVariables}
             filteredFunctions={filteredFunctions}
             onEditorReady={handleEditorReady}
-          />
-        </Spin>
+        />
         {/* 底部面板（变量名称/函数公式/函数概要） */}
         {isDebugMode ?
           <DebuggedFormula allRelatedVariables={allRelatedVariables} formula={formattedFormula()} /> :
           <Row>
             <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
               <VariableList
-                variables={variables}
+                variables={variableSearch ? filteredVariables : variables}
                 searchValue={variableSearch}
                 onSearchChange={setVariableSearch}
                 onInsertVariable={handleInsertVariable}

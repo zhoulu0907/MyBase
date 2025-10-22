@@ -42,3 +42,9 @@ export interface ChildVariablesField {
     regexPrompt: string;
   };
 }
+
+export interface variableItem{
+  fieldName: string, 
+  fieldId: string, 
+  fieldType: string
+}
