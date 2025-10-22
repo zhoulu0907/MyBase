@@ -9,18 +9,19 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniq
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
+import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Component;
 
-import java.util.logging.Logger;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
@@ -46,6 +47,9 @@ public class UniqueValidationService implements ValidationService {
 
     @Resource
     protected TemporaryDatasourceService temporaryDatasourceService;
+
+    @Resource
+    protected MetadataEntityFieldCoreService metadataEntityFieldCoreService;
 
     public UniqueValidationService(MetadataValidationUniqueRepository uniqueRepository) {
         this.uniqueRepository = uniqueRepository;
@@ -81,11 +85,11 @@ public class UniqueValidationService implements ValidationService {
             // TODO: 实现数据库唯一性检查
             // 这里需要根据 rule.getUniqueScope() 来确定检查范围
             // 可能需要调用数据库查询来检查是否已存在相同的值
-            
+
             log.fine("执行唯一性校验：entityId=" + entityId + ", fieldId=" + fieldId + ", value=" + value);
-            boolean isExist = validateDateExistByField(entityId,field,value);// 查询数据库检查唯一性
-            if(isExist){
-                 throw new IllegalArgumentException("字段[" + field.getDisplayName() + "]值已存在");// 如果发现重复值，抛出异常
+            boolean isExist = validateDateExistByField(entityId, field, value, data);// 查询数据库检查唯一性
+            if (isExist) {
+                throw new IllegalArgumentException("字段[" + field.getDisplayName() + "]值已存在");// 如果发现重复值，抛出异常
             }
 
         }
@@ -105,16 +109,44 @@ public class UniqueValidationService implements ValidationService {
     /**
      *根据字段值在业务表中查询是否已经存在相同的值
      */
-    private boolean validateDateExistByField(Long entityId,MetadataEntityFieldDO feild,Object value){
+    private boolean validateDateExistByField(Long entityId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
         MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-        log.info("成功切换到数据源：" +datasource.getCode());
+        log.info("成功切换到数据源：" + datasource.getCode());
         ConfigStore configs = new DefaultConfigStore();
-        configs.and(feild.getFieldName(),value);
+        configs.and(field.getFieldName(), value);
+
+        List<MetadataEntityFieldDO> entityFields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entityId);
+
+        // 仅校验未被逻辑删除的数据
+        boolean hasDeletedColumn = entityFields.stream()
+                .anyMatch(item -> "deleted".equalsIgnoreCase(item.getFieldName()));
+        if (hasDeletedColumn) {
+            configs.and("deleted", 0);
+        }
+
+        // 排除当前记录（用于更新场景）
+        Optional<String> primaryKeyField = entityFields.stream()
+                .filter(item -> item.getIsPrimaryKey() != null && item.getIsPrimaryKey() == 1)
+                .map(MetadataEntityFieldDO::getFieldName)
+                .findFirst();
+        Object currentId = null;
+        if (data != null) {
+            if (primaryKeyField.isPresent()) {
+                currentId = data.get(primaryKeyField.get());
+            }
+            if (currentId == null) {
+                currentId = data.get("id");
+            }
+        }
+        if (currentId != null) {
+            configs.and(Compare.NOT_EQUAL, primaryKeyField.orElse("id"), currentId);
+        }
+
         DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
         return !dataSet.isEmpty();
     }

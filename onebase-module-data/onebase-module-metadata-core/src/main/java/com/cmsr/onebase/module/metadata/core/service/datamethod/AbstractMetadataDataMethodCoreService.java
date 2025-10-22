@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
-import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -29,6 +27,7 @@ import java.util.stream.Collectors;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 
+
 /**
  * 抽象数据方法核心服务类
  *
@@ -39,7 +38,7 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
  * @date 2025-01-27
  */
 @Slf4j
-public abstract class AbstractMetadataDataMethodCoreService  implements MetadataDataMethodCoreServiceV2{
+public abstract class AbstractMetadataDataMethodCoreService  implements MetadataDataMethodCoreServiceV2 {
 
 
     // ========== 依赖注入 ==========
@@ -159,20 +158,77 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     }
 
     /**
-     * 转换DataRow为Map
+     * 转换DataRow为Map，并对JSON字段进行反序列化
      */
     protected Map<String, Object> convertDataRowToMap(DataRow dataRow, List<MetadataEntityFieldDO> fields) {
         Map<String, Object> resultMap = new HashMap<>();
 
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
+            String fieldType = field.getFieldType();
             Object value = dataRow.get(fieldName);
+            
             if (value != null) {
-                resultMap.put(fieldName, value);
+                // 对需要JSON反序列化的字段进行处理
+                if (needsJsonDeserialization(fieldType, value)) {
+                    try {
+                        // 尝试将JSON字符串反序列化为对象
+                        Object deserializedValue = JsonUtils.parseObject(value.toString(), Object.class);
+                        resultMap.put(fieldName, deserializedValue);
+                        log.debug("字段 {} (类型: {}) 的值已从JSON反序列化", fieldName, fieldType);
+                    } catch (Exception e) {
+                        // 反序列化失败时，保持原值
+                        log.debug("字段 {} 的JSON反序列化失败，保持原值: {}", fieldName, e.getMessage());
+                        resultMap.put(fieldName, value);
+                    }
+                } else {
+                    resultMap.put(fieldName, value);
+                }
             }
         }
 
         return resultMap;
+    }
+
+    /**
+     * 判断字段类型是否需要JSON反序列化
+     * 
+     * @param fieldType 字段类型
+     * @param fieldValue 字段值
+     * @return 是否需要反序列化
+     */
+    private boolean needsJsonDeserialization(String fieldType, Object fieldValue) {
+        if (fieldType == null || fieldValue == null) {
+            return false;
+        }
+        
+        // 只有当值是字符串类型时才考虑反序列化
+        if (!(fieldValue instanceof String)) {
+            return false;
+        }
+        
+        String upperFieldType = fieldType.toUpperCase();
+        
+        // 字段类型包含以下关键字的需要JSON反序列化
+        boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
+                                upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
+                                upperFieldType.contains("ADDRESS") ||       // 地址类型
+                                upperFieldType.contains("FILE") ||          // 文件附件
+                                upperFieldType.contains("ATTACHMENT") ||    // 附件
+                                upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
+                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
+                                upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
+                                upperFieldType.contains("GEO") ||           // 地理位置（简写）
+                                upperFieldType.equals("JSONB") ||           // JSONB类型
+                                upperFieldType.equals("JSON");              // JSON类型
+        
+        // 判断字符串值是否像JSON（以{或[开头）
+        String strValue = fieldValue.toString().trim();
+        boolean looksLikeJson = strValue.startsWith("{") || strValue.startsWith("[");
+        
+        return isComplexType && looksLikeJson;
     }
 
     /**
@@ -260,7 +316,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
                     }
                 }
             } catch (Exception e) {
-                // 自动编号生成失败不应该阻塞整个数据创建过程，记录警告日志
+                // 如果字段是必填的（数据库NOT NULL约束），自动编号生成失败应该抛出异常
+                if (BooleanStatusEnum.isYes(field.getIsRequired())) {
+                    log.error("必填字段 {} 自动编号生成失败: {}", field.getFieldName(), e.getMessage(), e);
+                    throw exception(AUTO_NUMBER_GENERATE_FAILED, "字段[{}]自动编号生成失败: {}", 
+                        field.getDisplayName(), e.getMessage());
+                }
+                // 非必填字段，自动编号生成失败不应该阻塞整个数据创建过程，记录警告日志
                 log.warn("为字段 " + field.getFieldName() + " 生成自动编号失败: " + e.getMessage());
             }
         }
@@ -284,71 +346,75 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     // ========== 抽象方法定义 ==========
 
     /**
-     * 执行统一的数据处理流程
+     * 执行统一的数据处理流程（用于create操作）
+     */
+    public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Map<String, Object> data,
+                                               String methodCode) {
+        return executeProcess(operationType, entityId, null, data, methodCode);
+    }
+
+    /**
+     * 执行统一的数据处理流程（用于update/delete/get操作）
+     *
+     * @param operationType 操作类型
+     * @param entityId 实体ID
+     * @param id 数据ID（update/delete/get操作必填）
+     * @param data 数据
+     * @param methodCode 方法代码
+     * @return 处理结果
      */
     public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Object id, Map<String, Object> data,
                                                String methodCode) {
-        log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，方法：" + methodCode);
+        log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，数据ID：" + id + "，方法：" + methodCode);
 
         try {
-            // 校验实体存在
+            //1. 校验实体存在
             MetadataBusinessEntityDO entity = validateEntityExists(entityId);
 
-            // 校验字段列表存在
+            //2. 校验字段列表存在
             List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
 
-            //1. 初始化上下文【新增、更新、删除、查询操作都需要此步骤】
+            //3. 初始化上下文
             ProcessContext context = initializeContext(operationType, entity, fields, data, methodCode);
+            context.setId(id); // 设置数据ID
 
-            // 请求数据完整性校验（基础属性）【新增、更新操作需要此步骤】
+
+            //4. 请求数据完整性校验（基础属性）
             validateDataIntegrity(data, fields);
 
-            // 处理数据并设置默认值
+            //5. 处理数据并设置默认值
             Map<String, Object> processedData = processDataAndSetDefaults(data, fields);
-            context.setProcessedData(processedData);
-            context.setId(id);
 
-            // 2. 功能权限校验【新增、更新、删除、查询操作都需要此步骤】
+            context.setProcessedData(processedData);
+
+            // 6. 功能权限校验
             validatePermission(context);//todo 暂未实现
 
-            // 3. 数据标准化与补全【新增、更新、删除、查询操作都需要此步骤】
+            // 7. 数据标准化与补全
             standardizeData(context);//todo 暂未实现
 
-            // 4.数据权限校验【更新、删除操作都需要此步骤】
+            // 8. 初步数据校验------数据校验规则 ----核心功能!!!
+            validateData(context);//todo 暂未实现
 
-            // 5. 初步数据校验------数据校验规则 ----核心功能!!!【新增、更新、删除、查询操作都需要此步骤】
-            validateData(context);
+            // 9. 唯一性校验和条件校验
+            validateUniqueness(context);//todo 暂未实现
 
-            // 6.目标记录存在性校验【更新、删除操作都需要此步骤】
-            checkDataExistence(context);
-
-            // 唯一性校验和条件校验【插入操作需要，第5步已做】
-            // validateUniqueness(context);
-
-            // 7. 前置自动化工作流触发【新增、更新、删除操作需要此步骤，查询操作不需要】
+            // 10. 前置自动化工作流触发
             executePreWorkflow(context);//暂未实现
 
-            // 数据编号【只有新增操作需要此步骤】
+            // 11. 数据编号
             generateDataNumber(context);//todo 暂未实现
 
-            // 8. 数据存储【新增、更新、删除操作（级联删除在本方法内部实现）需要此步骤，查询操作不需要】
+            // 12. 数据存储
             storeData(context);//todo 实现了create的方法
 
-            //数据权限校验拼接【只有查询操作需要此步骤】
-
-            //【只有查询操作需要此步骤】
-            optimizeQueryConditions(context);
-
-            //【只有查询操作需要此步骤】
-            queryData(context);
-
-            // 9. 后置自动化工作流触发【新增、更新、删除操作需要此步骤，查询操作不需要】
+            // 13. 后置自动化工作流触发
             executePostWorkflow(context);//todo 暂未实现
 
-            // 10. 结果格式化【新增、更新、删除、查询操作都需要此步骤】
+            // 14. 结果格式化
             Map<String, Object> result = formatResult(context);// 已实现
 
-            // 11. 日志记录【新增、更新、删除、查询操作都需要此步骤】
+            // 15. 日志记录
             logProcess(context);
 
             return result;
@@ -427,14 +493,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * 2. 功能权限校验
      */
     protected void validatePermission(ProcessContext context) {
-        Boolean hasPermission = false;
-        hasPermission = false;
-        LoginUser user = SecurityFrameworkUtils.getLoginUser();
-//        List list = SecurityFrameworkUtils.getLoginUser().getScopes();
-        if(!hasPermission){
-            log.info("checkPermission failed.");
-            throw exception(GlobalErrorCodeConstants.APP_PERM_CHECK_ERROR);
-        }
+
+        //todo
     }
 
     /**
@@ -452,20 +512,31 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         Long entityId = context.getEntityId();
         Map<String, Object> data = context.getData();
         List<MetadataEntityFieldDO> fields = context.getFields();
+        Object id = context.getId();
+        OperationType operationType = context.getOperationType();
 
-        log.info("开始执行数据校验：entityId={}, 字段数量={}", entityId, fields.size());
+        log.info("开始执行数据校验：entityId={}, 操作类型={}, 字段数量={}", entityId, operationType.getDescription(), fields.size());
+
+        // 对于UPDATE操作，需要将ID添加到data中，以便唯一性校验时能够排除当前记录
+        Map<String, Object> dataForValidation = data;
+        if (operationType == OperationType.UPDATE && id != null) {
+            // 查找主键字段名
+            String primaryKeyField = fields.stream()
+                .filter(f -> f.getIsPrimaryKey() != null && f.getIsPrimaryKey() == 1)
+                .map(MetadataEntityFieldDO::getFieldName)
+                .findFirst()
+                .orElse("id");
+            
+            // 创建包含ID的临时数据副本用于校验
+            dataForValidation = new java.util.HashMap<>(data);
+            dataForValidation.put(primaryKeyField, id);
+            log.info("UPDATE操作：将ID[{}]添加到校验数据中，字段名：{}", id, primaryKeyField);
+        }
 
         // 使用校验管理器执行所有字段的校验
-        validationManager.validateEntity(entityId, fields, data);
+        validationManager.validateEntity(entityId, fields, dataForValidation);
 
         log.info("数据校验完成：entityId={}", entityId);
-    }
-
-    /**
-     * 数据存在性校验
-     */
-    protected  void checkDataExistence(ProcessContext context){
-
     }
 
     /**
@@ -486,7 +557,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * 7. 数据编号
      */
     protected void generateDataNumber(ProcessContext context) {
-
+        // 只有在创建操作时才处理自动编号字段
+        if (context.getOperationType() == OperationType.CREATE) {
+            processAutoNumberFields(context.getFields(), context.getProcessedData());
+            log.info("新增操作：已触发自动编号规则");
+        } else {
+            log.debug("非新增操作（{}），跳过自动编号规则", context.getOperationType().getDescription());
+        }
     }
 
     /**
@@ -527,23 +604,6 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
 
         }); // TenantUtils.executeIgnore 闭合
 
-    }
-
-    /**
-     * 优化查询条件
-     */
-    protected void optimizeQueryConditions(ProcessContext context){
-
-    }
-
-    /**
-     * 查询数据
-     *
-     * @return
-     */
-    protected Map<String, Object> queryData(ProcessContext context){
-
-        return null;
     }
 
 
@@ -620,7 +680,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     protected static class ProcessContext {
         private OperationType operationType;
         private Long entityId;
-        private Object id;//数据记录id
+        private Object id; // 数据ID，用于update/delete/get操作
         private Map<String, Object> data;
         private String methodCode;
         // 核心上下文字段

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * 范围校验 创建/保存 请求VO
@@ -20,14 +21,29 @@ public class ValidationRangeSaveReqVO {
     @NotNull(message = "字段ID不能为空")
     private Long fieldId;
 
-    @Schema(description = "是否启用(0/1)")
+    @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;
 
-    @Schema(description = "最小值")
+    @Schema(description = "范围类型：NUMBER/DATE", example = "NUMBER")
+    private String rangeType;
+
+    @Schema(description = "最小值（数值类型）")
     private BigDecimal minValue;
 
-    @Schema(description = "最大值")
+    @Schema(description = "最大值（数值类型）")
     private BigDecimal maxValue;
+
+    @Schema(description = "最小日期（日期类型）")
+    private LocalDateTime minDate;
+
+    @Schema(description = "最大日期（日期类型）")
+    private LocalDateTime maxDate;
+
+    @Schema(description = "是否包含最小边界(0/1)", example = "1")
+    private Integer includeMin;
+
+    @Schema(description = "是否包含最大边界(0/1)", example = "1")
+    private Integer includeMax;
 
     @Schema(description = "提示信息")
     private String promptMessage;

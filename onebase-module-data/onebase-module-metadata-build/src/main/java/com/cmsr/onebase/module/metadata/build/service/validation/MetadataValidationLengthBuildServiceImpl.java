@@ -49,10 +49,11 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         // 转换DO为VO
         ValidationLengthRespVO respVO = BeanUtils.toBean(lengthDO, ValidationLengthRespVO.class);
 
-        // 获取规则组名称
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(lengthDO.getGroupId());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
 
         return respVO;
@@ -236,9 +237,12 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         }
         MetadataValidationLengthDO lengthDO = list.get(0);
         ValidationLengthRespVO respVO = BeanUtils.toBean(lengthDO, ValidationLengthRespVO.class);
+        
+        // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(lengthDO.getGroupId());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
+            respVO.setPromptMessage(ruleGroup.getPopPrompt());
         }
         return respVO;
     }
@@ -248,19 +252,22 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
     public void deleteById(Long id) {
         // 约定：id 为 groupId，查找对应规则
         List<MetadataValidationLengthDO> list = lengthRepository.findByGroupId(id);
-        if (list.isEmpty()) {
-            return; // 无记录
+        Long fieldId = null;
+        
+        // 删除子表记录
+        if (!list.isEmpty()) {
+            if (list.size() > 1) {
+                throw new IllegalStateException("数据异常：同一组存在多条长度校验规则(组ID=" + id + ")");
+            }
+            MetadataValidationLengthDO lengthDO = list.get(0);
+            fieldId = lengthDO.getFieldId();
+            lengthRepository.deleteById(lengthDO.getId());
         }
-        if (list.size() > 1) {
-            throw new IllegalStateException("数据异常：同一组存在多条长度校验规则(组ID=" + id + ")");
-        }
-        MetadataValidationLengthDO lengthDO = list.get(0);
-        Long groupId = lengthDO.getGroupId();
-        Long fieldId = lengthDO.getFieldId();
-        lengthRepository.deleteById(lengthDO.getId());
-        if (groupId != null) {
-            deleteRuleGroupIfNotReferenced(groupId);
-        }
+        
+        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        deleteRuleGroupIfNotReferenced(id);
+        
+        // 同步字段状态
         if (fieldId != null) {
             syncToEntityField(fieldId, null);
         }

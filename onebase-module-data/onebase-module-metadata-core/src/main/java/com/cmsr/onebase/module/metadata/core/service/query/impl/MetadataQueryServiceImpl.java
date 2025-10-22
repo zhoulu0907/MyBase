@@ -44,8 +44,9 @@ public class MetadataQueryServiceImpl implements MetadataQueryService {
 
     @Override
     public QueryResult queryByConditions(QueryRequest queryRequest) {
-        log.info("开始执行领域查询，实体ID: {}, 条件组数量: {}", 
-                 queryRequest.getEntityId(), 
+        log.info("开始执行领域查询，实体ID: {}, 全局AND条件数: {}, 条件组数量: {}", 
+                 queryRequest.getEntityId(),
+                 queryRequest.getAndConditions() != null ? queryRequest.getAndConditions().size() : 0,
                  queryRequest.getConditionGroups() != null ? queryRequest.getConditionGroups().size() : 0);
 
         // 1. 获取实体字段信息
@@ -55,7 +56,11 @@ public class MetadataQueryServiceImpl implements MetadataQueryService {
                 .collect(Collectors.toMap(MetadataEntityFieldDO::getId, field -> field));
 
         // 2. 构建复杂条件查询
-        List<Map<String, Object>> complexFilters = buildComplexFilters(queryRequest.getConditionGroups(), fieldMap);
+        // 逻辑：(andConditions) AND ((group1) OR (group2) OR ...)
+        List<Map<String, Object>> complexFilters = buildComplexFilters(
+                queryRequest.getAndConditions(),
+                queryRequest.getConditionGroups(), 
+                fieldMap);
 
         // 3. 构建排序条件
         String sortField = null;
@@ -95,21 +100,33 @@ public class MetadataQueryServiceImpl implements MetadataQueryService {
 
     /**
      * 构建查询过滤条件 - 支持完整的AND/OR逻辑
+     * 逻辑：(andConditions) AND ((group1) OR (group2) OR ...)
      * 
+     * @param andConditions 全局AND条件列表
      * @param conditionGroups 条件组列表（二维数组，外层OR，内层AND）
      * @param fieldMap 字段映射Map
      * @return 复杂条件结构
      */
-    private List<Map<String, Object>> buildComplexFilters(List<List<QueryCondition>> conditionGroups, 
+    private List<Map<String, Object>> buildComplexFilters(List<QueryCondition> andConditions,
+                                                          List<List<QueryCondition>> conditionGroups, 
                                                           Map<Long, MetadataEntityFieldDO> fieldMap) {
         List<Map<String, Object>> orConditionGroups = new ArrayList<>();
         
+        // 构建全局 AND 条件的 Map
+        Map<String, Object> globalAndFilters = buildAndConditionsMap(andConditions, fieldMap);
+        
         if (CollectionUtils.isEmpty(conditionGroups)) {
-            orConditionGroups.add(new HashMap<>());
+            // 如果没有 OR 条件组，但有全局 AND 条件，则返回全局 AND 条件
+            if (!globalAndFilters.isEmpty()) {
+                orConditionGroups.add(globalAndFilters);
+            } else {
+                orConditionGroups.add(new HashMap<>());
+            }
             return orConditionGroups;
         }
 
-        log.debug("开始构建复杂条件，OR组数量: {}", conditionGroups.size());
+        log.debug("开始构建复杂条件，全局AND条件数: {}, OR组数量: {}", 
+                  andConditions != null ? andConditions.size() : 0, conditionGroups.size());
 
         // 处理每个OR条件组
         for (int i = 0; i < conditionGroups.size(); i++) {
@@ -119,8 +136,9 @@ public class MetadataQueryServiceImpl implements MetadataQueryService {
                 continue;
             }
 
-            Map<String, Object> andFilters = new HashMap<>();
-            boolean hasValidCondition = false;
+            // 复制全局 AND 条件作为基础
+            Map<String, Object> andFilters = new HashMap<>(globalAndFilters);
+            boolean hasValidCondition = !andFilters.isEmpty();
 
             log.debug("处理OR组{}，包含{}个AND条件", i, andConditionGroup.size());
 
@@ -145,7 +163,8 @@ public class MetadataQueryServiceImpl implements MetadataQueryService {
                 // 根据操作符处理条件值
                 Object filterValue = FieldValueUtil.processConditionValue(operator, fieldValues, field);
                 if (filterValue != null) {
-                    String conditionKey = QueryConditionUtil.buildConditionKey(fieldName, operator, j);
+                    String conditionKey = QueryConditionUtil.buildConditionKey(fieldName, operator, 
+                                                                              j + globalAndFilters.size());
                     andFilters.put(conditionKey, QueryConditionUtil.buildConditionObject(fieldName, operator, filterValue));
                     hasValidCondition = true;
                     log.debug("OR组{}添加AND条件: {} {} {}", i, fieldName, operator, filterValue);
@@ -161,11 +180,63 @@ public class MetadataQueryServiceImpl implements MetadataQueryService {
         }
 
         if (orConditionGroups.isEmpty()) {
-            orConditionGroups.add(new HashMap<>());
+            // 如果所有 OR 组都无效，但有全局 AND 条件，则返回全局 AND 条件
+            if (!globalAndFilters.isEmpty()) {
+                orConditionGroups.add(globalAndFilters);
+            } else {
+                orConditionGroups.add(new HashMap<>());
+            }
         }
 
         log.info("构建复杂条件完成，生成{}个OR条件组", orConditionGroups.size());
         return orConditionGroups;
+    }
+
+    /**
+     * 构建全局 AND 条件的 Map
+     * 
+     * @param andConditions 全局AND条件列表
+     * @param fieldMap 字段映射Map
+     * @return AND条件Map
+     */
+    private Map<String, Object> buildAndConditionsMap(List<QueryCondition> andConditions, 
+                                                       Map<Long, MetadataEntityFieldDO> fieldMap) {
+        Map<String, Object> andFilters = new HashMap<>();
+        
+        if (CollectionUtils.isEmpty(andConditions)) {
+            return andFilters;
+        }
+
+        log.debug("开始构建全局AND条件，数量: {}", andConditions.size());
+
+        for (int i = 0; i < andConditions.size(); i++) {
+            QueryCondition condition = andConditions.get(i);
+            if (condition.getFieldId() == null || condition.getOperator() == null) {
+                log.debug("全局AND条件{}无效，跳过", i);
+                continue;
+            }
+
+            MetadataEntityFieldDO field = fieldMap.get(condition.getFieldId());
+            if (field == null) {
+                log.warn("字段ID {}不存在，跳过此条件", condition.getFieldId());
+                continue;
+            }
+
+            String fieldName = field.getFieldName();
+            String operator = condition.getOperator();
+            List<String> fieldValues = condition.getFieldValues();
+
+            // 根据操作符处理条件值
+            Object filterValue = FieldValueUtil.processConditionValue(operator, fieldValues, field);
+            if (filterValue != null) {
+                String conditionKey = QueryConditionUtil.buildConditionKey(fieldName, operator, i);
+                andFilters.put(conditionKey, QueryConditionUtil.buildConditionObject(fieldName, operator, filterValue));
+                log.debug("添加全局AND条件: {} {} {}", fieldName, operator, filterValue);
+            }
+        }
+
+        log.debug("全局AND条件构建完成，有效条件数: {}", andFilters.size());
+        return andFilters;
     }
 
     /**

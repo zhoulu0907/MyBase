@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -48,6 +49,7 @@ public class AutoNumberConfigReqVO {
     private Integer runMode;
 
     @Schema(description = "规则项列表", requiredMode = Schema.RequiredMode.REQUIRED)
+    @JsonProperty("rules")
     @Valid
     @NotNull(message = "规则项列表不能为空")
     private List<AutoNumberRuleItemReqVO> ruleItems;

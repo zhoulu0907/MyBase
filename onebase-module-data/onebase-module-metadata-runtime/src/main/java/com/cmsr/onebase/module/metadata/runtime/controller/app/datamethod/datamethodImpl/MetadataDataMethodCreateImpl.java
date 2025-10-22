@@ -1,5 +1,6 @@
-package com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl;
+package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
@@ -35,6 +36,12 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             // 跳过系统字段和主键字段 - 使用新的枚举值：1-是，0-否
             if (BooleanStatusEnum.isYes(field.getIsSystemField()) ||
                     BooleanStatusEnum.isYes(field.getIsPrimaryKey())) {
+                continue;
+            }
+
+            // 跳过自动编号字段，自动编号字段不进行必填等任何校验
+            if (autoNumberService.hasAutoNumber(field.getId())) {
+                log.debug("字段[{}]是自动编号字段，跳过校验", field.getFieldName());
                 continue;
             }
 
@@ -161,8 +168,93 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         // 处理自动编号字段
         processAutoNumberFields(fields, processedData);
 
+        // 处理复杂类型字段（数组、对象等）的JSON序列化
+        processComplexTypeFields(fields, processedData);
+
         return processedData;
     }
+
+    /**
+     * 处理复杂类型字段的JSON序列化
+     * 对于数组和对象类型的字段值，需要序列化为JSON字符串存储到数据库
+     *
+     * @param fields 字段列表
+     * @param processedData 待处理的数据
+     */
+    private void processComplexTypeFields(List<MetadataEntityFieldDO> fields, Map<String, Object> processedData) {
+        log.info("开始处理复杂类型字段，字段数量: {}", fields.size());
+        
+        for (MetadataEntityFieldDO field : fields) {
+            String fieldName = field.getFieldName();
+            String fieldType = field.getFieldType();
+            
+            if (fieldName == null || fieldType == null) {
+                continue;
+            }
+            
+            Object fieldValue = processedData.get(fieldName);
+            if (fieldValue == null) {
+                continue;
+            }
+            
+            log.info("检查字段 {} (类型: {}), 值类型: {}, 值: {}", 
+                    fieldName, fieldType, fieldValue.getClass().getName(), fieldValue);
+            
+            // 判断是否需要JSON序列化的字段类型
+            boolean needsSerialization = needsJsonSerialization(fieldType, fieldValue);
+            log.info("字段 {} 是否需要JSON序列化: {}", fieldName, needsSerialization);
+            
+            if (needsSerialization) {
+                try {
+                    // 将复杂对象序列化为JSON字符串
+                    String jsonString = JsonUtils.toJsonString(fieldValue);
+                    processedData.put(fieldName, jsonString);
+                    log.info("字段 {} (类型: {}) 的值已序列化为JSON: {}", fieldName, fieldType, jsonString);
+                } catch (Exception e) {
+                    log.error("字段 {} 的值序列化为JSON失败: {}", fieldName, e.getMessage(), e);
+                    // 序列化失败时，保持原值
+                }
+            }
+        }
+        
+        log.info("复杂类型字段处理完成，最终数据: {}", processedData);
+    }
+
+    /**
+     * 判断字段类型是否需要JSON序列化
+     * 
+     * @param fieldType 字段类型
+     * @param fieldValue 字段值
+     * @return 是否需要序列化
+     */
+    private boolean needsJsonSerialization(String fieldType, Object fieldValue) {
+        if (fieldType == null) {
+            return false;
+        }
+        
+        String upperFieldType = fieldType.toUpperCase();
+        
+        // 字段类型包含以下关键字的需要JSON序列化
+        boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
+                                upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
+                                upperFieldType.contains("ADDRESS") ||       // 地址类型
+                                upperFieldType.contains("FILE") ||          // 文件附件
+                                upperFieldType.contains("ATTACHMENT") ||    // 附件
+                                upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
+                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
+                                upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
+                                upperFieldType.contains("GEO") ||           // 地理位置（简写）
+                                upperFieldType.equals("JSONB") ||           // JSONB类型
+                                upperFieldType.equals("JSON");              // JSON类型
+        
+        // 同时判断值是否为复杂对象（List或Map）
+        boolean isComplexValue = fieldValue instanceof List || fieldValue instanceof Map;
+        
+        return isComplexType && isComplexValue;
+    }
+
 
     protected void storeData(ProcessContext context) {
 
@@ -185,10 +277,30 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         TenantUtils.executeIgnore(() -> {
 
             // 7. 执行插入
-            if (log.isDebugEnabled()) {
-                log.debug("createData -> processedData before insert: {}", processedData);
-            }
+            log.info("准备插入数据，processedData: {}", processedData);
+            
+            // 打印每个字段的详细信息
+            processedData.forEach((key, value) -> {
+                if (value != null) {
+                    log.info("插入前字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
+                } else {
+                    log.info("插入前字段 {} 的值为null", key);
+                }
+            });
+            
             DataRow dataRow = new DataRow(processedData);
+            
+            // 检查DataRow中的数据
+            log.info("DataRow创建后的数据: {}", dataRow);
+            processedData.forEach((key, value) -> {
+                Object dataRowValue = dataRow.get(key);
+                if (dataRowValue != null) {
+                    log.info("DataRow中字段 {} 的值类型: {}, 值: {}", key, dataRowValue.getClass().getName(), dataRowValue);
+                } else {
+                    log.info("DataRow中字段 {} 的值为null", key);
+                }
+            });
+            
             Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
             log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
 

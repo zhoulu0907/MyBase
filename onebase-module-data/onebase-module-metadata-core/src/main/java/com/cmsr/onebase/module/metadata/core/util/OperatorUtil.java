@@ -2,14 +2,14 @@ package com.cmsr.onebase.module.metadata.core.util;
 
 import org.springframework.util.StringUtils;
 
-import com.cmsr.onebase.framework.express.OpEnum;
+import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 操作符工具类
  * 用于操作符的解析和处理
- * 
+ *
  * @author bty418
  * @date 2025-09-24
  */
@@ -19,7 +19,7 @@ public class OperatorUtil {
     /**
      * 解析操作符字符串为枚举
      * 支持多种格式的操作符输入，包括枚举名称、中文描述、符号等
-     * 
+     *
      * @param operator 操作符字符串
      * @return 操作符枚举
      */
@@ -159,7 +159,7 @@ public class OperatorUtil {
 
     /**
      * 检查操作符是否需要值
-     * 
+     *
      * @param opEnum 操作符枚举
      * @return 是否需要值
      */
@@ -175,7 +175,7 @@ public class OperatorUtil {
 
     /**
      * 检查操作符是否支持多个值
-     * 
+     *
      * @param opEnum 操作符枚举
      * @return 是否支持多个值
      */
@@ -196,7 +196,7 @@ public class OperatorUtil {
 
     /**
      * 检查操作符是否为比较操作符
-     * 
+     *
      * @param opEnum 操作符枚举
      * @return 是否为比较操作符
      */
@@ -218,7 +218,7 @@ public class OperatorUtil {
 
     /**
      * 检查操作符是否为文本操作符
-     * 
+     *
      * @param opEnum 操作符枚举
      * @return 是否为文本操作符
      */
@@ -238,7 +238,7 @@ public class OperatorUtil {
 
     /**
      * 检查操作符是否为集合操作符
-     * 
+     *
      * @param opEnum 操作符枚举
      * @return 是否为集合操作符
      */
@@ -254,7 +254,7 @@ public class OperatorUtil {
 
     /**
      * 检查操作符是否为空值操作符
-     * 
+     *
      * @param opEnum 操作符枚举
      * @return 是否为空值操作符
      */
