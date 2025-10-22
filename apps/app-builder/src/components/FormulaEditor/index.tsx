@@ -1,5 +1,5 @@
 import { Message, Modal, Grid, Spin } from '@arco-design/web-react';
-import { getFormulaById, getFormulaFunctionSimpleList, type VariablesEntity, executeFormula, type formulaParams, getEntityListByApp, getEntityFields, type ChildEntityField } from '@onebase/app';
+import { getFormulaById, getFormulaFunctionSimpleList, type VariablesList, executeFormula, type formulaParams, getEntityListByApp, getEntityFields, type ChildVariablesField } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { FormulaInput, FunctionList, InfoPanel, VariableList, DebuggedFormula } from './components';
@@ -28,7 +28,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const [funcList, setFuncList] = useState<FunctionItem[]>([]); //公式编辑器中的函数列表展示
   const editorRef = useRef<{ insertAtPosition: (text: string, type: string, position?: number) => void } | null>(null);
   const [info, setInfo] = useState<info | null>(null);
-  const [variables, setVariables] = useState<VariablesEntity[]>([]) //公式编辑器中的左侧变量列表展示
+  const [variables, setVariables] = useState<VariablesList[]>([]) //公式编辑器中的左侧变量列表展示
   const [isDebugMode, setIsDebugMode] = useState<boolean>(false);
   const { curAppId } = useAppStore();
 
@@ -51,7 +51,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const retrievedEntityListByApp = async () => {
     const nodes = getPrecedingNodes(curAppId, triggerEditorSignal.nodes.value, nodeTypes);
     try {
-      const res: VariablesEntity[] = await getEntityListByApp(curAppId);
+      const res: any[] = await getEntityListByApp(curAppId);
       if (res.length > 0) {
         const result =  await Promise.all(res.map(async (item) => {
           try {
@@ -61,6 +61,8 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
               });
               return {
                 ...item,
+                variableId:item.entityId,
+                variableName: item.entityName,
                 fields: [...item.fields || [], ...childEntityList].reverse()
               }
             } else {
@@ -82,7 +84,8 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
               fieldType: "node",
             }
           })
-          result.push({entityName: nodeItem.data?.title, fields: newFields || [], entityId: nodeItem.id, tableName:""});
+          const reverseNewFields = (newFields || []).reverse();
+          result.push({variableName: nodeItem.data?.title, fields: reverseNewFields, variableId: nodeItem.id, tableName:""});
         })
         console.log("result", result)
         setVariables(result as any);
@@ -148,7 +151,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 插入变量到公式
    * @param variable - 要插入的变量
    */
-  const handleInsertVariable = useCallback((variable: ChildEntityField) => {
+  const handleInsertVariable = useCallback((variable: ChildVariablesField) => {
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
       //如果fieldtype是node 代表是节点， 需要传入的格式是$节点.字段
@@ -226,7 +229,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     const variablesMapping: { [key: string]: string } = {};
     matches.forEach((match) => {
       const temp = match[1].split(".");
-      if(temp.length === 4) {
+      if(temp.length > 2) {
         variablesMapping[temp[2]] = temp[0];
         variablesMapping[temp[3]] = temp[1];
       }else {
@@ -295,7 +298,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const getAllRelatedVariables = () => {
     const currentVariablesObj = retrieveAllVariables(formula);
     const newVariablesData = Object.keys(currentVariablesObj)?.map(key => {
-      const index = variables.findIndex(data => data.entityId === key);
+      const index = variables.findIndex(data => data.variableId === key);
       return {
         fieldName: key,
         fieldId: currentVariablesObj[key],

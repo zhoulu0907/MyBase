@@ -3,18 +3,18 @@ import { IconFolder, IconSearch } from '@arco-design/web-react/icon';
 import { useCallback, useState, type ReactNode } from 'react';
 import LightText from './LightText';
 import styles from './VariableList.module.less';
-import type {  ChildEntityField, VariablesEntity} from '@onebase/app';
+import type {  VariablesList, ChildVariablesField} from '@onebase/app';
 import { cloneDeep } from 'lodash-es';
 
 interface VariableListProps {
-  variables: VariablesEntity[]; //变量数组，包含所有可展示的变量
+  variables: VariablesList[]; //变量数组，包含所有可展示的变量
   searchValue: string;  // 搜索框的值，用于过滤变量列表
   onSearchChange: (value: string) => void; // 搜索框值变化回调，用于更新搜索值
-  onInsertVariable: (variable: ChildEntityField) => void;  // 插入变量回调，用于将选中的变量插入到公式编辑器中
+  onInsertVariable: (variable: ChildVariablesField) => void;  // 插入变量回调，用于将选中的变量插入到公式编辑器中
 }
 
 export function VariableList({ variables, searchValue, onSearchChange, onInsertVariable }: VariableListProps) {
-  const [filteredVariables, setFilteredVariables] = useState<VariablesEntity[]>(variables);
+  const [filteredVariables, setFilteredVariables] = useState<VariablesList[]>(variables);
   /**
    * 处理搜索框值变化
    * @param value - 搜索框输入的值
@@ -31,7 +31,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
    * @param variable - 点击的变量项
    */
   const handleVariableClick = useCallback(
-    (variable: ChildEntityField) => {
+    (variable: ChildVariablesField) => {
       onInsertVariable(variable);
     },
     [onInsertVariable]
@@ -54,9 +54,9 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
   }, []);
 
   //点击字段列表中的切换按钮调用该函数
-  const handleChangeVariables = (entityId: string) => {
+  const handleChangeVariables = (variableId: string) => {
     const copyVariables = cloneDeep(variables);
-    const selectedVariable = copyVariables?.filter(item => item?.entityId === entityId) || [];
+    const selectedVariable = copyVariables?.filter(item => item?.variableId === variableId) || [];
     setFilteredVariables(selectedVariable);
   }
 
@@ -69,7 +69,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
           handleChangeVariables(key)
         }}>
           {variables.map((item) => {
-            return <Menu.Item key={item?.entityId}>{item?.entityName}</Menu.Item>
+            return <Menu.Item key={item?.variableId}>{item?.variableName}</Menu.Item>
           })}
         </Menu>
       </div>
@@ -92,7 +92,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
             droplist={variablesList()} 
             icon={<Button type='text' color='success'>切换</Button>}>
             <IconFolder className={styles.categoryIcon} />
-            <span className={styles.categoryEntityName}>{filteredVariables?.[0]?.entityName || ""}</span>
+            <span className={styles.categoryEntityName}>{filteredVariables?.[0]?.variableName || ""}</span>
           </Dropdown.Button>
         </div>
         <List
