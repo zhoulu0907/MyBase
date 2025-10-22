@@ -97,10 +97,10 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
      */
     private String calculatePercentage(double current, double previous) {
         if (previous == 0) {
-            return current > 0 ? "100.00%" : "0.00%";
+            return current > 0 ? "100.00" : "0.00";
         }
         double percentage = ((current - previous) / previous) * 100;
-        return String.format("%.2f%%", percentage);
+        return String.format("%.2f", percentage);
     }
     
     /**
