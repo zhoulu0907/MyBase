@@ -6,7 +6,6 @@ import {
 } from '@onebase/app';
 import MyMenuItem from '../MyMenuItem';
 import { IconSettings, IconDragDotVertical } from '@arco-design/web-react/icon';
-// import willdoIcon from '@/assets/images/task_center/willdo.svg'
 import RenameForm from './modal/renameForm'
 
 import './style/taskSide.less'
@@ -199,48 +198,12 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
             dragItem.className = '';
             setTreeData([...data]);
           }, 1000);
-          // let drop_key_arr = dropNode.key.split('-');
-          // if (drop_key_arr.length === 3) {
-          //   dropPosition = drop_key_arr[2] - 0 + 1;
-          // }
-          // const tree_data:TreeNode[] = treeData ? [...treeData] : [];
-          // let drag_item:any;
-          // tree_data.some((item, index) => {
-          //     if (item.key === dragNode.props._key) {
-          //       tree_data.splice(index, 1);
-          //       drag_item = item;
-          //       drag_item.className = 'tree-node-dropover';
-          //       return true;
-          //     }
-          //     if (item.children) {
-          //       // 不考虑
-          //       return false;
-          //     }
-          // });
-          // setTreeData([...tree_data]);
-          // let dragTimer = setTimeout(() => {
-          //   clearTimeout(dragTimer)
-          //   drag_item.className = '';
-          //   tree_data?.splice(dropPosition, 0, drag_item)
-          //   let new_tree_data: Array<any> = [];
-          //   console.log('tree_data ========', tree_data)
-          //   if (tree_data) {
-          //     new_tree_data = tree_data.map((item: TreeNode, idx:number) => {
-          //       let key_arr = item.key.split('-');
-          //       key_arr[2] = idx + '';
-          //       item.key = key_arr.join('-');
-          //       return item;
-          //     })
-          //   }
-          //   console.log('new_tree_data ========', new_tree_data)
-          //   setTreeData(new_tree_data);
-          // }, 300);
       }}
       style={{
-        width: '200px',
+        width: '220px',
         overflow: 'hidden',
         boxSizing: 'border-box',
-        padding: '0 8px'
+        padding: '0 8px',
       }}
     />
     <RenameForm

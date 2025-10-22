@@ -4,7 +4,7 @@ import { FlowNodeEntity, FlowNodeRegistry, useClientContext } from '@flowgram.ai
 import { debounce } from 'lodash-es';
 import { useCallback, useState } from 'react';
 import { FlowNodeRegistries } from '../nodes';
-import { NodeType } from '../nodes/const';
+import { NodeType } from '@onebase/common';
 import './index.less';
 
 interface AllNodeRegistry {
@@ -148,7 +148,7 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
 
   const getHeight = (activeTab: string) => {
     if (activeTab == 'all') {
-      return '530px';
+      return '646px';
     } else if (activeTab == 'control') {
       return '185px';
     } else if (activeTab == 'data') {

@@ -21,7 +21,6 @@ export const ENTITY_FIELD_TYPE = {
   URL: { VALUE: 'URL', LABEL: '网址链接' },
   ADDRESS: { VALUE: 'ADDRESS', LABEL: '详细地址' },
   NUMBER: { VALUE: 'NUMBER', LABEL: '通用数字' },
-  CURRENCY: { VALUE: 'CURRENCY', LABEL: '货币金额' },
   DATE: { VALUE: 'DATE', LABEL: '日期' },
   DATETIME: { VALUE: 'DATETIME', LABEL: '日期时间' },
   TIME: { VALUE: 'TIME', LABEL: '时间' },
@@ -44,7 +43,9 @@ export const ENTITY_FIELD_TYPE = {
   ID: { VALUE: 'ID', LABEL: 'ID' },
   MULTI_USER: { VALUE: 'MULTI_USER', LABEL: '用户多选' },
   MULTI_DEPARTMENT: { VALUE: 'MULTI_DEPARTMENT', LABEL: '部门多选' },
-  MULTI_DATA_SELECTION: { VALUE: 'MULTI_DATA_SELECTION', LABEL: '数据多选' }
+  MULTI_DATA_SELECTION: { VALUE: 'MULTI_DATA_SELECTION', LABEL: '数据多选' },
+  RADIO: { VALUE: 'RADIO', LABEL: '单选框' },
+  CHECKBOX: { VALUE: 'CHECKBOX', LABEL: '复选框' },
 };
 
 // 系统字段对应

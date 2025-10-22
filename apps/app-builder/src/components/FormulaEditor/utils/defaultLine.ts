@@ -4,10 +4,12 @@ import { Decoration, EditorView, WidgetType } from "@codemirror/view";
  class DefaultLineWidget extends WidgetType {
     onCopy: any;
     onDebug: any;
-    constructor(onCopy: any, onDebug: any) {
+    value: string
+    constructor(onCopy: any, onDebug: any, value: string) {
       super();
       this.onCopy = onCopy;
       this.onDebug = onDebug; 
+      this.value = value;
     }
     //公式编辑器第一行显示单行文本以及两个按钮
     toDOM() {
@@ -35,6 +37,7 @@ import { Decoration, EditorView, WidgetType } from "@codemirror/view";
         border: none;
         `
         btn.onclick = onClick;
+        btn.disabled = !this.value;
         return btn;
       }
       container.append(textSpan,createButton("复制", this.onCopy), createButton("调试", this.onDebug));
@@ -48,7 +51,7 @@ import { Decoration, EditorView, WidgetType } from "@codemirror/view";
     }
   }
 
-  export const defaultExtenstion = (onCopy: any, onDebug: any) => {
+  export const defaultExtenstion = (onCopy: any, onDebug: any, value: string) => {
     const defaultLineExtenstion = [
       EditorState.changeFilter.of((tr: any):any => {
         if (tr?.doc?.length === 0) {
@@ -58,7 +61,7 @@ import { Decoration, EditorView, WidgetType } from "@codemirror/view";
       }),
       EditorView.decorations.of(
         Decoration.set([Decoration.widget({
-          widget: new DefaultLineWidget(onCopy, onDebug),
+          widget: new DefaultLineWidget(onCopy, onDebug, value),
           side: -1
         }).range(0)])
       ),

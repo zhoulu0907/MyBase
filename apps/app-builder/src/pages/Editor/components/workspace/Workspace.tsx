@@ -30,6 +30,7 @@ import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import { COMPONENT_MAP } from '../panel/components/metadata/component_map';
@@ -39,6 +40,14 @@ import styles from './index.module.less';
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
   const [isFormEditor, setIsFormEditor] = useState(false);
+  const [pageSetId, setPageSetId] = useState('');
+
+  useEffect(() => {
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
+    }
+  }, []);
 
   useSignals();
 
@@ -208,7 +217,7 @@ export default function EditorWorkspace() {
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
-        <div className={styles.workspaceHeaderLeft}>{isFormEditor && <View />}</div>
+        <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
         <div className={styles.workspaceHeaderRight}>
           {/* TODO 撤回重做 */}
           <div className={styles.editorStepCtrl}>
@@ -237,11 +246,10 @@ export default function EditorWorkspace() {
         className={styles.workspaceBody}
         id="workspace-body"
         onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
-          // 点击空白区域取消选中
-          console.log('点击空白区域取消选中');
-
           const target = e.target as HTMLElement;
           if (target.id === 'workspace-content') {
+            // 点击空白区域取消选中
+            console.log('点击空白区域取消选中');
             clearCurComponentID();
             setShowDeleteButton(false);
           }
@@ -295,8 +303,6 @@ export default function EditorWorkspace() {
             setComponents(newList);
           }}
           onAdd={(e) => {
-            // console.log('onAdd', e);
-
             let cpID = e.item.id || e.item.getAttribute('data-cp-id');
             const itemType = e.item.getAttribute('data-cp-type');
             const itemDisplayName = e.item.getAttribute('data-cp-displayname');
@@ -355,7 +361,6 @@ export default function EditorWorkspace() {
           forceFallback={true}
           className={styles.workspaceContent}
           onStart={(e) => {
-            // console.log('onStart', e);
             const cpID = e.item.getAttribute('data-cp-id') || '';
             setCurComponentID(cpID);
             const curComponentSchema = pageComponentSchemas[cpID] || {};
@@ -392,8 +397,6 @@ export default function EditorWorkspace() {
 
                   setCurComponentSchema(curComponentSchema);
 
-                  // console.log('当前组件的ID: ', cp.id);
-                  // console.log('当前组件的配置: ', curComponentSchema);
                   setShowDeleteButton(true);
                 }}
               >

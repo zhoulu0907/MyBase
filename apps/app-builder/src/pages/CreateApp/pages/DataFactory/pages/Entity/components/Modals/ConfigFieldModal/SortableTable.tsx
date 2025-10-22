@@ -1,16 +1,18 @@
-import React from 'react';
 import { Table } from '@arco-design/web-react';
-import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
+import React from 'react';
+import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import styles from './index.module.less';
 
 // 拖拽手柄组件
-const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles['drag-handle']} />);
+const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles.dragHandle} />);
 
 // 可排序的表格行组件
-const SortableTableRow = SortableElement(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => {
-  return <tr {...props}>{children}</tr>;
-});
+const SortableTableRow = SortableElement(
+  ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => {
+    return <tr {...props}>{children}</tr>;
+  }
+);
 
 // 可排序的表格体组件
 const SortableTableBody = SortableContainer((props: { children: React.ReactNode; [key: string]: unknown }) => {
@@ -39,7 +41,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
         {
           node: (
             <td>
-              <div className="arco-table-cell">
+              <div>
                 <DragHandle />
               </div>
             </td>
@@ -56,7 +58,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
             container = document.querySelector(`#field-config-container table tbody`);
             return (container as HTMLElement) || document.body;
           }}
-          helperClass="sortable-helper"
+          helperClass="sortableHelper"
           {...props}
         />
       ),
@@ -76,10 +78,9 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
       data={data}
       columns={columns}
       pagination={false}
-      className={styles['field-config-table']}
+      className={styles.fieldConfigTable}
       rowKey="id"
       components={components}
-      align="center"
     />
   );
 };

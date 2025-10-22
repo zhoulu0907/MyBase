@@ -59,14 +59,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [cronValue, setCronValue] = useState('* * * * *');
   const [monthlyType, setMonthlyType] = useState('specified');
 
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = (changeValue: any, values: any) => {
-    // handlePropsOnChange(values);
-  };
-
   return (
     <>
       <FormHeader />
@@ -75,7 +67,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onValuesChange={onValuesChange}
             layout="vertical"
             requiredSymbol={{ position: 'end' }}
           >
@@ -193,8 +184,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                       { required: true, message: '请选择触发时间' },
                       {
                         validator: (value, callback) => {
-                          console.log(isValidCron(value));
-                          if (!isValidCron(value)) {
+                          console.log(isValidCron(value, { seconds: true }));
+                          if (!isValidCron(value, { seconds: true })) {
                             return callback('请输入正确的cron表达式');
                           }
                         }

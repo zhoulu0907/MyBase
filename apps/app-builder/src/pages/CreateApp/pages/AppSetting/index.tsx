@@ -2,6 +2,8 @@ import appPermissionSVG from '@/assets/images/app_auth.svg';
 import appPermissionActiveSVG from '@/assets/images/app_auth_active.svg';
 import baseSettingSVG from '@/assets/images/base_setting.svg';
 import baseSettingActiveSVG from '@/assets/images/base_setting_active.svg';
+import appReleaseSVG from '@/assets/images/app_release.svg';
+import appReleaseActiveSVG from '@/assets/images/app_release_active.svg';
 import { type Options } from '@/components/CreateApp/const';
 import { Button, Form, Layout, Menu, Message } from '@arco-design/web-react';
 import { IconMenuFold } from '@arco-design/web-react/icon';
@@ -17,6 +19,7 @@ import AppPermission from './components/AppPermission';
 import BasicSetting from './components/BasicSetting';
 import { useAppStore } from '@/store/store_app';
 import styles from './index.module.less';
+import AppReleasePage from '../AppRelease';
 
 const MenuItem = Menu.Item;
 const Sider = Layout.Sider;
@@ -33,7 +36,9 @@ const AppSettingPage: FC = () => {
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
 
   useEffect(() => {
-    curAppId && getApplicationData();
+    if (curAppId) {
+      getApplicationData();
+    }
   }, [curAppId]);
 
   const getApplicationData = async () => {
@@ -84,9 +89,10 @@ const AppSettingPage: FC = () => {
             iconName: iconName || '',
             iconColor: iconColor || '',
             appName: appName || '--'
-          })
+          });
         }
       } catch (_error) {
+        console.error('保存失败 _error:', _error);
       } finally {
         setSaveLoading(false);
       }
@@ -96,7 +102,7 @@ const AppSettingPage: FC = () => {
   return (
     <div className={styles.appSettingPage}>
       <Layout style={{ height: '100%' }}>
-        <Layout>
+        <Layout className={styles.settingContent}>
           <Sider
             collapsible
             collapsed={collapsed}
@@ -120,11 +126,20 @@ const AppSettingPage: FC = () => {
                 />
                 应用权限
               </MenuItem>
+              <MenuItem key="appRelease" style={{ display: 'flex' }}>
+                <img
+                  src={activeTab === 'appRelease' ? appReleaseActiveSVG : appReleaseSVG}
+                  alt="应用发布"
+                  style={{ marginRight: 16 }}
+                />
+                应用发布
+              </MenuItem>
             </Menu>
           </Sider>
           <Content className={styles.content}>
             {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
             {activeTab === 'appPermission' && <AppPermission />}
+            {activeTab === 'appRelease' && <AppReleasePage />}
           </Content>
         </Layout>
         {activeTab === 'baseSetting' && (

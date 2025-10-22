@@ -2,7 +2,7 @@ export interface FlowMgmt {
   id: string;
   applicationId: string;
   processName: string;
-  processStatus: ProcessStatus;
+  enableStatus: ProcessStatus;
   processDescription: string;
   triggerType: string;
   createTime: string;
@@ -32,7 +32,7 @@ export interface TriggerConfig {
 export interface CreateFlowMgmtReq {
   applicationId: string;
   processName: string;
-  processStatus: ProcessStatus;
+  enableStatus: ProcessStatus;
   processDescription?: string;
   triggerType: string;
   triggerConfig?: TriggerConfig;
@@ -42,7 +42,7 @@ export interface UpdateFlowMgmtReq {
   id: string;
   applicationId: string;
   processName: string;
-  processStatus: ProcessStatus;
+  enableStatus: ProcessStatus;
   processDescription?: string;
   triggerType: TriggerType;
   triggerConfig?: TriggerConfig;
@@ -56,7 +56,7 @@ export interface RenameFlowMgmtReq {
 export interface UpdateFlowMgmtDefinitionReq {
   id: string | undefined;
   processDefinition: string;
-  processStatus: number | string;
+  enableStatus: number | string;
 }
 
 // 数据源类型   表单、数据节点、关联表、子表
@@ -79,14 +79,14 @@ export interface SelectOption {
   value: string;
 }
 
-// 弹窗类型
-export enum MODAL_TYPE {
-  CONFIRM = 'confirm',
-  INFOR = 'infor',
-  CUSTOM = 'custom'
-}
-
 export enum CAL_TYPE {
   FORMULA = 'FORMULA',
   DATASUMMARY = 'DATASUMMARY'
+}
+
+// 触发事件
+export enum TRIGGER_EVENTS {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete'
 }

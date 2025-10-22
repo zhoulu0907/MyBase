@@ -1,14 +1,37 @@
-import { nanoid } from 'nanoid';
-import { memo } from 'react';
 import { DatePicker, Form } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputDatePickerConfig } from './schema';
 import '../index.css';
+import type { XInputDatePickerConfig } from './schema';
 
 const { YearPicker, MonthPicker } = DatePicker;
-const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, defaultValue, verify, dateType, layout, labelColSpan = 0, runtime = true } = props;
+const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  const {
+    label,
+    dataField,
+    tooltip,
+    status,
+    defaultValue,
+    verify,
+    dateType,
+    layout,
+    labelColSpan = 0,
+    runtime = true,
+    detailMode
+  } = props;
+
+  const { form } = Form.useFormContext();
+  const [fieldId, setFieldId] = useState('');
+
+  const fieldValue = Form.useWatch(fieldId, form);
+
+  useEffect(() => {
+    if (dataField.length > 0) {
+      setFieldId(dataField[dataField.length - 1]);
+    }
+  }, [dataField]);
 
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
@@ -18,7 +41,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean })
     const styles = {
       width: '100%',
       pointerEvents: (runtime ? 'auto' : 'none') as React.CSSProperties['pointerEvents']
-    }
+    };
     switch (currentDateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
         return <YearPicker style={styles} />;
@@ -35,10 +58,12 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean })
   };
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`}
+        field={
+          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
+        }
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -52,10 +77,11 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean })
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {
-          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
-            renderDatePicker()
-        }
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+          <div>{fieldValue || '--'}</div>
+        ) : (
+          renderDatePicker()
+        )}
       </Form.Item>
     </div>
   );

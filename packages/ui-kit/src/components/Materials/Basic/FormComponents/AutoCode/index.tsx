@@ -1,12 +1,13 @@
-import { memo } from 'react';
 import { Form, Input } from '@arco-design/web-react';
+import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import { type XautoCodeConfig } from './schema';
 import '../index.css';
+import { type XautoCodeConfig } from './schema';
 
-const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean }) => {
+const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
+    dataField,
     tooltip,
     placeholder,
     status,
@@ -17,11 +18,23 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean }) => {
     color,
     bgColor,
     labelColSpan = 0,
-    runtime = true
+    runtime = true,
+    detailMode
   } = props;
 
+  const { form } = Form.useFormContext();
+  const [fieldId, setFieldId] = useState('');
+
+  const fieldValue = Form.useWatch(fieldId, form);
+
+  useEffect(() => {
+    if (dataField.length > 0) {
+      setFieldId(dataField[dataField.length - 1]);
+    }
+  }, [dataField]);
+
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
         layout={layout}
@@ -37,21 +50,22 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean }) => {
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {
-          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
-            <Input
-              readOnly={true}
-              defaultValue={defaultValue}
-              placeholder={placeholder}
-              style={{
-                width: '100%',
-                color,
-                textAlign: align,
-                backgroundColor: bgColor,
-                pointerEvents: runtime ? 'unset' : 'none'
-              }}
-            />
-        }
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+          <div>{fieldValue || '--'}</div>
+        ) : (
+          <Input
+            readOnly={true}
+            defaultValue={defaultValue}
+            placeholder={placeholder}
+            style={{
+              width: '100%',
+              color,
+              textAlign: align,
+              backgroundColor: bgColor,
+              pointerEvents: runtime ? 'unset' : 'none'
+            }}
+          />
+        )}
       </Form.Item>
     </div>
   );

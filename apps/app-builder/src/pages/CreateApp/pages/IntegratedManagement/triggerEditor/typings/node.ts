@@ -64,3 +64,9 @@ export interface FlowNodeRegistry extends FlowNodeRegistryDefault {
 export type FlowDocumentJSON = {
   nodes: FlowNodeJSON[];
 };
+
+export interface Field {
+  id: string;
+  fieldName?: string;
+  fieldType?: string;
+}

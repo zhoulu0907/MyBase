@@ -1,10 +1,10 @@
 import { useAppStore } from '@/store/store_app';
 import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
-// import { IconPlus } from '@arco-design/web-react/icon';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasource, getDatasourcePage, type DatasourceSaveReqVO } from '@onebase/app';
 import { useEffect, useState } from 'react';
-import EditDsDrawer from './EditDsDrawer';
 import styles from '../index.module.less';
+import EditDsDrawer from './EditDsDrawer';
 
 // 数据源记录类型
 interface DatasourceRecord {
@@ -137,12 +137,25 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
     {
       title: '操作',
       dataIndex: 'operation',
-      render: (_, record: DatasourceRecord) => (
+      render: (_, record: DatasourceRecord, index) => (
+        // 默认数据源（第一个返回值）不可编辑删除
         <Space>
-          <Button type="text" size="mini" style={{ marginRight: 8 }} onClick={() => gotoEdit(record.id)}>
+          <Button
+            type="text"
+            size="mini"
+            style={{ marginRight: 8 }}
+            onClick={() => gotoEdit(record.id)}
+            disabled={index === 0}
+          >
             编辑
           </Button>
-          <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record.id)}>
+          <Button
+            type="text"
+            size="mini"
+            status="danger"
+            onClick={() => handleDelete(record.id)}
+            disabled={index === 0}
+          >
             删除
           </Button>
         </Space>
@@ -156,16 +169,17 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
     <div>
       <div className={styles.operationHeader}>
         <div className={styles.operationHeaderLeft}>数据源管理</div>
-        {/* 本期隐藏，后续开放 */}
-        {/* <Button
+
+        <Button
           type="primary"
+          hidden={true}
           onClick={() => {
             handlePageType('create-ds');
           }}
         >
           <IconPlus />
           创建数据源
-        </Button> */}
+        </Button>
       </div>
       <Table
         columns={columns}
@@ -181,6 +195,7 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
         }}
         loading={tableLoading}
         style={{ margin: '0 16px' }}
+        rowKey="id"
       />
 
       {/* 删除确认对话框 */}

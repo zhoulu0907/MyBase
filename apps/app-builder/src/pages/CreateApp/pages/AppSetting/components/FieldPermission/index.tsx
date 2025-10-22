@@ -1,19 +1,20 @@
-import { useEffect, useState, type FC } from 'react';
-import { Radio, Checkbox, Divider, Grid, Form } from '@arco-design/web-react';
+import { Checkbox, Divider, Empty, Form, Grid, Radio } from '@arco-design/web-react';
 import {
-  getFieldPermission,
-  updateFieldPermission,
-  RoleAllFieldPermission,
-  FieldRead,
-  FieldEdit,
   FieldDownloadable,
+  FieldEdit,
+  FieldRead,
+  getFieldPermission,
+  RoleAllFieldPermission,
+  updateFieldPermission,
+  Visibility,
   type AuthFieldVO,
   type GetPermissionReq,
   type UpdateFieldPermissionReq
 } from '@onebase/app';
+import { useEffect, useState, type FC } from 'react';
 
-import styles from './index.module.less';
 import { IconAttachment, IconEmpty } from '@arco-design/web-react/icon';
+import styles from './index.module.less';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -41,11 +42,26 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const [isAllFieldsAllowed, setIsAllFieldsAllowed] = useState<number>();
   const [operationConfig, setOperationConfig] = useState<AuthFieldVO[]>();
 
+  const [showEmpty, setShowEmpty] = useState(false);
+
   useEffect(() => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
     }
   }, [appId, menuId, roleId]);
+
+  useEffect(() => {
+    // 检查是否有任何字段权限数据
+    const hasFieldPermission = fieldPermission && fieldPermission.length > 0;
+    const hasOperationConfig = operationConfig && operationConfig.length > 0;
+
+    // 如果没有任何权限数据，则显示空状态
+    if (!hasFieldPermission && !hasOperationConfig && !isAllFieldsAllowed) {
+      setShowEmpty(true);
+    } else {
+      setShowEmpty(false);
+    }
+  }, [fieldPermission, operationConfig, isAllFieldsAllowed]);
 
   useEffect(() => {
     if (fieldPermission) {
@@ -68,6 +84,24 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     }
   }, [fieldPermission]);
 
+  useEffect(() => {
+    if (operationConfig) {
+      const formattedOperationFields = operationConfig.reduce(
+        (acc, field) => {
+          acc[field.fieldId] = {
+            isCanDownload: field.isCanDownload === FieldDownloadable.canDownloadable
+          };
+          return acc;
+        },
+        {} as Record<string, { isCanDownload: boolean }>
+      );
+
+      form.setFieldsValue({
+        operationPermissions: formattedOperationFields
+      });
+    }
+  }, [operationConfig]);
+
   /* 获取权限信息 */
   const getFieldsPermission = async () => {
     const params: GetPermissionReq = {
@@ -76,12 +110,10 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       roleId
     };
     const res = await getFieldPermission(params);
-    const addDisabled = res.authFields.map((field: AuthFieldVO) => ({
-      ...field
-    }));
-    setFieldPermission(addDisabled);
-    // 处理操作权限可下载数据 TODO
-    setOperationConfig(addDisabled);
+    const fieldPermissionFields = res.authFields.filter((field: AuthFieldVO) => field.fieldType !== 'FILE');
+    const operationConfigFields = res.authFields.filter((field: AuthFieldVO) => field.fieldType === 'FILE');
+    setFieldPermission(fieldPermissionFields);
+    setOperationConfig(operationConfigFields);
     setIsAllFieldsAllowed(res.isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
   };
 
@@ -148,8 +180,10 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   // 更新全部选中的值
   const onChangeSelectAll = () => {
-    const currentValues = form.getFieldsValue().authFields;
+    const formData = form.getFieldsValue();
 
+    // 处理字段权限的半选状态
+    const currentValues = formData.authFields || {};
     const allCheckedRead = Object.values(currentValues).every((field: any) => field.isCanRead);
     const allUnCheckedRead = Object.values(currentValues).every((field: any) => !field.isCanRead);
     setCheckReadableAll(allCheckedRead);
@@ -161,7 +195,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     setIndeterminateEditable(!allCheckedEdit && !allUnCheckedEdit);
 
     // 处理可下载的半选状态
-    const currentOperationValues = form.getFieldsValue().operationPermissions || {};
+    const currentOperationValues = formData.operationPermissions || {};
     const allCheckedDownload = Object.values(currentOperationValues).every((field: any) => field.isCanDownload);
     const allUnCheckedDownload = Object.values(currentOperationValues).every((field: any) => !field.isCanDownload);
     setCheckDownloadableAll(allCheckedDownload);
@@ -180,13 +214,12 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     setCheckDownloadableAll(checked);
     setIndeterminateDownloadable(false);
     form.setFieldValue('operationPermissions', updatedOperationPermissions);
-    const updateFields = fieldPermission?.map((field) => ({
+    const updateFields = operationConfig?.map((field) => ({
       ...field,
       isCanDownload: +checked
     }));
     setOperationConfig(updateFields);
     updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
-    console.log(operationConfig, updateFields);
   };
 
   return (
@@ -205,25 +238,48 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               const getChangeFieldKey = changeField[0];
               const getChangeFieldValue = Object.values(value)[0];
               const getChangeFieldName = getChangeFieldKey[0].trim().split('.');
+              const changeFieldAuthFields = getChangeFieldName.length > 0 ? getChangeFieldName[0] : '';
+              const changeFieldId = getChangeFieldName.length > 1 ? getChangeFieldName[1] : '';
+              const changeFieldValueName = getChangeFieldName.length > 2 ? getChangeFieldName[2] : '';
 
-              const updateField = fieldPermission?.map((field) => {
-                if (field.fieldId === getChangeFieldName[1]) {
-                  return {
-                    ...field,
-                    isCanRead: Number(getChangeFieldValue) || field.isCanRead,
-                    [getChangeFieldName[2]]: Number(getChangeFieldValue)
-                  };
-                }
-                return field;
-              });
+              if (changeFieldAuthFields === 'authFields') {
+                const updateField = fieldPermission?.map((field) => {
+                  if (field.fieldId === changeFieldId) {
+                    return {
+                      ...field,
+                      isCanRead: Number(getChangeFieldValue) || field.isCanRead,
+                      [changeFieldValueName]: Number(getChangeFieldValue)
+                    };
+                  }
+                  return field;
+                });
 
-              setFieldPermission(updateField);
+                setFieldPermission(updateField);
 
-              const modifiedField = updateField?.filter((field) => field.fieldId === getChangeFieldName[1]) || [];
-              updateFieldsPermission(
-                modifiedField,
-                isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission
-              );
+                const modifiedField = updateField?.filter((field) => field.fieldId === changeFieldId) || [];
+                updateFieldsPermission(
+                  modifiedField,
+                  isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission
+                );
+              } else if (changeFieldAuthFields === 'operationPermissions') {
+                const updateField = operationConfig?.map((field) => {
+                  if (field.fieldId === changeFieldId) {
+                    return {
+                      ...field,
+                      [changeFieldValueName]: Number(getChangeFieldValue)
+                    };
+                  }
+                  return field;
+                });
+
+                setOperationConfig(updateField);
+
+                const modifiedField = updateField?.filter((field) => field.fieldId === changeFieldId) || [];
+                updateFieldsPermission(
+                  modifiedField,
+                  isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission
+                );
+              }
 
               // 更新单个字段
               form.setFieldValue(getChangeFieldKey + '', changeField[1]);
@@ -241,74 +297,78 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               <Radio value={RoleAllFieldPermission.AllFieldPermissionAllow}>所有字段内容可操作</Radio>
               <Radio value={RoleAllFieldPermission.FieldCustomFieldPermission}>自定义权限</Radio>
             </RadioGroup>
+            {showEmpty && <Empty description="暂无数据" />}
+            {fieldPermission && fieldPermission.length > 0 && (
+              <Form.Item
+                field="authFields"
+                label="字段内容权限"
+                layout="vertical"
+                shouldUpdate
+                style={{
+                  marginTop: 12,
+                  visibility:
+                    isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission
+                      ? Visibility.visible
+                      : Visibility.hidden
+                }}
+              >
+                <div className={styles.table}>
+                  <Row>
+                    <Col span={8}></Col>
+                    <Col span={4}>
+                      <Checkbox
+                        onChange={onChangeReadableAll}
+                        checked={checkReadableAll}
+                        indeterminate={indeterminateReadable}
+                      >
+                        可阅读
+                      </Checkbox>
+                    </Col>
+                    <Col span={4}>
+                      <Checkbox
+                        onChange={onChangeEditableAll}
+                        checked={checkEditableAll}
+                        indeterminate={indeterminateEditable}
+                      >
+                        可编辑
+                      </Checkbox>
+                    </Col>
+                  </Row>
+                  <Divider />
+                  {fieldPermission?.map((field) => {
+                    return (
+                      <Row className={styles.rowItem} key={field.fieldId}>
+                        <Col span={8}>
+                          <span>{field.fieldDisplayName}</span>
+                        </Col>
 
-            <Form.Item
-              field="authFields"
-              label="字段内容权限"
-              layout="vertical"
-              shouldUpdate
-              style={{
-                marginTop: 12,
-                visibility:
-                  isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission ? 'visible' : 'hidden'
-              }}
-            >
-              <div className={styles.table}>
-                <Row>
-                  <Col span={8}></Col>
-                  <Col span={4}>
-                    <Checkbox
-                      onChange={onChangeReadableAll}
-                      checked={checkReadableAll}
-                      indeterminate={indeterminateReadable}
-                    >
-                      可阅读
-                    </Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox
-                      onChange={onChangeEditableAll}
-                      checked={checkEditableAll}
-                      indeterminate={indeterminateEditable}
-                    >
-                      可编辑
-                    </Checkbox>
-                  </Col>
-                </Row>
-                <Divider />
-                {fieldPermission?.map((field) => {
-                  return (
-                    <Row className={styles.rowItem} key={field.fieldId}>
-                      <Col span={8}>
-                        <span>{field.fieldDisplayName}</span>
-                      </Col>
+                        {/* 可阅读权限 */}
+                        <Col span={4}>
+                          <Form.Item
+                            field={`authFields.${field.fieldId}.isCanRead`}
+                            trigger="onChange"
+                            triggerPropName="checked"
+                            noStyle
+                          >
+                            <Checkbox disabled={field.isCanEdit === FieldEdit.canEdit} />
+                          </Form.Item>
+                        </Col>
 
-                      {/* 可阅读权限 */}
-                      <Col span={4}>
-                        <Form.Item
-                          field={`authFields.${field.fieldId}.isCanRead`}
-                          trigger="onChange"
-                          triggerPropName="checked"
-                          noStyle
-                        >
-                          <Checkbox disabled={field.isCanEdit === FieldEdit.canEdit} />
-                        </Form.Item>
-                      </Col>
-
-                      {/* 可编辑权限 */}
-                      <Col span={4}>
-                        <Form.Item field={`authFields.${field.fieldId}.isCanEdit`} triggerPropName="checked" noStyle>
-                          <Checkbox
-                            className={`${field.isCanRead === FieldRead.notRead ? styles.checkboxGray : ''} ${field.isCanEdit === FieldEdit.canEdit ? styles.checkboxGreen : ''}`}
-                          />
-                          {/* field.editDisabled */}
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  );
-                })}
-              </div>
-            </Form.Item>
+                        {/* 可编辑权限 */}
+                        <Col span={4}>
+                          <Form.Item field={`authFields.${field.fieldId}.isCanEdit`} triggerPropName="checked" noStyle>
+                            <Checkbox
+                              className={`${field.isCanRead === FieldRead.notRead ? styles.checkboxGray : ''} ${field.isCanEdit === FieldEdit.canEdit ? styles.checkboxGreen : ''}`}
+                            />
+                            {/* field.editDisabled */}
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    );
+                  })}
+                </div>
+              </Form.Item>
+            )}
 
             {operationConfig && operationConfig.length > 0 && (
               <Form.Item
@@ -318,7 +378,9 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                 shouldUpdate
                 style={{
                   visibility:
-                    isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission ? 'visible' : 'hidden'
+                    isAllFieldsAllowed === RoleAllFieldPermission.FieldCustomFieldPermission
+                      ? Visibility.visible
+                      : Visibility.hidden
                 }}
               >
                 <div className={styles.table}>
@@ -337,7 +399,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                   <Divider />
                   {operationConfig?.map((field: any) => {
                     return (
-                      <Row className={styles.rowItem} key={field.key}>
+                      <Row className={styles.rowItem} key={field.fieldId}>
                         <Col span={8}>
                           <IconAttachment style={{ marginRight: 8 }} />
                           <span>{field.fieldDisplayName}</span>

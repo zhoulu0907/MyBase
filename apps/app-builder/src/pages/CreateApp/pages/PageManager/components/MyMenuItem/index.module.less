@@ -2,35 +2,53 @@
   display: flex;
   align-items: center;
   width: 100%;
-  height: 30px;
+  height: 40px;
   box-sizing: border-box;
+  border-radius: 4px;
+  padding: 9px 12px;
 
   .menuName {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: calc(100% - 40px);
+    display: flex;
+    align-items: center;
   }
+
   .eyeVisible {
     margin: 0 4px;
     color: #999;
   }
 
   .dropdownContainer {
+    width: 16px;
+    height: 16px;
     opacity: 0;
     transition: opacity 0.1s ease;
     cursor: pointer;
-    margin-right: 4px;
     margin-left: auto;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
+  }
+
+  .moreIcon {
+    width: 16px;
+    height: 16px;
   }
 
   &:hover {
     .dropdownContainer {
       opacity: 1;
     }
+  }
+}
+
+.menuContent {
+  display: flex;
+  align-items: center;
+
+  img {
+    margin-right: 8px;
   }
 }

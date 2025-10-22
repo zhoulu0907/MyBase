@@ -15,7 +15,7 @@ import {
   type FormInstance
 } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
-import { IconDelete } from '@arco-design/web-react/icon';
+import { IconDelete, IconLaunch } from '@arco-design/web-react/icon';
 import {
   FieldType,
   VALIDATION_TYPE,
@@ -23,10 +23,10 @@ import {
   type EntityFieldValidationTypes,
   type ValidationTypeItem
 } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '../../nodes/const';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -83,7 +83,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   // 过滤为空的条件
   useEffect(() => {
-    // console.log('filterCondition:  ', filterCondition);
     if (Array.isArray(filterCondition)) {
       filterCondition.forEach((item: any, index: number) => {
         if (Array.isArray(item.conditions)) {
@@ -96,14 +95,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
       form.setFieldValue('filterCondition', filterCondition);
     }
   }, []);
-
-  useEffect(() => {
-    // console.log('entityFieldValidationTypes:  ', entityFieldValidationTypes);
-  }, [entityFieldValidationTypes]);
-
-  useEffect(() => {
-    // console.log('filterCondition:  ', filterCondition);
-  }, [filterCondition]);
 
   const StaticValueComponent = (fieldName: string, fieldId: string, op: string) => {
     const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldId == fieldId);
@@ -143,7 +134,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                         second !== null &&
                         second <= first
                       ) {
-                        // callback('第二个值必须大于第一个值');
                         callback();
                         return;
                       }
@@ -153,7 +143,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                 }
               ]}
             >
-              {(list, {}) => {
+              {(list) => {
                 return (
                   <div className={styles.inputNumberWrapper}>
                     {list.map((item) => {
@@ -250,15 +240,23 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   const processConditionFields = (
     nodeId: string,
     conditionFields: ConditionField[],
-    children: TreeSelectDataType[]
+    children: TreeSelectDataType[],
+    fieldType?: string
   ): void => {
     if (!conditionFields) return;
 
     conditionFields.forEach((field: ConditionField) => {
-      children.push({
-        key: `${nodeId}.${field.value}`,
-        title: field.label
-      });
+      if (!fieldType || !field.fieldType) {
+        children.push({
+          key: `${nodeId}.${field.value}`,
+          title: field.label
+        });
+      } else if (field?.fieldType === fieldType) {
+        children.push({
+          key: `${nodeId}.${field.value}`,
+          title: field.label
+        });
+      }
     });
   };
 
@@ -274,14 +272,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
         NodeType.DATA_CALC,
-        NodeType.LOOP
+        NodeType.LOOP,
+        NodeType.MODAL
       ]),
     []
   );
 
   // 使用 useCallback 缓存函数，避免不必要的重新创建
   const getVariableOptions = useCallback(
-    (nodeId: string): TreeSelectDataType[] => {
+    (nodeId: string, item: any): TreeSelectDataType[] => {
       if (nodeId == undefined || nodeId == '') {
         if (variableOptions) {
           return variableOptions;
@@ -301,8 +300,16 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.START_DATE_FIELD,
         NodeType.START_API,
         NodeType.START_BPM,
-        NodeType.LOOP
+        NodeType.LOOP,
+        NodeType.MODAL
       ];
+
+      const fieldId = form.getFieldValue(item.field + '.fieldId');
+      let targetField: any = {};
+      for (let ele of fields) {
+        targetField = ele?.children?.find((element) => element.key == fieldId);
+      }
+      const fieldType = targetField?.fieldType;
 
       const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
       const options: TreeSelectDataType[] = [];
@@ -324,7 +331,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
         // 统一处理 conditionFields
         if (nodeOutput.conditionFields && treeNode.children) {
-          processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children);
+          processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children, fieldType);
         }
 
         // 只有当有子字段时才添加到选项中
@@ -335,7 +342,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
       return options;
     },
-    [nodesWithConditionFields, variableOptions]
+    [nodesWithConditionFields, variableOptions, fields]
   );
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
@@ -397,7 +404,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                           {(condition, { add: childAdd, remove: childRemove }) => {
                             return (
                               <div style={{ width: '100%' }}>
-                                {condition.map((item, childIndex) => {
+                                {condition.map((item: any, childIndex) => {
                                   return (
                                     // 字段id
                                     <Grid.Row key={item.key} gutter={8} align="center">
@@ -483,12 +490,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.VARIABLES && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <TreeSelect
-                                                    treeData={getVariableOptions(nodeId)}
+                                                    treeData={getVariableOptions(nodeId, item)}
                                                     triggerElement={(params) => {
                                                       return (
                                                         <Input
                                                           readOnly
-                                                          value={showTriggerElement(params, getVariableOptions(nodeId))}
+                                                          value={showTriggerElement(
+                                                            params,
+                                                            getVariableOptions(nodeId, item)
+                                                          )}
                                                         ></Input>
                                                       );
                                                     }}
@@ -500,7 +510,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                                                    ƒx 编辑公式
+                                                    {form.getFieldValue(item.field + '.value') ? '已设置公式' : 'ƒx 编辑公式'}
+                                                    {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ""}
                                                   </Button>
                                                 </Form.Item>
                                               )}

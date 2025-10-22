@@ -3,6 +3,8 @@ import { Form, Input, Modal, Button, type FormInstance } from '@arco-design/web-
 import MenuComp from '@/components/MenuIcon';
 import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import styles from './index.module.less';
+import DynamicIcon from '@/components/DynamicIcon';
+import { menuIconList } from '@/components/MenuIcon/const';
 
 /**
  * RenameModal 组件
@@ -23,7 +25,13 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
 
   useEffect(() => {
     menuIcon && form.setFieldValue('menuIcon', menuIcon);
+
+    return () => setMenuIcon('');
   }, [menuIcon]);
+
+  const handleCloseModal = () => {
+    setVisible(false);
+  };
 
   return (
     <Modal
@@ -32,15 +40,13 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
       visible={visible}
       onOk={handleRename}
       closable={!visibleMenuIcon}
-      onCancel={() => {
-        setVisible(false);
-      }}
+      onCancel={handleCloseModal}
       autoFocus={false}
       focusLock={true}
       unmountOnExit={true}
       footer={
         <div style={{ textAlign: 'right', visibility: !visibleMenuIcon ? 'visible' : 'hidden' }}>
-          <Button type="default" onClick={() => setVisible(false)} style={{ marginRight: 12 }}>
+          <Button type="default" onClick={handleCloseModal} style={{ marginRight: 12 }}>
             取消
           </Button>
           <Button type="primary" onClick={handleRename}>
@@ -78,7 +84,12 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
                   backgroundColor: '#F2F3F5'
                 }}
               >
-                <i className={`iconfont ${menuIcon || form.getFieldValue('menuIcon')}`} style={{ fontSize: 16 }} />
+                <DynamicIcon
+                  IconComponent={menuIconList.find(icon => icon.code === (menuIcon || form.getFieldValue('menuIcon')))?.icon}
+                  theme="outline"
+                  size="18"
+                  fill="#333"
+                />
               </div>
               <img
                 src={iconEditSVG}

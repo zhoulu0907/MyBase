@@ -1,6 +1,6 @@
 import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   listApplicationMenu,
   MenuType,
@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
+import { menuSignal } from '@/store/menu';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -90,6 +91,7 @@ const Runtime: React.FC = () => {
           }
         }
         setCurMenu(currentMenu);
+        menuSignal.setCurMenuId(currentMenu.id);
       }
     }
   };
@@ -127,6 +129,7 @@ const Runtime: React.FC = () => {
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
               setCurMenu(menu);
+              menuSignal.setCurMenuId(menu.id);
             }
           }}
         />
@@ -139,30 +142,27 @@ const Runtime: React.FC = () => {
     <div className={styles.runtimePage}>
       <Layout style={{ height: '100%' }}>
         <Layout>
-          {/* <Sider style={{ width: 225 }}> */}
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
-              <Input
-                style={{
-                  width: 120,
-                  border: '1px solid #dedede',
-                  borderRadius: 3
-                }}
-                allowClear
-                suffix={<IconSearch />}
-                placeholder={t('app.searchPlaceHolder')}
-              />
+              <div className={styles.siderHeaderInput}>
+                <Input
+                  allowClear
+                  suffix={<IconSearch />}
+                  placeholder={t('app.searchPlaceHolder')}
+                />
+              </div>
             </div>
             <Tree
               blockNode
               draggable
               treeData={treeData}
+              selectedKeys={[curMenu?.menuCode!]}
               expandedKeys={expandedKeys}
               onExpand={setExpandedKeys}
-              className={styles.tree}
+              className={`menuTree ${styles.tree}`}
               showLine={false}
               icons={{
-                switcherIcon: null,
+                switcherIcon: <IconDown />,
                 dragIcon: null
               }}
               actionOnClick={'expand'}
@@ -170,7 +170,10 @@ const Runtime: React.FC = () => {
                 width: '200px',
                 overflow: 'hidden',
                 boxSizing: 'border-box',
-                padding: '0 8px'
+                padding: '4px 8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8
               }}
             />
           </Sider>

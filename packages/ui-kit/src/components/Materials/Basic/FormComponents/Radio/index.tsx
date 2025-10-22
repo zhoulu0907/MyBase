@@ -1,14 +1,14 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Radio } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputRadioConfig } from './schema';
 import '../index.css';
+import type { XInputRadioConfig } from './schema';
 
 const RadioGroup = Radio.Group;
 
-const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
+const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
@@ -23,7 +23,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
   } = props;
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
         field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`}
@@ -40,12 +40,18 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {
-          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue?.find(op => op.chosen)?.label || '--'}</div> :
-            <RadioGroup direction={direction} options={defaultValue} defaultValue={defaultValue?.find(op => op.chosen)?.value} style={{
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
+          <div>{defaultValue?.find((op) => op.chosen)?.label || '--'}</div>
+        ) : (
+          <RadioGroup
+            direction={direction}
+            options={defaultValue}
+            defaultValue={defaultValue?.find((op) => op.chosen)?.value}
+            style={{
               pointerEvents: runtime ? 'unset' : 'none'
-            }} />
-        }
+            }}
+          />
+        )}
       </Form.Item>
     </div>
   );

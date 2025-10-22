@@ -88,7 +88,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
-          <img src={LogoSVG} />
+          <img src={LogoSVG} alt="logo" />
         </div>
 
         <Tabs
@@ -126,7 +126,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bl">
             <div className={styles.userDropdown}>
-              <img src={AvatarSVG} />
+              <img src={AvatarSVG} alt="avatar" />
             </div>
           </Dropdown>
         </div>

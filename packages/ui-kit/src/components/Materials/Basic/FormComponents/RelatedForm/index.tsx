@@ -8,7 +8,7 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import '../index.css';
 import { type XRelatedFormConfig } from './schema';
 
-const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) => {
+const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; detailMode?: boolean }) => {
   //   const { appEntities } = useAppEntityStore();
 
   const {

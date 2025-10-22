@@ -50,7 +50,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.TEXT]: BasicSchema.XText,
   [ALL_COMPONENT_TYPES.WEB_VIEW]: BasicSchema.XWebView,
   [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,
-  [ALL_COMPONENT_TYPES.PLACEHOLDER]: BasicSchema.XPlaceholder,
+  [ALL_COMPONENT_TYPES.PLACEHOLDER]: BasicSchema.XPlaceholder
 };
 
 /**
@@ -89,7 +89,6 @@ export function hasComponentSchema(componentType: string): componentType is Comp
 export function getComponentWidth(schema: any, itemType: string): string {
   if (!schema || !schema.config || !schema.config.width) {
     schema = getComponentSchema(itemType as any);
-    // console.log("初始化 schema.config.width", schema.config.width);
   }
   return schema.config.width;
 }
@@ -97,7 +96,6 @@ export function getComponentWidth(schema: any, itemType: string): string {
 export function getComponentConfig(schema: any, itemType: string): any {
   if (!schema || !schema.config) {
     schema = getComponentSchema(itemType as any);
-    // console.log("初始化 schema.config 默认配置", schema.config);
   }
   return schema.config;
 }

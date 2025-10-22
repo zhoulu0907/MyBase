@@ -21,6 +21,7 @@ import {
   ENTITY_TYPE,
   getAppIdByPageSetId,
   getApplication,
+  getDatasourceList,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
   updateApplicationMenu,
@@ -36,6 +37,7 @@ import {
   useFormEditorSignal,
   useListEditorSignal,
   usePageEditorSignal,
+  usePageViewEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
@@ -43,6 +45,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
+import { useResourceStore } from '@/store/store_resource';
 
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -82,6 +85,7 @@ export default function EditorHeader() {
   const [renameForm] = Form.useForm();
 
   const { clearCurComponentID } = usePageEditorSignal();
+  const { curViewId } = usePageViewEditorSignal;
 
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
@@ -106,6 +110,7 @@ export default function EditorHeader() {
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
 
   const { curAppId, setCurAppId } = useAppStore();
+  const { setCurDataSourceId } = useResourceStore();
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('');
@@ -191,6 +196,19 @@ export default function EditorHeader() {
         setAppStatus(appResp.appStatus);
       }
     }
+
+    // 获取数据源ID
+    const params = {
+      appId: appId
+    };
+    const res = await getDatasourceList(params);
+    if (res?.length > 0) {
+      const dataSource = res?.[0];
+      // 将数据源ID存储到store中
+      setCurDataSourceId(dataSource.id.toString());
+    } else {
+      console.warn('getAppResources - 未获取到数据源列表');
+    }
   };
 
   // 获取主表对应的主实体信息
@@ -227,16 +245,20 @@ export default function EditorHeader() {
 
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
+    console.log('curViewId: ', curViewId.value);
 
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,
       formComponents: formComponents.value,
+      formPageComponentSchemas: cloneDeep(formPageComponentSchemas.value),
+      fromColComponentsMap: cloneDeep(fromLayoutSubComponents.value),
+
       listComponents: listComponents.value,
-      formPageComponentSchemas: new Map(Object.entries(cloneDeep(formPageComponentSchemas.value))),
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
-      fromColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(fromLayoutSubComponents.value))) },
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
+
+    console.log('savePageSetParams: ', savePageSetParams);
 
     startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
   };

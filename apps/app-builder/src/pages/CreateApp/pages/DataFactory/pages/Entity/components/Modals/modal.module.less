@@ -1,24 +1,32 @@
 @import '../../../../styles/variables.less';
 
 /* 创建业务实体页面样式 */
-.create-entity-modal {
+.createEntityModal {
   width: 600px;
-  .arco-modal-header .arco-modal-title {
-    text-align: left !important;
-  }
 }
 
 /* 创建规则弹窗样式 */
-.create-rule-modal {
+.createRuleModal {
   width: 800px;
-  .arco-modal-header .arco-modal-title {
-    text-align: left !important;
+  .rangeSpace {
+    width: 100%;
+    & div:first-child, & div:last-child {
+      flex-grow: 1;
+    }
+    & div:nth-child(2) {
+      height: 52px;
+    }
   }
+}
+
+.regexText {
+  color: #4E5969;
+  margin-left: 8px;
 }
 
 /* 条件设置容器样式 */
 .condition-setting-container {
-  .condition-group {
+  .conditionGroup {
     margin-bottom: 16px;
     border: 1px solid #e5e5e5;
     border-radius: 6px;
@@ -105,18 +113,18 @@
 }
 
 /* 创建关联关系弹窗样式 */
-.create-relation-modal {
+.createRelationModal {
   width: 560px;
 }
 
 /* 关联关系表单样式 */
-.relation-form {
-  .relation-form-container {
-    .form-item-bottom {
+.relationForm {
+  .relationFormContainer {
+    .formItemBottom {
       margin-top: 30px;
     }
 
-    .relation-type-section {
+    .relationTypeSection {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -130,17 +138,11 @@
   }
 }
 
-.create-master-detail-modal {
+.createMasterDetailModal {
   width: 500px;
-  .arco-modal-header .arco-modal-title {
-    text-align: left !important;
-  }
 }
 
 /* 查看数据方法弹窗样式 */
-.check-method-modal {
+.checkMethodModal {
   width: 600px;
-  .arco-modal-header .arco-modal-title {
-    text-align: left !important;
-  }
 }

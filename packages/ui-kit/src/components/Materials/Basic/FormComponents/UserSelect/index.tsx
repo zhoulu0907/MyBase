@@ -1,17 +1,21 @@
-import { Form, Select } from '@arco-design/web-react';
+import { Avatar, Form, Input, Select } from '@arco-design/web-react';
 import { getSimpleUserPage, type UserVO } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputUserSelectConfig } from './schema';
 import '../index.css';
+import type { XInputUserSelectConfig } from './schema';
+import { IconClose, IconSearch } from '@arco-design/web-react/icon';
+import AdvanceSelectModal from './AdvanceSelectModal';
 
-const Option = Select.Option;
+import '../index.css';
+import './index.css';
 
-const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime } = props;
+
+const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime, detailMode} = props;
   const [userData, setUserData] = useState<UserVO[]>([]);
   // 分页
   const [pageNo, setPageNo] = useState<number>(1);
@@ -21,11 +25,25 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
   // 是否加载中
   const [fetching, setFetching] = useState<boolean>(false);
 
+  const {form} = Form.useFormContext();
+  const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${props.id}`;
+  const [advanceVisible, setAdvanceVisible] = useState(false); //高级选项popup
+  const [currentSelectUser, setCurrentSelectUser] = useState<string>();
+  const [currentSelectUserID, setCurrentSelectUserID] = useState<number>();
+
+  const fieldValue = Form.useWatch(fieldName, form);
+
   useEffect(() => {
-    if (runtime === true) {
+    if (runtime === true && keywords === '') {
       getUserData('');
     }
-  }, []);
+  }, [keywords]);
+
+  useEffect(() => {
+    if (runtime === true && fieldValue) {
+      setCurrentSelectUser(fieldValue?.userName);
+    }
+  }, [fieldValue]);
 
   // 第一页的加载
   const debouncedSearch = useCallback(
@@ -69,11 +87,40 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
     }
   };
 
+  const handleSelectChange = (value: number) => {
+    const user = userData.find((item) => item.id === value);
+    setCurrentSelectUser(user?.nickname);
+    setCurrentSelectUserID(value);
+    form.setFieldValue(fieldName, {
+      userID: value,
+      userName: user?.nickname
+    });
+  }
+
+  const handleRemove = (e: React.MouseEvent<SVGElement, MouseEvent>) => {
+    // 阻止下拉框弹出
+    e.stopPropagation();
+    setCurrentSelectUser(undefined);
+    setCurrentSelectUserID(undefined);
+    form.setFieldValue(fieldName, undefined);
+  }
+
+  const handleOKModal = (user: any) => {
+    // form.setFieldValue(fieldName, user.value);
+    setCurrentSelectUser(user.name);
+    setCurrentSelectUserID(user.value);
+    form.setFieldValue(fieldName, {
+      userID: user.value,
+      userName: user.name
+    });
+    setAdvanceVisible(false);
+  };
+
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${nanoid()}`}
+        field={fieldName}
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -87,25 +134,72 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+          <div>{currentSelectUser || '--'}</div>
+        ) : (
         <Select
           placeholder="请选择"
-          showSearch={true}
-          filterOption={false}
-          onSearch={debouncedSearch}
           onPopupScroll={scrollHandler}
-          allowClear
+          getPopupContainer={(node) => node.parentNode as HTMLElement}
           style={{
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
-        >
-          {userData.map((option) => (
-            <Option key={option.id} value={option.id}>
-              {`${option.nickname}（${option.username}）`}
-            </Option>
-          ))}
-        </Select>
+          onVisibleChange={() => setKeywords('')}
+          onChange={(value) => handleSelectChange(value)}
+          options={userData.map((option) => ({
+            label: (
+              <div className='optionDiv'>
+                  <Avatar size={34} className='optionAvatar'>
+                      {option.nickname[0]}
+                  </Avatar>
+                  <div>
+                    <div className='optionName'>{option.nickname}</div>
+                    <div className='optionInfo'>
+                      {option.deptName} {option.email}
+                    </div>
+                  </div>
+                </div>
+            ),
+            value: option.id,
+            subValue: option.nickname
+          }))}
+          dropdownRender={(menu) => (
+            <div>
+              <div className='dropdownRender'>
+                <Input
+                  className='searchInput'
+                  placeholder="搜索人员"
+                  onChange={(value) => debouncedSearch(value)}
+                />
+                <IconSearch className='searchIcon' />
+                <span className='advanceBtn'
+                  onClick={(e) => setAdvanceVisible(true)}
+                >
+                  高级
+                </span>
+              </div>
+              {menu}
+            </div>
+          )}
+          renderFormat={() => {
+            return (
+                <span className='renderFormat'>
+                    <Avatar size={24} className='avatar'>
+                      {currentSelectUser?.[0]}
+                    </Avatar>
+                    <span className='displayName'> {currentSelectUser} </span>
+                    <IconClose className='closeBtn'
+                        onClick={(e) => {handleRemove(e)}}/>
+                </span>);
+          }}/>)}
       </Form.Item>
+      <AdvanceSelectModal  
+          runtime={runtime}
+          visible={advanceVisible}
+          currentSelectUserID={currentSelectUserID}
+          onCancel={() => setAdvanceVisible(false)}
+          onOk={(value: any) => handleOKModal(value)}/>
     </div>
   );
 });

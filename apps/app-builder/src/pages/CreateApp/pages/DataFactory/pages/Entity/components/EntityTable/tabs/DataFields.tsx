@@ -93,16 +93,23 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
 
   const columns: TableColumnProps[] = [
     {
+      title: '序号',
+      dataIndex: 'index',
+      key: 'index',
+      width: 80,
+      render: (text: string, record: any, index: number) => index + 1 + (page.pageNo - 1) * page.pageSize
+    },
+    {
       title: '字段名称',
       dataIndex: 'fieldName',
       key: 'fieldName',
-      width: 150
+      width: 250
     },
     {
       title: '展示名称',
       dataIndex: 'displayName',
       key: 'displayName',
-      width: 150
+      width: 250
     },
     {
       title: '字段描述',
@@ -113,52 +120,52 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       title: '数据类型',
       dataIndex: 'fieldType',
       key: 'fieldType',
-      width: 100,
+      width: 200,
       render: (fieldType: string) => (
         <Tag color="cyan">{fieldTypes.find((item) => item.fieldType === fieldType)?.displayName}</Tag>
       )
     },
-    {
-      title: '字段类型',
-      dataIndex: 'isSystemField',
-      key: 'isSystemField',
-      render: (isSystemField: number) => (
-        <Tag color={isSystemField === FIELD_TYPE.SYSTEM ? 'red' : 'green'}>
-          {FIELD_TYPE_LABEL[isSystemField as keyof typeof FIELD_TYPE_LABEL]}
-        </Tag>
-      )
-    },
-    {
-      title: '默认值',
-      dataIndex: 'defaultValue',
-      key: 'defaultValue'
-    },
-    {
-      title: '唯一',
-      dataIndex: 'isUnique',
-      key: 'isUnique',
-      width: 70,
-      render: (isUnique: boolean) => (isUnique ? '是' : '否')
-    },
-    {
-      title: '必填',
-      dataIndex: 'isRequired',
-      key: 'isRequired',
-      width: 70,
-      render: (isRequired: boolean) => (isRequired ? '是' : '否')
-    },
-    {
-      title: '长度范围',
-      dataIndex: 'dataLength',
-      key: 'dataLength',
-      width: 90
-    },
-    {
-      title: '正则校验',
-      dataIndex: 'validationRulesId',
-      key: 'validationRulesId',
-      width: 90
-    },
+    // {
+    //   title: '字段类型',
+    //   dataIndex: 'isSystemField',
+    //   key: 'isSystemField',
+    //   render: (isSystemField: number) => (
+    //     <Tag color={isSystemField === FIELD_TYPE.SYSTEM ? 'red' : 'green'}>
+    //       {FIELD_TYPE_LABEL[isSystemField as keyof typeof FIELD_TYPE_LABEL]}
+    //     </Tag>
+    //   )
+    // },
+    // {
+    //   title: '默认值',
+    //   dataIndex: 'defaultValue',
+    //   key: 'defaultValue'
+    // },
+    // {
+    //   title: '唯一',
+    //   dataIndex: 'isUnique',
+    //   key: 'isUnique',
+    //   width: 70,
+    //   render: (isUnique: boolean) => (isUnique ? '是' : '否')
+    // },
+    // {
+    //   title: '必填',
+    //   dataIndex: 'isRequired',
+    //   key: 'isRequired',
+    //   width: 70,
+    //   render: (isRequired: boolean) => (isRequired ? '是' : '否')
+    // },
+    // {
+    //   title: '长度范围',
+    //   dataIndex: 'dataLength',
+    //   key: 'dataLength',
+    //   width: 90
+    // },
+    // {
+    //   title: '正则校验',
+    //   dataIndex: 'validationRulesId',
+    //   key: 'validationRulesId',
+    //   width: 90
+    // },
     {
       title: '操作',
       key: 'operation',
@@ -169,8 +176,9 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
               编辑
             </Button>
           )}
+          {/* 本期不支持删除 */}
           {record.isSystemField === FIELD_TYPE.CUSTOM && (
-            <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
+            <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)} disabled>
               删除
             </Button>
           )}
