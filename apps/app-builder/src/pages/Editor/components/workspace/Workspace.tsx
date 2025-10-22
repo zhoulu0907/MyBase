@@ -261,6 +261,7 @@ export default function EditorWorkspace() {
           setList={(newList) => {
             const entityList: GridItem[] = [];
             newList.forEach((item) => {
+              console.log(item);
               if (item.type == 'entity') {
                 item.fields
                   .filter(
