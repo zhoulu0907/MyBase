@@ -77,7 +77,7 @@ const DetailPage:FC<PageProps> = ({detailPopVisible=false, setPopVisible}) => {
                 <Row className='header-row' style={{ marginBottom: 16 }}>
                     <Col span={6}>
                         <p className='gray-color'>当前状态</p>
-                        <div><Tag color='arcoblue' defaultChecked checkable={false}>Lark</Tag></div>
+                        <div style={{padding: '4px 0'}}><Tag color='arcoblue' defaultChecked checkable={false}>Lark</Tag></div>
                     </Col>
                     <Col span={6}>
                         <p className='gray-color'>发起人</p>

@@ -3,7 +3,7 @@ import { Table, type TableColumnProps, Button, Tag, Radio, Space } from '@arco-d
 import { IconPlusCircle } from '@arco-design/web-react/icon'
 import TableSearch from './TableSearch';
 import EditProxyModal from '../modal/editProxyForm'
-import '../taskSide.less'
+import '../style/tcPage.less'
 
 const radioList = [
     {label: '全部', value: 'all'},

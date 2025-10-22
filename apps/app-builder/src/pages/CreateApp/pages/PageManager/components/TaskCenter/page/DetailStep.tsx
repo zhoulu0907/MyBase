@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react';
 import { Steps, Avatar } from '@arco-design/web-react';
 import { IconDownload, IconEye } from '@arco-design/web-react/icon';
-import '../taskSide.less'
+import '../style/tcPage.less'
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg'
 
 const Step = Steps.Step;

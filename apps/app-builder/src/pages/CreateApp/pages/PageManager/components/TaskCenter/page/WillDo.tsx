@@ -2,8 +2,8 @@ import { useState, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Link } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
-import '../taskSide.less'
 import BatchApproveModal from '../modal/batchApprove';
+import '../style/tcPage.less'
 
 const WillDo:FC = () => {
     const columns: TableColumnProps[] = [

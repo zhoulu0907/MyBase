@@ -4,7 +4,7 @@ import tbSort from '@/assets/images/task_center/tb-sort.svg'
 import tbBatch from '@/assets/images/task_center/tb-batch.svg'
 import tbFilter from '@/assets/images/task_center/tb-filter.svg'
 import { IconCheck } from '@arco-design/web-react/icon';
-import '../taskSide.less'
+import '../style/tcPage.less'
 
 const Option = Select.Option;
 const { RangePicker } = DatePicker;

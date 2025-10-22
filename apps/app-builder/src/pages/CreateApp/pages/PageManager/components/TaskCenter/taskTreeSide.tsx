@@ -9,7 +9,7 @@ import { IconSettings, IconDragDotVertical } from '@arco-design/web-react/icon';
 // import willdoIcon from '@/assets/images/task_center/willdo.svg'
 import RenameForm from './modal/renameForm'
 
-import './taskSide.less'
+import './style/taskSide.less'
 
 const TreeNode = Tree.Node;
 /**
@@ -147,7 +147,7 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
   //   console.log(curMenu2)
   // }, [curMenu2])
   
-  return <section className='task-center-box'>
+  return <section className='task-center-side'>
     <Tree
       blockNode
       draggable={true}

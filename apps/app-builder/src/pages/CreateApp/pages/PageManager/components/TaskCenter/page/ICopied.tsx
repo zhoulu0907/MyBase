@@ -2,7 +2,7 @@ import { useState, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
-import '../taskSide.less'
+import '../style/tcPage.less'
 
 const radioList = [
     {label: '未读', value: '0'},
