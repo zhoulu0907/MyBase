@@ -57,15 +57,6 @@ const ModalPopover: React.FC<ModalPopoverProps> = ({
       const triggerCenterX = triggerRect.left + triggerRect.width / 2;
       const triggerCenterY = triggerRect.top + triggerRect.height / 2;
 
-      console.log('triggerCenterX', triggerCenterX);
-      console.log('triggerCenterY', triggerCenterY);
-      console.log('viewportWidth', viewportWidth);
-      console.log('viewportHeight', viewportHeight);
-      console.log('triggerRect', triggerRect);
-      console.log('modalWidth', modalWidth);
-      console.log('modalHeight', modalHeight);
-      console.log('offset', offset);
-
       // 计算各个方向的空间
       const spaceTop = triggerRect.top;
       const spaceBottom = viewportHeight - triggerRect.bottom;
@@ -137,7 +128,6 @@ const ModalPopover: React.FC<ModalPopoverProps> = ({
 
     const triggerElement = getTriggerElement();
     if (!triggerElement || typeof triggerElement.getBoundingClientRect !== 'function') {
-      console.warn('triggerElement is not a valid DOM element:', triggerElement);
       return;
     }
 
@@ -272,7 +262,6 @@ const ModalPopover: React.FC<ModalPopoverProps> = ({
         if (node && node.nodeType === Node.ELEMENT_NODE) {
           triggerRef.current = node as HTMLElement;
         } else {
-          console.warn('Invalid DOM element received in ref:', node);
           triggerRef.current = null;
         }
 

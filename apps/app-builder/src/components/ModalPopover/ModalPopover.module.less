@@ -1,63 +1,3 @@
-.modalPopover {
-  // 使用更高优先级的选择器来覆盖 Arco Design 的默认样式
-  :global(.arco-modal) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: auto;
-    bottom: auto;
-    transform: none;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    box-shadow: none;
-    border: none;
-    border-radius: 0;
-    z-index: 1000;
-  }
-
-  :global(.arco-modal-mask) {
-    display: none;
-  }
-
-  :global(.arco-modal-container) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: auto;
-    bottom: auto;
-    transform: none;
-    margin: 0;
-    padding: 0;
-    z-index: 1000;
-  }
-
-  :global(.arco-modal-wrapper) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: auto;
-    bottom: auto;
-    transform: none;
-    margin: 0;
-    padding: 0;
-    z-index: 1000;
-  }
-
-  :global(.arco-modal-content) {
-    padding: 0;
-  }
-
-  // 强制置顶样式
-  &.forceTop {
-    :global(.arco-modal),
-    :global(.arco-modal-container),
-    :global(.arco-modal-wrapper) {
-      z-index: 9999;
-    }
-  }
-}
-
 .modalContent {
   position: relative;
   background: var(--color-bg-popup);
@@ -65,7 +5,7 @@
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 0;
-  margin: 0;
+  margin: -24px -20px;
   min-width: 200px;
   max-width: 400px;
   overflow: visible;
