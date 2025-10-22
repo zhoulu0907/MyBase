@@ -112,16 +112,39 @@ const FlowExecuteRecordPage: React.FC = () => {
     };
     const statisticRes = await getFlowLogStatistic(statisticParam);
 
+    const compareTotal = parseFloat((statisticRes?.compareTotal || '0.00%').replace('%', ''));
+    const compareSuccess = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', ''));
+    const compareFailed = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', ''));
+    const compareAvgs = parseFloat((statisticRes?.compareAvgs || '0.00%').replace('%', ''));
+
     const newCardList = [
-      { name: '今日执行次数', frequency: statisticRes?.total || 0, type: 'rise', value: '12.8%', describe: '较昨日' },
-      { name: '执行成功', frequency: statisticRes?.success || 0, type: 'rise', value: '12.8%', describe: '较昨日' },
-      { name: '执行失败', frequency: statisticRes?.faied || 0, type: 'rise', value: '12.8%', describe: '较昨日' },
+      {
+        name: '今日执行次数',
+        frequency: statisticRes?.total || 0,
+        type: compareTotal >= 0 ? 'rise' : 'decline',
+        value: statisticRes?.compareTotal || '0.00%',
+        describe: '较昨日'
+      },
+      {
+        name: '执行成功',
+        frequency: statisticRes?.success || 0,
+        type: compareSuccess >= 0 ? 'rise' : 'decline',
+        value: statisticRes?.compareSuccess || '0.00%',
+        describe: '较昨日'
+      },
+      {
+        name: '执行失败',
+        frequency: statisticRes?.faied || 0,
+        type: compareFailed >= 0 ? 'rise' : 'decline',
+        value: statisticRes?.compareFailed || '0.00%',
+        describe: '较昨日'
+      },
       {
         name: '平均执行时间',
         frequency: statisticRes?.avgs || 0,
         unit: 's',
-        type: 'rise',
-        value: '12.8%',
+        type: compareAvgs >= 0 ? 'rise' : 'decline',
+        value: statisticRes?.compareAvgs || '0.00%',
         describe: '较昨日'
       }
     ];
@@ -199,7 +222,9 @@ const FlowExecuteRecordPage: React.FC = () => {
                       ) : (
                         <IconArrowDown style={{ color: '#F53F3F' }} />
                       )}
-                      <span style={{ padding: '0 4px', color: '#24B28F' }}>{item.value}</span>
+                      <span style={{ padding: '0 4px', color: item.type === 'rise' ? '#24B28F' : '#F53F3F' }}>
+                        {item.value}
+                      </span>
                       <span>{item.describe}</span>
                     </div>
                   </div>

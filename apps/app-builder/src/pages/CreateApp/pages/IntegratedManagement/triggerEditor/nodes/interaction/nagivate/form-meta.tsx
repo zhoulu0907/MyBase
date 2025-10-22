@@ -6,8 +6,9 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { TARGET_PAGE_TYPE, OPEN_PAGE_TYPE, MODAL_SIZE_TYPE, UNAUTHORIZED_EVENT, type SelectOption } from '@onebase/app';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ParamField from '../../../components/param-field';
+import { validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -20,6 +21,20 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const authorize = Form.useWatch('authorize', payloadForm);
 
   const [pageList, setPageList] = useState<SelectOption[]>([]);
+
+  useEffect(() => {
+    payloadForm && validateNodeForm(form, payloadForm, true);
+  }, [payloadForm]);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+
+  const init = async () => {
+    // todo 接口获取跳转页面列表
+    setPageList([]);
+  };
 
   // 目标页面类型
   const handleTargetPageTypeChange = () => {
@@ -52,9 +67,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            requiredSymbol={{ position: 'end' }}
             layout="vertical"
+            requiredSymbol={{ position: 'end' }}
+            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
           >
             <Form.Item label="节点ID" field="id" initialValue={node.id} required>
               <Input disabled />
