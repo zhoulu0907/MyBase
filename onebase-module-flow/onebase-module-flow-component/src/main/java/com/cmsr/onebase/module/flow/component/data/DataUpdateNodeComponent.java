@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.component.data;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
@@ -47,6 +48,8 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataUpdateNodeData nodeData = (DataUpdateNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
+        Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
+
         //
         UpdateDataReqDTO reqDTO = new UpdateDataReqDTO();
         reqDTO.setTraceId(executeContext.getTraceId());
@@ -57,19 +60,19 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         }
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
-        OrExpression orExpression = conditionsProvider.formatConditionsForValue(this, variableContext, inLoopDepth, conditions);
+        OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
         reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         //
         List<ConditionItem> fields = nodeData.getFields();
-        reqDTO.setData(buildSingleReqData(fields, inLoopDepth, variableContext));
+        reqDTO.setData(buildSingleReqData(fields, expressionContext));
         //
         List<List<EntityFieldDataRespDTO>> respDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.updateData(reqDTO));
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(respDTOSS));
     }
 
-    private List<Map<Long, Object>> buildSingleReqData(List<ConditionItem> conditionItems, InLoopDepth inLoopDepth, VariableContext variableContext) {
+    private List<Map<Long, Object>> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> vars) {
         List<Map<Long, Object>> reqData = new ArrayList<>();
-        conditionsProvider.formatConditionItemsForValue(this, variableContext, inLoopDepth, conditionItems);
+        conditionsProvider.formatConditionItemsForValue(conditionItems, vars);
         Map<Long, Object> data = new HashMap<>();
         for (ConditionItem conditionItem : conditionItems) {
             data.put(NumberUtils.toLong(conditionItem.getFieldId()), conditionItem.getValue());
