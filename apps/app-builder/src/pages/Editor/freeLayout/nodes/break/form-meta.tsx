@@ -13,7 +13,7 @@ import { defaultFormMeta } from '../default-form-meta';
 import { useIsSidebar } from '../../hooks';
 import { FormHeader, FormContent } from '../../form-components';
 
-export const renderForm = () => {
+export const renderForm = (form) => {
   const isSidebar = useIsSidebar();
   if (isSidebar) {
     return (

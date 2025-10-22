@@ -16,11 +16,8 @@ export const BpmStartNodeRegistry: FlowNodeRegistry = {
     copyDisable: true,
     sidebarDisabled: true,
     nodePanelVisible: false,
-    defaultPorts: [{ type: 'output' }],
-    size: {
-      width: 74,
-      height: 29
-    },
+    defaultPorts: [{ type: 'output', location: 'bottom' }],
+
     wrapperStyle: {
       minWidth: 'unset',
       width: '100%',

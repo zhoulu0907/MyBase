@@ -36,13 +36,13 @@ export const CodeNodeRegistry: FlowNodeRegistry = {
   type: WorkflowNodeType.Code,
   info: {
     icon: iconCode,
-    description: 'Run the Script',
+    description: 'Run the Script'
   },
   meta: {
     size: {
       width: 360,
-      height: 390,
-    },
+      height: 390
+    }
   },
   onAdd() {
     return {
@@ -51,36 +51,36 @@ export const CodeNodeRegistry: FlowNodeRegistry = {
       data: {
         title: `Code_${++index}`,
         inputsValues: {
-          input: { type: 'constant', content: '' },
+          input: { type: 'constant', content: '' }
         },
         script: {
           language: 'javascript',
-          content: defaultCode,
+          content: defaultCode
         },
         outputs: {
           type: 'object',
           properties: {
             key0: {
-              type: 'string',
+              type: 'string'
             },
             key1: {
               type: 'array',
               items: {
-                type: 'string',
-              },
+                type: 'string'
+              }
             },
             key2: {
               type: 'object',
               properties: {
                 key21: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-        },
-      },
+                  type: 'string'
+                }
+              }
+            }
+          }
+        }
+      }
     };
   },
-  formMeta: formMeta,
+  formMeta: formMeta
 };

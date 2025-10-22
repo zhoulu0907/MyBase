@@ -1,9 +1,6 @@
 import type { FormRenderProps, FormMeta } from '@flowgram.ai/free-layout-editor';
 
-import { Avatar } from '@douyinfe/semi-ui';
-
 import type { FlowNodeJSON } from '../../typings';
-import iconStart from '../../assets/icon-start.jpg';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => (
   <>
@@ -15,20 +12,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => (
         alignItems: 'center',
         justifyContent: 'center',
         background: 'rgba(78, 89, 105, 1)',
-        borderRadius: '15px'
+        borderRadius: '15px',
+        color: '#fff'
       }}
     >
-      <Avatar
-        shape="circle"
-        style={{
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          cursor: 'move'
-        }}
-        alt="Icon"
-        src={iconStart}
-      />
+      <div>开始</div>
     </div>
   </>
 );

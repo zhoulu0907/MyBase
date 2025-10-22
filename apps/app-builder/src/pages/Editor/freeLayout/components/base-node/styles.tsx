@@ -9,7 +9,7 @@ import { IconInfoCircle } from '@douyinfe/semi-icons';
 export const NodeWrapperStyle = styled.div`
   align-items: flex-start;
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow:
     0 4px 4px 0 rgba(0, 0, 0, 0.15),
     0 4px 4px 0 rgba(0, 0, 0, 0.15);
@@ -17,7 +17,7 @@ export const NodeWrapperStyle = styled.div`
   flex-direction: column;
   justify-content: center;
   position: relative;
-  width: 360px;
+  width: 120px;
   height: auto;
 
   &.selected {

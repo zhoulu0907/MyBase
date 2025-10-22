@@ -14,14 +14,13 @@ export const LLMNodeRegistry: FlowNodeRegistry = {
   type: WorkflowNodeType.LLM,
   info: {
     icon: iconLLM,
-    description:
-      'Call the large language model and use variables and prompt words to generate responses.',
+    description: 'Call the large language model and use variables and prompt words to generate responses.'
   },
   meta: {
     size: {
       width: 360,
-      height: 390,
-    },
+      height: 390
+    }
   },
   onAdd() {
     return {
@@ -32,66 +31,66 @@ export const LLMNodeRegistry: FlowNodeRegistry = {
         inputsValues: {
           modelName: {
             type: 'constant',
-            content: 'gpt-3.5-turbo',
+            content: 'gpt-3.5-turbo'
           },
           apiKey: {
             type: 'constant',
-            content: 'sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+            content: 'sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
           },
           apiHost: {
             type: 'constant',
-            content: 'https://mock-ai-url/api/v3',
+            content: 'https://mock-ai-url/api/v3'
           },
           temperature: {
             type: 'constant',
-            content: 0.5,
+            content: 0.5
           },
           systemPrompt: {
             type: 'template',
-            content: '# Role\nYou are an AI assistant.\n',
+            content: '# Role\nYou are an AI assistant.\n'
           },
           prompt: {
             type: 'template',
-            content: '',
-          },
+            content: ''
+          }
         },
         inputs: {
           type: 'object',
           required: ['modelName', 'apiKey', 'apiHost', 'temperature', 'prompt'],
           properties: {
             modelName: {
-              type: 'string',
+              type: 'string'
             },
             apiKey: {
-              type: 'string',
+              type: 'string'
             },
             apiHost: {
-              type: 'string',
+              type: 'string'
             },
             temperature: {
-              type: 'number',
+              type: 'number'
             },
             systemPrompt: {
               type: 'string',
               extra: {
-                formComponent: 'prompt-editor',
-              },
+                formComponent: 'prompt-editor'
+              }
             },
             prompt: {
               type: 'string',
               extra: {
-                formComponent: 'prompt-editor',
-              },
-            },
-          },
+                formComponent: 'prompt-editor'
+              }
+            }
+          }
         },
         outputs: {
           type: 'object',
           properties: {
-            result: { type: 'string' },
-          },
-        },
-      },
+            result: { type: 'string' }
+          }
+        }
+      }
     };
-  },
+  }
 };

@@ -5,26 +5,20 @@
 
 import { nanoid } from 'nanoid';
 
-import { type FlowNodeRegistry } from '../../typings';
-import iconBreak from '../../assets/icon-break.jpg';
+import type { FlowNodeRegistry } from '../../typings';
+import iconContinue from '../../assets/bpmLogo/approver.png';
 import { formMeta } from './form-meta';
 import { WorkflowNodeType } from '../constants';
 
 let index = 0;
-export const BreakNodeRegistry: FlowNodeRegistry = {
-  type: WorkflowNodeType.Break,
+export const ProcessNodeRegistry: FlowNodeRegistry = {
+  type: WorkflowNodeType.ProcessNode,
   meta: {
     defaultPorts: [{ type: 'input' }],
-    sidebarDisabled: true,
-    size: {
-      width: 360,
-      height: 54
-    },
-    expandable: false,
-    onlyInContainer: WorkflowNodeType.Loop
+    sidebarDisabled: true
   },
   info: {
-    icon: iconBreak,
+    icon: iconContinue,
     description: 'The final node of the workflow, used to return the result information after the workflow is run.'
   },
   /**
@@ -33,10 +27,10 @@ export const BreakNodeRegistry: FlowNodeRegistry = {
   formMeta,
   onAdd() {
     return {
-      id: `break_${nanoid(5)}`,
-      type: 'break',
+      id: `continue_${nanoid(5)}`,
+      type: 'continue',
       data: {
-        title: `Break_${++index}`
+        title: `Continue_${++index}`
       }
     };
   }
