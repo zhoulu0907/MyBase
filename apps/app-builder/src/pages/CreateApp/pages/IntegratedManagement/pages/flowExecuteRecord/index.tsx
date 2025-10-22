@@ -6,11 +6,22 @@ import { useAppStore } from '@/store';
 import { getFlowLogDetail, getFlowLogPage } from '@onebase/app';
 import { getHashQueryParam, formatTimeYMDHMS } from '@onebase/common';
 
+interface ExecuteRecord {
+  processName: string;
+  executionUuid: string;
+  id: string;
+  executionResult: string;
+  startTime: number;
+  endTime: number;
+  processId: string;
+  duration: string;
+}
+
 const FlowExecuteRecordPage: React.FC = () => {
   const { curAppId } = useAppStore();
 
   const [cardList, setCardList] = useState<any[]>([]);
-  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableData, setTableData] = useState<ExecuteRecord[]>([]);
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   // 分页器
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -53,17 +64,35 @@ const FlowExecuteRecordPage: React.FC = () => {
     },
     {
       title: '耗时',
-      dataIndex: 'frequency',
-      key: 'frequency'
+      dataIndex: 'duration',
+      key: 'duration'
     },
     {
       title: '操作',
       dataIndex: 'operation',
       key: 'operation',
       width: 100,
-      render: (_, record) => <div style={{ color: 'rgb(var(--primary-6))' }}>详情</div>
+      render: (_, record) => (
+        <div
+          style={{ color: 'rgb(var(--primary-6))', cursor: 'pointer' }}
+          onClick={() => {
+            openDetailDialog(record);
+          }}
+        >
+          详情
+        </div>
+      )
     }
   ];
+
+  // todo 打开详情弹窗
+  const openDetailDialog = async (record: ExecuteRecord) => {
+    const param = {
+      id: record.id
+    };
+    const res = await getFlowLogDetail(param);
+    console.log(res);
+  };
 
   useEffect(() => {
     getData(pagination);
