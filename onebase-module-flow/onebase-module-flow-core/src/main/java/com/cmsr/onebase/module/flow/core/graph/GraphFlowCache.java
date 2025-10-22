@@ -12,19 +12,16 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import lombok.Setter;
-import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -34,10 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Conditional(FlowRuntimeCondition.class)
 public class GraphFlowCache {
 
-
-    private HashSetValuedHashMap<Long, Long> applicationFlowCache = new HashSetValuedHashMap<>();
-
-    private final ReadWriteLock applicationFlowCacheLock = new ReentrantReadWriteLock();
+    private ConcurrentHashMap<Long, Long> processApplicationCache = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Long, Map<String, NodeData>> flowNodeDataCache = new ConcurrentHashMap<>();
 
@@ -61,41 +55,35 @@ public class GraphFlowCache {
         JsonGraphNode startNode = jsonGraph.getStartNode();
         if (startNode.getType().equalsIgnoreCase(JsonGraphConstant.START_TIME)) {
             StartTimeNodeData nodeData = (StartTimeNodeData) startNode.getData();
+            nodeData.setApplicationId(applicationId);
+            nodeData.setProcessId(processId);
             startTimeNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_FORM)) {
             StartFormNodeData nodeData = (StartFormNodeData) startNode.getData();
+            nodeData.setApplicationId(applicationId);
             nodeData.setProcessId(processId);
             startFormNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_ENTITY)) {
             StartEntityNodeData nodeData = (StartEntityNodeData) startNode.getData();
+            nodeData.setApplicationId(applicationId);
             nodeData.setProcessId(processId);
             startEntityNodeDataCache.put(processId, nodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_DATE_FIELD)) {
             StartDateFieldNodeData nodeData = (StartDateFieldNodeData) startNode.getData();
+            nodeData.setApplicationId(applicationId);
             nodeData.setProcessId(processId);
             startDateFieldNodeDataCache.put(processId, nodeData);
         }
-        applicationFlowCacheLock.writeLock().lock();
-        try {
-            applicationFlowCache.put(applicationId, processId);
-        } finally {
-            applicationFlowCacheLock.writeLock().unlock();
-        }
+        processApplicationCache.put(processId, applicationId);
     }
 
-    public void delete(Long applicationId, Long processId) {
+    public void deleteByApplicationId(Long applicationId, Long processId) {
         flowNodeDataCache.remove(processId);
         startTimeNodeDataCache.remove(processId);
         startFormNodeDataCache.remove(processId);
         startDateFieldNodeDataCache.remove(processId);
         startEntityNodeDataCache.remove(processId);
-        //删除这个要加锁
-        applicationFlowCacheLock.writeLock().lock();
-        try {
-            applicationFlowCache.removeMapping(applicationId, processId);
-        } finally {
-            applicationFlowCacheLock.writeLock().unlock();
-        }
+        processApplicationCache.remove(processId);
     }
 
     public boolean isProcessExist(Long processId) {
@@ -130,22 +118,22 @@ public class GraphFlowCache {
                 .toList();
     }
 
-    public Set<Long> findFlowByApplicationId(Long applicationId) {
-        applicationFlowCacheLock.readLock().lock();
-        try {
-            Set<Long> ids = applicationFlowCache.get(applicationId);
-            Set<Long> result = new HashSet<>();
-            result.addAll(ids);
-            return result;
-        } finally {
-            applicationFlowCacheLock.readLock().unlock();
-        }
+    public Set<Long> findProcessByApplicationId(Long applicationId) {
+        return processApplicationCache.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(applicationId))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
-    public void delete(Long applicationId) {
-        Set<Long> flowIds = findFlowByApplicationId(applicationId);
-        for (Long flowId : flowIds) {
-            delete(applicationId, flowId);
+    public Set<Long> deleteByApplicationId(Long applicationId) {
+        Set<Long> processIds = findProcessByApplicationId(applicationId);
+        for (Long processId : processIds) {
+            deleteByApplicationId(applicationId, processId);
         }
+        return processIds;
+    }
+
+    public Long findApplicationByProcessId(Long processId) {
+        return processApplicationCache.get(processId);
     }
 }

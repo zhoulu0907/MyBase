@@ -98,6 +98,11 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
         for (ConditionItem conditionItem : filterConditions) {
             if (StringUtils.isNumeric(conditionItem.getFieldId())) {
                 fieldIds.add(NumberUtils.toLong(conditionItem.getFieldId()));
+            } else if (conditionItem.getFieldId().contains(".")) {
+                String f = StringUtils.substringAfter(conditionItem.getFieldId(), ".");
+                if (StringUtils.isNumeric(f)) {
+                    fieldIds.add(NumberUtils.toLong(f));
+                }
             }
         }
     }
@@ -163,10 +168,20 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
             return;
         }
         for (ConditionItem conditionItem : fields) {
-            if (!StringUtils.isNumeric(conditionItem.getFieldId())) {
+            Long fieldId = null;
+            if (StringUtils.isNumeric(conditionItem.getFieldId())) {
+                fieldId = NumberUtils.toLong(conditionItem.getFieldId());
+            }
+            if (conditionItem.getFieldId().contains(".")) {
+                String f = StringUtils.substringAfter(conditionItem.getFieldId(), ".");
+                if (StringUtils.isNumeric(f)) {
+                    fieldId = NumberUtils.toLong(f);
+                }
+            }
+            if (fieldId == null) {
                 continue;
             }
-            EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(NumberUtils.toLong(conditionItem.getFieldId()));
+            EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(fieldId);
             if (fieldInfo == null) {
                 continue;
             }

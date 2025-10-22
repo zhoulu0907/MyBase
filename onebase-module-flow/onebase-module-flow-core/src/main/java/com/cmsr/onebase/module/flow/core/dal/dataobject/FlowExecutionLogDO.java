@@ -14,8 +14,14 @@ public class FlowExecutionLogDO extends BaseDO {
     @Column(name = "trigger_user_id")
     private Long triggerUserId;
 
+    @Column(name = "trace_id")
+    private String traceId;
+
     @Column(name = "execution_uuid")
     private String executionUuid;
+
+    @Column(name = "application_id", nullable = false)
+    private Long applicationId;
 
     @Column(name = "process_id", nullable = false)
     private Long processId;
@@ -25,6 +31,9 @@ public class FlowExecutionLogDO extends BaseDO {
 
     @Column(name = "end_time")
     private LocalDateTime endTime;
+
+    @Column(name = "duration_time")
+    private Long durationTime;
 
     @Column(name = "execution_result")
     private String executionResult;

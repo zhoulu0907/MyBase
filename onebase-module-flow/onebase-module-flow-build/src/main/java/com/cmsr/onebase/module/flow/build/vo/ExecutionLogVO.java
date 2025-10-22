@@ -1,15 +1,10 @@
 package com.cmsr.onebase.module.flow.build.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 /**
  * 流程管理 - 流程视图对象
@@ -28,6 +23,9 @@ public class ExecutionLogVO implements Serializable {
 
     @Schema(description = "执行UUID")
     private String executionUuid;
+
+    @Schema(description = "应用ID")
+    private Long applicationId;
 
     @Schema(description = "流程ID")
     private Long processId;

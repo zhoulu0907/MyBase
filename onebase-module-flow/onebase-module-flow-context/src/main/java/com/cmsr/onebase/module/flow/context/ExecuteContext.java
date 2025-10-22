@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -21,7 +20,12 @@ public class ExecuteContext implements Serializable {
 
     @Setter
     @Getter
-    private String traceId = UUID.randomUUID().toString();
+    private String traceId;
+
+    @Setter
+    @Getter
+    private String executionUuid;
+
 
     @Setter
     private Long processId;
@@ -34,7 +38,9 @@ public class ExecuteContext implements Serializable {
     private Map<String, NodeData> nodeDataMap = new HashMap<>();
 
     //节点执行的结果
-    private Map<String, Object> nodeProcessResults = new ConcurrentHashMap<>();
+    private Map<String, Object> nodeProcessHisResults = new ConcurrentHashMap<>();
+
+    private Map<String, Object> nodeProcessCurResults = new ConcurrentHashMap<>();
 
     @Getter
     @Setter
@@ -49,24 +55,26 @@ public class ExecuteContext implements Serializable {
     @Getter
     private volatile String executionEndNodeTag;
 
-    @Setter
-    @Getter
-    private volatile String executionUuid;
 
     public void setNodeDataMap(Map<String, NodeData> nodeData) {
         this.nodeDataMap = Collections.unmodifiableMap(nodeData);
     }
 
+    public void resetNodeProcessResult() {
+        nodeProcessHisResults.putAll(nodeProcessCurResults);
+        this.nodeProcessCurResults.clear();
+    }
+
     public void putNodeProcessResult(String tag, Object result) {
-        this.nodeProcessResults.put(tag, result);
+        this.nodeProcessCurResults.put(tag, result);
     }
 
     public boolean hasNodeProcessResult(String tag) {
-        return nodeProcessResults.containsKey(tag);
+        return nodeProcessHisResults.containsKey(tag);
     }
 
     public Object getNodeProcessResult(String tag) {
-        return nodeProcessResults.get(tag);
+        return nodeProcessHisResults.get(tag);
     }
 
     public NodeData getNodeData(String nodeTag) {
