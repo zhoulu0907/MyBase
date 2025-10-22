@@ -13,15 +13,15 @@ import lombok.experimental.SuperBuilder;
 import org.anyline.metadata.Schema;
 import org.apache.commons.lang3.StringUtils;
 
-@Table(name = "datafactory_schema")
+@Table(name = "etl_schema")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataFactorySchemaDO extends TenantBaseDO {
+public class ETLSchemaDO extends TenantBaseDO {
 
-    public DataFactorySchemaDO setId(Long id) {
+    public ETLSchemaDO setId(Long id) {
         super.setId(id);
         return this;
     }
@@ -52,8 +52,8 @@ public class DataFactorySchemaDO extends TenantBaseDO {
         this.metaInfo = JsonUtils.toJsonString(metaInfo);
     }
 
-    public static DataFactorySchemaDO convert(Long datasourceId, Long catalogId, Schema schema) {
-        DataFactorySchemaDO schemaDO = new DataFactorySchemaDO();
+    public static ETLSchemaDO convert(Long datasourceId, Long catalogId, Schema schema) {
+        ETLSchemaDO schemaDO = new ETLSchemaDO();
         schemaDO.setDatasourceId(datasourceId);
         schemaDO.setCatalogId(catalogId);
         String name = schema.getName();
@@ -70,7 +70,7 @@ public class DataFactorySchemaDO extends TenantBaseDO {
         return schemaDO;
     }
 
-    public static void applyChanges(DataFactorySchemaDO oldSchemaDO, DataFactorySchemaDO newSchemaDO) {
+    public static void applyChanges(ETLSchemaDO oldSchemaDO, ETLSchemaDO newSchemaDO) {
         String oldName = oldSchemaDO.getSchemaName();
         String oldDisplayName = oldSchemaDO.getDisplayName();
         String oldComment = oldSchemaDO.getMetaInfo().getComment();
