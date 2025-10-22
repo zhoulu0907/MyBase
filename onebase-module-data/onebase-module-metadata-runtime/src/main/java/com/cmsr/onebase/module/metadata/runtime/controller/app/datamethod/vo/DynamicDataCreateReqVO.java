@@ -30,7 +30,6 @@ public class DynamicDataCreateReqVO {
     @Schema(description = "方法编码（可选）")
     private String methodCode;
 
-    private Long childEntityId;
-
-    private List<Map<Long, Object>> childData;
+    @Schema(description = "子表数据对象")
+    private List<SubEntityVo> subEntities;
 }
