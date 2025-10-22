@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
@@ -39,7 +38,7 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
  * @date 2025-01-27
  */
 @Slf4j
-public abstract class AbstractMetadataDataMethodCoreService  implements MetadataDataMethodCoreServiceV2{
+public abstract class AbstractMetadataDataMethodCoreService  implements MetadataDataMethodCoreServiceV2 {
 
 
     // ========== 依赖注入 ==========

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl;
+package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
