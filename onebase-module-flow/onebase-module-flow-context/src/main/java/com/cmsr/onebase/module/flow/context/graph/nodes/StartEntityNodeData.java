@@ -14,6 +14,13 @@ import java.util.List;
 @Data
 public class StartEntityNodeData extends NodeData implements Serializable {
 
+    /**
+     * 应用ID，后补充
+     */
+    private Long applicationId;
+    /**
+     * 流程ID，后补充
+     */
     private Long processId;
 
     private Long entityId;

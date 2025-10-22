@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -51,6 +52,11 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
         Duration duration = Duration.between(logDO.getStartTime(), logDO.getEndTime());
         logVO.setExecutionTime(toSecondsDouble(duration));
         return logVO;
+    }
+
+    @Override
+    public Map<String, Integer> statisticTody(Long applicationId) {
+       return flowExecutionLogRepository.statisticTodyByApplicationId(applicationId);
     }
 
     private String toSecondsDouble(Duration duration) {
