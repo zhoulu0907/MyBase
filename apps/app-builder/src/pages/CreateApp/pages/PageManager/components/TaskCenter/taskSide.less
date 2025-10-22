@@ -8,7 +8,7 @@
         list-style: none; margin: 0; padding: 0;
     }
     .ineedtodo-icon, .ihavedone-icon, .icreated-icon, .icopied-icon, .taskproxy-icon {
-        width: 16px; height: 16px; display: inline-block;
+        width: 18px; height: 18px; display: inline-block; margin-left: -1px;
     }
     .arco-tree-node-title {
         left: -8px;
@@ -18,18 +18,23 @@
     }
     .ineedtodo-icon {
         background: url(../../../../../../assets/images/task_center/willdo.svg) no-repeat center;
+        background-size: 100% 100%;
     }
     .ihavedone-icon {
         background: url(../../../../../../assets/images/task_center/idone.svg) no-repeat center;
+        background-size: 100% 100%;
     }
     .icreated-icon {
         background: url(../../../../../../assets/images/task_center/icreated.svg) no-repeat center;
+        background-size: 100% 100%;
     }
     .icopied-icon {
         background: url(../../../../../../assets/images/task_center/icopied.svg) no-repeat center;
+        background-size: 100% 100%;
     }
     .taskproxy-icon {
         background: url(../../../../../../assets/images/task_center/taskproxy.svg) no-repeat center;
+        background-size: 100% 100%;
     }
     .arco-tree-node-title-text {
         margin-right: 20px;
@@ -44,18 +49,23 @@
         }
         .ineedtodo-icon {
             background: url(../../../../../../assets/images/task_center/willdo-on.svg) no-repeat center;
+            background-size: 100% 100%;
         }
         .ihavedone-icon {
             background: url(../../../../../../assets/images/task_center/idone-on.svg) no-repeat center;
+            background-size: 100% 100%;
         }
         .icreated-icon {
             background: url(../../../../../../assets/images/task_center/icreated-on.svg) no-repeat center;
+            background-size: 100% 100%;
         }
         .icopied-icon {
             background: url(../../../../../../assets/images/task_center/icopied-on.svg) no-repeat center;
+            background-size: 100% 100%;
         }
         .taskproxy-icon {
             background: url(../../../../../../assets/images/task_center/taskproxy-on.svg) no-repeat center;
+            background-size: 100% 100%;
         }
     }
     .menu-hidden {
@@ -165,6 +175,20 @@
             color: #86909c;
         }
     }
+    &.task-proxy-tb {
+        .arco-tag-gray {
+            color: rgb(var(--gray-10));
+        }
+        .arco-table-td:last-child {
+            .arco-btn-text:last-child {
+                margin-left: 2px;
+                &::before {
+                    content: ''; position: absolute; left: -2px; top: 7px;
+                    height: 17px; width: 2px; border-left: 1px solid rgba(201, 205, 212, 1);
+                }
+            }
+        }
+    }
 }
 // 抽屉详情页
 .draw-detail-pop {
@@ -179,6 +203,10 @@
         justify-content: center;
         padding: 8px 14px;
         margin-top: 10px;
+        .arco-btn-text {
+            display: flex; align-items: center;
+            position: absolute; left: 0;
+        }
     }
     .arco-drawer-header {
         background: #fff; border: none;
@@ -369,6 +397,8 @@
         .arco-steps-item-process {
             .arco-steps-item-icon {
                 background: url(../../../../../../assets/images/task_center/process-blue.svg) no-repeat 0 0;
+                background-size: 85%;
+                background-position-x: 1px;
             }
             .date-line {
                 padding: 8px 0 8px 2px;
@@ -403,5 +433,29 @@
                 width: 2px; border-left: 1px solid rgba(78, 89, 105, 1);
             }
         }
+    }
+    &.task-proxy-radio {
+        .arco-btn-size-default {
+            padding: 0;
+        }
+        .arco-radio {
+            margin: 0 16px;
+            &:first-child {
+                margin-left: 0;
+            }
+            &  + .arco-radio::before {
+                left: -15px;
+            }
+        }
+        .arco-btn.arco-btn-text:hover {
+            background: none;
+        }
+    }
+}
+// task-proxy
+.normal-box-title {
+    margin-bottom: 8px;
+    & > span {
+        color: #86909c; margin-left: 8px;
     }
 }

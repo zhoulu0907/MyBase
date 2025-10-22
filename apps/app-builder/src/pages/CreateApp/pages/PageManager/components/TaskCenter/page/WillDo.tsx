@@ -107,6 +107,9 @@ const WillDo:FC = () => {
             setTbRowSelection(undefined)
         }
     }
+    function handleBatch2Click() {
+        setApproveVisible(true)
+    }
 
     function handleDetailPage(row:any) {
         console.log('click to detail page === row ===', row)
@@ -121,8 +124,8 @@ const WillDo:FC = () => {
             <span>已选中3/20条</span>
             <div className='batch-btns'>
                 <Button type='outline' onClick={() => setTbRowSelection(undefined)}>取消操作</Button>
-                <Button type='outline'>批量拒绝</Button>
-                <Button type='primary'>批量同意</Button>
+                <Button type='outline' onClick={() => handleBatch2Click()}>批量拒绝</Button>
+                <Button type='primary' onClick={() => handleBatch2Click()}>批量同意</Button>
             </div>
         </div>}
         <Table className='task-tb-box' rowKey='name' rowSelection={tbRowSelection} columns={columns} data={data} />

@@ -2,6 +2,7 @@ import { useRef, useState, type FC } from 'react';
 import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web-react';
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit} from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg'
+import ProPreviewImg from '@/assets/images/task_center/process-preview.svg'
 import DetailTable from './DetailTable'
 import DetailStep from './DetailStep'
 import DetailOKConfirm from './DetailOKConfirm';
@@ -40,10 +41,14 @@ const DetailPage:FC<PageProps> = ({detailPopVisible=false, setPopVisible}) => {
     function handleConfirmOK() {
         confirmRef.current.childMethod()
     }
+    function handlePreview() {
+        console.log('handle Preview ...')
+    }
     function renderDrawerFooter() {
         return <>
+            <Button type='text' onClick={handlePreview}><img src={ProPreviewImg} style={{marginRight: '3px'}}/>流程预览</Button>
             <Popconfirm
-                title=''  
+                title=''
                 style={{maxWidth: '420px', width: '420px'}}
                 className='dt-ok-confirm'
                 content={<DetailOKConfirm ref={confirmRef}/>}
