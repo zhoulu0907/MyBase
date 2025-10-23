@@ -108,10 +108,20 @@ public class FormulaFunctionDemo {
         r2.put("amount", 50);
         contextData.getRecordList().add(r2);
 
+        Map<String, Object> r3 = new HashMap<>();
+        r3.put("id", 3);
+        r3.put("status", "完成");
+        r3.put("amount", 50);
+        contextData.getRecordList().add(r3);
+
         // COUNT：COUNT([$recordList.id]) => 2
         String c1 = "COUNT($recordList.id)";
         Object rc1 = formulaEngineService.executeFormulaWithParams(c1, new HashMap<>(), contextData);
         log.info("COUNT: {} = {}", c1, rc1);
+
+        String c11 = "COUNT($recordList.status)";
+        Object rc11 = formulaEngineService.executeFormulaWithParams(c11, new HashMap<>(), contextData);
+        log.info("COUNT: {} = {}", c11, rc11);
 
         // SUMIF：id > 1 时累计 amount => 仅记录1，结果 100
         String s1 = "SUMIF($recordList.id, \">1\", $recordList.amount)";
