@@ -1,10 +1,4 @@
 /* 批量配置弹窗样式 */
-.batch-config-modal {
-  .arco-modal-header .arco-modal-title {
-    text-align: left !important;
-  }
-}
-
 .configContainer {
   .colorModeSection {
     display: flex;
@@ -22,55 +16,12 @@
   .dictValuesSection {
     margin-bottom: 16px;
     
-    .dictTableContainer {
-      border: 1px solid #e5e5e5;
-      border-radius: 6px;
-      overflow: hidden;
-      
-      .dictTable {
-        width: 100%;
-        border-collapse: collapse;
+    .dictTable {
+      .arco-table-tbody .arco-table-tr {
+        cursor: pointer;
         
-        thead {
-          background-color: #fafafa;
-          
-          th {
-            padding: 12px 8px;
-            text-align: left;
-            font-weight: 500;
-            color: #333;
-            border-bottom: 1px solid #e5e5e5;
-            
-            .requiredDot {
-              color: #f53f3f;
-              margin-right: 4px;
-            }
-          }
-        }
-        
-        tbody {
-          tr {
-            border-bottom: 1px solid #f0f0f0;
-            
-            &:hover {
-              background-color: #f8f9fa;
-            }
-            
-            &:last-child {
-              border-bottom: none;
-            }
-            
-            td {
-              padding: 8px;
-              vertical-align: middle;
-              
-              .arco-table-cell {
-                display: flex;
-                align-items: center;
-                min-height: 32px;
-              }
-            } 
-          }
+        &:hover {
+          background-color: #f8f9fa;
         }
       }
     }
@@ -113,23 +64,29 @@
   }
 }
 
+/* 必填标识样式 */
+.requiredDot {
+  color: #f53f3f;
+  margin-right: 4px;
+}
+
 // 拖拽时的样式
 .sortableHelper {
-  display: table !important;
-  background: #fff !important;
-  border: 1px solid #e5e5e5 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  z-index: 9999 !important;
-  opacity: 0.9 !important;
+  display: table;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  opacity: 0.9;
   
   tr {
-    display: table-row !important;
+    display: table-row;
   }
   
   td {
-    display: table-cell !important;
-    padding: 8px !important;
-    border-right: 1px solid #e5e5e5 !important;
+    display: table-cell;
+    padding: 8px;
+    border-right: 1px solid #e5e5e5;
   }
 }
 
@@ -139,21 +96,6 @@
   border-radius: 50%;
   .arco-color-picker-size-small .arco-color-picker-preview {
     border-radius: 50%;
-  }
-}
-
-/* 表单样式调整 */
-.arco-form-item {
-  margin-bottom: 0 !important;
-}
-
-.arco-input {
-  border: none !important;
-  box-shadow: none !important;
-  
-  &:focus {
-    border: 1px solid var(--primary-6) !important;
-    box-shadow: 0 0 0 2px rgba(var(--primary-6), 0.2) !important;
   }
 }
 

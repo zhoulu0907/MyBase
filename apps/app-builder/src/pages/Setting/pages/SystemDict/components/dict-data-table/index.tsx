@@ -46,6 +46,11 @@ export default function DictionaryTable({
     return getStatusLabel(nextStatus);
   };
   const columns = [
+    {
+      title: '颜色标识',
+      dataIndex: 'color',
+      render: (val: string) => <div style={{ width: 16, height: 16, borderRadius: 50, backgroundColor: val }} />
+    },
     { title: '字典值', dataIndex: 'label' },
     { title: '字典值编码', dataIndex: 'value' },
     { title: '显示顺序', dataIndex: 'sort' },

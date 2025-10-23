@@ -1,26 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Message, Modal, Switch, Input, ColorPicker, Spin } from '@arco-design/web-react';
-import { IconDelete, IconDragDotVertical, IconTranslate, IconPlusCircle } from '@arco-design/web-react/icon';
-import { SortableHandle } from 'react-sortable-hoc';
+import { IconDelete, IconTranslate, IconPlusCircle } from '@arco-design/web-react/icon';
+import { arrayMove } from 'react-sortable-hoc';
 import type { DictData } from '@onebase/platform-center';
 import { useCodeGenerator, type DictValueItem } from '../../hooks/useCodeGenerator';
 import CodeGenerationConfirmModal from '../code-generation-confirm-modal';
+import SortableTable from './SortableTable';
 import styles from './index.module.less';
-
-// 拖拽手柄组件
-const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles.dragHandle} />);
-
-// 可排序的表格行组件（暂时不使用）
-// const SortableTableRow = SortableElement(
-//   ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => {
-//     return <tr {...props}>{children}</tr>;
-//   }
-// );
-
-// 可排序的表格体组件（暂时不使用）
-// const SortableTableBody = SortableContainer((props: { children: React.ReactNode; [key: string]: unknown }) => {
-//   return <tbody {...props} />;
-// });
 
 // DictValueItem 类型已从 useCodeGenerator hook 中导入
 
@@ -105,17 +91,17 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
     form.setFieldsValue({ dictValues: newValues });
   };
 
-  // 处理拖拽排序（暂时不使用）
-  // const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-  //   const newValues = arrayMove([...dictValues], oldIndex, newIndex);
-  //   // 更新排序
-  //   const updatedValues = newValues.map((item, index) => ({
-  //     ...item,
-  //     sort: index + 1
-  //   }));
-  //   setDictValues(updatedValues);
-  //   form.setFieldsValue({ dictValues: updatedValues });
-  // };
+  // 处理拖拽排序
+  const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+    const newValues = arrayMove([...dictValues], oldIndex, newIndex);
+    // 更新排序
+    const updatedValues = newValues.map((item, index) => ({
+      ...item,
+      sort: index + 1
+    }));
+    setDictValues(updatedValues);
+    form.setFieldsValue({ dictValues: updatedValues });
+  };
 
   // 一键生成编码 - 显示确认对话框
   const handleGenerateCodes = () => {
@@ -136,6 +122,116 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
     }
   };
 
+  // 创建表格列配置
+  const createColumns = () => {
+    const columns: Array<{
+      title: React.ReactNode;
+      dataIndex: string;
+      width?: number;
+      render?: (value: unknown, record: DictValueItem, index: number) => React.ReactNode;
+    }> = [];
+
+    // 颜色列（如果启用彩色模式）
+    if (colorMode) {
+      columns.push({
+        title: '',
+        dataIndex: 'color',
+        width: 32,
+        render: (_: unknown, record: DictValueItem) => (
+          <ColorPicker
+            value={record.color}
+            onChange={(color) => {
+              const colorValue = typeof color === 'string' ? color : String(color);
+              updateDictValue(record.id, 'color', colorValue);
+            }}
+            size="small"
+            className={styles.colorPicker}
+          />
+        )
+      });
+    }
+
+    // 字典值列
+    columns.push({
+      title: (
+        <>
+          <span className={styles.requiredDot}>*</span>字典值
+        </>
+      ),
+      dataIndex: 'label',
+      width: 200,
+      render: (_: unknown, record: DictValueItem, index: number) => (
+        <Form.Item
+          field={`dictValues.${index}.label`}
+          rules={[{ required: true, message: '请输入字典值' }]}
+          style={{ margin: 0 }}
+        >
+          <Input
+            placeholder="请输入字典值"
+            value={record.label}
+            onChange={(value) => updateDictValue(record.id, 'label', value)}
+          />
+        </Form.Item>
+      )
+    });
+
+    // 字典值编码列
+    columns.push({
+      title: (
+        <>
+          <span className={styles.requiredDot}>*</span>字典值编码
+        </>
+      ),
+      dataIndex: 'value',
+      width: 200,
+      render: (_: unknown, record: DictValueItem, index: number) => (
+        <Form.Item
+          field={`dictValues.${index}.value`}
+          rules={[{ required: true, message: '请输入字典值编码' }]}
+          style={{ margin: 0 }}
+        >
+          <Input
+            placeholder="请输入字典值编码"
+            value={record.value}
+            onChange={(value) => updateDictValue(record.id, 'value', value)}
+          />
+        </Form.Item>
+      )
+    });
+
+    // 启用状态列
+    columns.push({
+      title: '启用状态',
+      dataIndex: 'status',
+      width: 100,
+      render: (_: unknown, record: DictValueItem) => (
+        <Switch
+          checked={record.status === 1}
+          onChange={(checked) => updateDictValue(record.id, 'status', checked ? 1 : 0)}
+          size="small"
+        />
+      )
+    });
+
+    // 操作列
+    columns.push({
+      title: '操作',
+      dataIndex: 'operation',
+      width: 60,
+      render: (_: unknown, record: DictValueItem) => (
+        <Button
+          type="text"
+          status="danger"
+          icon={<IconDelete />}
+          onClick={() => deleteDictValue(record.id)}
+          size="small"
+        />
+      )
+    });
+
+    return columns;
+  };
+
   // 提交
   const handleOk = async () => {
     try {
@@ -149,6 +245,8 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
         Message.warning('请至少添加一个有效的字典值');
         return;
       }
+
+      console.log('validValues', validValues);
 
       onOk(validValues);
     } catch (error) {
@@ -181,105 +279,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
             <div className={styles.dictValuesSection} id="dict-config-container">
               <Form form={form}>
                 <Form.List field="dictValues">
-                  {() => (
-                    <div className={styles.dictTableContainer}>
-                      <table className={styles.dictTable}>
-                        <thead>
-                          <tr>
-                            <th style={{ width: 40 }}></th>
-                            {colorMode && <th style={{ width: 32 }}></th>}
-                            <th style={{ width: 200 }}>
-                              <span className={styles.requiredDot}>*</span>字典值
-                            </th>
-                            <th style={{ width: 200 }}>
-                              <span className={styles.requiredDot}>*</span>字典值编码
-                            </th>
-                            <th style={{ width: 100 }}>启用状态</th>
-                            <th style={{ width: 60 }}>操作</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {dictValues.map((item, index) => (
-                            <tr key={item.id}>
-                              <td>
-                                <div className="arco-table-cell">
-                                  <DragHandle />
-                                </div>
-                              </td>
-                              {colorMode && (
-                                <td>
-                                  <div className="arco-table-cell">
-                                    <ColorPicker
-                                      value={item.color}
-                                      onChange={(color) =>
-                                        updateDictValue(
-                                          item.id,
-                                          'color',
-                                          typeof color === 'string' ? color : (color as any).hex || color
-                                        )
-                                      }
-                                      size="small"
-                                      className={styles.colorPicker}
-                                    />
-                                  </div>
-                                </td>
-                              )}
-                              <td>
-                                <div className="arco-table-cell">
-                                  <Form.Item
-                                    field={`dictValues.${index}.label`}
-                                    rules={[{ required: true, message: '请输入字典值' }]}
-                                    style={{ margin: 0 }}
-                                  >
-                                    <Input
-                                      placeholder="请输入字典值"
-                                      value={item.label}
-                                      onChange={(value) => updateDictValue(item.id, 'label', value)}
-                                    />
-                                  </Form.Item>
-                                </div>
-                              </td>
-                              <td>
-                                <div className="arco-table-cell">
-                                  <Form.Item
-                                    field={`dictValues.${index}.value`}
-                                    rules={[{ required: true, message: '请输入字典值编码' }]}
-                                    style={{ margin: 0 }}
-                                  >
-                                    <Input
-                                      placeholder="请输入字典值编码"
-                                      value={item.value}
-                                      onChange={(value) => updateDictValue(item.id, 'value', value)}
-                                    />
-                                  </Form.Item>
-                                </div>
-                              </td>
-                              <td>
-                                <div className="arco-table-cell">
-                                  <Switch
-                                    checked={item.status === 1}
-                                    onChange={(checked) => updateDictValue(item.id, 'status', checked ? 1 : 0)}
-                                    size="small"
-                                  />
-                                </div>
-                              </td>
-                              <td>
-                                <div className="arco-table-cell">
-                                  <Button
-                                    type="text"
-                                    status="danger"
-                                    icon={<IconDelete />}
-                                    onClick={() => deleteDictValue(item.id)}
-                                    size="small"
-                                  />
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                  {() => <SortableTable data={dictValues} columns={createColumns()} onSort={handleSort} />}
                 </Form.List>
               </Form>
             </div>
