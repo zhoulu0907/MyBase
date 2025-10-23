@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -114,6 +115,7 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
         configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
         List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
         List<String> subTableIds = new ArrayList<String>();
+        List subEntities = new ArrayList();
         for(MetadataEntityRelationshipDO relationshipDO:relationships){
             MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
 
@@ -136,18 +138,40 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
             // 查询子表数据
             DataSet dataSet = temporaryService.querys(tableName,config);
 
-            List<Map<String, Object>> list = new ArrayList<>();
+            List list = new ArrayList<>();
             for (int i = 0; i < dataSet.size(); i++) {
                 DataRow row = dataSet.getRow(i);
                 Map<String, Object> data = convertDataRowToMap(row, targetfields);
-                list.add(buildDataResponse(targetEntity, data, targetfields));
-            }
+                // 将Map<String, Object> data 转换为 Map<Long, Object> data
+                Map<Long, Object> _subData = new HashMap<>();
+                // long的值是targetFieldId, Object是data中的value。 对应关系是：data中的key转换成大写，与targetfields中的fieldName对应，找到对应的fieldId
+                for (Map.Entry<String, Object> entry : data.entrySet()) {
+                    String dataKey = entry.getKey();
+                    Object dataValue = entry.getValue();
 
-            Map resultData = context.getProcessedData();
-            resultData.put("sub",list);
+                    // 将data的key转换为大写后，与targetfields中的fieldName进行匹配
+                    String dataKeyUpper = dataKey.toUpperCase();
+                    for (MetadataEntityFieldDO field : targetfields) {
+                        if (field.getFieldName() != null && field.getFieldName().toUpperCase().equals(dataKeyUpper)) {
+                            // 找到匹配的字段，使用fieldId作为key
+                            _subData.put(field.getId(), dataValue);
+                            break;
+                        }
+                    }
+                }
+
+                list.add(_subData);
+//                list.add(data);
+            }
+            SubEntityVo subEntityVo = new SubEntityVo();
+            subEntityVo.setSubData(list);
+            subEntityVo.setSubEntityId(targetEntity.getId());
+            subEntities.add(subEntityVo);
         }
-        Map map = context.getProcessedData();
-        return map;
+        Map resultData = context.getProcessedData();
+        resultData.put("subEntities",subEntities);
+        context.setProcessedData(resultData);
+        return resultData;
     }
 
     /**

@@ -29,5 +29,5 @@ public class DynamicDataRespVO {
     private Map<String, String> fieldType;
 
     @Schema(description = "子表数据对象")
-    private List<Map<String, Object>> subEntities;
+    private List<SubEntityVo> subEntities;
 }
