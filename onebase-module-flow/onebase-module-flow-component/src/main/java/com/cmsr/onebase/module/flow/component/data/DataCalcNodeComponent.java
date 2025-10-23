@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
@@ -40,13 +41,15 @@ public class DataCalcNodeComponent extends SkippableNodeComponent {
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataCalcNodeData nodeData = (DataCalcNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
+        Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
+
         List<ConditionItem> conditionItems = nodeData.getCalRules();
         // 固定是字符串类型
         for (ConditionItem conditionItem : conditionItems) {
             conditionItem.setJdbcType(JdbcTypeEnum.VARCHAR.getCode());
             conditionItem.setOp(OpEnum.EQUALS.name());
         }
-        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(this, variableContext, inLoopDepth, conditionItems);
+        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
         Map<String, Object> dataMap = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getKey, ExpressionItem::getValue));
         variableContext.putNodeVariables(this.getTag(), dataMap);
     }

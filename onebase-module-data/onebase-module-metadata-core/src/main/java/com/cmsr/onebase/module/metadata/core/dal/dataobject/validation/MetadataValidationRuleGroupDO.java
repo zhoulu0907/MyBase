@@ -31,6 +31,7 @@ public class MetadataValidationRuleGroupDO extends TenantBaseDO {
     public static final String POP_PROMPT  = "pop_prompt";
     public static final String POP_TYPE    = "pop_type";
     public static final String VALIDATION_TYPE = "validation_type";
+    public static final String ENTITY_ID = "entity_id";
 
     public MetadataValidationRuleGroupDO setId(Long id) {
         super.setId(id);

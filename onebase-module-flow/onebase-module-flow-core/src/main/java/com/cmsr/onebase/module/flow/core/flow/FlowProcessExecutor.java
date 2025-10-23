@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
+import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -77,16 +79,18 @@ public class FlowProcessExecutor {
             //执行流程
             ExecutorResult result = executeFlow(processId, variableContext, executeContext);
             //处理结果到日志
-            executionLog.setExecutionResult(result.isSuccess() ? "success" : "failed");
+            executionLog.setExecutionResult(result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(result.getCause()));
             return result;
         } catch (Exception e) {
             log.error("执行流程异常", e);
-            executionLog.setExecutionResult("failed");
+            executionLog.setExecutionResult(ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
             return ExecutorResult.error("执行流程异常", e);
         } finally {
             executionLog.setEndTime(LocalDateTime.now());
+            Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
+            executionLog.setDurationTime(duration.toNanos());
             flowExecutionLogRepository.insert(executionLog);
         }
     }
@@ -126,16 +130,18 @@ public class FlowProcessExecutor {
             //执行流程
             ExecutorResult result = executeFlow(processId, variableContext, executeContext);
             //处理结果到日志
-            executionLog.setExecutionResult(result.isSuccess() ? "success" : "failed");
+            executionLog.setExecutionResult(result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(result.getCause()));
             return result;
         } catch (Exception e) {
             log.error("执行流程异常", e);
-            executionLog.setExecutionResult("failed");
+            executionLog.setExecutionResult(ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
             return ExecutorResult.error("执行流程异常", e);
         } finally {
             executionLog.setEndTime(LocalDateTime.now());
+            Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
+            executionLog.setDurationTime(duration.toNanos());
             flowExecutionLogRepository.insert(executionLog);
         }
     }

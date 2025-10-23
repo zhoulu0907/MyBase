@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.component.logic;
 
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
@@ -14,6 +15,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -35,22 +37,25 @@ public class SwitchConditionNodeComponent extends NodeSwitchComponent {
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         SwitchConditionNodeData nodeData = (SwitchConditionNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
+        Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
+
         //
         if (executeContext.hasNodeProcessResult(this.getTag())) {
             return (String) executeContext.getNodeProcessResult(this.getTag());
         }
         //
-        String result = "tag:" + evaluateSwitchCondition(nodeData, variableContext, inLoopDepth);
+        String result = "tag:" + evaluateSwitchCondition(nodeData, expressionContext);
         //
         executeContext.putNodeProcessResult(this.getTag(), result);
         return result;
     }
 
-    private String evaluateSwitchCondition(SwitchConditionNodeData nodeData, VariableContext variableContext, InLoopDepth inLoopDepth) {
+    private String evaluateSwitchCondition(SwitchConditionNodeData nodeData, Map<String, Object> expressionContext) {
+        //
         for (SwitchConditionNodeData.Case aCase : nodeData.getCases()) {
             List<Conditions> conditions = aCase.getFilterCondition();
-            OrExpression orExpression = conditionsProvider.formatConditionsForExpression(this, variableContext, inLoopDepth, conditions);
-            boolean evaluated = expressionExecutor.evaluate(orExpression, variableContext.getNodeVariables());
+            OrExpression orExpression = conditionsProvider.formatConditionsForExpression(conditions, expressionContext);
+            boolean evaluated = expressionExecutor.evaluate(orExpression, expressionContext);
             if (evaluated) {
                 return aCase.getId();
             }

@@ -2,13 +2,13 @@ package com.cmsr.onebase.module.etl.build.service.datasource;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.etl.build.controller.datasource.vo.DataFactoryDatasourceReqVO;
+import com.cmsr.onebase.module.etl.build.controller.datasource.vo.ETLDatasourceReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
-import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryCatalogRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryDatasourceRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.DataFactorySchemaRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryTableRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.DataFactoryErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.service.collector.MetadataCollectorService;
@@ -28,19 +28,19 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class DataFactoryDatasourceServiceImpl implements DataFactoryDatasourceService {
+public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Resource
-    private DataFactoryDatasourceRepository datasourceRepository;
+    private ETLDatasourceRepository datasourceRepository;
 
     @Resource
-    private DataFactoryCatalogRepository catalogRepository;
+    private ETLCatalogRepository catalogRepository;
 
     @Resource
-    private DataFactorySchemaRepository schemaRepository;
+    private ETLSchemaRepository schemaRepository;
 
     @Resource
-    private DataFactoryTableRepository tableRepository;
+    private ETLTableRepository tableRepository;
 
     @Resource
     private MetadataCollectorService metadataCollectorService;
@@ -80,35 +80,35 @@ public class DataFactoryDatasourceServiceImpl implements DataFactoryDatasourceSe
     }
 
     @Override
-    public Boolean pingDatasource(DataFactoryDatasourceReqVO requestVO) {
-        DataFactoryDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, DataFactoryDatasourceDO.class);
+    public Boolean pingDatasource(ETLDatasourceReqVO requestVO) {
+        ETLDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, ETLDatasourceDO.class);
         validDatasourceTypeSupported(datasourceDO.getDatasourceType());
         return metadataCollectorService.testConnection(datasourceDO);
     }
 
     @Override
-    public Long createDatasource(DataFactoryDatasourceReqVO requestVO) {
+    public Long createDatasource(ETLDatasourceReqVO requestVO) {
         validDatasourceCodeDuplicate(requestVO.getDatasourceCode(), null);
         validDatasourceTypeSupported(requestVO.getDatasourceType());
 
-        DataFactoryDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, DataFactoryDatasourceDO.class);
+        ETLDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, ETLDatasourceDO.class);
         datasourceDO.setId(null);
         datasourceDO = datasourceRepository.insert(datasourceDO);
         return datasourceDO.getId();
     }
 
     @Override
-    public void updateDatasource(DataFactoryDatasourceReqVO requestVO) {
+    public void updateDatasource(ETLDatasourceReqVO requestVO) {
         validDatasourceCodeDuplicate(requestVO.getDatasourceCode(), requestVO.getId());
         validDatasourceTypeSupported(requestVO.getDatasourceType());
 
-        DataFactoryDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, DataFactoryDatasourceDO.class);
+        ETLDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, ETLDatasourceDO.class);
         datasourceRepository.update(datasourceDO);
     }
 
     @Override
     public void deleteDatasource(Long datasourceId) {
-        DataFactoryDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
@@ -132,7 +132,7 @@ public class DataFactoryDatasourceServiceImpl implements DataFactoryDatasourceSe
 
     @Override
     public Boolean preCheckCollectStatus(Long id) {
-        DataFactoryDatasourceDO datasourceDO = datasourceRepository.findById(id);
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(id);
         // 1. 检查数据源是否存在
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);

@@ -7,9 +7,13 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.vo.PageExecutionLogReqVO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
+import org.anyline.entity.DataSet;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,8 +46,36 @@ public class FlowExecutionLogRepository extends DataRepository<FlowExecutionLogD
         return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public Map<String, Integer> statisticTodyByApplicationId(Long applicationId) {
+    public Map<String, Object> statisticByApplicationId(LocalDateTime day, Long applicationId) {
+        Map<String, Object> result = new HashMap<>();
         ConfigStore configs = new DefaultConfigStore();
-        return null;
+        configs.eq("application_id", applicationId);
+        configs.ge("start_time", day.withHour(0).withMinute(0).withSecond(0).withNano(0));
+        configs.le("start_time", day.withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+        int total = 0;
+        {
+            DataSet dataSet = this.querys("""
+                            select execution_result as result, count(*) as counts 
+                            from flow_execution_log
+                            """, configs,
+                    "group by execution_result");
+            for (DataRow dataRow : dataSet) {
+                String key = dataRow.getString("result");
+                int value = dataRow.getInt("counts");
+                result.put(key, value);
+                total += value;
+            }
+            result.put("total", total);
+        }
+        {
+            DataSet dataSet = this.querys("""
+                    select avg( duration_time ) as avgs
+                    from flow_execution_log
+                    """, configs);
+            for (DataRow dataRow : dataSet) {
+                result.put("avgs", dataRow.getDouble("avgs"));
+            }
+        }
+        return result;
     }
 }

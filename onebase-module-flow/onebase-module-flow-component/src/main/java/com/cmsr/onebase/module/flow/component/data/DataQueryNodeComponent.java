@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.component.data;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -43,6 +45,8 @@ public class DataQueryNodeComponent extends SkippableNodeComponent {
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataQueryNodeData nodeData = (DataQueryNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
+        Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
+
         // 转换成数据方法参数
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
         if (nodeData.getMainEntityId() != null) {
@@ -52,7 +56,7 @@ public class DataQueryNodeComponent extends SkippableNodeComponent {
         }
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
             List<Conditions> conditions = nodeData.getFilterCondition();
-            OrExpression orExpression = conditionsProvider.formatConditionsForValue(this, variableContext, inLoopDepth, conditions);
+            OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
             reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
         reqDTO.setOrderDtos(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));
