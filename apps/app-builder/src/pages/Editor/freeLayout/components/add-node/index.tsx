@@ -10,13 +10,12 @@ import { useAddNode } from './use-add-node';
 import { WorkflowDragService, useService, useClientContext } from '@flowgram.ai/free-layout-editor';
 
 import { LLMNodeRegistry } from '../../nodes/llm/index';
-export const AddNode = (props: { disabled: boolean,onSave:any }) => {
+export const AddNode = (props: { disabled: boolean; onSave: any }) => {
   const addNode = useAddNode();
-    const startDragSerivce = useService<WorkflowDragService>(WorkflowDragService);
-const onSaveTest=()=>{
-    console.log(props,'-----------')
-    props.onSave()
-}
+  const startDragSerivce = useService<WorkflowDragService>(WorkflowDragService);
+  const onSaveTest = () => {
+    props.onSave();
+  };
 
   return (
     <>
