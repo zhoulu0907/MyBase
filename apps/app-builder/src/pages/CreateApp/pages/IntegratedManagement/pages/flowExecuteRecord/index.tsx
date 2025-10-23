@@ -127,14 +127,14 @@ const FlowExecuteRecordPage: React.FC = () => {
       {
         name: '执行成功',
         frequency: statisticRes?.success || 0,
-        type: Number(statisticRes?.success || '0.00') >= 0 ? 'rise' : 'decline',
+        type: Number(statisticRes?.compareSuccess || '0.00') >= 0 ? 'rise' : 'decline',
         value: compareSuccess,
         describe: '较昨日'
       },
       {
         name: '执行失败',
         frequency: statisticRes?.faied || 0,
-        type: Number(statisticRes?.faied || '0.00') >= 0 ? 'rise' : 'decline',
+        type: Number(statisticRes?.compareFailed || '0.00') >= 0 ? 'rise' : 'decline',
         value: compareFailed,
         describe: '较昨日'
       },
@@ -142,7 +142,7 @@ const FlowExecuteRecordPage: React.FC = () => {
         name: '平均执行时间',
         frequency: statisticRes?.avgs || 0,
         unit: 's',
-        type: Number(statisticRes?.avgs || '0.00') >= 0 ? 'rise' : 'decline',
+        type: Number(statisticRes?.compareAvgs || '0.00') >= 0 ? 'rise' : 'decline',
         value: compareAvgs,
         describe: '较昨日'
       }
