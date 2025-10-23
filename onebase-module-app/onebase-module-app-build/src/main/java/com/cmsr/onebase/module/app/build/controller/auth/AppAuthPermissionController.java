@@ -85,7 +85,7 @@ public class AppAuthPermissionController {
      * 更新字段权限
      */
     @PostMapping("/update-view")
-    @Operation(summary = "更新字段权限")
+    @Operation(summary = "更新视图权限")
     public CommonResult<Boolean> updateView(@Valid @RequestBody AuthUpdateViewReqVO reqVO) {
         authPermissionService.updateView(reqVO);
         return CommonResult.success(true);
