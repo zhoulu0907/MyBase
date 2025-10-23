@@ -8,7 +8,14 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import com.cmsr.onebase.module.system.service.dict.DictDataService;
-import com.cmsr.onebase.module.system.vo.dictdata.*;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataBatchReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataBatchRespVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataInsertReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataPageReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataRespVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataSimpleRespVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataUpdateStatusVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -110,4 +117,11 @@ public class DictDataController {
                 BeanUtils.toBean(list, DictDataRespVO.class));
     }
 
+    @PostMapping("/batch-operate")
+    @Operation(summary = "批量操作字典数据（批量新增、更新、删除）")
+    @PreAuthorize("@ss.hasPermission('system:dict:write')")
+    public CommonResult<DictDataBatchRespVO> batchOperateDictData(@Valid @RequestBody DictDataBatchReqVO batchReqVO) {
+        DictDataBatchRespVO result = dictDataService.batchOperateDictData(batchReqVO);
+        return success(result);
+    }
 }
