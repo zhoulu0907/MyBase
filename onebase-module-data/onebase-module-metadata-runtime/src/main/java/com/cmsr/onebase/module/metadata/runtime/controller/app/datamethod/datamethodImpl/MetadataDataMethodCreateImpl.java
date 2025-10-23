@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl;
+package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +31,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
      * 校验创建数据的完整性
      */
     public void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
+        // 将字段ID转换为字段名后再校验
+        Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
+        
         for (MetadataEntityFieldDO field : fields) {
             // 跳过系统字段和主键字段 - 使用新的枚举值：1-是，0-否
             if (BooleanStatusEnum.isYes(field.getIsSystemField()) ||
@@ -47,7 +49,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
             // 校验必填字段 - 使用新的枚举值：1-是，0-否
             if (BooleanStatusEnum.isYes(field.getIsRequired()) &&
-                    (data.get(field.getFieldName()) == null || String.valueOf(data.get(field.getFieldName())).trim().isEmpty())) {
+                    (convertedData.get(field.getFieldName()) == null || String.valueOf(convertedData.get(field.getFieldName())).trim().isEmpty())) {
                 throw invalidParamException("字段[{}]为必填字段", field.getDisplayName());
             }
         }
@@ -57,7 +59,8 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
      * 处理创建数据
      */
     protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
-        Map<String, Object> processedData = new HashMap<>(data);
+        // 将字段ID映射为字段名
+        Map<String, Object> processedData = convertFieldIdToFieldName(data, fields);
 
         // 获取当前时间
         LocalDateTime now = LocalDateTime.now();

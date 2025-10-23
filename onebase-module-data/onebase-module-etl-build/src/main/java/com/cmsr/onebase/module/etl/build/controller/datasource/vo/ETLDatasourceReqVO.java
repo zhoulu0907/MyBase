@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Schema(description = "数据工厂 - 数据源创建/修改 VO")
 @Data
-public class DataFactoryDatasourceReqVO {
+public class ETLDatasourceReqVO {
 
     @Schema(description = "数据源ID")
     private Long id;
