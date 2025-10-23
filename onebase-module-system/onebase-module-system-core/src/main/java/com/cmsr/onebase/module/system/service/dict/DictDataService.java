@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.system.service.dict;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataBatchReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataBatchRespVO;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataInsertReqVO;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataPageReqVO;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataUpdateReqVO;
@@ -115,5 +117,13 @@ public interface DictDataService {
      * @return 字典数据列表
      */
     List<DictDataDO> getDictDataListByDictType(String dictType);
+
+    /**
+     * 批量操作字典数据（批量新增、更新、删除）
+     *
+     * @param batchReqVO 批量操作请求参数
+     * @return 批量操作结果
+     */
+    DictDataBatchRespVO batchOperateDictData(DictDataBatchReqVO batchReqVO);
 
 }
