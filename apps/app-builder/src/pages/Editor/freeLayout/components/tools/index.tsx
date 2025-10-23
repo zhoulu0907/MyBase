@@ -23,7 +23,7 @@ import { FitView } from './fit-view';
 import { Comment } from './comment';
 import { AutoLayout } from './auto-layout';
 
-export const DemoTools = () => {
+export const DemoTools = ({ onSave }) => {
   const { history, playground } = useClientContext();
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -73,7 +73,7 @@ export const DemoTools = () => {
           />
         </Tooltip>
         <Divider layout="vertical" style={{ height: '16px' }} margin={3} />
-        <AddNode disabled={playground.config.readonly} />
+        <AddNode disabled={playground.config.readonly} onSave={onSave} />
         <Divider layout="vertical" style={{ height: '16px' }} margin={3} />
         <TestRunButton disabled={playground.config.readonly} />
       </ToolSection>
