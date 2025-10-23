@@ -147,7 +147,7 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => {}}
+                setList={() => { }}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -185,7 +185,8 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
                       className="table-col-item-handle"
                       style={{
                         cursor: 'move',
-                        color: '#555'
+                        color: '#555',
+                        marginRight: 8
                       }}
                     />
                     <Input
@@ -217,7 +218,7 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
                         handlePropsChange(columnsKey, newList);
                         remove(idx);
                       }}
-                    ></Button>
+                    />
                   </div>
                 ))}
               </ReactSortable>

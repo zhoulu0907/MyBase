@@ -1,4 +1,6 @@
-import { ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES } from '@onebase/ui-kit';
+
+import { ENTITY_FIELD_TYPE } from "@/components/DataFactory";
+import { FORM_COMPONENT_TYPES } from "@/components/Materials/componentTypes";
 
 // 组件类型与组件实现的映射表
 export const COMPONENT_MAP: Record<string, string> = {

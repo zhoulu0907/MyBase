@@ -263,40 +263,72 @@ export default function EditorWorkspace() {
             newList.forEach((item) => {
               console.log(item);
               if (item.type == 'entity') {
-                item.fields
-                  .filter(
-                    (field: AppEntityField) =>
-                      field.fieldName !== 'lock_version' &&
-                      field.fieldName !== 'deleted' &&
-                      field.fieldName !== 'parent_id' &&
-                      field.isSystemField !== 1
-                  )
-                  .forEach((field: AppEntityField) => {
-                    let cpType = COMPONENT_MAP[field.fieldType];
-                    let cpID = `${cpType}-${uuidv4()}`;
-                    console.log('cpType', cpType, field);
-                    const schema = getComponentSchema(cpType as any);
+                if (item.entityType === '子表') {
 
-                    schema.config.cpName = field.displayName;
-                    schema.config.id = cpID;
-                    schema.config.dataField = [item.entityId, field.fieldId];
-                    schema.config.label.text = field.displayName;
-                    const props = {
-                      id: cpID,
-                      type: cpType,
-                      ...schema
-                    };
+                  const cpName = '子表单';
+                  const cpType = 'XSubTable';
+                  const cpID = `${cpType}-${uuidv4()}`;
 
-                    setPageComponentSchemas(cpID!, props);
-                    setCurComponentID(cpID!);
+                  const schema = getComponentSchema(cpType as any);
 
-                    setCurComponentSchema(props);
-                    setShowDeleteButton(false);
+                  schema.config.cpName = cpName;
+                  schema.config.id = cpID;
+                  schema.config.dataField = [item.entityId, item.id];
+                  schema.config.label.text = item.entityName;
+                  schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                  const props = {
+                    id: cpID,
+                    type: cpType,
+                    ...schema
+                  };
 
-                    entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
-                  });
-                // 移除当前item
-                newList.splice(newList.indexOf(item), 1);
+                  setPageComponentSchemas(cpID!, props);
+                  setCurComponentID(cpID!);
+
+                  setCurComponentSchema(props);
+                  setShowDeleteButton(false);
+
+                  entityList.push({ displayName: cpName, id: cpID, type: cpType });
+
+                  // 移除当前item
+                  newList.splice(newList.indexOf(item), 1);
+                } else if (item.entityType === '主表') {
+
+                  item.fields
+                    .filter(
+                      (field: AppEntityField) =>
+                        field.fieldName !== 'lock_version' &&
+                        field.fieldName !== 'deleted' &&
+                        field.fieldName !== 'parent_id' &&
+                        field.isSystemField !== 1
+                    )
+                    .forEach((field: AppEntityField) => {
+                      let cpType = COMPONENT_MAP[field.fieldType];
+                      let cpID = `${cpType}-${uuidv4()}`;
+                      console.log('cpType', cpType, field);
+                      const schema = getComponentSchema(cpType as any);
+
+                      schema.config.cpName = field.displayName;
+                      schema.config.id = cpID;
+                      schema.config.dataField = [item.entityId, field.fieldId];
+                      schema.config.label.text = field.displayName;
+                      const props = {
+                        id: cpID,
+                        type: cpType,
+                        ...schema
+                      };
+
+                      setPageComponentSchemas(cpID!, props);
+                      setCurComponentID(cpID!);
+
+                      setCurComponentSchema(props);
+                      setShowDeleteButton(false);
+
+                      entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
+                    });
+                  // 移除当前item
+                  newList.splice(newList.indexOf(item), 1);
+                }
               }
             });
             newList.push(...entityList);
