@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSystemMethodCoreService;
@@ -213,22 +214,56 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Override
     public Map<String, Object> getData(Long entityId, Object id, String methodCode) {
+
+        Map<String, Object> result = metadataDataMethodQuery.executeProcess(OperationType.GET,entityId,id,null,null);
+        return result;
+//        //查询子表数据
+//        Long sourceEntityId = reqVO.getEntityId();
+//        DefaultConfigStore configStore = new DefaultConfigStore();
+//        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
+//        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
+//        List<String> subTableIds = new ArrayList<String>();
+//        for(MetadataEntityRelationshipDO relationshipDO:relationships){
+//            MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
+//
+//            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+//            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+//            String tableName = targetEntity.getTableName();
+//            String fieldName = targetFieldDO.getFieldName();
+//            // 获取临时数据源服务
+//            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
+//            if (datasource == null) {
+//                throw exception(DATASOURCE_NOT_EXISTS);
+//            }
+//            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+//            log.info("成功切换到数据源：{}", datasource.getCode());
+//
+//            DefaultConfigStore config = new DefaultConfigStore();
+//            if("parent_id".equals(fieldName)){
+//                config.and(fieldName, reqVO.getId());
+//            }else{
+//                Object value = resultData.get(sourceFieldDO.getFieldName());
+//                config.and(fieldName, value);
+//            }
+//            DataSet dataSet = temporaryService.querys(tableName,config);
+//            System.out.println(dataSet);
+//        }
         // 移除多表查询逻辑，直接使用单表查询
-        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-        if (datasource == null) {
-            throw exception(DATASOURCE_NOT_EXISTS);
-        }
-        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-        log.info("成功切换到数据源：{}", datasource.getCode());
-        return TenantUtils.executeIgnore(() -> {
-            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
-            if (resultData == null || resultData.isEmpty()) {
-                throw exception(BUSINESS_ENTITY_NOT_EXISTS);
-            }
-            return buildDataResponse(entity, resultData, fields);
-        });
+//        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
+//        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
+//        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+//        if (datasource == null) {
+//            throw exception(DATASOURCE_NOT_EXISTS);
+//        }
+//        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+//        log.info("成功切换到数据源：{}", datasource.getCode());
+//        return TenantUtils.executeIgnore(() -> {
+//            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
+//            if (resultData == null || resultData.isEmpty()) {
+//                throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+//            }
+//            return buildDataResponse(entity, resultData, fields);
+//        });
     }
 
     @Override

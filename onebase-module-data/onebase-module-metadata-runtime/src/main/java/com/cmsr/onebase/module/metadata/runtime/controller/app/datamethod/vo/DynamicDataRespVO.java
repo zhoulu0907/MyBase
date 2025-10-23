@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,4 +27,7 @@ public class DynamicDataRespVO {
 
     @Schema(description = "字段类型信息")
     private Map<String, String> fieldType;
+
+    @Schema(description = "子表数据对象")
+    private List<Map<String, Object>> subEntities;
 }
