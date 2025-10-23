@@ -24,13 +24,15 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENT
 @Component
 public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCoreService {
 
-
     /**
      * 校验更新数据
      */
     protected void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
+        // 将字段ID转换为字段名后再校验
+        Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
+        
         // 更新时不校验必填，只校验数据类型等
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
+        for (Map.Entry<String, Object> entry : convertedData.entrySet()) {
             String fieldName = entry.getKey();
             MetadataEntityFieldDO field = fields.stream()
                     .filter(f -> f.getFieldName().equals(fieldName))
@@ -57,9 +59,11 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
      * 处理更新数据
      */
     protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
+        // 将字段ID转换为字段名
+        Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
         Map<String, Object> processedData = new HashMap<>();
 
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
+        for (Map.Entry<String, Object> entry : convertedData.entrySet()) {
             String fieldName = entry.getKey();
             MetadataEntityFieldDO field = fields.stream()
                     .filter(f -> f.getFieldName().equals(fieldName))
