@@ -326,7 +326,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private void upsetViewField(AuthPermissionReqVO permissionReq, AuthViewVO authViewVO) {
         AuthViewDO authViewDO = null;
-        if (authViewDO.getId() != null) {
+        if (authViewVO.getId() != null) {
             authViewDO = authViewRepository.findById(authViewVO.getId());
         }
         if (authViewDO == null) {
