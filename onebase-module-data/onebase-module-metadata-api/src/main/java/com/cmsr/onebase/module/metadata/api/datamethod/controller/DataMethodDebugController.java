@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.datamethod.controller;
+package com.cmsr.onebase.module.metadata.api.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
@@ -26,7 +26,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * 路径规范：/metadata/data-method-debug/query
  *
  * @author bty418
- * @date 2025-09-24
+ * @date 2025-10-23
  */
 @Tag(name = "调试 - 动态数据查询接口")
 @RestController
@@ -57,3 +57,4 @@ public class DataMethodDebugController {
         return success(result);
     }
 }
+
