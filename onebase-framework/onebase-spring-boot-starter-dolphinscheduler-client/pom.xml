@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
-    <description>DolphinScheduler SDK Java Client - 从GitHub复用并改造的DolphinScheduler客户端SDK</description>
+    <description>DolphinScheduler Client Spring Boot Starter - 提供 DolphinScheduler 客户端 SDK 的 Spring Boot 自动配置支持</description>
     <url>https://cmsr.com</url>
 
     <properties>
@@ -22,6 +22,25 @@
     </properties>
 
     <dependencies>
+        <!-- Spring Boot Starter - 提供 Spring Boot 自动配置支持 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Configuration Processor - 提供配置元数据支持 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Jakarta Validation API - 用于配置属性校验 -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+
         <!-- SLF4J API - 使用 Spring Boot 统一管理的版本 -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -32,6 +51,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- Lombok - 使用 OneBase 统一版本 1.18.36 -->
@@ -106,6 +126,11 @@
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>${spring-boot.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

@@ -1,124 +1,245 @@
-# 1 背景
-
-在我们的场景中，dolphin scheduler已经成为我们作业的底层系统，几乎所有需要调度的任务都跑在dolphin scheduler上。
-
-此外会有很多的第三方系统去对接dolphin scheduler，但是dolphin官方没有java sdk，如果用swagger去生成会非常难用，所以我们很需要一个公共的sdk供三方系统进行使用。因为通过代码去进行dolphin scheduler的工作流构建还是相对比较麻烦的事情，用户需要关心的参数比较多，上手比较困难。
+# DolphinScheduler Client Spring Boot Starter# 1 背景
 
 
 
-# 2 功能特点
+提供 DolphinScheduler 客户端 SDK 的 Spring Boot 自动配置支持。在我们的场景中，dolphin scheduler已经成为我们作业的底层系统，几乎所有需要调度的任务都跑在dolphin scheduler上。
 
-## 2.1 方便使用
 
-本sdk尽可能的简化工作流的创建，让用户尽量少的去填写参数。同时尽可能多的构建实体类而不是Map,让用户知道自己设置的参数是什么东西。
 
-你可以像使用页面那样的流程去操作定义dolphin scheduler上的资源，不过不同的是，你是通过代码的方式去实现。
+## 功能特性此外会有很多的第三方系统去对接dolphin scheduler，但是dolphin官方没有java sdk，如果用swagger去生成会非常难用，所以我们很需要一个公共的sdk供三方系统进行使用。因为通过代码去进行dolphin scheduler的工作流构建还是相对比较麻烦的事情，用户需要关心的参数比较多，上手比较困难。
 
-## 2.2 多版本支持
 
-随着dolphin scheduler的不断发展，rest api很可能会发生变化，所以我目前支持了dolphin scheduler`2.0.5`,`3.1.4`,`3.2.0`版本。如果你使用的是其他版本，可以考虑自行做修改，一般来说改动量不大
 
-* `2.0.5-release` in branch `2.0.5-release`
-* `3.1.4-release` in branch `3.1.4-release`
-* `3.2.0-release` in branch `3.2.0-release`
+- 🚀 开箱即用的 DolphinScheduler 客户端
 
-## 2.3 支持的操作
+- ⚙️ 基于 Spring Boot 的自动配置
 
-| 内容       | 支持的操作                                           |
+- 📝 完善的配置属性支持# 2 功能特点
+
+- 🔧 灵活的连接池配置
+
+- ✅ 配置属性校验## 2.1 方便使用
+
+
+
+## 快速开始本sdk尽可能的简化工作流的创建，让用户尽量少的去填写参数。同时尽可能多的构建实体类而不是Map,让用户知道自己设置的参数是什么东西。
+
+
+
+### 1. 添加依赖你可以像使用页面那样的流程去操作定义dolphin scheduler上的资源，不过不同的是，你是通过代码的方式去实现。
+
+
+
+在项目的 `pom.xml` 中添加依赖：## 2.2 多版本支持
+
+
+
+```xml随着dolphin scheduler的不断发展，rest api很可能会发生变化，所以我目前支持了dolphin scheduler`2.0.5`,`3.1.4`,`3.2.0`版本。如果你使用的是其他版本，可以考虑自行做修改，一般来说改动量不大
+
+<dependency>
+
+    <groupId>com.cmsr.onebase</groupId>* `2.0.5-release` in branch `2.0.5-release`
+
+    <artifactId>onebase-spring-boot-starter-dolphinscheduler-client</artifactId>* `3.1.4-release` in branch `3.1.4-release`
+
+    <version>${onebase.version}</version>* `3.2.0-release` in branch `3.2.0-release`
+
+</dependency>
+
+```## 2.3 支持的操作
+
+
+
+### 2. 配置属性| 内容       | 支持的操作                                           |
+
 | ---------- |-------------------------------------------------|
-| 项目       | 创建项目，更新项目，列出项目，删除项目                             |
+
+在 `application.yml` 中配置 DolphinScheduler 连接信息：| 项目       | 创建项目，更新项目，列出项目，删除项目                             |
+
 | 工作流     | 创建工作流定义，更新工作流定义，删除工作流定义，上线/下线工作流定义              |
-| 工作流实例 | 运行工作流实例，重跑工作流实例，删除工作流实例，列出工作流实例，停止工作流实例，暂停工作流实例 |
-| 定时       | 创建定时，更新定时，上线定时，下线定时，删除定时，查询定时                   |
-| 数据源     | 创建数据源，更新数据源，列出数据源，删除数据源                         |
-| 资源       | 上传文件，在线创建文件，在线更新文件内容，列出文件，删除文件                  |
-| 告警       | 创建告警插件，列出告警插件                                   |
-| 租户       | 创建租户，更新租户，删除租户，列出租户                             |
-| 任务实例    | 列出任务实例，查询任务实例日志 |
 
-# 3 使用指南
+```yaml| 工作流实例 | 运行工作流实例，重跑工作流实例，删除工作流实例，列出工作流实例，停止工作流实例，暂停工作流实例 |
 
-## 3.1 编译安装
+onebase:| 定时       | 创建定时，更新定时，上线定时，下线定时，删除定时，查询定时                   |
 
-```shell
-git clone https://github.com/weaksloth/dolphinscheduler-sdk-java.git
-mvn install -Dmaven.test.skip=true 
+  dolphinscheduler:| 数据源     | 创建数据源，更新数据源，列出数据源，删除数据源                         |
+
+    client:| 资源       | 上传文件，在线创建文件，在线更新文件内容，列出文件，删除文件                  |
+
+      # DolphinScheduler 服务地址（必填）| 告警       | 创建告警插件，列出告警插件                                   |
+
+      dolphin-address: http://localhost:12345/dolphinscheduler| 租户       | 创建租户，更新租户，删除租户，列出租户                             |
+
+      # 访问认证 token（必填）| 任务实例    | 列出任务实例，查询任务实例日志 |
+
+      token: your-token-here
+
+      # 连接超时时间（毫秒），默认 5000# 3 使用指南
+
+      connection-timeout: 5000
+
+      # Socket 超时时间（毫秒），默认 30000## 3.1 编译安装
+
+      socket-timeout: 30000
+
+      # 连接请求超时时间（毫秒），默认 3000```shell
+
+      connection-request-timeout: 3000git clone https://github.com/weaksloth/dolphinscheduler-sdk-java.git
+
+      # 最大连接数，默认 100mvn install -Dmaven.test.skip=true 
+
+      max-total-connections: 100```
+
+      # 每个路由的最大连接数，默认 20
+
+      max-connections-per-route: 20
+
 ```
-
-
 
 ## 3.2 导入依赖
 
+### 3. 使用客户端
+
 在你的程序中，引入 `dolphinscheduler-sdk-java` 依赖
 
+直接注入 `DolphinClient` 即可使用：
+
 ```xml
-<dependency>
-    <groupId>com.github.weaksloth</groupId>
-    <artifactId>dolphinscheduler-sdk-java</artifactId>
+
+```java<dependency>
+
+import com.cmsr.onebase.dolphins.core.DolphinClient;    <groupId>com.github.weaksloth</groupId>
+
+import org.springframework.stereotype.Service;    <artifactId>dolphinscheduler-sdk-java</artifactId>
+
     <version>x.x.x-RELEASE</version>
-</dependency>
+
+@Service</dependency>
+
+public class YourService {```
+
+    
+
+    private final DolphinClient dolphinClient;
+
+    
+
+    public YourService(DolphinClient dolphinClient) {## 3.3 创建dolphin client
+
+        this.dolphinClient = dolphinClient;
+
+    }在使用dolphin client之前，请先准备好这些参数
+
+    
+
+    public void createProject() {| parameters     | comment                                                      |
+
+        // 使用 DolphinClient 进行操作| -------------- | ------------------------------------------------------------ |
+
+        dolphinClient.opsForProject().page(null, null, "myProject");| token          | dolphin scheduler token, 可以在web ui创建                    |
+
+    }| dolphinAddress | dolphin scheduler入口,例如:`http://localhost:12345/dolphinscheduler` |
+
+}
+
 ```
 
 
 
-## 3.3 创建dolphin client
-
-在使用dolphin client之前，请先准备好这些参数
-
-| parameters     | comment                                                      |
-| -------------- | ------------------------------------------------------------ |
-| token          | dolphin scheduler token, 可以在web ui创建                    |
-| dolphinAddress | dolphin scheduler入口,例如:`http://localhost:12345/dolphinscheduler` |
+## 配置属性说明`springboot` project:
 
 
 
-`springboot` project:
+| 配置项 | 说明 | 类型 | 默认值 | 是否必填 |```java
 
-```java
-@Configuration
-public class BeanConfig {
-    @Bean
-    public DolphinClient dolphinClient() {
-        String token = "xxxx";	// dolphin scheduler token
-        String dolphinAddress = "http://localhost:12345/dolphinscheduler";  // dolphin scheduler address
-        DolphinsRestTemplate restTemplate =
-              new DolphinsRestTemplate(
+|--------|------|------|--------|----------|@Configuration
+
+| `onebase.dolphinscheduler.client.dolphin-address` | DolphinScheduler 服务地址 | String | - | 是 |public class BeanConfig {
+
+| `onebase.dolphinscheduler.client.token` | 访问认证 token | String | - | 是 |    @Bean
+
+| `onebase.dolphinscheduler.client.connection-timeout` | 连接超时时间（毫秒） | Integer | 5000 | 否 |    public DolphinClient dolphinClient() {
+
+| `onebase.dolphinscheduler.client.socket-timeout` | Socket 超时时间（毫秒） | Integer | 30000 | 否 |        String token = "xxxx";	// dolphin scheduler token
+
+| `onebase.dolphinscheduler.client.connection-request-timeout` | 连接请求超时时间（毫秒） | Integer | 3000 | 否 |        String dolphinAddress = "http://localhost:12345/dolphinscheduler";  // dolphin scheduler address
+
+| `onebase.dolphinscheduler.client.max-total-connections` | 最大连接数 | Integer | 100 | 否 |        DolphinsRestTemplate restTemplate =
+
+| `onebase.dolphinscheduler.client.max-connections-per-route` | 每个路由的最大连接数 | Integer | 20 | 否 |              new DolphinsRestTemplate(
+
                   new DefaultHttpClientRequest(
-                      HttpClients.custom()
+
+## 主要组件                      HttpClients.custom()
+
                           .addInterceptorLast(new RequestContent(true))
-                          .setDefaultRequestConfig(RequestConfig.custom().build())
+
+### DolphinClient                          .setDefaultRequestConfig(RequestConfig.custom().build())
+
                           .build(),
-                      RequestConfig.custom().build()));	
+
+DolphinScheduler 客户端的主要入口类，提供以下操作器：                      RequestConfig.custom().build()));	
+
         
-        return new DolphinClient(token,dolphinAddress,restTemplate);
-    }
-} 
 
-// then you can use by  @Autowired private DolphinClient dolphinClient;
-```
+- `opsForProject()` - 项目操作        return new DolphinClient(token,dolphinAddress,restTemplate);
 
+- `opsForProcess()` - 流程定义操作    }
 
+- `opsForProcessInst()` - 流程实例操作} 
+
+- `opsForTask()` - 任务操作
+
+- `opsForTaskInst()` - 任务实例操作// then you can use by  @Autowired private DolphinClient dolphinClient;
+
+- `opsForSchedule()` - 调度操作```
+
+- `opsForTenant()` - 租户操作
+
+- `opsForDataSource()` - 数据源操作
+
+- `opsForResource()` - 资源操作
 
 `java` project:
 
+### 自动配置
+
 ```java
-String token = "xxxx";	// dolphin scheduler token
+
+当应用启动时，Spring Boot 会自动：String token = "xxxx";	// dolphin scheduler token
+
 String dolphinAddress = "http://localhost:12345/dolphinscheduler";  // dolphin scheduler address
-DolphinsRestTemplate restTemplate =
-      new DolphinsRestTemplate(
-          new DefaultHttpClientRequest(
-              HttpClients.custom()
+
+1. 读取配置属性DolphinsRestTemplate restTemplate =
+
+2. 创建 HTTP 客户端配置      new DolphinsRestTemplate(
+
+3. 初始化 DolphinsRestTemplate          new DefaultHttpClientRequest(
+
+4. 创建并注册 DolphinClient Bean              HttpClients.custom()
+
                   .addInterceptorLast(new RequestContent(true))
-                  .setDefaultRequestConfig(RequestConfig.custom().build())
+
+## 注意事项                  .setDefaultRequestConfig(RequestConfig.custom().build())
+
                   .build(),
-              RequestConfig.custom().build()));	
 
-DolphinClient dolphinClient = new DolphinClient(token,dolphinAddress,restTemplate);
-```
+1. `dolphin-address` 和 `token` 为必填配置项              RequestConfig.custom().build()));	
+
+2. 建议在生产环境中使用环境变量或配置中心管理敏感信息（如 token）
+
+3. 根据实际业务需求调整连接池和超时配置DolphinClient dolphinClient = new DolphinClient(token,dolphinAddress,restTemplate);
+
+4. 确保 DolphinScheduler 服务地址可访问```
 
 
 
-## 3.4 操作dolphin scheduler
+## 许可证
+
+
+
+Copyright © 2025 CMSR## 3.4 操作dolphin scheduler
+
 
 > 在test目录里有很多的测试代码可以提供参考
 
