@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.etl.core.service.collector;
 
-import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 
 public interface MetadataCollectorService {
 
-    boolean testConnection(DataFactoryDatasourceDO datasourceDO);
+    boolean testConnection(ETLDatasourceDO datasourceDO);
 
     void submitCollectJob(Long datasourceId);
 }

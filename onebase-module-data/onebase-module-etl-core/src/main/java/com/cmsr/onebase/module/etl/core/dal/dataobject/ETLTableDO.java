@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.MetaTable;
-import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -15,15 +14,15 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
-@Table(name = "datafactory_table")
+@Table(name = "etl_table")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataFactoryTableDO extends TenantBaseDO {
+public class ETLTableDO extends TenantBaseDO {
 
-    public DataFactoryTableDO setId(Long id) {
+    public ETLTableDO setId(Long id) {
         super.setId(id);
         return this;
     }
@@ -57,10 +56,10 @@ public class DataFactoryTableDO extends TenantBaseDO {
         this.metaInfo = JsonUtils.toJsonString(metaInfo);
     }
 
-    public static DataFactoryTableDO convert(Long datasourceId, Long catalogId, Long schemaId,
-                                             org.anyline.metadata.Table table,
-                                             Map<String, org.anyline.metadata.Column> columns) {
-        DataFactoryTableDO tableDO = new DataFactoryTableDO();
+    public static ETLTableDO convert(Long datasourceId, Long catalogId, Long schemaId,
+                                     org.anyline.metadata.Table table,
+                                     Map<String, org.anyline.metadata.Column> columns) {
+        ETLTableDO tableDO = new ETLTableDO();
         tableDO.setDatasourceId(datasourceId);
         tableDO.setCatalogId(catalogId);
         tableDO.setSchemaId(schemaId);
@@ -78,7 +77,7 @@ public class DataFactoryTableDO extends TenantBaseDO {
         return tableDO;
     }
 
-    public static void applyChanges(DataFactoryTableDO oldTableDO, DataFactoryTableDO newTableDO) {
+    public static void applyChanges(ETLTableDO oldTableDO, ETLTableDO newTableDO) {
         MetaTable oldMetaTable = oldTableDO.getMetaInfo();
         MetaTable newMetaTable = newTableDO.getMetaInfo();
         MetaTable.applyChanges(oldMetaTable, newMetaTable);

@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.etl.core.service.collector;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryDatasourceRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.DataFactoryErrorCodeConstants;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +28,9 @@ public class DataSourceFactory {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
 
     @Resource
-    private DataFactoryDatasourceRepository datasourceRepository;
+    private ETLDatasourceRepository datasourceRepository;
 
-    public DataSource constructDataSource(DataFactoryDatasourceDO datasourceDO, boolean oneshot) {
+    public DataSource constructDataSource(ETLDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
         String databaseType = datasourceDO.getDatasourceType();
         DatabaseType dbType = parseDatabaseType(databaseType);
@@ -60,7 +60,7 @@ public class DataSourceFactory {
     }
 
     public DataSource constructDataSource(Long datasourceId, boolean oneshot) {
-        DataFactoryDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
