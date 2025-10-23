@@ -23,7 +23,7 @@ export const initialData: FlowDocumentJSON = {
     },
     {
       id: 'node_0',
-      type: 'condition',
+      type: 'process-node',
       meta: {
         position: {
           x: 180,
@@ -40,7 +40,7 @@ export const initialData: FlowDocumentJSON = {
     },
     {
       id: 'end_0',
-      type: 'bpm_end',
+      type: 'bpm-end',
       meta: {
         position: {
           x: 180,

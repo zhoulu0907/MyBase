@@ -4,7 +4,6 @@
  */
 
 import { type FlowNodeRegistry } from '../../typings';
-import iconStart from '../../assets/icon-start.jpg';
 import { formMeta } from './form-meta';
 import { WorkflowNodeType } from '../constants';
 
@@ -16,7 +15,7 @@ export const BpmEndNodeRegistry: FlowNodeRegistry = {
     copyDisable: true,
     sidebarDisabled: true,
     nodePanelVisible: false,
-    defaultPorts: [{ type: 'input' }],
+    defaultPorts: [{ type: 'input', location: 'top' }],
     size: {
       width: 74,
       height: 30
@@ -30,7 +29,7 @@ export const BpmEndNodeRegistry: FlowNodeRegistry = {
     }
   },
   info: {
-    icon: iconStart,
+    icon: '',
     description: 'The final node of the block.'
   },
   /**

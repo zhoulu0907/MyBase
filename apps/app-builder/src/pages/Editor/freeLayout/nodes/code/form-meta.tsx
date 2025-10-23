@@ -32,5 +32,5 @@ export const formMeta: FormMeta = {
   render: (props) => <FormRender {...props} />,
   effect: defaultFormMeta.effect,
   validate: defaultFormMeta.validate,
-  plugins: [createInferInputsPlugin({ sourceKey: 'inputsValues', targetKey: 'inputs' })],
+  plugins: [createInferInputsPlugin({ sourceKey: 'inputsValues', targetKey: 'inputs' })]
 };

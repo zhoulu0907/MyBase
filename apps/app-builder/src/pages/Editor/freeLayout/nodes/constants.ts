@@ -18,5 +18,6 @@ export enum WorkflowNodeType {
   Continue = 'continue',
   Break = 'break',
   BpmStart = 'bpm-start',
-  BpmEnd = 'bpm-end'
+  BpmEnd = 'bpm-end',
+  ProcessNode = 'process-node'
 }
