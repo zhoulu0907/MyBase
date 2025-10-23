@@ -55,9 +55,10 @@ const Right: React.FC = () => {
     const redirectURL = getHashQueryParam('redirectURL');
     if (redirectURL) {
       const startIndex = redirectURL.indexOf('/runtime/');
-      const endRedirectURL = redirectURL.slice(startIndex + 9);
+      const runtimeLength = '/runtime/'.length;
+      const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
       const endIndex = endRedirectURL?.indexOf('/');
-      const applicationId = redirectURL.slice(startIndex + 9, startIndex + 9 + endIndex);
+      const applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
 
       if (applicationId) {
         const res = await getApplication({ id: applicationId });

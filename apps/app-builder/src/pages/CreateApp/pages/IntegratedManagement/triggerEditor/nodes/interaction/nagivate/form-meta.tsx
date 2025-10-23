@@ -166,8 +166,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                     <Radio value="right">右侧打开</Radio>
                   </Radio.Group>
                 </Form.Item>
-                <Form.Item label="侧边栏宽带" field="modalWidth">
-                  <InputNumber placeholder="请输入侧边栏宽带" />
+                <Form.Item label="侧边栏宽度" field="modalWidth">
+                  <InputNumber placeholder="请输入侧边栏宽度" />
                 </Form.Item>
                 <Form.Item label="侧边栏标题" field="modalTitle">
                   <Input placeholder="请输入侧边栏标题" />
