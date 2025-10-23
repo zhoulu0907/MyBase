@@ -93,35 +93,38 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
 
         // 处理子表插入数据
         List<SubEntityVo> subEntities = reqVO.getSubEntities();
-        for(SubEntityVo subEntityVo: subEntities){
-            //子实体Id
-            Long subEntityId = subEntityVo.getSubEntityId();
-            //该子实体对应多条数据待插入
-            List<Map<Long,Object>> list  = subEntityVo.getSubData();
-            for(Map<Long,Object> data: list){
-                // 将 field_id -> value 转换为 field_name -> value
-                Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
+        if(subEntities!=null){
+            for(SubEntityVo subEntityVo: subEntities){
+                //子实体Id
+                Long subEntityId = subEntityVo.getSubEntityId();
+                //该子实体对应多条数据待插入
+                List<Map<Long,Object>> list  = subEntityVo.getSubData();
+                for(Map<Long,Object> data: list){
+                    // 将 field_id -> value 转换为 field_name -> value
+                    Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
 
-                subDataByName.put("parent_id",parentId);
-                log.info("字段ID映射为名称后的数据: {}", subDataByName);
+                    subDataByName.put("parent_id",parentId);
+                    log.info("字段ID映射为名称后的数据: {}", subDataByName);
 
-                // 打印每个字段值的类型
-                subDataByName.forEach((key, value) -> {
-                    if (value != null) {
-                        log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
-                    } else {
-                        log.info("字段 {} 的值为null", key);
-                    }
-                });
+                    // 打印每个字段值的类型
+                    subDataByName.forEach((key, value) -> {
+                        if (value != null) {
+                            log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
+                        } else {
+                            log.info("字段 {} 的值为null", key);
+                        }
+                    });
 
-                // 调用core模块的基础服务
-                Map<String, Object> subResultData = coreDataMethodService.createData(
-                        subEntityId,
-                        subDataByName,
-                        reqVO.getMethodCode()
-                );
+                    // 调用core模块的基础服务
+                    Map<String, Object> subResultData = coreDataMethodService.createData(
+                            subEntityId,
+                            subDataByName,
+                            reqVO.getMethodCode()
+                    );
+                }
             }
         }
+
         // 转换为VO
         return convertToDynamicDataRespVO(resultData);
     }
