@@ -9,11 +9,11 @@ import {
   COMPONENT_GROUP_NAME,
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
   ENTITY_COMPONENT_TYPES,
-  FORM_COMPONENT_TYPES
+  FORM_COMPONENT_TYPES,
+  COMPONENT_MAP
 } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { COMPONENT_MAP } from './component_map';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;

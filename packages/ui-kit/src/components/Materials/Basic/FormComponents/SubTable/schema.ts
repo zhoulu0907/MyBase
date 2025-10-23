@@ -1,38 +1,42 @@
 import {
-  baseConfig, baseDefault, widthConfig, statusConfig, layoutConfig, subTableConfig, labelColSpanConfig, type ICommonBaseType,
-  type TStatusSelectKeyType,
+  baseConfig,
+  baseDefault,
+  labelColSpanConfig,
+  layoutConfig,
+  statusConfig,
+  subTableConfig,
+  widthConfig,
+  type ICommonBaseType,
   type TLayoutSelectKeyType,
-
+  type TStatusSelectKeyType
 } from '../../../common';
 import {
   COLUMN_COUNT_OPTIONS,
-  COLUMN_COUNT_VALUES,
   CONFIG_TYPES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
   IColumnCountConfigType,
   ILabelConfigType,
-  ISelectConfigType,
-  ITextConfigType,
-  IWidthConfigType,
-  TRadioDefaultType,
-  TSelectDefaultType,
-  TTextDefaultType,
-  TNumberDefaultType,
-  TBooleanDefaultType,
-  IStatusConfigType,
-  TTextAreaDefaultType,
-  IVerifyConfigType,
   ILayoutConfigType,
-  ITooltipConfigType,
   INumberConfigType,
+  ISelectConfigType,
+  IStatusConfigType,
   ISubTableConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IVerifyConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType
 } from '../../../types';
 
 export type TColumnCountSelectKeyType = (typeof COLUMN_COUNT_OPTIONS)[keyof typeof COLUMN_COUNT_OPTIONS];
@@ -43,8 +47,7 @@ export type TColumnLayoutEditData = Array<
   | IColumnCountConfigType<TColumnCountSelectKeyType>
   | IWidthConfigType<TColumnLayouTWidthSelectKeyType>
   | ILabelConfigType
-  | ISelectConfigType<TColumnLayouTWidthSelectKeyType
-    | TColumnCountSelectKeyType>
+  | ISelectConfigType<TColumnLayouTWidthSelectKeyType | TColumnCountSelectKeyType>
   | IStatusConfigType<TStatusSelectKeyType>
   | IVerifyConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
@@ -67,17 +70,12 @@ export interface XSubTableConfig extends ICommonBaseType {
   /**
    * 数据字段
    */
-  dataField: TTextDefaultType[];
+  dataField: TTextDefaultType;
 
   /**
    * 描述信息（鼠标悬浮时显示）
    */
   tooltip?: TTextAreaDefaultType;
-
-  /**
-   * 列数
-   */
-  colCount: TRadioDefaultType<TColumnCountSelectKeyType>;
 
   /**
    * 布局宽度
@@ -106,13 +104,15 @@ export interface XSubTableConfig extends ICommonBaseType {
     noRepeat: TBooleanDefaultType;
     maxLength: TTextDefaultType;
     allowNull: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
    */
   layout?: TLayoutSelectKeyType;
+
+  columns: any[];
 }
 
 export interface XSubTableSchema {
@@ -134,40 +134,13 @@ const XSubTable: XSubTableSchema = {
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     subTableConfig,
-    labelColSpanConfig,
+    // labelColSpanConfig,
     layoutConfig,
     {
       key: 'verify',
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
-    // {
-    //   key: 'colCount',
-    //   name: '列数',
-    //   type: CONFIG_TYPES.COLUMN_COUNT_RADIO,
-    //   range: [
-    //     {
-    //       key: String(COLUMN_COUNT_OPTIONS.ONE),
-    //       text: String(COLUMN_COUNT_OPTIONS.ONE),
-    //       value: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.ONE]
-    //     },
-    //     {
-    //       key: String(COLUMN_COUNT_OPTIONS.TWO),
-    //       text: String(COLUMN_COUNT_OPTIONS.TWO),
-    //       value: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.TWO]
-    //     },
-    //     {
-    //       key: String(COLUMN_COUNT_OPTIONS.THREE),
-    //       text: String(COLUMN_COUNT_OPTIONS.THREE),
-    //       value: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.THREE]
-    //     },
-    //     {
-    //       key: String(COLUMN_COUNT_OPTIONS.FOUR),
-    //       text: String(COLUMN_COUNT_OPTIONS.FOUR),
-    //       value: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.FOUR]
-    //     }
-    //   ]
-    // },
     statusConfig,
     widthConfig
   ],
@@ -175,11 +148,10 @@ const XSubTable: XSubTableSchema = {
     ...baseDefault,
     label: {
       text: '子表单',
-      display: true,
+      display: true
     },
-    dataField: [],
+    dataField: '',
     tooltip: '',
-    colCount: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.ONE],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 100,
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
@@ -189,7 +161,17 @@ const XSubTable: XSubTableSchema = {
       noRepeat: false,
       maxLength: '',
       allowNull: false
-    }
+    },
+    columns: [
+      {
+        title: '序号',
+        dataIndex: 'index'
+      },
+      {
+        title: '操作',
+        dataIndex: 'operation'
+      }
+    ]
   }
 };
 

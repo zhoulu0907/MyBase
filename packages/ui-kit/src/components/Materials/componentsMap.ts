@@ -1,4 +1,6 @@
-import { ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES } from '@onebase/ui-kit';
+
+import { ENTITY_FIELD_TYPE } from "@/components/DataFactory";
+import { FORM_COMPONENT_TYPES } from "@/components/Materials/componentTypes";
 
 // 组件类型与组件实现的映射表
 export const COMPONENT_MAP: Record<string, string> = {
@@ -20,7 +22,7 @@ export const COMPONENT_MAP: Record<string, string> = {
   [ENTITY_FIELD_TYPE.DEPARTMENT.VALUE]: FORM_COMPONENT_TYPES.DEPT_SELECT,
 
   //   TODO(Mickey): 补充对应组件
-  [ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
+  [ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE]: FORM_COMPONENT_TYPES.DATA_SELECT,
   [ENTITY_FIELD_TYPE.RELATION.VALUE]: FORM_COMPONENT_TYPES.RELATED_FORM,
   //   TODO(Mickey): 补充对应组件
   [ENTITY_FIELD_TYPE.STRUCTURE.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
