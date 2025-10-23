@@ -49,7 +49,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
         id: item.id ? item.id.toString() : `temp-${Date.now()}-${index}`,
         label: item.label || '',
         value: item.value || '',
-        color: '#1890ff', // 默认颜色
+        color: 'rgb(var(--primary-6))', // 默认颜色
         status: item.status || 1,
         sort: item.sort || index + 1
       }));
@@ -68,7 +68,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
       id: `temp-${Date.now()}-${dictValues.length}`,
       label: '',
       value: '',
-      color: '#1890ff',
+      color: 'rgb(var(--primary-6))',
       status: 1,
       sort: dictValues.length + 1
     };
