@@ -1,4 +1,4 @@
-import { Input, List, Tag, Button, Dropdown, Menu } from '@arco-design/web-react';
+import { Input, List, Tag, Button, Dropdown, Menu, Spin } from '@arco-design/web-react';
 import { IconFolder, IconSearch } from '@arco-design/web-react/icon';
 import { useCallback, useState, type ReactNode } from 'react';
 import LightText from './LightText';
@@ -14,7 +14,7 @@ interface VariableListProps {
 }
 
 export function VariableList({ variables, searchValue, onSearchChange, onInsertVariable }: VariableListProps) {
-  const [filteredVariables, setFilteredVariables] = useState<VariablesList[]>(variables);
+  const [filteredVariables, setFilteredVariables] = useState<VariablesList[]>([]);
   /**
    * 处理搜索框值变化
    * @param value - 搜索框输入的值
@@ -85,38 +85,44 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
         onChange={handleSearchChange}
         className={styles.searchInput}
       />
-      <div className={styles.categorySection}>
-        <div className={styles.categoryHeader}>
-          <Dropdown.Button trigger={"hover"} type='text' position='bl' 
-            triggerProps={{autoAlignPopupWidth: true}}
-            droplist={variablesList()} 
-            icon={<Button type='text' color='success'>切换</Button>}>
-            <IconFolder className={styles.categoryIcon} />
-            <span className={styles.categoryEntityName}>{filteredVariables?.[0]?.variableName || ""}</span>
-          </Dropdown.Button>
-        </div>
-        <List
-          size='small'
-          className={styles.listSection}
-          dataSource={filteredVariables?.[0]?.fields || []}
-          render={(variable, index) => (
-            <List.Item
-              key={index}
-              className={styles.variableItem}
-              onClick={() => handleVariableClick(variable)}
-            >
-              <div className={styles.variableInfo}>
-                <div className={styles.variableName}>
-                  <LightText text={variable?.displayName} searchValue={searchValue} />
+      {!variables.length ? 
+        <div className={styles.loadingVariables}>
+          <Spin size={18} tip="加载变量列表..."></Spin>
+        </div> 
+        : 
+        <div className={styles.categorySection}>
+          <div className={styles.categoryHeader}>
+            <Dropdown.Button trigger={"hover"} type='text' position='bl' 
+              triggerProps={{autoAlignPopupWidth: true}}
+              droplist={variablesList()} 
+              icon={<Button type='text' color='success'>切换</Button>}>
+              <IconFolder className={styles.categoryIcon} />
+              <span className={styles.categoryEntityName}>{filteredVariables?.[0]?.variableName || variables?.[0]?.variableName || ""}</span>
+            </Dropdown.Button>
+          </div>
+          <List
+            size='small'
+            className={styles.listSection}
+            dataSource={filteredVariables?.[0]?.fields || variables?.[0]?.fields || []}
+            render={(variable, index) => (
+              <List.Item
+                key={index}
+                className={styles.variableItem}
+                onClick={() => handleVariableClick(variable)}
+              >
+                <div className={styles.variableInfo}>
+                  <div className={styles.variableName}>
+                    <LightText text={variable?.displayName} searchValue={searchValue} />
+                  </div>
+                  <Tag color={getTypeColor(variable?.fieldType)} size="small">
+                    {variable?.fieldType}
+                  </Tag>
                 </div>
-                <Tag color={getTypeColor(variable?.fieldType)} size="small">
-                  {variable?.fieldType}
-                </Tag>
-              </div>
-            </List.Item>
-          )}
-        />
+              </List.Item>
+            )}
+          />
       </div>
+    }
     </>
   );
 }
