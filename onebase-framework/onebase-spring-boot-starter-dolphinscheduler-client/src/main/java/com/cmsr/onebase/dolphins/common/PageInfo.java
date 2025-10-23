@@ -1,5 +1,6 @@
 package com.cmsr.onebase.dolphins.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 /**
@@ -7,6 +8,7 @@ import java.util.List;
  *
  * @param <T>
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PageInfo<T> {
 
   /** totalList */
@@ -95,5 +97,13 @@ public class PageInfo<T> {
 
   public void setCurrentPage(Integer currentPage) {
     this.currentPage = currentPage;
+  }
+
+  public Integer getPageNo() {
+    return pageNo;
+  }
+
+  public void setPageNo(Integer pageNo) {
+    this.pageNo = pageNo;
   }
 }

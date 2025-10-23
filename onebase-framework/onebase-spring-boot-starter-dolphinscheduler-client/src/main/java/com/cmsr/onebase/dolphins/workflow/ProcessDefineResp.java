@@ -1,6 +1,7 @@
 package com.cmsr.onebase.dolphins.workflow;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import lombok.Data;
 
 /** define process response,copied from org.apache.dolphinscheduler.dao.entity.ProcessDefinition */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProcessDefineResp {
 
   /** id */
@@ -65,6 +67,9 @@ public class ProcessDefineResp {
 
   /** schedule release state : online/offline */
   private String scheduleReleaseState;
+
+  /** schedule */
+  private Object schedule;
 
   /** process warning time out. unit: minute */
   private int timeout;
