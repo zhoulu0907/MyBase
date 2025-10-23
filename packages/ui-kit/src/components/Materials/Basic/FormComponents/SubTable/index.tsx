@@ -1,18 +1,16 @@
-import { useSignals } from '@preact/signals-react/runtime';
 import { ENTITY_FIELD_TYPE } from '@/components/DataFactory';
-import { Button, Form, Layout, Table, Message } from '@arco-design/web-react';
+import { FormComp, FormSchema } from '@/components/Materials/Basic/FormComponents';
+import { Button, Form, Layout, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import { type XSubTableConfig } from './schema';
-import { FormComp, FormSchema } from '@/components/Materials/Basic/FormComponents';
 // import DragableTable from './dragableTable';
-import { ReactSortable } from 'react-sortablejs';
-import { usePageEditorSignal } from '@/hooks';
-import { getComponentConfig, getComponentSchema } from '@/components/Materials/schema';
-import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
-import { COMPONENT_GROUP_NAME } from '@/utils';
-import { v4 as uuidv4 } from 'uuid';
 import { LAYOUT_OPTIONS, LAYOUT_VALUES } from '@/components/Materials/constants';
+import { getComponentConfig, getComponentSchema } from '@/components/Materials/schema';
+import { usePageEditorSignal } from '@/hooks';
+import { pagesRuntimeSignal } from '@onebase/common';
+import { v4 as uuidv4 } from 'uuid';
 import { COMPONENT_MAP } from '../../../componentsMap';
 import './index.css';
 
@@ -23,19 +21,49 @@ const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { cpName, columns = [], id, runtime = true, label, layout, tooltip, labelColSpan = 100, status, verify, dataField } = props;
+  const {
+    cpName,
+    columns = [],
+    id,
+    runtime = true,
+    label,
+    layout,
+    tooltip,
+    labelColSpan = 100,
+    status,
+    verify,
+    dataField
+  } = props;
 
   useSignals();
+
+  const { subTableDataLength } = pagesRuntimeSignal;
+
+  const { form } = Form.useFormContext();
 
   const {
     setCurComponentID,
     setCurComponentSchema,
     pageComponentSchemas,
     setPageComponentSchemas,
-    setShowDeleteButton,
+    setShowDeleteButton
   } = usePageEditorSignal();
 
-  // window['pageComponentSchemas'] = pageComponentSchemas;
+  useEffect(() => {
+    console.log(form.getFieldValue(`${id}`));
+  }, [form]);
+
+  useEffect(() => {
+    console.log('subTableDataLength: ', subTableDataLength.value);
+    if (subTableDataLength.value[id]) {
+      setSubTableData((prevData) => {
+        return [];
+      });
+      for (let i = 0; i < subTableDataLength.value[id]; i++) {
+        handleAdd();
+      }
+    }
+  }, [subTableDataLength.value]);
 
   const [subTableData, setSubTableData] = useState<any[]>([]);
   const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
@@ -74,7 +102,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
     for (const column of columns) {
       // 组件类型与 apps/app-builder/src/pages/Editor/components/panel/components/metadata/component_map.ts 文件下一致
-      const inputType = column.dataType === ENTITY_FIELD_TYPE.TEXT.VALUE ||
+      const inputType =
+        column.dataType === ENTITY_FIELD_TYPE.TEXT.VALUE ||
         column.dataType === ENTITY_FIELD_TYPE.ID.VALUE ||
         column.dataType === ENTITY_FIELD_TYPE.URL.VALUE ||
         column.dataType === ENTITY_FIELD_TYPE.ADDRESS.VALUE ||
@@ -84,7 +113,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         column.dataType === ENTITY_FIELD_TYPE.PASSWORD.VALUE ||
         column.dataType === ENTITY_FIELD_TYPE.ENCRYPTED.VALUE ||
         column.dataType === ENTITY_FIELD_TYPE.AGGREGATE.VALUE;
-
 
       const displayName = column.title;
       const itemType = COMPONENT_MAP[column.dataType];
@@ -123,7 +151,14 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XInputText {...FormSchema.XInputTextSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <div>
+                <FormComp.XInputText
+                  {...FormSchema.XInputTextSchema.config}
+                  label={{ text: col.title, display: false }}
+                  runtime={runtime}
+                  dataField={[`${id}.${index}.${column.dataIndex}`]}
+                />
+              </div>
             );
           }
         });
@@ -136,7 +171,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XInputTextArea {...FormSchema.XInputTextAreaSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XInputTextArea
+                {...FormSchema.XInputTextAreaSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
@@ -149,7 +189,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XInputEmail {...FormSchema.XInputEmailSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XInputEmail
+                {...FormSchema.XInputEmailSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
@@ -162,7 +207,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XInputPhone {...FormSchema.XInputPhoneSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XInputPhone
+                {...FormSchema.XInputPhoneSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
@@ -175,11 +225,17 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XInputNumber {...FormSchema.XInputNumberSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XInputNumber
+                {...FormSchema.XInputNumberSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.DATE.VALUE) { // DATE_PICKER
+      } else if (column.dataType === ENTITY_FIELD_TYPE.DATE.VALUE) {
+        // DATE_PICKER
         tableColumns.push({
           ...column,
           width: 200,
@@ -188,11 +244,17 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XDatePicker {...FormSchema.XDatePickerSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XDatePicker
+                {...FormSchema.XDatePickerSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.DATETIME.VALUE) { // DATE_TIME_PICKER
+      } else if (column.dataType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
+        // DATE_TIME_PICKER
         tableColumns.push({
           ...column,
           width: 200,
@@ -201,65 +263,17 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XDateTimePicker {...FormSchema.XDateTimePickerSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XDateTimePicker
+                {...FormSchema.XDateTimePickerSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.TIME.VALUE) { // TIME_PICKER
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <Form.Item initialValue={col} field={`${id}.${index}.${column.dataIndex}`}>
-                <FormComp.XTimePicker {...FormSchema.XTimePickerSchema.config} label={{ text: col.title, display: false }} runtime={runtime} />
-              </Form.Item>
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) { // SWITCH
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XSwitch {...FormSchema.XSwitchSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.SELECT.VALUE) { // SELECT_ONE
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XSelectOne {...FormSchema.XSelectOneSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) { // SELECT_MUTIPLE
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XSelectMutiple {...FormSchema.XSelectMutipleSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) { // AUTO_CODE
+      } else if (column.dataType === ENTITY_FIELD_TYPE.TIME.VALUE) {
+        // TIME_PICKER
         tableColumns.push({
           ...column,
           width: 200,
@@ -269,12 +283,17 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           render: (col: any, record: any, index: number) => {
             return (
               <Form.Item initialValue={col} field={`${id}.${index}.${column.dataIndex}`}>
-                <FormComp.XAutoCode {...FormSchema.XAutoCodeSchema.config} label={{ text: col.title, display: false }} runtime={runtime} />
+                <FormComp.XTimePicker
+                  {...FormSchema.XTimePickerSchema.config}
+                  label={{ text: col.title, display: false }}
+                  runtime={runtime}
+                />
               </Form.Item>
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.USER.VALUE || column.dataType === ENTITY_FIELD_TYPE.MULTI_USER.VALUE) { // USER_SELECT
+      } else if (column.dataType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
+        // SWITCH
         tableColumns.push({
           ...column,
           width: 200,
@@ -283,11 +302,55 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XUserSelect {...FormSchema.XUserSelectSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XSwitch
+                {...FormSchema.XSwitchSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE || column.dataType === ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE) { // DEPT_SELECT
+      } else if (column.dataType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
+        // SELECT_ONE
+        tableColumns.push({
+          ...column,
+          width: 200,
+          id: cpID,
+          type: itemType,
+          displayName,
+          render: (col: any, record: any, index: number) => {
+            return (
+              <FormComp.XSelectOne
+                {...FormSchema.XSelectOneSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
+            );
+          }
+        });
+      } else if (column.dataType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
+        // SELECT_MUTIPLE
+        tableColumns.push({
+          ...column,
+          width: 200,
+          id: cpID,
+          type: itemType,
+          displayName,
+          render: (col: any, record: any, index: number) => {
+            return (
+              <FormComp.XSelectMutiple
+                {...FormSchema.XSelectMutipleSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
+            );
+          }
+        });
+      } else if (column.dataType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
+        // AUTO_CODE
         tableColumns.push({
           ...column,
           width: 200,
@@ -297,12 +360,20 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           render: (col: any, record: any, index: number) => {
             return (
               <Form.Item initialValue={col} field={`${id}.${index}.${column.dataIndex}`}>
-                <FormComp.XDeptSelect {...FormSchema.XDeptSelectSchema.config} label={{ text: col.title, display: false }} runtime={runtime} />
+                <FormComp.XAutoCode
+                  {...FormSchema.XAutoCodeSchema.config}
+                  label={{ text: col.title, display: false }}
+                  runtime={runtime}
+                />
               </Form.Item>
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.RELATION.VALUE) { // RELATED_FORM
+      } else if (
+        column.dataType === ENTITY_FIELD_TYPE.USER.VALUE ||
+        column.dataType === ENTITY_FIELD_TYPE.MULTI_USER.VALUE
+      ) {
+        // USER_SELECT
         tableColumns.push({
           ...column,
           width: 200,
@@ -311,11 +382,20 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XRelatedForm {...FormSchema.XRelatedFormSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XUserSelect
+                {...FormSchema.XUserSelectSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.FILE.VALUE) { // FILE_UPLOAD
+      } else if (
+        column.dataType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE ||
+        column.dataType === ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE
+      ) {
+        // DEPT_SELECT
         tableColumns.push({
           ...column,
           width: 200,
@@ -324,11 +404,18 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XFileUpload {...FormSchema.XFileUploadSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <Form.Item initialValue={col} field={`${id}.${index}.${column.dataIndex}`}>
+                <FormComp.XDeptSelect
+                  {...FormSchema.XDeptSelectSchema.config}
+                  label={{ text: col.title, display: false }}
+                  runtime={runtime}
+                />
+              </Form.Item>
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.IMAGE.VALUE) { // IMG_UPLOAD
+      } else if (column.dataType === ENTITY_FIELD_TYPE.RELATION.VALUE) {
+        // RELATED_FORM
         tableColumns.push({
           ...column,
           width: 200,
@@ -337,11 +424,17 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XImgUpload {...FormSchema.XImgUploadSchema.config} label={{ text: col.title, display: false }} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XRelatedForm
+                {...FormSchema.XRelatedFormSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE || column.dataType === ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE) { // DATA_SELECT
+      } else if (column.dataType === ENTITY_FIELD_TYPE.FILE.VALUE) {
+        // FILE_UPLOAD
         tableColumns.push({
           ...column,
           width: 200,
@@ -350,7 +443,52 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <FormComp.XUserSelect {...FormSchema.XUserSelectSchema.config} runtime={runtime} dataField={[`${id}.${index}.${column.dataIndex}`]} />
+              <FormComp.XFileUpload
+                {...FormSchema.XFileUploadSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
+            );
+          }
+        });
+      } else if (column.dataType === ENTITY_FIELD_TYPE.IMAGE.VALUE) {
+        // IMG_UPLOAD
+        tableColumns.push({
+          ...column,
+          width: 200,
+          id: cpID,
+          type: itemType,
+          displayName,
+          render: (col: any, record: any, index: number) => {
+            return (
+              <FormComp.XImgUpload
+                {...FormSchema.XImgUploadSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
+            );
+          }
+        });
+      } else if (
+        column.dataType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE ||
+        column.dataType === ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
+      ) {
+        // DATA_SELECT
+        tableColumns.push({
+          ...column,
+          width: 200,
+          id: cpID,
+          type: itemType,
+          displayName,
+          render: (col: any, record: any, index: number) => {
+            return (
+              <FormComp.XUserSelect
+                {...FormSchema.XUserSelectSchema.config}
+                runtime={runtime}
+                dataField={[`${id}.${index}.${column.dataIndex}`]}
+              />
             );
           }
         });
@@ -373,138 +511,55 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   }, [columns]);
 
   useEffect(() => {
-    const newComp = subTableColumns.filter(v => v.dataIndex !== 'action').map(v => {
-      return {
-        id: v?.id,
-        type: v?.type,
-        displayName: v?.displayName,
-        selected: false,
-        chosen: false
-      }
-    });
+    const newComp = subTableColumns
+      .filter((v) => v.dataIndex !== 'action')
+      .map((v) => {
+        return {
+          id: v?.id,
+          type: v?.type,
+          displayName: v?.displayName,
+          selected: false,
+          chosen: false
+        };
+      });
     setComponents(newComp);
   }, [subTableColumns]);
 
   return (
     <Layout className="XSubTable">
       <div className="item">
-        <ReactSortable
-          id={`workspace-content-XSubTable`}
-          list={components}
-          setList={(newList) => {
-            setComponents(newList);
-          }}
-          onAdd={(e) => {
-            // 允许拖入的组件
-            const validata = [
-              'XInputText',
-              'XInputTextArea',
-              'XInputNumber',
-              'XDatePicker',
-              'XRadio',
-              'XCheckbox',
-              'XSelectOne',
-              'XSelectMutiple',
-              'XImgUpload',
-              'XFileUpload',
-              'XUserSelect',
-              'XDeptSelect'
-            ];
-            console.debug('onAdd', e.item.getAttribute('data-cp-type'));
-
-            const cpID = e.item.id || e.item.getAttribute('data-cp-id');
-            console.log(`拖入组件${id}内， 拖入组件为 ${cpID}`);
-            const itemType = e.item.getAttribute('data-cp-type') || '';
-            if (!validata.includes(itemType)) {
-              return Message.warning('不支持的组件类型');
-            }
-
-            const itemDisplayName = e.item.getAttribute('data-cp-displayname');
-            const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
-            const schema = getComponentSchema(itemType as any);
-
-            schema.config = schemaConfig;
-            schema.config.cpName = itemDisplayName;
-            schema.config.id = cpID;
-
-            const props = {
-              id: cpID,
-              type: itemType,
-              ...schema
-            };
-
-            setPageComponentSchemas(cpID!, props);
-
-            const containerType = FORM_COMPONENT_TYPES.SUB_TABLE;
-
-            const containerSchemaConfig = getComponentConfig(pageComponentSchemas[id], containerType);
-            const containerSchema = getComponentSchema(containerType);
-
-            containerSchema.config = containerSchemaConfig;
-            containerSchema.config.cpName = '子表单';
-            containerSchema.config.id = id;
-
-            const containerProps = {
-              id,
-              type: containerType,
-              ...containerSchema
-            };
-
-            setCurComponentID(id);
-            setCurComponentSchema(containerProps);
-
-            setShowDeleteButton(false);
-          }}
-          onRemove={(e) => {
-            const cpID = e.item.getAttribute('data-cp-id');
-            console.log(`删除组件${id}内， 删除组件为 ${cpID}`);
-          }}
-          group={{
-            name: COMPONENT_GROUP_NAME
-          }}
-          sort={true}
-          forceFallback={true}
-          animation={150}
-          fallbackOnBody={true}
-          swapThreshold={0.65}
-          className="content"
-        >
-          <div className="subTableHeader">{cpName}</div>
-          <div className="subTableContent" style={{
+        <div className="subTableHeader">{cpName}</div>
+        <div
+          className="subTableContent"
+          style={{
             maxWidth: runtime
               ? '100%'
               : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0) + 2}px)`
-          }}>
-            {
-              // runtime ? (
-              <Table columns={subTableColumns} data={subTableData} size="small" scroll={{ x: 'max-content' }} style={{
+          }}
+        >
+          {
+            <Table
+              columns={subTableColumns}
+              data={subTableData}
+              size="small"
+              scroll={{ x: 'max-content' }}
+              style={{
                 width: '100%'
-              }} />
-              // ) : (
-              //   <DragableTable
-              //     id={id}
-              //     status={status}
-              //     columns={subTableColumns}
-              //     data={subTableData}
-              //     runtime={runtime}
-              //     setColumns={setSubTableColumns}
-              //   />
-              // )
-            }
-
-          </div>
-          <div className="subTableFooter">
-            <Button
-              className="addButton"
-              type="outline"
-              icon={<IconPlus />}
-              style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
-              onClick={handleAdd}
-            >
-              新增一项
-            </Button>
-          </div>
-        </ReactSortable>
+              }}
+            />
+          }
+        </div>
+        <div className="subTableFooter">
+          <Button
+            className="addButton"
+            type="outline"
+            icon={<IconPlus />}
+            style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
+            onClick={handleAdd}
+          >
+            新增一项
+          </Button>
+        </div>
       </div>
     </Layout>
   );

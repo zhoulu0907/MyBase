@@ -27,6 +27,17 @@ export const createPagesRuntimeSignal = () => {
     detailPageViewId.value = newDetailPageViewId;
   };
 
+  const subTableDataLength = signal<Record<string, number>>({});
+  const setSubTableDataLength = (subTableId: string, length: number) => {
+    console.log('subTableId: ', subTableId, 'length: ', length);
+    subTableDataLength.value = { ...subTableDataLength.value, [subTableId]: length };
+  };
+
+  const subEntities = signal<any[]>([]);
+  const setSubEntities = (entities: any[]) => {
+    subEntities.value = entities;
+  };
+
   return {
     curPage,
     setCurPage,
@@ -41,7 +52,13 @@ export const createPagesRuntimeSignal = () => {
     setEditPageViewId,
 
     detailPageViewId,
-    setDetailPageViewId
+    setDetailPageViewId,
+
+    subTableDataLength,
+    setSubTableDataLength,
+
+    subEntities,
+    setSubEntities
   };
 };
 

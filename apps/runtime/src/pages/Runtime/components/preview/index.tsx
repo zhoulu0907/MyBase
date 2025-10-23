@@ -45,13 +45,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
-  const { curPage, drawerVisible, setDrawerVisible, editPageViewId, detailPageViewId } = pagesRuntimeSignal;
+  const { curPage, drawerVisible, setDrawerVisible, editPageViewId, detailPageViewId, subEntities, setSubEntities } =
+    pagesRuntimeSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
+
   const [editTargetId, setEditTargetId] = useState('');
 
   // 当前时间戳
@@ -71,7 +73,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
   }, [drawerVisible.value]);
 
-  // 获取主表字段
+  // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
     console.log('mainMetaData: ', mainMetaData);
@@ -81,6 +83,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('当前主表及所有子表数据: ', entityWithChildren);
 
     setMainMetaDataFields(entityWithChildren.parentFields);
+    setSubEntities(entityWithChildren.childEntities);
   };
 
   useEffect(() => {
@@ -94,7 +97,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     if (editTargetId && mainMetaData && mainMetaDataFields.length > 0) {
       handleGetData(mainMetaData, editTargetId);
     }
-  }, [mainMetaData, mainMetaDataFields]);
+  }, [mainMetaData, mainMetaDataFields, subEntities]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -234,6 +237,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     // 遍历 res.data，将数据回填到表单
     if (res && res.data) {
+      console.log('res.data: ', res.data);
       const fieldIdNameMap: Record<string, string> = {};
       (mainMetaDataFields || []).forEach((field: AppEntityField) => {
         fieldIdNameMap[field.fieldName] = field.fieldId;
@@ -252,6 +256,44 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         });
         form.setFieldsValue(formValues);
       }
+    }
+
+    if (res && res.subEntities) {
+      console.log('subEntities: ', res.subEntities);
+
+      console.log(useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value);
+
+      const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+
+      for (const subEntity of res.subEntities) {
+        console.log('XXXX: ', subEntities.value);
+        const targetSubEntity = subEntities.value.find((ele: any) => ele.childEntityId == subEntity.entityId);
+
+        if (targetSubEntity) {
+          Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
+            if (
+              key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) &&
+              schema?.config?.subTable == res.subEntities[0].entityId
+            ) {
+              // TODO(data是数组的时候处理下)
+              console.log('subEntity.data: ', subEntity.data);
+              pagesRuntimeSignal.setSubTableDataLength(key, 1);
+
+              schema?.config?.columns.forEach((column: any) => {
+                console.log('column: ', column);
+                const fieldName = targetSubEntity.childFields.find(
+                  (ele: any) => ele.fieldId == column.dataIndex
+                )?.fieldName;
+                form.setFieldValue(`${key}.0.${column.dataIndex}`, subEntity.data[fieldName]);
+              });
+            }
+          });
+        }
+      }
+
+      //   form.setFieldValue('subEntities', res.subEntities);
+      //   form.setFieldValue('XSubTable-780b619c-e260-499c-8d84-d29627233e1a.0.95870421798322176', 11111);
+      //   form.setFieldValue('XSubTable-780b619c-e260-499c-8d84-d29627233e1a.0.101848397806141440', 22222);
     }
 
     return res;
