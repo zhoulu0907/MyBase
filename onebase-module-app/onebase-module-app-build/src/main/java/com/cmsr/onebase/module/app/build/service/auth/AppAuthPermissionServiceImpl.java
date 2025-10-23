@@ -281,7 +281,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authFieldDO = authFieldRepository.findById(authFieldVO.getId());
         }
         if (authFieldDO == null) {
-            authFieldDO = authFieldRepository.findByQuery(permissionReq, authFieldVO.getId());
+            authFieldDO = authFieldRepository.findByQuery(permissionReq, authFieldVO.getFieldId());
         }
         if (authFieldDO == null) {
             authFieldDO = new AuthFieldDO();
@@ -294,7 +294,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authFieldDO.setIsCanDownload(authFieldVO.getIsCanDownload());
             authFieldRepository.insert(authFieldDO);
         } else {
-            authFieldDO.setFieldId(authFieldVO.getFieldId());
             authFieldDO.setIsCanRead(authFieldVO.getIsCanRead());
             authFieldDO.setIsCanEdit(authFieldVO.getIsCanEdit());
             authFieldDO.setIsCanDownload(authFieldVO.getIsCanDownload());
@@ -330,7 +329,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authViewDO = authViewRepository.findById(authViewVO.getId());
         }
         if (authViewDO == null) {
-            authViewDO = authViewRepository.findByQuery(permissionReq, authViewVO.getId());
+            authViewDO = authViewRepository.findByQuery(permissionReq, authViewVO.getViewId());
         }
         if (authViewDO == null) {
             authViewDO = new AuthViewDO();
