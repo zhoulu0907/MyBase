@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useCallback } from 'react';
 
 import { WorkflowPortRender } from '@flowgram.ai/free-layout-editor';
 import { useClientContext } from '@flowgram.ai/free-layout-editor';
@@ -13,6 +13,9 @@ import { useNodeRenderContext, usePortClick } from '../../hooks';
 import { SidebarContext } from '../../context';
 import { scrollToView } from './utils';
 import { NodeWrapperStyle } from './styles';
+import './node-wrapper.less';
+import iconCopy from '../../assets/copy.svg';
+import iconDelete from '../../assets/delete.svg';
 
 export interface NodeWrapperProps {
   isScrollToView?: boolean;
@@ -26,25 +29,60 @@ export interface NodeWrapperProps {
 export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const { children, isScrollToView = false } = props;
   const nodeRender = useNodeRenderContext();
-  const { node, selected, startDrag, ports, selectNode, nodeRef, onFocus, onBlur, readonly } =
-    nodeRender;
+  const { node, selected, startDrag, ports, selectNode, nodeRef, onFocus, onBlur, readonly } = nodeRender;
+
   const [isDragging, setIsDragging] = useState(false);
+  const [isHover, setIsHover] = useState(false);
   const sidebar = useContext(SidebarContext);
   const form = nodeRender.form;
   const ctx = useClientContext();
   const onPortClick = usePortClick();
   const meta = node.getNodeMeta<FlowNodeMeta>();
-
+  const childRef = useRef<HTMLDivElement>(null);
+  // console.log(selected, nodeRender, '就是这里');
   const portsRender = ports.map((p) => (
     <WorkflowPortRender key={p.id} entity={p} onClick={!readonly ? onPortClick : undefined} />
   ));
+  // selected && (meta.error = true);
+  const onMouseOver = useCallback(() => {
+    setIsHover(true);
+  }, [node]);
+  const onMouseOut = useCallback(
+    (e: React.MouseEvent) => {
+      const toElement = e.relatedTarget as Node | null;
+      // 判断鼠标是不是进入了子元素
+      if (childRef.current && childRef.current.contains(toElement)) {
+        return; // 不隐藏
+      }
+      setIsHover(false);
+    },
+    [node]
+  );
+  const deleteNode = useCallback(() => {
+    console.log('删除节点');
+  }, [node]);
+  const copyNode = useCallback(() => {
+    console.log('复制节点');
+  }, [node]);
 
   return (
     <>
+      {(isHover || selected) && (
+        <div className="showMore" ref={childRef} onMouseOut={onMouseOut}>
+          <div className="iconBox" onClick={copyNode}>
+            <img src={iconCopy} />
+          </div>
+          <div className="iconBox" onClick={deleteNode}>
+            <img src={iconDelete} />
+          </div>
+        </div>
+      )}
       <NodeWrapperStyle
         className={selected ? 'selected' : ''}
         ref={nodeRef}
         draggable
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
         onDragStart={(e) => {
           startDrag(e);
           setIsDragging(true);
@@ -70,7 +108,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
         data-node-selected={String(selected)}
         style={{
           ...meta.wrapperStyle,
-          outline: form?.state.invalid ? '1px solid red' : 'none',
+          outline: form?.state.invalid ? '1px solid red' : 'none'
         }}
       >
         {children}
