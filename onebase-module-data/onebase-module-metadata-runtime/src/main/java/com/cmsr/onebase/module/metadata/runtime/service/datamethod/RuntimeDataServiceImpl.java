@@ -303,6 +303,10 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
             reqVO.getMethodCode()
         );
 
+        if (pageResult == null || pageResult.getTotal() == 0) {
+            return new PageResult<>(null, 0L);
+        }
+
         // 转换为VO
         List<DynamicDataRespVO> list = pageResult.getList().stream()
             .map(this::convertToDynamicDataRespVO)
