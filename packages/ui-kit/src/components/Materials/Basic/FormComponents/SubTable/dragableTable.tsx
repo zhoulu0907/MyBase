@@ -32,10 +32,10 @@ const DragableTable = (props: IProps) => {
   const {
     curComponentID,
     setCurComponentID,
+    // curComponentSchema,
     setCurComponentSchema,
     pageComponentSchemas,
     setPageComponentSchemas,
-    setLayoutSubComponents
   } = usePageEditorSignal();
 
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null); // 选中的列
@@ -359,8 +359,29 @@ const DragableTable = (props: IProps) => {
         // 拖拽结束后选中被移动的列，显示实线边框
         setSelectedColumnId(columns[draggedIndex].id);
 
-        const newArr = newColumns.slice(1, -1);  // 去掉头尾
-        setLayoutSubComponents(id, [newArr]);
+        // const updateColumns = newColumns.filter(col => col.dataIndex !== 'action').map(col => ({
+        //   dataIndex: col.dataIndex,
+        //   dataType: col.dataType,
+        //   disabled: col.disabled,
+        //   id: col.id,
+        //   title: col.title
+        // }))
+
+        // const newCurComponentSchema = {
+        //   id,
+        //   type: curComponentSchema.type,
+        //   editData: curComponentSchema.editData,
+        //   config: {
+        //     ...curComponentSchema.config,
+        //     columns: updateColumns
+        //   },
+        //   layout: curComponentSchema.layout
+        // };
+
+        // console.log('frag', curComponentSchema, newCurComponentSchema)
+
+        // setCurComponentSchema(newCurComponentSchema);
+        // setPageComponentSchemas(id, newCurComponentSchema);
       }
     }
     setDraggedIndex(null);

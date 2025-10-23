@@ -163,7 +163,7 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
                 onSort={(e) => {
                   console.log(e);
                   const newList = [...configs[columnsKey]];
-                  console.log('configs[columnsKey]',configs[columnsKey])
+                  // console.log('configs[columnsKey]', configs[columnsKey])
                   // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
                   const { oldIndex, newIndex } = e;
                   if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
