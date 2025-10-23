@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/formula/engine")
 @Validated
 @Slf4j
-@PermitAll
 public class FormulaEngineController {
 
     @Resource
@@ -60,11 +59,11 @@ public class FormulaEngineController {
     @PostMapping("/executeForFlow")
     @Operation(summary = "执行公式计算")
     @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
-    public CommonResult<FormulaExecuteRespDTO> executeFormula(FormulaExecuteReqDTO reqDTO) {
+    public CommonResult<FormulaExecuteRespDTO> executeFormula(@Valid @RequestBody FormulaExecuteReqDTO reqDTO) {
         long startTime = System.currentTimeMillis();
         log.info("############: "+reqDTO.getFormula());
-        Object result = formulaEngineService.executeFormulaWithParamsForFlow(reqDTO.getFormula(),
-                reqDTO.getParameters(), reqDTO.getContextData());
+        Object result = formulaEngineService.executeFormulaWithParamsForFlow(reqDTO.getFormula(), reqDTO.getParameters(),
+                reqDTO.getContextData());
 
         long executionTime = System.currentTimeMillis() - startTime;
 

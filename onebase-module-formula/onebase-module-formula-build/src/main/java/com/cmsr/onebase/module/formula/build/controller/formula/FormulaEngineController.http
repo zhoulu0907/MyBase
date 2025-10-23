@@ -76,22 +76,28 @@ Content-Type: application/json
       }
 }
 
-//{
-//  "formula": "COUNT($数据查询节点(多条).关联主表ID)",
-//  "parameters":
-//  {
-//    "$数据查询节点(多条)": "r_id",
-//    "$数据查询节点(多条).关联主表ID": "f_id",
-//  },
-//  "contextData":
-//  {
-//    "r_id": [
-//        {"f_id": 1},
-//        {"f_id": 2},
-//        {"f_id": 3}
-//    ],
-//  },
-//}
+### 请求 /execute 接口 => 执行函数函数 计数
+POST {{baseUrl}}/formula/engine/executeForFlow
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+    "formula": "COUNT($数据查询节点(多条).关联主表ID)",
+    "parameters":
+    {
+      "$数据查询节点(多条)": "r_id",
+      "$数据查询节点(多条).关联主表ID": "f_id"
+    },
+    "contextData":
+    {
+      "r_id": [
+          {"f_id": 1},
+          {"f_id": 2},
+          {"f_id": 3}
+      ]
+    }
+}
 
 ### 请求 /execute 接口 => 执行函数函数 计数
 POST {{baseUrl}}/formula/engine/executeForFlow
@@ -100,18 +106,8 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "formula": "COUNT($abc,$bcd)",
-  "parameters": {"$abc": 5, "$bcd": 6}
-}
-
-### 请求 /execute 接口 => 执行函数函数 计数
-POST {{baseUrl}}/formula/engine/debugFormula
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
-Content-Type: application/json
-
-{
-  "formula": "COUNT($abc,$bcd)",
-  "parameters": {"$abc": 5, "$bcd": 6}
+  "formula": "LEN(text,length)",
+  "parameters": {"text": "HELLO", "length": 2},
+  "parameters": {"text": "HELLO", "length": 2}
 }
 

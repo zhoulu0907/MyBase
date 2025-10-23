@@ -240,23 +240,8 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     @Override
     public Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters, Map<String, Object> contextData) {
         formula = replaceParametersInFormula(formula,parameters);
-        String resolved = resolveFormulaWithparameters(formula, contextData);
-        return executeFormulaWithParams(resolved, parameters);
-    }
-
-    private String resolveFormulaWithparameters(String formula, Map<String, Object> parameters) {
-        if (parameters == null || parameters.isEmpty()) {
-            return formula;
-        }
-        Collection<Object> values = parameters.values();
-        if (values != null && !values.isEmpty()) {
-            for (Object value : values) {
-                if (value instanceof List) {
-                    formula = resolveFormulaWithContext(formula, new ContextData().setRecordList((List<Map<String, Object>>) value));
-                }
-            }
-        }
-        return formula;
+        formula = resolveFormulaWithContextData(formula, contextData);
+        return executeFormulaWithParams(formula, parameters);
     }
 
     @Override
@@ -407,6 +392,81 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             resolved = resolved.replace("$recordList." + field, arrayLiteral);
         }
         return resolved;
+    }
+
+    /**
+     * 新的解析方法，用于处理流程公式中的上下文数据
+     * 该方法会将字段引用直接替换为值列表，例如将 COUNT(f_id) 转换为 COUNT(1,2,3)
+     *
+     * @param formula    原始公式
+     * @param contextData 上下文数据
+     * @return 解析替换后的公式
+     */
+    private String resolveFormulaWithContextData(String formula, Map<String, Object> contextData) {
+        if (contextData == null || contextData.isEmpty()) {
+            return formula;
+        }
+
+        String result = formula;
+
+        // 遍历contextData中的每个键值对
+        for (Map.Entry<String, Object> entry : contextData.entrySet()) {
+            Object value = entry.getValue();
+
+            // 如果值是List类型，处理数组数据
+            if (value instanceof List) {
+                List<?> listValue = (List<?>) value;
+
+                // 处理字段引用，如 f_id
+                for (Object item : listValue) {
+                    if (item instanceof Map) {
+                        Map<?, ?> mapItem = (Map<?, ?>) item;
+
+                        // 遍历Map中的所有键，查找公式中匹配的字段名
+                        for (Map.Entry<?, ?> mapEntry : mapItem.entrySet()) {
+                            String fieldName = mapEntry.getKey().toString();
+
+                            // 如果公式中包含字段名
+                            if (result.contains(fieldName)) {
+                                // 构造字段值列表
+                                StringBuilder fieldValues = new StringBuilder();
+
+                                // 收集所有元素中该字段的值
+                                for (int i = 0; i < listValue.size(); i++) {
+                                    Object listItem = listValue.get(i);
+                                    if (listItem instanceof Map) {
+                                        Map<?, ?> listItemMap = (Map<?, ?>) listItem;
+                                        Object fieldValue = listItemMap.get(fieldName);
+
+                                        if (i > 0) {
+                                            fieldValues.append(",");
+                                        }
+
+                                        // 根据值的类型进行处理，数字和布尔值不加引号
+                                        if (fieldValue instanceof String) {
+                                            fieldValues.append("\"").append(fieldValue).append("\"");
+                                        } else if (fieldValue instanceof Number || fieldValue instanceof Boolean) {
+                                            fieldValues.append(fieldValue.toString());
+                                        } else if (fieldValue == null) {
+                                            fieldValues.append("null");
+                                        } else {
+                                            fieldValues.append(fieldValue.toString());
+                                        }
+                                    }
+                                }
+
+                                // 替换公式中的字段名为值列表
+                                result = result.replace(fieldName, fieldValues.toString());
+                            }
+                        }
+                        // 处理完第一个元素后跳出，因为我们假设所有元素具有相同的结构
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -633,8 +693,12 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
         String result = formula;
 
+        // 按参数名长度降序排列，确保长参数名优先匹配
+        List<Map.Entry<String, Object>> sortedParameters = new ArrayList<>(parameters.entrySet());
+        sortedParameters.sort((e1, e2) -> Integer.compare(e2.getKey().length(), e1.getKey().length()));
+
         // 处理复杂参数名（包含点号等特殊字符）
-        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+        for (Map.Entry<String, Object> entry : sortedParameters) {
             String key = entry.getKey();
             Object value = entry.getValue();
 
@@ -643,8 +707,14 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                 String replacement;
                 // 根据参数值的类型进行适当格式化
                 if (value instanceof String) {
-                    // 字符串需要加引号
-                    replacement = "\"" + value.toString() + "\"";
+                    // 检查这个参数是否是字段引用（不带引号），还是普通字符串值（带引号）
+                    // 如果key中包含"."，则认为是字段引用，不需要加引号
+                    if (key.contains(".")) {
+                        replacement = value.toString();
+                    } else {
+                        // 普通字符串值需要加引号
+                        replacement = "\"" + value.toString() + "\"";
+                    }
                 } else if (value instanceof Number || value instanceof Boolean) {
                     // 数字和布尔值直接转换为字符串
                     replacement = value.toString();
@@ -652,8 +722,12 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                     // null值替换为JavaScript的null
                     replacement = "null";
                 } else {
-                    // 其他类型也加引号处理
-                    replacement = "\"" + value.toString() + "\"";
+                    // 其他类型如果是字段引用则不加引号，否则加引号
+                    if (key.contains(".")) {
+                        replacement = value.toString();
+                    } else {
+                        replacement = "\"" + value.toString() + "\"";
+                    }
                 }
 
                 // 替换公式中的参数
