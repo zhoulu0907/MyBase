@@ -134,7 +134,7 @@ const XSubTable: XSubTableSchema = {
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     subTableConfig,
-    labelColSpanConfig,
+    // labelColSpanConfig,
     layoutConfig,
     {
       key: 'verify',
