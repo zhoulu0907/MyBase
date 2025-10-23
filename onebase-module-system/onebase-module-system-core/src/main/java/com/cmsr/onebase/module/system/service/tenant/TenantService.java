@@ -172,7 +172,8 @@ public interface TenantService {
      */
     Long getTenantExistUserCount(Long tenantId);
 
-    Long getOtherTenantEnterpriseCount(Long id);
+    Long getTenantEnterpriseCount(Long id);
 
-    Long getOtherTenantApplicationCount(Long id);
+    Long getTenantApplicationCount(Long id);
+
 }

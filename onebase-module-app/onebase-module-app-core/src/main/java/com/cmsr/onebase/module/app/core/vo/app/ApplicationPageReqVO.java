@@ -27,4 +27,11 @@ public class ApplicationPageReqVO extends PageParam {
 
     @Schema(description = "应用状态")
     private Integer status;
+
+    @Schema(description = "发布模式")
+    private Integer saasEnabled;
+
+    @Schema(description = "空间ID")
+    private Long tenantId;
+
 }

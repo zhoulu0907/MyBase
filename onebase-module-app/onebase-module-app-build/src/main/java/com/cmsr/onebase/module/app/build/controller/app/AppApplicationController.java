@@ -30,6 +30,7 @@ public class AppApplicationController {
     @GetMapping("/page")
     @Operation(summary = "获得应用列表")
     public CommonResult<PageResult<ApplicationRespVO>> getApplicationPage(@Validated ApplicationPageReqVO pageReqVO) {
+        pageReqVO.setTenantId(1L);
         return CommonResult.success(appApplicationService.getApplicationPage(pageReqVO));
     }
 
@@ -73,7 +74,6 @@ public class AppApplicationController {
     @GetMapping("/id/generate")
     @Operation(summary = "发号器")
     public CommonResult<Long> generateId() {
-
         return CommonResult.success(appApplicationService.generateId());
     }
 

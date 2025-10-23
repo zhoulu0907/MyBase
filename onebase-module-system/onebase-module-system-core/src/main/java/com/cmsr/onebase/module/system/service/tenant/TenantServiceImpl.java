@@ -13,6 +13,7 @@ import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
+import com.cmsr.onebase.module.system.dal.database.EnterpriseDataRepository;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -51,12 +52,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static java.util.Collections.singleton;
@@ -94,6 +93,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private TenantDataRepository tenantDataRepository;
+
+    @Resource
+    private EnterpriseDataRepository enterpriseDataRepository;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -606,14 +608,16 @@ public class TenantServiceImpl implements TenantService {
 
 
     @Override
-    public Long getOtherTenantEnterpriseCount(Long tenantId) {
-        // 查询当前租户下企业数量
-       return 0L;
+    public Long getTenantEnterpriseCount(Long tenantId) {
+
+        return enterpriseDataRepository.getTenantEnterpriseCount(tenantId);
     }
 
     @Override
-    public Long getOtherTenantApplicationCount(Long tenantId) {
-        // 查询当前租户下已分配应用数量
-        return 0L;
+    public Long getTenantApplicationCount(Long tenantId) {
+
+        return   appApplicationApi.countApplicationByTenantId(tenantId);
     }
+
+
 }

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
+import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -95,6 +96,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Resource
     private AppAuthRoleRepository appAuthRoleRepository;
 
+    @Resource
+    private TenantCommonApi tenantApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -146,12 +149,22 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO.setAppUid(findAndCreateAppUid());
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
+
         if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
             applicationDO.setAppCode(createReqVO.getAppCode());
         } else {
             applicationDO.setAppCode(AppUtils.createAppCode());
         }
+       // createReqVO.setTenantId(1L);
+        applicationDO.setSaasEnabled(createReqVO.getSaasEnabled()==null?0:createReqVO.getSaasEnabled());
+        // 新增空间id
+        applicationDO.setTenantId(createReqVO.getTenantId());
         applicationDO = applicationRepository.insert(applicationDO);
+        //  获取应用数量
+        Long appCount = applicationRepository.countByTenantId(createReqVO.getTenantId());
+        // 回写一个空间内企业数到 空间主表
+        tenantApi.updateTenantAppCount(createReqVO.getTenantId(), appCount);
+
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());
         createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
@@ -192,6 +205,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
+        updateObj.setSaasEnabled(createReqVO.getSaasEnabled()==null?0:createReqVO.getSaasEnabled());
         saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
     }
@@ -268,7 +282,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
     }
-
 
 
 }

@@ -96,8 +96,7 @@ public class TenantController {
     @GetMapping("/get")
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-   // @PreAuthorize("@ss.hasPermission('system:tenant:query')")
-    @PermitAll
+    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
     public CommonResult<TenantRespVO> getTenant() {
         return success(tenantService.getTenantWithAppCount(TenantContextHolder.getTenantId()));
     }
@@ -145,20 +144,20 @@ public class TenantController {
                 BeanUtils.toBean(list, TenantRespVO.class));
     }
 
-    @GetMapping("/get-other-exist-application-count")
-    @Operation(summary = "获得其他已有的用户数量和")
+    @GetMapping("/get-exist-application-count")
+    @Operation(summary = "获得空间应用数")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")
-    public CommonResult<Long> getOtherTenantApplicationCount(@RequestParam(required = false) Long id) {
-        Long accountCount = tenantService.getOtherTenantApplicationCount(id);
-        return success(accountCount);
+    public CommonResult<Long> getTenantApplicationCount(@RequestParam(required = false) Long id) {
+        Long applicationCount = tenantService.getTenantApplicationCount(id);
+        return success(applicationCount);
     }
 
-    @GetMapping("/get-other-exist-enterprise-count")
-    @Operation(summary = "获得其他已有的用户数量和")
+    @GetMapping("/get-exist-enterprise-count")
+    @Operation(summary = "获得空间企业数")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")
-    public CommonResult<Long> getOtherTenantEnterpriseCount(@RequestParam(required = false) Long id) {
-        Long accountCount = tenantService.getOtherTenantEnterpriseCount(id);
-        return success(accountCount);
+    public CommonResult<Long> getTenantEnterpriseCount(@RequestParam(required = false) Long id) {
+        Long enterpriseCount = tenantService.getTenantEnterpriseCount(id);
+        return success(enterpriseCount);
     }
 
 }

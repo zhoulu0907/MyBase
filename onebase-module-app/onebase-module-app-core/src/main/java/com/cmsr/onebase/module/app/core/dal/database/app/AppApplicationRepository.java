@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.core.dal.database.app;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import org.anyline.data.param.ConfigStore;
@@ -28,8 +29,15 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
         if (StringUtils.isNotBlank(pageReqVO.getName())) {
             configs.and(Compare.LIKE, "app_name", pageReqVO.getName());
         }
+        if (pageReqVO.getTenantId()!=null) {
+            configs.and(Compare.EQUAL, "tenant_id", pageReqVO.getTenantId());
+        }
         if (pageReqVO.getStatus() != null) {
             configs.and(Compare.EQUAL, "app_status", pageReqVO.getStatus());
+        }
+        if (pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag()==1) {
+            Long currentUserId = WebFrameworkUtils.getLoginUserId();
+            configs.and(Compare.EQUAL, "creator", currentUserId);
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
             configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
@@ -69,6 +77,9 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
     public Long countByTenantId(Long tenantId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("tenant_id", tenantId);
+        // 只查询未删除的记录,已启用的
+        configs.eq("deleted", 0L);
+        configs.eq("status", 1L);
         return countByConfig(configs);
     }
 
