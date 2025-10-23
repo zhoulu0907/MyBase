@@ -105,7 +105,7 @@ export function FunctionList({ functions, searchValue, onSearchChange, onChooseF
             </div> :
             <Menu
               defaultOpenKeys={['0']}
-              defaultSelectedKeys={[`0_${functions[0]?.id}`]}>
+              defaultSelectedKeys={[`0_${functions?.[0]?.id}`]}>
               {getSubMenu()}
             </Menu>}
         </div>

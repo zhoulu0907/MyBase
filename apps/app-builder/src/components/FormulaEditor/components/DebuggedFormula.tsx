@@ -33,7 +33,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         if(typeof fieldObj === "object") {
           const fieldName = key + "." + Object.keys(fieldObj);
           const fieldValue = Object.values(fieldObj);
-          newValidFieldResult[fieldName] = fieldValue[0] || ""
+          newValidFieldResult[fieldName] = fieldValue?.[0] || ""
         }else {
           newValidFieldResult  = {
             ...newValidFieldResult,
