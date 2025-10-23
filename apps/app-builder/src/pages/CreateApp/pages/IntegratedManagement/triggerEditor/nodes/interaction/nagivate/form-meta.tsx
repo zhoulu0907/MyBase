@@ -41,14 +41,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
   // 打开方式
   const handleOpenPageTypeChange = () => {
-    payloadForm.clearFields([
-      'modalSizeType',
-      'modalWidth',
-      'modalHeight',
-      'drawerPlacement',
-      'drawerWidth',
-      'drawerTitle'
-    ]);
+    payloadForm.clearFields(['modalSizeType', 'modalWidth', 'modalHeight', 'modalTitle', 'modalPlacement']);
   };
   // 弹窗尺寸
   const handleModalSizeTypeChange = () => {
@@ -167,16 +160,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {/* 侧边栏打开 */}
             {openPageType === OPEN_PAGE_TYPE.DRAWER && (
               <>
-                <Form.Item label="侧边栏位置" field="drawerPlacement" rules={[{ required: true, message: '打开位置' }]}>
+                <Form.Item label="侧边栏位置" field="modalPlacement" rules={[{ required: true, message: '打开位置' }]}>
                   <Radio.Group direction="vertical">
                     <Radio value="left">左侧打开</Radio>
                     <Radio value="right">右侧打开</Radio>
                   </Radio.Group>
                 </Form.Item>
-                <Form.Item label="侧边栏宽带" field="drawerWidth">
-                  <InputNumber placeholder="请输入侧边栏宽带" />
+                <Form.Item label="侧边栏宽度" field="modalWidth">
+                  <InputNumber placeholder="请输入侧边栏宽度" />
                 </Form.Item>
-                <Form.Item label="侧边栏标题" field="drawerTitle">
+                <Form.Item label="侧边栏标题" field="modalTitle">
                   <Input placeholder="请输入侧边栏标题" />
                 </Form.Item>
               </>
