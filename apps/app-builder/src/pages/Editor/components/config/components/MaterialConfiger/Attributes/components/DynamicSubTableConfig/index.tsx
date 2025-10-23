@@ -44,12 +44,6 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
 
   const [enableAddColumn, setEnableAddColumn] = useState<boolean>(false);
 
-  useEffect(() => {
-    console.log(item);
-    console.log(configs[columnsKey]);
-    console.log('===============');
-  }, []);
-
   // 如果实体id变化，重新获取字段列表
   useEffect(() => {
     if (subEntityId) {
@@ -80,7 +74,7 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
   // 获取字段列表
   const getFieldList = async () => {
     const res = await getEntityFields({ entityId: subEntityId });
-    console.log('fieldList res: ', res);
+
     res.forEach((item: MetadataEntityField) => {
       if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
         item.disabled = true;
@@ -119,16 +113,6 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
         <Select
           value={configs[item.key]}
           onChange={(value) => {
-            // const subEntity = subEntities?.entities.find((entity: AppEntity) => entity.entityId === value);
-            // if (subEntity) {
-            //   //   setSubEntityFields(
-            //   //     subEntity.fields.map((field: AppEntityField) => ({
-            //   //       label: field.displayName,
-            //   //       value: field.fieldId
-            //   //     }))
-            //   //   );
-            // }
-            console.log(item.key);
             handlePropsChange(item.key, value);
             setSubEntityId(value);
             setColumnsConfig([]);
@@ -147,7 +131,7 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -161,7 +145,6 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
                   console.log('onAdd: ', e);
                 }}
                 onSort={(e) => {
-                  console.log(e);
                   const newList = [...configs[columnsKey]];
                   // console.log('configs[columnsKey]', configs[columnsKey])
                   // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
@@ -237,7 +220,6 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
                           key={item.fieldName}
                           disabled={item?.disabled}
                           onClick={() => {
-                            console.log(item);
                             const newList = [
                               ...columnsConfig,
                               {

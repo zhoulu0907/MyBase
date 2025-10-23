@@ -45,14 +45,22 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
-  const { curPage, drawerVisible, setDrawerVisible, editPageViewId, detailPageViewId, subEntities, setSubEntities } =
-    pagesRuntimeSignal;
+  const {
+    curPage,
+    drawerVisible,
+    setDrawerVisible,
+    editPageViewId,
+    detailPageViewId,
+    mainMetaDataFields,
+    setMainMetaDataFields,
+    subEntities,
+    setSubEntities
+  } = pagesRuntimeSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
-  const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
 
   const [editTargetId, setEditTargetId] = useState('');
 
@@ -94,10 +102,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   }, [menuId]);
 
   useEffect(() => {
-    if (editTargetId && mainMetaData && mainMetaDataFields.length > 0) {
+    if (editTargetId && mainMetaData && mainMetaDataFields.value.length > 0) {
       handleGetData(mainMetaData, editTargetId);
     }
-  }, [mainMetaData, mainMetaDataFields, subEntities]);
+  }, [mainMetaData, mainMetaDataFields.value]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -220,6 +228,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       if (mainMetaData) {
         handleGetData(mainMetaData, id);
       }
+    } else {
+      // id为空，属于新增，需要重置子表数据长度为0
+      pagesRuntimeSignal.resetSubTableDataLength();
     }
 
     if (toFormPage) {
@@ -236,28 +247,32 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log(res);
 
     // 遍历 res.data，将数据回填到表单
+    const formValues: Record<string, any> = {};
+
     if (res && res.data) {
       console.log('res.data: ', res.data);
       const fieldIdNameMap: Record<string, string> = {};
-      (mainMetaDataFields || []).forEach((field: AppEntityField) => {
+      (mainMetaDataFields.value || []).forEach((field: AppEntityField) => {
         fieldIdNameMap[field.fieldName] = field.fieldId;
       });
+
+      console.log('fieldIdNameMap: ', fieldIdNameMap);
 
       // 只处理第一个数据对象（通常为单条数据）
       const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
 
       if (dataItem && typeof dataItem === 'object') {
-        const formValues: Record<string, any> = {};
         Object.entries(dataItem).forEach(([fieldName, value]) => {
           const fieldID = fieldIdNameMap[fieldName];
           if (fieldID) {
             formValues[fieldID] = value;
           }
         });
-        form.setFieldsValue(formValues);
+        // form.setFieldsValue(formValues);
       }
     }
 
+    // TODO(mickey): remove debug log
     if (res && res.subEntities) {
       console.log('subEntities: ', res.subEntities);
 
@@ -266,35 +281,33 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
 
       for (const subEntity of res.subEntities) {
-        console.log('XXXX: ', subEntities.value);
-        const targetSubEntity = subEntities.value.find((ele: any) => ele.childEntityId == subEntity.entityId);
+        const targetSubEntity = subEntities.value.find((ele: any) => ele.childEntityId == subEntity.subEntityId);
+        console.log('已找到目标子表: ', targetSubEntity);
 
         if (targetSubEntity) {
           Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
-            if (
-              key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) &&
-              schema?.config?.subTable == res.subEntities[0].entityId
-            ) {
-              // TODO(data是数组的时候处理下)
-              console.log('subEntity.data: ', subEntity.data);
-              pagesRuntimeSignal.setSubTableDataLength(key, 1);
+            if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) && schema?.config?.subTable == subEntity.subEntityId) {
+              console.log('subEntity.data: ', subEntity.subData);
 
-              schema?.config?.columns.forEach((column: any) => {
-                console.log('column: ', column);
-                const fieldName = targetSubEntity.childFields.find(
-                  (ele: any) => ele.fieldId == column.dataIndex
-                )?.fieldName;
-                form.setFieldValue(`${key}.0.${column.dataIndex}`, subEntity.data[fieldName]);
-              });
+              pagesRuntimeSignal.setSubTableDataLength(key, (subEntity.subData || []).length);
+
+              for (let idx = 0; idx < (subEntity.subData || []).length; idx++) {
+                schema?.config?.columns.forEach((column: any) => {
+                  //   console.log('column: ', column);
+                  //   const fieldName = targetSubEntity.childFields.find(
+                  //     (ele: any) => ele.fieldId == column.dataIndex
+                  //   )?.fieldName;
+                  formValues[`${key}.${idx}.${column.dataIndex}`] = subEntity.subData[idx]?.[column.dataIndex];
+                });
+              }
             }
           });
         }
       }
-
-      //   form.setFieldValue('subEntities', res.subEntities);
-      //   form.setFieldValue('XSubTable-780b619c-e260-499c-8d84-d29627233e1a.0.95870421798322176', 11111);
-      //   form.setFieldValue('XSubTable-780b619c-e260-499c-8d84-d29627233e1a.0.101848397806141440', 22222);
     }
+
+    console.log('formValues: ', formValues);
+    form.setFieldsValue(formValues);
 
     return res;
   };
