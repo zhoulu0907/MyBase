@@ -78,9 +78,9 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
               ...data,
               displayName: data.label,
               entityId: nodeItem.id,
-              appId: nodeItem.id,
+              id: nodeItem.id,
               fieldName: nodeItem.data?.title || "",
-              fieldType: "node",
+              isNode: true
             }
           })
           const reverseNewFields = (newFields || []).reverse();
@@ -154,10 +154,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
       //如果fieldtype是node 代表是节点， 需要传入的格式是$节点.字段
-      if (variable.fieldType === "node") {
+      if (variable.isNode) {
         editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
       } else {
-        editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.displayName}]]`, 'var');
+        editorRef.current.insertAtPosition(`[[${variable.id}.${variable.displayName}]]`, 'var');
       }
     } else {
       // 降级处理：直接添加到末尾
@@ -275,22 +275,25 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     setIsDebugMode(false);
   }
 
+  const getFieldType = (keyName: string, value: any) => {
+    let fieldType: string = "";
+    variables.forEach(variable => {
+      const fieldIndex = variable.fields?.findIndex(item => keyName.includes(item.displayName) && item.id === value);
+      if(fieldIndex !== -1) {
+         fieldType = variable?.fields?.[fieldIndex as number].fieldType || "TEXT";
+       }
+    })
+    return fieldType;
+  }
   const getAllRelatedVariables = () => {
     const currentVariablesObj = retrieveAllVariables(formula);
     let newVariablesData: variableItem[] = [];
     if (variables.length > 0) {
       Object.keys(currentVariablesObj).forEach(key => {
-        let fieldType = "";
-        variables.forEach(variable => {
-          const fieldIndex = variable.fields?.findIndex(field => field.displayName === key);
-          if (fieldIndex !== -1 && !newVariablesData.some(item => item.fieldName === key)) {
-            fieldType = variable?.fields?.[fieldIndex as number].fieldType || "TEXT";
-          }
-        })
         newVariablesData.push({
           fieldName: key,
           fieldId: currentVariablesObj[key],
-          fieldType: fieldType
+          fieldType: getFieldType(key,currentVariablesObj[key])
         })
       })
     }

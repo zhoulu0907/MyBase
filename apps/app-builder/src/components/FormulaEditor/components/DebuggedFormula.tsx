@@ -33,7 +33,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         if(typeof fieldObj === "object") {
           const fieldName = key + "." + Object.keys(fieldObj);
           const fieldValue = Object.values(fieldObj);
-          newValidFieldResult[fieldName] = fieldValue.join("");
+          newValidFieldResult[fieldName] = fieldValue[0] || ""
         }else {
           newValidFieldResult  = {
             ...newValidFieldResult,
@@ -75,7 +75,8 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
       <div className={styles.content}>
           <Form className={styles.variablesDisplay} form={form}>
           {allRelatedVariables.map((item) => {
-            return <FormItem label={item.fieldName} field={item.fieldName} required>
+            console.log(form.getFieldValue(item.fieldName),"11")
+            return <FormItem label={item.fieldName} field={item.fieldName} rules={[{required: true}]}>
               {renderFormItem(item.fieldType)}
             </FormItem>
           })}

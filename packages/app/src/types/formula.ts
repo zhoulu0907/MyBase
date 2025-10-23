@@ -25,6 +25,7 @@ export interface ChildVariablesField {
   fieldCode: string;
   fieldName: string;
   id: string;
+  isNode: boolean;
   isUnique: number;
   isRequired: number;
   isSystemField: number;
