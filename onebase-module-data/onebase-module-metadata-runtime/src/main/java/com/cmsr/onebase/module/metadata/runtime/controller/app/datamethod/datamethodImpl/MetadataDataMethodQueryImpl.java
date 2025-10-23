@@ -142,7 +142,26 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
             for (int i = 0; i < dataSet.size(); i++) {
                 DataRow row = dataSet.getRow(i);
                 Map<String, Object> data = convertDataRowToMap(row, targetfields);
-                list.add(data);
+                // 将Map<String, Object> data 转换为 Map<Long, Object> data
+                Map<Long, Object> _subData = new HashMap<>();
+                // long的值是targetFieldId, Object是data中的value。 对应关系是：data中的key转换成大写，与targetfields中的fieldName对应，找到对应的fieldId
+                for (Map.Entry<String, Object> entry : data.entrySet()) {
+                    String dataKey = entry.getKey();
+                    Object dataValue = entry.getValue();
+
+                    // 将data的key转换为大写后，与targetfields中的fieldName进行匹配
+                    String dataKeyUpper = dataKey.toUpperCase();
+                    for (MetadataEntityFieldDO field : targetfields) {
+                        if (field.getFieldName() != null && field.getFieldName().toUpperCase().equals(dataKeyUpper)) {
+                            // 找到匹配的字段，使用fieldId作为key
+                            _subData.put(field.getId(), dataValue);
+                            break;
+                        }
+                    }
+                }
+
+                list.add(_subData);
+//                list.add(data);
             }
             SubEntityVo subEntityVo = new SubEntityVo();
             subEntityVo.setSubData(list);
