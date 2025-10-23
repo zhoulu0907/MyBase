@@ -126,7 +126,7 @@ DolphinClient dolphinClient = new DolphinClient(token,dolphinAddress,restTemplat
 
 ![](doc/images/shell_task.png)
 
-通过下面的代码就可以创建一个类似上图的工作流任务，了解详细代码请参考：`com.github.weaksloth.dolphins.task.TaskTest`
+通过下面的代码就可以创建一个类似上图的工作流任务，了解详细代码请参考：`task.com.cmsr.onebase.dolphins.TaskTest`
 
 ```java
   @Test
@@ -170,7 +170,7 @@ DolphinClient dolphinClient = new DolphinClient(token,dolphinAddress,restTemplat
 
 ![](doc/images/simple_workflow.png)
 
-通过下面的代码我们就可以创建一个类似上图中展示的简单的工作流任务，详细代码请参考：`com.github.weaksloth.dolphins.workflow.WorkflowTest`
+通过下面的代码我们就可以创建一个类似上图中展示的简单的工作流任务，详细代码请参考：`workflow.com.cmsr.onebase.dolphins.WorkflowTest`
 
 下面代码主要分为以下几步：
 
