@@ -31,7 +31,7 @@ public interface FormulaEngineService {
 
     Object executeFormulaWithParams(String formula, Map<String, Object> parameters, ContextData context);
 
-    Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters);
+    Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters, Map<String, Object> contextData);
 
     /**
      * 验证公式语法

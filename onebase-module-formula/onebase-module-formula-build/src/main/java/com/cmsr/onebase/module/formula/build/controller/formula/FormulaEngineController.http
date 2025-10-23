@@ -69,8 +69,39 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "formula": "COUNT($数据查询节点(多条).关联主表ID,$数据查询节点(多条).拥有部门ID)",
-  "parameters": {"$数据查询节点(多条).关联主表ID": 5, "$数据查询节点(多条).拥有部门ID": 6}
+  "formula": "COUNT($数据查询节点(多条).关联主表ID)",
+  "parameters":
+      {
+        "$数据查询节点(多条).关联主表ID": [1,2,3,4,5,6]
+      }
+}
+
+//{
+//  "formula": "COUNT($数据查询节点(多条).关联主表ID)",
+//  "parameters":
+//  {
+//    "$数据查询节点(多条)": "r_id",
+//    "$数据查询节点(多条).关联主表ID": "f_id",
+//  },
+//  "contextData":
+//  {
+//    "r_id": [
+//        {"f_id": 1},
+//        {"f_id": 2},
+//        {"f_id": 3}
+//    ],
+//  },
+//}
+
+### 请求 /execute 接口 => 执行函数函数 计数
+POST {{baseUrl}}/formula/engine/executeForFlow
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula": "COUNT($abc,$bcd)",
+  "parameters": {"$abc": 5, "$bcd": 6}
 }
 
 ### 请求 /execute 接口 => 执行函数函数 计数

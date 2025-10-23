@@ -238,12 +238,16 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     }
 
     @Override
-    public Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters) {
-        String resolved = resolveFormulaWithparameters(formula, parameters);
+    public Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters, Map<String, Object> contextData) {
+        formula = replaceParametersInFormula(formula,parameters);
+        String resolved = resolveFormulaWithparameters(formula, contextData);
         return executeFormulaWithParams(resolved, parameters);
     }
 
     private String resolveFormulaWithparameters(String formula, Map<String, Object> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return formula;
+        }
         Collection<Object> values = parameters.values();
         if (values != null && !values.isEmpty()) {
             for (Object value : values) {

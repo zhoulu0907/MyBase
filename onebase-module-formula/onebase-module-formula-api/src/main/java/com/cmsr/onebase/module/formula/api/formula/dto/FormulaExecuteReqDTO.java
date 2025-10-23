@@ -9,6 +9,7 @@ import java.util.Map;
 
 @Data
 public class FormulaExecuteReqDTO {
+
     /**
      * 公式表达式
      */
@@ -20,5 +21,10 @@ public class FormulaExecuteReqDTO {
      * 公式参数
      */
     private Map<String, Object> parameters;
+
+    /**
+     * 上下文参数
+     */
+    private Map<String, Object> contextData;
 
 }

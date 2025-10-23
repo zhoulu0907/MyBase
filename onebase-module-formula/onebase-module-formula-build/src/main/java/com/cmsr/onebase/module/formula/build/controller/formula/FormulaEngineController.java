@@ -1,6 +1,9 @@
 package com.cmsr.onebase.module.formula.build.controller.formula;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
+import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
 import com.cmsr.onebase.module.formula.vo.formula.FormulaExecuteReqVO;
 import com.cmsr.onebase.module.formula.vo.formula.FormulaExecuteRespVO;
 import com.cmsr.onebase.module.formula.vo.formula.FormulaValidateReqVO;
@@ -57,17 +60,20 @@ public class FormulaEngineController {
     @PostMapping("/executeForFlow")
     @Operation(summary = "执行公式计算")
     @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
-    public CommonResult<FormulaExecuteRespVO> executeFormulaForFlow(@Valid @RequestBody FormulaExecuteReqVO reqVO) {
+    public CommonResult<FormulaExecuteRespDTO> executeFormula(FormulaExecuteReqDTO reqDTO) {
         long startTime = System.currentTimeMillis();
-        log.info("############: "+reqVO.getFormula());
-        Object result = formulaEngineService.executeFormulaWithParams(reqVO.getFormula(), reqVO.getParameters(),null);
+        log.info("############: "+reqDTO.getFormula());
+        Object result = formulaEngineService.executeFormulaWithParamsForFlow(reqDTO.getFormula(),
+                reqDTO.getParameters(), reqDTO.getContextData());
+
         long executionTime = System.currentTimeMillis() - startTime;
 
         FormulaExecuteRespVO respVO = FormulaExecuteRespVO.success(result, executionTime);
 
-        log.info("公式执行成功，公式：{}，结果：{}，耗时：{}ms", reqVO.getFormula(), result, executionTime);
+        log.info("公式执行成功，公式：{}，结果：{}，耗时：{}ms", reqDTO.getFormula(), result, executionTime);
 
-        return CommonResult.success(respVO);
+        return CommonResult.success(BeanUtils.toBean(respVO, FormulaExecuteRespDTO.class));
+
     }
 
 
