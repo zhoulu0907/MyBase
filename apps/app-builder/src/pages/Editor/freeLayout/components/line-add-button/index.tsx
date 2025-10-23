@@ -79,6 +79,8 @@ export const LineAddButton = (props: LineRenderProps) => {
       containerNode?.id
     );
 
+    console.log(node,'---------------')
+
     // auto offset subsequent nodes - 自动偏移后续节点
     if (fromPort && toPort) {
       WorkflowNodePanelUtils.subNodesAutoOffset({

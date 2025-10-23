@@ -4,10 +4,11 @@
  */
 
 import React, { type FC } from 'react';
+import { Button } from '@douyinfe/semi-ui';
 
 import styled from 'styled-components';
 import type { NodePanelRenderProps } from '@flowgram.ai/free-node-panel-plugin';
-import { useClientContext, WorkflowNodeEntity } from '@flowgram.ai/free-layout-editor';
+import { useClientContext, WorkflowNodeEntity, WorkflowDragService, useService } from '@flowgram.ai/free-layout-editor';
 import { Collapse, Tabs, Layout, Input } from '@arco-design/web-react';
 import type { FlowNodeRegistry } from '../../typings';
 import { nodeRegistries } from '../../nodes';
@@ -24,6 +25,7 @@ import subprocess from '../../assets/bpmLogo/subprocess.png';
 import task from '../../assets/bpmLogo/task.png';
 import wait from '../../assets/bpmLogo/wait.png';
 import message from '../../assets/bpmLogo/message .png';
+import {LLMNodeRegistry} from '../../nodes/llm/index'
 
 interface NodeListProps {
   onSelect: NodePanelRenderProps['onSelect'];
@@ -52,6 +54,20 @@ export const NodeList: FC<NodeListProps> = (props) => {
         expandIcon={<img src={IconCollapsedDown} alt="" />}
       >
         <Collapse.Item className="collapseItem" header="人工节点" name="1">
+          <Button
+            onClick={(e) => handleClick(e, LLMNodeRegistry)}
+            // onMouseDown={(e) =>
+            //   startDragSerivce.startDragCard(LLMNodeRegistry.type.toLowerCase(), e, {
+            //     data: {
+            //       title: `New ${LLMNodeRegistry.type}`,
+            //       content: '新的',
+            //       registry: LLMNodeRegistry // 保留注册器信息
+            //     }
+            //   })
+            // }
+          >
+            测试llm
+          </Button>
           <div className="nodeItem">
             <div className="nodeItemIcon">
               <img src={approver} alt="" />
