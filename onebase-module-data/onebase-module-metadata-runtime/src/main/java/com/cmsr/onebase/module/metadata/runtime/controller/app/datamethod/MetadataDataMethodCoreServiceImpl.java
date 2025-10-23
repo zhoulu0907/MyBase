@@ -55,7 +55,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Autowired
     private MetadataDataMethodCreateImpl metadataDataMethodCreate;
-    
+
     @Autowired
     private MetadataDataMethodUpdateImpl metadataDataMethodUpdate;
 
@@ -207,7 +207,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 //            }
 //
 //            boolean ok = deleteCount > 0;
-            // 移除多表写入逻辑，直接返回删除结果
+        // 移除多表写入逻辑，直接返回删除结果
 //            return ok;
 //        }); // TenantUtils.executeIgnore 闭合
     }
@@ -270,29 +270,10 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     public PageResult<Map<String, Object>> getDataPage(Long entityId, Integer pageNo, Integer pageSize,
                                                        String sortField, String sortDirection,
                                                        Map<String, Object> filters, String methodCode) {
-        Map<String,Object> map = new HashMap<>();
-        map.put("pageNo",pageNo);
-        map.put("pageSize",pageSize);
-        map.put("sortField",sortField);
-        map.put("sortDirection",sortDirection);
-        map.put("filters",filters);
-        Map<String, Object> result = metadataDataMethodQuery.executeProcess(OperationType.GET_PAGE,entityId,null,map,null);
-        List<Map<String, Object>> list = (List<Map<String, Object>>)result.get("list");
-        Long total = (Long)result.get("total");
-        
-        // 确保 list 不为 null，避免后续处理时出现空指针异常
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-        if (total == null) {
-            total = 0L;
-        }
-        
-        return new PageResult<>(list,total);
-//        // 添加调试日志
-//        log.info("核心服务分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}",
-//                 entityId, pageNo, pageSize, pageSize != null ? pageSize.getClass().getSimpleName() : "null");
-//
+        // 添加调试日志
+        log.info("核心服务分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}",
+                entityId, pageNo, pageSize, pageSize != null ? pageSize.getClass().getSimpleName() : "null");
+//合并代码
 //        // 移除多表查询逻辑，直接使用单表分页
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);

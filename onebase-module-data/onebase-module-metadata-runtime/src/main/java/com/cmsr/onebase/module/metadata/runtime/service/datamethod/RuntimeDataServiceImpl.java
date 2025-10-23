@@ -82,9 +82,9 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
 
         // 调用core模块的基础服务
         Map<String, Object> resultData = coreDataMethodService.createData(
-            reqVO.getEntityId(),
-            dataByName,
-            reqVO.getMethodCode()
+                reqVO.getEntityId(),
+                dataByName,
+                reqVO.getMethodCode()
         );
 
         // 获取主表业务数据id，作为子表parent_id字段的值
@@ -192,23 +192,23 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                 Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
                 Object id = subDataByName.get("id");
                 if(id == null){
-                   //插入数据不包含id字段，说明数据表不存在则插入
-                   coreDataMethodService.createData(
-                           subEntityId,
-                           subDataByName,
-                           reqVO.getMethodCode()
-                   );
-               }else{
-                   //插入数据包含id字段，说明数据表已经存在则修改
+                    //插入数据不包含id字段，说明数据表不存在则插入
+                    coreDataMethodService.createData(
+                            subEntityId,
+                            subDataByName,
+                            reqVO.getMethodCode()
+                    );
+                }else{
+                    //插入数据包含id字段，说明数据表已经存在则修改
                     subDataByName.remove("id");
-                   coreDataMethodService.updateData(
-                           subEntityId,
-                           id,
-                           subDataByName,
-                           reqVO.getMethodCode()
-                   );
+                    coreDataMethodService.updateData(
+                            subEntityId,
+                            id,
+                            subDataByName,
+                            reqVO.getMethodCode()
+                    );
                     processedIds.add(id.toString());
-               }
+                }
             }
             //找出【在子表有的但没在更新信息表单】的记录行
             List<String> toDelete = subTableIds.stream().filter(item ->
@@ -232,9 +232,9 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
     public Boolean deleteData(DynamicDataDeleteReqVO reqVO) {
         // 调用core模块的基础服务
         return coreDataMethodService.deleteData(
-            reqVO.getEntityId(),
-            reqVO.getId(),
-            reqVO.getMethodCode()
+                reqVO.getEntityId(),
+                reqVO.getId(),
+                reqVO.getMethodCode()
         );
     }
 
@@ -242,9 +242,9 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
     public DynamicDataRespVO getData(DynamicDataGetReqVO reqVO) {
         // 调用core模块的基础服务查询主表数据
         Map<String, Object> resultData = coreDataMethodService.getData(
-            reqVO.getEntityId(),
-            reqVO.getId(),
-            reqVO.getMethodCode()
+                reqVO.getEntityId(),
+                reqVO.getId(),
+                reqVO.getMethodCode()
         );
 
 //        //查询子表数据
@@ -285,34 +285,32 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
     @Override
     public PageResult<DynamicDataRespVO> getDataPage(DynamicDataPageReqVO reqVO) {
         // 添加调试日志
-        log.info("分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}", 
-                 reqVO.getEntityId(), reqVO.getPageNo(), reqVO.getPageSize(), 
-                 reqVO.getPageSize() != null ? reqVO.getPageSize().getClass().getSimpleName() : "null");
-        
+        //--
+        log.info("分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}",
+                reqVO.getEntityId(), reqVO.getPageNo(), reqVO.getPageSize(),
+                reqVO.getPageSize() != null ? reqVO.getPageSize().getClass().getSimpleName() : "null");
+
         // 将 filters 的 field_id -> value 转换为 field_name -> value
         Map<String, Object> filtersByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getFilters());
 
-    // 允许 sortField 传字段ID：如果是数字则转换为字段名
-    String sortField = convertSortFieldToName(reqVO.getEntityId(), reqVO.getSortField());
+        // 允许 sortField 传字段ID：如果是数字则转换为字段名
+        String sortField = convertSortFieldToName(reqVO.getEntityId(), reqVO.getSortField());
 
         // 调用core模块的基础服务
         PageResult<Map<String, Object>> pageResult = coreDataMethodService.getDataPage(
-            reqVO.getEntityId(),
-            reqVO.getPageNo(),
-            reqVO.getPageSize(),
-            sortField,
-            reqVO.getSortDirection(),
-            filtersByName,
-            reqVO.getMethodCode()
+                reqVO.getEntityId(),
+                reqVO.getPageNo(),
+                reqVO.getPageSize(),
+                sortField,
+                reqVO.getSortDirection(),
+                filtersByName,
+                reqVO.getMethodCode()
         );
 
-        // 转换为VO，添加空值检查确保 list 不为 null
-        List<DynamicDataRespVO> list = new ArrayList<>();
-        if (pageResult.getList() != null) {
-            list = pageResult.getList().stream()
+        // 转换为VO
+        List<DynamicDataRespVO> list = pageResult.getList().stream()
                 .map(this::convertToDynamicDataRespVO)
                 .collect(Collectors.toList());
-        }
 
         return new PageResult<>(list, pageResult.getTotal());
     }
