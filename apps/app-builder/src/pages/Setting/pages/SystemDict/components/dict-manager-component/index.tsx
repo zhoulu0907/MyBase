@@ -437,6 +437,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   // 批量配置确认
   const handleBatchConfigOk = async (values: any[]) => {
+    console.log('handleBatchConfigOk values', values);
     setBatchConfigLoading(true);
     try {
       if (!activeDict?.type) {
