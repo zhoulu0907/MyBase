@@ -229,6 +229,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         handleGetData(mainMetaData, id);
       }
     } else {
+      // id为空，属于新增，需要重置子表数据长度为0
       pagesRuntimeSignal.resetSubTableDataLength();
     }
 
@@ -271,6 +272,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       }
     }
 
+    // TODO(mickey): remove debug log
     if (res && res.subEntities) {
       console.log('subEntities: ', res.subEntities);
 
@@ -280,7 +282,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       for (const subEntity of res.subEntities) {
         const targetSubEntity = subEntities.value.find((ele: any) => ele.childEntityId == subEntity.subEntityId);
-        console.log('targetSubEntity: ', targetSubEntity);
+        console.log('已找到目标子表: ', targetSubEntity);
 
         if (targetSubEntity) {
           Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
@@ -290,24 +292,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               pagesRuntimeSignal.setSubTableDataLength(key, (subEntity.subData || []).length);
 
               for (let idx = 0; idx < (subEntity.subData || []).length; idx++) {
-                console.log('idx: ', idx, ' data:  ', subEntity.subData[idx]);
                 schema?.config?.columns.forEach((column: any) => {
                   //   console.log('column: ', column);
                   //   const fieldName = targetSubEntity.childFields.find(
                   //     (ele: any) => ele.fieldId == column.dataIndex
                   //   )?.fieldName;
                   formValues[`${key}.${idx}.${column.dataIndex}`] = subEntity.subData[idx]?.[column.dataIndex];
-                  //   form.setFieldValue(`${key}.${idx}.${column.dataIndex}`, subEntity.subData[idx]?.[column.dataIndex]);
                 });
               }
             }
           });
         }
       }
-
-      //   form.setFieldValue('subEntities', res.subEntities);
-      //   form.setFieldValue('XSubTable-780b619c-e260-499c-8d84-d29627233e1a.0.95870421798322176', 11111);
-      //   form.setFieldValue('XSubTable-780b619c-e260-499c-8d84-d29627233e1a.0.101848397806141440', 22222);
     }
 
     console.log('formValues: ', formValues);
