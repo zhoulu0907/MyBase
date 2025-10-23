@@ -5,16 +5,16 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { type XSubTableConfig } from './schema';
 import { FormComp, FormSchema } from '@/components/Materials/Basic/FormComponents';
-import DragableTable from './dragableTable';
+// import DragableTable from './dragableTable';
 import { ReactSortable } from 'react-sortablejs';
-import './index.css';
 import { usePageEditorSignal } from '@/hooks';
 import { getComponentConfig, getComponentSchema } from '@/components/Materials/schema';
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import { COMPONENT_GROUP_NAME } from '@/utils';
 import { v4 as uuidv4 } from 'uuid';
 import { LAYOUT_OPTIONS, LAYOUT_VALUES } from '@/components/Materials/constants';
-import { COMPONENT_MAP } from './components_map';
+import { COMPONENT_MAP } from '../../../componentsMap';
+import './index.css';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -23,7 +23,7 @@ const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { cpName, columns = [], id, runtime = true, label, layout, tooltip, labelColSpan = 100, status, verify } = props;
+  const { cpName, columns = [], id, runtime = true, label, layout, tooltip, labelColSpan = 100, status, verify, dataField } = props;
 
   useSignals();
 
@@ -40,6 +40,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   const [subTableData, setSubTableData] = useState<any[]>([]);
   const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
   const [components, setComponents] = useState<any[]>([]);
+
+  // console.log('columnscolumns', columns, id);
 
   useEffect(() => {
     console.log('subTableData: ', subTableData);
@@ -474,20 +476,20 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0) + 2}px)`
           }}>
             {
-              runtime ? (
-                <Table columns={subTableColumns} data={subTableData} size="small" scroll={{ x: 'max-content' }} style={{
-                  width: '100%'
-                }} />
-              ) : (
-                <DragableTable
-                  id={id}
-                  status={status}
-                  columns={subTableColumns}
-                  data={subTableData}
-                  runtime={runtime}
-                  setColumns={setSubTableColumns}
-                />
-              )
+              // runtime ? (
+              <Table columns={subTableColumns} data={subTableData} size="small" scroll={{ x: 'max-content' }} style={{
+                width: '100%'
+              }} />
+              // ) : (
+              //   <DragableTable
+              //     id={id}
+              //     status={status}
+              //     columns={subTableColumns}
+              //     data={subTableData}
+              //     runtime={runtime}
+              //     setColumns={setSubTableColumns}
+              //   />
+              // )
             }
 
           </div>
