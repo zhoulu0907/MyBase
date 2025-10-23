@@ -21,10 +21,10 @@ const FlowExecuteRecordPage: React.FC = () => {
   const { curAppId } = useAppStore();
 
   const [cardList, setCardList] = useState<any[]>([
-    { name: '今日执行次数', frequency: 0, type: 'rise', value: '0.00%', describe: '较昨日' },
-    { name: '执行成功', frequency: 0, type: 'rise', value: '0.00%', describe: '较昨日' },
-    { name: '执行失败', frequency: 0, type: 'rise', value: '0.00%', describe: '较昨日' },
-    { name: '平均执行时间', frequency: 0, unit: 's', type: 'rise', value: '0.00%', describe: '较昨日' }
+    { name: '今日执行次数', frequency: 0, type: 'rise', value: '0.00', describe: '较昨日' },
+    { name: '执行成功', frequency: 0, type: 'rise', value: '0.00', describe: '较昨日' },
+    { name: '执行失败', frequency: 0, type: 'rise', value: '0.00', describe: '较昨日' },
+    { name: '平均执行时间', frequency: 0, unit: 's', type: 'rise', value: '0.00', describe: '较昨日' }
   ]);
   const [tableData, setTableData] = useState<ExecuteRecord[]>([]);
   const [tableLoading, setTableLoading] = useState<boolean>(false);
@@ -111,39 +111,39 @@ const FlowExecuteRecordPage: React.FC = () => {
       applicationId: appId
     };
     const statisticRes = await getFlowLogStatistic(statisticParam);
-    const compareTotal = parseFloat((statisticRes?.compareTotal || '0.00%').replace('%', '')).toFixed(2);
-    const compareSuccess = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', '')).toFixed(2);
-    const compareFailed = parseFloat((statisticRes?.compareFailed || '0.00%').replace('%', '')).toFixed(2);
-    const compareAvgs = parseFloat((statisticRes?.compareAvgs || '0.00%').replace('%', '')).toFixed(2);
+    const compareTotal = (statisticRes?.compareTotal || '0.00').replace('-', '');
+    const compareSuccess = (statisticRes?.compareSuccess || '0.00').replace('-', '');
+    const compareFailed = (statisticRes?.compareFailed || '0.00').replace('-', '');
+    const compareAvgs = (statisticRes?.compareAvgs || '0.00').replace('-', '');
 
     const newCardList = [
       {
         name: '今日执行次数',
         frequency: statisticRes?.total || 0,
-        type: compareTotal >= 0 ? 'rise' : 'decline',
-        value: compareTotal >= 0 ? compareTotal : -compareTotal,
+        type: Number(statisticRes?.compareTotal || '0.00') >= 0 ? 'rise' : 'decline',
+        value: compareTotal,
         describe: '较昨日'
       },
       {
         name: '执行成功',
         frequency: statisticRes?.success || 0,
-        type: compareSuccess >= 0 ? 'rise' : 'decline',
-        value: compareSuccess >= 0 ? compareSuccess : -compareSuccess,
+        type: Number(statisticRes?.success || '0.00') >= 0 ? 'rise' : 'decline',
+        value: compareSuccess,
         describe: '较昨日'
       },
       {
         name: '执行失败',
         frequency: statisticRes?.faied || 0,
-        type: compareFailed >= 0 ? 'rise' : 'decline',
-        value: compareFailed >= 0 ? compareFailed : -compareFailed,
+        type: Number(statisticRes?.faied || '0.00') >= 0 ? 'rise' : 'decline',
+        value: compareFailed,
         describe: '较昨日'
       },
       {
         name: '平均执行时间',
         frequency: statisticRes?.avgs || 0,
         unit: 's',
-        type: compareAvgs >= 0 ? 'rise' : 'decline',
-        value: compareAvgs >= 0 ? compareAvgs : -compareAvgs,
+        type: Number(statisticRes?.avgs || '0.00') >= 0 ? 'rise' : 'decline',
+        value: compareAvgs,
         describe: '较昨日'
       }
     ];

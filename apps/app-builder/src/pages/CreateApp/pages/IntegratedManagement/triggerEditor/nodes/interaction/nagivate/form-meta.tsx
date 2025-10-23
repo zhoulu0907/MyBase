@@ -30,7 +30,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     init();
   }, []);
 
-
   const init = async () => {
     // todo 接口获取跳转页面列表
     setPageList([]);

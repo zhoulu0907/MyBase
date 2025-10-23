@@ -91,7 +91,7 @@ export enum TRIGGER_EVENTS {
   DELETE = 'delete'
 }
 
-// 目标页面类型
+// 跳转节点 目标页面类型
 export enum TARGET_PAGE_TYPE {
   INSIDE = 'inside', // 系统内页面
   OUTSIDE= 'outside' // 外部链接
@@ -119,3 +119,14 @@ export enum UNAUTHORIZED_EVENT {
   JUMP = 'jump'
 }
 
+//  刷新节点 刷新范围
+export enum REFRESH_TYPE {
+  CURRENT_PAGE = 'currentPage', // 当前页面
+  SPECIFY_PAGE = 'specifyPage', // 指定页面
+  SPECIFY_COMPONENT = 'specifyComponent', // 页面内指定组件
+}
+// 刷新策略
+export enum REFRESH_STRATEGY {
+  RESERVE = 'reserve', // 保留状态刷新
+  RESET = 'reset', // 重置状态刷新
+}
