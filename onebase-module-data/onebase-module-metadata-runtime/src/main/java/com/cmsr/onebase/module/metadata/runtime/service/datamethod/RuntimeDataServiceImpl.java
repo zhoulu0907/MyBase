@@ -193,6 +193,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                 Object id = subDataByName.get("id");
                 if(id == null){
                    //插入数据不包含id字段，说明数据表不存在则插入
+                    subDataByName.put("parent_id",reqVO.getId());
                    coreDataMethodService.createData(
                            subEntityId,
                            subDataByName,
@@ -329,7 +330,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         respVO.setEntityName((String) data.get("entityName"));
         respVO.setData((Map<String, Object>) data.get("data"));
         respVO.setFieldType((Map<String, String>) data.get("fieldType"));
-        respVO.setSubEntities((List<Map<String, Object>>)data.get("sub"));
+        respVO.setSubEntities((List<SubEntityVo>)data.get("subEntities"));
         return respVO;
 
     }
