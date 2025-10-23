@@ -306,10 +306,13 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
             reqVO.getMethodCode()
         );
 
-        // 转换为VO
-        List<DynamicDataRespVO> list = pageResult.getList().stream()
-            .map(this::convertToDynamicDataRespVO)
-            .collect(Collectors.toList());
+        // 转换为VO，添加空值检查确保 list 不为 null
+        List<DynamicDataRespVO> list = new ArrayList<>();
+        if (pageResult.getList() != null) {
+            list = pageResult.getList().stream()
+                .map(this::convertToDynamicDataRespVO)
+                .collect(Collectors.toList());
+        }
 
         return new PageResult<>(list, pageResult.getTotal());
     }
