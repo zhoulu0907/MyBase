@@ -7,5 +7,5 @@ onebase:
     connectTimeout: 5s
     readTimeout: 30s
     writeTimeout: 30s
-    # 日志级别:NONE/BASIC/HEADERS/BODY
-    logLevel: BODY
+    # 日志级别:TRACE/DEBUG/INFO/WARN/ERROR，默认 INFO
+    logLevel: INFO

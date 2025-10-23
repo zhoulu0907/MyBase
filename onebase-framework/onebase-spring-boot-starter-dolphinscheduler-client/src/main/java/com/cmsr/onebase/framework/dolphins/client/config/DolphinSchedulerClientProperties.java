@@ -34,6 +34,6 @@ public class DolphinSchedulerClientProperties {
   /** 写入超时时间，默认 30s */
   private Duration writeTimeout = Duration.ofSeconds(30);
 
-  /** 日志级别：NONE/BASIC/HEADERS/BODY，默认 BODY */
-  private String logLevel = "BODY";
+  /** 日志级别：TRACE/DEBUG/INFO/WARN/ERROR，默认 INFO */
+  private String logLevel = "INFO";
 }

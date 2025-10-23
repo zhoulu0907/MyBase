@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- 从 Spring 配置中读取日志级别 -->
+    <springProperty scope="context" name="LOG_LEVEL" source="onebase.dolphinscheduler.logLevel" defaultValue="INFO"/>
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="debug">
+    <!-- DolphinScheduler Client 日志级别配置 -->
+    <logger name="com.cmsr.onebase.dolphins" level="${LOG_LEVEL}"/>
+
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
