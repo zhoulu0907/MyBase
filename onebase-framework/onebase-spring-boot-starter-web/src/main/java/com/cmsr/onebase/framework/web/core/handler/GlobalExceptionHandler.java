@@ -383,21 +383,22 @@ public class GlobalExceptionHandler {
     public CommonResult<?> defaultExceptionHandler(HttpServletRequest req, Throwable ex) {
         log.error("[defaultExceptionHandler]", ex);
         
-        // 检查根因异常，如果是业务相关的异常，提取具体错误信息
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        if (rootCause != null && rootCause instanceof IllegalArgumentException) {
-            // 业务参数校验失败，返回具体错误信息
-            String errorMessage = StrUtil.isNotBlank(rootCause.getMessage()) ? rootCause.getMessage() : "参数校验失败";
-            log.warn("[defaultExceptionHandler][业务校验失败] url: {}, 错误: {}", req.getRequestURI(), errorMessage);
-            return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
-        }
-        
-        // 检查异常消息中是否包含"校验失败"关键字，如果包含则认为是业务异常
+        // 优先检查异常消息中是否包含"校验失败"关键字，如果包含则认为是业务异常
+        // 这样可以提取到完整的错误信息（包含字段名和校验类型）
         String exceptionMessage = ex.getMessage();
         if (StrUtil.isNotBlank(exceptionMessage) && exceptionMessage.contains("校验失败")) {
             // 提取具体的校验失败信息
             String errorMessage = extractValidationError(exceptionMessage);
             log.warn("[defaultExceptionHandler][业务校验失败] url: {}, 错误: {}", req.getRequestURI(), errorMessage);
+            return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
+        }
+        
+        // 其次检查根因异常，如果是业务相关的异常，提取具体错误信息
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        if (rootCause != null && rootCause instanceof IllegalArgumentException) {
+            // 业务参数校验失败，返回具体错误信息
+            String errorMessage = StrUtil.isNotBlank(rootCause.getMessage()) ? rootCause.getMessage() : "参数校验失败";
+            log.warn("[defaultExceptionHandler][业务参数异常] url: {}, 错误: {}", req.getRequestURI(), errorMessage);
             return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
         }
         
