@@ -248,21 +248,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         if (values != null && !values.isEmpty()) {
             for (Object value : values) {
                 if (value instanceof List) {
-                    // List<?> list = (List<?>) value;
-                    // if (!list.isEmpty() && list.get(0) instanceof Map) {
-                    //     // 构造JS数组字面量
-                    //     String arrayLiteral = toJsArrayLiteral((List<Object>) value);
-                    //     // 精确替换参数占位符
-                    //     String key = null;
-                    //     for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                    //         if (entry.getValue() == value) {
-                    //             key = entry.getKey();
-                    //             break;
-                    //         }
-                    //     }
-                    //     if (key != null) {
-                    //         formula = formula.replace("$" + key, arrayLiteral);
-                    //     }
+                    formula = resolveFormulaWithContext(formula, new ContextData().setRecordList((List<Map<String, Object>>) value));
                 }
             }
         }
