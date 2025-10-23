@@ -63,7 +63,10 @@ const Right: React.FC = () => {
       if (applicationId) {
         const res = await getApplication({ id: applicationId });
 
-        setAppName(res?.appName || '');
+        if(res?.appName){
+          setAppName(res.appName);
+          document.title = res.appName;
+        }
       }
     }
   };
