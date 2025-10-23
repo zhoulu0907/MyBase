@@ -55,7 +55,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Autowired
     private MetadataDataMethodCreateImpl metadataDataMethodCreate;
-    
+
     @Autowired
     private MetadataDataMethodUpdateImpl metadataDataMethodUpdate;
 
@@ -207,7 +207,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 //            }
 //
 //            boolean ok = deleteCount > 0;
-            // 移除多表写入逻辑，直接返回删除结果
+        // 移除多表写入逻辑，直接返回删除结果
 //            return ok;
 //        }); // TenantUtils.executeIgnore 闭合
     }
@@ -272,8 +272,8 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                                                        Map<String, Object> filters, String methodCode) {
         // 添加调试日志
         log.info("核心服务分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}",
-                 entityId, pageNo, pageSize, pageSize != null ? pageSize.getClass().getSimpleName() : "null");
-
+                entityId, pageNo, pageSize, pageSize != null ? pageSize.getClass().getSimpleName() : "null");
+//合并代码
 //        // 移除多表查询逻辑，直接使用单表分页
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
