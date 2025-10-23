@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store/store_app';
 import { Layout, Menu, Tooltip } from '@arco-design/web-react';
-import { IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
+import { IconCommon, IconShareAlt, IconBook } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import DataSourcePage from './pages/DataSource';
