@@ -419,6 +419,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             AuthFieldVO authFieldVO = new AuthFieldVO();
             authFieldVO.setFieldId(entityField.getId());
             authFieldVO.setFieldType(entityField.getFieldType());
+            authFieldVO.setFieldDisplayName(entityField.getDisplayName());
             if (authFieldDO != null) {
                 authFieldVO.setId(authFieldDO.getId());
                 authFieldVO.setIsCanRead(authFieldDO.getIsCanRead());

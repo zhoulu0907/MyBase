@@ -33,18 +33,13 @@ import com.cmsr.onebase.module.metadata.core.util.FieldValueUtil;
 import jakarta.annotation.Resource;
 
 /**
- * 数据方法转换器
+ * 数据方法转换器（运行态）
  * 负责：
- * 1. DTO 与 领域模型之间的转换（原始职责）
- * 2. （合并自 Support）条件组装、字段ID->名称映射、核心结果包装为 QueryResult、基础校验与若干辅助工具。
+ * 1. DTO 与 领域模型之间的转换
+ * 2. 条件组装、字段ID->名称映射、核心结果包装为 QueryResult、基础校验与若干辅助工具
  *
- * 说明：按当前需求合并 Support 逻辑，后续如需再次拆分，可将“非纯转换”逻辑再抽离为 Support/Helper。
- * 注意：部分方法含有对 core service 的依赖（字段元数据查询），已通过 @Resource 注入。
- *
- * 合并日期: 2025-09-25
- * 原作者: bty418
  * @author bty418
- * @date 2025-09-25
+ * @date 2025-10-23
  */
 @Component
 public class DataMethodAssembler {
@@ -91,8 +86,6 @@ public class DataMethodAssembler {
 
         return queryRequest;
     }
-
-    // （已去重）原 toQueryConditionGroup 逻辑合并进 convertConditionGroups，避免两套实现维护成本
 
     /**
      * 将排序DTO转换为查询排序
@@ -174,10 +167,9 @@ public class DataMethodAssembler {
         return respDTO;
     }
 
-    // ============================= 以下为合并自 DataMethodSupport 的扩展能力 =============================
-
     /**
      * 基础请求校验（简单防御性校验，不进入业务规则）
+     *
      * @param reqDTO 请求参数
      */
     public void validateBase(EntityFieldDataReqDTO reqDTO) {
@@ -188,6 +180,7 @@ public class DataMethodAssembler {
 
     /**
      * 将二维条件 DTO 结构转换为领域条件结构（外层 OR，内层 AND）
+     *
      * @param groups 条件DTO分组
      * @return 领域条件分组
      */
@@ -212,7 +205,8 @@ public class DataMethodAssembler {
     }
 
     /**
-     * 供支持逻辑使用的 ConditionDTO -> QueryCondition（保留 public 以被 API 实现层复用）
+     * ConditionDTO -> QueryCondition
+     *
      * @param dto 条件DTO
      * @return QueryCondition
      */
@@ -229,6 +223,7 @@ public class DataMethodAssembler {
 
     /**
      * 字段ID Key -> 字段名称 Key 的 Map 转换
+     *
      * @param entityId 实体ID
      * @param idMap 以字段ID为 key 的 Map
      * @return 以字段名称为 key 的 Map
@@ -264,6 +259,13 @@ public class DataMethodAssembler {
         return resultList;
     }
 
+    /**
+     * 单个ID Map转换
+     *
+     * @param idMap 字段ID为key的Map
+     * @param idToField 字段ID到字段DO的映射
+     * @return 字段名称为key的Map
+     */
     private Map<String, Object> convertSingleIdMap(Map<Long, Object> idMap, Map<Long, MetadataEntityFieldDO> idToField) {
         if (idMap == null || idMap.isEmpty()) {
             return new HashMap<>();
@@ -279,6 +281,13 @@ public class DataMethodAssembler {
         return result;
     }
 
+    /**
+     * 按字段类型转换值
+     *
+     * @param value 原始值
+     * @param field 字段定义
+     * @return 转换后的值
+     */
     private Object convertValueByField(Object value, MetadataEntityFieldDO field) {
         if (value == null) {
             return null;
@@ -305,6 +314,13 @@ public class DataMethodAssembler {
         return adaptJdbcTemporal(value, field);
     }
 
+    /**
+     * 适配JDBC时间类型
+     *
+     * @param value 值
+     * @param field 字段定义
+     * @return 适配后的值
+     */
     private Object adaptJdbcTemporal(Object value, MetadataEntityFieldDO field) {
         if (value == null || field == null || !StringUtils.hasText(field.getFieldType())) {
             return value;
@@ -312,6 +328,13 @@ public class DataMethodAssembler {
         return adaptJdbcTemporal(value, field.getFieldType());
     }
 
+    /**
+     * 适配JDBC时间类型
+     *
+     * @param value 值
+     * @param fieldType 字段类型
+     * @return 适配后的值
+     */
     private Object adaptJdbcTemporal(Object value, String fieldType) {
         if (value == null || !StringUtils.hasText(fieldType)) {
             return value;
@@ -336,6 +359,7 @@ public class DataMethodAssembler {
 
     /**
      * 构建单条 core 返回 Map 的 QueryResult
+     *
      * @param entityId 实体ID
      * @param coreResult core 返回的数据结构 需要包含 key:data(Map), 可选 key:fieldType(Map)
      * @return QueryResult
@@ -382,6 +406,7 @@ public class DataMethodAssembler {
 
     /**
      * 批量构建 QueryResult
+     *
      * @param entityId 实体ID
      * @param list core 多条记录列表
      * @return QueryResult
@@ -401,6 +426,7 @@ public class DataMethodAssembler {
 
     /**
      * rowId 尝试解析为 Long，失败返回原字符串
+     *
      * @param rowId 行ID字符串
      * @return 解析后的 Long 或 原值
      */
@@ -415,3 +441,4 @@ public class DataMethodAssembler {
         }
     }
 }
+
