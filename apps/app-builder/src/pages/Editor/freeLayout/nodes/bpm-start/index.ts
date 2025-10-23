@@ -16,12 +16,11 @@ export const BpmStartNodeRegistry: FlowNodeRegistry = {
     copyDisable: true,
     sidebarDisabled: true,
     nodePanelVisible: false,
-    defaultPorts: [{ type: 'output', location: 'bottom' }],
 
     wrapperStyle: {
       minWidth: 'unset',
       width: '100%',
-      borderWidth: 2,
+      borderWidth: 0,
       borderRadius: 15,
       cursor: 'move'
     }

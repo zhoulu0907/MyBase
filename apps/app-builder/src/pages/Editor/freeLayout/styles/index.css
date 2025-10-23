@@ -12,10 +12,10 @@
 
   /* Line colors */
   --g-workflow-line-color-hidden: transparent;
-  --g-workflow-line-color-default: #4d53e8;
+  --g-workflow-line-color-default: #c9cdd4;
   --g-workflow-line-color-drawing: #5dd6e3;
-  --g-workflow-line-color-hover: #37d0ff;
-  --g-workflow-line-color-selected: #37d0ff;
+  --g-workflow-line-color-hover: #65bf73;
+  --g-workflow-line-color-selected: #65bf73;
   --g-workflow-line-color-error: red;
 }
 

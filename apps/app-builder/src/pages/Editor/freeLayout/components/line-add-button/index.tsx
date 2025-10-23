@@ -5,10 +5,7 @@
 
 import { useCallback } from 'react';
 
-import {
-  WorkflowNodePanelService,
-  WorkflowNodePanelUtils,
-} from '@flowgram.ai/free-node-panel-plugin';
+import { WorkflowNodePanelService, WorkflowNodePanelUtils } from '@flowgram.ai/free-node-panel-plugin';
 import type { LineRenderProps } from '@flowgram.ai/free-lines-plugin';
 import {
   delay,
@@ -18,7 +15,7 @@ import {
   WorkflowDragService,
   WorkflowLinesManager,
   WorkflowNodeEntity,
-  type WorkflowNodeJSON,
+  type WorkflowNodeJSON
 } from '@flowgram.ai/free-layout-editor';
 
 import './index.less';
@@ -28,6 +25,7 @@ import { IconPlusCircle } from './button';
 export const LineAddButton = (props: LineRenderProps) => {
   const { line, selected, hovered, color } = props;
   const visible = useVisible({ line, selected, hovered });
+  console.log('==========', visible);
   const nodePanelService = useService<WorkflowNodePanelService>(WorkflowNodePanelService);
   const document = useService(WorkflowDocument);
   const dragService = useService(WorkflowDragService);
@@ -37,11 +35,10 @@ export const LineAddButton = (props: LineRenderProps) => {
   const { fromPort, toPort } = line;
 
   const onClick = useCallback(async () => {
-    
     // calculate the middle point of the line - 计算线条的中点位置
     const position = {
       x: (line.position.from.x + line.position.to.x) / 2,
-      y: (line.position.from.y + line.position.to.y) / 2,
+      y: (line.position.from.y + line.position.to.y) / 2
     };
 
     // get container node for the new node - 获取新节点的容器节点
@@ -52,8 +49,8 @@ export const LineAddButton = (props: LineRenderProps) => {
       position,
       containerNode,
       panelProps: {
-        enableScrollClose: true,
-      },
+        enableScrollClose: true
+      }
     });
     if (!result) {
       return;
@@ -68,7 +65,7 @@ export const LineAddButton = (props: LineRenderProps) => {
       toPort,
       containerNode,
       document,
-      dragService,
+      dragService
     });
 
     // create new workflow node - 创建新的工作流节点
@@ -88,7 +85,7 @@ export const LineAddButton = (props: LineRenderProps) => {
         containerNode,
         historyService,
         dragService,
-        linesManager,
+        linesManager
       });
     }
 
@@ -100,7 +97,7 @@ export const LineAddButton = (props: LineRenderProps) => {
       fromPort,
       node,
       toPort,
-      linesManager,
+      linesManager
     });
 
     // remove original line - 移除原始线条
@@ -108,7 +105,7 @@ export const LineAddButton = (props: LineRenderProps) => {
   }, []);
 
   if (!visible) {
-    return <></>;
+    return <div className="line-node" style={{}}></div>;
   }
 
   return (
@@ -117,7 +114,7 @@ export const LineAddButton = (props: LineRenderProps) => {
       style={{
         left: '50%',
         top: '50%',
-        color,
+        color
       }}
       data-testid="sdk.workflow.canvas.line.add"
       data-line-id={line.id}

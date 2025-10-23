@@ -15,7 +15,6 @@ export const BpmEndNodeRegistry: FlowNodeRegistry = {
     copyDisable: true,
     sidebarDisabled: true,
     nodePanelVisible: false,
-    defaultPorts: [{ type: 'input', location: 'top' }],
     size: {
       width: 74,
       height: 30
@@ -23,7 +22,7 @@ export const BpmEndNodeRegistry: FlowNodeRegistry = {
     wrapperStyle: {
       minWidth: 'unset',
       width: '100%',
-      borderWidth: 2,
+      borderWidth: 0,
       borderRadius: 15,
       cursor: 'move'
     }

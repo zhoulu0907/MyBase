@@ -7,11 +7,7 @@ import { usePlayground, WorkflowLineEntity } from '@flowgram.ai/free-layout-edit
 
 import './index.less';
 
-export const useVisible = (params: {
-  line: WorkflowLineEntity;
-  selected?: boolean;
-  hovered?: boolean;
-}): boolean => {
+export const useVisible = (params: { line: WorkflowLineEntity; selected?: boolean; hovered?: boolean }): boolean => {
   const playground = usePlayground();
   const { line, selected = false, hovered } = params;
   if (line.disposed) {

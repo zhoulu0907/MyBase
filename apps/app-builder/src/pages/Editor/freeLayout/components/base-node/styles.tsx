@@ -21,7 +21,7 @@ export const NodeWrapperStyle = styled.div`
   height: auto;
 
   &.selected {
-    border: 1px solid #4e40e5;
+    border: 2px solid #65bf73;
   }
 `;
 

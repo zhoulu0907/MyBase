@@ -10,7 +10,7 @@ export const Header = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: 118px;
+  width: 116px;
   column-gap: 8px;
   border-radius: 4px;
   cursor: move;

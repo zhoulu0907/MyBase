@@ -6,16 +6,16 @@
 export const IconPlusCircle = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <g id="add">
-      <path
+      {/* <path
         id="background"
         fill="#ffffff"
         fillRule="evenodd"
         stroke="none"
         d="M 24 12 C 24 5.372583 18.627417 0 12 0 C 5.372583 0 -0 5.372583 -0 12 C -0 18.627417 5.372583 24 12 24 C 18.627417 24 24 18.627417 24 12 Z"
-      />
+      /> */}
       <path
         id="content"
-        fill="currentColor"
+        fill="#65bf73"
         fillRule="evenodd"
         stroke="none"
         d="M 22 12.005 C 22 6.482153 17.522848 2.004999 12 2.004999 C 6.477152 2.004999 2 6.482153 2 12.005 C 2 17.527847 6.477152 22.004999 12 22.004999 C 17.522848 22.004999 22 17.527847 22 12.005 Z"
