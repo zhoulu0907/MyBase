@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.entity.impl;
+package com.cmsr.onebase.module.metadata.api.entity;
 
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
