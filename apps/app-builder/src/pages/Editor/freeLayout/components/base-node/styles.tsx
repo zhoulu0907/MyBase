@@ -23,6 +23,9 @@ export const NodeWrapperStyle = styled.div`
   &.selected {
     border: 1px solid #4e40e5;
   }
+  &.error {
+    border: 1px solid red;
+  }
 `;
 
 export const ErrorIcon = () => (
