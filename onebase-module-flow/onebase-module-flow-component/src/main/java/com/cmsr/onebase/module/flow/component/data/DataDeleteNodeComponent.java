@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.component.data;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -40,9 +42,10 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataDeleteeNodeData nodeData = (DataDeleteeNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
+        Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
-        OrExpression orExpression = conditionsProvider.formatConditionsForValue(this, variableContext, inLoopDepth, conditions);
+        OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
 
         DeleteDataReqDTO reqDTO = new DeleteDataReqDTO();
         reqDTO.setTraceId(executeContext.getTraceId());

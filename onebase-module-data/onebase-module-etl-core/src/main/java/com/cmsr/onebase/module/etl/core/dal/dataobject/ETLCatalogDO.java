@@ -13,15 +13,15 @@ import lombok.experimental.SuperBuilder;
 import org.anyline.metadata.Catalog;
 import org.apache.commons.lang3.StringUtils;
 
-@Table(name = "datafactory_catalog")
+@Table(name = "etl_catalog")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataFactoryCatalogDO extends TenantBaseDO {
+public class ETLCatalogDO extends TenantBaseDO {
 
-    public DataFactoryCatalogDO setId(Long id) {
+    public ETLCatalogDO setId(Long id) {
         super.setId(id);
         return this;
     }
@@ -49,8 +49,8 @@ public class DataFactoryCatalogDO extends TenantBaseDO {
         this.metaInfo = JsonUtils.toJsonString(metaInfo);
     }
 
-    public static DataFactoryCatalogDO convert(Long datasourceId, Catalog catalog) {
-        DataFactoryCatalogDO catalogDO = new DataFactoryCatalogDO();
+    public static ETLCatalogDO convert(Long datasourceId, Catalog catalog) {
+        ETLCatalogDO catalogDO = new ETLCatalogDO();
         catalogDO.setDatasourceId(datasourceId);
         String name = catalog.getName();
         catalogDO.setCatalogName(name);
@@ -66,7 +66,7 @@ public class DataFactoryCatalogDO extends TenantBaseDO {
         return catalogDO;
     }
 
-    public static void applyChanges(DataFactoryCatalogDO oldCatalogDO, DataFactoryCatalogDO newCatalogDO) {
+    public static void applyChanges(ETLCatalogDO oldCatalogDO, ETLCatalogDO newCatalogDO) {
         String oldName = oldCatalogDO.getCatalogName();
         String oldDisplayName = oldCatalogDO.getDisplayName();
         String oldComment = oldCatalogDO.getMetaInfo().getComment();

@@ -46,12 +46,12 @@ public class FlowExecutionLogRepository extends DataRepository<FlowExecutionLogD
         return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public Map<String, Object> statisticTodyByApplicationId(Long applicationId) {
+    public Map<String, Object> statisticByApplicationId(LocalDateTime day, Long applicationId) {
         Map<String, Object> result = new HashMap<>();
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
-        configs.ge("start_time", LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0));
-        configs.le("start_time", LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+        configs.ge("start_time", day.withHour(0).withMinute(0).withSecond(0).withNano(0));
+        configs.le("start_time", day.withHour(23).withMinute(59).withSecond(59).withNano(999999999));
         int total = 0;
         {
             DataSet dataSet = this.querys("""
@@ -59,7 +59,6 @@ public class FlowExecutionLogRepository extends DataRepository<FlowExecutionLogD
                             from flow_execution_log
                             """, configs,
                     "group by execution_result");
-
             for (DataRow dataRow : dataSet) {
                 String key = dataRow.getString("result");
                 int value = dataRow.getInt("counts");
@@ -70,11 +69,13 @@ public class FlowExecutionLogRepository extends DataRepository<FlowExecutionLogD
         }
         {
             DataSet dataSet = this.querys("""
-                            select execution_result as result, count(*) as counts 
-                            from flow_execution_log
-                            """, configs,
-                    "group by execution_result");
+                    select avg( duration_time ) as avgs
+                    from flow_execution_log
+                    """, configs);
+            for (DataRow dataRow : dataSet) {
+                result.put("avgs", dataRow.getDouble("avgs"));
+            }
         }
-        return null;
+        return result;
     }
 }

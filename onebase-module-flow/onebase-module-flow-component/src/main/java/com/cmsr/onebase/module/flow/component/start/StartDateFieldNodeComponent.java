@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.component.start;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.data.DataMethodApiHelper;
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
@@ -28,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -54,6 +56,8 @@ public class StartDateFieldNodeComponent extends NodeComponent {
         variableContext.putInputVariables(this.getTag());
         StartDateFieldNodeData nodeData = (StartDateFieldNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
+        Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
+
         JdbcTypeEnum fieldJdbcType = queryFieldType(nodeData.getOffsetFiledId());
 
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
@@ -89,7 +93,7 @@ public class StartDateFieldNodeComponent extends NodeComponent {
 
         if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
             List<Conditions> conditions = nodeData.getFilterCondition();
-            OrExpression orExpression = conditionsProvider.formatConditionsForValue(this, variableContext, inLoopDepth, conditions);
+            OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
             reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
         if (nodeData.isBatchMode()) {

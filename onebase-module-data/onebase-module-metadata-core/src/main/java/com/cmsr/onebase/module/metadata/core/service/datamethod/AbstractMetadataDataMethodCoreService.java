@@ -411,6 +411,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 13. 后置自动化工作流触发
             executePostWorkflow(context);//todo 暂未实现
 
+            getData(context);
+
             // 14. 结果格式化
             Map<String, Object> result = formatResult(context);// 已实现
 
@@ -612,6 +614,11 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      */
     protected void executePostWorkflow(ProcessContext context) {
 
+    }
+
+    protected Map<String, Object> getData(ProcessContext context){
+
+        return null;
     }
 
     /**

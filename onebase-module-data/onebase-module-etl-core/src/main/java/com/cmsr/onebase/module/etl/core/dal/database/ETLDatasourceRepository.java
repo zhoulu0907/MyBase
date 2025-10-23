@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -12,18 +12,18 @@ import java.time.LocalDateTime;
 
 @Repository
 @Slf4j
-public class DataFactoryDatasourceRepository extends DataRepository<DataFactoryDatasourceDO> {
-    public DataFactoryDatasourceRepository() {
-        super(DataFactoryDatasourceDO.class);
+public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
+    public ETLDatasourceRepository() {
+        super(ETLDatasourceDO.class);
     }
 
-    public DataFactoryDatasourceDO findOneByDatasourceCode(String datasourceCode) {
+    public ETLDatasourceDO findOneByDatasourceCode(String datasourceCode) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("datasource_code", datasourceCode);
         return findOne(cs);
     }
 
-    public DataFactoryDatasourceDO findOneByDatasourceCodeAndIdNe(String datasourceCode, Long datasourceId) {
+    public ETLDatasourceDO findOneByDatasourceCodeAndIdNe(String datasourceCode, Long datasourceId) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("datasource_code", datasourceCode);
         cs.ne("id", datasourceId);
@@ -31,7 +31,7 @@ public class DataFactoryDatasourceRepository extends DataRepository<DataFactoryD
     }
 
     public void updateCollectStatusById(Long datasourceId, CollectStatus collectStatus) {
-        DataFactoryDatasourceDO datasourceDO = new DataFactoryDatasourceDO();
+        ETLDatasourceDO datasourceDO = new ETLDatasourceDO();
         datasourceDO.setId(datasourceId);
         datasourceDO.setCollectStatus(collectStatus);
         if (collectStatus == CollectStatus.RUNNING) {

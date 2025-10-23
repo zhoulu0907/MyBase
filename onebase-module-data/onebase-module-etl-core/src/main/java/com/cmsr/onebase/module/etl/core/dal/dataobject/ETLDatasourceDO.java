@@ -12,15 +12,15 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Table(name = "datafactory_datasource")
+@Table(name = "etl_datasource")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataFactoryDatasourceDO extends TenantBaseDO {
+public class ETLDatasourceDO extends TenantBaseDO {
 
-    public DataFactoryDatasourceDO setId(Long id) {
+    public ETLDatasourceDO setId(Long id) {
         super.setId(id);
         return this;
     }
