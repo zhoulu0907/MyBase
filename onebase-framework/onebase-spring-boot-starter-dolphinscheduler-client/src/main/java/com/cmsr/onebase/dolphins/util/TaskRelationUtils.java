@@ -1,6 +1,6 @@
 package com.cmsr.onebase.dolphins.util;
 
-import com.cmsr.onebase.dolphins.process.TaskRelation;
+import com.cmsr.onebase.dolphins.workflow.TaskRelation;
 import java.util.ArrayList;
 import java.util.List;
 

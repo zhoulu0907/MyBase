@@ -66,10 +66,25 @@
             <artifactId>guava</artifactId>
         </dependency>
 
-        <!-- Test 测试依赖 - 使用 OneBase 统一管理的 JUnit 5 -->
+        <!-- Test 测试依赖 - 使用 JUnit 4 以兼容现有测试代码 -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit 5 - 备用 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit Vintage Engine - 在 JUnit 5 平台上运行 JUnit 4 测试 -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.process;
+package com.cmsr.onebase.dolphins.workflow;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

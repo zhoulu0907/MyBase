@@ -1,9 +1,9 @@
 package com.cmsr.onebase.dolphins.task;
 
-import com.cmsr.onebase.dolphins.process.Parameter;
 import com.cmsr.onebase.dolphins.remote.HttpMethod;
 import com.cmsr.onebase.dolphins.remote.RequestHttpEntity;
 import com.cmsr.onebase.dolphins.util.JacksonUtils;
+import com.cmsr.onebase.dolphins.workflow.Parameter;
 import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;

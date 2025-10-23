@@ -1,6 +1,6 @@
 package com.cmsr.onebase.dolphins.instance;
 
-import com.cmsr.onebase.dolphins.process.ProcessDefineResp;
+import com.cmsr.onebase.dolphins.workflow.ProcessDefineResp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;

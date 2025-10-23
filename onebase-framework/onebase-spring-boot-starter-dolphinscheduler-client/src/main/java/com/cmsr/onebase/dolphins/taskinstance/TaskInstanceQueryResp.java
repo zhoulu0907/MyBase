@@ -18,8 +18,8 @@
 package com.cmsr.onebase.dolphins.taskinstance;
 
 import com.cmsr.onebase.dolphins.instance.ProcessInstanceQueryResp;
-import com.cmsr.onebase.dolphins.process.ProcessDefineResp;
-import com.cmsr.onebase.dolphins.process.TaskDefinition;
+import com.cmsr.onebase.dolphins.workflow.ProcessDefineResp;
+import com.cmsr.onebase.dolphins.workflow.TaskDefinition;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;

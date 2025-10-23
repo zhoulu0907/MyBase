@@ -1,6 +1,6 @@
 package com.cmsr.onebase.dolphins.task;
 
-import com.cmsr.onebase.dolphins.process.Parameter;
+import com.cmsr.onebase.dolphins.workflow.Parameter;
 import java.util.Collections;
 import java.util.List;
 import lombok.Data;

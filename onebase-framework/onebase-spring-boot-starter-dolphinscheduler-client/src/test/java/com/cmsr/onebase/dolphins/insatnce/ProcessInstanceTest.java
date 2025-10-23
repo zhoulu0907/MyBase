@@ -3,7 +3,6 @@ package com.cmsr.onebase.dolphins.insatnce;
 import com.cmsr.onebase.dolphins.BaseTest;
 import com.cmsr.onebase.dolphins.enums.*;
 import com.cmsr.onebase.dolphins.instance.ProcessInstanceCreateParam;
-import com.github.weaksloth.dolphins.enums.*;
 import org.junit.Assert;
 import org.junit.Test;
 

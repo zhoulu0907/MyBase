@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.process;
+package com.cmsr.onebase.dolphins.workflow;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.Date;

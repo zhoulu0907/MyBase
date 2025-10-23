@@ -1,7 +1,7 @@
 package com.cmsr.onebase.dolphins.util;
 
-import com.cmsr.onebase.dolphins.process.TaskDefinition;
 import com.cmsr.onebase.dolphins.task.AbstractTask;
+import com.cmsr.onebase.dolphins.workflow.TaskDefinition;
 import com.google.common.base.Strings;
 import java.util.Optional;
 

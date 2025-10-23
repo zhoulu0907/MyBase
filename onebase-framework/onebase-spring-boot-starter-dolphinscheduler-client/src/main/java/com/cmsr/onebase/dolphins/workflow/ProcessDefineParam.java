@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.process;
+package com.cmsr.onebase.dolphins.workflow;
 
 import java.util.List;
 import lombok.Data;

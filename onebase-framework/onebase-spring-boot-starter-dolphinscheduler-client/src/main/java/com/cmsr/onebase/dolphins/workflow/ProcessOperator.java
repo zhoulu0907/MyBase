@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.process;
+package com.cmsr.onebase.dolphins.workflow;
 
 import com.cmsr.onebase.dolphins.common.PageInfo;
 import com.cmsr.onebase.dolphins.core.AbstractOperator;
@@ -37,7 +37,7 @@ public class ProcessOperator extends AbstractOperator {
     size = Optional.ofNullable(size).orElse(DolphinClientConstant.Page.DEFAULT_SIZE);
     searchVal = Optional.ofNullable(searchVal).orElse("");
 
-    String url = dolphinAddress + "/projects/" + projectCode + "/process-definition";
+    String url = dolphinAddress + "/projects/" + projectCode + "/workflow-definition";
     Query query =
         new Query()
             .addParam("pageNo", String.valueOf(page))
@@ -65,9 +65,9 @@ public class ProcessOperator extends AbstractOperator {
    * @return create response
    */
   public ProcessDefineResp create(Long projectCode, ProcessDefineParam processDefineParam) {
-    String url = dolphinAddress + "/projects/" + projectCode + "/process-definition";
+    String url = dolphinAddress + "/projects/" + projectCode + "/workflow-definition";
     log.info(
-        "create process definition, url:{}, param:{}",
+        "create workflow definition, url:{}, param:{}",
         url,
         JacksonUtils.toJSONString(processDefineParam));
     try {
@@ -90,13 +90,14 @@ public class ProcessOperator extends AbstractOperator {
    *
    * <p>api:/dolphinscheduler/projects/{projectCode}/process-definition/{process-definition-code}
    *
-   * @param processDefineParam update process def param
+   * @param processDefineParam update workflow def param
    * @param processCode workflow code
    * @return update response json
    */
   public ProcessDefineResp update(
       Long projectCode, ProcessDefineParam processDefineParam, Long processCode) {
-    String url = dolphinAddress + "/projects/" + projectCode + "/process-definition/" + processCode;
+    String url =
+        dolphinAddress + "/projects/" + projectCode + "/workflow-definition/" + processCode;
     log.info("update process definition, url:{}, param:{}", url, processDefineParam);
     try {
       HttpRestResult<ProcessDefineResp> restResult =
@@ -121,7 +122,8 @@ public class ProcessOperator extends AbstractOperator {
    * @return true for success,otherwise false
    */
   public Boolean delete(Long projectCode, Long processCode) {
-    String url = dolphinAddress + "/projects/" + projectCode + "/process-definition/" + processCode;
+    String url =
+        dolphinAddress + "/projects/" + projectCode + "/workflow-definition/" + processCode;
     log.info("delete process definition,processCode:{}, url:{}", processCode, url);
     try {
       HttpRestResult<String> restResult =
@@ -142,7 +144,7 @@ public class ProcessOperator extends AbstractOperator {
    */
   public Boolean release(Long projectCode, Long code, ProcessReleaseParam processReleaseParam) {
     String url =
-        dolphinAddress + "/projects/" + projectCode + "/process-definition/" + code + "/release";
+        dolphinAddress + "/projects/" + projectCode + "/workflow-definition/" + code + "/release";
     log.info("release process definition,url:{}, param:{}", url, processReleaseParam);
     try {
       HttpRestResult<String> restResult =

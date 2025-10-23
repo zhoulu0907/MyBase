@@ -1,6 +1,6 @@
 package com.cmsr.onebase.dolphins.util;
 
-import com.cmsr.onebase.dolphins.process.TaskLocation;
+import com.cmsr.onebase.dolphins.workflow.TaskLocation;
 import java.util.ArrayList;
 import java.util.List;
 
