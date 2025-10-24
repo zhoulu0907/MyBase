@@ -45,7 +45,7 @@ public class EnterpriseDataRepository extends DataRepository<EnterpriseDO> {
             configStore.eq("industry_type", pageReqVO.getIndustryType());
         }
         // 只查询未删除的记录
-        configStore.eq("deleted", 0L);
+        configStore.eq("deleted", 0);
         // 按创建时间倒序排列
         configStore.order("create_time", Order.TYPE.DESC);
 
@@ -61,7 +61,7 @@ public class EnterpriseDataRepository extends DataRepository<EnterpriseDO> {
             configStore.eq("tenant_id", tenantId);
         }
         // 只查询未删除的记录
-        configStore.eq("deleted", 0L);
+        configStore.eq("deleted", 0);
         // 执行计数查询
         return countByConfig(configStore);
 
@@ -71,7 +71,7 @@ public class EnterpriseDataRepository extends DataRepository<EnterpriseDO> {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq("enterprise_name", name);
         // 只查询未删除的记录
-        configStore.eq("deleted", 0L);
+        configStore.eq("deleted", 0);
         return findOne(configStore);
     }
 }

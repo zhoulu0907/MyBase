@@ -119,10 +119,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteEnterprise(Long id) {
         DataRow row = new DataRow();
-        row.put(EnterpriseDO.ID,  id);
-        row.put("deleted",  1L);
-        row.put("update_time",java.time.LocalDateTime.now());
-        enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID,  id));
+        row.put(EnterpriseDO.ID, id);
+        row.put("deleted", 1L);
+        row.put("update_time", java.time.LocalDateTime.now());
+        enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID, id));
     }
 
     @Override
@@ -169,24 +169,24 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         // 插入用户
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
-        String password=getRandomPassWord();
+        String password = getRandomPassWord();
 
         user.setPassword(encodePassword(password)); // 加密密码
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-        AdminUserDO adminUserDO=   adminUserDataRepository.insert(user);
-        EnterpriseUserRespVO vo=new EnterpriseUserRespVO();
+        AdminUserDO adminUserDO = adminUserDataRepository.insert(user);
+        EnterpriseUserRespVO vo = new EnterpriseUserRespVO();
         vo.setUsername(reqVO.getUsername());
         vo.setPassword(password);
         vo.setId(adminUserDO.getId());
 
         // 回写企业表管理员id
         DataRow row = new DataRow();
-        row.put(EnterpriseDO.ID,  reqVO.getEnterpriseId());
-        row.put("admin_id",  String.valueOf(adminUserDO.getId()));
-        row.put("update_time",java.time.LocalDateTime.now());
-        enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID,  reqVO.getEnterpriseId()));
+        row.put(EnterpriseDO.ID, reqVO.getEnterpriseId());
+        row.put("admin_id", String.valueOf(adminUserDO.getId()));
+        row.put("update_time", java.time.LocalDateTime.now());
+        enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID, reqVO.getEnterpriseId()));
 
         return vo;
 
@@ -196,15 +196,16 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     public void updateStatus(Long id, Long status) {
         //  企业禁用
         DataRow row = new DataRow();
-        row.put(EnterpriseDO.ID,  id);
-        row.put("status",   status);
-        row.put("update_time",java.time.LocalDateTime.now());
-        enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID,  id));
+        row.put(EnterpriseDO.ID, id);
+        row.put("status", status);
+        row.put("update_time", java.time.LocalDateTime.now());
+        enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID, id));
 
     }
 
     /**
      * 获取应用名称
+     *
      * @param enterpriseId 企业ID
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
@@ -223,6 +224,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
     /**
      * 获取
+     *
      * @param pageReqVO
      * @return
      */
@@ -231,19 +233,22 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     public PageResult<EnterpriseApplicationRespVO> enterpriseApplicationPage(ApplicationAuthEnterprisePageReqVO pageReqVO) {
         // 调用数据仓库进行分页查询
         PageResult<ApplicationAuthEnterpriseDO> pageResult = applicationAuthEnterpriseDataRepository.selectPage(pageReqVO);
-        Map<Long, ApplicationDO> applicationMap= getApplicationNameMap( Long.valueOf(pageReqVO.getEnterpriseId()));
+        Map<Long, ApplicationDO> applicationMap = getApplicationNameMap(Long.valueOf(pageReqVO.getEnterpriseId()));
 
         // 将 DO 对象转换为 VO 对象
         return new PageResult<EnterpriseApplicationRespVO>(
                 pageResult.getList().stream()
                         .map(applicationAuthEnterpriseDO -> {
                             EnterpriseApplicationRespVO enterpriseRespVO = new EnterpriseApplicationRespVO();
-                            ApplicationDO appDo=applicationMap.get(applicationAuthEnterpriseDO.getApplicationId());
-                            enterpriseRespVO.setApplicationName(appDo.getAppName());
-                            enterpriseRespVO.setApplicationCode(appDo.getAppCode());
-                            enterpriseRespVO.setAuthTime(applicationAuthEnterpriseDO.getCreateTime());
-                            enterpriseRespVO.setVersionNumber(appDo.getVersionNumber());
-                            enterpriseRespVO.setExpiresTime(applicationAuthEnterpriseDO.getExpiresTime());
+                            ApplicationDO appDo = applicationMap.get(applicationAuthEnterpriseDO.getApplicationId());
+                            if (appDo != null) {
+                                enterpriseRespVO.setApplicationName(appDo.getAppName());
+                                enterpriseRespVO.setApplicationCode(appDo.getAppCode());
+                                enterpriseRespVO.setAuthTime(applicationAuthEnterpriseDO.getCreateTime());
+                                enterpriseRespVO.setVersionNumber(appDo.getVersionNumber());
+                                enterpriseRespVO.setExpiresTime(applicationAuthEnterpriseDO.getExpiresTime());
+                            }
+                            enterpriseRespVO.setApplicationId(applicationAuthEnterpriseDO.getApplicationId()+"");
                             return enterpriseRespVO;
                         })
                         .collect(java.util.stream.Collectors.toList()),
@@ -253,9 +258,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
     /**
      * 随机生成一个密码
+     *
      * @return randomStr
      */
-    public  String getRandomPassWord(){
+    public String getRandomPassWord() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
         StringBuilder sb = new StringBuilder();

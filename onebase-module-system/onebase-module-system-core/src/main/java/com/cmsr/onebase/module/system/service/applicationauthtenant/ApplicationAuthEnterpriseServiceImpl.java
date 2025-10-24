@@ -50,7 +50,7 @@ public class ApplicationAuthEnterpriseServiceImpl implements ApplicationAuthEnte
         });
 
         //获取企业应用数
-        Integer enterpriseId =  createReqVO.getEnterpriseId();
+        Long enterpriseId =  createReqVO.getEnterpriseId();
         Long authorizedAppsCount = applicationAuthEnterpriseDataRepository.countByEnterpriseId(enterpriseId);
 
         // 回写主表应用数

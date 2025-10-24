@@ -23,11 +23,11 @@ public class ApplicationAuthEnterpriseDataRepository extends DataRepository<Appl
     public PageResult<ApplicationAuthEnterpriseDO> selectPage(ApplicationAuthEnterprisePageReqVO pageReqVO) {
         // 构建查询条件
         DefaultConfigStore configStore = new DefaultConfigStore();
-        if (pageReqVO.getApplicationId() != null  ) {
-            configStore.eq("enterprise_id", pageReqVO.getApplicationId());
+        if (pageReqVO.getEnterpriseId() != null  ) {
+            configStore.eq("enterprise_id", pageReqVO.getEnterpriseId());
         }
         // 只查询未删除的记录
-        configStore.eq("deleted", 0L);
+        configStore.eq("deleted", 0);
         // 按创建时间倒序排列
         configStore.order("create_time", Order.TYPE.DESC);
 
@@ -36,12 +36,12 @@ public class ApplicationAuthEnterpriseDataRepository extends DataRepository<Appl
 
 }
 
-    public Long countByEnterpriseId(Integer enterpriseId) {
+    public Long countByEnterpriseId(Long enterpriseId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("enterprise_id", enterpriseId);
         // 只查询未删除的记录,已启用的
-        configs.eq("deleted", 0L);
-        configs.eq("status", 1L);
+        configs.eq("deleted", 0);
+        configs.eq("status", 1);
         return countByConfig(configs);
     }
 }

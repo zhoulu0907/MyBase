@@ -13,11 +13,11 @@ import lombok.ToString;
 public class ApplicationAuthEnterprisePageReqVO extends PageParam {
 
     @Schema(description = "应用id", example = "1")
-    private Integer applicationId;
+    private Long applicationId;
 
     @Schema(description = "企业id", example = "100")
-    private Integer enterpriseId;
+    private Long enterpriseId;
 
     @Schema(description = "空间id", example = "200")
-    private Integer tenantId;
+    private Long tenantId;
 }

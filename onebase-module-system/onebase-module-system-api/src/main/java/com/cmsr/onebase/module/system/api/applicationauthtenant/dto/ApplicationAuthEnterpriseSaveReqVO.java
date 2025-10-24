@@ -14,11 +14,11 @@ public class ApplicationAuthEnterpriseSaveReqVO {
     private Long id;
 
     @Schema(description = "应用id", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    private Integer applicationId;
+    private Long applicationId;
 
     @Schema(description = "企业id", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
     @NotNull(message = "企业id不能为空")
-    private Integer enterpriseId;
+    private Long enterpriseId;
 
     @Schema(description = "空间id", example = "200")
     private Integer tenantId;
@@ -44,5 +44,5 @@ public class ApplicationAuthEnterpriseSaveReqVO {
 
     @Schema(description = "应用id")
     @NotNull(message = "企业id不能为空")
-    private  List<Integer> applicationIdList;
+    private  List<Long> applicationIdList;
 }

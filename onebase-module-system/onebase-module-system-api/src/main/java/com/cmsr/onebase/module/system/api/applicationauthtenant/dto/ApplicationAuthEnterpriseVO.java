@@ -15,13 +15,13 @@ public class ApplicationAuthEnterpriseVO   {
     private Long id;
 
     @Schema(description = "应用id", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    private Integer applicationId;
+    private Long applicationId;
 
     @Schema(description = "企业id", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
-    private Integer enterpriseId;
+    private Long enterpriseId;
 
     @Schema(description = "空间id", example = "200")
-    private Integer tenantId;
+    private Long tenantId;
 
     @Schema(description = "锁标识", example = "1")
     private Long lockVersion;

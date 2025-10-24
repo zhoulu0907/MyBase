@@ -78,8 +78,8 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("tenant_id", tenantId);
         // 只查询未删除的记录,已启用的
-        configs.eq("deleted", 0L);
-        configs.eq("status", 1L);
+        configs.eq("deleted", 0);
+        configs.eq("status", 1);
         return countByConfig(configs);
     }
 

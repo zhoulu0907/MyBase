@@ -29,13 +29,13 @@ public class ApplicationAuthEnterpriseDO extends BaseDO {
      * 应用id
      */
     @Column(name = "application_id", length = 10, nullable = false)
-    private Integer applicationId;
+    private Long applicationId;
 
     /**
      * 企业id
      */
     @Column(name = "enterprise_id", length = 10, nullable = false)
-    private Integer enterpriseId;
+    private Long enterpriseId;
 
     /**
      * 空间id
