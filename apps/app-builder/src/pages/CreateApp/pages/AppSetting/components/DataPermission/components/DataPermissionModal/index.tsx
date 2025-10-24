@@ -12,6 +12,7 @@ import {
   type ConditionField,
   type EntityFieldValidationTypes,
   type GetDeptUserReq,
+  type MetadataEntityPair,
   type ScopeTypeOption
 } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
@@ -20,13 +21,14 @@ import { useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 const FormItem = Form.Item;
+const CheckboxGroup = Checkbox.Group;
 
 interface IProps {
   roleId: string;
   initialFormValues: AuthDataGroupVO;
   modalVisible: boolean;
   status: 'create' | 'edit';
-  dataPermissionEntityName: string;
+  dataPermissionEntity: MetadataEntityPair;
   dataPermissionPerson: AuthDataPermissionPersonVO[];
   appEntityFields: AppEntityField[];
   filterFieldCheckType: EntityFieldValidationTypes[];
@@ -36,13 +38,24 @@ interface IProps {
   handleModalCancel: () => void;
 }
 
+// 权限范围 Array
+const ALLDATA = 'allData';
+const CUSTOMCONDITION = 'customCondition';
+const PERMISSIONSCOPE_DICT = [
+  { value: 'allData', label: '全部数据', disabled: false },
+  { value: 'ownSubmit', label: '本人提交', disabled: false },
+  { value: 'departmentSubmit', label: '本部门提交', disabled: false },
+  { value: 'subDepartmentSubmit', label: '下级部门提交', disabled: false }
+  // { value: 'customCondition', label: '自定义条件' }
+];
+
 const DataPermissionModal = (props: IProps) => {
   const {
     roleId,
     initialFormValues,
     modalVisible,
     status,
-    dataPermissionEntityName,
+    dataPermissionEntity,
     dataPermissionPerson,
     appEntityFields,
     filterFieldCheckType,
@@ -61,9 +74,14 @@ const DataPermissionModal = (props: IProps) => {
   const [form] = Form.useForm();
   const Option = Select.Option;
 
+  //权限范围
+  const [scopeOptions, setScopeOptions] = useState<any[]>(PERMISSIONSCOPE_DICT);
+  const [customChecked, setCustomChecked] = useState(false); //自定义权限
+  const [isCustomDisabled, setIsCustomDisabled] = useState(false);
+
   const [checkAll, setCheckAll] = useState<boolean>(!!initialFormValues.isOperable); // 操作权限
   const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
-  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
+  const [conditionFields, setConditionFields] = useState<any[]>([]);
   const [scopeType, setScopeType] = useState('');
 
   // 部门用户信息
@@ -71,6 +89,8 @@ const DataPermissionModal = (props: IProps) => {
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
   const [deptData, setDeptData] = useState<Member>();
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
+
+  const [scopeTagsStatus, setScopeTagsStatus] = useState('');
 
   useEffect(() => {
     if (!modalVisible && !initialFormValues.id) {
@@ -81,21 +101,23 @@ const DataPermissionModal = (props: IProps) => {
   useEffect(() => {
     if (!modalVisible) {
       // 无论新建还是编辑，关闭时都重置
-      form.resetFields();
-      setScopeType('');
-      setDataFilters([]);
-      setSelectedMembers([]);
-      setCheckAll(true);
+      formReset();
     }
   }, [modalVisible]);
   useEffect(() => {
     // 将 appEntityFields 转换为 ConditionField 格式
     const convertedFields = appEntityFields.map((field) => ({
-      label: field.displayName,
-      value: field.fieldId,
+      title: field.displayName,
+      key: field.fieldId,
       fieldType: field.fieldType
     }));
-    setConditionFields(convertedFields);
+    setConditionFields([
+      {
+        key: dataPermissionEntity?.entityId,
+        title: dataPermissionEntity?.entityName,
+        children: convertedFields
+      }
+    ]);
 
     if (initialFormValues.scopeLevel) {
       setScopeType(initialFormValues.scopeLevel);
@@ -132,6 +154,14 @@ const DataPermissionModal = (props: IProps) => {
       }
     }
     setDataFilters(dataFilters);
+    const scopeTags = initialFormValues.scopeTags;
+    if (scopeTags.includes(CUSTOMCONDITION)) {
+      scopeTags.splice(scopeTags.indexOf(CUSTOMCONDITION), 1);
+      setCustomChecked(true);
+      initialFormValues.customCondition = true;
+      setCustomChecked(true);
+    }
+    setScopeDisabled(scopeTags);
   }, [appEntityFields, dataFilters, initialFormValues, dataPermissionPerson]);
   // 操作权限 全选反选
   function onChangeAll(checked: boolean) {
@@ -139,6 +169,30 @@ const DataPermissionModal = (props: IProps) => {
     form.setFieldValue('isOperable', checked ? 1 : 0);
   }
 
+  const changeScopePermission = (values: string[]) => {
+    setScopeDisabled(values);
+  };
+
+  const setScopeDisabled = (values: string[]) => {
+    if (values.includes(ALLDATA)) {
+      setScopeOptions((prev) => prev.map((item) => (item.value !== ALLDATA ? { ...item, disabled: true } : item)));
+      form.setFieldsValue({
+        scopeTags: [ALLDATA],
+        scopeFieldId: undefined,
+        scopeLevel: undefined,
+        scopeValue: '',
+        customCondition: false
+      });
+      setScopeType('');
+      setSelectedMembers([]);
+      setCustomChecked(false);
+    } else {
+      setScopeOptions((prev) => prev.map((item) => ({ ...item, disabled: false })));
+      form.setFieldValue('scopeTags', values);
+      form.setFieldValue('allScopeTags', values);
+    }
+    setIsCustomDisabled(values.includes(ALLDATA));
+  };
   // 权限范围选择指定人员/部门
   // 'specifiedDepartment' | 'specifiedPerson' 指定部门/人员
   const specifiedModalVisible = async () => {
@@ -211,11 +265,17 @@ const DataPermissionModal = (props: IProps) => {
     setDataFilters([]);
     setSelectedMembers([]);
     setCheckAll(true);
+    setIsCustomDisabled(false);
+    setCustomChecked(false);
+    setScopeOptions(PERMISSIONSCOPE_DICT);
   };
 
   const handleOk = async () => {
     try {
       const values = await form.validate();
+      const scopeTags = form.getFieldValue('scopeTags');
+      if (scopeTags.length === 0) setScopeTagsStatus('error');
+
       console.log('提交数据 values:', values);
       values.isOperable = checkAll ? IsOperable.allowed : IsOperable.notAllowed;
       handleModalSubmit(values);
@@ -233,7 +293,7 @@ const DataPermissionModal = (props: IProps) => {
   return (
     <>
       <Modal
-        style={{ width: '750px' }}
+        style={{ width: '850px' }}
         className={styles.dataPermissionModal}
         title={<div className={styles.dataPermissionModalTitle}>{status === 'create' ? '添加' : '编辑'}数据权限组</div>}
         visible={modalVisible}
@@ -251,87 +311,132 @@ const DataPermissionModal = (props: IProps) => {
           <FormItem field="description" label="说明">
             <Input placeholder="请输入权限组说明" />
           </FormItem>
-          <FormItem label="业务实体" rules={[{ required: true, message: '请选择业务实体' }]}>
-            <Input value={dataPermissionEntityName} readOnly />
-          </FormItem>
           <FormItem label="权限范围" rules={[{ required: true, message: '请选择权限范围' }]}>
             <div className={styles.dataPermissionScope}>
+              <FormItem field="scopeTags" noStyle>
+                <CheckboxGroup options={scopeOptions} onChange={(values) => changeScopePermission(values)} />
+              </FormItem>
               <div className={styles.scopeRow}>
-                <FormItem
-                  field="scopeFieldId"
-                  className={styles.scopeRoles}
-                  rules={[{ required: true, message: '请选择权限范围' }]}
-                >
-                  <Select
-                    placeholder="请选择"
-                    onChange={(value) => {
-                      console.log('选择拥有者 value:', value);
-                    }}
+                <FormItem field="customCondition" noStyle>
+                  <Checkbox
+                    checked={customChecked}
+                    disabled={isCustomDisabled}
+                    onChange={(checked: boolean) => setCustomChecked(checked)}
                   >
-                    {dataPermissionPerson
-                      .filter((option) => option.PersonId)
-                      .map((option) => (
-                        <Option key={option.PersonId} value={option.PersonId || ''}>
-                          {option.displayName}
-                        </Option>
-                      ))}
-                  </Select>
+                    自定义条件
+                  </Checkbox>
                 </FormItem>
-                是
-                <FormItem
-                  field="scopeLevel"
-                  className={styles.scopePerson}
-                  rules={[{ required: true, message: '请选择权限范围' }]}
-                >
-                  <Select
-                    placeholder="请选择"
-                    onChange={(value) => {
-                      setScopeType(value);
-                      setSelectedMembers([]);
-                      // 同时更新scopeValue字段
-                      form.setFieldValue('scopeValue', value);
-                    }}
-                  >
-                    {dataPermissionScope.map((option) => (
-                      <Option key={option.value} value={option.value}>
-                        {option.label}
-                      </Option>
-                    ))}
-                  </Select>
-                </FormItem>
-              </div>
-              {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
-                <div className={styles.scopeAssign}>
-                  <FormItem field="scopeValue" noStyle>
-                    {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') &&
-                    selectedMembers &&
-                    selectedMembers.length > 0 ? (
-                      <div className={styles.assignIdTag}>
-                        <div className={styles.tagContainer}>
-                          {selectedMembers.map((member) => (
-                            <Tag
-                              className={styles.tag}
-                              key={member.key}
-                              closable
-                              onClose={(e) => {
-                                e.preventDefault();
-                                handleTagClose(member.key);
-                              }}
-                            >
-                              <span>{member.name}</span>
-                            </Tag>
+                {customChecked && (
+                  <div className={`${styles.selfRow} ${isCustomDisabled ? styles.disableField : ''}`.trim()}>
+                    <FormItem
+                      field="scopeFieldId"
+                      className={styles.scopeRoles}
+                      rules={[{ required: customChecked, message: '请选择权限范围' }]}
+                    >
+                      <Select
+                        placeholder="请选择"
+                        onChange={(value) => {
+                          console.log('选择拥有者 value:', value);
+                        }}
+                      >
+                        {dataPermissionPerson
+                          .filter((option) => option.PersonId)
+                          .map((option) => (
+                            <Option key={option.PersonId} value={option.PersonId || ''}>
+                              {option.displayName}
+                            </Option>
                           ))}
-                        </div>
-                        <IconEdit className={styles.tagBtn} onClick={() => specifiedModalVisible()}></IconEdit>
+                      </Select>
+                    </FormItem>
+                    是
+                    <FormItem
+                      field="scopeLevel"
+                      className={styles.scopePerson}
+                      rules={[{ required: customChecked, message: '请选择权限范围' }]}
+                    >
+                      <Select
+                        placeholder="请选择"
+                        onChange={(value) => {
+                          setScopeType(value);
+                          setSelectedMembers([]);
+                          // 同时更新scopeValue字段
+                          form.setFieldValue('scopeValue', value);
+                        }}
+                      >
+                        {dataPermissionScope.map((option) => (
+                          <Option key={option.value} value={option.value}>
+                            {option.label}
+                          </Option>
+                        ))}
+                      </Select>
+                    </FormItem>
+                    {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
+                      <div className={styles.scopeAssign}>
+                        <FormItem field="scopeValue" noStyle style={{ pointerEvents: 'none' }}>
+                          {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') &&
+                          selectedMembers &&
+                          selectedMembers.length > 0 ? (
+                            <div className={styles.assignIdTag} title={selectedMembers[0].name}>
+                              <div className={styles.tagContainer}>
+                                {selectedMembers.map((member) => (
+                                  <Tag
+                                    className={styles.tag}
+                                    key={member.key}
+                                    closable
+                                    onClose={(e) => {
+                                      e.preventDefault();
+                                      handleTagClose(member.key);
+                                    }}
+                                  >
+                                    <span>{member.name}</span>
+                                  </Tag>
+                                ))}
+                              </div>
+                              <IconEdit className={styles.tagBtn} onClick={() => specifiedModalVisible()}></IconEdit>
+                            </div>
+                          ) : (
+                            <Button type="outline" style={{ width: '100%' }} onClick={() => specifiedModalVisible()}>
+                              {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
+                            </Button>
+                          )}
+                        </FormItem>
                       </div>
-                    ) : (
-                      <Button type="primary" style={{ width: '100%' }} onClick={() => specifiedModalVisible()}>
-                        {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
-                      </Button>
                     )}
-                  </FormItem>
-                </div>
-              )}
+                    {/* {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
+                      <div className={styles.scopeAssign}>
+                        <FormItem field="scopeValue" noStyle>
+                          {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') &&
+                          selectedMembers &&
+                          selectedMembers.length > 0 ? (
+                            <div className={styles.assignIdTag}>
+                              <div className={styles.tagContainer}>
+                                {selectedMembers.map((member) => (
+                                  <Tag
+                                    className={styles.tag}
+                                    key={member.key}
+                                    closable
+                                    onClose={(e) => {
+                                      e.preventDefault();
+                                      handleTagClose(member.key);
+                                    }}
+                                  >
+                                    <span>{member.name}</span>
+                                  </Tag>
+                                ))}
+                              </div>
+                              <IconEdit className={styles.tagBtn} onClick={() => specifiedModalVisible()}></IconEdit>
+                            </div>
+                          ) : (
+                            <Button type="primary" style={{ width: '100%' }} onClick={() => specifiedModalVisible()}>
+                              {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
+                            </Button>
+                          )}
+                        </FormItem>
+                      </div>
+                    )} */}
+                  </div>
+                )}
+              </div>
             </div>
           </FormItem>
           {/* 数据过滤 */}

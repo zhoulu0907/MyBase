@@ -58,6 +58,7 @@ export interface ChildEntity {
 }
 
 export interface AppEntityField {
+  id: string;
   fieldId: string; // 字段ID
   fieldName: string; // 字段名称
   fieldType: string; // 字段类型，如 BIGINT、VARCHAR、INT、DECIMAL、TIMESTAMP、TEXT、NUMBER 等
