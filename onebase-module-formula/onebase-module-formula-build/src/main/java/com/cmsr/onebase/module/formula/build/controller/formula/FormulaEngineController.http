@@ -76,6 +76,22 @@ Content-Type: application/json
       }
 }
 
+
+### 请求 /execute 接口 => 执行函数函数 计数
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+    "formula": "SUM(COUNTA($数据查询节点1.关联主表ID), COUNTA($数据查询节点2.关联主表ID))",
+    "parameters":
+    {
+      "$数据查询节点1.关联主表ID": "[1,2,3]",
+      "$数据查询节点2.关联主表ID": "[4,5]"
+    }
+}
+
 ### 请求 /execute 接口 => 执行函数函数 计数
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
@@ -83,28 +99,26 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-    "formula": "COUNTA($数据查询节点(多条).关联主表ID)",
+    "formula": "SUM(COUNTA($数据查询节点1.关联主表ID), COUNTA($数据查询节点2.关联主表ID))",
     "parameters":
     {
-      "$数据查询节点(多条)": "r_id1",
-      "$数据查询节点(多条).关联主表ID": "f_id"
+      "$数据查询节点1": "r_id1",
+      "$数据查询节点1.关联主表ID": "f_id1",
+      "$数据查询节点2": "r_id2",
+      "$数据查询节点2.关联主表ID": "f_id2"
     },
     "contextData":
     {
       "r_id1": [
-          {"f_id": "1"},
-          {"f_id": "2"},
-          {"f_id": "3"}
+          {"f_id1": "1"},
+          {"f_id1": "2"},
+          {"f_id1": "3"}
       ],
       "r_id2": [
-          {"f_id": 4},
-          {"f_id": 5},
-          {"f_id": 6},
-          {"f_id": 4},
-          {"f_id": 5},
-          {"f_id": 6}
+          {"f_id2": 4},
+          {"f_id2": 5}
       ],
-      "r_id3": {"f_id": 4}
+      "r_id3": {"f_id3": 6}
     }
 }
 

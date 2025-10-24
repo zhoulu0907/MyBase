@@ -25,7 +25,7 @@ public class FormulaExecuteRespVO {
     /**
      * 执行时间（毫秒）
      */
-    @JsonIgnore
+    // @JsonIgnore
     private Long executionTime;
 
     public static FormulaExecuteRespVO success(Object result, Long executionTime) {
