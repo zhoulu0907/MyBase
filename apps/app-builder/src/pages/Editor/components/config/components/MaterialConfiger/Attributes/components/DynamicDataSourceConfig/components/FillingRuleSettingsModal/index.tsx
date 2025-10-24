@@ -4,8 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import styles from '../../index.module.less';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP, getComponentSchema, usePageEditorSignal } from '@onebase/ui-kit';
-import { COMPONENT_MAP } from '@/pages/Editor/components/panel/components/metadata/component_map';
+import { COMPONENT_TYPE_DISPLAY_NAME_MAP, getComponentSchema, usePageEditorSignal, COMPONENT_MAP } from '@onebase/ui-kit';
 
 interface FillingRuleSettingsModalProps {
   visible: boolean;

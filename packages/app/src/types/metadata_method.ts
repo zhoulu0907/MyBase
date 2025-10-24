@@ -1,20 +1,19 @@
 export interface InsertMethodParams {
   entityId: string;
   data: object;
-
-  //   TODO(mickey): 处理子表逻辑
-  //   subEntities: SubEntityParams[];
+  subEntities?: SubEntityParams[];
 }
 
 export interface SubEntityParams {
   subEntityId: string;
-  data: object;
+  subData: object;
 }
 
 export interface UpdateMethodParams {
   entityId: string;
   id: string;
   data: object;
+  subEntities?: SubEntityParams[];
 }
 
 export interface PageMethodParam {

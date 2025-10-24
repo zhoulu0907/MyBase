@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Modal, Button, type FormInstance } from '@arco-design/web-react';
 import MenuComp from '@/components/MenuIcon';
-import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import styles from './index.module.less';
 import DynamicIcon from '@/components/DynamicIcon';
 import { menuIconList } from '@/components/MenuIcon/const';
@@ -81,8 +80,10 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: '#F2F3F5'
+                  backgroundColor: '#F2F3F5',
+                  cursor: 'pointer'
                 }}
+                onClick={() => setVisibleMenuIcon(true)}
               >
                 <DynamicIcon
                   IconComponent={menuIconList.find(icon => icon.code === (menuIcon || form.getFieldValue('menuIcon')))?.icon}
@@ -91,12 +92,6 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
                   fill="#333"
                 />
               </div>
-              <img
-                src={iconEditSVG}
-                alt="选择菜单图标"
-                style={{ cursor: 'pointer' }}
-                onClick={() => setVisibleMenuIcon(true)}
-              />
             </div>
           </Form.Item>
         </Form>

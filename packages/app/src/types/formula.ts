@@ -25,6 +25,7 @@ export interface ChildVariablesField {
   fieldCode: string;
   fieldName: string;
   id: string;
+  isNode: boolean;
   isUnique: number;
   isRequired: number;
   isSystemField: number;
@@ -41,4 +42,10 @@ export interface ChildVariablesField {
     regexPattern: string;
     regexPrompt: string;
   };
+}
+
+export interface variableItem{
+  fieldName: string, 
+  fieldId: string, 
+  fieldType: string
 }

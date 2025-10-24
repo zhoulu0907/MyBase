@@ -253,7 +253,7 @@ const XInputText: XInputTextSchema = {
     color: '',
     bgColor: '',
     labelColSpan: 100,
-    maxLength: 40,
+    maxLength: 200,
     security: {
       display: false,
       type: ''

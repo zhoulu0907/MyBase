@@ -1,5 +1,5 @@
-import { Message, Modal, Grid, Spin } from '@arco-design/web-react';
-import { getFormulaById, getFormulaFunctionSimpleList, type VariablesList, executeFormula, type formulaParams, getEntityListByApp, getEntityFields, type ChildVariablesField } from '@onebase/app';
+import { Message, Modal, Grid } from '@arco-design/web-react';
+import { getFormulaById, getFormulaFunctionSimpleList, type VariablesList, type variableItem, getEntityListByApp, getEntityFields, type ChildVariablesField } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { FormulaInput, FunctionList, InfoPanel, VariableList, DebuggedFormula } from './components';
@@ -22,7 +22,6 @@ const Col = Grid.Col;
  */
 export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '' }: FormulaEditorProps) {
   const [formula, setFormula] = useState(initialFormula);  //公式的值
-  const [loading, setLoading] = useState<boolean>(false);  //当调用接口的时候显示加载中
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
   const [funcList, setFuncList] = useState<FunctionItem[]>([]); //公式编辑器中的函数列表展示
@@ -53,7 +52,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     try {
       const res: any[] = await getEntityListByApp(curAppId);
       if (res.length > 0) {
-        const result =  await Promise.all(res.map(async (item) => {
+        const result = await Promise.all(res.map(async (item) => {
           try {
             if (!item.fields?.length) {
               const childEntityList = await getEntityFields({
@@ -61,7 +60,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
               });
               return {
                 ...item,
-                variableId:item.entityId,
+                variableId: item.entityId,
                 variableName: item.entityName,
                 fields: [...item.fields || [], ...childEntityList].reverse()
               }
@@ -74,18 +73,18 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
         }))
         nodes?.forEach(nodeItem => {
           const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(nodeItem.id);
-          const newFields = nodeOutput?.conditionFields?.map((data:any) => {
+          const newFields = nodeOutput?.conditionFields?.map((data: any) => {
             return {
               ...data,
               displayName: data.label,
               entityId: nodeItem.id,
-              appId: nodeItem.id,
+              id: nodeItem.id,
               fieldName: nodeItem.data?.title || "",
-              fieldType: "node",
+              isNode: true
             }
           })
           const reverseNewFields = (newFields || []).reverse();
-          result.push({variableName: nodeItem.data?.title, fields: reverseNewFields, variableId: nodeItem.id, tableName:""});
+          result.push({ variableName: nodeItem.data?.title, fields: reverseNewFields, variableId: nodeItem.id, tableName: "" });
         })
         console.log("result", result)
         setVariables(result as any);
@@ -123,7 +122,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    * 过滤变量列表
    * 根据变量名称或类型是否包含搜索关键词（不区分大小写）
    */
-  const filteredVariables: VariablesEntity[] = useMemo(() => {
+  const filteredVariables: VariablesList[] = useMemo(() => {
     if (!variableSearch) return variables || [];
     const newFields = variables?.[0]?.fields?.filter(
       (v) =>
@@ -155,10 +154,10 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
       //如果fieldtype是node 代表是节点， 需要传入的格式是$节点.字段
-      if(variable.fieldType === "node") {
-        editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
-      }else {
-        editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.displayName}]]`, 'var');
+      if (variable.isNode) {
+        editorRef.current.insertAtPosition(`[[${variable.id}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
+      } else {
+        editorRef.current.insertAtPosition(`[[${variable.id}.${variable.displayName}]]`, 'var');
       }
     } else {
       // 降级处理：直接添加到末尾
@@ -208,7 +207,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
         content = match.slice(2, -2)
         content = content.replace(/^[^\.]+\.(.+)$/, '$1,');
         const temp = content.split("$");
-        if(temp[1]) {
+        if (temp.length > 1) {
           content = `$${temp[1]}`
         }
       }
@@ -218,170 +217,175 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   }
 
   /**
-   * 根据formula生成paramters信息{[变量名称]: fieldId}
-   * @param formulaData 
-   * @returns 
+   * 设置运行态所需要的parameters
+   * 格式:
+   * {
+   *  $节点: 节点ID,
+   *  $节点.字段: 字段ID
+   * }
    */
-  const retrieveAllVariables = (formulaData: string) => {
+  const getParameters = (formulaData: string) => {
     const regex = /\[\[(.*?)\]\]/g;
     const copyFormulaData = formulaData;
     const matches = [...copyFormulaData.matchAll(regex)];
     const variablesMapping: { [key: string]: string } = {};
     matches.forEach((match) => {
       const temp = match[1].split(".");
-      if(temp.length > 2) {
-        variablesMapping[temp[2]] = temp[0];
-        variablesMapping[temp[3]] = temp[1];
-      }else {
-        const fieldId = temp[0] || "";
-        const fieldName = temp[1] || "";
-        variablesMapping[fieldName] = fieldId;
+      let fieldName = "";
+      let fieldId = "";
+      let nodeName = "";
+      let nodeId = "";
+      //[nodeid->temp[0], variableid->temp[1], nodeName->temp[2], variableName->temp[3]]
+      if (temp.length > 3) {
+        nodeName = temp[2];
+        nodeId = temp[0]
+        fieldName = `${temp[2] + "." + temp[3]}`
+        fieldId = temp[1];
+        variablesMapping[nodeName] = nodeId
+      } else {
+        fieldId = temp[0] || "";
+        fieldName = temp[1] || "";
       }
+      variablesMapping[fieldName] = fieldId;
     })
     return variablesMapping;
   }
 
-  /**
-   * 点击确认之后计算
-   */
-  const handleConfirm = useCallback(async () => {
-    await handleDebug();
-    onConfirm(formula);
-    setIsDebugMode(false);
-  }, [formula, onConfirm, onCancel]);
+/**
+ * 点击确认之后计算
+ */
+const handleConfirm = useCallback(async () => {
+  const newFormula = formattedFormula();
+  const params = getParameters(formula);
+  onConfirm(formula, newFormula, params);
+  setIsDebugMode(false);
+}, [formula, onConfirm, onCancel]);
 
-  /**
-   * 调试公式
-   */
-  const handleDebug = useCallback(async () => {
-    setLoading(true);
-    const newFormula = formattedFormula();
-    const selectedVariables = retrieveAllVariables(formula);
-    const newFormulaData: formulaParams = {
-      formula: newFormula,
-      parameters: selectedVariables
+/**
+ * 公式编辑器准备就绪
+ * @param editor - 编辑器实例
+ */
+const handleEditorReady = useCallback(
+  (editor: { insertAtPosition: (text: string, type: string, position?: number) => void }) => {
+    editorRef.current = editor;
+  },
+  []
+);
+
+/**
+ * 组件挂载时初始化函数列表
+ */
+useEffect(() => {
+  if (!visible) return;
+  getFuncList();
+}, [visible]);
+
+/**点击调试页面的返回按钮 */
+const handleGoBack = () => {
+  setIsDebugMode(false);
+}
+
+const getFieldType = (keyName: string, value: any) => {
+  let fieldType: string = "";
+  variables.forEach(variable => {
+    const fieldIndex = variable?.fields?.findIndex(item => keyName.includes(item.displayName) && item.id === value);
+    if (fieldIndex !== -1) {
+      fieldType = variable?.fields?.[fieldIndex as number].fieldType || "TEXT";
     }
-    try {
-      await executeFormula(newFormulaData);
-      Message.info('公式调试成功');
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
-    }
-  }, [formula]);
+  })
+  return fieldType;
+}
 
-  /**
-   * 公式编辑器准备就绪
-   * @param editor - 编辑器实例
-   */
-  const handleEditorReady = useCallback(
-    (editor: { insertAtPosition: (text: string, type: string, position?: number) => void }) => {
-      editorRef.current = editor;
-    },
-    []
-  );
-
-  /**
-   * 组件挂载时初始化函数列表
-   */
-  useEffect(() => {
-    if (!visible) return;
-    getFuncList();
-  }, [visible]);
-
-  /**点击调试页面的返回按钮 */
-  const handleGoBack = () => {
-    setIsDebugMode(false);
-  }
-
-  const getAllRelatedVariables = () => {
-    const currentVariablesObj = retrieveAllVariables(formula);
-    const newVariablesData = Object.keys(currentVariablesObj)?.map(key => {
-      const index = variables.findIndex(data => data.variableId === key);
-      return {
-        fieldName: key,
-        fieldId: currentVariablesObj[key],
-        fieldType: index > 0 ? variables[index] : "TEXT"
-      }
+/**
+ * 调试模式-字段赋值区域
+ * 
+ */
+const getAllRelatedVariables = () => {
+  const currentVariablesObj = getParameters(formula);
+  let newVariablesData: variableItem[] = [];
+  if (variables.length > 0) {
+    Object.keys(currentVariablesObj).forEach(key => {
+        newVariablesData.push({
+          fieldName: key,
+          fieldId: currentVariablesObj[key],
+          fieldType: getFieldType(key,currentVariablesObj[key])
+        })
     })
-    return newVariablesData;
   }
+  return newVariablesData;
+}
 
-  /**点击调试 */
-  const handleClickDebug = () => {
-    setIsDebugMode(true);
-  }
+/**点击调试 */
+const handleClickDebug = () => {
+  setIsDebugMode(true);
+}
 
-  /**点击取消按钮 */
-  const handleCancel = () => {
-    setIsDebugMode(false);
-    onCancel();
-  }
+/**点击取消按钮 */
+const handleCancel = () => {
+  setIsDebugMode(false);
+  onCancel();
+}
 
-  const allRelatedVariables = getAllRelatedVariables();
+const allRelatedVariables = getAllRelatedVariables();
 
-  return (
-    <Modal
-      visible={visible}
-      onCancel={handleCancel}
-      title={
-        <div className={styles.formulaHeader}>
-          {isDebugMode && <IconLeft className={styles.goBack} onClick={handleGoBack}/>}
-          <span className={styles.title}>公式编辑</span>
-          <span className={styles.subtitle}>使用数学运算符编辑公式</span>
-        </div>
-      }
-      style={{ width: '1000px' }}
-      className={styles.formulaEditor}
-      maskClosable={false}
-      onOk={handleConfirm}
-      confirmLoading={loading}
-      okButtonProps={{
-        disabled: !formula
-      }}
-    >
-      {/* 内容区域 */}
-      <div className={styles.contentWrapper}>
-        {/* 公式编辑区 */}
-        <Spin loading={loading} style={{ display: 'block', marginTop: 8, }}>
-          <FormulaInput
-            value={formula}
-            onChange={setFormula}
-            onCopy={handleCopy}
-            onDebug={handleClickDebug}
-            filteredVariables={filteredVariables}
-            filteredFunctions={filteredFunctions}
-            onEditorReady={handleEditorReady}
-          />
-        </Spin>
-        {/* 底部面板（变量名称/函数公式/函数概要） */}
-        {isDebugMode ? 
-          <DebuggedFormula allRelatedVariables={allRelatedVariables} formula= {formattedFormula()}/> : 
-          <Row>
-            <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
-              <VariableList
-                variables={variables}
-                searchValue={variableSearch}
-                onSearchChange={setVariableSearch}
-                onInsertVariable={handleInsertVariable}
-              />
-            </Col>
-            <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
-              <FunctionList
-                functions={functionSearch ? filteredFunctions : funcList}
-                searchValue={functionSearch}
-                onSearchChange={setFunctionSearch}
-                onChooseFunction={handleChooseFunction}
-              />
-            </Col>
-            {info &&
-              <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
-                <InfoPanel info={info} />
-              </Col>}
-          </Row>
-        }
+return (
+  <Modal
+    visible={visible}
+    onCancel={handleCancel}
+    title={
+      <div className={styles.formulaHeader}>
+        {isDebugMode && <IconLeft className={styles.goBack} onClick={handleGoBack} />}
+        <span className={styles.title}>公式编辑</span>
+        <span className={styles.subtitle}>使用数学运算符编辑公式</span>
       </div>
-    </Modal>
-  );
+    }
+    style={{ width: '1000px' }}
+    className={styles.formulaEditor}
+    maskClosable={false}
+    onOk={handleConfirm}
+    okButtonProps={{
+      disabled: !formula
+    }}
+  >
+    {/* 内容区域 */}
+    <div className={styles.contentWrapper}>
+      {/* 公式编辑区 */}
+        <FormulaInput
+          value={formula}
+          onChange={setFormula}
+          onCopy={handleCopy}
+          onDebug={handleClickDebug}
+          filteredVariables={filteredVariables}
+          filteredFunctions={filteredFunctions}
+          onEditorReady={handleEditorReady}
+        />
+      {/* 底部面板（变量名称/函数公式/函数概要） */}
+      {isDebugMode ?
+        <DebuggedFormula allRelatedVariables={allRelatedVariables} formula={formattedFormula()} /> :
+        <Row>
+          <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
+            <VariableList
+              variables={variableSearch ? filteredVariables : variables}
+              searchValue={variableSearch}
+              onSearchChange={setVariableSearch}
+              onInsertVariable={handleInsertVariable}
+            />
+          </Col>
+          <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
+            <FunctionList
+              functions={functionSearch ? filteredFunctions : funcList}
+              searchValue={functionSearch}
+              onSearchChange={setFunctionSearch}
+              onChooseFunction={handleChooseFunction}
+            />
+          </Col>
+          {info &&
+            <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
+              <InfoPanel info={info} />
+            </Col>}
+        </Row>
+      }
+    </div>
+  </Modal>
+);
 }

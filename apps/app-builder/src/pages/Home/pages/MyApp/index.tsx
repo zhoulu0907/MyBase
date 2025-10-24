@@ -34,7 +34,8 @@ import { useNavigate } from 'react-router-dom';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
 import CreateApp from '@/components/CreateApp';
-import { iconMap, type Options } from '@/components/CreateApp/const';
+import { type Options } from '@/components/CreateApp/const';
+import { appIconMap } from '@onebase/ui-kit';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
@@ -404,7 +405,7 @@ const MyAppPage: React.FC = () => {
                       <div className={styles.myAppName}>
                         <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
                           <DynamicIcon
-                            IconComponent={iconMap[item.iconName as keyof typeof iconMap]}
+                            IconComponent={appIconMap[item.iconName as keyof typeof appIconMap]}
                             theme="filled"
                             size="32"
                             fill="#F2F3F5"

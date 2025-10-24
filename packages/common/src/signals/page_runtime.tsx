@@ -27,6 +27,25 @@ export const createPagesRuntimeSignal = () => {
     detailPageViewId.value = newDetailPageViewId;
   };
 
+  const mainMetaDataFields = signal<any[]>([]);
+  const setMainMetaDataFields = (fields: any[]) => {
+    mainMetaDataFields.value = fields;
+  };
+
+  const subTableDataLength = signal<Record<string, number>>({});
+  const setSubTableDataLength = (subTableId: string, length: number) => {
+    console.log('subTableId: ', subTableId, 'length: ', length);
+    subTableDataLength.value = { ...subTableDataLength.value, [subTableId]: length };
+  };
+  const resetSubTableDataLength = () => {
+    subTableDataLength.value = {};
+  };
+
+  const subEntities = signal<any[]>([]);
+  const setSubEntities = (entities: any[]) => {
+    subEntities.value = entities;
+  };
+
   return {
     curPage,
     setCurPage,
@@ -41,7 +60,17 @@ export const createPagesRuntimeSignal = () => {
     setEditPageViewId,
 
     detailPageViewId,
-    setDetailPageViewId
+    setDetailPageViewId,
+
+    mainMetaDataFields,
+    setMainMetaDataFields,
+
+    subTableDataLength,
+    setSubTableDataLength,
+    resetSubTableDataLength,
+
+    subEntities,
+    setSubEntities
   };
 };
 

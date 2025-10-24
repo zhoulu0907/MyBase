@@ -195,10 +195,10 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 }}
                 onSort={(e) => {
                   console.log(e);
-                  const newList = [...columnsConfig];
+                  const newList = [...configs[columnsKey]];
+                  console.log('configs[columnsKey]',configs[columnsKey])
                   // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
                   const { oldIndex, newIndex } = e;
-                  console.log(oldIndex, newIndex);
                   if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
                     // 复制一份新数组
                     const movedList = [...newList];

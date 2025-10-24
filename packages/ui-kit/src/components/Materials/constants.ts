@@ -275,7 +275,7 @@ export const BUTTON_OPTIONS = {
 
 export const BUTTON_VALUES = {
   [BUTTON_OPTIONS.HIDDEN]: 'hidden',
-  [BUTTON_OPTIONS.DISABLED]: 'disabled',
+  [BUTTON_OPTIONS.DISABLED]: 'disabled'
 } as const;
 
 // 表格操作按钮

@@ -22,8 +22,8 @@ import {
 import { pagesRuntimeSignal } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { RedirectMethod } from '../../../constants';
-import './index.css';
 import type { XTableConfig } from './schema';
+import './index.css';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -35,7 +35,7 @@ type XTableSelectProps = {
   showSelect: boolean;
   selectedDataId: string | null;
   setSelectData: (value: any) => void
-} 
+}
 
 const XTable = memo(
   (
@@ -113,16 +113,16 @@ const XTable = memo(
                       <>
                         {(operationButtonShowType === TableOperationButtonStyle.ICON ||
                           operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                          <DynamicIcon
-                            IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                            theme="outline"
-                            size="16"
-                            fill={opearate.iconColor}
-                            style={{
-                              marginRight: 4
-                            }}
-                          />
-                        )}
+                            <DynamicIcon
+                              IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                              theme="outline"
+                              size="16"
+                              fill={opearate.iconColor}
+                              style={{
+                                marginRight: 4
+                              }}
+                            />
+                          )}
                         {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
                           operationButtonShowType === TableOperationButtonStyle.ALL) &&
                           opearate.buttonName}
@@ -151,25 +151,25 @@ const XTable = memo(
                       onOk={(event) => {
                         event.stopPropagation();
                         handleDelete(record.id);
-                        if (opearate.deletedAction === RedirectMethod.REFRESH) {
-                          handlePage();
-                        } else if (opearate.deletedAction === RedirectMethod.PROMPT_JUMP) {
-                          // todo
-                        }
+                        // if (opearate.deletedAction === RedirectMethod.REFRESH) {
+                        //   handlePage();
+                        // } else if (opearate.deletedAction === RedirectMethod.PROMPT_JUMP) {
+                        //   // todo
+                        // }
                       }}
                     >
                       {(operationButtonShowType === TableOperationButtonStyle.ICON ||
                         operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                        <DynamicIcon
-                          IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                          theme="outline"
-                          size="16"
-                          fill={opearate.iconColor}
-                          style={{
-                            marginRight: 4
-                          }}
-                        />
-                      )}
+                          <DynamicIcon
+                            IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                            theme="outline"
+                            size="16"
+                            fill={opearate.iconColor}
+                            style={{
+                              marginRight: 4
+                            }}
+                          />
+                        )}
                       {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
                         operationButtonShowType === TableOperationButtonStyle.ALL) &&
                         opearate.buttonName}
@@ -206,7 +206,7 @@ const XTable = memo(
         setFinalColumns(() => columns?.filter((v) => v.dataIndex !== 'op'));
       }
 
-      if(props?.xTableSelectProps?.showSelect && runtime) {
+      if (props?.xTableSelectProps?.showSelect && runtime) {
         const checkboxColumnRender = {
           title: '',
           dataIndex: 'select',
@@ -448,6 +448,7 @@ const XTable = memo(
         </div>
         <div>
           <Form.Item
+            className='tableFormItem'
             label={label.display && label.text}
             layout={'vertical'}
             style={{

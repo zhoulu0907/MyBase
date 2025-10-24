@@ -50,8 +50,8 @@ const TenantManagement: React.FC = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [isNewTenant, setIsNewTenant] = useState(false);
   const [currentTenant, setCurrentTenant] = useState<PlatformTenantInfo | null>(null);
-  const [originalAdmin, setOriginalAdmin] = useState<string>('');
-  const [allocatableLicense, setAllocatableLicense] = useState<number>(10000); // 可分配许可证数量
+  // const [originalAdmin, setOriginalAdmin] = useState<string>('');
+  // const [allocatableLicense, setAllocatableLicense] = useState<number>(10000); // 可分配许可证数量
   const [tenantLimit, setTenantLimit] = useState<number>(10000); // 租户数量限制
   const [otherTenantCount, setOtherTenantCount] = useState<number>(0); // 其他租户分配数
   const [tenantUserCount, setTenantUserCount] = useState<number>(0); // 租户下用户数
@@ -144,7 +144,7 @@ const TenantManagement: React.FC = () => {
     try {
       const resp = await getCreateTenantCountApi();
       if (resp) {
-        setAllocatableLicense(resp);
+        // setAllocatableLicense(resp);
       }
     } catch (error) {
       console.error('Error fetching allocatable:', error);
@@ -217,7 +217,7 @@ const TenantManagement: React.FC = () => {
       tenantCode: record.tenantCode
     };
     setCurrentTenant(tenant);
-    setOriginalAdmin(record.adminNickName || record.adminUserName);
+    // setOriginalAdmin(record.adminNickName || record.adminUserName);
 
     form.setFieldsValue({
       tenantName: record.name,

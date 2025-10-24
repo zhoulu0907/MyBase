@@ -1,4 +1,4 @@
-import { Input, Menu } from '@arco-design/web-react';
+import { Input, Menu, Spin } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import LightText from './LightText';
 import { useCallback, useState } from 'react';
@@ -50,38 +50,38 @@ export function FunctionList({ functions, searchValue, onSearchChange, onChooseF
   /**
      * 切换函数列表的展开/折叠状态
      */
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded(!isExpanded);
-  }, [isExpanded]);
+  // const toggleExpanded = useCallback(() => {
+  //   setIsExpanded(!isExpanded);
+  // }, [isExpanded]);
 
   const getSubMenu = () => {
-    if(!functionCategoryList.length) return null;
-    return functionCategoryList.map((category,index) => {
+    if (!functionCategoryList.length) return null;
+    return functionCategoryList.map((category, index) => {
       return <SubMenu
-          key={index.toString()}
-          className={styles.categoryContent}
-          title = {
-            <span className={styles.categoryTitle}>{category}</span>
-          }>
+        key={index.toString()}
+        className={styles.categoryContent}
+        title={
+          <span className={styles.categoryTitle}>{category}</span>
+        }>
         {getMenuItem(index)}
-        </SubMenu>
-      }
+      </SubMenu>
+    }
     )
   }
 
   const getMenuItem = (index: number) => {
-    if(!functions.length) return null;
+    if (!functions.length) return null;
     return functions.map((func) => {
-      return <MenuItem 
-      key={`${index}_${func.id}`} 
-      onClick={() => handleFunctionClick(func)} 
-      className={`${styles.functionItem} ${selectedFunctionId === func.id ? styles.selected : ''}`}>
-      <div className={styles.functionInfo}>
-        <div className={styles.functionName}>
-          <LightText text={func.name} searchValue={searchValue} />
+      return <MenuItem
+        key={`${index}_${func.id}`}
+        onClick={() => handleFunctionClick(func)}
+        className={`${styles.functionItem} ${selectedFunctionId === func.id ? styles.selected : ''}`}>
+        <div className={styles.functionInfo}>
+          <div className={styles.functionName}>
+            <LightText text={func.name} searchValue={searchValue} />
+          </div>
+          <div className={styles.functionDesc}>{func.summary}</div>
         </div>
-        <div className={styles.functionDesc}>{func.summary}</div>
-      </div>
       </MenuItem>
     })
   }
@@ -99,11 +99,15 @@ export function FunctionList({ functions, searchValue, onSearchChange, onChooseF
       </div>
       {isExpanded && (
         <div className={styles.listSection}>
-          <Menu
-            defaultOpenKeys={['0']}
-            defaultSelectedKeys={[`0_${functions[0]?.id}`]}>
-            {getSubMenu()}
-          </Menu>
+          {!functions.length ?
+            <div className={styles.loadingFunction}>
+              <Spin size={18} tip="加载函数列表..."></Spin>
+            </div> :
+            <Menu
+              defaultOpenKeys={['0']}
+              defaultSelectedKeys={[`0_${functions?.[0]?.id}`]}>
+              {getSubMenu()}
+            </Menu>}
         </div>
       )}
     </div>
