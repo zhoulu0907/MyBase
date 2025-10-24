@@ -71,6 +71,8 @@ public class ETLSchemaDO extends TenantBaseDO {
         } else {
             schemaDO.setDisplayName(name);
         }
+        String metaType = schema.keyword();
+        schemaDO.setMetaType(metaType);
         MetaSchema metaCatalog = MetaSchema.convert(schema);
         schemaDO.setMetaInfo(metaCatalog);
 

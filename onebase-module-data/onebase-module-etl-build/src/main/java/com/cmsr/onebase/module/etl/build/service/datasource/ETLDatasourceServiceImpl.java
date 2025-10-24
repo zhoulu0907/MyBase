@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
-import com.cmsr.onebase.module.etl.core.enums.DataFactoryErrorCodeConstants;
+import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.service.collector.MetadataCollectorService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -110,7 +110,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     public void deleteDatasource(Long datasourceId) {
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {
-            throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
 
         deleteAllRelated(datasourceId);
@@ -135,7 +135,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(id);
         // 1. 检查数据源是否存在
         if (datasourceDO == null) {
-            throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_EXIST);
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         if (datasourceDO.getCollectStatus() == CollectStatus.RUNNING) {
             // 1. 检查任务状态
@@ -147,18 +147,18 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     private void validDatasourceCodeDuplicate(String datasourceCode, Long datasourceId) {
         if (datasourceId == null) {
             if (datasourceRepository.findOneByDatasourceCode(datasourceCode) != null) {
-                throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
+                throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
             }
         } else {
             if (datasourceRepository.findOneByDatasourceCodeAndIdNe(datasourceCode, datasourceId) != null) {
-                throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
+                throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
             }
         }
     }
 
     private void validDatasourceTypeSupported(String datasourceType) {
         if (!supportedDbs.containsKey(datasourceType)) {
-            throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
         }
     }
 }

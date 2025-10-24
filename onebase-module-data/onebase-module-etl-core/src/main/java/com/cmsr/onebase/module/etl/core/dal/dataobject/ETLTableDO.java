@@ -78,6 +78,8 @@ public class ETLTableDO extends TenantBaseDO {
         } else {
             tableDO.setDisplayName(name);
         }
+        String metaType = table.keyword();
+        tableDO.setMetaType(metaType);
         MetaTable metaTable = MetaTable.convert(table, columns);
         tableDO.setMetaInfo(metaTable);
 
