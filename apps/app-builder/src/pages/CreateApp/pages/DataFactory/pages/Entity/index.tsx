@@ -1,7 +1,7 @@
+import { useFieldStore } from '@/store/store_field';
+import { getFieldTypes } from '@onebase/app';
 import React, { useEffect } from 'react';
 import { EntityPageHeader } from './main/EntityPageHeader';
-import { getFieldTypes } from '@onebase/app';
-import { useFieldStore } from '@/store/store_field';
 
 const EntityPage: React.FC = () => {
   const { setFieldTypes } = useFieldStore();

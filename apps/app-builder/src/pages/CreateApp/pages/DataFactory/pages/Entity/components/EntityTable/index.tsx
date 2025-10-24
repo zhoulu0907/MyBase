@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Layout, Message } from '@arco-design/web-react';
-import { getEntityList, deleteEntity, updateEntity, type UpdateEntityReqVO } from '@onebase/app';
-import { useResourceStore } from '@/store/store_resource';
-import { useAppStore } from '@/store/store_app';
 import type { EntityListItem, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import EntityList from './EntityList';
-import EntityDetail from './EntityDetail';
-import styles from './index.module.less';
+import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
+import { Layout, Message } from '@arco-design/web-react';
+import { deleteEntity, getEntityList, updateEntity, type UpdateEntityReqVO } from '@onebase/app';
+import React, { useCallback, useEffect, useState } from 'react';
+import { MODAL_TYPE, useModalManager } from '../../hooks/useModalManager';
+import EditEntityDrawer from '../Drawers/EditEntityDrawer';
 import CreateEntityPage from '../Modals/CreateEntityModal';
 import DeleteConfirmModal from '../Modals/DeleteConfirmModal';
-import EditEntityDrawer from '../Drawers/EditEntityDrawer';
-import { useModalManager, MODAL_TYPE } from '../../hooks/useModalManager';
+import EntityDetail from './EntityDetail';
+import EntityList from './EntityList';
+import styles from './index.module.less';
 const { Sider, Content } = Layout;
 
 const EntityTable: React.FC = () => {
@@ -50,7 +50,7 @@ const EntityTable: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [curDataSourceId]);
+  }, [curDataSourceId, curAppId]);
 
   const handleDelete = (entity: EntityListItem) => {
     setSelectedEntity(entity);
@@ -106,10 +106,10 @@ const EntityTable: React.FC = () => {
   };
 
   useEffect(() => {
-    if (curDataSourceId) {
+    if (curDataSourceId && curAppId) {
       loadEntities();
     }
-  }, [curDataSourceId]);
+  }, [curDataSourceId, curAppId]);
 
   return (
     <>

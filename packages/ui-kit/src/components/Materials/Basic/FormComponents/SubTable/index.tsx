@@ -1,18 +1,17 @@
 import { ENTITY_FIELD_TYPE } from '@/components/DataFactory';
 import { FormComp, FormSchema } from '@/components/Materials/Basic/FormComponents';
-import { Button, Form, Layout, Table } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
-import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect, useState } from 'react';
-import { type XSubTableConfig } from './schema';
-// import DragableTable from './dragableTable';
 import { LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
 import { getComponentConfig, getComponentSchema } from '@/components/Materials/schema';
 import { usePageEditorSignal } from '@/hooks';
+import { Button, Form, Layout, Table } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
+import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { COMPONENT_MAP } from '../../../componentsMap';
 import './index.css';
+import { type XSubTableConfig } from './schema';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -108,7 +107,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     const updateFormData = {
       ...formData,
       [id]: filterFormData
-    }
+    };
 
     form.setFieldsValue(updateFormData);
   };
@@ -548,7 +547,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           style={{
             maxWidth: runtime
               ? '100%'
-              : `calc(100vw - ${componentMaxWidth + ((LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout && label.display) ? labelColSpan : 0) + 2}px)`
+              : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout && label.display ? labelColSpan : 0) + 2}px)`
           }}
         >
           {
