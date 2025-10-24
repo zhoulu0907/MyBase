@@ -37,8 +37,8 @@ import java.util.regex.Pattern;
 public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     private final FormulaEngineProperties properties;
-    private final String formulaJsScript;
-    private final Pattern dangerousPatternRegex;
+    private final String                  formulaJsScript;
+    private final Pattern                 dangerousPatternRegex;
 
     /**
      * 注入用户API
@@ -126,13 +126,13 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     /**
      * 人员函数常量
      */
-    private static final String GETUSER = "GETUSER";
-    private static final String GETDEPT = "GETDEPT";
-    private static final String GETUPDEPT = "GETUPDEPT";
-    private static final String GETROLE = "GETROLE";
+    private static final String GETUSER       = "GETUSER";
+    private static final String GETDEPT       = "GETDEPT";
+    private static final String GETUPDEPT     = "GETUPDEPT";
+    private static final String GETROLE       = "GETROLE";
     private static final String GETSUPERVISOR = "GETSUPERVISOR";
-    private static final String ISINROLE = "ISINROLE";
-    private static final String ISINDEPT = "ISINDEPT";
+    private static final String ISINROLE      = "ISINROLE";
+    private static final String ISINDEPT      = "ISINDEPT";
 
     public FormulaEngineServiceImpl(FormulaEngineProperties properties) {
         this.properties = properties;
@@ -394,80 +394,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         return resolved;
     }
 
-    /**
-     * 新的解析方法，用于处理流程公式中的上下文数据
-     * 该方法会将字段引用直接替换为值列表，例如将 COUNT(f_id) 转换为 COUNT(1,2,3)
-     *
-     * @param formula    原始公式
-     * @param contextData 上下文数据
-     * @return 解析替换后的公式
-     */
-    private String resolveFormulaWithContextData(String formula, Map<String, Object> contextData) {
-        if (contextData == null || contextData.isEmpty()) {
-            return formula;
-        }
 
-        String result = formula;
-
-        // 遍历contextData中的每个键值对
-        for (Map.Entry<String, Object> entry : contextData.entrySet()) {
-            Object value = entry.getValue();
-
-            // 如果值是List类型，处理数组数据
-            if (value instanceof List) {
-                List<?> listValue = (List<?>) value;
-
-                // 处理字段引用，如 f_id
-                for (Object item : listValue) {
-                    if (item instanceof Map) {
-                        Map<?, ?> mapItem = (Map<?, ?>) item;
-
-                        // 遍历Map中的所有键，查找公式中匹配的字段名
-                        for (Map.Entry<?, ?> mapEntry : mapItem.entrySet()) {
-                            String fieldName = mapEntry.getKey().toString();
-
-                            // 如果公式中包含字段名
-                            if (result.contains(fieldName)) {
-                                // 构造字段值列表
-                                StringBuilder fieldValues = new StringBuilder();
-
-                                // 收集所有元素中该字段的值
-                                for (int i = 0; i < listValue.size(); i++) {
-                                    Object listItem = listValue.get(i);
-                                    if (listItem instanceof Map) {
-                                        Map<?, ?> listItemMap = (Map<?, ?>) listItem;
-                                        Object fieldValue = listItemMap.get(fieldName);
-
-                                        if (i > 0) {
-                                            fieldValues.append(",");
-                                        }
-
-                                        // 根据值的类型进行处理，数字和布尔值不加引号
-                                        if (fieldValue instanceof String) {
-                                            fieldValues.append("\"").append(fieldValue).append("\"");
-                                        } else if (fieldValue instanceof Number || fieldValue instanceof Boolean) {
-                                            fieldValues.append(fieldValue.toString());
-                                        } else if (fieldValue == null) {
-                                            fieldValues.append("null");
-                                        } else {
-                                            fieldValues.append(fieldValue.toString());
-                                        }
-                                    }
-                                }
-
-                                // 替换公式中的字段名为值列表
-                                result = result.replace(fieldName, fieldValues.toString());
-                            }
-                        }
-                        // 处理完第一个元素后跳出，因为我们假设所有元素具有相同的结构
-                        break;
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
 
     /**
      * 将Java List转换为JS数组字面量字符串
@@ -496,6 +423,26 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    /**
+     * 将Java对象转换为JS字面量字符串
+     * - 字符串自动加引号并转义
+     * - 数字/布尔/空值保持本型
+     *
+     * @param v 值
+     * @return JS字面量字符串
+     */
+    private String toJsLiteral(Object v) {
+        if (v == null) {
+            return "null";
+        }
+        if (v instanceof Number || v instanceof Boolean) {
+            return String.valueOf(v);
+        }
+        String s = String.valueOf(v);
+        s = s.replace("\\", "\\\\").replace("\"", "\\\"");
+        return "\"" + s + "\"";
     }
 
     /**
@@ -683,58 +630,176 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     }
 
     /**
-     * 替换公式中的参数占位符
+     * 替换公式中的参数占位符，例如：
+     * {
+     *     "formula": "COUNT($数据查询节点(多条).关联主表ID)",
+     *     "parameters":
+     *     {
+     *       "$数据查询节点(多条)": "r_id",
+     *       "$数据查询节点(多条).关联主表ID": "f_id"
+     *     }
+     * }
+     * 执行完成后 "formula": "COUNT($r_id.f_id)",
      *
      * @param formula    包含$占位符的公式
      * @param parameters 参数映射
      * @return 替换占位符后的新公式
      */
     private String replaceParametersInFormula(String formula, Map<String, Object> parameters) {
+        if (!StringUtils.hasText(formula) || parameters == null || parameters.isEmpty()) {
+            return formula;
+        }
 
         String result = formula;
 
-        // 按参数名长度降序排列，确保长参数名优先匹配
-        List<Map.Entry<String, Object>> sortedParameters = new ArrayList<>(parameters.entrySet());
-        sortedParameters.sort((e1, e2) -> Integer.compare(e2.getKey().length(), e1.getKey().length()));
+        // 收集所有以$开头的键，并按长度倒序，避免短键先替换污染长键
+        List<String> keys = new ArrayList<>();
+        for (String key : parameters.keySet()) {
+            if (key != null && key.startsWith("$")) {
+                keys.add(key);
+            }
+        }
+        if (keys.isEmpty()) {
+            return result;
+        }
+        keys.sort((a, b) -> Integer.compare(b.length(), a.length()));
 
-        // 处理复杂参数名（包含点号等特殊字符）
-        for (Map.Entry<String, Object> entry : sortedParameters) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
+        for (String key : keys) {
+            Object valObj = parameters.get(key);
+            if (valObj == null) {
+                continue;
+            }
+            String val = String.valueOf(valObj).trim();
+            if (val.isEmpty()) {
+                continue;
+            }
 
-            // 如果参数键包含在公式中
-            if (result.contains(key)) {
-                String replacement;
-                // 根据参数值的类型进行适当格式化
-                if (value instanceof String) {
-                    // 检查这个参数是否是字段引用（不带引号），还是普通字符串值（带引号）
-                    // 如果key中包含"."，则认为是字段引用，不需要加引号
-                    if (key.contains(".")) {
-                        replacement = value.toString();
+            String replacement;
+            int dotIdx = key.indexOf('.', 1); // 从$之后开始找.
+            if (dotIdx > 0) {
+                // 形式: $node.field
+                String nodeName = key.substring(1, dotIdx);
+                // String fieldName = key.substring(dotIdx + 1); // 原始字段名，不再直接使用
+
+                // $node 对应的映射值作为节点映射
+                Object mappedNodeObj = parameters.get("$" + nodeName);
+                String mappedNode = mappedNodeObj == null ? nodeName : String.valueOf(mappedNodeObj).trim();
+                if (mappedNode.startsWith("$")) {
+                    mappedNode = mappedNode.substring(1);
+                }
+                // 当前键的值作为字段映射
+                String mappedField = val;
+
+                replacement = "$" + mappedNode + "." + mappedField;
+            } else {
+                // 形式: $node
+                String mappedNode = val;
+                if (mappedNode.startsWith("$")) {
+                    mappedNode = mappedNode.substring(1);
+                }
+                replacement = "$" + mappedNode;
+            }
+
+            // 精确替换该键出现的所有位置
+            result = result.replace(key, replacement);
+        }
+
+        return result;
+    }
+
+    /**
+     * 新的解析方法，用于处理流程公式中的上下文数据
+     * 该方法会将字段引用直接替换为值列表，例如将 COUNT(f_id) 转换为 COUNT(1,2,3)，例如：
+     * {
+     *  "formula": "COUNT($r_id1.f_id)",
+     *  "contextData":
+     *     {
+     *       "r_id1": [
+     *           {"f_id": 1},
+     *           {"f_id": 2},
+     *           {"f_id": 3}
+     *       ],
+     *       "r_id2": [
+     *           {"f_id": 4},
+     *           {"f_id": 5},
+     *           {"f_id": 6}
+     *       ],
+     *       "r_id3": {"f_id": 4}
+     *     }
+     * }
+     * 执行完成后 "formula": "COUNT(1,2,3)"
+     *
+     * @param formula    原始公式
+     * @param contextData 上下文数据
+     * @return 解析替换后的公式
+     */
+    private String resolveFormulaWithContextData(String formula, Map<String, Object> contextData) {
+        if (!StringUtils.hasText(formula) || contextData == null || contextData.isEmpty()) {
+            return formula;
+        }
+
+        String result = formula;
+
+        // 匹配占位符: $recordKey.fieldKey （recordKey和fieldKey均为字母/数字/下划线，recordKey以字母或下划线开头）
+        Pattern p = Pattern.compile("\\$([A-Za-z_][\\w]*)\\.([A-Za-z_][\\w]*)");
+        Matcher m = p.matcher(result);
+
+        // 收集唯一占位符，避免重复处理
+        Set<String> placeholders = new LinkedHashSet<>();
+        while (m.find()) {
+            placeholders.add(m.group(0));
+        }
+        if (placeholders.isEmpty()) {
+            return result;
+        }
+
+        for (String placeholder : placeholders) {
+            Matcher pm = p.matcher(placeholder);
+            if (!pm.matches()) {
+                continue;
+            }
+            String recordKey = pm.group(1);
+            String fieldKey = pm.group(2);
+
+            Object data = contextData.get(recordKey);
+            List<Object> values = new ArrayList<>();
+
+            if (data instanceof List) {
+                List<?> list = (List<?>) data;
+                for (Object item : list) {
+                    if (item instanceof Map) {
+                        Map<?, ?> map = (Map<?, ?>) item;
+                        values.add(map.get(fieldKey));
                     } else {
-                        // 普通字符串值需要加引号
-                        replacement = "\"" + value.toString() + "\"";
-                    }
-                } else if (value instanceof Number || value instanceof Boolean) {
-                    // 数字和布尔值直接转换为字符串
-                    replacement = value.toString();
-                } else if (value == null) {
-                    // null值替换为JavaScript的null
-                    replacement = "null";
-                } else {
-                    // 其他类型如果是字段引用则不加引号，否则加引号
-                    if (key.contains(".")) {
-                        replacement = value.toString();
-                    } else {
-                        replacement = "\"" + value.toString() + "\"";
+                        // 若为非Map元素，直接当作值使用
+                        values.add(item);
                     }
                 }
-
-                // 替换公式中的参数
-                result = result.replace(key, replacement);
+            } else if (data instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) data;
+                values.add(map.get(fieldKey));
+            } else if (data != null) {
+                // 其他类型，直接当作单值
+                values.add(data);
             }
+
+            // 将值拼接为逗号分隔的JS字面量参数列表；空集用 null 占位，避免出现 COUNT()
+            StringBuilder sb = new StringBuilder();
+            if (values.isEmpty()) {
+                sb.append("null");
+            } else {
+                for (int i = 0; i < values.size(); i++) {
+                    sb.append(toJsLiteral(values.get(i)));
+                    if (i < values.size() - 1) {
+                        sb.append(",");
+                    }
+                }
+            }
+
+            result = result.replace(placeholder, sb.toString());
         }
 
         return result;
     }
 }
+

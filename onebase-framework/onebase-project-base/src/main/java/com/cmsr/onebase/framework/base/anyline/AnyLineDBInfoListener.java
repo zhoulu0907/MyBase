@@ -226,6 +226,12 @@ public class AnyLineDBInfoListener implements DMListener {
         return SWITCH.CONTINUE;
     }
 
+    private void log(String msg, Object... args) {
+        if (ConfigTable.IS_DEBUG) {
+            log.info(msg, args);
+        }
+    }
+
     /**
      * 检查是否是简单的测试查询
      *

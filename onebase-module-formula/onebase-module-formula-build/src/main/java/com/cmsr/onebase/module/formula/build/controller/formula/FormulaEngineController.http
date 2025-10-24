@@ -86,16 +86,22 @@ Content-Type: application/json
     "formula": "COUNT($数据查询节点(多条).关联主表ID)",
     "parameters":
     {
-      "$数据查询节点(多条)": "r_id",
+      "$数据查询节点(多条)": "r_id1",
       "$数据查询节点(多条).关联主表ID": "f_id"
     },
     "contextData":
     {
-      "r_id": [
+      "r_id1": [
           {"f_id": 1},
           {"f_id": 2},
           {"f_id": 3}
-      ]
+      ],
+      "r_id2": [
+          {"f_id": 4},
+          {"f_id": 5},
+          {"f_id": 6}
+      ],
+      "r_id3": {"f_id": 4}
     }
 }
 

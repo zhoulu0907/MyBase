@@ -89,6 +89,44 @@ public class FormulaFunctionDemo {
      * @author matianyu
      * @date 2025-09-01
      */
+    public void testMetaDataFormulas1() {
+        log.info("\n=== 元数据函数测试（含ContextData解析） ===");
+
+        // 构造上下文数据：recordList
+        ContextData contextData = new ContextData();
+        contextData.setRecordList(new ArrayList<>());
+
+        Map<String, Object> r1 = new HashMap<>();
+        r1.put("id", 2);
+        r1.put("status", "完成");
+        r1.put("amount", 100);
+        contextData.getRecordList().add(r1);
+
+        Map<String, Object> r2 = new HashMap<>();
+        r2.put("id", 1);
+        r2.put("status", "未完成");
+        r2.put("amount", 50);
+        contextData.getRecordList().add(r2);
+
+        // COUNT：COUNT([$recordList.id]) => 2
+        String c1 = "COUNT($查询节点.主键ID)";
+        // 参数
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("$查询节点", "data_id_10");
+        parameters.put("$查询节点.主键ID", "f_id_10");
+
+
+        Object rc1 = formulaEngineService.executeFormulaWithParams(c1, new HashMap<>(), contextData);
+        log.info("COUNT: {} = {}", c1, rc1);
+
+    }
+        /**
+         * 条件汇总/计数与日期/逻辑函数验证
+         * 覆盖：SUMIF、SUMIFS、COUNTIFS、DAY、MONTH、DATEDIF、IF
+         *
+         * @author matianyu
+         * @date 2025-09-01
+         */
     public void testMetaDataFormulas() {
         log.info("\n=== 元数据函数测试（含ContextData解析） ===");
 

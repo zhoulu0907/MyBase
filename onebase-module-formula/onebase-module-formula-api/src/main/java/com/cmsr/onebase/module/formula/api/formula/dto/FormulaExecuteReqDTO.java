@@ -18,12 +18,12 @@ public class FormulaExecuteReqDTO {
     private String formula;
 
     /**
-     * 公式参数
+     * 公式执行参数，寻找公式中的参数并替换为唯一标志ID（编辑态存的）
      */
     private Map<String, Object> parameters;
 
     /**
-     * 上下文参数
+     * 公式执行数据，上游给的上下文数据（运行时给出）
      */
     private Map<String, Object> contextData;
 
