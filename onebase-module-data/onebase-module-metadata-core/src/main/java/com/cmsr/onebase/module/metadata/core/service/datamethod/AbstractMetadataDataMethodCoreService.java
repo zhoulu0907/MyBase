@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
@@ -399,8 +400,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 9. 唯一性校验和条件校验
             validateUniqueness(context);//todo 暂未实现
 
-            // 10. 前置自动化工作流触发
-            executePreWorkflow(context);//暂未实现
+            try{
+                // 10. 前置自动化工作流触发
+                executePreWorkflow(context);//暂未实现
+            }catch (Exception e){
+                log.error("执行前置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
+//                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
+            }
 
             // 11. 数据编号
             generateDataNumber(context);//todo 暂未实现
@@ -408,8 +414,15 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 12. 数据存储
             storeData(context);//todo 实现了create的方法
 
-            // 13. 后置自动化工作流触发
-            executePostWorkflow(context);//todo 暂未实现
+            try{
+                // 13. 后置自动化工作流触发
+                executePostWorkflow(context);//todo 暂未实现
+            }catch (Exception e){
+                log.error("执行后置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
+//                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
+            }
+
+
 
             getData(context);
 
