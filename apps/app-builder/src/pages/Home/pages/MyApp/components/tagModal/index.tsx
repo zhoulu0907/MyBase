@@ -25,7 +25,7 @@ const TagModal: React.FC<TagModalProps> = ({ visible, onOk, onCancel }) => {
     
     const res = await updateApplicationTag(tagList);
     if (res) {
-      Message.success('保存成功');
+      Message.success('更新成功');
       onOk();
     }
   };
