@@ -3,10 +3,7 @@ package com.cmsr.onebase.dolphins.workflowinsatnce;
 import com.cmsr.onebase.dolphins.BaseTest;
 import com.cmsr.onebase.dolphins.enums.*;
 import com.cmsr.onebase.dolphins.workflowinstance.WorkflowInstanceCreateParam;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class WorkflowInstanceTest extends BaseTest {
@@ -16,6 +13,7 @@ public class WorkflowInstanceTest extends BaseTest {
 
   /** the workflow must in online state,otherwise will cause error */
   @Test
+  @Order(1)
   public void testStartInstance() {
 
     WorkflowInstanceCreateParam startParam = new WorkflowInstanceCreateParam();
@@ -39,11 +37,13 @@ public class WorkflowInstanceTest extends BaseTest {
   }
 
   @Test
+  @Order(2)
   public void testReRun() {
     Assertions.assertTrue(getClient().opsForProcessInst().reRun(projectCode, WORK_FLOW_INSTANCEID));
   }
 
   @Test
+  @Order(3)
   public void testPage() {
     getClient()
         .opsForProcessInst()
@@ -52,6 +52,7 @@ public class WorkflowInstanceTest extends BaseTest {
   }
 
   @Test
+  @Order(4)
   public void testDelete() {
     Assertions.assertTrue(getClient().opsForProcessInst().delete(projectCode, WORK_FLOW_INSTANCEID));
   }
