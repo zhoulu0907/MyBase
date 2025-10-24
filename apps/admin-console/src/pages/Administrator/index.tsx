@@ -30,10 +30,7 @@ const Administrator: React.FC = () => {
       title: '序号',
       dataIndex: 'order',
       key: 'order',
-      render: (text: any, record: any, index: number) => {
-        console.log(text,record)
-        return index + 1;
-      },
+      render: (_text: any, _record: any, index: number) => index + 1,
       width: '5%',
       // fixed: 'left',
     },
