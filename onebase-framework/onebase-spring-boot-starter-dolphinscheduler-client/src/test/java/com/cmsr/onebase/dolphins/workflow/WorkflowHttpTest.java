@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 /** the test for workflow/process */
 public class WorkflowHttpTest extends BaseTest {
 
-  public static final String WORKFLOW_NAME = "test-dag2";
+  public static final String WORKFLOW_NAME = "test-httptask-dag";
 
   /**
    * create simple workflow like: shellTask -> httpTask
