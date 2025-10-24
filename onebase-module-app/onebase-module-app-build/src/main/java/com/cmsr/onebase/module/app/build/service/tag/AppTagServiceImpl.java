@@ -2,12 +2,16 @@ package com.cmsr.onebase.module.app.build.service.tag;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.util.AuthUtils;
+import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.tag.TagDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.vo.tag.TagGroupCountVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -26,6 +30,9 @@ public class AppTagServiceImpl implements AppTagService {
 
     @Resource
     private AppTagRepository tagRepository;
+
+    @Resource
+    private AppApplicationTagRepository appApplicationTagRepository;
 
 
     @Override
@@ -48,6 +55,32 @@ public class AppTagServiceImpl implements AppTagService {
     @Override
     public void deleteTag(Long tagId) {
         tagRepository.deleteById(tagId);
+    }
+
+    @Override
+    public List<TagGroupCountVO> groupCount() {
+        return tagRepository.groupCount();
+    }
+
+    @Override
+    public void updateTags(List<TagRespVO> tagRespVOS) {
+        List<TagDO> tagDOS = tagRepository.findAllTags();
+        List<Pair<TagDO, TagRespVO>> pairs = AuthUtils.fullOuterJoin(tagDOS, tagRespVOS, (tagDO, tagRespVO) -> tagDO.getId().equals(tagRespVO.getId()));
+        for (Pair<TagDO, TagRespVO> pair : pairs) {
+            TagDO tagDO = pair.getLeft();
+            TagRespVO tagRespVO = pair.getRight();
+            if (tagDO == null) {
+                tagDO = new TagDO();
+                tagDO.setTagName(tagRespVO.getTagName());
+                tagRepository.insert(tagDO);
+            } else if (tagRespVO == null) {
+                tagRepository.deleteById(tagDO.getId());
+                appApplicationTagRepository.deleteByTagId(tagDO.getId());
+            } else {
+                tagDO.setTagName(tagRespVO.getTagName());
+                tagRepository.update(tagDO);
+            }
+        }
     }
 
 }
