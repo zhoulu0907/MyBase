@@ -230,6 +230,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       }
     } else {
       // id为空，属于新增，需要重置子表数据长度为0
+      setEditTargetId('');
       pagesRuntimeSignal.resetSubTableDataLength();
     }
 

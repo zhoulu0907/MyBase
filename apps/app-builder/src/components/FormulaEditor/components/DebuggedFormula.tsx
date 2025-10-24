@@ -1,7 +1,7 @@
 import { DatePicker, Form, Input, InputNumber, Typography } from "@arco-design/web-react";
-import { IconArrowRight } from "@arco-design/web-react/icon";
+import { IconArrowRight, IconLoading } from "@arco-design/web-react/icon";
 import styles from "./DebuggedFormula.module.less";
-import { executeFormula } from "@onebase/app";
+import { debugFormula } from "@onebase/app";
 import { useState } from "react";
 const FormItem = Form.Item;
 
@@ -19,20 +19,39 @@ interface DebuggedFormulaProps {
 export function DebuggedFormula(props: DebuggedFormulaProps) {
   const { allRelatedVariables, formula } = props;
   const [displayValue, setDisplayValue] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(false);  //当调用接口的时候显示加载中
   const [form] = Form.useForm();
 
   const handleFormula = async() => {
+    setLoading(true);
      try {
       const values = await form.validate();
       console.log('提交数据 values:', values);
-      const data = await executeFormula({
+      let newValidFieldResult:{[key: string]: any}= {};
+      Object.keys(values)?.map(key => {
+        const fieldObj = values[key];
+        if(typeof fieldObj === "object") {
+          const fieldName = key + "." + Object.keys(fieldObj);
+          const fieldValue = Object.values(fieldObj);
+          newValidFieldResult[fieldName] = fieldValue?.[0] || ""
+        }else {
+          newValidFieldResult  = {
+            ...newValidFieldResult,
+            [key]: fieldObj
+          }
+        }
+        
+      })
+      const data = await debugFormula({
         formula: formula,
-        parameters: values
+        parameters: newValidFieldResult
       });
       setDisplayValue(data.result);
       console.log(data,"data")
     } catch (error) {
       console.log('提交数据失败 error:', error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -56,7 +75,8 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
       <div className={styles.content}>
           <Form className={styles.variablesDisplay} form={form}>
           {allRelatedVariables.map((item) => {
-            return <FormItem label={item.fieldName} field={item.fieldName} required>
+            console.log(form.getFieldValue(item.fieldName),"11")
+            return <FormItem label={item.fieldName} field={item.fieldName} rules={[{required: true}]}>
               {renderFormItem(item.fieldType)}
             </FormItem>
           })}
@@ -65,7 +85,9 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
           <span>公式计算</span>
           <IconArrowRight style={{ fontSize: 30, color: "#4FAE7B" }}/>
         </div>
-        <div className={styles.rightContent}>{displayValue}</div>
+        <div className={styles.rightContent}>
+            {loading ? <IconLoading fontSize={24} /> : displayValue}
+        </div>
       </div>
     </div>
   );
