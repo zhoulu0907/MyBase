@@ -96,18 +96,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
     const formData = form.getFieldsValue();
 
-    console.log('formData: ', formData[id]);
-
     const filterFormData = formData[id].filter((_: any, i: number) => i !== index);
-
-    console.log('filterFormData: ', filterFormData);
 
     const updateFormData = {
       ...formData,
       [id]: filterFormData
     };
-
-    console.log('updateFormData: ', updateFormData);
 
     form.setFieldsValue(updateFormData);
   };
