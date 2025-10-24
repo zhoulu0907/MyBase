@@ -22,5 +22,5 @@ export const getFormulaById = (id: string) => {
  * @returns 返回计算结果
  */
 export const debugFormula = (formulaData: formulaParams) => {
-  return formulaService.post('/engine/debugFormula',formulaData);
+  return formulaService.post('/engine/debug-formula',formulaData);
 }

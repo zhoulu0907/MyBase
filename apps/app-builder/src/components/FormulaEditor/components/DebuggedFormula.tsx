@@ -1,8 +1,8 @@
-import { DatePicker, Form, Input, InputNumber, Typography } from "@arco-design/web-react";
-import { IconArrowRight, IconLoading } from "@arco-design/web-react/icon";
+import { DatePicker, Form, Input, InputNumber, Table, Typography } from "@arco-design/web-react";
+import { IconArrowRight, IconLoading, IconPlusCircle } from "@arco-design/web-react/icon";
 import styles from "./DebuggedFormula.module.less";
-import { debugFormula } from "@onebase/app";
-import { useState } from "react";
+import { debugFormula, type fieldListWithNodeData } from "@onebase/app";
+import { useRef, useState } from "react";
 const FormItem = Form.Item;
 
 interface variableItem {
@@ -12,39 +12,56 @@ interface variableItem {
 }
 
 interface DebuggedFormulaProps {
-  allRelatedVariables: variableItem[],
-  formula: string
+  entityFields: variableItem[],
+  formula: string,
+  tableData: fieldListWithNodeData;
 }
 
 export function DebuggedFormula(props: DebuggedFormulaProps) {
-  const { allRelatedVariables, formula } = props;
+  const { entityFields, formula, tableData = {} } = props;
   const [displayValue, setDisplayValue] = useState<any>();
   const [loading, setLoading] = useState<boolean>(false);  //当调用接口的时候显示加载中
   const [form] = Form.useForm();
+  const formRef = useRef(null); // Form实例引用
+
+  const transformTableData = (items: fieldListWithNodeData[]) => {
+    const result:{[key: string]: string[]}  = {};
+    Object.entries(items).forEach(([tableKey, rows]) => {
+      if (!rows.length) return;
+      if(tableKey.includes("$")){
+        const newTableKey = tableKey.replace("tableRows","");
+        const fieldNames = Object.keys(rows[0]);
+        // 遍历每个字段名，提取所有行的该字段值
+        fieldNames.forEach(fieldName => {
+          // 生成目标 key：表格标识 + 字段名（如 "tableRows$数据查询节点(多条)111.任务名称"）
+          const targetKey= `${newTableKey}.${fieldName}`;
+          result[targetKey] = (rows as any)?.map((row:any) => row[fieldName] || '');
+        });
+      }
+    });
+    return result;
+  }
 
   const handleFormula = async() => {
     setLoading(true);
      try {
       const values = await form.validate();
-      console.log('提交数据 values:', values);
+      const allData = formRef.current?.getFieldsValue() || [];
+      const formattedTableData = transformTableData(allData);
       let newValidFieldResult:{[key: string]: any}= {};
       Object.keys(values)?.map(key => {
         const fieldObj = values[key];
-        if(typeof fieldObj === "object") {
-          const fieldName = key + "." + Object.keys(fieldObj);
-          const fieldValue = Object.values(fieldObj);
-          newValidFieldResult[fieldName] = fieldValue?.[0] || ""
-        }else {
+        if(!key.includes("$")) {
           newValidFieldResult  = {
             ...newValidFieldResult,
             [key]: fieldObj
           }
         }
-        
       })
+      console.log("22",newValidFieldResult, formattedTableData);
       const data = await debugFormula({
         formula: formula,
-        parameters: newValidFieldResult
+        parameters: {...(newValidFieldResult || {}),...(formattedTableData || {})}
       });
       setDisplayValue(data.result);
       console.log(data,"data")
@@ -66,6 +83,33 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
     }
   }
 
+  //生成table的column数据
+  const getColumns = (rootField: string, fields: variableItem[]) => {
+    const columns = fields.map(data => ({
+        title: data.fieldName,
+        dataIndex: data.fieldName,
+        key: data.fieldName,
+        width: 120,
+        render: (_:any, record:any, index:number) => (
+          <Form.Item
+            field={`tableRows${rootField}[${index}].${data.fieldName}`} 
+            rules={[{ required: true}]}
+          >
+            <Input />
+          </Form.Item>
+        ),
+    }));
+    return columns;
+  }
+
+   //生成新增行的空数据结构
+  const getNewRow = (fieldConfig: variableItem[]) => {
+    return fieldConfig.reduce((row:any, { fieldName }) => {
+      row[fieldName] = '';
+      return row;
+    }, {});
+  };
+
   return (
     <div className={styles.debugModeContainer}>
       <div className={styles.header}>
@@ -73,13 +117,40 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         <Typography.Title heading={6} className={styles.rightTitle}>公式计算结果</Typography.Title>
       </div>
       <div className={styles.content}>
-          <Form className={styles.variablesDisplay} form={form}>
-          {allRelatedVariables.map((item) => {
-            console.log(form.getFieldValue(item.fieldName),"11")
+          <Form className={styles.variablesDisplay} form={form} ref={formRef} >
+          {entityFields.map((item) => {
             return <FormItem label={item.fieldName} field={item.fieldName} rules={[{required: true}]}>
               {renderFormItem(item.fieldType)}
             </FormItem>
           })}
+          {/* 表格 */}
+         {Object.keys(tableData)?.map((key) => {
+          return (
+            <>
+              <Typography.Title heading={6}>{key}</Typography.Title>
+              <Form.List field="tableRows" initialValue={tableData[key].fieldList.length > 0 ? [getNewRow(tableData[key].fieldList)] : []}>
+                 {(fields, {add}) => {
+                  return (
+                    <>
+                    <Table
+                      border={false}
+                      columns={getColumns(key,tableData[key].fieldList)}
+                      data={fields.map(item => item.key)}
+                      rowKey="id"
+                      pagination = {false}
+                    />
+                    <IconPlusCircle  
+                      fontSize={24} className={styles.iconPlus} 
+                      onClick={() => {
+                        add(getNewRow(tableData[key].fieldList));
+                      }} />
+                    </>
+                  )
+                 }}
+             </Form.List>
+            </>
+          )
+         })}
         </Form>
         <div className={styles.calculateIcon} onClick={handleFormula} >
           <span>公式计算</span>

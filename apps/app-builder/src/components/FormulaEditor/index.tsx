@@ -1,5 +1,5 @@
 import { Message, Modal, Grid } from '@arco-design/web-react';
-import { getFormulaById, getFormulaFunctionSimpleList, type VariablesList, type variableItem, getEntityListByApp, getEntityFields, type ChildVariablesField } from '@onebase/app';
+import { getFormulaById, getFormulaFunctionSimpleList, type VariablesList, type variableItem, getEntityListByApp, getEntityFields, type ChildVariablesField, type fieldListWithNodeData } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { FormulaInput, FunctionList, InfoPanel, VariableList, DebuggedFormula } from './components';
@@ -297,22 +297,46 @@ const getFieldType = (keyName: string, value: any) => {
 }
 
 /**
- * 调试模式-字段赋值区域
+ * 调试模式下获取只包含实体的数据
  * 
  */
-const getAllRelatedVariables = () => {
+const displayEntityField = () => {
   const currentVariablesObj = getParameters(formula);
   let newVariablesData: variableItem[] = [];
   if (variables.length > 0) {
     Object.keys(currentVariablesObj).forEach(key => {
-        newVariablesData.push({
-          fieldName: key,
-          fieldId: currentVariablesObj[key],
-          fieldType: getFieldType(key,currentVariablesObj[key])
-        })
+        if(!key.includes("$")) {
+          newVariablesData.push({
+            fieldName: key,
+            fieldId: currentVariablesObj[key],
+            fieldType: getFieldType(key,currentVariablesObj[key])
+          })
+        }
     })
   }
   return newVariablesData;
+}
+
+/**调试模式下获取只包含节点的数据 */
+const displaywithNodeField = () => {
+  const currentVariablesObj = getParameters(formula);
+  const newObj:fieldListWithNodeData = {};
+  // 遍历原对象中以 $ 开头的键
+  for (const key in currentVariablesObj) {
+    if (key.startsWith('$')) {
+      const [baseKey, name] = key.split('.'); // 分割为 [基础key, 字段名name]
+      const id = currentVariablesObj[key]; // id 为原键对应的值
+      if (name) {
+        // 初始化 newObj 中的基础 key 结构，fieldList 为对象数组
+        if (!newObj[baseKey]) {
+          newObj[baseKey] = { fieldList: [] };
+        }
+        // 构建 { id, name } 对象并添加到 fieldList
+        newObj[baseKey].fieldList.push({ fieldId: id, fieldName: name , fieldType: "NUMBER"});
+      }
+    }
+  }
+  return newObj;
 }
 
 /**点击调试 */
@@ -326,7 +350,9 @@ const handleCancel = () => {
   onCancel();
 }
 
-const allRelatedVariables = getAllRelatedVariables();
+const entityFields = displayEntityField();
+
+const tableData = displaywithNodeField();
 
 return (
   <Modal
@@ -361,7 +387,7 @@ return (
         />
       {/* 底部面板（变量名称/函数公式/函数概要） */}
       {isDebugMode ?
-        <DebuggedFormula allRelatedVariables={allRelatedVariables} formula={formattedFormula()} /> :
+        <DebuggedFormula entityFields={entityFields} tableData={tableData} formula={formattedFormula()} /> :
         <Row>
           <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
             <VariableList

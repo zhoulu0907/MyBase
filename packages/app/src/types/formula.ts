@@ -49,3 +49,9 @@ export interface variableItem{
   fieldId: string, 
   fieldType: string
 }
+
+export interface fieldListWithNodeData {
+  [key: string] : {
+    fieldList: variableItem[]
+  }
+}
