@@ -369,13 +369,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <Form.Item initialValue={col} field={`${id}.${index}.${column.dataIndex}`}>
-                <FormComp.XAutoCode
-                  {...FormSchema.XAutoCodeSchema.config}
-                  label={{ text: col.title, display: false }}
-                  runtime={runtime}
-                />
-              </Form.Item>
+              <FormComp.XAutoCode
+                {...FormSchema.XAutoCodeSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+              />
             );
           }
         });

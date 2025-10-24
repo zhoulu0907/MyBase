@@ -140,7 +140,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
           <Select
             placeholder="请选择"
             onPopupScroll={scrollHandler}
-            getPopupContainer={(node) => node.parentNode as HTMLElement}
+            getPopupContainer={(node) => node.parentNode?.parentNode as HTMLElement}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'
@@ -164,6 +164,11 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
               value: option.id,
               subValue: option.nickname
             }))}
+            triggerProps={{
+              autoAlignPopupWidth: false,
+              autoAlignPopupMinWidth: true,
+              position: 'bl',
+            }}
             dropdownRender={(menu) => (
               <div>
                 <div className='dropdownRender'>
