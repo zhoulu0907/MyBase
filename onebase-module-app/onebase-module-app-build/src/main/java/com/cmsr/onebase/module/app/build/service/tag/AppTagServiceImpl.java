@@ -29,7 +29,7 @@ import java.util.List;
 public class AppTagServiceImpl implements AppTagService {
 
     @Resource
-    private AppTagRepository tagRepository;
+    private AppTagRepository appTagRepository;
 
     @Resource
     private AppApplicationTagRepository appApplicationTagRepository;
@@ -37,34 +37,34 @@ public class AppTagServiceImpl implements AppTagService {
 
     @Override
     public List<TagRespVO> listTags(String tagName) {
-        List<TagDO> tagDOS = tagRepository.findByTagNameLike(tagName);
+        List<TagDO> tagDOS = appTagRepository.findByTagNameLike(tagName);
         return BeanUtils.toBean(tagDOS, TagRespVO.class);
     }
 
     @Override
     public void createTag(String tagName) {
-        long count = tagRepository.countByTagName(tagName);
+        long count = appTagRepository.countByTagName(tagName);
         if (count > 0) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_TAG_EXIST);
         }
         TagDO tagDO = new TagDO();
         tagDO.setTagName(tagName);
-        tagRepository.insert(tagDO);
+        appTagRepository.insert(tagDO);
     }
 
     @Override
     public void deleteTag(Long tagId) {
-        tagRepository.deleteById(tagId);
+        appTagRepository.deleteById(tagId);
     }
 
     @Override
     public List<TagGroupCountVO> groupCount() {
-        return tagRepository.groupCount();
+        return appTagRepository.groupCount();
     }
 
     @Override
     public void updateTags(List<TagRespVO> tagRespVOS) {
-        List<TagDO> tagDOS = tagRepository.findAllTags();
+        List<TagDO> tagDOS = appTagRepository.findAllTags();
         List<Pair<TagDO, TagRespVO>> pairs = AuthUtils.fullOuterJoin(tagDOS, tagRespVOS, (tagDO, tagRespVO) -> tagDO.getId().equals(tagRespVO.getId()));
         for (Pair<TagDO, TagRespVO> pair : pairs) {
             TagDO tagDO = pair.getLeft();
@@ -72,13 +72,13 @@ public class AppTagServiceImpl implements AppTagService {
             if (tagDO == null) {
                 tagDO = new TagDO();
                 tagDO.setTagName(tagRespVO.getTagName());
-                tagRepository.insert(tagDO);
+                appTagRepository.insert(tagDO);
             } else if (tagRespVO == null) {
-                tagRepository.deleteById(tagDO.getId());
+                appTagRepository.deleteById(tagDO.getId());
                 appApplicationTagRepository.deleteByTagId(tagDO.getId());
             } else {
                 tagDO.setTagName(tagRespVO.getTagName());
-                tagRepository.update(tagDO);
+                appTagRepository.update(tagDO);
             }
         }
     }
