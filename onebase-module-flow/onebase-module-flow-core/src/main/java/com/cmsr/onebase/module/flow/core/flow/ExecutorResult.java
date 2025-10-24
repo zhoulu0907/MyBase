@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 public class ExecutorResult {
 
-    private Long logId;
+    private String traceId;
 
     private boolean success;
 
@@ -30,4 +30,19 @@ public class ExecutorResult {
     private String executionEndNodeTag;
 
     private Map<String, Object> outputParams;
+
+    public static ExecutorResult error(String message) {
+        ExecutorResult result = new ExecutorResult();
+        result.setSuccess(false);
+        result.setMessage(message);
+        return result;
+    }
+
+    public static ExecutorResult error(String message, Exception cause) {
+        ExecutorResult result = new ExecutorResult();
+        result.setSuccess(false);
+        result.setMessage(message);
+        result.setCause(cause);
+        return result;
+    }
 }

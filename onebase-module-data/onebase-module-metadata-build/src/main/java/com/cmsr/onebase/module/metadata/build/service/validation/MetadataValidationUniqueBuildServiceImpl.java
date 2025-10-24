@@ -177,7 +177,16 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationUniqueDO recordToDelete = uniqueRepository.findOneByFieldId(fieldId);
+        
+        // 删除唯一性校验记录
         uniqueRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
         
         // 同步更新字段的唯一性状态为非唯一
         syncFieldUniqueStatus(fieldId, false);
@@ -204,14 +213,22 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         var list = uniqueRepository.findByGroupId(id);
-        if (list.isEmpty()) { return; }
-        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条唯一性校验规则(组ID=" + id + ")"); }
-        MetadataValidationUniqueDO uniqueDO = list.get(0);
-        Long fieldId = uniqueDO.getFieldId();
-        Long groupId = uniqueDO.getGroupId();
-        uniqueRepository.deleteById(uniqueDO.getId());
-        if (fieldId != null) { syncFieldUniqueStatus(fieldId, false); }
-        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
+        
+        // 删除子表记录和同步字段状态
+        if (!list.isEmpty()) {
+            if (list.size() > 1) {
+                throw new IllegalStateException("数据异常：同一组存在多条唯一性校验规则(组ID=" + id + ")");
+            }
+            MetadataValidationUniqueDO uniqueDO = list.get(0);
+            Long fieldId = uniqueDO.getFieldId();
+            uniqueRepository.deleteById(uniqueDO.getId());
+            if (fieldId != null) {
+                syncFieldUniqueStatus(fieldId, false);
+            }
+        }
+        
+        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        ruleGroupService.safeDeleteGroupDirect(id);
     }
     
     /**

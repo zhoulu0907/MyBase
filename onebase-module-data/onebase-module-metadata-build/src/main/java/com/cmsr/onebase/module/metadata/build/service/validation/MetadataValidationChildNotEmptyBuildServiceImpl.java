@@ -87,16 +87,32 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        // 先校验记录是否存在
+        // 先尝试按主键ID查找记录
         MetadataValidationChildNotEmptyDO existing = childNotEmptyRepository.findById(id);
-        if (existing == null) {
-            throw new IllegalArgumentException("子表非空校验规则不存在，ID: " + id);
+        Long groupIdToDelete = null;
+        
+        if (existing != null) {
+            // 按主键ID找到了记录
+            groupIdToDelete = existing.getGroupId();
+            childNotEmptyRepository.deleteById(id);
+        } else {
+            // 按主键ID未找到，尝试按groupId查找
+            var list = childNotEmptyRepository.findByGroupId(id);
+            if (!list.isEmpty()) {
+                if (list.size() > 1) {
+                    throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组ID=" + id + ")");
+                }
+                MetadataValidationChildNotEmptyDO validationDO = list.get(0);
+                childNotEmptyRepository.deleteById(validationDO.getId());
+            }
+            // 将id作为groupId删除
+            groupIdToDelete = id;
         }
         
-        // 执行删除
-        Long groupId = existing.getGroupId();
-        childNotEmptyRepository.deleteById(id);
-        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
+        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        if (groupIdToDelete != null) {
+            ruleGroupService.safeDeleteGroupDirect(groupIdToDelete);
+        }
     }
 
     @Override
@@ -216,6 +232,15 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        MetadataValidationChildNotEmptyDO recordToDelete = childNotEmptyRepository.findOneByFieldId(fieldId);
+        
+        // 删除子表非空校验记录
         childNotEmptyRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组
+        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        }
     }
 }

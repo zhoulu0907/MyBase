@@ -92,7 +92,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                     vo.setMessage("表单不满足触发条件");
                     return vo;
                 } else {
-                    //TODO 增加调用的用户
+                    //TODO 增加记录调用的用户id
                     ExecutorResult executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), reqVO.getProcessId(), inputMap);
                     return formTriggerRespVO(executorResult);
                 }
@@ -128,6 +128,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     private FormTriggerRespVO formTriggerRespVO(ExecutorResult executorResult) {
         FormTriggerRespVO respVO = new FormTriggerRespVO();
+        respVO.setTraceId(executorResult.getTraceId());
         respVO.setTriggered(true);
         respVO.setSuccess(executorResult.isSuccess());
         respVO.setCode(executorResult.getCode());

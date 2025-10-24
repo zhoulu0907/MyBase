@@ -14,7 +14,7 @@ import java.util.List;
 public class AuthDetailViewVO {
 
     @Schema(description = "所有视图可访问")
-    private Integer isAllViewsAllowed = 0;
+    private Integer isAllViewsAllowed;
 
     @Schema(description = "实体访问权限")
     private List<AuthViewVO> authViews;

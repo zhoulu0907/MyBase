@@ -7,6 +7,8 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 应用权限功能数据访问层
  *
@@ -26,5 +28,12 @@ public class AppAuthPermissionRepository extends DataRepository<AuthPermissionDO
         configs.eq("role_id", reqVO.getRoleId());
         configs.eq("menu_id", reqVO.getMenuId());
         return this.findOne(configs);
+    }
+
+    public List<AuthPermissionDO> findByApplicationIdAndRoleId(Long applicationId, Long roleId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("role_id", roleId);
+        return this.findAllByConfig(configs);
     }
 }

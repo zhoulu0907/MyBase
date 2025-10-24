@@ -104,12 +104,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         appCommonService.validateRoleExist(reqVO.getRoleId());
         MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         Long entityId = menuDO.getEntityId();
-
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
         //数据权限
-
-
         List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
         if (CollectionUtils.isEmpty(authDataGroupDOS)) {
             authDataGroupDOS = AuthDefaultFactory.createListAuthDataGroupDOList(reqVO);
@@ -132,7 +129,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
         dataPermissionVO.setScopeFields(queryScopeFields(entityId));
         dataPermissionVO.setDataFilterFields(queryDataFilterFields(entityId));
-        //补充全部的字段名称属性
         return dataPermissionVO;
     }
 
@@ -275,29 +271,28 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         }
     }
 
-    private void upsetAuthField(AuthPermissionReqVO permissionReq, AuthFieldVO authField) {
+    private void upsetAuthField(AuthPermissionReqVO permissionReq, AuthFieldVO authFieldVO) {
         AuthFieldDO authFieldDO = null;
-        if (authField.getId() != null) {
-            authFieldDO = authFieldRepository.findById(authField.getId());
+        if (authFieldVO.getId() != null) {
+            authFieldDO = authFieldRepository.findById(authFieldVO.getId());
         }
         if (authFieldDO == null) {
-            authFieldDO = authFieldRepository.findByQuery(permissionReq, authField.getId());
+            authFieldDO = authFieldRepository.findByQuery(permissionReq, authFieldVO.getFieldId());
         }
         if (authFieldDO == null) {
             authFieldDO = new AuthFieldDO();
             authFieldDO.setApplicationId(permissionReq.getApplicationId());
             authFieldDO.setRoleId(permissionReq.getRoleId());
             authFieldDO.setMenuId(permissionReq.getMenuId());
-            authFieldDO.setFieldId(authField.getFieldId());
-            authFieldDO.setIsCanRead(authField.getIsCanRead());
-            authFieldDO.setIsCanEdit(authField.getIsCanEdit());
-            authFieldDO.setIsCanDownload(authField.getIsCanDownload());
+            authFieldDO.setFieldId(authFieldVO.getFieldId());
+            authFieldDO.setIsCanRead(authFieldVO.getIsCanRead());
+            authFieldDO.setIsCanEdit(authFieldVO.getIsCanEdit());
+            authFieldDO.setIsCanDownload(authFieldVO.getIsCanDownload());
             authFieldRepository.insert(authFieldDO);
         } else {
-            authFieldDO.setFieldId(authField.getFieldId());
-            authFieldDO.setIsCanRead(authField.getIsCanRead());
-            authFieldDO.setIsCanEdit(authField.getIsCanEdit());
-            authFieldDO.setIsCanDownload(authField.getIsCanDownload());
+            authFieldDO.setIsCanRead(authFieldVO.getIsCanRead());
+            authFieldDO.setIsCanEdit(authFieldVO.getIsCanEdit());
+            authFieldDO.setIsCanDownload(authFieldVO.getIsCanDownload());
             authFieldRepository.update(authFieldDO);
         }
     }
@@ -307,10 +302,10 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
         if (authPermissionDO == null) {
             authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
-            authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllViewsAllowed());
+            authPermissionDO.setIsAllViewsAllowed(reqVO.getIsAllViewsAllowed());
             authPermissionRepository.insert(authPermissionDO);
         } else {
-            authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllViewsAllowed());
+            authPermissionDO.setIsAllViewsAllowed(reqVO.getIsAllViewsAllowed());
             authPermissionRepository.update(authPermissionDO);
         }
         if (authPermissionDO != null && reqVO.getIsAllViewsAllowed() == 1) {
@@ -326,11 +321,11 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private void upsetViewField(AuthPermissionReqVO permissionReq, AuthViewVO authViewVO) {
         AuthViewDO authViewDO = null;
-        if (authViewDO.getId() != null) {
+        if (authViewVO.getId() != null) {
             authViewDO = authViewRepository.findById(authViewVO.getId());
         }
         if (authViewDO == null) {
-            authViewDO = authViewRepository.findByQuery(permissionReq, authViewVO.getId());
+            authViewDO = authViewRepository.findByQuery(permissionReq, authViewVO.getViewId());
         }
         if (authViewDO == null) {
             authViewDO = new AuthViewDO();
@@ -419,6 +414,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             AuthFieldVO authFieldVO = new AuthFieldVO();
             authFieldVO.setFieldId(entityField.getId());
             authFieldVO.setFieldType(entityField.getFieldType());
+            authFieldVO.setFieldDisplayName(entityField.getDisplayName());
             if (authFieldDO != null) {
                 authFieldVO.setId(authFieldDO.getId());
                 authFieldVO.setIsCanRead(authFieldDO.getIsCanRead());

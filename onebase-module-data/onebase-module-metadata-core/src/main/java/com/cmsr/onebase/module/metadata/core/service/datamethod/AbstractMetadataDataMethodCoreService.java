@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
@@ -39,7 +38,7 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
  * @date 2025-01-27
  */
 @Slf4j
-public abstract class AbstractMetadataDataMethodCoreService  implements MetadataDataMethodCoreServiceV2{
+public abstract class AbstractMetadataDataMethodCoreService  implements MetadataDataMethodCoreServiceV2 {
 
 
     // ========== 依赖注入 ==========
@@ -412,6 +411,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 13. 后置自动化工作流触发
             executePostWorkflow(context);//todo 暂未实现
 
+            getData(context);
+
             // 14. 结果格式化
             Map<String, Object> result = formatResult(context);// 已实现
 
@@ -429,6 +430,40 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     protected void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
     }
 
+    /**
+     * 将字段ID转换为字段名
+     * 前端传入的数据是以字段ID为key，需要转换为字段名才能进行后续处理
+     *
+     * @param data 原始数据（字段ID为key）
+     * @param fields 字段列表
+     * @return 转换后的数据（字段名为key）
+     */
+    protected Map<String, Object> convertFieldIdToFieldName(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
+        Map<String, Object> convertedData = new HashMap<>();
+        
+        // 构建字段ID到字段名的映射
+        Map<String, String> fieldIdToNameMap = new HashMap<>();
+        for (MetadataEntityFieldDO field : fields) {
+            if (field.getId() != null && field.getFieldName() != null) {
+                fieldIdToNameMap.put(String.valueOf(field.getId()), field.getFieldName());
+            }
+        }
+        
+        // 转换数据的key
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            // 如果key是字段ID，则转换为字段名
+            String fieldName = fieldIdToNameMap.getOrDefault(key, key);
+            convertedData.put(fieldName, value);
+            
+            log.debug("字段转换: {} -> {}, 值: {}", key, fieldName, value);
+        }
+        
+        log.info("字段ID转换完成，原始数据key数量: {}, 转换后数据key数量: {}", data.size(), convertedData.size());
+        return convertedData;
+    }
 
     protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
 
@@ -613,6 +648,11 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      */
     protected void executePostWorkflow(ProcessContext context) {
 
+    }
+
+    protected Map<String, Object> getData(ProcessContext context){
+
+        return null;
     }
 
     /**

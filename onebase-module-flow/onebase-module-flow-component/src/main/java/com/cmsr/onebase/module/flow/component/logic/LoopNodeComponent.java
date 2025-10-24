@@ -8,6 +8,7 @@ import com.yomahub.liteflow.core.NodeForComponent;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -25,15 +26,12 @@ public class LoopNodeComponent extends NodeForComponent {
         LoopNodeData nodeData = (LoopNodeData) executeContext.getNodeData(this.getTag());
         //
         String dataNodeId = nodeData.getDataNodeId();
-        Object value = variableContext.getVariableByExpression(dataNodeId);
+        List<Map<String, Object>> value = variableContext.getListVariableByTag(dataNodeId);
         if (value == null) {
             return 0;
         }
-        if (value instanceof List l) {
-            variableContext.putNodeVariables(this.getTag(), l);
-            return l.size();
-        }
-        throw new IllegalStateException("变量" + dataNodeId + "不是List类型: " + value.getClass().getName());
+        variableContext.putNodeVariables(this.getTag(), value);
+        return value.size();
     }
 
 }

@@ -11,7 +11,10 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       minimum-idle: 1
-      maximum-pool-size: 20
+      maximum-pool-size: 10  # 降低连接池大小，避免超过数据库最大连接数
+      connection-timeout: 30000  # 连接超时时间30秒
+      idle-timeout: 600000  # 空闲连接超时时间10分钟
+      max-lifetime: 1800000  # 连接最大存活时间30分钟
   redis:
     redisson:
       config: |

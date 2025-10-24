@@ -653,6 +653,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
                 // 修复：正确处理isSystemField字段的更新
                 if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
+                // 处理dictTypeId字段
+                if (item.getDictTypeId() != null) {
+                    upd.setDictTypeId(item.getDictTypeId());
+                }
 
                 metadataEntityFieldRepository.update(upd);
 
@@ -744,6 +748,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
                     // 关键：正确处理isSystemField字段的更新
                     if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
+                    // 处理dictTypeId字段
+                    if (item.getDictTypeId() != null) {
+                        upd.setDictTypeId(item.getDictTypeId());
+                    }
 
                     metadataEntityFieldRepository.update(upd);
 
@@ -825,6 +833,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 toCreate.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
                 // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
                 toCreate.setRunMode(0);
+                // 处理dictTypeId字段
+                toCreate.setDictTypeId(item.getDictTypeId());
 
                 metadataEntityFieldRepository.insert(toCreate);
 
@@ -1689,8 +1699,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                                        List<FieldOptionRespVO> options,
                                        FieldConstraintRespVO constraints,
                                        AutoNumberConfigReqVO autoNumber) {
-        // 处理选项
-        if (options != null) {
+        // 处理选项：仅当未关联字典类型时才处理自定义选项
+        // 如果 dictTypeId 不为 null，说明复用系统字典，忽略 options 参数
+        if (entityField != null && entityField.getDictTypeId() == null && options != null) {
             fieldOptionService.deleteByFieldId(fieldId);
             for (var opt : options) {
                 MetadataEntityFieldOptionDO d =
@@ -1704,6 +1715,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 d.setAppId(entityField != null ? entityField.getAppId() : null);
                 fieldOptionService.create(d);
             }
+        } else if (entityField != null && entityField.getDictTypeId() != null) {
+            // 如果切换到使用字典类型，删除原有的自定义选项
+            fieldOptionService.deleteByFieldId(fieldId);
         }
 
         // 处理约束 - 修复：只有当 constraints 不为空对象时才执行删除和处理

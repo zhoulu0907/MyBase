@@ -58,6 +58,9 @@ public class MetadataValidationRuleGroupRepository extends DataRepository<Metada
         if (entityId != null) {
             configStore.eq("entity_id", entityId);
         }
+        
+        // 过滤软删除的数据
+        configStore.eq("deleted", 0);
 
         // 添加排序
         configStore.order("create_time", Order.TYPE.DESC);
@@ -82,6 +85,8 @@ public class MetadataValidationRuleGroupRepository extends DataRepository<Metada
         if (excludeId != null) {
             configStore.ne("id", excludeId);
         }
+        // 过滤软删除的数据
+        configStore.eq("deleted", 0);
         return findOne(configStore);
     }
 

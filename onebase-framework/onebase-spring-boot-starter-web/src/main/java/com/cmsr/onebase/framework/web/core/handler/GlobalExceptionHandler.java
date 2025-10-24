@@ -382,6 +382,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public CommonResult<?> defaultExceptionHandler(HttpServletRequest req, Throwable ex) {
         log.error("[defaultExceptionHandler]", ex);
+        
+        // 优先检查异常消息中是否包含"校验失败"关键字，如果包含则认为是业务异常
+        // 这样可以提取到完整的错误信息（包含字段名和校验类型）
+        String exceptionMessage = ex.getMessage();
+        if (StrUtil.isNotBlank(exceptionMessage) && exceptionMessage.contains("校验失败")) {
+            // 提取具体的校验失败信息
+            String errorMessage = extractValidationError(exceptionMessage);
+            log.warn("[defaultExceptionHandler][业务校验失败] url: {}, 错误: {}", req.getRequestURI(), errorMessage);
+            return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
+        }
+        
+        // 其次检查根因异常，如果是业务相关的异常，提取具体错误信息
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        if (rootCause != null && rootCause instanceof IllegalArgumentException) {
+            // 业务参数校验失败，返回具体错误信息
+            String errorMessage = StrUtil.isNotBlank(rootCause.getMessage()) ? rootCause.getMessage() : "参数校验失败";
+            log.warn("[defaultExceptionHandler][业务参数异常] url: {}, 错误: {}", req.getRequestURI(), errorMessage);
+            return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
+        }
+        
         // 插入异常日志
         createExceptionLog(req, ex);
         // 返回 ERROR；在开发/测试环境返回结构化 JSON（放入 data），生产只返回简要 msg
@@ -398,6 +418,34 @@ public class GlobalExceptionHandler {
         } else {
             return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg());
         }
+    }
+    
+    /**
+     * 从异常消息中提取校验错误信息
+     * 
+     * @param exceptionMessage 异常消息
+     * @return 提取后的错误信息
+     */
+    private String extractValidationError(String exceptionMessage) {
+        // 尝试匹配 "执行xxx数据异常：字段[xxx]-校验类型-校验失败：yyy" 格式
+        // 提取从 "字段[" 开始的完整错误信息
+        if (StrUtil.isNotBlank(exceptionMessage)) {
+            // 查找 "字段[" 的位置
+            int fieldStartIndex = exceptionMessage.indexOf("字段[");
+            if (fieldStartIndex >= 0) {
+                // 从 "字段[" 开始提取完整的错误信息
+                return exceptionMessage.substring(fieldStartIndex);
+            }
+            
+            // 如果没有找到 "字段["，则查找最后一个冒号
+            int lastColonIndex = exceptionMessage.lastIndexOf("：");
+            if (lastColonIndex > 0 && lastColonIndex < exceptionMessage.length() - 1) {
+                return exceptionMessage.substring(lastColonIndex + 1).trim();
+            }
+        }
+        
+        // 如果都没找到，返回完整的异常消息
+        return exceptionMessage;
     }
 
     private void createExceptionLog(HttpServletRequest req, Throwable e) {
