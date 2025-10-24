@@ -1,5 +1,8 @@
 package com.cmsr.onebase.dolphins.workflow;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.cmsr.onebase.dolphins.BaseTest;
 import com.cmsr.onebase.dolphins.enums.HttpCheckCondition;
 import com.cmsr.onebase.dolphins.enums.HttpMethod;
@@ -11,8 +14,8 @@ import com.cmsr.onebase.dolphins.util.TaskRelationUtils;
 import com.cmsr.onebase.dolphins.util.TaskUtils;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 
 /** the test for workflow/process */
 public class WorkflowTest extends BaseTest {
@@ -35,6 +38,7 @@ public class WorkflowTest extends BaseTest {
    * <p>
    */
   @Test
+  @Order(1)
   public void testCreateProcessDefinition() {
 
     List<Long> taskCodes = getClient().opsForProcess().generateTaskCode(projectCode, 2);
@@ -71,32 +75,37 @@ public class WorkflowTest extends BaseTest {
   }
 
   @Test
+  @Order(2)
   public void testPage() {
     List<ProcessDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
     int expectedWorkflowNumber = 1;
-    Assert.assertEquals(expectedWorkflowNumber, page.size());
+    assertEquals(expectedWorkflowNumber, page.size());
   }
 
   @Test
+  @Order(3)
   public void testOnlineWorkflow() {
     List<ProcessDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
-    Assert.assertTrue(getClient().opsForProcess().online(projectCode, page.get(0).getCode()));
+    assertTrue(getClient().opsForProcess().online(projectCode, page.get(0).getCode()));
   }
 
   @Test
+  @Order(4)
   public void testOfflineWorkflow() {
     List<ProcessDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
-    Assert.assertTrue(getClient().opsForProcess().offline(projectCode, page.get(0).getCode()));
+    assertTrue(getClient().opsForProcess().offline(projectCode, page.get(0).getCode()));
   }
 
   /** the workflow must in offline state */
   @Test
+  @Order(5)
   public void testDeleteWorkflow() {
     List<ProcessDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
-    Assert.assertTrue(getClient().opsForProcess().delete(projectCode, page.get(0).getCode()));
+      getClient().opsForProcess().offline(projectCode, page.get(0).getCode());//确保下线之后才能删除
+    assertTrue(getClient().opsForProcess().delete(projectCode, page.get(0).getCode()));
   }
 }

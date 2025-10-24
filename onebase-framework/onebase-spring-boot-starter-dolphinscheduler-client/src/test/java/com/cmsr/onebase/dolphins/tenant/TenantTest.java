@@ -2,8 +2,8 @@ package com.cmsr.onebase.dolphins.tenant;
 
 import com.cmsr.onebase.dolphins.BaseTest;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TenantTest extends BaseTest {
 
@@ -15,7 +15,7 @@ public class TenantTest extends BaseTest {
     createParam.setTenantCode(TENANT_CODE).setDescription("create by dolphin scheduler api");
     TenantInfoResp tenantInfoResp = getClient().opsForTenant().create(createParam);
     System.out.println(tenantInfoResp);
-    Assert.assertEquals(TENANT_CODE, tenantInfoResp.getTenantCode());
+    Assertions.assertEquals(TENANT_CODE, tenantInfoResp.getTenantCode());
   }
 
   @Test
@@ -23,7 +23,7 @@ public class TenantTest extends BaseTest {
     long tenantId = getClient().opsForTenant().page(null, null, TENANT_CODE).get(0).getId();
     TenantDefineParam updateParam = new TenantDefineParam();
     updateParam.setTenantCode(TENANT_CODE).setDescription("update by dolphin scheduler");
-    Assert.assertTrue(getClient().opsForTenant().update(tenantId, updateParam));
+    Assertions.assertTrue(getClient().opsForTenant().update(tenantId, updateParam));
   }
 
   @Test
@@ -35,6 +35,6 @@ public class TenantTest extends BaseTest {
   @Test
   public void testDeleteTenant() {
     long tenantId = getClient().opsForTenant().page(null, null, TENANT_CODE).get(0).getId();
-    Assert.assertTrue(getClient().opsForTenant().delete(tenantId));
+    Assertions.assertTrue(getClient().opsForTenant().delete(tenantId));
   }
 }

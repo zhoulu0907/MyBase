@@ -1,8 +1,8 @@
 package com.cmsr.onebase.dolphins.project;
 
 import com.cmsr.onebase.dolphins.BaseTest;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ProjectTest extends BaseTest {
 
@@ -15,7 +15,7 @@ public class ProjectTest extends BaseTest {
     param.setProjectName(PROJECT_NAME).setDescription("created by dolphinscheduler java sdk");
     ProjectInfoResp projectInfoResp = getClient().opsForProject().create(param);
     System.out.println(projectInfoResp);
-    Assert.assertEquals(PROJECT_NAME, projectInfoResp.getName());
+    Assertions.assertEquals(PROJECT_NAME, projectInfoResp.getName());
   }
 
   @Test
@@ -34,7 +34,7 @@ public class ProjectTest extends BaseTest {
         .setUserName(projectInfo.getUserName())
         .setDescription(newDescription);
     ProjectInfoResp newProjectInfo = getClient().opsForProject().update(updateParam);
-    Assert.assertEquals(newDescription, newProjectInfo.getDescription());
+    Assertions.assertEquals(newDescription, newProjectInfo.getDescription());
   }
 
   @Test

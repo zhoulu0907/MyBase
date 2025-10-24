@@ -11,8 +11,8 @@ import com.cmsr.onebase.dolphins.workflow.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TaskTest extends BaseTest {
 
@@ -159,7 +159,7 @@ public class TaskTest extends BaseTest {
 
     ProcessDefineResp resp = getClient().opsForProcess().create(projectCode, pcr);
     System.out.println(resp);
-    Assert.assertEquals("condition-dag", resp.getName());
+    Assertions.assertEquals("condition-dag", resp.getName());
   }
 
   private void submit(
@@ -177,7 +177,7 @@ public class TaskTest extends BaseTest {
 
     ProcessDefineResp resp = getClient().opsForProcess().create(projectCode, pcr);
     System.out.println(resp);
-    Assert.assertEquals(processName, resp.getName());
+    Assertions.assertEquals(processName, resp.getName());
   }
 
   @Test
@@ -185,6 +185,6 @@ public class TaskTest extends BaseTest {
     int expectedCodeNumber = 10;
     List<Long> taskCodes =
         super.getClient().opsForProcess().generateTaskCode(projectCode, expectedCodeNumber);
-    Assert.assertEquals(expectedCodeNumber, taskCodes.size());
+    Assertions.assertEquals(expectedCodeNumber, taskCodes.size());
   }
 }
