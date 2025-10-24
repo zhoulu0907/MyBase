@@ -94,7 +94,7 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
                       rules={[{ required: true, message: '请填写最小长度' }]}
                       style={{ marginBottom: 0 }}
                     >
-                      <Input type="number" placeholder="0" style={{ width: '120px' }} />
+                      <Input type="number" placeholder="0" style={{ width: '120px' }} defaultValue="0" />
                     </Form.Item>
                   </div>
 
@@ -105,7 +105,7 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
                       rules={[{ required: true, message: '请填写最大长度' }]}
                       style={{ marginBottom: 0 }}
                     >
-                      <Input type="number" placeholder="800" style={{ width: '120px' }} />
+                      <Input type="number" placeholder="800" style={{ width: '120px' }} defaultValue="800" />
                     </Form.Item>
                   </div>
 
