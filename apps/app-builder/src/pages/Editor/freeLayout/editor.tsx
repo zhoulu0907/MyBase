@@ -27,7 +27,7 @@ export const Editor = () => {
   };
   return (
     <div className="doc-free-feature-overview">
-      <Button onClick={() => onSave()}>保存</Button>
+      {/* <Button onClick={() => onSave()}>保存</Button> */}
       <FreeLayoutEditorProvider {...editorProps} ref={ref}>
         <SidebarProvider>
           <div className="demo-container">

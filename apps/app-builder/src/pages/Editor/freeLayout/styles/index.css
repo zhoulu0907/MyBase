@@ -61,7 +61,7 @@
 .demo-container {
   position: absolute;
   left: 0px;
-  top: 62px;
+  top: 50px;
   display: flex;
   width: 100%;
   height: calc(100% - 62px);

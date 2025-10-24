@@ -24,8 +24,8 @@ import automation from '../../assets/bpmLogo/automation.png';
 import subprocess from '../../assets/bpmLogo/subprocess.png';
 import task from '../../assets/bpmLogo/task.png';
 import wait from '../../assets/bpmLogo/wait.png';
-import message from '../../assets/bpmLogo/message .png';
-import {LLMNodeRegistry} from '../../nodes/llm/index'
+import message from '../../assets/bpmLogo/message.png';
+import { LLMNodeRegistry } from '../../nodes/llm/index';
 
 interface NodeListProps {
   onSelect: NodePanelRenderProps['onSelect'];
