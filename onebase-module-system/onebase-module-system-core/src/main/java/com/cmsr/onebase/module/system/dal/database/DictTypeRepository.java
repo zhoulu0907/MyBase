@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypeListReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -104,6 +105,52 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
      * @return 字典类型列表
      */
     public List<DictTypeDO> findAllList() {
-        return findAll();
+        return findAllByConfig(new DefaultConfigStore());
+    }
+
+    /**
+     * 根据条件查询字典类型列表（不分页）
+     *
+     * @param reqVO 查询条件
+     * @return 字典类型列表
+     */
+    public List<DictTypeDO> findList(DictTypeListReqVO reqVO) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+
+        // 构建查询条件
+        if (reqVO.getName() != null && !reqVO.getName().trim().isEmpty()) {
+            configs.and(Compare.LIKE, DictTypeDO.NAME, reqVO.getName());
+        }
+        if (reqVO.getType() != null && !reqVO.getType().trim().isEmpty()) {
+            configs.and(Compare.LIKE, DictTypeDO.TYPE, reqVO.getType());
+        }
+        if (reqVO.getStatus() != null) {
+            configs.and(Compare.EQUAL, DictTypeDO.STATUS, reqVO.getStatus());
+        }
+        if (reqVO.getCreateTime() != null && reqVO.getCreateTime().length == 2) {
+            LocalDateTime startTime = reqVO.getCreateTime()[0];
+            LocalDateTime endTime = reqVO.getCreateTime()[1];
+            if (startTime != null) {
+                configs.and(Compare.GREAT_EQUAL, DictTypeDO.CREATE_TIME, startTime);
+            }
+            if (endTime != null) {
+                configs.and(Compare.LESS_EQUAL, DictTypeDO.CREATE_TIME, endTime);
+            }
+        }
+
+        // 字典所有者类型过滤条件
+        if (reqVO.getDictOwnerType() != null && !reqVO.getDictOwnerType().trim().isEmpty()) {
+            configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_TYPE, reqVO.getDictOwnerType());
+        }
+
+        // 字典所有者ID过滤条件
+        if (reqVO.getDictOwnerId() != null) {
+            configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
+        }
+
+        // 添加排序条件，按ID降序排列
+        configs.order(DictTypeDO.ID, org.anyline.entity.Order.TYPE.DESC);
+
+        return findAllByConfig(configs);
     }
 }
