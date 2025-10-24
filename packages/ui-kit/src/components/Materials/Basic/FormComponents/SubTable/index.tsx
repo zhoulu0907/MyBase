@@ -6,7 +6,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import { type XSubTableConfig } from './schema';
 // import DragableTable from './dragableTable';
-import { LAYOUT_OPTIONS, LAYOUT_VALUES } from '@/components/Materials/constants';
+import { LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
 import { getComponentConfig, getComponentSchema } from '@/components/Materials/schema';
 import { usePageEditorSignal } from '@/hooks';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -369,13 +369,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           displayName,
           render: (col: any, record: any, index: number) => {
             return (
-              <Form.Item initialValue={col} field={`${id}.${index}.${column.dataIndex}`}>
-                <FormComp.XAutoCode
-                  {...FormSchema.XAutoCodeSchema.config}
-                  label={{ text: col.title, display: false }}
-                  runtime={runtime}
-                />
-              </Form.Item>
+              <FormComp.XAutoCode
+                {...FormSchema.XAutoCodeSchema.config}
+                label={{ text: col.title, display: false }}
+                runtime={runtime}
+              />
             );
           }
         });
@@ -537,14 +535,28 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
   return (
     <Layout className="XSubTable">
-      <div className="item">
-        <div className="subTableHeader">{cpName}</div>
+      <Form.Item
+        label={label.display && label.text}
+        layout={layout}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
+        }}
+        wrapperCol={{ style: { flex: 1 } }}
+        rules={[{ required: verify?.required }]}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          width: '100%',
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
+      >
         <div
           className="subTableContent"
           style={{
             maxWidth: runtime
               ? '100%'
-              : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0) + 2}px)`
+              : `calc(100vw - ${componentMaxWidth + ((LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout && label.display) ? labelColSpan : 0) + 2}px)`
           }}
         >
           {
@@ -570,7 +582,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             新增一项
           </Button>
         </div>
-      </div>
+      </Form.Item>
     </Layout>
   );
 };
