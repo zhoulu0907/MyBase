@@ -1,7 +1,5 @@
 package com.cmsr.onebase.module.formula.service.engine;
 
-import com.cmsr.onebase.module.formula.service.dto.ContextData;
-
 import java.util.Map;
 
 /**
@@ -28,8 +26,6 @@ public interface FormulaEngineService {
      * @return 计算结果
      */
     Object executeFormulaWithParams(String formula, Map<String, Object> parameters);
-
-    Object executeFormulaWithParams(String formula, Map<String, Object> parameters, ContextData context);
 
     Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters, Map<String, Object> contextData);
 

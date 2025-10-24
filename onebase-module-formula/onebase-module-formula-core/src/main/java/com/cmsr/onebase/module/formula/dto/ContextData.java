@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.formula.service.dto;
+package com.cmsr.onebase.module.formula.dto;
 
 import lombok.Data;
 

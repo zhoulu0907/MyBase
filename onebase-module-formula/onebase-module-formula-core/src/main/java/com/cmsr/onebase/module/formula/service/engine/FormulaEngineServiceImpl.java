@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.formula.service.engine;
 
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
-import com.cmsr.onebase.module.formula.service.dto.ContextData;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.api.permission.RoleApi;
@@ -24,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.cmsr.onebase.module.formula.enums.FormulaConstants.*;
 
 /**
  * 公式引擎服务实现类
@@ -57,82 +58,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      */
     @Resource
     private DeptApi deptApi;
-
-    /**
-     * 支持的Excel函数列表 - 基于FormulaJS v4.5.3完整函数库
-     */
-    private static final String[] SUPPORTED_FUNCTIONS = {
-            // 文本函数
-            "LEFT", "RIGHT", "MID", "LEN", "UPPER", "LOWER", "PROPER", "TRIM",
-            "CONCATENATE", "FIND", "REPLACE", "SUBSTITUTE", "SEARCH", "EXACT",
-            "CLEAN", "CODE", "CHAR", "REPT", "TEXT", "VALUE", "FIXED",
-
-            // 数学和三角函数
-            "SUM", "SUMIF", "SUMIFS", "AVERAGE", "AVERAGEIF", "AVERAGEIFS",
-            "MAX", "MIN", "COUNT", "COUNTA", "COUNTIF", "COUNTIFS", "COUNTBLANK",
-            "ROUND", "ROUNDUP", "ROUNDDOWN", "ABS", "POWER", "SQRT", "MOD",
-            "CEILING", "FLOOR", "INT", "SIGN", "TRUNC", "EVEN", "ODD",
-            "SIN", "COS", "TAN", "ASIN", "ACOS", "ATAN", "ATAN2",
-            "SINH", "COSH", "TANH", "PI", "RADIANS", "DEGREES",
-            "EXP", "LN", "LOG", "LOG10", "FACT", "COMBIN", "PERMUT",
-            "GCD", "LCM", "RAND", "RANDBETWEEN",
-
-            // 逻辑函数
-            "IF", "AND", "OR", "NOT", "IFERROR", "IFNA", "TRUE", "FALSE",
-
-            // 日期时间函数
-            "TODAY", "NOW", "DATE", "TIME", "YEAR", "MONTH", "DAY",
-            "HOUR", "MINUTE", "SECOND", "WEEKDAY", "WEEKNUM",
-            "DATEDIF", "DATEVALUE", "TIMEVALUE", "DAYS", "DAYS360",
-            "NETWORKDAYS", "WORKDAY", "EDATE", "EOMONTH",
-
-            // 查找和引用函数
-            "INDEX", "MATCH", "VLOOKUP", "HLOOKUP", "LOOKUP", "CHOOSE",
-            "INDIRECT", "OFFSET", "ROW", "ROWS", "COLUMN", "COLUMNS",
-
-            // 信息函数
-            "ISNUMBER", "ISTEXT", "ISBLANK", "ISERROR", "ISNA", "ISLOGICAL",
-            "ISEVEN", "ISODD", "TYPE", "N", "NA", "ERROR.TYPE",
-
-            // 统计函数
-            "MEDIAN", "MODE", "VAR", "VARP", "STDEV", "STDEVP",
-            "QUARTILE", "PERCENTILE", "PERCENTRANK", "RANK",
-            "LARGE", "SMALL", "FREQUENCY", "CORREL", "COVAR",
-
-            // 财务函数
-            "PV", "FV", "PMT", "RATE", "NPER", "NPV", "IRR",
-            "CUMIPMT", "CUMPRINC", "IPMT", "PPMT", "EFFECT", "NOMINAL",
-
-            // 工程函数
-            "BIN2DEC", "BIN2HEX", "BIN2OCT", "DEC2BIN", "DEC2HEX", "DEC2OCT",
-            "HEX2BIN", "HEX2DEC", "HEX2OCT", "OCT2BIN", "OCT2DEC", "OCT2HEX",
-            "BITAND", "BITOR", "BITXOR", "BITLSHIFT", "BITRSHIFT",
-
-            // 数据库函数
-            "DGET", "DMAX", "DMIN", "DSUM", "DAVERAGE", "DCOUNT", "DCOUNTA",
-
-            // 其他常用函数
-            "TRANSPOSE", "UNIQUE", "SORT", "FILTER", "SUMPRODUCT"
-    };
-
-    /**
-     * 危险函数和操作的正则表达式
-     */
-    private static final String DANGEROUS_PATTERNS =
-            "(?i)(\\beval\\b|\\bFunction\\b|\\bnew\\s+Function\\b|\\bimport\\b|\\brequire\\b|" +
-                    "\\bprocess\\b|\\bsetTimeout\\b|\\bsetInterval\\b|\\bsetImmediate\\b|" +
-                    "\\b__proto__\\b|\\bconstructor\\b|\\bprototype\\b)";
-
-    /**
-     * 人员函数常量
-     */
-    private static final String GETUSER       = "GETUSER";
-    private static final String GETDEPT       = "GETDEPT";
-    private static final String GETUPDEPT     = "GETUPDEPT";
-    private static final String GETROLE       = "GETROLE";
-    private static final String GETSUPERVISOR = "GETSUPERVISOR";
-    private static final String ISINROLE      = "ISINROLE";
-    private static final String ISINDEPT      = "ISINDEPT";
 
     public FormulaEngineServiceImpl(FormulaEngineProperties properties) {
         this.properties = properties;
@@ -239,16 +164,9 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     @Override
     public Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters, Map<String, Object> contextData) {
-        formula = replaceParametersInFormula(formula,parameters);
-        formula = resolveFormulaWithContextData(formula, contextData);
+        formula = handleFormulaParameters(formula,parameters);
+        formula = handleFormulaContextData(formula, contextData);
         return executeFormulaWithParams(formula, parameters);
-    }
-
-    @Override
-    public Object executeFormulaWithParams(String formula, Map<String, Object> parameters, ContextData contextData) {
-        // 从contextData解析占位符并替换为可执行的JS数组字面量，再复用已有方法执行
-        String resolved = resolveFormulaWithContext(formula, contextData);
-        return executeFormulaWithParams(resolved, parameters);
     }
 
     @Override
@@ -352,80 +270,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     }
 
     /**
-     * 将ContextData中的数据注入公式
-     * 当前支持占位符：
-     * - $recordList.fieldName  => 由ContextData.recordList提取该字段，替换为JS数组字面量，如 [1,2,"完成"]
-     *
-     * @param formula     原始公式
-     * @param contextData 上下文数据
-     * @return 已替换占位符的公式
-     */
-    private String resolveFormulaWithContext(String formula, ContextData contextData) {
-        if (contextData == null || !StringUtils.hasText(formula)) {
-            return formula;
-        }
-        // 仅支持解析 $recordList.xxx 模式
-        Pattern p = Pattern.compile("\\$recordList\\.([a-zA-Z_][\\w]*)");
-        Matcher m = p.matcher(formula);
-        Set<String> fields = new LinkedHashSet<>();
-        while (m.find()) {
-            fields.add(m.group(1));
-        }
-        if (fields.isEmpty()) {
-            return formula;
-        }
-
-        List<Map<String, Object>> recordList = contextData.getRecordList();
-        if (recordList == null) {
-            recordList = new ArrayList<>();
-        }
-
-        String resolved = formula;
-        for (String field : fields) {
-            List<Object> values = new ArrayList<>();
-            for (Map<String, Object> rec : recordList) {
-                Object v = rec != null ? rec.get(field) : null;
-                values.add(v);
-            }
-            String arrayLiteral = toJsArrayLiteral(values);
-            // 精确替换占位符
-            resolved = resolved.replace("$recordList." + field, arrayLiteral);
-        }
-        return resolved;
-    }
-
-
-
-    /**
-     * 将Java List转换为JS数组字面量字符串
-     * 规则：
-     * - 字符串自动加引号并转义
-     * - 数字/布尔/空值保持本型
-     */
-    private String toJsArrayLiteral(List<Object> list) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (int i = 0; i < list.size(); i++) {
-            Object v = list.get(i);
-            if (v == null) {
-                sb.append("null");
-            } else if (v instanceof Number || v instanceof Boolean) {
-                sb.append(String.valueOf(v));
-            } else {
-                // 统一按字符串处理并转义
-                String s = String.valueOf(v);
-                s = s.replace("\\", "\\\\").replace("\"", "\\\"");
-                sb.append("\"").append(s).append("\"");
-            }
-            if (i < list.size() - 1) {
-                sb.append(",");
-            }
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
-    /**
      * 将Java对象转换为JS字面量字符串
      * - 字符串自动加引号并转义
      * - 数字/布尔/空值保持本型
@@ -458,41 +302,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                 bindings.putMember(entry.getKey(), entry.getValue());
             }
         }
-    }
-
-    /**
-     * 包装公式执行，添加错误处理和结果返回
-     *
-     * @param formula 原始公式
-     * @return 包装后的JavaScript代码
-     */
-    private String wrapFormulaExecution(String formula) {
-        return String.format(
-                "(function() { " +
-                        "try { " +
-                        "    // 创建module和exports对象来支持UMD模块加载" +
-                        "    var module = { exports: {} }; " +
-                        "    var exports = module.exports; " +
-                        "    " +
-                        "    // 重新执行FormulaJS库以获取exports对象" +
-                        "    eval(arguments[0]); " +
-                        "    " +
-                        "    // 将所有函数暴露到全局作用域" +
-                        "    for (var key in exports) { " +
-                        "        if (typeof exports[key] === 'function') { " +
-                        "            global[key] = exports[key]; " +
-                        "        } " +
-                        "    } " +
-                        "    " +
-                        "    // 执行用户公式" +
-                        "    var result = %s; " +
-                        "    return result; " +
-                        "} catch (error) { " +
-                        "    throw new Error('公式执行错误: ' + error.message); " +
-                        "} " +
-                        "})",
-                formula
-        );
     }
 
     /**
@@ -645,7 +454,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      * @param parameters 参数映射
      * @return 替换占位符后的新公式
      */
-    private String replaceParametersInFormula(String formula, Map<String, Object> parameters) {
+    private String handleFormulaParameters(String formula, Map<String, Object> parameters) {
         if (!StringUtils.hasText(formula) || parameters == null || parameters.isEmpty()) {
             return formula;
         }
@@ -733,7 +542,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      * @param contextData 上下文数据
      * @return 解析替换后的公式
      */
-    private String resolveFormulaWithContextData(String formula, Map<String, Object> contextData) {
+    private String handleFormulaContextData(String formula, Map<String, Object> contextData) {
         if (!StringUtils.hasText(formula) || contextData == null || contextData.isEmpty()) {
             return formula;
         }
@@ -804,7 +613,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     /**
      * 处理公式中的参数映射，将形如"$数据查询节点(多条).关联主表ID"的参数替换为对应的字段名"f_id"
-     * 例如：将"COUNT($数据查询节点(多条).关联主表ID)"转换为"COUNT(f_id)"
+     * 例如：将"COUNT($数据查询节点(多条).关联主表ID)"转换为"COUNT(值1, 值2，...)"
      * 
      * @param formula 公式字符串
      * @param parameters 参数映射
