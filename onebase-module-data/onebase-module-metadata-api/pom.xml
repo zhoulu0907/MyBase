@@ -18,37 +18,30 @@
     </properties>
 
     <dependencies>
+        <!-- 基础公共依赖 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
 
-        
-        <!-- 依赖 Core 模块获得默认实现 -->
+        <!-- 依赖Core模块，使用核心Service -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-core</artifactId>
             <version>${revision}</version>
         </dependency>
 
-        <!-- Web 相关 -->
+        <!-- Web 相关（Controller需要） -->
         <dependency>
-            <groupId>org.springdoc</groupId> <!-- 接口文档：使用最新版本的 Swagger 模型 -->
+            <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
             <scope>provided</scope>
         </dependency>
 
-        <!-- 参数校验 -->
+        <!-- 参数校验（用于DTO校验注解） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- RPC 远程调用相关 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

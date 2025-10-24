@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSystemMethodCoreService;
@@ -54,7 +55,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Autowired
     private MetadataDataMethodCreateImpl metadataDataMethodCreate;
-    
+
     @Autowired
     private MetadataDataMethodUpdateImpl metadataDataMethodUpdate;
 
@@ -206,50 +207,48 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 //            }
 //
 //            boolean ok = deleteCount > 0;
-            // 移除多表写入逻辑，直接返回删除结果
+        // 移除多表写入逻辑，直接返回删除结果
 //            return ok;
 //        }); // TenantUtils.executeIgnore 闭合
     }
 
     @Override
     public Map<String, Object> getData(Long entityId, Object id, String methodCode) {
-        // 移除多表查询逻辑，直接使用单表查询
-        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-        if (datasource == null) {
-            throw exception(DATASOURCE_NOT_EXISTS);
-        }
-        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-        log.info("成功切换到数据源：{}", datasource.getCode());
-        return TenantUtils.executeIgnore(() -> {
-            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
-            if (resultData == null || resultData.isEmpty()) {
-                throw exception(BUSINESS_ENTITY_NOT_EXISTS);
-            }
-            return buildDataResponse(entity, resultData, fields);
-        });
-    }
 
-    @Override
-    public PageResult<Map<String, Object>> getDataPage(Long entityId, Integer pageNo, Integer pageSize,
-                                                       String sortField, String sortDirection,
-                                                       Map<String, Object> filters, String methodCode) {
-        Map<String,Object> map = new HashMap<>();
-        map.put("pageNo",pageNo);
-        map.put("pageSize",pageSize);
-        map.put("sortField",sortField);
-        map.put("sortDirection",sortDirection);
-        map.put("filters",filters);
-        Map<String, Object> result = metadataDataMethodQuery.executeProcess(OperationType.GET_PAGE,entityId,null,map,null);
-        List<Map<String, Object>> list = (List<Map<String, Object>>)result.get("list");
-        Long total = (Long)result.get("total");
-        return new PageResult<>(list,total);
-//        // 添加调试日志
-//        log.info("核心服务分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}",
-//                 entityId, pageNo, pageSize, pageSize != null ? pageSize.getClass().getSimpleName() : "null");
+        Map<String, Object> result = metadataDataMethodQuery.executeProcess(OperationType.GET,entityId,id,null,null);
+        return result;
+//        //查询子表数据
+//        Long sourceEntityId = reqVO.getEntityId();
+//        DefaultConfigStore configStore = new DefaultConfigStore();
+//        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
+//        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
+//        List<String> subTableIds = new ArrayList<String>();
+//        for(MetadataEntityRelationshipDO relationshipDO:relationships){
+//            MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
 //
-//        // 移除多表查询逻辑，直接使用单表分页
+//            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+//            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+//            String tableName = targetEntity.getTableName();
+//            String fieldName = targetFieldDO.getFieldName();
+//            // 获取临时数据源服务
+//            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
+//            if (datasource == null) {
+//                throw exception(DATASOURCE_NOT_EXISTS);
+//            }
+//            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+//            log.info("成功切换到数据源：{}", datasource.getCode());
+//
+//            DefaultConfigStore config = new DefaultConfigStore();
+//            if("parent_id".equals(fieldName)){
+//                config.and(fieldName, reqVO.getId());
+//            }else{
+//                Object value = resultData.get(sourceFieldDO.getFieldName());
+//                config.and(fieldName, value);
+//            }
+//            DataSet dataSet = temporaryService.querys(tableName,config);
+//            System.out.println(dataSet);
+//        }
+        // 移除多表查询逻辑，直接使用单表查询
 //        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
 //        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
 //        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
@@ -258,95 +257,121 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 //        }
 //        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
 //        log.info("成功切换到数据源：{}", datasource.getCode());
-//        boolean hasDeletedField = fields.stream().anyMatch(f -> "deleted".equalsIgnoreCase(f.getFieldName()));
-//
 //        return TenantUtils.executeIgnore(() -> {
-//            ConfigStore configs = new DefaultConfigStore();
-//            boolean deletedConditionAdded = false;
-//            if (filters != null && !filters.isEmpty()) {
-//                Set<String> names = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
-//                for (Map.Entry<String, Object> entry : filters.entrySet()) {
-//                    String rawKey = entry.getKey();
-//                    Object rawVal = entry.getValue();
-//                    if (rawVal == null) {
-//                        continue;
-//                    }
-//                    if ("deleted".equalsIgnoreCase(rawKey) || "tenant_id".equalsIgnoreCase(rawKey)) {
-//                        continue;
-//                    }
-//                    // 兼容上层传入的结构：可能是直接 fieldName -> value，也可能是 conditionKey -> {fieldName, operator, value}
-//                    if (rawVal instanceof Map) {
-//                        @SuppressWarnings("unchecked")
-//                        Map<String,Object> cond = (Map<String,Object>) rawVal;
-//                        String fieldName = (String) cond.getOrDefault("fieldName", rawKey);
-//                        Object value = cond.get("value");
-//                        String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
-//                        if (value == null || !names.contains(fieldName)) {
-//                            continue;
-//                        }
-//                        applyOperatorCondition(configs, fieldName, operator, value);
-//                    } else {
-//                        // 退化：直接LIKE
-//                        if (names.contains(rawKey)) {
-//                            configs.and(Compare.LIKE, rawKey, rawVal);
-//                        }
-//                    }
-//                }
+//            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
+//            if (resultData == null || resultData.isEmpty()) {
+//                throw exception(BUSINESS_ENTITY_NOT_EXISTS);
 //            }
-//            if (hasDeletedField && !deletedConditionAdded) {
-//                configs.and(Compare.EQUAL, "deleted", 0);
-//                deletedConditionAdded = true;
-//            }
-//            Set<String> fieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
-//            if (StringUtils.hasText(sortField) && fieldNames.contains(sortField)) {
-//                String orderClause = sortField;
-//                orderClause += "desc".equalsIgnoreCase(sortDirection) ? " DESC" : " ASC";
-//                configs.order(orderClause);
-//            } else {
-//                String primaryKeyField = getPrimaryKeyFieldName(fields);
-//                configs.order(primaryKeyField + " DESC");
-//            }
-//            if (pageNo != null && pageSize != null) {
-//                PageNavi page = new DefaultPageNavi(pageNo, pageSize);
-//                configs.setPageNavi(page);
-//                log.info("设置分页参数 - pageNo: {}, pageSize: {}", pageNo, pageSize);
-//            }
-//            ConfigStore countConfigs = new DefaultConfigStore();
-//            if (filters != null && !filters.isEmpty()) {
-//                Set<String> existingFieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
-//                for (Map.Entry<String, Object> entry : filters.entrySet()) {
-//                    String rawKey = entry.getKey();
-//                    Object rawVal = entry.getValue();
-//                    if (rawVal == null) { continue; }
-//                    if ("deleted".equalsIgnoreCase(rawKey) || "tenant_id".equalsIgnoreCase(rawKey)) { continue; }
-//                    if (rawVal instanceof Map) {
-//                        @SuppressWarnings("unchecked") Map<String,Object> cond = (Map<String,Object>) rawVal;
-//                        String fieldName = (String) cond.getOrDefault("fieldName", rawKey);
-//                        Object value = cond.get("value");
-//                        String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
-//                        if (value == null || !existingFieldNames.contains(fieldName)) { continue; }
-//                        // count 语句保守处理：范围/比较用相同 Compare，模糊仍用 LIKE
-//                        applyOperatorCondition(countConfigs, fieldName, operator, value);
-//                    } else {
-//                        if (existingFieldNames.contains(rawKey)) {
-//                            countConfigs.and(Compare.LIKE, rawKey, rawVal);
-//                        }
-//                    }
-//                }
-//            }
-//            if (hasDeletedField) {
-//                countConfigs.and(Compare.EQUAL, "deleted", 0);
-//            }
-//            long total = temporaryService.count(quoteTableName(entity.getTableName()), countConfigs);
-//            DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
-//            List<Map<String, Object>> list = new ArrayList<>();
-//            for (int i = 0; i < dataSet.size(); i++) {
-//                DataRow row = dataSet.getRow(i);
-//                Map<String, Object> data = convertDataRowToMap(row, fields);
-//                list.add(buildDataResponse(entity, data, fields));
-//            }
-//            return new PageResult<>(list, total);
+//            return buildDataResponse(entity, resultData, fields);
 //        });
+    }
+
+    @Override
+    public PageResult<Map<String, Object>> getDataPage(Long entityId, Integer pageNo, Integer pageSize,
+                                                       String sortField, String sortDirection,
+                                                       Map<String, Object> filters, String methodCode) {
+        // 添加调试日志
+        log.info("核心服务分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}",
+                entityId, pageNo, pageSize, pageSize != null ? pageSize.getClass().getSimpleName() : "null");
+//合并代码
+//        // 移除多表查询逻辑，直接使用单表分页
+        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
+        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
+        boolean hasDeletedField = fields.stream().anyMatch(f -> "deleted".equalsIgnoreCase(f.getFieldName()));
+
+        return TenantUtils.executeIgnore(() -> {
+            ConfigStore configs = new DefaultConfigStore();
+            boolean deletedConditionAdded = false;
+            if (filters != null && !filters.isEmpty()) {
+                Set<String> names = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
+                for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                    String rawKey = entry.getKey();
+                    Object rawVal = entry.getValue();
+                    if (rawVal == null) {
+                        continue;
+                    }
+                    if ("deleted".equalsIgnoreCase(rawKey) || "tenant_id".equalsIgnoreCase(rawKey)) {
+                        continue;
+                    }
+//                    // 兼容上层传入的结构：可能是直接 fieldName -> value，也可能是 conditionKey -> {fieldName, operator, value}
+                    if (rawVal instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String,Object> cond = (Map<String,Object>) rawVal;
+                        String fieldName = (String) cond.getOrDefault("fieldName", rawKey);
+                        Object value = cond.get("value");
+                        String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
+                        if (value == null || !names.contains(fieldName)) {
+                            continue;
+                        }
+                        applyOperatorCondition(configs, fieldName, operator, value);
+                    } else {
+                        // 退化：直接LIKE
+                        if (names.contains(rawKey)) {
+                            configs.and(Compare.LIKE, rawKey, rawVal);
+                        }
+                    }
+                }
+            }
+            if (hasDeletedField && !deletedConditionAdded) {
+                configs.and(Compare.EQUAL, "deleted", 0);
+                deletedConditionAdded = true;
+            }
+            Set<String> fieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
+            if (StringUtils.hasText(sortField) && fieldNames.contains(sortField)) {
+                String orderClause = sortField;
+                orderClause += "desc".equalsIgnoreCase(sortDirection) ? " DESC" : " ASC";
+                configs.order(orderClause);
+            } else {
+                String primaryKeyField = getPrimaryKeyFieldName(fields);
+                configs.order(primaryKeyField + " DESC");
+            }
+            if (pageNo != null && pageSize != null) {
+                PageNavi page = new DefaultPageNavi(pageNo, pageSize);
+                configs.setPageNavi(page);
+                log.info("设置分页参数 - pageNo: {}, pageSize: {}", pageNo, pageSize);
+            }
+            ConfigStore countConfigs = new DefaultConfigStore();
+            if (filters != null && !filters.isEmpty()) {
+                Set<String> existingFieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
+                for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                    String rawKey = entry.getKey();
+                    Object rawVal = entry.getValue();
+                    if (rawVal == null) { continue; }
+                    if ("deleted".equalsIgnoreCase(rawKey) || "tenant_id".equalsIgnoreCase(rawKey)) { continue; }
+                    if (rawVal instanceof Map) {
+                        @SuppressWarnings("unchecked") Map<String,Object> cond = (Map<String,Object>) rawVal;
+                        String fieldName = (String) cond.getOrDefault("fieldName", rawKey);
+                        Object value = cond.get("value");
+                        String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
+                        if (value == null || !existingFieldNames.contains(fieldName)) { continue; }
+                        // count 语句保守处理：范围/比较用相同 Compare，模糊仍用 LIKE
+                        applyOperatorCondition(countConfigs, fieldName, operator, value);
+                    } else {
+                        if (existingFieldNames.contains(rawKey)) {
+                            countConfigs.and(Compare.LIKE, rawKey, rawVal);
+                        }
+                    }
+                }
+            }
+            if (hasDeletedField) {
+                countConfigs.and(Compare.EQUAL, "deleted", 0);
+            }
+            long total = temporaryService.count(quoteTableName(entity.getTableName()), countConfigs);
+            DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
+            List<Map<String, Object>> list = new ArrayList<>();
+            for (int i = 0; i < dataSet.size(); i++) {
+                DataRow row = dataSet.getRow(i);
+                Map<String, Object> data = convertDataRowToMap(row, fields);
+                list.add(buildDataResponse(entity, data, fields));
+            }
+            return new PageResult<>(list, total);
+        });
     }
 
     @Override
