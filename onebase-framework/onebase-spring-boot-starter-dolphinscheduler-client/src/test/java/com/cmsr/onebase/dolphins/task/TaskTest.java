@@ -11,8 +11,6 @@ import com.cmsr.onebase.dolphins.workflow.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import com.sun.java.accessibility.util.GUIInitializedListener;
 import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -177,37 +175,37 @@ public class TaskTest extends BaseTest {
     // 构建 Flink 任务
     FlinkTask flinkTask = new FlinkTask();
     flinkTask
-            .setMainClass("abc.de")
-            .setMainJar(
-                    new TaskResource()
-                            .setResourceName(
-                                    "onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar"))
-            .setDeployMode("cluster")
-            .setProgramType("JAVA")
-            .setFlinkVersion(">=1.12")
-            .setJobManagerMemory("1G")
-            .setTaskManagerMemory("2G")
-            .setSlot(1)
-            .setTaskManager(2)
-            .setParallelism(1)
-            .setInitScript("")
-            .setRawScript("")
-            .setYarnQueue("")
-            .setLocalParams(Collections.emptyList())
-            .setResourceList(Collections.emptyList());
+        .setMainClass("abc.de")
+        .setMainJar(
+            new TaskResource()
+                .setResourceName(
+                    "onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar"))
+        .setDeployMode("cluster")
+        .setProgramType("JAVA")
+        .setFlinkVersion(">=1.12")
+        .setJobManagerMemory("1G")
+        .setTaskManagerMemory("2G")
+        .setSlot(1)
+        .setTaskManager(2)
+        .setParallelism(1)
+        .setInitScript("")
+        .setRawScript("")
+        .setYarnQueue("")
+        .setLocalParams(Collections.emptyList())
+        .setResourceList(Collections.emptyList());
     TaskDefinition flinkTaskDefinition =
-            TaskDefinitionUtils.createDefaultTaskDefinition(taskCodes.get(0), flinkTask);
+        TaskDefinitionUtils.createDefaultTaskDefinition(taskCodes.get(0), flinkTask);
 
     ProcessDefineParam pcr = new ProcessDefineParam();
     pcr.setName("test-flink-task-dag-by-junit-test")
-            .setLocations(TaskLocationUtils.horizontalLocation(taskCodes.toArray(new Long[0])))
-            .setDescription("test-flink-dag-description")
-            .setTenantCode(tenantCode)
-            .setTimeout("0")
-            .setExecutionType(ProcessDefineParam.EXECUTION_TYPE_PARALLEL)
-            .setTaskDefinitionJson(Collections.singletonList(flinkTaskDefinition))
-            .setTaskRelationJson(TaskRelationUtils.oneLineRelation(taskCodes.toArray(new Long[0])))
-            .setGlobalParams(null);
+        .setLocations(TaskLocationUtils.horizontalLocation(taskCodes.toArray(new Long[0])))
+        .setDescription("test-flink-dag-description")
+        .setTenantCode(tenantCode)
+        .setTimeout("0")
+        .setExecutionType(ProcessDefineParam.EXECUTION_TYPE_PARALLEL)
+        .setTaskDefinitionJson(Collections.singletonList(flinkTaskDefinition))
+        .setTaskRelationJson(TaskRelationUtils.oneLineRelation(taskCodes.toArray(new Long[0])))
+        .setGlobalParams(null);
 
     System.out.println(getClient().opsForProcess().create(projectCode, pcr));
   }
