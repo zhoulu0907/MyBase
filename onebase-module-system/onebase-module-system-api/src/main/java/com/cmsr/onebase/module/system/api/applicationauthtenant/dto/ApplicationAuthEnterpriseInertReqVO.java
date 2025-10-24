@@ -8,7 +8,7 @@ import java.util.List;
 
 @Schema(description = "应用授权企业表创建/修改 Request VO")
 @Data
-public class ApplicationAuthEnterpriseSaveReqVO {
+public class ApplicationAuthEnterpriseInertReqVO {
 
     @Schema(description = "企业id", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
     @NotNull(message = "企业id不能为空")

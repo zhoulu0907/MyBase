@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.service.applicationauthtenant;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 
 import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterprisePageReqVO;
-import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseSaveReqVO;
+import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseInertReqVO;
 import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseVO;
 import jakarta.validation.Valid;
 
@@ -19,14 +19,14 @@ public interface ApplicationAuthEnterpriseService {
      * @param createReqVO 创建信息
      * @return 编号
      */
-    void createApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseSaveReqVO createReqVO);
+    void createApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseInertReqVO createReqVO);
 
     /**
      * 更新应用授权企业表
      *
      * @param updateReqVO 更新信息
      */
-    void updateApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseSaveReqVO updateReqVO);
+    void updateApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseInertReqVO updateReqVO);
 
     /**
      * 删除应用授权企业表

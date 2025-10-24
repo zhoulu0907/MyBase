@@ -70,11 +70,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         validEnterpriseUserCountDuplicate(reqVO.getUserCount());
 
         EnterpriseDO enterprise = BeanUtils.toBean(reqVO, EnterpriseDO.class);
-        enterprise.setLockVersion(0L);
-        enterprise.setTenantId(reqVO.getTenantId());
-        enterprise.setCreateTime(java.time.LocalDateTime.now());
-        enterprise.setUpdateTime(java.time.LocalDateTime.now());
-        enterprise.setDeleted(0L);
         return enterpriseDataRepository.insert(enterprise).getId();
     }
 
@@ -104,7 +99,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             throw exception(ENTERPRRISE_NO_EXISTS, reqVO.getEnterpriseName());
         }
         EnterpriseDO enterprise = BeanUtils.toBean(reqVO, EnterpriseDO.class);
-        enterprise.setUpdateTime(java.time.LocalDateTime.now());
         enterpriseDataRepository.update(enterprise);
     }
 
@@ -113,6 +107,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     public void deleteEnterprise(Long id) {
         DataRow row = new DataRow();
         row.put(EnterpriseDO.ID, id);
+        // todo 用deleteByConfig
         row.put("deleted", 1L);
         row.put("update_time", java.time.LocalDateTime.now());
         enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID, id));
@@ -189,9 +184,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     public void updateStatus(Long id, Long status) {
         //  企业禁用
         DataRow row = new DataRow();
-        row.put(EnterpriseDO.ID, id);
         row.put("status", status);
-        row.put("update_time", java.time.LocalDateTime.now());
         enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID, id));
 
     }

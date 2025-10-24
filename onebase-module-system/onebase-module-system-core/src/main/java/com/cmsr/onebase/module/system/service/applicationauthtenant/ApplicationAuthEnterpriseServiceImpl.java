@@ -2,18 +2,14 @@ package com.cmsr.onebase.module.system.service.applicationauthtenant;
 
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.ComponentDO;
 import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterprisePageReqVO;
-import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseSaveReqVO;
+import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseInertReqVO;
 import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseVO;
 import com.cmsr.onebase.module.system.convert.applicationauthtenant.ApplicationAuthEnterpriseConvert;
 import com.cmsr.onebase.module.system.dal.database.ApplicationAuthEnterpriseDataRepository;
 import com.cmsr.onebase.module.system.dal.database.EnterpriseDataRepository;
-import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant.ApplicationAuthEnterpriseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.enterprise.EnterpriseDO;
-import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +36,7 @@ public class ApplicationAuthEnterpriseServiceImpl implements ApplicationAuthEnte
     private EnterpriseDataRepository enterpriseDataRepository;
 
     @Override
-    public void createApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseSaveReqVO createReqVO) {
+    public void createApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseInertReqVO createReqVO) {
         // 插入
         createReqVO.getApplicationIdList().forEach(appliationId -> {
             createReqVO.setApplicationId(appliationId);
@@ -63,7 +59,7 @@ public class ApplicationAuthEnterpriseServiceImpl implements ApplicationAuthEnte
     }
 
     @Override
-    public void updateApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseSaveReqVO updateReqVO) {
+    public void updateApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseInertReqVO updateReqVO) {
 
         // 更新
         ApplicationAuthEnterpriseDO updateObj = ApplicationAuthEnterpriseConvert.INSTANCE.convert(updateReqVO);

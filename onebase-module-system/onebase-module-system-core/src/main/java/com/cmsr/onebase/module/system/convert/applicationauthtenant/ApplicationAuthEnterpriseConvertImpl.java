@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.convert.applicationauthtenant;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseSaveReqVO;
+import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseInertReqVO;
 import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseVO;
 import com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant.ApplicationAuthEnterpriseDO;
 
@@ -12,7 +12,7 @@ public class ApplicationAuthEnterpriseConvertImpl implements ApplicationAuthEnte
 
 
     @Override
-    public ApplicationAuthEnterpriseDO convert(ApplicationAuthEnterpriseSaveReqVO bean) {
+    public ApplicationAuthEnterpriseDO convert(ApplicationAuthEnterpriseInertReqVO bean) {
         return BeanUtils.toBean(bean, ApplicationAuthEnterpriseDO.class);
     }
 
