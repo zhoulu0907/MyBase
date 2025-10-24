@@ -7,6 +7,6 @@ import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 
 @Configuration(value = "systemRpcConfiguration", proxyBeanMethods = false)
-@EnableFeignClients(clients = {FileApi.class, ConfigApi.class})
+// @EnableFeignClients(clients = {FileApi.class, ConfigApi.class})
 public class RpcConfiguration {
 }
