@@ -135,6 +135,12 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
                 Object value = resultData.get(sourceFieldDO.getFieldName());
                 config.and(fieldName, value);
             }
+            // 检查子表中是否有软删除字段
+            boolean hasDeletedField = targetfields.stream()
+                    .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+            if(hasDeletedField){
+                config.and("deleted", 0);
+            }
             // 查询子表数据
             DataSet dataSet = temporaryService.querys(tableName,config);
 
