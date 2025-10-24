@@ -212,7 +212,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
                     // 检查公式中是否包含$字符，如果包含则进行参数替换
                     if (formula.contains("$")) {
-                        formula = replaceParametersInFormula(formula, parameters);
+                        formula = processFormulaParameters(formula, parameters);
                     }
 
                     // 5. 注入参数
@@ -797,6 +797,58 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             }
 
             result = result.replace(placeholder, sb.toString());
+        }
+
+        return result;
+    }
+
+    /**
+     * 处理公式中的参数映射，将形如"$数据查询节点(多条).关联主表ID"的参数替换为对应的字段名"f_id"
+     * 例如：将"COUNT($数据查询节点(多条).关联主表ID)"转换为"COUNT(f_id)"
+     * 
+     * @param formula 公式字符串
+     * @param parameters 参数映射
+     * @return 处理后的公式
+     */
+    public String processFormulaParameters(String formula, Map<String, Object> parameters) {
+        if (!StringUtils.hasText(formula) || parameters == null || parameters.isEmpty()) {
+            return formula;
+        }
+
+        String result = formula;
+        
+        // 收集所有以$开头的键
+        List<String> keys = new ArrayList<>();
+        for (String key : parameters.keySet()) {
+            if (key != null && key.startsWith("$")) {
+                keys.add(key);
+            }
+        }
+        
+        if (keys.isEmpty()) {
+            return result;
+        }
+        
+        // 按键长度倒序排列，避免短键先替换影响长键
+        keys.sort((a, b) -> Integer.compare(b.length(), a.length()));
+
+        for (String key : keys) {
+            Object valObj = parameters.get(key);
+            if (valObj == null) {
+                continue;
+            }
+            
+            String val = String.valueOf(valObj).trim();
+            if (val.isEmpty()) {
+                continue;
+            }
+
+            // 如果是字段引用形式 ($nodeName.fieldName)
+            int dotIdx = key.indexOf('.', 1); // 从$之后开始找.
+            if (dotIdx > 0) {
+                // 提取字段名，用于替换
+                result = result.replace(key, val);
+            }
         }
 
         return result;

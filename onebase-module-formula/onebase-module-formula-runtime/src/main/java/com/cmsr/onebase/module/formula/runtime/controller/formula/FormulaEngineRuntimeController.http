@@ -31,7 +31,7 @@ Content-Type: application/json
 }
 
 ### 请求 /execute 接口 => 执行函数函数 获取人员信息
-POST {{baseUrl}}/formula/excute/engine/executeFormula
+POST {{baseUrl}}/formula/excute/engine/execute-formula1
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -42,7 +42,7 @@ Content-Type: application/json
 }
 
 ### 请求 /execute 接口 => 执行函数函数 获取人员信息
-POST {{baseUrl}}/formula/engine/executeFormula
+POST {{baseUrl}}/formula/excute/engine/execute-formula1
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -63,7 +63,7 @@ Content-Type: application/json
 }
 
 ### 执行公式计算
-POST {{baseUrl}}/formula/excute/engine/executeFormula
+POST {{baseUrl}}/formula/excute/engine/execute-formula1
 Content-Type: application/json
 
 {

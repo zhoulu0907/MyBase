@@ -38,8 +38,8 @@ public class FormulaEngineController {
     @Resource
     private FormulaEngineService formulaEngineService;
 
-    @PostMapping("/debugFormula")
-    @Operation(summary = "执行公式计算")
+    @PostMapping("/debug-formula")
+    @Operation(summary = "调试公式计算")
     @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
     public CommonResult<FormulaExecuteRespVO> debugFormula(@Valid @RequestBody FormulaExecuteReqVO reqVO) {
         long startTime = System.currentTimeMillis();
@@ -56,7 +56,7 @@ public class FormulaEngineController {
         return CommonResult.success(respVO);
     }
 
-    @PostMapping("/executeForFlow")
+    @PostMapping("/execute-formula")
     @Operation(summary = "执行公式计算")
     @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
     public CommonResult<FormulaExecuteRespDTO> executeFormula(@Valid @RequestBody FormulaExecuteReqDTO reqDTO) {
@@ -88,3 +88,4 @@ public class FormulaEngineController {
     }
 
 }
+

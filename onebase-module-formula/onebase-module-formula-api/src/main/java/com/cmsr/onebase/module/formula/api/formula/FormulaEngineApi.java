@@ -17,7 +17,7 @@ public interface FormulaEngineApi {
 
     String PREFIX = "/rpc-api/formula/engine";
 
-    @PostMapping(PREFIX+"/executeFormula")
+    @PostMapping(PREFIX+"/execute-formula")
     @Operation(summary = "获得函数信息")
     @Parameter(name = "reqDTO", description = "执行公式计算", required = true)
     CommonResult<FormulaExecuteRespDTO> executeFormula(@Valid @RequestBody FormulaExecuteReqDTO reqDTO);

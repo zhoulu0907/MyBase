@@ -5,7 +5,7 @@
 
 
 ### 请求 /create 接口 => 创建函数
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ### 请求 /create 接口 => 创建函数
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -31,7 +31,7 @@ Content-Type: application/json
 }
 
 ### 请求 /execute 接口 => 执行函数函数 获取人员信息
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -42,7 +42,7 @@ Content-Type: application/json
 }
 
 ### 请求 /create 接口 => 创建函数
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -52,7 +52,7 @@ Content-Type: application/json
 }
 
 ### 请求 /execute 接口 => 执行函数函数 获取人员信息
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -63,7 +63,7 @@ Content-Type: application/json
 }
 
 ### 请求 /execute 接口 => 执行函数函数 计数
-POST {{baseUrl}}/formula/engine/debugFormula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -77,13 +77,13 @@ Content-Type: application/json
 }
 
 ### 请求 /execute 接口 => 执行函数函数 计数
-POST {{baseUrl}}/formula/engine/executeForFlow
+POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-    "formula": "COUNT($数据查询节点(多条).关联主表ID)",
+    "formula": "COUNTA($数据查询节点(多条).关联主表ID)",
     "parameters":
     {
       "$数据查询节点(多条)": "r_id1",
@@ -92,11 +92,14 @@ Content-Type: application/json
     "contextData":
     {
       "r_id1": [
-          {"f_id": 1},
-          {"f_id": 2},
-          {"f_id": 3}
+          {"f_id": "1"},
+          {"f_id": "2"},
+          {"f_id": "3"}
       ],
       "r_id2": [
+          {"f_id": 4},
+          {"f_id": 5},
+          {"f_id": 6},
           {"f_id": 4},
           {"f_id": 5},
           {"f_id": 6}
@@ -106,7 +109,7 @@ Content-Type: application/json
 }
 
 ### 请求 /execute 接口 => 执行函数函数 计数
-POST {{baseUrl}}/formula/engine/executeForFlow
+POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
