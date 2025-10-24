@@ -31,8 +31,7 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
     }
 
     public void updateCollectStatusById(Long datasourceId, CollectStatus collectStatus) {
-        ETLDatasourceDO datasourceDO = new ETLDatasourceDO();
-        datasourceDO.setId(datasourceId);
+        ETLDatasourceDO datasourceDO = findById(datasourceId);
         datasourceDO.setCollectStatus(collectStatus);
         if (collectStatus == CollectStatus.RUNNING) {
             datasourceDO.setCollectStartTime(LocalDateTime.now());
