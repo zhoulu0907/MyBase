@@ -87,6 +87,7 @@ const MenuIcon = (props: IProps) => {
                   onClick={() => {
                     onSelected(item.code);
                     setActiveIcon(item.name);
+                    handleBack();
                   }}
                 >
                   <DynamicIcon

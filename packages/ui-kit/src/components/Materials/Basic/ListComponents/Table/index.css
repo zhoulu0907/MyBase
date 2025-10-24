@@ -31,3 +31,16 @@
     gap: 10px;
   }
 }
+
+.tableFormItem {
+  .arco-form-label-item {
+    width: 100px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    label {
+      white-space: nowrap;
+    }
+  }
+}

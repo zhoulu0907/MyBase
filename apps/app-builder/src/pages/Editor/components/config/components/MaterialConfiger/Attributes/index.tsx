@@ -240,14 +240,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     {(item.type === CONFIG_TYPES.TEXT_INPUT ||
                       item.type === CONFIG_TYPES.PLACEHOLDER_INPUT ||
                       item.type === CONFIG_TYPES.UPLOAD_COMPRESS) && (
-                      <Input
-                        placeholder={`请输入${item.name}`}
-                        value={configs[item.key]}
-                        onChange={(value) => {
-                          handlePropsChange(item.key, value);
-                        }}
-                      />
-                    )}
+                        <Input
+                          placeholder={`请输入${item.name}`}
+                          value={configs[item.key]}
+                          onChange={(value) => {
+                            handlePropsChange(item.key, value);
+                          }}
+                        />
+                      )}
                     {item.type === CONFIG_TYPES.LABEL_INPUT && (
                       <Input
                         placeholder={`请输入${item.name}`}
@@ -268,7 +268,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                             handlePropsChange(item.key, value);
                           }
                         }}
-                        // suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
+                      // suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
                       />
                     )}
 
@@ -324,7 +324,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                         >
                           {item.range.map((item: any) => (
                             <Option key={item.key} value={item.value}>
-                              <Tabs defaultActiveTab="1" type={item.value} style={{ pointerEvents: 'none' }}>
+                              <Tabs size='mini' defaultActiveTab="1" type={item.value} style={{ pointerEvents: 'none' }}>
                                 <TabPane key="1" title="标签页1" />
                                 <TabPane key="2" title="标签页2" />
                               </Tabs>
@@ -349,33 +349,33 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       item.type === CONFIG_TYPES.FORM_LAYOUT ||
                       item.type === CONFIG_TYPES.COLLAPSED ||
                       item.type === CONFIG_TYPES.TEXT_ALIGN) && (
-                      <Radio.Group
-                        type="button"
-                        size="default"
-                        value={configs[item.key]}
-                        onChange={(value) => {
-                          handlePropsChange(item.key, value);
-                        }}
-                        style={{
-                          width: '100%',
-                          display: 'flex'
-                        }}
-                      >
-                        {item.range.map((item: any) => (
-                          <Radio
-                            key={item.key}
-                            value={item.value}
-                            style={{
-                              flex: 1,
-                              textAlign: 'center',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
-                          </Radio>
-                        ))}
-                      </Radio.Group>
-                    )}
+                        <Radio.Group
+                          type="button"
+                          size="default"
+                          value={configs[item.key]}
+                          onChange={(value) => {
+                            handlePropsChange(item.key, value);
+                          }}
+                          style={{
+                            width: '100%',
+                            display: 'flex'
+                          }}
+                        >
+                          {item.range.map((item: any) => (
+                            <Radio
+                              key={item.key}
+                              value={item.value}
+                              style={{
+                                flex: 1,
+                                textAlign: 'center',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
+                            </Radio>
+                          ))}
+                        </Radio.Group>
+                      )}
                     {item.type === CONFIG_TYPES.COLUMN_COUNT_RADIO && (
                       <Radio.Group
                         type="button"
@@ -469,13 +469,10 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           )}
                           {typeof configs[item.key]['min'] === 'number' && (
                             <InputNumber
-                              defaultValue={0}
                               value={configs[item.key]['min']}
-                              max={200}
-                              min={0}
                               prefix="最小值"
                               onChange={(value) => {
-                                if (!value) return;
+                                if (value > configs[item.key]['max']) return;
                                 handlePropsChange(item.key, { ...configs[item.key], min: value });
                               }}
                             />
@@ -483,11 +480,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           {typeof configs[item.key]['max'] === 'number' && (
                             <InputNumber
                               value={configs[item.key]['max']}
-                              max={200}
-                              min={0}
                               prefix="最大值"
                               onChange={(value) => {
-                                if (!value) return;
+                                if (value < configs[item.key]['min']) return;
                                 handlePropsChange(item.key, { ...configs[item.key], max: value });
                               }}
                             />

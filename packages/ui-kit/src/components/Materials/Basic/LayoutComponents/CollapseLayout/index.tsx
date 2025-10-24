@@ -1,4 +1,4 @@
-import { Collapse, Divider } from '@arco-design/web-react';
+import { Collapse, Divider, Tooltip } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { cloneDeep } from 'lodash-es';
 import { memo, useEffect, useState } from 'react';
@@ -20,8 +20,8 @@ import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { COLLAPSED_OPTIONS, COLLAPSED_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import './index.css';
 import type { XCollapseLayoutConfig } from './schema';
+import './index.css';
 
 const CollapseItem = Collapse.Item;
 
@@ -200,7 +200,11 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
       style={{ opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1 }}
     >
       <CollapseItem
-        header={label.text}
+        header={
+          <Tooltip content={label.text}>
+            <div className="collapse-title-ellipsis">{label.text}</div>
+          </Tooltip>
+        }
         name="1"
         contentStyle={{ backgroundColor: '#fff', paddingLeft: 13, paddingTop: 5, borderTop: '1px solid #ccc' }}
       >

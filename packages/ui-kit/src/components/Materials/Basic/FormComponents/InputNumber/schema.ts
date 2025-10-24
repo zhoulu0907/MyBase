@@ -282,7 +282,7 @@ const XInputNumber: XInputNumberSchema = {
     verify: {
       required: false,
       min: 0,
-      max: 100
+      max: Infinity
     }
   }
 };

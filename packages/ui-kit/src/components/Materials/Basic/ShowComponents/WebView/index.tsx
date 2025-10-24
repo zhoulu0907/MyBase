@@ -1,6 +1,7 @@
 import { memo, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XWebViewConfig } from './schema';
+import './index.css';
 
 const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, title, webViewUrl, runtime = true } = props;
@@ -60,7 +61,7 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
         flexDirection: 'column'
       }}
     >
-      {title}
+      <div className='iframeTitle'>{title}</div>
       <iframe
         src={validUrl}
         style={{
