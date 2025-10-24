@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "管理后台 - 数据工厂 - 数据源管理")
+@Tag(name = "数据工厂 - 数据源管理")
 @RestController
 @RequestMapping("/datafactory/datasource")
 @Validated
@@ -67,7 +67,6 @@ public class ETLDatasourceController {
     @PostMapping("/delete")
     @Operation(summary = "删除数据源")
     public CommonResult<Boolean> deleteDataFactoryDatasource(@RequestParam("id") Long id) {
-
         return CommonResult.success(Boolean.TRUE);
     }
 }

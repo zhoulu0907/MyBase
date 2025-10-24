@@ -14,7 +14,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "数据方法 sdk")
+/**
+ * 数据方法API接口
+ * 
+ * @author bty418
+ * @date 2025-10-23
+ */
+@Tag(name = "数据方法 API")
 public interface DataMethodApi {
 
     /**
@@ -52,3 +58,4 @@ public interface DataMethodApi {
      */
     List<List<EntityFieldDataRespDTO>> updateData(@Valid @RequestBody UpdateDataReqDTO reqDTO);
 }
+

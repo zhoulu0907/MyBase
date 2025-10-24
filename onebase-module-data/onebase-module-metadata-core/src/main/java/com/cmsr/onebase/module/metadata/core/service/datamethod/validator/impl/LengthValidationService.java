@@ -4,8 +4,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,10 @@ import java.util.Map;
  * 
  * 校验字段长度是否符合规则
  *
+ * @author bty418
+ * @date 2025-10-23
  */
+@Slf4j
 @Component
 public class LengthValidationService implements ValidationService {
 
@@ -33,7 +36,7 @@ public class LengthValidationService implements ValidationService {
         }
 
         // 查询长度规则
-        List<MetadataValidationLengthDO> rules = lengthRepository.findByFieldId( fieldId);
+        List<MetadataValidationLengthDO> rules = lengthRepository.findByFieldId(fieldId);
 
         if (rules.isEmpty()) {
             return; // 没有长度规则，跳过校验
@@ -48,23 +51,33 @@ public class LengthValidationService implements ValidationService {
         }
 
         // 执行长度校验
-        String stringValue = value.toString();
+        String originalValue = value.toString();
+        log.debug("长度校验 - 字段[{}]，原始值长度: {}, 值: {}", field.getDisplayName(), originalValue.length(), originalValue);
         
         for (MetadataValidationLengthDO rule : rules) {
             if (rule.getIsEnabled() == null || rule.getIsEnabled() != 1) {
                 continue; // 跳过未启用的规则
             }
 
+            // 每个规则使用原始值进行校验，避免规则之间相互影响
+            String stringValue = originalValue;
+            
             // 是否在校验前去除空格
             if (rule.getTrimBefore() != null && rule.getTrimBefore() == 1) {
                 stringValue = stringValue.trim();
+                log.debug("长度校验 - 字段[{}]，trim后长度: {}, 值: {}", field.getDisplayName(), stringValue.length(), stringValue);
             }
+
+            log.debug("长度校验 - 字段[{}]，规则ID: {}, minLength: {}, maxLength: {}, trimBefore: {}", 
+                    field.getDisplayName(), rule.getId(), rule.getMinLength(), rule.getMaxLength(), rule.getTrimBefore());
 
             // 校验最小长度
             if (rule.getMinLength() != null && stringValue.length() < rule.getMinLength()) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
                         ? rule.getPromptMessage()
                         : "字段[" + field.getDisplayName() + "]长度不能小于" + rule.getMinLength() + "个字符";
+                log.error("长度校验失败 - 字段[{}]，当前长度: {}, 要求最小长度: {}, 错误消息: {}", 
+                        field.getDisplayName(), stringValue.length(), rule.getMinLength(), errorMessage);
                 throw new IllegalArgumentException(errorMessage);
             }
 
@@ -73,6 +86,8 @@ public class LengthValidationService implements ValidationService {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
                         ? rule.getPromptMessage()
                         : "字段[" + field.getDisplayName() + "]长度不能大于" + rule.getMaxLength() + "个字符";
+                log.error("长度校验失败 - 字段[{}]，当前长度: {}, 要求最大长度: {}, 错误消息: {}", 
+                        field.getDisplayName(), stringValue.length(), rule.getMaxLength(), errorMessage);
                 throw new IllegalArgumentException(errorMessage);
             }
         }
