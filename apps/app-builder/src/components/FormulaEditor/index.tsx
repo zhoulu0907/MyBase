@@ -155,7 +155,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       // 使用编辑器的插入方法，支持光标定位
       //如果fieldtype是node 代表是节点， 需要传入的格式是$节点.字段
       if (variable.isNode) {
-        editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
+        editorRef.current.insertAtPosition(`[[${variable.id}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
       } else {
         editorRef.current.insertAtPosition(`[[${variable.id}.${variable.displayName}]]`, 'var');
       }
@@ -247,7 +247,9 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
    */
   const handleConfirm = useCallback(async () => {
     // await handleDebug();
-    onConfirm(formula);
+    const newFormula = formattedFormula();
+    const params = retrieveAllVariables(formula);
+    onConfirm(formula, newFormula, params);
     setIsDebugMode(false);
   }, [formula, onConfirm, onCancel]);
 
@@ -278,7 +280,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   const getFieldType = (keyName: string, value: any) => {
     let fieldType: string = "";
     variables.forEach(variable => {
-      const fieldIndex = variable.fields?.findIndex(item => keyName.includes(item.displayName) && item.id === value);
+      const fieldIndex = variable?.fields?.findIndex(item => keyName.includes(item.displayName) && item.id === value);
       if(fieldIndex !== -1) {
          fieldType = variable?.fields?.[fieldIndex as number].fieldType || "TEXT";
        }
