@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.formula.build.controller.formula;
+package com.cmsr.onebase.module.formula.runtime.controller.formula;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -29,38 +29,20 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "公式引擎")
 @RestController
-@RequestMapping("/formula/engine")
+@RequestMapping("/formula/excute/engine")
 @Validated
 @Slf4j
-public class FormulaEngineController {
+public class FormulaEngineRuntimeController {
 
     @Resource
     private FormulaEngineService formulaEngineService;
 
-    @PostMapping("/debug-formula")
-    @Operation(summary = "调试公式计算")
-    @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
-    public CommonResult<FormulaExecuteRespVO> debugFormula(@Valid @RequestBody FormulaExecuteReqVO reqVO) {
-        long startTime = System.currentTimeMillis();
-        log.info("debugFormula --> formula: {}" ,reqVO.getFormula());
-        log.info("debugFormula --> params: {} ",reqVO.getParameters());
-        Object result = formulaEngineService.executeFormulaWithParams(reqVO.getFormula(), reqVO.getParameters());
-
-        long executionTime = System.currentTimeMillis() - startTime;
-
-        FormulaExecuteRespVO respVO = FormulaExecuteRespVO.success(result, executionTime);
-
-        log.info("debugFormula成功，公式：{}，结果：{}，耗时：{}ms", reqVO.getFormula(), result, executionTime);
-
-        return CommonResult.success(respVO);
-    }
-
-    @PostMapping("/execute-formula")
+    @PostMapping("/execute-formula1")
     @Operation(summary = "执行公式计算")
     @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
     public CommonResult<FormulaExecuteRespDTO> executeFormula(@Valid @RequestBody FormulaExecuteReqDTO reqDTO) {
         long startTime = System.currentTimeMillis();
-        log.info("executeFormula --> formula"+reqDTO.getFormula());
+        log.info("############: "+reqDTO.getFormula());
         Object result = formulaEngineService.executeFormulaWithParamsForFlow(reqDTO.getFormula(), reqDTO.getParameters(),
                 reqDTO.getContextData());
 
@@ -68,23 +50,10 @@ public class FormulaEngineController {
 
         FormulaExecuteRespVO respVO = FormulaExecuteRespVO.success(result, executionTime);
 
-        log.info("executeFormula成功，公式：{}，结果：{}，耗时：{}ms", reqDTO.getFormula(), result, executionTime);
+        log.info("公式执行成功，公式：{}，结果：{}，耗时：{}ms", reqDTO.getFormula(), result, executionTime);
 
         return CommonResult.success(BeanUtils.toBean(respVO, FormulaExecuteRespDTO.class));
 
     }
 
-
-    @PostMapping("/validate")
-    @Operation(summary = "验证公式语法")
-    @PreAuthorize("@ss.hasPermission('formula:engine:validate')")
-    public CommonResult<Boolean> validateFormula(@Valid @RequestBody FormulaValidateReqVO reqVO) {
-        boolean isValid = formulaEngineService.validateFormula(reqVO.getFormula());
-
-        log.info("公式验证完成，公式：{}，结果：{}", reqVO.getFormula(), isValid);
-
-        return CommonResult.success(isValid);
-    }
-
 }
-

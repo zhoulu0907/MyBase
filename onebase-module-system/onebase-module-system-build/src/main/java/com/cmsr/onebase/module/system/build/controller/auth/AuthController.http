@@ -1,4 +1,4 @@
-### 默认环境变量配置（直接使用local环境配置）
+## 默认环境变量配置（直接使用local环境配置）
 # 使用全局环境配置文件 http-client.env.json
 # 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
 # 登录成功后会自动更新token到环境变量中
@@ -67,3 +67,16 @@ tenant-id: {{adminTenantId}}
 GET {{baseUrl}}/system/list-menus
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+
+### 请求 /reset-password 接口 => 失败
+POST {{baseUrl}}/system/auth/reset-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "userId": "544417214451814400",
+  "password": "admin125"
+}
