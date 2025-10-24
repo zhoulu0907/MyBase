@@ -6,8 +6,12 @@
 import React from 'react';
 
 import type { NodeRenderReturnType } from '@flowgram.ai/free-layout-editor';
+import type { FormInstance } from '@arco-design/web-react';
 
-interface INodeRenderContext extends NodeRenderReturnType {}
+interface INodeRenderContext extends NodeRenderReturnType {
+  configForm?: FormInstance;
+  setconfigFormForm?: (form: FormInstance) => void;
+}
 
 /** 业务自定义节点上下文 */
 export const NodeRenderContext = React.createContext<INodeRenderContext>({} as INodeRenderContext);
