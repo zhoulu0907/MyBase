@@ -1,16 +1,16 @@
 import AppIconSVG from '@/assets/images/app_icon.svg';
-import AvatarSVG from '@/assets/images/avatar.svg';
 import TabMiddleBgSVG from '@/assets/images/tab_bg.svg';
 import TabFirstBgSVG from '@/assets/images/tab_first_bg.svg';
 import TabFirstSelectBgSVG from '@/assets/images/tab_first_select_bg.svg';
 import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
 import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
+import VisitIconSVG from '@/assets/images/visit.svg';
 import { iconMap } from '@/components/CreateApp/const';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';
-import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { Button, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
@@ -202,17 +202,20 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </Tabs>
 
         <div className={styles.userInfo}>
-          <Button type="outline" size="small" onClick={toRuntime}>
-            访问
+          <Button type="secondary" size="small" onClick={toRuntime} className={styles.visitButton}>
+            <div className={styles.visitButtonContent}>
+              <img src={VisitIconSVG} alt="visit" />
+              <div>访问</div>
+            </div>
           </Button>
 
-          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
+          {/* {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
               <img src={AvatarSVG} alt="avatar" />
             </div>
-          </Dropdown>
+          </Dropdown> */}
         </div>
       </div>
     </Header>
