@@ -183,13 +183,28 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
             }
             //如果子表数据为空，对子表数据全部删除
             if(subEntities.isEmpty()) {
-                for (String id : subTableIds) {
-                    coreDataMethodService.deleteData(
-                            targetEntity.getId(),
-                            id,
-                            null
-                    );
+                List<MetadataEntityFieldDO> fields = entityFieldRepository.getEntityFieldListByEntityId(targetEntity.getId());
+                boolean hasDeletedField = fields.stream()
+                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+                DefaultConfigStore subConfig = new DefaultConfigStore();
+                subConfig.and("parent_id", reqVO.getId());
+                if (hasDeletedField) {
+                    // 软删除：更新deleted字段为删除时间戳
+                    DataRow updateData = new DataRow();
+                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+                    temporaryService.update(tableName, updateData, subConfig);
+//                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+                } else {
+                     temporaryService.delete(tableName, subConfig);
+//                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
                 }
+//                for (String id : subTableIds) {
+//                    coreDataMethodService.deleteData(
+//                            targetEntity.getId(),
+//                            id,
+//                            null
+//                    );
+//                }
             }
         }
 
