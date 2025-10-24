@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 @ActiveProfiles("unit-test")
 @Transactional
-public class RoleServiceTest {
+public class RoleDTOServiceTest {
 
     @Resource
     private RoleService roleService;
