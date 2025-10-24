@@ -15,7 +15,7 @@ export const ProcessNodeRegistry: FlowNodeRegistry = {
   type: WorkflowNodeType.ProcessNode,
   meta: {
     defaultPorts: [{ type: 'input' }],
-    sidebarDisabled: true
+    // sidebarDisabled: true
   },
   info: {
     icon: iconContinue,
