@@ -14,7 +14,7 @@ const Administrator: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ id: '0', username: '', newPassword: '', confirmPassword: '' });
   const [emailForm, setEmailForm] = useState({ id: '0', username: '', oldEmail: '', newEmail: '' });
-  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  // const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
   const [createForm] = useForm();
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -30,7 +30,7 @@ const Administrator: React.FC = () => {
       title: '序号',
       dataIndex: 'order',
       key: 'order',
-      render: (text: any, record: any, index: number) => index + 1,
+      render: (_text: any, _record: any, index: number) => index + 1,
       width: '5%',
       // fixed: 'left',
     },

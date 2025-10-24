@@ -1,5 +1,5 @@
 import { Button, Typography } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styles from './index.module.less';
 
 interface FieldCardProps {
