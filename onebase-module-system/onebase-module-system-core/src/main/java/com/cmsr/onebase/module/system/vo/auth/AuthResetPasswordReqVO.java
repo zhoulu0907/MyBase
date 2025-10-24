@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.vo.auth;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import lombok.Data;
@@ -16,7 +17,7 @@ import org.hibernate.validator.constraints.Length;
 public class AuthResetPasswordReqVO {
 
     @Schema(description = "userId", requiredMode = Schema.RequiredMode.REQUIRED, example = "007")
-    @NotEmpty(message = "userId 不能为空")
+    @NotNull(message = "userId 不能为空")
     private Long userId;
 
     @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "1234")

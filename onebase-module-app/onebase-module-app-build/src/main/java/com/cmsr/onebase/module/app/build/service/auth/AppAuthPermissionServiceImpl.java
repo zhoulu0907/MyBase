@@ -104,12 +104,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         appCommonService.validateRoleExist(reqVO.getRoleId());
         MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         Long entityId = menuDO.getEntityId();
-
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
         //数据权限
-
-
         List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
         if (CollectionUtils.isEmpty(authDataGroupDOS)) {
             authDataGroupDOS = AuthDefaultFactory.createListAuthDataGroupDOList(reqVO);
@@ -132,7 +129,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
         dataPermissionVO.setScopeFields(queryScopeFields(entityId));
         dataPermissionVO.setDataFilterFields(queryDataFilterFields(entityId));
-        //补充全部的字段名称属性
         return dataPermissionVO;
     }
 

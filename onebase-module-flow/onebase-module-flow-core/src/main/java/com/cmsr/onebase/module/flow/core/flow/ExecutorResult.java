@@ -11,6 +11,8 @@ import java.util.Map;
 @Data
 public class ExecutorResult {
 
+    private String traceId;
+
     private boolean success;
 
     private String code;

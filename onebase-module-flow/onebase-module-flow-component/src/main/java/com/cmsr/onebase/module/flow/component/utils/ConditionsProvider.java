@@ -99,6 +99,9 @@ public class ConditionsProvider {
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
             //TODO 公式
+            Map valueMap = (Map)expressionItem.getValue();
+            String formula = MapUtils.getString(valueMap, "formula");
+            Map parameters = MapUtils.getMap(valueMap, "parameters");
         }
     }
 

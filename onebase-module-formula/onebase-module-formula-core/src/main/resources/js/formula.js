@@ -1,15 +1,15 @@
 /* 自定义函数区域开始 */
-function GETUSER() {
-  return {name:"张三", id: 18}
-}
-function GET_NAME(user) {
-  return user.name
-}
+// function GETUSER() {
+//   return {name:"张三", id: 18}
+// }
+// function GET_NAME(user) {
+//   return user.name
+// }
 
-// 函数导出区域开始
-exports.GETUSER = GETUSER;
-exports.GET_NAME = GET_NAME;
-// 函数导出区域结束
+// // 函数导出区域开始
+// exports.GETUSER = GETUSER;
+// exports.GET_NAME = GET_NAME;
+// // 函数导出区域结束
 
 /* 自定义函数区域结束 */
 
@@ -4558,6 +4558,36 @@ function _typeof(o) {
     }
     return text.substring(0, num_chars);
   }
+
+  function GETUSER(id,name,type) {
+    console.log(id,name);
+    var user = {
+      name: name,
+      id: id,
+    }
+    if (type == "name") {
+      return name;
+    } else if ( type == "id") {
+      return id;
+    }
+    return null;
+  }
+
+  function GETDEPT(deptId,name,type) {
+    console.log(deptno,name);
+    var user = {
+      name: name,
+      id: id,
+    }
+    if (type == "name") {
+      return name;
+    } else if ( type == "deptno") {
+      return deptno;
+    }
+    return null;
+  }
+
+
   function LEN(text) {
     if (arguments.length === 0) {
       return error;
@@ -10665,6 +10695,8 @@ function _typeof(o) {
   exports.LARGE = LARGE;
   exports.LCM = LCM;
   exports.LEFT = LEFT;
+  exports.GETUSER = GETUSER;
+  exports.GETDEPT = GETDEPT;
   exports.LEN = LEN;
   exports.LINEST = LINEST;
   exports.LN = LN;

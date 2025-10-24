@@ -1,0 +1,57 @@
+## 默认环境变量配置（直接使用local环境配置）
+#@baseUrl = http://localhost:48080/admin-api
+#@adminTenantId = 1
+#@token = 327a71784fa14847867c95e2f5bab8cd
+#@tag = OneBase.local
+
+### 创建字典类型
+POST {{baseUrl}}/system/dict-type/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "name": "测试",
+  "type": "test",
+  "status": 1,
+  "remark": "test"
+}
+
+### 修改字典类型
+POST {{baseUrl}}/system/dict-type/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 1,
+  "name": "更新的字典类型",
+  "type": "updated_dict_type",
+  "status": 1,
+  "remark": "更新的备注"
+}
+
+### 删除字典类型
+POST {{baseUrl}}/system/dict-type/delete?id=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得字典类型的分页列表
+GET {{baseUrl}}/system/dict-type/page?pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 查询字典类型详细
+GET {{baseUrl}}/system/dict-type/get?id=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得全部字典类型列表
+GET {{baseUrl}}/system/dict-type/simple-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 导出数据类型
+GET {{baseUrl}}/system/dict-type/export
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

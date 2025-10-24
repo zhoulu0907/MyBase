@@ -208,6 +208,7 @@ public class FlowProcessExecutor {
      */
     private static ExecutorResult buildExecutorResult(LiteflowResponse response, ExecuteContext executeContext, VariableContext variableContext) {
         ExecutorResult result = new ExecutorResult();
+        result.setTraceId(executeContext.getTraceId());
         result.setSuccess(response.isSuccess());
         result.setCode(response.getCode());
         result.setMessage(response.getMessage());

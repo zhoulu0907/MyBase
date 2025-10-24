@@ -13,6 +13,9 @@ import java.util.List;
 @Schema(description = "应用管理 - 数据权限组 Response VO")
 public class AuthDetailDataPermissionVO {
 
+    @Schema(description = "数据实体ID")
+    private Long entityId;
+
     @Schema(description = "数据访问权限")
     private List<AuthDataGroupVO> authDataGroups;
 
