@@ -66,4 +66,6 @@ public class EnterpriseRespVO  extends PageParam {
 
     @Schema(description = "企业id", example = "1")
     private Integer tenantId;
+
+
 }

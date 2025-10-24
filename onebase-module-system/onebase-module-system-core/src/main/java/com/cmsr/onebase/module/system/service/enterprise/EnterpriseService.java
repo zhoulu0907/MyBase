@@ -2,9 +2,9 @@
 package com.cmsr.onebase.module.system.service.enterprise;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.api.enterprise.dto.EnterprisePageReqVO;
-import com.cmsr.onebase.module.system.api.enterprise.dto.EnterpriseRespVO;
-import com.cmsr.onebase.module.system.api.enterprise.dto.EnterpriseSaveReqVO;
+import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterprisePageReqVO;
+import com.cmsr.onebase.module.system.api.enterprise.dto.*;
+import jakarta.validation.Valid;
 
 
 /**
@@ -52,4 +52,19 @@ public interface EnterpriseService {
      * @return 企业详情
      */
     EnterpriseRespVO getEnterprise(Long id);
+    /**
+     * 创建企业管理员
+     *
+     */
+    EnterpriseUserRespVO createUser( EnterpriseUserReqVO reqVO);
+    /**
+     * 创建企业管理员
+     *
+     */
+    void updateStatus(Long id, Long status);
+    /**
+     * 创建企业对于的应用
+     *
+     */
+    PageResult<EnterpriseApplicationRespVO> enterpriseApplicationPage(ApplicationAuthEnterprisePageReqVO pageReqVO);
 }

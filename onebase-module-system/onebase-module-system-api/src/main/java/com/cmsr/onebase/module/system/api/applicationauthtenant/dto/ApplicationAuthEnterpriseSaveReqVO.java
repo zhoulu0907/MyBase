@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.api.applicationauthtenant.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
+import java.util.List;
 import java.time.LocalDateTime;
 
 @Schema(description = "应用授权企业表创建/修改 Request VO")
@@ -14,7 +14,6 @@ public class ApplicationAuthEnterpriseSaveReqVO {
     private Long id;
 
     @Schema(description = "应用id", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "应用id不能为空")
     private Integer applicationId;
 
     @Schema(description = "企业id", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
@@ -42,4 +41,8 @@ public class ApplicationAuthEnterpriseSaveReqVO {
     
     @Schema(description = "是否删除", example = "0")
     private Long deleted;
+
+    @Schema(description = "应用id")
+    @NotNull(message = "企业id不能为空")
+    private  List<Integer> applicationIdList;
 }

@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.api.enterprise.dto.EnterprisePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.enterprise.EnterpriseDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
@@ -64,5 +65,13 @@ public class EnterpriseDataRepository extends DataRepository<EnterpriseDO> {
         // 执行计数查询
         return countByConfig(configStore);
 
+    }
+
+    public EnterpriseDO findByName(String name) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("enterprise_name", name);
+        // 只查询未删除的记录
+        configStore.eq("deleted", 0L);
+        return findOne(configStore);
     }
 }

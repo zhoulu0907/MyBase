@@ -1,20 +1,28 @@
 package com.cmsr.onebase.module.system.service.applicationauthtenant;
 
 
-
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.ComponentDO;
 import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterprisePageReqVO;
 import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseSaveReqVO;
 import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterpriseVO;
 import com.cmsr.onebase.module.system.convert.applicationauthtenant.ApplicationAuthEnterpriseConvert;
 import com.cmsr.onebase.module.system.dal.database.ApplicationAuthEnterpriseDataRepository;
+import com.cmsr.onebase.module.system.dal.database.EnterpriseDataRepository;
+import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant.ApplicationAuthEnterpriseDO;
+import com.cmsr.onebase.module.system.dal.dataobject.enterprise.EnterpriseDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
 
@@ -28,14 +36,30 @@ public class ApplicationAuthEnterpriseServiceImpl implements ApplicationAuthEnte
 
     @Resource
     private ApplicationAuthEnterpriseDataRepository applicationAuthEnterpriseDataRepository;
+    @Resource
+    private EnterpriseDataRepository enterpriseDataRepository;
 
     @Override
-    public Long createApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseSaveReqVO createReqVO) {
+    public void createApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseSaveReqVO createReqVO) {
         // 插入
-        ApplicationAuthEnterpriseDO applicationAuthEnterprise = ApplicationAuthEnterpriseConvert.INSTANCE.convert(createReqVO);
-        applicationAuthEnterpriseDataRepository.insert(applicationAuthEnterprise);
-        // 返回
-        return applicationAuthEnterprise.getId();
+        createReqVO.getApplicationIdList().forEach(appliationId -> {
+            createReqVO.setApplicationId(appliationId);
+            ApplicationAuthEnterpriseDO applicationAuthEnterprise = ApplicationAuthEnterpriseConvert.INSTANCE.convert(createReqVO);
+            applicationAuthEnterprise.setExpiresTime(java.time.LocalDateTime.now().plusYears(1));
+            applicationAuthEnterpriseDataRepository.insert(applicationAuthEnterprise);
+        });
+
+        //获取企业应用数
+        Integer enterpriseId =  createReqVO.getEnterpriseId();
+        Long authorizedAppsCount = applicationAuthEnterpriseDataRepository.countByEnterpriseId(enterpriseId);
+
+        // 回写主表应用数
+        DataRow row = new DataRow();
+        row.put(EnterpriseDO.ID,  createReqVO.getEnterpriseId());
+        row.put("authorized_apps", authorizedAppsCount);
+        enterpriseDataRepository.updateByConfig(row, new DefaultConfigStore().eq(EnterpriseDO.ID, createReqVO.getEnterpriseId()));
+
+
     }
 
     @Override

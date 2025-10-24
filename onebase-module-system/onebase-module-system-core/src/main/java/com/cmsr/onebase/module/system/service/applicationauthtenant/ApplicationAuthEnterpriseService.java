@@ -19,7 +19,7 @@ public interface ApplicationAuthEnterpriseService {
      * @param createReqVO 创建信息
      * @return 编号
      */
-    Long createApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseSaveReqVO createReqVO);
+    void createApplicationAuthEnterprise(@Valid ApplicationAuthEnterpriseSaveReqVO createReqVO);
 
     /**
      * 更新应用授权企业表

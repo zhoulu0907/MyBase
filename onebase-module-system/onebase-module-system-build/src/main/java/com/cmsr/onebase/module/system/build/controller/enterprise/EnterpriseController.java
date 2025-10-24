@@ -2,9 +2,8 @@ package com.cmsr.onebase.module.system.build.controller.enterprise;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.api.enterprise.dto.EnterprisePageReqVO;
-import com.cmsr.onebase.module.system.api.enterprise.dto.EnterpriseRespVO;
-import com.cmsr.onebase.module.system.api.enterprise.dto.EnterpriseSaveReqVO;
+import com.cmsr.onebase.module.system.api.applicationauthtenant.dto.ApplicationAuthEnterprisePageReqVO;
+import com.cmsr.onebase.module.system.api.enterprise.dto.*;
 import com.cmsr.onebase.module.system.service.enterprise.EnterpriseService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,9 +36,18 @@ public class EnterpriseController {
     @PostMapping("create")
     @Operation(summary = "创建企业")
     @PermitAll
-   // @PreAuthorize("@ss.hasPermission('system:enterprise:create')")
+    //@PreAuthorize("@ss.hasPermission('system:enterprise:create')")
     public CommonResult<Long> createEnterprise(@RequestBody @Valid EnterpriseSaveReqVO reqVO) {
         return success(enterpriseService.createEnterprise(reqVO));
+    }
+
+
+    @PostMapping("create_user")
+    @Operation(summary = "创建企业管理员")
+    @PermitAll
+    public CommonResult<EnterpriseUserRespVO> createUser(@RequestBody @Valid EnterpriseUserReqVO reqVO) {
+        EnterpriseUserRespVO user=enterpriseService.createUser(reqVO);
+        return success(user);
     }
 
     @PostMapping("update")
@@ -59,12 +68,30 @@ public class EnterpriseController {
         return success(true);
     }
 
+    @PostMapping("update_status")
+    @Operation(summary = "企业禁用")
+    @PermitAll
+    //@PreAuthorize("@ss.hasPermission('system:enterprise:delete')")
+    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id,Long status) {
+        enterpriseService.updateStatus(id,status);
+        return success(true);
+    }
+
     @GetMapping("page")
     @Operation(summary = "获得企业分页")
     @PermitAll
    // @PreAuthorize("@ss.hasPermission('system:enterprise:query')")
     public CommonResult<PageResult<EnterpriseRespVO>> getEnterprisePage(EnterprisePageReqVO pageReqVO) {
         PageResult<EnterpriseRespVO> pageResult = enterpriseService.getEnterprisePage(pageReqVO);
+        return success(pageResult);
+    }
+
+    @GetMapping("enterprise_application_page")
+    @Operation(summary = "获得企业应用列表")
+    @PermitAll
+    // @PreAuthorize("@ss.hasPermission('system:enterprise:query')")
+    public CommonResult<PageResult<EnterpriseApplicationRespVO>> enterpriseApplicationPage(ApplicationAuthEnterprisePageReqVO pageReqVO) {
+        PageResult<EnterpriseApplicationRespVO> pageResult = enterpriseService.enterpriseApplicationPage(pageReqVO);
         return success(pageResult);
     }
 
@@ -77,4 +104,5 @@ public class EnterpriseController {
 
         return success(enterprise);
     }
+
 }

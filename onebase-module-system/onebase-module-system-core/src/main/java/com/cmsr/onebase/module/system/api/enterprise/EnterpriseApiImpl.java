@@ -34,9 +34,6 @@ public class EnterpriseApiImpl implements EnterpriseApi {
     }
 
 
-
-
-
     @Override
     public CommonResult<Boolean> updateEnterprise(@RequestBody @Valid  EnterpriseSaveReqVO reqVO) {
         enterpriseService.updateEnterprise(reqVO);
@@ -60,7 +57,6 @@ public class EnterpriseApiImpl implements EnterpriseApi {
     @Override
     public CommonResult< EnterpriseRespVO> getEnterprise(@RequestParam("id") Long id) {
        EnterpriseRespVO enterprise = enterpriseService.getEnterprise(id);
-
         return success(enterprise);
     }
 }

@@ -1,11 +1,14 @@
 package com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.time.LocalDateTime;
 
 /**
  * 应用授权企业表 DO
@@ -45,4 +48,7 @@ public class ApplicationAuthEnterpriseDO extends BaseDO {
      */
     @Column(name = "lock_version", length = 19)
     private Long lockVersion;
+
+    @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
+    private LocalDateTime expiresTime;
 }
