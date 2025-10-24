@@ -17,40 +17,15 @@
     </description>
 
     <dependencies>
-        <!-- 依赖服务 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-system-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
-        </dependency>
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
-
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-orm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-redis</artifactId>
         </dependency>
         <!-- Test 测试相关 -->
         <dependency>
@@ -58,7 +33,6 @@
             <artifactId>onebase-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
