@@ -26,6 +26,6 @@ public enum CollectStatus {
                 return status;
             }
         }
-        throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.INVALID_COLLECT_STATUS);
+        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.INVALID_COLLECT_STATUS);
     }
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDateTime;
 
@@ -48,6 +49,17 @@ public class ETLDatasourceDO extends TenantBaseDO {
 
     @Column(name = "collect_end_time")
     private LocalDateTime collectEndTime;
+
+    @Column(name = "readonly")
+    private Integer readonly;
+
+    public Boolean getReadonly() {
+        return BooleanUtils.toBoolean(readonly);
+    }
+
+    public void setReadonly(Boolean readonly) {
+        this.readonly = BooleanUtils.toInteger(readonly);
+    }
 
     public CollectStatus getCollectStatus() {
         return CollectStatus.parse(collectStatus);

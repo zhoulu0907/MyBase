@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.core.enums;
 
 import com.cmsr.onebase.framework.common.exception.ErrorCode;
 
-public interface DataFactoryErrorCodeConstants {
+public interface ETLErrorCodeConstants {
     // TODO: 后续规范化后需要修改
 
     // 数据源信息
@@ -20,4 +20,7 @@ public interface DataFactoryErrorCodeConstants {
     ErrorCode INVALID_COLLECT_STATUS                = new ErrorCode(110501, "无效的采集状态");
     ErrorCode METADATA_EMPTY                        = new ErrorCode(110502, "目标元数据信息不存在");
     ErrorCode METADATA_COLLECT_FAILED               = new ErrorCode(110503, "元数据采集失败");
+
+    // 元数据类型异常
+    ErrorCode ILLEGAL_METADATA_TYPE                 = new ErrorCode(110601, "元数据类型异常");
 }
