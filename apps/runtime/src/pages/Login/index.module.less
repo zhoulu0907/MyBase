@@ -46,19 +46,36 @@
       left: 50%;
       transform: translate(-50%, -50%);
 
-      .appIcon {
-        width: 66px;
-        height: 66px;
-        border-radius: 4px;
-        position: relative;
+      .appInfo {
         display: flex;
         align-items: center;
-        justify-content: center;
+        margin-bottom: 32px;
+
+        .appIcon {
+          width: 48px;
+          height: 48px;
+          border-radius: 2px;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 12px;
+        }
+        .appName {
+          width: calc(100% - 60px);
+          color: #272e3b;
+          font-size: 28px;
+          font-weight: 500;
+          line-height: 48px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
 
       .title {
         color: #272e3b;
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 500;
         margin-bottom: 64px;
       }

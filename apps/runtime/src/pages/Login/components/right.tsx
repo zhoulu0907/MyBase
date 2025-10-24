@@ -191,22 +191,25 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
         {appInfo.iconName && (
-          <div
-            className={styles.appIcon}
-            style={{
-              background: appInfo.iconColor || 'transparent'
-            }}
-          >
-            <DynamicIcon
-              IconComponent={appIconMap[appInfo.iconName as keyof typeof appIconMap]}
-              theme="outline"
-              size="40"
-              fill="#F2F3F5"
-            />
+          <div className={styles.appInfo}>
+            <div
+              className={styles.appIcon}
+              style={{
+                background: appInfo.iconColor || 'transparent'
+              }}
+            >
+              <DynamicIcon
+                IconComponent={appIconMap[appInfo.iconName as keyof typeof appIconMap]}
+                theme="outline"
+                size="40"
+                fill="#F2F3F5"
+              />
+            </div>
+            <div className={styles.appName}>{appInfo.appName}</div>
           </div>
         )}
         {/* <img src={LogoSVG} alt="logo" /> */}
-        <h1 className={styles.title}>欢迎登录{appInfo.appName}</h1>
+        <h1 className={styles.title}>欢迎登录</h1>
 
         <Form
           form={form}
