@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
@@ -10,9 +11,14 @@ import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.formula.api.formula.FormulaEngineApi;
+import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
+import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
+import lombok.Setter;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -24,9 +30,13 @@ import java.util.Map;
  * @Author：huangjie
  * @Date：2025/9/28 9:17
  */
+@Setter
 @Component
 public class ConditionsProvider {
 
+
+    @Autowired
+    private FormulaEngineApi formulaEngineApi;
 
     /**
      * 格式化条件，把其规范为表达式能执行的。左值是合法的变量名称，右值是具体的值或者表达式。
@@ -99,9 +109,18 @@ public class ConditionsProvider {
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
             //TODO 公式
-            Map valueMap = (Map)expressionItem.getValue();
+            Map valueMap = (Map) expressionItem.getValue();
             String formula = MapUtils.getString(valueMap, "formula");
             Map parameters = MapUtils.getMap(valueMap, "parameters");
+            FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
+            reqDTO.setFormula(formula);
+            reqDTO.setParameters(parameters);
+            reqDTO.setContextData(vars);
+            CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
+            if (respDTO.getData() == null) {
+                throw new IllegalCallerException("公式错误: " + formula + ", 错误信息: " + respDTO.getMsg());
+            }
+            expressionItem.setValue(respDTO.getData().getResult());
         }
     }
 
