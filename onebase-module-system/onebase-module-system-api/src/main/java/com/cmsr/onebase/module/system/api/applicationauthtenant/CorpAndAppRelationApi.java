@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "应用授权企业表 API")
 @RestController
-@RequestMapping("/system/application-auth-enterprise")
-public interface ApplicationAuthEnterpriseApi {
+@RequestMapping("/system/corp-and-app-relation")
+public interface CorpAndAppRelationApi {
 
     @PostMapping("/create")
     @Operation(summary = "创建应用授权企业表")
-    CommonResult<Long> createApplicationAuthEnterprise(@Valid @RequestBody ApplicationAuthEnterpriseSaveReqVO createReqVO);
+    CommonResult<Long> createCorpAppRelation(@Valid @RequestBody ApplicationAuthEnterpriseSaveReqVO createReqVO);
 
     @PutMapping("/update")
     @Operation(summary = "更新应用授权企业表")

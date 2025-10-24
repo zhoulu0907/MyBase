@@ -98,7 +98,7 @@ public class TenantDO extends BaseDO {
     @Column(name = EXPIRE_TIME)
     private LocalDateTime expireTime;
     /**
-     * 账号数量
+     * 账号数量上限
      */
     @Column(name = ACCOUNT_COUNT)
     private Integer accountCount;
