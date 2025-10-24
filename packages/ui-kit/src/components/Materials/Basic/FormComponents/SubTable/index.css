@@ -40,4 +40,8 @@
     align-items: flex-start;
     /* justify-content: center; */
   }
+
+  .arco-table-td {
+    padding: 0;
+  }
 }

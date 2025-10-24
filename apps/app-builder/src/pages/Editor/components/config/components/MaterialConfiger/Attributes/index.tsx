@@ -261,10 +261,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       <InputNumber
                         placeholder={`请输入${item.name}`}
                         value={configs[item.key]}
-                        max={200}
-                        min={0}
                         onChange={(value) => {
-                          if (value >= 0 && value <= 200) {
+                          if (value >= 0) {
                             handlePropsChange(item.key, value);
                           }
                         }}
@@ -490,7 +488,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           {typeof configs[item.key]['maxChecked'] === 'number' && (
                             <InputNumber
                               value={configs[item.key]['maxChecked']}
-                              max={200}
                               min={0}
                               prefix="可选数量限制"
                               onChange={(value) => {
@@ -502,7 +499,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           {typeof configs[item.key]['maxCount'] === 'number' && (
                             <InputNumber
                               value={configs[item.key]['maxCount']}
-                              max={200}
                               min={-1}
                               prefix="上传数量限制"
                               onChange={(value) => {
@@ -514,7 +510,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           {typeof configs[item.key]['maxSize'] === 'number' && (
                             <InputNumber
                               value={configs[item.key]['maxSize']}
-                              max={200}
                               min={0}
                               prefix="大小限制"
                               suffix={configs['verify']['maxSize'] ? 'MB' : ''}
