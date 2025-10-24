@@ -9,11 +9,12 @@ import { NodeRenderContext } from '../../context';
 import type { FormInstance } from '@arco-design/web-react';
 import Header from '../../components/header';
 import BottomBtn from '../../components/bottomBtn';
-import Approver from './components/approver';
+import ApproveDreawer from './components/approver';
 
 export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
   const { node } = props;
   const nodeRender = useNodeRender(node);
+  console.log('抽屉1234===', nodeRender)
   const [configForm, setconfigFormForm] = useState<FormInstance>();
   const contextValue = {
     ...nodeRender,
@@ -40,7 +41,8 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
         {/* <Header />
         <Approver />
         <BottomBtn /> */}
-        <div>抽屉内容</div>
+        {/* <div>抽屉内容</div> */}
+        {nodeRender?.type === 'approver' && <ApproveDreawer />}
       </div>
     </NodeRenderContext.Provider>
   );
