@@ -59,7 +59,8 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
     [node]
   );
   const deleteNode = useCallback(() => {
-    console.log('删除节点');
+    // 删除节点
+    ctx.get<CommandService>(CommandService).executeCommand('DELETE', [node]);
   }, [node]);
   const copyNode = useCallback(() => {
     console.log('复制节点');
