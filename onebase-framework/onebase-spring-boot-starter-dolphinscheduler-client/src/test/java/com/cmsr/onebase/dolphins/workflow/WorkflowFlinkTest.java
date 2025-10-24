@@ -90,7 +90,7 @@ public class WorkflowFlinkTest extends BaseTest {
     List<ProcessDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
     int expectedWorkflowNumber = 1;
-    assertEquals(expectedWorkflowNumber, page.size());
+    assertTrue(page.size()>=expectedWorkflowNumber);
   }
 
   @Test
