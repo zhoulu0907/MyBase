@@ -15,7 +15,8 @@ import {
   getDictDataListByPage,
   updateDict,
   updateDictData,
-  updateDictDataStatus
+  updateDictDataStatus,
+  batchConfigDictData
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useEffect, useState } from 'react';
@@ -51,6 +52,7 @@ export interface DictManagerConfig {
     deleteDictData?: (id: number) => Promise<any>;
     updateDictDataStatus?: (params: { id: number; status: number }) => Promise<any>;
     batchConfigDictData?: (data: DictData[]) => Promise<any>;
+    batchUpdateDictData?: (data: DictData[]) => Promise<any>;
   };
   // UI 配置
   ui?: {
@@ -109,6 +111,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       updateDictData,
       deleteDictData,
       updateDictDataStatus,
+      batchConfigDictData,
       ...config.api
     },
     ui: {
@@ -437,7 +440,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   // 批量配置确认
   const handleBatchConfigOk = async (values: any[]) => {
-    console.log('handleBatchConfigOk values', values);
     setBatchConfigLoading(true);
     try {
       if (!activeDict?.type) {
@@ -446,53 +448,27 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       }
 
       // 分离新增和更新的数据
-      const newItems = values.filter((item) => item.id.startsWith('temp-'));
-      const updateItems = values.filter((item) => !item.id.startsWith('temp-'));
-
-      // 处理新增
-      if (newItems.length > 0) {
-        const newData = newItems.map((item) => ({
-          dictType: activeDict.type,
-          label: item.label,
-          value: item.value,
-          status: item.status,
-          sort: item.sort,
-          remark: ''
+      const newItems = values
+        .filter((item) => item.id.startsWith('temp-'))
+        .map((item) => ({
+          ...item,
+          id: '',
+          dictType: activeDict.type
         }));
-
-        // 如果有批量创建API，使用批量API
-        if (currentTabConfig.api?.batchConfigDictData) {
-          await currentTabConfig.api?.batchConfigDictData(newData);
-        } else {
-          // 否则逐个创建
-          for (const data of newData) {
-            await currentTabConfig.api.createDictData(data);
-          }
-        }
-      }
-
-      // 处理更新
-      if (updateItems.length > 0) {
-        const updateData = updateItems.map((item) => ({
-          id: item.id,
-          dictType: activeDict.type,
-          label: item.label,
-          value: item.value,
-          status: item.status,
-          sort: item.sort,
-          remark: ''
+      const updateItems = values
+        .filter((item) => !item.id.startsWith('temp-') && !item.isDelete)
+        .map((item) => ({
+          ...item,
+          dictType: activeDict.type
         }));
+      const deleteItems = values.filter((item) => item.isDelete).map((item) => item.id);
 
-        // 如果有批量更新API，使用批量API
-        if (currentTabConfig.api.batchUpdateDictData) {
-          await currentTabConfig.api.batchUpdateDictData(updateData);
-        } else {
-          // 否则逐个更新
-          for (const data of updateData) {
-            await currentTabConfig.api.updateDictData(data);
-          }
-        }
-      }
+      console.log('batchConfigDictData', newItems, updateItems, deleteItems);
+      await currentTabConfig.api?.batchConfigDictData({
+        createList: newItems,
+        updateList: updateItems,
+        deleteIds: deleteItems
+      });
 
       Message.success('批量配置成功');
       setBatchConfigModalVisible(false);

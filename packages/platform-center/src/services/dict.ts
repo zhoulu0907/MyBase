@@ -86,3 +86,10 @@ export const getDictDataListByPage = (params: PageParam & { dictType: string }):
 export const getDictDataDetail = (id: number): Promise<DictData> => {
   return systemService.get(`/dict-data/get?id=${id}`);
 };
+
+/**
+ * 批量配置字典数据
+ */
+export const batchConfigDictData = (data: DictData[]): Promise<void> => {
+  return systemService.post('/dict-data/batch-operate', data);
+};
