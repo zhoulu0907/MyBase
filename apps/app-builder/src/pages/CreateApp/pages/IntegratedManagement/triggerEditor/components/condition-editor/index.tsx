@@ -383,18 +383,19 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     return title;
   };
 
-  const handleFormulaConfirm = (formulaData: any) => {
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
     setFormulaVisible(false);
-
-    form.setFieldValue(formulaFieldKey, formulaData);
-
+    form.setFieldValue(
+      formulaFieldKey, 
+      {formulaData: formulaData, formula: formattedFormula, parameters: params}
+    );
     setFormulaData('');
     setFormulaFieldKey('');
   };
 
   const openFormulaEditor = (fieldKey: string) => {
     setFormulaVisible(true);
-    setFormulaData(form.getFieldValue(fieldKey));
+    setFormulaData(form.getFieldValue(fieldKey)?.formulaData);
     setFormulaFieldKey(fieldKey);
   };
 
