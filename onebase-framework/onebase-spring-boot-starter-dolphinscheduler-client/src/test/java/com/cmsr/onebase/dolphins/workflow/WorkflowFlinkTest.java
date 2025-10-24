@@ -6,7 +6,6 @@
  */
 package com.cmsr.onebase.dolphins.workflow;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.cmsr.onebase.dolphins.BaseTest;
@@ -90,7 +89,7 @@ public class WorkflowFlinkTest extends BaseTest {
     List<ProcessDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
     int expectedWorkflowNumber = 1;
-    assertTrue(page.size()>=expectedWorkflowNumber);
+    assertTrue(page.size() >= expectedWorkflowNumber);
   }
 
   @Test
