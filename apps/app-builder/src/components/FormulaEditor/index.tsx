@@ -155,7 +155,7 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       // 使用编辑器的插入方法，支持光标定位
       //如果fieldtype是node 代表是节点， 需要传入的格式是$节点.字段
       if (variable.isNode) {
-        editorRef.current.insertAtPosition(`[[${variable.appId}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
+        editorRef.current.insertAtPosition(`[[${variable.id}.${variable.value}.$${variable.fieldName}.${variable.displayName}]]`, 'var');
       } else {
         editorRef.current.insertAtPosition(`[[${variable.id}.${variable.displayName}]]`, 'var');
       }
@@ -217,11 +217,14 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   }
 
   /**
-   * 根据formula生成paramters信息{[变量名称]: fieldId}
-   * @param formulaData 
-   * @returns 
+   * 设置运行态所需要的parameters
+   * 格式:
+   * {
+   *  $节点: 节点ID,
+   *  $节点.字段: 字段ID
+   * }
    */
-  const retrieveAllVariables = (formulaData: string) => {
+  const getParameters = (formulaData: string) => {
     const regex = /\[\[(.*?)\]\]/g;
     const copyFormulaData = formulaData;
     const matches = [...copyFormulaData.matchAll(regex)];
@@ -230,9 +233,15 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
       const temp = match[1].split(".");
       let fieldName = "";
       let fieldId = "";
+      let nodeName = "";
+      let nodeId = "";
+      //[nodeid->temp[0], variableid->temp[1], nodeName->temp[2], variableName->temp[3]]
       if (temp.length > 3) {
+        nodeName = temp[2];
+        nodeId = temp[0]
         fieldName = `${temp[2] + "." + temp[3]}`
         fieldId = temp[1];
+        variablesMapping[nodeName] = nodeId
       } else {
         fieldId = temp[0] || "";
         fieldName = temp[1] || "";
@@ -242,99 +251,105 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     return variablesMapping;
   }
 
-  /**
-   * 点击确认之后计算
-   */
-  const handleConfirm = useCallback(async () => {
-    // await handleDebug();
-    onConfirm(formula);
-    setIsDebugMode(false);
-  }, [formula, onConfirm, onCancel]);
+/**
+ * 点击确认之后计算
+ */
+const handleConfirm = useCallback(async () => {
+  const newFormula = formattedFormula();
+  const params = getParameters(formula);
+  onConfirm(formula, newFormula, params);
+  setIsDebugMode(false);
+}, [formula, onConfirm, onCancel]);
 
-  /**
-   * 公式编辑器准备就绪
-   * @param editor - 编辑器实例
-   */
-  const handleEditorReady = useCallback(
-    (editor: { insertAtPosition: (text: string, type: string, position?: number) => void }) => {
-      editorRef.current = editor;
-    },
-    []
-  );
+/**
+ * 公式编辑器准备就绪
+ * @param editor - 编辑器实例
+ */
+const handleEditorReady = useCallback(
+  (editor: { insertAtPosition: (text: string, type: string, position?: number) => void }) => {
+    editorRef.current = editor;
+  },
+  []
+);
 
-  /**
-   * 组件挂载时初始化函数列表
-   */
-  useEffect(() => {
-    if (!visible) return;
-    getFuncList();
-  }, [visible]);
+/**
+ * 组件挂载时初始化函数列表
+ */
+useEffect(() => {
+  if (!visible) return;
+  getFuncList();
+}, [visible]);
 
-  /**点击调试页面的返回按钮 */
-  const handleGoBack = () => {
-    setIsDebugMode(false);
-  }
+/**点击调试页面的返回按钮 */
+const handleGoBack = () => {
+  setIsDebugMode(false);
+}
 
-  const getFieldType = (keyName: string, value: any) => {
-    let fieldType: string = "";
-    variables.forEach(variable => {
-      const fieldIndex = variable.fields?.findIndex(item => keyName.includes(item.displayName) && item.id === value);
-      if(fieldIndex !== -1) {
-         fieldType = variable?.fields?.[fieldIndex as number].fieldType || "TEXT";
-       }
-    })
-    return fieldType;
-  }
-  const getAllRelatedVariables = () => {
-    const currentVariablesObj = retrieveAllVariables(formula);
-    let newVariablesData: variableItem[] = [];
-    if (variables.length > 0) {
-      Object.keys(currentVariablesObj).forEach(key => {
+const getFieldType = (keyName: string, value: any) => {
+  let fieldType: string = "";
+  variables.forEach(variable => {
+    const fieldIndex = variable?.fields?.findIndex(item => keyName.includes(item.displayName) && item.id === value);
+    if (fieldIndex !== -1) {
+      fieldType = variable?.fields?.[fieldIndex as number].fieldType || "TEXT";
+    }
+  })
+  return fieldType;
+}
+
+/**
+ * 调试模式-字段赋值区域
+ * 
+ */
+const getAllRelatedVariables = () => {
+  const currentVariablesObj = getParameters(formula);
+  let newVariablesData: variableItem[] = [];
+  if (variables.length > 0) {
+    Object.keys(currentVariablesObj).forEach(key => {
         newVariablesData.push({
           fieldName: key,
           fieldId: currentVariablesObj[key],
           fieldType: getFieldType(key,currentVariablesObj[key])
         })
-      })
+    })
+  }
+  return newVariablesData;
+}
+
+/**点击调试 */
+const handleClickDebug = () => {
+  setIsDebugMode(true);
+}
+
+/**点击取消按钮 */
+const handleCancel = () => {
+  setIsDebugMode(false);
+  onCancel();
+}
+
+const allRelatedVariables = getAllRelatedVariables();
+
+return (
+  <Modal
+    visible={visible}
+    onCancel={handleCancel}
+    title={
+      <div className={styles.formulaHeader}>
+        {isDebugMode && <IconLeft className={styles.goBack} onClick={handleGoBack} />}
+        <span className={styles.title}>公式编辑</span>
+        <span className={styles.subtitle}>使用数学运算符编辑公式</span>
+      </div>
     }
-    return newVariablesData;
-  }
-
-  /**点击调试 */
-  const handleClickDebug = () => {
-    setIsDebugMode(true);
-  }
-
-  /**点击取消按钮 */
-  const handleCancel = () => {
-    setIsDebugMode(false);
-    onCancel();
-  }
-
-  const allRelatedVariables = getAllRelatedVariables();
-
-  return (
-    <Modal
-      visible={visible}
-      onCancel={handleCancel}
-      title={
-        <div className={styles.formulaHeader}>
-          {isDebugMode && <IconLeft className={styles.goBack} onClick={handleGoBack} />}
-          <span className={styles.title}>公式编辑</span>
-          <span className={styles.subtitle}>使用数学运算符编辑公式</span>
-        </div>
-      }
-      style={{ width: '1000px' }}
-      className={styles.formulaEditor}
-      maskClosable={false}
-      onOk={handleConfirm}
-      okButtonProps={{
-        disabled: !formula
-      }}
-    >
-      {/* 内容区域 */}
-      <div className={styles.contentWrapper}>
-        {/* 公式编辑区 */}
+    style={{ width: '1000px' }}
+    className={styles.formulaEditor}
+    maskClosable={false}
+    onOk={handleConfirm}
+    okButtonProps={{
+      disabled: !formula
+    }}
+  >
+    {/* 内容区域 */}
+    <div className={styles.contentWrapper}>
+      {/* 公式编辑区 */}
         <FormulaInput
           value={formula}
           onChange={setFormula}
@@ -344,33 +359,33 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
           filteredFunctions={filteredFunctions}
           onEditorReady={handleEditorReady}
         />
-        {/* 底部面板（变量名称/函数公式/函数概要） */}
-        {isDebugMode ?
-          <DebuggedFormula allRelatedVariables={allRelatedVariables} formula={formattedFormula()} /> :
-          <Row>
+      {/* 底部面板（变量名称/函数公式/函数概要） */}
+      {isDebugMode ?
+        <DebuggedFormula allRelatedVariables={allRelatedVariables} formula={formattedFormula()} /> :
+        <Row>
+          <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
+            <VariableList
+              variables={variableSearch ? filteredVariables : variables}
+              searchValue={variableSearch}
+              onSearchChange={setVariableSearch}
+              onInsertVariable={handleInsertVariable}
+            />
+          </Col>
+          <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
+            <FunctionList
+              functions={functionSearch ? filteredFunctions : funcList}
+              searchValue={functionSearch}
+              onSearchChange={setFunctionSearch}
+              onChooseFunction={handleChooseFunction}
+            />
+          </Col>
+          {info &&
             <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
-              <VariableList
-                variables={variableSearch ? filteredVariables : variables}
-                searchValue={variableSearch}
-                onSearchChange={setVariableSearch}
-                onInsertVariable={handleInsertVariable}
-              />
-            </Col>
-            <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
-              <FunctionList
-                functions={functionSearch ? filteredFunctions : funcList}
-                searchValue={functionSearch}
-                onSearchChange={setFunctionSearch}
-                onChooseFunction={handleChooseFunction}
-              />
-            </Col>
-            {info &&
-              <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
-                <InfoPanel info={info} />
-              </Col>}
-          </Row>
-        }
-      </div>
-    </Modal>
-  );
+              <InfoPanel info={info} />
+            </Col>}
+        </Row>
+      }
+    </div>
+  </Modal>
+);
 }

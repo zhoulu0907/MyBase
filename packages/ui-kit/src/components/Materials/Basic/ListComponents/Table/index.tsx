@@ -151,11 +151,11 @@ const XTable = memo(
                       onOk={(event) => {
                         event.stopPropagation();
                         handleDelete(record.id);
-                        if (opearate.deletedAction === RedirectMethod.REFRESH) {
-                          handlePage();
-                        } else if (opearate.deletedAction === RedirectMethod.PROMPT_JUMP) {
-                          // todo
-                        }
+                        // if (opearate.deletedAction === RedirectMethod.REFRESH) {
+                        //   handlePage();
+                        // } else if (opearate.deletedAction === RedirectMethod.PROMPT_JUMP) {
+                        //   // todo
+                        // }
                       }}
                     >
                       {(operationButtonShowType === TableOperationButtonStyle.ICON ||

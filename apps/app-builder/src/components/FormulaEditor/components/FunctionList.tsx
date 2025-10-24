@@ -50,9 +50,9 @@ export function FunctionList({ functions, searchValue, onSearchChange, onChooseF
   /**
      * 切换函数列表的展开/折叠状态
      */
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded(!isExpanded);
-  }, [isExpanded]);
+  // const toggleExpanded = useCallback(() => {
+  //   setIsExpanded(!isExpanded);
+  // }, [isExpanded]);
 
   const getSubMenu = () => {
     if (!functionCategoryList.length) return null;

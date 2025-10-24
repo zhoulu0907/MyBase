@@ -280,7 +280,7 @@ export function FormulaInput({
   }, [handlePaste]);
 
   const blurHandlerExtension = EditorView.domEventHandlers({
-    blur: (event, view) => {
+    blur: () => {
       isBlurred = true;
     }
   });
