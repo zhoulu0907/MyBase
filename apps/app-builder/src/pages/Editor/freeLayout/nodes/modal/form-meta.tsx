@@ -2,48 +2,23 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select, Switch, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { useEffect } from 'react';
 import { FormContent, FormHeader } from '../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
-// import { validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
   const [payloadForm] = Form.useForm();
-  const modalType = Form.useWatch('modalType', payloadForm);
 
-//   useEffect(() => {
-//     payloadForm && validateNodeForm(form, payloadForm, true);
-//   }, [payloadForm]);
 
   const onValuesChange = async (changeValue: any, values: any) => {
     // 校验表单
     // validateNodeForm(form, payloadForm, false);
     // handlePropsOnChange(values);
   };
-  // 表单内容改变
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
 
-  // 弹窗类型改变
-  const modalTypeChange = (value: string) => {
-    payloadForm.clearFields(['fields', 'arrange']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      fields: [],
-      arrange: undefined
-    });
-  };
 
-  console.log(isSidebar,'==========判断侧边栏')
-
-  useEffect(()=>{
-console.log('没走吗')
-  },[])
   return (
     <>
       <FormHeader />
@@ -63,8 +38,6 @@ console.log('没走吗')
             <Form.Item label="弹窗标题" field="modalTitle" rules={[{ required: true, message: '请输入弹窗标题' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
-
-  
 
             <Form.Item label="提示文字" field="prompt">
               <Input.TextArea placeholder="请输入" rows={4} />
@@ -124,8 +97,7 @@ console.log('没走吗')
           </Form>
         </FormContent>
       ) : (
-        <FormContent>
-        </FormContent>
+        <FormContent></FormContent>
       )}
     </>
   );
