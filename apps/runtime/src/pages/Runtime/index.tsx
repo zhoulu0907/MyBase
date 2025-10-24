@@ -1,5 +1,5 @@
 import { useI18n } from '@/hooks/useI18n';
-import { Input, Layout, Tree } from '@arco-design/web-react';
+import { Input, Layout, Tree, Dropdown, Menu } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   listApplicationMenu,
@@ -9,11 +9,15 @@ import {
   type ListApplicationMenuReq
 } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import { menuSignal } from '@/store/menu';
 import styles from './index.module.less';
+import { UserPermissionManager } from '@/utils/permission';
+import { TokenManager } from '@onebase/common';
+import { getPermissionInfo } from '@onebase/platform-center';
+import AvatarSVG from '@/assets/images/avatar.svg';
 
 const Sider = Layout.Sider;
 const Content = Layout.Content;
@@ -35,6 +39,7 @@ interface TreeNode {
  */
 
 const Runtime: React.FC = () => {
+  const navigate = useNavigate();
   const { appId } = useParams<{ appId?: string }>();
   const { t } = useI18n();
 
@@ -45,11 +50,24 @@ const Runtime: React.FC = () => {
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
+  const [nickname, setNickname] = useState('U');
+
   useEffect(() => {
     if (appId) {
       getMenuList(appId);
     }
   }, [appId]);
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
+
+  const getUserInfo = async () => {
+    const res = await getPermissionInfo();
+    UserPermissionManager.setUserPermissionInfo(res);
+    // userPermissionSignal.setPermissionInfo(res);
+    setNickname(res.user.nickname);
+  };
 
   // 递归处理 去除隐藏的页面
   const dealPage = (array: ApplicationMenu[]) => {
@@ -138,6 +156,23 @@ const Runtime: React.FC = () => {
     }));
   };
 
+  // 登出处理
+  const handleLogout = () => {
+    // 清除 token
+    TokenManager.clearToken();
+    UserPermissionManager.clearUserPermissionInfo();
+    // 跳转到登录页
+    navigate('/login', { replace: true });
+  };
+  // 用户菜单
+  const userMenu = (
+    <Menu>
+      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#FF0000' }}>
+        {t('header.logout')}
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
     <div className={styles.runtimePage}>
       <Layout style={{ height: '100%' }}>
@@ -145,11 +180,7 @@ const Runtime: React.FC = () => {
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
               <div className={styles.siderHeaderInput}>
-                <Input
-                  allowClear
-                  suffix={<IconSearch />}
-                  placeholder={t('app.searchPlaceHolder')}
-                />
+                <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
               </div>
             </div>
             <Tree
@@ -181,8 +212,18 @@ const Runtime: React.FC = () => {
             {curMenu?.id && (
               <div className={styles.contentHeader}>
                 <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                <div className={styles.userInfo}>
+                  {nickname || '未登录'}
+
+                  <Dropdown droplist={userMenu} position="bottom">
+                    <div className={styles.userDropdown}>
+                      <img src={AvatarSVG} alt="avatar" />
+                    </div>
+                  </Dropdown>
+                </div>
               </div>
             )}
+
             <div className={styles.contentBody}>
               <PreviewContainer menuId={curMenu?.id || ''} runtime={true} />
             </div>

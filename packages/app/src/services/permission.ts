@@ -6,6 +6,7 @@ import {
   type UpdateOperationPermissionReq,
   type UpdateDataGroupPermissionReq,
   type UpdateFieldPermissionReq,
+  UpdateViewPermissionReq,
 } from '../types/permission';
 import { appService } from './clients';
 
@@ -32,6 +33,11 @@ export const updatePagePermission = (params: UpdatePagePermissionReq) => {
 // 更新操作权限
 export const updateOperationPermission = (params: UpdateOperationPermissionReq) => {
   return appService.post('/auth-permission/update-operation', params);
+};
+
+// 更新视图权限
+export const updateViewPermission = (params: UpdateViewPermissionReq) => {
+  return appService.post('/auth-permission/update-view', params);
 };
 
 // 更新数据组权限

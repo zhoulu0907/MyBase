@@ -100,12 +100,3 @@ export const APP_MYAPP_PERMISSION = {
 }
 
 export const ALL_PERMISSION_CODE = '*:*:*';
-
-/** 数据权限-权限范围 */
-export const PERMISSION_SCOPE: Record<string, string> = {
-  allData: '全部数据',
-  ownSubmit: '本人提交',
-  departmentSubmit: '本部门提交',
-  subDepartmentSubmit: '下级部门提交',
-  customCondition: '自定义条件'
-};

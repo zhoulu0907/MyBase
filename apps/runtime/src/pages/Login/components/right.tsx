@@ -1,4 +1,3 @@
-import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
@@ -208,7 +207,6 @@ const Right: React.FC = () => {
             <div className={styles.appName}>{appInfo.appName}</div>
           </div>
         )}
-        {/* <img src={LogoSVG} alt="logo" /> */}
         <h1 className={styles.title}>欢迎登录</h1>
 
         <Form

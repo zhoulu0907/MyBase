@@ -170,8 +170,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
       </Form>
 
       <div className={styles.formActions}>
-        {/* 本期不支持删除 */}
-        <Button type="text" status="danger" onClick={() => openDeleteModal()} disabled>
+        <Button type="text" status="danger" onClick={() => openDeleteModal()}>
           删除
         </Button>
         <Space>
