@@ -1,7 +1,7 @@
 package com.cmsr.onebase.dolphins.core;
 
 import com.cmsr.onebase.dolphins.datasource.DataSourceOperator;
-import com.cmsr.onebase.dolphins.instance.ProcessInstanceOperator;
+import com.cmsr.onebase.dolphins.workflowinstance.WorkflowInstanceOperator;
 import com.cmsr.onebase.dolphins.project.ProjectOperator;
 import com.cmsr.onebase.dolphins.remote.DolphinsRestTemplate;
 import com.cmsr.onebase.dolphins.resource.ResourceOperator;
@@ -22,7 +22,7 @@ public class DolphinClient {
   private DataSourceOperator dataSourceOperator;
   private ResourceOperator resourceOperator;
   private ProcessOperator processOperator;
-  private ProcessInstanceOperator processInstanceOperator;
+  private WorkflowInstanceOperator workflowInstanceOperator;
   private ScheduleOperator scheduleOperator;
   private ProjectOperator projectOperator;
   private TenantOperator tenantOperator;
@@ -43,8 +43,8 @@ public class DolphinClient {
         new ResourceOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
     this.processOperator =
         new ProcessOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
-    this.processInstanceOperator =
-        new ProcessInstanceOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
+    this.workflowInstanceOperator =
+        new WorkflowInstanceOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
     this.scheduleOperator =
         new ScheduleOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
     this.projectOperator =
@@ -67,8 +67,8 @@ public class DolphinClient {
     return this.processOperator;
   }
 
-  public ProcessInstanceOperator opsForProcessInst() {
-    return this.processInstanceOperator;
+  public WorkflowInstanceOperator opsForProcessInst() {
+    return this.workflowInstanceOperator;
   }
 
   public ScheduleOperator opsForSchedule() {

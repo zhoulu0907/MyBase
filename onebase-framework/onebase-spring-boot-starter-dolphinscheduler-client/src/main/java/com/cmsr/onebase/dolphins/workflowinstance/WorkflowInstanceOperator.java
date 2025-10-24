@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.instance;
+package com.cmsr.onebase.dolphins.workflowinstance;
 
 import com.cmsr.onebase.dolphins.common.PageInfo;
 import com.cmsr.onebase.dolphins.core.AbstractOperator;
@@ -15,9 +15,9 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ProcessInstanceOperator extends AbstractOperator {
+public class WorkflowInstanceOperator extends AbstractOperator {
 
-  public ProcessInstanceOperator(
+  public WorkflowInstanceOperator(
       String dolphinAddress, String token, DolphinsRestTemplate dolphinsRestTemplate) {
     super(dolphinAddress, token, dolphinsRestTemplate);
   }
@@ -27,16 +27,16 @@ public class ProcessInstanceOperator extends AbstractOperator {
    *
    * <p>api: /dolphinscheduler/projects/{projectCode}/executors/start-process-instance
    *
-   * @param processInstanceCreateParam process instance create param
+   * @param workflowInstanceCreateParam process instance create param
    * @return true for success,otherwise false
    */
-  public Boolean start(Long projectCode, ProcessInstanceCreateParam processInstanceCreateParam) {
+  public Boolean start(Long projectCode, WorkflowInstanceCreateParam workflowInstanceCreateParam) {
     String url = dolphinAddress + "/projects/" + projectCode + "/executors/start-workflow-instance";
     log.info("start process instance ,url:{}", url);
     try {
       HttpRestResult<JsonNode> restResult =
           dolphinsRestTemplate.postForm(
-              url, getHeader(), processInstanceCreateParam, JsonNode.class);
+              url, getHeader(), workflowInstanceCreateParam, JsonNode.class);
       log.info("start process response:{}", restResult);
       return restResult.getSuccess();
     } catch (Exception e) {
@@ -53,7 +53,7 @@ public class ProcessInstanceOperator extends AbstractOperator {
    * @param workflowCode workflow id
    * @return
    */
-  public List<ProcessInstanceQueryResp> page(
+  public List<WorkflowInstanceQueryResp> page(
       Integer page, Integer size, Long projectCode, Long workflowCode) {
     page = Optional.ofNullable(page).orElse(DolphinClientConstant.Page.DEFAULT_PAGE);
     size = Optional.ofNullable(size).orElse(DolphinClientConstant.Page.DEFAULT_SIZE);
@@ -71,7 +71,7 @@ public class ProcessInstanceOperator extends AbstractOperator {
           dolphinsRestTemplate.get(url, getHeader(), query, JsonNode.class);
       return JacksonUtils.parseObject(
               restResult.getData().toString(),
-              new TypeReference<PageInfo<ProcessInstanceQueryResp>>() {})
+              new TypeReference<PageInfo<WorkflowInstanceQueryResp>>() {})
           .getTotalList();
     } catch (Exception e) {
       throw new DolphinException("page dolphin scheduler process instance list fail", e);
@@ -124,9 +124,9 @@ public class ProcessInstanceOperator extends AbstractOperator {
    */
   public Boolean execute(Long projectCode, Long processInstanceId, String executeType) {
     String url = dolphinAddress + "/projects/" + projectCode + "/executors/execute";
-    ProcessInstanceRunParam reProcessInstanceRunParam =
-        new ProcessInstanceRunParam()
-            .setProcessInstanceId(processInstanceId)
+    WorkflowInstanceRunParam reProcessInstanceRunParam =
+        new WorkflowInstanceRunParam()
+            .setWorkflowInstanceId(processInstanceId)
             .setExecuteType(executeType);
     try {
       HttpRestResult<String> restResult =

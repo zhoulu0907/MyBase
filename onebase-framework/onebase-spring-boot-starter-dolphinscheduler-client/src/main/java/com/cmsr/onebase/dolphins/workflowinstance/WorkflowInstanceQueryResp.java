@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.instance;
+package com.cmsr.onebase.dolphins.workflowinstance;
 
 import com.cmsr.onebase.dolphins.workflow.ProcessDefineResp;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProcessInstanceQueryResp {
+public class WorkflowInstanceQueryResp {
 
   /** id */
   private int id;

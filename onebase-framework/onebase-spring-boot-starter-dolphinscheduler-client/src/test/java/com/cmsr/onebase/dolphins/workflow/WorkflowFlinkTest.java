@@ -17,10 +17,13 @@ import com.cmsr.onebase.dolphins.util.TaskLocationUtils;
 import com.cmsr.onebase.dolphins.util.TaskRelationUtils;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 /** Flink 工作流测试 */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class WorkflowFlinkTest extends BaseTest {
 
     public static final String WORKFLOW_NAME = "test-flink-dag";
@@ -103,4 +106,3 @@ public class WorkflowFlinkTest extends BaseTest {
         assertTrue(getClient().opsForProcess().delete(projectCode, page.get(0).getCode()));
     }
 }
-

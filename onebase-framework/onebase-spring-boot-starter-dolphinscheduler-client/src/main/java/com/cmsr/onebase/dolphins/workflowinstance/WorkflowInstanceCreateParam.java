@@ -1,4 +1,4 @@
-package com.cmsr.onebase.dolphins.instance;
+package com.cmsr.onebase.dolphins.workflowinstance;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -6,14 +6,14 @@ import lombok.experimental.Accessors;
 /** process instance create param */
 @Data
 @Accessors(chain = true)
-public class ProcessInstanceCreateParam {
+public class WorkflowInstanceCreateParam {
 
   /** continue or and */
   private String failureStrategy;
 
-  private Long processDefinitionCode;
+  private Long workflowDefinitionCode;
 
-  private String processInstancePriority;
+  private String workflowInstancePriority;
 
   private String scheduleTime;
 

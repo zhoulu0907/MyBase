@@ -1,22 +1,26 @@
-package com.cmsr.onebase.dolphins.insatnce;
+package com.cmsr.onebase.dolphins.workflowinsatnce;
 
 import com.cmsr.onebase.dolphins.BaseTest;
 import com.cmsr.onebase.dolphins.enums.*;
-import com.cmsr.onebase.dolphins.instance.ProcessInstanceCreateParam;
+import com.cmsr.onebase.dolphins.workflowinstance.WorkflowInstanceCreateParam;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
-public class ProcessInstanceTest extends BaseTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class WorkflowInstanceTest extends BaseTest {
 
-  public static final Long PROCESS_DEFINITION_CODE = 11386905142912L;
+  public static final Long WORK_FLOW_DEFINITION_CODE = 155488152079744L;
+  public static final Long WORK_FLOW_INSTANCEID = 163L;
 
   /** the workflow must in online state,otherwise will cause error */
   @Test
   public void testStartInstance() {
 
-    ProcessInstanceCreateParam startParam = new ProcessInstanceCreateParam();
+    WorkflowInstanceCreateParam startParam = new WorkflowInstanceCreateParam();
     startParam
-        .setProcessDefinitionCode(PROCESS_DEFINITION_CODE)
+        .setWorkflowDefinitionCode(WORK_FLOW_DEFINITION_CODE)
         .setScheduleTime("")
         .setFailureStrategy(FailureStrategy.CONTINUE.toString())
         .setWarningType(WarningType.NONE.toString())
@@ -25,7 +29,7 @@ public class ProcessInstanceTest extends BaseTest {
         .setStartNodeList("")
         .setTaskDependType(TaskDependType.TASK_POST.toString())
         .setRunMode(RunMode.RUN_MODE_SERIAL.toString())
-        .setProcessInstancePriority(Priority.MEDIUM.toString())
+        .setWorkflowInstancePriority(Priority.MEDIUM.toString())
         .setWorkerGroup("default")
         .setEnvironmentCode("")
         .setStartParams("")
@@ -36,21 +40,19 @@ public class ProcessInstanceTest extends BaseTest {
 
   @Test
   public void testReRun() {
-    Long instanceId = 31L;
-    Assertions.assertTrue(getClient().opsForProcessInst().reRun(projectCode, instanceId));
+    Assertions.assertTrue(getClient().opsForProcessInst().reRun(projectCode, WORK_FLOW_INSTANCEID));
   }
 
   @Test
   public void testPage() {
     getClient()
         .opsForProcessInst()
-        .page(null, null, projectCode, PROCESS_DEFINITION_CODE)
+        .page(null, null, projectCode, WORK_FLOW_DEFINITION_CODE)
         .forEach(System.out::println);
   }
 
   @Test
   public void testDelete() {
-    Long instanceId = 31L;
-    Assertions.assertTrue(getClient().opsForProcessInst().delete(projectCode, instanceId));
+    Assertions.assertTrue(getClient().opsForProcessInst().delete(projectCode, WORK_FLOW_INSTANCEID));
   }
 }
