@@ -2,23 +2,25 @@ package com.cmsr.onebase.dolphins.schedule;
 
 import com.cmsr.onebase.dolphins.BaseTest;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.*;
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ScheduleTest extends BaseTest {
 
-  public static final Long WORKFLOW_CODE = 11386905160832L;
+  public static final Long WORKFLOW_CODE = 155151039079744L;
 
   /** the workflow must in online state */
   @Test
+  @Order(1)
   public void testCreate() {
     ScheduleDefineParam scheduleDefineParam = new ScheduleDefineParam();
     scheduleDefineParam
-        .setProcessDefinitionCode(WORKFLOW_CODE)
+        .setWorkflowDefinitionCode(WORKFLOW_CODE)
         .setSchedule(
             new ScheduleDefineParam.Schedule()
-                .setStartTime("2023-10-27 00:00:00")
-                .setEndTime("2024-09-20 00:00:00")
+                .setStartTime("2026-10-27 00:00:00")
+                .setEndTime("2029-09-20 00:00:00")
                 .setCrontab("0 0 * * * ? *"));
     ScheduleInfoResp scheduleInfoResp =
         getClient().opsForSchedule().create(projectCode, scheduleDefineParam);
@@ -26,6 +28,7 @@ public class ScheduleTest extends BaseTest {
   }
 
   @Test
+  @Order(2)
   public void testGetByProject() {
     List<ScheduleInfoResp> resp =
         getClient().opsForSchedule().getByWorkflowCode(projectCode, WORKFLOW_CODE);
@@ -34,6 +37,7 @@ public class ScheduleTest extends BaseTest {
   }
 
   @Test
+  @Order(3)
   public void testOnline() {
     List<ScheduleInfoResp> resp =
         getClient().opsForSchedule().getByWorkflowCode(projectCode, WORKFLOW_CODE);
@@ -42,6 +46,7 @@ public class ScheduleTest extends BaseTest {
   }
 
   @Test
+  @Order(4)
   public void testOffline() {
     List<ScheduleInfoResp> resp =
         getClient().opsForSchedule().getByWorkflowCode(projectCode, WORKFLOW_CODE);
@@ -50,6 +55,7 @@ public class ScheduleTest extends BaseTest {
   }
 
   @Test
+  @Order(5)
   public void testDelete() {
     List<ScheduleInfoResp> resp =
         getClient().opsForSchedule().getByWorkflowCode(projectCode, WORKFLOW_CODE);

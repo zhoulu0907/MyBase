@@ -1,7 +1,6 @@
 package com.cmsr.onebase.dolphins.core;
 
 import com.cmsr.onebase.dolphins.datasource.DataSourceOperator;
-import com.cmsr.onebase.dolphins.workflowinstance.WorkflowInstanceOperator;
 import com.cmsr.onebase.dolphins.project.ProjectOperator;
 import com.cmsr.onebase.dolphins.remote.DolphinsRestTemplate;
 import com.cmsr.onebase.dolphins.resource.ResourceOperator;
@@ -9,6 +8,7 @@ import com.cmsr.onebase.dolphins.schedule.ScheduleOperator;
 import com.cmsr.onebase.dolphins.taskinstance.TaskInstanceOperator;
 import com.cmsr.onebase.dolphins.tenant.TenantOperator;
 import com.cmsr.onebase.dolphins.workflow.ProcessOperator;
+import com.cmsr.onebase.dolphins.workflowinstance.WorkflowInstanceOperator;
 import lombok.extern.slf4j.Slf4j;
 
 /** dolphin scheduler client to operate dolphin scheduler */

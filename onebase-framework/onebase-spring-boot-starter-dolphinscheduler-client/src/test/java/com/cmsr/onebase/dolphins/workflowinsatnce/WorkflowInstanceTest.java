@@ -9,7 +9,7 @@ import org.junit.jupiter.api.*;
 public class WorkflowInstanceTest extends BaseTest {
 
   public static final Long WORK_FLOW_DEFINITION_CODE = 155488152079744L;
-  public static final Long WORK_FLOW_INSTANCEID = 163L;
+  public static final Long WORK_FLOW_INSTANCEID = 190L;
 
   /** the workflow must in online state,otherwise will cause error */
   @Test
@@ -54,6 +54,7 @@ public class WorkflowInstanceTest extends BaseTest {
   @Test
   @Order(4)
   public void testDelete() {
-    Assertions.assertTrue(getClient().opsForProcessInst().delete(projectCode, WORK_FLOW_INSTANCEID));
+    Assertions.assertTrue(
+        getClient().opsForProcessInst().delete(projectCode, WORK_FLOW_INSTANCEID));
   }
 }
