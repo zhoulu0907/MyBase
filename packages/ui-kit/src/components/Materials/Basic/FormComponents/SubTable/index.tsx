@@ -546,6 +546,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
+          width: '100%',
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
