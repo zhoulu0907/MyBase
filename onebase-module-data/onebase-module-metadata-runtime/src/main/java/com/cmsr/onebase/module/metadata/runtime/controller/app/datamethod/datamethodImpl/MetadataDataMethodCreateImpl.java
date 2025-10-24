@@ -4,6 +4,10 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
+import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
+import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
@@ -12,12 +16,16 @@ import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadata
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
@@ -26,6 +34,8 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DAT
 @Component
 public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCoreService {
 
+    @Autowired
+    private FlowProcessExecApiImpl flowProcessExecApi;
 
     /**
      * 校验创建数据的完整性
@@ -325,6 +335,43 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
         });
     }
+
+    @Override
+    protected void executePreWorkflow(ProcessContext context) {
+        Long entityId = context.getEntityId();
+        Map<String, Object> data = context.getData();
+        Map fieldData = convertNameToId(entityId,data);
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(entityId);
+        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
+        reqDTO.setFieldData(fieldData);
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(respDTO.isSuccess()){
+            log.info("数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+        }else{
+            log.info("数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+        }
+    }
+
+    @Override
+    protected void executePostWorkflow(ProcessContext context) {
+        Long entityId = context.getEntityId();
+        Map<String, Object> data = context.getData();
+        Map fieldData = convertNameToId(entityId,data);
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(entityId);
+        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
+        reqDTO.setFieldData(fieldData);
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(respDTO.isSuccess()){
+            log.info("数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+        }else{
+            log.info("数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+        }
+    }
+
 
 
 }
