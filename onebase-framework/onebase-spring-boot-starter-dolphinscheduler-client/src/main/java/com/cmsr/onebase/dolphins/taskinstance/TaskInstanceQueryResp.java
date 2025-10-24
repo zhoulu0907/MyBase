@@ -17,8 +17,8 @@
 
 package com.cmsr.onebase.dolphins.taskinstance;
 
-import com.cmsr.onebase.dolphins.workflow.ProcessDefineResp;
 import com.cmsr.onebase.dolphins.workflow.TaskDefinition;
+import com.cmsr.onebase.dolphins.workflow.WorkflowDefineResp;
 import com.cmsr.onebase.dolphins.workflowinstance.WorkflowInstanceQueryResp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -99,7 +99,7 @@ public class TaskInstanceQueryResp implements Serializable {
   private WorkflowInstanceQueryResp processInstance;
 
   /** process definition */
-  private ProcessDefineResp processDefine;
+  private WorkflowDefineResp processDefine;
 
   /** task definition */
   private TaskDefinition taskDefine;

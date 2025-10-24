@@ -63,13 +63,14 @@ public class WorkflowHttpTest extends BaseTest {
     TaskDefinition httpTaskDefinition =
         TaskDefinitionUtils.createDefaultTaskDefinition(taskCodes.get(1), httpTask);
 
-    ProcessDefineParam pcr = new ProcessDefineParam();
+    WorkflowDefineParam pcr = new WorkflowDefineParam();
     pcr.setName(WORKFLOW_NAME)
         .setLocations(TaskLocationUtils.horizontalLocation(taskCodes.toArray(new Long[0])))
         .setDescription("test-dag-description")
         .setTenantCode(tenantCode)
         .setTimeout("0")
-        .setExecutionType(ProcessDefineParam.EXECUTION_TYPE_PARALLEL)
+        .setExecutionType(
+            com.cmsr.onebase.dolphins.workflow.WorkflowDefineParam.EXECUTION_TYPE_PARALLEL)
         .setTaskDefinitionJson(Arrays.asList(shellTaskDefinition, httpTaskDefinition))
         .setTaskRelationJson(TaskRelationUtils.oneLineRelation(taskCodes.toArray(new Long[0])))
         .setGlobalParams(null);
@@ -80,7 +81,7 @@ public class WorkflowHttpTest extends BaseTest {
   @Test
   @Order(2)
   public void testPage() {
-    List<ProcessDefineResp> page =
+    List<WorkflowDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
     int expectedWorkflowNumber = 1;
     assertEquals(expectedWorkflowNumber, page.size());
@@ -89,7 +90,7 @@ public class WorkflowHttpTest extends BaseTest {
   @Test
   @Order(3)
   public void testOnlineWorkflow() {
-    List<ProcessDefineResp> page =
+    List<WorkflowDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
     assertTrue(getClient().opsForProcess().online(projectCode, page.get(0).getCode()));
   }
@@ -97,7 +98,7 @@ public class WorkflowHttpTest extends BaseTest {
   @Test
   @Order(4)
   public void testOfflineWorkflow() {
-    List<ProcessDefineResp> page =
+    List<WorkflowDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
     assertTrue(getClient().opsForProcess().offline(projectCode, page.get(0).getCode()));
   }
@@ -106,7 +107,7 @@ public class WorkflowHttpTest extends BaseTest {
   @Test
   @Order(5)
   public void testDeleteWorkflow() {
-    List<ProcessDefineResp> page =
+    List<WorkflowDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
     getClient().opsForProcess().offline(projectCode, page.get(0).getCode()); // 确保下线之后才能删除
     assertTrue(getClient().opsForProcess().delete(projectCode, page.get(0).getCode()));

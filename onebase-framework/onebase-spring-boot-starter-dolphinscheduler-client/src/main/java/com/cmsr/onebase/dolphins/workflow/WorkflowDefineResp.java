@@ -10,7 +10,7 @@ import lombok.Data;
 /** define process response,copied from org.apache.dolphinscheduler.dao.entity.ProcessDefinition */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProcessDefineResp {
+public class WorkflowDefineResp {
 
   /** id */
   private int id;

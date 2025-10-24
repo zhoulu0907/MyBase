@@ -17,7 +17,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class ProcessDefineParam {
+public class WorkflowDefineParam {
 
   public static final String EXECUTION_TYPE_PARALLEL = "PARALLEL";
   public static final String EXECUTION_TYPE_SERIAL_WAIT = "SERIAL_WAIT";
@@ -52,19 +52,19 @@ public class ProcessDefineParam {
 
   private String timeout;
 
-  public static ProcessDefineParam newParallelInstance() {
-    return new ProcessDefineParam().setExecutionType(EXECUTION_TYPE_PARALLEL);
+  public static WorkflowDefineParam newParallelInstance() {
+    return new WorkflowDefineParam().setExecutionType(EXECUTION_TYPE_PARALLEL);
   }
 
-  public static ProcessDefineParam newSerialWaitInstance() {
-    return new ProcessDefineParam().setExecutionType(EXECUTION_TYPE_SERIAL_WAIT);
+  public static WorkflowDefineParam newSerialWaitInstance() {
+    return new WorkflowDefineParam().setExecutionType(EXECUTION_TYPE_SERIAL_WAIT);
   }
 
-  public static ProcessDefineParam newSerialDiscardInstance() {
-    return new ProcessDefineParam().setExecutionType(EXECUTION_TYPE_SERIAL_DISCARD);
+  public static WorkflowDefineParam newSerialDiscardInstance() {
+    return new WorkflowDefineParam().setExecutionType(EXECUTION_TYPE_SERIAL_DISCARD);
   }
 
-  public static ProcessDefineParam newSerialPriorityInstance() {
-    return new ProcessDefineParam().setExecutionType(EXECUTION_TYPE_SERIAL_PRIORITY);
+  public static WorkflowDefineParam newSerialPriorityInstance() {
+    return new WorkflowDefineParam().setExecutionType(EXECUTION_TYPE_SERIAL_PRIORITY);
   }
 }

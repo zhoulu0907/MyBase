@@ -1,6 +1,6 @@
 package com.cmsr.onebase.dolphins.workflowinstance;
 
-import com.cmsr.onebase.dolphins.workflow.ProcessDefineResp;
+import com.cmsr.onebase.dolphins.workflow.WorkflowDefineResp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
@@ -44,7 +44,7 @@ public class WorkflowInstanceQueryResp {
   private String host;
 
   /** process definition structure */
-  private ProcessDefineResp processDefinition;
+  private WorkflowDefineResp processDefinition;
   /** process command type */
   private String commandType;
 

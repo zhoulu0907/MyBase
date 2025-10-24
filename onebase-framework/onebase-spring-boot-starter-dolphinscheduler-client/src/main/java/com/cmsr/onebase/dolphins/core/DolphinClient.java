@@ -3,7 +3,7 @@ package com.cmsr.onebase.dolphins.core;
 import com.cmsr.onebase.dolphins.remote.DolphinsRestTemplate;
 import com.cmsr.onebase.dolphins.schedule.ScheduleOperator;
 import com.cmsr.onebase.dolphins.taskinstance.TaskInstanceOperator;
-import com.cmsr.onebase.dolphins.workflow.ProcessOperator;
+import com.cmsr.onebase.dolphins.workflow.WorkflowOperator;
 import com.cmsr.onebase.dolphins.workflowinstance.WorkflowInstanceOperator;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,7 +15,7 @@ public class DolphinClient {
   private final String dolphinAddress;
   private final String token;
 
-  private ProcessOperator processOperator;
+  private WorkflowOperator workflowOperator;
   private WorkflowInstanceOperator workflowInstanceOperator;
   private ScheduleOperator scheduleOperator;
   private TaskInstanceOperator taskInstanceOperator;
@@ -29,8 +29,8 @@ public class DolphinClient {
   }
 
   public void initOperators() {
-    this.processOperator =
-        new ProcessOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
+    this.workflowOperator =
+        new WorkflowOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
     this.workflowInstanceOperator =
         new WorkflowInstanceOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
     this.scheduleOperator =
@@ -39,8 +39,8 @@ public class DolphinClient {
         new TaskInstanceOperator(this.dolphinAddress, this.token, this.dolphinsRestTemplate);
   }
 
-  public ProcessOperator opsForProcess() {
-    return this.processOperator;
+  public WorkflowOperator opsForProcess() {
+    return this.workflowOperator;
   }
 
   public WorkflowInstanceOperator opsForProcessInst() {
