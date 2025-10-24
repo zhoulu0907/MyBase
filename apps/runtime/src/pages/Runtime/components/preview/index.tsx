@@ -16,7 +16,7 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
+import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
@@ -57,7 +57,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setSubEntities
   } = pagesRuntimeSignal;
 
-  const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
@@ -67,13 +66,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [refresh, setRefresh] = useState(Date.now());
-
-  useEffect(() => {
-    const appId = getHashQueryParam('appId');
-    if (appId) {
-      setAppId(appId);
-    }
-  }, [window.location.hash]);
 
   useEffect(() => {
     if (drawerVisible.value) {

@@ -75,7 +75,7 @@ const Runtime: React.FC = () => {
     // 处理数据
     const pageList = res && res.length > 0 ? dealPage(res) : [];
 
-    const treeData = convertMenuToTreeData(pageList, initTreeItemWidth, true);
+    const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
     setTreeData(treeData);
 
     // 如果菜单列表不为空，默认选中第一个菜单
@@ -117,7 +117,7 @@ const Runtime: React.FC = () => {
     }
   };
 
-  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
+  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number): any[] => {
     return menus.map((menu) => ({
       key: menu.menuCode,
       title: (
