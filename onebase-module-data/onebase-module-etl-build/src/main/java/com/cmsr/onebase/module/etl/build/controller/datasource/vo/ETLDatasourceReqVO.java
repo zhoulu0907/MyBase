@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.etl.build.controller.datasource.vo;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,4 +38,15 @@ public class ETLDatasourceReqVO {
 
     @Schema(description = "只读", requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean readonly;
+
+    @Schema(description = "采集状态")
+    private String collegeStatus;
+
+    public JsonNode getConfig() {
+        return JsonUtils.parseTree(this.config);
+    }
+
+    public void setConfig(JsonNode config) {
+        this.config = JsonUtils.toJsonString(config);
+    }
 }
