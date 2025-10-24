@@ -12,14 +12,9 @@ import com.cmsr.onebase.module.system.dal.database.ApplicationAuthEnterpriseData
 import com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant.ApplicationAuthEnterpriseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.enterprise.EnterpriseDO;
 import com.cmsr.onebase.module.system.dal.database.EnterpriseDataRepository;
-
-
-import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import jakarta.annotation.Resource;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -29,8 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
