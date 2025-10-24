@@ -11,11 +11,8 @@ import lombok.Data;
 @Schema(description = "应用权限功能定义")
 public class PermissionDTO {
 
-    @Schema(description = "应用id", example = "1024")
-    private Long applicationId;
-
-    @Schema(description = "角色id")
-    private Long roleId;
+    @Schema(description = "权限id")
+    private Long id;
 
     @Schema(description = "菜单id")
     private Long menuId;
