@@ -21,13 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
- * 流程运行
+ * 流程任务中心
  */
 @RestController
-@RequestMapping("/bpm/design")
-@Tag(name = "流程运行", description = "流程运行相关接口")
+@RequestMapping("/bpm/task-center")
+@Tag(name = "流程任务中心", description = "流程任务中心相关接口")
 @Slf4j
-public class BpmFlowRuntimeController {
+public class BpmFlowTaskCenterController {
     @Resource
     private BpmFlowTodoRuntimeService bpmFlowTodoRuntimeService;
     @GetMapping("/todo/page")
@@ -43,7 +43,7 @@ public class BpmFlowRuntimeController {
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
     public CommonResult<PageResult<BpmFlowDoneTaskVO>> done(@Valid BpmFlowDoneTaskPageReqVO reqVO) {
         log.info("分页查询已办信息: {}", reqVO);
-        PageResult<BpmFlowDoneTaskVO> pageResult = bpmFlowTodoRuntimeService.getTodoPage(reqVO);
+        PageResult<BpmFlowDoneTaskVO> pageResult = bpmFlowTodoRuntimeService.getDonePage(reqVO);
         return success(pageResult);
     }
     @GetMapping("/my-create/page")

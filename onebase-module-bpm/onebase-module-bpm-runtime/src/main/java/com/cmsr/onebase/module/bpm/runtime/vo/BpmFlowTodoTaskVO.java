@@ -29,6 +29,6 @@ public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO{
     private LocalDateTime arrivalTime;
 
     @Schema(description = "发起时间")
-    private LocalDateTime startTime;
+    private LocalDateTime submitTime;
 
 }

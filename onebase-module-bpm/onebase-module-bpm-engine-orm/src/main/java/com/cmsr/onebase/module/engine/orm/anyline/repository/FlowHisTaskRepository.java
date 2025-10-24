@@ -2,9 +2,13 @@ package com.cmsr.onebase.module.engine.orm.anyline.repository;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.engine.orm.anyline.dataobject.FlowTaskDO;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
 import jakarta.annotation.Resource;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
@@ -23,99 +27,65 @@ public class FlowHisTaskRepository extends DataRepository<FlowHisTask> {
     public FlowHisTaskRepository() {
         super(FlowHisTask.class);
     }
-    public PageResult<FlowHisTask> getProcessedTaskPage(BpmFlowDoneTaskPageReqVO reqVO, Long userId) {
-        StringBuilder sql = new StringBuilder();
-        buildQuerySql(sql, reqVO, userId);
+    public PageResult<FlowHisTask> getDoneTaskPage(BpmFlowDoneTaskPageReqVO reqVO, Long userId) {
+        // 构建基础SQL
+        String baseSql = buildBaseSql(userId);
+        // 设置分页参数
         PageNavi navi = new DefaultPageNavi();
         navi.setCurPage(reqVO.getPageNo());
         navi.setPageRows(reqVO.getPageSize());
-        DataSet dataSet = service.querys(sql.toString(), navi);
+        // 构建动态条件
+        ConfigStore condition = buildDynamicCondition(reqVO);
+        // 执行查询
+        DataSet dataSet = service.querys(baseSql, condition, navi);
         return new PageResult<>(
                 dataSet.entitys(FlowHisTask.class).stream().toList(),
                 dataSet.total()
         );
     }
-    private void buildQuerySql(StringBuilder sql, BpmFlowDoneTaskPageReqVO reqVO, Long userId) {
-        sql.append("SELECT ")
-                .append("    ht.id, ")
-                .append("    ht.update_time AS update_time, ")
-                .append("    i.ext, ")
-                .append("    CASE ")
-                .append("        WHEN ht.skip_type = 'PASS' THEN '已同意' ")
-                .append("        WHEN ht.skip_type = 'REJECT' THEN '已拒绝' ")
-                .append("        WHEN ht.skip_type = 'NONE' THEN '已退回' ")
-                .append("        ELSE '' ")
-                .append("    END AS skipType, ")
-                .append("    ht.message AS message, ")
-                .append("    ht.node_name AS nodeName ")
-                .append("FROM ")
-                .append("    bpm_flow_his_task ht ")
-                .append("    INNER JOIN bpm_flow_instance i ON ht.instance_id = i.id AND i.deleted = 0 ")
-                .append("WHERE ")
-                .append("    ht.deleted = 0 ")
-                .append("    AND ( ")
-                .append("        ht.approver = '").append(userId).append("' ")
-                .append("        OR (ht.collaborator IS NOT NULL AND ht.collaborator LIKE '%").append(userId).append("%') ")
-                .append("        OR EXISTS ( ")
-                .append("            SELECT 1 FROM bpm_flow_user u ")
-                .append("            WHERE u.associated = ht.task_id ")
-                .append("            AND u.processed_by = '").append(userId).append("' ")
-                .append("            AND u.deleted = 0 ")
-                .append("        ) ")
-                .append("    ) ");
-
-        // 动态添加查询条件
+    private String buildBaseSql(Long userId) {
+        return "select \n" +
+                "    t.id,\n" +
+                "    t.skip_type,\n" +
+                "    t1.ext,\n" +
+                "    t.update_time,\n" +
+                "    t.create_time\n" +
+                "FROM (\n" +
+                "    SELECT *,\n" +
+                "           ROW_NUMBER() OVER (PARTITION BY instance_id ORDER BY id DESC) as rn\n" +
+                "    FROM bpm_flow_his_task\n" +
+                "    WHERE deleted  = 0 \n" +
+                "    and approver = '" + userId + "'\n" +
+                "   ) t\n" +
+                "LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id\n" +
+                "WHERE t.rn = 1 \n" +
+                "and t1.deleted  = 0";
+    }
+    private ConfigStore buildDynamicCondition(BpmFlowDoneTaskPageReqVO reqVO){
+        DefaultConfigStore condition = new DefaultConfigStore();
+        // 动态添加其他查询条件
         if (reqVO.getProcessTitle() != null && !reqVO.getProcessTitle().isEmpty()) {
-            sql.append(" AND i.ext::json->'processInfo'->>'processTitle' LIKE '%").append(reqVO.getProcessTitle()).append("%' ");
+            condition.and(Compare.LIKE, "t1.ext::json->'processInfo'->>'processTitle'", reqVO.getProcessTitle());
         }
-
         if (reqVO.getInitiator() != null && !reqVO.getInitiator().isEmpty()) {
-            sql.append(" AND i.ext::json->'processInfo'->>'initiator' LIKE '%").append(reqVO.getInitiator()).append("%' ");
+            condition.and(Compare.LIKE, "t1.ext::json->'processInfo'->>'initiator'", reqVO.getInitiator());
         }
-
-        if (reqVO.getHandleOperation() != null && !reqVO.getHandleOperation().isEmpty()) {
-            // 根据处理操作类型反向映射查询条件
-            sql.append(" AND ( ");
-            switch (reqVO.getHandleOperation()) {
-                case "已同意":
-                    sql.append(" ht.skip_type = 'PASS' ");
-                    break;
-                case "已拒绝":
-                    sql.append(" ht.skip_type = 'REJECT' ");
-                    break;
-                case "已退回":
-                    sql.append(" ht.skip_type = 'NONE' ");
-                    break;
-                case "已转交":
-                    sql.append(" ht.cooperate_type = 2 ");
-                    break;
-                case "已委派":
-                    sql.append(" ht.cooperate_type = 3 ");
-                    break;
-                default:
-                    sql.append(" 1=1 ");
-            }
-            sql.append(" ) ");
+        if (reqVO.getFormSummary() != null && !reqVO.getFormSummary().isEmpty()) {
+            condition.and(Compare.LIKE, "t1.ext::json->'processInfo'->>'formSummary'", reqVO.getFormSummary());
         }
-
         if (reqVO.getHandleTime() != null && reqVO.getHandleTime().length == 2) {
-            sql.append(" AND ht.update_time >= '").append(reqVO.getHandleTime()[0]).append("' ");
-            sql.append(" AND ht.update_time <= '").append(reqVO.getHandleTime()[1]).append("' ");
+            condition.and(Compare.BETWEEN, "t.update_time",reqVO.getHandleTime()[0], reqVO.getHandleTime()[1]);
         }
-        // 排序逻辑
-        sql.append(" ORDER BY ");
-        if (reqVO.getSortType() != null) {
-            switch (reqVO.getSortType()) {
-                case "asc":
-                    sql.append(" ht.update_time ASC "); // 最早处理的
-                    break;
-                case "desc":
-                default:
-                    sql.append(" ht.update_time DESC "); // 最新处理的（默认）
-            }
-        } else {
-            sql.append(" ht.update_time DESC "); // 默认最新处理的
+        if (reqVO.getSkipType() != null && !reqVO.getSkipType().isEmpty()) {
+            condition.and(Compare.EQUAL, "t.skip_type", reqVO.getSkipType());
         }
+        // 设置排序
+        if("asc".equals(reqVO.getSortType())){
+            condition.order("t.create_time asc");
+        }else{
+            condition.order("t.create_time desc");
+        }
+        return condition;
     }
 }
 

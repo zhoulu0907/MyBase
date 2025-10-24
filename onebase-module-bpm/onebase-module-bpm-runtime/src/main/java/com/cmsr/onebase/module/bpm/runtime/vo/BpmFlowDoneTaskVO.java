@@ -30,11 +30,4 @@ public class BpmFlowDoneTaskVO {
     @Schema(description = "处理操作")
     private String handleOperation;
 
-    @Schema(description = "处理意见")
-    private String message ;
-
-    @Schema(description = "节点名称")
-    private String nodeName ;
-
-
 }

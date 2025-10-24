@@ -23,7 +23,7 @@ public interface BpmFlowTodoRuntimeService {
      * @param pageReqVO
      * @return
      */
-    PageResult<BpmFlowDoneTaskVO> getTodoPage(BpmFlowDoneTaskPageReqVO pageReqVO);
+    PageResult<BpmFlowDoneTaskVO> getDonePage(BpmFlowDoneTaskPageReqVO pageReqVO);
 
     /**
      * 获取流我创建的流程

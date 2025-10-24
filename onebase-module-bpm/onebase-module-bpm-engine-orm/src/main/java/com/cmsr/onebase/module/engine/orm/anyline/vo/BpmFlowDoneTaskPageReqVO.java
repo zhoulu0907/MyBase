@@ -23,8 +23,12 @@ public class BpmFlowDoneTaskPageReqVO extends PageParam {
     @Size(max = 100, message = "发起人长度不能超过100个字符")
     private String initiator;
 
-    @Schema(description = "处理操作：已同意、已拒绝、已退回、已转交、已委派、已会签")
-    private String handleOperation;
+    @Schema(description = "表单摘要，模糊匹配", example = "铅笔")
+    @Size(max = 500, message = "表单摘要长度不能超过500个字符")
+    private String formSummary;
+
+    @Schema(description = "处理操作：PASS通过 REJECT退回 NONE无动作")
+    private String skipType;
 
     @Schema(description = "处理时间范围" ,example = "[2025-08-01 00:00:00,2025-08-18 23:59:59]")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
