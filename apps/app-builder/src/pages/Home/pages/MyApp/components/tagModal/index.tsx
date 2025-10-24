@@ -22,7 +22,7 @@ const TagModal: React.FC<TagModalProps> = ({ visible, onOk, onCancel }) => {
   const handleConfirm = async () => {
     await form.validate();
     const tagList = form.getFieldValue('tagList');
-    
+
     const res = await updateApplicationTag(tagList);
     if (res) {
       Message.success('更新成功');
@@ -96,17 +96,19 @@ const TagModal: React.FC<TagModalProps> = ({ visible, onOk, onCancel }) => {
                       </Grid.Row>
                     );
                   })}
-                  <Button
-                    type="text"
-                    icon={<IconPlusCircle />}
-                    onClick={() => {
-                      add({
-                        tagName: undefined
-                      });
-                    }}
-                  >
-                    添加标签
-                  </Button>
+                  <div>
+                    <Button
+                      type="text"
+                      icon={<IconPlusCircle />}
+                      onClick={() => {
+                        add({
+                          tagName: undefined
+                        });
+                      }}
+                    >
+                      添加标签
+                    </Button>
+                  </div>
                 </>
               );
             }}
