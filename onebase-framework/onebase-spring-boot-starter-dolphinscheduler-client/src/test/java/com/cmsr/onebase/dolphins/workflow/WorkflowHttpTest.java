@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 /** the test for workflow/process */
-public class WorkflowTest extends BaseTest {
+public class WorkflowHttpTest extends BaseTest {
 
   public static final String WORKFLOW_NAME = "test-dag2";
 
