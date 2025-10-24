@@ -4,6 +4,9 @@ import lombok.Getter;
 
 import java.util.Collection;
 
+/**
+ * 元数据变更影响枚举，当前版本不纳入考虑，减少开发复杂度.
+ */
 public enum MetadataChange {
     NONE(0, "无变化"),
     ADD(1, "新增"),

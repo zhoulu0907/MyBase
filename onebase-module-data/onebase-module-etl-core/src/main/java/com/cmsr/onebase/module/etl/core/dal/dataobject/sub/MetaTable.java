@@ -14,11 +14,7 @@ public class MetaTable {
 
     private String fullyQualifiedName;
 
-    private String keyword;
-
     private String baseType;
-
-    private String comment;
 
     private List<MetaColumn> columns;
 
@@ -33,14 +29,10 @@ public class MetaTable {
                 table.getCatalogName(),
                 table.getSchemaName(),
                 table.getName()));
-        metaTable.setKeyword(table.keyword());
         metaTable.setBaseType(table.getType());
-        metaTable.setComment(table.getComment());
 
         List<MetaColumn> columns = Lists.newArrayList();
-        columnList.forEach((key, column) -> {
-            columns.add(MetaColumn.convert(column));
-        });
+        columnList.forEach((key, column) -> columns.add(MetaColumn.convert(column)));
         metaTable.setColumns(columns);
 
         return metaTable;

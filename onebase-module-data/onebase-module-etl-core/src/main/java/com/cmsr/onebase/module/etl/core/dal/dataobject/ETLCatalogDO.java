@@ -38,8 +38,14 @@ public class ETLCatalogDO extends TenantBaseDO {
     @Column(name = "display_name")
     private String displayName;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "meta_info")
     private String metaInfo;
+
+    @Column(name = "meta_type")
+    private String metaType;
 
     public MetaCatalog getMetaInfo() {
         return JsonUtils.parseObject(metaInfo, MetaCatalog.class);
@@ -55,21 +61,23 @@ public class ETLCatalogDO extends TenantBaseDO {
         String name = catalog.getName();
         catalogDO.setCatalogName(name);
         String comment = catalog.getComment();
+        catalogDO.setDescription(comment);
         if (StringUtils.isNotBlank(comment)) {
             catalogDO.setDisplayName(comment);
         } else {
             catalogDO.setDisplayName(name);
         }
+        String metaType = catalog.keyword();
+        catalogDO.setMetaType(metaType);
         MetaCatalog metaCatalog = MetaCatalog.convert(catalog);
         catalogDO.setMetaInfo(metaCatalog);
-
         return catalogDO;
     }
 
     public static void applyChanges(ETLCatalogDO oldCatalogDO, ETLCatalogDO newCatalogDO) {
         String oldName = oldCatalogDO.getCatalogName();
         String oldDisplayName = oldCatalogDO.getDisplayName();
-        String oldComment = oldCatalogDO.getMetaInfo().getComment();
+        String oldComment = oldCatalogDO.getDescription();
         if (!StringUtils.equals(oldDisplayName, oldName) && !StringUtils.equals(oldDisplayName, oldComment)) {
             newCatalogDO.setDisplayName(oldDisplayName);
         }

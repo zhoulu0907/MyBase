@@ -41,8 +41,14 @@ public class ETLSchemaDO extends TenantBaseDO {
     @Column(name = "display_name")
     private String displayName;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "meta_info")
     private String metaInfo;
+
+    @Column(name = "meta_type")
+    private String metaType;
 
     public MetaSchema getMetaInfo() {
         return JsonUtils.parseObject(metaInfo, MetaSchema.class);
@@ -59,11 +65,14 @@ public class ETLSchemaDO extends TenantBaseDO {
         String name = schema.getName();
         schemaDO.setSchemaName(name);
         String comment = schema.getComment();
+        schemaDO.setDescription(comment);
         if (StringUtils.isNotBlank(comment)) {
             schemaDO.setDisplayName(comment);
         } else {
             schemaDO.setDisplayName(name);
         }
+        String metaType = schema.keyword();
+        schemaDO.setMetaType(metaType);
         MetaSchema metaCatalog = MetaSchema.convert(schema);
         schemaDO.setMetaInfo(metaCatalog);
 
@@ -73,7 +82,7 @@ public class ETLSchemaDO extends TenantBaseDO {
     public static void applyChanges(ETLSchemaDO oldSchemaDO, ETLSchemaDO newSchemaDO) {
         String oldName = oldSchemaDO.getSchemaName();
         String oldDisplayName = oldSchemaDO.getDisplayName();
-        String oldComment = oldSchemaDO.getMetaInfo().getComment();
+        String oldComment = oldSchemaDO.getDescription();
         if (!StringUtils.equals(oldDisplayName, oldName) && !StringUtils.equals(oldDisplayName, oldComment)) {
             newSchemaDO.setDisplayName(oldDisplayName);
         }

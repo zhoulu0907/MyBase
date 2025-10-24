@@ -8,15 +8,9 @@ public class MetaCatalog {
 
     private String fullyQualifiedName;
 
-    private String keyword;
-
-    private String comment;
-
     public static MetaCatalog convert(Catalog catalog) {
         MetaCatalog metaCatalog = new MetaCatalog();
         metaCatalog.setFullyQualifiedName(catalog.getName());
-        metaCatalog.setKeyword(catalog.keyword());
-        metaCatalog.setComment(catalog.getComment());
 
         return metaCatalog;
     }
