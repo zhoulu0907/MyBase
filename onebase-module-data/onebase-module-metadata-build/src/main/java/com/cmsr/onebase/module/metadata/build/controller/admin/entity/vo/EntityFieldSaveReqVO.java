@@ -74,4 +74,7 @@ public class EntityFieldSaveReqVO {
     @Schema(description = "自动编号配置（若提供则整体替换）")
     private AutoNumberConfigReqVO autoNumber;
 
+    @Schema(description = "关联的字典类型ID,用于SELECT/MULTI_SELECT字段复用系统字典,为null时使用自定义选项", example = "1001")
+    private Long dictTypeId;
+
 }
