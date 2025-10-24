@@ -26,12 +26,15 @@ public class DolphinSchedulerClientProperties {
   private String token;
 
   /** 工作流用projectCode */
+  @NotBlank(message = "工作流用projectCode 不能为空")
   private Long projectCodeFlow;
 
   /** ETL用projectCode */
+  @NotBlank(message = "ETL用projectCode 不能为空")
   private Long projectCodeETL;
 
   /** 租户code */
+  @NotBlank(message = "租户code 不能为空")
   private String tenantCode;
 
   /** 连接超时时间，默认 5s */

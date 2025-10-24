@@ -108,23 +108,29 @@ onebase:
   dolphinscheduler:
     baseUrl: http://your-dolphinscheduler-host:12345/dolphinscheduler
     token: your-access-token
+    projectCodeFlow: 155148878289211
+    projectCodeETL: 155148878289216
+    tenantCode: default
 ```
 
 ```java
-// 3. 注入并使用 DolphinClient
+// 3. 注入并使用 DolphinClient、dolphinProperties
 import com.cmsr.onebase.dolphins.core.DolphinClient;
+import com.cmsr.onebase.framework.dolphins.config.DolphinSchedulerClientProperties;
 
 @Resource
 private DolphinClient dolphinClient;
+@Resource
+private DolphinSchedulerClientProperties dolphinProperties;
 
 // 使用示例
-List<WorkflowDefineResp> workflows = dolphinClient.opsForWorkflow()
-    .page(projectCode, 1, 10, "search-keyword");
+List<WorkflowDefineResp> workflows = dolphinClient.opsForWorkflow().page(dolphinProperties.getProjectCodeETL(), 1, 10, "search-keyword");
 ```
 ---
 
 ## 📝 使用注意事项
 
-1. 所有操作都需要提供有效的 `projectCode`
+1. 所有操作都需要提供有效的 `projectCode`，可以直接使用dolphinProperties.getProjectCodeETL()或者dolphinProperties.getProjectCodeFlow()获取。
+2. 可以直接使用dolphinProperties.getTenantCode()获取租户编码。
 
 ---
