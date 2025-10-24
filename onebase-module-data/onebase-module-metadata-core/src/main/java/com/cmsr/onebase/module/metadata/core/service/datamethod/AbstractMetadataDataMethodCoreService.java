@@ -731,4 +731,27 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         private AnylineService<?> temporaryService;
 
     }
+
+    // 将name：value的格式变成id：value的格式
+    public Map convertNameToId(Long entityId, Map<String, Object> map){
+
+        Map newData = new HashMap();// 存放id:value格式
+        List<MetadataEntityFieldDO> targetfields = getEntityFields(entityId);
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String dataKey = entry.getKey();
+            Object dataValue = entry.getValue();
+
+            // 将data的key转换为大写后，与targetfields中的fieldName进行匹配
+            String dataKeyUpper = dataKey.toUpperCase();
+            for (MetadataEntityFieldDO field : targetfields) {
+                if (field.getFieldName() != null && field.getFieldName().toUpperCase().equals(dataKeyUpper)) {
+                    // 找到匹配的字段，使用fieldId作为key
+                    newData.put(field.getId(), dataValue);
+                    break;
+                }
+            }
+        }
+        return newData;
+    }
 }
