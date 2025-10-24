@@ -161,7 +161,4 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
         }
     }
-//    public void test() {
-//        BeanUtils.toBean()
-//    }
 }

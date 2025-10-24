@@ -32,6 +32,8 @@ public class ETLDatasourceReqVO {
     private String config;
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED)
-//    @NotBlank(message = "应用ID不能为空")
     private Long appId;
+
+    @Schema(description = "只读", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean readonly;
 }

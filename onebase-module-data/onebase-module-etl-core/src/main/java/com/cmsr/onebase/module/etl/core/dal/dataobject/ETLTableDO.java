@@ -45,8 +45,14 @@ public class ETLTableDO extends TenantBaseDO {
     @Column(name = "display_name")
     private String displayName;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "meta_info")
     private String metaInfo;
+
+    @Column(name = "meta_type")
+    private String metaType;
 
     public MetaTable getMetaInfo() {
         return JsonUtils.parseObject(metaInfo, MetaTable.class);
@@ -66,6 +72,7 @@ public class ETLTableDO extends TenantBaseDO {
         String name = table.getName();
         tableDO.setTableName(name);
         String comment = table.getComment();
+        tableDO.setDescription(comment);
         if (StringUtils.isNotBlank(comment)) {
             tableDO.setDisplayName(comment);
         } else {
@@ -83,7 +90,7 @@ public class ETLTableDO extends TenantBaseDO {
         MetaTable.applyChanges(oldMetaTable, newMetaTable);
         String oldName = oldTableDO.getTableName();
         String oldDisplayName = oldTableDO.getDisplayName();
-        String oldComment = oldMetaTable.getComment();
+        String oldComment = oldTableDO.getDescription();
         if (!StringUtils.equals(oldDisplayName, oldName) && !StringUtils.equals(oldDisplayName, oldComment)) {
             newTableDO.setDisplayName(oldDisplayName);
         }
