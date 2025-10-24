@@ -9,10 +9,14 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
+import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
-import org.anyline.metadata.*;
+import org.anyline.metadata.Catalog;
+import org.anyline.metadata.Column;
+import org.anyline.metadata.Schema;
+import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -59,17 +66,18 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
     @Override
     public void submitCollectJob(Long datasourceId) {
         log.info("提交元数据采集任务，数据源ID：{}", datasourceId);
-        datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.RUNNING);
         threadPoolTaskExecutor.submit(() -> {
-            long starTime = System.currentTimeMillis();
-            boolean isJobDone = doCollection(datasourceId);
-            long endTime = System.currentTimeMillis();
-            long timeCost = endTime - starTime;
-            if (isJobDone) {
-                datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.SUCCESS);
+            LocalDateTime starTime = LocalDateTime.now();
+            datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.RUNNING, starTime);
+            boolean isJobSuccess = doCollection(datasourceId);
+            LocalDateTime endTime = LocalDateTime.now();
+            Duration duration = Duration.between(starTime, endTime);
+            long timeCost = duration.toMillis();
+            if (isJobSuccess) {
+                datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.SUCCESS, starTime);
                 log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
             } else {
-                datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.FAILED);
+                datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.FAILED, starTime);
                 log.info("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
             }
         });
@@ -77,6 +85,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
 
     public boolean doCollection(Long datasourceId) {
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
+        // TODO: add precheck etc. to prevent multiply submit. --> cause data duplication or error response.
         String datasourceKey = "metadata-collector-" + datasourceId;
         try {
             DataSourceHolder.reg(datasourceKey, datasource);
@@ -110,8 +119,9 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                 schemaId = oldSchemaDO.getId();
             }
             // Table
-            Map<String, Table> tables = temporary.metadata().tables();
+            Map<String, Table> tables = temporary.metadata().tables(Table.TYPE.VIEW.value());
             Map<String, ETLTableDO> tableDOs = tableRepository.findAllByCatalogIdAndSchemaIdAndDatasourceId(datasourceId, catalogId, schemaId);
+            List<ETLTableDO> tableDOList = Lists.newArrayList();
             for (Table table : tables.values()) {
                 String tableName = table.getName();
                 // 重新获取一遍，由于Anyline .tables()方法会忽略列(Column)
@@ -120,25 +130,12 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                 if (tableDOs.containsKey(tableName)) {
                     ETLTableDO oldTableDO = tableDOs.get(tableName);
                     ETLTableDO.applyChanges(oldTableDO, newTableDO);
-                    tableRepository.update(newTableDO);
+                    tableDOList.add(newTableDO);
                 } else {
-                    tableRepository.insert(newTableDO);
+                    tableDOList.add(newTableDO);
                 }
             }
-            Map<String, View> views = temporary.metadata().views();
-            for (View view : views.values()) {
-                String viewName = view.getName();
-                // 重新获取一遍，由于Anyline .views()方法会忽略列(Column)
-                Map<String, Column> viewColumn = temporary.metadata().columns(view);
-                ETLTableDO newViewDO = ETLTableDO.convert(datasourceId, catalogId, schemaId, view, viewColumn);
-                if (tableDOs.containsKey(viewName)) {
-                    ETLTableDO oldViewDO = tableDOs.get(viewName);
-                    ETLTableDO.applyChanges(oldViewDO, newViewDO);
-                    tableRepository.update(newViewDO);
-                } else {
-                    tableRepository.insert(newViewDO);
-                }
-            }
+            tableRepository.upsertBatch(tableDOList);
             return true;
         } catch (Exception ex) {
             log.error("元数据采集时发生异常", ex);

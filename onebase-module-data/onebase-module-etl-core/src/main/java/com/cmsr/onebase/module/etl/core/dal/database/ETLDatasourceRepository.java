@@ -30,13 +30,20 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
         return findOne(cs);
     }
 
-    public void updateCollectStatusById(Long datasourceId, CollectStatus collectStatus) {
+    public void updateCollectStatusById(Long datasourceId, CollectStatus collectStatus, LocalDateTime plannedStartTime) {
         ETLDatasourceDO datasourceDO = findById(datasourceId);
         datasourceDO.setCollectStatus(collectStatus);
-        if (collectStatus == CollectStatus.RUNNING) {
-            datasourceDO.setCollectStartTime(LocalDateTime.now());
-        } else {
-            datasourceDO.setCollectEndTime(LocalDateTime.now());
+        LocalDateTime nowTime = LocalDateTime.now();
+        switch (collectStatus) {
+            case RUNNING, REQUIRED: {
+                datasourceDO.setCollectStartTime(nowTime);
+                datasourceDO.setCollectEndTime(null);
+                break;
+            }
+            case SUCCESS, FAILED: {
+                datasourceDO.setCollectEndTime(nowTime);
+                break;
+            }
         }
         update(datasourceDO);
     }
