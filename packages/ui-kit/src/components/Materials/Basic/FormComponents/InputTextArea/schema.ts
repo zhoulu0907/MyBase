@@ -282,7 +282,7 @@ const XInputTextArea: XInputTextAreaSchema = {
     color: '',
     bgColor: '',
     minLength: 0,
-    maxLength: 200,
+    maxLength: 2000,
     minRows: 3,
     maxRows: 5,
     security: {
