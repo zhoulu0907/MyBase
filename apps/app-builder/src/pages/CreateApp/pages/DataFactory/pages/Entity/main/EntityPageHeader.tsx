@@ -25,6 +25,7 @@ const PAGE_TYPE = {
   ER_CHART: 'ER_CHART',
   ENTITY_TABLE: 'ENTITY_TABLE'
 };
+// TODO(xiaoyi): 这命名和Header无关，后面有空改下：）
 export const EntityPageHeader: React.FC = () => {
   const [activeTab, setActiveTab] = useState(PAGE_TYPE.ER_CHART);
   const [refreshEntityList, setRefreshEntityList] = useState(false);
