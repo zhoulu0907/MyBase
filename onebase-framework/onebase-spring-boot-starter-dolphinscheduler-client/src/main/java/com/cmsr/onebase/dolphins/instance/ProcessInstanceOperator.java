@@ -31,7 +31,7 @@ public class ProcessInstanceOperator extends AbstractOperator {
    * @return true for success,otherwise false
    */
   public Boolean start(Long projectCode, ProcessInstanceCreateParam processInstanceCreateParam) {
-    String url = dolphinAddress + "/projects/" + projectCode + "/executors/start-process-instance";
+    String url = dolphinAddress + "/projects/" + projectCode + "/executors/start-workflow-instance";
     log.info("start process instance ,url:{}", url);
     try {
       HttpRestResult<JsonNode> restResult =
@@ -58,7 +58,7 @@ public class ProcessInstanceOperator extends AbstractOperator {
     page = Optional.ofNullable(page).orElse(DolphinClientConstant.Page.DEFAULT_PAGE);
     size = Optional.ofNullable(size).orElse(DolphinClientConstant.Page.DEFAULT_SIZE);
 
-    String url = dolphinAddress + "/projects/" + projectCode + "/process-instances";
+    String url = dolphinAddress + "/projects/" + projectCode + "/workflow-instances";
 
     Query query = new Query();
     query
@@ -139,7 +139,7 @@ public class ProcessInstanceOperator extends AbstractOperator {
 
   public Boolean delete(Long projectCode, Long processInstanceId) {
     String url =
-        dolphinAddress + "/projects/" + projectCode + "/process-instances/" + processInstanceId;
+        dolphinAddress + "/projects/" + projectCode + "/workflow-instances/" + processInstanceId;
     try {
       HttpRestResult<String> restResult =
           dolphinsRestTemplate.delete(url, getHeader(), null, String.class);
