@@ -148,6 +148,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         configStore.order("create_time", Order.TYPE.DESC);
         List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
         List<String> subTableIds = new ArrayList<String>();
+        //获取子表数据
+        List<SubEntityVo> subEntities = reqVO.getSubEntities();
         for(MetadataEntityRelationshipDO relationshipDO:relationships){
             //根据关联字段查询子表存在的所有记录
             MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
@@ -178,9 +180,18 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                 DataRow row = dataSet.getRow(i);
                 subTableIds.add((String) row.get("id"));
             }
+            //如果子表数据为空，对子表数据全部删除
+            if(subEntities.isEmpty()) {
+                for (String id : subTableIds) {
+                    coreDataMethodService.deleteData(
+                            targetEntity.getId(),
+                            id,
+                            null
+                    );
+                }
+            }
         }
-        //获取子表数据
-        List<SubEntityVo> subEntities = reqVO.getSubEntities();
+
         for(SubEntityVo subEntityVo: subEntities) {
             //子实体Id
             Long subEntityId = subEntityVo.getSubEntityId();
