@@ -71,6 +71,7 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("flow_process_form");
         TENANT_IGNORE_TABLES.add("flow_process_stat");
         TENANT_IGNORE_TABLES.add("flow_process_time");
+        TENANT_IGNORE_TABLES.add("flow_execution_log");
         // 可以根据需要添加更多表
     }
 
@@ -196,6 +197,9 @@ public class AnyLineDBInfoListener implements DMListener {
         if (!isSystemDataSource(runtime)) {
             log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
+        }
+        if (!TenantContextHolder.isIgnore() && TenantContextHolder.getRequiredTenantId() != null) {
+            configs.param("tenant_id", TenantContextHolder.getRequiredTenantId());
         }
         // 检查是否有表名，如果没有表名则跳过添加条件
         if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {

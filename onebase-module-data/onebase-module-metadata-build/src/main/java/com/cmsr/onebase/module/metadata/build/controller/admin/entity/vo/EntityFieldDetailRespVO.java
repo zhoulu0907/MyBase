@@ -76,4 +76,7 @@ public class EntityFieldDetailRespVO {
     @Schema(description = "字段编码", example = "USER_NAME")
     private String fieldCode;
 
+    @Schema(description = "关联的字典类型ID,用于SELECT/MULTI_SELECT字段复用系统字典", example = "1001")
+    private Long dictTypeId;
+
 }

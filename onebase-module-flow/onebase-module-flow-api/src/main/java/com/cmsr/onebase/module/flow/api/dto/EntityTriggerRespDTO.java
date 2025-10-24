@@ -11,7 +11,7 @@ import lombok.Data;
 @Schema(description = "实体操作触发响应DTO")
 public class EntityTriggerRespDTO {
 
-    public final static EntityTriggerRespDTO SUCCESS = new EntityTriggerRespDTO(true);
+    private String traceId;
 
     private boolean success;
 
@@ -23,14 +23,23 @@ public class EntityTriggerRespDTO {
 
     private boolean executionEnd;
 
-    public EntityTriggerRespDTO() {
+    public EntityTriggerRespDTO(String traceId) {
+        this.traceId = traceId;
     }
 
-    public EntityTriggerRespDTO(boolean success) {
+    public EntityTriggerRespDTO(String traceId, boolean success) {
+        this.traceId = traceId;
         this.success = success;
     }
 
-    public EntityTriggerRespDTO(boolean success, Exception cause) {
+    public EntityTriggerRespDTO(String traceId, boolean success, String message) {
+        this.traceId = traceId;
+        this.success = success;
+        this.message = message;
+    }
+
+    public EntityTriggerRespDTO(String traceId, boolean success, Exception cause) {
+        this.traceId = traceId;
         this.success = success;
         this.cause = cause;
     }

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.component.logic;
 
 import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
@@ -14,6 +15,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -35,14 +37,15 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         IfCaseNodeData nodeData = (IfCaseNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
+        Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
         //
         if (executeContext.hasNodeProcessResult(this.getTag())) {
             return (Boolean) executeContext.getNodeProcessResult(this.getTag());
         }
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
-        OrExpression orExpression = conditionsProvider.formatConditionsForExpression(this, variableContext, inLoopDepth, conditions);
-        boolean evaluated = expressionExecutor.evaluate(orExpression, variableContext.getNodeVariables());
+        OrExpression orExpression = conditionsProvider.formatConditionsForExpression(conditions, expressionContext);
+        boolean evaluated = expressionExecutor.evaluate(orExpression, expressionContext);
         //
         executeContext.putNodeProcessResult(this.getTag(), evaluated);
         return evaluated;

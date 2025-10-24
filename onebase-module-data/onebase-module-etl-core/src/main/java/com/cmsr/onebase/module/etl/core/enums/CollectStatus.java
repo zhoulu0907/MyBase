@@ -2,30 +2,32 @@ package com.cmsr.onebase.module.etl.core.enums;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 public enum CollectStatus {
-    NONE(0, "未采集"),
-    SUCCESS(1, "采集成功"),
-    FAILED(2, "采集失败"),
-    RUNNING(3, "采集中");
+    NONE("NONE", "未采集"),
+    SUCCESS("SUCCESS", "采集成功"),
+    FAILED("FAILED", "采集失败"),
+    RUNNING("RUNNING", "采集中"),
+    REQUIRED("REQUIRED", "需重新采集");
 
     @Getter
-    private Integer value;
+    private String value;
 
     @Getter
     private String description;
 
-    CollectStatus(Integer value, String description) {
+    CollectStatus(String value, String description) {
         this.value = value;
         this.description = description;
     }
 
-    public static CollectStatus parse(Integer collectStatus) {
+    public static CollectStatus parse(String collectStatus) {
         for (CollectStatus status : CollectStatus.values()) {
-            if (status.getValue().equals(collectStatus)) {
+            if (StringUtils.equals(status.getValue(), collectStatus)) {
                 return status;
             }
         }
-        throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.INVALID_COLLECT_STATUS);
+        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.INVALID_COLLECT_STATUS);
     }
 }

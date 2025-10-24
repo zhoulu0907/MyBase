@@ -62,12 +62,39 @@ public class ValidationManager {
                     service.validate(entityId, fieldId, field, value, data);
                 }
             } catch (Exception e) {
-                log.severe("字段" + fieldName + "校验失败：" + e.getMessage());
-                throw new RuntimeException("字段[" + field.getDisplayName() + "]校验失败：" + e.getMessage(), e);
+                // 构造详细的错误消息：字段名-校验类型-失败原因
+                String validationType = getValidationTypeName(service.getValidationType());
+                String errorMessage = String.format("字段[%s]-%s校验失败：%s", 
+                        field.getDisplayName(), validationType, e.getMessage());
+                log.severe(errorMessage);
+                throw new RuntimeException(errorMessage, e);
             }
         }
 
         log.fine("字段" + fieldName + "校验完成");
+    }
+
+    /**
+     * 获取校验类型的中文名称
+     *
+     * @param validationType 校验类型代码
+     * @return 校验类型中文名称
+     */
+    private String getValidationTypeName(String validationType) {
+        if (validationType == null) {
+            return "未知";
+        }
+        
+        return switch (validationType.toUpperCase()) {
+            case "REQUIRED" -> "必填";
+            case "LENGTH" -> "长度";
+            case "FORMAT" -> "格式";
+            case "UNIQUE" -> "唯一性";
+            case "RANGE" -> "范围";
+            case "REGEX" -> "正则表达式";
+            case "CUSTOM" -> "自定义";
+            default -> validationType;
+        };
     }
 
     /**

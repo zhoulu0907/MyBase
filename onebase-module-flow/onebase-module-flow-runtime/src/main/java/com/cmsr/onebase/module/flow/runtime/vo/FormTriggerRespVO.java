@@ -10,6 +10,8 @@ import java.util.Map;
 @Schema(description = "表单触发响应VO")
 public class FormTriggerRespVO {
 
+    private String traceId;
+
     @Schema(description = "是否触发了执行")
     private Boolean triggered;
 
@@ -21,7 +23,7 @@ public class FormTriggerRespVO {
 
     private String cause;
 
-    private boolean executionEnd;
+    private Boolean executionEnd;
 
     private String executionUuid;
 

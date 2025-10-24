@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.util.Arrays;
 
 /**
- * 全局用户类型枚举
+ * 函数类型分类枚举
  */
 @AllArgsConstructor
 @Getter
