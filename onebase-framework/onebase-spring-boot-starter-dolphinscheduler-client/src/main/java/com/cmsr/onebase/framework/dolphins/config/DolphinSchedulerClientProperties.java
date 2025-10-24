@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.dolphins.client.config;
+package com.cmsr.onebase.framework.dolphins.config;
 
 import jakarta.validation.constraints.NotBlank;
 import java.time.Duration;

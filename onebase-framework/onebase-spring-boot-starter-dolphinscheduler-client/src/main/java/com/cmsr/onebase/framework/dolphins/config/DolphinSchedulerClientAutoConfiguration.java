@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.dolphins.client.config;
+package com.cmsr.onebase.framework.dolphins.config;
 
 import com.cmsr.onebase.dolphins.core.DolphinClient;
 import com.cmsr.onebase.dolphins.remote.DolphinsRestTemplate;
