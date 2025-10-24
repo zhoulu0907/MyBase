@@ -4,8 +4,8 @@ import com.cmsr.onebase.dolphins.BaseTest;
 import com.cmsr.onebase.dolphins.core.DolphinClientConstant;
 import java.io.File;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ResourceTest extends BaseTest {
 
@@ -37,7 +37,7 @@ public class ResourceTest extends BaseTest {
         .setSuffix(suffix)
         .setFileName(fileName)
         .setContent("created by dolphin scheduler java sdk");
-    Assert.assertTrue(getClient().opsForResource().onlineCreate(resourceCreateParam));
+    Assertions.assertTrue(getClient().opsForResource().onlineCreate(resourceCreateParam));
   }
 
   @Test
@@ -47,7 +47,7 @@ public class ResourceTest extends BaseTest {
         .setTenantCode(tenantCode)
         .setFullName(fullName)
         .setContent("update by dolphin scheduler java sdk");
-    Assert.assertTrue(getClient().opsForResource().onlineUpdate(resourceUpdateParam));
+    Assertions.assertTrue(getClient().opsForResource().onlineUpdate(resourceUpdateParam));
   }
 
   @Test
@@ -57,11 +57,11 @@ public class ResourceTest extends BaseTest {
         .setName("test_upload.txt")
         .setDescription("upload by dolphin scheduler java sdk")
         .setFile(new File("/home/chen/Documents/test_upload.txt"));
-    Assert.assertTrue(getClient().opsForResource().upload(resourceUploadParam));
+    Assertions.assertTrue(getClient().opsForResource().upload(resourceUploadParam));
   }
 
   @Test
   public void delete() {
-    Assert.assertTrue(getClient().opsForResource().delete(tenantCode, fullName));
+    Assertions.assertTrue(getClient().opsForResource().delete(tenantCode, fullName));
   }
 }

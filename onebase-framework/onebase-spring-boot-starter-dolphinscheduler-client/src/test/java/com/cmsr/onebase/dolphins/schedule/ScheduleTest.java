@@ -2,8 +2,8 @@ package com.cmsr.onebase.dolphins.schedule;
 
 import com.cmsr.onebase.dolphins.BaseTest;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ScheduleTest extends BaseTest {
 
@@ -30,7 +30,7 @@ public class ScheduleTest extends BaseTest {
     List<ScheduleInfoResp> resp =
         getClient().opsForSchedule().getByWorkflowCode(projectCode, WORKFLOW_CODE);
     System.out.println(resp);
-    Assert.assertEquals(1, resp.size());
+    Assertions.assertEquals(1, resp.size());
   }
 
   @Test
@@ -38,7 +38,7 @@ public class ScheduleTest extends BaseTest {
     List<ScheduleInfoResp> resp =
         getClient().opsForSchedule().getByWorkflowCode(projectCode, WORKFLOW_CODE);
     long id = resp.get(0).getId();
-    Assert.assertTrue(getClient().opsForSchedule().online(projectCode, id));
+    Assertions.assertTrue(getClient().opsForSchedule().online(projectCode, id));
   }
 
   @Test
@@ -46,7 +46,7 @@ public class ScheduleTest extends BaseTest {
     List<ScheduleInfoResp> resp =
         getClient().opsForSchedule().getByWorkflowCode(projectCode, WORKFLOW_CODE);
     long id = resp.get(0).getId();
-    Assert.assertTrue(getClient().opsForSchedule().offline(projectCode, id));
+    Assertions.assertTrue(getClient().opsForSchedule().offline(projectCode, id));
   }
 
   @Test
@@ -54,6 +54,6 @@ public class ScheduleTest extends BaseTest {
     List<ScheduleInfoResp> resp =
         getClient().opsForSchedule().getByWorkflowCode(projectCode, WORKFLOW_CODE);
     long id = resp.get(0).getId();
-    Assert.assertTrue(getClient().opsForSchedule().delete(projectCode, id));
+    Assertions.assertTrue(getClient().opsForSchedule().delete(projectCode, id));
   }
 }

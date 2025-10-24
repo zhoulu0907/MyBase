@@ -3,7 +3,7 @@ package com.cmsr.onebase.dolphins.utils;
 import com.cmsr.onebase.dolphins.util.TaskLocationUtils;
 import com.cmsr.onebase.dolphins.workflow.TaskLocation;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TaskLocationUtilsTest {
 

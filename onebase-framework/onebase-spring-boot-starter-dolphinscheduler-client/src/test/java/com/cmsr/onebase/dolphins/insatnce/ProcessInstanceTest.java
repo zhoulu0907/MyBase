@@ -3,8 +3,8 @@ package com.cmsr.onebase.dolphins.insatnce;
 import com.cmsr.onebase.dolphins.BaseTest;
 import com.cmsr.onebase.dolphins.enums.*;
 import com.cmsr.onebase.dolphins.instance.ProcessInstanceCreateParam;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ProcessInstanceTest extends BaseTest {
 
@@ -31,13 +31,13 @@ public class ProcessInstanceTest extends BaseTest {
         .setStartParams("")
         .setExpectedParallelismNumber("")
         .setDryRun(0);
-    Assert.assertTrue(getClient().opsForProcessInst().start(projectCode, startParam));
+    Assertions.assertTrue(getClient().opsForProcessInst().start(projectCode, startParam));
   }
 
   @Test
   public void testReRun() {
     Long instanceId = 31L;
-    Assert.assertTrue(getClient().opsForProcessInst().reRun(projectCode, instanceId));
+    Assertions.assertTrue(getClient().opsForProcessInst().reRun(projectCode, instanceId));
   }
 
   @Test
@@ -51,6 +51,6 @@ public class ProcessInstanceTest extends BaseTest {
   @Test
   public void testDelete() {
     Long instanceId = 31L;
-    Assert.assertTrue(getClient().opsForProcessInst().delete(projectCode, instanceId));
+    Assertions.assertTrue(getClient().opsForProcessInst().delete(projectCode, instanceId));
   }
 }

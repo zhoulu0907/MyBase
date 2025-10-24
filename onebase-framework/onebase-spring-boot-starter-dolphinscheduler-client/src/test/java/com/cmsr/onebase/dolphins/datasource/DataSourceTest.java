@@ -5,8 +5,8 @@ import com.cmsr.onebase.dolphins.enums.DbTypeEnum;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class DataSourceTest extends BaseTest {
 
@@ -25,7 +25,7 @@ public class DataSourceTest extends BaseTest {
         .setType(DbTypeEnum.MYSQL.name())
         .setHost("localhost")
         .setOther(map);
-    Assert.assertTrue(getClient().opsForDataSource().create(dataSourceCreateParam));
+    Assertions.assertTrue(getClient().opsForDataSource().create(dataSourceCreateParam));
   }
 
   /** list all datasource */
@@ -49,12 +49,12 @@ public class DataSourceTest extends BaseTest {
         .setNote("this note is generate by update api")
         .setType(DbTypeEnum.MYSQL.name())
         .setHost("localhost");
-    Assert.assertTrue(getClient().opsForDataSource().update(dataSourceUpdateParam));
+    Assertions.assertTrue(getClient().opsForDataSource().update(dataSourceUpdateParam));
   }
 
   @Test
   public void deleteDataSource() {
     List<DataSourceQueryResp> dataSources = getClient().opsForDataSource().list(null);
-    Assert.assertTrue(getClient().opsForDataSource().delete(dataSources.get(0).getId()));
+    Assertions.assertTrue(getClient().opsForDataSource().delete(dataSources.get(0).getId()));
   }
 }
