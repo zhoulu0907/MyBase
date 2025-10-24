@@ -180,16 +180,16 @@ const XSelectOne: XInputSelectOneSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: [
       {
-        label: '选项一',
-        value: '选项一'
+        label: '已完成',
+        value: '已完成'
       },
       {
-        label: '选项二',
-        value: '选项二'
+        label: '进行中',
+        value: '进行中'
       },
       {
-        label: '选项三',
-        value: '选项三'
+        label: '待办',
+        value: '待办'
       }
     ],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
