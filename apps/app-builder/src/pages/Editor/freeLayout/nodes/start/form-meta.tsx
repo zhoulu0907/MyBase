@@ -27,7 +27,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => {
     return (
       <>
         <FormHeader />
-        你好这是弹窗吗
         <FormContent>
           <Field
             name="outputs"

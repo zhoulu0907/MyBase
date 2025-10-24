@@ -39,7 +39,6 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const onPortClick = usePortClick();
   const meta = node.getNodeMeta<FlowNodeMeta>();
   const childRef = useRef<HTMLDivElement>(null);
-  // console.log(selected, nodeRender, '就是这里');
   const portsRender = ports.map((p) => (
     <WorkflowPortRender key={p.id} entity={p} onClick={!readonly ? onPortClick : undefined} />
   ));

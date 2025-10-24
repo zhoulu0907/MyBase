@@ -9,9 +9,7 @@ import { SidebarContext, NodeRenderContext } from '../../context';
 
 export default function BottomBtn() {
   const { setNodeId } = useContext(SidebarContext);
-  const { configForm, setconfigFormForm } = useContext(NodeRenderContext);
-  console.log(configForm, setconfigFormForm);
-
+  // const { configForm, setconfigFormForm } = useContext(NodeRenderContext); // 在这里设置和获取form
   const handleClose = () => {
     setNodeId(undefined);
   };
