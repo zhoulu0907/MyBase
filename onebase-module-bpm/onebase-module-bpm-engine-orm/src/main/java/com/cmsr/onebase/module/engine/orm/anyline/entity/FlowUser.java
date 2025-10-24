@@ -63,9 +63,9 @@ public class FlowUser extends BaseEntity implements User {
     @Override
     public User setCreateBy(String createBy) {
         if (createBy != null) {
-            this.createBy = Long.valueOf(createBy);
+            this.creator = Long.valueOf(createBy);
         } else {
-            this.createBy = null;
+            this.creator = null;
         }
 
         return this;
@@ -74,9 +74,9 @@ public class FlowUser extends BaseEntity implements User {
     @Override
     public User setUpdateBy(String updateBy) {
         if (updateBy != null) {
-            this.updateBy = Long.valueOf(updateBy);
+            this.updater = Long.valueOf(updateBy);
         } else {
-            this.updateBy = null;
+            this.updater = null;
         }
 
         return this;
@@ -96,9 +96,9 @@ public class FlowUser extends BaseEntity implements User {
     @Override
     public User setDelFlag(String delFlag) {
         if (delFlag != null) {
-            this.delFlag = Long.valueOf(delFlag);
+            this.deleted = Long.valueOf(delFlag);
         } else {
-            this.delFlag = null;
+            this.deleted = null;
         }
 
         return this;
