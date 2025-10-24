@@ -54,20 +54,13 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
   useEffect(() => {
     console.log('subTableDataLength: ', subTableDataLength.value);
-    // if (subTableDataLength.value[id]) {
-    //   setSubTableData((prevData) => {
-    //     return [];
-    //   });
-    //   for (let i = 0; i < subTableDataLength.value[id]; i++) {
-    //     handleAdd();
-    //   }
-    // }
 
     let newSubTableData: any[] = [];
     const newData = columns.reduce((acc, column) => {
       acc[column.dataIndex] = '';
       return acc;
     }, {});
+
     for (let i = 0; i < subTableDataLength.value[id]; i++) {
       newSubTableData.push({ ...newData, key: `${i}` });
     }
@@ -102,12 +95,19 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     });
 
     const formData = form.getFieldsValue();
+
+    console.log('formData: ', formData[id]);
+
     const filterFormData = formData[id].filter((_: any, i: number) => i !== index);
+
+    console.log('filterFormData: ', filterFormData);
 
     const updateFormData = {
       ...formData,
       [id]: filterFormData
     };
+
+    console.log('updateFormData: ', updateFormData);
 
     form.setFieldsValue(updateFormData);
   };
