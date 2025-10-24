@@ -77,9 +77,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
   const [subTableData, setSubTableData] = useState<any[]>([]);
   const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
-  const [components, setComponents] = useState<any[]>([]);
-
-  // console.log('columnscolumns', columns, id);
 
   useEffect(() => {
     console.log('subTableData: ', subTableData);
@@ -91,7 +88,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       acc[column.dataIndex] = '';
       return acc;
     }, {});
-    newData.key = `${subTableData.length + 1}`;
+    newData.key = subTableData.length;
 
     setSubTableData((prevData) => {
       const newDataArray = [...prevData, newData];
@@ -99,11 +96,21 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     });
   };
 
-  const handleDelete = (key: string) => {
+  const handleDelete = (key: string, index: number) => {
     setSubTableData((prevData) => {
       const filteredData = prevData.filter((item) => item.key !== key);
-      return filteredData;
+      return filteredData.map((_, key) => ({ ..._, key }));
     });
+
+    const formData = form.getFieldsValue();
+    const filterFormData = formData[id].filter((_: any, i: number) => i !== index);
+
+    const updateFormData = {
+      ...formData,
+      [id]: filterFormData
+    }
+
+    form.setFieldsValue(updateFormData);
   };
 
   useEffect(() => {
@@ -509,7 +516,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       fixed: 'right',
       render: (_col: any, record: any, index: number) => {
         return (
-          <Button type="text" onClick={() => handleDelete(record.key)}>
+          <Button type="text" onClick={() => handleDelete(record.key, index)}>
             删除
           </Button>
         );
@@ -517,21 +524,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     });
     setSubTableColumns(tableColumns);
   }, [columns]);
-
-  useEffect(() => {
-    const newComp = subTableColumns
-      .filter((v) => v.dataIndex !== 'action')
-      .map((v) => {
-        return {
-          id: v?.id,
-          type: v?.type,
-          displayName: v?.displayName,
-          selected: false,
-          chosen: false
-        };
-      });
-    setComponents(newComp);
-  }, [subTableColumns]);
 
   return (
     <Layout className="XSubTable">
