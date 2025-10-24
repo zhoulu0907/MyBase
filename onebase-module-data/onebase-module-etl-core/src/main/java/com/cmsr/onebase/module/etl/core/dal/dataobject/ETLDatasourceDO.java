@@ -42,7 +42,7 @@ public class ETLDatasourceDO extends TenantBaseDO {
     private Long appId;
 
     @Column(name = "collect_status")
-    private Integer collectStatus;
+    private String collectStatus;
 
     @Column(name = "collect_start_time")
     private LocalDateTime collectStartTime;

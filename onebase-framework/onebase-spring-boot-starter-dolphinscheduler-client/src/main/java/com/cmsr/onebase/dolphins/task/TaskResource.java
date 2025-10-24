@@ -16,7 +16,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TaskResource {
 
-  private Long id;
+  //  private Long id;
+
+  /** 资源名称，如 onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar */
+  private String resourceName;
 
   /**
    * must rewrite,then {@link RequestHttpEntity#bodyToMap()} can transfer object to json string
