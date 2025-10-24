@@ -41,6 +41,12 @@ public class AppApplicationTagRepository extends DataRepository<ApplicationTagDO
         deleteByConfig(configStore);
     }
 
+    public void deleteByTagId(Long tagId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("tag_id", tagId);
+        deleteByConfig(configStore);
+    }
+
     public void saveAll(Long applicationId, List<Long> tagIds) {
         for (Long tagId : tagIds) {
             ConfigStore existConfig = new DefaultConfigStore();
@@ -55,4 +61,6 @@ public class AppApplicationTagRepository extends DataRepository<ApplicationTagDO
             }
         }
     }
+
+
 }
