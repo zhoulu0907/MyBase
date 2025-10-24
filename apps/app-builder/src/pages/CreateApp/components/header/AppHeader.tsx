@@ -5,7 +5,7 @@ import TabFirstBgSVG from '@/assets/images/tab_first_bg.svg';
 import TabFirstSelectBgSVG from '@/assets/images/tab_first_select_bg.svg';
 import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
 import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
-import { iconMap } from '@/components/CreateApp/const';
+import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
@@ -119,7 +119,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo?.iconColor }}>
             <DynamicIcon
-              IconComponent={iconMap[curAppInfo?.iconName as keyof typeof iconMap]}
+              IconComponent={appIconMap[curAppInfo?.iconName as keyof typeof appIconMap]}
               theme="outline"
               size="14"
               fill="#F2F3F5"
