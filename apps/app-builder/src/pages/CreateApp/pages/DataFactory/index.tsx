@@ -17,9 +17,6 @@ const DataFactoryPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // const searchParams = new URLSearchParams(location.search);
-    // console.log('searchParams: ', searchParams);
-    // const appId = searchParams.get('appId');
     const appId = getHashQueryParam('appId');
 
     if (appId) {
