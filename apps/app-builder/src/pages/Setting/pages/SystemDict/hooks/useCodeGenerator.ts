@@ -1,24 +1,16 @@
 import { useState, useCallback } from 'react';
 import { batchGenerateCodes } from '../utils/codeGenerator';
-
-export interface DictValueItem {
-  id: string;
-  label: string;
-  value: string;
-  color?: string;
-  status: number;
-  sort?: number;
-}
+import type { DictData } from '@onebase/platform-center';
 
 export interface UseCodeGeneratorOptions {
-  onSuccess?: (items: DictValueItem[]) => void;
+  onSuccess?: (items: DictData[]) => void;
   onError?: (error: Error) => void;
 }
 
 export interface UseCodeGeneratorReturn {
   isGenerating: boolean;
-  generateCodes: (items: DictValueItem[]) => Promise<DictValueItem[]>;
-  canGenerate: (items: DictValueItem[]) => boolean;
+  generateCodes: (items: DictData[]) => Promise<DictData[]>;
+  canGenerate: (items: DictData[]) => boolean;
 }
 
 /**
@@ -28,13 +20,13 @@ export function useCodeGenerator(options: UseCodeGeneratorOptions = {}): UseCode
   const [isGenerating, setIsGenerating] = useState(false);
 
   // 检查是否可以生成编码
-  const canGenerate = useCallback((items: DictValueItem[]): boolean => {
+  const canGenerate = useCallback((items: DictData[]): boolean => {
     return items.some((item) => item.label && item.label.trim() && (!item.value || !item.value.trim()));
   }, []);
 
   // 生成编码
   const generateCodes = useCallback(
-    async (items: DictValueItem[]): Promise<DictValueItem[]> => {
+    async (items: DictData[]): Promise<DictData[]> => {
       if (!canGenerate(items)) {
         throw new Error('没有需要生成编码的项');
       }
@@ -43,7 +35,7 @@ export function useCodeGenerator(options: UseCodeGeneratorOptions = {}): UseCode
 
       try {
         // 模拟异步操作
-        const result = await new Promise<DictValueItem[]>((resolve) => {
+        const result = await new Promise<DictData[]>((resolve) => {
           const timeoutId = setTimeout(() => {
             const generatedItems = batchGenerateCodes(items);
             resolve(generatedItems);
