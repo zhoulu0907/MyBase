@@ -88,12 +88,9 @@ const PlatformInfo: React.FC = () => {
       // 认证内容
       dataIndex: 'certificationContent',
       key: 'certificationContent',
-      render: (text, record) => {
-        console.log(text);
-        return  <div>
-          租户数量：{record.tenantLimit}，用户数量：{record.userLimit}
-        </div>
-      }
+      render: (_text, record) =>  (<div>
+        租户数量：{record.tenantLimit}，用户数量：{record.userLimit}
+      </div>)
     },
     {
       title: '当前状态',
