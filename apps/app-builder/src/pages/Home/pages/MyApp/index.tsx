@@ -412,7 +412,6 @@ const MyAppPage: React.FC = () => {
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.infoHeader}>
                             <div className={styles.myAppTitle}>{item.appName}</div>
-                            {/* TODO */}
                             <Tag
                               color={TagColor[item.appStatus]}
                               style={{
