@@ -3,7 +3,7 @@ import { useAppStore } from '@/store/store_app';
 import { useNewNodeStore } from '@/store/store_entity';
 import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
@@ -47,32 +47,71 @@ export const EntityERContainer: React.FC<{
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
   const chartRef = useRef<any>(null);
-  const loadEntityList = async () => {
-    const res = await getEntityGraph(curDataSourceId);
-    console.log('loadEntityList', res);
-    if (res?.entities || res?.relationships) {
-      setData({
-        nodes:
-          res?.entities.map((item: unknown) => {
-            const entityItem = item as Record<string, unknown>;
-            const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
-            return {
-              ...entityItem,
-              positionX: pos?.x,
-              positionY: pos?.y
-            };
-          }) || [],
-        edges:
-          res?.relationships.map((item: unknown) => {
-            const relationItem = item as Record<string, unknown>;
-            return {
-              ...relationItem,
-              label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
-            };
-          }) || []
-      });
-    }
-  };
+  const prevDataSourceIdRef = useRef<string>('');
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const loadEntityList = useCallback(
+    async (dataSourceId: string) => {
+      if (!dataSourceId) {
+        return;
+      }
+
+      // 取消之前的请求
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // 创建新的AbortController
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      try {
+        console.log(`开始加载实体列表，数据源ID: ${dataSourceId}`);
+
+        const res = await getEntityGraph(dataSourceId);
+
+        // 检查请求是否被取消或数据源ID已变化
+        if (abortController.signal.aborted || dataSourceId !== curDataSourceId) {
+          console.log('请求被取消或数据源ID已变化，跳过处理结果');
+          return;
+        }
+
+        console.log('loadEntityList', res);
+
+        if (res?.entities || res?.relationships) {
+          setData({
+            nodes:
+              res?.entities.map((item: unknown) => {
+                const entityItem = item as Record<string, unknown>;
+                const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
+                return {
+                  ...entityItem,
+                  positionX: pos?.x,
+                  positionY: pos?.y
+                };
+              }) || [],
+            edges:
+              res?.relationships.map((item: unknown) => {
+                const relationItem = item as Record<string, unknown>;
+                return {
+                  ...relationItem,
+                  label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
+                };
+              }) || []
+          });
+        } else {
+          setData({ nodes: [], edges: [] });
+        }
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          console.error('加载实体列表失败:', error);
+          setData({ nodes: [], edges: [] });
+        }
+      }
+    },
+    [curDataSourceId]
+  );
 
   // 打开节点编辑抽屉
   const handleOpenNodeEditDrawer = (editData: Partial<EntityNode>) => {
@@ -166,7 +205,7 @@ export const EntityERContainer: React.FC<{
     const res = await deleteEntity(nodeId);
     if (res) {
       Message.success('删除节点成功');
-      loadEntityList();
+      loadEntityList(curDataSourceId);
     }
     closeModal();
     setDeleteLoading(false);
@@ -197,18 +236,53 @@ export const EntityERContainer: React.FC<{
   // };
 
   useEffect(() => {
-    if (refreshEntityList) {
-      loadEntityList();
+    if (refreshEntityList && curDataSourceId) {
+      loadEntityList(curDataSourceId);
       setRefreshEntityList(false);
     }
-  }, [refreshEntityList]);
+  }, [refreshEntityList, curDataSourceId]);
 
+  // 数据源ID变化
   useEffect(() => {
-    if (curDataSourceId) {
-      loadEntityList();
-      clearNewNodes();
+    if (!curDataSourceId) {
+      setData({ nodes: [], edges: [] });
+      return;
     }
-  }, [curDataSourceId]);
+
+    if (prevDataSourceIdRef.current && prevDataSourceIdRef.current !== curDataSourceId) {
+      console.log('数据源切换，清理旧实体数据');
+      setData({ nodes: [], edges: [] });
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    }
+
+    prevDataSourceIdRef.current = curDataSourceId;
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // 防抖
+    debounceTimerRef.current = setTimeout(() => {
+      loadEntityList(curDataSourceId);
+      clearNewNodes();
+    }, 100);
+  }, [curDataSourceId, loadEntityList, clearNewNodes]);
+
+  // 组件卸载时取消请求
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return (
     <div style={{ height: '100%' }} className={styles['entity-page-container']}>

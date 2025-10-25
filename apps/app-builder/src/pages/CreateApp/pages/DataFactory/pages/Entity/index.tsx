@@ -1,7 +1,7 @@
 import { useFieldStore } from '@/store/store_field';
 import { getFieldTypes } from '@onebase/app';
 import React, { useEffect } from 'react';
-import { EntityPageHeader } from './main/EntityPageHeader';
+import { EntityPageContainer } from './main/EntityPageContainer';
 
 const EntityPage: React.FC = () => {
   const { setFieldTypes } = useFieldStore();
@@ -21,7 +21,7 @@ const EntityPage: React.FC = () => {
 
   return (
     <>
-      <EntityPageHeader />
+      <EntityPageContainer />
     </>
   );
 };

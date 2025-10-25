@@ -4,7 +4,7 @@ import { Message, Radio, Tag } from '@arco-design/web-react';
 import { IconCopy, IconMindMapping, IconNav } from '@arco-design/web-react/icon';
 import { getDatasourceList } from '@onebase/app';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import EntityTable from '../components/EntityTable';
 import styles from '../index.module.less';
 import { EntityERContainer } from './EntityERContainer';
@@ -25,40 +25,93 @@ const PAGE_TYPE = {
   ER_CHART: 'ER_CHART',
   ENTITY_TABLE: 'ENTITY_TABLE'
 };
-// TODO(xiaoyi): 这命名和Header无关，后面有空改下：）
-export const EntityPageHeader: React.FC = () => {
+
+export const EntityPageContainer: React.FC = () => {
   const [activeTab, setActiveTab] = useState(PAGE_TYPE.ER_CHART);
   const [refreshEntityList, setRefreshEntityList] = useState(false);
   const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
   const [dsData, setDsData] = useState<DatasourceRecord | null>(null);
   const { curAppId } = useAppStore();
-  const { setCurDataSourceId } = useResourceStore();
+  const { setCurDataSourceId, clearCurDataSourceId } = useResourceStore();
+  const prevAppIdRef = useRef<string>('');
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const getAppResources = useCallback(
+    async (appId: string) => {
+      if (!appId) {
+        return;
+      }
+
+      // 取消之前的请求
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // 创建新的AbortController
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      try {
+        console.log(`开始获取数据源，应用ID: ${appId}`);
+
+        const params = { appId };
+        const res = await getDatasourceList(params);
+
+        if (abortController.signal.aborted || appId !== curAppId) {
+          console.log('请求被取消或应用ID已变化');
+          return;
+        }
+
+        if (res?.length > 0) {
+          const dataSource = res?.[0];
+          setDsData(dataSource);
+          // 将数据源ID存储到store中
+          setCurDataSourceId(dataSource.id.toString());
+        } else {
+          console.warn('未获取到数据源列表');
+          setDsData(null);
+          clearCurDataSourceId();
+        }
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          console.error('获取数据源失败:', error);
+          setDsData(null);
+          clearCurDataSourceId();
+        }
+      }
+    },
+    [curAppId, setCurDataSourceId, clearCurDataSourceId]
+  );
 
   useEffect(() => {
-    if (curAppId) {
-      getAppResources();
+    if (!curAppId) {
+      return;
     }
+
+    if (prevAppIdRef.current && prevAppIdRef.current !== curAppId) {
+      console.log('应用切换，清理旧状态');
+      setDsData(null);
+      clearCurDataSourceId();
+      setRefreshEntityList(false);
+      setOnlyUpdateNode(false);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    }
+
+    prevAppIdRef.current = curAppId;
+
+    getAppResources(curAppId);
   }, [curAppId]);
 
-  const getAppResources = async () => {
-    try {
-      const params = {
-        appId: curAppId
-      };
-      const res = await getDatasourceList(params);
-      if (res?.length > 0) {
-        const dataSource = res?.[0];
-        setDsData(dataSource);
-        // 将数据源ID存储到store中
-        setCurDataSourceId(dataSource.id.toString());
-        console.log('数据源ID已存储到store:', dataSource.id);
-      } else {
-        console.warn('getAppResources - 未获取到数据源列表');
+  // 组件卸载时取消请求
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
-    } catch (error) {
-      console.error('getAppResources - API调用失败:', error);
-    }
-  };
+    };
+  }, []);
 
   const handleCopy = (text: string | undefined) => {
     if (text) {
@@ -102,14 +155,12 @@ export const EntityPageHeader: React.FC = () => {
       </div>
 
       {activeTab === PAGE_TYPE.ER_CHART && (
-        <div className={styles.entityPageContent}>
-          <EntityERContainer
-            refreshEntityList={refreshEntityList}
-            setRefreshEntityList={setRefreshEntityList}
-            onlyUpdateNode={onlyUpdateNode}
-            setOnlyUpdateNode={setOnlyUpdateNode}
-          />
-        </div>
+        <EntityERContainer
+          refreshEntityList={refreshEntityList}
+          setRefreshEntityList={setRefreshEntityList}
+          onlyUpdateNode={onlyUpdateNode}
+          setOnlyUpdateNode={setOnlyUpdateNode}
+        />
       )}
 
       {activeTab === PAGE_TYPE.ENTITY_TABLE && (
