@@ -1,13 +1,16 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { ConfigProvider } from '@douyinfe/semi-ui';
 import { FlowNodeEntity, useNodeRender } from '@flowgram.ai/fixed-layout-editor';
+import { NodeType } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useCallback } from 'react';
 import { NodeRenderContext } from '../../context';
 import styles from './index.module.less';
 import { ErrorIcon } from './styles';
-import { NodeType } from '@onebase/common';
 
 export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
+  useSignals();
+
   /**
    * Provides methods related to node rendering
    * 提供节点渲染相关的方法
@@ -32,7 +35,8 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
 
   return (
     <ConfigProvider getPopupContainer={getPopupContainer}>
-      {form?.getValueIn('invalid') && <ErrorIcon />}
+      {triggerEditorSignal.isInvalidNode(node.id) && <ErrorIcon />}
+
       <div
         /*
          * onMouseEnter is added to a fixed layout node primarily to listen for hover highlighting of branch lines
@@ -42,7 +46,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
         onMouseLeave={nodeRender.onMouseLeave}
         className={
           // if-block 样式 没有边框 阴影
-          nodeRender.activated && !form?.getValueIn('invalid')
+          nodeRender.activated && !triggerEditorSignal.isInvalidNode(node.id)
             ? `${styles.baseNodeStyle} ${styles.activated} ${nodeRender.type === NodeType.IF_BLOCK ? styles.noShadow : ''}`
             : `${styles.baseNodeStyle} ${nodeRender.type === NodeType.IF_BLOCK ? styles.noShadow : ''}`
         }
@@ -62,7 +66,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
            */
           ...nodeRender.node.getNodeRegistry().meta.style,
           opacity: nodeRender.dragging ? 0.3 : 1,
-          outline: form?.getValueIn('invalid') ? '1px solid rgb(var(--red-6))' : 'none'
+          outline: triggerEditorSignal.isInvalidNode(node.id) ? '1px solid rgb(var(--red-6))' : 'none'
         }}
       >
         <NodeRenderContext.Provider value={nodeRender}>{form?.render()}</NodeRenderContext.Provider>
