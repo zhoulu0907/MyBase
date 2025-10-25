@@ -31,13 +31,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XRichTextSchema {
@@ -102,7 +102,7 @@ export interface XRichTextConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -159,7 +159,7 @@ const XRichText: XRichTextSchema = {
     ...baseDefault,
     label: {
       text: '富文本',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
@@ -168,9 +168,9 @@ const XRichText: XRichTextSchema = {
     defaultValue: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     verify: {
-      required: false,
+      required: false
     }
   }
 };

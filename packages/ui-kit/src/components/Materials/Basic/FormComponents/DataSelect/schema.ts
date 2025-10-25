@@ -210,7 +210,7 @@ const XDataSelect: XDataSelectSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '选择数据',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    labelColSpan: 100,
+    labelColSpan: 200,
     saveWithHidden: false,
     verify: {
       required: false,
@@ -253,7 +253,7 @@ const XDataSelect: XDataSelectSchema = {
       pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
       pageSize: 5,
       metaData: '',
-      labelColSpan: 100,
+      labelColSpan: 200,
       defaultValue: [],
       columns: [],
       searchItems: [],

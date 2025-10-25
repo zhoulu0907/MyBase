@@ -1,7 +1,6 @@
 import {
   baseConfig,
   baseDefault,
-  labelColSpanConfig,
   layoutConfig,
   statusConfig,
   subTableConfig,
@@ -153,7 +152,7 @@ const XSubTable: XSubTableSchema = {
     dataField: '',
     tooltip: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    labelColSpan: 100,
+    labelColSpan: 200,
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     verify: {

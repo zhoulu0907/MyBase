@@ -26,6 +26,7 @@ import {
 } from '../../../constants';
 import type {
   IBooleanConfigType,
+  IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -37,14 +38,13 @@ import type {
   ITooltipConfigType,
   IUploadLimitConfigType,
   IUploadSizeConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType,
-  IDataFieldConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputFileUploadSchema {
@@ -109,17 +109,17 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-    * required：是否必填，未填写时提交报错
-    * maxCount：最大上传数量，默认：-1 不限制
-    * maxSize：最大图片大小单位：MB，默认：10，最大100
-    * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
-    */
+   * required：是否必填，未填写时提交报错
+   * maxCount：最大上传数量，默认：-1 不限制
+   * maxSize：最大图片大小单位：MB，默认：10，最大100
+   * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
+   */
   verify: {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
     maxSize: TNumberDefaultType;
     fileFormat: TTextDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -192,13 +192,13 @@ const XFileUpload: XInputFileUploadSchema = {
     },
     listTypeConfig,
     statusConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '文件上传',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
@@ -210,7 +210,7 @@ const XFileUpload: XInputFileUploadSchema = {
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     verify: {
       required: false,
       maxCount: -1,

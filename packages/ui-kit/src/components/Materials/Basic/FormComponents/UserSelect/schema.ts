@@ -32,13 +32,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputUserSelectSchema {
@@ -106,7 +106,7 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
-  }
+  };
   /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
@@ -157,7 +157,7 @@ const XUserSelect: XInputUserSelectSchema = {
     ...baseDefault,
     label: {
       text: '人员选择',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
@@ -165,7 +165,7 @@ const XUserSelect: XInputUserSelectSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    labelColSpan: 100,
+    labelColSpan: 200,
     saveWithHidden: false,
     verify: {
       required: false,
