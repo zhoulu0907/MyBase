@@ -1,11 +1,11 @@
-package com.cmsr.onebase.module.engine.orm.anyline.entity;
+package com.cmsr.onebase.framework.data.base;
 
-import com.cmsr.onebase.framework.data.base.BaseDOInterface;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -53,23 +53,28 @@ public class BaseEntity implements BaseDOInterface {
      * 创建者，目前使用 SysUser 的 id 编号
      *
      */
+    @Getter
+    @Setter
     @Column(name = CREATOR)
-    protected Long createBy;
+    protected Long creator;
 
     /**
      * 更新者，目前使用 SysUser 的 id 编号
      *
      */
+    @Getter
+    @Setter
     @Column(name = UPDATER)
-    protected Long updateBy;
+    protected Long updater;
 
 
     /**
      * 是否删除
      */
     @Getter
+    @Setter
     @Column(name = DELETED, columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "是否删除")
-    protected Long delFlag;
+    protected Long deleted;
 
     /**
      * 乐观锁版本号
@@ -91,33 +96,94 @@ public class BaseEntity implements BaseDOInterface {
     }
 
     public String getDelFlag() {
-        if (delFlag == null) {
+        if (deleted == null) {
             return null;
         }
-        return String.valueOf(delFlag);
+        return String.valueOf(deleted);
     }
 
     public String getUpdateBy() {
-        if (updateBy == null) {
+        if (updater == null) {
             return null;
         }
-        return String.valueOf(updateBy);
+        return String.valueOf(updater);
     }
 
     public String getCreateBy() {
-        if (createBy == null) {
+        if (creator == null) {
             return null;
         }
-        return String.valueOf(createBy);
+        return String.valueOf(creator);
+    }
+
+    // =============== 以下实现get函数提供给Anyline的Listener使用 =================
+
+    public Long getIdByListener() {
+        return this.id;
+    }
+
+    public Long getCreatorByListener() {
+        return this.creator;
+    }
+
+    public Long getUpdaterByListener() {
+        return this.updater;
+    }
+
+    public Long getDeletedByListener() {
+        return this.deleted;
+    }
+
+    public Long getTenantIdByListener() {
+        return this.tenantId;
+    }
+
+    public LocalDateTime getCreateTimeByListener() {
+        return this.createTime;
+    }
+
+    public LocalDateTime getUpdateTimeByListener() {
+        return this.updateTime;
+    }
+
+    // =============== 以下实现set函数提供给Anyline的Listener使用 =================
+
+
+    public void setIdByListener(Long id) {
+        this.id = id;
+    }
+
+    public void setTenantIdByListener(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public void setDeletedByListener(Long delFlag) {
+        this.deleted = delFlag;
+    }
+
+    public void setCreatorByListener(Long creator) {
+        this.creator = creator;
+    }
+
+    public void setUpdaterByListener(Long updater) {
+        this.updater = updater;
+    }
+
+    public void setCreateTimeByListener(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public void setUpdateTimeByListener(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
     }
 
     /**
      * 把 creator、createTime、updateTime、updater 都清空，避免前端直接传递 creator 之类的字段，直接就被更新了
      */
     public void clean() {
-        this.createBy = null;
+        this.creator = null;
         this.createTime = null;
-        this.updateBy = null;
+        this.updater = null;
         this.updateTime = null;
     }
 }

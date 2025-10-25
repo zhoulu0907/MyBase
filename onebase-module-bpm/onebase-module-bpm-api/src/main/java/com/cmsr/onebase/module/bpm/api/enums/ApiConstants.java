@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.enums;
+package com.cmsr.onebase.module.bpm.api.enums;
 
 /**
  * API 相关的枚举
