@@ -235,8 +235,8 @@ public class AnyLineDBInfoListener implements DMListener {
             log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
-        if (!TenantContextHolder.isIgnore() && TenantContextHolder.getRequiredTenantId() != null) {
-            configs.param("tenant_id", TenantContextHolder.getRequiredTenantId());
+        if (!TenantContextHolder.isIgnore() && TenantContextHolder.getTenantId() != null) {
+            configs.param("tenant_id", TenantContextHolder.getTenantId());
         }
         // 检查是否有表名，如果没有表名则跳过添加条件
         if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {

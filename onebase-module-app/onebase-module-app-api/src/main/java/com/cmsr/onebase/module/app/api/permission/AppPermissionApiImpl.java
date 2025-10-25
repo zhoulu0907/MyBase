@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.app.api.permission;
 
-import com.cmsr.onebase.module.app.api.permission.dto.PermissionDTO;
-import com.cmsr.onebase.module.app.api.permission.dto.RoleDTO;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.permission.dto.*;
+import com.cmsr.onebase.module.app.core.dal.database.auth.*;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -25,15 +26,38 @@ public class AppPermissionApiImpl implements AppPermissionApi {
     @Resource
     private AppAuthPermissionRepository appAuthPermissionRepository;
 
+    @Resource
+    private AppAuthViewRepository appAuthViewRepository;
+
+    @Resource
+    private AppAuthDataGroupRepository appAuthDataGroupRepository;
+
+    @Resource
+    private AppAuthDataFilterRepository appAuthDataFilterRepository;
+
+    @Resource
+    private AppAuthFieldRepository appAuthFieldRepository;
+
+    @Resource
+    private AppMenuRepository appMenuRepository;
+
+    @Override
+    public Long findEntityByMenuId(Long menuId) {
+        MenuDO menuDO = appMenuRepository.findById(menuId);
+        if (menuDO != null) {
+            return menuDO.getEntityId();
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public List<RoleDTO> findRoles(Long applicationId, Long userId) {
         return appAuthRoleRepository.findByApplicationIdAndUserId(applicationId, userId)
                 .stream()
                 .map(role -> {
                     RoleDTO roleDTO = new RoleDTO();
-                    roleDTO.setId(role.getId());
-                    roleDTO.setRoleCode(role.getRoleCode());
-                    roleDTO.setRoleName(role.getRoleName());
+                    BeanUtils.copyProperties(role, roleDTO);
                     return roleDTO;
                 }).toList();
     }
@@ -44,14 +68,52 @@ public class AppPermissionApiImpl implements AppPermissionApi {
                 .stream()
                 .map(permission -> {
                     PermissionDTO permissionDTO = new PermissionDTO();
-                    permissionDTO.setApplicationId(permission.getApplicationId());
-                    permissionDTO.setRoleId(permission.getRoleId());
-                    permissionDTO.setMenuId(permission.getMenuId());
-                    permissionDTO.setIsPageAllowed(permission.getIsPageAllowed());
-                    permissionDTO.setIsAllViewsAllowed(permission.getIsAllViewsAllowed());
-                    permissionDTO.setIsAllFieldsAllowed(permission.getIsAllFieldsAllowed());
-                    permissionDTO.setOperationTags(permission.getOperationTags());
+                    BeanUtils.copyProperties(permission, permissionDTO);
                     return permissionDTO;
+                }).toList();
+    }
+
+    @Override
+    public List<ViewDTO> findViews(Long applicationId, Long roleId) {
+        return appAuthViewRepository.findByApplicationIdAndRoleId(applicationId, roleId)
+                .stream()
+                .map(view -> {
+                    ViewDTO viewDTO = new ViewDTO();
+                    BeanUtils.copyProperties(view, viewDTO);
+                    return viewDTO;
+                }).toList();
+    }
+
+    @Override
+    public List<DataGroupDTO> findDataGroups(Long applicationId, Long roleId) {
+        List<DataGroupDTO> dataGroupDTOS = appAuthDataGroupRepository.findByApplicationIdAndRoleId(applicationId, roleId)
+                .stream()
+                .map(dataGroup -> {
+                    DataGroupDTO dataGroupDTO = new DataGroupDTO();
+                    BeanUtils.copyProperties(dataGroup, dataGroupDTO);
+                    return dataGroupDTO;
+                }).toList();
+        for (DataGroupDTO dataGroupDTO : dataGroupDTOS) {
+            List<DataFilterDTO> dataFilterDTOS = appAuthDataFilterRepository.findByGroupId(dataGroupDTO.getId())
+                    .stream()
+                    .map(dataFilter -> {
+                        DataFilterDTO dataFilterDTO = new DataFilterDTO();
+                        BeanUtils.copyProperties(dataFilter, dataFilterDTO);
+                        return dataFilterDTO;
+                    }).toList();
+            dataGroupDTO.setDataFilters(dataFilterDTOS);
+        }
+        return dataGroupDTOS;
+    }
+
+    @Override
+    public List<FieldDTO> findFields(Long applicationId, Long roleId) {
+        return appAuthFieldRepository.findByApplicationIdAndRoleId(applicationId, roleId)
+                .stream()
+                .map(fieldDO -> {
+                    FieldDTO fieldDTO = new FieldDTO();
+                    BeanUtils.copyProperties(fieldDO, fieldDTO);
+                    return fieldDTO;
                 }).toList();
     }
 

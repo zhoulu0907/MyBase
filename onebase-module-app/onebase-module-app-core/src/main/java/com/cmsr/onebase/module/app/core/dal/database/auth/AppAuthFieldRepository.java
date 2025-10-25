@@ -7,6 +7,7 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -47,4 +48,10 @@ public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
         this.deleteByConfig(configs);
     }
 
+    public List<AuthFieldDO> findByApplicationIdAndRoleId(Long applicationId, Long roleId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("role_id", roleId);
+        return this.findAllByConfig(configs);
+    }
 }
