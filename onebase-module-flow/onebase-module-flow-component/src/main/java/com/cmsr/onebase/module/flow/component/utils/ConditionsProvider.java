@@ -95,7 +95,18 @@ public class ConditionsProvider {
             Object value = expressionItem.getValue().toString();
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            //TODO 公式
+            Map valueMap = (Map) expressionItem.getValue();
+            String formula = MapUtils.getString(valueMap, "formula");
+            Map parameters = MapUtils.getMap(valueMap, "parameters");
+            FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
+            reqDTO.setFormula(formula);
+            reqDTO.setParameters(parameters);
+            reqDTO.setContextData(vars);
+            CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
+            if (respDTO.getData() == null) {
+                throw new IllegalCallerException("公式错误: " + formula + ", 错误信息: " + respDTO.getMsg());
+            }
+            expressionItem.setValue(respDTO.getData().getResult());
         }
     }
 
@@ -108,7 +119,6 @@ public class ConditionsProvider {
             Object value = getVariableByExpression(exp, vars);
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            //TODO 公式
             Map valueMap = (Map) expressionItem.getValue();
             String formula = MapUtils.getString(valueMap, "formula");
             Map parameters = MapUtils.getMap(valueMap, "parameters");
