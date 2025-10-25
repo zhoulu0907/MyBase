@@ -1,4 +1,4 @@
-import { EDITOR_TYPES, ENTITY_FIELD_TYPE, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -214,6 +214,18 @@ export default function EditorWorkspace() {
     }
   };
 
+  const getFieldOptions = async (fieldId: string) => {
+    const options = await getEntityFieldOptions(fieldId);
+    if (!options) return [];
+
+    return options.map((option: EntityFieldOption) => ({
+      label: option.optionLabel,
+      value: option.optionValue,
+      chosen: false,
+      selected: false
+    }));
+  };
+
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
@@ -260,7 +272,7 @@ export default function EditorWorkspace() {
           list={components}
           setList={(newList) => {
             const entityList: GridItem[] = [];
-            newList.forEach((item) => {
+            newList.forEach(async (item) => {
               // console.log(item);
               if (item.type == 'entity') {
                 if (item.entityType === '子表') {
@@ -281,11 +293,9 @@ export default function EditorWorkspace() {
                         field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
                         field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
                       ) {
-                        const options = await getEntityFieldOptions(field.fieldId);
-                        schema.config.defaultValue = options.map((option: EntityFieldOption) => ({
-                          label: option.optionLabel,
-                          value: option.optionValue
-                        }));
+                        getFieldOptions(field.fieldId).then((options: any) => {
+                          schema.config.defaultValue = options;
+                        });
                       }
 
                       schema.config.cpName = field.displayName;
@@ -313,7 +323,7 @@ export default function EditorWorkspace() {
 
                   const newColumns = item.fields
                     .filter((field: AppEntityField) => field.isSystemField !== 1)
-                    .map((field) => ({
+                    .map((field: AppEntityField) => ({
                       id: field.fieldId,
                       title: field.displayName,
                       dataIndex: field.fieldId,
@@ -338,9 +348,8 @@ export default function EditorWorkspace() {
                   };
 
                   setPageComponentSchemas(cpID!, props);
-                  setCurComponentID(cpID!);
-
-                  setCurComponentSchema(props);
+                  //   setCurComponentID(cpID!);
+                  //   setCurComponentSchema(props);
                   setShowDeleteButton(false);
 
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
@@ -366,11 +375,9 @@ export default function EditorWorkspace() {
                         field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
                         field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
                       ) {
-                        const options = await getEntityFieldOptions(field.fieldId);
-                        schema.config.defaultValue = options.map((option: EntityFieldOption) => ({
-                          label: option.optionLabel,
-                          value: option.optionValue
-                        }));
+                        getFieldOptions(field.fieldId).then((options: any) => {
+                          schema.config.defaultValue = options;
+                        });
                       }
 
                       schema.config.cpName = field.displayName;
@@ -384,9 +391,8 @@ export default function EditorWorkspace() {
                       };
 
                       setPageComponentSchemas(cpID!, props);
-                      setCurComponentID(cpID!);
-
-                      setCurComponentSchema(props);
+                      //   setCurComponentID(cpID!);
+                      //   setCurComponentSchema(props);
                       setShowDeleteButton(false);
 
                       entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
@@ -400,7 +406,7 @@ export default function EditorWorkspace() {
 
             setComponents(newList);
           }}
-          onAdd={(e) => {
+          onAdd={async (e) => {
             let cpID = e.item.id || e.item.getAttribute('data-cp-id');
             const itemType = e.item.getAttribute('data-cp-type');
             const itemDisplayName = e.item.getAttribute('data-cp-displayname');
@@ -434,6 +440,12 @@ export default function EditorWorkspace() {
                 console.log('dataField:  ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];
                 schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+                console.log('itemType: ', itemType);
+                if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
+                  const options = await getFieldOptions(fieldID);
+                  schema.config.defaultValue = options;
+                }
               }
 
               if (dataLabel) {
@@ -449,7 +461,6 @@ export default function EditorWorkspace() {
 
               setPageComponentSchemas(cpID!, props);
               setCurComponentID(cpID!);
-
               setCurComponentSchema(props);
               setShowDeleteButton(false);
             }
