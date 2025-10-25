@@ -34,7 +34,6 @@ export const EntityPageContainer: React.FC = () => {
   const { curAppId } = useAppStore();
   const { setCurDataSourceId, clearCurDataSourceId } = useResourceStore();
   const prevAppIdRef = useRef<string>('');
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const getAppResources = useCallback(
     async (appId: string) => {
@@ -42,23 +41,14 @@ export const EntityPageContainer: React.FC = () => {
         return;
       }
 
-      // 取消之前的请求
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      // 创建新的AbortController
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-
       try {
         console.log(`开始获取数据源，应用ID: ${appId}`);
 
         const params = { appId };
         const res = await getDatasourceList(params);
 
-        if (abortController.signal.aborted || appId !== curAppId) {
-          console.log('请求被取消或应用ID已变化');
+        if (appId !== curAppId) {
+          console.log('应用ID已变化');
           return;
         }
 
@@ -73,11 +63,9 @@ export const EntityPageContainer: React.FC = () => {
           clearCurDataSourceId();
         }
       } catch (error) {
-        if (!abortController.signal.aborted) {
-          console.error('获取数据源失败:', error);
-          setDsData(null);
-          clearCurDataSourceId();
-        }
+        console.error('获取数据源失败:', error);
+        setDsData(null);
+        clearCurDataSourceId();
       }
     },
     [curAppId, setCurDataSourceId, clearCurDataSourceId]
@@ -94,24 +82,12 @@ export const EntityPageContainer: React.FC = () => {
       clearCurDataSourceId();
       setRefreshEntityList(false);
       setOnlyUpdateNode(false);
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
     }
 
     prevAppIdRef.current = curAppId;
 
     getAppResources(curAppId);
   }, [curAppId]);
-
-  // 组件卸载时取消请求
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
 
   const handleCopy = (text: string | undefined) => {
     if (text) {

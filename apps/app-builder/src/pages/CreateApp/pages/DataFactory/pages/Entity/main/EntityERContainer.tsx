@@ -48,7 +48,6 @@ export const EntityERContainer: React.FC<{
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
   const chartRef = useRef<any>(null);
   const prevDataSourceIdRef = useRef<string>('');
-  const abortControllerRef = useRef<AbortController | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadEntityList = useCallback(
@@ -57,23 +56,14 @@ export const EntityERContainer: React.FC<{
         return;
       }
 
-      // 取消之前的请求
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      // 创建新的AbortController
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-
       try {
         console.log(`开始加载实体列表，数据源ID: ${dataSourceId}`);
 
         const res = await getEntityGraph(dataSourceId);
 
-        // 检查请求是否被取消或数据源ID已变化
-        if (abortController.signal.aborted || dataSourceId !== curDataSourceId) {
-          console.log('请求被取消或数据源ID已变化，跳过处理结果');
+        // 检查数据源ID已变化
+        if (dataSourceId !== curDataSourceId) {
+          console.log('数据源ID已变化，跳过处理结果');
           return;
         }
 
@@ -104,10 +94,8 @@ export const EntityERContainer: React.FC<{
           setData({ nodes: [], edges: [] });
         }
       } catch (error) {
-        if (!abortController.signal.aborted) {
-          console.error('加载实体列表失败:', error);
-          setData({ nodes: [], edges: [] });
-        }
+        console.error('加载实体列表失败:', error);
+        setData({ nodes: [], edges: [] });
       }
     },
     [curDataSourceId]
@@ -253,10 +241,6 @@ export const EntityERContainer: React.FC<{
       console.log('数据源切换，清理旧实体数据');
       setData({ nodes: [], edges: [] });
 
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
@@ -274,15 +258,6 @@ export const EntityERContainer: React.FC<{
       clearNewNodes();
     }, 100);
   }, [curDataSourceId, loadEntityList, clearNewNodes]);
-
-  // 组件卸载时取消请求
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
 
   return (
     <div style={{ height: '100%' }} className={styles['entity-page-container']}>
