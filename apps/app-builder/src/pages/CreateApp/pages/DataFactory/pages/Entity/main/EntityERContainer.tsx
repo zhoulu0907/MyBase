@@ -3,7 +3,8 @@ import { useAppStore } from '@/store/store_app';
 import { useNewNodeStore } from '@/store/store_entity';
 import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { debounce } from 'lodash-es';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
@@ -48,57 +49,55 @@ export const EntityERContainer: React.FC<{
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
   const chartRef = useRef<any>(null);
   const prevDataSourceIdRef = useRef<string>('');
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const loadEntityList = useCallback(
-    async (dataSourceId: string) => {
-      if (!dataSourceId) {
-        return;
-      }
+  const loadEntityList = useCallback(async (dataSourceId: string) => {
+    if (!dataSourceId) {
+      return;
+    }
 
-      try {
-        console.log(`开始加载实体列表，数据源ID: ${dataSourceId}`);
+    try {
+      const res = await getEntityGraph(dataSourceId);
 
-        const res = await getEntityGraph(dataSourceId);
+      console.log('loadEntityList', res);
 
-        // 检查数据源ID已变化
-        if (dataSourceId !== curDataSourceId) {
-          console.log('数据源ID已变化，跳过处理结果');
-          return;
-        }
-
-        console.log('loadEntityList', res);
-
-        if (res?.entities || res?.relationships) {
-          setData({
-            nodes:
-              res?.entities.map((item: unknown) => {
-                const entityItem = item as Record<string, unknown>;
-                const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
-                return {
-                  ...entityItem,
-                  positionX: pos?.x,
-                  positionY: pos?.y
-                };
-              }) || [],
-            edges:
-              res?.relationships.map((item: unknown) => {
-                const relationItem = item as Record<string, unknown>;
-                return {
-                  ...relationItem,
-                  label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
-                };
-              }) || []
-          });
-        } else {
-          setData({ nodes: [], edges: [] });
-        }
-      } catch (error) {
-        console.error('加载实体列表失败:', error);
+      if (res?.entities || res?.relationships) {
+        setData({
+          nodes:
+            res?.entities.map((item: unknown) => {
+              const entityItem = item as Record<string, unknown>;
+              const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
+              return {
+                ...entityItem,
+                positionX: pos?.x,
+                positionY: pos?.y
+              };
+            }) || [],
+          edges:
+            res?.relationships.map((item: unknown) => {
+              const relationItem = item as Record<string, unknown>;
+              return {
+                ...relationItem,
+                label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
+              };
+            }) || []
+        });
+      } else {
         setData({ nodes: [], edges: [] });
       }
-    },
-    [curDataSourceId]
+    } catch (error) {
+      console.error('加载实体列表失败:', error);
+      setData({ nodes: [], edges: [] });
+    }
+  }, []);
+
+  // 防抖
+  const debouncedLoadEntityList = useMemo(
+    () =>
+      debounce((dataSourceId: string) => {
+        loadEntityList(dataSourceId);
+        clearNewNodes();
+      }, 100),
+    [loadEntityList, clearNewNodes]
   );
 
   // 打开节点编辑抽屉
@@ -240,24 +239,20 @@ export const EntityERContainer: React.FC<{
     if (prevDataSourceIdRef.current && prevDataSourceIdRef.current !== curDataSourceId) {
       console.log('数据源切换，清理旧实体数据');
       setData({ nodes: [], edges: [] });
-
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      debouncedLoadEntityList.cancel();
     }
 
     prevDataSourceIdRef.current = curDataSourceId;
 
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
+    debouncedLoadEntityList(curDataSourceId);
+  }, [curDataSourceId, debouncedLoadEntityList]);
 
-    // 防抖
-    debounceTimerRef.current = setTimeout(() => {
-      loadEntityList(curDataSourceId);
-      clearNewNodes();
-    }, 100);
-  }, [curDataSourceId, loadEntityList, clearNewNodes]);
+  // 组件卸载时清理防抖函数
+  useEffect(() => {
+    return () => {
+      debouncedLoadEntityList.cancel();
+    };
+  }, [debouncedLoadEntityList]);
 
   return (
     <div style={{ height: '100%' }} className={styles['entity-page-container']}>

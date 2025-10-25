@@ -42,15 +42,8 @@ export const EntityPageContainer: React.FC = () => {
       }
 
       try {
-        console.log(`开始获取数据源，应用ID: ${appId}`);
-
         const params = { appId };
         const res = await getDatasourceList(params);
-
-        if (appId !== curAppId) {
-          console.log('应用ID已变化');
-          return;
-        }
 
         if (res?.length > 0) {
           const dataSource = res?.[0];
