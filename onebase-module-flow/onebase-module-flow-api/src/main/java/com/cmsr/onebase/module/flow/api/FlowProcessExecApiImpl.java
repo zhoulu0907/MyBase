@@ -74,7 +74,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
                 OrExpression orExpression = ConditionsSupport.convertToOrExpresses(nodeData.getFilterCondition());
                 boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
                 if (!isMatch) {
-                    return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, "触发条件不匹配");
+                    return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, String.format("触发条件不匹配: %s", orExpression));
                 }
             }
             ExecutorResult executorResult = flowProcessExecutor.execute(
