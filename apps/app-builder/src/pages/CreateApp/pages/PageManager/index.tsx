@@ -145,7 +145,6 @@ const PageManagerPage: FC = () => {
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
               setCurMenu(menu);
-              //   menuEditorSignal.setCurMenuId(menu.id);
             }
           }}
           triggerCreate={triggerCreate}
@@ -184,7 +183,6 @@ const PageManagerPage: FC = () => {
     if (res && res.length > 0) {
       setCurMenu(findFirstPage(res));
 
-      //   menuEditorSignal.setCurMenuId(findFirstPage(res)?.id);
       setSearchResult(false);
     }
 
