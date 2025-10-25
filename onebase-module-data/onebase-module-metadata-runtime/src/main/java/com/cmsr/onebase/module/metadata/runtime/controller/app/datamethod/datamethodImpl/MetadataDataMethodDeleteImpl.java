@@ -1,6 +1,10 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
+import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
+import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -15,11 +19,13 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
@@ -37,6 +43,9 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
     @Resource
     private MetadataEntityFieldRepository entityFieldRepository;
+
+    @Autowired
+    private FlowProcessExecApiImpl flowProcessExecApi;
 
     @Override
     protected void validateData(ProcessContext context) {
@@ -345,4 +354,75 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
         });
     }
+
+    @Override
+    protected void executePreWorkflow(ProcessContext context) {
+        //查询待删除数据
+        MetadataBusinessEntityDO entity = context.getEntity();
+        List<MetadataEntityFieldDO> fields = context.getFields();
+
+        String primaryKeyField = getPrimaryKeyFieldName(fields);
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        Object id = context.getId();
+        configStore.and(primaryKeyField, id);
+
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
+        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+
+        Long entityId = context.getEntityId();
+        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(entityId);
+        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
+        reqDTO.setFieldData(data);
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(respDTO.isSuccess()){
+            log.info("数据删除触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+        }else{
+            log.info("数据删除触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+        }
+    }
+
+    @Override
+    protected void executePostWorkflow(ProcessContext context) {
+        //查询删除数据
+        MetadataBusinessEntityDO entity = context.getEntity();
+        List<MetadataEntityFieldDO> fields = context.getFields();
+
+        String primaryKeyField = getPrimaryKeyFieldName(fields);
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        Object id = context.getId();
+        configStore.and(primaryKeyField, id);
+
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
+        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+
+        Long entityId = context.getEntityId();
+        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(entityId);
+        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
+        reqDTO.setFieldData(data);
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(respDTO.isSuccess()){
+            log.info("数据删除触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+        }else{
+            log.info("数据删除触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+        }
+    }
+
 }
