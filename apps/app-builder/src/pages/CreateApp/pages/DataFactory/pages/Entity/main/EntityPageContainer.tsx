@@ -155,12 +155,14 @@ export const EntityPageContainer: React.FC = () => {
       </div>
 
       {activeTab === PAGE_TYPE.ER_CHART && (
-        <EntityERContainer
-          refreshEntityList={refreshEntityList}
-          setRefreshEntityList={setRefreshEntityList}
-          onlyUpdateNode={onlyUpdateNode}
-          setOnlyUpdateNode={setOnlyUpdateNode}
-        />
+        <div className={styles.entityPageContent}>
+          <EntityERContainer
+            refreshEntityList={refreshEntityList}
+            setRefreshEntityList={setRefreshEntityList}
+            onlyUpdateNode={onlyUpdateNode}
+            setOnlyUpdateNode={setOnlyUpdateNode}
+          />
+        </div>
       )}
 
       {activeTab === PAGE_TYPE.ENTITY_TABLE && (
