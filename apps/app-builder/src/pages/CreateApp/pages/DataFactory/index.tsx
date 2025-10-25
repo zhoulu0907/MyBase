@@ -10,13 +10,14 @@ import EntityPage from './pages/Entity';
 
 const DataFactoryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('check-entity');
-  const { setCurAppId, curAppId } = useAppStore();
+  const { setCurAppId, curAppId, clearCurAppId } = useAppStore();
 
   const handleMenuClick = (key: string) => {
     setActiveTab(key);
   };
 
   useEffect(() => {
+    clearCurAppId();
     const appId = getHashQueryParam('appId');
 
     if (appId) {
