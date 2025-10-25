@@ -348,9 +348,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(respDTO.isSuccess()){
-            log.info("数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+            log.info("BEFORE_CREATE 数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
-            log.info("数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+            log.info("BEFORE_CREATE 数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
         }
     }
 
@@ -366,9 +366,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(respDTO.isSuccess()){
-            log.info("数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+            log.info("AFTER_CREATE 数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
-            log.info("数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+            log.error("AFTER_CREATE 数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
         }
     }
 
