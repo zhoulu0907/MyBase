@@ -16,7 +16,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -42,37 +45,44 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "没有相应的流程");
         }
-        EntityTriggerRespDTO errorRespDTO = null;
+        List<EntityTriggerRespDTO> respDTOS = new ArrayList<>();
         for (StartEntityNodeData startEntityNodeData : entityNodeDataList) {
             EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(reqDTO, startEntityNodeData);
             if (!entityTriggerRespDTO.isSuccess()) {
-                errorRespDTO = entityTriggerRespDTO;
+                return entityTriggerRespDTO;
+            } else {
+                respDTOS.add(entityTriggerRespDTO);
             }
         }
-        if (errorRespDTO != null) {
-            return errorRespDTO;
+        if (respDTOS.size() == 1) {
+            return respDTOS.get(0);
         } else {
-            return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "执行结束");
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "执行结束: " + respDTOS);
         }
     }
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
+        Map<String, Object> inputData = new HashMap<>();
+        for (Map.Entry<?, Object> entry : reqDTO.getFieldData().entrySet()) {
+            inputData.put(entry.getKey().toString(), entry.getValue());
+        }
         try {
             if (!triggerEventContains(nodeData.getTriggerEvents(), reqDTO.getTriggerEvent())) {
-                return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "触发事件不匹配");
+                return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, String.format("不支持的触发事件, 配置: %s, 传入: %s.", nodeData.getTriggerEvents(), reqDTO.getTriggerEvent()));
             }
             if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
                 OrExpression orExpression = ConditionsSupport.convertToOrExpresses(nodeData.getFilterCondition());
-                boolean isMatch = expressionExecutor.evaluate(orExpression, reqDTO.getFieldData());
+                boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
                 if (!isMatch) {
-                    return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "触发条件不匹配");
+                    return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, String.format("触发条件不匹配: %s", orExpression));
                 }
             }
             ExecutorResult executorResult = flowProcessExecutor.execute(
                     reqDTO.getTraceId(),
                     nodeData.getProcessId(),
-                    reqDTO.getFieldData());
+                    inputData);
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setProcessId(executorResult.getProcessId());
             respDTO.setSuccess(executorResult.isSuccess());
             respDTO.setCode(executorResult.getCode());
             respDTO.setMessage(executorResult.getMessage());
@@ -81,7 +91,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             return respDTO;
         } catch (Exception e) {
             log.error("entityTrigger failed, {}, {}", reqDTO, nodeData, e);
-            return new EntityTriggerRespDTO(reqDTO.getTraceId(), false, e);
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), false, e);
         }
     }
 

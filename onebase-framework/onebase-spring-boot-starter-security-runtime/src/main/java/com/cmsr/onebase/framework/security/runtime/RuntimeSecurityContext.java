@@ -17,16 +17,16 @@ public class RuntimeSecurityContext {
         return null;
     }
 
-    public static boolean hasApplicationPermission(Long applicationId) {
+    public static boolean hasApplicationPermission() {
         return true;
     }
 
-    public static boolean hasPagePermission(Long pageId) {
-        return true;
+    public static Set<Long> getAccessibleMenus() {
+        return null;
     }
 
-    public static boolean hasEntityPermission(Long entityId) {
-        return true;
+    public static Set<Long> getAccessibleEntities() {
+        return null;
     }
 
     public static Set<OperationEnum> getPagePermissions(Long pageId) {

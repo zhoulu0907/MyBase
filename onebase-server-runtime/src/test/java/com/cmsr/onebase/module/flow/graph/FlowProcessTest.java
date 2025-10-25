@@ -69,6 +69,20 @@ public class FlowProcessTest {
     }
 
     @Test
+    public void testSimple22() throws IOException {
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(101573932216057856L);
+        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        reqDTO.setFieldData(Map.of(
+                104845168301834240L, "x11111111",
+                "104951150916075520", "z1"
+        ));
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        System.out.println(respDTO);
+    }
+
+    @Test
     public void testSimple3() throws IOException {
         FlowJobMessage jobMessage = new FlowJobMessage();
         jobMessage.setJobType("fld");
