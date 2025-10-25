@@ -1,8 +1,10 @@
 package com.cmsr.onebase.framework.ds.model.workflow;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class WorkflowReleaseReq {
 
     public static final String ONLINE_STATE = "ONLINE";
