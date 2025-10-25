@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.dict;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypeListReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
@@ -65,5 +66,13 @@ public interface DictTypeService {
      * @return 字典类型列表
      */
     List<DictTypeDO> getDictTypeList();
+
+    /**
+     * 根据条件获得字典类型列表（不分页）
+     *
+     * @param reqVO 查询条件
+     * @return 字典类型列表
+     */
+    List<DictTypeDO> getDictTypeList(DictTypeListReqVO reqVO);
 
 }
