@@ -1,11 +1,17 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
 import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
-import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
+import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.entity.Instance;
@@ -47,6 +53,9 @@ public class BpmDesignServiceImpl implements BpmDesignService {
 
     @Resource
     private InsService insService;
+
+    @Resource
+    private FlowDefinitionRepository flowDefinitionRepository;
 
     @Resource
     private BpmDesignConvert bpmDesignConvert;
@@ -157,5 +166,48 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         if (!success) {
             throw exception(ErrorCodeConstants.DELETE_FLOW_FAILED);
         }
+    }
+
+    /**
+     *  发布流程
+     *
+     * - 只会有一个版本是【已发布】，发布新的版本后，之前【已发布】的流程就会状态变更为历史
+     *
+     * @param reqVo
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void publish(BpmPublishReqVo reqVo) {
+        Long id = reqVo.getId();
+
+        // 校验流程是否存在
+        Definition existDef = defService.getById(id);
+
+        if (existDef == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
+        }
+
+        // 已发布，直接返回
+        if (existDef.getIsPublish().equals(PublishStatus.PUBLISHED.getKey())) {
+            log.info("流程[{}]已发布，无需重复发布", id);
+            return;
+        }
+
+        // 此处为自定义业务逻辑，不使用defService.publish，业务场景不同
+        // 先更新所有已发布（目前理论上最多只有一个）的流程为历史版本
+        String flowCode = existDef.getFlowCode();
+
+        // 条件
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(FlowDefinition.FLOW_CODE, flowCode);
+
+        // 更新状态
+        DataRow row = new DataRow();
+        row.put(FlowDefinition.IS_PUBLISH, PublishStatus.EXPIRED.getKey());
+        flowDefinitionRepository.updateByConfig(row, configStore);
+
+        // 更新当前状态为已发布
+        existDef.setIsPublish(PublishStatus.PUBLISHED.getKey());
+        defService.updateById(existDef);
     }
 }

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
-
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
 
 
 /**
@@ -35,4 +35,13 @@ public interface BpmDesignService {
      * @param reqVo
      */
     void delete(BpmDeleteReqVo reqVo);
+
+
+    /**
+     * 发布流程设计
+     *
+     * @param reqVo
+     * @return
+     */
+    void publish(BpmPublishReqVo reqVo);
 }

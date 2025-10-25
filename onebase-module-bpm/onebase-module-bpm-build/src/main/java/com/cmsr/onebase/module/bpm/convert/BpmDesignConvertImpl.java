@@ -56,11 +56,11 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         Integer isPublish = defJson.getIsPublish();
 
         if (isPublish.equals(PublishStatus.PUBLISHED.getKey())) {
-             flowDesignVO.setVersionStatus(VersionStatusEnum.PUBLISHED.getCode());
+            flowDesignVO.setVersionStatus(VersionStatusEnum.PUBLISHED.getCode());
         } else if (isPublish.equals(PublishStatus.UNPUBLISHED.getKey())) {
-             flowDesignVO.setVersionStatus(VersionStatusEnum.DESIGNING.getCode());
+            flowDesignVO.setVersionStatus(VersionStatusEnum.DESIGNING.getCode());
         } else if (isPublish.equals(PublishStatus.EXPIRED.getKey())) {
-             flowDesignVO.setVersionStatus(VersionStatusEnum.PREVIOUS.getCode());
+            flowDesignVO.setVersionStatus(VersionStatusEnum.PREVIOUS.getCode());
         }
 
         String ext = defJson.getExt();
@@ -93,6 +93,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
      * @param flowDesignVO BpmDesignVO
      * @return DefJson
      */
+    @Override
     public DefJson toDefJson(BpmDesignVO flowDesignVO) {
         if (flowDesignVO == null) {
            return null;
