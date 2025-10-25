@@ -57,7 +57,6 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
   // 初始化实体选项
   useEffect(() => {
-    console.log('curDataSourceId=====', curDataSourceId);
     if (visible && curDataSourceId) {
       loadEntities();
     }
