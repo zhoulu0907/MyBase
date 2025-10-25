@@ -1,5 +1,8 @@
+import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
-import { Input, Layout, Tree, Dropdown, Menu } from '@arco-design/web-react';
+import { menuSignal } from '@/store/menu';
+import { UserPermissionManager } from '@/utils/permission';
+import { Dropdown, Input, Layout, Menu, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   listApplicationMenu,
@@ -8,16 +11,14 @@ import {
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import RuntimeMenuItem from './components/menuItem';
-import PreviewContainer from './components/preview';
-import { menuSignal } from '@/store/menu';
-import styles from './index.module.less';
-import { UserPermissionManager } from '@/utils/permission';
 import { TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
-import AvatarSVG from '@/assets/images/avatar.svg';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import RuntimeMenuItem from './components/menuItem';
+import PreviewContainer from './components/preview';
+import styles from './index.module.less';
 
 const Sider = Layout.Sider;
 const Content = Layout.Content;
@@ -39,6 +40,8 @@ interface TreeNode {
  */
 
 const Runtime: React.FC = () => {
+  useSignals();
+
   const navigate = useNavigate();
   const { appId } = useParams<{ appId?: string }>();
   const { t } = useI18n();
@@ -47,7 +50,8 @@ const Runtime: React.FC = () => {
 
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
-  const [curMenu, setCurMenu] = useState<ApplicationMenu>();
+  //   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
+  const { curMenu, setCurMenu } = menuSignal;
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   const [nickname, setNickname] = useState('U');
@@ -109,7 +113,7 @@ const Runtime: React.FC = () => {
           }
         }
         setCurMenu(currentMenu);
-        menuSignal.setCurMenuId(currentMenu.id);
+        // setCurMenuId(currentMenu.id);
       }
     }
   };
@@ -147,7 +151,7 @@ const Runtime: React.FC = () => {
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
               setCurMenu(menu);
-              menuSignal.setCurMenuId(menu.id);
+              //   setCurMenuId(menu.id);
             }
           }}
         />
@@ -187,7 +191,7 @@ const Runtime: React.FC = () => {
               blockNode
               draggable
               treeData={treeData}
-              selectedKeys={[curMenu?.menuCode!]}
+              selectedKeys={[curMenu.value.menuCode!]}
               expandedKeys={expandedKeys}
               onExpand={setExpandedKeys}
               className={`menuTree ${styles.tree}`}
@@ -209,9 +213,9 @@ const Runtime: React.FC = () => {
             />
           </Sider>
           <Content className={styles.content}>
-            {curMenu?.id && (
+            {curMenu.value.id && (
               <div className={styles.contentHeader}>
-                <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                <div className={styles.contentTitle}>{curMenu.value.menuName}</div>
                 <div className={styles.userInfo}>
                   {nickname || '未登录'}
 
@@ -225,7 +229,7 @@ const Runtime: React.FC = () => {
             )}
 
             <div className={styles.contentBody}>
-              <PreviewContainer menuId={curMenu?.id || ''} runtime={true} />
+              <PreviewContainer menuId={curMenu.value.id || ''} runtime={true} />
             </div>
           </Content>
         </Layout>
