@@ -147,7 +147,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         destDefJson.setFlowCode(sourceDefJson.getFlowCode());
 
         // 节点也使用相同的version
-        for (NodeJson nodeJson : sourceDefJson.getNodeList()) {
+        for (NodeJson nodeJson : destDefJson.getNodeList()) {
             nodeJson.setVersion(sourceVersion);
         }
 
@@ -222,7 +222,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             return null;
         }
 
-        BpmDefJsonVO bpmDefJsonVO = JsonUtils.parseObject(bpmDefJson, BpmDefJsonVO.class);
+        BpmDefJsonVO bpmDefJsonVO = flowDesignVO.getBpmDefJsonVO();
         if (bpmDefJsonVO == null) {
             return null;
         }

@@ -27,7 +27,9 @@ public interface BpmDesignConvert {
     /**
      * 复制通用字段数据，如version
      *
-     * @param bpmDesignVO 流程设计视图对象
+     * @param destDefJson 目标流程定义JSON
+     * @param sourceDefJson 源流程定义JSON
+     *
      * @return 流程定义JSON
      */
     void copyCommonField(DefJson destDefJson, DefJson sourceDefJson);

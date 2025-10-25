@@ -71,7 +71,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         return "fc_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
     }
 
-    public void validateBpmDefJsonVO(String bpmDefJson) {
+    public BpmDefJsonVO validateBpmDefJsonVO(String bpmDefJson) {
         BpmDefJsonVO bpmDefJsonVO = JsonUtils.parseObject(bpmDefJson, BpmDefJsonVO.class);
         if (bpmDefJsonVO == null) {
             log.error("流程定义JSON解析失败");
@@ -88,6 +88,8 @@ public class BpmDesignServiceImpl implements BpmDesignService {
                 throw exception(ErrorCodeConstants.VALIDATE_BPM_DEF_JSON_FAILED.getCode(), violation.getMessage());
             }
         }
+
+        return bpmDefJsonVO;
     }
 
     @Override
@@ -105,7 +107,8 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         }
 
         // 校验流程定义JSON
-        validateBpmDefJsonVO(flowDesignVO.getBpmDefJson());
+        BpmDefJsonVO bpmDefJsonVO = validateBpmDefJsonVO(flowDesignVO.getBpmDefJson());
+        flowDesignVO.setBpmDefJsonVO(bpmDefJsonVO);
 
         // 转换JSON
         DefJson defJson = bpmDesignConvert.toDefJson(flowDesignVO);
@@ -155,7 +158,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
                 throw exception(ErrorCodeConstants.SAVE_FLOW_FAILED_FOR_NOT_DESIGN_STATUS);
             }
 
-            bpmDesignConvert.copyCommonField(existDef, defJson);
+            bpmDesignConvert.copyCommonField(defJson, existDef);
 
             // 更新流程
             try {
