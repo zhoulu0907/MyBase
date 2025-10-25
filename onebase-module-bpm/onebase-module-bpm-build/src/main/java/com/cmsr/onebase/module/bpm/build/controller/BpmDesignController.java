@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.bpm.build.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.bpm.build.service.BpmDesignService;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,14 +49,6 @@ public class BpmDesignController {
         log.info("查询流程: {}", businessId);
         BpmDesignVO flowDesignVO = bpmDesignService.queryByBusinessId(businessId);
         return CommonResult.success(flowDesignVO);
-    }
-
-    @PostMapping("/delete")
-    @Operation(summary = "删除流程")
-    public CommonResult<Boolean> delete(@Valid @RequestBody BpmDeleteReqVo reqVo) {
-        log.info("删除流程: {}", reqVo);
-        bpmDesignService.delete(reqVo);
-        return CommonResult.success(true);
     }
 
     @PostMapping("/publish")

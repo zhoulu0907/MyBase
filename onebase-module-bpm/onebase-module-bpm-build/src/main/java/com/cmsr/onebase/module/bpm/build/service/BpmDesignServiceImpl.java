@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDeleteReqVo;
+import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
 import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
@@ -209,51 +209,6 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         defJson.setId(flowId);
 
         return bpmDesignConvert.toFlowDesignVO(defJson);
-    }
-
-    /**
-     * 可对指定的流程版本进行删除，但已发布版本及含有尚未完结的历史版本流程无法删除。
-     *
-     * @param reqVo
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void delete(BpmDeleteReqVo reqVo) {
-        List<Long> ids = new ArrayList<>();
-        ids.add(reqVo.getId());
-
-        // 校验流程是否存在
-        Definition existDef = defService.getById(reqVo.getId().toString());
-
-        if (existDef == null) {
-            return;
-        }
-
-        // 已发布流程无法删除
-        if (existDef.getIsPublish().equals(PublishStatus.PUBLISHED.getKey())) {
-            throw exception(ErrorCodeConstants.DELETE_FLOW_FAILED_FOR_PUBLISHED);
-        }
-
-        // 包含历史未完结的历史版本无法删除
-        List<Instance> instanceList = insService.getByDefId(reqVo.getId());
-
-        if (CollUtil.isNotEmpty(instanceList)) {
-            for (Instance instance : instanceList) {
-                if (!instance.getFlowStatus().equals(FlowStatus.FINISHED.getKey())) {
-                    throw exception(ErrorCodeConstants.DELETE_FLOW_FAILED_FOR_INS_NOT_FINISHED);
-                }
-            }
-        }
-
-        // 删除流程节点和跳转
-        nodeService.deleteNodeByDefIds(ids);
-        skipService.deleteSkipByDefIds(ids);
-
-        boolean success = defService.removeById(reqVo.getId());
-
-        if (!success) {
-            throw exception(ErrorCodeConstants.DELETE_FLOW_FAILED);
-        }
     }
 
     /**
