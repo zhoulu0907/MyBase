@@ -210,9 +210,9 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(respDTO.isSuccess()){
-            log.info("数据更新触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+            log.info("BEFORE_UPDATE 数据更新触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
-            log.info("数据更新触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+            log.error("BEFORE_UPDATE 数据更新触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
         }
     }
 
@@ -228,9 +228,9 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(respDTO.isSuccess()){
-            log.info("数据更新触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+            log.info("AFTER_UPDATE 数据更新触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
-            log.info("数据更新触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+            log.info("AFTER_UPDATE 数据更新触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
         }
     }
 
