@@ -27,6 +27,8 @@ public class FlowDefinition extends BaseEntity implements Definition {
 
     public static final String IS_PUBLISH = "is_publish";
 
+    public static final String FORM_PATH = "form_path";
+
 
     /** 流程编码 */
     @Column(name = FLOW_CODE, length = 40, nullable = false)
@@ -53,7 +55,7 @@ public class FlowDefinition extends BaseEntity implements Definition {
     private String formCustom;
 
     /** 审批表单路径 */
-    @Column(name = "form_path", length = 100)
+    @Column(name = FORM_PATH, length = 100)
     private String formPath;
 
     /** 流程激活状态（0挂起 1激活） */

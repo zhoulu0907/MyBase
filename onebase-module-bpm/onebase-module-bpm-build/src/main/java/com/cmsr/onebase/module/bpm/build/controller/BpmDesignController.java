@@ -44,6 +44,14 @@ public class BpmDesignController {
         return CommonResult.success(flowDesignVO);
     }
 
+    @GetMapping("/get-by-business-id")
+    @Operation(summary = "根据业务ID查询默认流程")
+    public CommonResult<BpmDesignVO> queryByBusinessId(@RequestParam("businessId") Long businessId) {
+        log.info("查询流程: {}", businessId);
+        BpmDesignVO flowDesignVO = bpmDesignService.queryByBusinessId(businessId);
+        return CommonResult.success(flowDesignVO);
+    }
+
     @PostMapping("/delete")
     @Operation(summary = "删除流程")
     public CommonResult<Boolean> delete(@Valid @RequestBody BpmDeleteReqVo reqVo) {

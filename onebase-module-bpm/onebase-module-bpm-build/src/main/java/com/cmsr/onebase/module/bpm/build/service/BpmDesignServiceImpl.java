@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDeleteReqVo;
@@ -15,6 +16,7 @@ import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
@@ -182,6 +184,29 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         return bpmDesignConvert.toFlowDesignVO(defJson);
     }
 
+    @Override
+    public BpmDesignVO queryByBusinessId(Long businessId) {
+        // 通过业务ID查询流程定义
+        // todo：通过业务ID查询流程定义，按创建时间降序查询最新的流程，后续要改成优先查询已发布的流程定义
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.and(Compare.EQUAL, FlowDefinition.FORM_PATH, String.valueOf(businessId));
+        // 按创建时间降序排序，获取最新的流程定义
+        configStore.order(BaseEntity.CREATE_TIME + " DESC");
+
+        FlowDefinition flowDefinition = flowDefinitionRepository.findOne(configStore);
+
+        // 不存在则返回一个空的流程定义
+        if (flowDefinition == null) {
+            return new BpmDesignVO();
+        }
+
+        // 获取defJson结构
+        Long flowId = flowDefinition.getId();
+        DefJson defJson = defService.queryDesign(flowId);
+        defJson.setId(flowId);
+
+        return bpmDesignConvert.toFlowDesignVO(defJson);
+    }
 
     /**
      * 可对指定的流程版本进行删除，但已发布版本及含有尚未完结的历史版本流程无法删除。

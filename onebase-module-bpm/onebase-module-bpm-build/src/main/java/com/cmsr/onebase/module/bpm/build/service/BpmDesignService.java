@@ -30,6 +30,14 @@ public interface BpmDesignService {
     BpmDesignVO queryById(Long id);
 
     /**
+     * 查询流程设计
+     *
+     * @param businessId 业务ID
+     * @return
+     */
+    BpmDesignVO queryByBusinessId(Long businessId);
+
+    /**
      * 删除流程设计
      *
      * @param reqVo
