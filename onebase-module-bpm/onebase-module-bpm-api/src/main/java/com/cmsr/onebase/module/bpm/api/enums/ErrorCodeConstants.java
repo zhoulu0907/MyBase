@@ -26,6 +26,9 @@ public interface ErrorCodeConstants {
 
     ErrorCode DELETE_FLOW_FAILED_FOR_INS_NOT_FINISHED = new ErrorCode(1_009_001_005, "包含历史未完结的历史版本无法删除");
 
+    ErrorCode SAVE_FLOW_FAILED_FOR_NOT_DESIGN_STATUS = new ErrorCode(1_009_001_006, "非设计状态流程无法更新");
+
+    ErrorCode DESIGNING_FLOW_EXISTS = new ErrorCode(1_009_001_007, "存在设计中状态的流程");
 
     // ============= 校验 =============
 

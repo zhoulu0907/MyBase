@@ -91,6 +91,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
      * BpmDesignVO转换为DefJson
      *
      * @param flowDesignVO BpmDesignVO
+     *
      * @return DefJson
      */
     @Override
@@ -122,6 +123,34 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         defJson.setNodeList(toNodeJsonList(flowDesignVO));
 
         return defJson;
+    }
+
+    /**
+     * 复制通用字段数据，保持version不变
+     *
+     * @param destDefJson 目标流程定义JSON
+     * @param sourceDefJson 源流程定义JSON
+     */
+    @Override
+    public void copyCommonField(DefJson destDefJson, DefJson sourceDefJson) {
+        if (destDefJson == null || sourceDefJson == null) {
+            return;
+        }
+
+        String sourceVersion = sourceDefJson.getVersion();
+
+        // 保持version不变
+        destDefJson.setVersion(sourceVersion);
+
+        // flowcode保持不变
+        destDefJson.setFlowCode(sourceDefJson.getFlowCode());
+
+        // 节点也使用相同的version
+        for (NodeJson nodeJson : sourceDefJson.getNodeList()) {
+            nodeJson.setVersion(sourceVersion);
+        }
+
+        // todo：确认是否还有其他通用字段
     }
 
     /**
