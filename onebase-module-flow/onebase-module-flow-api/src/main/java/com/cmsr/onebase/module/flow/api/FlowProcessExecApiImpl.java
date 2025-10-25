@@ -17,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -60,13 +62,17 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     }
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
+        Map<String, Object> inputData = new HashMap<>();
+        for (Map.Entry<?, Object> entry : reqDTO.getFieldData().entrySet()) {
+            inputData.put(entry.getKey().toString(), entry.getValue());
+        }
         try {
             if (!triggerEventContains(nodeData.getTriggerEvents(), reqDTO.getTriggerEvent())) {
-                return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, "触发事件不匹配");
+                return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, String.format("不支持的触发事件, 配置: %s, 传入: %s.", nodeData.getTriggerEvents(), reqDTO.getTriggerEvent()));
             }
             if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
                 OrExpression orExpression = ConditionsSupport.convertToOrExpresses(nodeData.getFilterCondition());
-                boolean isMatch = expressionExecutor.evaluate(orExpression, reqDTO.getFieldData());
+                boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
                 if (!isMatch) {
                     return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, "触发条件不匹配");
                 }
@@ -74,7 +80,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             ExecutorResult executorResult = flowProcessExecutor.execute(
                     reqDTO.getTraceId(),
                     nodeData.getProcessId(),
-                    reqDTO.getFieldData());
+                    inputData);
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setProcessId(executorResult.getProcessId());
             respDTO.setSuccess(executorResult.isSuccess());
