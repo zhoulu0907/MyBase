@@ -8,6 +8,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,4 +33,10 @@ public class AppAuthDataGroupRepository extends DataRepository<AuthDataGroupDO> 
         return this.findAllByConfig(configs);
     }
 
+    public List<AuthDataGroupDO> findByApplicationIdAndRoleId(Long applicationId, Long roleId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("role_id", roleId);
+        return this.findAllByConfig(configs);
+    }
 }

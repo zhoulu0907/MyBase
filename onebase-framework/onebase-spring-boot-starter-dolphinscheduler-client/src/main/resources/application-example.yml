@@ -4,6 +4,9 @@ onebase:
     baseUrl: http://10.0.104.33:12345/dolphinscheduler/v2
     # DolphinScheduler的访问认证 token
     token: 85806d2d33502cef3036fb30b320e5f5
+    projectCodeFlow: 155148878289216
+    projectCodeETL: 155148878289217
+    tenantCode: default
     connectTimeout: 5s
     readTimeout: 30s
     writeTimeout: 30s
