@@ -50,7 +50,6 @@ const Runtime: React.FC = () => {
 
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
-  //   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
   const { curMenu, setCurMenu } = menuSignal;
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
@@ -113,7 +112,6 @@ const Runtime: React.FC = () => {
           }
         }
         setCurMenu(currentMenu);
-        // setCurMenuId(currentMenu.id);
       }
     }
   };
@@ -151,7 +149,6 @@ const Runtime: React.FC = () => {
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
               setCurMenu(menu);
-              //   setCurMenuId(menu.id);
             }
           }}
         />
