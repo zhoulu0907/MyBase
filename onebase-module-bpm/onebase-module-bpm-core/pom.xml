@@ -33,12 +33,6 @@
             <version>${revision}</version>
         </dependency>
 
-        <!-- 业务组件 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
-        </dependency>
-
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
