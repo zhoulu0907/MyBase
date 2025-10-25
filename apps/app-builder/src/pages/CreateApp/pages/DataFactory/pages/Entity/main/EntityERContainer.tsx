@@ -1,10 +1,8 @@
 import type { EdgeData, Entity, EntityERProps, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
-import { useNewNodeStore } from '@/store/store_entity';
 import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { debounce } from 'lodash-es';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
@@ -22,6 +20,7 @@ import {
   CreateRelationModal,
   DeleteConfirmModal
 } from '../components/Modals';
+import type { DatasourceRecord } from './EntityPageContainer';
 import styles from '../index.module.less';
 
 const relationshipTypeMap: Record<string, string> = {
@@ -36,10 +35,10 @@ export const EntityERContainer: React.FC<{
   setRefreshEntityList: (refresh: boolean) => void;
   onlyUpdateNode: boolean;
   setOnlyUpdateNode: (onlyUpdateNode: boolean) => void;
-}> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode }) => {
+  dsData: DatasourceRecord;
+}> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode, dsData }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
-  const { clearNewNodes } = useNewNodeStore();
 
   // 使用统一的弹窗/抽屉管理器
   const { openModal, closeModal, isModalOpen, getModalData, setModalDataValue } = useModalManager();
@@ -50,54 +49,45 @@ export const EntityERContainer: React.FC<{
   const chartRef = useRef<any>(null);
   const prevDataSourceIdRef = useRef<string>('');
 
-  const loadEntityList = useCallback(async (dataSourceId: string) => {
-    if (!dataSourceId) {
-      return;
-    }
+  const loadEntityList = useCallback(
+    async (dataSourceId: string) => {
+      if (!dataSourceId) {
+        return;
+      }
 
-    try {
-      const res = await getEntityGraph(dataSourceId);
+      try {
+        const res = await getEntityGraph(dataSourceId);
 
-      console.log('loadEntityList', res);
-
-      if (res?.entities || res?.relationships) {
-        setData({
-          nodes:
-            res?.entities.map((item: unknown) => {
-              const entityItem = item as Record<string, unknown>;
-              const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
-              return {
-                ...entityItem,
-                positionX: pos?.x,
-                positionY: pos?.y
-              };
-            }) || [],
-          edges:
-            res?.relationships.map((item: unknown) => {
-              const relationItem = item as Record<string, unknown>;
-              return {
-                ...relationItem,
-                label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
-              };
-            }) || []
-        });
-      } else {
+        if (res?.entities || res?.relationships) {
+          setData({
+            nodes:
+              res?.entities.map((item: unknown) => {
+                const entityItem = item as Record<string, unknown>;
+                const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
+                return {
+                  ...entityItem,
+                  positionX: pos?.x,
+                  positionY: pos?.y
+                };
+              }) || [],
+            edges:
+              res?.relationships.map((item: unknown) => {
+                const relationItem = item as Record<string, unknown>;
+                return {
+                  ...relationItem,
+                  label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
+                };
+              }) || []
+          });
+        } else {
+          setData({ nodes: [], edges: [] });
+        }
+      } catch (error) {
+        console.error('加载实体列表失败:', error);
         setData({ nodes: [], edges: [] });
       }
-    } catch (error) {
-      console.error('加载实体列表失败:', error);
-      setData({ nodes: [], edges: [] });
-    }
-  }, []);
-
-  // 防抖
-  const debouncedLoadEntityList = useMemo(
-    () =>
-      debounce((dataSourceId: string) => {
-        loadEntityList(dataSourceId);
-        clearNewNodes();
-      }, 100),
-    [loadEntityList, clearNewNodes]
+    },
+    [dsData]
   );
 
   // 打开节点编辑抽屉
@@ -227,32 +217,24 @@ export const EntityERContainer: React.FC<{
       loadEntityList(curDataSourceId);
       setRefreshEntityList(false);
     }
-  }, [refreshEntityList, curDataSourceId]);
+  }, [refreshEntityList]);
 
   // 数据源ID变化
   useEffect(() => {
-    if (!curDataSourceId) {
+    if (!dsData?.id) {
       setData({ nodes: [], edges: [] });
       return;
     }
 
-    if (prevDataSourceIdRef.current && prevDataSourceIdRef.current !== curDataSourceId) {
+    if (prevDataSourceIdRef.current && prevDataSourceIdRef.current !== dsData?.id) {
       console.log('数据源切换，清理旧实体数据');
       setData({ nodes: [], edges: [] });
-      debouncedLoadEntityList.cancel();
     }
 
-    prevDataSourceIdRef.current = curDataSourceId;
+    prevDataSourceIdRef.current = dsData?.id;
 
-    debouncedLoadEntityList(curDataSourceId);
-  }, [curDataSourceId, debouncedLoadEntityList]);
-
-  // 组件卸载时清理防抖函数
-  useEffect(() => {
-    return () => {
-      debouncedLoadEntityList.cancel();
-    };
-  }, [debouncedLoadEntityList]);
+    loadEntityList(dsData?.id);
+  }, [dsData]);
 
   return (
     <div style={{ height: '100%' }} className={styles['entity-page-container']}>

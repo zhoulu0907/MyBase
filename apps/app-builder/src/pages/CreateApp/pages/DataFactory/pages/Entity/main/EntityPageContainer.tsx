@@ -1,4 +1,3 @@
-import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Message, Radio, Tag } from '@arco-design/web-react';
 import { IconCopy, IconMindMapping, IconNav } from '@arco-design/web-react/icon';
@@ -9,8 +8,8 @@ import EntityTable from '../components/EntityTable';
 import styles from '../index.module.less';
 import { EntityERContainer } from './EntityERContainer';
 
-interface DatasourceRecord {
-  id: number;
+export interface DatasourceRecord {
+  id: string;
   datasourceName: string;
   code: string;
   datasourceType: string;
@@ -26,12 +25,11 @@ const PAGE_TYPE = {
   ENTITY_TABLE: 'ENTITY_TABLE'
 };
 
-export const EntityPageContainer: React.FC = () => {
+export const EntityPageContainer: React.FC<{ appId: string }> = ({ appId }) => {
   const [activeTab, setActiveTab] = useState(PAGE_TYPE.ER_CHART);
   const [refreshEntityList, setRefreshEntityList] = useState(false);
   const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
   const [dsData, setDsData] = useState<DatasourceRecord | null>(null);
-  const { curAppId } = useAppStore();
   const { setCurDataSourceId, clearCurDataSourceId } = useResourceStore();
   const prevAppIdRef = useRef<string>('');
 
@@ -61,15 +59,16 @@ export const EntityPageContainer: React.FC = () => {
         clearCurDataSourceId();
       }
     },
-    [curAppId, setCurDataSourceId, clearCurDataSourceId]
+    [appId]
   );
 
   useEffect(() => {
-    if (!curAppId) {
+    console.log('curAppId', appId, prevAppIdRef.current);
+    if (!appId) {
       return;
     }
 
-    if (prevAppIdRef.current && prevAppIdRef.current !== curAppId) {
+    if (prevAppIdRef.current && prevAppIdRef.current !== appId) {
       console.log('应用切换，清理旧状态');
       setDsData(null);
       clearCurDataSourceId();
@@ -77,10 +76,10 @@ export const EntityPageContainer: React.FC = () => {
       setOnlyUpdateNode(false);
     }
 
-    prevAppIdRef.current = curAppId;
+    prevAppIdRef.current = appId;
 
-    getAppResources(curAppId);
-  }, [curAppId]);
+    getAppResources(appId);
+  }, [appId]);
 
   const handleCopy = (text: string | undefined) => {
     if (text) {
@@ -130,6 +129,7 @@ export const EntityPageContainer: React.FC = () => {
             setRefreshEntityList={setRefreshEntityList}
             onlyUpdateNode={onlyUpdateNode}
             setOnlyUpdateNode={setOnlyUpdateNode}
+            dsData={dsData as DatasourceRecord}
           />
         </div>
       )}
