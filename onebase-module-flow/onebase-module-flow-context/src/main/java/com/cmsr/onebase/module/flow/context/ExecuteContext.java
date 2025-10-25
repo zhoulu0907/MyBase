@@ -28,6 +28,7 @@ public class ExecuteContext implements Serializable {
 
 
     @Setter
+    @Getter
     private Long processId;
 
     @Setter

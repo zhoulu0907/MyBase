@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.app.api.permission;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.permission.dto.*;
 import com.cmsr.onebase.module.app.core.dal.database.auth.*;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,19 @@ public class AppPermissionApiImpl implements AppPermissionApi {
 
     @Resource
     private AppAuthFieldRepository appAuthFieldRepository;
+
+    @Resource
+    private AppMenuRepository appMenuRepository;
+
+    @Override
+    public Long findEntityByMenuId(Long menuId) {
+        MenuDO menuDO = appMenuRepository.findById(menuId);
+        if (menuDO != null) {
+            return menuDO.getEntityId();
+        } else {
+            return null;
+        }
+    }
 
     @Override
     public List<RoleDTO> findRoles(Long applicationId, Long userId) {
