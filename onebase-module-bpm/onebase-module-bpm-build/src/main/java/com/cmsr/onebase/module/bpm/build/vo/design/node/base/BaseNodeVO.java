@@ -1,9 +1,13 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.base;
 
-import com.cmsr.onebase.module.bpm.build.vo.design.node.*;
+import com.cmsr.onebase.module.bpm.build.vo.design.node.ApproverNodeVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.node.EndNodeVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.node.InitiationNodeVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.node.StartNodeVO;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
@@ -29,18 +33,21 @@ import lombok.Data;
 @Data
 @Schema(description = "节点信息视图")
 public class BaseNodeVO {
+    @NotBlank(message = "节点类型不能为空")
     @Schema(description = "节点类型")
     private String type;
 
     /**
      * 实际使用的是流程节点编码
      */
+    @NotBlank(message = "流程ID不能为空")
     @Schema(description = "流程节点编码")
     private String id;
 
     /**
      * 节点名称
      */
+    @NotBlank(message = "节点名称不能为空")
     @Schema(description = "节点名称")
     private String name;
 

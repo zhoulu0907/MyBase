@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.bpm.build.vo.design;
 
+import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.List;
@@ -23,35 +26,14 @@ public class BpmDefJsonVO {
     /**
      * 节点信息
      */
+    @Valid
+    @NotEmpty(message = "流程节点信息不能为空")
     private List<BaseNodeVO> nodes;
 
     /**
      * 边信息
      */
-    private List<EdgeVO> edges;
-
-    @Schema(description = "边信息")
-    @Data
-    public static class EdgeVO {
-        /**
-         * 源节点编码
-         */
-        @Schema(description = "当前流程节点的编码")
-        private String sourceNodeId;
-
-        /**
-         * 目标节点编码
-         */
-        @Schema(description = "下一个流程节点的编码")
-        private String targetNodeId;
-
-        @Schema(description = "边名称")
-        private String name;
-
-        @Schema(description = "边类型（PASS审批通过 REJECT退回）")
-        private String type;
-
-        @Schema(description = "条件")
-        private String skipCondition;
-    }
+    @Valid
+    @NotEmpty(message = "流程边信息不能为空")
+    private List<BaseEdgeVO> edges;
 }

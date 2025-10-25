@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.NodeVOStrategyManager;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
@@ -192,7 +193,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         // 处理边
         for (NodeJson nodeJson : nodeJsonList) {
             for (SkipJson skipJson : nodeJson.getSkipList()) {
-                BpmDefJsonVO.EdgeVO edgeVO = new BpmDefJsonVO.EdgeVO();
+                BaseEdgeVO edgeVO = new BaseEdgeVO();
                 edgeVO.setSourceNodeId(skipJson.getNowNodeCode());
                 edgeVO.setTargetNodeId(skipJson.getNextNodeCode());
                 edgeVO.setName(skipJson.getSkipName());
@@ -258,7 +259,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         }
 
         // 处理边
-        for (BpmDefJsonVO.EdgeVO edgeVO : bpmDefJsonVO.getEdges()) {
+        for (BaseEdgeVO edgeVO : bpmDefJsonVO.getEdges()) {
             String sourceNodeCode = edgeVO.getSourceNodeId();
             String targetNodeCode = edgeVO.getTargetNodeId();
 

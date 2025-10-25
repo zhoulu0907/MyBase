@@ -37,4 +37,6 @@ public interface ErrorCodeConstants {
 
     ErrorCode BPM_NODE_EXT_EMPTY = new ErrorCode(1_009_002_001, "节点扩展信息不能为空");
 
+    ErrorCode VALIDATE_BPM_DEF_JSON_FAILED = new ErrorCode(1_009_002_002, "校验流程定义JSON失败");
+
 }

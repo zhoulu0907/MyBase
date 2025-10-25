@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.vo.design;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
@@ -18,5 +19,16 @@ public class BpmDesignVO extends BpmDefinitionVO {
     /**
      * 流程定义JSON
      */
+    @Schema(description = "流程定义JSON")
+    @NotBlank(message = "流程定义JSON不能为空")
     private String bpmDefJson;
+
+    /**
+     * 流程定义JSONVO
+     *
+     * 不返回给前端展示，用于解析和校验bpmDefJson后存储使用
+     *
+     */
+    @Schema(description = "流程定义JSONVO")
+    private BpmDefJsonVO bpmDefJsonVO;
 }

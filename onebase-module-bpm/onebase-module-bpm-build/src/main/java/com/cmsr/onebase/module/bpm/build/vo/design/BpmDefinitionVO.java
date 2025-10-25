@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.vo.design;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -36,6 +37,7 @@ public class BpmDefinitionVO {
      *
      * 通常为表单ID
      */
+    @NotNull(message = "业务ID不能为空")
     @Schema(description = "业务ID")
     private Long businessId;
 }

@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
-import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
@@ -9,6 +10,8 @@ import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
 import jakarta.annotation.Resource;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -27,10 +30,7 @@ import org.dromara.warm.flow.core.utils.CollUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -63,10 +63,29 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     private BpmDesignConvert bpmDesignConvert;
 
     @Resource
-    private UidGenerator uidGenerator;
+    private Validator validator;
 
     private String generateFlowCode() {
-        return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        return "fc_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+    }
+
+    public void validateBpmDefJsonVO(String bpmDefJson) {
+        BpmDefJsonVO bpmDefJsonVO = JsonUtils.parseObject(bpmDefJson, BpmDefJsonVO.class);
+        if (bpmDefJsonVO == null) {
+            log.error("流程定义JSON解析失败");
+            throw exception(ErrorCodeConstants.VALIDATE_BPM_DEF_JSON_FAILED);
+        }
+
+        // 使用Jakarta Validation进行校验
+        Set<ConstraintViolation<BpmDefJsonVO>> violations = validator.validate(bpmDefJsonVO);
+
+        if (!violations.isEmpty()) {
+            log.error("BpmDefJsonVO校验失败:");
+            for (ConstraintViolation<BpmDefJsonVO> violation : violations) {
+                log.error("- {}: {}", violation.getPropertyPath(), violation.getMessage());
+                throw exception(ErrorCodeConstants.VALIDATE_BPM_DEF_JSON_FAILED.getCode(), violation.getMessage());
+            }
+        }
     }
 
     @Override
@@ -78,6 +97,15 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         // 流程编码代表流程唯一标识，流程的多个版本编码也一样；只有多流程的场景才会有不同编码，暂时忽略
         String flowCode = flowDesignVO.getFlowCode();
 
+        // 前端暂时用不到流程名称字段，如果流程名称为空则使用默认名称“业务流程”
+        if (StringUtils.isBlank(flowDesignVO.getFlowName())) {
+            flowDesignVO.setFlowName("业务流程");
+        }
+
+        // 校验流程定义JSON
+        validateBpmDefJsonVO(flowDesignVO.getBpmDefJson());
+
+        // 转换JSON
         DefJson defJson = bpmDesignConvert.toDefJson(flowDesignVO);
 
         // 数据校验和转换
