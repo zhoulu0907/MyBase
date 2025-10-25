@@ -441,7 +441,6 @@ export default function EditorWorkspace() {
                 schema.config.dataField = [entityID, fieldID];
                 schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
 
-                console.log('itemType: ', itemType);
                 if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
                   const options = await getFieldOptions(fieldID);
                   schema.config.defaultValue = options;
