@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.cmsr.onebase.module.system.enums.dict.DictOwnerTypeEnum;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypeListReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSaveReqVO;
 import com.google.common.annotations.VisibleForTesting;
@@ -98,6 +99,11 @@ public class DictTypeServiceImpl implements DictTypeService {
     @Override
     public List<DictTypeDO> getDictTypeList() {
         return dictTypeRepository.findAllList();
+    }
+
+    @Override
+    public List<DictTypeDO> getDictTypeList(DictTypeListReqVO reqVO) {
+        return dictTypeRepository.findList(reqVO);
     }
 
     @VisibleForTesting

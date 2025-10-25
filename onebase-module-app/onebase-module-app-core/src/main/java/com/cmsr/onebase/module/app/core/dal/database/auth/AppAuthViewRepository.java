@@ -48,4 +48,10 @@ public class AppAuthViewRepository extends DataRepository<AuthViewDO> {
     }
 
 
+    public List<AuthViewDO> findByApplicationIdAndRoleId(Long applicationId, Long roleId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("role_id", roleId);
+        return this.findAllByConfig(configs);
+    }
 }

@@ -11,12 +11,13 @@ import com.cmsr.onebase.dolphins.workflow.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TaskTest extends BaseTest {
 
   @Test
+  @Order(1)
   public void testShellTask() {
     Long taskCode = getClient().opsForProcess().generateTaskCode(projectCode, 1).get(0);
     ShellTask shellTask = new ShellTask();
@@ -30,6 +31,7 @@ public class TaskTest extends BaseTest {
   }
 
   @Test
+  @Order(2)
   public void testHttpTask() {
     Long taskCode = getClient().opsForProcess().generateTaskCode(projectCode, 1).get(0);
 
@@ -50,6 +52,7 @@ public class TaskTest extends BaseTest {
 
   /** run this test before creating datasource and then set its id to SqlTask */
   @Test
+  @Order(3)
   public void testSqlTask() {
     Long taskCode = getClient().opsForProcess().generateTaskCode(projectCode, 1).get(0);
 
@@ -74,6 +77,7 @@ public class TaskTest extends BaseTest {
   }
 
   @Test
+  @Order(4)
   public void testPythonTask() {
     Long taskCode = getClient().opsForProcess().generateTaskCode(projectCode, 1).get(0);
     PythonTask pythonTask = new PythonTask();
@@ -87,6 +91,7 @@ public class TaskTest extends BaseTest {
   }
 
   @Test
+  @Order(5)
   public void testConditionTask() {
     List<Long> taskCodes = getClient().opsForProcess().generateTaskCode(projectCode, 4);
 
@@ -141,13 +146,14 @@ public class TaskTest extends BaseTest {
     TaskLocation tl3 = new TaskLocation(successTaskCode, 800, 240);
     TaskLocation tl4 = new TaskLocation(failTaskCode, 800, 440);
 
-    ProcessDefineParam pcr = new ProcessDefineParam();
+    WorkflowDefineParam pcr = new WorkflowDefineParam();
     pcr.setName("condition-dag")
         .setLocations(Arrays.asList(tl1, tl2, tl3, tl4))
         .setDescription("test for use condition dag")
         .setTenantCode(tenantCode)
         .setTimeout("0")
-        .setExecutionType(ProcessDefineParam.EXECUTION_TYPE_PARALLEL)
+        .setExecutionType(
+            com.cmsr.onebase.dolphins.workflow.WorkflowDefineParam.EXECUTION_TYPE_PARALLEL)
         .setTaskDefinitionJson(
             Arrays.asList(
                 shellTaskDefinition,
@@ -157,30 +163,76 @@ public class TaskTest extends BaseTest {
         .setTaskRelationJson(Arrays.asList(r1, r2, r3, r4))
         .setGlobalParams(null);
 
-    ProcessDefineResp resp = getClient().opsForProcess().create(projectCode, pcr);
+    WorkflowDefineResp resp = getClient().opsForProcess().create(projectCode, pcr);
     System.out.println(resp);
     Assertions.assertEquals("condition-dag", resp.getName());
   }
 
+  @Test
+  @Order(6)
+  public void testFlinkTask() {
+    List<Long> taskCodes = getClient().opsForProcess().generateTaskCode(projectCode, 1);
+
+    // 构建 Flink 任务
+    FlinkTask flinkTask = new FlinkTask();
+    flinkTask
+        .setMainClass("abc.de")
+        .setMainJar(
+            new TaskResource()
+                .setResourceName(
+                    "onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar"))
+        .setDeployMode("cluster")
+        .setProgramType("JAVA")
+        .setFlinkVersion(">=1.12")
+        .setJobManagerMemory("1G")
+        .setTaskManagerMemory("2G")
+        .setSlot(1)
+        .setTaskManager(2)
+        .setParallelism(1)
+        .setInitScript("")
+        .setRawScript("")
+        .setYarnQueue("")
+        .setLocalParams(Collections.emptyList())
+        .setResourceList(Collections.emptyList());
+    TaskDefinition flinkTaskDefinition =
+        TaskDefinitionUtils.createDefaultTaskDefinition(taskCodes.get(0), flinkTask);
+
+    WorkflowDefineParam pcr = new WorkflowDefineParam();
+    pcr.setName("test-flink-task-dag-by-junit-test")
+        .setLocations(TaskLocationUtils.horizontalLocation(taskCodes.toArray(new Long[0])))
+        .setDescription("test-flink-dag-description")
+        .setTenantCode(tenantCode)
+        .setTimeout("0")
+        .setExecutionType(
+            com.cmsr.onebase.dolphins.workflow.WorkflowDefineParam.EXECUTION_TYPE_PARALLEL)
+        .setTaskDefinitionJson(Collections.singletonList(flinkTaskDefinition))
+        .setTaskRelationJson(TaskRelationUtils.oneLineRelation(taskCodes.toArray(new Long[0])))
+        .setGlobalParams(null);
+
+    System.out.println(getClient().opsForProcess().create(projectCode, pcr));
+  }
+
   private void submit(
       Long taskCode, TaskDefinition taskDefinition, String processName, String description) {
-    ProcessDefineParam pcr = new ProcessDefineParam();
+    WorkflowDefineParam pcr = new WorkflowDefineParam();
     pcr.setName(processName)
         .setLocations(TaskLocationUtils.verticalLocation(taskCode))
         .setDescription(description)
         .setTenantCode(tenantCode)
         .setTimeout("0")
-        .setExecutionType(ProcessDefineParam.EXECUTION_TYPE_PARALLEL)
+        .setExecutionType(
+            com.cmsr.onebase.dolphins.workflow.WorkflowDefineParam.EXECUTION_TYPE_PARALLEL)
         .setTaskDefinitionJson(Collections.singletonList(taskDefinition))
         .setTaskRelationJson(TaskRelationUtils.oneLineRelation(taskCode))
         .setGlobalParams(null);
 
-    ProcessDefineResp resp = getClient().opsForProcess().create(projectCode, pcr);
+    WorkflowDefineResp resp = getClient().opsForProcess().create(projectCode, pcr);
     System.out.println(resp);
     Assertions.assertEquals(processName, resp.getName());
   }
 
   @Test
+  @Order(8)
   public void testGenerateTaskCode() {
     int expectedCodeNumber = 10;
     List<Long> taskCodes =

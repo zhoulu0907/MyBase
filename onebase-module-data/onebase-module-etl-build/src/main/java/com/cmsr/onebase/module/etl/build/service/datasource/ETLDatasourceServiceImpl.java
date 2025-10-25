@@ -102,8 +102,12 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         validDatasourceCodeDuplicate(requestVO.getDatasourceCode(), requestVO.getId());
         validDatasourceTypeSupported(requestVO.getDatasourceType());
 
-        ETLDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, ETLDatasourceDO.class);
-        datasourceRepository.update(datasourceDO);
+        ETLDatasourceDO oldDatasource = datasourceRepository.findById(requestVO.getId());
+        oldDatasource.setDatasourceCode(requestVO.getDatasourceCode());
+        oldDatasource.setDatasourceName(requestVO.getDatasourceName());
+        oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
+
+        datasourceRepository.update(oldDatasource);
     }
 
     @Override
@@ -139,7 +143,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         }
         if (datasourceDO.getCollectStatus() == CollectStatus.RUNNING) {
             // 1. 检查任务状态
-
+            // TODO
         }
         return Boolean.TRUE;
     }

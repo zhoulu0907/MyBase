@@ -20,6 +20,7 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -148,6 +149,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         configStore.order("create_time", Order.TYPE.DESC);
         List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
         List<String> subTableIds = new ArrayList<String>();
+        //获取子表数据
+        List<SubEntityVo> subEntities = reqVO.getSubEntities();
         for(MetadataEntityRelationshipDO relationshipDO:relationships){
             //根据关联字段查询子表存在的所有记录
             MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
@@ -178,15 +181,50 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                 DataRow row = dataSet.getRow(i);
                 subTableIds.add((String) row.get("id"));
             }
+            //如果子表数据为空，对子表数据全部删除
+            if(subEntities.isEmpty()) {
+                List<MetadataEntityFieldDO> fields = entityFieldRepository.getEntityFieldListByEntityId(targetEntity.getId());
+                boolean hasDeletedField = fields.stream()
+                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+                DefaultConfigStore subConfig = new DefaultConfigStore();
+                subConfig.and("parent_id", reqVO.getId());
+                if (hasDeletedField) {
+                    // 软删除：更新deleted字段为删除时间戳
+                    DataRow updateData = new DataRow();
+                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+                    temporaryService.update(tableName, updateData, subConfig);
+//                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+                } else {
+                     temporaryService.delete(tableName, subConfig);
+//                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+                }
+//                for (String id : subTableIds) {
+//                    coreDataMethodService.deleteData(
+//                            targetEntity.getId(),
+//                            id,
+//                            null
+//                    );
+//                }
+            }
         }
-        //获取子表数据
-        List<SubEntityVo> subEntities = reqVO.getSubEntities();
+
         for(SubEntityVo subEntityVo: subEntities) {
             //子实体Id
             Long subEntityId = subEntityVo.getSubEntityId();
+
+            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(subEntityId);
+
+
             List<String> processedIds = new ArrayList<String>();
             //该子实体对应多条数据待插入
             List<Map<Long, Object>> list = subEntityVo.getSubData();
+
+            // 获取临时数据源服务
+            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
+            if (datasource == null) {
+                throw exception(DATASOURCE_NOT_EXISTS);
+            }
+            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
 
             for (Map<Long, Object> data : list) {
                 Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
@@ -217,11 +255,30 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
 
             //删除多余的【在子表有的但没在更新信息表单】数据行
             for(String id: toDelete){
-                coreDataMethodService.deleteData(
-                        subEntityId,
-                        id,
-                        null
-                );
+//                coreDataMethodService.deleteData(
+//                        subEntityId,
+//                        id,
+//                        null
+//                );
+
+                List<MetadataEntityFieldDO> fields = entityFieldRepository.getEntityFieldListByEntityId(subEntityId);
+                boolean hasDeletedField = fields.stream()
+                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+                DefaultConfigStore subConfig = new DefaultConfigStore();
+                subConfig.and("id", id);
+                if (hasDeletedField) {
+                    // 软删除：更新deleted字段为删除时间戳
+                    DataRow updateData = new DataRow();
+                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+                    temporaryService.update(targetEntity.getTableName(), updateData, subConfig);
+//                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+                } else {
+                    temporaryService.delete(targetEntity.getTableName(), subConfig);
+//                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+                }
+
+
+
             }
         }
 

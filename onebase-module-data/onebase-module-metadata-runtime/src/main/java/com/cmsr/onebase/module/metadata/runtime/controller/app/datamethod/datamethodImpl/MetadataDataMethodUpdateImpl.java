@@ -2,6 +2,10 @@ package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datam
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
+import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
+import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
@@ -11,11 +15,13 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
@@ -23,6 +29,9 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENT
 @Slf4j
 @Component
 public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCoreService {
+
+    @Autowired
+    private FlowProcessExecApiImpl flowProcessExecApi;
 
     /**
      * 校验更新数据
@@ -189,7 +198,41 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         });
     }
 
+    @Override
+    protected void executePreWorkflow(ProcessContext context) {
+        Long entityId = context.getEntityId();
+        Map<String, Object> data = context.getData();
+        Map fieldData = convertNameToId(entityId,data);
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(entityId);
+        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
+        reqDTO.setFieldData(fieldData);
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(respDTO.isSuccess()){
+            log.info("数据更新触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+        }else{
+            log.info("数据更新触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+        }
+    }
 
+    @Override
+    protected void executePostWorkflow(ProcessContext context) {
+        Long entityId = context.getEntityId();
+        Map<String, Object> data = context.getData();
+        Map fieldData = convertNameToId(entityId,data);
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(entityId);
+        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        reqDTO.setFieldData(fieldData);
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(respDTO.isSuccess()){
+            log.info("数据更新触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+        }else{
+            log.info("数据更新触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+        }
+    }
 
 
 }
