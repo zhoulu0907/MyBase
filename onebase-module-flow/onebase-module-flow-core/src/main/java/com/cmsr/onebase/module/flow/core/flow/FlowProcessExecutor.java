@@ -56,7 +56,7 @@ public class FlowProcessExecutor {
      */
     public ExecutorResult execute(String traceId, Long processId, Map<String, Object> inputParams) {
         if (!graphFlowCache.isProcessExist(processId)) {
-            return ExecutorResult.error("流程不存在: " + processId);
+            return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
 
@@ -86,7 +86,7 @@ public class FlowProcessExecutor {
             log.error("执行流程异常", e);
             executionLog.setExecutionResult(ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
-            return ExecutorResult.error("执行流程异常", e);
+            return ExecutorResult.error(processId, "执行流程异常", e);
         } finally {
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
@@ -103,7 +103,7 @@ public class FlowProcessExecutor {
      */
     public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputFields) {
         if (!graphFlowCache.isProcessExist(processId)) {
-            return ExecutorResult.error("流程不存在: " + processId);
+            return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
 
@@ -111,14 +111,14 @@ public class FlowProcessExecutor {
             //初始化变量上下文
             VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
             if (variableContext == null) {
-                return ExecutorResult.error("执行上下文不存在或已过期: " + executionUuid);
+                return ExecutorResult.error(processId, "执行上下文不存在或已过期: " + executionUuid);
             }
             variableContext.setInputFields(inputFields);
             variableContext.setOutputParams(Collections.emptyMap());
             //初始化执行上下文
             ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
             if (executeContext == null) {
-                return ExecutorResult.error("执行上下文不存在或已过期: " + executionUuid);
+                return ExecutorResult.error(processId, "执行上下文不存在或已过期: " + executionUuid);
             }
             //重置执行结果
             executeContext.resetNodeProcessResult();
@@ -137,7 +137,7 @@ public class FlowProcessExecutor {
             log.error("执行流程异常", e);
             executionLog.setExecutionResult(ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
-            return ExecutorResult.error("执行流程异常", e);
+            return ExecutorResult.error(processId, "执行流程异常", e);
         } finally {
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
@@ -209,6 +209,7 @@ public class FlowProcessExecutor {
     private static ExecutorResult buildExecutorResult(LiteflowResponse response, ExecuteContext executeContext, VariableContext variableContext) {
         ExecutorResult result = new ExecutorResult();
         result.setTraceId(executeContext.getTraceId());
+        result.setProcessId(executeContext.getProcessId());
         result.setSuccess(response.isSuccess());
         result.setCode(response.getCode());
         result.setMessage(response.getMessage());

@@ -11,6 +11,8 @@ import java.util.List;
 @Tag(name = "RPC 服务 - 应用")
 public interface AppPermissionApi {
 
+    Long findEntityByMenuId(Long menuId);
+
     List<RoleDTO> findRoles(Long applicationId, Long userId);
 
     List<PermissionDTO> findPermissions(Long applicationId, Long roleId);
