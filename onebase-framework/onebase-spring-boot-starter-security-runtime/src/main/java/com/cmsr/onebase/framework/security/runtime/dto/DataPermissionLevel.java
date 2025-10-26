@@ -1,11 +1,11 @@
-package com.cmsr.onebase.framework.security.runtime;
+package com.cmsr.onebase.framework.security.runtime.dto;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/23 11:22
  * 权限范围枚举
  */
-public enum DataPermissionScopeTagEnum {
+public enum DataPermissionLevel {
 
     /**
      * 本人
@@ -35,14 +35,13 @@ public enum DataPermissionScopeTagEnum {
     /**
      * 指定人员
      */
-    SPECIFIED_PERSON("specifiedPerson", "指定人员"),
+    SPECIFIED_PERSON("specifiedPerson", "指定人员");
 
-    ;
 
     private final String code;
     private final String label;
 
-    DataPermissionScopeTagEnum(String code, String label) {
+    DataPermissionLevel(String code, String label) {
         this.code = code;
         this.label = label;
     }

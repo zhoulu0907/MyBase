@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.runtime;
+package com.cmsr.onebase.framework.security.runtime.dto;
 
 import lombok.Data;
 

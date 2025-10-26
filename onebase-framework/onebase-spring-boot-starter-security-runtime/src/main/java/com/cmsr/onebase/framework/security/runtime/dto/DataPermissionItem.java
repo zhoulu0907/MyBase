@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.runtime;
+package com.cmsr.onebase.framework.security.runtime.dto;
 
 import lombok.Data;
 
@@ -9,13 +9,13 @@ import java.util.List;
  * @Date：2025/10/18 14:54
  */
 @Data
-public class DataPermission {
+public class DataPermissionItem {
 
-    private List<DataPermissionScopeTagEnum> scopTags;
+    private List<DataPermissionTag> scopTags;
 
     private Long scopeFieldId;
 
-    private DataPermissionScopeEnum scopeLevel;
+    private DataPermissionLevel scopeLevel;
 
     /**
      * 权限范围值，当时scopeLevel等于 指定部门 或者 指定人员时 有代码的值
@@ -65,7 +65,6 @@ public class DataPermission {
     /**
      * 操作标签 只有 编辑和删除两类值
      */
-    private List<OperationEnum> operationTags;
-
+    private boolean canEdit;
 
 }
