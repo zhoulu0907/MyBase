@@ -55,7 +55,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
+          <div style={{ marginLeft: '10px' }}>{fieldValue || '--'}</div>
         ) : (
           <Input
             defaultValue={defaultValue}

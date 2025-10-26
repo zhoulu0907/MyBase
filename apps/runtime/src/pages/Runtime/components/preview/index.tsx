@@ -390,15 +390,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         {/* 右侧详情抽屉 */}
         <Drawer
-          width={600}
+          width={'60vw'}
           title={
             <div className={styles.drawerTitle}>
               <div>详情</div>
-              {detailMode && (
+              {/* {detailMode && (
                 <Button type="primary" onClick={() => toEditMode()}>
                   编辑
                 </Button>
-              )}
+              )} */}
             </div>
           }
           visible={drawerVisible.value}
