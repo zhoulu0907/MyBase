@@ -31,7 +31,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     labelColSpan = 100,
     status,
     verify,
-    dataField
+    dataField,
+    detailMode
   } = props;
 
   useSignals();
@@ -166,6 +167,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   {...FormSchema.XInputTextSchema.config}
                   label={{ text: col.title, display: false }}
                   runtime={runtime}
+                  detailMode={detailMode}
                   dataField={[`${id}.${index}.${column.dataIndex}`]}
                 />
               </div>
@@ -185,6 +187,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XInputTextAreaSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -203,6 +206,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XInputEmailSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -221,6 +225,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XInputPhoneSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -239,6 +244,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XInputNumberSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -258,6 +264,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XDatePickerSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -277,6 +284,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XDateTimePickerSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -297,6 +305,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   {...FormSchema.XTimePickerSchema.config}
                   label={{ text: col.title, display: false }}
                   runtime={runtime}
+                  detailMode={detailMode}
                 />
               </Form.Item>
             );
@@ -316,6 +325,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XSwitchSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -335,6 +345,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XSelectOneSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -354,6 +365,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XSelectMutipleSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -373,6 +385,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XAutoCodeSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
               />
             );
           }
@@ -394,6 +407,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XUserSelectSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -417,6 +431,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   {...FormSchema.XDeptSelectSchema.config}
                   label={{ text: col.title, display: false }}
                   runtime={runtime}
+                  detailMode={detailMode}
                 />
               </Form.Item>
             );
@@ -436,6 +451,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XRelatedFormSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -455,6 +471,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XFileUploadSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -474,6 +491,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 {...FormSchema.XImgUploadSchema.config}
                 label={{ text: col.title, display: false }}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -495,6 +513,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               <FormComp.XUserSelect
                 {...FormSchema.XUserSelectSchema.config}
                 runtime={runtime}
+                detailMode={detailMode}
                 dataField={[`${id}.${index}.${column.dataIndex}`]}
               />
             );
@@ -557,15 +576,17 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           }
         </div>
         <div className="subTableFooter">
-          <Button
-            className="addButton"
-            type="outline"
-            icon={<IconPlus />}
-            style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
-            onClick={handleAdd}
-          >
-            新增一项
-          </Button>
+          {!detailMode && (
+            <Button
+              className="addButton"
+              type="outline"
+              icon={<IconPlus />}
+              style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
+              onClick={handleAdd}
+            >
+              新增一项
+            </Button>
+          )}
         </div>
       </Form.Item>
     </Layout>
