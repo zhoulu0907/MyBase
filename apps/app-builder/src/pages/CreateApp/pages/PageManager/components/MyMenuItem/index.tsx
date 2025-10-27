@@ -46,6 +46,7 @@ interface MenuItemProps {
   renameForm: FormInstance;
   copyForm: FormInstance;
   createForm: FormInstance;
+  style?: React.CSSProperties;
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
@@ -65,7 +66,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   maxWidth,
   renameForm,
   copyForm,
-  createForm
+  createForm,
+  style
 }) => {
   useSignals();
   const navigate = useNavigate();
@@ -208,6 +210,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       onClick={onClick}
       role="menuitem"
       tabIndex={0}
+      style={style}
     >
       <Tooltip content={menuName} position="top">
         <div
