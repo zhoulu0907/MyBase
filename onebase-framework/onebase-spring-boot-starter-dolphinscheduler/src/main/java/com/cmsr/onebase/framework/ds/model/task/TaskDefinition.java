@@ -1,48 +1,75 @@
 package com.cmsr.onebase.framework.ds.model.task;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.ds.model.task.def.AbstractTask;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class TaskDefinition {
 
-    private Long code;
+    private Integer id;
 
-    private Integer version;
+    private long code;
 
     private String name;
 
+    private int version;
+
     private String description;
+
+    private long projectCode;
+
+    private int userId;
 
     private String taskType;
 
     private AbstractTask taskParams;
 
-    private String flag;
+    // taskParamList
+    // taskParamMap
 
-    private String taskPriority;
+    private String flag = "YES";
 
-    private String workerGroup;
+    private String taskPriority = "MEDIUM";
 
-    private String failRetryTimes;
+    private String userName;
 
-    private String failRetryInterval;
+    private String projectName;
 
-    private String timeoutFlag;
+    private String workerGroup = "default";
 
-    private String timeoutNotifyStrategy;
+    private long environmentCode;
 
-    private Integer timeout = 0;
+    private int failRetryTimes = 0;
 
-    private String delayTime = "0";
+    private int failRetryInterval;
 
-    private Integer environmentCode = -1;
+    private String timeoutFlag = "CLOSE";
 
-    private String taskExecuteType;
+    private String timeoutNotifyStrategy = "";
+
+    private int timeout = 0;
+
+    private int delayTime = 0;
+
+    private String taskExecuteType = "BATCH";
 
     private Integer cpuQuota = -1;
 
-    private Long memoryMax = -1L;
+    private Integer memoryMax = -1;
 
-    private String isCache = "NO";
+    public static TaskDefinition singleton(AbstractTask task) {
+        TaskDefinition taskDefinition = new TaskDefinition();
+        taskDefinition.setTaskType(task.grantTaskType())
+                .setTaskParams(task);
+
+        return taskDefinition;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJsonString(this);
+    }
 }

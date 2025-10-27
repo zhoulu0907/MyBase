@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.ds.model.schedule;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -17,8 +18,10 @@ public class ScheduleInfoResp {
 
     private String definitionDescription;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
     private String timezoneId;
@@ -29,8 +32,10 @@ public class ScheduleInfoResp {
 
     private String warningType;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
     private int userId;
