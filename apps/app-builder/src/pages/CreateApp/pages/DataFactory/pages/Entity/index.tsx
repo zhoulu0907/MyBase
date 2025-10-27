@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { EntityPageHeader } from './main/EntityPageHeader';
-import { getFieldTypes } from '@onebase/app';
 import { useFieldStore } from '@/store/store_field';
+import { getFieldTypes } from '@onebase/app';
+import React, { useEffect } from 'react';
+import { EntityPageContainer } from './main/EntityPageContainer';
 
-const EntityPage: React.FC = () => {
+const EntityPage: React.FC = ({appId}) => {
   const { setFieldTypes } = useFieldStore();
 
   // 加载字段类型
@@ -21,7 +21,7 @@ const EntityPage: React.FC = () => {
 
   return (
     <>
-      <EntityPageHeader />
+      <EntityPageContainer appId={appId} />
     </>
   );
 };

@@ -189,7 +189,7 @@ const XRadio: XInputRadioSchema = {
       }
     ],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    labelColSpan: 100,
+    labelColSpan: 200,
     saveWithHidden: false,
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {

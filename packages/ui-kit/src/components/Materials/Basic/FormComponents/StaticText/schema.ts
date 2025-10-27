@@ -219,7 +219,7 @@ const XStaticText: XStaticTextSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100,
+    labelColSpan: 200,
     maxLength: 40
   }
 };

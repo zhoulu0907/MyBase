@@ -35,6 +35,14 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
     }
   }, [dataField]);
 
+  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
+    return (
+      (node?.closest('.arco-form-item') as HTMLElement) ||
+      node?.parentNode as HTMLElement ||
+      document.body
+    );
+  };
+
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
   const validStartTime = startTime && dayjs(startTime);
@@ -71,6 +79,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
             mode={currentDateType}
             defaultValue={[validStartTime, validEndTime]}
             showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
+            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

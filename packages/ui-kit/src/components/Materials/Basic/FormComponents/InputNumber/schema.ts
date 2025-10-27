@@ -274,7 +274,7 @@ const XInputNumber: XInputNumberSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100,
+    labelColSpan: 200,
     security: {
       display: false,
       type: ''

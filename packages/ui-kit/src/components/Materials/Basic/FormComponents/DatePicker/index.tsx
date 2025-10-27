@@ -42,15 +42,22 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
       width: '100%',
       pointerEvents: (runtime ? 'auto' : 'none') as React.CSSProperties['pointerEvents']
     };
+    const getPopupContainer = (node?: HTMLElement): HTMLElement => {
+      return (
+        (node?.closest('.arco-form-item') as HTMLElement) ||
+        node?.parentNode as HTMLElement ||
+        document.body
+      );
+    };
     switch (currentDateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
-        return <YearPicker style={styles} />;
+        return <YearPicker style={styles} getPopupContainer={getPopupContainer} />;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
-        return <MonthPicker style={styles} />;
+        return <MonthPicker style={styles} getPopupContainer={getPopupContainer} />;
       case DATE_VALUES[DATE_OPTIONS.DATE]:
-        return <DatePicker style={styles} />;
+        return <DatePicker style={styles} getPopupContainer={getPopupContainer} />;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
-        return <DatePicker showTime style={styles} />;
+        return <DatePicker showTime style={styles} getPopupContainer={getPopupContainer} />;
       default:
         // 默认显示日期选择器
         return <DatePicker style={{ width: '100%' }} />;

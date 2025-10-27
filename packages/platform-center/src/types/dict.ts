@@ -10,7 +10,7 @@ export interface DictItem {
 
 // 字典数据
 export interface DictData {
-  id: number;
+  id: string;
   sort: number;
   label: string;
   value: string;
@@ -18,6 +18,7 @@ export interface DictData {
   status: number;
   remark?: string;
   createTime?: string;
+  colorType?: string;
 }
 
 export type DictForm = Partial<DictItem>;

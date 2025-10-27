@@ -194,7 +194,7 @@ const XSelectOne: XInputSelectOneSchema = {
     ],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     showSearch: true,
     verify: {
       required: false,

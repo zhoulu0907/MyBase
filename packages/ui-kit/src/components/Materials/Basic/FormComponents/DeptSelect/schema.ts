@@ -30,13 +30,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputDeptSelectSchema {
@@ -98,7 +98,7 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -149,7 +149,7 @@ const XDeptSelect: XInputDeptSelectSchema = {
     ...baseDefault,
     label: {
       text: '部门选择',
-      display: true,
+      display: true
     },
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
@@ -157,7 +157,7 @@ const XDeptSelect: XInputDeptSelectSchema = {
     defaultValue: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     verify: {
       required: false,
       noRepeat: false

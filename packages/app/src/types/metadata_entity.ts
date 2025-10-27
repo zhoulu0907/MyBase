@@ -173,3 +173,12 @@ export interface ValidationTypeItem {
   description: string;
   sortOrder: number;
 }
+
+export interface EntityFieldOption {
+  id: string;
+  fieldId: string;
+  optionValue: string;
+  optionLabel: string;
+  optionOrder: number;
+  isEnable: number;
+}

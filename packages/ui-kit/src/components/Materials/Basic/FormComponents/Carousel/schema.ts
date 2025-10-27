@@ -1,37 +1,47 @@
 import {
   baseConfig,
   baseDefault,
-  statusConfig,
-  widthConfig,
+  carouselConfig,
   fillConfig,
   layoutConfig,
-  carouselConfig,
+  statusConfig,
+  widthConfig,
   type ICommonBaseType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType,
+  type TAlignSelectKeyType,
   type TFillSelectKeyType,
   type TLayoutSelectKeyType,
-  type TAlignSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, FILL_OPTIONS, FILL_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, } from '../../../constants';
+import {
+  CONFIG_TYPES,
+  FILL_OPTIONS,
+  FILL_VALUES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
+} from '../../../constants';
 import type {
   IBooleanConfigType,
+  ICarouselConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
   IStatusConfigType,
+  ITextAreaConfigType,
   ITextConfigType,
+  ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
-  INumberConfigType,
-  ICarouselConfigType,
-  IVerifyConfigType,
-  TTextDefaultType,
   TTextAreaDefaultType,
-  ILayoutConfigType,
-  ITextAreaConfigType,
-  ILabelConfigType,
-  ITooltipConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XCarouselSchema {
@@ -40,7 +50,7 @@ export interface XCarouselSchema {
 }
 
 export type TXCarouselEditData = Array<
-  ITextConfigType
+  | ITextConfigType
   | IBooleanConfigType
   | INumberConfigType
   | ICarouselConfigType
@@ -113,7 +123,7 @@ export interface XCarouselConfig extends ICommonBaseType {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
     maxSize: TNumberDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -165,13 +175,13 @@ const XCarousel: XCarouselSchema = {
     },
     fillConfig,
     statusConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '轮播图',
-      display: true,
+      display: true
     },
     tooltip: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
@@ -180,17 +190,17 @@ const XCarousel: XCarouselSchema = {
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
     autoplay: false,
     interval: 3,
-    labelColSpan: 100,
+    labelColSpan: 200,
     carouselConfig: [
       {
         image: 'https://devops.cm-iov.com:9000/system-static/img/annual2.jpg',
         text: '🎑 中秋快乐 🎉',
-        url: 'https://devops.cm-iov.com:9000/system-static/img/annual2.jpg',
+        url: 'https://devops.cm-iov.com:9000/system-static/img/annual2.jpg'
       },
       {
         image: 'https://devops.cm-iov.com/static/img/bg.dd06daaa.png',
         text: '222',
-        url: '#',
+        url: '#'
       }
     ],
     verify: {

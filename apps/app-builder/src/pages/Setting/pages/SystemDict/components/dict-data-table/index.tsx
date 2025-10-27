@@ -48,7 +48,8 @@ export default function DictionaryTable({
   const columns = [
     {
       title: '颜色标识',
-      dataIndex: 'color',
+      dataIndex: 'colorType',
+      width: 100,
       render: (val: string) => <div style={{ width: 16, height: 16, borderRadius: 50, backgroundColor: val }} />
     },
     { title: '字典值', dataIndex: 'label' },
