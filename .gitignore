@@ -113,3 +113,4 @@ sessionStore
 /sql/patch/fix_uid_worker_node_sequence_simple.sql
 /sql/patch/update_parent_id_flags.sql
 /sql/patch/20250908_add_validation_type_to_rule_group.sql
+LOG_FILE_IS_UNDEFINED

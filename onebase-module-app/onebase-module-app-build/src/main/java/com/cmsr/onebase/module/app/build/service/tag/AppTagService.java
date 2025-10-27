@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.tag;
 
+import com.cmsr.onebase.module.app.core.vo.tag.TagGroupCountVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
 
 import java.util.List;
@@ -15,4 +16,8 @@ public interface AppTagService {
     void createTag(String tagName);
 
     void deleteTag(Long tagId);
+
+    List<TagGroupCountVO> groupCount();
+
+    void updateTags(List<TagRespVO> tagRespVOS);
 }

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.datamethod.impl;
+package com.cmsr.onebase.module.metadata.api.datamethod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
-import com.cmsr.onebase.module.metadata.api.datamethod.assembler.DataMethodAssembler;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
@@ -19,15 +18,17 @@ import com.cmsr.onebase.module.metadata.core.domain.query.QueryResult;
 import com.cmsr.onebase.module.metadata.core.domain.query.RowData;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.query.MetadataQueryService;
+import com.cmsr.onebase.module.metadata.api.datamethod.assembler.DataMethodAssembler;
 
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+
 /**
- * 数据方法API实现类
+ * 数据方法API实现类（运行态）
  * 
  * @author bty418
- * @date 2025-09-24
+ * @date 2025-10-23
  */
 @Service
 @Slf4j
@@ -41,8 +42,6 @@ public class DataMethodApiImpl implements DataMethodApi {
 
     @Resource
     private DataMethodAssembler dataMethodAssembler;
-
-    // Support 已合并进 Assembler
 
     /**
      * 查询
@@ -175,3 +174,4 @@ public class DataMethodApiImpl implements DataMethodApi {
         return dataMethodAssembler.toResponseDTOs(qr);
     }
 }
+

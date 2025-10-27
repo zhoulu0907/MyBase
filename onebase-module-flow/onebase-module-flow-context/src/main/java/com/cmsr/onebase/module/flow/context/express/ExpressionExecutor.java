@@ -40,11 +40,11 @@ public class ExpressionExecutor {
      * 根据Condition类的注释：条件项之间是OR关系
      * 根据ConditionItem类的注释：规则项之间是AND关系
      */
-    public boolean evaluate(OrExpression orExpression, Map<String, Object> context) {
+    public boolean evaluate(OrExpression orExpression, Map<String, Object> vars) {
         try {
             String fullExpression = buildConditionExpression(orExpression);
             JexlExpression expression = jexlEngine.createExpression(fullExpression);
-            MapContext jc = new MapContext(formatMapContextKey(context));
+            MapContext jc = new MapContext(formatMapContextKey(vars));
             Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {

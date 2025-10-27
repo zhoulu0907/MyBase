@@ -19,7 +19,7 @@ CREATE TABLE bpm_flow_definition
     "updater" int8 NOT NULL DEFAULT 0,
     "update_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deleted" int8 NOT NULL DEFAULT 0,
-    "tenant_id" int8 NOT NULL DEFAULT 0
+    "tenant_id" int8 NOT NULL DEFAULT 0,
     CONSTRAINT bpm_flow_definition_pkey PRIMARY KEY (id)
 );
 COMMENT ON TABLE bpm_flow_definition IS '流程定义表';

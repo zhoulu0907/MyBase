@@ -2,11 +2,6 @@ package com.cmsr.onebase.module.flow.context;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.jexl3.JexlBuilder;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.jexl3.MapContext;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -20,8 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class VariableContext implements Serializable {
 
-    private static JexlEngine jexl = new JexlBuilder().create();
-
     private Map<String, Object> inputParams = Collections.emptyMap();
 
     private Map<String, Object> nodeVariables = new ConcurrentHashMap<>();
@@ -30,7 +23,7 @@ public class VariableContext implements Serializable {
 
     @Getter
     @Setter
-    private Map<String, Object> uuidFiles = Collections.emptyMap();
+    private Map<String, Object> inputFields = Collections.emptyMap();
 
     public void setInputParams(Map<String, Object> inputParams) {
         if (inputParams != null) {
@@ -64,43 +57,14 @@ public class VariableContext implements Serializable {
         nodeVariables.put(tag, inputParams);
     }
 
-    /**
-     * 通过表达式获取变量值，表达式格式为 tag.key，列如： dataQuery_cCui4tl6zRVBwOmxTNr1G.46999569445519360
-     * 数据格式为 Map<String, Map<String,Object>>
-     *
-     * @param expression 表达式字符串
-     * @return 变量值
-     */
-    public Object getVariableByExpression(String expression) {
-        if (expression == null) {
-            return null;
-        }
-        expression = formatExpression(expression);
-        JexlExpression exp = jexl.createExpression(expression);
-        MapContext jc = new MapContext(nodeVariables);
-        return exp.evaluate(jc);
-    }
-
-    private String formatExpression(String expression) {
-        if (expression.contains(".")) {
-            String[] ss = StringUtils.split(expression, ".");
-            if (!ss[1].startsWith("'") || !ss[1].endsWith("'")) {
-                return String.format("%s.'%s'", ss[0], ss[1]);
-            }
-        }
-        return expression;
-    }
-
-    public int getVariableSizeByTag(String tag) {
+    public List<Map<String, Object>> getListVariableByTag(String tag) {
         Object value = nodeVariables.get(tag);
         if (value == null) {
-            return 0;
+            return Collections.emptyList();
         }
         if (value instanceof List list) {
-            return list.size();
+            return list;
         }
         throw new RuntimeException("变量" + tag + "不是List类型: " + value.getClass().getName());
     }
-
-
 }

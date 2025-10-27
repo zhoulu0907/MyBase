@@ -1,162 +1,104 @@
-# DolphinScheduler 接口封装实现报告
+# DolphinScheduler Client SDK 接口封装指南
 
-> 生成时间：2025-10-18  
-> 项目模块：onebase-spring-boot-starter-dolphinscheduler  
-> 基于版本：DolphinScheduler 3.3.1 API v2
+> 生成时间：2025-10-24  
+> 项目模块：onebase-spring-boot-starter-dolphinscheduler-client  
+> 基于版本：DolphinScheduler 3.3.1
 
 ---
 
 ## 📊 总体概览
 
-| 统计项 | 数量 |
-|--------|------|
-| **API 分类数** | 6 个 |
-| **接口总数** | 32 个 |
+`onebase-spring-boot-starter-dolphinscheduler-client` 是一个用于与 Apache DolphinScheduler 进行交互的 Java SDK 客户端。该模块提供了一套完整的操作接口，允许开发者通过编程方式管理 DolphinScheduler 中的项目、工作流、任务、调度计划以及实例等资源。
+
+### 核心组件
+
+| 组件 | 类名 | 功能描述 |
+|------|------|----------|
+| 工作流定义操作 | [WorkflowOperator](#1-工作流定义操作) | 管理工作流定义（创建、更新、删除、发布等） |
+| 调度计划操作 | [ScheduleOperator](#2-调度计划操作) | 管理调度计划（创建、更新、上线、下线、删除等） |
+| 任务实例操作 | [TaskInstanceOperator](#3-任务实例操作) | 查询任务实例及日志 |
+| 工作流实例操作 | [WorkflowInstanceOperator](#4-工作流实例操作) | 管理工作流实例（启动、停止、暂停、删除等） |
 
 ---
 
-## 📁 接口分类详情
+## 1. 工作流定义操作
 
-### 1️⃣ 项目管理（ProjectApi）
+**操作类：** `com.cmsr.onebase.dolphins.workflow.WorkflowOperator`  
+**功能描述：** 提供工作流定义的完整生命周期管理，包括创建、查询、更新、删除、发布等操作。
 
-**接口文件：** `ProjectApi.java`  
-**接口数量：** 13 个  
-**功能描述：** 提供项目的创建、查询、更新、删除及授权管理等功能
+### 接口列表
 
-#### 接口列表
-
-| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 |
-|------|---------|----------|----------|----------|
-| 1 | POST | `/projects` | createProject | 创建项目 |
-| 2 | GET | `/projects/{code}` | queryProjectByCode | 通过项目编码查询项目信息 |
-| 3 | PUT | `/projects/{code}` | updateProject | 更新项目 |
-| 4 | DELETE | `/projects/{code}` | deleteProject | 通过编码删除项目 |
-| 5 | GET | `/projects` | queryProjectListPaging | 分页查询项目列表 |
-| 6 | GET | `/projects/list` | queryAllProjectList | 查询所有项目 |
-| 7 | GET | `/projects/list-dependent` | queryAllProjectListForDependent | 查询 Dependent 节点所有项目 |
-| 8 | GET | `/projects/created-and-authed` | queryProjectCreatedAndAuthorizedByUser | 查询授权和用户创建的项目 |
-| 9 | GET | `/projects/authed-project` | queryAuthorizedProject | 查询授权项目 |
-| 10 | GET | `/projects/unauth-project` | queryUnauthorizedProject | 查询未授权的项目 |
-| 11 | GET | `/projects/authed-user` | queryAuthorizedUser | 查询拥有项目授权的用户 |
+| 方法名 | 功能说明 |
+|--------|----------|
+| `page(Long projectCode, Integer page, Integer size, String searchVal)` | 分页查询工作流定义列表 |
+| `create(Long projectCode, WorkflowDefineParam workflowDefineParam)` | 创建工作流定义 |
+| `update(Long projectCode, WorkflowDefineParam workflowDefineParam, Long WorkflowCode)` | 更新工作流定义 |
+| `delete(Long projectCode, Long WorkflowCode)` | 删除工作流定义 |
+| `release(Long projectCode, Long code, WorkflowReleaseParam workflowReleaseParam)` | 发布工作流定义 |
+| `online(Long projectCode, Long code)` | 上线工作流定义 |
+| `offline(Long projectCode, Long code)` | 下线工作流定义 |
+| `generateTaskCode(Long projectCode, int codeNumber)` | 生成任务编码 |
 
 ---
 
-### 2️⃣ 工作流定义管理（WorkflowApi）
+## 2. 调度计划操作
 
-**接口文件：** `WorkflowApi.java`  
-**接口数量：** 5 个  
-**功能描述：** 提供工作流定义的创建、查询、更新、删除等功能
+**操作类：** `com.cmsr.onebase.dolphins.schedule.ScheduleOperator`  
+**功能描述：** 提供调度计划的管理功能，包括创建、查询、更新、上线、下线、删除等操作。
 
-#### 接口列表
+### 接口列表
 
-| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 | 变更记录 |
-|------|---------|----------|----------|----------|---------|
-| 1 | POST | `/workflows` | createWorkflow | 创建工作流定义 | - |
-| 2 | GET | `/workflows/{code}` | getWorkflow | 通过编码查询工作流定义 | ✅ 2025-10-18 重命名（原 queryWorkflowByCode） |
-| 3 | PUT | `/workflows/{code}` | updateWorkflow | 更新工作流定义 | - |
-| 4 | DELETE | `/workflows/{code}` | deleteWorkflow | 删除工作流定义 | - |
-| 5 | POST | `/workflows/query` | filterWorkflows | 分页查询工作流定义列表 | ✅ 2025-10-18 重命名（原 queryWorkflowListPaging） |
+| 方法名 | 功能说明 |
+|--------|----------|
+| `create(Long projectCode, ScheduleDefineParam scheduleDefineParam)` | 创建调度计划 |
+| `getByWorkflowCode(Long projectCode, Long WorkflowDefinitionCode)` | 根据工作流编码查询调度计划 |
+| `update(Long projectCode, Long scheduleId, ScheduleDefineParam scheduleDefineParam)` | 更新调度计划 |
+| `online(Long projectCode, Long scheduleId)` | 上线调度计划 |
+| `offline(Long projectCode, Long scheduleId)` | 下线调度计划 |
+| `delete(Long projectCode, Long scheduleId)` | 删除调度计划 |
 
----
+## 3. 任务实例操作
 
-### 3️⃣ 定时调度管理（ScheduleApi）
+**操作类：** `com.cmsr.onebase.dolphins.taskinstance.TaskInstanceOperator`  
+**功能描述：** 提供任务实例的查询及相关操作。
 
-**接口文件：** `ScheduleApi.java`  
-**接口数量：** 5 个  
-**功能描述：** 提供定时调度的创建、查询、更新、删除等功能
+### 接口列表
 
-#### 接口列表
-
-| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 | 变更记录 |
-|------|---------|----------|----------|----------|---------|
-| 1 | POST | `/schedules` | createSchedule | 创建定时调度 | - |
-| 2 | GET | `/schedules/{id}` | getSchedule | 通过ID查询定时调度 | ✅ 2025-10-18 重命名（原 queryScheduleById） |
-| 3 | PUT | `/schedules/{id}` | updateSchedule | 更新定时调度 | - |
-| 4 | DELETE | `/schedules/{id}` | deleteSchedule | 删除定时调度 | - |
-| 5 | POST | `/schedules/filter` | filterSchedule | 分页查询定时调度列表 | ✅ 2025-10-18 重命名（原 queryScheduleListPaging） |
+| 方法名 | 功能说明 |
+|--------|----------|
+| `page(Long projectCode, Integer page, Integer size, Long WorkflowInstanceId)` | 分页查询任务实例列表 |
+| `queryLog(Long projectCode, Integer skipLineNum, Integer limit, Long taskInstanceId)` | 查询任务实例日志 |
 
 ---
 
-### 4️⃣ 任务定义管理（TaskApi）
+## 4. 工作流实例操作
 
-**接口文件：** `TaskApi.java`  
-**接口数量：** 2 个  
-**功能描述：** 提供任务定义的查询与详情获取能力（不包含任务实例相关接口）
+**操作类：** `com.cmsr.onebase.dolphins.workflowinstance.WorkflowInstanceOperator`  
+**功能描述：** 提供工作流实例的管理功能，包括启动、查询、控制（停止、暂停等）、删除等操作。
 
-#### 接口列表
+### 接口列表
 
-| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 |
-|------|---------|----------|----------|----------|
-| 1 | POST | `/tasks/query` | filterTaskDefinition | 分页筛选任务定义 |
-| 2 | GET | `/tasks/{code}` | getTaskDefinition | 获取任务定义详情 |
-
----
-
-### 5️⃣ 任务实例管理（TaskInstanceApi）
-
-**接口文件：** `TaskInstanceApi.java`  
-**接口数量：** 5 个  
-**功能描述：** 提供任务实例的查询、停止、强制成功等操作能力
-
-#### 接口列表
-
-| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 |
-|------|---------|----------|----------|----------|
-| 1 | GET | `/projects/{projectCode}/task-instances` | queryTaskListPaging | 分页查询任务实例列表 |
-| 2 | POST | `/projects/{projectCode}/task-instances/{taskInstanceId}` | queryTaskInstanceByCode | 查询单个任务实例 |
-| 3 | POST | `/projects/{projectCode}/task-instances/{id}/stop` | stopTask | 停止任务实例 |
-| 4 | POST | `/projects/{projectCode}/task-instances/{id}/savepoint` | taskSavePoint | 任务 SavePoint |
-| 5 | POST | `/projects/{projectCode}/task-instances/{id}/force-success` | forceTaskSuccess | 强制任务成功 |
+| 方法名 | 功能说明 |
+|--------|----------|
+| `start(Long projectCode, WorkflowInstanceCreateParam workflowInstanceCreateParam)` | 启动工作流实例 |
+| `page(Integer page, Integer size, Long projectCode, Long workflowCode)` | 分页查询工作流实例列表 |
+| `reRun(Long projectCode, Long WorkflowInstanceId)` | 重新运行工作流实例 |
+| `stop(Long projectCode, Long WorkflowInstanceId)` | 停止工作流实例 |
+| `pause(Long projectCode, Long WorkflowInstanceId)` | 暂停工作流实例 |
+| `execute(Long projectCode, Long WorkflowInstanceId, String executeType)` | 执行指定类型的操作 |
+| `delete(Long projectCode, Long WorkflowInstanceId)` | 删除工作流实例 |
 
 ---
 
-### 6️⃣ 工作流实例管理（WorkflowInstanceApi）
+## 🎯 使用指南
 
-**接口文件：** `WorkflowInstanceApi.java`  
-**接口数量：** 4 个  
-**功能描述：** 提供工作流实例的查询、执行与删除能力
-
-#### 接口列表
-
-| 序号 | HTTP方法 | 接口路径 | 接口方法 | 功能说明 |
-|------|---------|----------|----------|----------|
-| 1 | POST | `/workflow-instances/{workflowInstanceId}/execute/{executeType}` | execute | 执行流程实例操作（暂停、停止、重跑、恢复等） |
-| 2 | GET | `/workflow-instances` | queryWorkflowInstanceListPaging | 分页查询流程实例列表 |
-| 3 | GET | `/workflow-instances/{workflowInstanceId}` | queryWorkflowInstanceById | 根据ID查询流程实例详情 |
-| 4 | DELETE | `/workflow-instances/{workflowInstanceId}` | deleteWorkflowInstance | 删除流程实例 |
-
----
-
-## 📈 功能覆盖度分析
-
-### 已实现的核心功能模块
-
-✅ **项目管理** - 完整支持项目的 CRUD 及授权管理  
-✅ **工作流定义** - 支持工作流的完整生命周期管理  
-✅ **定时调度** - 支持定时任务的创建和管理  
-✅ **任务定义** - 支持任务定义的查询  
-✅ **任务实例** - 支持任务实例的查询和控制  
-✅ **工作流实例** - 支持实例的查询、执行与删除
-
-### 接口设计特点
-
-1. **统一采用 Retrofit2** 框架进行 HTTP 调用封装
-2. **遵循 RESTful 规范**，使用标准 HTTP 方法（GET/POST/PUT/DELETE）
-3. **完善的 DTO 体系**，请求和响应都有对应的数据传输对象
-4. **清晰的注释文档**，每个接口都有详细的 JavaDoc 说明
-5. **模块化设计**，按业务领域划分不同的 API 接口
-
----
-
-## 🎯 使用建议
-
-### 项目集成方式（推荐：统一客户端 DolphinSchedulerClient）
+### 项目集成方式
 
 ```xml
 <!-- 1. 在 pom.xml 中引入依赖 -->
 <dependency>
     <groupId>com.cmsr.onebase</groupId>
-    <artifactId>onebase-spring-boot-starter-dolphinscheduler</artifactId>
+    <artifactId>onebase-spring-boot-starter-dolphinscheduler-client</artifactId>
 </dependency>
 ```
 
@@ -164,57 +106,31 @@
 # 2. 在配置文件中配置 DolphinScheduler 连接信息（application.yml）
 onebase:
   dolphinscheduler:
-    baseUrl: http://dolphinscheduler-api:12345/dolphinscheduler/v2/
-    token: your-token-here
-    # 可选：超时与日志级别
-    connectTimeout: 5s
-    readTimeout: 30s
-    writeTimeout: 30s
-    # 日志级别：NONE / BASIC / HEADERS / BODY
-    logLevel: BASIC
+    baseUrl: http://your-dolphinscheduler-host:12345/dolphinscheduler
+    token: your-access-token
+    projectCodeFlow: 155148878289211
+    projectCodeETL: 155148878289216
+    tenantCode: default
 ```
 
 ```java
-// 3. 统一注入并使用聚合客户端
-import jakarta.annotation.Resource;
-import com.cmsr.onebase.framework.dolphins.client.DolphinSchedulerClient;
+// 3. 注入并使用 DolphinClient、dolphinProperties
+import com.cmsr.onebase.dolphins.core.DolphinClient;
+import com.cmsr.onebase.framework.dolphins.config.DolphinSchedulerClientProperties;
 
 @Resource
-private DolphinSchedulerClient dolphins;
+private DolphinClient dolphinClient;
+@Resource
+private DolphinSchedulerClientProperties dolphinProperties;
 
-// 示例：创建项目
-// dolphins.project().createProject(requestDto);
-
-// 示例：发布工作流定义
-// dolphins.workflow().releaseWorkflowDefinition(projectCode, workflowCode, 1);
-
-// 示例：创建/更新定时调度
-// dolphins.schedule().createSchedule(req);
-// dolphins.schedule().updateSchedule(id, req);
-
-// 示例：查询任务实例分页
-// dolphins.taskInstance().queryTaskListPaging(projectCode, pageNo, pageSize, ...);
+// 使用示例
+List<WorkflowDefineResp> workflows = dolphinClient.opsForWorkflow().page(dolphinProperties.getProjectCodeETL(), 1, 10, "search-keyword");
 ```
-
-> 说明：仍然保留对单个 Api 接口 Bean 的直接注入能力，但推荐通过 `DolphinSchedulerClient` 统一访问，减少注入数量、提升可维护性。
-
-### 典型使用场景
-
-1. **创建调度任务**：`dolphins.project()` → `dolphins.workflow()` → `dolphins.schedule()`  
-2. **查询任务执行状态**：`dolphins.taskInstance()`  
-3. **管理工作流**：`dolphins.workflow()` + `dolphins.task()`  
-4. **控制工作流实例**：`dolphins.workflowInstance()`（暂停/停止/重跑/恢复/删除/查询）
-
 ---
 
-## 📝 补充说明
+## 📝 使用注意事项
 
-- 所有接口均基于 DolphinScheduler 3.3.1 版本的 API v2
-- 项目位置：`onebase-framework/onebase-spring-boot-starter-dolphinscheduler`
-- 支持自动配置和依赖注入，开箱即用
-- 新增聚合客户端：`DolphinSchedulerClient`（包名：`com.cmsr.onebase.framework.dolphins.client`）
-- 包含完整的异常处理和认证拦截器
+1. 所有操作都需要提供有效的 `projectCode`，可以直接使用dolphinProperties.getProjectCodeETL()或者dolphinProperties.getProjectCodeFlow()获取。
+2. 可以直接使用dolphinProperties.getTenantCode()获取租户编码。
 
 ---
-
-**报告结束**

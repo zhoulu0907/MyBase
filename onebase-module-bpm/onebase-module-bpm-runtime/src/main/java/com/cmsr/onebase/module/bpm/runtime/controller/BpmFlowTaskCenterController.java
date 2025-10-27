@@ -42,6 +42,7 @@ public class BpmFlowTaskCenterController {
         PageResult<BpmFlowTodoTaskVO> pageResult = flowTaskCenterService.getTodoPage(reqVO);
         return success(pageResult);
     }
+
     @GetMapping("/done/page")
     @Operation(summary = "分页查询已办信息")
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
@@ -50,12 +51,13 @@ public class BpmFlowTaskCenterController {
         PageResult<BpmFlowDoneTaskVO> pageResult = flowTaskCenterService.getDonePage(reqVO);
         return success(pageResult);
     }
+
     @GetMapping("/my-create/page")
     @Operation(summary = "分页查询我创建的流程信息")
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
     public CommonResult<PageResult<BpmMyCreatedVO>> myCreate(@Valid BpmMyCreatedPageReqVO reqVO) {
         log.info("分页查询我创建的流程信息: {}", reqVO);
-        PageResult<BpmMyCreatedVO> pageResult = flowTaskCenterService.getMyCreatedPage(reqVO);
+        PageResult<BpmMyCreatedVO> pageResult = bpmFlowTodoRuntimeService.getMyCreatedPage(reqVO);
         return success(pageResult);
     }
 

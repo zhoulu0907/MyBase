@@ -8,3 +8,6 @@ ALTER TABLE public.app_resource_page ADD is_default_detail_view_mode int2 DEFAUL
 COMMENT ON COLUMN public.app_resource_page.is_default_detail_view_mode IS '是否默认详情视图';
 ALTER TABLE public.app_resource_page ADD is_latest_updated int2 DEFAULT 0 NOT NULL;
 COMMENT ON COLUMN public.app_resource_page.is_latest_updated IS '最新更新的视图';
+ALTER TABLE public.app_resource_component ADD component_index int8 DEFAULT 0 NOT NULL;
+COMMENT ON COLUMN public.app_resource_page.component_index IS '组件索引';
+

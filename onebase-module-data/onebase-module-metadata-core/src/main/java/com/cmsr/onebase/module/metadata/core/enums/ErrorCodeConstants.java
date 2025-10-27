@@ -39,6 +39,7 @@ public interface ErrorCodeConstants {
     // ========== 自动编号相关 1-003-005-000 ==========
     ErrorCode AUTO_NUMBER_CONFIG_NOT_EXISTS = new ErrorCode(1_003_005_000, "自动编号配置不存在");
     ErrorCode AUTO_NUMBER_CONFIG_DUPLICATE = new ErrorCode(1_003_005_001, "自动编号配置已存在");
+    ErrorCode AUTO_NUMBER_GENERATE_FAILED = new ErrorCode(1_003_005_002, "自动编号生成失败");
 
     // ========== 数据方法相关 1-003-006-000 ==========
     ErrorCode DATA_METHOD_NOT_EXISTS = new ErrorCode(1_003_006_000, "数据方法不存在");

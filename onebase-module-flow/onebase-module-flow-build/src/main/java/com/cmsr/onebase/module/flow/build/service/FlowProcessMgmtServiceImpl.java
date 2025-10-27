@@ -46,6 +46,9 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
     @Autowired
     private FlowProcessTimeRepository flowProcessTimeRepository;
 
+    @Autowired
+    private FlowCommonService flowCommonService;
+
     @Override
     public PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO) {
         // 分页查询
@@ -129,6 +132,8 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         BeanUtils.copyProperties(reqVO, flowProcessDO);
         // 保存更新
         flowProcessRepository.update(flowProcessDO);
+        // 清除缓存
+        flowCommonService.clearProcessNameCache(flowProcessDO.getId());
     }
 
     @Override

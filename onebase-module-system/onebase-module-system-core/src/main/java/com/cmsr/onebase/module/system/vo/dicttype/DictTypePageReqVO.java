@@ -26,6 +26,12 @@ public class DictTypePageReqVO extends PageParam {
     @Schema(description = "展示状态，参见 CommonStatusEnum 枚举类", example = "1")
     private Integer status;
 
+    @Schema(description = "字典所有者类型（app-应用自定义字典，tenant-空间公共字典）", example = "tenant")
+    private String dictOwnerType;
+
+    @Schema(description = "字典所有者ID（应用ID或租户ID）", example = "1")
+    private Long dictOwnerId;
+
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @Schema(description = "创建时间")
     private LocalDateTime[] createTime;

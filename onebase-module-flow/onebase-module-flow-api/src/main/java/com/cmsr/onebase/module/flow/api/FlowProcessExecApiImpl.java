@@ -16,7 +16,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -33,51 +36,62 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
+
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
-    public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {
-        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.findStartEntityNodeDataByEntityId(entityTriggerReqDTO.getEntityId());
+    public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
+        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.findStartEntityNodeDataByEntityId(reqDTO.getEntityId());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
-            return EntityTriggerRespDTO.SUCCESS;
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "没有相应的流程");
         }
-        EntityTriggerRespDTO errorEntityTriggerRespDTO = null;
+        List<EntityTriggerRespDTO> respDTOS = new ArrayList<>();
         for (StartEntityNodeData startEntityNodeData : entityNodeDataList) {
-            EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(entityTriggerReqDTO, startEntityNodeData);
+            EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(reqDTO, startEntityNodeData);
             if (!entityTriggerRespDTO.isSuccess()) {
-                errorEntityTriggerRespDTO = entityTriggerRespDTO;
+                return entityTriggerRespDTO;
+            } else {
+                respDTOS.add(entityTriggerRespDTO);
             }
         }
-        if (errorEntityTriggerRespDTO != null) {
-            return errorEntityTriggerRespDTO;
+        if (respDTOS.size() == 1) {
+            return respDTOS.get(0);
         } else {
-            return EntityTriggerRespDTO.SUCCESS;
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "执行结束: " + respDTOS);
         }
     }
 
-    private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO, StartEntityNodeData startEntityNodeData) {
+    private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
+        Map<String, Object> inputData = new HashMap<>();
+        for (Map.Entry<?, Object> entry : reqDTO.getFieldData().entrySet()) {
+            inputData.put(entry.getKey().toString(), entry.getValue());
+        }
         try {
-            if (!triggerEventContains(startEntityNodeData.getTriggerEvents(), entityTriggerReqDTO.getTriggerEvent())) {
-                return EntityTriggerRespDTO.SUCCESS;
+            if (!triggerEventContains(nodeData.getTriggerEvents(), reqDTO.getTriggerEvent())) {
+                return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, String.format("不支持的触发事件, 配置: %s, 传入: %s.", nodeData.getTriggerEvents(), reqDTO.getTriggerEvent()));
             }
-            if (CollectionUtils.isNotEmpty(startEntityNodeData.getFilterCondition())) {
-                OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startEntityNodeData.getFilterCondition());
-                boolean isMatch = expressionExecutor.evaluate(orExpression, entityTriggerReqDTO.getFieldData());
+            if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
+                OrExpression orExpression = ConditionsSupport.convertToOrExpresses(nodeData.getFilterCondition());
+                boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
                 if (!isMatch) {
-                    return EntityTriggerRespDTO.SUCCESS;
+                    return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, String.format("触发条件不匹配: %s", orExpression));
                 }
             }
-            ExecutorResult executorResult = flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
-            EntityTriggerRespDTO resp = new EntityTriggerRespDTO();
-            resp.setSuccess(executorResult.isSuccess());
-            resp.setCode(executorResult.getCode());
-            resp.setMessage(executorResult.getMessage());
-            resp.setCause(executorResult.getCause());
-            resp.setExecutionEnd(executorResult.isExecutionEnd());
-            return resp;
+            ExecutorResult executorResult = flowProcessExecutor.execute(
+                    reqDTO.getTraceId(),
+                    nodeData.getProcessId(),
+                    inputData);
+            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setProcessId(executorResult.getProcessId());
+            respDTO.setSuccess(executorResult.isSuccess());
+            respDTO.setCode(executorResult.getCode());
+            respDTO.setMessage(executorResult.getMessage());
+            respDTO.setCause(executorResult.getCause());
+            respDTO.setExecutionEnd(executorResult.isExecutionEnd());
+            return respDTO;
         } catch (Exception e) {
-            log.error("entityTrigger failed, {}, {}", entityTriggerReqDTO, startEntityNodeData, e);
-            return new EntityTriggerRespDTO(false, e);
+            log.error("entityTrigger failed, {}, {}", reqDTO, nodeData, e);
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), false, e);
         }
     }
 

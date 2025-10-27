@@ -7,6 +7,8 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataBatchReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataBatchRespVO;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataInsertReqVO;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataPageReqVO;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataUpdateReqVO;
@@ -17,6 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,13 +39,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Slf4j
 public class DictDataServiceImpl implements DictDataService {
 
-    /**
-     * 排序 dictType > sort
-     */
-    private static final Comparator<DictDataDO> COMPARATOR_TYPE_AND_SORT = Comparator
-            .comparing(DictDataDO::getDictType)
-            .thenComparingInt(DictDataDO::getSort);
-
     @Resource
     private DictTypeService dictTypeService;
 
@@ -56,7 +52,8 @@ public class DictDataServiceImpl implements DictDataService {
             List<DictDataDO> list = dictDataRepository.findListByStatusAndDictType(status, dictType);
             // 创建可变列表的副本以支持排序
             List<DictDataDO> mutableList = new ArrayList<>(list);
-            mutableList.sort(COMPARATOR_TYPE_AND_SORT);
+            // 按 sort 字段排序
+            mutableList.sort(Comparator.comparingInt(DictDataDO::getSort));
             return mutableList;
         });
     }
@@ -206,6 +203,52 @@ public class DictDataServiceImpl implements DictDataService {
             mutableList.sort(Comparator.comparing(DictDataDO::getSort));
             return mutableList;
         });
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public DictDataBatchRespVO batchOperateDictData(DictDataBatchReqVO batchReqVO) {
+        List<Long> createdIds = new ArrayList<>();
+        List<Long> updatedIds = new ArrayList<>();
+        List<Long> deletedIds = new ArrayList<>();
+
+        // 批量新增
+        if (CollUtil.isNotEmpty(batchReqVO.getCreateList())) {
+            for (DictDataInsertReqVO createReqVO : batchReqVO.getCreateList()) {
+                Long id = createDictData(createReqVO);
+                createdIds.add(id);
+            }
+            log.info("[batchOperateDictData] 批量新增字典数据成功，数量: {}", createdIds.size());
+        }
+
+        // 批量更新
+        if (CollUtil.isNotEmpty(batchReqVO.getUpdateList())) {
+            for (DictDataUpdateReqVO updateReqVO : batchReqVO.getUpdateList()) {
+                updateDictData(updateReqVO);
+                updatedIds.add(updateReqVO.getId());
+            }
+            log.info("[batchOperateDictData] 批量更新字典数据成功，数量: {}", updatedIds.size());
+        }
+
+        // 批量删除
+        if (CollUtil.isNotEmpty(batchReqVO.getDeleteIds())) {
+            for (Long id : batchReqVO.getDeleteIds()) {
+                deleteDictData(id);
+                deletedIds.add(id);
+            }
+            log.info("[batchOperateDictData] 批量删除字典数据成功，数量: {}", deletedIds.size());
+        }
+
+        // 构建返回结果
+        DictDataBatchRespVO respVO = new DictDataBatchRespVO();
+        respVO.setCreatedIds(createdIds);
+        respVO.setUpdatedIds(updatedIds);
+        respVO.setDeletedIds(deletedIds);
+        respVO.setCreateCount(createdIds.size());
+        respVO.setUpdateCount(updatedIds.size());
+        respVO.setDeleteCount(deletedIds.size());
+
+        return respVO;
     }
 
 }
