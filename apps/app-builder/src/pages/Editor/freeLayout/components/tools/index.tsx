@@ -22,12 +22,14 @@ import { Interactive } from './interactive';
 import { FitView } from './fit-view';
 import { Comment } from './comment';
 import { AutoLayout } from './auto-layout';
+import { GlobalConfig } from './globalConfig';
 
 export const DemoTools = ({ onSave }) => {
   const { history, playground } = useClientContext();
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [minimapVisible, setMinimapVisible] = useState(true);
+
   useEffect(() => {
     const disposable = history.undoRedoService.onChange(() => {
       setCanUndo(history.canUndo());
@@ -76,6 +78,8 @@ export const DemoTools = ({ onSave }) => {
         <AddNode disabled={playground.config.readonly} onSave={onSave} />
         <Divider layout="vertical" style={{ height: '16px' }} margin={3} />
         <TestRunButton disabled={playground.config.readonly} />
+        <Divider layout="vertical" style={{ height: '16px' }} margin={3} />
+        <GlobalConfig />
       </ToolSection>
     </ToolContainer>
   );
