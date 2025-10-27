@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.engine.orm.anyline.dataobject.FlowTaskDO;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
@@ -14,6 +15,8 @@ import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * 历史任务 仓储
@@ -86,6 +89,11 @@ public class FlowHisTaskRepository extends DataRepository<FlowHisTask> {
             condition.order("t.create_time desc");
         }
         return condition;
+    }
+    public List<FlowHisTask> getHisTaskByInstanceId(Long instanceId){
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.in(FlowHisTask.INSTANCE_ID, instanceId);
+        return findAllByConfig(configStore);
     }
 }
 
