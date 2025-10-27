@@ -564,9 +564,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                 searchValue={dictDataSearch}
                 onSearchChange={handleDictDataSearch}
                 onBatchConfig={handleBatchConfig}
-                onEdit={(item) => handleDictDataEdit(item)}
-                onDelete={(id) => handleDeleteDictData(id)}
-                onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
               />
             </>
           )}
