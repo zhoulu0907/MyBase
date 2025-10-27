@@ -15,5 +15,5 @@ public class FieldPermissionItem {
 
     private boolean canEdit;
 
-    private boolean danDownload;
+    private boolean canDownload;
 }

@@ -46,10 +46,11 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "没有相应的流程");
         }
         List<EntityTriggerRespDTO> respDTOS = new ArrayList<>();
+        boolean success = true;
         for (StartEntityNodeData startEntityNodeData : entityNodeDataList) {
             EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(reqDTO, startEntityNodeData);
             if (!entityTriggerRespDTO.isSuccess()) {
-                return entityTriggerRespDTO;
+                success = false;
             } else {
                 respDTOS.add(entityTriggerRespDTO);
             }
@@ -57,7 +58,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         if (respDTOS.size() == 1) {
             return respDTOS.get(0);
         } else {
-            return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "执行结束: " + respDTOS);
+            return new EntityTriggerRespDTO(reqDTO.getTraceId(), success, "执行结束: " + respDTOS);
         }
     }
 
