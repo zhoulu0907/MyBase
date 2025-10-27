@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.bpm.api.dto.node;
 
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class InitiationNodeExtDTO extends BaseNodeExtDTO {
         /**
          * 是否使用自定义配置
          */
+        @NotBlank(message = "是否使用自定义配置不能为空")
         private Boolean useCustomDept;
 
         /**

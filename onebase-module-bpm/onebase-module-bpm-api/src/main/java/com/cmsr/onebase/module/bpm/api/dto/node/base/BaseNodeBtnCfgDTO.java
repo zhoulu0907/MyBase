@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.bpm.api.dto.node.base;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -18,6 +20,7 @@ public class BaseNodeBtnCfgDTO {
     /**
      * 按钮类型
      */
+    @NotBlank(message = "按钮类型不能为空")
     private String buttonType;
 
     /**
@@ -33,10 +36,12 @@ public class BaseNodeBtnCfgDTO {
     /**
      * 审批意见必填
      */
+    @NotNull(message = "审批意见必填不能为空")
     private Boolean approvalCommentRequired;
 
     /**
      * 是否启用按钮
      */
+    @NotNull(message = "是否启用按钮不能为空")
     private Boolean enabled;
 }

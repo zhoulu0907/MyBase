@@ -53,7 +53,13 @@ public enum BpmActionButtonEnum {
     /**
      * 弃权
      */
-    ABSTAIN("abstain", "弃权");
+    ABSTAIN("abstain", "弃权"),
+
+    /**
+     * 提交目前只有在发起节点时有效
+     */
+    SUBMIT("submit", "提交"),
+    ;
 
     /**
      * 按钮编码

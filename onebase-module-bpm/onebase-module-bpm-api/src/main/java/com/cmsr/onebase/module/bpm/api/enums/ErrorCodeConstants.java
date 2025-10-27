@@ -48,4 +48,21 @@ public interface ErrorCodeConstants {
 
     ErrorCode VALIDATE_BPM_DEF_JSON_FAILED = new ErrorCode(1_009_002_002, "校验流程定义JSON失败");
 
+    ErrorCode UNSUPPORT_NODE_APPROVER_TYPE = new ErrorCode(1_009_002_003, "不支持的审批人类型");
+
+    ErrorCode MISSING_NODE_USER_LIST = new ErrorCode(1_009_002_004, "审批人列表不能为空");
+
+    ErrorCode MISSING_NODE_ROLE_LIST = new ErrorCode(1_009_002_005, "审批角色列表不能为空");
+
+    ErrorCode UNSUPPORT_NODE_APPROVAL_MODE = new ErrorCode(1_009_002_006, "不支持的审批方式");
+
+    ErrorCode MISSING_NODE_VO_DATA = new ErrorCode(1_009_002_007, "缺少节点视图数据");
+
+    ErrorCode MISSING_NODE_BTN_CFG = new ErrorCode(1_009_002_008, "节点缺少按钮配置");
+
+    ErrorCode MISSING_ACTION_BUTTON_TYPE = new ErrorCode(1_009_002_009, "缺少操作按钮类型");
+
+    ErrorCode UNSUPPORT_ACTION_BUTTON_TYPE = new ErrorCode(1_009_002_010, "不支持的操作按钮类型");
+
+    ErrorCode MISSING_NODE_FIELD_PERM_CFG = new ErrorCode(1_009_002_011, "节点缺少字段权限配置");
 }

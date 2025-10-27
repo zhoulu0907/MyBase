@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.bpm.api.dto.node.base;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -18,6 +20,7 @@ public class FieldPermCfgDTO {
     /**
      * 是否使用节点配置
      */
+    @NotNull(message = "是否使用节点配置不能为空")
     private Boolean useNodeConfig;
 
     /**
@@ -31,11 +34,13 @@ public class FieldPermCfgDTO {
         /**
          * 字段ID
          */
+        @NotBlank(message = "字段ID不能为空")
         private String fieldId;
 
         /**
          * 字段名
          */
+        @NotBlank(message = "字段名不能为空")
         private String fieldName;
 
         /**
@@ -44,6 +49,7 @@ public class FieldPermCfgDTO {
          * 可编辑 只读 隐藏
          *
          */
+        @NotBlank(message = "字段权限类型不能为空")
         private String fieldPermType;
     }
 }
