@@ -146,8 +146,7 @@ public class DolphinSchedulerClient {
             throw DolphinschedulerException.of("工作流【%s】上线失败", workflowCode);
         }
         // 2. 创建调度信息
-        Result<ScheduleInfoResp> createScheduleResp = execute(dsClientStub.createSchedule(projectCode, workflowCode, environmentCode, tenantCode,
-                wrapSingleton2ListedJsonString(schedule),
+        Result<ScheduleInfoResp> createScheduleResp = execute(dsClientStub.createSchedule(projectCode, workflowCode, environmentCode, tenantCode, schedule,
                 "CONTINUE", "NONE", "MEDIUM", 0L, "default"));
         if (createScheduleResp.getFailed()) {
             throw DolphinschedulerException.of("工作流【%s】上线失败，失败原因：创建调度失败，%s", workflowCode, createScheduleResp.getMsg());

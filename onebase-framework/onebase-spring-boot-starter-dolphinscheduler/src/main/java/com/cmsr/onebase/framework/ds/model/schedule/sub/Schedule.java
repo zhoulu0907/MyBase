@@ -1,16 +1,27 @@
 package com.cmsr.onebase.framework.ds.model.schedule.sub;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class Schedule {
 
-    private String startTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime startTime;
 
-    private String endTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime endTime;
 
-    private String cronTab;
+    private String crontab;
 
     // example value: Asia/Shanghai
     private String timezoneId = "Asia/Shanghai";
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJsonString(this);
+    }
 }

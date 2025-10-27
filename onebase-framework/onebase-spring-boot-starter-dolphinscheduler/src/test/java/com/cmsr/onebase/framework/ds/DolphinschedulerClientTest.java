@@ -1,18 +1,20 @@
 package com.cmsr.onebase.framework.ds;
 
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
+import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
+import java.time.LocalDateTime;
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DolphinschedulerClientTest {
 
     private static final Long TEST_PROJECT_CODE = 154596852705760L;
 
     private DolphinSchedulerClient client;
 
-    private Long workflowCode = 155747039101312L;
+    private Long workflowCode = 155765171524992L;
 
     @BeforeEach
     public void init() {
@@ -37,7 +39,19 @@ public class DolphinschedulerClientTest {
     }
 
     @Test
-    @Order(99)
+    @Order(2)
+    public void testOnlineWorkflow() {
+        Schedule schedule = new Schedule();
+        schedule.setStartTime(LocalDateTime.now());
+        schedule.setEndTime(LocalDateTime.now().withYear(2125));
+        schedule.setTimezoneId("Asia/Shanghai");
+        schedule.setCrontab("0 0 1 * * ? 2030");
+
+        client.onlineWorkflow(TEST_PROJECT_CODE, workflowCode, schedule);
+    }
+
+    @Test
+    @Order(3)
     public void testPurgeWorkflow() {
         client.purgeWorkflow(TEST_PROJECT_CODE, workflowCode);
     }

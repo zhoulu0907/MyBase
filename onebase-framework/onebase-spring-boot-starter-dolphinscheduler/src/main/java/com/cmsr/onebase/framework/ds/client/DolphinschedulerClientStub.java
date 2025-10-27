@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.ds.client;
 import com.cmsr.onebase.framework.ds.model.common.PageInfo;
 import com.cmsr.onebase.framework.ds.model.common.Result;
 import com.cmsr.onebase.framework.ds.model.schedule.ScheduleInfoResp;
+import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDefinitionResp;
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -53,7 +54,7 @@ public interface DolphinschedulerClientStub {
                                                   @Field("workflowDefinitionCode") Long workflowCode,
                                                   @Field("environmentCode") Long environmentCode,
                                                   @Field("tenantCode") String tenantCode,
-                                                  @Field("schedule") String schedule,
+                                                  @Field("schedule") Schedule schedule,
                                                   @Field("failureStrategy") String failureStrategy,
                                                   @Field("warningType") String warningType,
                                                   @Field("workflowInstancePriority") String workflowInstancePriority,
