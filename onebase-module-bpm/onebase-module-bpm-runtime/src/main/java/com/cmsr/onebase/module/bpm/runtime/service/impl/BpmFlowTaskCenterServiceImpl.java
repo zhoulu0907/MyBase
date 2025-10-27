@@ -3,8 +3,9 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowInstanceExtVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
-import com.cmsr.onebase.module.engine.orm.anyline.dataobject.FlowTaskDO;
+import com.cmsr.onebase.module.engine.orm.anyline.dataobject.ext.FlowTaskExt;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowInstance;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
@@ -17,9 +18,9 @@ import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.entity.DataSet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +36,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 @Service
 @Slf4j
 public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
@@ -65,44 +65,31 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 //        List<String> permissionList = permissionList(String.valueOf(sysUser.getUserId()), sysUser.getDeptId(), sysUser);
 //        reqVO.setPermissionList(permissionList);
         List<String> permissionList = new ArrayList<>();
-        PageResult<FlowTaskDO> pageResult = flowTaskRepository.getTodoTaskPage(pageReqVO, permissionList);
+        PageResult<FlowTaskExt> pageResult = flowTaskRepository.getTodoTaskPage(pageReqVO, permissionList);
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
-        for (FlowTaskDO flowTaskDO : pageResult.getList()) {
+        for (FlowTaskExt flowTaskExt : pageResult.getList()) {
             try {
                 // 创建BpmFlowTodoTaskVO实例
                 BpmFlowTodoTaskVO todoTaskVO = new BpmFlowTodoTaskVO();
-
-                // 复制BpmFlowInstanceVO的属性
-                BeanUtils.copyProperties(flowTaskDO,todoTaskVO);
+                todoTaskVO.setId(flowTaskExt.getId());
                 // 解析ext字段中的JSON数据
-                if (StringUtils.isNotBlank(flowTaskDO.getExt())) {
+                if (StringUtils.isNotBlank(flowTaskExt.getExt())) {
                     ObjectMapper objectMapper = new ObjectMapper();
-                    JsonNode extNode = objectMapper.readTree(flowTaskDO.getExt());
-                    // 提取processInfo对象
-                    if (extNode.has("processInfo")) {
-                        JsonNode processInfoNode = extNode.get("processInfo");
-                        // 设置BpmFlowTodoTaskVO特有字段
-                        if (processInfoNode.has("processTitle")) {
-                            todoTaskVO.setProcessTitle(processInfoNode.get("processTitle").asText());
-                        }
-                        if (processInfoNode.has("initiator")) {
-                            todoTaskVO.setInitiator(processInfoNode.get("initiator").asText());
-                        }
-                        if (processInfoNode.has("formSummary")) {
-                            todoTaskVO.setFormSummary(processInfoNode.get("formSummary").asText());
-                        }
-                        // 时间字段转换
+                    BpmFlowInstanceExtVO extVO = objectMapper.readValue(
+                            flowTaskExt.getExt(),
+                            BpmFlowInstanceExtVO.class
+                    );
+                    if (extVO != null && extVO.getProcessInfo() != null) {
+                        BpmFlowInstanceExtVO.ProcessInfo processInfo = extVO.getProcessInfo();
+                        todoTaskVO.setProcessTitle(processInfo.getProcessTitle());
+                        todoTaskVO.setInitiator(processInfo.getInitiator());
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-                        if (processInfoNode.has("submitTime")) {
-                            String submitTimeStr = processInfoNode.get("submitTime").asText();
-                            if (StringUtils.isNotBlank(submitTimeStr)) {
-                                todoTaskVO.setSubmitTime(LocalDateTime.parse(submitTimeStr, formatter));
-                            }
-                        }
+                        todoTaskVO.setSubmitTime(LocalDateTime.parse(processInfo.getSubmitTime(), formatter));
+                        todoTaskVO.setFormSummary(processInfo.getFormSummary());
                     }
                 }
+                todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
                 todoTaskList.add(todoTaskVO);
             } catch (Exception e) {
                 // 记录日志并跳过异常项
@@ -125,20 +112,17 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         for (FlowHisTask flowHisTask : pageResult.getList()){
             BpmFlowDoneTaskVO doneTaskVO = new BpmFlowDoneTaskVO();
             if (StringUtils.isNotBlank(flowHisTask.getExt())){
-                ObjectMapper objectMapper = new ObjectMapper();
                 try {
-                    JsonNode extNode = objectMapper.readTree(flowHisTask.getExt());
-                    if (extNode.has("processInfo")){
-                        JsonNode processInfoNode = extNode.get("processInfo");
-                        if (processInfoNode.has("processTitle")) {
-                            doneTaskVO.setProcessTitle(processInfoNode.get("processTitle").asText());
-                        }
-                        if (processInfoNode.has("initiator")) {
-                            doneTaskVO.setInitiator(processInfoNode.get("initiator").asText());
-                        }
-                        if (processInfoNode.has("formSummary")) {
-                            doneTaskVO.setFormSummary(processInfoNode.get("formSummary").asText());
-                        }
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    BpmFlowInstanceExtVO extVO = objectMapper.readValue(
+                            flowHisTask.getExt(),
+                            BpmFlowInstanceExtVO.class
+                    );
+                    if (extVO != null && extVO.getProcessInfo() != null) {
+                        BpmFlowInstanceExtVO.ProcessInfo processInfo = extVO.getProcessInfo();
+                        doneTaskVO.setProcessTitle(processInfo.getProcessTitle());
+                        doneTaskVO.setInitiator(processInfo.getInitiator());
+                        doneTaskVO.setFormSummary(processInfo.getFormSummary());
                     }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
@@ -165,24 +149,17 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             // 复制BpmFlowInstanceVO的属性
             BeanUtils.copyProperties(flowInstance,bpmMyCreatedVO);
             if (StringUtils.isNotBlank(flowInstance.getExt())){
-                ObjectMapper objectMapper = new ObjectMapper();
                 try {
-                    JsonNode extNode = objectMapper.readTree(flowInstance.getExt());
-                    if (extNode.has("processInfo")){
-                        JsonNode processInfoNode = extNode.get("processInfo");
-                        if (processInfoNode.has("processTitle")) {
-                            bpmMyCreatedVO.setProcessTitle(processInfoNode.get("processTitle").asText());
-                        }
-                        // 时间字段转换
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    BpmFlowInstanceExtVO extVO = objectMapper.readValue(
+                            flowInstance.getExt(),
+                            BpmFlowInstanceExtVO.class
+                    );
+                    if (extVO != null && extVO.getProcessInfo() != null) {
+                        BpmFlowInstanceExtVO.ProcessInfo processInfo = extVO.getProcessInfo();
+                        bpmMyCreatedVO.setProcessTitle(processInfo.getProcessTitle());
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-                        if (processInfoNode.has("submitTime")) {
-                            String submitTimeStr = processInfoNode.get("submitTime").asText();
-                            if (StringUtils.isNotBlank(submitTimeStr)) {
-                                bpmMyCreatedVO.setSubmitTime(LocalDateTime.parse(submitTimeStr, formatter));
-                            }
-                        }
-
+                        bpmMyCreatedVO.setSubmitTime(LocalDateTime.parse(processInfo.getSubmitTime(), formatter));
                     }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);

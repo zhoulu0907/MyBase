@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.engine.orm.anyline.vo;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,13 +31,13 @@ public class BpmFlowTodoTaskPageReqVO extends PageParam {
 
     @Schema(description = "发起时间", example = "[2025-08-01 00:00:00,2025-08-18 23:59:59]")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime[] startTime;
+    private LocalDateTime[] submitTime;
 
     @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
             example = "desc", defaultValue = "desc")
     private String sortType;
 
-    @Schema(description = "当前登录人权限")
-    private List<String> permissionList;
-
+    @Schema(description = "应用ID", example = "1332334434343")
+    @NotBlank(message = "应用ID不能为空")
+    private String appId;
 }

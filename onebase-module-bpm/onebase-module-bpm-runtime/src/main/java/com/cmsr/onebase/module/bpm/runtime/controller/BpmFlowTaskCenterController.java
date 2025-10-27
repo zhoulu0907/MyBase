@@ -57,7 +57,7 @@ public class BpmFlowTaskCenterController {
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
     public CommonResult<PageResult<BpmMyCreatedVO>> myCreate(@Valid BpmMyCreatedPageReqVO reqVO) {
         log.info("分页查询我创建的流程信息: {}", reqVO);
-        PageResult<BpmMyCreatedVO> pageResult = bpmFlowTodoRuntimeService.getMyCreatedPage(reqVO);
+        PageResult<BpmMyCreatedVO> pageResult = flowTaskCenterService.getMyCreatedPage(reqVO);
         return success(pageResult);
     }
 

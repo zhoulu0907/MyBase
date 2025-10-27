@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.engine.orm.anyline.vo;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,4 +38,8 @@ public class BpmFlowDoneTaskPageReqVO extends PageParam {
     @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
             example = "desc", defaultValue = "desc")
     private String sortType;
+
+    @Schema(description = "应用ID", example = "1332334434343")
+    @NotBlank(message = "应用ID不能为空")
+    private String appId;
 }

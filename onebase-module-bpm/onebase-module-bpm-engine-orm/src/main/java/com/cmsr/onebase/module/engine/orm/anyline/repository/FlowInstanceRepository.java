@@ -2,13 +2,12 @@ package com.cmsr.onebase.module.engine.orm.anyline.repository;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.BaseEntity;
+import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowInstance;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.*;
-import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -19,15 +18,13 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class FlowInstanceRepository extends DataRepository<FlowInstance> {
-    @Resource
-    private AnylineService<?> service;
 
     public FlowInstanceRepository() {
         super(FlowInstance.class);
     }
     public PageResult<FlowInstance> findPage(BpmMyCreatedPageReqVO reqVO, Long userId) {
         DefaultConfigStore configs = new DefaultConfigStore();
-
+        configs.and(Compare.EQUAL, "ext::json->>'appId'", reqVO.getAppId());//设置appId
         // 构建查询条件
         if (reqVO.getProcessTitle() != null && !reqVO.getProcessTitle().trim().isEmpty()) {
             configs.and(Compare.LIKE, "ext::json->'processInfo'->>'processTitle'", reqVO.getProcessTitle());
@@ -41,7 +38,7 @@ public class FlowInstanceRepository extends DataRepository<FlowInstance> {
         configs.and(Compare.EQUAL, FlowInstance.CREATOR, userId);
 
         if (reqVO.getSubmitTime() != null && reqVO.getSubmitTime().length == 2){
-            configs.and(Compare.BETWEEN, FlowInstance.CREATE_TIME, reqVO.getSubmitTime()[0], reqVO.getSubmitTime()[1]);
+            configs.and(Compare.BETWEEN, "ext::json->'processInfo'->>'submitTime')::timestamp", reqVO.getSubmitTime()[0], reqVO.getSubmitTime()[1]);
         }
         if (reqVO.getFlowStatus() != null && !reqVO.getFlowStatus().isEmpty()){
             configs.and(Compare.EQUAL, "flowStatus", reqVO.getFlowStatus());
