@@ -26,11 +26,6 @@ public class AppAuthPermissionController {
     @Resource
     private AppAuthPermissionService authPermissionService;
 
-//    @GetMapping("/get-permission-scope")
-//    @Operation(summary = "获取可配置的权限范围")
-//    public CommonResult<List<AuthPermissionScope>> getPermissionScope() {
-//        return CommonResult.success(authPermissionService.getPermissionScope());
-//    }
 
     /**
      * 获取角色-菜单的功能权限

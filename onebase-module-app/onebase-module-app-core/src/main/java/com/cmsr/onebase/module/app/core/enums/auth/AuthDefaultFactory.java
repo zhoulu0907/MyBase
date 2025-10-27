@@ -29,17 +29,16 @@ public class AuthDefaultFactory {
     }
 
 
-    //数据组权限list authDataGroupDOS
-    public static List<AuthDataGroupDO> createListAuthDataGroupDOList(AuthPermissionReqVO reqVO) {
-        List<AuthDataGroupDO> adgList = new ArrayList<AuthDataGroupDO>();
-        adgList.add(createAuthDataGroupDO(reqVO));
-        return adgList;
-    }
+//    //数据组权限list authDataGroupDOS
+//    public static List<AuthDataGroupDO> createListAuthDataGroupDOList(AuthPermissionReqVO reqVO) {
+//        List<AuthDataGroupDO> adgList = new ArrayList<AuthDataGroupDO>();
+//        adgList.add(createAuthDataGroupDO(reqVO));
+//        return adgList;
+//    }
 
     //数据组权限 authDataGroupDOS
     public static AuthDataGroupDO createAuthDataGroupDO(AuthPermissionReqVO reqVO) {
         AuthDataGroupDO adg = new AuthDataGroupDO();
-        adg.setId(null);
         adg.setGroupName("默认权限");
         adg.setApplicationId(reqVO.getApplicationId());
         adg.setRoleId(reqVO.getRoleId());
