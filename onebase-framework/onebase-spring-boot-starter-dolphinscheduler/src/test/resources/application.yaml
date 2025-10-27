@@ -1,0 +1,7 @@
+onebase:
+  scheduler:
+    address: http://10.0.104.33:12345/dolphinscheduler
+    token: 85806d2d33502cef3036fb30b320e5f5
+    flow-project: 154702155517248
+    etl-project: 155572154738048
+    tenant: root
