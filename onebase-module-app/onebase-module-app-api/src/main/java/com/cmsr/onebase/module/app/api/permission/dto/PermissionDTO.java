@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.app.api.permission.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author：huangjie
  * @Date：2025/10/24 14:15
@@ -27,6 +29,9 @@ public class PermissionDTO {
     private Integer isAllFieldsAllowed;
 
     @Schema(description = "操作权限标签")
-    private String operationTags;
+    private List<String> operationTags;
+
+    @Schema(description = "视图id")
+    private List<Long> viewIds;
 
 }

@@ -41,7 +41,7 @@ public class DataGroupDTO {
     private String scopeValue;
 
     @Schema(description = "操作标签")
-    private String operationTags;
+    private List<String> operationTags;
 
     @Schema(description = "数据过滤条件")
     private List<DataFilterDTO> dataFilters;

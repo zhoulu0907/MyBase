@@ -58,6 +58,8 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
                 	app_auth_role aar
                 where
                 	aaru.role_id = aar.id
+                    and aaru.deleted = 0
+                    and aar.deleted = 0
                 	and aaru.user_id = #{user_id}
                 	and aar.application_id = #{application_id}
                 """;
