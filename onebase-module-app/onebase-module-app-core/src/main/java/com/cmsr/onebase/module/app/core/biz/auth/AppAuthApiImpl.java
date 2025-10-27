@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.app.core.biz.auth;
 
 import com.cmsr.onebase.module.app.api.auth.AppAuthApi;
 import com.cmsr.onebase.module.app.api.auth.dto.*;
+import com.cmsr.onebase.module.app.core.dal.cache.auth.CachedAppAuthRoleProvider;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +18,11 @@ import java.util.Set;
 @Service
 public class AppAuthApiImpl implements AppAuthApi {
 
+    private CachedAppAuthRoleProvider cachedAppAuthRoleProvider;
+
     @Override
     public UserRole findRoles(Long userId, Long applicationId) {
+        List<AuthRoleDO> authRoleDOS = cachedAppAuthRoleProvider.findByApplicationIdAndUserId(applicationId, userId);
         return null;
     }
 

@@ -26,15 +26,8 @@ public class RTPermissionService {
     @Autowired
     private AppAuthApi appAuthApi;
 
-    /**
-     * 获取用户在应用下面的角色，如果角色不存在，则返回空，代表这个用户没有权限访问这个应用
-     *
-     * @param applicationId
-     * @param userId
-     * @return
-     */
     public UserRole getUserRole(Long userId, Long applicationId) {
-        return appAuthApi.findRoles(userId, applicationId);
+        return appAuthApi.findRoles(applicationId, userId);
     }
 
     public AccessibleMenus getAccessibleMenus(Long userId, Long applicationId) {
