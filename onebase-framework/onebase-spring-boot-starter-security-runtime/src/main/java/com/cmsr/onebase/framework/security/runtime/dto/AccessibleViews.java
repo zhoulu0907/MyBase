@@ -2,20 +2,18 @@ package com.cmsr.onebase.framework.security.runtime.dto;
 
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 /**
  * @Author：huangjie
- * @Date：2025/10/26 8:16
+ * @Date：2025/10/27 10:50
  */
 @Data
-public class DataPermission {
+public class AccessibleViews {
 
     private boolean allAllowed;
 
     private boolean allDenied;
 
-    private List<DataPermissionItem> items = new ArrayList<>();
-
+    private Set<Long> viewIds;
 }

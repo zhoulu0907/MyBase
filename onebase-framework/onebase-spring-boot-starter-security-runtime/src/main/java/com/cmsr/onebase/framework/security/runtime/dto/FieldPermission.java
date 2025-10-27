@@ -12,11 +12,9 @@ import java.util.Map;
 @Data
 public class FieldPermission {
 
-    private Long menuId;
+    private boolean allAllowed = false;
 
-    private Long entityId;
-
-    private boolean allFieldsAllowed;
+    private boolean allDenied = false;
 
     private Map<Long, FieldPermissionItem> items = new HashMap<>();
 

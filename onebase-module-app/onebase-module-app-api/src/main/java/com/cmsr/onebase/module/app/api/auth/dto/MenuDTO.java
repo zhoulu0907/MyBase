@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.api.permission.dto;
+package com.cmsr.onebase.module.app.api.auth.dto;
 
 import lombok.Data;
 

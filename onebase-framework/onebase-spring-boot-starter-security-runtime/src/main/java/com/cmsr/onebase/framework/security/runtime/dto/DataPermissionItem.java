@@ -63,8 +63,10 @@ public class DataPermissionItem {
 
 
     /**
-     * 操作标签 只有 编辑和删除两类值
+     *
      */
     private boolean canEdit;
+
+    private boolean canDelete;
 
 }
