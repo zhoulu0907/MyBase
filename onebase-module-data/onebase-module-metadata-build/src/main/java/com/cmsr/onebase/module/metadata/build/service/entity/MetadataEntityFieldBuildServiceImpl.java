@@ -653,6 +653,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
                 // 修复：正确处理isSystemField字段的更新
                 if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
+                // 处理dictTypeId字段
+                if (item.getDictTypeId() != null) {
+                    upd.setDictTypeId(item.getDictTypeId());
+                }
 
                 metadataEntityFieldRepository.update(upd);
 
@@ -744,6 +748,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
                     // 关键：正确处理isSystemField字段的更新
                     if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
+                    // 处理dictTypeId字段
+                    if (item.getDictTypeId() != null) {
+                        upd.setDictTypeId(item.getDictTypeId());
+                    }
 
                     metadataEntityFieldRepository.update(upd);
 
@@ -825,6 +833,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 toCreate.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
                 // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
                 toCreate.setRunMode(0);
+                // 处理dictTypeId字段
+                toCreate.setDictTypeId(item.getDictTypeId());
 
                 metadataEntityFieldRepository.insert(toCreate);
 
@@ -1689,8 +1699,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                                        List<FieldOptionRespVO> options,
                                        FieldConstraintRespVO constraints,
                                        AutoNumberConfigReqVO autoNumber) {
-        // 处理选项
-        if (options != null) {
+        // 处理选项：仅当未关联字典类型时才处理自定义选项
+        // 如果 dictTypeId 不为 null，说明复用系统字典，忽略 options 参数
+        if (entityField != null && entityField.getDictTypeId() == null && options != null) {
             fieldOptionService.deleteByFieldId(fieldId);
             for (var opt : options) {
                 MetadataEntityFieldOptionDO d =
@@ -1704,6 +1715,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 d.setAppId(entityField != null ? entityField.getAppId() : null);
                 fieldOptionService.create(d);
             }
+        } else if (entityField != null && entityField.getDictTypeId() != null) {
+            // 如果切换到使用字典类型，删除原有的自定义选项
+            fieldOptionService.deleteByFieldId(fieldId);
         }
 
         // 处理约束 - 修复：只有当 constraints 不为空对象时才执行删除和处理
@@ -1741,6 +1755,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 处理字段约束
+     * 
+     * 注意：本方法仅处理字段约束(constraint)配置，不处理validation规则。
+     * validation规则的同步由batchSaveEntityFields中的字段变更检测逻辑负责，避免重复处理。
      */
     private void processFieldConstraints(Long fieldId, MetadataEntityFieldDO entityField, FieldConstraintRespVO constraints) {
         if (constraints.getMinLength() != null && constraints.getMaxLength() != null &&
@@ -1770,9 +1787,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             req.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
-
-            // 新增：同步到 MetadataValidationLengthDO
-            processLengthValidation(fieldId, entityField);
         }
 
         // 正则 - 只有当正则表达式不为空且启用时才创建REGEX约束
@@ -1806,9 +1820,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // isRequired = 0 时删除已有的必填约束配置
                 fieldConstraintService.delete(fieldId, "REQUIRED");
             }
-            
-            // 新增：同步到 MetadataValidationRequiredDO
-            processRequiredValidation(fieldId, entityField);
         }
 
         // 唯一（与 isUnique 联动）
@@ -1827,9 +1838,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // isUnique = 0 时删除已有的唯一性约束配置
                 fieldConstraintService.delete(fieldId, "UNIQUE");
             }
-            
-            // 新增：同步到 MetadataValidationUniqueDO
-            processUniqueValidation(fieldId, entityField);
         }
     }
 

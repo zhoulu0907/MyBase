@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.consts.DeleteConstant;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
@@ -21,6 +22,7 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
+import org.anyline.util.ConfigTable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -70,6 +72,7 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("flow_process_form");
         TENANT_IGNORE_TABLES.add("flow_process_stat");
         TENANT_IGNORE_TABLES.add("flow_process_time");
+        TENANT_IGNORE_TABLES.add("flow_execution_log");
         // 可以根据需要添加更多表
     }
 
@@ -128,9 +131,14 @@ public class AnyLineDBInfoListener implements DMListener {
     private void injectTenantIdToSingleEntity(Object obj) {
         boolean shouldIgnore = isTableTenantIgnored(obj);
         log.info("injectTenantIdToOneEntity--------------> isTableTenantIgnored: {}", shouldIgnore);
-        if (!shouldIgnore && obj instanceof TenantBaseDO tenantBaseDO) {
-            tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
-            log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), tenantBaseDO.getTenantId());
+        if (!shouldIgnore) {
+            if (obj instanceof TenantBaseDO tenantBaseDO) {
+                tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
+                log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), tenantBaseDO.getTenantId());
+            } else if (obj instanceof BaseEntity baseEntity) {
+                baseEntity.setTenantIdByListener(TenantContextHolder.getRequiredTenantId());
+                log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), baseEntity.getTenantId());
+            }
         }
     }
 
@@ -174,6 +182,37 @@ public class AnyLineDBInfoListener implements DMListener {
             }
             // 新增数据，删除状态为未删除。解决批量插入数据是插入deleted为null的问题
             baseDO.setDeleted(DeleteConstant.NOT_DELETED);
+        } else if (obj instanceof BaseEntity baseEntity) {
+            // 设置雪花ID
+            if (baseEntity.getId() == null) {
+                baseEntity.setIdByListener(uidGenerator.getUID());
+                log.info("anyline global prepareInsert ---------> snow id:{}", baseEntity.getId());
+            }
+
+            // 创建时间为空，则以当前时间为插入时间
+            LocalDateTime current = LocalDateTime.now();
+            if (Objects.isNull(baseEntity.getCreateTime())) {
+                baseEntity.setCreateTimeByListener(current);
+            }
+
+            // 更新时间为空，则以当前时间为更新时间
+            if (Objects.isNull(baseEntity.getUpdateTime())) {
+                baseEntity.setUpdateTimeByListener(current);
+            }
+
+            Long userId = WebFrameworkUtils.getLoginUserId();
+            // 当前登录用户不为空，创建人为空，则当前登录用户为创建人
+            if (Objects.nonNull(userId) && Objects.isNull(baseEntity.getCreatorByListener())) {
+                baseEntity.setCreatorByListener(userId);
+            }
+
+            // 当前登录用户不为空，更新人为空，则当前登录用户为更新人
+            if (Objects.nonNull(userId) && Objects.isNull(baseEntity.getUpdaterByListener())) {
+                baseEntity.setUpdaterByListener(userId);
+            }
+
+            // 新增数据，删除状态为未删除。解决批量插入数据是插入deleted为null的问题
+            baseEntity.setDeletedByListener(DeleteConstant.NOT_DELETED);
         }
     }
 
@@ -196,6 +235,9 @@ public class AnyLineDBInfoListener implements DMListener {
             log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
+        if (!TenantContextHolder.isIgnore() && TenantContextHolder.getTenantId() != null) {
+            configs.param("tenant_id", TenantContextHolder.getTenantId());
+        }
         // 检查是否有表名，如果没有表名则跳过添加条件
         if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {
             log.info("prepareQuery--------------> 没有表名，跳过添加租户和软删除条件");
@@ -215,7 +257,9 @@ public class AnyLineDBInfoListener implements DMListener {
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
         boolean shouldIgnore = isTableTenantIgnored(prepare) || TenantContextHolder.isIgnore();
-        log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (ConfigTable.IS_DEBUG) {
+            log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
+        }
         if (!shouldIgnore) {
             configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
         }
@@ -352,16 +396,26 @@ public class AnyLineDBInfoListener implements DMListener {
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
         // 加入租户标志
         boolean shouldIgnore = isTableTenantIgnored(dest.getName());
-        log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (ConfigTable.IS_DEBUG) {
+            log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
+        }
         if (!shouldIgnore) {
             configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         // 加入更新时间和更新人
-        if (Objects.nonNull(obj) && obj instanceof BaseDO) {
-            BaseDO baseDO = (BaseDO) obj;
-            baseDO.setUpdateTime(LocalDateTime.now());
+        if (Objects.nonNull(obj)) {
             Long userId = WebFrameworkUtils.getLoginUserId();
-            baseDO.setUpdater(userId);
+            LocalDateTime now = LocalDateTime.now();
+
+            if (obj instanceof BaseDO) {
+                BaseDO baseDO = (BaseDO) obj;
+                baseDO.setUpdateTime(now);
+                baseDO.setUpdater(userId);
+            } else if (obj instanceof BaseEntity) {
+                BaseEntity baseEntity = (BaseEntity) obj;
+                baseEntity.setUpdateTimeByListener(now);
+                baseEntity.setUpdaterByListener(userId);
+            }
         }
         return SWITCH.CONTINUE;
     }

@@ -3,19 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.cmsr.onebase</groupId>
         <artifactId>onebase-module-flow</artifactId>
         <version>${revision}</version>
     </parent>
-    
+
     <artifactId>onebase-module-flow-component</artifactId>
     <packaging>jar</packaging>
-    
+
     <name>${project.artifactId}</name>
     <description>流程模块Flow组件包实现</description>
-    
+
     <dependencies>
         <!-- OneBase框架依赖 -->
         <dependency>
@@ -33,6 +33,11 @@
             <artifactId>onebase-module-metadata-api</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-formula-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- LiteFlow流程引擎 -->
         <dependency>
             <groupId>com.yomahub</groupId>
@@ -45,7 +50,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
 
     </dependencies>
 </project>

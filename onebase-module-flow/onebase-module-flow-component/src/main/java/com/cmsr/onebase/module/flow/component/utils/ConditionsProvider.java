@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
 
-import com.cmsr.onebase.module.flow.context.VariableContext;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
@@ -11,12 +11,14 @@ import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
-import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
-import com.yomahub.liteflow.core.NodeComponent;
+import com.cmsr.onebase.module.formula.api.formula.FormulaEngineApi;
+import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
+import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
+import lombok.Setter;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -28,9 +30,13 @@ import java.util.Map;
  * @Author：huangjie
  * @Date：2025/9/28 9:17
  */
+@Setter
 @Component
 public class ConditionsProvider {
 
+
+    @Autowired
+    private FormulaEngineApi formulaEngineApi;
 
     /**
      * 格式化条件，把其规范为表达式能执行的。左值是合法的变量名称，右值是具体的值或者表达式。
@@ -39,19 +45,16 @@ public class ConditionsProvider {
      * 右值是变量，保留表达式变量。
      * 右值是函数，计算出相关的值。
      *
-     * @param nodeComponent
-     * @param conditions
-     * @param inLoopDepth
      * @return
      */
-    public OrExpression formatConditionsForExpression(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, List<Conditions> conditions) {
+    public OrExpression formatConditionsForExpression(List<Conditions> conditions, Map<String, Object> vars) {
         OrExpression orExpression = ConditionsSupport.convertToOrExpresses(conditions);
         if (orExpression == null) {
             return null;
         }
         for (AndExpression andExpression : ListUtils.emptyIfNull(orExpression.getAndExpressions())) {
             for (ExpressionItem expressionItem : ListUtils.emptyIfNull(andExpression.getExpressionItems())) {
-                formatRuleItemForExpression(nodeComponent, variableContext, inLoopDepth, expressionItem);
+                formatRuleItemForExpression(expressionItem, vars);
             }
         }
         return orExpression;
@@ -61,65 +64,100 @@ public class ConditionsProvider {
      * 格式化条件，把其规范为值。左值是合法的变量名称，右值是具体的值。
      * 主要工作！如果右值是表达式，提取相关的值。
      *
-     * @param conditions
-     * @param variableContext
      * @return
      */
-    public OrExpression formatConditionsForValue(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, List<Conditions> conditions) {
+    public OrExpression formatConditionsForValue(List<Conditions> conditions, Map<String, Object> vars) {
         OrExpression orExpression = ConditionsSupport.convertToOrExpresses(conditions);
         for (AndExpression andExpression : orExpression.getAndExpressions()) {
             for (ExpressionItem expressionItem : andExpression.getExpressionItems()) {
-                formatRuleItemForValue(nodeComponent, variableContext, inLoopDepth, expressionItem);
+                formatRuleItemForValue(expressionItem, vars);
             }
         }
         return orExpression;
     }
 
-    public List<ExpressionItem> formatConditionItemsForValue(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, List<ConditionItem> conditionItems) {
+    public List<ExpressionItem> formatConditionItemsForValue(List<ConditionItem> conditionItems, Map<String, Object> vars) {
         List<ExpressionItem> expressionItems = new ArrayList<>();
         for (ConditionItem conditionItem : conditionItems) {
             ExpressionItem expressionItem = ConditionsSupport.convertToExpressesItem(conditionItem);
-            formatRuleItemForValue(nodeComponent, variableContext, inLoopDepth, expressionItem);
+            formatRuleItemForValue(expressionItem, vars);
             expressionItems.add(expressionItem);
         }
         return expressionItems;
     }
 
-    private void formatRuleItemForExpression(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, ExpressionItem expressionItem) {
-        String fieldId = formatFieldIdForExpression(nodeComponent, inLoopDepth, expressionItem.getKey().toString());
+    private void formatRuleItemForExpression(ExpressionItem expressionItem, Map<String, Object> vars) {
+        String fieldId = expressionItem.getKey().toString();
         expressionItem.setKey(fieldId);
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
             formatExpressionItemValue(expressionItem);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
-            Object value = formatValueForExpression(nodeComponent, inLoopDepth, expressionItem.getValue().toString());
+            Object value = expressionItem.getValue().toString();
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            //TODO 公式
+            Map valueMap = (Map) expressionItem.getValue();
+            String formula = MapUtils.getString(valueMap, "formula");
+            Map parameters = MapUtils.getMap(valueMap, "parameters");
+            FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
+            reqDTO.setFormula(formula);
+            reqDTO.setParameters(parameters);
+            reqDTO.setContextData(vars);
+            CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
+            if (respDTO.getData() == null) {
+                throw new IllegalCallerException("公式错误: " + formula + ", 错误信息: " + respDTO.getMsg());
+            }
+            expressionItem.setValue(respDTO.getData().getResult());
         }
     }
 
-
-    private void formatRuleItemForValue(NodeComponent nodeComponent, VariableContext variableContext, InLoopDepth inLoopDepth, ExpressionItem expressionItem) {
+    private void formatRuleItemForValue(ExpressionItem expressionItem, Map<String, Object> vars) {
         // 转换值
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
             formatExpressionItemValue(expressionItem);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
-            String valueExp = formatValueForExpression(nodeComponent, inLoopDepth, expressionItem.getValue().toString());
-            Object value = variableContext.getVariableByExpression(valueExp);
+            String exp = expressionItem.getValue().toString();
+            Object value = getVariableByExpression(exp, vars);
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            //TODO 公式
+            Map valueMap = (Map) expressionItem.getValue();
+            String formula = MapUtils.getString(valueMap, "formula");
+            Map parameters = MapUtils.getMap(valueMap, "parameters");
+            FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
+            reqDTO.setFormula(formula);
+            reqDTO.setParameters(parameters);
+            reqDTO.setContextData(vars);
+            CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
+            if (respDTO.getData() == null) {
+                throw new IllegalCallerException("公式错误: " + formula + ", 错误信息: " + respDTO.getMsg());
+            }
+            expressionItem.setValue(respDTO.getData().getResult());
+        }
+    }
+
+    private Object getVariableByExpression(String exp, Map<String, Object> vars) {
+        if (exp.contains(".")) {
+            String[] vv = StringUtils.split(exp, ".");
+            Object value = vars.get(vv[0]);
+            if (value == null) {
+                return null;
+            }
+            if (value instanceof Map map) {
+                return map.get(vv[1]);
+            }
+            throw new IllegalArgumentException("变量错误: " + exp);
+        } else {
+            return vars.get(exp);
         }
     }
 
 
-    public ExpressionItem formatConditionItemForValue(int index, VariableContext variableContext, ConditionItem conditionItem) {
+    public ExpressionItem formatConditionItemForValue(ConditionItem conditionItem, Map<String, Object> dataMap) {
         ExpressionItem expressionItem = ConditionsSupport.convertToExpressesItem(conditionItem);
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
             formatExpressionItemValue(expressionItem);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
-            String valueExp = formatValueForExpression(conditionItem.getValue().toString(), index);
-            Object value = variableContext.getVariableByExpression(valueExp);
+            String exp = conditionItem.getValue().toString();
+            Object value = getVariableByExpression(exp, dataMap);
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
             //TODO 公式
@@ -134,33 +172,5 @@ public class ConditionsProvider {
             expressionItem.setValue(List.of(begin, end));
         }
     }
-
-
-    private String formatFieldIdForExpression(NodeComponent nodeComponent, InLoopDepth inLoopDepth, String exp) {
-        if (NumberUtils.isParsable(exp)) {
-            return exp;
-        }
-        int loopDepthValue = inLoopDepth.getLoopDepthValue(exp);
-        if (loopDepthValue >= 0) {
-            Integer loopIndex = nodeComponent.getPreNLoopIndex(loopDepthValue);
-            exp = formatValueForExpression(exp, loopIndex);
-        }
-        return exp;
-    }
-
-    private String formatValueForExpression(NodeComponent nodeComponent, InLoopDepth inLoopDepth, String exp) {
-        int loopDepthValue = inLoopDepth.getLoopDepthValue(exp);
-        if (loopDepthValue >= 0) {
-            Integer loopIndex = nodeComponent.getPreNLoopIndex(loopDepthValue);
-            exp = formatValueForExpression(exp, loopIndex);
-        }
-        return exp;
-    }
-
-    private String formatValueForExpression(String exp, int index) {
-        String[] split = StringUtils.split(exp, '.');
-        return split[0] + "[" + index + "]." + split[1];
-    }
-
 
 }

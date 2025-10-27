@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Bean;
  *
  */
 @AutoConfiguration
-@EnableFeignClients(clients = {OAuth2TokenCommonApi.class, // 主要是引入相关的 API 服务
-        PermissionCommonApi.class})
+// @EnableFeignClients(clients = {OAuth2TokenCommonApi.class, // 主要是引入相关的 API 服务
+//         PermissionCommonApi.class})
 public class OneBaseSecurityRpcAutoConfiguration {
 
     @Bean

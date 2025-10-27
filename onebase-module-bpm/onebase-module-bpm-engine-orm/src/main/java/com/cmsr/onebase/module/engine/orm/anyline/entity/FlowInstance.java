@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.engine.orm.anyline.entity;
 
+import com.cmsr.onebase.framework.data.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -101,9 +102,9 @@ public class FlowInstance extends BaseEntity implements Instance {
     @Override
     public Instance setCreateBy(String createBy) {
         if (createBy != null) {
-            this.createBy = Long.valueOf(createBy);
+            this.creator = Long.valueOf(createBy);
         } else {
-            this.createBy = null;
+            this.creator = null;
         }
 
         return this;
@@ -112,9 +113,9 @@ public class FlowInstance extends BaseEntity implements Instance {
     @Override
     public Instance setUpdateBy(String updateBy) {
         if (updateBy != null) {
-            this.updateBy = Long.valueOf(updateBy);
+            this.updater = Long.valueOf(updateBy);
         } else {
-            this.updateBy = null;
+            this.updater = null;
         }
 
         return this;
@@ -134,9 +135,9 @@ public class FlowInstance extends BaseEntity implements Instance {
     @Override
     public Instance setDelFlag(String delFlag) {
         if (delFlag != null) {
-            this.delFlag = Long.valueOf(delFlag);
+            this.deleted = Long.valueOf(delFlag);
         } else {
-            this.delFlag = null;
+            this.deleted = null;
         }
 
         return this;

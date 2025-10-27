@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
-import com.cmsr.onebase.framework.common.pojo.PageResult;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 
+
 /**
  * 抽象数据方法核心服务类
  *
@@ -38,7 +39,7 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
  * @date 2025-01-27
  */
 @Slf4j
-public abstract class AbstractMetadataDataMethodCoreService  implements MetadataDataMethodCoreServiceV2{
+public abstract class AbstractMetadataDataMethodCoreService  implements MetadataDataMethodCoreServiceV2 {
 
 
     // ========== 依赖注入 ==========
@@ -210,11 +211,17 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         String upperFieldType = fieldType.toUpperCase();
         
         // 字段类型包含以下关键字的需要JSON反序列化
-        boolean isComplexType = upperFieldType.contains("MULTI") ||        // 多选类型
+        boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
+                                upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
                                 upperFieldType.contains("ADDRESS") ||       // 地址类型
                                 upperFieldType.contains("FILE") ||          // 文件附件
                                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                                 upperFieldType.contains("IMAGE") ||         // 图片
+                                upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
+                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
+                                upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
+                                upperFieldType.contains("GEO") ||           // 地理位置（简写）
                                 upperFieldType.equals("JSONB") ||           // JSONB类型
                                 upperFieldType.equals("JSON");              // JSON类型
         
@@ -310,7 +317,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
                     }
                 }
             } catch (Exception e) {
-                // 自动编号生成失败不应该阻塞整个数据创建过程，记录警告日志
+                // 如果字段是必填的（数据库NOT NULL约束），自动编号生成失败应该抛出异常
+                if (BooleanStatusEnum.isYes(field.getIsRequired())) {
+                    log.error("必填字段 {} 自动编号生成失败: {}", field.getFieldName(), e.getMessage(), e);
+                    throw exception(AUTO_NUMBER_GENERATE_FAILED, "字段[{}]自动编号生成失败: {}", 
+                        field.getDisplayName(), e.getMessage());
+                }
+                // 非必填字段，自动编号生成失败不应该阻塞整个数据创建过程，记录警告日志
                 log.warn("为字段 " + field.getFieldName() + " 生成自动编号失败: " + e.getMessage());
             }
         }
@@ -387,8 +400,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 9. 唯一性校验和条件校验
             validateUniqueness(context);//todo 暂未实现
 
-            // 10. 前置自动化工作流触发
-            executePreWorkflow(context);//暂未实现
+            try{
+                // 10. 前置自动化工作流触发
+                executePreWorkflow(context);//暂未实现
+            }catch (Exception e){
+                log.error("执行前置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
+//                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
+            }
 
             // 11. 数据编号
             generateDataNumber(context);//todo 暂未实现
@@ -396,8 +414,17 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 12. 数据存储
             storeData(context);//todo 实现了create的方法
 
-            // 13. 后置自动化工作流触发
-            executePostWorkflow(context);//todo 暂未实现
+            try{
+                // 13. 后置自动化工作流触发
+                executePostWorkflow(context);//todo 暂未实现
+            }catch (Exception e){
+                log.error("执行后置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
+//                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
+            }
+
+
+
+            getData(context);
 
             // 14. 结果格式化
             Map<String, Object> result = formatResult(context);// 已实现
@@ -416,6 +443,40 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     protected void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
     }
 
+    /**
+     * 将字段ID转换为字段名
+     * 前端传入的数据是以字段ID为key，需要转换为字段名才能进行后续处理
+     *
+     * @param data 原始数据（字段ID为key）
+     * @param fields 字段列表
+     * @return 转换后的数据（字段名为key）
+     */
+    protected Map<String, Object> convertFieldIdToFieldName(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
+        Map<String, Object> convertedData = new HashMap<>();
+        
+        // 构建字段ID到字段名的映射
+        Map<String, String> fieldIdToNameMap = new HashMap<>();
+        for (MetadataEntityFieldDO field : fields) {
+            if (field.getId() != null && field.getFieldName() != null) {
+                fieldIdToNameMap.put(String.valueOf(field.getId()), field.getFieldName());
+            }
+        }
+        
+        // 转换数据的key
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            // 如果key是字段ID，则转换为字段名
+            String fieldName = fieldIdToNameMap.getOrDefault(key, key);
+            convertedData.put(fieldName, value);
+            
+            log.debug("字段转换: {} -> {}, 值: {}", key, fieldName, value);
+        }
+        
+        log.info("字段ID转换完成，原始数据key数量: {}, 转换后数据key数量: {}", data.size(), convertedData.size());
+        return convertedData;
+    }
 
     protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
 
@@ -545,8 +606,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * 7. 数据编号
      */
     protected void generateDataNumber(ProcessContext context) {
-        // 处理自动编号字段
-        processAutoNumberFields(context.getFields(), context.getProcessedData());
+        // 只有在创建操作时才处理自动编号字段
+        if (context.getOperationType() == OperationType.CREATE) {
+            processAutoNumberFields(context.getFields(), context.getProcessedData());
+            log.info("新增操作：已触发自动编号规则");
+        } else {
+            log.debug("非新增操作（{}），跳过自动编号规则", context.getOperationType().getDescription());
+        }
     }
 
     /**
@@ -595,6 +661,11 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      */
     protected void executePostWorkflow(ProcessContext context) {
 
+    }
+
+    protected Map<String, Object> getData(ProcessContext context){
+
+        return null;
     }
 
     /**
@@ -672,5 +743,28 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         private Map<String, Object> processedData; // 处理后的数据
         private AnylineService<?> temporaryService;
 
+    }
+
+    // 将name：value的格式变成id：value的格式
+    public Map convertNameToId(Long entityId, Map<String, Object> map){
+
+        Map newData = new HashMap();// 存放id:value格式
+        List<MetadataEntityFieldDO> targetfields = getEntityFields(entityId);
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String dataKey = entry.getKey();
+            Object dataValue = entry.getValue();
+
+            // 将data的key转换为大写后，与targetfields中的fieldName进行匹配
+            String dataKeyUpper = dataKey.toUpperCase();
+            for (MetadataEntityFieldDO field : targetfields) {
+                if (field.getFieldName() != null && field.getFieldName().toUpperCase().equals(dataKeyUpper)) {
+                    // 找到匹配的字段，使用fieldId作为key
+                    newData.put(field.getId(), dataValue);
+                    break;
+                }
+            }
+        }
+        return newData;
     }
 }

@@ -74,7 +74,7 @@ public class EntityRelationshipController {
 
     @PostMapping("/update")
     @Operation(summary = "更新实体关系信息")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:update')")
+    //@PreAuthorize("@ss.hasPermission('metadata:entity-relationship:update')")
     public CommonResult<Boolean> updateEntityRelationship(@Valid @RequestBody EntityRelationshipSaveReqVO reqVO) {
         entityRelationshipService.updateEntityRelationship(reqVO);
         return success(true);

@@ -5,6 +5,9 @@ import lombok.Data;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +31,9 @@ public class DynamicDataUpdateReqVO {
     @Schema(description = "数据内容", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "数据内容不能为空")
     private Map<Long, Object> data;
+
+    @Schema(description = "子表数据对象")
+    private List<SubEntityVo> subEntities = new ArrayList<>();
 
     @Schema(description = "方法编码（可选）")
     private String methodCode;

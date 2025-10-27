@@ -41,6 +41,7 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
     public static final String APP_ID          = "app_id";
     public static final String STATUS          = "status";
     public static final String FIELD_CODE      = "field_code";
+    public static final String DICT_TYPE_ID    = "dict_type_id";
 
     public MetadataEntityFieldDO setId(Long id) {
         super.setId(id);
@@ -141,5 +142,11 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
      * 字段编码
      */
     private String fieldCode;
+
+    /**
+     * 关联的字典类型ID(system_dict_type.id)
+     * 用于SELECT/MULTI_SELECT字段复用系统字典,为null时使用自定义选项
+     */
+    private Long dictTypeId;
 
 }

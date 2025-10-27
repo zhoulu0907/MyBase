@@ -121,14 +121,13 @@ public class FlowChangeEventCacheHandler implements MessageListener, Application
     }
 
     public String onApplicationDelete(Long applicationId) {
-        Set<Long> ids = graphFlowCache.findFlowByApplicationId(applicationId);
-        graphFlowCache.delete(applicationId);
+        Set<Long> ids = graphFlowCache.deleteByApplicationId(applicationId);
         return "删除：" + ids;
     }
 
     public String onApplicationChange(Long applicationId) {
         List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
-        Set<Long> oldProcessIds = graphFlowCache.findFlowByApplicationId(applicationId);
+        Set<Long> oldProcessIds = graphFlowCache.findProcessByApplicationId(applicationId);
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             oldProcessIds.remove(flowProcessDO.getId());
         }
@@ -156,7 +155,7 @@ public class FlowChangeEventCacheHandler implements MessageListener, Application
         String chainId = FlowUtils.toFlowChainId(processId);
         FlowBus.removeChain(chainId);
         //
-        graphFlowCache.delete(applicationId, processId);
+        graphFlowCache.deleteByApplicationId(applicationId, processId);
     }
 
     @Override

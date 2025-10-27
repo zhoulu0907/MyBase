@@ -1,24 +1,32 @@
 package com.cmsr.onebase.module.etl.core.service.collector;
 
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryCatalogRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.DataFactorySchemaRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.DataFactoryTableRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryCatalogDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryDatasourceDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactorySchemaDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.DataFactoryTableDO;
-import com.cmsr.onebase.module.etl.core.enums.DataFactoryErrorCodeConstants;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
+import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
+import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.datasource.DataSourceHolder;
 import org.anyline.metadata.Catalog;
+import org.anyline.metadata.Column;
 import org.anyline.metadata.Schema;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -28,18 +36,23 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
     private DataSourceFactory dataSourceFactory;
 
     @Resource
-    private DataFactoryCatalogRepository catalogRepository;
+    private ETLDatasourceRepository datasourceRepository;
 
     @Resource
-    private DataFactorySchemaRepository schemaRepository;
+    private ETLCatalogRepository catalogRepository;
 
     @Resource
-    private DataFactoryTableRepository tableRepository;
+    private ETLSchemaRepository schemaRepository;
 
+    @Resource
+    private ETLTableRepository tableRepository;
+
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Override
-    public boolean testConnection(DataFactoryDatasourceDO datasourceDO) {
-        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO);
+    public boolean testConnection(ETLDatasourceDO datasourceDO) {
+        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
         try {
             boolean validity = ServiceProxy.temporary(datasource).validity();
             boolean hit = ServiceProxy.temporary(datasource).hit();
@@ -51,57 +64,92 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
     }
 
     @Override
-    public boolean doCollection(DataFactoryDatasourceDO datasourceDO) {
-        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO);
-        Long datasourceId = datasourceDO.getId();
+    public void submitCollectJob(Long datasourceId) {
+        log.info("提交元数据采集任务，数据源ID：{}", datasourceId);
+        threadPoolTaskExecutor.submit(() -> {
+            LocalDateTime starTime = LocalDateTime.now();
+            datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.RUNNING, starTime);
+            boolean isJobSuccess = doCollection(datasourceId);
+            LocalDateTime endTime = LocalDateTime.now();
+            Duration duration = Duration.between(starTime, endTime);
+            long timeCost = duration.toMillis();
+            if (isJobSuccess) {
+                datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.SUCCESS, starTime);
+                log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+            } else {
+                datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.FAILED, starTime);
+                log.info("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+            }
+        });
+    }
+
+    public boolean doCollection(Long datasourceId) {
+        DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
+        // TODO: add precheck etc. to prevent multiply submit. --> cause data duplication or error response.
+        String datasourceKey = "metadata-collector-" + datasourceId;
         try {
-            AnylineService<?> temporary = ServiceProxy.temporary(datasource);
+            DataSourceHolder.reg(datasourceKey, datasource);
+            AnylineService<?> temporary = ServiceProxy.service(datasourceKey);
             // Catalog
             Catalog catalog = temporary.metadata().catalog();
             String catalogName = catalog.getName();
-            DataFactoryCatalogDO oldCatalogDO = catalogRepository.findOneByNameAndDatasourceId(datasourceId, catalogName);
-            DataFactoryCatalogDO newCatalogDO = DataFactoryCatalogDO.convert(datasourceId, catalog);
+            ETLCatalogDO oldCatalogDO = catalogRepository.findOneByNameAndDatasourceId(datasourceId, catalogName);
+            ETLCatalogDO newCatalogDO = ETLCatalogDO.convert(datasourceId, catalog);
             Long catalogId;
             if (oldCatalogDO == null) {
                 newCatalogDO = catalogRepository.insert(newCatalogDO);
                 catalogId = newCatalogDO.getId();
             } else {
-                DataFactoryCatalogDO.applyChanges(oldCatalogDO, newCatalogDO);
+                ETLCatalogDO.applyChanges(oldCatalogDO, newCatalogDO);
                 catalogRepository.update(newCatalogDO);
                 catalogId = oldCatalogDO.getId();
             }
             // Schema
             Schema schema = temporary.metadata().schema();
             String schemaName = schema.getName();
-            DataFactorySchemaDO oldSchemaDO = schemaRepository.findOneByNameAndCatalogIdAndDatasourceId(datasourceId, catalogId, schemaName);
+            ETLSchemaDO oldSchemaDO = schemaRepository.findOneByNameAndCatalogIdAndDatasourceId(datasourceId, catalogId, schemaName);
             Long schemaId;
-            DataFactorySchemaDO newSchemaDO = DataFactorySchemaDO.convert(datasourceId, catalogId, schema);
+            ETLSchemaDO newSchemaDO = ETLSchemaDO.convert(datasourceId, catalogId, schema);
             if (oldSchemaDO == null) {
                 newSchemaDO = schemaRepository.insert(newSchemaDO);
                 schemaId = newSchemaDO.getId();
             } else {
-                DataFactorySchemaDO.applyChanges(oldSchemaDO, newSchemaDO);
+                ETLSchemaDO.applyChanges(oldSchemaDO, newSchemaDO);
                 schemaRepository.update(newSchemaDO);
                 schemaId = oldSchemaDO.getId();
             }
             // Table
-            Map<String, Table> tables = temporary.metadata().tables();
-            Map<String, DataFactoryTableDO> tableDOs = tableRepository.findAllByCatalogIdAndSchemaIdAndDatasourceId(datasourceId, catalogId, schemaId);
+            Map<String, Table> tables = temporary.metadata().tables(Table.TYPE.VIEW.value());
+            Map<String, ETLTableDO> tableDOs = tableRepository.findAllByCatalogIdAndSchemaIdAndDatasourceId(datasourceId, catalogId, schemaId);
+            List<ETLTableDO> tableDOList = Lists.newArrayList();
             for (Table table : tables.values()) {
                 String tableName = table.getName();
-                DataFactoryTableDO newTableDO = DataFactoryTableDO.convert(datasourceId, catalogId, schemaId, table);
+                // 重新获取一遍，由于Anyline .tables()方法会忽略列(Column)
+                Map<String, Column> tableColumn = temporary.metadata().columns(table);
+                ETLTableDO newTableDO = ETLTableDO.convert(datasourceId, catalogId, schemaId, table, tableColumn);
                 if (tableDOs.containsKey(tableName)) {
-                    DataFactoryTableDO oldTableDO = tableDOs.get(tableName);
-                    DataFactoryTableDO.applyChanges(oldTableDO, newTableDO);
-                    tableRepository.update(newTableDO);
+                    ETLTableDO oldTableDO = tableDOs.get(tableName);
+                    ETLTableDO.applyChanges(oldTableDO, newTableDO);
+                    tableDOList.add(newTableDO);
                 } else {
-                    tableRepository.insert(newTableDO);
+                    tableDOList.add(newTableDO);
                 }
             }
+            tableRepository.upsertBatch(tableDOList);
             return true;
         } catch (Exception ex) {
             log.error("元数据采集时发生异常", ex);
-            throw ServiceExceptionUtil.exception(DataFactoryErrorCodeConstants.METADATA_COLLECT_FAILED);
+            return false;
+        } finally {
+            unregisterDataSource(datasourceKey);
+        }
+    }
+
+    private void unregisterDataSource(String datasourceKey) {
+        try {
+            DataSourceHolder.destroy(datasourceKey);
+        } catch (Exception ex) {
+            log.error("注销数据源失败，数据源标识：{}", datasourceKey, ex);
         }
     }
 }

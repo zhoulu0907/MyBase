@@ -85,6 +85,7 @@ public class MetaColumn {
     public static MetaColumn convert(Column column) {
         MetaColumn metaColumn = new MetaColumn();
         String columnName = column.getName();
+        metaColumn.setName(columnName);
         metaColumn.setFullyQualifiedName(String.join(".",
                 column.getCatalogName(),
                 column.getSchemaName(),
@@ -98,7 +99,6 @@ public class MetaColumn {
         } else {
             metaColumn.setDisplayName(columnName);
         }
-        metaColumn.setName(columnName);
         metaColumn.setOriginType(column.getOriginType());
         metaColumn.setCompatibleType(column.getTypeName());
         metaColumn.setPosition(column.getPosition());

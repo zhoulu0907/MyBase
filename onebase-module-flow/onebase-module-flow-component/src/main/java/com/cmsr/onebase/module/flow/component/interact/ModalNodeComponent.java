@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @Author：huangjie
@@ -36,17 +35,15 @@ public class ModalNodeComponent extends SkippableNodeComponent {
         if (nodeActionEnum == NodeActionEnum.DO_PROCESS) {
             Map<String, Object> outputParams = createOutputParams(nodeData);
             variableContext.setOutputParams(outputParams);
-            String executionUuid = UUID.randomUUID().toString();
-            executeContext.setExecutionUuid(executionUuid);
             executeContext.setExecutionEndNodeType("modal");
             executeContext.setExecutionEndNodeTag(this.getTag());
-            contextProvider.storeExecuteContext(executionUuid, executeContext);
-            contextProvider.storeVariableContext(executionUuid, variableContext);
+            contextProvider.storeExecuteContext(executeContext.getExecutionUuid(), executeContext);
+            contextProvider.storeVariableContext(executeContext.getExecutionUuid(), variableContext);
             this.setIsEnd(true);
         }
         if (nodeActionEnum == NodeActionEnum.DO_RESET) {
-            variableContext.putNodeVariables(this.getTag(), variableContext.getUuidFiles());
-            variableContext.setUuidFiles(Collections.emptyMap());
+            variableContext.putNodeVariables(this.getTag(), variableContext.getInputFields());
+            variableContext.setInputFields(Collections.emptyMap());
             executeContext.restExecutionUuid();
             executeContext.restExecutionEndNodeTag();
         }
