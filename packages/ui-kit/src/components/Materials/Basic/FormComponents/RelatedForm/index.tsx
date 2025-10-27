@@ -58,6 +58,14 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
     }
   };
 
+  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
+    return (
+      (node?.closest('.arco-form-item') as HTMLElement) ||
+      node?.parentNode as HTMLElement ||
+      document.body
+    );
+  };
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -82,6 +90,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
           placeholder={placeholder}
           showSearch
           options={options}
+          getPopupContainer={getPopupContainer}
           style={{
             width: '100%',
             color,

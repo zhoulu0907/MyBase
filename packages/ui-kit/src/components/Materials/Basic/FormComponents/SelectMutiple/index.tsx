@@ -22,16 +22,31 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
   } = props;
 
   const { form } = Form.useFormContext();
-
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`
+  const [fieldId, setFieldId] = useState('');
 
   const fieldValue = Form.useWatch(fieldId, form);
+
+  useEffect(() => {
+    if (dataField.length > 0) {
+      setFieldId(dataField[dataField.length - 1]);
+    }
+  }, [dataField]);
+
+  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
+    return (
+      (node?.closest('.arco-form-item') as HTMLElement) ||
+      node?.parentNode as HTMLElement ||
+      document.body
+    );
+  };
 
   return (
     <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={fieldId}
+        field={
+          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`
+        }
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -56,6 +71,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
             mode="multiple"
             allowClear
             showSearch={showSearch}
+            getPopupContainer={getPopupContainer}
             filterOption={(input, option) => {
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
