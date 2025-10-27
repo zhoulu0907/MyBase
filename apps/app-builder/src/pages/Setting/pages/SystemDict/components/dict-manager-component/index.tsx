@@ -27,6 +27,7 @@ import styles from '../../index.module.less';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { useLocation } from 'react-router-dom';
+import StatusTag from '@/components/StatusTag';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -493,11 +494,11 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   return (
     <div className={`${styles.systemDictPage} ${finalConfig.className}`} style={finalConfig.style}>
-      {finalConfig.tabs.enabled ? (
-        <Tabs activeTab={activeTab} onChange={setActiveTab} type="line" className={styles.tabsContainer}>
-          <Tabs.TabPane key={finalConfig.tabs.systemDictTab.key} title={finalConfig.tabs.systemDictTab.title}>
-            <Layout className={styles.pageLayout}>
-              <Sider width={252} className={styles.leftPanel}>
+      <Layout className={styles.pageLayout}>
+        <Sider width={252} className={styles.leftPanel}>
+          {finalConfig.tabs.enabled ? (
+            <Tabs activeTab={activeTab} onChange={setActiveTab} type="line" className={styles.tabsContainer}>
+              <Tabs.TabPane key={finalConfig.tabs.systemDictTab.key} title={finalConfig.tabs.systemDictTab.title}>
                 <DictList
                   list={filteredDictList}
                   activeId={activeDictId || undefined}
@@ -509,43 +510,8 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                   }}
                   onSelect={(id) => handleDictSelect(id)}
                 />
-              </Sider>
-              <Content className={styles.rightPanel}>
-                {!activeDictId || showEmpty ? (
-                  <Empty description={finalConfig.ui.emptyText} />
-                ) : (
-                  <>
-                    <Header>
-                      <InfoPanel
-                        title={activeDict?.name}
-                        description={activeDict?.remark}
-                        rightChildren={OperationButtons}
-                        wrapperClassName={styles.infoPanel}
-                      />
-                      <Divider style={{ margin: '16px 0' }} />
-                    </Header>
-                    <DictionaryTable
-                      data={tableData}
-                      currentPage={currentPage}
-                      pageSize={pageSize}
-                      total={total}
-                      onPageChange={handlePageChange}
-                      onPageSizeChange={setPageSize}
-                      searchValue={dictDataSearch}
-                      onSearchChange={handleDictDataSearch}
-                      onBatchConfig={handleBatchConfig}
-                      onEdit={(item) => handleDictDataEdit(item)}
-                      onDelete={(id) => handleDeleteDictData(id)}
-                      onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
-                    />
-                  </>
-                )}
-              </Content>
-            </Layout>
-          </Tabs.TabPane>
-          <Tabs.TabPane key={finalConfig.tabs.customDictTab.key} title={finalConfig.tabs.customDictTab.title}>
-            <Layout className={styles.pageLayout}>
-              <Sider width={252} className={styles.leftPanel}>
+              </Tabs.TabPane>
+              <Tabs.TabPane key={finalConfig.tabs.customDictTab.key} title={finalConfig.tabs.customDictTab.title}>
                 <DictList
                   list={filteredDictList}
                   activeId={activeDictId || undefined}
@@ -557,44 +523,9 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                   }}
                   onSelect={(id) => handleDictSelect(id)}
                 />
-              </Sider>
-              <Content className={styles.rightPanel}>
-                {!activeDictId || showEmpty ? (
-                  <Empty description={finalConfig.ui.emptyText} />
-                ) : (
-                  <>
-                    <Header>
-                      <InfoPanel
-                        title={activeDict?.name}
-                        description={activeDict?.remark}
-                        rightChildren={OperationButtons}
-                        wrapperClassName={styles.infoPanel}
-                      />
-                      <Divider style={{ margin: '16px 0' }} />
-                    </Header>
-                    <DictionaryTable
-                      data={tableData}
-                      currentPage={currentPage}
-                      pageSize={pageSize}
-                      total={total}
-                      onPageChange={handlePageChange}
-                      onPageSizeChange={setPageSize}
-                      searchValue={dictDataSearch}
-                      onSearchChange={handleDictDataSearch}
-                      onBatchConfig={handleBatchConfig}
-                      onEdit={(item) => handleDictDataEdit(item)}
-                      onDelete={(id) => handleDeleteDictData(id)}
-                      onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
-                    />
-                  </>
-                )}
-              </Content>
-            </Layout>
-          </Tabs.TabPane>
-        </Tabs>
-      ) : (
-        <Layout className={styles.pageLayout}>
-          <Sider width={252} className={styles.leftPanel}>
+              </Tabs.TabPane>
+            </Tabs>
+          ) : (
             <DictList
               list={filteredDictList}
               activeId={activeDictId || undefined}
@@ -606,40 +537,41 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
               }}
               onSelect={(id) => handleDictSelect(id)}
             />
-          </Sider>
-          <Content className={styles.rightPanel}>
-            {!activeDictId || showEmpty ? (
-              <Empty description={finalConfig.ui.emptyText} />
-            ) : (
-              <>
-                <Header>
-                  <InfoPanel
-                    title={activeDict?.name}
-                    description={activeDict?.remark}
-                    rightChildren={OperationButtons}
-                    wrapperClassName={styles.infoPanel}
-                  />
-                  <Divider style={{ margin: '16px 0' }} />
-                </Header>
-                <DictionaryTable
-                  data={tableData}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  total={total}
-                  onPageChange={handlePageChange}
-                  onPageSizeChange={setPageSize}
-                  searchValue={dictDataSearch}
-                  onSearchChange={handleDictDataSearch}
-                  onBatchConfig={handleBatchConfig}
-                  onEdit={(item) => handleDictDataEdit(item)}
-                  onDelete={(id) => handleDeleteDictData(id)}
-                  onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
+          )}
+        </Sider>
+        <Content className={styles.rightPanel}>
+          {!activeDictId || showEmpty ? (
+            <Empty description={finalConfig.ui.emptyText} />
+          ) : (
+            <>
+              <Header>
+                <InfoPanel
+                  title={activeDict?.name}
+                  description={activeDict?.remark}
+                  rightChildren={OperationButtons}
+                  wrapperClassName={styles.infoPanel}
+                  titleChildren={<StatusTag status={activeDict?.status} type="tag" />}
                 />
-              </>
-            )}
-          </Content>
-        </Layout>
-      )}
+                <Divider style={{ margin: '16px 0' }} />
+              </Header>
+              <DictionaryTable
+                data={tableData}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={handlePageChange}
+                onPageSizeChange={setPageSize}
+                searchValue={dictDataSearch}
+                onSearchChange={handleDictDataSearch}
+                onBatchConfig={handleBatchConfig}
+                onEdit={(item) => handleDictDataEdit(item)}
+                onDelete={(id) => handleDeleteDictData(id)}
+                onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
+              />
+            </>
+          )}
+        </Content>
+      </Layout>
       {addDictModalVisible && (
         <DictModal
           visible={addDictModalVisible}

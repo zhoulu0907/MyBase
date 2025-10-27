@@ -53,7 +53,7 @@ const DataDictPage: React.FC = () => {
 
   return (
     <div className={styles.dictPage}>
-      <DictManager config={config} onDictChange={handleDictChange} onDictDataChange={handleDictDataChange} />;
+      <DictManager config={config} onDictChange={handleDictChange} onDictDataChange={handleDictDataChange} />
     </div>
   );
 };
