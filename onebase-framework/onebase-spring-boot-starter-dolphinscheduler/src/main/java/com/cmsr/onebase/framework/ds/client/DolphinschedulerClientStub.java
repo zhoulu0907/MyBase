@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.ds.model.common.Result;
 import com.cmsr.onebase.framework.ds.model.schedule.ScheduleInfoResp;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDefinitionResp;
+import com.cmsr.onebase.framework.ds.model.workflow.sub.ComplementTime;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -14,7 +15,6 @@ public interface DolphinschedulerClientStub {
 
     // Workflow   out:: create/delete/online/offline
     //            in::  verify-name
-
     @POST("projects/{projectCode}/workflow-definition")
     @FormUrlEncoded
     Call<Result<WorkflowDefinitionResp>> createWorkflow(@Path("projectCode") Long projectCode,
@@ -79,6 +79,22 @@ public interface DolphinschedulerClientStub {
                                                                      @Query("workflowDefinitionCode") Long workflowCode,
                                                                      @Query("pageNo") Integer pageNo,
                                                                      @Query("pageSize") Integer pageSize);
+
+    @POST("projects/{projectCode}/executors/start-workflow-instance")
+    @FormUrlEncoded
+    Call<Result<List<Long>>> manuallyStartWorkflow(@Path("projectCode") Long projectCode,
+                                                   @Field("workflowDefinitionCode") Long workflowCode,
+                                                   @Field("environmentCode") Long environmentCode,
+                                                   @Field("tenantCode") String tenantCode,
+                                                   @Field("scheduleTime") ComplementTime scheduleTime, // {xxx}
+                                                   @Field("failureStrategy") String failureStrategy, // CONTINUE
+                                                   @Field("warningType") String warningType, // NONE
+                                                   @Field("runMode") String runMode, // RUN_MODE_SERIAL
+                                                   @Field("workflowInstancePriority") String workflowInstancePriority, // MEDIUM
+                                                   @Field("workerGroup") String workerGroup, // default
+                                                   @Field("execType") String execType,
+                                                   @Field("executionOrder") String executionOrder // DESC_ORDER
+                                                      );
 
     // WorkflowInstance manualy start, no usage for now
     @POST("projects/{projectCode}/executors/start-workflow-instance")
