@@ -1,5 +1,5 @@
 import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
-import { Button, Checkbox, Form, Input, Modal, Select, Tag } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, Modal, Popover, Select, Tag } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconEdit } from '@arco-design/web-react/icon';
 import {
@@ -32,7 +32,6 @@ interface IProps {
   dataPermissionPerson: AuthDataPermissionPersonVO[];
   appEntityFields: AppEntityField[];
   filterFieldCheckType: EntityFieldValidationTypes[];
-  dataPermissionScope: ScopeTypeOption[];
   variableOptions: TreeSelectDataType[];
   handleModalSubmit: (values: AuthDataGroupVO) => void;
   handleModalCancel: () => void;
@@ -46,7 +45,18 @@ const PERMISSIONSCOPE_DICT = [
   { value: 'ownSubmit', label: '本人提交', disabled: false },
   { value: 'departmentSubmit', label: '本部门提交', disabled: false },
   { value: 'subDepartmentSubmit', label: '下级部门提交', disabled: false }
-  // { value: 'customCondition', label: '自定义条件' }
+];
+const OperationOptions = [
+  { value: 'EDIT', label: '可编辑', disabled: false },
+  { value: 'DELETE', label: '可删除', disabled: false }
+];
+const dataPermissionScope: ScopeTypeOption[] = [
+  { label: '本人', value: 'self' },
+  { label: '本人及下属员工', value: 'selfAndSubordinates' },
+  { label: '当前员工所在主部门', value: 'mainDepartment' },
+  { label: '当前员工所在主部门及下级部门', value: 'mainDepartmentAndSubs' },
+  { label: '指定部门', value: 'specifiedDepartment' },
+  { label: '指定人员', value: 'specifiedPerson' }
 ];
 
 const DataPermissionModal = (props: IProps) => {
@@ -59,7 +69,6 @@ const DataPermissionModal = (props: IProps) => {
     dataPermissionPerson,
     appEntityFields,
     filterFieldCheckType,
-    dataPermissionScope,
     variableOptions,
     handleModalSubmit,
     handleModalCancel
@@ -79,7 +88,7 @@ const DataPermissionModal = (props: IProps) => {
   const [customChecked, setCustomChecked] = useState(false); //自定义权限
   const [isCustomDisabled, setIsCustomDisabled] = useState(false);
 
-  const [checkAll, setCheckAll] = useState<boolean>(!!initialFormValues.isOperable); // 操作权限
+  const [checkAll, setCheckAll] = useState<boolean>(); // 操作权限
   const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
   const [conditionFields, setConditionFields] = useState<any[]>([]);
   const [scopeType, setScopeType] = useState('');
@@ -155,21 +164,44 @@ const DataPermissionModal = (props: IProps) => {
     }
     setDataFilters(dataFilters);
     const scopeTags = initialFormValues.scopeTags;
-    if (scopeTags.includes(CUSTOMCONDITION)) {
-      scopeTags.splice(scopeTags.indexOf(CUSTOMCONDITION), 1);
-      setCustomChecked(true);
+    if (scopeTags?.includes(CUSTOMCONDITION)) {
       initialFormValues.customCondition = true;
       setCustomChecked(true);
     }
-    setScopeDisabled(scopeTags);
+    setScopeDisabled(scopeTags || []);
+
+    setCheckAll(initialFormValues.operationTags?.length == OperationOptions.length);
   }, [appEntityFields, dataFilters, initialFormValues, dataPermissionPerson]);
   // 操作权限 全选反选
   function onChangeAll(checked: boolean) {
+    if (checked) {
+      // 全选：选中所有操作权限
+      const allOperationValues = OperationOptions?.map((option) => option.value) || [];
+      form.setFieldValue('operationTags', allOperationValues);
+    } else {
+      // 取消全选：清空所有操作权限
+      form.setFieldValue('operationTags', []);
+    }
+
     setCheckAll(checked);
     form.setFieldValue('isOperable', checked ? 1 : 0);
   }
 
+  const changeOperationPermission = (values: string[]) => {
+    if (values.length == OperationOptions.length) {
+      setCheckAll(true);
+    } else {
+      setCheckAll(false);
+    }
+  };
+
   const changeScopePermission = (values: string[]) => {
+    //切换时去掉error message
+    form.setFields({
+      scopeTags: {
+        error: { message: '' }
+      }
+    });
     setScopeDisabled(values);
   };
 
@@ -180,16 +212,17 @@ const DataPermissionModal = (props: IProps) => {
         scopeTags: [ALLDATA],
         scopeFieldId: undefined,
         scopeLevel: undefined,
-        scopeValue: '',
+        scopeValue: undefined,
         customCondition: false
       });
+      initialFormValues.scopeLevel = undefined;
+      initialFormValues.scopeFieldId = undefined;
       setScopeType('');
       setSelectedMembers([]);
       setCustomChecked(false);
     } else {
       setScopeOptions((prev) => prev.map((item) => ({ ...item, disabled: false })));
       form.setFieldValue('scopeTags', values);
-      form.setFieldValue('allScopeTags', values);
     }
     setIsCustomDisabled(values.includes(ALLDATA));
   };
@@ -258,13 +291,26 @@ const DataPermissionModal = (props: IProps) => {
     form.setFieldValue('scopeValue', ids);
   };
 
+  const handleCustomChecked = (value: boolean) => {
+    setCustomChecked(value);
+    if (value) {
+      const tags = form.getFieldValue('scopeTags');
+      tags.push(CUSTOMCONDITION);
+      form.setFieldValue('scopeTags', tags);
+    } else {
+      const tags = form.getFieldValue('scopeTags');
+      tags.splice(tags.indexOf(CUSTOMCONDITION), 1);
+      form.setFieldValue('scopeTags', tags);
+    }
+  };
+
   // 重置表单
   const formReset = () => {
     form.resetFields();
     setScopeType('');
     setDataFilters([]);
     setSelectedMembers([]);
-    setCheckAll(true);
+    setCheckAll(false);
     setIsCustomDisabled(false);
     setCustomChecked(false);
     setScopeOptions(PERMISSIONSCOPE_DICT);
@@ -273,11 +319,37 @@ const DataPermissionModal = (props: IProps) => {
   const handleOk = async () => {
     try {
       const values = await form.validate();
-      const scopeTags = form.getFieldValue('scopeTags');
-      if (scopeTags.length === 0) setScopeTagsStatus('error');
+      // scope 表单验证
+      const formValues = await form.getFieldsValue();
+      // 如果开启自定义范围，先检查基础配置是否完整
+      if (formValues.customCondition) {
+        if (!formValues.scopeFieldId || !formValues.scopeLevel) {
+          form.setFields({
+            scopeTags: {
+              error: { message: '自定义权限范围时请配置条件' }
+            }
+          });
+          return;
+        }
+
+        // 根据 scopeLevel 检查 selectedMembers（不同级别可有不同提示）
+        const levelMsgMap: Record<string, string> = {
+          specifiedPerson: '自定义范围时请选择人员',
+          specifiedDepartment: '自定义范围时请选择部门'
+        };
+
+        const needListCheck = !!levelMsgMap[formValues.scopeLevel];
+        if (needListCheck && (!Array.isArray(selectedMembers) || selectedMembers.length === 0)) {
+          form.setFields({
+            scopeTags: {
+              error: { message: levelMsgMap[formValues.scopeLevel] }
+            }
+          });
+          return;
+        }
+      }
 
       console.log('提交数据 values:', values);
-      values.isOperable = checkAll ? IsOperable.allowed : IsOperable.notAllowed;
       handleModalSubmit(values);
       handleModalCancel();
     } catch (error) {
@@ -311,7 +383,7 @@ const DataPermissionModal = (props: IProps) => {
           <FormItem field="description" label="说明">
             <Input placeholder="请输入权限组说明" />
           </FormItem>
-          <FormItem label="权限范围" rules={[{ required: true, message: '请选择权限范围' }]}>
+          <FormItem label="权限范围" field="scopeTags" rules={[{ required: true, message: '至少设置一个权限范围' }]}>
             <div className={styles.dataPermissionScope}>
               <FormItem field="scopeTags" noStyle>
                 <CheckboxGroup options={scopeOptions} onChange={(values) => changeScopePermission(values)} />
@@ -321,18 +393,14 @@ const DataPermissionModal = (props: IProps) => {
                   <Checkbox
                     checked={customChecked}
                     disabled={isCustomDisabled}
-                    onChange={(checked: boolean) => setCustomChecked(checked)}
+                    onChange={(checked: boolean) => handleCustomChecked(checked)}
                   >
                     自定义条件
                   </Checkbox>
                 </FormItem>
                 {customChecked && (
                   <div className={`${styles.selfRow} ${isCustomDisabled ? styles.disableField : ''}`.trim()}>
-                    <FormItem
-                      field="scopeFieldId"
-                      className={styles.scopeRoles}
-                      rules={[{ required: customChecked, message: '请选择权限范围' }]}
-                    >
+                    <FormItem field="scopeFieldId" className={styles.scopeRoles}>
                       <Select
                         placeholder="请选择"
                         onChange={(value) => {
@@ -349,11 +417,7 @@ const DataPermissionModal = (props: IProps) => {
                       </Select>
                     </FormItem>
                     是
-                    <FormItem
-                      field="scopeLevel"
-                      className={styles.scopePerson}
-                      rules={[{ required: customChecked, message: '请选择权限范围' }]}
-                    >
+                    <FormItem field="scopeLevel" className={styles.scopePerson}>
                       <Select
                         placeholder="请选择"
                         onChange={(value) => {
@@ -376,10 +440,11 @@ const DataPermissionModal = (props: IProps) => {
                           {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') &&
                           selectedMembers &&
                           selectedMembers.length > 0 ? (
-                            <div className={styles.assignIdTag} title={selectedMembers[0].name}>
+                            <div className={styles.assignIdTag}>
                               <div className={styles.tagContainer}>
-                                {selectedMembers.map((member) => (
+                                {selectedMembers.slice(0, 2).map((member) => (
                                   <Tag
+                                    title={member.name}
                                     className={styles.tag}
                                     key={member.key}
                                     closable
@@ -391,6 +456,16 @@ const DataPermissionModal = (props: IProps) => {
                                     <span>{member.name}</span>
                                   </Tag>
                                 ))}
+                                {selectedMembers.length - 2 > 0 && (
+                                  <Popover
+                                    trigger="hover"
+                                    content={selectedMembers.slice(2).map((member) => (
+                                      <div>{member.name}</div>
+                                    ))}
+                                  >
+                                    <Tag>+{selectedMembers.length - 2}</Tag>
+                                  </Popover>
+                                )}
                               </div>
                               <IconEdit className={styles.tagBtn} onClick={() => specifiedModalVisible()}></IconEdit>
                             </div>
@@ -456,13 +531,13 @@ const DataPermissionModal = (props: IProps) => {
                 操作权限
               </Checkbox>
             </div>
-            <div className={styles.dataPermissionOperable}>
-              <Checkbox checked={true} disabled>
+            <div>
+              <Checkbox checked={true} disabled className={styles.dataPermissionOperable}>
                 可查看
               </Checkbox>
-              <Checkbox checked={checkAll} onChange={onChangeAll}>
-                可操作
-              </Checkbox>
+              <FormItem field="operationTags" noStyle>
+                <CheckboxGroup options={OperationOptions} onChange={(values) => changeOperationPermission(values)} />
+              </FormItem>
             </div>
           </FormItem>
         </Form>
