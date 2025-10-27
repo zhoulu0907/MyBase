@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.app.api.permission.dto.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author：huangjie
@@ -11,16 +12,17 @@ import java.util.List;
 @Tag(name = "RPC 服务 - 应用")
 public interface AppPermissionApi {
 
-    Long findEntityByMenuId(Long menuId);
+    List<RoleDTO> findRoles(Long userId, Long applicationId);
 
-    List<RoleDTO> findRoles(Long applicationId, Long userId);
+    List<ViewDTO> findViews(Long applicationId, Long menuId);
 
-    List<PermissionDTO> findPermissions(Long applicationId, Long roleId);
+    MenuDTO findMenuById(Long menuId);
 
-    List<ViewDTO> findViews(Long applicationId, Long roleId);
+    List<PermissionDTO> findPermissions(Long applicationId, Set<Long> roleIds);
 
-    List<DataGroupDTO> findDataGroups(Long applicationId, Long roleId);
+    List<PermissionDTO> findPermissions(Long applicationId, Set<Long> roleIds, Long menuId);
 
-    List<FieldDTO> findFields(Long applicationId, Long roleId);
+    List<DataGroupDTO> findDataGroups(Long applicationId, Set<Long> roleIds, Long menuId);
 
+    List<FieldDTO> findFields(Long applicationId, Set<Long> roleIds, Long menuId);
 }

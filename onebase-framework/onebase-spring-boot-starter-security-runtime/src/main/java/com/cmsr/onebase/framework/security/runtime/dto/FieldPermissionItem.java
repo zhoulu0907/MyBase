@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.runtime;
+package com.cmsr.onebase.framework.security.runtime.dto;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import lombok.Data;
  * @Date：2025/10/20 17:07
  */
 @Data
-public class FieldPermission {
+public class FieldPermissionItem {
 
     private Long fieldId;
 

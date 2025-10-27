@@ -40,6 +40,7 @@ public class AuthDefaultFactory {
     public static AuthDataGroupDO createAuthDataGroupDO(AuthPermissionReqVO reqVO) {
         AuthDataGroupDO adg = new AuthDataGroupDO();
         adg.setId(null);
+        adg.setGroupName("默认权限");
         adg.setApplicationId(reqVO.getApplicationId());
         adg.setRoleId(reqVO.getRoleId());
         adg.setMenuId(reqVO.getMenuId());
