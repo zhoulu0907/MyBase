@@ -31,7 +31,7 @@ import DataPermissionModal from './components/DataPermissionModal';
 
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import styles from './index.module.less';
-import { PERMISSION_SCOPE } from '@/constants/permission';
+import { OPERATION_OPTIONS, PERMISSION_SCOPE } from '@/constants/permission';
 
 const initialFormValues: AuthDataGroupVO = {
   id: '',
@@ -43,7 +43,7 @@ const initialFormValues: AuthDataGroupVO = {
   scopeValue: '',
   dataFilters: [],
   filterCondition: [],
-  isOperable: IsOperable.allowed
+  operationTags: []
 };
 
 const opCodeOptions = [
@@ -60,9 +60,6 @@ const opCodeOptions = [
     value: FieldType.VARIABLES
   }
 ];
-
-// 权限范围自定义权限
-const CUSTOMCONDITION = 'customCondition';
 
 interface IProps {
   appId: string;
@@ -87,7 +84,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   useEffect(() => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
-      getScopeType();
       getSetIdFromMenuId();
     }
   }, [appId, menuId, roleId]);
@@ -155,15 +151,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       // 创建模式下清空编辑数据
       // setEditingPermData(null);
       setEditingPermData({ ...initialFormValues });
-    }
-  };
-
-  const getScopeType = async () => {
-    try {
-      const scopeTypeResq = await getScopeTypeApi();
-      await SetDataPermissionScopeType(scopeTypeResq);
-    } catch (error) {
-      console.error('获取权限范围失败 error:', error);
     }
   };
 
@@ -320,7 +307,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const formattedData = dataPermissionRoles.map((item: AuthDataPermissionPersonVO) => ({
         PersonId: item.id,
         fieldName: item.fieldName,
-        displayName: item.displayName,
+        displayName: item.displayName?.replace(/\s*id$/i, ''),
         entityID: item.entityId
       }));
 
@@ -352,7 +339,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         submitData.scopeValue = JSON.stringify(values.scopeValue);
       }
     }
-    if (values.customCondition) submitData.scopeTags.push(CUSTOMCONDITION);
   };
 
   const processDataFilters = (values: AuthDataGroupVO, submitData: AuthDataGroupVO) => {
@@ -619,10 +605,12 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                       <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
                         查看
                       </Tag>
-                      <Tag visible={!!perm.isOperable} color="#F2F3F5" style={{ color: '#1D2129' }}>
-                        操作
-                      </Tag>
-                      {perm.scopeTags.map((tag: string) => (
+                      {perm.operationTags?.map((tag: string) => (
+                        <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
+                          {OPERATION_OPTIONS[tag]}
+                        </Tag>
+                      ))}
+                      {perm.scopeTags?.map((tag: string) => (
                         <Tag color="#E8F3FF" style={{ color: '#3C7EFF' }}>
                           {PERMISSION_SCOPE[tag]}
                         </Tag>
@@ -687,7 +675,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             dataPermissionPerson={dataPermissionPerson}
             appEntityFields={appEntityFields}
             filterFieldCheckType={filterFieldCheckType}
-            dataPermissionScope={dataPermissionScopeType}
             variableOptions={variableOptions}
             handleModalSubmit={(values: AuthDataGroupVO) => handleModalSubmit(values)}
             handleModalCancel={() => handleModalCancel()}

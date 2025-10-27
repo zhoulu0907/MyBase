@@ -132,7 +132,7 @@ export interface AuthDataGroupVO {
   /**
    * 是否可以操作
    */
-  isOperable?: IsOperable;
+  operationTags?: string[];
   /**
    * 权限范围字段名称
    */

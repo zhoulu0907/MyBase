@@ -61,7 +61,10 @@
               gap: 4px;
               // 图片和文字中线对齐
               vertical-align: middle;
-
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 80px;
             }
           }
           .tagBtn {
@@ -83,9 +86,7 @@
       margin-bottom: 20px;
     }
     .dataPermissionOperable {
-      display: flex;
-      align-items: center;
-      gap: 36px;
+      margin-right: 14px;
     }
   }
 }
