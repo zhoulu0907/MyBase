@@ -12,33 +12,33 @@ public class DolphinschedulerClientTest {
 
     private DolphinSchedulerClient client;
 
+    private Long workflowCode = 155747039101312L;
+
     @BeforeEach
     public void init() {
         client = new DolphinSchedulerClient();
         client.setAddress("http://10.0.104.33:12345/dolphinscheduler");
         client.setToken("85806d2d33502cef3036fb30b320e5f5");
         client.setTenantCode("root");
-        client.setEtlProjectCode(TEST_PROJECT_CODE);
-        client.setFlowProjectCode(TEST_PROJECT_CODE);
         client.setEnvironmentCode(154612656767296L);
         client.initClient();
     }
 
     @Test
     @Order(1)
-    public void testCreateTask() {
+    public void testCreateWorkflow() {
         HttpTask httpTask = HttpTask.ofUrl("https://www.baidu.com")
                 .method(HttpTask.HttpMethod.GET)
                 .form("q", "你好");
 
-        Long workflowId = client.createHttpWorkflow("测试创建", httpTask, null);
+        Long workflowId = client.createSingletonWorkflow(TEST_PROJECT_CODE, "测试创建", httpTask, null);
         assert workflowId != null;
+        this.workflowCode = workflowId;
     }
 
     @Test
-    public void testUpdateTask() {
-        HttpTask httpTask = HttpTask.ofUrl("https://www.baidu.com/")
-                .method(HttpTask.HttpMethod.GET)
-                .form("q", "你好");
+    @Order(99)
+    public void testPurgeWorkflow() {
+        client.purgeWorkflow(TEST_PROJECT_CODE, workflowCode);
     }
 }

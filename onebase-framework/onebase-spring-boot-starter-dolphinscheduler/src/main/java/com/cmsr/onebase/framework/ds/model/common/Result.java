@@ -15,4 +15,10 @@ public class Result<T> {
 
     private Boolean failed;
 
+    public static <T> Result<T> newEmpty() {
+        Result<T> empty = new Result<>();
+        empty.setFailed(true);
+
+        return empty;
+    }
 }
