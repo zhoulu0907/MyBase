@@ -1,9 +1,12 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
+import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 /**
  * 节点配置创建策略抽象类
@@ -53,4 +56,35 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
      */
     @Override
     public abstract E buildExtData(T nodeVO);
+
+    /**
+     * 默认的按钮配置构建方法
+     *
+     * 主要用与开始节点和发起节点
+     */
+    protected List<BaseNodeBtnCfgDTO> buildDefaultButtonConfigs() {
+        List<BaseNodeBtnCfgDTO> buttonConfigs = new java.util.ArrayList<>();
+
+        // 保存按钮
+        BaseNodeBtnCfgDTO btnCfg = new BaseNodeBtnCfgDTO();
+        btnCfg.setButtonName("保存");
+        btnCfg.setEnabled(true);
+        btnCfg.setDisplayName("保存");
+        btnCfg.setButtonType("save");
+        btnCfg.setDefaultApprovalComment("");
+
+        buttonConfigs.add(btnCfg);
+
+        // 提交按钮
+        btnCfg = new BaseNodeBtnCfgDTO();
+        btnCfg.setButtonName("提交");
+        btnCfg.setEnabled(true);
+        btnCfg.setDisplayName("提交");
+        btnCfg.setButtonType("submit");
+        btnCfg.setDefaultApprovalComment("");
+
+        buttonConfigs.add(btnCfg);
+
+        return buttonConfigs;
+    }
 }

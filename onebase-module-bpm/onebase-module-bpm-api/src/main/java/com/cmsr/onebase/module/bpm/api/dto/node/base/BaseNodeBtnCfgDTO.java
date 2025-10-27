@@ -16,6 +16,11 @@ public class BaseNodeBtnCfgDTO {
     private String buttonName;
 
     /**
+     * 按钮类型
+     */
+    private String buttonType;
+
+    /**
      * 显示名称
      */
     private String displayName;

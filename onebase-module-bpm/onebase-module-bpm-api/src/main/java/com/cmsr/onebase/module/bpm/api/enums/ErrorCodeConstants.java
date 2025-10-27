@@ -30,6 +30,15 @@ public interface ErrorCodeConstants {
 
     ErrorCode DESIGNING_FLOW_EXISTS = new ErrorCode(1_009_001_007, "存在设计中状态的流程");
 
+    ErrorCode FLOW_INSTANCE_NOT_EXISTS = new ErrorCode(1_009_001_008, "流程实例不存在");
+
+    ErrorCode FLOW_NODE_NOT_EXISTS = new ErrorCode(1_009_001_009, "流程节点不存在");
+
+    ErrorCode FLOW_PERMISSION_DENY = new ErrorCode(1_009_001_010, "权限不足");
+
+    ErrorCode PUBLISHED_FLOW_NOT_EXISTS = new ErrorCode(1_009_001_000, "不存在已发布流程");
+
+
     // ============= 校验 =============
 
     ErrorCode UNSUPPORT_NODE_TYPE = new ErrorCode(1_009_002_000, "不支持的节点类型");

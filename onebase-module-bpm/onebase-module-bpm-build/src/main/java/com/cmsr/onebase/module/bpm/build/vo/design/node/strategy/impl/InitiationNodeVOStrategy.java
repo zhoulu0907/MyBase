@@ -52,7 +52,9 @@ public class InitiationNodeVOStrategy extends AbstractNodeVOStrategy<InitiationN
             extDTO.setDeptConfig(nodeVO.getData().getDeptConfig());
         }
 
+        extDTO.setButtonConfigs(this.buildDefaultButtonConfigs());
         extDTO.setMeta(nodeVO.getMeta());
+
         return extDTO;
     }
 

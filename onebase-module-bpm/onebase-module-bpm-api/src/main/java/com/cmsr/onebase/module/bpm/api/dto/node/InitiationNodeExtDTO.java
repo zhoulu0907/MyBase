@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.bpm.api.dto.node;
 
+import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * 发起节点里的扩展字段信息
@@ -15,6 +18,11 @@ public class InitiationNodeExtDTO extends BaseNodeExtDTO {
      * 字段权限配置
      */
     private DeptConfigDTO deptConfig;
+
+    /**
+     * 按钮配置，前端暂不可配置，默认有保存和提交按钮
+     */
+    private List<BaseNodeBtnCfgDTO> buttonConfigs;
 
     /**
      * 部门配置
