@@ -1,6 +1,7 @@
 import React from 'react';
 import DictManager from '@/pages/Setting/pages/SystemDict/components/dict-manager-component';
 import type { DictManagerConfig } from '@/pages/Setting/pages/SystemDict/components/dict-manager-component';
+import styles from './index.module.less';
 
 const DataDictPage: React.FC = () => {
   // 配置带tabs的字典管理器
@@ -15,13 +16,8 @@ const DataDictPage: React.FC = () => {
     },
     tabs: {
       enabled: true,
-      systemDictTab: {
-        key: 'system',
-        title: '系统字典'
-        // 系统字典使用默认的API和权限
-      },
       customDictTab: {
-        key: 'custom',
+        key: 'app',
         title: '自定义字典'
         // 自定义字典的API和权限配置（后续可以添加）
         // api: {
@@ -36,6 +32,11 @@ const DataDictPage: React.FC = () => {
         //   query: 'CUSTOM_QUERY_PERMISSION',
         //   status: 'CUSTOM_STATUS_PERMISSION'
         // }
+      },
+      systemDictTab: {
+        key: 'tenant',
+        title: '系统字典'
+        // 系统字典使用默认的API和权限
       }
     }
   };
@@ -50,7 +51,11 @@ const DataDictPage: React.FC = () => {
     // 可以在这里处理字典数据变化逻辑
   };
 
-  return <DictManager config={config} onDictChange={handleDictChange} onDictDataChange={handleDictDataChange} />;
+  return (
+    <div className={styles.dictPage}>
+      <DictManager config={config} onDictChange={handleDictChange} onDictDataChange={handleDictDataChange} />;
+    </div>
+  );
 };
 
 export default DataDictPage;

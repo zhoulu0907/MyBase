@@ -26,6 +26,7 @@ import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-
 import styles from '../../index.module.less';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
+import { useLocation } from 'react-router-dom';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -42,7 +43,7 @@ export interface DictManagerConfig {
   };
   // API 配置
   api?: {
-    getDictList?: () => Promise<DictItem[]>;
+    getDictList?: (dictOwnerType: string) => Promise<DictItem[]>;
     getDictDataList?: (params: any) => Promise<{ list: DictData[]; total: number }>;
     createDict?: (data: DictItem) => Promise<any>;
     updateDict?: (data: DictItem) => Promise<any>;
@@ -102,7 +103,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       ...config.permissions
     },
     api: {
-      getDictList: getAllDictList,
+      getDictList: (dictOwnerType: string) => getAllDictList({ dictOwnerType }),
       getDictDataList: getDictDataListByPage,
       createDict,
       updateDict,
@@ -126,12 +127,12 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     tabs: {
       enabled: false,
       systemDictTab: {
-        key: 'system',
-        title: '系统字典',
+        key: 'tenant',
+        title: '公共字典',
         ...config.tabs?.systemDictTab
       },
       customDictTab: {
-        key: 'custom',
+        key: 'app',
         title: '自定义字典',
         ...config.tabs?.customDictTab
       },
@@ -141,10 +142,12 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     style: {},
     ...config
   };
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const appId = searchParams.get('appId');
 
   // Tabs 相关状态
   const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs.systemDictTab?.key || '');
-
   // 字典相关状态
   const [dictList, setDictList] = useState<DictItem[]>([]);
   const [activeDictId, setActiveDictId] = useState<number | undefined>(undefined);
@@ -167,6 +170,13 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   const [batchConfigModalVisible, setBatchConfigModalVisible] = useState(false);
   const [batchConfigLoading, setBatchConfigLoading] = useState(false);
 
+  const getTenantId = () => {
+    let tenantId = sessionStorage.getItem('tenant_id');
+    if (!tenantId) {
+      tenantId = localStorage.getItem('tenant_id');
+    }
+    return tenantId;
+  };
   // 获取当前tab的配置
   const getCurrentTabConfig = () => {
     if (activeTab === finalConfig.tabs.systemDictTab?.key) {
@@ -193,8 +203,8 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   const loadDictList = async () => {
     try {
-      const data = await currentTabConfig.api.getDictList();
-      setDictList(data);
+      const data = await currentTabConfig.api?.getDictList?.(activeTab);
+      setDictList(data || []);
       if (activeDictId && data.findIndex((item) => item.id === activeDictId) > -1) {
         setActiveDictId(activeDictId);
         setActiveDict(dictList.find((t) => t.id === activeDictId));
@@ -263,10 +273,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     );
   }, [dictList, dictSearch]);
 
-  const debouncedLoadTableData = debounce((keyword: string) => {
-    loadTableData(keyword);
-  }, 300);
-
   useEffect(() => {
     if (activeDictId !== undefined) {
       debouncedLoadTableData(dictDataSearch);
@@ -275,6 +281,10 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       debouncedLoadTableData.cancel();
     };
   }, [dictDataSearch]);
+
+  const debouncedLoadTableData = debounce((keyword: string) => {
+    loadTableData(keyword);
+  }, 300);
 
   const handleDictDataSearch = (value: string) => {
     setDictDataSearch(value);
@@ -377,8 +387,8 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         await currentTabConfig.api.updateDict({ ...editDict, ...values });
         setDictList((prev) => prev.map((t) => (t.id === editDict.id ? { ...t, ...values } : t)));
       } else {
-        await currentTabConfig.api.createDict(values);
-        const data = await currentTabConfig.api.getDictList();
+        await currentTabConfig.api.createDict({ ...values, dictOwnerType: activeTab });
+        const data = await currentTabConfig.api?.getDictList?.(activeTab);
         setDictList(data);
       }
       setAddDictModalVisible(false);
