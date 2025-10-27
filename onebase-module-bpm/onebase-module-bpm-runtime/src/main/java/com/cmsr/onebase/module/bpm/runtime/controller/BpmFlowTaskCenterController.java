@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowTodoTaskPageReqVO;
-import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTodoRuntimeService;
+import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,29 +29,32 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Slf4j
 public class BpmFlowTaskCenterController {
     @Resource
-    private BpmFlowTodoRuntimeService bpmFlowTodoRuntimeService;
+    private BpmFlowTaskCenterService taskCenterService;
+
     @GetMapping("/todo/page")
     @Operation(summary = "分页查询待办信息")
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
     public CommonResult<PageResult<BpmFlowTodoTaskVO>> todo(@Valid BpmFlowTodoTaskPageReqVO reqVO) {
         log.info("分页查询待办信息: {}", reqVO);
-        PageResult<BpmFlowTodoTaskVO> pageResult = bpmFlowTodoRuntimeService.getTodoPage(reqVO);
+        PageResult<BpmFlowTodoTaskVO> pageResult = taskCenterService.getTodoPage(reqVO);
         return success(pageResult);
     }
+
     @GetMapping("/done/page")
     @Operation(summary = "分页查询已办信息")
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
     public CommonResult<PageResult<BpmFlowDoneTaskVO>> done(@Valid BpmFlowDoneTaskPageReqVO reqVO) {
         log.info("分页查询已办信息: {}", reqVO);
-        PageResult<BpmFlowDoneTaskVO> pageResult = bpmFlowTodoRuntimeService.getDonePage(reqVO);
+        PageResult<BpmFlowDoneTaskVO> pageResult = taskCenterService.getDonePage(reqVO);
         return success(pageResult);
     }
+
     @GetMapping("/my-create/page")
     @Operation(summary = "分页查询我创建的流程信息")
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
     public CommonResult<PageResult<BpmMyCreatedVO>> myCreate(@Valid BpmMyCreatedPageReqVO reqVO) {
         log.info("分页查询我创建的流程信息: {}", reqVO);
-        PageResult<BpmMyCreatedVO> pageResult = bpmFlowTodoRuntimeService.getMyCreatedPage(reqVO);
+        PageResult<BpmMyCreatedVO> pageResult = taskCenterService.getMyCreatedPage(reqVO);
         return success(pageResult);
     }
 }

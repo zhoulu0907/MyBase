@@ -13,7 +13,7 @@ import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowInstanceReposit
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowTodoTaskPageReqVO;
-import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTodoRuntimeService;
+import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,7 +38,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class BpmFlowTodoRuntimeServiceImpl implements BpmFlowTodoRuntimeService {
+public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource
     FlowInstanceRepository flowInstanceRepository;
 

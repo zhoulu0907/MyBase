@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowTodoTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
 
-public interface BpmFlowTodoRuntimeService {
+public interface BpmFlowTaskCenterService {
     /**
      * 获取流程待办分页
      *
