@@ -135,12 +135,12 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
   /**
    * 是否允许预览文件
    */
-  showPreview?: TBooleanDefaultType;
+  // showPreview?: TBooleanDefaultType;
 
   /**
    * 是否允许下载文件
    */
-  showDownload?: TBooleanDefaultType;
+  // showDownload?: TBooleanDefaultType;
 
   /**
    * 文件/图片展示样式：文本、平铺、列表
@@ -170,21 +170,21 @@ const XFileUpload: XInputFileUploadSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'showPreview',
-      name: '允许预览文件',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'showDownload',
-      name: '允许下载文件',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'showPreview',
+    //   name: '允许预览文件',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
+    // {
+    //   key: 'showDownload',
+    //   name: '允许下载文件',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'verify',
       name: '校验',
@@ -205,8 +205,8 @@ const XFileUpload: XInputFileUploadSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    showPreview: false,
-    showDownload: false,
+    // showPreview: false,
+    // showDownload: false,
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,

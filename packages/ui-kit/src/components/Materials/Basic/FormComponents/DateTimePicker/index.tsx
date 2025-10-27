@@ -31,6 +31,14 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
     }
   }, [dataField]);
 
+  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
+    return (
+      (node?.closest('.arco-form-item') as HTMLElement) ||
+      node?.parentNode as HTMLElement ||
+      document.body
+    );
+  };
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -57,6 +65,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           <DatePicker
             showTime
             defaultValue={defaultValue}
+            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

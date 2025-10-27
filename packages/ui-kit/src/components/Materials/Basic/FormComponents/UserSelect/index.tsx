@@ -116,6 +116,14 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     setAdvanceVisible(false);
   };
 
+  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
+    return (
+      (node?.closest('.arco-form-item') as HTMLElement) ||
+      node?.parentNode as HTMLElement ||
+      document.body
+    );
+  };
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -140,7 +148,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
           <Select
             placeholder="请选择"
             onPopupScroll={scrollHandler}
-            getPopupContainer={(node) => node.parentNode?.parentNode as HTMLElement}
+            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

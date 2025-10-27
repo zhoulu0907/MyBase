@@ -34,11 +34,11 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -66,13 +66,13 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
 
   // 自定义文件列表展示
   const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
-    const getFileIcon=(file:UploadItem)=>{
-      if(file?.name){
+    const getFileIcon = (file: UploadItem) => {
+      if (file?.name) {
         // todo  根据文件类型展示不同icon
         const index = file.name.lastIndexOf('.');
-        const type = file.name.slice(index+1)
+        const type = file.name.slice(index + 1)
       }
-      return <IconFile style={{fontSize:'40px'}} />
+      return <IconFile style={{ fontSize: '40px' }} />
     }
     return (
       <div className="uplaodList-text">
