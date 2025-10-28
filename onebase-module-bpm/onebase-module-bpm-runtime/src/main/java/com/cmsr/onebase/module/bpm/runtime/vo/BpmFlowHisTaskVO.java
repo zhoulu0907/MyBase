@@ -75,4 +75,10 @@ public class BpmFlowHisTaskVO {
     @Schema(description = "审批完成时间")
     private LocalDateTime updateTime;
 
+    @Schema(description = "创建人")
+    private Long creator;
+
+    @Schema(description = "更新人")
+    private Long updater;
+
 }
