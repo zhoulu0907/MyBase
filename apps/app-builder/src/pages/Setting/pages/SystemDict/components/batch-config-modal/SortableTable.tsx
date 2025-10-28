@@ -2,8 +2,8 @@ import React from 'react';
 import { Table } from '@arco-design/web-react';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
+import type { DictData } from '@onebase/platform-center';
 import styles from './index.module.less';
-import type { DictValueItem } from '../../hooks/useCodeGenerator';
 
 // 拖拽手柄组件 - 使用 forwardRef 包装
 const DragHandle = SortableHandle(
@@ -27,12 +27,12 @@ const SortableTableBody = SortableContainer((props: { children: React.ReactNode;
 });
 
 interface SortableTableProps {
-  data: DictValueItem[];
+  data: DictData[];
   columns: Array<{
     title: React.ReactNode;
     dataIndex: string;
     width?: number;
-    render?: (value: unknown, record: DictValueItem, index: number) => React.ReactNode;
+    render?: (value: unknown, record: DictData, index: number) => React.ReactNode;
   }>;
   onSort: ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => void;
 }
@@ -96,6 +96,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
         className={styles.dictTable}
         rowKey="id"
         components={components}
+        scroll={{ y: 510 }}
       />
     </div>
   );

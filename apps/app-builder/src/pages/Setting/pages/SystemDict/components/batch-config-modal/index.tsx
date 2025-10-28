@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Form, Message, Modal, Switch, Input, ColorPicker, Spin } from '@arco-design/web-react';
 import { IconDelete, IconTranslate, IconPlusCircle } from '@arco-design/web-react/icon';
 import { arrayMove } from 'react-sortable-hoc';
-import type { DictData } from '@onebase/platform-center';
+import { getDictDataListByType, type DictData } from '@onebase/platform-center';
 import { useCodeGenerator } from '../../hooks/useCodeGenerator';
 import CodeGenerationConfirmModal from '../code-generation-confirm-modal';
 import SortableTable from './SortableTable';
@@ -30,20 +30,15 @@ interface BatchConfigModalProps {
   onCancel: () => void;
   onOk: (values: DictData[]) => void;
   loading?: boolean;
-  initialValues?: DictData[];
+  dictType: string;
 }
 
-const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
-  visible,
-  onCancel,
-  onOk,
-  loading = false,
-  initialValues = []
-}) => {
+const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, onOk, loading = false, dictType }) => {
   const [form] = Form.useForm();
-  const [colorMode, setColorMode] = useState(true);
+  const [colorMode, setColorMode] = useState(false);
   const [dictValues, setDictValues] = useState<DictValueItem[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [tableLoading, setTableLoading] = useState(true);
 
   // 同步表单数据
   const syncFormData = (values: DictData[]) => {
@@ -55,6 +50,26 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
       sort: item.sort
     }));
     form.setFieldsValue({ dictValues: formData });
+  };
+
+  const loadAllDictDataList = async () => {
+    try {
+      setTableLoading(true);
+      const res = await getDictDataListByType(dictType);
+      let colorEnabled = false;
+      if (res.some((item) => item?.colorType?.startsWith('#'))) {
+        colorEnabled = true;
+      }
+      setColorMode(colorEnabled);
+      setDictValues(res);
+      syncFormData(res);
+    } catch (error) {
+      console.error('加载字典数据失败:', error);
+    } finally {
+      setTimeout(() => {
+        setTableLoading(false);
+      }, 500);
+    }
   };
 
   // 获取未删除的数据
@@ -76,22 +91,13 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
 
   useEffect(() => {
     if (visible) {
-      const initialDictValues = initialValues.map((item, index) => ({
-        id: item.id || `temp-${Date.now()}-${index}`,
-        label: item.label || '',
-        value: item.value || '',
-        colorType: colorMode ? item.colorType || getColorByIndex(index) : '', // 默认颜色
-        status: item.status || 1,
-        sort: item.sort || index + 1
-      }));
-      setDictValues(initialDictValues);
-      form.setFieldsValue({ dictValues: initialDictValues });
+      loadAllDictDataList();
     } else {
       // 关闭时重置
       form.resetFields();
       setDictValues([]);
     }
-  }, [visible, initialValues, form]);
+  }, [visible, form]);
 
   // 新增字典值
   const addDictValue = () => {
@@ -362,11 +368,15 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
 
             {/* 字典值列表 */}
             <div className={styles.dictValuesSection} id="dict-config-container">
-              <Form form={form}>
-                <Form.List field="dictValues">
-                  {() => <SortableTable data={getVisibleDictValues()} columns={createColumns()} onSort={handleSort} />}
-                </Form.List>
-              </Form>
+              <Spin loading={tableLoading} tip="正在加载字典值...">
+                <Form form={form}>
+                  <Form.List field="dictValues">
+                    {() => (
+                      <SortableTable data={getVisibleDictValues()} columns={createColumns()} onSort={handleSort} />
+                    )}
+                  </Form.List>
+                </Form>
+              </Spin>
             </div>
 
             {/* 操作按钮 */}

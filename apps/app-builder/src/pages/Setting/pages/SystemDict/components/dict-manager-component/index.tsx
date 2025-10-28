@@ -26,8 +26,7 @@ import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-
 import styles from '../../index.module.less';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
-import { useLocation } from 'react-router-dom';
-import StatusTag, { getStatusLabel, StatusLabelEnum } from '@/components/StatusTag';
+import StatusTag, { StatusLabelEnum } from '@/components/StatusTag';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -143,9 +142,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     style: {},
     ...config
   };
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const appId = searchParams.get('appId');
 
   // Tabs 相关状态
   const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs.systemDictTab?.key || '');
@@ -649,7 +645,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         onCancel={() => setBatchConfigModalVisible(false)}
         onOk={handleBatchConfigOk}
         loading={batchConfigLoading}
-        initialValues={tableData}
         dictType={activeDict?.type || ''}
       />
     </div>
