@@ -52,11 +52,11 @@ export function FormHeader() {
           onClick={handleExpand}
         />
       )}
-      {readonly ? undefined : (
+      {/* {readonly ? undefined : (
         <Operators>
           <NodeMenu node={node} deleteNode={handleDelete} updateTitleEdit={updateTitleEdit} />
         </Operators>
-      )}
+      )} */}
       {isSidebar && (
         <Button type="primary" icon={<IconClose />} size="small" theme="borderless" onClick={handleClose} />
       )}
