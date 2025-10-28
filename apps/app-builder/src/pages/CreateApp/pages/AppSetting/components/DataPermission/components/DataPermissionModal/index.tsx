@@ -4,12 +4,10 @@ import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/in
 import { IconEdit } from '@arco-design/web-react/icon';
 import {
   getDeptUser,
-  IsOperable,
   type AppEntityField,
   type AuthDataFilterVO,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
-  type ConditionField,
   type EntityFieldValidationTypes,
   type GetDeptUserReq,
   type MetadataEntityPair,
@@ -28,7 +26,7 @@ interface IProps {
   initialFormValues: AuthDataGroupVO;
   modalVisible: boolean;
   status: 'create' | 'edit';
-  dataPermissionEntity: MetadataEntityPair;
+  dataPermissionEntity: MetadataEntityPair | undefined;
   dataPermissionPerson: AuthDataPermissionPersonVO[];
   appEntityFields: AppEntityField[];
   filterFieldCheckType: EntityFieldValidationTypes[];
@@ -98,8 +96,6 @@ const DataPermissionModal = (props: IProps) => {
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
   const [deptData, setDeptData] = useState<Member>();
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
-
-  const [scopeTagsStatus, setScopeTagsStatus] = useState('');
 
   useEffect(() => {
     if (!modalVisible && !initialFormValues.id) {
