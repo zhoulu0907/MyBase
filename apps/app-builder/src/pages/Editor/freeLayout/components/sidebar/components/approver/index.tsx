@@ -1,23 +1,23 @@
 /**
  * 审批人
  */
-import { Radio, Divider } from '@arco-design/web-react';
+import { Radio } from '@arco-design/web-react';
 import styles from './index.module.less';
 import { useState } from 'react';
 import Header from '../../../header'
 import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
+import ApproverBtnConfig from './btnConfig/index'
 const RadioGroup = Radio.Group;
 
 export default function ApproveDreawer() {
   const [useApprover, setApprover] = useState<string>('approver');
-  const [configMode, setConfigMode] = useState<string>('simple');
   const renderContent = () => {
     switch (useApprover) {
       case 'approver':
         return <ApproverConfig />;
       case 'approverBtn':
-        return <div>审批按钮</div>;
+        return <ApproverBtnConfig />;
       case 'fieldPermissions':
         return <div>字段权限</div>;
       case 'advancedSettings':
