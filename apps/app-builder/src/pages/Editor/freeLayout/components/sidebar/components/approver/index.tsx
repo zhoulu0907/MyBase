@@ -8,6 +8,8 @@ import Header from '../../../header'
 import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index'
+import FieldConfig from './fieldConfig/index'
+
 const RadioGroup = Radio.Group;
 
 export default function ApproveDreawer() {
@@ -19,7 +21,7 @@ export default function ApproveDreawer() {
       case 'approverBtn':
         return <ApproverBtnConfig />;
       case 'fieldPermissions':
-        return <div>字段权限</div>;
+        return <FieldConfig />;
       case 'advancedSettings':
         return <div>高级设置</div>;
       default:

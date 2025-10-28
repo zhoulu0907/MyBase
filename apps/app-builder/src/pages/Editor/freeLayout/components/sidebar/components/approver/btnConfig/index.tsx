@@ -220,7 +220,7 @@ export default function ApproverBtnConfig() {
     }
 
     return <div className={styles.approverConfig}>
-        <div className={styles.configTitle}>审批人设置</div>
+        <div className={styles.configTitle}>操作按钮</div>
         <Table
             pagination={false}
             data={data}
