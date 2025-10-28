@@ -9,9 +9,10 @@ import { IconMinimap } from '../../assets/icon-minimap';
 
 export const ToolContainer = styled.div`
   position: absolute;
-  bottom: 16px;
+  top: 52px;
   display: flex;
   justify-content: left;
+  right: 80px;
   min-width: 360px;
   pointer-events: none;
   gap: 8px;
@@ -25,7 +26,9 @@ export const ToolSection = styled.div`
   background-color: #fff;
   border: 1px solid rgba(68, 83, 130, 0.25);
   border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.04) 0px 2px 6px 0px, rgba(0, 0, 0, 0.02) 0px 4px 12px 0px;
+  box-shadow:
+    rgba(0, 0, 0, 0.04) 0px 2px 6px 0px,
+    rgba(0, 0, 0, 0.02) 0px 4px 12px 0px;
   column-gap: 2px;
   height: 40px;
   padding: 0 4px;
@@ -43,7 +46,8 @@ export const SelectZoom = styled.span`
 
 export const MinimapContainer = styled.div`
   position: absolute;
-  bottom: 60px;
+  bottom: -120px;
+  right: 0;
   width: 198px;
 `;
 
