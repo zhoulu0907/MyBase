@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service;
 
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmStartReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ExecActButtonReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
 
 /**
@@ -16,4 +18,18 @@ public interface BpmExecService {
      * @param businessId  业务ID
      */
      ListActButtonRespVO getActButtons(String dataId, String businessId);
+
+    /**
+     * 流程执行
+     *
+     * @param reqVO 执行操作按钮请求VO
+     */
+    String start(BpmStartReqVO reqVO);
+
+    /**
+     * 流程执行
+     *
+     * @param reqVO 执行操作按钮请求VO
+     */
+    String execActButton(ExecActButtonReqVO reqVO);
 }

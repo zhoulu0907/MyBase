@@ -7,28 +7,42 @@ import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.StartNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.api.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmExecService;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmStartReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ExecActButtonReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
+import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
+import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.dto.NodeJson;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.entity.Instance;
+import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
+import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.InsService;
+import org.dromara.warm.flow.core.service.TaskService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -41,6 +55,11 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Slf4j
 @Service
 public class BpmExecServiceImpl implements BpmExecService {
+    // 自注入
+    @Lazy
+    @Resource
+    private BpmExecServiceImpl self;
+
     @Resource
     private BpmEngineDefExtService defExtService;
 
@@ -49,6 +68,15 @@ public class BpmExecServiceImpl implements BpmExecService {
 
     @Resource
     private InsService insService;
+
+    @Resource
+    private TaskService taskService;
+
+    @Resource
+    private DataMethodApi dataMethodApi;
+
+    @Resource
+    private BpmFlowInsExtRepository flowInsExtRepository;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -165,5 +193,130 @@ public class BpmExecServiceImpl implements BpmExecService {
         respVO.setBusinessId(businessId);
 
         return respVO;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String start(BpmStartReqVO reqVO) {
+        String entityDataId = null;
+
+        String buttonType = reqVO.getButtonType();
+        BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(buttonType);
+
+        if (buttonEnum == null) {
+            throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
+        }
+
+        // 业务状态
+        BpmBusinessStatusEnum businessStatus;
+
+        if (buttonEnum == BpmActionButtonEnum.SAVE) {
+            businessStatus = BpmBusinessStatusEnum.DRAFT;
+        } else if (buttonEnum == BpmActionButtonEnum.SUBMIT) {
+            businessStatus = BpmBusinessStatusEnum.IN_APPROVAL;
+        } else {
+            throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
+        }
+
+        InsertDataReqDTO insertDataReqDTO = new InsertDataReqDTO();
+        insertDataReqDTO.setEntityId(reqVO.getEntityId());
+        insertDataReqDTO.setData(new ArrayList<>());
+        insertDataReqDTO.getData().add(reqVO.getEntityData());
+
+        // 先插入数据
+        List<List<EntityFieldDataRespDTO>> insertedData = dataMethodApi.insertData(insertDataReqDTO);
+
+        for (EntityFieldDataRespDTO respDTO : insertedData.get(0)) {
+            if (Objects.equals(respDTO.getFieldName(), "id")) {
+                entityDataId = String.valueOf(respDTO.getFieldValue());
+                break;
+            }
+        }
+
+        if (StringUtils.isBlank(entityDataId)) {
+            throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_ID_NOT_EXISTS);
+        }
+
+        Definition def = defExtService.getByFormPathAndStatus(reqVO.getBusinessId(), PublishStatus.PUBLISHED.getKey());
+        if (def == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
+        }
+
+        BpmFlowInsBizExtDO flowInsExtDO = new BpmFlowInsBizExtDO();
+        Map<String, Object> variables = new HashMap<>();
+        reqVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+
+        // 开启流程
+        FlowParams flowParams = FlowParams.build()
+                //.handler(startProcessBo.getHandler())
+                .flowCode(def.getFlowCode())
+                .variable(variables)
+                .flowStatus(businessStatus.getCode());
+
+        Instance instance = insService.start(entityDataId, flowParams);
+
+        // 如果是提交按钮，则要往下走一个流程
+        if (buttonEnum == BpmActionButtonEnum.SUBMIT) {
+            List<Task> tasks = taskService.getByInsId(instance.getId());
+            Task task = tasks.get(0);
+            String taskNodeCode = task.getNodeCode();
+
+            String defJsonStr = instance.getDefJson();
+            DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+
+            for (NodeJson nodeJson : defJson.getNodeList()) {
+                if (Objects.equals(nodeJson.getNodeCode(), taskNodeCode)) {
+                    // 判断节点类型，必须是发起节点
+                    BaseNodeExtDTO extDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
+
+                    if (!Objects.equals(extDTO.getNodeType(), BpmNodeTypeEnum.INITIATION.getCode())) {
+                        throw exception(ErrorCodeConstants.FLOW_NODE_TYPE_MUST_BE_INITIATION);
+                    }
+
+                    break;
+                }
+            }
+
+            // 自动跳到下一个节点
+            FlowParams skipParams = FlowParams.build()
+//                    .handler(completeTaskBo.getHandler())
+                    .variable(variables)
+                    .skipType(SkipType.PASS.getKey())
+                    .message("提交")
+                    .flowStatus(businessStatus.getCode());
+//                    .hisStatus(TaskStatusEnum.PASS.getStatus())
+//                    .hisTaskExt(completeTaskBo.getFileId());
+            taskService.skip(skipParams, task);
+
+            // 设置发起时间
+            flowInsExtDO.setSubmitTime(LocalDateTime.now());
+        }
+
+        // 保存扩展信息 todo：处理Mock的参数值
+        flowInsExtDO.setBusinessId(entityDataId);
+        flowInsExtDO.setBpmVersion("V" + def.getVersion());
+        flowInsExtDO.setBpmBusinessStatus(businessStatus.getCode());
+        flowInsExtDO.setBusinessTitle("流程标题");
+        flowInsExtDO.setInitiatorId(1L);
+        flowInsExtDO.setInitiatorName("发起人");
+        flowInsExtDO.setInitiatorDeptId(1L);
+        flowInsExtDO.setInitiatorDeptName("发起人部门");
+        flowInsExtDO.setFormName(reqVO.getFormName());
+        flowInsExtDO.setFormSummary("摘要");
+        flowInsExtDO.setInstanceId(instance.getId());
+
+        flowInsExtRepository.insert(flowInsExtDO);
+
+        return entityDataId;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String execActButton(ExecActButtonReqVO reqVO) {
+        String entityDataId = reqVO.getEntityDataId();
+
+        // todo 增加业务逻辑
+
+        return entityDataId;
     }
 }

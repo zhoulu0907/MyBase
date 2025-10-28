@@ -38,6 +38,8 @@ public interface ErrorCodeConstants {
 
     ErrorCode PUBLISHED_FLOW_NOT_EXISTS = new ErrorCode(1_009_001_000, "不存在已发布流程");
 
+    ErrorCode FLOW_ENTITY_DATA_ID_NOT_EXISTS = new ErrorCode(1_009_001_011, "流程实体数据ID不存在");
+
 
     // ============= 校验 =============
 
@@ -65,4 +67,6 @@ public interface ErrorCodeConstants {
     ErrorCode UNSUPPORT_ACTION_BUTTON_TYPE = new ErrorCode(1_009_002_010, "不支持的操作按钮类型");
 
     ErrorCode MISSING_NODE_FIELD_PERM_CFG = new ErrorCode(1_009_002_011, "节点缺少字段权限配置");
+
+    ErrorCode FLOW_NODE_TYPE_MUST_BE_INITIATION = new ErrorCode(1_009_002_012, "流程节点类型必须为提交节点");
 }

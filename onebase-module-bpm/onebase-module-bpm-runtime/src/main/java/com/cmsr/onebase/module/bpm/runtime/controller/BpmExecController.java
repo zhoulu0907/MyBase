@@ -2,16 +2,15 @@ package com.cmsr.onebase.module.bpm.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmExecService;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmStartReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ExecActButtonReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -36,5 +35,20 @@ public class BpmExecController {
         log.info("获取流程实例的操作按钮: {}, {}", entityDataId, businessId);
         ListActButtonRespVO respVO = bpmExecService.getActButtons(entityDataId, businessId);
         return CommonResult.success(respVO);
+    }
+
+    @PostMapping("/start")
+    @Operation(summary = "流程发起")
+    public CommonResult<String> exec(@RequestBody @Validated BpmStartReqVO reqVO) {
+        log.info("执行流程实例的操作按钮: {}", reqVO);
+        String entityDataId = bpmExecService.start(reqVO);
+        return CommonResult.success(entityDataId);
+    }
+
+    @PostMapping("/perform-act")
+    public CommonResult<String> exec(@RequestBody @Validated ExecActButtonReqVO reqVO) {
+        log.info("执行流程实例的操作按钮: {}", reqVO);
+        String entityDataId = bpmExecService.execActButton(reqVO);
+        return CommonResult.success(entityDataId);
     }
 }
