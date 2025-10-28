@@ -220,7 +220,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
             theme="outline"
             size="18"
-            fill={curMenu.value.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
+            fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
             style={{ marginRight: 16 }}
           />
           {label}

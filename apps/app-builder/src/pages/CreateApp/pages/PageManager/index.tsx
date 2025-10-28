@@ -327,7 +327,7 @@ const PageManagerPage: FC = () => {
       if (pageSetId && menuResp.menuType === MenuType.PAGE) {
         sessionStorage.setItem(
           'EDITOR_PAGE_INFO',
-          JSON.stringify({ id: curMenu.value.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
+          JSON.stringify({ id: curMenu.value?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
         );
         navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
       }
@@ -390,13 +390,13 @@ const PageManagerPage: FC = () => {
   };
 
   const handleEditPageSet = async (name: string, icon: string) => {
-    if (!curMenu.value.id) {
+    if (!curMenu.value?.id) {
       Message.error('请选择菜单');
       return;
     }
 
     const req: GetPageSetIdReq = {
-      menuId: curMenu.value.id
+      menuId: curMenu.value?.id
     };
     const pageSetId = await getPageSetId(req);
 
@@ -406,7 +406,7 @@ const PageManagerPage: FC = () => {
     }
 
     // 把编辑页菜单数据保存起来；
-    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value.id, name, icon }));
+    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 
@@ -536,7 +536,7 @@ const PageManagerPage: FC = () => {
           <Tree
             blockNode
             draggable
-            selectedKeys={[curMenu.value.id!]}
+            selectedKeys={[curMenu.value?.id!]}
             treeData={treeData}
             className={`menuTree ${styles.tree}`}
             showLine={false}
@@ -611,21 +611,21 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {curMenu.value.id && (
+                  {curMenu.value?.id && (
                     <>
                       <div className={styles.contentHeader}>
-                        <div className={styles.contentTitle}>{curMenu.value.menuName}</div>
+                        <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
                         <Button
                           className={styles.editButton}
                           type="primary"
                           icon={<img src={EditIcon} alt="编辑页面" />}
-                          onClick={() => handleEditPageSet(curMenu.value.menuName, curMenu.value.menuIcon)}
+                          onClick={() => handleEditPageSet(curMenu.value?.menuName, curMenu.value?.menuIcon)}
                         >
                           {t('createApp.editPage')}
                         </Button>
                       </div>
                       <div className={styles.contentBody}>
-                        <PreviewContainer menuId={curMenu.value.id} runtime={true} />
+                        <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
                       </div>
                     </>
                   )}
