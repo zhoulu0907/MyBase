@@ -11,6 +11,7 @@ import com.cmsr.onebase.framework.ds.model.task.TaskLocation;
 import com.cmsr.onebase.framework.ds.model.task.TaskRelation;
 import com.cmsr.onebase.framework.ds.model.task.def.AbstractTask;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDefinitionResp;
+import com.cmsr.onebase.framework.ds.model.workflow.sub.ComplementTime;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +31,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -62,6 +64,9 @@ public class DolphinSchedulerClient {
     @Value("${onebase.scheduler.env}")
     private Long environmentCode;
 
+    @Value("${onebase.scheduler.worker-group:default}")
+    private String workerGroup;
+
     private DolphinschedulerClientStub dsClientStub;
 
     @PostConstruct
@@ -73,12 +78,7 @@ public class DolphinSchedulerClient {
                     .build();
             return chain.proceed(request);
         });
-        OkHttpClient httpClient = httpClientBuilder
-                .addInterceptor(chain -> {
-                    Request request = chain.request();
-                    return chain.proceed(request);
-                })
-                .build();
+        OkHttpClient httpClient = httpClientBuilder.build();
 
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
         retrofitBuilder.client(httpClient);
@@ -133,18 +133,50 @@ public class DolphinSchedulerClient {
     }
 
     /**
-     * 上线工作流，包括调度
+     * 上线工作流
      */
-    public void onlineWorkflow(Long projectCode, Long workflowCode, Schedule schedule) {
-        // 0. 清理调度任务
+    public void onlineWorkflow(Long projectCode, Long workflowCode) {
         offlineWorkflow(projectCode, workflowCode);
-        // 1. 上线工作流
         Result<Boolean> releaseResult = execute(dsClientStub.releaseWorkflow(projectCode, workflowCode,
                 // magic string: flowName, DS required for this, but no usage at all.
                 "flowName", "ONLINE"));
         if (releaseResult.getFailed()) {
             throw DolphinschedulerException.of("工作流【%s】上线失败", workflowCode);
         }
+    }
+
+    public List<Long> runWorkflowManually(Long projectCode, Long workflowCode, LocalDateTime startTime, LocalDateTime endTime) {
+        ComplementTime complementTime = null;
+        String execType = "START_PROCESS";
+        if (startTime != null && endTime != null) {
+            complementTime = new ComplementTime();
+            complementTime.setComplementStartDate(startTime);
+            complementTime.setComplementEndDate(endTime);
+            execType = "COMPLEMENT_DATA";
+        }
+
+
+        Result<List<Long>> executeResult = execute(dsClientStub.manuallyStartWorkflow(projectCode, workflowCode, environmentCode, tenantCode,
+                complementTime,
+                "CONTINUE", "NONE",
+                "RUN_MODE_SERIAL", "MEDIUM", workerGroup,
+                execType, "DESC_ORDER"
+        ));
+
+        if (executeResult.getFailed()) {
+            log.error("工作流运行失败{}, {}", workflowCode, executeResult.getMsg());
+            throw DolphinschedulerException.of("工作流【%s】运行提交失败, %s", workflowCode);
+        }
+
+        return executeResult.getData();
+    }
+
+    /**
+     * 上线工作流，包括调度
+     */
+    public void onlineWorkflowWithSchedule(Long projectCode, Long workflowCode, Schedule schedule) {
+        // 1. 上线工作流
+        onlineWorkflow(projectCode, workflowCode);
         // 2. 创建调度信息
         Result<ScheduleInfoResp> createScheduleResp = execute(dsClientStub.createSchedule(projectCode, workflowCode, environmentCode, tenantCode, schedule,
                 "CONTINUE", "NONE", "MEDIUM", 0L, "default"));

@@ -43,22 +43,34 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
         List<StartEntityNodeData> entityNodeDataList = graphFlowCache.findStartEntityNodeDataByEntityId(reqDTO.getEntityId());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
-            return new EntityTriggerRespDTO(reqDTO.getTraceId(), true, "没有相应的流程");
+            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setSuccess(true);
+            respDTO.setTriggered(false);
+            respDTO.setMessage("未找到匹配的流程.");
+            return respDTO;
         }
         List<EntityTriggerRespDTO> respDTOS = new ArrayList<>();
         boolean success = true;
+        boolean triggered = false;
         for (StartEntityNodeData startEntityNodeData : entityNodeDataList) {
-            EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(reqDTO, startEntityNodeData);
-            if (!entityTriggerRespDTO.isSuccess()) {
+            EntityTriggerRespDTO respDTO = entityTrigger(reqDTO, startEntityNodeData);
+            if (!respDTO.isSuccess()) {
                 success = false;
-            } else {
-                respDTOS.add(entityTriggerRespDTO);
             }
+            if (respDTO.isTriggered()) {
+                triggered = true;
+            }
+            respDTOS.add(respDTO);
         }
         if (respDTOS.size() == 1) {
             return respDTOS.get(0);
         } else {
-            return new EntityTriggerRespDTO(reqDTO.getTraceId(), success, "执行结束: " + respDTOS);
+            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setSuccess(success);
+            respDTO.setTriggered(triggered);
+            respDTO.setMessage(String.format("执行结束, 尝试%s个流程", respDTOS.size()));
+            respDTO.setDetail(respDTOS.toString());
+            return respDTO;
         }
     }
 
@@ -67,23 +79,29 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
         for (Map.Entry<?, Object> entry : reqDTO.getFieldData().entrySet()) {
             inputData.put(entry.getKey().toString(), entry.getValue());
         }
+        EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId());
         try {
             if (!triggerEventContains(nodeData.getTriggerEvents(), reqDTO.getTriggerEvent())) {
-                return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, String.format("不支持的触发事件, 配置: %s, 传入: %s.", nodeData.getTriggerEvents(), reqDTO.getTriggerEvent()));
+                respDTO.setSuccess(true);
+                respDTO.setTriggered(false);
+                respDTO.setMessage(String.format("不支持的触发事件, 配置: %s, 传入: %s.", nodeData.getTriggerEvents(), reqDTO.getTriggerEvent().getCode()));
+                return respDTO;
             }
             if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
                 OrExpression orExpression = ConditionsSupport.convertToOrExpresses(nodeData.getFilterCondition());
                 boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
                 if (!isMatch) {
-                    return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), true, String.format("触发条件不匹配: %s", orExpression));
+                    respDTO.setSuccess(true);
+                    respDTO.setTriggered(false);
+                    respDTO.setMessage(String.format("触发条件不匹配: %s", orExpression));
+                    return respDTO;
                 }
             }
+            respDTO.setTriggered(true);
             ExecutorResult executorResult = flowProcessExecutor.execute(
                     reqDTO.getTraceId(),
                     nodeData.getProcessId(),
                     inputData);
-            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
-            respDTO.setProcessId(executorResult.getProcessId());
             respDTO.setSuccess(executorResult.isSuccess());
             respDTO.setCode(executorResult.getCode());
             respDTO.setMessage(executorResult.getMessage());
@@ -92,7 +110,9 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             return respDTO;
         } catch (Exception e) {
             log.error("entityTrigger failed, {}, {}", reqDTO, nodeData, e);
-            return new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId(), false, e);
+            respDTO.setSuccess(false);
+            respDTO.setCause(e);
+            return respDTO;
         }
     }
 

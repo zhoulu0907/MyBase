@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public interface AppAuthApi {
 
-    UserRole findRoles(Long userId, Long applicationId);
+    UserRole findRoles(Long applicationId, Long userId);
 
     MenuDTO findMenuById(Long menuId);
 

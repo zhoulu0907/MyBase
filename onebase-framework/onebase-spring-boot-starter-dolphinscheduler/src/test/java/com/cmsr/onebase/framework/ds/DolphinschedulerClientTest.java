@@ -47,7 +47,7 @@ public class DolphinschedulerClientTest {
         schedule.setTimezoneId("Asia/Shanghai");
         schedule.setCrontab("0 0 1 * * ? 2030");
 
-        client.onlineWorkflow(TEST_PROJECT_CODE, workflowCode, schedule);
+        client.onlineWorkflowWithSchedule(TEST_PROJECT_CODE, workflowCode, schedule);
     }
 
     @Test
