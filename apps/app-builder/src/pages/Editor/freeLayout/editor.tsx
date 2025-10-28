@@ -17,7 +17,7 @@ import { initialData } from './initial-data';
 import { useEditorProps } from './hooks';
 import { DemoTools } from './components/tools';
 import { SidebarProvider, SidebarRenderer } from './components/sidebar';
-
+import LeftNavBar from './components/left-nav-bar/index';
 export const Editor = () => {
   const ref = useRef<FreeLayoutPluginContext | undefined>();
   const editorProps = useEditorProps(initialData, nodeRegistries);
@@ -34,6 +34,7 @@ export const Editor = () => {
             <EditorRenderer className="demo-editor" />
           </div>
           <DemoTools onSave={onSave} />
+          <LeftNavBar></LeftNavBar>
           <SidebarRenderer />
         </SidebarProvider>
       </FreeLayoutEditorProvider>

@@ -9,7 +9,7 @@ import { IconMinimap } from '../../assets/icon-minimap';
 
 export const ToolContainer = styled.div`
   position: absolute;
-  top: 56px;
+  top: 52px;
   display: flex;
   justify-content: left;
   right: 80px;
@@ -46,7 +46,8 @@ export const SelectZoom = styled.span`
 
 export const MinimapContainer = styled.div`
   position: absolute;
-  bottom: 60px;
+  bottom: -120px;
+  right: 0;
   width: 198px;
 `;
 
