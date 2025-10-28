@@ -4,25 +4,33 @@ import { useEffect, useState } from 'react';
 
 const CheckboxGroup = Checkbox.Group;
 
-export default function FieldModal({fmVisible, setFmVisible, curKeyArr, isEdit}: any) {
+export default function FieldModal({fmVisible, setFmVisible, curKeyArr, isEdit, mergeDataToTable}: any) {
     let [ckedKey, setCkedKey] = useState(curKeyArr)
     let [checkedItem, setCheckedItem] = useState([])
     const ckOptions = [
         {
-            label: 'Option 1',
-            value: '1',
+            label: 'Jane Doe',
+            value: '1'
         },
         {
-            label: 'Option 2',
             value: '2',
+            label: 'Alisa Ross',
         },
         {
-            label: 'Option 3',
-            value: '3',
+            label: '字段1',
+            value: 'fid1',
         },
         {
-            label: 'Option 4',
-            value: '4',
+            label: '字段2',
+            value: 'fid2',
+        },
+        {
+            label: '字段3',
+            value: 'fid3',
+        },
+        {
+            label: '字段4',
+            value: 'fid4',
         },
     ];
     function handleCheckChange(keyArr:Array<any>) {
@@ -31,7 +39,6 @@ export default function FieldModal({fmVisible, setFmVisible, curKeyArr, isEdit}:
     function handleDelCked(item: any) {
         let key = item?.value;
         if (key !== undefined) {
-
             let key_arr:Array<any> = [];
             key_arr = key_arr.concat(ckedKey)
             let idx = key_arr.indexOf(key);
@@ -41,7 +48,22 @@ export default function FieldModal({fmVisible, setFmVisible, curKeyArr, isEdit}:
             }
         }
     }
-    function handleSubmit() {}
+    function handleSubmit() {
+        if (Array.isArray(checkedItem)) {
+            let resData: Array<any> = []
+            checkedItem.forEach((item:any) => {
+                resData.push({
+                    fieldId: item.value,
+                    fieldName: item.label,
+                    fieldPermType: isEdit ? 'write' : 'hidden'
+                })
+            })
+            mergeDataToTable && mergeDataToTable(resData)
+            setFmVisible(false)
+        } else {
+            console.error('选择的数据结构不对')
+        }
+    }
 
     useEffect(() => {
         let ckedArr:any = ckOptions.filter(item => {
