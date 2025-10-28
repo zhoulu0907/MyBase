@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.api.permission.dto;
+package com.cmsr.onebase.module.app.api.auth.dto;
 
 import lombok.Data;
 
@@ -14,5 +14,7 @@ public class MenuDTO {
     private Long applicationId;
 
     private Long entityId;
+
+    private String menuCode;
 
 }

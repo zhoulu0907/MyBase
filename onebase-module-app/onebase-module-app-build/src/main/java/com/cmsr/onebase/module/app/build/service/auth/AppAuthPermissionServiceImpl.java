@@ -100,14 +100,14 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     public AuthDetailDataPermissionVO getDataPermission(AuthPermissionReqVO reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
         appCommonService.validateRoleExist(reqVO.getRoleId());
-        MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
-        Long entityId = menuDO.getEntityId();
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
         //数据权限
         List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
         if (CollectionUtils.isEmpty(authDataGroupDOS)) {
-            authDataGroupDOS = AuthDefaultFactory.createListAuthDataGroupDOList(reqVO);
+            AuthDataGroupDO authDataGroupDO = AuthDefaultFactory.createAuthDataGroupDO(reqVO);
+            authDataGroupRepository.insert(authDataGroupDO);
+            authDataGroupDOS = List.of(authDataGroupDO);
         }
         List<AuthDataGroupVO> authDataGroupVOS = authDataGroupDOS.stream().map(authDataGroupDO -> {
             AuthDataGroupVO authDataGroupVO = BeanUtils.toBean(authDataGroupDO, AuthDataGroupVO.class);
@@ -125,37 +125,8 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authDataGroupVO.setDataFilters(dataFilters);
         }
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
-//        dataPermissionVO.setScopeFields(queryScopeFields(entityId));
-//        dataPermissionVO.setDataFilterFields(queryDataFilterFields(entityId));
         return dataPermissionVO;
     }
-
-//    private List<EntityFieldVO> queryScopeFields(Long entityId) {
-//        EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
-//        reqDTO.setEntityId(entityId);
-//        reqDTO.setIsPerson(NumberUtils.INTEGER_ONE);
-//        List<EntityFieldRespDTO> entityFieldsByIds = metadataEntityFieldApi.getEntityFieldList(reqDTO);
-//        return entityFieldsByIds.stream().map(entityFieldRespDTO -> {
-//            EntityFieldVO entityFieldVO = new EntityFieldVO();
-//            entityFieldVO.setId(entityFieldRespDTO.getId());
-//            entityFieldVO.setDisplayName(entityFieldRespDTO.getDisplayName());
-//            return entityFieldVO;
-//        }).collect(Collectors.toList());
-//    }
-//
-//    private List<EntityFieldVO> queryDataFilterFields(Long entityId) {
-//        EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
-//        reqDTO.setEntityId(entityId);
-//        reqDTO.setIsSystemField(NumberUtils.INTEGER_ZERO);
-//        List<EntityFieldRespDTO> entityFieldsByIds = metadataEntityFieldApi.getEntityFieldList(reqDTO);
-//        return entityFieldsByIds.stream().map(entityFieldRespDTO -> {
-//            EntityFieldVO entityFieldVO = new EntityFieldVO();
-//            entityFieldVO.setId(entityFieldRespDTO.getId());
-//            entityFieldVO.setDisplayName(entityFieldRespDTO.getDisplayName());
-//            return entityFieldVO;
-//        }).collect(Collectors.toList());
-//    }
-
 
     @Override
     public AuthDetailFieldPermissionVO getFieldPermission(AuthPermissionReqVO reqVO) {

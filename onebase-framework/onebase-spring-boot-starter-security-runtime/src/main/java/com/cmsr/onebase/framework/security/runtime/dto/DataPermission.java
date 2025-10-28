@@ -12,7 +12,9 @@ import java.util.List;
 @Data
 public class DataPermission {
 
-    private Long menuId;
+    private boolean allAllowed;
+
+    private boolean allDenied;
 
     private List<DataPermissionItem> items = new ArrayList<>();
 

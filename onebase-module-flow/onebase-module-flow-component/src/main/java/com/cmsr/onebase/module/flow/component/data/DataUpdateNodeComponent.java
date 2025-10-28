@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -53,10 +54,12 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         //
         UpdateDataReqDTO reqDTO = new UpdateDataReqDTO();
         reqDTO.setTraceId(executeContext.getTraceId());
-        if (nodeData.getMainEntityId() != null) {
+        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getUpdateType())) {
             reqDTO.setEntityId(nodeData.getMainEntityId());
-        } else {
+        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getUpdateType())) {
             reqDTO.setEntityId(nodeData.getSubEntityId());
+        } else {
+            throw new IllegalArgumentException("updateType 类型错误: " + nodeData.getUpdateType());
         }
         //
         List<Conditions> conditions = nodeData.getFilterCondition();

@@ -27,7 +27,4 @@ public interface AppAuthPermissionService {
 
     void updateField(AuthUpdateFieldReqVO reqVO);
 
-//    List<AuthPermissionScope> getPermissionScope();
-
-
 }

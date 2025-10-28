@@ -2,6 +2,7 @@ package com.cmsr.onebase.framework.ds.model.workflow;
 
 import com.cmsr.onebase.framework.ds.model.common.Parameter;
 import com.cmsr.onebase.framework.ds.model.schedule.ScheduleInfoResp;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ public class WorkflowDefinitionResp {
 
     private String name;
 
-    private int version;
+    private int version = 0;
 
     private String releaseState;
 
@@ -31,8 +32,10 @@ public class WorkflowDefinitionResp {
 
     private Map<String, String> globalParamMap;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
     private String flag;
