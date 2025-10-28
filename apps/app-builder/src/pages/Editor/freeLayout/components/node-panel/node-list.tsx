@@ -24,8 +24,12 @@ import automation from '../../assets/bpmLogo/automation.png';
 import subprocess from '../../assets/bpmLogo/subprocess.png';
 import task from '../../assets/bpmLogo/task.png';
 import wait from '../../assets/bpmLogo/wait.png';
+
 import message from '../../assets/bpmLogo/message.png';
-import { LLMNodeRegistry } from '../../nodes/llm/index';
+import {LLMNodeRegistry} from '../../nodes/llm/index';
+import {ModalNodeRegistry} from '../../nodes/modal/index';
+import {ExecutorNodeRegistry} from '../../nodes/executor/index';
+import {ApproverNodeRegistry} from '../../nodes/approver/index'
 
 interface NodeListProps {
   onSelect: NodePanelRenderProps['onSelect'];
@@ -54,27 +58,13 @@ export const NodeList: FC<NodeListProps> = (props) => {
         expandIcon={<img src={IconCollapsedDown} alt="" />}
       >
         <Collapse.Item className="collapseItem" header="人工节点" name="1">
-          <Button
-            onClick={(e) => handleClick(e, LLMNodeRegistry)}
-            // onMouseDown={(e) =>
-            //   startDragSerivce.startDragCard(LLMNodeRegistry.type.toLowerCase(), e, {
-            //     data: {
-            //       title: `New ${LLMNodeRegistry.type}`,
-            //       content: '新的',
-            //       registry: LLMNodeRegistry // 保留注册器信息
-            //     }
-            //   })
-            // }
-          >
-            测试llm
-          </Button>
-          <div className="nodeItem">
+          <div className="nodeItem" onClick={(e) => handleClick(e, ApproverNodeRegistry)}>
             <div className="nodeItemIcon">
               <img src={approver} alt="" />
             </div>
             审批人
           </div>
-          <div className="nodeItem">
+          <div className="nodeItem" onClick={(e) => handleClick(e, ExecutorNodeRegistry)}>
             <div className="nodeItemIcon">
               <img src={executor_big} alt="" />
             </div>
