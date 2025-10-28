@@ -4,7 +4,6 @@ import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
-import { menuEditorSignal } from '@/store/singals/menu_editor';
 import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
@@ -17,6 +16,7 @@ import {
   getEntityListByApp,
   getPageSetId,
   listApplicationMenu,
+  menuSignal,
   MenuType,
   PageType,
   RootParentPage,
@@ -93,8 +93,7 @@ const PageManagerPage: FC = () => {
   const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
-  //   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
-  const { curMenu, setCurMenu } = menuEditorSignal;
+  const { curMenu, setCurMenu } = menuSignal;
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);

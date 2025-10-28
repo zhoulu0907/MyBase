@@ -2,7 +2,7 @@ import { Form, Select } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useState } from 'react';
 // import { useAppEntityStore } from 'src/store/store_entity';
-import { dataMethodPage, type AppEntityField, type PageMethodParam } from '@onebase/app';
+import { dataMethodPage, menuSignal, type AppEntityField, type PageMethodParam } from '@onebase/app';
 import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import '../index.css';
@@ -28,6 +28,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
     runtime = true
   } = props;
 
+  const { curMenu } = menuSignal;
   const [options, setOptions] = useState<any[]>([]);
 
   const handleGetRelatedData = async (entityId: string, relatedField: AppEntityField) => {
@@ -37,6 +38,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
     }
     // TODO(mickey) 分页问题
     const req: PageMethodParam = {
+      menuId: curMenu.value?.id,
       entityId: entityId,
       pageNo: 1,
       pageSize: 100
@@ -59,11 +61,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
   };
 
   const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
+    return (node?.closest('.arco-form-item') as HTMLElement) || (node?.parentNode as HTMLElement) || document.body;
   };
 
   return (
