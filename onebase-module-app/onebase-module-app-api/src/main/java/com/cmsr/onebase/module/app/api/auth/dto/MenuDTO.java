@@ -15,4 +15,6 @@ public class MenuDTO {
 
     private Long entityId;
 
+    private String menuCode;
+
 }

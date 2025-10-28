@@ -30,7 +30,7 @@ public class AppAuthPermissionRepository extends DataRepository<AuthPermissionDO
         return this.findOne(configs);
     }
 
-    public List<AuthPermissionDO> findByApplicationIdAndRoleId(Long applicationId, Long roleId) {
+    public List<AuthPermissionDO> findByAppIdAndRoleId(Long applicationId, Long roleId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
         configs.eq("role_id", roleId);

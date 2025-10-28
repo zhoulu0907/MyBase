@@ -15,11 +15,6 @@ public class RoleDTO {
     private Long id;
 
     /**
-     * 是否为管理员角色
-     */
-    private boolean adminRole;
-
-    /**
      * 角色名称
      */
     private String roleName;
