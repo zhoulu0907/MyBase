@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
-import { Button, Table, Input, Select, Form, type FormInstance, Switch, Checkbox } from '@arco-design/web-react';
+import { Table, Input, Form, type FormInstance, Switch, Checkbox } from '@arco-design/web-react';
 import {IconEdit, IconSettings} from '@arco-design/web-react/icon'
 import SettingModal from './SettingModal';
+import {btnConfigVar} from '../constant.ts'
 
 import styles from '../approverConfig/index.module.less';
 import './style.less'
@@ -115,57 +116,92 @@ export default function ApproverBtnConfig() {
     const [data, setData] = useState([
         {
             key: '1',
-            na1me: '同意',
+            buttonName: btnConfigVar.buttonName['agree'],
+            displayName: '同意',
             name: '同意',
-            salary: '同意',
-            address: '32 Park Road, London',
-            email: 'jane.doe@example.com',
-            na2me: 'Jane Doe',
+            defaultApprovalComment: '同意',
+            approvalCommentRequired: false,
+            batchApproval: false,
+            enabled: false,
         },
         {
             key: '2',
-            na1me: '拒绝',
+            buttonName: btnConfigVar.buttonName['reject'],
+            displayName: '拒绝',
             name: '拒绝',
-            salary: '拒绝',
-            address: '35 Park Road, London',
-            email: 'alisa.ross@example.com',
-            na2me: 'Jane Doe',
+            defaultApprovalComment: '拒绝',
+            approvalCommentRequired: false,
+            batchApproval: false,
+            enabled: false,
         },
         {
             key: '3',
-            na1me: 'Jane Doe',
-            name: 'Kevin Sandra',
-            salary: '22000',
-            address: '31 Park Road, London',
-            na2me: 'Jane Doe',
+            buttonName: btnConfigVar.buttonName['save'],
+            displayName: '保存',
+            name: '保存',
+            approvalCommentRequired: false,
+            batchApproval: false,
+            enabled: false,
         },
         {
             key: '4',
-            na1me: '退回',
-            name: '退回',
-            salary: '退回',
-            address: '42 Park Road, London',
-            email: 'ed.hellen@example.com',
-            na2me: 'Jane Doe',
+            buttonName: btnConfigVar.buttonName['transfer'],
+            displayName: '转交',
+            name: '转交',
+            defaultApprovalComment: '转交',
+            approvalCommentRequired: false,
+            batchApproval: false,
+            enabled: false,
         },
         {
             key: '5',
-            na1me: 'Jane Doe',
-            name: 'William Smith',
-            salary: '27000',
-            address: '62 Park Road, London',
-            email: 'william.smith@example.com',
-            na2me: 'Jane Doe',
+            buttonName: btnConfigVar.buttonName['signature'],
+            displayName: '加签',
+            name: '加签',
+            defaultApprovalComment: '加签',
+            approvalCommentRequired: false,
+            batchApproval: false,
+            enabled: false,
+        },
+        {
+            key: '6',
+            buttonName: btnConfigVar.buttonName['returnBack'],
+            displayName: '退回',
+            name: '退回',
+            defaultApprovalComment: '退回',
+            approvalCommentRequired: false,
+            batchApproval: false,
+            enabled: false,
+        },
+        {
+            key: '7',
+            buttonName: btnConfigVar.buttonName['rollBack'],
+            displayName: '撤回',
+            name: '撤回',
+            defaultApprovalComment: '撤回',
+            approvalCommentRequired: false,
+            batchApproval: false,
+            enabled: false,
+        },
+        {
+            key: '8',
+            buttonName: btnConfigVar.buttonName['abstention'],
+            displayName: '弃权',
+            name: '弃权',
+            defaultApprovalComment: '弃权',
+            approvalCommentRequired: false,
+            batchApproval: false,
+            enabled: false,
         },
     ]);
     const columns = [
         {
             title: '操作按钮',
-            dataIndex: 'na1me'
+            dataIndex: 'name'
         },
         {
             title: '显示名称',
-            dataIndex: 'name',
+            dataIndex: 'displayName',
             editable: true,
             render: (_:any, row:any) => {
                 return <>{_}<IconEdit /></>
@@ -173,25 +209,33 @@ export default function ApproverBtnConfig() {
         },
         {
             title: '默认审批意见',
-            dataIndex: 'salary',
+            dataIndex: 'defaultApprovalComment',
             editable: true,
             render: (_:any, row:any) => {
-                return <>{_}<IconEdit /></>
+              if (row?.key === '3' || row?.key === '7') {
+                  return <></>
+              } else {
+                  return <>{_}<IconEdit /></>
+              }
             }
         },
         {
             title: '审批意见必填',
-            dataIndex: 'address',
+            dataIndex: 'approvalCommentRequired',
             render: (_:any, row:any) => {
-                return <Switch size='small'/>
+              if (row?.key === '3' || row?.key === '7') {
+                  return <></>
+              } else {
+                  return <Switch onChange={(flag: boolean) => handleSwitchChange(row, 'approvalCommentRequired', flag)} size='small' checked={_}/>
+              }
             }
         },
         {
             title: '批量审批',
-            dataIndex: 'email',
+            dataIndex: 'batchApproval',
             render: (_:any, row:any) => {
                 if (row?.key === '1' || row?.key === '2') {
-                    return <Checkbox />
+                    return <Checkbox onChange={(flag: boolean) => handleSwitchChange(row, 'batchApproval', flag)} checked={_} />
                 } else {
                     return <></>
                 }
@@ -199,18 +243,28 @@ export default function ApproverBtnConfig() {
         },
         {
             title: '启用按钮',
-            dataIndex: 'na2me',
+            dataIndex: 'enabled',
             render: (_:any, row:any) => {
                 if (row?.key === '4') {
-                    return <div className='back-settings'><Switch size='small' /><IconSettings onClick={() => setSettingShow(true)} /></div>
+                    return <div className='back-settings'>
+                      <Switch onChange={(flag: boolean) => handleSwitchChange(row, 'enabled', flag)} size='small' checked={_} />
+                      <IconSettings onClick={() => setSettingShow(true)} />
+                    </div>
                 } else {
-                    return <Switch size='small' />
+                    return <Switch onChange={(flag: boolean) => handleSwitchChange(row, 'enabled', flag)} size='small' checked={_} />
                 }
             }
         },
     ];
 
     let [settingsShow, setSettingShow] = useState(false)
+
+    function handleSwitchChange(row: any, type: string, flag: boolean) {
+      let _row = {...row};
+      _row[type] = flag;
+      // console.log('', )
+      handleSave(_row)
+    }
 
     function handleSave(row:any) {
         const newData = [...data];
@@ -219,8 +273,12 @@ export default function ApproverBtnConfig() {
         setData(newData);
     }
 
+    function testclick() {
+      console.log('table data ====', data)
+    }
+
     return <div className={styles.approverConfig}>
-        <div className={styles.configTitle}>操作按钮</div>
+        <div className={styles.configTitle} onClick={testclick}>操作按钮</div>
         <Table
             pagination={false}
             data={data}
