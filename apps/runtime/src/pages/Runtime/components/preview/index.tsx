@@ -127,6 +127,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
     console.log('mainMetaDataFields: ', mainMetaDataFields.value);
+    console.log('menuId: ', menuId);
 
     const formData = {} as any;
     const subFormData = [] as any;
@@ -173,6 +174,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     if (editTargetId) {
       const req: UpdateMethodParams = {
+        menuId: menuId,
         entityId: mainMetaData,
         id: editTargetId,
         data: formData,
@@ -193,6 +195,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setRefresh(Date.now());
     } else {
       const req: InsertMethodParams = {
+        menuId: menuId,
         entityId: mainMetaData,
         data: formData,
         subEntities: subFormData
@@ -243,6 +246,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const handleGetData = async (entityId: string, id: string) => {
     const req: DataMethodParam = {
+      menuId: menuId,
       entityId: entityId,
       id: id
     };

@@ -8,10 +8,9 @@ import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { menuIconList } from '@/components/MenuIcon/const';
-import { menuEditorSignal } from '@/store/singals/menu_editor';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
+import { getPageSetId, menuSignal, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
@@ -69,7 +68,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 }) => {
   useSignals();
   const navigate = useNavigate();
-  const { curMenu } = menuEditorSignal;
+  const { curMenu } = menuSignal;
 
   const [popupVisible, setPopupVisible] = useState(false);
 
