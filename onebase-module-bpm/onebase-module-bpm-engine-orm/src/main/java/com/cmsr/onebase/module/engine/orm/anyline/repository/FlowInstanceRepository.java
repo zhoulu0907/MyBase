@@ -38,7 +38,7 @@ public class FlowInstanceRepository extends DataRepository<FlowInstance> {
         configs.and(Compare.EQUAL, FlowInstance.CREATOR, userId);
 
         if (reqVO.getSubmitTime() != null && reqVO.getSubmitTime().length == 2){
-            configs.and(Compare.BETWEEN, "ext::json->'processInfo'->>'submitTime')::timestamp", reqVO.getSubmitTime()[0], reqVO.getSubmitTime()[1]);
+            configs.and(Compare.BETWEEN, "(ext::json->'processInfo'->>'submitTime')::timestamp", reqVO.getSubmitTime()[0], reqVO.getSubmitTime()[1]);
         }
         if (reqVO.getFlowStatus() != null && !reqVO.getFlowStatus().isEmpty()){
             configs.and(Compare.EQUAL, "flowStatus", reqVO.getFlowStatus());
