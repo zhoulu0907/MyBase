@@ -4,10 +4,10 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
-import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
 import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
+import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
 import jakarta.annotation.Resource;
@@ -21,18 +21,14 @@ import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.entity.Definition;
-import org.dromara.warm.flow.core.entity.Instance;
-import org.dromara.warm.flow.core.enums.FlowStatus;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.service.DefService;
-import org.dromara.warm.flow.core.service.InsService;
-import org.dromara.warm.flow.core.service.NodeService;
-import org.dromara.warm.flow.core.service.SkipService;
-import org.dromara.warm.flow.core.utils.CollUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -50,13 +46,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     private DefService defService;
 
     @Resource
-    private NodeService nodeService;
-
-    @Resource
-    private SkipService skipService;
-
-    @Resource
-    private InsService insService;
+    private BpmEngineDefExtService defExtService;
 
     @Resource
     private FlowDefinitionRepository flowDefinitionRepository;
@@ -116,10 +106,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         // 数据校验和转换
         if (flowId == null) {
             // 先查询是否存在已经设计中的流程
-            Definition defQuery = new FlowDefinition();
-            defQuery.setFormPath(String.valueOf(businessId));
-            defQuery.setIsPublish(PublishStatus.UNPUBLISHED.getKey());
-            Definition existDef = defService.getOne(defQuery);
+            Definition existDef = defExtService.getByFormPathAndStatus(String.valueOf(businessId), PublishStatus.UNPUBLISHED.getKey());
 
             // 只能存在一个设计态的流程
             if (existDef != null) {
@@ -127,9 +114,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
             }
 
             // 查询对应表单下任意一个流程
-            Definition anyQuery = new FlowDefinition();
-            anyQuery.setFormPath(String.valueOf(businessId));
-            Definition anyDef = defService.getOne(anyQuery);
+            Definition anyDef = defExtService.getByFormPath(String.valueOf(businessId));
 
             if (anyDef == null) {
                 // 检测flowCode

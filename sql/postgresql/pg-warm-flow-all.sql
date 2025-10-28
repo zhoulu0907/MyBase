@@ -311,3 +311,67 @@ COMMENT ON COLUMN bpm_flow_user.update_time IS '更新时间';
 COMMENT ON COLUMN bpm_flow_user.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_user.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_user.tenant_id IS '租户id';
+
+
+-- 流程实例扩展信息表
+-- 与流程实例表一一对应，扩展流程相关信息
+
+CREATE TABLE bpm_flow_instance_biz_ext
+(
+    id                      int8         NOT NULL,
+    instance_id             int8         NOT NULL,
+    business_id             varchar(100) NOT NULL,
+    business_code           varchar(100) NULL,
+    business_title          varchar(200) NOT NULL,
+    initiator_id            int8         NULL,
+    initiator_name          varchar(100) NULL,
+    initiator_dept_id       int8         NULL,
+    initiator_dept_name     varchar(100) NULL,
+    submit_time             timestamp(6) NULL,
+    form_summary            varchar(500) NOT NULL,
+    form_name               varchar(100) NOT NULL,
+    bpm_version             varchar(50)  NOT NULL,
+    bpm_business_status     varchar(50)  NOT NULL,
+    lock_version            int8         NOT NULL DEFAULT 0,
+    creator                 int8         NOT NULL DEFAULT 0,
+    create_time             timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updater                 int8         NOT NULL DEFAULT 0,
+    update_time             timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted                 int8         NOT NULL DEFAULT 0,
+    tenant_id               int8         NOT NULL DEFAULT 0,
+    CONSTRAINT bpm_flow_instance_biz_ext_pkey PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE bpm_flow_instance_biz_ext IS '流程实例扩展信息表';
+
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.id IS '主键ID';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.instance_id IS '流程实例ID';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_id IS '业务ID';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_code IS '业务编码';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_title IS '业务标题';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.bpm_title IS '流程标题';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_id IS '发起人ID';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_name IS '发起人名称（冗余字段）';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_dept_id IS '发起部门ID';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_dept_name IS '发起部门名称（冗余字段）';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.submit_time IS '发起时间（与create_time的区别：以提交表单动作为标准，而非保存表单）';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.form_summary IS '表单摘要';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.form_name IS '流程表单';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.bpm_version IS '流程版本号';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.bpm_business_status IS '流程状态';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.lock_version IS '乐观锁';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.creator IS '创建人';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.create_time IS '创建时间';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.updater IS '更新人';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.update_time IS '更新时间';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.deleted IS '删除标志';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.tenant_id IS '租户ID';
+
+-- 创建索引
+CREATE INDEX idx_bpm_flow_instance_biz_ext_instance_id ON bpm_flow_instance_biz_ext(instance_id);
+CREATE INDEX idx_bpm_flow_instance_biz_ext_business_id ON bpm_flow_instance_biz_ext(business_id);
+CREATE INDEX idx_bpm_flow_instance_biz_ext_tenant_id ON bpm_flow_instance_biz_ext(tenant_id);
+CREATE INDEX idx_bpm_flow_instance_biz_ext_deleted ON bpm_flow_instance_biz_ext(deleted);
+
+-- 唯一索引：一个流程实例只对应一条扩展信息（未删除的记录）
+CREATE UNIQUE INDEX uk_bpm_flow_instance_biz_ext_instance_id ON bpm_flow_instance_biz_ext(instance_id) WHERE deleted = 0;
