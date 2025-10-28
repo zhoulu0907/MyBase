@@ -314,8 +314,64 @@ public class BpmExecServiceImpl implements BpmExecService {
     @Override
     public String execActButton(ExecActButtonReqVO reqVO) {
         String entityDataId = reqVO.getEntityDataId();
+        String taskId = reqVO.getTaskId();
 
-        // todo 增加业务逻辑
+        // 查找task是否存在
+        Task task = taskService.getById(taskId);
+        if (task == null) {
+            throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
+        }
+
+        BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(reqVO.getButtonType());
+        if (buttonEnum == null) {
+            throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
+        }
+
+        // 暂时只支持同意和拒绝和保存 todo：判断当前节点是否支持该按钮
+        if (!BpmActionButtonEnum.APPROVE.equals(buttonEnum)
+                && !BpmActionButtonEnum.REJECT.equals(buttonEnum)
+                && !BpmActionButtonEnum.SAVE.equals(buttonEnum)) {
+            throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
+        }
+
+        // todo 保存暂时只有发起节点会有
+
+        // todo: 判断执行权限，应该在permissonHandler里处理，暂时先直接放行
+
+        // todo： 判断字段读写权限
+
+
+        Map<String, Object> variables = new HashMap<>();
+        reqVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+
+        // 自动跳到下一个节点
+        FlowParams skipParams = FlowParams.build()
+//                    .handler(completeTaskBo.getHandler())
+                .variable(variables);
+//                    .hisStatus(TaskStatusEnum.PASS.getStatus())
+//                    .hisTaskExt(completeTaskBo.getFileId());
+
+        // todo 查按钮的默认审批意见
+        String comment = reqVO.getComment();
+        if (StringUtils.isBlank( comment)) {
+            comment = buttonEnum.getName();
+        }
+
+        if (buttonEnum == BpmActionButtonEnum.APPROVE) {
+            // 同意按钮，判断是否有审批意见
+            skipParams = skipParams.message(comment)
+                    .skipType(SkipType.PASS.getKey())
+                    .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode());
+        } else if (buttonEnum == BpmActionButtonEnum.REJECT) {
+            // 拒绝按钮，判断是否有审批意见
+            skipParams = skipParams.message(comment)
+                    .skipType(SkipType.PASS.getKey())
+                    .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode());
+        }
+
+        taskService.skip(skipParams, task);
+
+        // todo：更新实体数据
 
         return entityDataId;
     }

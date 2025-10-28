@@ -69,4 +69,6 @@ public interface ErrorCodeConstants {
     ErrorCode MISSING_NODE_FIELD_PERM_CFG = new ErrorCode(1_009_002_011, "节点缺少字段权限配置");
 
     ErrorCode FLOW_NODE_TYPE_MUST_BE_INITIATION = new ErrorCode(1_009_002_012, "流程节点类型必须为提交节点");
+
+    ErrorCode FLOW_TASK_NOT_EXISTS = new ErrorCode(1_009_002_013, "流程任务不存在");
 }

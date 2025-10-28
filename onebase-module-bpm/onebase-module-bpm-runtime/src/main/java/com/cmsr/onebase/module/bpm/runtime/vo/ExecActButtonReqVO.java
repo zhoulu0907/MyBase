@@ -30,19 +30,25 @@ public class ExecActButtonReqVO {
     /**
      * 实体数据ID
      */
+    @NotBlank(message = "实体数据ID不能为空")
     private String entityDataId;
 
     /**
-     * 业务ID
+     * 任务ID
      */
-    @NotBlank(message = "业务ID不能为空")
-    private String businessId;
+    @NotBlank(message = "任务ID不能为空")
+    private String taskId;
 
     /**
      * 实体ID
      */
     @NotNull(message = "实体ID不能为空")
     private Long entityId;
+
+    /**
+     * 审批意见
+     */
+    private String comment;
 
     /**
      * 数据内容
