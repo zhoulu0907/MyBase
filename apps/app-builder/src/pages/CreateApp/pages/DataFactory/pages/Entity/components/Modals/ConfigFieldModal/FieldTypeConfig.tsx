@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Input, Select, Dropdown, Menu, Cascader } from '@arco-design/web-react';
-import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
+import { IconDelete, IconDragDotVertical, IconPlus, IconEdit, IconBook } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
+import SelectDictModal from '@/components/SelectDictModal';
 import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './types';
 import {
   convertAutoCodeCompoToAutoNumberRule,
@@ -32,11 +33,23 @@ const initialThreeOptions = [
   { optionLabel: '选项3', optionValue: '选项3' }
 ];
 
+const configTypeOptions = [
+  { label: '自定义', value: 'CUSTOM' },
+  { label: '引用字典', value: 'DICT' }
+];
+
+const CONFIG_TYPE = {
+  CUSTOM: 'CUSTOM',
+  DICT: 'DICT'
+};
+
 export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onConfirm, onCancel, initialOptions }) => {
   const [options, setOptions] = useState(
     initialOptions && initialOptions?.length > 0 ? initialOptions : initialThreeOptions
   );
-  const [optionType, setOptionType] = useState('custom');
+  const [optionType, setOptionType] = useState(CONFIG_TYPE.CUSTOM);
+  const [selectDictModalVisible, setSelectDictModalVisible] = useState(false);
+  const [selectDict, setSelectDict] = useState<DictItem | null>(null);
 
   const addOption = () => {
     const newopt = { optionLabel: `选项${options.length + 1}`, optionValue: `选项${options.length + 1}` };
@@ -71,39 +84,64 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
     }
   };
 
+  const handleSelectDictOk = () => {};
+
+  const handleSelectDictCancel = () => {
+    setSelectDictModalVisible(false);
+  };
+
   return (
     <div className={styles.fieldTypeConfig}>
       <h4>选项配置</h4>
       <Select value={optionType} onChange={setOptionType} style={{ width: '100%', marginBottom: 16 }}>
-        <Select.Option value="custom">自定义</Select.Option>
-        <Select.Option value="system">引用字典</Select.Option>
+        {configTypeOptions.map((option) => (
+          <Select.Option key={option.value} value={option.value}>
+            {option.label}
+          </Select.Option>
+        ))}
       </Select>
 
       <div>
-        {options.map((option, index) => (
-          <div key={index} className={styles.optionItem}>
-            <Input
-              value={option.optionLabel}
-              onChange={(value) => updateOption(index, value)}
-              placeholder="请输入选项内容"
-              className={styles.optionInput}
-            />
-            {options.length > 1 && index > 1 && (
-              <Button
-                type="text"
-                status="danger"
-                icon={<IconDelete />}
-                onClick={() => removeOption(index)}
-                className={styles.deleteBtn}
+        {optionType === CONFIG_TYPE.CUSTOM &&
+          options.map((option, index) => (
+            <div key={index} className={styles.optionItem}>
+              <Input
+                value={option.optionLabel}
+                onChange={(value) => updateOption(index, value)}
+                placeholder="请输入选项内容"
+                className={styles.optionInput}
               />
-            )}
+              {options.length > 1 && index > 1 && (
+                <Button
+                  type="text"
+                  status="danger"
+                  icon={<IconDelete />}
+                  onClick={() => removeOption(index)}
+                  className={styles.deleteBtn}
+                />
+              )}
+            </div>
+          ))}
+
+        {optionType === CONFIG_TYPE.DICT && (
+          <div className={styles.optionItem}>
+            <Button
+              type="outline"
+              icon={<IconBook />}
+              onClick={() => setSelectDictModalVisible(true)}
+              className={styles.selectDictBtn}
+            >
+              选择数据字典
+            </Button>
           </div>
-        ))}
+        )}
       </div>
 
-      <Button type="dashed" icon={<IconPlus />} onClick={addOption} className={styles.addOptionBtn}>
-        新增选项
-      </Button>
+      {optionType === CONFIG_TYPE.CUSTOM && (
+        <Button type="dashed" icon={<IconPlus />} onClick={addOption} className={styles.addOptionBtn}>
+          新增选项
+        </Button>
+      )}
 
       <div className={styles.fieldTypeConfigFooter}>
         <Button type="outline" size="small" onClick={handleCancel}>
@@ -113,6 +151,9 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
           确定
         </Button>
       </div>
+
+      {/* 选择字典弹窗 */}
+      <SelectDictModal visible={selectDictModalVisible} onOk={handleSelectDictOk} onCancel={handleSelectDictCancel} />
     </div>
   );
 };
