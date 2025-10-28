@@ -28,8 +28,7 @@ import wait from '../../assets/bpmLogo/wait.png';
 import message from '../../assets/bpmLogo/message.png';
 import {LLMNodeRegistry} from '../../nodes/llm/index';
 import {ModalNodeRegistry} from '../../nodes/modal/index';
-import {ExecutorNodeRegistry} from '../../nodes/executor/index';
-import {ApproverNodeRegistry} from '../../nodes/approver/index'
+import { ApproverNodeRegistry, CcRecipientsNodeRegistry, ExecutorNodeRegistry } from '../../nodes/index';
 
 interface NodeListProps {
   onSelect: NodePanelRenderProps['onSelect'];
@@ -70,7 +69,7 @@ export const NodeList: FC<NodeListProps> = (props) => {
             </div>
             执行人
           </div>
-          <div className="nodeItem">
+          <div className="nodeItem" onClick={(e) => handleClick(e, CcRecipientsNodeRegistry)}>
             <div className="nodeItemIcon">
               <img src={ccto} alt="" />
             </div>

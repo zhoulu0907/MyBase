@@ -23,7 +23,8 @@ import { BpmEndNodeRegistry } from './bpm-end';
 import { ProcessNodeRegistry } from './process-node';
 import { ModalNodeRegistry } from './modal/index';
 import { ExecutorNodeRegistry } from './executor/index';
-import {ApproverNodeRegistry} from './approver/index';
+import { ApproverNodeRegistry } from './approver/index';
+import { CcRecipientsNodeRegistry } from './CcRecipients/index';
 export { WorkflowNodeType } from './constants';
 
 export const nodeRegistries: FlowNodeRegistry[] = [
@@ -46,5 +47,7 @@ export const nodeRegistries: FlowNodeRegistry[] = [
   ProcessNodeRegistry,
   ModalNodeRegistry,
   ExecutorNodeRegistry,
-  ApproverNodeRegistry
+  ApproverNodeRegistry,
+  CcRecipientsNodeRegistry
 ];
+export { ExecutorNodeRegistry, ApproverNodeRegistry, CcRecipientsNodeRegistry };
