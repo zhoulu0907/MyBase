@@ -38,5 +38,5 @@ public interface BpmFlowTaskCenterService {
     PageResult<BpmMyCreatedVO> getMyCreatedPage(BpmMyCreatedPageReqVO pageReqVO);
 
 
-    List<FlowHisTask>  getHisTaskByInstanceId(Long instanceId);
+    List<FlowHisTask>  getHisTaskByInstanceId(Long instanceId,String appId);
 }

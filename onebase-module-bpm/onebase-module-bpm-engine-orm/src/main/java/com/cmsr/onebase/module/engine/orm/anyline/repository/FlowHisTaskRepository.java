@@ -6,10 +6,7 @@ import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.DataSet;
-import org.anyline.entity.DefaultPageNavi;
-import org.anyline.entity.PageNavi;
+import org.anyline.entity.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -86,9 +83,11 @@ public class FlowHisTaskRepository extends DataRepository<FlowHisTask> {
         }
         return condition;
     }
-    public List<FlowHisTask> getHisTaskByInstanceId(Long instanceId){
+    public List<FlowHisTask> getHisTaskByInstanceId(Long instanceId,String appId){
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.in(FlowHisTask.INSTANCE_ID, instanceId);
+        configStore.and(FlowHisTask.INSTANCE_ID, instanceId);
+        configStore.and(Compare.EQUAL,"ext::json->>'appId'",appId);
+        configStore.order("update_time", Order.TYPE.ASC);
         return findAllByConfig(configStore);
     }
 }

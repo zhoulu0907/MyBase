@@ -199,7 +199,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     }
 
     @Override
-    public List<FlowHisTask> getHisTaskByInstanceId(Long instanceId) {
-        return flowHisTaskRepository.getHisTaskByInstanceId(instanceId);
+    public List<FlowHisTask> getHisTaskByInstanceId(Long instanceId,String appId) {
+        return flowHisTaskRepository.getHisTaskByInstanceId(instanceId, appId);
     }
 }

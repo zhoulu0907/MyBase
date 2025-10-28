@@ -64,9 +64,11 @@ public class BpmFlowTaskCenterController {
     @PostMapping("/his/get")
     @Operation(summary = "查询流程历史信息")
     //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
-    public CommonResult<List<BpmFlowHisTaskVO>> getHisTask(@RequestParam @NotNull(message = "实例ID不能为空") Long instanceId) {
-        log.info("查询流程历史信息实例ID: {}", instanceId);
-        List<FlowHisTask> list = flowTaskCenterService.getHisTaskByInstanceId(instanceId);
+    public CommonResult<List<BpmFlowHisTaskVO>> getHisTask
+            (   @RequestParam @NotNull(message = "实例ID不能为空") Long instanceId,
+                @RequestParam @NotNull(message = "应用ID不能为空") String appId){
+        log.info("查询流程历史信息实例ID: {},应用Id{}", instanceId, appId);
+        List<FlowHisTask> list = flowTaskCenterService.getHisTaskByInstanceId(instanceId,appId);
         return success(BeanUtils.toBean(list,BpmFlowHisTaskVO.class));
     }
 }
