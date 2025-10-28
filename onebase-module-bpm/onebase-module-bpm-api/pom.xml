@@ -13,7 +13,7 @@
 
     <name>${project.artifactId}</name>
     <description>
-        公式模块 API，暴露给其它模块调用
+        流程模块 API，暴露给其它模块调用
     </description>
 
     <dependencies>

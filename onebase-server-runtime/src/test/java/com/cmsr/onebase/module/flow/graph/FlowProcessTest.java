@@ -75,8 +75,8 @@ public class FlowProcessTest {
         reqDTO.setEntityId(101573932216057856L);
         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
         reqDTO.setFieldData(Map.of(
-                104845168301834240L, "x11111111",
-                "104951150916075520", "z1"
+                104845168301834240L, "yy",
+                "104951150916075520", "yy"
         ));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);
