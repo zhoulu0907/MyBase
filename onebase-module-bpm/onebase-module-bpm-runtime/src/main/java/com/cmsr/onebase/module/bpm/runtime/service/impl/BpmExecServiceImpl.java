@@ -80,7 +80,7 @@ public class BpmExecServiceImpl implements BpmExecService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ListActButtonRespVO getActButtons(String entityDataId, String businessId) {
+    public ListActButtonRespVO getActButtons(String taskId, String businessId) {
         ListActButtonRespVO respVO = new ListActButtonRespVO();
         NodeJson currNodeJson = null;
         Instance instance = null;
@@ -89,11 +89,11 @@ public class BpmExecServiceImpl implements BpmExecService {
 
         // businessId 业务ID是dataSetId，通过该ID能查到对应的流程定义信息
         // dataId是数据ID，通过该ID能查到对应的流程实例信息
-        log.info("获取流程实例的操作按钮: {}, {}", entityDataId, businessId);
+        log.info("获取流程实例的操作按钮: {}, {}", taskId, businessId);
 
         // 查询已经发布的业务流程
-        // 先判断dataId是否为空
-        if (StringUtils.isBlank(entityDataId)) {
+        // 先判断taskId是否为空
+        if (StringUtils.isBlank(taskId)) {
             // 为空则代表尚未发起流程，查询业务流程定义是否存在
             Definition flowDefinition = defExtService.getByFormPathAndStatus(businessId, PublishStatus.PUBLISHED.getKey());
 
@@ -111,20 +111,29 @@ public class BpmExecServiceImpl implements BpmExecService {
                 }
             }
         } else {
-            // 数据存在则说明已经发起过流程，查询流程实例表
-            instance = insService.getOne(FlowEngine.newIns().setBusinessId(entityDataId)
-                    .setFormPath(businessId));
+            Task task = taskService.getById(taskId);
 
-            // instance为空说明流程未发起，不存在流程实例
-            if (instance == null) {
-                throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+            if (task == null) {
+                log.error("获取流程实例的操作按钮: {} 不存在", taskId);
+                throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
             }
 
-            Integer nodeType = instance.getNodeType();
+            // todo：判断task的权限
+            String nodeCode = task.getNodeCode();
+            Long instanceId = task.getInstanceId();
+            Integer nodeType = task.getNodeType();
 
             // 流程节点类型不存在操作按钮
             if (!NodeType.isBetween(nodeType)) {
                 throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS);
+            }
+
+            // 数据存在则说明已经发起过流程，查询流程实例表
+            instance = insService.getById(instanceId);
+
+            // instance为空说明流程未发起/已完成，不存在流程实例
+            if (instance == null) {
+                throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
             }
 
             // 找到流程定义
@@ -132,8 +141,6 @@ public class BpmExecServiceImpl implements BpmExecService {
             DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
 
             // 找到对应节点的配置
-            String nodeCode = instance.getNodeCode();
-
             for (NodeJson nodeJson : defJson.getNodeList()) {
                 if (nodeJson.getNodeCode().equals(nodeCode)) {
                     currNodeJson = nodeJson;
@@ -353,7 +360,8 @@ public class BpmExecServiceImpl implements BpmExecService {
 
         // todo 查按钮的默认审批意见
         String comment = reqVO.getComment();
-        if (StringUtils.isBlank( comment)) {
+
+        if (StringUtils.isBlank(comment)) {
             comment = buttonEnum.getName();
         }
 

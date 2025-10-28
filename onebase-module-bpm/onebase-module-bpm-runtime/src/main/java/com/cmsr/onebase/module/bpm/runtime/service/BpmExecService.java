@@ -14,10 +14,10 @@ public interface BpmExecService {
     /**
      * 获取流程实例的操作按钮
      *
-     * @param dataId      数据ID
+     * @param taskId      任务ID
      * @param businessId  业务ID
      */
-     ListActButtonRespVO getActButtons(String dataId, String businessId);
+     ListActButtonRespVO getActButtons(String taskId, String businessId);
 
     /**
      * 流程执行

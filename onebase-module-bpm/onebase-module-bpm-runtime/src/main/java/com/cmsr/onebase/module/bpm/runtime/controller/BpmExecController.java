@@ -31,9 +31,9 @@ public class BpmExecController {
 
     @GetMapping("/list-act-buttons")
     @Operation(summary = "获取流程实例的操作按钮")
-    public CommonResult<ListActButtonRespVO> listActButtons(@RequestParam(value = "entityDataId", required = false) String entityDataId, @RequestParam("businessId") String businessId) {
-        log.info("获取流程实例的操作按钮: {}, {}", entityDataId, businessId);
-        ListActButtonRespVO respVO = bpmExecService.getActButtons(entityDataId, businessId);
+    public CommonResult<ListActButtonRespVO> listActButtons(@RequestParam(value = "taskId", required = false) String taskId, @RequestParam("businessId") String businessId) {
+        log.info("获取流程实例的操作按钮: {}, {}", taskId, businessId);
+        ListActButtonRespVO respVO = bpmExecService.getActButtons(taskId, businessId);
         return CommonResult.success(respVO);
     }
 
