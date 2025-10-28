@@ -19,6 +19,13 @@ public class DataUpdateNodeData extends NodeData implements Serializable {
 
     private Long subEntityId;
 
+    /**
+     * 更新类型
+     * "updateType": "mainEntity"
+     * "updateType": "subEntity",
+     */
+    private String updateType;
+
     private List<Conditions> filterCondition;
 
     private List<ConditionItem> fields;
