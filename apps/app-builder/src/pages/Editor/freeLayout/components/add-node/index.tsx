@@ -45,6 +45,7 @@ export const AddNode = (props: { disabled: boolean; onSave: any }) => {
         {/* 点击就可以增加节点，拖拽也支持 */}
         测试拖拽节点
       </Button>
+
       <Button onClick={() => onSaveTest()}>模拟保存</Button>
     </>
   );

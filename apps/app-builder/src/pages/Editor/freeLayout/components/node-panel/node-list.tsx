@@ -24,7 +24,9 @@ import automation from '../../assets/bpmLogo/automation.png';
 import subprocess from '../../assets/bpmLogo/subprocess.png';
 import task from '../../assets/bpmLogo/task.png';
 import wait from '../../assets/bpmLogo/wait.png';
-import message from '../../assets/bpmLogo/message .png';
+
+import message from '../../assets/bpmLogo/message.png';
+import {LLMNodeRegistry} from '../../nodes/llm/index';
 import {ModalNodeRegistry} from '../../nodes/modal/index';
 import { ApproverNodeRegistry, CcRecipientsNodeRegistry, ExecutorNodeRegistry } from '../../nodes/index';
 

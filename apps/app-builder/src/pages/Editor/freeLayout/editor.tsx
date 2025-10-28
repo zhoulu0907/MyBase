@@ -16,6 +16,7 @@ import { initialData } from './initial-data';
 import { useEditorProps } from './hooks';
 import { DemoTools } from './components/tools';
 import { SidebarProvider, SidebarRenderer } from './components/sidebar';
+import LeftNavBar from './components/left-nav-bar/index';
 import { GlobalConfigProvider } from './components/globalConfig/components/globalConfigProvider';
 
 export const Editor = () => {
@@ -27,7 +28,7 @@ export const Editor = () => {
   };
   return (
     <div className="doc-free-feature-overview">
-      <Button onClick={() => onSave()}>保存</Button>
+      {/* <Button onClick={() => onSave()}>保存</Button> */}
       <FreeLayoutEditorProvider {...editorProps} ref={ref}>
         <GlobalConfigProvider>
           <SidebarProvider>
@@ -35,6 +36,7 @@ export const Editor = () => {
               <EditorRenderer className="demo-editor" />
             </div>
             <DemoTools onSave={onSave} />
+            <LeftNavBar></LeftNavBar>
             <SidebarRenderer />
           </SidebarProvider>
         </GlobalConfigProvider>
