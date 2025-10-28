@@ -20,6 +20,7 @@ export const TENANT_MENUS = {
   DEPT: 'tenant:dept',
   DICT: 'tenant:dict',
   INFO: 'tenant:info',
+  BUSINESS: 'tenant:business'
 }
 
 /** 租户管理-用户管理 */

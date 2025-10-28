@@ -12,6 +12,7 @@ import TenantPage from './pages/Tenant';
 import UserPage from './pages/User';
 
 import styles from './index.module.less';
+import BusinessPage from './pages/Business';
 
 const Content = Layout.Content;
 
@@ -39,6 +40,7 @@ const SettingPage: React.FC = () => {
                 <Route path="organization" element={<OrganizationPage />} />
                 <Route path="system-dict" element={<SystemDictPage />} />
                 <Route path="tenant" element={<TenantPage />} />
+                <Route path="business" element = {<BusinessPage />} />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>
             </div>
