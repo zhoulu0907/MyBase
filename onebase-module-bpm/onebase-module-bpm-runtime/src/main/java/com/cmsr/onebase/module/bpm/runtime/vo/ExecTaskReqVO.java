@@ -3,15 +3,10 @@ package com.cmsr.onebase.module.bpm.runtime.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.List;
-import java.util.Map;
-
 /**
- * 流程执行操作按钮请求VO
+ * 流程执行任务请求VO
  *
  * @author liyang
  * @date 2025/10/19
@@ -19,7 +14,7 @@ import java.util.Map;
 
 @Data
 @Schema(description = "流程执行操作按钮请求VO")
-public class ExecActButtonReqVO {
+public class ExecTaskReqVO {
 
     /**
      * 按钮类型
@@ -28,22 +23,16 @@ public class ExecActButtonReqVO {
     private String buttonType;
 
     /**
-     * 实体数据ID
-     */
-    @NotBlank(message = "实体数据ID不能为空")
-    private String entityDataId;
-
-    /**
      * 任务ID
      */
     @NotBlank(message = "任务ID不能为空")
     private String taskId;
 
     /**
-     * 实体ID
+     * 流程实例ID
      */
-    @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    @NotBlank(message = "流程实例ID不能为空")
+    private String instanceId;
 
     /**
      * 审批意见
@@ -51,15 +40,8 @@ public class ExecActButtonReqVO {
     private String comment;
 
     /**
-     * 数据内容
-     */
-    @NotEmpty(message = "实体数据内容不能为空")
-    private Map<Long, Object> entityData;
-
-    /**
-     * 子实体数据列表
+     * 实体数据
      */
     @Valid
-    private List<SubEntityVo> subEntities;
-
+    private EntityVO entity;
 }

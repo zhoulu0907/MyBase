@@ -14,10 +14,8 @@ import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
-import com.cmsr.onebase.module.bpm.runtime.service.BpmExecService;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmStartReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ExecActButtonReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
+import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
+import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
@@ -47,18 +45,19 @@ import java.util.*;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
- * 流程执行服务实现类
+ *
+ * 流程实例服务实现
  *
  * @author liyang
  * @date 2025-10-27
  */
 @Slf4j
 @Service
-public class BpmExecServiceImpl implements BpmExecService {
+public class BpmInstanceServiceImpl implements BpmInstanceService {
     // 自注入
     @Lazy
     @Resource
-    private BpmExecServiceImpl self;
+    private BpmInstanceServiceImpl self;
 
     @Resource
     private BpmEngineDefExtService defExtService;
@@ -204,31 +203,23 @@ public class BpmExecServiceImpl implements BpmExecService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public String start(BpmStartReqVO reqVO) {
+    public BpmSubmitRespVO submit(BpmSubmitReqVO reqVO) {
+        BpmSubmitRespVO respVO = new BpmSubmitRespVO();
         String entityDataId = null;
 
-        String buttonType = reqVO.getButtonType();
-        BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(buttonType);
-
-        if (buttonEnum == null) {
-            throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
-        }
-
         // 业务状态
-        BpmBusinessStatusEnum businessStatus;
+        BpmBusinessStatusEnum businessStatus = BpmBusinessStatusEnum.IN_APPROVAL;
 
-        if (buttonEnum == BpmActionButtonEnum.SAVE) {
+        if (reqVO.isDraft()) {
             businessStatus = BpmBusinessStatusEnum.DRAFT;
-        } else if (buttonEnum == BpmActionButtonEnum.SUBMIT) {
-            businessStatus = BpmBusinessStatusEnum.IN_APPROVAL;
-        } else {
-            throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
         }
+
+        EntityVO entityVO = reqVO.getEntity();
 
         InsertDataReqDTO insertDataReqDTO = new InsertDataReqDTO();
-        insertDataReqDTO.setEntityId(reqVO.getEntityId());
+        insertDataReqDTO.setEntityId(entityVO.getEntityId());
         insertDataReqDTO.setData(new ArrayList<>());
-        insertDataReqDTO.getData().add(reqVO.getEntityData());
+        insertDataReqDTO.getData().add(entityVO.getEntityData());
 
         // 先插入数据
         List<List<EntityFieldDataRespDTO>> insertedData = dataMethodApi.insertData(insertDataReqDTO);
@@ -251,7 +242,7 @@ public class BpmExecServiceImpl implements BpmExecService {
 
         BpmFlowInsBizExtDO flowInsExtDO = new BpmFlowInsBizExtDO();
         Map<String, Object> variables = new HashMap<>();
-        reqVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+        entityVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
 
         // 开启流程
         FlowParams flowParams = FlowParams.build()
@@ -262,8 +253,8 @@ public class BpmExecServiceImpl implements BpmExecService {
 
         Instance instance = insService.start(entityDataId, flowParams);
 
-        // 如果是提交按钮，则要往下走一个流程
-        if (buttonEnum == BpmActionButtonEnum.SUBMIT) {
+        // 提交请求 自动往下走一个节点
+        if (!reqVO.isDraft()) {
             List<Task> tasks = taskService.getByInsId(instance.getId());
             Task task = tasks.get(0);
             String taskNodeCode = task.getNodeCode();
@@ -314,13 +305,15 @@ public class BpmExecServiceImpl implements BpmExecService {
 
         flowInsExtRepository.insert(flowInsExtDO);
 
-        return entityDataId;
+        respVO.setInstanceId(instance.getId());
+        respVO.setEntityDataId(entityDataId);
+
+        return respVO;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public String execActButton(ExecActButtonReqVO reqVO) {
-        String entityDataId = reqVO.getEntityDataId();
+    public void execTask(ExecTaskReqVO reqVO) {
         String taskId = reqVO.getTaskId();
 
         // 查找task是否存在
@@ -349,7 +342,12 @@ public class BpmExecServiceImpl implements BpmExecService {
 
 
         Map<String, Object> variables = new HashMap<>();
-        reqVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+
+        EntityVO entityVO = reqVO.getEntity();
+
+        if (entityVO != null) {
+            entityVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+        }
 
         // 自动跳到下一个节点
         FlowParams skipParams = FlowParams.build()
@@ -380,7 +378,5 @@ public class BpmExecServiceImpl implements BpmExecService {
         taskService.skip(skipParams, task);
 
         // todo：更新实体数据
-
-        return entityDataId;
     }
 }

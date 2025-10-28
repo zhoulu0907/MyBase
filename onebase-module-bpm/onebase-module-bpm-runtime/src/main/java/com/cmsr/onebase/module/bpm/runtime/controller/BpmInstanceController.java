@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.bpm.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.bpm.runtime.service.BpmExecService;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmStartReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ExecActButtonReqVO;
+import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,20 +15,20 @@ import org.springframework.web.bind.annotation.*;
 
 
 /**
- * 流程执行控制器
+ * 流程实例管理Controller
  *
  * @author liyang
  * @date 2025-10-21
  */
-@Tag(name = "流程执行管理")
+@Tag(name = "流程实例管理")
 @RestController
-@RequestMapping("/bpm/exec")
+@RequestMapping("/bpm/instance")
 @Validated
 @Slf4j
-public class BpmExecController {
+public class BpmInstanceController {
 
     @Resource
-    private BpmExecService bpmExecService;
+    private BpmInstanceService bpmExecService;
 
     @GetMapping("/list-act-buttons")
     @Operation(summary = "获取流程实例的操作按钮")
@@ -37,18 +38,18 @@ public class BpmExecController {
         return CommonResult.success(respVO);
     }
 
-    @PostMapping("/start")
+    @PostMapping("/submit")
     @Operation(summary = "流程发起")
-    public CommonResult<String> exec(@RequestBody @Validated BpmStartReqVO reqVO) {
+    public CommonResult<BpmSubmitRespVO> exec(@RequestBody @Validated BpmSubmitReqVO reqVO) {
         log.info("执行流程实例的操作按钮: {}", reqVO);
-        String entityDataId = bpmExecService.start(reqVO);
-        return CommonResult.success(entityDataId);
+        BpmSubmitRespVO respVO = bpmExecService.submit(reqVO);
+        return CommonResult.success(respVO);
     }
 
-    @PostMapping("/perform-act")
-    public CommonResult<String> exec(@RequestBody @Validated ExecActButtonReqVO reqVO) {
+    @PostMapping("/exec-task")
+    public CommonResult<Boolean> exec(@RequestBody @Validated ExecTaskReqVO reqVO) {
         log.info("执行流程实例的操作按钮: {}", reqVO);
-        String entityDataId = bpmExecService.execActButton(reqVO);
-        return CommonResult.success(entityDataId);
+        bpmExecService.execTask(reqVO);
+        return CommonResult.success(true);
     }
 }

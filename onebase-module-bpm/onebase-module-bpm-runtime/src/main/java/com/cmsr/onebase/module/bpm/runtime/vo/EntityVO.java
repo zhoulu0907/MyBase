@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.vo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -11,39 +9,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 流程执行操作按钮请求VO
+ * 实体数据
  *
  * @author liyang
- * @date 2025/10/19
+ * @date 2025-10-28
  */
-
 @Data
-@Schema(description = "流程执行操作按钮请求VO")
-public class BpmStartReqVO {
-
-    /**
-     * 按钮类型
-     */
-    @NotBlank(message = "按钮类型不能为空")
-    private String buttonType;
-
-    /**
-     * 业务ID
-     */
-    @NotBlank(message = "业务ID不能为空")
-    private String businessId;
-
+public class EntityVO {
     /**
      * 实体ID
      */
     @NotNull(message = "实体ID不能为空")
     private Long entityId;
-
-    /**
-     * 表单名称
-     */
-    @NotBlank(message = "表单名称不能为空")
-    private String formName;
 
     /**
      * 数据内容
@@ -56,4 +33,25 @@ public class BpmStartReqVO {
      */
     @Valid
     private List<SubEntityVo> subEntities;
+
+    /**
+     * 子实体数据
+     *
+     * @author liyang
+     * @date 2025-10-28
+     */
+    @Data
+    public static class SubEntityVo {
+        /**
+         * 子实体ID
+         */
+        @NotNull(message = "子实体ID不能为空")
+        private Long subEntityId;
+
+        /**
+         * 子实体数据
+         */
+        @NotEmpty(message = "子实体数据不能为空")
+        private List<Map<Long, Object>> subEntityData;
+    }
 }

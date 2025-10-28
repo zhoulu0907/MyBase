@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.bpm.runtime.service;
 
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmStartReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ExecActButtonReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
 
 /**
@@ -10,7 +11,7 @@ import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
  * @author liyang
  * @date 2025-10-27
  */
-public interface BpmExecService {
+public interface BpmInstanceService {
     /**
      * 获取流程实例的操作按钮
      *
@@ -20,16 +21,16 @@ public interface BpmExecService {
      ListActButtonRespVO getActButtons(String taskId, String businessId);
 
     /**
-     * 流程执行
+     * 发起流程实例
      *
-     * @param reqVO 执行操作按钮请求VO
+     * @param reqVO 开启流程实例请求VO
      */
-    String start(BpmStartReqVO reqVO);
+    BpmSubmitRespVO submit(BpmSubmitReqVO reqVO);
 
     /**
-     * 流程执行
+     * 执行流程任务
      *
      * @param reqVO 执行操作按钮请求VO
      */
-    String execActButton(ExecActButtonReqVO reqVO);
+    void execTask(ExecTaskReqVO reqVO);
 }
