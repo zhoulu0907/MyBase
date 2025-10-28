@@ -40,7 +40,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
    */
   const form = nodeRender.form;
 
-const errorMessages = getAllErrorMessages(form);
+  const errorMessages = getAllErrorMessages(form);
   /**
    * Used to make the Tooltip scale with the node, which can be implemented by itself depending on the UI library
    * 用于让 Tooltip 跟随节点缩放, 这个可以根据不同的 ui 库自己实现
