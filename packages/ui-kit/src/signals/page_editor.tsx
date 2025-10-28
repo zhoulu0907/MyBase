@@ -61,6 +61,21 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     layoutSubComponents.value = {};
   };
 
+   // 子表单
+  const subTableComponents = signal<{ [key: string]: any[] }>({});
+  const setSubTableComponents = (cp_id: string, newColumns: any[]) => {
+    subTableComponents.value = { ...subTableComponents.value, [cp_id]: newColumns };
+  };
+  const delSubTableComponents = (cp_id: string) => {
+    const newSubTableComponents = { ...subTableComponents.value };
+    delete newSubTableComponents[cp_id];
+    subTableComponents.value = newSubTableComponents;
+  };
+  const clearSubTableComponents = () => {
+    subTableComponents.value = {};
+  };
+
+
   return {
     // 页面组件
     components,
@@ -81,7 +96,14 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     loadLayoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
-    clearLayoutSubComponents
+    clearLayoutSubComponents,
+
+    // 子表单组件的列数据
+    subTableComponents,
+    setSubTableComponents,
+    delSubTableComponents,
+    clearSubTableComponents,
+
   };
 };
 

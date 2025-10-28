@@ -26,7 +26,6 @@ import DynamicImageConfig from './components/DynamicImageConfig';
 import DynamicOptionsConfig from './components/DynamicOptionsConfig';
 import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
-import DynamicSubTableConfig from './components/DynamicSubTableConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import DynamicTabsConfig from './components/DynamicTabsConfig';
 import styles from './index.module.less';
@@ -665,18 +664,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 );
               }
 
-              // 子表数据配置
-              if (item.type === CONFIG_TYPES.SUB_TABLE) {
-                return (
-                  <DynamicSubTableConfig
-                    key={index}
-                    id={cpID}
-                    handlePropsChange={handlePropsChange}
-                    item={item}
-                    configs={configs}
-                  />
-                );
-              }
               if (item.type === CONFIG_TYPES.IMAGE) {
                 return (
                   <DynamicImageConfig

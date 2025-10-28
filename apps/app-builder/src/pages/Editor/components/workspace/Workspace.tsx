@@ -13,6 +13,8 @@ import {
   getComponentSchema,
   getComponentWidth,
   usePageEditorSignal,
+  WIDTH_VALUES,
+  WIDTH_OPTIONS,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -30,7 +32,7 @@ import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
-import { getEntityFieldOptions, type AppEntityField, type EntityFieldOption } from '@onebase/app';
+import { getEntityFieldOptions, ENTITY_TYPE, type AppEntityField, type EntityFieldOption } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
@@ -67,7 +69,8 @@ export default function EditorWorkspace() {
     setShowDeleteButton,
     layoutSubComponents,
     setLayoutSubComponents,
-    delLayoutSubComponents
+    delLayoutSubComponents,
+    setSubTableComponents
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -275,70 +278,17 @@ export default function EditorWorkspace() {
             newList.forEach(async (item) => {
               // console.log(item);
               if (item.type == 'entity') {
-                if (item.entityType === '子表') {
-                  item.fields
-                    .filter(
-                      (field: AppEntityField) =>
-                        field.fieldName !== 'lock_version' &&
-                        field.fieldName !== 'deleted' &&
-                        field.fieldName !== 'parent_id' &&
-                        field.isSystemField !== 1
-                    )
-                    .map(async (field: AppEntityField) => {
-                      let cpType = COMPONENT_MAP[field.fieldType];
-                      let cpID = `${cpType}-${uuidv4()}`;
-                      const schema = getComponentSchema(cpType as any);
-
-                      if (
-                        field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
-                        field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
-                      ) {
-                        getFieldOptions(field.fieldId).then((options: any) => {
-                          schema.config.defaultValue = options;
-                        });
-                      }
-
-                      schema.config.cpName = field.displayName;
-                      schema.config.id = cpID;
-                      schema.config.dataField = [item.entityId, field.fieldId];
-                      schema.config.label.text = field.displayName;
-                      const props = {
-                        id: cpID,
-                        type: cpType,
-                        ...schema
-                      };
-
-                      setPageComponentSchemas(cpID!, props);
-                      setCurComponentID(cpID!);
-
-                      setCurComponentSchema(props);
-                      setShowDeleteButton(false);
-                    });
-
+                if (item.entityType === ENTITY_TYPE.SUB) {
                   const cpName = '子表单';
-                  const cpType = 'XSubTable';
+                  const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
                   const cpID = `${cpType}-${uuidv4()}`;
 
+                  // 子表单 配置
                   const schema = getComponentSchema(cpType as any);
-
-                  const newColumns = item.fields
-                    .filter((field: AppEntityField) => field.isSystemField !== 1)
-                    .map((field: AppEntityField) => ({
-                      id: field.fieldId,
-                      title: field.displayName,
-                      dataIndex: field.fieldId,
-                      dataType: field.fieldType,
-                      disabled: undefined,
-                      selected: false,
-                      chosen: false
-                    }));
-
                   schema.config.cpName = cpName;
                   schema.config.id = cpID;
-                  schema.config.dataField = [item.entityId, item.id];
                   schema.config.label.text = cpName;
                   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-                  schema.config.columns = [...newColumns];
                   schema.config.subTable = item.id;
 
                   const props = {
@@ -346,11 +296,31 @@ export default function EditorWorkspace() {
                     type: cpType,
                     ...schema
                   };
-
                   setPageComponentSchemas(cpID!, props);
-                  //   setCurComponentID(cpID!);
-                  //   setCurComponentSchema(props);
                   setShowDeleteButton(false);
+
+                  const subFields = item.fields.filter((field: AppEntityField) => field.isSystemField !== 1);
+                  // 子表单的每个表单项配置
+                  const subFieldComponents = subFields.map((ele: AppEntityField) => {
+                    const subType = COMPONENT_MAP[ele.fieldType];
+                    const subSchema = getComponentSchema(subType as any);
+                    const subId = `${subType}-${uuidv4()}`;
+                    subSchema.config.cpName = ele.displayName;
+                    subSchema.config.id = subId;
+                    subSchema.config.label.text = ele.displayName;
+                    subSchema.config.label.display = false;
+                    subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                    subSchema.config.dataField = [item.entityId, ele.fieldId];
+                    subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
+                    const subProps = {
+                      id: subId,
+                      type: subType,
+                      ...subSchema
+                    };
+                    setPageComponentSchemas(subId, subProps);
+                    return { id: subId, type: subType, displayName: ele.displayName };
+                  });
+                  setSubTableComponents(cpID, subFieldComponents);
 
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
 
