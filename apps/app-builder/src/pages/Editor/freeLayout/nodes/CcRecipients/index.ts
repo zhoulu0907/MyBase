@@ -1,11 +1,12 @@
 import { type FlowNodeRegistry } from '../../typings';
-import { formMeta } from './form-meta';
 import { nanoid } from 'nanoid';
-import executor_big from '../../assets/bpmLogo/executor_big.png';
+import { formMeta } from './formMeta';
+import ccto from '../../assets/bpmLogo/ccto.png';
 
-export const ExecutorNodeRegistry: FlowNodeRegistry = {
-  type: 'executor',
-  title: '执行人',
+
+export const CcRecipientsNodeRegistry: FlowNodeRegistry = {
+  type: 'ccRecipients',
+  title: '抄送人',
   category: 'interaction',
   meta: {
     isStart: false,
@@ -20,22 +21,20 @@ export const ExecutorNodeRegistry: FlowNodeRegistry = {
     ]
   },
   info: {
-    icon: executor_big,
-    description: '这是执行人节点，用于编辑执行人。'
+    icon: ccto,
+    description: '这是抄送人节点，用于编辑抄送人。'
   },
-  /**
-   * Render node via formMeta
-   */
   formMeta,
+
   canDelete(ctx, node) {
     return node.parent !== ctx.document.root;
   },
   onAdd(ctx, from) {
     return {
-      id: `executor_${nanoid(5)}`,
-      type: 'executor',
+      id: `ccRecipients_${nanoid(5)}`,
+      type: 'ccRecipients',
       data: {
-        title: '执行人'
+        title: '抄送人'
       }
     };
   }
