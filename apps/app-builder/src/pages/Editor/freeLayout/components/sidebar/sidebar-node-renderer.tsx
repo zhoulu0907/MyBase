@@ -4,25 +4,43 @@
  */
 
 import { useNodeRender, FlowNodeEntity } from '@flowgram.ai/free-layout-editor';
-
+import { useState } from 'react';
 import { NodeRenderContext } from '../../context';
+import type { FormInstance } from '@arco-design/web-react';
+import Header from '../../components/header';
+import BottomBtn from '../../components/bottomBtn';
+import Approver from './components/approver';
 
 export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
   const { node } = props;
   const nodeRender = useNodeRender(node);
+  const [configForm, setconfigFormForm] = useState<FormInstance>();
+  const contextValue = {
+    ...nodeRender,
+    configForm: configForm,
+    setconfigFormForm: (form: FormInstance) => setconfigFormForm(form)
+  };
 
+  const handleSubmit = () => {
+    const newData = Object.assign({}, nodeRender.data, { type: 123 });
+    nodeRender.updateData(newData);
+  };
   return (
-    <NodeRenderContext.Provider value={nodeRender}>
+    <NodeRenderContext.Provider value={contextValue}>
       <div
         style={{
-          background: 'rgb(251, 251, 251)',
-          height: 'calc(100vh - 40px)',
-          margin: '8px 8px 8px 0',
           borderRadius: 8,
           border: '1px solid rgba(82,100,154, 0.13)',
+          margin: 0,
+          height: 'calc(100% - 2px)',
+          overflow: 'hidden',
+          background: '#fff'
         }}
       >
-        {nodeRender.form?.render()}
+        {/* <Header />
+        <Approver />
+        <BottomBtn /> */}
+        <div>抽屉内容</div>
       </div>
     </NodeRenderContext.Provider>
   );

@@ -6,7 +6,7 @@
 import React, { useState, useContext, useRef, useCallback } from 'react';
 
 import { WorkflowPortRender } from '@flowgram.ai/free-layout-editor';
-import { useClientContext } from '@flowgram.ai/free-layout-editor';
+import { useClientContext, CommandService } from '@flowgram.ai/free-layout-editor';
 
 import { type FlowNodeMeta } from '../../typings';
 import { useNodeRenderContext, usePortClick } from '../../hooks';
@@ -39,7 +39,6 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const onPortClick = usePortClick();
   const meta = node.getNodeMeta<FlowNodeMeta>();
   const childRef = useRef<HTMLDivElement>(null);
-  // console.log(selected, nodeRender, '就是这里');
   const portsRender = ports.map((p) => (
     <WorkflowPortRender key={p.id} entity={p} onClick={!readonly ? onPortClick : undefined} />
   ));
@@ -59,7 +58,8 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
     [node]
   );
   const deleteNode = useCallback(() => {
-    console.log('删除节点');
+    // 删除节点
+    ctx.get<CommandService>(CommandService).executeCommand('DELETE', [node]);
   }, [node]);
   const copyNode = useCallback(() => {
     console.log('复制节点');

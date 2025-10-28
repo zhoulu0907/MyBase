@@ -34,10 +34,10 @@ export const AddNode = (props: { disabled: boolean; onSave: any }) => {
       </Button>
       <Button
         onMouseDown={(e) =>
-          startDragSerivce.startDragCard('node', e, {
+          startDragSerivce.startDragCard('modal', e, {
             data: {
-              type: LLMNodeRegistry.type,
-              registry: LLMNodeRegistry
+              type: 'modal',
+              title: '抄送人'
             }
           })
         }
