@@ -4573,12 +4573,8 @@ function _typeof(o) {
     return null;
   }
 
-  function GETDEPT(deptId,name,type) {
+  function GETDEPT(deptno,name,type) {
     console.log(deptno,name);
-    var user = {
-      name: name,
-      id: id,
-    }
     if (type == "name") {
       return name;
     } else if ( type == "deptno") {
@@ -4586,6 +4582,17 @@ function _typeof(o) {
     }
     return null;
   }
+
+  function GETUPDEPT(deptno,name,type) {
+    console.log(deptno,name);
+    if (type == "name") {
+      return name;
+    } else if ( type == "deptno") {
+      return deptno;
+    }
+    return null;
+  }
+
 
 
   function LEN(text) {

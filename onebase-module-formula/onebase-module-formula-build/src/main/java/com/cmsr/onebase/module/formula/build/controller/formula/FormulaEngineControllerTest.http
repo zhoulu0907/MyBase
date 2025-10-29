@@ -192,7 +192,9 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETUSER(18,'张三','name')" }
+{ "formula": "GETUSER(id,name,'id')",
+  "parameters": {}
+}
 
 ### GETDEPT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -200,7 +202,9 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETDEPT(100,'财务','name')" }
+{ "formula": "GETDEPT(deptno,name,'deptno')",
+  "parameters": {}
+}
 
 ### GETSUPERVISOR
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -456,7 +460,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "COUNTIF([1,2,3,4],\">\"+\"2\")" }
+{ "formula": "COUNTIF([1,2,3,4],'>'+'2')" }
 
 ### DAY
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -584,7 +588,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "HOUR('2025-10-27T14:15:00')" }
+{ "formula": "HOUR('2025-10-27 14:15:00')" }
 
 ### TODAY
 POST {{baseUrl}}/formula/engine/execute-formula

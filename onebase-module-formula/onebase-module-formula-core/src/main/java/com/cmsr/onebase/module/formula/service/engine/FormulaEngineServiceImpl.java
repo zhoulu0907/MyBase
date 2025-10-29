@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.formula.service.engine;
 
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
+import com.cmsr.onebase.module.formula.service.user.FormulaUserService;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.api.permission.RoleApi;
@@ -38,26 +39,13 @@ import static com.cmsr.onebase.module.formula.enums.FormulaConstants.*;
 public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     private final FormulaEngineProperties properties;
+
     private final String                  formulaJsScript;
+
     private final Pattern                 dangerousPatternRegex;
 
-    /**
-     * 注入用户API
-     */
     @Resource
-    private AdminUserApi adminUserApi;
-
-    /**
-     * 注入用户API
-     */
-    @Resource
-    private RoleApi RoleApi;
-
-    /**
-     * 注入部门API
-     */
-    @Resource
-    private DeptApi deptApi;
+    private FormulaUserService formulaUserService;
 
     public FormulaEngineServiceImpl(FormulaEngineProperties properties) {
         this.properties = properties;
@@ -133,7 +121,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                     }
 
 
-                    enrichParametersWithUserInfo(formula, parameters);
+                    formulaUserService.enrichParametersWithUserInfo(formula, parameters);
 
                     // 检查公式中是否包含$字符，如果包含则进行参数替换
                     if (formula.contains("$")) {
@@ -345,98 +333,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      * @param formula    公式
      * @param parameters 参数映射
      */
-    private void enrichParametersWithUserInfo(String formula, Map<String, Object> parameters) {
-        // 获取当前登录用户信息
-        Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
-        if (loginUserId == null) {
-            return;
-        }
 
-        // 检查公式是否包含用户相关函数
-        if (formula.contains(GETUSER)) {
-            try {
-                AdminUserRespDTO user = adminUserApi.getUser(loginUserId).getCheckedData();
-                if (user != null) {
-                    parameters.put("id", user.getId());
-                    parameters.put("name", user.getNickname());
-                }
-            } catch (Exception e) {
-                log.warn("获取用户信息失败，loginUserId: {}", loginUserId, e);
-                // 即使获取用户信息失败，也要确保id和name变量在JS环境中存在默认值
-                parameters.putIfAbsent("id", 0L);
-                parameters.putIfAbsent("name", "");
-            }
-            return;
-        }
-
-        // 检查公式是否包含部门相关函数
-        if (formula.contains(GETDEPT)) {
-            try {
-                AdminUserRespDTO user = adminUserApi.getUser(loginUserId).getCheckedData();
-                if (user != null && user.getDeptId() != null) {
-                    DeptRespDTO dept = deptApi.getDept(user.getDeptId()).getCheckedData();
-                    if (dept != null) {
-                        parameters.put("deptId", dept.getId());
-                        parameters.put("name", dept.getName());
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("获取部门信息失败，loginUserId: {}", loginUserId, e);
-                parameters.putIfAbsent("deptId", 0L);
-                parameters.putIfAbsent("name", "");
-            }
-            return;
-        }
-
-        // 检查公式是否包含上级部门相关函数
-        if (formula.contains(GETUPDEPT)) {
-            try {
-                AdminUserRespDTO user = adminUserApi.getUser(loginUserId).getCheckedData();
-                if (user != null && user.getDeptId() != null) {
-                    DeptRespDTO dept = deptApi.getDept(user.getDeptId()).getCheckedData();
-                    if (dept != null && dept.getParentId() != null) {
-                        DeptRespDTO parentDept = deptApi.getDept(dept.getParentId()).getCheckedData();
-                        if (parentDept != null) {
-                            parameters.put("parentDeptId", parentDept.getId());
-                            parameters.put("parentDeptName", parentDept.getName());
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("获取上级部门信息失败，loginUserId: {}", loginUserId, e);
-                parameters.putIfAbsent("parentDeptId", 0L);
-                parameters.putIfAbsent("parentDeptName", "");
-            }
-            return;
-        }
-
-        // 检查公式是否包含角色相关函数
-        if (formula.contains(GETROLE)) {
-            // 角色信息已在PermissionService中处理，此处可扩展具体实现
-        }
-
-        // 检查公式是否包含直属上级相关函数
-        if (formula.contains(GETSUPERVISOR)) {
-            try {
-                AdminUserRespDTO user = adminUserApi.getUser(loginUserId).getCheckedData();
-                if (user != null && user.getDeptId() != null) {
-                    DeptRespDTO dept = deptApi.getDept(user.getDeptId()).getCheckedData();
-                    if (dept != null && dept.getLeaderUserId() != null) {
-                        AdminUserRespDTO supervisor = adminUserApi.getUser(dept.getLeaderUserId()).getCheckedData();
-                        if (supervisor != null) {
-                            parameters.put("supervisorId", supervisor.getId());
-                            parameters.put("supervisorName", supervisor.getNickname());
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("获取直属上级信息失败，loginUserId: {}", loginUserId, e);
-                parameters.putIfAbsent("supervisorId", 0L);
-                parameters.putIfAbsent("supervisorName", "");
-            }
-            return;
-        }
-    }
 
     /**
      * 替换公式中的参数占位符，例如：
