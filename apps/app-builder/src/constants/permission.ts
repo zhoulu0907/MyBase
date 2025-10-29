@@ -112,6 +112,6 @@ export const PERMISSION_SCOPE: Record<string, string> = {
 
 /** 数据权限-操作权限 */
 export const OPERATION_OPTIONS: Record<string, string> = {
-  EDIT: '编辑',
-  DELETE: '删除'
+  edit: '编辑',
+  delete: '删除'
 };
