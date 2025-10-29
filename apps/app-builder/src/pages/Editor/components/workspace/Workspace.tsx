@@ -279,7 +279,7 @@ export default function EditorWorkspace() {
               // console.log(item);
               if (item.type == 'entity') {
                 if (item.entityType === ENTITY_TYPE.SUB) {
-                  const cpName = '子表单';
+                  const cpName = item.entityName || '子表单';
                   const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
                   const cpID = `${cpType}-${uuidv4()}`;
 
