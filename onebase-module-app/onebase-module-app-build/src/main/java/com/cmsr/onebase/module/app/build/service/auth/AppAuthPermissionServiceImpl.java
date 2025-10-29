@@ -115,10 +115,23 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         }
         List<AuthDataGroupVO> authDataGroupVOS = authDataGroupDOS.stream().map(authDataGroupDO -> {
             AuthDataGroupVO authDataGroupVO = BeanUtils.toBean(authDataGroupDO, AuthDataGroupVO.class);
-            authDataGroupVO.setScopeTags(JsonUtils.parseArray(authDataGroupDO.getScopeTags(), String.class));
-            authDataGroupVO.setDataFilters(JsonUtils.parseObject(authDataGroupDO.getDataFilter(), new TypeReference<List<List<AuthDataFilterVO>>>() {
-            }));
-            authDataGroupVO.setOperationTags(JsonUtils.parseArray(authDataGroupDO.getOperationTags(), String.class));
+
+            if (authDataGroupDO.getScopeTags() != null) {
+                authDataGroupVO.setScopeTags(JsonUtils.parseArray(authDataGroupDO.getScopeTags(), String.class));
+            } else {
+                authDataGroupVO.setScopeTags(Collections.emptyList());
+            }
+            if (authDataGroupDO.getDataFilter() != null) {
+                authDataGroupVO.setDataFilters(JsonUtils.parseObject(authDataGroupDO.getDataFilter(), new TypeReference<List<List<AuthDataFilterVO>>>() {
+                }));
+            } else {
+                authDataGroupVO.setDataFilters(Collections.emptyList());
+            }
+            if (authDataGroupDO.getOperationTags() != null) {
+                authDataGroupVO.setOperationTags(JsonUtils.parseArray(authDataGroupDO.getOperationTags(), String.class));
+            } else {
+                authDataGroupVO.setOperationTags(Collections.emptyList());
+            }
             return authDataGroupVO;
         }).toList();
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);

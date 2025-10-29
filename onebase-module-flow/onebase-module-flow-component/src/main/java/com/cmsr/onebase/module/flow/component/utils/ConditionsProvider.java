@@ -102,12 +102,20 @@ public class ConditionsProvider {
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(vars);
-            CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
-            if (respDTO.getData() == null) {
-                throw new IllegalCallerException("公式错误: " + formula + ", 错误信息: " + respDTO.getMsg());
-            }
-            expressionItem.setValue(respDTO.getData().getResult());
+            expressionItem.setValue(callFormula(reqDTO));
         }
+    }
+
+
+    private Object callFormula(FormulaExecuteReqDTO reqDTO) {
+        CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
+        if (respDTO.getData() == null) {
+            throw new IllegalCallerException("调用公式错误: " + reqDTO.getFormula() + ", 错误信息: " + respDTO.getMsg());
+        }
+        String resultType = respDTO.getData().getResultType();
+        Object result = respDTO.getData().getResult();
+
+        return result;
     }
 
     private void formatRuleItemForValue(ExpressionItem expressionItem, Map<String, Object> vars) {
@@ -126,11 +134,7 @@ public class ConditionsProvider {
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(vars);
-            CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
-            if (respDTO.getData() == null) {
-                throw new IllegalCallerException("公式错误: " + formula + ", 错误信息: " + respDTO.getMsg());
-            }
-            expressionItem.setValue(respDTO.getData().getResult());
+            expressionItem.setValue(callFormula(reqDTO));
         }
     }
 
