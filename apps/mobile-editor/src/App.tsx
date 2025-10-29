@@ -1,4 +1,10 @@
-function App() {
+interface AppProps {
+  props: any;
+  //   myName: string;
+  //   onCountChange?: (count: number) => void;
+}
+
+const App: React.FC<AppProps> = ({ props }) => {
   return (
     <>
       <div>
@@ -6,6 +12,6 @@ function App() {
       </div>
     </>
   );
-}
+};
 
 export default App;

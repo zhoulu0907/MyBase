@@ -21,7 +21,7 @@ async function mount(props: any) {
 
   root.render(
     <StrictMode>
-      <App />
+      <App props={props} />
     </StrictMode>
   );
 

@@ -35,9 +35,9 @@ const FormEditor: React.FC = () => {
   useEffect(() => {
     if (editMode.value === EditMode.MOBILE) {
       const microApp = loadMicroApp({
-        name: 'mobile-editor-container',
+        name: 'mobile-editor',
         entry: '//localhost:4400',
-        container: '#mobile-editor-container',
+        container: '#mobile-editor',
         props: {
           onGlobalStateChange: globalState.onGlobalStateChange,
           setGlobalState: globalState.setGlobalState,
@@ -62,7 +62,7 @@ const FormEditor: React.FC = () => {
       )}
       {editMode.value === EditMode.MOBILE && (
         <>
-          <div id="mobile-editor-container"></div>
+          <div id="mobile-editor"></div>
         </>
       )}
       {/* <EditorPanel />

@@ -1,7 +1,6 @@
 import { initGlobalState } from 'qiankun';
 const initialState = {
-  myName: '',
-  subAppCount: 0
+  myName: ''
 };
 const globalState = initGlobalState(initialState);
 
