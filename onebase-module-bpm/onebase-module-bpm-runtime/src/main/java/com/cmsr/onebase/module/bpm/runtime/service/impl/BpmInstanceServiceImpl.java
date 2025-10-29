@@ -222,7 +222,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         InsertDataReqDTO insertDataReqDTO = new InsertDataReqDTO();
         insertDataReqDTO.setEntityId(entityVO.getEntityId());
         insertDataReqDTO.setData(new ArrayList<>());
-        insertDataReqDTO.getData().add(entityVO.getEntityData());
+        insertDataReqDTO.getData().add(entityVO.getData());
 
         // 先插入数据
         List<List<EntityFieldDataRespDTO>> insertedData = dataMethodApi.insertData(insertDataReqDTO);
@@ -249,7 +249,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
         variables.put("appId", extDto.getAppId());
 
-        entityVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+        entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
 
         // 开启流程
         FlowParams flowParams = FlowParams.build()
@@ -353,7 +353,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         EntityVO entityVO = reqVO.getEntity();
 
         if (entityVO != null) {
-            entityVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+            entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
         }
 
         // 自动跳到下一个节点
