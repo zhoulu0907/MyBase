@@ -7,23 +7,7 @@ export const CarbonCopyFormRender = ({ form }: FormRenderProps) => {
     <>
       <FormHeader />
       <FormContent>
-        <div>
-          <Field name="test">
-            {({ field, fieldState }) => (
-              <div>
-                <Input
-                  placeholder="请选择抄送人"
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                //   status={fieldState.invalid ? 'error' : undefined}
-                  style={{
-                    width: '100%'
-                  }}
-                />
-              </div>
-            )}
-          </Field>
-        </div>
+       
       </FormContent>
     </>
   );
@@ -31,13 +15,6 @@ export const CarbonCopyFormRender = ({ form }: FormRenderProps) => {
 
 export const formMeta: FormMeta = {
   validateTrigger: 'onChange',
-  validate: {
-    test: ({ value }) => {
-      if (!value || value.trim() === '') {
-        return '抄送人不能为空';
-      }
-      return undefined;
-    }
-  },
+  validate: {},
   render: CarbonCopyFormRender
 };
