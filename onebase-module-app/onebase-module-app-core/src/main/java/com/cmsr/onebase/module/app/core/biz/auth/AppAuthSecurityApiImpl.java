@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.app.core.dal.provider.auth.AppAuthRoleProvider;
 import com.cmsr.onebase.module.app.core.dal.provider.menu.AppMenuProvider;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRole;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,13 +61,13 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     @Override
     public MenuPermission getMenuPermission(Long userId, Long applicationId, Long menuId) {
         MenuPermission menuPermission = new MenuPermission();
-        UserRole userRole = appAuthRoleProvider.findByApplicationIdAndUserId(userId, applicationId);
-        if (userRole == null) {
-            menuPermission.allDeny();
+        UserRole userRole = appAuthRoleProvider.findByUserIdAndApplicationId(userId, applicationId);
+        if (userRole != null && userRole.isAdminRole()) {
+            menuPermission.allAllow();
             return menuPermission;
         }
-        if (userRole.isAdminRole()) {
-            menuPermission.allAllow();
+        if (userRole == null || CollectionUtils.isEmpty(userRole.getRoleIds())) {
+            menuPermission.allDeny();
             return menuPermission;
         }
         Set<Long> roleIds = userRole.getRoleIds();
@@ -104,21 +105,21 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     @Override
     public DataPermission getMenuDataPermission(Long userId, Long applicationId, Long menuId) {
         DataPermission dataPermission = new DataPermission();
-        UserRole userRole = appAuthRoleProvider.findByApplicationIdAndUserId(applicationId, userId);
-        if (userRole == null) {
-            dataPermission.setAllAllowed(false);
-            dataPermission.setAllDenied(true);
-            return dataPermission;
-        }
-        if (userRole.isAdminRole()) {
+        UserRole userRole = appAuthRoleProvider.findByUserIdAndApplicationId(userId, applicationId);
+        if (userRole != null && userRole.isAdminRole()) {
             dataPermission.setAllAllowed(true);
             dataPermission.setAllDenied(false);
+            return dataPermission;
+        }
+        if (userRole == null || CollectionUtils.isEmpty(userRole.getRoleIds())) {
+            dataPermission.setAllAllowed(false);
+            dataPermission.setAllDenied(true);
             return dataPermission;
         }
         //
         Set<Long> roleIds = userRole.getRoleIds();
         List<DataPermissionGroup> dataGroups = appAuthDataGroupProvider.findDataGroups(applicationId, roleIds, menuId);
-        dataPermission.getGroups().addAll(dataGroups);
+        dataPermission.setGroups(dataGroups);
         dataPermission.setAllAllowed(false);
         dataPermission.setAllDenied(false);
         return dataPermission;
@@ -127,21 +128,26 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     @Override
     public FieldPermission getMenuFieldPermission(Long userId, Long applicationId, Long menuId) {
         FieldPermission fieldPermission = new FieldPermission();
-        UserRole userRole = appAuthRoleProvider.findByApplicationIdAndUserId(applicationId, userId);
+        UserRole userRole = appAuthRoleProvider.findByUserIdAndApplicationId(userId, applicationId);
+        if (userRole != null && userRole.isAdminRole()) {
+            fieldPermission.setAllAllowed(true);
+            fieldPermission.setAllDenied(false);
+            return fieldPermission;
+        }
         if (userRole == null) {
             fieldPermission.setAllAllowed(false);
             fieldPermission.setAllDenied(true);
-            return fieldPermission;
-        }
-        if (userRole.isAdminRole()) {
-            fieldPermission.setAllAllowed(true);
-            fieldPermission.setAllDenied(false);
             return fieldPermission;
         }
         MenuPermission menuPermission = getMenuPermission(userId, applicationId, menuId);
         if (menuPermission.isAllFieldsAllowed()) {
             fieldPermission.setAllAllowed(true);
             fieldPermission.setAllDenied(false);
+            return fieldPermission;
+        }
+        if (CollectionUtils.isEmpty(userRole.getRoleIds())) {
+            fieldPermission.setAllAllowed(false);
+            fieldPermission.setAllDenied(true);
             return fieldPermission;
         }
         Set<Long> roleIds = userRole.getRoleIds();
