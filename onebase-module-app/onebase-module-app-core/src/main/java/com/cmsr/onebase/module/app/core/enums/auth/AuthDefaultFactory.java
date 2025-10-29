@@ -50,6 +50,8 @@ public class AuthDefaultFactory {
 
     private static final String DEFAULT_OPERATION_TAGS = JsonUtils.toJsonString(List.of(CREATE, EDIT, DELETE, IMPORT, EXPORT, SHARE));
 
+    private static final String DEFAULT_DATA_FILTER = JsonUtils.toJsonString(List.of());
+
     //应用 AuthPermissionDO
     public static AuthPermissionDO createAuthPermissionDO(AuthPermissionReq req) {
         AuthPermissionDO ap = new AuthPermissionDO();
@@ -63,6 +65,14 @@ public class AuthDefaultFactory {
         return ap;
     }
 
+    public static AuthPermissionDO createAuthPermissionDO() {
+        AuthPermissionDO ap = new AuthPermissionDO();
+        ap.setIsPageAllowed(NumberUtils.INTEGER_ONE);
+        ap.setIsAllViewsAllowed(NumberUtils.INTEGER_ONE);
+        ap.setIsAllFieldsAllowed(NumberUtils.INTEGER_ONE);
+        ap.setOperationTags(DEFAULT_OPERATION_TAGS);
+        return ap;
+    }
 
     //数据组权限 authDataGroupDOS
     public static AuthDataGroupDO createAuthDataGroupDO(AuthPermissionReq req) {
@@ -72,8 +82,19 @@ public class AuthDefaultFactory {
         adg.setRoleId(req.getRoleId());
         adg.setMenuId(req.getMenuId());
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
+        adg.setDataFilter(DEFAULT_DATA_FILTER);
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
         return adg;
     }
+
+    public static AuthDataGroupDO createAuthDataGroupDO() {
+        AuthDataGroupDO adg = new AuthDataGroupDO();
+        adg.setGroupName("默认权限");
+        adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
+        adg.setDataFilter(DEFAULT_DATA_FILTER);
+        adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
+        return adg;
+    }
+
 
 }

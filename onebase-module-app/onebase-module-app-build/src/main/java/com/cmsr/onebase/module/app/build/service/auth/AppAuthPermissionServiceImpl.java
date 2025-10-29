@@ -115,10 +115,23 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         }
         List<AuthDataGroupVO> authDataGroupVOS = authDataGroupDOS.stream().map(authDataGroupDO -> {
             AuthDataGroupVO authDataGroupVO = BeanUtils.toBean(authDataGroupDO, AuthDataGroupVO.class);
-            authDataGroupVO.setScopeTags(JsonUtils.parseArray(authDataGroupDO.getScopeTags(), String.class));
-            authDataGroupVO.setDataFilters(JsonUtils.parseObject(authDataGroupDO.getDataFilter(), new TypeReference<List<List<AuthDataFilterVO>>>() {
-            }));
-            authDataGroupVO.setOperationTags(JsonUtils.parseArray(authDataGroupDO.getOperationTags(), String.class));
+
+            if (StringUtils.isNotBlank(authDataGroupDO.getScopeTags())) {
+                authDataGroupVO.setScopeTags(JsonUtils.parseArray(authDataGroupDO.getScopeTags(), String.class));
+            } else {
+                authDataGroupVO.setScopeTags(Collections.emptyList());
+            }
+            if (StringUtils.isNotBlank(authDataGroupDO.getDataFilter())) {
+                authDataGroupVO.setDataFilters(JsonUtils.parseObject(authDataGroupDO.getDataFilter(), new TypeReference<List<List<AuthDataFilterVO>>>() {
+                }));
+            } else {
+                authDataGroupVO.setDataFilters(Collections.emptyList());
+            }
+            if (StringUtils.isNotBlank(authDataGroupDO.getOperationTags())) {
+                authDataGroupVO.setOperationTags(JsonUtils.parseArray(authDataGroupDO.getOperationTags(), String.class));
+            } else {
+                authDataGroupVO.setOperationTags(Collections.emptyList());
+            }
             return authDataGroupVO;
         }).toList();
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
@@ -181,16 +194,28 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authDataGroupDO.setRoleId(reqVO.getPermissionReq().getRoleId());
             authDataGroupDO.setMenuId(reqVO.getPermissionReq().getMenuId());
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
-            authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
-            authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
-            authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
+            if (reqVO.getAuthDataGroup().getScopeTags() != null) {
+                authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
+            }
+            if (reqVO.getAuthDataGroup().getOperationTags() != null) {
+                authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
+            }
+            if (reqVO.getAuthDataGroup().getDataFilters() != null) {
+                authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
+            }
             authDataGroupRepository.insert(authDataGroupDO);
         } else {
             AuthDataGroupDO authDataGroupDO = authDataGroupRepository.findById(dataGroupId);
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
-            authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
-            authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
-            authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
+            if (reqVO.getAuthDataGroup().getScopeTags() != null) {
+                authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
+            }
+            if (reqVO.getAuthDataGroup().getOperationTags() != null) {
+                authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
+            }
+            if (reqVO.getAuthDataGroup().getDataFilters() != null) {
+                authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
+            }
             authDataGroupRepository.update(authDataGroupDO);
         }
     }

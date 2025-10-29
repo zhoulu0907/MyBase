@@ -8,6 +8,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 应用权限字段数据访问层
@@ -47,10 +48,11 @@ public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
         this.deleteByConfig(configs);
     }
 
-    public List<AuthFieldDO> findByApplicationIdAndRoleId(Long applicationId, Long roleId) {
+    public List<AuthFieldDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
-        configs.eq("role_id", roleId);
+        configs.in("role_id", roleIds);
+        configs.eq("menu_id", menuId);
         return this.findAllByConfig(configs);
     }
 }

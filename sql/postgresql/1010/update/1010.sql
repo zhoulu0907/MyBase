@@ -11,3 +11,5 @@ COMMENT ON COLUMN public.app_resource_page.is_latest_updated IS '最新更新的
 ALTER TABLE public.app_resource_component ADD component_index int8 DEFAULT 0 NOT NULL;
 COMMENT ON COLUMN public.app_resource_page.component_index IS '组件索引';
 
+ALTER TABLE public.app_resource_pageset ADD pageset_type int4 DEFAULT 1 NOT NULL;
+
