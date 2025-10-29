@@ -7,6 +7,9 @@ import lombok.Data;
 @Data
 public class DictDataSimpleRespVO {
 
+    @Schema(description = "字典数据编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private Long id;
+
     @Schema(description = "字典类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "gender")
     private String dictType;
 
