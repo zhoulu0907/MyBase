@@ -1755,6 +1755,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 处理字段约束
+     * 
+     * 注意：本方法仅处理字段约束(constraint)配置，不处理validation规则。
+     * validation规则的同步由batchSaveEntityFields中的字段变更检测逻辑负责，避免重复处理。
      */
     private void processFieldConstraints(Long fieldId, MetadataEntityFieldDO entityField, FieldConstraintRespVO constraints) {
         if (constraints.getMinLength() != null && constraints.getMaxLength() != null &&
@@ -1784,9 +1787,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             req.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
-
-            // 新增：同步到 MetadataValidationLengthDO
-            processLengthValidation(fieldId, entityField);
         }
 
         // 正则 - 只有当正则表达式不为空且启用时才创建REGEX约束
@@ -1820,9 +1820,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // isRequired = 0 时删除已有的必填约束配置
                 fieldConstraintService.delete(fieldId, "REQUIRED");
             }
-            
-            // 新增：同步到 MetadataValidationRequiredDO
-            processRequiredValidation(fieldId, entityField);
         }
 
         // 唯一（与 isUnique 联动）
@@ -1841,9 +1838,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // isUnique = 0 时删除已有的唯一性约束配置
                 fieldConstraintService.delete(fieldId, "UNIQUE");
             }
-            
-            // 新增：同步到 MetadataValidationUniqueDO
-            processUniqueValidation(fieldId, entityField);
         }
     }
 

@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.formula.service.impl;
 
-import com.cmsr.onebase.module.formula.build.config.FormulaEngineProperties;
-import com.cmsr.onebase.module.formula.build.service.engine.FormulaEngineService;
-import com.cmsr.onebase.module.formula.build.service.engine.FormulaEngineServiceImpl;
+import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
+import com.cmsr.onebase.module.formula.service.engine.FormulaEngineService;
+import com.cmsr.onebase.module.formula.service.engine.FormulaEngineServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -30,7 +30,7 @@ spring:
       #host: 127.0.0.1 # 地址
       port: 6379 # 端口
       database: 0 # 数据库索引
-  #    password: dev # 密码，建议生产环境开启
+      #    password: dev # 密码，建议生产环境开启
       timeout: 30000ms # 超时时间
       connect-timeout: 30000 # 连接超时时间
       lettuce:
@@ -69,6 +69,12 @@ onebase:
     enable: false
   web:
     return-exception-stack-trace: true # 本地开发：接口错误时返回堆栈，便于调试
+  scheduler:
+    address: http://10.0.104.33:12345/dolphinscheduler
+    token: 85806d2d33502cef3036fb30b320e5f5
+    flow-project: 154702155517248
+    etl-project: 155572154738048
+    tenant: root
 
 justauth:
   enabled: true
@@ -95,6 +101,6 @@ wx:
     http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
 
 liteflow:
-  enable: false
+  enable: true
 rocketmq:
   endpoints: 10.0.104.38:8081

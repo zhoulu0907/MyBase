@@ -9,7 +9,6 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/8/13 10:30
  */
-@Tag(name = "RPC 服务 - 应用")
 public interface AppApplicationApi {
 
     Long countApplicationByTenantId(Long tenantId);

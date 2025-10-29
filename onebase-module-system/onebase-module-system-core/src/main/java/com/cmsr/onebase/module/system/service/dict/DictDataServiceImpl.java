@@ -39,13 +39,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Slf4j
 public class DictDataServiceImpl implements DictDataService {
 
-    /**
-     * 排序 dictType > sort
-     */
-    private static final Comparator<DictDataDO> COMPARATOR_TYPE_AND_SORT = Comparator
-            .comparing(DictDataDO::getDictType)
-            .thenComparingInt(DictDataDO::getSort);
-
     @Resource
     private DictTypeService dictTypeService;
 
@@ -59,7 +52,8 @@ public class DictDataServiceImpl implements DictDataService {
             List<DictDataDO> list = dictDataRepository.findListByStatusAndDictType(status, dictType);
             // 创建可变列表的副本以支持排序
             List<DictDataDO> mutableList = new ArrayList<>(list);
-            mutableList.sort(COMPARATOR_TYPE_AND_SORT);
+            // 按 sort 字段排序
+            mutableList.sort(Comparator.comparingInt(DictDataDO::getSort));
             return mutableList;
         });
     }

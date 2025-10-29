@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.core.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthFieldDO;
-import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -22,7 +22,7 @@ public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
         super(AuthFieldDO.class);
     }
 
-    public List<AuthFieldDO> findByQuery(AuthPermissionReqVO reqVO) {
+    public List<AuthFieldDO> findByQuery(AuthPermissionReq reqVO) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", reqVO.getApplicationId());
         configs.eq("role_id", reqVO.getRoleId());
@@ -30,7 +30,7 @@ public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
         return this.findAllByConfig(configs);
     }
 
-    public AuthFieldDO findByQuery(AuthPermissionReqVO reqVO, Long fieldId) {
+    public AuthFieldDO findByQuery(AuthPermissionReq reqVO, Long fieldId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", reqVO.getApplicationId());
         configs.eq("role_id", reqVO.getRoleId());
@@ -39,7 +39,7 @@ public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
         return this.findOne(configs);
     }
 
-    public void deleteByQuery(AuthPermissionReqVO reqVO) {
+    public void deleteByQuery(AuthPermissionReq reqVO) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", reqVO.getApplicationId());
         configs.eq("role_id", reqVO.getRoleId());
@@ -47,4 +47,10 @@ public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
         this.deleteByConfig(configs);
     }
 
+    public List<AuthFieldDO> findByApplicationIdAndRoleId(Long applicationId, Long roleId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("role_id", roleId);
+        return this.findAllByConfig(configs);
+    }
 }

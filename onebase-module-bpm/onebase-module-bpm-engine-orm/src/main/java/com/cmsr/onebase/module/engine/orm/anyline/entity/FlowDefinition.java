@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.engine.orm.anyline.entity;
 
+import com.cmsr.onebase.framework.data.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -25,6 +26,8 @@ public class FlowDefinition extends BaseEntity implements Definition {
     public static final String FLOW_CODE = "flow_code";
 
     public static final String IS_PUBLISH = "is_publish";
+
+    public static final String FORM_PATH = "form_path";
 
 
     /** 流程编码 */
@@ -52,7 +55,7 @@ public class FlowDefinition extends BaseEntity implements Definition {
     private String formCustom;
 
     /** 审批表单路径 */
-    @Column(name = "form_path", length = 100)
+    @Column(name = FORM_PATH, length = 100)
     private String formPath;
 
     /** 流程激活状态（0挂起 1激活） */
@@ -109,9 +112,9 @@ public class FlowDefinition extends BaseEntity implements Definition {
     @Override
     public Definition setCreateBy(String createBy) {
         if (createBy != null) {
-            this.createBy = Long.valueOf(createBy);
+            this.creator = Long.valueOf(createBy);
         } else {
-            this.createBy = null;
+            this.creator = null;
         }
 
         return this;
@@ -120,9 +123,9 @@ public class FlowDefinition extends BaseEntity implements Definition {
     @Override
     public Definition setUpdateBy(String updateBy) {
         if (updateBy != null) {
-            this.updateBy = Long.valueOf(updateBy);
+            this.updater = Long.valueOf(updateBy);
         } else {
-            this.updateBy = null;
+            this.updater = null;
         }
 
         return this;
@@ -142,9 +145,9 @@ public class FlowDefinition extends BaseEntity implements Definition {
     @Override
     public Definition setDelFlag(String delFlag) {
         if (delFlag != null) {
-            this.delFlag = Long.valueOf(delFlag);
+            this.deleted = Long.valueOf(delFlag);
         } else {
-            this.delFlag = null;
+            this.deleted = null;
         }
 
         return this;

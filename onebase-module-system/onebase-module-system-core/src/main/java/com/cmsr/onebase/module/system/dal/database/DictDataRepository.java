@@ -66,8 +66,8 @@ public class DictDataRepository extends DataRepository<DictDataDO> {
             configs.and(Compare.EQUAL, DictDataDO.STATUS, reqVO.getStatus());
         }
 
-        // 添加排序条件，按ID降序排列
-        configs.order(DictDataDO.ID, org.anyline.entity.Order.TYPE.DESC);
+        // 添加排序条件，按sort升序排列
+        configs.order(DictDataDO.SORT, org.anyline.entity.Order.TYPE.ASC);
 
         return findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
     }

@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 public class EntityRelationshipSaveReqVO {
 
-    @Schema(description = "关系ID", example = "5001")
+    @Schema(description = "关系ID（更新时必填）", example = "5001")
     private String id;
 
     @Schema(description = "关系名称", example = "用户订单关系")

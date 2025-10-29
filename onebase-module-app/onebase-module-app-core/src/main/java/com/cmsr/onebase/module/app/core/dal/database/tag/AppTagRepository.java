@@ -46,32 +46,39 @@ public class AppTagRepository extends DataRepository<TagDO> {
     public List<TagGroupCountVO> groupCount() {
         ConfigStore configs = new DefaultConfigStore();
         String sql = """
-            select
-                id,
-                tag_name,
-                sum(one) as counts
-            from
-                (
                 select
-                    tag.id,
-                    tag.tag_name,
-                    case
-                        when aat.application_id is null then 0
-                        else 1
-                    end as one
+                	id,
+                	tag_name,
+                	sum(one) as counts
                 from
-                    app_application_tag aat
-                full outer join app_tag tag on
-                    aat.tag_id = tag.id
-            ) as subquery
-            where
-                id is not null
-            group by
-                id,
-                tag_name
-            order by
-                counts desc
-                """;
+                	(
+                	select
+                		tag.id,
+                		tag.tag_name,
+                		case
+                			when aat.application_id is null then 0
+                			else 1
+                		end as one
+                	from
+                		app_application_tag aat
+                	full outer join app_tag tag on
+                		aat.tag_id = tag.id
+                	where
+                		tag.id is not null and tag.tenant_id = #{tenant_id}
+                		and
+                	(aat.deleted = 0
+                			or aat.deleted is null)
+                		and (tag.deleted = 0
+                			or tag.deleted is null)
+                ) as subquery
+                where
+                	id is not null
+                group by
+                	id,
+                	tag_name
+                order by
+                	counts desc
+            """;
         DataSet dataSet = this.querys(sql, configs);
         return dataSet.stream().map(row -> {
                     TagGroupCountVO tagGroupCountVO = new TagGroupCountVO();

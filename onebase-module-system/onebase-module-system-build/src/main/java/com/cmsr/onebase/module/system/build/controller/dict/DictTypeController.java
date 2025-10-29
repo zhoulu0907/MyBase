@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypeListReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeRespVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSaveReqVO;
@@ -78,10 +79,10 @@ public class DictTypeController {
     }
 
     @GetMapping("/simple-list")
-    @Operation(summary = "获得全部字典类型列表", description = "包括开启 + 禁用的字典类型，主要用于前端的下拉选项")
+    @Operation(summary = "获得字典类型列表", description = "支持过滤条件的字典类型列表查询，包括开启 + 禁用的字典类型，主要用于前端的下拉选项")
     // 无需添加权限认证，因为前端全局都需要
-    public CommonResult<List<DictTypeSimpleRespVO>> getSimpleDictTypeList() {
-        List<DictTypeDO> list = dictTypeService.getDictTypeList();
+    public CommonResult<List<DictTypeSimpleRespVO>> getSimpleDictTypeList(@Valid DictTypeListReqVO reqVO) {
+        List<DictTypeDO> list = dictTypeService.getDictTypeList(reqVO);
         return success(BeanUtils.toBean(list, DictTypeSimpleRespVO.class));
     }
 

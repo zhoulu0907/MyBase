@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
@@ -399,8 +400,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 9. 唯一性校验和条件校验
             validateUniqueness(context);//todo 暂未实现
 
-            // 10. 前置自动化工作流触发
-            executePreWorkflow(context);//暂未实现
+            try{
+                // 10. 前置自动化工作流触发
+                executePreWorkflow(context);//暂未实现
+            }catch (Exception e){
+                log.error("执行前置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
+//                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
+            }
 
             // 11. 数据编号
             generateDataNumber(context);//todo 暂未实现
@@ -408,8 +414,15 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 12. 数据存储
             storeData(context);//todo 实现了create的方法
 
-            // 13. 后置自动化工作流触发
-            executePostWorkflow(context);//todo 暂未实现
+            try{
+                // 13. 后置自动化工作流触发
+                executePostWorkflow(context);//todo 暂未实现
+            }catch (Exception e){
+                log.error("执行后置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
+//                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
+            }
+
+
 
             getData(context);
 
@@ -730,5 +743,28 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         private Map<String, Object> processedData; // 处理后的数据
         private AnylineService<?> temporaryService;
 
+    }
+
+    // 将name：value的格式变成id：value的格式
+    public Map convertNameToId(Long entityId, Map<String, Object> map){
+
+        Map newData = new HashMap();// 存放id:value格式
+        List<MetadataEntityFieldDO> targetfields = getEntityFields(entityId);
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String dataKey = entry.getKey();
+            Object dataValue = entry.getValue();
+
+            // 将data的key转换为大写后，与targetfields中的fieldName进行匹配
+            String dataKeyUpper = dataKey.toUpperCase();
+            for (MetadataEntityFieldDO field : targetfields) {
+                if (field.getFieldName() != null && field.getFieldName().toUpperCase().equals(dataKeyUpper)) {
+                    // 找到匹配的字段，使用fieldId作为key
+                    newData.put(field.getId(), dataValue);
+                    break;
+                }
+            }
+        }
+        return newData;
     }
 }

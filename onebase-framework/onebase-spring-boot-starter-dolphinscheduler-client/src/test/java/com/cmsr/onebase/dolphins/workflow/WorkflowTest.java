@@ -105,7 +105,7 @@ public class WorkflowTest extends BaseTest {
   public void testDeleteWorkflow() {
     List<ProcessDefineResp> page =
         getClient().opsForProcess().page(projectCode, null, null, WORKFLOW_NAME);
-      getClient().opsForProcess().offline(projectCode, page.get(0).getCode());//确保下线之后才能删除
+    getClient().opsForProcess().offline(projectCode, page.get(0).getCode()); // 确保下线之后才能删除
     assertTrue(getClient().opsForProcess().delete(projectCode, page.get(0).getCode()));
   }
 }
