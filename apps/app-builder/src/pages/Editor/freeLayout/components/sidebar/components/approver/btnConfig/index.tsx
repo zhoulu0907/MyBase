@@ -116,6 +116,7 @@ export default function ApproverBtnConfig({setApprovalConfigData}: any) {
     const [tbData, setData] = useState([
         {
             key: '1',
+            buttonType:'approve',
             buttonName: btnConfigVar.buttonName['agree'],
             displayName: '同意',
             name: '同意',
@@ -126,6 +127,7 @@ export default function ApproverBtnConfig({setApprovalConfigData}: any) {
         },
         {
             key: '2',
+             buttonType:'reject',
             buttonName: btnConfigVar.buttonName['reject'],
             displayName: '拒绝',
             name: '拒绝',

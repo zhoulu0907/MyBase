@@ -2,9 +2,9 @@ import { type FlowNodeRegistry } from '../../typings';
 import { nanoid } from 'nanoid';
 import initiate from '../../assets/bpmLogo/initiate.png';
 import { formMeta } from './formMeta';
-
+import { WorkflowNodeType } from '../constants';
 export const InitiateNodeRegistry: FlowNodeRegistry = {
-  type: 'initiation',
+  type: WorkflowNodeType.INITIATION,
   id:'initiation',
   title: '发起',
   category: 'interaction',

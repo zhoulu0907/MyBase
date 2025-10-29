@@ -634,7 +634,9 @@ const PageManagerPage: FC = () => {
                       </div>
                     </>
                   )}
-                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id} />}
+                  {curMenu?.value?.id && curMenu?.value?.id?.indexOf('TASK-') >= 0 && (
+                    <TaskCenterPage curMenuId={curMenu.value?.id} />
+                  )}
                 </>
               )}
             </>

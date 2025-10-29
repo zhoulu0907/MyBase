@@ -4,41 +4,79 @@
 import { Radio } from '@arco-design/web-react';
 import styles from './index.module.less';
 import { useState } from 'react';
-import Header from '../../../header'
+import Header from '../../../header';
 import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
-import ApproverBtnConfig from './btnConfig/index'
-import FieldConfig from './fieldConfig/index'
+import ApproverBtnConfig from './btnConfig/index';
+import FieldConfig from './fieldConfig/index';
+import { ApproveDrawerTab } from './constant';
 // import { approverConfigVar } from './constant';
 
 const RadioGroup = Radio.Group;
+// todo(gjc):
+// 1. approverConfigData类型不要写any
+const approverConfigData: any = {
+  approverConfig: {
+    approvalMode: 'any_sign'
+  },
+  buttonConfigs: [],
+  // fieldPermConfig: {}
 
-const approverConfigData:any = {
-  approverConfig: {},
-  buttonConfigs: {},
-  fieldPermConfig: {}
-}
+  fieldPermConfig: {
+    useNodeConfig: true,
+    fieldConfigs: [
+      {
+        fieldId: '1',
+        fieldName: '申请人姓名',
+        fieldPermType: 'read'
+      },
+      {
+        fieldId: '2',
+        fieldName: '所属部门',
+        fieldPermType: 'read'
+      },
+      {
+        fieldId: '3',
+        fieldName: '申请事由',
+        fieldPermType: 'read'
+      },
+      {
+        fieldId: '4',
+        fieldName: '申请金额',
+        fieldPermType: 'read'
+      },
+      {
+        fieldId: '5',
+        fieldName: '审批备注',
+        fieldPermType: 'write'
+      }
+    ]
+  }
+};
 
 function setApprovalConfigData(key: string, data: Object) {
-  approverConfigData[key] = {
-    ...approverConfigData[key],
-    ...data
+  if (key === 'buttonConfigs') {
+    approverConfigData.buttonConfigs = data;
+  } else {
+    approverConfigData[key] = {
+      ...approverConfigData[key],
+      ...data
+    };
   }
 }
 
-export default function ApproveDreawer({handleConfigSubmit}: any) {
-
+export default function ApproveDreawer({ handleConfigSubmit }: any) {
   const [useApprover, setApprover] = useState<string>('approver');
 
   const renderContent = () => {
     switch (useApprover) {
-      case 'approver':
-        return <ApproverConfig setApprovalConfigData={setApprovalConfigData}/>;
-      case 'approverBtn':
-        return <ApproverBtnConfig setApprovalConfigData={setApprovalConfigData}/>;
-      case 'fieldPermissions':
-        return <FieldConfig setApprovalConfigData={setApprovalConfigData}/>;
-      case 'advancedSettings':
+      case ApproveDrawerTab.APPROVER:
+        return <ApproverConfig setApprovalConfigData={setApprovalConfigData} />;
+      case ApproveDrawerTab.APPROVER_BTN:
+        return <ApproverBtnConfig setApprovalConfigData={setApprovalConfigData} />;
+      case ApproveDrawerTab.FIELD_PERMISSIONS:
+        return <FieldConfig setApprovalConfigData={setApprovalConfigData} />;
+      case ApproveDrawerTab.ADVANCED_SETTINGS:
         return <div>高级设置</div>;
       default:
         return <div>审批人</div>;
@@ -46,8 +84,8 @@ export default function ApproveDreawer({handleConfigSubmit}: any) {
   };
 
   function handleSubmit() {
-    console.log('approverConfigData ===', approverConfigData)
-    handleConfigSubmit && handleConfigSubmit(approverConfigData, [])
+    console.log('approverConfigData ===', approverConfigData);
+    handleConfigSubmit && handleConfigSubmit(approverConfigData, []);
   }
 
   return (
@@ -68,7 +106,7 @@ export default function ApproveDreawer({handleConfigSubmit}: any) {
         </RadioGroup>
         <div className={styles.content}>{renderContent()}</div>
       </div>
-      <BottomBtn handleSubmit={handleSubmit}/>
+      <BottomBtn handleSubmit={handleSubmit} />
     </>
   );
 }

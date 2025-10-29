@@ -8,7 +8,7 @@ import { formMeta } from './form-meta';
 import { WorkflowNodeType } from '../constants';
 
 export const BpmEndNodeRegistry: FlowNodeRegistry = {
-  type: WorkflowNodeType.End,
+  type: WorkflowNodeType.END,
   meta: {
     isNodeEnd: true,
     deleteDisable: true,
