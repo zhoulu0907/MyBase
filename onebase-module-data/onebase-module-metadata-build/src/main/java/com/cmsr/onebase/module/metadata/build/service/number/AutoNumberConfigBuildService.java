@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.service.number;
 
+import com.cmsr.onebase.module.metadata.build.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 
@@ -55,9 +56,9 @@ public interface AutoNumberConfigBuildService {
      * 获取自动编号配置及其规则项（Controller使用）
      *
      * @param fieldId 字段ID
-     * @return 配置和规则项的响应VO
+     * @return 配置和规则项的响应VO，如果配置不存在则返回null
      */
-    Object getAutoNumberConfigWithRules(Long fieldId);
+    AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(Long fieldId);
 
     /**
      * 保存自动编号配置（Controller使用）
