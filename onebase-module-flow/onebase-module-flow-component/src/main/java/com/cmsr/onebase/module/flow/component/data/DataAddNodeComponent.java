@@ -17,6 +17,7 @@ import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -50,10 +51,16 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
 
-        // 参数校验
-        Long entityId = nodeData.getMainEntityId();
-        if (entityId == null) {
-            throw new IllegalArgumentException("实体ID不能为空");
+        // 执行数据添加操作
+        InsertDataReqDTO reqDTO = new InsertDataReqDTO();
+        reqDTO.setTraceId(executeContext.getTraceId());
+        //
+        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getAddType())) {
+            reqDTO.setEntityId(nodeData.getMainEntityId());
+        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getAddType())) {
+            reqDTO.setEntityId(nodeData.getSubEntityId());
+        } else {
+            throw new IllegalArgumentException("数据添加addType类型错误: " + nodeData.getAddType());
         }
         boolean batchType = nodeData.getBatchType();
         List<ConditionItem> conditionItems = nodeData.getFields();
@@ -67,10 +74,8 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         if (CollectionUtils.isEmpty(reqData)) {
             return;
         }
-        // 执行数据添加操作
-        InsertDataReqDTO reqDTO = new InsertDataReqDTO();
-        reqDTO.setTraceId(executeContext.getTraceId());
-        reqDTO.setEntityId(entityId);
+
+
         reqDTO.setData(reqData);
 
         try {

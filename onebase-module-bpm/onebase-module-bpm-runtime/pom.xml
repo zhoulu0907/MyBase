@@ -30,23 +30,6 @@
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
 
-        <!-- DB 相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-orm</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-redis</artifactId>
-        </dependency>
-
-        <!-- RPC 远程调用相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-rpc</artifactId>
-        </dependency>
-
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -54,7 +37,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- 公式引擎相关 -->
+        <!-- GraalVM JS 引擎相关 - runtime 模块独立需要 -->
 <!--        <dependency>-->
 <!--            <groupId>org.graalvm.polyglot</groupId>-->
 <!--            <artifactId>polyglot</artifactId>-->
@@ -68,6 +51,12 @@
             <artifactId>js-scriptengine</artifactId>
         </dependency>
 
+        <!-- 元数据模块 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
     </dependencies>
     <build>

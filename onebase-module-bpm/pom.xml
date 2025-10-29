@@ -21,7 +21,7 @@
 
     <name>${project.artifactId}</name>
     <description>
-        公式主模块
+        流程主模块
     </description>
 
 </project>

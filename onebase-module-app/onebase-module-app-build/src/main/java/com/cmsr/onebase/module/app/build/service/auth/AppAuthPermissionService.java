@@ -1,9 +1,7 @@
 package com.cmsr.onebase.module.app.build.service.auth;
 
 import com.cmsr.onebase.module.app.build.vo.auth.*;
-import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
-
-import java.util.List;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 
 /**
  * @Author：huangjie
@@ -11,11 +9,11 @@ import java.util.List;
  */
 public interface AppAuthPermissionService {
 
-    AuthDetailFunctionPermissionVO getFunctionPermission(AuthPermissionReqVO reqVO);
+    AuthDetailFunctionPermissionVO getFunctionPermission(AuthPermissionReq reqVO);
 
-    AuthDetailDataPermissionVO getDataPermission(AuthPermissionReqVO reqVO);
+    AuthDetailDataPermissionVO getDataPermission(AuthPermissionReq reqVO);
 
-    AuthDetailFieldPermissionVO getFieldPermission(AuthPermissionReqVO reqVO);
+    AuthDetailFieldPermissionVO getFieldPermission(AuthPermissionReq reqVO);
 
     void updatePageAllowed(AuthUpdatePageAllowedReqVO reqVO);
 
@@ -28,8 +26,5 @@ public interface AppAuthPermissionService {
     void deleteDataGroup(Long id);
 
     void updateField(AuthUpdateFieldReqVO reqVO);
-
-    List<AuthPermissionScope> getPermissionScope();
-
 
 }

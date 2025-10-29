@@ -32,9 +32,7 @@ import org.dromara.warm.flow.core.utils.page.Page;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * WarmDao AnyLine 实现
@@ -172,6 +170,19 @@ public abstract class WarmDaoImpl<T extends RootEntity & BaseDOInterface> implem
         }
     }
 
+    public List<Field> getAllFields(T entity) {
+        List<Field> fields = new ArrayList<>();
+        // 替换为while 循环
+        Class<?> c = entity.getClass();
+
+        while (c != null && c != Object.class) {
+            fields.addAll(Arrays.asList(c.getDeclaredFields()));
+            c = c.getSuperclass();
+        }
+
+        return fields;
+    }
+
     /**
      * 构建查询条件
      * 子类可重写此方法以添加更多查询条件
@@ -187,7 +198,8 @@ public abstract class WarmDaoImpl<T extends RootEntity & BaseDOInterface> implem
         }
 
         // 使用反射获取实体所有字段，构建查询条件
-        Field[] fields = entity.getClass().getDeclaredFields();
+        List<Field> fields = getAllFields(entity);
+
         for (Field field : fields) {
             try {
                 field.setAccessible(true);

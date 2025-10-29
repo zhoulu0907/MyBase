@@ -17,11 +17,9 @@
     </description>
 
     <dependencies>
-        <!-- 依赖服务 -->
         <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-app-core</artifactId>
-            <version>${revision}</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
     </dependencies>
 

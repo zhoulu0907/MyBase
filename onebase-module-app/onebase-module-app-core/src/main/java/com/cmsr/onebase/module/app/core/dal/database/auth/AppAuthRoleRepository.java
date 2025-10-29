@@ -52,12 +52,14 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
         configs.param("user_id", userId);
         String sql = """
                 select
-                	aar.id, aar.role_code, aar.role_name
+                	aar.id, aar.role_code, aar.role_type, aar.role_name
                 from
                 	app_auth_role_user aaru ,
                 	app_auth_role aar
                 where
                 	aaru.role_id = aar.id
+                    and aaru.deleted = 0
+                    and aar.deleted = 0
                 	and aaru.user_id = #{user_id}
                 	and aar.application_id = #{application_id}
                 """;
@@ -65,6 +67,7 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
             AuthRoleDO authRoleDO = new AuthRoleDO();
             authRoleDO.setId(row.getLong("id"));
             authRoleDO.setRoleCode(row.getString("role_code"));
+            authRoleDO.setRoleType(row.getInt("role_type"));
             authRoleDO.setRoleName(row.getString("role_name"));
             return authRoleDO;
         }).toList();

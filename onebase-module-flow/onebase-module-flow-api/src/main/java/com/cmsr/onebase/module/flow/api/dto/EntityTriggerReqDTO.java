@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.flow.api.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,7 +22,7 @@ public class EntityTriggerReqDTO {
     @Schema(description = "触发事件，beforeCreate,afterCreate,beforeUpdate,afterUpdate,beforeDelete,afterDelete")
     private TriggerEventEnum triggerEvent;
 
-    @Schema(description = "数据，字段名称和字段数据")
-    private Map<String, Object> fieldData;
+    @Schema(description = "数据，字段名称和字段数据, key是字段的id, value是字段值")
+    private Map<?, Object> fieldData;
 
 }
