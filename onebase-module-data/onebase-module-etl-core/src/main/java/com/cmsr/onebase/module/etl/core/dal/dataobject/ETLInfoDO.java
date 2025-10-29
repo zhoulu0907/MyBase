@@ -22,6 +22,7 @@ public class ETLInfoDO extends TenantBaseDO {
     @Column(name = "etl_name")
     private String ETLName;
 
+    // FIXED, OBSERVE, MANUALLY(default)
     @Column(name = "update_strategy")
     private String updateStrategy;
 
