@@ -77,6 +77,9 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'business':
           title = t('sider.business');
           break;
+        case "create-business":
+          title = t('sider.createBusiness');
+          break;
         default:
           title = segment;
       }

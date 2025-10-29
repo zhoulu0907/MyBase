@@ -117,7 +117,8 @@
     "organization": "组织管理",
     "systemDict": "数据字典管理",
     "tenant": "租户信息",
-    "business": "企业管理"
+    "business": "企业管理",
+    "createBusiness":"创建企业"
   },
   "myApp": {
     "createApp": "零代码创建"
