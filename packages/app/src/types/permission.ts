@@ -132,7 +132,7 @@ export interface AuthDataGroupVO {
   /**
    * 是否可以操作
    */
-  isOperable?: IsOperable;
+  operationTags?: string[];
   /**
    * 权限范围字段名称
    */
@@ -190,6 +190,14 @@ export interface AuthDataPermissionPersonVO {
    * 操作人员名称
    */
   displayName?: string;
+  /**
+   * entityId
+   */
+  entityId?: string;
+  /**
+   * Id
+   */
+  id?: string;
 }
 
 /**
@@ -207,7 +215,7 @@ export interface AuthDataFilterVO {
   /**
    * 字段id
    */
-  fieldId?: number;
+  fieldId?: string;
   /**
    * 字段名称
    */

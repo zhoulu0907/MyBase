@@ -52,9 +52,6 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         rules={[
           {
             required: verify?.required,
-            type: 'number',
-            min: verify?.min,
-            max: verify?.max
           }
         ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

@@ -36,6 +36,14 @@ const treeData = [
 const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, tooltip, status, verify, layout, labelColSpan = 0, runtime = true } = props;
 
+  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
+    return (
+      (node?.closest('.arco-form-item') as HTMLElement) ||
+      node?.parentNode as HTMLElement ||
+      document.body
+    );
+  };
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -57,6 +65,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
           placeholder="请选择"
           allowClear
           treeData={treeData}
+          getPopupContainer={getPopupContainer}
           style={{
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
