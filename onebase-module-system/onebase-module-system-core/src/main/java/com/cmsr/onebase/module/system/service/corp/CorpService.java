@@ -2,9 +2,9 @@
 package com.cmsr.onebase.module.system.service.corp;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.api.corpapprelation.dto.CorpAppRelationPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.enterprise.CorpDO;
 import com.cmsr.onebase.module.system.vo.corp.*;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 
 import java.util.List;
 

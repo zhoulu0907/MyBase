@@ -15,7 +15,6 @@ import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
-import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.enterprise.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
@@ -57,10 +56,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static java.util.Collections.singleton;
@@ -207,7 +208,7 @@ public class TenantServiceImpl implements TenantService {
 
 
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
-        tenant.setSaasEnabled(createReqVO.getSaasEnabled()==null? CommonSaasEnum.DISABLE.getValue():createReqVO.getSaasEnabled());
+        tenant.setSaasEnabled(createReqVO.getSaasEnabled() == null ? CommonSaasEnum.DISABLE.getValue() : createReqVO.getSaasEnabled());
         tenant = tenantDataRepository.insert(tenant);
 
         // 创建租户的管理员1
@@ -490,19 +491,16 @@ public class TenantServiceImpl implements TenantService {
 
     /**
      * 获取所有应用
+     *
      * @return
      */
     public Map<Integer, Integer> findAppCount() {
-        List<ApplicationDO> allList = appApplicationApi.finAppApplicationAll();
+        List<ApplicationDO> allList = null;// appApplicationApi.finAppApplicationAll();
         return allList.stream()
                 .collect(Collectors.groupingBy(
                         app -> app.getTenantId().intValue(),  // Long转Integer
                         Collectors.summingInt(app -> 1)       // Integer计数替代Long计数
                 ));
-    }
-
-    public String formatTime(LocalDateTime createTime){
-        return createTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     @Override
@@ -525,8 +523,8 @@ public class TenantServiceImpl implements TenantService {
             userNicknameMap = users.stream()
                     .collect(Collectors.toMap(AdminUserDO::getId, AdminUserDO::getNickname));
         }
-        Map<Integer,Integer>  coupCountMap=findCorpCount();
-        Map<Integer,Integer>  appCountMap=findAppCount();
+        Map<Integer, Integer> coupCountMap = findCorpCount();
+        Map<Integer, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称
         Map<Long, String> finalUserNicknameMap = userNicknameMap;
         List<TenantRespVO> tenantRespVOList = tenantDOPageResult.getList().stream()
@@ -544,11 +542,10 @@ public class TenantServiceImpl implements TenantService {
                     if (corpCount == null) {
                         appCount = CorpConstant.ZERO; // 默认值处理
                     }
-                     tenantRespVO.setAppCount(appCount);
-                     if(tenantRespVO.getSaasEnabled()==null){
-                         tenantRespVO.setSaasEnabled(CommonSaasEnum.DISABLE.getValue());
-                     }
-                    tenantRespVO.setFormatCreateTime(formatTime(tenantRespVO.getCreateTime()));
+                    tenantRespVO.setAppCount(appCount);
+                    if (tenantRespVO.getSaasEnabled() == null) {
+                        tenantRespVO.setSaasEnabled(CommonSaasEnum.DISABLE.getValue());
+                    }
                     // 设置联系人昵称
                     if (tenantDO.getAdminUserId() != null) {
                         tenantRespVO.setAdminNickName(finalUserNicknameMap.get(tenantDO.getAdminUserId()));

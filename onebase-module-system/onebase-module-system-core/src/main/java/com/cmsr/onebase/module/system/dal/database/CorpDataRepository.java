@@ -33,12 +33,6 @@ public class CorpDataRepository extends DataRepository<CorpDO> {
         if (pageReqVO.getCorpName() != null && !pageReqVO.getCorpName().isEmpty()) {
             configStore.like("corp_name", pageReqVO.getCorpName());
         }
-
-        // 按照企业编码精确查询
-        if (pageReqVO.getCorpCode() != null && !pageReqVO.getCorpCode().isEmpty()) {
-            configStore.eq("corp_code", pageReqVO.getCorpCode());
-        }
-
         // 按照状态查询
         if (pageReqVO.getStatus() != null) {
             configStore.eq("status", pageReqVO.getStatus());
@@ -47,8 +41,6 @@ public class CorpDataRepository extends DataRepository<CorpDO> {
         if (pageReqVO.getIndustryType() != null) {
             configStore.eq("industry_type", pageReqVO.getIndustryType());
         }
-        // 只查询未删除的记录
-        configStore.eq("deleted", 0);
         // 按创建时间倒序排列
         configStore.order("create_time", Order.TYPE.DESC);
 

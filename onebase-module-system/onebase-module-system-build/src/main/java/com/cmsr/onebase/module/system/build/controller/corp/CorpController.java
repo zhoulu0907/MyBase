@@ -2,13 +2,14 @@ package com.cmsr.onebase.module.system.build.controller.corp;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.api.corpapprelation.dto.CorpAppRelationPageReqVO;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.vo.corp.*;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -57,8 +58,8 @@ public class CorpController {
 
     @PostMapping("update_status")
     @Operation(summary = "企业禁用")
-    @PreAuthorize("@ss.hasPermission('system:corp:delete')")
-    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id,Long status) {
+    @PreAuthorize("@ss.hasPermission('system:corp:update')")
+    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id,@RequestParam("status") Long status) {
         corpService.updateStatus(id,status);
         return success(true);
     }
@@ -66,7 +67,7 @@ public class CorpController {
     @GetMapping("page")
     @Operation(summary = "获得企业分页")
     @PreAuthorize("@ss.hasPermission('system:corp:query')")
-    public CommonResult<PageResult<CorpRespVO>> getCorpPage(CorpPageReqVO pageReqVO) {
+    public CommonResult<PageResult<CorpRespVO>> getCorpPage(@Valid  CorpPageReqVO pageReqVO) {
         PageResult<CorpRespVO> pageResult = corpService.getCorpPage(pageReqVO);
         return success(pageResult);
     }
@@ -74,7 +75,7 @@ public class CorpController {
     @GetMapping("corp_application_page")
     @Operation(summary = "获得企业应用列表")
     @PreAuthorize("@ss.hasPermission('system:corp:query')")
-    public CommonResult<PageResult<CorpApplicationRespVO>> corpApplicationPage(CorpAppRelationPageReqVO pageReqVO) {
+    public CommonResult<PageResult<CorpApplicationRespVO>> corpApplicationPage(@Valid CorpAppRelationPageReqVO pageReqVO) {
         PageResult<CorpApplicationRespVO> pageResult = corpService.selectCorpAppRelationPage(pageReqVO);
         return success(pageResult);
     }

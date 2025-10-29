@@ -93,7 +93,4 @@ public class TenantRespVO {
     @Schema(description = "企业数")
     private Integer CorpCount;
 
-    @Schema(description = "创建时间")
-    private String formatCreateTime;
-
 }

@@ -7,17 +7,22 @@ import java.time.LocalDateTime;
 
 @Data
 public class CorpApplicationRespVO {
+
+    @Schema(description = "Id")
+    private Long id;
     @Schema(description = "应用名称")
     private String applicationName;
     @Schema(description = "应用编码")
     private String applicationCode;
     @Schema(description = "应用Id")
-    private String applicationId;
+    private Long applicationId;
     @Schema(description = "授权时间")
     private LocalDateTime authorizationTime ;
     @Schema(description = "版本号")
     private String versionNumber;
-    @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "过期时间")
     private LocalDateTime expiresTime;
+    @Schema(description = "状态")
+    private Integer status;
 
 }

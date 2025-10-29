@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.vo.corp;
 
-import com.cmsr.onebase.module.system.api.corpapprelation.dto.CorpAppRelationInertReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -17,6 +17,6 @@ public class CorpCombinedVo {
 
     @Schema(description = "应用id")
     @NotNull(message = "企业id list不能为空")
-    public  CorpAppRelationInertReqVO corpAppRelationInertReqVO;
+    public CorpAppRelationInertReqVO corpAppRelationInertReqVO;
 
 }

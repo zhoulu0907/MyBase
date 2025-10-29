@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.api.corpapprelation.dto;
+package com.cmsr.onebase.module.system.vo.corpapprelation;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;

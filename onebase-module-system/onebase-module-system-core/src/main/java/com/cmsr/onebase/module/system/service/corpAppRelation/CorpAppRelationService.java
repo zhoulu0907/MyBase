@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.system.service.corpAppRelation;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.api.corpapprelation.dto.CorpAppRelationInertReqVO;
-import com.cmsr.onebase.module.system.api.corpapprelation.dto.CorpAppRelationPageReqVO;
-import com.cmsr.onebase.module.system.api.corpapprelation.dto.CorpAppRelationVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationVO;
 import jakarta.validation.Valid;
 
 
@@ -25,7 +26,7 @@ public interface CorpAppRelationService {
      *
      * @param updateReqVO 更新信息
      */
-    void updateCorpAppRelation(@Valid CorpAppRelationInertReqVO updateReqVO);
+    void updateCorpAppRelation(@Valid CorpAppRelationUpdateReqVO updateReqVO);
 
     /**
      * 删除企业应用关联
