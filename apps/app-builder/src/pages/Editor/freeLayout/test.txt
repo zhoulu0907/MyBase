@@ -1,0 +1,11 @@
+{
+  "id": "1433051588389376000",
+  "flowCode": "1024001",
+  "flowName": "串行-简单",
+  "version": "V7",
+  "versionAlias": "流程版本V1",
+  "versionStatus": "designing",
+  "businessId": "85239398472974337",
+  "appId": "85236512254951424",
+  "bpmDefJson": "{\"nodes\":[{\"id\":\"start_1\",\"type\":\"initiation\",\"meta\":{\"position\":{\"x\":77,\"y\":243}},\"data\":{\"name\":\"发起\"},\"name\":\"发起\"},{\"id\":\"end_0\",\"type\":\"end\",\"meta\":{\"position\":{\"x\":77,\"y\":443}},\"data\":{\"name\":\"结束\"},\"name\":\"结束\"},{\"id\":\"start_0\",\"type\":\"start\",\"meta\":{\"position\":{\"x\":77,\"y\":73}},\"data\":{\"name\":\"开始\"},\"name\":\"开始\"},{\"id\":\"executor_dIayJ\",\"type\":\"approver\",\"meta\":{\"position\":{\"x\":77,\"y\":343}},\"data\":{\"approverConfig\":{\"approverType\":\"user\",\"users\":[{\"userId\":\"101802183959412736\",\"name\":\"高国清\"}],\"approvalMode\":\"a_sign\"},\"buttonConfigs\":{\"0\":{\"key\":\"1\",\"buttonName\":\"agree\",\"displayName\":\"同意\",\"name\":\"同意\",\"defaultApprovalComment\":\"同意\",\"approvalCommentRequired\":false,\"batchApproval\":false,\"enabled\":true},\"1\":{\"key\":\"2\",\"buttonName\":\"reject\",\"displayName\":\"拒绝\",\"name\":\"拒绝\",\"defaultApprovalComment\":\"拒绝\",\"approvalCommentRequired\":false,\"batchApproval\":false,\"enabled\":true}},\"fieldPermConfig\":{}}}],\"edges\":[{\"sourceNodeID\":\"start_0\",\"targetNodeID\":\"start_1\",\"type\":\"PASS\"},{\"sourceNodeID\":\"start_1\",\"targetNodeID\":\"executor_dIayJ\",\"type\":\"PASS\"},{\"sourceNodeID\":\"executor_dIayJ\",\"targetNodeID\":\"end_0\",\"type\":\"PASS\"}]}"
+}
