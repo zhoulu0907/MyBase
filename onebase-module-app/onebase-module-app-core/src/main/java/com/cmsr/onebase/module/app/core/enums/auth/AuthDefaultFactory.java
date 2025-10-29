@@ -4,7 +4,7 @@ package com.cmsr.onebase.module.app.core.enums.auth;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
-import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.List;
@@ -51,11 +51,11 @@ public class AuthDefaultFactory {
     private static final String DEFAULT_OPERATION_TAGS = JsonUtils.toJsonString(List.of(CREATE, EDIT, DELETE, IMPORT, EXPORT, SHARE));
 
     //应用 AuthPermissionDO
-    public static AuthPermissionDO createAuthPermissionDO(AuthPermissionReqVO reqVO) {
+    public static AuthPermissionDO createAuthPermissionDO(AuthPermissionReq req) {
         AuthPermissionDO ap = new AuthPermissionDO();
-        ap.setApplicationId(reqVO.getApplicationId());
-        ap.setRoleId(reqVO.getRoleId());
-        ap.setMenuId(reqVO.getMenuId());
+        ap.setApplicationId(req.getApplicationId());
+        ap.setRoleId(req.getRoleId());
+        ap.setMenuId(req.getMenuId());
         ap.setIsPageAllowed(NumberUtils.INTEGER_ONE);
         ap.setIsAllViewsAllowed(NumberUtils.INTEGER_ONE);
         ap.setIsAllFieldsAllowed(NumberUtils.INTEGER_ONE);
@@ -65,12 +65,12 @@ public class AuthDefaultFactory {
 
 
     //数据组权限 authDataGroupDOS
-    public static AuthDataGroupDO createAuthDataGroupDO(AuthPermissionReqVO reqVO) {
+    public static AuthDataGroupDO createAuthDataGroupDO(AuthPermissionReq req) {
         AuthDataGroupDO adg = new AuthDataGroupDO();
         adg.setGroupName("默认权限");
-        adg.setApplicationId(reqVO.getApplicationId());
-        adg.setRoleId(reqVO.getRoleId());
-        adg.setMenuId(reqVO.getMenuId());
+        adg.setApplicationId(req.getApplicationId());
+        adg.setRoleId(req.getRoleId());
+        adg.setMenuId(req.getMenuId());
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
         return adg;

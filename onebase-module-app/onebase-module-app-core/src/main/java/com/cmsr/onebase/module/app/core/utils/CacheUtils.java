@@ -16,6 +16,12 @@ public class CacheUtils {
     public static Duration CACHE_TIMEOUT = Duration.of(15, ChronoUnit.MINUTES);
 
     /**
+     * 缓存应用菜单，key是applicationId
+     */
+    public static String REDIS_APPLICATION_MENU_KEY = "app:application:menu:%s";
+
+
+    /**
      * 用户角色缓存key  applicationId, userId
      */
     public static String REDIS_USER_ROLE_KEY = "app:auth:user:role:%s:%s";
@@ -25,6 +31,11 @@ public class CacheUtils {
      * 菜单缓存key  menuId
      */
     public static String REDIS_MENU_KEY = "app:menu:%s";
+
+    /**
+     * 角色可访问菜单缓存key  applicationId, roleId
+     */
+    public static String REDIS_ROLE_ACCESSIBLE_MENU_KEY = "app:auth:menu:accessible:%s:%s";
 
 
 }

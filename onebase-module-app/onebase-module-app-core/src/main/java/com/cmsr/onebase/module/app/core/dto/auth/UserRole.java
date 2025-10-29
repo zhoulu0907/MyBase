@@ -1,8 +1,7 @@
-package com.cmsr.onebase.module.app.api.auth.dto;
+package com.cmsr.onebase.module.app.core.dto.auth;
 
 import lombok.Data;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -16,5 +15,4 @@ public class UserRole {
 
     private Set<Long> roleIds;
 
-    private List<RoleDTO>  roles;
 }
