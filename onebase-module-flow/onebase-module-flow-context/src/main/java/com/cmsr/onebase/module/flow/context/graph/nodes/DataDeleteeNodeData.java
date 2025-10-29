@@ -18,5 +18,17 @@ public class DataDeleteeNodeData extends NodeData implements Serializable {
 
     private Long subEntityId;
 
+    /**
+     * mainEntity
+     * subEntity
+     */
+    private String dataType;
+
+    /**
+     * all
+     * condition
+     */
+    private String filterType;
+
     private List<Conditions> filterCondition;
 }

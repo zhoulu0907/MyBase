@@ -1,6 +1,10 @@
 package com.cmsr.onebase.framework.ds.model.task;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import lombok.Data;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 public class TaskRelation {
@@ -15,14 +19,19 @@ public class TaskRelation {
 
     private Integer postTaskVersion = 0;
 
-    private Integer conditionType = 0;
+    private String conditionType = "NONE";
 
-    private Integer conditionParams;
+    private Map<String, Object> conditionParams = new HashMap<>();
 
-    public static TaskRelation singleTask(Long taskCode) {
+    public static TaskRelation singleton(Long taskCode) {
         TaskRelation taskRelation = new TaskRelation();
         taskRelation.setPostTaskCode(taskCode);
 
         return taskRelation;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJsonString(this);
     }
 }

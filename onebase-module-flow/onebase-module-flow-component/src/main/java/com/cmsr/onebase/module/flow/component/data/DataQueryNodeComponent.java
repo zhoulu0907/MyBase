@@ -49,9 +49,9 @@ public class DataQueryNodeComponent extends SkippableNodeComponent {
 
         // 转换成数据方法参数
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
-        if (nodeData.getMainEntityId() != null) {
+        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getDataType())) {
             reqDTO.setEntityId(nodeData.getMainEntityId());
-        } else {
+        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getDataType())) {
             reqDTO.setEntityId(nodeData.getSubEntityId());
         }
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
