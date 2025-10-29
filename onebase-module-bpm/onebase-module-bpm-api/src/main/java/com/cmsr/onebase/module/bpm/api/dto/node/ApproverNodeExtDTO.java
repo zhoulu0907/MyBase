@@ -4,6 +4,8 @@ import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverConfigDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -19,11 +21,15 @@ public class ApproverNodeExtDTO extends BaseNodeExtDTO {
     /**
      * 审批人配置
      */
+    @Valid
+    @NotNull(message = "审批人配置不能为空")
     private ApproverConfigDTO approverConfig;
 
     /**
      * 按钮配置
      */
+    @Valid
+    @NotNull(message = "按钮配置不能为空")
     private List<ApproverNodeBtnCfgDTO> buttonConfigs;
 
     /**
