@@ -11,13 +11,13 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Table(name = "etl_info")
+@Table(name = "etl_definition")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ETLInfoDO extends TenantBaseDO {
+public class ETLDefinitionDO extends TenantBaseDO {
 
     @Column(name = "etl_name")
     private String ETLName;
