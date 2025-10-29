@@ -21,10 +21,10 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
     setconfigFormForm: (form: FormInstance) => setconfigFormForm(form)
   };
 
-  const handleSubmit = (data, errmsg) => {
-    const newData = Object.assign({}, nodeRender.data, errmsg, { type: 123 });
-    nodeRender.updateData(newData);
+  const handleSubmit = (data:any, errmsg:string[]) => {
+    nodeRender.updateData(data);
   };
+
   return (
     <NodeRenderContext.Provider value={contextValue}>
       <div
