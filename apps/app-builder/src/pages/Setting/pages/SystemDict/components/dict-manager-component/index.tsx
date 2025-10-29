@@ -6,6 +6,7 @@ import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-da
 import DictList from '@/pages/Setting/pages/SystemDict/components/dict-list';
 import { Divider, Empty, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
 import { StatusEnum, type DictData, type DictItem, type PageParam } from '@onebase/platform-center';
+import { TokenManager } from '@onebase/common';
 import {
   createDict,
   createDictData,
@@ -23,10 +24,11 @@ import { useEffect, useState } from 'react';
 import DictDataModal from '@/pages/Setting/pages/SystemDict/components/dict-data-modal';
 import DictModal from '@/pages/Setting/pages/SystemDict/components/dict-modal';
 import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-config-modal';
-import styles from '../../index.module.less';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import StatusTag, { StatusLabelEnum } from '@/components/StatusTag';
+import { useAppStore } from '@/store/store_app';
+import styles from '../../index.module.less';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -43,7 +45,7 @@ export interface DictManagerConfig {
   };
   // API 配置
   api?: {
-    getDictList?: (dictOwnerType: string) => Promise<DictItem[]>;
+    getDictList?: (dictOwnerType: string, dictOwnerId: string) => Promise<DictItem[]>;
     getDictDataList?: (params: any) => Promise<{ list: DictData[]; total: number }>;
     createDict?: (data: DictItem) => Promise<any>;
     updateDict?: (data: DictItem) => Promise<any>;
@@ -92,6 +94,7 @@ interface DictManagerProps {
 }
 
 export default function DictManager({ config = {}, onDictChange, onDictDataChange }: DictManagerProps) {
+  const { curAppId } = useAppStore();
   // 合并默认配置
   const finalConfig: Required<DictManagerConfig> = {
     permissions: {
@@ -103,7 +106,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       ...config.permissions
     },
     api: {
-      getDictList: (dictOwnerType: string) => getAllDictList({ dictOwnerType }),
+      getDictList: (dictOwnerType: string, dictOwnerId: string) => getAllDictList({ dictOwnerType, dictOwnerId }),
       getDictDataList: getDictDataListByPage,
       createDict,
       updateDict,
@@ -166,6 +169,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   const [editItem, setEditItem] = useState<DictData | null>(null);
   const [batchConfigModalVisible, setBatchConfigModalVisible] = useState(false);
   const [batchConfigLoading, setBatchConfigLoading] = useState(false);
+  const getTenantInfo = TokenManager.getTenantInfo();
 
   // 获取当前tab的配置
   const getCurrentTabConfig = () => {
@@ -193,7 +197,8 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   const loadDictList = async () => {
     try {
-      const data = await currentTabConfig.api?.getDictList?.(activeTab);
+      const dictOwnerId = activeTab === finalConfig.tabs.systemDictTab?.key ? getTenantInfo?.tenantId : curAppId;
+      const data = await currentTabConfig.api?.getDictList?.(activeTab, dictOwnerId);
       setDictList(data || []);
       if (activeDictId && data.findIndex((item) => item.id === activeDictId) > -1) {
         setActiveDictId(activeDictId);
@@ -416,7 +421,9 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         setDictList((prev) => prev.map((t) => (t.id === editDict.id ? { ...t, ...values } : t)));
       } else {
         await currentTabConfig.api.createDict({ ...values, dictOwnerType: activeTab });
-        const data = await currentTabConfig.api?.getDictList?.(activeTab);
+
+        const dictOwnerId = activeTab === finalConfig.tabs.systemDictTab?.key ? getTenantInfo?.tenantId : curAppId;
+        const data = await currentTabConfig.api?.getDictList?.(activeTab, dictOwnerId);
         setDictList(data);
       }
       setAddDictModalVisible(false);
