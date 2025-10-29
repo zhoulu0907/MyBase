@@ -27,6 +27,7 @@ import {
   STATUS_VALUES,
   useEditorSignalMap,
   useListEditorSignal,
+  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -43,7 +44,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = Form.useForm();
 
-  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas,  } = useListEditorSignal;
 
   const {
     curPage,
@@ -152,7 +153,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           if (Object.values(item).every((v: any) => v === undefined)) {
             return;
           }
-          subTableRows.push(item);
+          const keys = Object.keys(item);
+          let temp:any = {};
+          for(let key of keys){
+            const newKey = key.slice(key.lastIndexOf('.')+1)
+            temp[newKey] = item[key]
+          }
+          subTableRows.push(temp);
         }
         subFormData.push({
           subEntityId: subEntityId,
@@ -298,13 +305,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               pagesRuntimeSignal.setSubTableDataLength(key, (subEntity.subData || []).length);
 
               for (let idx = 0; idx < (subEntity.subData || []).length; idx++) {
-                schema?.config?.columns.forEach((column: any) => {
-                  //   console.log('column: ', column);
-                  //   const fieldName = targetSubEntity.childFields.find(
-                  //     (ele: any) => ele.fieldId == column.dataIndex
-                  //   )?.fieldName;
-                  formValues[`${key}.${idx}.${column.dataIndex}`] = subEntity.subData[idx]?.[column.dataIndex];
-                });
+                const keys = Object.keys((subEntity.subData || [])[idx])
+                for(let ele in componentSchemas){
+                  const config = componentSchemas[ele]?.config;
+                  const fieldId = config?.dataField?.[1]
+                  if(keys.includes(fieldId)){
+                    formValues[`${key}.${idx}.${fieldId}`] = subEntity.subData[idx]?.[fieldId];
+                  }
+                }
               }
             }
           });

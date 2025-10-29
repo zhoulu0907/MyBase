@@ -67,6 +67,19 @@
     color: #f53f3f;
   }
 }
+.simulate-header {
+  background-color: #f2f3f5;
+  display: flex;
+  align-items: center;
+  line-height: 32px;
+  height: 32px;
+  border-radius: 4px 4px 0 0;
+}
+.simulate-header-item {
+  flex: 1;
+  box-sizing: border-box;
+  padding: 0 16px;
+}
 
 .subTableContent {
   width: 100%;

@@ -16,6 +16,7 @@ import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { useEffect, useState } from 'react';
 import PreviewRender from 'src/components/render/PreviewRender';
+import { pagesRuntimeSignal } from '@onebase/common';
 import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -33,6 +34,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     subTableComponents,
     setSubTableComponents
   } = usePageEditorSignal();
+  const { subTableDataLength } = pagesRuntimeSignal;
   const { id, label, tooltip, labelColSpan = 100, status, verify, runtime = true, detailMode } = props;
 
   // 判断拖拽的组件是否是表单组件
@@ -149,6 +151,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
    */
   const [subTableData, setSubTableData] = useState<any[]>([]);
   const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
+  const { form } = Form.useFormContext();
 
   useEffect(() => {
     if (runtime) {
@@ -156,22 +159,32 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     }
   }, []);
 
+  useEffect(() => {
+    console.log('subTableDataLength: ', subTableDataLength.value);
+
+    let newSubTableData: any[] = [];
+    for (let i = 0; i < subTableDataLength.value[id]; i++) {
+      newSubTableData.push({ key: `${i}` });
+    }
+    setSubTableData(newSubTableData);
+  }, [subTableDataLength.value]);
+
   // 获取表格配置 columns
   const getTableColumns = () => {
     let tableColumns = [];
-    for (let column of subTableComponents[id]) {
+    for (let column of (subTableComponents[id] || [])) {
       const displayName = pageComponentSchemas[column.id].config.label.text || column.displayName;
       const tableColumn = {
         title: displayName,
         dataIndex: column.id,
         key: column.id,
         render: (_text: string, _record: any, index: number) => {
-          // todo 预览态渲染
-          const config = {...pageComponentSchemas[column.id].config, dataField:[`${id}.${index}.${column.id}`]}
-          const pageSchema = {...pageComponentSchemas[column.id], config}
+          const config = { ...pageComponentSchemas[column.id].config, dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`] }
+          const pageSchema = { ...pageComponentSchemas[column.id], config }
           return <PreviewRender
             cpId={column.id}
             cpType={column.type}
+            detailMode={detailMode}
             pageComponentSchema={pageSchema}
             runtime={true}
           />;
@@ -179,22 +192,24 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       };
       tableColumns.push(tableColumn);
     }
-    tableColumns.push({
-      title: '操作',
-      dataIndex: 'action',
-      width: 100,
-      fixed: 'right',
-      render: (_col: any, record: any, index: number) => {
-        return (
-          <Button
-            type="text"
-            status="danger"
-            icon={<IconDelete />}
-            onClick={() => handleDelete(index)}
-          ></Button>
-        );
-      }
-    });
+    if (runtime && !detailMode) {
+      tableColumns.push({
+        title: '操作',
+        dataIndex: 'action',
+        width: 100,
+        fixed: 'right',
+        render: (_col: any, _record: any, index: number) => {
+          return (
+            <Button
+              type="text"
+              status="danger"
+              icon={<IconDelete />}
+              onClick={() => handleDelete(index)}
+            ></Button>
+          );
+        }
+      });
+    }
     setSubTableColumns(tableColumns);
   };
 
@@ -209,12 +224,23 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   };
   // 删除
   const handleDelete = (index: number) => {
-    const newData = subTableData.splice(index,1);
-    setSubTableData(newData);
+    setSubTableData((prevData) => prevData.filter((_,i) => i !== index));
+
+    const formData = form.getFieldsValue();
+
+    const filterFormData = formData[id].filter((_: any, i: number) => i !== index);
+
+    const updateFormData = {
+      ...formData,
+      [id]: filterFormData
+    };
+
+    form.setFieldsValue(updateFormData);
+    
   };
 
   return (
-    <Layout className="XSubTable">
+    <Layout className="XSubTable" style={runtime ? {border:'none'}:{}}>
       <Form.Item
         label={label.display && label.text}
         layout="vertical"
@@ -261,6 +287,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           </>
         ) : (
           <>
+            <div className='simulate-header'>
+              {subTableComponents[id] && subTableComponents[id].map((cp, index) => (<div key={`header-${index}`} className='simulate-header-item'>
+                {pageComponentSchemas[cp.id].config.label.text || pageComponentSchemas[cp.id].config.displayName}
+              </div>))}
+            </div>
             <ReactSortable
               id={`workspace-content-subtable-${id}`}
               list={subTableComponents[id] || []}
@@ -347,9 +378,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   </div>
                 ))}
             </ReactSortable>
-            <Button type="outline" icon={<IconPlus />} style={{ pointerEvents: 'unset', marginTop: 10 }}>
-              新增一项
-            </Button>
           </>
         )}
       </Form.Item>

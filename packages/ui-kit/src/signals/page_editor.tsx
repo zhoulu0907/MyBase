@@ -66,6 +66,9 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
   const setSubTableComponents = (cp_id: string, newColumns: any[]) => {
     subTableComponents.value = { ...subTableComponents.value, [cp_id]: newColumns };
   };
+  const loadSubTableComponents = (config: { [key: string]: any[] }) => {
+    subTableComponents.value = config;
+  };
   const delSubTableComponents = (cp_id: string) => {
     const newSubTableComponents = { ...subTableComponents.value };
     delete newSubTableComponents[cp_id];
@@ -100,6 +103,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
 
     // 子表单组件的列数据
     subTableComponents,
+    loadSubTableComponents,
     setSubTableComponents,
     delSubTableComponents,
     clearSubTableComponents,
