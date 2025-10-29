@@ -22,8 +22,8 @@ export const initialData: FlowDocumentJSON = {
       }
     },
     {
-      id: 'node_0',
-      type: 'process-node',
+      id: 'start_1',
+      type: 'initiate',
       meta: {
         position: {
           x: 180,
@@ -35,7 +35,7 @@ export const initialData: FlowDocumentJSON = {
         ]
       },
       data: {
-        title: '抄送人'
+        title: '发起'
       }
     },
     {
@@ -56,11 +56,10 @@ export const initialData: FlowDocumentJSON = {
   edges: [
     {
       sourceNodeID: 'start_0',
-      targetNodeID: 'node_0'
+      targetNodeID: 'start_1'
     },
-
     {
-      sourceNodeID: 'node_0',
+      sourceNodeID: 'start_1',
       targetNodeID: 'end_0'
     }
   ]

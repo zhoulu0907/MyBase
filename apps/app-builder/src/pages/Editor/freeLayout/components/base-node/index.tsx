@@ -13,21 +13,6 @@ import { NodeStatusBar } from '../testrun/node-status-bar';
 import { NodeRenderContext } from '../../context';
 import { NodeWrapper } from './node-wrapper';
 
-const getAllErrorMessages = (form: any) => {
-  if (!form?.state?.errors) return [];
-  const errorMessages: string[] = [];
-  Object.values(form.state.errors).forEach((fieldErrors: any) => {
-    if (Array.isArray(fieldErrors)) {
-      fieldErrors.forEach((error: any) => {
-        if (error?.message && typeof error.message === 'string' && error.message.trim() !== '') {
-          errorMessages.push(error.message);
-        }
-      });
-    }
-  });
-
-  return errorMessages;
-};
 export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
   /**
    * Provides methods related to node rendering
@@ -40,7 +25,6 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
    */
   const form = nodeRender.form;
 
-  const errorMessages = getAllErrorMessages(form);
   /**
    * Used to make the Tooltip scale with the node, which can be implemented by itself depending on the UI library
    * 用于让 Tooltip 跟随节点缩放, 这个可以根据不同的 ui 库自己实现
@@ -51,7 +35,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
     <ConfigProvider getPopupContainer={getPopupContainer}>
       <NodeRenderContext.Provider value={nodeRender}>
         <NodeWrapper>
-          {form?.state.invalid && (
+          {form?.values?.errMsg?.length > 0 && (
             <div
               style={{
                 position: 'absolute',
@@ -63,7 +47,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
               <Tooltip
                 content={
                   <div>
-                    {errorMessages?.map((message, index) => (
+                    {form?.values?.errMsg?.map((message, index) => (
                       <div key={index}>{message}</div>
                     ))}
                   </div>
