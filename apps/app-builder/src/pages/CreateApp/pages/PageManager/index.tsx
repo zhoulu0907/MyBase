@@ -45,9 +45,9 @@ import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
-import TaskCenterSide from './components/TaskCenter/taskTreeSide'
-import TaskCenterPage from './components/TaskCenter/TaskCenterPage'
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -90,7 +90,10 @@ const PageManagerPage: FC = () => {
 
   const [title, setTitle] = useState('');
   const [showGuide, setShowGuide] = useState<boolean>(false);
-  const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
+  const pageSetTypeOptions = [
+    { label: '普通表单', value: PageType.NORMAL },
+    { label: '流程表单', value: PageType.BPM }
+  ];
 
   const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
@@ -300,6 +303,7 @@ const PageManagerPage: FC = () => {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: createForm.getFieldValue('pageSetType'),
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
@@ -612,7 +616,7 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {(curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0) && (
+                  {curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0 && (
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
@@ -630,7 +634,7 @@ const PageManagerPage: FC = () => {
                       </div>
                     </>
                   )}
-                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id}/>}
+                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id} />}
                 </>
               )}
             </>
@@ -666,7 +670,7 @@ const PageManagerPage: FC = () => {
         }}
         form={createForm}
         entityListOptions={entityListOptions}
-        pageTypeOptions={pageTypeOptions}
+        pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
