@@ -174,8 +174,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     let tableColumns = [];
     for (let column of (subTableComponents[id] || [])) {
       const displayName = pageComponentSchemas[column.id].config.label.text || column.displayName;
+      const required = pageComponentSchemas[column.id].config?.verify?.required
       const tableColumn = {
-        title: displayName,
+        title: (<>{displayName}{required && <span style={{color:'red',paddingLeft:'4px'}}>*</span>}</>),
         dataIndex: column.id,
         key: column.id,
         render: (_text: string, _record: any, index: number) => {
