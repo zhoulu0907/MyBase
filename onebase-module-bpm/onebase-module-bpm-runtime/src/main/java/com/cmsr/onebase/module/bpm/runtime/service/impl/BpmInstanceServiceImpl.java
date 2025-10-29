@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.StartNodeExtDTO;
@@ -26,13 +27,12 @@ import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.dto.NodeJson;
-import org.dromara.warm.flow.core.entity.Definition;
-import org.dromara.warm.flow.core.entity.Instance;
-import org.dromara.warm.flow.core.entity.Task;
+import org.dromara.warm.flow.core.entity.*;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.DefService;
+import org.dromara.warm.flow.core.service.HisTaskService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.springframework.context.annotation.Lazy;
@@ -73,6 +73,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private DataMethodApi dataMethodApi;
+
+    @Resource
+    private HisTaskService hisTaskService;
 
     @Resource
     private BpmFlowInsExtRepository flowInsExtRepository;
@@ -242,6 +245,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         BpmFlowInsBizExtDO flowInsExtDO = new BpmFlowInsBizExtDO();
         Map<String, Object> variables = new HashMap<>();
+
+        BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
+        variables.put("appId", extDto.getAppId());
+
         entityVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
 
         // 开启流程
@@ -293,7 +300,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         // 保存扩展信息 todo：处理Mock的参数值
         flowInsExtDO.setBusinessId(entityDataId);
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
-        flowInsExtDO.setBpmBusinessStatus(businessStatus.getCode());
         flowInsExtDO.setBusinessTitle("流程标题");
         flowInsExtDO.setInitiatorId(1L);
         flowInsExtDO.setInitiatorName("发起人");
@@ -302,6 +308,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary("摘要");
         flowInsExtDO.setInstanceId(instance.getId());
+        flowInsExtDO.setAppId(extDto.getAppId());
 
         flowInsExtRepository.insert(flowInsExtDO);
 
@@ -378,5 +385,94 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         taskService.skip(skipParams, task);
 
         // todo：更新实体数据
+    }
+
+    @Override
+    public List<BpmOperatorRecordRespVO.OperatorRecord> getOperatorRecord(Long instanceId) {
+        List<BpmOperatorRecordRespVO.OperatorRecord> operatorRecords = new ArrayList<>();
+
+        Instance instance = insService.getById(instanceId);
+
+        if (instance == null) {
+            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+        }
+
+        String defJsonStr = instance.getDefJson();
+        DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+
+        // 查出已办
+        List<HisTask> hisTasks = hisTaskService.getByInsId(instanceId);
+
+        // 查出待办
+        List<Task> tasks = taskService.getByInsId(instanceId);
+
+        for (HisTask hisTask : hisTasks) {
+            log.info("已办: {}", hisTask.getCreateTime());
+        }
+
+        // todo： 按照时间排序，已办、待办按照时间排序
+        Map<String, String> nodeTypeMap = new HashMap<>();
+        Map<String, BpmOperatorRecordRespVO.OperatorRecord> recordMap = new HashMap<>();
+
+        for (NodeJson nodeJson : defJson.getNodeList()) {
+            BaseNodeExtDTO nodeExt = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
+            nodeTypeMap.put(nodeJson.getNodeCode(), nodeExt.getNodeType());
+        }
+
+        // 进行组装
+        for (HisTask hisTask : hisTasks) {
+            String nodeCode = hisTask.getNodeCode();
+
+            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
+
+            if (record == null) {
+                record = new BpmOperatorRecordRespVO.OperatorRecord();
+                record.setNodeName(hisTask.getNodeName());
+                record.setNodeType(nodeTypeMap.get(hisTask.getNodeCode()));
+                operatorRecords.add(record);
+            }
+
+            if (record.getOperators() == null) {
+                record.setOperators(new ArrayList<>());
+            }
+
+            BpmOperatorRecordRespVO.OperatorInfo operatorInfo = new BpmOperatorRecordRespVO.OperatorInfo();
+            operatorInfo.setOperator(hisTask.getApprover());
+            operatorInfo.setOperatorTime(hisTask.getUpdateTime());
+            operatorInfo.setComment(hisTask.getMessage());
+
+            // todo: 待完善 设置处理人
+            if (StringUtils.isBlank(operatorInfo.getOperator())) {
+                operatorInfo.setOperator("处理人");
+            }
+
+            record.getOperators().add(operatorInfo);
+        }
+
+        for (Task task : tasks) {
+            String nodeCode = task.getNodeCode();
+
+            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
+
+            if (record == null) {
+                record = new BpmOperatorRecordRespVO.OperatorRecord();
+                record.setNodeName(task.getNodeName());
+                record.setNodeType(nodeTypeMap.get(task.getNodeCode()));
+                operatorRecords.add(record);
+            }
+
+            if (record.getOperators() == null) {
+                record.setOperators(new ArrayList<>());
+            }
+
+            for (User user : task.getUserList()) {
+                BpmOperatorRecordRespVO.OperatorInfo operatorInfo = new BpmOperatorRecordRespVO.OperatorInfo();
+                operatorInfo.setOperator(user.getProcessedBy());
+                operatorInfo.setOperatorTime(task.getUpdateTime());
+                record.getOperators().add(operatorInfo);
+            }
+        }
+
+        return operatorRecords;
     }
 }

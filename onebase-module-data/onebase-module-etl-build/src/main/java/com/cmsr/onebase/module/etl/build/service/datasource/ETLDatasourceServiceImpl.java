@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.build.service.datasource;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.etl.build.controller.datasource.vo.ETLDatasourceReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;

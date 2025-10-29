@@ -40,4 +40,11 @@ public class BpmDefinitionVO {
     @NotNull(message = "业务ID不能为空")
     @Schema(description = "业务ID")
     private Long businessId;
+
+    /**
+     * 应用ID
+     */
+    @NotNull(message = "应用ID不能为空")
+    @Schema(description = "应用ID")
+    private Long appId;
 }

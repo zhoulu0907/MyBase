@@ -65,6 +65,14 @@ public class AuthDefaultFactory {
         return ap;
     }
 
+    public static AuthPermissionDO createAuthPermissionDO() {
+        AuthPermissionDO ap = new AuthPermissionDO();
+        ap.setIsPageAllowed(NumberUtils.INTEGER_ONE);
+        ap.setIsAllViewsAllowed(NumberUtils.INTEGER_ONE);
+        ap.setIsAllFieldsAllowed(NumberUtils.INTEGER_ONE);
+        ap.setOperationTags(DEFAULT_OPERATION_TAGS);
+        return ap;
+    }
 
     //数据组权限 authDataGroupDOS
     public static AuthDataGroupDO createAuthDataGroupDO(AuthPermissionReq req) {
@@ -78,5 +86,15 @@ public class AuthDefaultFactory {
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
         return adg;
     }
+
+    public static AuthDataGroupDO createAuthDataGroupDO() {
+        AuthDataGroupDO adg = new AuthDataGroupDO();
+        adg.setGroupName("默认权限");
+        adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
+        adg.setDataFilter(DEFAULT_DATA_FILTER);
+        adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
+        return adg;
+    }
+
 
 }

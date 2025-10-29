@@ -31,6 +31,9 @@ public class MenuCreateReqVO {
     @NotBlank(message = "菜单图标不能为空")
     private String menuIcon;
 
+    @Schema(description = "页面集类型 1-普通表单 2-流程表单")
+    private Integer pageSetType;
+
     @Schema(description = "实体编码")
     private Long entityId;
 }
