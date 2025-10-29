@@ -1,0 +1,55 @@
+package com.cmsr.onebase.module.bpm.runtime.controller;
+
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+
+/**
+ * 流程实例管理Controller
+ *
+ * @author liyang
+ * @date 2025-10-21
+ */
+@Tag(name = "流程实例管理")
+@RestController
+@RequestMapping("/bpm/instance")
+@Validated
+@Slf4j
+public class BpmInstanceController {
+
+    @Resource
+    private BpmInstanceService bpmExecService;
+
+    @GetMapping("/list-act-buttons")
+    @Operation(summary = "获取流程实例的操作按钮")
+    public CommonResult<ListActButtonRespVO> listActButtons(@RequestParam(value = "taskId", required = false) String taskId, @RequestParam("businessId") String businessId) {
+        log.info("获取流程实例的操作按钮: {}, {}", taskId, businessId);
+        ListActButtonRespVO respVO = bpmExecService.getActButtons(taskId, businessId);
+        return CommonResult.success(respVO);
+    }
+
+    @PostMapping("/submit")
+    @Operation(summary = "流程发起")
+    public CommonResult<BpmSubmitRespVO> exec(@RequestBody @Validated BpmSubmitReqVO reqVO) {
+        log.info("执行流程实例的操作按钮: {}", reqVO);
+        BpmSubmitRespVO respVO = bpmExecService.submit(reqVO);
+        return CommonResult.success(respVO);
+    }
+
+    @PostMapping("/exec-task")
+    public CommonResult<Boolean> exec(@RequestBody @Validated ExecTaskReqVO reqVO) {
+        log.info("执行流程实例的操作按钮: {}", reqVO);
+        bpmExecService.execTask(reqVO);
+        return CommonResult.success(true);
+    }
+}

@@ -48,11 +48,10 @@ public class InitiationNodeVOStrategy extends AbstractNodeVOStrategy<InitiationN
         extDTO.setNodeType(getSupportedNodeType());
 
         // 设置字段权限配置
-        if (nodeVO.getData() != null) {
-            extDTO.setDeptConfig(nodeVO.getData().getDeptConfig());
-        }
-
+        extDTO.setDeptConfig(nodeVO.getData().getDeptConfig());
+        extDTO.setButtonConfigs(this.buildDefaultButtonConfigs());
         extDTO.setMeta(nodeVO.getMeta());
+
         return extDTO;
     }
 
