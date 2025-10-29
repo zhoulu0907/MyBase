@@ -26,7 +26,7 @@ function setApprovalConfigData(key: string, data: Object) {
   }
 }
 
-export default function ApproveDreawer() {
+export default function ApproveDreawer({handleConfigSubmit}: any) {
 
   const [useApprover, setApprover] = useState<string>('approver');
 
@@ -46,7 +46,8 @@ export default function ApproveDreawer() {
   };
 
   function handleSubmit() {
-    console.log('999 000 ===', approverConfigData)
+    console.log('approverConfigData ===', approverConfigData)
+    handleConfigSubmit && handleConfigSubmit(approverConfigData, {})
   }
 
   return (

@@ -41,7 +41,7 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
         <Approver />
         <BottomBtn /> */}
         {/* <div>抽屉内容</div> */}
-        {nodeRender?.type === 'approver' && <ApproveDreawer />}
+        {nodeRender?.type === 'approver' && <ApproveDreawer handleConfigSubmit={handleSubmit}/>}
       </div>
     </NodeRenderContext.Provider>
   );
