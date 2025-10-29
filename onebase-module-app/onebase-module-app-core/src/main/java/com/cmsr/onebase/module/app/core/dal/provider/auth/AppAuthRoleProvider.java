@@ -25,8 +25,8 @@ public class AppAuthRoleProvider {
     @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
 
-    public UserRole findByApplicationIdAndUserId(Long userId, Long applicationId) {
-        List<AuthRoleDO> authRoleDOS = appAuthRoleRepository.findByApplicationIdAndUserId(applicationId, userId);
+    public UserRole findByUserIdAndApplicationId(Long userId, Long applicationId) {
+        List<AuthRoleDO> authRoleDOS = appAuthRoleRepository.findByUserIdAndApplicationId(userId, applicationId);
         UserRole userRole = new UserRole();
         userRole.setAdminRole(false);
         if (authRoleDOS != null && !authRoleDOS.isEmpty()) {

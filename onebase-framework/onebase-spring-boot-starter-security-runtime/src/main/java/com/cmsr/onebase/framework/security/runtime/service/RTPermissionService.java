@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.MenuPermission;
 import lombok.Setter;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +17,17 @@ import org.springframework.stereotype.Service;
  */
 @Setter
 @Service
-public class RTPermissionService {
+public class RTPermissionService implements InitializingBean {
 
     public static RTPermissionService instance;
 
     @Autowired
     private AppAuthSecurityApi appAuthSecurityApi;
+
+    @Override
+    public void afterPropertiesSet() {
+        RTPermissionService.instance = this;
+    }
 
     public boolean checkMenuEntity(Long applicationId, Long menuId, Long entityId) {
         return appAuthSecurityApi.checkMenuEntity(applicationId, menuId, entityId);
