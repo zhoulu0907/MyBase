@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSystemMethodCoreService;
@@ -92,124 +93,36 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     // ========== 动态数据操作方法实现 ==========
 
     @Override
-    public Map<String, Object> createData(Long entityId, Map<String, Object> data, String methodCode) {
+    public Map<String, Object> createData(MetadataDataMethodCoreContext metadataDataMethodCoreContext) {
+
+        Long entityId = metadataDataMethodCoreContext.getEntityId();
+        Map<String, Object> data = metadataDataMethodCoreContext.getData();
+        String methodCode = metadataDataMethodCoreContext.getMethodCode();
 
         Map<String, Object> result = metadataDataMethodCreate.executeProcess(OperationType.CREATE, entityId, data, methodCode);
-
-
-//        // 1. 校验实体存在
-//        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-//
-//        // 2. 获取实体字段信息
-//        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-//
-//        // 3. 校验数据完整性
-//        validateDataIntegrity(data, fields);
-//
-//        // 4. 处理数据并设置默认值
-//        Map<String, Object> processedData = processDataAndSetDefaults(data, fields);
-//
-//        // 5. 获取临时数据源服务
-//        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-//        if (datasource == null) {
-//            throw exception(DATASOURCE_NOT_EXISTS);
-//        }
-//
-//        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-//        log.info("成功切换到数据源：{}", datasource.getCode());
-//
-//        // 6. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-//        return TenantUtils.executeIgnore(() -> {
-//
-//        // 7. 执行插入
-//        if (log.isDebugEnabled()) {
-//            log.debug("createData -> processedData before insert: {}", processedData);
-//        }
-//        DataRow dataRow = new DataRow(processedData);
-//        Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
-//        log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
-//
-//        // 8. 查询插入后的完整数据
-//        Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
-//        log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
-//
-//        // 确保主键值不为null
-//        if (primaryKeyValue == null) {
-//            log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", entityId, entity.getTableName());
-//            // 返回插入的数据
-//            return buildDataResponse(entity, processedData, fields);
-//        }
-//
-//        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
-//
-//        // 9. 构建响应（移除多表写入逻辑，直接返回结果）
-//        return buildDataResponse(entity, resultData, fields);
-//
-//        }); // TenantUtils.executeIgnore 闭合
-
         return result;
     }
 
     @Override
-    public Map<String, Object> updateData(Long entityId, Object id, Map<String, Object> data, String methodCode) {
+    public Map<String, Object> updateData(MetadataDataMethodCoreContext metadataDataMethodCoreContext) {
+
+        Long entityId = metadataDataMethodCoreContext.getEntityId();
+        Object id = metadataDataMethodCoreContext.getId();
+        Map<String, Object> data = metadataDataMethodCoreContext.getData();
+        String methodCode = metadataDataMethodCoreContext.getMethodCode();
+
         // 使用新的统一流程处理更新操作
         return metadataDataMethodUpdate.executeProcess(OperationType.UPDATE, entityId, id, data, methodCode);
     }
 
     @Override
-    public Boolean deleteData(Long entityId, Object id, String methodCode) {
+    public Boolean deleteData(MetadataDataMethodCoreContext methodCoreContext) {
 
+        Long entityId =  methodCoreContext.getEntityId();
+        Object id = methodCoreContext.getId();
+        String methodCode = methodCoreContext.getMethodCode();
         metadataDataMethodDelete.executeProcess(OperationType.DELETE, entityId, id, null, methodCode);
         return true;
-//        // 1. 校验实体存在
-//        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-//
-//        // 2. 获取实体字段信息
-//    List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-//
-//        // 3. 获取临时数据源服务
-//        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-//        if (datasource == null) {
-//            throw exception(DATASOURCE_NOT_EXISTS);
-//        }
-//
-//        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-//        log.info("成功切换到数据源：{}", datasource.getCode());
-//
-//        // 4. 检查表中是否有软删除字段
-//        boolean hasDeletedField = fields.stream()
-//                .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
-//
-//    // 5. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-//    return TenantUtils.executeIgnore(() -> {
-//
-//            // 6. 校验数据存在
-//            validateDataExistsWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
-//
-//            // 7. 获取主键字段名
-//            String primaryKeyField = getPrimaryKeyFieldName(fields);
-//
-//            // 8. 构建删除条件
-//            DefaultConfigStore configStore = new DefaultConfigStore();
-//            configStore.and(primaryKeyField, id);
-//
-//            long deleteCount;
-//            if (hasDeletedField) {
-//                // 软删除：更新deleted字段为删除时间戳
-//                DataRow updateData = new DataRow();
-//                updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
-//                deleteCount = temporaryService.update(quoteTableName(entity.getTableName()), updateData, configStore);
-//                log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-//            } else {
-//                // 物理删除：直接删除记录
-//                deleteCount = temporaryService.delete(quoteTableName(entity.getTableName()), configStore);
-//                log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-//            }
-//
-//            boolean ok = deleteCount > 0;
-        // 移除多表写入逻辑，直接返回删除结果
-//            return ok;
-//        }); // TenantUtils.executeIgnore 闭合
     }
 
     @Override
@@ -217,53 +130,6 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
         Map<String, Object> result = metadataDataMethodQuery.executeProcess(OperationType.GET,entityId,id,null,null);
         return result;
-//        //查询子表数据
-//        Long sourceEntityId = reqVO.getEntityId();
-//        DefaultConfigStore configStore = new DefaultConfigStore();
-//        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
-//        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
-//        List<String> subTableIds = new ArrayList<String>();
-//        for(MetadataEntityRelationshipDO relationshipDO:relationships){
-//            MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
-//
-//            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
-//            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
-//            String tableName = targetEntity.getTableName();
-//            String fieldName = targetFieldDO.getFieldName();
-//            // 获取临时数据源服务
-//            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
-//            if (datasource == null) {
-//                throw exception(DATASOURCE_NOT_EXISTS);
-//            }
-//            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-//            log.info("成功切换到数据源：{}", datasource.getCode());
-//
-//            DefaultConfigStore config = new DefaultConfigStore();
-//            if("parent_id".equals(fieldName)){
-//                config.and(fieldName, reqVO.getId());
-//            }else{
-//                Object value = resultData.get(sourceFieldDO.getFieldName());
-//                config.and(fieldName, value);
-//            }
-//            DataSet dataSet = temporaryService.querys(tableName,config);
-//            System.out.println(dataSet);
-//        }
-        // 移除多表查询逻辑，直接使用单表查询
-//        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-//        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-//        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-//        if (datasource == null) {
-//            throw exception(DATASOURCE_NOT_EXISTS);
-//        }
-//        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-//        log.info("成功切换到数据源：{}", datasource.getCode());
-//        return TenantUtils.executeIgnore(() -> {
-//            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
-//            if (resultData == null || resultData.isEmpty()) {
-//                throw exception(BUSINESS_ENTITY_NOT_EXISTS);
-//            }
-//            return buildDataResponse(entity, resultData, fields);
-//        });
     }
 
     @Override

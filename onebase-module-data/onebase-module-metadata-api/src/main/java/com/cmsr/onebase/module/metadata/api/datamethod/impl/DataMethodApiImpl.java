@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
@@ -77,7 +78,12 @@ public class DataMethodApiImpl implements DataMethodApi {
         for (RowData row : result.getRowDataList()) {
             Object idObj = dataMethodAssembler.tryParseId(row.getRowId());
             try {
-                Boolean ok = metadataDataMethodCoreService.deleteData(reqDTO.getEntityId(), idObj, null);
+                MetadataDataMethodCoreContext metadataDataMethodCoreContext = new MetadataDataMethodCoreContext();
+                metadataDataMethodCoreContext.setEntityId(reqDTO.getEntityId());
+                metadataDataMethodCoreContext.setId(idObj);
+                metadataDataMethodCoreContext.setMethodCode(null);
+
+                Boolean ok = metadataDataMethodCoreService.deleteData(metadataDataMethodCoreContext);
                 if (Boolean.TRUE.equals(ok)) { success++; }
             } catch (Exception e) {
                 log.warn("删除失败 rowId:{} - {}", row.getRowId(), e.getMessage());
@@ -107,8 +113,16 @@ public class DataMethodApiImpl implements DataMethodApi {
 
         List<Map<String, Object>> resultList = new ArrayList<>();
         for (Map<String, Object> dataByName : dataByNameList) {
+
+
+            MetadataDataMethodCoreContext methodCoreContext = new MetadataDataMethodCoreContext();
+            methodCoreContext.setEntityId(reqDTO.getEntityId());
+            methodCoreContext.setData(dataByName);
+            methodCoreContext.setMethodCode(null);
+
+
             Map<String, Object> resultMap = metadataDataMethodCoreService.createData(
-                    reqDTO.getEntityId(), dataByName, null);
+                    methodCoreContext);
             if (resultMap != null) {
                 resultList.add(resultMap);
             }
@@ -161,8 +175,14 @@ public class DataMethodApiImpl implements DataMethodApi {
             try {
                 Map<String, Object> payloadSource = singlePayload ? updateDataList.get(0) : updateDataList.get(i);
                 Map<String, Object> payload = new HashMap<>(payloadSource);
+                MetadataDataMethodCoreContext metadataDataMethodCoreContext = new MetadataDataMethodCoreContext();
+                metadataDataMethodCoreContext.setEntityId(reqDTO.getEntityId());
+                metadataDataMethodCoreContext.setId(idObj);
+                metadataDataMethodCoreContext.setData(payload);
+                metadataDataMethodCoreContext.setMethodCode(null);
+
                 Map<String, Object> updated = metadataDataMethodCoreService.updateData(
-                        reqDTO.getEntityId(), idObj, payload, null);
+                        metadataDataMethodCoreContext);
                 if (updated != null) {
                     updatedList.add(updated);
                 }

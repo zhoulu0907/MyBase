@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
 
 import java.util.Map;
 import java.util.List;
@@ -23,7 +24,9 @@ public interface MetadataDataMethodCoreService {
      * @param methodCode 方法编码（可选）
      * @return 新增后的数据（包含主键等）
      */
-    Map<String, Object> createData(Long entityId, Map<String, Object> data, String methodCode);
+//    Map<String, Object> createData(Long entityId, Map<String, Object> data, String methodCode);
+
+    Map<String, Object> createData(MetadataDataMethodCoreContext metadataDataMethodCoreContext);
 
     /**
      * 更新单条数据
@@ -34,7 +37,8 @@ public interface MetadataDataMethodCoreService {
      * @param methodCode 方法编码（可选）
      * @return 更新后的数据
      */
-    Map<String, Object> updateData(Long entityId, Object id, Map<String, Object> data, String methodCode);
+//    Map<String, Object> updateData(Long entityId, Object id, Map<String, Object> data, String methodCode);
+    Map<String, Object> updateData(MetadataDataMethodCoreContext metadataDataMethodCoreContext);
 
     /**
      * 删除单条数据
@@ -44,7 +48,9 @@ public interface MetadataDataMethodCoreService {
      * @param methodCode 方法编码（可选）
      * @return 删除是否成功
      */
-    Boolean deleteData(Long entityId, Object id, String methodCode);
+//    Boolean deleteData(Long entityId, Object id, String methodCode);
+
+    Boolean deleteData(MetadataDataMethodCoreContext metadataDataMethodCoreContext);
 
     /**
      * 根据ID查询数据详情
