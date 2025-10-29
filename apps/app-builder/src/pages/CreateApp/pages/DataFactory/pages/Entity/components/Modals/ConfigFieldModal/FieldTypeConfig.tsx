@@ -5,6 +5,7 @@ import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
 import SelectDictModal from '@/components/SelectDictModal';
+import type { DictItem } from '@onebase/platform-center';
 import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './types';
 import {
   convertAutoCodeCompoToAutoNumberRule,
@@ -22,7 +23,7 @@ import {
 // 选项配置组件
 interface OptionConfigProps {
   onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (options: object[]) => void;
+  onConfirm: (options: object[], dictTypeId?: string | number) => void;
   initialOptions?: { optionLabel: string; optionValue: string }[] | undefined;
   onCancel?: () => void; // 新增：取消回调
 }
@@ -70,7 +71,12 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
   };
 
   const handleConfirm = () => {
-    onConfirm(options);
+    if (optionType === CONFIG_TYPE.DICT && selectDict) {
+      const dictTypeId = selectDict.id;
+      onConfirm([], dictTypeId);
+    } else {
+      onConfirm(options);
+    }
     if (onVisibleChange) {
       onVisibleChange(false);
     }
@@ -84,7 +90,12 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
     }
   };
 
-  const handleSelectDictOk = () => {};
+  const handleSelectDictOk = (dict?: DictItem) => {
+    if (dict) {
+      setSelectDict(dict);
+    }
+    setSelectDictModalVisible(false);
+  };
 
   const handleSelectDictCancel = () => {
     setSelectDictModalVisible(false);
@@ -467,7 +478,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
 export const PicklistConfig: React.FC<{
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (options: string[]) => void;
+  onConfirm: (options: object[], dictTypeId?: string | number) => void;
   initialOptions?: { optionLabel: string; optionValue: string }[];
   onCancel?: () => void;
 }> = (props) => {
@@ -478,7 +489,7 @@ export const PicklistConfig: React.FC<{
 export const MultiPicklistConfig: React.FC<{
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (options: string[]) => void;
+  onConfirm: (options: object[], dictTypeId?: string | number) => void;
   initialOptions?: { optionLabel: string; optionValue: string }[];
   onCancel?: () => void;
 }> = (props) => {

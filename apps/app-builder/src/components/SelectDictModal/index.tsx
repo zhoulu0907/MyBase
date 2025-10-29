@@ -5,10 +5,11 @@ import { getAllDictList, getDictDataListByType } from '@onebase/platform-center'
 import styles from './index.module.less';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/store_app';
+import { StatusEnum } from '@onebase/platform-center';
 
 export interface SelectDictModalProps {
   visible: boolean;
-  onOk: (dictTypeId: string | number, dict?: DictItem) => void;
+  onOk: (dict?: DictItem) => void;
   onCancel: () => void;
 }
 
@@ -38,7 +39,8 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
     setLoadingList(true);
     try {
       const list = await getAllDictList({ dictOwnerType: ownerType });
-      setDictList(list || []);
+      const enabledList = list.filter((d) => d.status === StatusEnum.ENABLE);
+      setDictList(enabledList || []);
     } finally {
       setLoadingList(false);
     }
@@ -100,13 +102,8 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
         <Button
           type="primary"
           size="small"
-          onClick={() =>
-            onOk(
-              selectedId,
-              dictList.find((d) => d.id === selectedId)
-            )
-          }
-          disabled={selectedId === undefined}
+          onClick={() => onOk(dictList.find((d) => d.id === selectedId))}
+          disabled={selectedId === ''}
         >
           确认
         </Button>
@@ -156,7 +153,9 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
                       <div className={styles.meta}>{item.type}</div>
                     </div>
                   }
-                  extra={<input type="radio" checked={selectedId === item.id} readOnly />}
+                  extra={
+                    <input type="radio" checked={selectedId === item.id} onChange={() => setSelectedId(item.id)} />
+                  }
                 >
                   <div className={styles.previewRow}>
                     {cache?.loading ? (

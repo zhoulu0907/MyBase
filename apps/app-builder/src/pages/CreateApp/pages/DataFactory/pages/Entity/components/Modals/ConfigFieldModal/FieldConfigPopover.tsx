@@ -14,7 +14,9 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
         case ENTITY_FIELD_TYPE.SELECT.VALUE:
           return (
             <PicklistConfig
-              onConfirm={(options) => onConfirm(ENTITY_FIELD_TYPE.SELECT.VALUE, fieldId, options)}
+              onConfirm={(options, dictTypeId) =>
+                onConfirm(ENTITY_FIELD_TYPE.SELECT.VALUE, fieldId, options, dictTypeId)
+              }
               initialOptions={field?.options}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.SELECT.VALUE)}
             />
@@ -23,7 +25,9 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
         case ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE:
           return (
             <MultiPicklistConfig
-              onConfirm={(options) => onConfirm(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE, fieldId, options)}
+              onConfirm={(options, dictTypeId) =>
+                onConfirm(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE, fieldId, options, dictTypeId)
+              }
               initialOptions={field?.options}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE)}
             />

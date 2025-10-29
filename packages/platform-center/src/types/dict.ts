@@ -1,6 +1,6 @@
 // 字典
 export interface DictItem {
-  id: number;
+  id: string | number;
   name: string; // 字典名称
   type: string; // 字典编码
   status: number; // 字典状态
