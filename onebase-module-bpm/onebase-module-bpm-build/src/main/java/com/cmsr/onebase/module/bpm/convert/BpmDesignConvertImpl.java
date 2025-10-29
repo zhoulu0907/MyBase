@@ -74,6 +74,9 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
             if (extDto != null) {
                 flowDesignVO.setVersionAlias(extDto.getVersionAlias());
+
+                // todo：应用ID校验
+                flowDesignVO.setAppId(extDto.getAppId());
             }
         }
 
@@ -112,6 +115,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
         if (flowDesignVO.getVersionAlias() != null) {
             extDto.setVersionAlias(flowDesignVO.getVersionAlias());
+            extDto.setAppId(flowDesignVO.getAppId());
         }
 
         defJson.setExt(JsonUtils.toJsonString(extDto));
