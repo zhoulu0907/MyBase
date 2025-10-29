@@ -98,7 +98,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             authRoleDO.setRoleName(roleType.getName());
             authRoleDO.setRoleType(roleType.getValue());
             authRoleRepository.insert(authRoleDO);
-            if(!AuthRoleTypeEnum.isSystemAdminRole(roleType.getCode())){
+            if (!AuthRoleTypeEnum.isSystemAdminRole(roleType.getValue())) {
                 AuthRoleUserDO entity = new AuthRoleUserDO();
                 entity.setUserId(userId);
                 entity.setRoleId(authRoleDO.getId());

@@ -11,15 +11,6 @@ import lombok.Data;
 @Schema(description = "应用管理 - 数据 Filter VO")
 public class AuthDataFilterVO {
 
-    @Schema(description = "主键Id")
-    private Long id;
-
-    @Schema(description = "条件组")
-    private Integer conditionGroup;
-
-    @Schema(description = "条件顺序")
-    private Integer conditionOrder;
-
     @Schema(description = "字段id")
     private Long fieldId;
 

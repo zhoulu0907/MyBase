@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.runtime.dto;
+package com.cmsr.onebase.module.app.api.security.bo;
 
 import java.util.List;
 

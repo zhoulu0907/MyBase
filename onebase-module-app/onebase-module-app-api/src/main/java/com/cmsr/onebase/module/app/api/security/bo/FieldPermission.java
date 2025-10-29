@@ -1,9 +1,9 @@
-package com.cmsr.onebase.framework.security.runtime.dto;
+package com.cmsr.onebase.module.app.api.security.bo;
 
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -16,6 +16,6 @@ public class FieldPermission {
 
     private boolean allDenied = false;
 
-    private Map<Long, FieldPermissionItem> items = new HashMap<>();
+    private List<FieldPermissionItem> fields = new ArrayList<>();
 
 }
