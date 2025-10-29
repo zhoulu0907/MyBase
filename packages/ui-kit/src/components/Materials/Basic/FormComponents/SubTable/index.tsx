@@ -105,7 +105,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     }
 
     const entityId = e.item.getAttribute('data-entity-id');
-    // 拖拽的子表项必须是同一个数据源子表
+    // 拖拽的子表项必须是同一个子表
     if (entityId) {
       const sameField = subTableComponents[id]?.every((ele) => {
         const dataField = pageComponentSchemas[ele.id].config.dataField;
@@ -316,9 +316,20 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               id={`workspace-content-subtable-${id}`}
               list={subTableComponents[id] || []}
               setList={(newList) => {
+                const dataFieldPage = subTableComponents[id].find(
+                  (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
+                );
+                // 已有的数据源子表id
+                const dataField = pageComponentSchemas[dataFieldPage.id].config?.dataField?.[0];
+                /**
+                 * 不允许拖拽主、子表嵌套
+                 * 拖拽的子表项必须是同一个子表
+                 */
                 setSubTableComponents(
                   id,
-                  newList.filter((ele) => pageComponentSchemas[ele.id])
+                  newList.filter(
+                    (ele) => ele.type !== 'entity' && (!ele.entityID || !dataField || ele.entityID === dataField)
+                  )
                 );
               }}
               onAdd={onSubAdd}
@@ -330,7 +341,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               animation={150}
               fallbackOnBody={true}
               swapThreshold={0.65}
-              className="XSubTablecontent"
+              className="XSubTable-content"
               onStart={onSubStart}
             >
               {subTableComponents[id] &&
