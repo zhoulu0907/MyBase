@@ -9,7 +9,7 @@ tenant-id: {{adminTenantId}}
 }
 
 
-### 创建企业 /admin-api/system/corp/create
+### 创建企业 /admin-api/system/corp-app-relation/update
 POST {{baseUrl}}/system/corp/create
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -37,24 +37,15 @@ tenant-id: {{adminTenantId}}
     }
 }
 
-### 获取企业分页 /admin-api/system/tenant/page
-GET {{baseUrl}}/system/tenant/page?pageNum=1&pageSize=10
-Content-Type: application/json
+
+
+### 请求 /delete 接口 => 成功
+get {{baseUrl}}/system/corp-app-relation/delete?id=117
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 
 ### 请求 /delete 接口 => 成功
-POST {{baseUrl}}/system/corp/delete?id=117
+get {{baseUrl}}/system/corp-app-relation/page?corp_id=1
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
-
-
-### 请求 /delete 接口 => 成功
-POST {{baseUrl}}/system/corp/update_status
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
-{
-  "id": 1,
-  "status": 0
-}

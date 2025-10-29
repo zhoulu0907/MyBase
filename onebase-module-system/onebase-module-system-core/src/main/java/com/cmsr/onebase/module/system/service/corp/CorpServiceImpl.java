@@ -65,7 +65,7 @@ public class CorpServiceImpl implements CorpService {
     @Transactional(rollbackFor = Exception.class)
     public CorpUserRespVO createCorpCombined(CorpCombinedVo corpCombinReqVO) {
         // 保存基础数据
-        createCorp(corpCombinReqVO.getCorpRespVO());
+        createCorp(corpCombinReqVO.getCorpReqVO());
         // 保存系统管理员
         CorpUserRespVO vo = createUser(corpCombinReqVO.getCorpUserReqVO());
         // 保存关联关系
@@ -73,7 +73,7 @@ public class CorpServiceImpl implements CorpService {
         return vo;
     }
 
-    public Long createCorp(CorpRespVO reqVO) {
+    public Long createCorp(CorpReqVO reqVO) {
         //用于校验企业名称是否已存在
         validCorpNameDuplicate(reqVO.getCorpName());
         //用于校验企业用户数量是否超过限制（如大于500）
@@ -177,7 +177,7 @@ public class CorpServiceImpl implements CorpService {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
         // todo  adminUserService.createUser(user);
-        AdminUserDO adminUserDO = null;
+        AdminUserDO adminUserDO = new AdminUserDO();
         CorpUserRespVO vo = new CorpUserRespVO();
         vo.setUsername(reqVO.getUsername());
         vo.setPassword(password);
@@ -206,15 +206,32 @@ public class CorpServiceImpl implements CorpService {
     public PageResult<CorpApplicationRespVO> selectCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
         // 调用数据仓库进行分页查询
         PageResult<CorpAppRelationVO> pageResult = corpAppRelationService.getCorpAppRelationPage(pageReqVO);
-        // 将 DO 对象转换为 VO 对象
+        // 如果入参包含应用名称查询条件，进行返回值过滤
+        List<CorpAppRelationVO> filteredList = pageResult.getList();
+        if (pageReqVO.getApplicationName() != null && !pageReqVO.getApplicationName().trim().isEmpty()) {
+            // 获取所有应用信息用于过滤
+            List<ApplicationDO> allApplications = appApplicationApi.finAppApplicationAll();
+            Map<Long, String> appIdNameMap = allApplications.stream()
+                    .collect(Collectors.toMap(ApplicationDO::getId, ApplicationDO::getAppName));
+
+            // 根据应用名称过滤结果
+            filteredList = pageResult.getList().stream()
+                    .filter(vo -> {
+                        String appName = appIdNameMap.get(vo.getApplicationId());
+                        return appName != null && appName.contains(pageReqVO.getApplicationName());
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        // 将过滤后的 DO 对象转换为 VO 对象
         return new PageResult<CorpApplicationRespVO>(
-                pageResult.getList().stream()
+                filteredList.stream()
                         .map(corpAppRelationVO -> {
                             CorpApplicationRespVO corpRespVO = BeanUtils.toBean(corpAppRelationVO, CorpApplicationRespVO.class);
                             return corpRespVO;
                         })
                         .collect(java.util.stream.Collectors.toList()),
-                pageResult.getTotal()
+                Long.valueOf(filteredList.size()) // 转换为 Long 类型
         );
     }
 

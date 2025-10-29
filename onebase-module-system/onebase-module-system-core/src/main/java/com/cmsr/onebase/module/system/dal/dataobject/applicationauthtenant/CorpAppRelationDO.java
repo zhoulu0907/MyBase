@@ -45,5 +45,8 @@ public class CorpAppRelationDO extends BaseDO {
     @Schema(description = "授权时间", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime authorizationTime ;
 
+    @Schema(description = "状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    private Integer status;
+
 
 }

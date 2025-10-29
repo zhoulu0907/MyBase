@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.corpAppRelation;
 
 
+import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -8,6 +9,7 @@ import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant.CorpAppRelationDO;
+import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationUpdateReqVO;
@@ -59,7 +61,8 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             CorpAppRelationDO corpAppRelationDO = BeanUtils.toBean(createReqVO, CorpAppRelationDO.class);
             corpAppRelationDO.setApplicationId(appliationId);
             corpAppRelationDO.setAuthorizationTime(createReqVO.getAuthorizationTime());
-            corpAppRelationDO.setExpiresTime(createReqVO.getAuthorizationTime().plusYears(1));
+            corpAppRelationDO.setExpiresTime(createReqVO.getAuthorizationTime().plusYears(CorpConstant.EXPIRESYEAR));
+            corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
             corpAppRelationDataRepository.insert(corpAppRelationDO);
         });
     }

@@ -33,7 +33,8 @@ public class CorpController {
 
     @PostMapping("create")
     @Operation(summary = "创建企业")
-    @PreAuthorize("@ss.hasPermission('system:corp:create')")
+    @PermitAll
+    //@PreAuthorize("@ss.hasPermission('system:corp:create')")
     public CommonResult<CorpUserRespVO> createCorpCombined(@RequestBody @Valid CorpCombinedVo reqVO) {
         return success(corpService.createCorpCombined(reqVO));
     }

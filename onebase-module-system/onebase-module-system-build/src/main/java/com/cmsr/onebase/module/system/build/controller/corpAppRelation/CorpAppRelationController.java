@@ -31,13 +31,6 @@ public class CorpAppRelationController   {
     @Resource
     private CorpAppRelationService corpAppRelationService;
 
-    @PostMapping("/create")
-    @PreAuthorize("@ss.hasPermission('system:corp-app-relation:create')")
-    @Operation(summary = "创建企业应用关联")
-    public CommonResult<Boolean> createCorpAppRelation(@Valid @RequestBody CorpAppRelationInertReqVO createReqVO) {
-        corpAppRelationService.createCorpAppRelation(createReqVO);
-        return success(true);
-    }
 
     @PostMapping("/update")
     @PreAuthorize("@ss.hasPermission('system:corp-app-relation:update')")

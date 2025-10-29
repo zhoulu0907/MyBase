@@ -23,7 +23,7 @@ public interface CorpAppRelationService {
 
     /**
      * 更新企业应用关联
-     *
+     * 通过id 可以更新关联关系，业可以更新授权时间
      * @param updateReqVO 更新信息
      */
     void updateCorpAppRelation(@Valid CorpAppRelationUpdateReqVO updateReqVO);

@@ -27,8 +27,8 @@ public class CorpPageReqVO extends PageParam {
     private Integer status;
 
     @Schema(description = "开始时间")
-    private LocalDateTime beginTime;
+    private LocalDateTime beginCreateTime;
 
     @Schema(description = "结束时间")
-    private LocalDateTime endTime;
+    private LocalDateTime endCreateTime;
 }
