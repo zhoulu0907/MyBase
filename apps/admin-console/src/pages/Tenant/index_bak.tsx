@@ -1,22 +1,22 @@
-import { copyToClipboard, formatTimestamp, generateTimestampString, getDomainPrefix, simplifyUrl } from '@/utils/date';
+import { formatTimestamp, generateTimestampString } from '@/utils/date';
 import {
   Button,
-  Dropdown,
   Form,
   Input,
   InputNumber,
-  Menu,
   Message,
   Modal,
-  Pagination,
+  Radio,
   Select,
   Space,
   Switch,
+  Table,
   Tag,
   Tooltip,
   Typography
 } from '@arco-design/web-react';
-import { IconCaretDown, IconCheckCircleFill, IconCopy, IconDelete, IconEdit, IconPlus, IconRecord, IconSearch, IconStop } from '@arco-design/web-react/icon';
+import { IconCopy, IconSearch } from '@arco-design/web-react/icon';
+import { getBackendURL } from '@onebase/common';
 import {
   addPlatformTenantApi,
   getCreateTenantCountApi,
@@ -32,52 +32,21 @@ import {
   type UpdateTenantParams
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 const { Text } = Typography;
 const { Option } = Select;
 const { useForm } = Form;
 
-interface Options {
-  label: string;
-  value: string | PlatformTenantStatus;
-};
-
-const timeOptions: Options[] = [
-  {
-    label: "按创建时间正序排序",
-    value: 1 // todo
-  },
-  {
-    label: "按创建时间倒序排序",
-    value: 0
-  },
-];
-
-const statusOptions: Options[] = [
-  {
-    label: "全部状态",
-    value: ""
-  },
-  {
-    label: "已启用",
-    value: PlatformTenantStatus.enabled
-  },
-  {
-    label: "已禁用",
-    value: PlatformTenantStatus.disabled
-  }
-];
-
 const TenantManagement: React.FC = () => {
   const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<number | null>(null); // 状态筛选
-  const [timeFilter, setTimeFilter] = useState<number>(1); // 时间筛选
   const [keywordSearch, setKeywordSearch] = useState(''); // 关键字搜索
   const [searchInputValue, setSearchInputValue] = useState(''); // 输入框显示的值
   const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [confirmDisableVisible, setConfirmDisableVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [isNewTenant, setIsNewTenant] = useState(false);
   const [currentTenant, setCurrentTenant] = useState<PlatformTenantInfo | null>(null);
@@ -91,14 +60,7 @@ const TenantManagement: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 弹窗
-  const [modalVisible, setModalVisible] = useState(false);
-  const [confirmDisableVisible, setConfirmDisableVisible] = useState(false);
-  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
-
-
   const [form] = useForm();
-  const nav = useNavigate();
 
   // 获取租户列表
   const getPlatformTenantList = async () => {
@@ -108,8 +70,7 @@ const TenantManagement: React.FC = () => {
         pageNo: currentPage,
         pageSize: 10,
         status: statusFilter, // 添加状态筛选参数
-        keywords: keywordSearch, // 添加关键词搜索参数
-        // todo 时间排序
+        keywords: keywordSearch // 添加关键词搜索参数
       });
       setTenantList(resp.list);
       setTotal(resp.total);
@@ -132,17 +93,11 @@ const TenantManagement: React.FC = () => {
 
   useEffect(() => {
     getPlatformTenantList();
-  }, [statusFilter, keywordSearch, currentPage, timeFilter]);
+  }, [statusFilter, keywordSearch, currentPage]);
 
   // 处理状态筛选
   const handleStatusChange = (status: number) => {
     setStatusFilter(status);
-    setCurrentPage(1); // 重置到第一页
-  };
-
-  // 处理时间筛选
-  const handleTimeChange = (value: any) => {
-    setTimeFilter(value);
     setCurrentPage(1); // 重置到第一页
   };
 
@@ -435,9 +390,39 @@ const TenantManagement: React.FC = () => {
     form.setFieldsValue({ status: PlatformTenantStatus.enabled });
   };
 
-  // 删除
-  const confirmDelete = () => {
-    Message.success('确认删除');
+  const copyToClipboard = async (text: string) => {
+    try {
+      // 首先尝试使用现代 Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        Message.success('复制成功!');
+      } else {
+        // 降级到传统方法
+        fallbackCopyToClipboard(text);
+      }
+    } catch (error) {
+      console.error('复制失败:', error);
+      Message.error('复制失败');
+    }
+  };
+
+  const fallbackCopyToClipboard = (text: string) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      Message.success('复制成功!');
+    } catch (err) {
+      console.error('execCommand 失败:', err);
+      Message.error('复制失败');
+    }
+    document.body.removeChild(textArea);
   };
 
   // 表格列定义
@@ -532,52 +517,68 @@ const TenantManagement: React.FC = () => {
     }
   };
 
-  const iconStyle = {
-    marginRight: 4,
-    fontSize: 16,
-    transform: 'translateY(1px)',
+  // 获取当前环境的域名前缀
+  const getDomainPrefix = () => {
+    // 检查全局配置
+    try {
+      const url = new URL(getBackendURL());
+      return `${url.protocol}//${url.host}`;
+    } catch (e) {
+      console.error('解析BASE_URL失败:', e);
+    }
+
+    // 检查环境变量
+    if (import.meta.env.VITE_API_BASE_URL) {
+      try {
+        const url = new URL(import.meta.env.VITE_API_BASE_URL);
+        return `${url.protocol}//${url.host}`;
+      } catch (e) {
+        console.error('解析VITE_API_BASE_URL失败:', e);
+      }
+    }
+
+    // 返回默认值
+    return 'http://localhost:9524';
   };
 
-  const DropList = ({ data }: { data: PlatformTenantInfo }) => {
-    console.log('tenant', data)
-    return (
-      <Menu onClickMenuItem={() => setCurrentTenant(data)}>
-        <Menu.Item key='1' onClick={() => nav(`edit?id=${data.id}`)}>
-          <IconEdit style={iconStyle} />
-          编辑
-        </Menu.Item>
-        <Menu.Item key='2' onClick={confirmDelete}>
-          <IconRecord style={iconStyle} />
-          启用
-        </Menu.Item>
-        <Menu.Item key='3' onClick={confirmDisable}>
-          <IconStop style={iconStyle} />
-          禁用
-        </Menu.Item>
-        <Menu.Item key='4' onClick={() => setConfirmDeleteVisible(true)}>
-          <IconDelete style={iconStyle} />
-          删除
-        </Menu.Item>
-      </Menu>
-    )
-  }
+  // 简化URL显示
+  const simplifyUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      const host = urlObj.host;
+      const protocol = urlObj.protocol;
+      const hash = urlObj.hash;
 
-  const hasTenantLogo = true;
+      // 如果主机名很短，直接返回
+      if (host.length <= 20) {
+        return url;
+      }
+
+      // 省略主机名中间部分
+      const simplifiedHost = `${host.substring(0, 16)}...`;
+      return `${protocol}//${simplifiedHost}/${hash}`;
+    } catch (e) {
+      // 如果URL解析失败，返回原始URL
+      return url;
+    }
+  };
 
   return (
     <div className={styles.tenant}>
       {/* 新建搜索条件栏 */}
       <div className={styles.toolbar}>
-        <Button type="primary" icon={<IconPlus />} onClick={() => nav('create')}>
-          新建空间
+        <Button type="primary" onClick={handleCreate}>
+          + 新建
         </Button>
         <Space size="large">
-          <Select options={timeOptions} defaultValue={timeOptions[0].value} bordered={false} onChange={handleTimeChange} />
-          <Select options={statusOptions} defaultValue={statusOptions[0].value} bordered={false} onChange={handleStatusChange} />
-
+          <Radio.Group type="button" value={statusFilter} onChange={handleStatusChange}>
+            <Radio value={null}>全部</Radio>
+            <Radio value={PlatformTenantStatus.enabled}>启用</Radio>
+            <Radio value={PlatformTenantStatus.disabled}>禁用</Radio>
+          </Radio.Group>
           <Input.Search
-            className={styles.inputSearch}
-            placeholder="搜索空间"
+            placeholder="搜索租户名称/编码"
+            style={{ width: 300 }}
             allowClear
             value={searchInputValue}
             onChange={(value) => handleSearchInputChange(value)}
@@ -586,100 +587,20 @@ const TenantManagement: React.FC = () => {
           />
         </Space>
       </div>
-
       {/* 租户表格 */}
-      <div className={styles.tenantList}>
-        {
-          tenantList.map(tenant => {
-            const { id, website = '' } = tenant;
-            // 获取当前环境的域名前缀
-            const domainPrefix = getDomainPrefix();
-            const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${id}/${website}/`;
-            const displayUrl = simplifyUrl(fullUrl);
-
-            return (
-              <div className={styles.tenantItem} key={tenant.id}>
-                <div className={styles.left}>
-                  {hasTenantLogo ? <img className={styles.tenantLogo} src="" alt="" /> :
-                    <div className={styles.tenantLogo}>{tenant.name.slice(0, 6)}</div>}
-                  <div className={styles.tenantBaseInfo}>
-                    <div className={styles.tenantName}>
-                      <div className={styles.tenantNameText}>{tenant.name}</div>
-                      {tenant.status === PlatformTenantStatus.enabled ? <Tag color='arcoblue' icon={<IconCheckCircleFill />}>
-                        已启用
-                      </Tag> :
-                        <Tag color='gray' icon={<IconCheckCircleFill />}>
-                          未启用
-                        </Tag>
-                      }
-                    </div>
-                    <div className={styles.tenantID}>
-                      <div>ID：</div>
-                      <div className={styles.idText}>{tenant.tenantCode}</div>
-                    </div>
-                    <div className={styles.tenantAddress}>
-                      <div>访问地址：</div>
-                      <div className={styles.addressText}>{displayUrl}</div>
-                      <IconCopy onClick={() => copyToClipboard(fullUrl)} style={{ fontSize: 16 }} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.center}>
-                  <div className={styles.enterpriseNumber}>
-                    <div className={styles.rowName}>企业数</div>
-                    <div className={styles.rowValue16}>137</div>
-                  </div>
-
-                  <div className={styles.UserNumber}>
-                    <div className={styles.rowName}>用户数</div>
-                    <div className={styles.flexRow}>
-                      <div className={styles.rowValue16}>2200</div>
-                      <div className={styles.rowValue14}>/4000</div>
-                    </div>
-                  </div>
-
-                  <div className={styles.appNumber}>
-                    <div className={styles.rowName}>应用数</div>
-                    <div className={styles.rowValue16}>220</div>
-                  </div>
-
-                  <div className={styles.createTime}>
-                    <div className={styles.rowName}>创建时间</div>
-                    <div className={styles.rowValue12}>{formatTimestamp(tenant.createTime)}</div>
-                  </div>
-                </div>
-
-                <div className={styles.right}>
-                  <Button type="primary" onClick={() => handleClick(fullUrl)}>
-                    进入空间
-                  </Button>
-                  <Dropdown.Button
-                    type='secondary'
-                    icon={<IconCaretDown />}
-                    droplist={<DropList data={tenant} />}
-                  >
-                    <div onClick={() => nav(`edit?id=${tenant.id}`)} >
-                      <IconEdit fontSize={16} style={{ marginRight: 4 }} />编辑
-                    </div>
-                  </Dropdown.Button>
-
-                </div>
-
-              </div>
-            )
-          })
-        }
-
-      </div>
-
-      <Pagination
-        current={currentPage}
-        pageSize={10}
-        total={total}
-        onChange={handlePageChange}
-        style={{
-          alignSelf: 'flex-end'
+      <Table
+        rowKey="id"
+        border={false}
+        columns={columns}
+        data={tenantList}
+        loading={loading}
+        rowClassName={(record) => (record.status === PlatformTenantStatus.enabled ? 'enabled-row' : '')}
+        pagination={{
+          current: currentPage,
+          pageSize: 10,
+          showTotal: true,
+          total: total,
+          onChange: handlePageChange
         }}
       />
 
@@ -781,17 +702,6 @@ const TenantManagement: React.FC = () => {
         </div>
         <p style={{ marginBottom: 8 }}>为防止误操作，请输入“{currentTenant?.name}”进行确认：</p>
         <Input value={confirmText} onChange={(value) => setConfirmText(value)} placeholder="请输入要禁用的租户名称" />
-      </Modal>
-
-      {/* 删除弹窗 */}
-      <Modal title={`确认要删除空间（${currentTenant?.name}）吗？`} visible={confirmDeleteVisible} onOk={confirmDelete} onCancel={() => setConfirmDeleteVisible(false)}>
-        <div style={{ marginBottom: 20 }}>
-          <p>
-            删除空间，该空间下的企业、用户等数据将被永久删除，操作不可逆，请谨慎操作。
-          </p>
-        </div>
-        <p style={{ marginBottom: 8 }}>如确定删除，请输入空间名称：{currentTenant?.name}</p>
-        <Input value={confirmText} onChange={(value) => setConfirmText(value)} placeholder="请输入空间名称" />
       </Modal>
     </div>
   );

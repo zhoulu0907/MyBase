@@ -1,5 +1,5 @@
 import { systemService } from './clients';
-import { PlatformTenantInfo, CreateTenantParams } from '../types/platformTenant';
+import { PlatformTenantInfo, CreateTenantParams, UpdateTenantParams } from '../types/platformTenant';
 
 // 可分配数量接口 /admin-api/system/tenant/get-allocatable-count
 export const getCreateTenantCountApi = () => systemService.get('/tenant/get-allocatable-count');
@@ -40,3 +40,6 @@ export const updatePlatformTenantApi = (data: any) => systemService.post('/tenan
 
 // 获取租户管理员列表
 export const getPlatformTenantAdminListApi = () => systemService.get('/platform/admin/list');
+
+// 获得租户(安全考虑仅获取用户所属租户)
+export const getPlatformTenantAdminInfoApi = (id: UpdateTenantParams) => systemService.get('/tenant/get', id);
