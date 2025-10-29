@@ -37,11 +37,8 @@ public class TenantDO extends BaseDO {
     public static final String TENANT_KEY = "tenant_key";
     public static final String TENANT_SECRET = "tenant_secret";
     // 在其他字段常量后添加
-    public static final String ASSIGNED_USERS = "assigned_users";
     public static final String ACCESS_URL = "access_url";
-    public static final String SAAS_ENABLED = "saas_enabled";
-    public static final String APP_COUNT = "app_count";
-    public static final String ENTERPRISE_COUNT = "enterprise_count";
+    public static final String PUBLISH_MODEL = "publish_model";
     public static final String LOGO_URL = "logo_url";
 
     // builder模式可正常运作
@@ -62,14 +59,12 @@ public class TenantDO extends BaseDO {
     private String name;
     /**
      * 联系人的用户编号
-     * <p>
      * 关联 {@link com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO#getId()}
      */
     @Column(name = ADMIN_USER_ID)
     private Long adminUserId;
     /**
      * 租户状态
-     * <p>
      * 枚举 {@link CommonStatusEnum}
      */
     @Column(name = STATUS)
@@ -86,7 +81,6 @@ public class TenantDO extends BaseDO {
     private String websiteH5;
     /**
      * 租户套餐编号
-     * <p>
      * 关联 {@link TenantPackageDO#getId()}
      * 特殊逻辑：系统内置租户，不使用套餐，暂时使用 {@link #PACKAGE_ID_SYSTEM} 标识
      */
@@ -120,12 +114,8 @@ public class TenantDO extends BaseDO {
      * secret
      */
     @Column(name = TENANT_SECRET)
-    private String tenantSecret;// 在现有字段后添加以下字段定义
-    /**
-     * 分配人员数量
-     */
-    @Column(name = "ASSIGNED_USERS")
-    private Integer assignedUsers;
+    private String tenantSecret;
+
 
     /**
      * 访问地址
@@ -138,18 +128,6 @@ public class TenantDO extends BaseDO {
      */
     @Column(name = "SAAS_ENABLED")
     private Integer saasEnabled;
-
-    /**
-     * 应用数量
-     */
-    @Column(name = "APP_COUNT")
-    private Integer appCount;
-
-    /**
-     * 租户数量
-     */
-    @Column(name = "ENTERPRISE_COUNT")
-    private Integer enterpriseCount;
 
     /**
      * 用户logo

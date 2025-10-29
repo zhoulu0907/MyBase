@@ -1,0 +1,58 @@
+
+### 请求 /login 接口 => 成功（无验证码)
+POST {{baseUrl}}/system/auth/login
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+
+### 创建企业 /admin-api/system/corp/create
+POST {{baseUrl}}/system/corp/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "corpRespVO": {
+    "corpName": "企业名称",
+    "corpCode": "10010",
+    "industryType": 0,
+    "status": 0,
+    "address": "xxx",
+    "userCount": 100
+  },
+  "corpUserReqVO": {
+    "username": "gaoguoqing",
+    "nickname": "高高",
+    "email": "137@126.com",
+    "mobile": "15890615800"
+  },
+  "corpAppRelationInertReqVO": {
+    "corpId": 0,
+    "applicationIdList": [
+     100,111
+    ],
+    "authorizationTime": "2025-01-05"
+  }
+}
+
+### 获取企业分页 /admin-api/system/tenant/page
+GET {{baseUrl}}/system/tenant/page?pageNum=1&pageSize=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/corp/delete?id=117
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/corp/update_status?id=117
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

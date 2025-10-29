@@ -47,7 +47,7 @@ public class ApplicationDO extends TenantBaseDO {
     @Column(name = "description", columnDefinition = "VARCHAR(1024)", length = 1024, comment = "描述")
     private String description;
 
-    @Column(name = "saas_enabled", columnDefinition = "VARCHAR(1024)", length = 1024, comment = "发布模式/内部模式")
-    private Integer saasEnabled;
+    @Column(name = "publish_model", columnDefinition = "INT4 NOT NULL", comment = "发布模式/内部模式")
+    private Integer publishModel;
 
 }

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
+import com.cmsr.onebase.framework.common.enums.CommonSaasEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
@@ -12,9 +13,11 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
-import com.cmsr.onebase.module.system.dal.database.EnterpriseDataRepository;
+import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.enterprise.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -22,6 +25,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
@@ -29,6 +33,7 @@ import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -95,7 +100,8 @@ public class TenantServiceImpl implements TenantService {
     private TenantDataRepository tenantDataRepository;
 
     @Resource
-    private EnterpriseDataRepository enterpriseDataRepository;
+    private CorpService corpService;
+
 
     @Override
     public List<Long> getTenantIdList() {
@@ -154,7 +160,6 @@ public class TenantServiceImpl implements TenantService {
         });
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createTenant(TenantInsertReqVO createReqVO) {
@@ -200,16 +205,10 @@ public class TenantServiceImpl implements TenantService {
             }
         }
 
-        // 创建租户,默认数量为0
 
-        createReqVO.setEnterpriseCount(0);
-        createReqVO.setAppCount(0);
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
-        tenant.setSaasEnabled(createReqVO.getSaasEnabled()==null?0:createReqVO.getSaasEnabled());
-        tenant.setCreateTime(LocalDateTime.now());
-        tenant.setUpdateTime(LocalDateTime.now());
+        tenant.setSaasEnabled(createReqVO.getSaasEnabled()==null? CommonSaasEnum.DISABLE.getValue():createReqVO.getSaasEnabled());
         tenant = tenantDataRepository.insert(tenant);
-
 
         // 创建租户的管理员1
         TenantDO finalTenant = tenant;
@@ -218,12 +217,6 @@ public class TenantServiceImpl implements TenantService {
             Long roleId = createTenantAdminRole();
             // 创建用户，并分配角色
             Long userId = createSystemUser(roleId, createReqVO);
-            // 修改租户的管理员
-            DataRow row = new DataRow();
-            row.put(TenantDO.ID, finalTenant.getId());
-            row.put(TenantDO.ADMIN_USER_ID, userId);
-            tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, finalTenant.getId()));
-
         });
         return tenant.getId();
     }
@@ -262,12 +255,9 @@ public class TenantServiceImpl implements TenantService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateTenant(@Valid TenantUpdateReqVO updateReqVO) {
-
         // 校验存在
         TenantDO tenant = validateUpdateTenant(updateReqVO.getId());
-        tenant.setSaasEnabled(0);
-        tenant.setEnterpriseCount(0);
-        tenant.setAppCount(0);
+
         // 校验租户名称是否重复
         validTenantNameDuplicate(updateReqVO.getName(), updateReqVO.getId());
         // 校验租户域名是否重复
@@ -320,7 +310,6 @@ public class TenantServiceImpl implements TenantService {
         if (updateObj.getStatus() != null) {
             row.put(TenantDO.STATUS, updateObj.getStatus());
         }
-
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
         // 修改租户管理员
         if (StringUtils.isNotBlank(updateReqVO.getAdminUserName())) {
@@ -482,10 +471,39 @@ public class TenantServiceImpl implements TenantService {
         Long appCountResult = appApplicationApi.countApplicationByTenantId(id);
         // Long 转 Integer
         tenantRespVO.setAppCount(appCountResult != null ? appCountResult.intValue() : 0);
-
         return tenantRespVO;
     }
 
+    /**
+     * 获取所有企业的数据，并根据tenantId分组获取条数
+     *
+     * @return Map<tenantId, count>
+     */
+    public Map<Integer, Integer> findCorpCount() {
+        List<CorpDO> corpList = corpService.findCorpAll();
+        return corpList.stream()
+                .collect(Collectors.groupingBy(
+                        CorpDO::getTenantId,
+                        Collectors.summingInt(corp -> 1) // 使用summingInt替代counting
+                ));
+    }
+
+    /**
+     * 获取所有应用
+     * @return
+     */
+    public Map<Integer, Integer> findAppCount() {
+        List<ApplicationDO> allList = appApplicationApi.finAppApplicationAll();
+        return allList.stream()
+                .collect(Collectors.groupingBy(
+                        app -> app.getTenantId().intValue(),  // Long转Integer
+                        Collectors.summingInt(app -> 1)       // Integer计数替代Long计数
+                ));
+    }
+
+    public String formatTime(LocalDateTime createTime){
+        return createTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
 
     @Override
     public PageResult<TenantRespVO> getTenantPage(TenantPageReqVO reqVO) {
@@ -507,15 +525,30 @@ public class TenantServiceImpl implements TenantService {
             userNicknameMap = users.stream()
                     .collect(Collectors.toMap(AdminUserDO::getId, AdminUserDO::getNickname));
         }
+        Map<Integer,Integer>  coupCountMap=findCorpCount();
+        Map<Integer,Integer>  appCountMap=findAppCount();
         // 转换为VO并设置昵称
         Map<Long, String> finalUserNicknameMap = userNicknameMap;
         List<TenantRespVO> tenantRespVOList = tenantDOPageResult.getList().stream()
                 .map(tenantDO -> {
                     TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
                     tenantRespVO.setLogoUrl(tenantDO.getLogoUrl());
-                    tenantRespVO.setEnterpriseCount(tenantDO.getEnterpriseCount()==null?0:tenantDO.getEnterpriseCount());
-                    tenantRespVO.setAppCount(tenantDO.getAppCount()==null?0:tenantDO.getAppCount());
-                    tenantRespVO.setAccessUrl(tenantDO.getAccessUrl()==null?"":tenantDO.getAccessUrl());
+
+                    Integer corpCount = coupCountMap.get(tenantDO.getId());
+                    if (corpCount == null) {
+                        corpCount = CorpConstant.ZERO; // 默认值处理
+                    }
+                    tenantRespVO.setCorpCount(corpCount);
+
+                    Integer appCount = appCountMap.get(tenantDO.getId());
+                    if (corpCount == null) {
+                        appCount = CorpConstant.ZERO; // 默认值处理
+                    }
+                     tenantRespVO.setAppCount(appCount);
+                     if(tenantRespVO.getSaasEnabled()==null){
+                         tenantRespVO.setSaasEnabled(CommonSaasEnum.DISABLE.getValue());
+                     }
+                    tenantRespVO.setFormatCreateTime(formatTime(tenantRespVO.getCreateTime()));
                     // 设置联系人昵称
                     if (tenantDO.getAdminUserId() != null) {
                         tenantRespVO.setAdminNickName(finalUserNicknameMap.get(tenantDO.getAdminUserId()));
@@ -604,20 +637,4 @@ public class TenantServiceImpl implements TenantService {
     private boolean isTenantDisable() {
         return tenantProperties == null || Boolean.FALSE.equals(tenantProperties.getEnable());
     }
-
-
-
-    @Override
-    public Long getTenantEnterpriseCount(Long tenantId) {
-
-        return enterpriseDataRepository.getTenantEnterpriseCount(tenantId);
-    }
-
-    @Override
-    public Long getTenantApplicationCount(Long tenantId) {
-
-        return   appApplicationApi.countApplicationByTenantId(tenantId);
-    }
-
-
 }

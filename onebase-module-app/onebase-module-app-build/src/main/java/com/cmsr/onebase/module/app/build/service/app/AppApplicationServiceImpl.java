@@ -1,9 +1,11 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
 import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
@@ -12,7 +14,6 @@ import com.cmsr.onebase.module.app.build.util.VersionUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
-import com.cmsr.onebase.module.app.build.vo.auth.AuthRoleAddUserReqVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
@@ -23,19 +24,9 @@ import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
-import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
-import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
-import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
-import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
-import com.cmsr.onebase.module.app.build.service.AppCommonService;
-import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
-import com.cmsr.onebase.module.app.build.util.AppUtils;
-import com.cmsr.onebase.module.app.build.util.VersionUtils;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
@@ -96,8 +87,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Resource
     private AppAuthRoleRepository appAuthRoleRepository;
 
-    @Resource
-    private TenantCommonApi tenantApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -149,22 +138,16 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO.setAppUid(findAndCreateAppUid());
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
-
         if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
             applicationDO.setAppCode(createReqVO.getAppCode());
         } else {
             applicationDO.setAppCode(AppUtils.createAppCode());
         }
-       // createReqVO.setTenantId(1L);
-        applicationDO.setSaasEnabled(createReqVO.getSaasEnabled()==null?0:createReqVO.getSaasEnabled());
-        // 新增空间id
-        applicationDO.setTenantId(createReqVO.getTenantId());
-        applicationDO = applicationRepository.insert(applicationDO);
-        //  获取应用数量
-        Long appCount = applicationRepository.countByTenantId(createReqVO.getTenantId());
-        // 回写一个空间内企业数到 空间主表
-        tenantApi.updateTenantAppCount(createReqVO.getTenantId(), appCount);
+        // 新增发布模式，新增空间id
+        applicationDO.setPublishModel(createReqVO.getPublishModel()==null? CommonPublishModelEnum.InnerModel.getValue() :createReqVO.getPublishModel());
+        applicationDO.setTenantId(TenantContextHolder.getRequiredTenantId());
 
+        applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());
         createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
@@ -205,7 +188,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
-        updateObj.setSaasEnabled(createReqVO.getSaasEnabled()==null?0:createReqVO.getSaasEnabled());
+        updateObj.setPublishModel(createReqVO.getPublishModel()==null?CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
     }
@@ -282,6 +265,4 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
     }
-
-
 }

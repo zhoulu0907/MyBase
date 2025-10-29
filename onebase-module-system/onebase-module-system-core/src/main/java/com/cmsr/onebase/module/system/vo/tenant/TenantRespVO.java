@@ -5,10 +5,12 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
 import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
 import com.cmsr.onebase.module.system.enums.DictTypeConstants;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Schema(description = "管理后台 - 租户 Response VO")
 @Data
@@ -79,20 +81,19 @@ public class TenantRespVO {
     @Schema(description = "已存在用户数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Integer existUserCount;
 
-
-    @Schema(description = "分配人员数量")
-    private Integer assignedUsers;
-
     @Schema(description = "访问地址")
     private String accessUrl;
 
     @Schema(description = "saas功能是否开启默认0，开启1")
     private Integer saasEnabled;
 
-    @Schema(description = "租户数量")
-    private Integer enterpriseCount;
-
     @Schema(description = "用户logo")
     private String logoUrl;
+
+    @Schema(description = "企业数")
+    private Integer CorpCount;
+
+    @Schema(description = "创建时间")
+    private String formatCreateTime;
 
 }

@@ -52,7 +52,7 @@ public class ApplicationCreateReqVO {
 
     @Schema(description = "发布模式")
     @NotBlank(message = "发布模式不能为空")
-    private Integer saasEnabled;
+    private Integer publishModel;
 
 
 }

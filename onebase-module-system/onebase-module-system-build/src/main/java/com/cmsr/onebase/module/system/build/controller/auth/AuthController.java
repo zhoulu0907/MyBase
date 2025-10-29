@@ -73,7 +73,7 @@ public class AuthController {
         return success(authService.login(reqVO));
     }
 
-    @PostMapping("/enterprise-login")
+    @PostMapping("/corp-login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")
     public CommonResult<AuthLoginRespVO> enterpriseLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {

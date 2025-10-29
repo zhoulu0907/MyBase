@@ -21,10 +21,6 @@ public class TenantApiImpl implements TenantCommonApi {
 
     @Resource
     private TenantService tenantService;
-
-    @Resource
-    private TenantDataRepository tenantDataRepository;
-
     @Override
     @TenantIgnore // 防止递归。避免调用 /rpc-api/system/tenant/valid 接口时，又去触发 /rpc-api/system/tenant/valid 去校验
     public CommonResult<List<Long>> getTenantIdList() {
@@ -36,17 +32,6 @@ public class TenantApiImpl implements TenantCommonApi {
     public CommonResult<Boolean> validTenant(Long id) {
         tenantService.validTenant(id);
         return success(true);
-    }
-
-    @Override
-    public void updateTenantAppCount(Long tenantId, Long appCount) {
-        // 构建更新条件
-        DataRow row = new DataRow();
-        row.put("app_count", appCount);
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("id", tenantId);
-        // 执行更新操作
-        tenantDataRepository.updateByConfig(row, configStore);
     }
 
 }

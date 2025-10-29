@@ -1,6 +1,9 @@
 package com.cmsr.onebase.module.app.api.app;
 
+import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -10,5 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public interface AppApplicationApi {
 
     Long countApplicationByTenantId(Long tenantId);
+
+    List<ApplicationDO> finAppApplicationAll();
 
 }

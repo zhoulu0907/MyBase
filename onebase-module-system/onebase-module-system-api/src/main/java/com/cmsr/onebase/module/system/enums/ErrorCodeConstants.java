@@ -186,7 +186,7 @@ public interface ErrorCodeConstants {
     ErrorCode ENTERPRRISE_NO_EXISTS = new ErrorCode(1_002_025_006, "企业为【{}】的企业不存在");
     ErrorCode ENTERPRRISE_EXISTS = new ErrorCode(1_002_025_005, "企业为【{}】的企业已存在");
     ErrorCode ENTERPRRISE_USER_COUNT = new ErrorCode(1_002_025_007, "企业用户数为【{}】大于系统上限500");
-    // ========== 应用授权企业表 1-002-030-000 ==========
-    ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "应用授权企业表不存在");
+    // ========== 企业应用关联 1-002-030-000 ==========
+    ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "企业应用关联表不存在");
 
 }

@@ -96,7 +96,6 @@ public class TenantController {
     @GetMapping("/get")
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
     public CommonResult<TenantRespVO> getTenant() {
         return success(tenantService.getTenantWithAppCount(TenantContextHolder.getTenantId()));
     }
@@ -127,7 +126,8 @@ public class TenantController {
 
     @GetMapping("/page")
     @Operation(summary = "获得租户分页")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+   // @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    @PermitAll
     public CommonResult<PageResult<TenantRespVO>> getTenantPage(@Valid TenantPageReqVO pageVO) {
         PageResult<TenantRespVO> pageResult = tenantService.getTenantPage(pageVO);
         return success(BeanUtils.toBean(pageResult, TenantRespVO.class));
@@ -142,22 +142,6 @@ public class TenantController {
         // 导出 Excel
         ExcelUtils.write(response, "租户.xls", "数据", TenantRespVO.class,
                 BeanUtils.toBean(list, TenantRespVO.class));
-    }
-
-    @GetMapping("/get-exist-application-count")
-    @Operation(summary = "获得空间应用数")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
-    public CommonResult<Long> getTenantApplicationCount(@RequestParam(required = false) Long id) {
-        Long applicationCount = tenantService.getTenantApplicationCount(id);
-        return success(applicationCount);
-    }
-
-    @GetMapping("/get-exist-enterprise-count")
-    @Operation(summary = "获得空间企业数")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
-    public CommonResult<Long> getTenantEnterpriseCount(@RequestParam(required = false) Long id) {
-        Long enterpriseCount = tenantService.getTenantEnterpriseCount(id);
-        return success(enterpriseCount);
     }
 
 }

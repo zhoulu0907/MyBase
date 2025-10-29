@@ -30,7 +30,6 @@ public class AppApplicationController {
     @GetMapping("/page")
     @Operation(summary = "获得应用列表")
     public CommonResult<PageResult<ApplicationRespVO>> getApplicationPage(@Validated ApplicationPageReqVO pageReqVO) {
-        pageReqVO.setTenantId(1L);
         return CommonResult.success(appApplicationService.getApplicationPage(pageReqVO));
     }
 
@@ -53,7 +52,6 @@ public class AppApplicationController {
         return CommonResult.success(true);
     }
 
-
     @PostMapping("/update-name")
     @Operation(summary = "更新应用名称")
     public CommonResult<Boolean> updateApplicationName(@RequestParam("id") Long id,
@@ -62,7 +60,6 @@ public class AppApplicationController {
         return CommonResult.success(true);
     }
 
-
     @PostMapping("/delete")
     @Operation(summary = "删除应用")
     public CommonResult<Boolean> deleteApplication(@RequestParam("id") Long id,
@@ -70,7 +67,6 @@ public class AppApplicationController {
         appApplicationService.deleteApplication(id, name);
         return CommonResult.success(true);
     }
-
     @GetMapping("/id/generate")
     @Operation(summary = "发号器")
     public CommonResult<Long> generateId() {

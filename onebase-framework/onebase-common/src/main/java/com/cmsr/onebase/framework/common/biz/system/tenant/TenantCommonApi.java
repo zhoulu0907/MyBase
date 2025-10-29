@@ -26,7 +26,4 @@ public interface TenantCommonApi {
     @Parameter(name = "id", description = "租户编号", required = true, example = "1024")
     CommonResult<Boolean> validTenant(@RequestParam("id") Long id);
 
-    @GetMapping(PREFIX + "/updateTenantAppCount")
-    @Operation(summary = "获取空间应用数")
-    void updateTenantAppCount(Long tenantId, Long appCount);
 }
