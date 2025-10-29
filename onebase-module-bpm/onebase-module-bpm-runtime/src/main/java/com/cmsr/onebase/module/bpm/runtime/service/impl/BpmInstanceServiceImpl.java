@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.StartNodeExtDTO;
@@ -242,6 +243,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         BpmFlowInsBizExtDO flowInsExtDO = new BpmFlowInsBizExtDO();
         Map<String, Object> variables = new HashMap<>();
+
+        BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
+        variables.put("appId", extDto.getAppId());
+
         entityVO.getEntityData().forEach((key, value) -> variables.put(String.valueOf(key), value));
 
         // 开启流程
@@ -293,7 +298,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         // 保存扩展信息 todo：处理Mock的参数值
         flowInsExtDO.setBusinessId(entityDataId);
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
-        flowInsExtDO.setBpmBusinessStatus(businessStatus.getCode());
         flowInsExtDO.setBusinessTitle("流程标题");
         flowInsExtDO.setInitiatorId(1L);
         flowInsExtDO.setInitiatorName("发起人");
@@ -302,6 +306,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary("摘要");
         flowInsExtDO.setInstanceId(instance.getId());
+        flowInsExtDO.setAppId(extDto.getAppId());
 
         flowInsExtRepository.insert(flowInsExtDO);
 

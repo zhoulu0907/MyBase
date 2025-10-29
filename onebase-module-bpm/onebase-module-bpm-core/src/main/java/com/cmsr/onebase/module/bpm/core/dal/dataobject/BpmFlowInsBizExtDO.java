@@ -31,6 +31,12 @@ public class BpmFlowInsBizExtDO extends TenantBaseDO {
     private String businessId;
 
     /**
+     * 应用ID
+     */
+    @Column(name = "app_id", length = 100)
+    private Long appId;
+
+    /**
      * 业务编码
      */
     @Column(name = "business_code", length = 100)
@@ -39,7 +45,7 @@ public class BpmFlowInsBizExtDO extends TenantBaseDO {
     /**
      * 业务标题
      */
-    @Column(name = "business_title", length = 200)
+    @Column(name = "business_title", length = 500)
     private String businessTitle;
 
     /**
@@ -93,10 +99,4 @@ public class BpmFlowInsBizExtDO extends TenantBaseDO {
      */
     @Column(name = "bpm_version", length = 50)
     private String bpmVersion;
-
-    /**
-     * 流程状态
-     */
-    @Column(name = "bpm_business_status", length = 50)
-    private String bpmBusinessStatus;
 }

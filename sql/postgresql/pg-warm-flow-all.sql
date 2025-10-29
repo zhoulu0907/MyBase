@@ -322,7 +322,8 @@ CREATE TABLE bpm_flow_instance_biz_ext
     instance_id             int8         NOT NULL,
     business_id             varchar(100) NOT NULL,
     business_code           varchar(100) NULL,
-    business_title          varchar(200) NOT NULL,
+    business_title          varchar(500) NOT NULL,
+    app_id                  int8         NOT NULL,
     initiator_id            int8         NULL,
     initiator_name          varchar(100) NULL,
     initiator_dept_id       int8         NULL,
@@ -331,7 +332,6 @@ CREATE TABLE bpm_flow_instance_biz_ext
     form_summary            varchar(500) NOT NULL,
     form_name               varchar(100) NOT NULL,
     bpm_version             varchar(50)  NOT NULL,
-    bpm_business_status     varchar(50)  NOT NULL,
     lock_version            int8         NOT NULL DEFAULT 0,
     creator                 int8         NOT NULL DEFAULT 0,
     create_time             timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -358,7 +358,7 @@ COMMENT ON COLUMN bpm_flow_instance_biz_ext.submit_time IS '发起时间（与cr
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.form_summary IS '表单摘要';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.form_name IS '流程表单';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.bpm_version IS '流程版本号';
-COMMENT ON COLUMN bpm_flow_instance_biz_ext.bpm_business_status IS '流程状态';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.app_id IS '应用ID';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.lock_version IS '乐观锁';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.creator IS '创建人';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.create_time IS '创建时间';

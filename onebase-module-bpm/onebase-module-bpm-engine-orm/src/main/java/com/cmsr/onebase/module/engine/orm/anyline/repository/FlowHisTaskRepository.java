@@ -34,7 +34,7 @@ public class FlowHisTaskRepository extends DataRepository<FlowHisTask> {
         );
     }
     private String buildBaseSql(Long userId) {
-        return """
+        return String.format("""
                 select
                     t.id,
                     t.skip_type,
@@ -47,12 +47,12 @@ public class FlowHisTaskRepository extends DataRepository<FlowHisTask> {
                        ROW_NUMBER() OVER (PARTITION BY instance_id ORDER BY id DESC) as rn
                     FROM bpm_flow_his_task
                     WHERE deleted = 0
-                    and approver = '" + userId + "'
+                    and approver = '%d'
                     ) t
                 LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id
                 WHERE t.rn = 1
                 and t1.deleted = 0
-                """;
+                """, userId);
     }
     private ConfigStore buildDynamicCondition(BpmFlowDoneTaskPageReqVO reqVO){
         DefaultConfigStore condition = new DefaultConfigStore();
