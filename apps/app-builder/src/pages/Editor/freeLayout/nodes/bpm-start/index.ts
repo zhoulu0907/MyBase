@@ -9,14 +9,14 @@ import { formMeta } from './form-meta';
 import { WorkflowNodeType } from '../constants';
 
 export const BpmStartNodeRegistry: FlowNodeRegistry = {
-  type: WorkflowNodeType.BpmStart,
+  type: WorkflowNodeType.Start,
   meta: {
     isStart: true,
     deleteDisable: true,
     copyDisable: true,
     sidebarDisabled: true,
     nodePanelVisible: false,
-
+    defaultPorts: [{ type: 'output', location: 'bottom' }],
     wrapperStyle: {
       minWidth: 'unset',
       width: '100%',

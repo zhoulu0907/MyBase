@@ -4,8 +4,8 @@
  */
 
 export enum WorkflowNodeType {
-  Start = 'start',
-  End = 'end',
+  // Start = 'c',
+  // End = 'end',
   LLM = 'llm',
   HTTP = 'http',
   Code = 'code',
@@ -17,7 +17,7 @@ export enum WorkflowNodeType {
   Comment = 'comment',
   Continue = 'continue',
   Break = 'break',
-  BpmStart = 'bpm-start',
-  BpmEnd = 'bpm-end',
+  Start = 'start',
+  End = 'end',
   ProcessNode = 'process-node'
 }

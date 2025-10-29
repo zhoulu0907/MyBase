@@ -8,3 +8,4 @@ export const metadataService = createClient('/metadata');
 export const runtimeMetadataService = createClient('/metadata', getRuntimeBackendURL());
 export const flowService = createClient('/flow');
 export const formulaService = createClient('/formula');
+export const bpmService = createClient('/bpm');

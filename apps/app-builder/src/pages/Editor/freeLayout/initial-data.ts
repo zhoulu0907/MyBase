@@ -9,7 +9,7 @@ export const initialData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_0',
-      type: 'bpm-start',
+      type: 'start',
       meta: {
         position: {
           x: 180,
@@ -18,12 +18,12 @@ export const initialData: FlowDocumentJSON = {
         defaultPorts: [{ type: 'output', location: 'bottom' }]
       },
       data: {
-        title: '开始'
+        name: '开始'
       }
     },
     {
       id: 'start_1',
-      type: 'initiate',
+      type: 'initiation',
       meta: {
         position: {
           x: 180,
@@ -35,12 +35,12 @@ export const initialData: FlowDocumentJSON = {
         ]
       },
       data: {
-        title: '发起'
+        name: '发起'
       }
     },
     {
       id: 'end_0',
-      type: 'bpm-end',
+      type: 'end',
       meta: {
         position: {
           x: 180,
@@ -49,7 +49,7 @@ export const initialData: FlowDocumentJSON = {
         defaultPorts: [{ type: 'input', location: 'top' }]
       },
       data: {
-        title: '结束'
+        name: '结束'
       }
     }
   ],

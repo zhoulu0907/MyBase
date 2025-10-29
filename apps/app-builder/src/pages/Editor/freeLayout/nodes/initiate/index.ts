@@ -4,8 +4,8 @@ import initiate from '../../assets/bpmLogo/initiate.png';
 import { formMeta } from './formMeta';
 
 export const InitiateNodeRegistry: FlowNodeRegistry = {
-  type: 'initiate',
-  id:'initiate',
+  type: 'initiation',
+  id:'initiation',
   title: '发起',
   category: 'interaction',
   meta: {

@@ -28,7 +28,7 @@ export function TitleInput(props: {
 
   return (
     <Title>
-      <Field name="title">
+      <Field name="name">
         {({ field: { value, onChange }, fieldState }: FieldRenderProps<string>) => (
           <div style={{ height: 24 }}>
             {titleEditing ? (

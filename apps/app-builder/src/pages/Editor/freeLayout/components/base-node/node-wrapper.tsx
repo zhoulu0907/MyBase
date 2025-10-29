@@ -42,7 +42,6 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const portsRender = ports.map((p) => (
     <WorkflowPortRender key={p.id} entity={p} onClick={!readonly ? onPortClick : undefined} />
   ));
-  // selected && (meta.error = true);
   const onMouseOver = useCallback(() => {
     setIsHover(true);
   }, [node]);
