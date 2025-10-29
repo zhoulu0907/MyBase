@@ -10,3 +10,12 @@ export const btnConfigVar = {
         abstention: 'abstention'
     }
 }
+
+export const approverConfigVar = {
+    approvalMode: {
+        a: 'a_sign',
+        b: 'b_sign',
+        c: 'c_sign',
+        d: 'd_sign'
+    }
+}

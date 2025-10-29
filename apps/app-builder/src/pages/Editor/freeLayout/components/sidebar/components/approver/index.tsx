@@ -28,6 +28,11 @@ export default function ApproveDreawer() {
         return <div>审批人</div>;
     }
   };
+
+  function handleSubmit() {
+    console.log('999 000 ===')
+  }
+
   return (
     <>
       <Header />
@@ -46,7 +51,7 @@ export default function ApproveDreawer() {
         </RadioGroup>
         <div className={styles.content}>{renderContent()}</div>
       </div>
-      <BottomBtn />
+      <BottomBtn handleSubmit={handleSubmit}/>
     </>
   );
 }

@@ -274,7 +274,9 @@ export default function ApproverBtnConfig() {
     }
 
     function testclick() {
-      console.log('table data ====', data)
+      console.log('table data ====', data.filter((item:any) => {
+        return item?.enabled
+      }))
     }
 
     return <div className={styles.approverConfig}>
