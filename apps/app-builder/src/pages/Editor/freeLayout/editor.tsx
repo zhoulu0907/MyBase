@@ -21,6 +21,7 @@ import { GlobalConfigProvider } from './components/globalConfig/components/globa
 import { getByBusinessId, save } from '../../../../../../packages/app/src/services/index';
 import { useLocation, useParams } from 'react-router-dom';
 import type { WorkflowJSON, FlowData } from './editorType';
+import { getAppIdByPageSetId } from '@onebase/app';
 const sourceNodeIDMap = new Map();
 export const Editor = () => {
   //  const { appId } = useParams();
@@ -29,15 +30,14 @@ export const Editor = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
-  const appId = window.location.search.split('=')[1];
-  console.log(appId);
-  
+
   const [flowData, setFlowData] = useState<FlowData>({});
   // 数据请求
   const getFlowData = async () => {
     try {
       // 85239398472974337
       const res = await getByBusinessId({ businessId: pageSetId });
+
       let useJsonData = {};
       // 如果没有数据就用初始化数据
       if (!res.bpmDefJson) {
@@ -47,12 +47,14 @@ export const Editor = () => {
         const bpmDefJson = JSON.parse(res.bpmDefJson);
         useJsonData = normalizeNodes(bpmDefJson);
       }
+
       // 保存流程数据
       if (res.businessId) {
         setFlowData(res);
       }
       setIsLoading(true);
       ref?.current?.document.fromJSON(useJsonData);
+
       setTimeout(() => {
         // 加载后触发画布的 fitview 让节点自动居中
         ref?.current?.document.fitView();
@@ -89,13 +91,14 @@ export const Editor = () => {
   const editorProps = useEditorProps({ nodes: [], edges: [] }, nodeRegistries);
 
   // 保存数据
-  const onSave = () => {
+  const onSave = async () => {
+    // 查找appid
+    const appId = await getAppIdByPageSetId({ pageSetId });
+    // 处理数据
     const data = ref?.current?.document.toJSON();
     const useJsonData = normalizeNodes(data);
+    
     const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
-
-    console.log('保存数据', useJsonData);
-
     const params = {
       id: id || '',
       flowCode: flowCode || '',
@@ -104,7 +107,7 @@ export const Editor = () => {
       versionAlias: versionAlias || '',
       versionStatus: versionStatus || '',
       businessId: businessId || '',
-      appId:'85236512254951424',
+      appId,
       bpmDefJson: JSON.stringify(useJsonData)
     };
     save(params).then((res: any) => {
@@ -131,4 +134,3 @@ export const Editor = () => {
     </div>
   );
 };
-
