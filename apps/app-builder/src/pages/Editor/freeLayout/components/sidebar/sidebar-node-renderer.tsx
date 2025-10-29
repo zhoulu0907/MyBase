@@ -21,8 +21,8 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
     setconfigFormForm: (form: FormInstance) => setconfigFormForm(form)
   };
 
-  const handleSubmit = () => {
-    const newData = Object.assign({}, nodeRender.data, { type: 123 });
+  const handleSubmit = (data, errmsg) => {
+    const newData = Object.assign({}, nodeRender.data, errmsg, { type: 123 });
     nodeRender.updateData(newData);
   };
   return (

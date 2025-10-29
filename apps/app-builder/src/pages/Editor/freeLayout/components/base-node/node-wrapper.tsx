@@ -108,7 +108,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
         data-node-selected={String(selected)}
         style={{
           ...meta.wrapperStyle,
-          outline: form?.state.invalid ? '1px solid red' : 'none'
+          outline: form?.values?.errMsg?.length > 0 ? '1px solid red' : 'none'
         }}
       >
         {children}
