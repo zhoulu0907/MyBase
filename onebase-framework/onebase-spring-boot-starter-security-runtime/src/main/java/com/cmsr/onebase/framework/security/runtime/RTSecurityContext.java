@@ -31,28 +31,28 @@ public class RTSecurityContext {
     public static boolean checkMenuEntity(Long menuId, Long entityId) {
         RTLoginUser loginUser = getLoginUser();
         Long applicationId = loginUser.getApplicationId();
-        return RTPermissionService.instance.checkMenuEntity(applicationId, menuId, entityId);
+        return RTPermissionService.getInstance().checkMenuEntity(applicationId, menuId, entityId);
     }
 
     public static MenuPermission getMenuOperation(Long menuId) {
         RTLoginUser loginUser = getLoginUser();
         Long userId = loginUser.getUserId();
         Long applicationId = loginUser.getApplicationId();
-        return RTPermissionService.instance.getMenuOperation(userId, applicationId, menuId);
+        return RTPermissionService.getInstance().getMenuOperation(userId, applicationId, menuId);
     }
 
     public static DataPermission getMenuDataPermission(Long menuId) {
         RTLoginUser loginUser = getLoginUser();
         Long userId = loginUser.getUserId();
         Long applicationId = loginUser.getApplicationId();
-        return RTPermissionService.instance.getMenuDataPermission(userId, applicationId, menuId);
+        return RTPermissionService.getInstance().getMenuDataPermission(userId, applicationId, menuId);
     }
 
     public static FieldPermission getMenuFieldPermission(Long menuId) {
         RTLoginUser loginUser = getLoginUser();
         Long userId = loginUser.getUserId();
         Long applicationId = loginUser.getApplicationId();
-        return RTPermissionService.instance.getMenuFieldPermission(userId, applicationId, menuId);
+        return RTPermissionService.getInstance().getMenuFieldPermission(userId, applicationId, menuId);
     }
 
     public static void mockLoginUser(Long userId, Long applicationId) {
