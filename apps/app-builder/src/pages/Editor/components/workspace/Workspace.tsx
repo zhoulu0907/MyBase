@@ -1,4 +1,11 @@
-import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import {
+  currentEditorSignal,
+  EDITOR_TYPES,
+  ENTITY_FIELD_TYPE,
+  FORM_COMPONENT_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES
+} from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -31,13 +38,15 @@ import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
 import { getEntityFieldOptions, type AppEntityField, type EntityFieldOption } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
+import { EditMode, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import View from '../view';
 import styles from './index.module.less';
 
 export default function EditorWorkspace() {
+  useSignals();
+
   const [showEmpty, setShowEmpty] = useState(true);
   const [isFormEditor, setIsFormEditor] = useState(false);
   const [pageSetId, setPageSetId] = useState('');
@@ -48,8 +57,6 @@ export default function EditorWorkspace() {
       setPageSetId(pageSetId);
     }
   }, []);
-
-  useSignals();
 
   const {
     curComponentID,
@@ -70,7 +77,8 @@ export default function EditorWorkspace() {
     delLayoutSubComponents
   } = usePageEditorSignal();
 
-  const [pageMode, setPageMode] = useState<string>('pc');
+  //   const [pageMode, setPageMode] = useState<string>('pc');
+  const { editMode, setEditMode } = currentEditorSignal;
 
   useEffect(() => {
     if (components.length === 0) {
@@ -226,6 +234,12 @@ export default function EditorWorkspace() {
     }));
   };
 
+  // 切换pc端、移动端编辑模式
+  const switchEditMode = (mode: EditMode) => {
+    console.log('switchEditMode: ', mode);
+    setEditMode(mode);
+  };
+
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
@@ -238,18 +252,18 @@ export default function EditorWorkspace() {
           </div>
           <Divider type="vertical" />
           <div className={styles.pageModeCtrl}>
-            {pageMode === 'pc' && (
-              <>
-                <img className={styles.pageModeIcon} src={PCActiveIcon} />
-                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setPageMode('mobile')} />
-              </>
-            )}
-            {pageMode === 'mobile' && (
-              <>
-                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setPageMode('pc')} />
-                <img className={styles.pageModeIcon} src={MobileActiveIcon} />
-              </>
-            )}
+            <>
+              <img
+                className={styles.pageModeIcon}
+                src={editMode.value === EditMode.MOBILE ? PCIcon : PCActiveIcon}
+                onClick={() => editMode.value === EditMode.MOBILE && switchEditMode(EditMode.PC)}
+              />
+              <img
+                className={styles.pageModeIcon}
+                src={editMode.value === EditMode.PC ? MobileIcon : MobileActiveIcon}
+                onClick={() => editMode.value === EditMode.PC && switchEditMode(EditMode.MOBILE)}
+              />
+            </>
           </div>
         </div>
       </div>

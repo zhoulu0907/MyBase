@@ -5,7 +5,6 @@ import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
-import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -35,7 +34,7 @@ import {
   type UpdateApplicationMenuOrderReq,
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
-import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { currentEditorSignal, EDITOR_TYPES } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
@@ -45,9 +44,9 @@ import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
-import TaskCenterSide from './components/TaskCenter/taskTreeSide'
-import TaskCenterPage from './components/TaskCenter/TaskCenterPage'
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -104,7 +103,7 @@ const PageManagerPage: FC = () => {
   const initTreeItemWidth = 146;
   const cutTreeItemWidth = 25;
 
-  const { clearIsEditMode } = useBasicEditorStore();
+  const { clearEditMode } = currentEditorSignal;
 
   const findFirstPage: any = (nodes: ApplicationMenu[]) =>
     nodes.reduce((found, node) => {
@@ -119,7 +118,7 @@ const PageManagerPage: FC = () => {
       getMenuList();
       getEntityList();
     }
-    clearIsEditMode();
+    clearEditMode();
   }, [curAppId]);
 
   useEffect(() => {
@@ -612,7 +611,7 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {(curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0) && (
+                  {curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0 && (
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
@@ -630,7 +629,7 @@ const PageManagerPage: FC = () => {
                       </div>
                     </>
                   )}
-                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id}/>}
+                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id} />}
                 </>
               )}
             </>

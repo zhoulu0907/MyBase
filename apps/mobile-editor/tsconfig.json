@@ -1,0 +1,8 @@
+{
+    "files": [],
+    "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
+    "compilerOptions": {
+      "module": "esnext", // 如果您的环境需要也可以使用commonjs（需处理ESM互操作）
+      "moduleResolution": "bundler"
+    }
+  }

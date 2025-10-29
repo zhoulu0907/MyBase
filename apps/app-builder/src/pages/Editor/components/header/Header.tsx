@@ -6,16 +6,16 @@ import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
-import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
-import { useBasicEditorStore } from '@/store';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
+import { appIconMap, currentEditorSignal } from '@onebase/ui-kit';
 
+import { useResourceStore } from '@/store/store_resource';
 import {
   AppStatus,
   ENTITY_TYPE,
@@ -29,7 +29,7 @@ import {
   type GetApplicationReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
+import { EditMode, getHashQueryParam } from '@onebase/common';
 import {
   EDITOR_TYPES,
   startLoadPageSet,
@@ -40,12 +40,12 @@ import {
   usePageViewEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
-import { useResourceStore } from '@/store/store_resource';
 
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -81,13 +81,15 @@ const tabData = [
 ];
 
 export default function EditorHeader() {
+  useSignals();
+
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
 
   const { clearCurComponentID } = usePageEditorSignal();
   const { curViewId } = usePageViewEditorSignal;
 
-  const { isEditMode, setIsEditMode } = useBasicEditorStore();
+  const { editMode, setEditMode } = currentEditorSignal;
 
   const {
     components: formComponents,
@@ -161,9 +163,9 @@ export default function EditorHeader() {
   }, [pageInfo]);
 
   useEffect(() => {
-    if (!isEditMode && pageSetId != '') {
+    if (!editMode.value && pageSetId != '') {
       loadPageSetInfo(pageSetId);
-      setIsEditMode(true);
+      setEditMode(EditMode.PC);
       handleGetAppInfo(pageSetId);
       getMainMetaData(pageSetId);
     }

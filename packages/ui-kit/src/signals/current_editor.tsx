@@ -4,14 +4,14 @@ import type { EditConfig } from '../components/Materials/types';
 // 创建编辑器组件管理 store 的工厂函数
 export const createCurrentEditorSignal = () => {
   // 编辑模式信号
-  const isEditMode = signal(false);
+  const editMode = signal<string>('');
 
-  const setIsEditMode = (editMode: boolean) => {
-    isEditMode.value = editMode;
+  const setEditMode = (em: string) => {
+    editMode.value = em;
   };
 
-  const clearIsEditMode = () => {
-    isEditMode.value = false;
+  const clearEditMode = () => {
+    editMode.value = '';
   };
 
   // 当前选中组件ID信号
@@ -40,9 +40,9 @@ export const createCurrentEditorSignal = () => {
   };
 
   return {
-    isEditMode,
-    setIsEditMode,
-    clearIsEditMode,
+    editMode,
+    setEditMode,
+    clearEditMode,
     curComponentID,
     setCurComponentID,
     clearCurComponentID,
