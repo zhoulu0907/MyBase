@@ -9,7 +9,7 @@ import { formMeta } from './form-meta';
 import { WorkflowNodeType } from '../constants';
 
 export const BlockEndNodeRegistry: FlowNodeRegistry = {
-  type: WorkflowNodeType.BlockEnd,
+  type: WorkflowNodeType.BLOCKEND,
   meta: {
     isNodeEnd: true,
     deleteDisable: true,

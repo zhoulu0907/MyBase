@@ -8,11 +8,9 @@ import { useState } from 'react';
 import { NodeRenderContext } from '../../context';
 import type { FormInstance } from '@arco-design/web-react';
 import ApproveDreawer from './components/approver';
+import { WorkflowNodeType } from '../../nodes/constants';
 
 export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
-  const enum NodeType {
-    Approver = 'approver'
-  }
   const { node } = props;
   const nodeRender = useNodeRender(node);
   const [configForm, setconfigFormForm] = useState<FormInstance>();
@@ -38,7 +36,7 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
           background: '#fff'
         }}
       >
-        {nodeRender?.type === NodeType.Approver && <ApproveDreawer handleConfigSubmit={handleSubmit} />}
+        {nodeRender?.type === WorkflowNodeType.APPROVER && <ApproveDreawer handleConfigSubmit={handleSubmit} />}
       </div>
     </NodeRenderContext.Provider>
   );
