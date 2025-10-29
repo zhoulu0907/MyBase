@@ -19,8 +19,12 @@ import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
@@ -76,6 +80,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private BpmFlowInsExtRepository flowInsExtRepository;
+
+    @Resource
+    private MetadataDataMethodCoreService metadataDataMethodCoreService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -378,5 +385,82 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         taskService.skip(skipParams, task);
 
         // todo：更新实体数据
+    }
+
+    @Override
+    public BpmFlowTaskDetailVO getFormDetail(BpmFlowTaskDetailReqVO reqVO) {
+        BpmFlowTaskDetailVO vo = new BpmFlowTaskDetailVO();
+        NodeJson currNodeJson = null;
+        Task task = taskService.getById(reqVO.getTaskId());
+        if (task == null) {
+           return vo;
+        }
+        String nodeCode = task.getNodeCode();//当前节点
+
+        Instance instance = insService.getById(reqVO.getInstanceId());
+        if(instance != null){
+            DefJson defJson = FlowEngine.jsonConvert.strToBean(instance.getDefJson(), DefJson.class);
+            // 找到对应节点的配置
+            for (NodeJson nodeJson : defJson.getNodeList()) {
+                if (nodeJson.getNodeCode().equals(nodeCode)) {
+                    currNodeJson = nodeJson;
+                    break;
+                }
+            }
+            BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(currNodeJson.getExt(), BaseNodeExtDTO.class);
+            String userId = String.valueOf(WebFrameworkUtils.getLoginUserId());
+            List<BaseNodeBtnCfgDTO> buttonConfigs = new ArrayList<>();
+
+            if (nodeExtDTO instanceof ApproverNodeExtDTO approverNodeExtDTO) {
+                // todo：判断审批节点的权限
+
+                // 审批节点
+                if (approverNodeExtDTO.getButtonConfigs() != null) {
+                    buttonConfigs.addAll(approverNodeExtDTO.getButtonConfigs());
+                }
+            } else if (nodeExtDTO instanceof StartNodeExtDTO startNodeExtDTO) {
+                // 开始节点
+                if (startNodeExtDTO.getButtonConfigs() != null) {
+                    buttonConfigs.addAll(startNodeExtDTO.getButtonConfigs());
+                }
+            } else if (nodeExtDTO instanceof InitiationNodeExtDTO initiationNodeExtDTO) {
+                // 发起节点
+                // 判断是否是创建人
+                if (!Objects.equals(instance.getCreateBy(), userId)) {
+                    throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY);
+                }
+
+                if (initiationNodeExtDTO.getButtonConfigs() != null) {
+                    buttonConfigs.addAll(initiationNodeExtDTO.getButtonConfigs());
+                }
+            } else {
+                // 未知节点
+                throw exception(ErrorCodeConstants.UNSUPPORT_NODE_TYPE);
+            }
+            vo.setButtonConfigs(buttonConfigs);
+            vo.setCurrentStatus(instance.getFlowStatus());
+        }
+
+        //查询流程扩展信息
+        ConfigStore configStore= new DefaultConfigStore();
+        configStore.and("instance_id", reqVO.getInstanceId());
+        BpmFlowInsBizExtDO flowInsExtDO =  flowInsExtRepository.findOne(configStore);
+        if(flowInsExtDO!= null){
+            vo.setBpmVersion(flowInsExtDO.getBpmVersion());
+            vo.setInitiatorId(flowInsExtDO.getInitiatorId());
+            vo.setInitiatorName(flowInsExtDO.getInitiatorName());
+            vo.setSubmitTime(flowInsExtDO.getSubmitTime());
+            vo.setInitiatorDeptId(flowInsExtDO.getInitiatorDeptId());
+            vo.setInitiatorDeptName(flowInsExtDO.getInitiatorDeptName());
+            vo.setInitiatorId(flowInsExtDO.getInitiatorId());
+            vo.setInitiatorName(flowInsExtDO.getInitiatorName());
+        }
+       //查询form信息
+        Map<String, Object> data = metadataDataMethodCoreService.getData(reqVO.getEntityId(),reqVO.getDataId(),null);
+        if (data != null && !data.isEmpty()){
+            vo.setFormData(data);
+        }
+       return vo;
+
     }
 }

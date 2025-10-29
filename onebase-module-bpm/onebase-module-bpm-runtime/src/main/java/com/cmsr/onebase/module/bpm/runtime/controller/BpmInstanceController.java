@@ -2,10 +2,7 @@ package com.cmsr.onebase.module.bpm.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitRespVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -52,4 +49,10 @@ public class BpmInstanceController {
         bpmExecService.execTask(reqVO);
         return CommonResult.success(true);
     }
+    @PostMapping("/get-form-detail")
+    public CommonResult<BpmFlowTaskDetailVO> getFormDetail(@RequestBody @Validated BpmFlowTaskDetailReqVO reqVO) {
+        log.info("获取流程详情: {}", reqVO);
+        return CommonResult.success(bpmExecService.getFormDetail(reqVO));
+    }
+
 }
