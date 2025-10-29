@@ -50,6 +50,8 @@ public class AuthDefaultFactory {
 
     private static final String DEFAULT_OPERATION_TAGS = JsonUtils.toJsonString(List.of(CREATE, EDIT, DELETE, IMPORT, EXPORT, SHARE));
 
+    private static final String DEFAULT_DATA_FILTER = JsonUtils.toJsonString(List.of());
+
     //应用 AuthPermissionDO
     public static AuthPermissionDO createAuthPermissionDO(AuthPermissionReq req) {
         AuthPermissionDO ap = new AuthPermissionDO();
@@ -72,6 +74,7 @@ public class AuthDefaultFactory {
         adg.setRoleId(req.getRoleId());
         adg.setMenuId(req.getMenuId());
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
+        adg.setDataFilter(DEFAULT_DATA_FILTER);
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
         return adg;
     }
