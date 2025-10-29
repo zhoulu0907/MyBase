@@ -34,12 +34,12 @@ public class ETLInstanceLogDO extends TenantBaseDO {
     @Column(name = "duration")
     private Long duration;
 
-    @Column(name = "instance_trigger")
-    private String instanceTrigger;
+    @Column(name = "trigger_type")
+    private String triggerType;
 
-    @Column(name = "operate_user")
-    private Long operateUser;
+    @Column(name = "trigger_user")
+    private Long triggerUser;
 
-    @Column(name = "instance_status")
-    private String instanceStatus;
+    @Column(name = "task_status")
+    private String taskStatus;
 }

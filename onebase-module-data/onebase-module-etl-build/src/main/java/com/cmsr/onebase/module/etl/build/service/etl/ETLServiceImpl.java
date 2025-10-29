@@ -35,7 +35,7 @@ public class ETLServiceImpl implements ETLService {
     }
 
     @Override
-    public void configUpdateStrategy(ETLScheduleVO scheduleVO) {
+    public void configScheduleStrategy(ETLScheduleVO scheduleVO) {
 
     }
 

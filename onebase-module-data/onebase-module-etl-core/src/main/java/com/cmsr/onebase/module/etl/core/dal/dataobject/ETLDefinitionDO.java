@@ -23,8 +23,8 @@ public class ETLDefinitionDO extends TenantBaseDO {
     private String ETLName;
 
     // FIXED, OBSERVE, MANUALLY(default)
-    @Column(name = "update_strategy")
-    private String updateStrategy;
+    @Column(name = "schedule_strategy")
+    private String scheduleStrategy;
 
     @Column(name = "job_status")
     private String jobStatus;
@@ -38,10 +38,10 @@ public class ETLDefinitionDO extends TenantBaseDO {
     @Column(name = "config")
     private String config;
 
-    @Column(name = "update_config")
-    private String updateCoonfig;
+    @Column(name = "schedule_config")
+    private String scheduleConfig;
 
-    @Column(name = "ds_id")
-    private String dsId;
+    @Column(name = "workflow_code")
+    private String workflowCode;
 
 }

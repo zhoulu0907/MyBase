@@ -17,7 +17,7 @@ public interface ETLService {
 
     void startETLManually(Long etlId);
 
-    void configUpdateStrategy(ETLScheduleVO scheduleVO);
+    void configScheduleStrategy(ETLScheduleVO scheduleVO);
 
     void queryRunLogs(Long etlId);
 

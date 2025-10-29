@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Slf4j
-public class ETLInfoRepository extends DataRepository<ETLDefinitionDO> {
-    public ETLInfoRepository(Class<ETLDefinitionDO> defaultClazz) {
+public class ETLDefinitionRepository extends DataRepository<ETLDefinitionDO> {
+    public ETLDefinitionRepository(Class<ETLDefinitionDO> defaultClazz) {
         super(defaultClazz);
     }
 

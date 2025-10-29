@@ -17,10 +17,7 @@ public class ETLBriefVO {
     private String name;
 
     @Schema(description = "更新策略")
-    private String updateStrategy;
-
-    @Schema(description = "最后更新时间")
-    private LocalDateTime lastUpdateTime;
+    private String scheduleStrategy;
 
     @Schema(description = "执行状态")
     private String status;
@@ -30,5 +27,8 @@ public class ETLBriefVO {
 
     @Schema(description = "输出数据源")
     private String outputTable;
+
+    @Schema(description = "最后更新时间")
+    private LocalDateTime lastUpdateTime;
 
 }
