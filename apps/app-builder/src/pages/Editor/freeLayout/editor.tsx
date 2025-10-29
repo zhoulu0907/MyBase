@@ -19,16 +19,19 @@ import { SidebarProvider, SidebarRenderer } from './components/sidebar';
 import LeftNavBar from './components/left-nav-bar/index';
 import { GlobalConfigProvider } from './components/globalConfig/components/globalConfigProvider';
 import { getByBusinessId, save } from '../../../../../../packages/app/src/services/index';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import type { WorkflowJSON, FlowData } from './editorType';
 const sourceNodeIDMap = new Map();
 export const Editor = () => {
+  //  const { appId } = useParams();
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
-
+  const appId = window.location.search.split('=')[1];
+  console.log(appId);
+  
   const [flowData, setFlowData] = useState<FlowData>({});
   // 数据请求
   const getFlowData = async () => {
@@ -90,6 +93,9 @@ export const Editor = () => {
     const data = ref?.current?.document.toJSON();
     const useJsonData = normalizeNodes(data);
     const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
+
+    console.log('保存数据', useJsonData);
+
     const params = {
       id: id || '',
       flowCode: flowCode || '',
@@ -98,6 +104,7 @@ export const Editor = () => {
       versionAlias: versionAlias || '',
       versionStatus: versionStatus || '',
       businessId: businessId || '',
+      appId:'85236512254951424',
       bpmDefJson: JSON.stringify(useJsonData)
     };
     save(params).then((res: any) => {
@@ -124,3 +131,4 @@ export const Editor = () => {
     </div>
   );
 };
+
