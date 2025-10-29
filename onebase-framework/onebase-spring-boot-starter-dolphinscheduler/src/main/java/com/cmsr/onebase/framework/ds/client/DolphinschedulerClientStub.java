@@ -31,9 +31,9 @@ public interface DolphinschedulerClientStub {
     Call<Result<Object>> deleteWorkflow(@Path("projectCode") Long projectCode,
                                         @Path("workflowCode") Long workflowCode);
 
-    @GET("projects/{projectCode}/workflow-definition/verify-name")
-    Call<Result<Object>> verifyNameUniqueInProject(@Path("projectCode") Long projectCode,
-                                                   @Query("name") String name);
+    @GET("projects/{projectCode}/workflow-definition//query-by-name")
+    Call<Result<WorkflowDefinitionResp>> queryWorkflowByName(@Path("projectCode") Long projectCode,
+                                                             @Query("name") String name);
 
     // online or offline diff by param
     @POST("projects/{projectCode}/workflow-definition/{workflowCode}/release")
@@ -94,7 +94,7 @@ public interface DolphinschedulerClientStub {
                                                    @Field("workerGroup") String workerGroup, // default
                                                    @Field("execType") String execType,
                                                    @Field("executionOrder") String executionOrder // DESC_ORDER
-                                                      );
+    );
 
     // WorkflowInstance manualy start, no usage for now
     @POST("projects/{projectCode}/executors/start-workflow-instance")

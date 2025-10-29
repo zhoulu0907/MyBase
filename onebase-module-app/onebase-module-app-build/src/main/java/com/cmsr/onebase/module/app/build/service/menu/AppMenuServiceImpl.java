@@ -205,6 +205,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
         createPageSetDTO.setMenuId(menuDO.getId());
+        createPageSetDTO.setPageSetType(createReqVO.getPageSetType());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
         createPageSetDTO.setMainMetadata(String.valueOf(createReqVO.getEntityId()));

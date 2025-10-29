@@ -30,9 +30,5 @@ public class FlowChangeEventTest {
         flowChangeEventPublisher.publishApplicationUpdate(84076905441918976L);
     }
 
-    @Test
-    public void test2() {
-        List<AuthRoleDO> list = appAuthRoleRepository.findByApplicationIdAndUserId(6943244133695488L, 114L);
-        System.out.println(list);
-    }
+
 }

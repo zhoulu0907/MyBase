@@ -35,7 +35,12 @@ public enum DataPermissionLevel {
     /**
      * 指定人员
      */
-    SPECIFIED_PERSON("specifiedPerson", "指定人员");
+    SPECIFIED_PERSON("specifiedPerson", "指定人员"),
+
+    /**
+     * 未知
+     */
+    UNKNOW("unknown", "未知");;
 
 
     private final String code;
@@ -52,6 +57,15 @@ public enum DataPermissionLevel {
 
     public String getLabel() {
         return label;
+    }
+
+    public static DataPermissionLevel fromCode(String scopeLevel) {
+        for (DataPermissionLevel value : DataPermissionLevel.values()) {
+            if (value.code.equals(scopeLevel)) {
+                return value;
+            }
+        }
+        return UNKNOW;
     }
     
 
