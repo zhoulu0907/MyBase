@@ -11,3 +11,4 @@ export * from './permission';
 export * from './role';
 export * from './tag';
 export * from './formula';
+export * from './app_bpm';
