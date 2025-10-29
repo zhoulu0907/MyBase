@@ -2,23 +2,23 @@ import React, { useState } from 'react';
 import { Button, Input, Select, Dropdown, Menu, Cascader } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit, IconBook } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
-import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
 import SelectDictModal from '@/components/SelectDictModal';
 import type { DictItem } from '@onebase/platform-center';
-import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from './types';
+import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from '../types';
 import {
   convertAutoCodeCompoToAutoNumberRule,
   convertAutoNumberRuleToAutoCodeComp,
   findFieldPath
-} from './utils/transform';
+} from '../utils/transform';
 import {
   AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RESET_CYCLE,
   AUTO_CODE_RULE_TYPE,
   DATE_FORMAT_DEFAULT,
   DIGIT_DEFAULT
-} from './utils/const';
+} from '../utils/const';
+import styles from '../index.module.less';
 
 // 选项配置组件
 interface OptionConfigProps {
