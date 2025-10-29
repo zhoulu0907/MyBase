@@ -1,0 +1,36 @@
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
+import { nanoid } from 'nanoid';
+
+import type { FlowNodeRegistry } from '../../typings';
+import iconContinue from '../../assets/bpmLogo/approver.png';
+import { formMeta } from './form-meta';
+import { WorkflowNodeType } from '../constants';
+
+let index = 0;
+export const ProcessNodeRegistry: FlowNodeRegistry = {
+  type: WorkflowNodeType.ProcessNode,
+  meta: {
+    defaultPorts: [{ type: 'input' }],
+  },
+  info: {
+    icon: iconContinue,
+    description: 'The final node of the workflow, used to return the result information after the workflow is run.'
+  },
+  /**
+   * Render node via formMeta
+   */
+  formMeta,
+  onAdd() {
+    return {
+      id: `continue_${nanoid(5)}`,
+      type: 'continue',
+      data: {
+        title: `Continue_${++index}`
+      }
+    };
+  }
+};

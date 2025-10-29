@@ -1,17 +1,17 @@
-import MenuComp from '@/components/MenuIcon';
-import { Form, Input, Modal, Select, TreeSelect, Button, type FormInstance } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
-import { RootParentPage } from '@onebase/app';
-import styles from './index.module.less';
 import DynamicIcon from '@/components/DynamicIcon';
+import MenuComp from '@/components/MenuIcon';
 import { menuIconList } from '@/components/MenuIcon/const';
+import { Button, Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
+import { RootParentPage } from '@onebase/app';
+import React, { useEffect, useState } from 'react';
+import styles from './index.module.less';
 
 interface CreateModalProps {
   title: string;
   handleCreate: () => void;
   onCancel: () => void;
   form: FormInstance;
-  pageTypeOptions: { label: string; value: any }[];
+  pageSetTypeOptions: { label: string; value: any }[];
   visibleCreateForm: string;
   initValue: { pageType: number; menuName: string; parentId: string };
   treeData: any[];
@@ -23,7 +23,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   handleCreate,
   onCancel,
   form,
-  pageTypeOptions,
+  pageSetTypeOptions,
   visibleCreateForm,
   initValue,
   treeData,
@@ -83,11 +83,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
         >
           <Form.Item
             label="页面类型"
-            field="pageType"
+            field="pageSetType"
             hidden={visibleCreateForm === 'group'}
             rules={[{ required: true, message: '请选择页面类型' }]}
           >
-            <Select options={pageTypeOptions} placeholder="请选择页面类型" allowClear />
+            <Select options={pageSetTypeOptions} placeholder="请选择页面类型" allowClear />
           </Form.Item>
 
           <Form.Item
@@ -126,14 +126,17 @@ const CreateModal: React.FC<CreateModalProps> = ({
               >
                 {menuIcon ? (
                   <DynamicIcon
-                    IconComponent={menuIconList.find(icon => icon.code === menuIcon)?.icon}
+                    IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
                     theme="outline"
                     size="18"
                     fill="#333"
                   />
                 ) : (
                   <DynamicIcon
-                    IconComponent={menuIconList.find(icon => icon.code === (visibleCreateForm === 'page' ? 'page' : 'seo-folder'))?.icon}
+                    IconComponent={
+                      menuIconList.find((icon) => icon.code === (visibleCreateForm === 'page' ? 'page' : 'seo-folder'))
+                        ?.icon
+                    }
                     theme="outline"
                     size="18"
                     fill="#333"

@@ -89,7 +89,10 @@ const PageManagerPage: FC = () => {
 
   const [title, setTitle] = useState('');
   const [showGuide, setShowGuide] = useState<boolean>(false);
-  const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
+  const pageSetTypeOptions = [
+    { label: '普通表单', value: PageType.NORMAL },
+    { label: '流程表单', value: PageType.BPM }
+  ];
 
   const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
@@ -299,6 +302,7 @@ const PageManagerPage: FC = () => {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: createForm.getFieldValue('pageSetType'),
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
@@ -665,7 +669,7 @@ const PageManagerPage: FC = () => {
         }}
         form={createForm}
         entityListOptions={entityListOptions}
-        pageTypeOptions={pageTypeOptions}
+        pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
