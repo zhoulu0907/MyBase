@@ -32,7 +32,6 @@ public class CorpAppRelationController   {
     private CorpAppRelationService corpAppRelationService;
 
     @PostMapping("/create")
-   // @PermitAll
     @PreAuthorize("@ss.hasPermission('system:corp-app-relation:create')")
     @Operation(summary = "创建企业应用关联")
     public CommonResult<Boolean> createCorpAppRelation(@Valid @RequestBody CorpAppRelationInertReqVO createReqVO) {
@@ -64,8 +63,7 @@ public class CorpAppRelationController   {
     }
 
     @GetMapping("/page")
-    @PermitAll
-    //@PreAuthorize("@ss.hasPermission('system:corp-app-relation:query')")
+    @PreAuthorize("@ss.hasPermission('system:corp-app-relation:query')")
     @Operation(summary = "获得企业关联应用分页")
     public CommonResult<PageResult<CorpAppRelationVO>> getCorpApplication(@Valid CorpAppRelationPageReqVO pageReqVO) {
         PageResult<CorpAppRelationVO> pageResult = corpAppRelationService.getCorpAppRelationPage(pageReqVO);
