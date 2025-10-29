@@ -14,9 +14,15 @@ import java.util.List;
 @Data
 public class DataAddNodeData extends NodeData implements Serializable {
 
+    /**
+     * mainEntity
+     * subEntity
+     */
     private String addType;
 
     private Long mainEntityId;
+
+    private Long subEntityId;
 
     private Boolean batchType;
 

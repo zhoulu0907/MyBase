@@ -15,6 +15,7 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -49,12 +50,16 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
 
         DeleteDataReqDTO reqDTO = new DeleteDataReqDTO();
         reqDTO.setTraceId(executeContext.getTraceId());
-        reqDTO.setEntityId(nodeData.getMainEntityId());
-        if (reqDTO.getEntityId() == null) {
+        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getDataType())) {
+            reqDTO.setEntityId(nodeData.getMainEntityId());
+        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getDataType())) {
             reqDTO.setEntityId(nodeData.getSubEntityId());
+        } else {
+            throw new IllegalArgumentException("dataType 类型错误: " + nodeData.getDataType());
         }
-        reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
-
+        if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
+            reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
+        }
         TenantUtils.executeIgnore(() -> dataMethodApi.deleteDataByCondition(reqDTO));
     }
 
