@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Message, Modal, Switch, Input, ColorPicker, Spin } from '@arco-design/web-react';
 import { IconDelete, IconTranslate, IconPlusCircle } from '@arco-design/web-react/icon';
-import { arrayMove } from 'react-sortable-hoc';
+import { arrayMove } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/transform';
 import { getDictDataListByType, type DictData } from '@onebase/platform-center';
 import { useCodeGenerator } from '../../hooks/useCodeGenerator';
 import CodeGenerationConfirmModal from '../code-generation-confirm-modal';
@@ -178,18 +178,16 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
 
   // 处理拖拽排序
   const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+    console.log('oldIndex', oldIndex, newIndex);
     const visibleValues = getVisibleDictValues();
     const newVisibleValues = arrayMove([...visibleValues], oldIndex, newIndex);
+    const sortableValues = newVisibleValues.map((item, index) => ({
+      ...item,
+      sort: index + 1
+    }));
 
-    const updatedValues = dictValues.map((item) => {
-      if (item.isDelete) return item; // 跳过已删除的数据
-
-      const visibleIndex = newVisibleValues.findIndex((visibleItem) => visibleItem.id === item.id);
-      return visibleIndex !== -1 ? { ...item, sort: visibleIndex + 1 } : item;
-    });
-
-    setDictValues(updatedValues);
-    syncFormData(updatedValues);
+    setDictValues(sortableValues as DictValueItem[]);
+    syncFormData(sortableValues as DictData[]);
   };
 
   // 确认生成编码

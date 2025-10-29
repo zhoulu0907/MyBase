@@ -487,14 +487,14 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
       // 分离新增和更新的数据
       const newItems = values
-        .filter((item) => item.id.startsWith('temp-'))
+        .filter((item) => item?.id?.startsWith('temp-'))
         .map((item) => ({
           ...item,
           id: '',
           dictType: activeDict.type
         }));
       const updateItems = values
-        .filter((item) => !item.id.startsWith('temp-') && !item.isDelete)
+        .filter((item) => !item?.id?.startsWith('temp-') && !item?.isDelete)
         .map((item) => ({
           ...item,
           dictType: activeDict.type
@@ -513,7 +513,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       loadTableData();
     } catch (error) {
       console.error('批量配置失败:', error);
-      Message.error('批量配置失败');
     } finally {
       setBatchConfigLoading(false);
     }

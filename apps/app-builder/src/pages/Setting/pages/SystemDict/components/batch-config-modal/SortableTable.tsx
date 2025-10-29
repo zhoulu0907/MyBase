@@ -69,7 +69,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
           onSortEnd={onSort}
           helperContainer={() => {
             // 使用 ref 而不是 querySelector 来避免 findDOMNode 警告
-            return tableRef.current?.querySelector('tbody') || document.body;
+            return tableRef.current?.querySelector('dict-config-container') || document.body;
           }}
           helperClass="sortableHelper"
           {...props}
