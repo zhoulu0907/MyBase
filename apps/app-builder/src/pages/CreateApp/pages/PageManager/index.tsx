@@ -46,6 +46,8 @@ import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import styles from './index.module.less';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide'
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage'
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -531,7 +533,7 @@ const PageManagerPage: FC = () => {
               />
             </div>
           </div>
-
+          <TaskCenterSide setCurMenu={setCurMenu} styles_tree={styles.tree} />
           <Tree
             blockNode
             draggable
@@ -610,7 +612,7 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {curMenu.value?.id && (
+                  {(curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0) && (
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
@@ -628,6 +630,7 @@ const PageManagerPage: FC = () => {
                       </div>
                     </>
                   )}
+                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id}/>}
                 </>
               )}
             </>
