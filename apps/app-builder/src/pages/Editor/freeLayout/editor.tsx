@@ -21,6 +21,7 @@ import { GlobalConfigProvider } from './components/globalConfig/components/globa
 import { getByBusinessId, save } from '../../../../../../packages/app/src/services/index';
 import { useLocation } from 'react-router-dom';
 import type { WorkflowJSON, FlowData } from './editorType';
+import { getAppIdByPageSetId } from '@onebase/app';
 const sourceNodeIDMap = new Map();
 export const Editor = () => {
   const ref = useRef<FreeLayoutPluginContext | null>(null);
@@ -28,30 +29,24 @@ export const Editor = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
-
   const [flowData, setFlowData] = useState<FlowData>({});
-  // 数据请求
+
   const getFlowData = async () => {
     try {
-      // 85239398472974337
       const res = await getByBusinessId({ businessId: pageSetId });
       let useJsonData = {};
-      // 如果没有数据就用初始化数据
       if (!res.bpmDefJson) {
         useJsonData = initialData;
       } else {
-        // 否则用查询数据
         const bpmDefJson = JSON.parse(res.bpmDefJson);
         useJsonData = normalizeNodes(bpmDefJson);
       }
-      // 保存流程数据
       if (res.businessId) {
         setFlowData(res);
       }
       setIsLoading(true);
       ref?.current?.document.fromJSON(useJsonData);
       setTimeout(() => {
-        // 加载后触发画布的 fitview 让节点自动居中
         ref?.current?.document.fitView();
       }, 10);
     } catch (e) {
@@ -62,9 +57,7 @@ export const Editor = () => {
     getFlowData();
   }, []);
 
-  // 格式化数据
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
-    // 处理连线数据的type
     obj?.edges.forEach((item) => {
       if (item?.type) {
         sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
@@ -72,7 +65,6 @@ export const Editor = () => {
         item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
       }
     });
-    // 处理节点数据
     const newNodes = obj?.nodes.map((node) => {
       if ('name' in node) {
         return { ...node, data: { ...(node.data || {}), name: node.name } };
@@ -85,8 +77,8 @@ export const Editor = () => {
   };
   const editorProps = useEditorProps({ nodes: [], edges: [] }, nodeRegistries);
 
-  // 保存数据
-  const onSave = () => {
+  const onSave = async () => {
+    const appId = await getAppIdByPageSetId({ pageSetId });
     const data = ref?.current?.document.toJSON();
     const useJsonData = normalizeNodes(data);
     const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
@@ -98,6 +90,7 @@ export const Editor = () => {
       versionAlias: versionAlias || '',
       versionStatus: versionStatus || '',
       businessId: businessId || '',
+      appId,
       bpmDefJson: JSON.stringify(useJsonData)
     };
     save(params).then((res: any) => {
