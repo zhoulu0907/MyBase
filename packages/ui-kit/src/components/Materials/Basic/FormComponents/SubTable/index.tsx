@@ -316,11 +316,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               id={`workspace-content-subtable-${id}`}
               list={subTableComponents[id] || []}
               setList={(newList) => {
-                const dataFieldPage = subTableComponents[id].find(
+                const dataFieldPage = subTableComponents[id]?.find(
                   (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
                 );
                 // 已有的数据源子表id
-                const dataField = pageComponentSchemas[dataFieldPage.id].config?.dataField?.[0];
+                const dataField = pageComponentSchemas?.[dataFieldPage?.id].config?.dataField?.[0];
                 /**
                  * 不允许拖拽主、子表嵌套
                  * 拖拽的子表项必须是同一个子表
