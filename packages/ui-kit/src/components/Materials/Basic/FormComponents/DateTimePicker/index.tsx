@@ -1,13 +1,43 @@
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import { DatePicker, Form } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputDateTimePickerConfig } from './schema';
 
-const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
+const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  const {
+    label,
+    dataField,
+    tooltip,
+    status,
+    defaultValue,
+    verify,
+    layout,
+    labelColSpan = 0,
+    runtime = true,
+    detailMode
+  } = props;
+
+  const { form } = Form.useFormContext();
+  const [fieldId, setFieldId] = useState('');
+
+  const fieldValue = Form.useWatch(fieldId, form);
+
+  useEffect(() => {
+    if (dataField.length > 0) {
+      setFieldId(dataField[dataField.length - 1]);
+    }
+  }, [dataField]);
+
+  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
+    return (
+      (node?.closest('.arco-form-item') as HTMLElement) ||
+      node?.parentNode as HTMLElement ||
+      document.body
+    );
+  };
 
   return (
     <div className="formWrapper">
@@ -29,12 +59,13 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div>{defaultValue || '--'}</div>
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+          <div>{fieldValue || '--'}</div>
         ) : (
           <DatePicker
             showTime
             defaultValue={defaultValue}
+            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

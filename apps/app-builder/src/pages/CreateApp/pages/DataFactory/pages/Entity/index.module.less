@@ -1,14 +1,14 @@
 @import '../../styles/variables.less';
 
 /* 实体页面样式 */
-.entity-page {
-  &-content {
+.entityPage {
+  .entityPageContent {
     height: calc(100% - @headerHeight);
     width: 100%;
     position: absolute;
   }
 
-  &-header {
+  .entityPageHeader {
     .flex-between();
     padding: @spacingSm @spacingMd;
     height: @headerHeight;
@@ -16,31 +16,25 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     border-bottom: 1px solid #e5e6eb;
 
-    &-left {
+    .entityPageHeaderLeft {
       .flex-center();
 
-      &-name,
-      &-tag {
+      .entityPageHeaderLeftName,
+      .entityPageHeaderLeftTag {
         margin-right: @spacingSm;
       }
 
-      .copy-icon {
+      .copyIcon {
         cursor: pointer;
-        color: #4E5969;
+        color: #4e5969;
       }
     }
   }
 
-  &-create-button {
+  .entityPageCreateButton {
     position: absolute;
     left: @spacingMd;
     top: 16px;
     z-index: 10;
   }
-}
-
-/* 空实体页面样式 */
-.empty-entity-page {
-  text-align: center;
-  margin-top: 10%;
 }

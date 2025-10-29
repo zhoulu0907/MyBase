@@ -1,7 +1,7 @@
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
-import { Form, Grid, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
-import { createMasterChild, getEntityFields, getEntityList } from '@onebase/app';
+import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
+import { createMasterChild, getEntityList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';
 
@@ -20,16 +20,11 @@ interface EntityOption {
   value: string;
 }
 
-interface FieldOption {
-  label: string;
-  value: string;
-}
-
 const CreateMasterDetailModal: React.FC<{
   visible: boolean;
   setVisible: (visible: boolean) => void;
   entityId: string;
-  successCallback: () => void;
+  successCallback: (type?: string) => void;
 }> = ({ visible, setVisible, successCallback, entityId }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
@@ -102,7 +97,11 @@ const CreateMasterDetailModal: React.FC<{
           Message.success('创建成功');
           form.resetFields();
           setVisible(false);
-          successCallback();
+          if (values.childTableCode) {
+            successCallback('new_master_child');
+          } else {
+            successCallback();
+          }
         }
       } catch (error) {
         console.error('创建主子关系失败:', error);
@@ -114,7 +113,7 @@ const CreateMasterDetailModal: React.FC<{
 
   return (
     <Modal
-      className={styles['create-master-detail-modal']}
+      className={styles.createMasterDetailModal}
       title="添加主子关系"
       visible={visible}
       onOk={handleFinish}
@@ -123,7 +122,7 @@ const CreateMasterDetailModal: React.FC<{
       cancelText="取消"
       confirmLoading={loading}
     >
-      <Form form={form} layout="vertical" className={styles['master-detail-form']}>
+      <Form form={form} layout="vertical">
         {/* 主表选择 */}
         <Form.Item label="主表" required>
           <Form.Item field="parentEntityId" rules={[{ required: true, message: '请选择主表' }]}>

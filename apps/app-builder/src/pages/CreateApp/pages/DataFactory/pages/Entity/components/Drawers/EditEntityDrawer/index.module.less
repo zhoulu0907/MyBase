@@ -65,23 +65,22 @@
     width: 40px;
     height: 91px;
     writing-mode: vertical-lr;
-    // margin-bottom: 4px;
     margin-top: 0 !important;
-    background-size: contain;
-    background-position: center;
-    .flex-center();
+    background-size: contain !important;
+    background-position: center !important;
+    .flex-center() !important;
 
     &:first-child {
       background: url('@/assets/data_factory/white_tab_first.svg') no-repeat;
     }
-    &:nth-child(2), &:nth-child(3) {
+    &:nth-child(2),
+    &:nth-child(3) {
       background: url('@/assets/data_factory/white_tab_middle.svg') no-repeat;
     }
     &:nth-child(4) {
       background: url('@/assets/data_factory/white_tab_last.svg') no-repeat;
     }
   }
-
 
   :global(.arco-tabs-header-title-text::before) {
     display: none !important;
@@ -92,7 +91,8 @@
     &:first-child {
       background: url('@/assets/data_factory/tab_first.svg') no-repeat;
     }
-    &:nth-child(2), &:nth-child(3) {
+    &:nth-child(2),
+    &:nth-child(3) {
       background: url('@/assets/data_factory/tab_middle.svg') no-repeat;
     }
     &:nth-child(4) {

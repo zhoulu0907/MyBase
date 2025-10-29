@@ -9,7 +9,7 @@ interface DropdownRenderProps {
   selected: Array<any>;
   displayFieldOptions: Array<any>;
   hasEditLabel?: boolean;
-  handleOptionsChange: () => void;
+  handleOptionsChange?: () => void;
   setDisplayFieldOptions: (value: React.SetStateAction<any[]>) => void;
   setSelected: (value: React.SetStateAction<string[]>) => void;
 }
@@ -17,10 +17,7 @@ interface DropdownRenderProps {
 function getAllValues(options: any) {
   let values: Array<any> = [];
   options.forEach((opt: any) => {
-    values.push(opt.value);
-    if (opt.children) {
-      values = values.concat(opt.children.map((child: any) => child.value));
-    }
+    values.push(opt.fieldName);
   });
   return values;
 }
@@ -57,8 +54,8 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
         <Button
           type="primary"
           onClick={() => {
-            displayFieldOptions[index].label = editLabel;
-            handleOptionsChange();
+            displayFieldOptions[index].displayName = editLabel;
+            handleOptionsChange?.();
             setEditIdx(null);
           }}
         >
@@ -74,60 +71,18 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
   const isIndeterminate = selected.length > 0 && selected.length < allValues.length;
 
   // 父节点选中/半选
-  const getParentChecked = (opt: any) => {
-    if (!opt.children) return selected.includes(opt.value);
-    const childValues = opt.children.map((c: any) => c.value);
-    const checkedCount = childValues.filter((v: any) => selected.includes(v)).length;
-    if (checkedCount === 0) return false;
-    if (checkedCount === childValues.length) return true;
-    return 'indeterminate';
+  const getChecked = (opt: any) => {
+    return selected.includes(opt.fieldName);
   };
 
   // 父节点点击
-  const handleParentCheck = (checked: boolean, opt: any) => {
-    if (!opt.children) {
-      setSelected(checked ? [...selected, opt.value] : selected.filter((v) => v !== opt.value));
-    } else {
-      const childValues = opt.children.map((c: any) => c.value);
-      if (checked) {
-        setSelected([...selected, opt.value, ...childValues]);
-      } else {
-        setSelected(selected.filter((v) => v !== opt.value && !childValues.includes(v)));
-      }
-    }
-  };
-
-  // 子节点点击
-  const handleChildCheck = (checked: boolean, child: any, parent: any) => {
-    let newSelected: Array<any> = [];
-    if (checked) {
-      newSelected = [...selected, child.value];
-    } else {
-      newSelected = selected.filter((v) => v !== child.value);
-    }
-    // 如果所有子节点都选中，自动选中父节点
-    if (parent) {
-      const childValues = parent.children.map((c: any) => c.value);
-      const allChecked = childValues.every((v: any) => newSelected.includes(v));
-      if (allChecked) {
-        newSelected = [...newSelected, parent.value];
-      } else {
-        newSelected = newSelected.filter((v) => v !== parent.value);
-      }
-    }
-    setSelected(newSelected);
+  const handleCheck = (checked: boolean, opt: any) => {
+    setSelected(checked ? [...selected, opt.fieldName] : selected.filter((v) => v !== opt.fieldName));
   };
 
   // 全选点击
   const handleCheckAll = (checked: boolean) => {
     setSelected(checked ? allValues : []);
-  };
-
-  // 子级拖拽
-  const handleChildDrag = (parentIdx: number, newChildren: any) => {
-    const newOptions = [...displayFieldOptions];
-    newOptions[parentIdx].children = newChildren;
-    setDisplayFieldOptions(newOptions);
   };
 
   return (
@@ -142,29 +97,28 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
       </Checkbox>
       <ReactSortable list={displayFieldOptions} setList={setDisplayFieldOptions} handle=".drag-handle" animation={150}>
         {displayFieldOptions.map((option: any, index) => (
-          <div key={option.value}>
+          <div key={option.fieldName}>
             <div
-              key={option.value}
+              key={option.fieldName}
               className={styles.displayFieldOptions}
               style={{
-                background: hovered === option.value ? '#f2f3f5' : '#fff'
+                background: hovered === option.fieldName ? '#f2f3f5' : '#fff'
               }}
               onMouseEnter={() => {
-                setHovered(option.value);
+                setHovered(option.fieldName);
               }}
               onMouseLeave={() => {
                 setHovered(null);
               }}
             >
               <Checkbox
-                checked={getParentChecked(option) === true}
-                indeterminate={getParentChecked(option) === 'indeterminate'}
-                onChange={(checked) => handleParentCheck(checked, option)}
+                checked={getChecked(option)}
+                onChange={(checked) => handleCheck(checked, option)}
                 className={styles.childCheckbox}
               />
-              <span className={styles.optionSpan}>{option.label}</span>
+              <span className={styles.optionSpan}>{option.displayName}</span>
               <div className={styles.operationDiv}>
-                {selected.includes(option.value) && hasEditLabel && (
+                {selected.includes(option.fieldName) && hasEditLabel && (
                   <Popover
                     trigger="click"
                     position="tr"
@@ -172,7 +126,7 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
                     onVisibleChange={(visible) => {
                       if (visible) {
                         setEditIdx(index);
-                        setEditLabel(option.label);
+                        setEditLabel(option.displayName);
                       } else {
                         setEditIdx(null);
                       }
@@ -182,7 +136,7 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
                     <IconEdit
                       className={styles.iconEdit}
                       style={{
-                        visibility: hovered === option.value ? 'visible' : 'hidden',
+                        visibility: hovered === option.fieldName ? 'visible' : 'hidden',
                         color: '#838892'
                       }}
                     />
@@ -193,78 +147,12 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
                   style={{
                     cursor: 'move',
                     marginLeft: 8,
-                    visibility: hovered === option.value ? 'visible' : 'hidden',
+                    visibility: hovered === option.fieldName ? 'visible' : 'hidden',
                     color: '#838892'
                   }}
                 />
               </div>
             </div>
-            {option.children && (
-              <div style={{ marginLeft: 32 }}>
-                <ReactSortable
-                  list={option.children}
-                  setList={(newChildren) => handleChildDrag(index, newChildren)}
-                  handle=".drag-handle"
-                  animation={150}
-                >
-                  {option.children.map((child: any) => (
-                    <div
-                      key={child.value}
-                      className={styles.displayFieldOptions}
-                      style={{
-                        background: hovered === child.value ? '#f2f3f5' : '#fff'
-                      }}
-                      onMouseEnter={() => {
-                        setHovered(child.value);
-                      }}
-                      onMouseLeave={() => {
-                        setHovered(null);
-                      }}
-                    >
-                      <Checkbox
-                        checked={selected.includes(child.value)}
-                        onChange={(checked) => handleChildCheck(checked, child, option)}
-                        className={styles.childCheckbox}
-                      />
-                      <span className={styles.optionSpan}>{`${option.label}.${child.label}`}</span>
-                      <div className={styles.operationDiv}>
-                        {selected.includes(child.value) && hasEditLabel && (
-                          <Popover
-                            trigger="click"
-                            position="tr"
-                            popupVisible={editIdx === index}
-                            onVisibleChange={(visible) => {
-                              if (visible) {
-                                setEditIdx(index);
-                                setEditLabel(child.label);
-                              } else {
-                                setEditIdx(null);
-                              }
-                            }}
-                            content={renderEditPopover(index)}
-                          >
-                            <IconEdit
-                              className={styles.iconEdit}
-                              style={{
-                                visibility: hovered === child.value ? 'visible' : 'hidden'
-                              }}
-                            />
-                          </Popover>
-                        )}
-                        <IconDragDotVertical
-                          className="drag-handle"
-                          style={{
-                            cursor: 'move',
-                            marginLeft: 8,
-                            visibility: hovered === child.value ? 'visible' : 'hidden'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </ReactSortable>
-              </div>
-            )}
           </div>
         ))}
       </ReactSortable>

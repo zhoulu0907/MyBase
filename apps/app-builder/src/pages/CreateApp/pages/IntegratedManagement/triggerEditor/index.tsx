@@ -23,17 +23,8 @@ import { FlowNodeRegistries } from './nodes';
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
 
-  const {
-    setNodeId,
-    nodeId,
-    setFlowId,
-    flowId,
-    // setPageId,
-    setNodeData,
-    setAllNodeData,
-    setMainEntities,
-    setSubEntities
-  } = triggerEditorSignal;
+  const { setNodeId, nodeId, setFlowId, setNodeData, setAllNodeData, setMainEntities, setSubEntities } =
+    triggerEditorSignal;
 
   const [initData, setInitData] = useState<FlowDocumentJSON>();
   const sidebarContainerRef = useRef<HTMLDivElement>(null);
@@ -89,7 +80,7 @@ const TriggerEditor = () => {
 
       // 初始化节点的输出
       Object.values(data).forEach((item: any) => {
-        if (item.output) {
+        if (item.id && item.output) {
           triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
         }
       });
@@ -101,7 +92,7 @@ const TriggerEditor = () => {
     } else {
       // 对开始节点数据初始化
       switch (res.triggerType) {
-        case TriggerType.FORM:
+        case TriggerType.FORM: {
           setInitData(StartFormInitData);
           const formInitialData = {
             ...StartFormInitData.nodes[0].data.initialData,
@@ -112,7 +103,9 @@ const TriggerEditor = () => {
           setNodeData(StartFormInitData.nodes[0].id, formInitialData);
           setNodeData(StartFormInitData.nodes[1].id, StartFormInitData.nodes[1].data.initialData);
           break;
-        case TriggerType.ENTITY:
+        }
+
+        case TriggerType.ENTITY: {
           setInitData(StartEntityInitData);
           const entityInitialData = {
             ...StartEntityInitData.nodes[0].data.initialData,
@@ -121,12 +114,16 @@ const TriggerEditor = () => {
           setNodeData(StartEntityInitData.nodes[0].id, entityInitialData);
           setNodeData(StartEntityInitData.nodes[1].id, StartEntityInitData.nodes[1].data.initialData);
           break;
-        case TriggerType.TIME:
+        }
+
+        case TriggerType.TIME: {
           setInitData(StartTimeInitData);
           setNodeData(StartTimeInitData.nodes[0].id, StartTimeInitData.nodes[0].data.initialData);
           setNodeData(StartTimeInitData.nodes[1].id, StartTimeInitData.nodes[1].data.initialData);
           break;
-        case TriggerType.DATE_FIELD:
+        }
+
+        case TriggerType.DATE_FIELD: {
           setInitData(StartDateFieldInitData);
           const dateFieldInitialData = {
             ...StartDateFieldInitData.nodes[0].data.initialData,
@@ -135,12 +132,12 @@ const TriggerEditor = () => {
           setNodeData(StartDateFieldInitData.nodes[0].id, dateFieldInitialData);
           setNodeData(StartDateFieldInitData.nodes[1].id, StartDateFieldInitData.nodes[1].data.initialData);
           break;
-        case TriggerType.API:
+        }
+
+        case TriggerType.API: {
           setInitData(StartApiInitData);
           break;
-          // case TriggerType.BPM:
-          //   setInitData(StartBpmInitData);
-          break;
+        }
       }
     }
   };

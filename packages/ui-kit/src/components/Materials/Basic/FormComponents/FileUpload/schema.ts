@@ -26,6 +26,7 @@ import {
 } from '../../../constants';
 import type {
   IBooleanConfigType,
+  IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -37,14 +38,13 @@ import type {
   ITooltipConfigType,
   IUploadLimitConfigType,
   IUploadSizeConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType,
-  IDataFieldConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputFileUploadSchema {
@@ -109,17 +109,17 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-    * required：是否必填，未填写时提交报错
-    * maxCount：最大上传数量，默认：-1 不限制
-    * maxSize：最大图片大小单位：MB，默认：10，最大100
-    * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
-    */
+   * required：是否必填，未填写时提交报错
+   * maxCount：最大上传数量，默认：-1 不限制
+   * maxSize：最大图片大小单位：MB，默认：10，最大100
+   * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
+   */
   verify: {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
     maxSize: TNumberDefaultType;
     fileFormat: TTextDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -135,12 +135,12 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
   /**
    * 是否允许预览文件
    */
-  showPreview?: TBooleanDefaultType;
+  // showPreview?: TBooleanDefaultType;
 
   /**
    * 是否允许下载文件
    */
-  showDownload?: TBooleanDefaultType;
+  // showDownload?: TBooleanDefaultType;
 
   /**
    * 文件/图片展示样式：文本、平铺、列表
@@ -170,21 +170,21 @@ const XFileUpload: XInputFileUploadSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'showPreview',
-      name: '允许预览文件',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'showDownload',
-      name: '允许下载文件',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'showPreview',
+    //   name: '允许预览文件',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
+    // {
+    //   key: 'showDownload',
+    //   name: '允许下载文件',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'verify',
       name: '校验',
@@ -192,25 +192,25 @@ const XFileUpload: XInputFileUploadSchema = {
     },
     listTypeConfig,
     statusConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '文件上传',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    showPreview: false,
-    showDownload: false,
+    // showPreview: false,
+    // showDownload: false,
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     verify: {
       required: false,
       maxCount: -1,

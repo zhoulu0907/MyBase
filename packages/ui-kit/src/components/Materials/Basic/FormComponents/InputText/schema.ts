@@ -33,19 +33,19 @@ import type {
   ILayoutConfigType,
   INumberConfigType,
   IPlaceholderConfigType,
+  ISecurityConfigType,
   IStatusConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  ISecurityConfigType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 // 输入框组件的schema
@@ -125,7 +125,7 @@ export interface XInputTextConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -181,7 +181,7 @@ const XInputText: XInputTextSchema = {
     {
       key: 'label',
       name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT,
+      type: CONFIG_TYPES.LABEL_INPUT
     },
     ...dataFieldConfig,
     {
@@ -233,13 +233,13 @@ const XInputText: XInputTextSchema = {
       name: '安全',
       type: CONFIG_TYPES.SECURITY
     },
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '单行文本',
-      display: true,
+      display: true
     },
     dataField: [],
     placeholder: '请输入文字',
@@ -248,12 +248,12 @@ const XInputText: XInputTextSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100,
-    maxLength: 40,
+    labelColSpan: 200,
+    maxLength: 200,
     security: {
       display: false,
       type: ''

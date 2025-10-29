@@ -38,13 +38,13 @@ import type {
   ITooltipConfigType,
   IUploadCompressConfigType,
   IUploadSizeConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputImgUploadSchema {
@@ -109,15 +109,15 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-    * required：是否必填，未填写时提交报错
-    * maxCount：最大上传数量，默认：-1 不限制
-    * maxSize：最大图片大小单位：MB，默认：10，最大100
-    */
+   * required：是否必填，未填写时提交报错
+   * maxCount：最大上传数量，默认：-1 不限制
+   * maxSize：最大图片大小单位：MB，默认：10，最大100
+   */
   verify: {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
     maxSize: TNumberDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -180,13 +180,13 @@ const XImgUpload: XInputImgUploadSchema = {
     },
     listTypeConfig,
     statusConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '图片上传',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
@@ -194,14 +194,14 @@ const XImgUpload: XInputImgUploadSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     uploadCompress: -1,
-    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     verify: {
       required: false,
       maxCount: -1,
-      maxSize: 10,
+      maxSize: 10
     }
   }
 };

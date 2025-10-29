@@ -34,13 +34,9 @@ export interface UpdatePagePermissionReq {
  */
 export interface UpdateOperationPermissionReq {
   /**
-   * 操作权限
+   * 已选的操作权限
    */
-  authOperation: AuthOperationVO;
-  /**
-   * 操作权限组
-   */
-  authOperations: AuthOperationVO[];
+  operationTags: string[];
   /**
    * 应用管理 - 权限基础参数
    */
@@ -64,6 +60,24 @@ export interface AuthOperationVO {
    * 操作编码
    */
   operationCode: string;
+}
+
+/**
+ * 视图权限
+ */
+export interface UpdateViewPermissionReq {
+    /**
+     * 要更新的视图权限列表
+     */
+    authViews?: AuthViewVO[];
+    /**
+     * 所有字段可操作，当下面情况必须传值：从全部到自定义，或从自定义到全部
+     */
+    isAllViewsAllowed?: number;
+    /**
+     * 应用管理 - 权限基础参数
+     */
+    permissionReq: GetPermissionReq;
 }
 
 /**
@@ -96,6 +110,10 @@ export interface AuthDataGroupVO {
    */
   groupName?: string;
   /**
+   * 权限范围
+   */
+  scopeTags?: string[];
+  /**
    * 数据权限组排序
    */
   groupOrder?: number;
@@ -114,7 +132,7 @@ export interface AuthDataGroupVO {
   /**
    * 是否可以操作
    */
-  isOperable?: IsOperable;
+  operationTags?: string[];
   /**
    * 权限范围字段名称
    */
@@ -172,6 +190,14 @@ export interface AuthDataPermissionPersonVO {
    * 操作人员名称
    */
   displayName?: string;
+  /**
+   * entityId
+   */
+  entityId?: string;
+  /**
+   * Id
+   */
+  id?: string;
 }
 
 /**
@@ -189,7 +215,7 @@ export interface AuthDataFilterVO {
   /**
    * 字段id
    */
-  fieldId?: number;
+  fieldId?: string;
   /**
    * 字段名称
    */
@@ -270,6 +296,10 @@ export interface AuthFieldVO {
    */
   fieldId: string;
   /**
+   * 字段类型
+   */
+  fieldType: string;
+  /**
    * 主键Id
    */
   id: string;
@@ -293,29 +323,17 @@ export interface AuthFieldVO {
  */
 export interface FuncPermissionResponse {
   /**
-   * 应用Id
-   */
-  applicationId: string;
-  /**
-   * 实体访问权限
-   */
-  authEntity: AuthDetailViewVO;
-  /**
    * 操作权限
    */
-  authOperations: AuthOperationVO[];
+  authOperationTags: string[];
   /**
    * 页面是否可访问
    */
   isPageAllowed: number;
   /**
-   * 菜单Id
+   * 实体访问权限
    */
-  menuId: number;
-  /**
-   * 角色Id
-   */
-  roleId: number;
+  authViewVO: AuthDetailViewVO;
 }
 
 /**
@@ -384,6 +402,15 @@ export enum FunViewPermission {
 }
 
 /**
+ * 枚举 视图自定义权限
+ * @enum
+ */
+export enum FunViewCustomPermission {
+  notViewAllowed,
+  canViewAllowed
+}
+
+/**
  * 枚举 数据操作权限
  * @enum
  */
@@ -448,4 +475,13 @@ export enum FieldEdit {
 export enum FieldDownloadable {
   notDownloadable,
   canDownloadable
+}
+
+/**
+ * 枚举 字段可见性
+ * @enum
+ */
+export enum Visibility {
+  visible,
+  hidden
 }

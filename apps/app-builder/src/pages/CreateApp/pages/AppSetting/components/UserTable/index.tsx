@@ -9,7 +9,9 @@ import {
   type GetDeptUserReq,
   type Role,
   type RoleAddUserReq,
-  type RoleDeleteUserReq
+  type RoleDeleteUserReq,
+  type AuthRoleUsersPageRespVO,
+  type DeptAndUsersRespDTO
 } from '@onebase/app';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
@@ -18,7 +20,7 @@ import styles from './index.module.less';
 
 interface IProps {
   roleInfo: Role | undefined;
-  memberList?: any[];
+  memberList?: AuthRoleUsersPageRespVO[];
   memberTotal?: number;
 }
 
@@ -26,9 +28,7 @@ interface IProps {
 const UserMembers = (props: IProps) => {
   const { roleInfo, memberList, memberTotal } = props;
 
-  // const [memberList, setMemberList] = useState<any[]>([]);
-  // const [memberTotal, setMemberTotal] = useState<number>(0);
-  const [deptData, setDeptData] = useState<any>();
+  const [deptData, setDeptData] = useState<DeptAndUsersRespDTO>();
   const [userList, setMuneList] = useState(memberList || []); // 用户列表
   const [pagination, setPagination] = useState({
     pageSize: 10,
@@ -39,7 +39,7 @@ const UserMembers = (props: IProps) => {
   const [userLoading, setUserLoading] = useState<boolean>(false); // 用户列表加载状态
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
-  const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<AuthRoleUsersPageRespVO[]>([]);
 
   useEffect(() => {
     if (memberList && roleInfo?.id) {
@@ -66,14 +66,17 @@ const UserMembers = (props: IProps) => {
   const getDeptUsers = async ({ deptId, keywords }: { deptId?: string; keywords?: string }) => {
     setMemberLoading(true);
     try {
+      if (!roleInfo.id) return;
       const params: GetDeptUserReq = {
-        roleId: roleInfo?.id!,
+        roleId: roleInfo.id,
         deptId,
         keywords
       };
       const res = await getDeptUser(params);
+      console.log('获取部门用户信息 res:', res);
       setDeptData(res);
     } catch (error) {
+      console.error('获取部门用户信息失败 error:', error);
     } finally {
       setMemberLoading(false);
     }
@@ -90,11 +93,12 @@ const UserMembers = (props: IProps) => {
   };
 
   // 添加成员
-  const handleAddUser = async (selectedMembers: any[]) => {
+  const handleAddUser = async (selectedMembers: AuthRoleUsersPageRespVO[]) => {
     console.log('添加成员 selectedMembers:', selectedMembers);
+    if (!roleInfo.id) return;
     const userIds = selectedMembers.map((v) => v.key);
     const params: RoleAddUserReq = {
-      roleId: roleInfo?.id!,
+      roleId: roleInfo.id,
       userIds
     };
     console.log('添加成员 params:', params);
@@ -106,8 +110,9 @@ const UserMembers = (props: IProps) => {
 
   // 移除角色用户
   const handleDeleteUser = async (userId: number) => {
+    if (!roleInfo.id) return;
     const params: RoleDeleteUserReq = {
-      roleId: roleInfo?.id!,
+      roleId: roleInfo.id,
       userIds: [userId]
     };
     await roleDeleteUser(params);
@@ -174,7 +179,7 @@ const UserMembers = (props: IProps) => {
     return () => debouncedUpdate.cancel();
   }, [debouncedUpdate]);
 
-  const handleUpdateSelectedMembers = useCallback((members: any[]) => {
+  const handleUpdateSelectedMembers = useCallback((members: AuthRoleUsersPageRespVO[]) => {
     setSelectedMembers(members);
   }, []);
 

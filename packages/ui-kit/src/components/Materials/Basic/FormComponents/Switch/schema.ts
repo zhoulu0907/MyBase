@@ -27,19 +27,19 @@ import type {
   ILayoutConfigType,
   INumberConfigType,
   IPlaceholderConfigType,
+  ISecurityConfigType,
   ISelectConfigType,
   IStatusConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  ISecurityConfigType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputSwitchSchema {
@@ -166,20 +166,20 @@ const XSwitch: XInputSwitchSchema = {
     ...baseDefault,
     label: {
       text: '开关',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: false,
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
-    labelColSpan: 100,
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    labelColSpan: 200,
     saveWithHidden: false,
     security: {
       display: false,
       type: ''
-    },
+    }
   }
 };
 

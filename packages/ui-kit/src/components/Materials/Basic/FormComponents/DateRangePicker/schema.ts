@@ -1,12 +1,12 @@
 import {
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   dateTypeConfig,
   labelColSpanConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
-  dataFieldConfig,
   type ICommonBaseType,
   type TDateTypeSelectKeyType,
   type TLayoutSelectKeyType,
@@ -26,6 +26,7 @@ import {
 } from '../../../constants';
 import type {
   IBooleanConfigType,
+  IDataFieldConfigType,
   IDateConfigType,
   IDateTypeConfigType,
   ILabelConfigType,
@@ -36,14 +37,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType,
-  IDataFieldConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputDateRangePickerSchema {
@@ -111,7 +111,7 @@ export interface XInputDateRangePickerConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -189,27 +189,27 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
     },
     statusConfig,
     dateTypeConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '日期区间',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     dateType: DATE_VALUES[DATE_OPTIONS.DATE],
     startTime: '',
     endTime: '',
     verify: {
-      required: false,
+      required: false
     }
   }
 };

@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { CheckEntityPage } from './main/CheckEntityPage';
-import { EmptyEntityPage } from './main/EmptyEntityPage';
-import { getFieldTypes } from '@onebase/app';
 import { useFieldStore } from '@/store/store_field';
+import { getFieldTypes } from '@onebase/app';
+import React, { useEffect } from 'react';
+import { EntityPageContainer } from './main/EntityPageContainer';
 
-const EntityPage: React.FC = () => {
-  const [pageType, setPageType] = useState('check-entity');
+const EntityPage: React.FC = ({appId}) => {
   const { setFieldTypes } = useFieldStore();
-  const handlePageType = (type: string) => {
-    setPageType(type);
-  };
 
+  // 加载字段类型
   const loadFieldTypes = async () => {
     const res = await getFieldTypes();
 
@@ -25,8 +21,7 @@ const EntityPage: React.FC = () => {
 
   return (
     <>
-      {pageType === 'check-entity' && <CheckEntityPage />}
-      {pageType === 'empty-entity' && <EmptyEntityPage handlePageType={handlePageType} />}
+      <EntityPageContainer appId={appId} />
     </>
   );
 };

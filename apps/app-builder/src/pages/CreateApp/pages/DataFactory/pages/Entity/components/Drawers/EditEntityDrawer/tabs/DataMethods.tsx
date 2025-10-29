@@ -41,11 +41,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
 
   // 获取方法类型标签
   const getMethodTypeTag = () => {
-    return (
-      <Tag color="rgba(79, 174, 123, 0.20)" style={{ color: '#4FAE7B' }}>
-        系统预设
-      </Tag>
-    );
+    return <Tag color="rgba(var(--primary-6), 1)">系统预设</Tag>;
   };
 
   useEffect(() => {

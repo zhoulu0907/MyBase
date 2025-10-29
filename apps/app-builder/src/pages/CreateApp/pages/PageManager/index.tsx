@@ -1,5 +1,6 @@
 import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
+import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
@@ -7,49 +8,51 @@ import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
-import { IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
   createApplicationMenu,
   deleteApplicationMenu,
-  updateApplicationMenuVisible,
   getEntityListByApp,
   getPageSetId,
   listApplicationMenu,
+  menuSignal,
   MenuType,
-  VisibleType,
   PageType,
   RootParentPage,
   updateApplicationMenu,
+  updateApplicationMenuOrder,
+  updateApplicationMenuVisible,
+  VisibleType,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
   type DeleteApplicationMenuReq,
-  type UpdateApplicationMenuVisibleReq,
   type GetPageSetIdReq,
   type ListApplicationMenuReq,
   type MetadataEntityPair,
-  type UpdateApplicationMenuNameReq
+  type UpdateApplicationMenuNameReq,
+  type UpdateApplicationMenuOrderReq,
+  type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import styles from './index.module.less';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide'
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage'
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
 const Sider = Layout.Sider;
 const Content = Layout.Content;
-
-const iconStyle = {
-  marginRight: 8,
-  transform: 'translateY(5px)'
-};
 
 /**
  * 树形数据节点接口
@@ -58,6 +61,7 @@ interface TreeNode {
   key: string;
   value: string;
   title: string;
+  menuType?: MenuType;
   children?: TreeNode[];
 }
 
@@ -67,6 +71,8 @@ interface Options {
 }
 
 const PageManagerPage: FC = () => {
+  useSignals();
+
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -89,14 +95,13 @@ const PageManagerPage: FC = () => {
   const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
-  const [curMenu, setCurMenu] = useState<ApplicationMenu>();
-  const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
+  const { curMenu, setCurMenu } = menuSignal;
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [searchResult, setSearchResult] = useState<boolean>(false); // 菜单搜索结果
 
-  const initTreeItemWidth = 155;
+  const initTreeItemWidth = 146;
   const cutTreeItemWidth = 25;
 
   const { clearIsEditMode } = useBasicEditorStore();
@@ -142,7 +147,6 @@ const PageManagerPage: FC = () => {
             if (menu.menuType == MenuType.PAGE) {
               setCurMenu(menu);
             }
-            setActiveMenu(menu);
           }}
           triggerCreate={triggerCreate}
           triggerRename={triggerRename}
@@ -154,6 +158,11 @@ const PageManagerPage: FC = () => {
           createForm={createForm}
         />
       ),
+      menuType: menu.menuType,
+      props: {
+        // ✅ 显式传入 props 让 dragNode.props.menuType 能取到
+        menuType: menu.menuType
+      },
       children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth, showOption) : []
     }));
   };
@@ -174,6 +183,7 @@ const PageManagerPage: FC = () => {
 
     if (res && res.length > 0) {
       setCurMenu(findFirstPage(res));
+
       setSearchResult(false);
     }
 
@@ -185,11 +195,8 @@ const PageManagerPage: FC = () => {
   };
 
   const getEntityList = async () => {
-    // TODO(mickey): 等xiaoyi完成后 写活
-    // const appId: string = '1';
     const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
-    console.log(res);
     const entityOptions = res.map((entity) => ({
       label: entity.entityName,
       value: entity.entityId
@@ -207,8 +214,19 @@ const PageManagerPage: FC = () => {
           setTitle(t('createApp.createPage'));
         }}
       >
-        <img src={CreatePageIcon} style={iconStyle} />
-        {t('createApp.createPage')}
+        <div className={styles.createItem}>
+          <ReactSVG
+            className={styles.customSvg}
+            src={CreatePageIcon}
+            beforeInjection={(svg) => {
+              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+              svg.setAttribute('fill', '#4E5969');
+              svg.setAttribute('width', '16px');
+              svg.setAttribute('height', '16px');
+            }}
+          />
+          {t('createApp.createPage')}
+        </div>
       </MenuItem>
       <MenuItem
         key="group"
@@ -218,14 +236,26 @@ const PageManagerPage: FC = () => {
           setTitle(t('createApp.createGroup'));
         }}
       >
-        <img src={CreateGroupIcon} style={iconStyle} />
-        {t('createApp.createGroup')}
+        <div className={styles.createItem}>
+          <ReactSVG
+            className={styles.customSvg}
+            src={CreateGroupIcon}
+            beforeInjection={(svg) => {
+              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+              svg.setAttribute('fill', '#4E5969');
+              svg.setAttribute('width', '16px');
+              svg.setAttribute('height', '16px');
+            }}
+          />
+          {t('createApp.createGroup')}
+        </div>
       </MenuItem>
     </Menu>
   );
 
   const triggerRename = () => {
     setVisibleRenameForm(true);
+    setTitle(t('createApp.rename'));
   };
 
   const triggerCreate = (formType: string) => {
@@ -298,7 +328,7 @@ const PageManagerPage: FC = () => {
       if (pageSetId && menuResp.menuType === MenuType.PAGE) {
         sessionStorage.setItem(
           'EDITOR_PAGE_INFO',
-          JSON.stringify({ id: curMenu?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
+          JSON.stringify({ id: curMenu.value?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
         );
         navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
       }
@@ -335,8 +365,6 @@ const PageManagerPage: FC = () => {
       parentId: copyForm.getFieldValue('parentId') === RootParentPage.id ? '' : copyForm.getFieldValue('parentId')
     };
 
-    // console.log('req: ', req);
-
     const res = await copyApplicationMenu(req);
     if (res) {
       Message.success('复制成功');
@@ -356,21 +384,20 @@ const PageManagerPage: FC = () => {
     const res = await deleteApplicationMenu(req);
     if (res) {
       Message.success('删除成功');
-      setActiveMenu(undefined);
-      setCurMenu(undefined);
+      setCurMenu({} as ApplicationMenu);
     }
 
     getMenuList();
   };
 
   const handleEditPageSet = async (name: string, icon: string) => {
-    if (!curMenu?.id) {
+    if (!curMenu.value?.id) {
       Message.error('请选择菜单');
       return;
     }
 
     const req: GetPageSetIdReq = {
-      menuId: curMenu?.id
+      menuId: curMenu.value?.id
     };
     const pageSetId = await getPageSetId(req);
 
@@ -380,7 +407,7 @@ const PageManagerPage: FC = () => {
     }
 
     // 把编辑页菜单数据保存起来；
-    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu?.id, name, icon }));
+    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 
@@ -396,97 +423,219 @@ const PageManagerPage: FC = () => {
     return () => debouncedSearch.cancel();
   }, [debouncedSearch]);
 
+  // 菜单节点拖拽排序
+  const moveNode = (dragNode: TreeNode, dropNode: TreeNode | null, dropPosition: number): void => {
+    // 移除节点
+    const removeNode = (nodes: TreeNode[], key: string): TreeNode | null => {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].key === key) return nodes.splice(i, 1)[0];
+        if (nodes[i].children) {
+          const removed = removeNode(nodes[i].children!, key);
+          if (removed) return removed;
+        }
+      }
+      return null;
+    };
+
+    const dragItem = treeData ? removeNode(treeData, dragNode.key) : null;
+    if (!dragItem) return;
+
+    // 插入节点
+    const insertNode = (
+      nodes: TreeNode[],
+      key: string | null,
+      nodeToInsert: TreeNode,
+      position: number,
+      parentNodes: TreeNode[] = nodes
+    ): boolean => {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].key === key) {
+          const dropType = nodes[i].menuType;
+          const dragType = nodeToInsert.menuType;
+
+          // 页面节点不能放到页面节点内部
+          if (dragType === MenuType.PAGE && dropType === MenuType.PAGE && position === 0) {
+            return false;
+          }
+
+          if (dropType === MenuType.GROUP && position === 0) {
+            // 拖到分组节点上 -> 插入 children
+            if (!nodes[i].children) nodes[i].children = [];
+            nodes[i].children!.push(nodeToInsert);
+            setExpandedKeys((prev) => [...prev, nodes[i].key]);
+          } else if (position === -1) {
+            // 放在目标节点前面
+            const index = parentNodes.indexOf(nodes[i]);
+            parentNodes.splice(index, 0, nodeToInsert);
+          } else if (position === 1) {
+            // 放在目标节点后面
+            const index = parentNodes.indexOf(nodes[i]);
+            parentNodes.splice(index + 1, 0, nodeToInsert);
+          }
+
+          return true;
+        }
+
+        if (nodes[i].children && insertNode(nodes[i].children!, key, nodeToInsert, position, nodes[i].children)) {
+          return true;
+        }
+      }
+
+      // 拖到空白处，插入顶层
+      if (key === null && parentNodes === nodes) {
+        nodes.push(nodeToInsert);
+        return true;
+      }
+
+      return false;
+    };
+
+    insertNode(treeData!, dropNode ? dropNode.key : null, dragItem, dropPosition);
+    setTreeData([...treeData!]);
+  };
+
+  const buildMenuTree = (nodes: TreeNode[]): { id: string; children: any[] }[] =>
+    nodes.map((node) => ({
+      id: node.key,
+      children: node.children ? buildMenuTree(node.children) : []
+    }));
+
+  const findParentNode = (list: TreeNode[], key: string): TreeNode | null => {
+    for (const node of list) {
+      if (node.children?.some((c) => c.key === key)) {
+        return node;
+      }
+      const found = findParentNode(node.children || [], key);
+      if (found) return found;
+    }
+    return null;
+  };
+
   return (
     <div className={styles.pageManagerPage}>
       <Layout style={{ height: '100%' }}>
-        <Layout>
-          <Sider className={styles.sider}>
-            <div className={styles.siderTitle}>
-              所有页面
-              <Dropdown droplist={createMenuDropList} trigger="click" position="bl">
-                <Button type="text" icon={<IconPlus />} style={{ padding: 6 }}>新建</Button>
-              </Dropdown>
+        <Sider className={styles.sider} style={{ width: 220 }}>
+          <div className={styles.siderTitle}>
+            所有页面
+            <Dropdown droplist={createMenuDropList} trigger="click" position="bl">
+              <Button type="text" icon={<IconPlus />} style={{ padding: 6 }}>
+                新建
+              </Button>
+            </Dropdown>
+          </div>
+          <div className={styles.siderHeader}>
+            <div className={styles.siderHeaderInput}>
+              <Input
+                allowClear
+                suffix={<IconSearch />}
+                placeholder={t('createApp.searchPlaceHolder')}
+                onChange={debouncedSearch}
+              />
             </div>
-            <div className={styles.siderHeader}>
-              <div className={styles.siderHeaderInput}>
-                <Input
-                  allowClear
-                  suffix={<IconSearch />}
-                  placeholder={t('createApp.searchPlaceHolder')}
-                  onChange={debouncedSearch}
+          </div>
+          <TaskCenterSide setCurMenu={setCurMenu} styles_tree={styles.tree} />
+          <Tree
+            blockNode
+            draggable
+            selectedKeys={[curMenu.value?.id!]}
+            treeData={treeData}
+            className={`menuTree ${styles.tree}`}
+            showLine={false}
+            icons={{
+              switcherIcon: <IconDown />,
+              dragIcon: null
+            }}
+            expandedKeys={expandedKeys}
+            onExpand={setExpandedKeys}
+            actionOnClick={'expand'}
+            style={{
+              width: '220px',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              padding: '4px 8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8
+            }}
+            allowDrop={(info: any) => {
+              const { dragNode, dropNode, dropPosition } = info;
+
+              const dragParent = dragNode?.props?.parentKey;
+              const dropParent = dropNode?.props?.parentKey;
+              const sameParent = dragParent === dropParent;
+
+              // 仅允许同级间上下移动
+              return sameParent && dropPosition !== 0;
+            }}
+            onDrop={async (info: any) => {
+              const dragNode = info.dragNode;
+              const dropNode = info.dropNode;
+              const dropPosition = info.dropPosition;
+              const dropNodeParent = findParentNode(treeData!, dropNode.key);
+
+              moveNode(dragNode, dropNode, dropPosition);
+
+              // 生成接口参数
+              const payload: UpdateApplicationMenuOrderReq = {
+                id: dragNode.key,
+                parentId: dropNodeParent?.key || '0',
+                menuTree: buildMenuTree(treeData!)
+              };
+
+              console.debug('✅ 更新后的参数:', payload);
+              await updateApplicationMenuOrder(payload);
+            }}
+          />
+        </Sider>
+        <Content className={styles.content}>
+          {showGuide ? (
+            <div className={styles.guide}>
+              <div
+                className={styles.guideImg}
+                style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}
+              >
+                <div
+                  className={styles.guideButton}
+                  onClick={() => {
+                    setTitle(t('createApp.createPage'));
+                    setVisibleCreateForm('page');
+                  }}
                 />
               </div>
             </div>
-
-            <Tree
-              blockNode
-              draggable={undefined}
-              selectedKeys={[curMenu?.id!]}
-              treeData={treeData}
-              className={styles.tree}
-              showLine={false}
-              icons={{
-                switcherIcon: null,
-                dragIcon: null
-              }}
-              expandedKeys={expandedKeys}
-              onExpand={setExpandedKeys}
-              actionOnClick={'expand'}
-              style={{
-                width: '200px',
-                overflow: 'hidden',
-                boxSizing: 'border-box',
-                padding: '0 8px'
-              }}
-            />
-          </Sider>
-          <Content className={styles.content}>
-            {showGuide ? (
-              <div className={styles.guide}>
-                <div
-                  className={styles.guideImg}
-                  style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}
-                >
-                  <div
-                    className={styles.guideButton}
-                    onClick={() => {
-                      setTitle(t('createApp.createPage'));
-                      setVisibleCreateForm('page');
-                    }}
-                  />
+          ) : (
+            <>
+              {searchResult ? (
+                <div className={styles.contentEmpty}>
+                  <IconEmpty fontSize={56} />
+                  暂无数据
                 </div>
-              </div>
-            ) : (
-              <>
-                {searchResult ? (
-                  <div className={styles.contentEmpty}>
-                    <IconEmpty fontSize={56} />
-                    暂无数据
-                  </div>
-                ) : (
-                  <>
-                    {curMenu?.id && (
-                      <>
-                        <div className={styles.contentHeader}>
-                          <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                          <Button
-                            type="primary"
-                            onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}
-                          >
-                            {t('common.edit')}
-                          </Button>
-                        </div>
-                        <div className={styles.contentBody}>
-                          <PreviewContainer menuId={curMenu?.id} runtime={true} />
-                        </div>
-                      </>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-          </Content>
-        </Layout>
+              ) : (
+                <>
+                  {(curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0) && (
+                    <>
+                      <div className={styles.contentHeader}>
+                        <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
+                        <Button
+                          className={styles.editButton}
+                          type="primary"
+                          icon={<img src={EditIcon} alt="编辑页面" />}
+                          onClick={() => handleEditPageSet(curMenu.value?.menuName, curMenu.value?.menuIcon)}
+                        >
+                          {t('createApp.editPage')}
+                        </Button>
+                      </div>
+                      <div className={styles.contentBody}>
+                        <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
+                      </div>
+                    </>
+                  )}
+                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id}/>}
+                </>
+              )}
+            </>
+          )}
+        </Content>
       </Layout>
 
       {/* 重命名弹窗 */}

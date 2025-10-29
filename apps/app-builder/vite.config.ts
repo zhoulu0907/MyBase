@@ -10,12 +10,12 @@ export default defineConfig({
   base: './',
   plugins: [react(
     {
-        babel: {
-            plugins: [
-              ['@babel/plugin-proposal-decorators', { legacy: true }],
-              ['@babel/plugin-proposal-class-properties', { loose: true }],
-            ],
-        },
+      babel: {
+        plugins: [
+          ['@babel/plugin-proposal-decorators', { legacy: true }],
+          ['@babel/plugin-proposal-class-properties', { loose: true }],
+        ],
+      },
     }
   )],
   resolve: {

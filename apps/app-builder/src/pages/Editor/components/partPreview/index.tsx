@@ -31,18 +31,19 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
       placement="bottom"
       height={'80vh'}
       visible={visible}
-      title={null}
+      title="预览页面"
       footer={null}
       onCancel={() => {
         setVisible(false);
       }}
+      bodyStyle={{ background: '#F2F3F5', padding: '0' }}
     >
       <div className={styles.previewPage}>
         <div className={styles.content}>
           {pageType == EDITOR_TYPES.LIST_EDITOR &&
             listComponents.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
-                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div
                     key={cp.id}
                     className={styles.componentItem}
@@ -56,37 +57,42 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                       pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                       runtime={true}
                     />
-                  </div>}
+                  </div>
+                )}
               </Fragment>
             ))}
 
           {pageType == EDITOR_TYPES.FORM_EDITOR && (
-            <Form layout="inline">
-              {formComponents.value.map((cp: GridItem) => (
-                <Fragment key={cp.id}>
-                  {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-                        runtime={true}
-                      />
-                    </div>}
-                </Fragment>
-              ))}
-
-              <div className={styles.footer}>
-                <Button type="primary">提交</Button>
-                <Button type="default">取消</Button>
+            <div className={styles.fromContain}>
+              <div className={styles.previewForm}>
+                <Form layout="inline" >
+                  {formComponents.value.map((cp: GridItem) => (
+                    <Fragment key={cp.id}>
+                      {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <div
+                          key={cp.id}
+                          className={styles.componentItem}
+                          style={{
+                            width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
+                          }}
+                        >
+                          <PreviewRender
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                            runtime={true}
+                          />
+                        </div>
+                      )}
+                    </Fragment>
+                  ))}
+                </Form>
               </div>
-            </Form>
+              <div className={styles.footer}>
+                <Button type="default">取消</Button>
+                <Button type="primary">提交</Button>
+              </div>
+            </div>
           )}
         </div>
       </div>

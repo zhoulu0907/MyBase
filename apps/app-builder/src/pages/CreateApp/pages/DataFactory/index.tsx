@@ -1,28 +1,30 @@
-import React, { useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/store_app';
 import { Layout, Menu, Tooltip } from '@arco-design/web-react';
-import { IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
+import { IconBook, IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
+import { getHashQueryParam } from '@onebase/common';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
+import DataDictPage from './pages/DataDict';
 import DataSourcePage from './pages/DataSource';
 import EntityPage from './pages/Entity';
 
 const DataFactoryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('check-entity');
-  const { setCurAppId, curAppId } = useAppStore();
+  const [appId, setAppId] = useState(''); 
+  const { setCurAppId, curAppId, clearCurAppId } = useAppStore();
 
   const handleMenuClick = (key: string) => {
     setActiveTab(key);
   };
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    // TODO(xiaoyi): use getHashQueryParam
-    const appId = searchParams.get('appId');
+    clearCurAppId();
+    const appId = getHashQueryParam('appId');
 
     if (appId) {
       setCurAppId(appId);
-      console.log('从URL参数获取到appId:', searchParams);
+      setAppId(appId);
+      console.log('从URL参数获取到appId:', appId);
     } else {
       console.warn('URL参数中未找到appId');
     }
@@ -61,13 +63,19 @@ const DataFactoryPage: React.FC = () => {
               <IconShareAlt />
             </Tooltip>
           </Menu.Item>
+          <Menu.Item key="data-dict">
+            <Tooltip content="数据字典" position="right">
+              <IconBook />
+            </Tooltip>
+          </Menu.Item>
         </Menu>
       </Layout.Sider>
 
       {/* 右侧内容 */}
       <Layout.Content className={styles['content']}>
         {activeTab === 'data-source' && <DataSourcePage />}
-        {activeTab === 'check-entity' && <EntityPage />}
+        {activeTab === 'check-entity' && <EntityPage appId={appId} />}
+        {activeTab === 'data-dict' && <DataDictPage />}
       </Layout.Content>
     </Layout>
   );

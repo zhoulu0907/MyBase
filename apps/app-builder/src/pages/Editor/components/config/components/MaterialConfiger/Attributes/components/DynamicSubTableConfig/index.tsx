@@ -1,53 +1,137 @@
-// import { useAppEntityStore } from '@/store/store_entity';
-import { Button, Form, Input, Space } from '@arco-design/web-react';
-import { IconDelete, IconDragDotVertical, IconPlus } from '@arco-design/web-react/icon';
-// import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
+import { useAppEntityStore } from '@/store';
+import { Button, Dropdown, Form, Input, Menu, Select } from '@arco-design/web-react';
+import { IconDragDotVertical } from '@arco-design/web-react/icon';
+import { IconDelete } from '@douyinfe/semi-icons';
+import { FilterEntityFields, getEntityFields, type AppEntity, type MetadataEntityField } from '@onebase/app';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { usePageEditorSignal } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
-import { nanoid } from 'nanoid';
-const FormItem = Form.Item;
 
-export interface DynamicCheckboxConfigProps {
+export interface DynamicSubTableConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
   item: any;
   configs: any;
   id: string;
 }
 
-const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePropsChange, item, configs, id }) => {
-  const componentKey = 'subTable';
+// 暂时不能在表格展示的数据类型
+export const hiddenFieldTypes = [
+  ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE,
+  ENTITY_FIELD_TYPE.RELATION.VALUE,
+  ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
+  ENTITY_FIELD_TYPE.ARRAY.VALUE,
+  ENTITY_FIELD_TYPE.FILE.VALUE,
+  ENTITY_FIELD_TYPE.IMAGE.VALUE,
+  ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
+  ENTITY_FIELD_TYPE.PASSWORD.VALUE,
+  ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
+  ENTITY_FIELD_TYPE.AGGREGATE.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
+];
 
-  const {
-    pageComponentSchemas,
-    layoutSubComponents,
-    setLayoutSubComponents
-  } = usePageEditorSignal();
+const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePropsChange, item, configs, id }) => {
+  const columnsKey = 'columns';
 
-  const [allComponents, setAllComponents] = useState<any[]>(layoutSubComponents[id]?.[0] || []);
+  const { subEntities } = useAppEntityStore();
 
+  const [subEntityId, setSubEntityId] = useState<string>(configs[item.key] || '');
+  const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
 
+  const [columnsConfig, setColumnsConfig] = useState<any[]>(configs[columnsKey] || []);
+
+  const [enableAddColumn, setEnableAddColumn] = useState<boolean>(false);
+
+  // 如果实体id变化，重新获取字段列表
   useEffect(() => {
-    if (id && layoutSubComponents[id])
-      setAllComponents(layoutSubComponents[id]?.[0]);
-  }, [id, layoutSubComponents, pageComponentSchemas]);
+    if (subEntityId) {
+      getFieldList();
+    }
+  }, [subEntityId]);
 
-  console.debug({
-    pageComponentSchemas,
-    allComponents,
-    configs,
-  }, layoutSubComponents[id]);
+  // 获取当前表格关联的实体id
+  useEffect(() => {
+    if (id != configs.id) {
+      return;
+    }
+
+    if (configs[item.key]) {
+      setSubEntityId(configs[item.key]);
+    }
+  }, []);
+
+  // 设置允许的列
+  useEffect(() => {
+    const res = fieldList.some(
+      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.id)
+    );
+
+    setEnableAddColumn(res);
+  }, [fieldList, columnsConfig]);
+
+  // 获取字段列表
+  const getFieldList = async () => {
+    const res = await getEntityFields({ entityId: subEntityId });
+
+    res.forEach((item: MetadataEntityField) => {
+      if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
+        item.disabled = true;
+      }
+    });
+
+    const newFieldList = res.filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
+    const newFieldListNotSystemField = res.filter(
+      (item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled
+    );
+
+    setFieldList(newFieldList);
+
+    if (configs.subTable === subEntityId) {
+      return;
+    }
+
+    const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
+      // 保留已有的命名，如果没有则使用字段展示名称
+      title:
+        configs[columnsKey].find((col: any) => col.dataIndex === item.id && configs.subTable === subEntityId)?.title ||
+        item.displayName,
+      dataIndex: item.id,
+      disabled: item.disabled,
+      id: item.id,
+      dataType: item.fieldType
+    }));
+
+    setColumnsConfig(newColumns);
+    handlePropsChange(columnsKey, newColumns);
+  };
 
   return (
     <>
-      <FormItem layout="vertical" labelAlign="left" label={'子字段配置'} className={styles.formItem}>
-        <Form.List initialValue={allComponents} field={`${id}-${componentKey}`}>
-          {(_fields, { add, remove }) => (
+      <Form.Item layout="vertical" labelAlign="left" label={'子实体配置'} className={styles.formItem}>
+        <Select
+          value={configs[item.key]}
+          onChange={(value) => {
+            handlePropsChange(item.key, value);
+            setSubEntityId(value);
+            setColumnsConfig([]);
+          }}
+          options={(subEntities?.entities).map((entity: AppEntity) => ({
+            value: entity.entityId,
+            label: entity.entityName
+          }))}
+        />
+      </Form.Item>
+
+      {/* 表头配置 */}
+      <Form.Item layout="vertical" labelAlign="left" label={'子字段配置'} className={styles.formItem}>
+        <Form.List initialValue={configs[columnsKey]} field={`${id}-${columnsKey}`}>
+          {(_fields, { remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
-                list={allComponents}
-                setList={() => { }}
+                list={configs[columnsKey]}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -61,11 +145,10 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                   console.log('onAdd: ', e);
                 }}
                 onSort={(e) => {
-                  console.log(e);
-                  const newList = [...allComponents];
+                  const newList = [...configs[columnsKey]];
+                  // console.log('configs[columnsKey]', configs[columnsKey])
                   // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
                   const { oldIndex, newIndex } = e;
-                  console.log(oldIndex, newIndex);
                   if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
                     // 复制一份新数组
                     const movedList = [...newList];
@@ -74,94 +157,98 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                     // 插入到新位置
                     movedList.splice(newIndex, 0, movedItem);
                     // 更新属性
-                    setLayoutSubComponents(id, [movedList]);
+                    handlePropsChange(columnsKey, movedList);
                   }
                 }}
               >
-                {allComponents?.map((comp: any, idx: number) => (
+                {configs[columnsKey].map((_col: any, idx: number) => (
                   <div key={idx} className={styles.tableColumnItem}>
-                    <Space style={{ width: '100%' }}>
-                      <IconDragDotVertical
-                        // 支持拖拽的图标，别误删了：）
-                        className="table-col-item-handle"
-                        style={{
-                          cursor: 'move',
-                          color: '#555'
-                        }}
-                      />
-
-                      <Input
-                        size="small"
-                        value={comp.displayName}
-                        onChange={(e) => {
-                          const newList = [...allComponents];
-                          newList[idx] = {
-                            ...newList[idx],
-                            displayName: e
-                          };
-                          setAllComponents(newList);
-                          setLayoutSubComponents(id, [newList]);
-                        }}
-                        className={styles.tableColumnItemInput}
-                        // TODO(mickey): 国际化
-                        placeholder={'子组件表头名称'}
-                      />
-                      <Button
-                        icon={<IconPlus />}
-                        shape="circle"
-                        size="mini"
-                        className={styles.tableColumnItemButton}
-                        onClick={() => {
-                          const newList = [...allComponents];
-                          newList.splice(idx, 0, { ...comp, id: `${comp.type}${nanoid()}` });
-                          setAllComponents(newList);
-                          setLayoutSubComponents(id, [newList]);
-                          add(idx);
-                        }}
-                      />
-                      <Button
-                        icon={<IconDelete />}
-                        shape="circle"
-                        size="mini"
-                        status="danger"
-                        className={styles.tableColumnItemButton}
-                        onClick={() => {
-                          const newList = [...allComponents];
-                          newList.splice(idx, 1);
-                          setAllComponents(newList);
-                          setLayoutSubComponents(id, [newList]);
-                          remove(idx);
-                        }}
-                      />
-                    </Space>
+                    <IconDragDotVertical
+                      // 支持拖拽的图标，别误删了：）
+                      className="table-col-item-handle"
+                      style={{
+                        cursor: 'move',
+                        color: '#555',
+                        marginRight: 8
+                      }}
+                    />
+                    <Input
+                      size="small"
+                      value={configs[columnsKey][idx].title}
+                      onChange={(e) => {
+                        const newList = [...columnsConfig];
+                        newList[idx] = {
+                          ...newList[idx],
+                          title: e
+                          //   dataIndex: e
+                        };
+                        setColumnsConfig(newList);
+                        handlePropsChange(columnsKey, newList);
+                      }}
+                      className={styles.tableColumnItemInput}
+                      placeholder={`请输入第${idx + 1}项`}
+                    />
+                    <Button
+                      icon={<IconDelete />}
+                      shape="circle"
+                      size="mini"
+                      status="danger"
+                      className={styles.tableColumnItemButton}
+                      onClick={() => {
+                        const newList = [...columnsConfig];
+                        newList.splice(idx, 1);
+                        setColumnsConfig(newList);
+                        handlePropsChange(columnsKey, newList);
+                        remove(idx);
+                      }}
+                    />
                   </div>
                 ))}
               </ReactSortable>
 
-              <Button
-                type="outline"
-                disabled
-                onClick={() => {
-                  const newLabel = '新选项';
-                  const newValue = _fields[_fields.length - 1].field;
-                  const newList = [
-                    ...allComponents,
-                    { label: item.displayName || newLabel, value: item.fieldName || newValue }
-                  ];
-                  console.log('newList: ', newList, _fields);
-                  add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
-                  setAllComponents(newList);
-                  // handlePropsChange(componentKey, newList);
-                }}
+              <Dropdown
+                position={'tl'}
+                trigger="click"
+                droplist={
+                  <Menu>
+                    {fieldList
+                      .filter(
+                        (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex === item.id)
+                      )
+                      .map((item: MetadataEntityField) => (
+                        <Menu.Item
+                          key={item.fieldName}
+                          disabled={item?.disabled}
+                          onClick={() => {
+                            const newList = [
+                              ...columnsConfig,
+                              {
+                                title: item.displayName,
+                                dataIndex: item.id,
+                                id: item.id,
+                                dataType: item.fieldType
+                              }
+                            ];
+                            setColumnsConfig(newList);
+                            handlePropsChange(columnsKey, newList);
+                          }}
+                        >
+                          {item.displayName}
+                        </Menu.Item>
+                      ))}
+                  </Menu>
+                }
               >
-                添加一项
-              </Button>
+                <Button type={enableAddColumn ? 'outline' : 'secondary'} disabled={!enableAddColumn}>
+                  新增列
+                </Button>
+              </Dropdown>
             </div>
           )}
         </Form.List>
-      </FormItem>
+      </Form.Item>
     </>
   );
 };
 
-export default DynamicCheckboxConfig;
+export default DynamicSubTableConfig;

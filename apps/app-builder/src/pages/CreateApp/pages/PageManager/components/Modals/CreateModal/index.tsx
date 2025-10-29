@@ -1,9 +1,10 @@
-import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import MenuComp from '@/components/MenuIcon';
 import { Form, Input, Modal, Select, TreeSelect, Button, type FormInstance } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { RootParentPage } from '@onebase/app';
 import styles from './index.module.less';
+import DynamicIcon from '@/components/DynamicIcon';
+import { menuIconList } from '@/components/MenuIcon/const';
 
 interface CreateModalProps {
   title: string;
@@ -35,16 +36,21 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'icon-yemian' : 'icon-wenjianjia_seo-folder');
+      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'page' : 'seo-folder');
     }
   }, [menuIcon, visibleCreateForm]);
+
+  const handleCloseModal = () => {
+    setMenuIcon('');
+    onCancel();
+  };
 
   return (
     <Modal
       title={title}
       visible={visibleCreateForm !== ''}
       onOk={handleCreate}
-      onCancel={onCancel}
+      onCancel={handleCloseModal}
       closable={!visibleMenuIcon}
       autoFocus={false}
       focusLock={true}
@@ -52,7 +58,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       className={styles.createModal}
       footer={
         <div style={{ textAlign: 'right', visibility: !visibleMenuIcon ? 'visible' : 'hidden' }}>
-          <Button type="default" onClick={onCancel} style={{ marginRight: 12 }}>
+          <Button type="default" onClick={handleCloseModal} style={{ marginRight: 12 }}>
             取消
           </Button>
           <Button type="primary" onClick={handleCreate}>
@@ -113,24 +119,27 @@ const CreateModal: React.FC<CreateModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: '#F2F3F5'
+                  backgroundColor: '#F2F3F5',
+                  cursor: 'pointer'
                 }}
+                onClick={() => setVisibleMenuIcon(true)}
               >
                 {menuIcon ? (
-                  <i className={`iconfont ${menuIcon}`} style={{ fontSize: 16 }} />
+                  <DynamicIcon
+                    IconComponent={menuIconList.find(icon => icon.code === menuIcon)?.icon}
+                    theme="outline"
+                    size="18"
+                    fill="#333"
+                  />
                 ) : (
-                  <i
-                    className={`iconfont ${visibleCreateForm === 'page' ? 'icon-yemian' : 'icon-wenjianjia_seo-folder'}`}
-                    style={{ fontSize: 16 }}
+                  <DynamicIcon
+                    IconComponent={menuIconList.find(icon => icon.code === (visibleCreateForm === 'page' ? 'page' : 'seo-folder'))?.icon}
+                    theme="outline"
+                    size="18"
+                    fill="#333"
                   />
                 )}
               </div>
-              <img
-                src={iconEditSVG}
-                alt="选择菜单图标"
-                style={{ cursor: 'pointer' }}
-                onClick={() => setVisibleMenuIcon(true)}
-              />
             </div>
           </Form.Item>
           <Form.Item label="父级页面" field="parentId">

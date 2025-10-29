@@ -31,6 +31,7 @@ export interface MetadataEntityField {
   appId: string;
   status: number;
   fieldCode?: string;
+  disabled?: boolean;
 }
 
 export interface AppEntities {
@@ -57,6 +58,7 @@ export interface ChildEntity {
 }
 
 export interface AppEntityField {
+  id: string;
   fieldId: string; // 字段ID
   fieldName: string; // 字段名称
   fieldType: string; // 字段类型，如 BIGINT、VARCHAR、INT、DECIMAL、TIMESTAMP、TEXT、NUMBER 等
@@ -170,4 +172,13 @@ export interface ValidationTypeItem {
   name: string;
   description: string;
   sortOrder: number;
+}
+
+export interface EntityFieldOption {
+  id: string;
+  fieldId: string;
+  optionValue: string;
+  optionLabel: string;
+  optionOrder: number;
+  isEnable: number;
 }

@@ -1,5 +1,5 @@
 // utils/nodePositioner.ts
-import { Graph, Cell } from '@antv/x6';
+import { Cell, Graph } from '@antv/x6';
 
 interface GridPositionerOptions {
   /** 网格起始 X 坐标 */
@@ -162,10 +162,6 @@ export class GridNodePositioner {
 
       // 标记为已占用
       this.occupiedPositions.add(`${row}_${col}`);
-
-      // console.log(
-      //   `新增节点 [${nodeData.data?.data?.entityName}] 放置在逻辑位置 (索引: ${this.nextLogicalIndex - 1}): (${row}, ${col}) 坐标: (${x}, ${y})`
-      // );
     } else {
       // 已有节点 - 使用原有位置
       x = nodeData.x!;
@@ -178,8 +174,6 @@ export class GridNodePositioner {
       if (gridX >= 0 && gridY >= 0 && gridX < this.columns) {
         this.occupiedPositions.add(`${gridY}_${gridX}`);
       }
-
-      // console.log(`已有节点 [${nodeData.data?.data?.entityName}] 使用原有位置: (${x}, ${y})`);
     }
 
     const node = this.graph.addNode({
@@ -203,7 +197,6 @@ export class GridNodePositioner {
 
     if (gridX >= 0 && gridY >= 0 && gridX < this.columns) {
       this.occupiedPositions.delete(`${gridY}_${gridX}`);
-      // console.log(`位置 (${x}, ${y}) [网格: (${gridY}, ${gridX})] 已释放`);
     } else {
       console.warn(`尝试释放的位置 (${x}, ${y}) 不在网格范围内或无效`);
     }

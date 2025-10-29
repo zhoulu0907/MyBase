@@ -103,10 +103,10 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
       <div className={styles.cardFooter}>
         <div className={styles.cardFooterLeft}>
           <Switch
-            checked={data.processStatus === ProcessStatus.ENABLED}
+            checked={data.enableStatus === ProcessStatus.ENABLED}
             onChange={(checked) => handleChangeProcessStatus(data.id, checked)}
           />
-          <span>{data.processStatus === ProcessStatus.ENABLED ? '已启用' : '禁用'}</span>
+          <span>{data.enableStatus === ProcessStatus.ENABLED ? '已启用' : '禁用'}</span>
         </div>
         <div className={styles.cardFooterRight}>
           <Button type="text" size="small" onClick={() => handleEdit(data.id)}>

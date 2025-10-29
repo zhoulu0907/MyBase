@@ -57,7 +57,6 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
   // 初始化实体选项
   useEffect(() => {
-    console.log('curDataSourceId=====', curDataSourceId);
     if (visible && curDataSourceId) {
       loadEntities();
     }
@@ -194,7 +193,8 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       mask={false}
       footer={
         <div className={styles.footer}>
-          <Button type="text" status="danger" onClick={() => openDeleteModal()} style={{ float: 'left' }}>
+          {/* 本期不支持删除 */}
+          <Button type="text" status="danger" onClick={() => openDeleteModal()} style={{ float: 'left' }} disabled>
             删除
           </Button>
           <Space>

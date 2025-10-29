@@ -11,14 +11,12 @@ import { defaultFixedSemiMaterials } from '@flowgram.ai/fixed-semi-materials';
 import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
 import { debounce } from 'lodash-es';
 
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { DragNode } from '../components';
 import { BaseNode } from '../components/base-node';
+import { CollapseNode } from '../components/collapse-node';
 import BranchAdder from '../components/branch-adder';
 import NodeAdder from '../components/node-adder';
-// import { SelectorBoxPopover } from '../components/selector-box-popover';
-// import { createClipboardPlugin, createVariablePanelPlugin } from '../plugins';
-// import { GroupBoxHeader, GroupNode } from '../plugins/group-plugin';
-import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { CustomService } from '../services';
 import { shortcutGetter } from '../shortcuts';
 import { type FlowNodeRegistry } from '../typings';
@@ -110,7 +108,7 @@ export function useEditorProps(
         // [ConstantKeys.INLINE_BLOCKS_PADDING_BOTTOM]: 30,
         // [ConstantKeys.COLLAPSED_SPACING]: 10,
         [ConstantKeys.BASE_COLOR]: '#B8BCC1',
-        [ConstantKeys.BASE_ACTIVATED_COLOR]: '#82A7FC'
+        [ConstantKeys.BASE_ACTIVATED_COLOR]: 'rgb(var(--primary-3))'
       },
       /**
        * SelectBox config
@@ -130,21 +128,8 @@ export function useEditorProps(
         /**
          * Callback when drag drop
          */
-        onDrop: (ctx, dropData) => {
-          // console.log(
-          //   '>>> onDrop: ',
-          //   dropData.dropNode.id,
-          //   dropData.dragNodes.map(n => n.id),
-          // );
-        },
-        canDrop: (ctx, dropData) =>
-          // console.log(
-          //   '>>> canDrop: ',
-          //   dropData.isBranch,
-          //   dropData.dropNode.id,
-          //   dropData.dragNodes.map(n => n.id),
-          // );
-          true
+        onDrop: (ctx, dropData) => {},
+        canDrop: (ctx, dropData) => true
       },
       /**
        * Redo/Undo enable
@@ -181,7 +166,8 @@ export function useEditorProps(
           ...defaultFixedSemiMaterials,
           [FlowRendererKey.ADDER]: NodeAdder, // Node Add Button
           [FlowRendererKey.BRANCH_ADDER]: BranchAdder, // Branch Add Button
-          [FlowRendererKey.DRAG_NODE]: DragNode // Component in node dragging
+          [FlowRendererKey.DRAG_NODE]: DragNode, // Component in node dragging
+          [FlowRendererKey.COLLAPSE]: CollapseNode // 条件、分支、循环  收起/展示
         },
         renderDefaultNode: BaseNode, // node render
         renderTexts: {
@@ -225,7 +211,6 @@ export function useEditorProps(
           // fitView all nodes
           ctx.tools.fitView();
         }, 10);
-        // console.log(ctx.document.toString(true)); // Get the document tree
       },
       /**
        * Playground dispose

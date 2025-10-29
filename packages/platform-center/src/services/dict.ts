@@ -74,6 +74,13 @@ export const deleteDictData = (id: number): Promise<void> => {
 };
 
 /**
+ * 获取字典数据列表-不分页
+ */
+export const getAllDictDataList = (params: PageParam & { dictType: string }): Promise<PageResult<DictData>> => {
+  return systemService.get('/dict-data/simple-list', params);
+};
+
+/**
  * 获取字典数据列表-分页
  */
 export const getDictDataListByPage = (params: PageParam & { dictType: string }): Promise<PageResult<DictData>> => {
@@ -85,4 +92,11 @@ export const getDictDataListByPage = (params: PageParam & { dictType: string }):
  */
 export const getDictDataDetail = (id: number): Promise<DictData> => {
   return systemService.get(`/dict-data/get?id=${id}`);
+};
+
+/**
+ * 批量配置字典数据
+ */
+export const batchConfigDictData = (data: DictData[]): Promise<void> => {
+  return systemService.post('/dict-data/batch-operate', data);
 };

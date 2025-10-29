@@ -1,13 +1,13 @@
 import {
   baseConfig,
   baseDefault,
+  checkboxDataConfig,
   dataFieldConfig,
+  directionConfig,
   labelColSpanConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
-  directionConfig,
-  checkboxDataConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -24,6 +24,7 @@ import {
 } from '../../../constants';
 import type {
   IBooleanConfigType,
+  ICheckboxDataConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
@@ -33,14 +34,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType,
-  ICheckboxDataConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputCheckboxSchema {
@@ -94,7 +94,7 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue?: { label: string; value: string;[property: string]: any }[];
+  defaultValue?: { label: string; value: string; [property: string]: any }[];
 
   /**
    * 字段宽度
@@ -108,7 +108,7 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     maxChecked: TNumberDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -178,34 +178,34 @@ const XCheckbox: XInputCheckboxSchema = {
     ...baseDefault,
     label: {
       text: '复选框',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     defaultValue: [
       {
         label: '选项一',
-        value: '1',
+        value: '选项一'
       },
       {
         label: '选项二',
-        value: '2'
+        value: '选项二'
       },
       {
         label: '选项三',
-        value: '3'
+        value: '选项三'
       }
     ],
     allChecked: false,
     verify: {
       required: false,
-      maxChecked: 3,
+      maxChecked: 3
     }
   }
 };

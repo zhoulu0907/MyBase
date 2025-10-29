@@ -24,6 +24,7 @@ interface RuleFormValues {
   valueRules: ConditionRow[][];
   popPrompt: string;
   popType: string;
+  filterCondition?: ConditionRow[][];
 }
 
 interface CreateRuleModalProps {
@@ -52,8 +53,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
     operator: 'equals',
     valueType: 'custom',
     fieldValue: '',
-    logicOperator: 'AND',
-    logicType: 'CONDITION'
+    logicOperator: 'AND'
   });
 
   // 创建默认条件组
@@ -66,6 +66,18 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
       console.log('getRuleById', res);
       if (res) {
         form.setFieldsValue(res);
+
+        const conditions = res?.valueRules.map(item => {
+          return {
+            conditions: item.map(item => ({
+              fieldId: item.fieldId,
+              op: item.operator,
+              operatorType: item.valueType,
+              value: item.fieldValue
+            }))
+          };
+        });
+        form.setFieldValue('filterCondition', conditions);
       }
     } catch (error) {
       console.error('获取规则失败:', error);
@@ -240,7 +252,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
 
   return (
     <Modal
-      className={styles['create-rule-modal']}
+      className={styles.createRuleModal}
       title={`${editRule ? '编辑' : '添加'}规则`}
       visible={visible}
       onOk={handleFinish}
@@ -250,7 +262,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
       confirmLoading={loading}
       style={{ width: 610 }}
     >
-      <Form form={form} layout="vertical" className={styles['rule-form']}>
+      <Form form={form} layout="vertical">
         <Form.Item
           label="规则名称"
           field="rgName"
@@ -262,16 +274,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
           <Input placeholder="请输入规则名称" maxLength={50} showWordLimit />
         </Form.Item>
 
-        {/* <Form.Item label="校验类型" field="validationType" rules={[{ required: true, message: '请选择校验类型' }]}>
-          <Select onChange={handleValidationTypeChange} placeholder="请选择校验类型">
-            {validationTypeOptions.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item> */}
-
         <ConditionEditor
           nodeId={entity.id}
           label="条件设置"
@@ -281,149 +283,15 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
           entityFieldValidationTypes={filterFieldCheckType}
         />
 
-        {/* 条件设置 */}
-        {/* <Form.Item noStyle shouldUpdate>
-          {(values) => {
-            if (isConditionSettingVisible()) {
-              const valueRules = values.valueRules || [];
-
-              return (
-                <Form.Item label="条件设置" field="valueRules">
-                  <div className={styles['condition-setting-container']}>
-                    {valueRules.map((group, groupIndex) => (
-                      <div key={groupIndex} className={styles['condition-group']}>
-                        {groupIndex > 0 && (
-                          <div className={styles['condition-logicOperator-divider']}>
-                            <span className={styles['logicOperator-label']}>或者</span>
-                          </div>
-                        )}
-
-                        <div className={styles['condition-group-content']}>
-                          {group.map((condition, conditionIndex) => (
-                            <div key={conditionIndex} className={styles['condition-row']}>
-                              <Space size="small" align="start">
-                                <Select
-                                  placeholder="请选择字段"
-                                  value={condition.fieldId}
-                                  onChange={(value) => updateConditionRow(groupIndex, conditionIndex, 'fieldId', value)}
-                                  style={{ width: 200 }}
-                                  options={leftFieldOptions}
-                                />
-
-                                <Select
-                                  placeholder="请选择操作符"
-                                  value={condition.operator}
-                                  onChange={(value) =>
-                                    updateConditionRow(groupIndex, conditionIndex, 'operator', value)
-                                  }
-                                  style={{ width: 120 }}
-                                  // options={
-                                  //   fieldOperatorMapping[condition.fieldId]?.map(operator => ({
-                                  //     value: operator,
-                                  //     label: operatorOptions[operator],
-                                  //   })) || []
-                                  // }
-                                  options={operatorOptions}
-                                />
-
-                                <Select
-                                  placeholder="请选择值类型"
-                                  value={condition.valueType}
-                                  onChange={(value) =>
-                                    updateConditionRow(groupIndex, conditionIndex, 'valueType', value)
-                                  }
-                                  style={{ width: 100 }}
-                                  options={valueTypeOptions}
-                                />
-
-                                {condition.valueType === 'custom' && (
-                                  <Input
-                                    placeholder="请输入值"
-                                    value={condition.fieldValue}
-                                    onChange={(value) =>
-                                      updateConditionRow(groupIndex, conditionIndex, 'fieldValue', value)
-                                    }
-                                    style={{ width: 150 }}
-                                  />
-                                )}
-
-                                {condition.valueType === 'fieldId' && (
-                                  <Select
-                                    placeholder="请选择字段"
-                                    value={condition.fieldValue}
-                                    onChange={(value) =>
-                                      updateConditionRow(groupIndex, conditionIndex, 'fieldValue', value)
-                                    }
-                                    style={{ width: 150 }}
-                                    options={rightFieldOptions}
-                                  />
-                                )}
-
-                                <Button
-                                  type="text"
-                                  status="danger"
-                                  size="mini"
-                                  icon={<IconDelete />}
-                                  onClick={() => removeConditionRow(groupIndex, conditionIndex)}
-                                  className={styles['delete-condition-btn']}
-                                />
-                              </Space>
-                            </div>
-                          ))}
-
-                          <div className={styles['add-condition-buttons']}>
-                            <Button
-                              type="dashed"
-                              size="small"
-                              icon={<IconPlus />}
-                              onClick={() => addAndCondition(groupIndex)}
-                              className={styles['add-and-btn']}
-                            >
-                              并且
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    <div className={styles['add-or-button-container']}>
-                      <Button
-                        type="dashed"
-                        size="small"
-                        icon={<IconPlus />}
-                        onClick={addOrCondition}
-                        className={styles['add-or-btn']}
-                      >
-                        或者
-                      </Button>
-                    </div>
-                  </div>
-                </Form.Item>
-              );
-            }
-            return null;
-          }}
-        </Form.Item> */}
-
-        {/* 验证失败提示语 */}
-        {/* <Form.Item label="验证失败提示语" field="popType">
-          <Radio.Group
-            defaultValue={'SHORT'}
-            options={[
-              { label: '短提示框', value: 'SHORT' },
-              { label: '长提示框', value: 'LONG' }
-            ]}
-          />
-        </Form.Item> */}
-        <Form.Item label="弹窗提示" field="popPrompt">
-          <Input
-            placeholder="请输入校验不通过后的弹窗提示语"
-            maxLength={200}
-            rules={[
-              { required: true, message: '请输入弹窗提示语' },
-              { max: 200, message: '弹窗提示语不能超过200个字符' }
-            ]}
-          />
+        <Form.Item
+          label="弹窗提示"
+          field="popPrompt"
+          rules={[
+            { required: true, message: '请输入弹窗提示语' },
+            { max: 200, message: '弹窗提示语不能超过200个字符' }
+          ]}
+        >
+          <Input placeholder="请输入校验不通过后的弹窗提示语" maxLength={200} />
         </Form.Item>
       </Form>
     </Modal>

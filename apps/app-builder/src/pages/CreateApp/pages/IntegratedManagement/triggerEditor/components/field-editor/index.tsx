@@ -15,9 +15,9 @@ import {
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, type AppEntityField, type ConditionField } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NodeType } from '../../nodes/const';
 import { getPrecedingNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
@@ -39,10 +39,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
   const fields = Form.useWatch('fields', form);
 
   useEffect(() => {
-    setSelectedFields(form.getFieldValue('fields'));
+    setSelectedFields(fields);
   }, [form, fieldList]);
-
-  useEffect(() => {}, [fields]);
 
   const StaticValueComponent = (fieldName: string, fieldId: string) => {
     const targetField = fieldList.find((cc) => cc.fieldId == fieldId);
@@ -105,15 +103,23 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
   const processConditionFields = (
     nodeId: string,
     conditionFields: ConditionField[],
-    children: TreeSelectDataType[]
+    children: TreeSelectDataType[],
+    fieldType?: string
   ): void => {
     if (!conditionFields) return;
 
     conditionFields.forEach((field: ConditionField) => {
-      children.push({
-        key: `${nodeId}.${field.value}`,
-        title: field.label
-      });
+      if (!fieldType || !field.fieldType) {
+        children.push({
+          key: `${nodeId}.${field.value}`,
+          title: field.label
+        });
+      } else if (field?.fieldType === fieldType) {
+        children.push({
+          key: `${nodeId}.${field.value}`,
+          title: field.label
+        });
+      }
     });
   };
 
@@ -128,15 +134,26 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
         NodeType.DATA_QUERY,
         NodeType.DATA_QUERY_MULTIPLE,
         NodeType.DATA_UPDATE,
-        NodeType.DATA_CALC
+        NodeType.DATA_CALC,
+        NodeType.MODAL
       ]),
     []
   );
 
   // 使用 useCallback 缓存函数，避免不必要的重新创建
   const getVariableOptions = useCallback(
-    (nodeId: string, dataNodeId?: string): TreeSelectDataType[] => {
-      const nodeTypes = [NodeType.DATA_QUERY, NodeType.START_ENTITY, NodeType.START_FORM, NodeType.DATA_CALC];
+    (nodeId: string, dataNodeId?: string, item?: any): TreeSelectDataType[] => {
+      const nodeTypes = [
+        NodeType.DATA_QUERY,
+        NodeType.START_ENTITY,
+        NodeType.START_FORM,
+        NodeType.DATA_CALC,
+        NodeType.MODAL
+      ];
+
+      const fieldId = form.getFieldValue(item.field + '.fieldId');
+      const targetField = fieldList.find((ele) => ele.fieldId == fieldId);
+      const fieldType = targetField?.fieldType;
 
       let nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
 
@@ -163,7 +180,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
 
         // 统一处理 conditionFields
         if (nodeOutput.conditionFields && treeNode.children) {
-          processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children);
+          processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children, fieldType);
         }
 
         // 只有当有子字段时才添加到选项中
@@ -171,10 +188,9 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
           options.push(treeNode);
         }
       });
-
       return options;
     },
-    [nodesWithConditionFields]
+    [nodesWithConditionFields, fieldList]
   );
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
@@ -209,6 +225,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                             }))}
                             onChange={(_value) => {
                               setSelectedFields(form.getFieldValue('fields'));
+                              form.clearFields(item.field + '.value');
                             }}
                           />
                         </Form.Item>
@@ -240,12 +257,12 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VARIABLES && (
                           <Form.Item field={item.field + '.value'}>
                             <TreeSelect
-                              treeData={getVariableOptions(nodeId, dataNodeId)}
+                              treeData={getVariableOptions(nodeId, dataNodeId, item)}
                               triggerElement={(params) => {
                                 return (
                                   <Input
                                     readOnly
-                                    value={showTriggerElement(params, getVariableOptions(nodeId, dataNodeId))}
+                                    value={showTriggerElement(params, getVariableOptions(nodeId, dataNodeId, item))}
                                   ></Input>
                                 );
                               }}

@@ -15,6 +15,7 @@
     "@arco-themes/react-cyansu-ob03": "^0.0.3",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-proposal-decorators": "^7.28.0",
+    "@icon-park/react": "^1.4.2",
     "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",

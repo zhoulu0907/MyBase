@@ -1,5 +1,5 @@
 import { Form, Grid, Input, Popconfirm, Select, type FormInstance } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   createApplicationTag,
@@ -11,20 +11,23 @@ import {
 import { sample } from 'lodash-es';
 
 import appIconEditSVG from '@/assets/images/app_edit_white.svg';
+import previewSVG from '@/assets/images/app_preview.svg';
 import appTypeSVG from '@/assets/images/app_type_selected_icon.svg';
 import arrowSVG from '@/assets/images/arrow_icon.svg';
+import checkIcon from '@/assets/images/check_icon.svg';
 import classicModeSVG from '@/assets/images/classic_mode_icon.svg';
 import databaseSVG from '@/assets/images/database_icon.svg';
 import formSVG from '@/assets/images/form_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
 import tickSVG from '@/assets/images/tick_icon.svg';
-import previewSVG from '@/assets/images/app_preview.svg';
-import checkIcon from '@/assets/images/check_icon.svg';
-import { appIcon, appIconColor, appThemeColor, iconMap, type Options } from './const';
-import styles from './index.module.less';
 import DynamicIcon from '../DynamicIcon';
+import { appIcon, appIconColor, appThemeColor, type Options } from './const';
+import styles from './index.module.less';
+import { appIconMap } from '@onebase/ui-kit';
+
 
 type AppStatus = 'create' | 'update';
+type CloseReason = 'confirm' | 'cancel' | 'outside' | 'esc';
 interface IProps {
   form: FormInstance;
   readonly data?: Application;
@@ -43,7 +46,14 @@ const CreateApp = (props: IProps) => {
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
   const [iconName, setIconName] = useState<Application['iconName']>();
   const [iconColor, setIconColor] = useState<Application['iconColor']>();
-  const [themeColor, setThemeColor] = useState<Application['themeColor']>('#4FAE7B'); // 应用主题色
+  const [themeColor, setThemeColor] = useState<Application['themeColor']>('#009E9E'); // 应用主题色
+
+  // Bug S25029301301-591
+  const initialRef = useRef<{
+    iconName: Application['iconName'] | null;
+    iconColor: Application['iconColor'] | undefined;
+  } | null>(null);
+  const actionRef = useRef<CloseReason | null>(null);
 
   useEffect(() => {
     listAppTagReq();
@@ -68,6 +78,7 @@ const CreateApp = (props: IProps) => {
         setThemeColor(data.themeColor);
         setIconName(data.iconName);
         setIconColor(data.iconColor);
+        initialRef.current = { iconName: data.iconName, iconColor: data.iconColor };
       }
     }
   }, [data, status]);
@@ -129,6 +140,15 @@ const CreateApp = (props: IProps) => {
     form.setFieldsValue({ tagIds: normalized });
   };
 
+  const handleOnCancel = (visible?: boolean) => {
+    const reason = actionRef.current ?? 'outside';
+    if (status !== 'create' && !visible && reason !== 'confirm') {
+      setIconName(initialRef.current?.iconName);
+      setIconColor(initialRef.current?.iconColor);
+    }
+    actionRef.current = null;
+  };
+
   return (
     <div className={styles.createApp} style={style}>
       <div className={styles.preview} style={{ backgroundColor: previewBgColor }}>
@@ -141,15 +161,15 @@ const CreateApp = (props: IProps) => {
           <div className={styles.modeSpec}>
             <span>
               <img src={tickSVG} alt="Mode Characteristics" />
-              开箱即用的数据资产管理
+              {'开箱即用的数据资产管理'}
             </span>
             <span>
               <img src={tickSVG} alt="Mode Characteristics" />
-              拖拽搭建业务表单
+              {'拖拽搭建业务表单'}
             </span>
             <span>
               <img src={tickSVG} alt="Mode Characteristics" />
-              覆盖表单应用开发基础需求
+              {'覆盖表单应用开发基础需求'}
             </span>
           </div>
         </div>
@@ -174,7 +194,7 @@ const CreateApp = (props: IProps) => {
         </div>
         <div className={styles.row}>
           <div className={styles.subtitle}>预览图</div>
-          <img className={styles.previewImg} src={previewSVG} alt="preview image" />
+          <img className={styles.previewImg} src={previewSVG} alt="previewImage" />
         </div>
       </div>
 
@@ -199,7 +219,7 @@ const CreateApp = (props: IProps) => {
             >
               {iconName && (
                 <DynamicIcon
-                  IconComponent={iconMap[iconName as keyof typeof iconMap]}
+                  IconComponent={appIconMap[iconName as keyof typeof appIconMap]}
                   theme="outline"
                   size="40"
                   fill="#F2F3F5"
@@ -211,6 +231,7 @@ const CreateApp = (props: IProps) => {
                 position="bl"
                 okText="确认"
                 onOk={() => {
+                  actionRef.current = 'confirm';
                   form.setFieldsValue({
                     ...form.getFieldsValue(),
                     iconName,
@@ -218,8 +239,11 @@ const CreateApp = (props: IProps) => {
                   });
                 }}
                 onCancel={() => {
-                  setIconName('');
-                  setIconColor('');
+                  actionRef.current = 'cancel';
+                  handleOnCancel();
+                }}
+                onVisibleChange={(visible) => {
+                  handleOnCancel(visible);
                 }}
                 style={{ maxWidth: '381px' }}
                 content={
@@ -233,7 +257,7 @@ const CreateApp = (props: IProps) => {
                           onClick={() => setIconName(item)}
                         >
                           <DynamicIcon
-                            IconComponent={iconMap[item as keyof typeof iconMap]}
+                            IconComponent={appIconMap[item as keyof typeof appIconMap]}
                             theme="outline"
                             size="24"
                             fill={item === iconName ? '#F2F3F5' : '#272E3B'}
@@ -245,7 +269,7 @@ const CreateApp = (props: IProps) => {
                       {appIconColor.map((color, index) => (
                         <div
                           className={styles.color}
-                          key={index}
+                          key={`color-${index}`}
                           style={{ backgroundColor: color }}
                           onClick={() => setIconColor(color)}
                         >
@@ -312,7 +336,7 @@ const CreateApp = (props: IProps) => {
             />
           </Form.Item>
           <Form.Item field="description" label="应用描述" rules={[{ maxLength: 100, message: '应用描述超出限制' }]}>
-            <Input.TextArea placeholder="请输入应用描述" />
+            <Input.TextArea placeholder="请填写应用介绍，简要说明核心功能或用途，帮助他人快速了解你的应用" />
           </Form.Item>
 
           <div className={styles.formItem}>

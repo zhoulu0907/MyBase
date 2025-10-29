@@ -1,20 +1,20 @@
 import AppIconSVG from '@/assets/images/app_icon.svg';
-import AvatarSVG from '@/assets/images/avatar.svg';
 import TabMiddleBgSVG from '@/assets/images/tab_bg.svg';
 import TabFirstBgSVG from '@/assets/images/tab_first_bg.svg';
-import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
 import TabFirstSelectBgSVG from '@/assets/images/tab_first_select_bg.svg';
 import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
+import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
+import VisitIconSVG from '@/assets/images/visit.svg';
+import { appIconMap } from '@onebase/ui-kit';
+import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';
-import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { Button, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { iconMap } from '@/components/CreateApp/const';
-import DynamicIcon from '@/components/DynamicIcon';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -24,7 +24,7 @@ interface HeaderProps {
 }
 
 // tabs标题顺序，获取当前选型卡下标；
-const tabsList = ['data-factory', 'page-manager', 'integrated-management', 'app-setting', 'app-release'];
+const tabsList = ['data-factory', 'page-manager', 'integrated-management', 'app-setting'];
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
@@ -39,15 +39,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (pathname.includes('onebase/create-app/integrated-management')) return 'integrated-management';
     if (pathname.includes('onebase/create-app/data-factory')) return 'data-factory';
     if (pathname.includes('onebase/create-app/app-setting')) return 'app-setting';
-    if (pathname.includes('onebase/create-app/app-release')) return 'app-release';
     return 'page-manager';
   };
   const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
-  const [activeIndex, setActiveIndex] = useState(tabsList.findIndex(tab => location.pathname.includes(tab)));
+  const [activeIndex, setActiveIndex] = useState(tabsList.findIndex((tab) => location.pathname.includes(tab)));
 
   useEffect(() => {
     setActiveTab(getTabKeyFromPath(location.pathname));
-    setActiveIndex(tabsList.findIndex(tab => location.pathname.includes(tab)));
+    setActiveIndex(tabsList.findIndex((tab) => location.pathname.includes(tab)));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -70,7 +69,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         iconColor: appResp.iconColor || '',
         appName: appResp.appName || '--',
         appStatus: appResp.appStatus || 0
-      })
+      });
     }
   };
 
@@ -120,7 +119,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo?.iconColor }}>
             <DynamicIcon
-              IconComponent={iconMap[curAppInfo?.iconName as keyof typeof iconMap]}
+              IconComponent={appIconMap[curAppInfo?.iconName as keyof typeof appIconMap]}
               theme="outline"
               size="14"
               fill="#F2F3F5"
@@ -136,7 +135,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
 
         <Tabs
-          className='createAppTabs'
+          className="createAppTabs"
           type="line"
           activeTab={activeTab}
           onChange={(key) => {
@@ -154,16 +153,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               case 'app-setting':
                 navigate(`/onebase/create-app/app-setting?appId=${curAppId}`);
                 break;
-              case 'app-release':
-                navigate(`/onebase/create-app/app-release?appId=${curAppId}`);
-                break;
               default:
                 break;
             }
           }}
           size="large"
           renderTabTitle={(tabTitle, info) => {
-            const currentIndex = tabsList.findIndex(tab => tab === info.key);
+            const currentIndex = tabsList.findIndex((tab) => tab === info.key);
             const tabBg = () => {
               if (info.isActive) {
                 if (info.key === tabsList[0]) {
@@ -177,42 +173,49 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                 if (currentIndex >= activeIndex) return;
                 return info.key === tabsList[0] ? TabFirstBgSVG : TabMiddleBgSVG;
               }
-            }
+            };
             return (
-              <span style={{
-                position: 'relative'
-              }}>
+              <span
+                style={{
+                  position: 'relative'
+                }}
+              >
                 {tabTitle}
-                <img src={tabBg()} style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: -1
-                }} />
+                <img
+                  src={tabBg()}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: -1
+                  }}
+                />
               </span>
-            )
+            );
           }}
         >
           <Tabs.TabPane key="data-factory" title={t('createApp.dataFactory')} />
           <Tabs.TabPane key="page-manager" title={t('createApp.pageManager')} />
           <Tabs.TabPane key="integrated-management" title={t('createApp.integratedManagement')} />
-          <Tabs.TabPane key="app-setting" title={t('createApp.appSetting')} />
-          <Tabs.TabPane key="app-release" title={t('createApp.appRelease')} />
+          <Tabs.TabPane key="app-setting" title={t('createApp.appRelease')} />
         </Tabs>
 
         <div className={styles.userInfo}>
-          <Button type="outline" size="small" onClick={toRuntime}>
-            访问
+          <Button type="secondary" size="small" onClick={toRuntime} className={styles.visitButton}>
+            <div className={styles.visitButtonContent}>
+              <img src={VisitIconSVG} alt="visit" />
+              <div>访问</div>
+            </div>
           </Button>
 
-          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
+          {/* {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <img src={AvatarSVG} />
+              <img src={AvatarSVG} alt="avatar" />
             </div>
-          </Dropdown>
+          </Dropdown> */}
         </div>
       </div>
     </Header>
