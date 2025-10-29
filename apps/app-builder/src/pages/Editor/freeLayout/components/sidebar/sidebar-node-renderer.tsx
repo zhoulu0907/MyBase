@@ -9,7 +9,7 @@ import { NodeRenderContext } from '../../context';
 import type { FormInstance } from '@arco-design/web-react';
 import Header from '../../components/header';
 import BottomBtn from '../../components/bottomBtn';
-import Approver from './components/approver';
+import ApproveDreawer from './components/approver';
 
 export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
   const { node } = props;
@@ -21,10 +21,10 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
     setconfigFormForm: (form: FormInstance) => setconfigFormForm(form)
   };
 
-  const handleSubmit = (data, errmsg) => {
-    const newData = Object.assign({}, nodeRender.data, errmsg, { type: 123 });
-    nodeRender.updateData(newData);
+  const handleSubmit = (data:any, errmsg:string[]) => {
+    nodeRender.updateData(data);
   };
+
   return (
     <NodeRenderContext.Provider value={contextValue}>
       <div
@@ -40,7 +40,8 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
         {/* <Header />
         <Approver />
         <BottomBtn /> */}
-        <div>抽屉内容</div>
+        {/* <div>抽屉内容</div> */}
+        {nodeRender?.type === 'approver' && <ApproveDreawer handleConfigSubmit={handleSubmit}/>}
       </div>
     </NodeRenderContext.Provider>
   );
