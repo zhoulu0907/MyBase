@@ -34,22 +34,25 @@ public class FlowHisTaskRepository extends DataRepository<FlowHisTask> {
         );
     }
     private String buildBaseSql(Long userId) {
-        return "select " +
-                "    t.id, " +
-                "    t.skip_type, " +
-                "    t1.ext, " +
-                "    t.update_time, " +
-                "    t.create_time " +
-                "FROM ( " +
-                "    SELECT *, " +
-                "           ROW_NUMBER() OVER (PARTITION BY instance_id ORDER BY id DESC) as rn " +
-                "    FROM bpm_flow_his_task " +
-                "    WHERE deleted = 0 " +
-                "    and approver = '" + userId + "' " +
-                ") t " +
-                "LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id " +
-                "WHERE t.rn = 1 " +
-                "and t1.deleted = 0";
+        return """
+                select
+                    t.id,
+                    t.skip_type,
+                    t.instance_id,
+                    t1.ext,
+                    t.update_time,
+                    t.create_time
+                FROM (
+                    SELECT *,
+                       ROW_NUMBER() OVER (PARTITION BY instance_id ORDER BY id DESC) as rn
+                    FROM bpm_flow_his_task
+                    WHERE deleted = 0
+                    and approver = '" + userId + "'
+                    ) t
+                LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id
+                WHERE t.rn = 1
+                and t1.deleted = 0
+                """;
     }
     private ConfigStore buildDynamicCondition(BpmFlowDoneTaskPageReqVO reqVO){
         DefaultConfigStore condition = new DefaultConfigStore();

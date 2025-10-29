@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  */
 @Schema(description = "待办任务VO")
 @Data
-public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO{
+public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO {
 
 
     @Schema(description = "流程标题")
@@ -31,4 +31,9 @@ public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO{
     @Schema(description = "发起时间")
     private LocalDateTime submitTime;
 
+    @Schema(description = "任务id")
+    private Long taskId;
+
+    @Schema(description = "流程实例id")
+    private Long instanceId;
 }
