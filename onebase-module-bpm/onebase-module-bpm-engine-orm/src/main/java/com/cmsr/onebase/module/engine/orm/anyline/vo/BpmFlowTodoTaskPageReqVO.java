@@ -1,4 +1,5 @@
 package com.cmsr.onebase.module.engine.orm.anyline.vo;
+
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -8,7 +9,6 @@ import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
@@ -32,6 +32,14 @@ public class BpmFlowTodoTaskPageReqVO extends PageParam {
     @Schema(description = "发起时间", example = "[2025-08-01 00:00:00,2025-08-18 23:59:59]")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] submitTime;
+
+    @Schema(description = "发起时间 - 开始（包含）", example = "2025-08-01 00:00:00")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    private LocalDateTime submitTimeStart;
+
+    @Schema(description = "发起时间 - 结束（包含）", example = "2025-08-18 23:59:59")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    private LocalDateTime submitTimeEnd;
 
     @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
             example = "desc", defaultValue = "desc")

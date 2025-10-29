@@ -45,6 +45,7 @@ public class FlowTaskRepository extends DataRepository<FlowTask> {
                   select 
                     distinct
                      t.id,
+                     t.instance_id,
                      t.flow_status,
                      t2.ext ,
                      t.create_time

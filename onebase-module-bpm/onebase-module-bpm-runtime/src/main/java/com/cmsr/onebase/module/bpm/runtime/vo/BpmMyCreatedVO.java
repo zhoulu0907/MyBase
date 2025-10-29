@@ -29,4 +29,10 @@ public class BpmMyCreatedVO {
 
     @Schema(description = "更新时间（处理时间）")
     private LocalDateTime updateTime;
+
+    @Schema(description = "任务id")
+    private Long taskId;
+
+    @Schema(description = "流程实例id")
+    private Long instanceId;
 }

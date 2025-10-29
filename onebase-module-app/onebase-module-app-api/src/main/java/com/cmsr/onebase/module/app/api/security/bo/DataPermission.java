@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.runtime.dto;
+package com.cmsr.onebase.module.app.api.security.bo;
 
 import lombok.Data;
 
@@ -16,6 +16,6 @@ public class DataPermission {
 
     private boolean allDenied;
 
-    private List<DataPermissionItem> items = new ArrayList<>();
+    private List<DataPermissionGroup> groups = new ArrayList<>();
 
 }
