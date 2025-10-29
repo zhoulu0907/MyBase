@@ -44,7 +44,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = Form.useForm();
 
-  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas,  } = useListEditorSignal;
+  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const {
     curPage,
@@ -154,10 +154,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             return;
           }
           const keys = Object.keys(item);
-          let temp:any = {};
-          for(let key of keys){
-            const newKey = key.slice(key.lastIndexOf('.')+1)
-            temp[newKey] = item[key]
+          let temp: any = {};
+          for (let key of keys) {
+            const newKey = key.slice(key.lastIndexOf('.') + 1);
+            temp[newKey] = item[key];
           }
           subTableRows.push(temp);
         }
@@ -305,11 +305,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               pagesRuntimeSignal.setSubTableDataLength(key, (subEntity.subData || []).length);
 
               for (let idx = 0; idx < (subEntity.subData || []).length; idx++) {
-                const keys = Object.keys((subEntity.subData || [])[idx])
-                for(let ele in componentSchemas){
+                const keys = Object.keys((subEntity.subData || [])[idx]);
+                for (let ele in componentSchemas) {
                   const config = componentSchemas[ele]?.config;
-                  const fieldId = config?.dataField?.[1]
-                  if(keys.includes(fieldId)){
+                  const fieldId = config?.dataField?.[1];
+                  if (keys.includes(fieldId)) {
                     formValues[`${key}.${idx}.${fieldId}`] = subEntity.subData[idx]?.[fieldId];
                   }
                 }

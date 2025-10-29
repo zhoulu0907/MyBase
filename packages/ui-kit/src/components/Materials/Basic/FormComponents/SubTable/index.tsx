@@ -104,10 +104,22 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       return;
     }
 
+    const entityId = e.item.getAttribute('data-entity-id');
+    // 拖拽的子表项必须是同一个数据源子表
+    if (entityId) {
+      const sameField = subTableComponents[id]?.every((ele) => {
+        const dataField = pageComponentSchemas[ele.id].config.dataField;
+        return !dataField || dataField?.[0] === entityId;
+      });
+      if (!sameField) {
+        return;
+      }
+    }
+
     // 表单项配置
     const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
     const schema = getComponentSchema(itemType as any);
-    const entityId = e.item.getAttribute('data-entity-id');
+
     const fieldId = e.item.getAttribute('data-field-id');
     const itemDisplayName = e.item.getAttribute('data-label') || e.item.getAttribute('data-cp-displayname');
     schema.config = schemaConfig;
@@ -172,23 +184,33 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   // 获取表格配置 columns
   const getTableColumns = () => {
     let tableColumns = [];
-    for (let column of (subTableComponents[id] || [])) {
+    for (let column of subTableComponents[id] || []) {
       const displayName = pageComponentSchemas[column.id].config.label.text || column.displayName;
-      const required = pageComponentSchemas[column.id].config?.verify?.required
+      const required = pageComponentSchemas[column.id].config?.verify?.required;
       const tableColumn = {
-        title: (<>{displayName}{required && <span style={{color:'red',paddingLeft:'4px'}}>*</span>}</>),
+        title: (
+          <>
+            {displayName}
+            {required && <span style={{ color: 'red', paddingLeft: '4px' }}>*</span>}
+          </>
+        ),
         dataIndex: column.id,
         key: column.id,
         render: (_text: string, _record: any, index: number) => {
-          const config = { ...pageComponentSchemas[column.id].config, dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`] }
-          const pageSchema = { ...pageComponentSchemas[column.id], config }
-          return <PreviewRender
-            cpId={column.id}
-            cpType={column.type}
-            detailMode={detailMode}
-            pageComponentSchema={pageSchema}
-            runtime={true}
-          />;
+          const config = {
+            ...pageComponentSchemas[column.id].config,
+            dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`]
+          };
+          const pageSchema = { ...pageComponentSchemas[column.id], config };
+          return (
+            <PreviewRender
+              cpId={column.id}
+              cpType={column.type}
+              detailMode={detailMode}
+              pageComponentSchema={pageSchema}
+              runtime={true}
+            />
+          );
         }
       };
       tableColumns.push(tableColumn);
@@ -201,12 +223,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         fixed: 'right',
         render: (_col: any, _record: any, index: number) => {
           return (
-            <Button
-              type="text"
-              status="danger"
-              icon={<IconDelete />}
-              onClick={() => handleDelete(index)}
-            ></Button>
+            <Button type="text" status="danger" icon={<IconDelete />} onClick={() => handleDelete(index)}></Button>
           );
         }
       });
@@ -225,7 +242,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   };
   // 删除
   const handleDelete = (index: number) => {
-    setSubTableData((prevData) => prevData.filter((_,i) => i !== index));
+    setSubTableData((prevData) => prevData.filter((_, i) => i !== index));
 
     const formData = form.getFieldsValue();
 
@@ -237,11 +254,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     };
 
     form.setFieldsValue(updateFormData);
-    
   };
 
   return (
-    <Layout className="XSubTable" style={runtime ? {border:'none'}:{}}>
+    <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
       <Form.Item
         label={label.display && label.text}
         layout="vertical"
@@ -288,16 +304,22 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           </>
         ) : (
           <>
-            <div className='simulate-header'>
-              {subTableComponents[id] && subTableComponents[id].map((cp, index) => (<div key={`header-${index}`} className='simulate-header-item'>
-                {pageComponentSchemas[cp.id].config.label.text || pageComponentSchemas[cp.id].config.displayName}
-              </div>))}
+            <div className="simulate-header">
+              {subTableComponents[id] &&
+                subTableComponents[id].map((cp, index) => (
+                  <div key={`header-${index}`} className="simulate-header-item">
+                    {pageComponentSchemas[cp.id].config.label.text || pageComponentSchemas[cp.id].config.displayName}
+                  </div>
+                ))}
             </div>
             <ReactSortable
               id={`workspace-content-subtable-${id}`}
               list={subTableComponents[id] || []}
               setList={(newList) => {
-                setSubTableComponents(id, newList);
+                setSubTableComponents(
+                  id,
+                  newList.filter((ele) => pageComponentSchemas[ele.id])
+                );
               }}
               onAdd={onSubAdd}
               group={{
