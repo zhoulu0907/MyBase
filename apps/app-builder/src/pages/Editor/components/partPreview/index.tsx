@@ -63,34 +63,36 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
             ))}
 
           {pageType == EDITOR_TYPES.FORM_EDITOR && (
-            <>
-              <Form layout="inline" className={styles.previewForm}>
-                {formComponents.value.map((cp: GridItem) => (
-                  <Fragment key={cp.id}>
-                    {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                      <div
-                        key={cp.id}
-                        className={styles.componentItem}
-                        style={{
-                          width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
-                        }}
-                      >
-                        <PreviewRender
-                          cpId={cp.id}
-                          cpType={cp.type}
-                          pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-                          runtime={true}
-                        />
-                      </div>
-                    )}
-                  </Fragment>
-                ))}
-              </Form>
-              <div className={styles.footer}>
-                <Button type="primary">提交</Button>
-                <Button type="default">取消</Button>
+            <div className={styles.fromContain}>
+              <div className={styles.previewForm}>
+                <Form layout="inline" >
+                  {formComponents.value.map((cp: GridItem) => (
+                    <Fragment key={cp.id}>
+                      {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <div
+                          key={cp.id}
+                          className={styles.componentItem}
+                          style={{
+                            width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
+                          }}
+                        >
+                          <PreviewRender
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                            runtime={true}
+                          />
+                        </div>
+                      )}
+                    </Fragment>
+                  ))}
+                </Form>
               </div>
-            </>
+              <div className={styles.footer}>
+                <Button type="default">取消</Button>
+                <Button type="primary">提交</Button>
+              </div>
+            </div>
           )}
         </div>
       </div>

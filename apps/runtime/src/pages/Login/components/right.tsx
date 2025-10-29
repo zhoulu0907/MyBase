@@ -1,13 +1,29 @@
-import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import { getApplication } from '@onebase/app';
+import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
+import type { IIconBase } from '@icon-park/react/lib/runtime';
+
+interface DynamicIconProps extends IIconBase {
+  IconComponent: React.ComponentType<any>;
+  theme?: 'outline' | 'filled' | 'two-tone' | 'multi-color';
+  size?: number | string;
+  fill?: string;
+  style?: React.CSSProperties;
+}
+
+interface APP_INFO {
+  appName: string;
+  iconName: string;
+  iconColor: string;
+}
 
 const { Paragraph } = Typography;
 
@@ -16,6 +32,12 @@ const Right: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
+
+  const [appInfo, setAppInfo] = useState<APP_INFO>({
+    appName: '',
+    iconName: '',
+    iconColor: ''
+  });
 
   // 从路由中获取 appid 参数
   const { appId } = useParams<{ appId?: string }>();
@@ -44,7 +66,27 @@ const Right: React.FC = () => {
       }
       return;
     }
+
+    handleGetApplication();
   }, []);
+
+  const handleGetApplication = async () => {
+    const redirectURL = getHashQueryParam('redirectURL');
+    if (redirectURL) {
+      const startIndex = redirectURL.indexOf('/runtime/');
+      const runtimeLength = '/runtime/'.length;
+      const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
+      const endIndex = endRedirectURL?.indexOf('/');
+      const applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
+
+      if (applicationId) {
+        const res = await getApplication({ id: applicationId });
+        if (res) {
+          setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+        }
+      }
+    }
+  };
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
@@ -139,11 +181,33 @@ const Right: React.FC = () => {
     }
   };
 
+  const DynamicIcon = ({ IconComponent, ...rest }: DynamicIconProps) => {
+    if (!IconComponent) return null;
+    return <IconComponent {...rest} />;
+  };
+
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
-        <img src={LogoSVG} alt="logo" />
-        <h1 className={styles.title}>欢迎登录数智化底座</h1>
+        {appInfo.iconName && (
+          <div className={styles.appInfo}>
+            <div
+              className={styles.appIcon}
+              style={{
+                background: appInfo.iconColor || 'transparent'
+              }}
+            >
+              <DynamicIcon
+                IconComponent={appIconMap[appInfo.iconName as keyof typeof appIconMap]}
+                theme="outline"
+                size="40"
+                fill="#F2F3F5"
+              />
+            </div>
+            <div className={styles.appName}>{appInfo.appName}</div>
+          </div>
+        )}
+        <h1 className={styles.title}>欢迎登录</h1>
 
         <Form
           form={form}

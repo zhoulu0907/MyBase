@@ -187,7 +187,7 @@ const XCheckbox: XInputCheckboxSchema = {
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     defaultValue: [
       {
         label: '选项一',

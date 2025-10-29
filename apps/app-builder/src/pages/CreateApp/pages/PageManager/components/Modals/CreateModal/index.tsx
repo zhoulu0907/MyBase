@@ -1,4 +1,3 @@
-import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import MenuComp from '@/components/MenuIcon';
 import { Form, Input, Modal, Select, TreeSelect, Button, type FormInstance } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
@@ -120,8 +119,10 @@ const CreateModal: React.FC<CreateModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: '#F2F3F5'
+                  backgroundColor: '#F2F3F5',
+                  cursor: 'pointer'
                 }}
+                onClick={() => setVisibleMenuIcon(true)}
               >
                 {menuIcon ? (
                   <DynamicIcon
@@ -139,12 +140,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
                   />
                 )}
               </div>
-              <img
-                src={iconEditSVG}
-                alt="选择菜单图标"
-                style={{ cursor: 'pointer' }}
-                onClick={() => setVisibleMenuIcon(true)}
-              />
             </div>
           </Form.Item>
           <Form.Item label="父级页面" field="parentId">

@@ -1,5 +1,11 @@
-import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, AUTO_CODE_RULE_TYPE, DIGIT_DEFAULT } from './const';
-import type { AutoNumberRule, AutoNumberRuleItem, AutoCodeRule } from './types';
+import {
+  AUTO_CODE_NUMBER_MODE,
+  AUTO_CODE_RESET_CYCLE,
+  AUTO_CODE_RULE_TYPE,
+  DIGIT_DEFAULT,
+  DATE_FORMAT_DEFAULT
+} from './const';
+import type { AutoNumberRule, AutoNumberRuleItem, AutoCodeRule } from '../types';
 
 /**
  * 将自动编号组件数组格式转换为 AutoNumberRule 对象格式

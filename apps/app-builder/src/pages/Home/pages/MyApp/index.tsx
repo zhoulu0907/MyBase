@@ -26,7 +26,6 @@ import {
   type PageParam
 } from '@onebase/app';
 import { getCommonPaginationList } from '@onebase/common';
-import dayjs from 'dayjs';
 import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -34,12 +33,12 @@ import { useNavigate } from 'react-router-dom';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
 import CreateApp from '@/components/CreateApp';
-import { iconMap, type Options } from '@/components/CreateApp/const';
+import { type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission /* UserPermissionManager */ } from '@/utils/permission';
+import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
 import {
   appOptions,
@@ -404,8 +403,8 @@ const MyAppPage: React.FC = () => {
                       <div className={styles.myAppName}>
                         <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
                           <DynamicIcon
-                            IconComponent={iconMap[item.iconName as keyof typeof iconMap]}
-                            theme="filled"
+                            IconComponent={appIconMap[item.iconName as keyof typeof appIconMap]}
+                            theme="outline"
                             size="32"
                             fill="#F2F3F5"
                           />
@@ -413,7 +412,6 @@ const MyAppPage: React.FC = () => {
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.infoHeader}>
                             <div className={styles.myAppTitle}>{item.appName}</div>
-                            {/* TODO */}
                             <Tag
                               color={TagColor[item.appStatus]}
                               style={{

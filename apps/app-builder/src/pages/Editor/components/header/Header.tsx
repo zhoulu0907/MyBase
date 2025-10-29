@@ -6,7 +6,7 @@ import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
-import { iconMap } from '@/components/CreateApp/const';
+import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
@@ -318,7 +318,7 @@ export default function EditorHeader() {
 
         <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
           <DynamicIcon
-            IconComponent={iconMap[appIcon as keyof typeof iconMap]}
+            IconComponent={appIconMap[appIcon as keyof typeof appIconMap]}
             theme="outline"
             size="14"
             fill="#F2F3F5"

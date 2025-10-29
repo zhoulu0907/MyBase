@@ -21,8 +21,10 @@ import formSVG from '@/assets/images/form_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
 import tickSVG from '@/assets/images/tick_icon.svg';
 import DynamicIcon from '../DynamicIcon';
-import { appIcon, appIconColor, appThemeColor, iconMap, type Options } from './const';
+import { appIcon, appIconColor, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
+import { appIconMap } from '@onebase/ui-kit';
+
 
 type AppStatus = 'create' | 'update';
 type CloseReason = 'confirm' | 'cancel' | 'outside' | 'esc';
@@ -217,7 +219,7 @@ const CreateApp = (props: IProps) => {
             >
               {iconName && (
                 <DynamicIcon
-                  IconComponent={iconMap[iconName as keyof typeof iconMap]}
+                  IconComponent={appIconMap[iconName as keyof typeof appIconMap]}
                   theme="outline"
                   size="40"
                   fill="#F2F3F5"
@@ -255,7 +257,7 @@ const CreateApp = (props: IProps) => {
                           onClick={() => setIconName(item)}
                         >
                           <DynamicIcon
-                            IconComponent={iconMap[item as keyof typeof iconMap]}
+                            IconComponent={appIconMap[item as keyof typeof appIconMap]}
                             theme="outline"
                             size="24"
                             fill={item === iconName ? '#F2F3F5' : '#272E3B'}

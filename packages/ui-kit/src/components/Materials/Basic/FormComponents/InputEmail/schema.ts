@@ -33,19 +33,19 @@ import type {
   ILayoutConfigType,
   INumberConfigType,
   IPlaceholderConfigType,
+  ISecurityConfigType,
   ISelectConfigType,
   IStatusConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  ISecurityConfigType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputEmailSchema {
@@ -122,7 +122,7 @@ export interface XInputEmailConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -220,13 +220,13 @@ const XInputEmail: XInputEmailSchema = {
       name: '安全',
       type: CONFIG_TYPES.SECURITY
     },
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '邮箱',
-      display: true,
+      display: true
     },
     dataField: [],
     placeholder: '请输入邮箱',
@@ -239,7 +239,7 @@ const XInputEmail: XInputEmailSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100,
+    labelColSpan: 200,
     security: {
       display: false,
       type: 'email'

@@ -340,7 +340,7 @@ const XTable: XTableSchema = {
     pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
     pageSize: 5,
     metaData: '',
-    labelColSpan: 100,
+    labelColSpan: 200,
     defaultValue: [],
     columns: [],
 

@@ -1,3 +1,12 @@
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+
+// 需要额外配置的字段类型
+export const FIELD_TYPES_NEED_CONFIG = [
+  ENTITY_FIELD_TYPE.SELECT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE,
+  ENTITY_FIELD_TYPE.AUTO_CODE.VALUE
+];
+
 // 自动编号规则类型
 export const AUTO_CODE_RULE_TYPE = {
   SEQUENCE: 'SEQUENCE',
@@ -28,3 +37,5 @@ export const RULE_ENABLED = {
   ENABLE: 1,
   DISABLE: 0
 } as const;
+
+export const CHECK_CONST = { IS_TRUE: 1, IS_FALSE: 0 };

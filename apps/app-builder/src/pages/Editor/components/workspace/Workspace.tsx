@@ -1,4 +1,4 @@
-import { EDITOR_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -6,13 +6,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   COMPONENT_GROUP_NAME,
+  COMPONENT_MAP,
   EditRender,
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
   getComponentSchema,
   getComponentWidth,
-  type GridItem,
-  usePageEditorSignal
+  usePageEditorSignal,
+  type GridItem
 } from '@onebase/ui-kit';
 
 import EmptyIcon from '@/assets/images/empty.svg';
@@ -29,11 +30,10 @@ import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
-import type { AppEntityField } from '@onebase/app';
+import { getEntityFieldOptions, type AppEntityField, type EntityFieldOption } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
-import { COMPONENT_MAP } from '../panel/components/metadata/component_map';
 import View from '../view';
 import styles from './index.module.less';
 
@@ -214,6 +214,18 @@ export default function EditorWorkspace() {
     }
   };
 
+  const getFieldOptions = async (fieldId: string) => {
+    const options = await getEntityFieldOptions(fieldId);
+    if (!options) return [];
+
+    return options.map((option: EntityFieldOption) => ({
+      label: option.optionLabel,
+      value: option.optionValue,
+      chosen: false,
+      selected: false
+    }));
+  };
+
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
@@ -260,49 +272,141 @@ export default function EditorWorkspace() {
           list={components}
           setList={(newList) => {
             const entityList: GridItem[] = [];
-            newList.forEach((item) => {
+            newList.forEach(async (item) => {
+              // console.log(item);
               if (item.type == 'entity') {
-                item.fields
-                  .filter(
-                    (field: AppEntityField) =>
-                      field.fieldName !== 'lock_version' &&
-                      field.fieldName !== 'deleted' &&
-                      field.fieldName !== 'parent_id' &&
-                      field.isSystemField !== 1
-                  )
-                  .forEach((field: AppEntityField) => {
-                    let cpType = COMPONENT_MAP[field.fieldType];
-                    let cpID = `${cpType}-${uuidv4()}`;
-                    console.log('cpType', cpType, field);
-                    const schema = getComponentSchema(cpType as any);
+                if (item.entityType === '子表') {
+                  item.fields
+                    .filter(
+                      (field: AppEntityField) =>
+                        field.fieldName !== 'lock_version' &&
+                        field.fieldName !== 'deleted' &&
+                        field.fieldName !== 'parent_id' &&
+                        field.isSystemField !== 1
+                    )
+                    .map(async (field: AppEntityField) => {
+                      let cpType = COMPONENT_MAP[field.fieldType];
+                      let cpID = `${cpType}-${uuidv4()}`;
+                      const schema = getComponentSchema(cpType as any);
 
-                    schema.config.cpName = field.displayName;
-                    schema.config.id = cpID;
-                    schema.config.dataField = [item.entityId, field.fieldId];
-                    schema.config.label.text = field.displayName;
-                    const props = {
-                      id: cpID,
-                      type: cpType,
-                      ...schema
-                    };
+                      if (
+                        field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
+                        field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
+                      ) {
+                        getFieldOptions(field.fieldId).then((options: any) => {
+                          schema.config.defaultValue = options;
+                        });
+                      }
 
-                    setPageComponentSchemas(cpID!, props);
-                    setCurComponentID(cpID!);
+                      schema.config.cpName = field.displayName;
+                      schema.config.id = cpID;
+                      schema.config.dataField = [item.entityId, field.fieldId];
+                      schema.config.label.text = field.displayName;
+                      const props = {
+                        id: cpID,
+                        type: cpType,
+                        ...schema
+                      };
 
-                    setCurComponentSchema(props);
-                    setShowDeleteButton(false);
+                      setPageComponentSchemas(cpID!, props);
+                      setCurComponentID(cpID!);
 
-                    entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
-                  });
-                // 移除当前item
-                newList.splice(newList.indexOf(item), 1);
+                      setCurComponentSchema(props);
+                      setShowDeleteButton(false);
+                    });
+
+                  const cpName = '子表单';
+                  const cpType = 'XSubTable';
+                  const cpID = `${cpType}-${uuidv4()}`;
+
+                  const schema = getComponentSchema(cpType as any);
+
+                  const newColumns = item.fields
+                    .filter((field: AppEntityField) => field.isSystemField !== 1)
+                    .map((field: AppEntityField) => ({
+                      id: field.fieldId,
+                      title: field.displayName,
+                      dataIndex: field.fieldId,
+                      dataType: field.fieldType,
+                      disabled: undefined,
+                      selected: false,
+                      chosen: false
+                    }));
+
+                  schema.config.cpName = cpName;
+                  schema.config.id = cpID;
+                  schema.config.dataField = [item.entityId, item.id];
+                  schema.config.label.text = cpName;
+                  schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                  schema.config.columns = [...newColumns];
+                  schema.config.subTable = item.id;
+
+                  const props = {
+                    id: cpID,
+                    type: cpType,
+                    ...schema
+                  };
+
+                  setPageComponentSchemas(cpID!, props);
+                  //   setCurComponentID(cpID!);
+                  //   setCurComponentSchema(props);
+                  setShowDeleteButton(false);
+
+                  entityList.push({ displayName: cpName, id: cpID, type: cpType });
+
+                  newList.splice(newList.indexOf(item), 1);
+                } else if (item.entityType === '主表') {
+                  item.fields
+                    .filter(
+                      (field: AppEntityField) =>
+                        field.fieldName !== 'lock_version' &&
+                        field.fieldName !== 'deleted' &&
+                        field.fieldName !== 'parent_id' &&
+                        field.isSystemField !== 1
+                    )
+                    .forEach(async (field: AppEntityField) => {
+                      let cpType = COMPONENT_MAP[field.fieldType];
+                      let cpID = `${cpType}-${uuidv4()}`;
+                      console.log('cpType', cpType, field);
+
+                      const schema = getComponentSchema(cpType as any);
+
+                      if (
+                        field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
+                        field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
+                      ) {
+                        getFieldOptions(field.fieldId).then((options: any) => {
+                          schema.config.defaultValue = options;
+                        });
+                      }
+
+                      schema.config.cpName = field.displayName;
+                      schema.config.id = cpID;
+                      schema.config.dataField = [item.entityId, field.fieldId];
+                      schema.config.label.text = field.displayName;
+                      const props = {
+                        id: cpID,
+                        type: cpType,
+                        ...schema
+                      };
+
+                      setPageComponentSchemas(cpID!, props);
+                      //   setCurComponentID(cpID!);
+                      //   setCurComponentSchema(props);
+                      setShowDeleteButton(false);
+
+                      entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
+                    });
+                  // 移除当前item
+                  newList.splice(newList.indexOf(item), 1);
+                }
               }
             });
             newList.push(...entityList);
 
             setComponents(newList);
           }}
-          onAdd={(e) => {
+          onAdd={async (e) => {
             let cpID = e.item.id || e.item.getAttribute('data-cp-id');
             const itemType = e.item.getAttribute('data-cp-type');
             const itemDisplayName = e.item.getAttribute('data-cp-displayname');
@@ -336,6 +440,11 @@ export default function EditorWorkspace() {
                 console.log('dataField:  ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];
                 schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+                if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
+                  const options = await getFieldOptions(fieldID);
+                  schema.config.defaultValue = options;
+                }
               }
 
               if (dataLabel) {
@@ -351,7 +460,6 @@ export default function EditorWorkspace() {
 
               setPageComponentSchemas(cpID!, props);
               setCurComponentID(cpID!);
-
               setCurComponentSchema(props);
               setShowDeleteButton(false);
             }

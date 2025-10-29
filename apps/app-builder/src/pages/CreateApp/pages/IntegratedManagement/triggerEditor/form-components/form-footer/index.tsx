@@ -278,6 +278,10 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         const fields = nodeInfo.props.form.getFieldValue('fields');
         param = { ...param, fields };
       }
+      if (curNode && curNode.type === NodeType.NAGIVATE) {
+        const paramFields = nodeInfo.props.form.getFieldValue('paramFields');
+        param = { ...param, paramFields };
+      }
       // 过滤掉数据为空的数组  一维数组
       const keys = Object.keys(param);
       for (let key of keys) {

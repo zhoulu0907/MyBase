@@ -172,7 +172,7 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
     defaultValue: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     verify: {
       required: false
     }

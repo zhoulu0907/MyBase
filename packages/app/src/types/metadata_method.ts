@@ -1,23 +1,25 @@
 export interface InsertMethodParams {
+  menuId: string;
   entityId: string;
   data: object;
-
-  //   TODO(mickey): 处理子表逻辑
-  //   subEntities: SubEntityParams[];
+  subEntities?: SubEntityParams[];
 }
 
 export interface SubEntityParams {
   subEntityId: string;
-  data: object;
+  subData: object;
 }
 
 export interface UpdateMethodParams {
+  menuId: string;
   entityId: string;
   id: string;
   data: object;
+  subEntities?: SubEntityParams[];
 }
 
 export interface PageMethodParam {
+  menuId: string;
   entityId: string;
   pageNo: number;
   pageSize: number;
@@ -27,11 +29,13 @@ export interface PageMethodParam {
 }
 
 export interface DeleteMethodParam {
+  menuId: string;
   entityId: string;
   id: string;
 }
 
 export interface DataMethodParam {
+  menuId: string;
   entityId: string;
   id: string;
 }

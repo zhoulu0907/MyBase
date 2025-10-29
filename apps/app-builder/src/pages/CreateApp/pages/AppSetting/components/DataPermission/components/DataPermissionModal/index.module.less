@@ -2,29 +2,43 @@
   .dataPermissionModalTitle {
     text-align: left;
   }
-  .dataPermissionForm { 
+  .dataPermissionForm {
     box-sizing: border-box;
     padding: 0 65px;
     .dataPermissionScope {
       .scopeRow {
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        margin-top: 12px;
+        height: 32px;
         &:last-child {
           margin-bottom: 0;
         }
+
+        .selfRow {
+          display: flex;
+          flex: 1;
+          margin-left: 12px;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .disableField {
+          pointer-events: none;
+          opacity: 0.6;
+        }
       }
       .scopeRoles {
-        width: 150px;
+        width: 120px;
         margin-bottom: 0;
       }
       .scopePerson {
-        width: 360px;
+        width: 160px;
         margin-bottom: 0;
       }
       .scopeAssign {
-        margin-top: 16px;
         width: 100%;
+        flex: 1;
         margin-bottom: 0;
         border-radius: 4px;
         .assignIdTag {
@@ -47,7 +61,10 @@
               gap: 4px;
               // 图片和文字中线对齐
               vertical-align: middle;
-
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 80px;
             }
           }
           .tagBtn {
@@ -69,9 +86,7 @@
       margin-bottom: 20px;
     }
     .dataPermissionOperable {
-      display: flex;
-      align-items: center;
-      gap: 36px;
+      margin-right: 14px;
     }
   }
 }

@@ -274,7 +274,7 @@ const XInputNumber: XInputNumberSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100,
+    labelColSpan: 200,
     security: {
       display: false,
       type: ''
@@ -282,7 +282,7 @@ const XInputNumber: XInputNumberSchema = {
     verify: {
       required: false,
       min: 0,
-      max: 100
+      max: Infinity
     }
   }
 };

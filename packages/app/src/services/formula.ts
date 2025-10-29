@@ -21,6 +21,6 @@ export const getFormulaById = (id: string) => {
  * 执行公式计算
  * @returns 返回计算结果
  */
-export const executeFormula = (formulaData: formulaParams) => {
-  return formulaService.post('/engine/execute',formulaData);
+export const debugFormula = (formulaData: formulaParams) => {
+  return formulaService.post('/engine/debug-formula',formulaData);
 }

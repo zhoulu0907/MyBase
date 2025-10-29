@@ -290,13 +290,23 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         {ruleType === VALIDATION_TYPES.LENGTH && (
           <Grid.Row gutter={16}>
             <Grid.Col span={12}>
-              <Form.Item label="最小长度" field="minLength" rules={[{ required: true, message: '请输入最小长度' }]}>
-                <Input placeholder="请输入最小长度" defaultValue="0" />
+              <Form.Item
+                label="最小长度"
+                field="minLength"
+                rules={[{ required: true, message: '请输入最小长度' }]}
+                initialValue="0"
+              >
+                <Input placeholder="请输入最小长度" />
               </Form.Item>
             </Grid.Col>
             <Grid.Col span={12}>
-              <Form.Item label="最大长度" field="maxLength" rules={[{ required: true, message: '请输入最大长度' }]}>
-                <Input placeholder="请输入最大长度" defaultValue="8000" />
+              <Form.Item
+                label="最大长度"
+                field="maxLength"
+                rules={[{ required: true, message: '请输入最大长度' }]}
+                initialValue="800"
+              >
+                <Input placeholder="请输入最大长度" />
               </Form.Item>
             </Grid.Col>
           </Grid.Row>
