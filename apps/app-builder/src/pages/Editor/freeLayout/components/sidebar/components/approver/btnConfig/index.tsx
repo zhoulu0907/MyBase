@@ -112,8 +112,8 @@ function EditableCell(props:any) {
   );
 }
 
-export default function ApproverBtnConfig() {
-    const [data, setData] = useState([
+export default function ApproverBtnConfig({setApprovalConfigData}: any) {
+    const [tbData, setData] = useState([
         {
             key: '1',
             buttonName: btnConfigVar.buttonName['agree'],
@@ -267,23 +267,23 @@ export default function ApproverBtnConfig() {
     }
 
     function handleSave(row:any) {
-        const newData = [...data];
+        const newData = [...tbData];
         const index = newData.findIndex((item) => row.key === item.key);
         newData.splice(index, 1, { ...newData[index], ...row });
         setData(newData);
     }
 
-    function testclick() {
-      console.log('table data ====', data.filter((item:any) => {
+    useEffect(() => {
+      setApprovalConfigData('buttonConfigs', tbData.filter((item:any) => {
         return item?.enabled
       }))
-    }
+    }, [tbData])
 
     return <div className={styles.approverConfig}>
-        <div className={styles.configTitle} onClick={testclick}>操作按钮</div>
+        <div className={styles.configTitle}>操作按钮</div>
         <Table
             pagination={false}
-            data={data}
+            data={tbData}
             components={{
             body: {
                 row: EditableRow,

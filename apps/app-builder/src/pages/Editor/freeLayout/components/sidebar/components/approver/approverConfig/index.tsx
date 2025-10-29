@@ -4,35 +4,27 @@
 import { Radio, Divider } from '@arco-design/web-react';
 import {IconQuestionCircle} from '@arco-design/web-react/icon';
 import styles from './index.module.less';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SimpleMode from './SimpleMode';
 import ConditionMode from './ConditionMode';
 import {approverConfigVar} from '../constant'
 
 const RadioGroup = Radio.Group;
 
-// 定义 ref 的类型接口
-interface ChildComponentRef {
-  getModeData: () => any[];
-}
-
-export default function Approver() {
+export default function Approver({setApprovalConfigData}: any) {
   const [configMode, setConfigMode] = useState<string>('simple');
   let [approvalMode, setApprovalMode] = useState(approverConfigVar.approvalMode['a'])
-  let simpleRef = useRef<ChildComponentRef>()
 
   function changeApprovalMode(val: string) {
     setApprovalMode(val)
   }
-  
-  function testclick() {
-    let data:any = simpleRef.current?.getModeData()
-    data.approvalMode = approvalMode;
-    console.log(data)
-  }
+  useEffect(() => {
+    setApprovalConfigData('approverConfig', {approvalMode})
+  }, [approvalMode])
+
   return (
     <div className={styles.approverConfig}>
-      <div className={styles.configTitle} onClick={testclick}>审批人设置</div>
+      <div className={styles.configTitle}>审批人设置</div>
       <div className={styles.configMode} style={{display: 'none'}}>
         <span>配置模式：</span>
         <RadioGroup value={configMode} onChange={setConfigMode}>
@@ -41,7 +33,7 @@ export default function Approver() {
         </RadioGroup>
       </div>
       <Divider />
-      {configMode === 'simple' && <SimpleMode ref={simpleRef} />}
+      {configMode === 'simple' && <SimpleMode setApprovalConfigData={setApprovalConfigData}/>}
       {configMode === 'condition' && <ConditionMode />}
       <div className={styles.configTitle} style={{paddingTop: '8px'}}>多人审批方式</div>
       <RadioGroup direction='vertical' value={approvalMode} onChange={changeApprovalMode}>

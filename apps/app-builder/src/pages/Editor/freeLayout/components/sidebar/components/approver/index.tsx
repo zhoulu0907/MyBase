@@ -9,19 +9,35 @@ import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index'
 import FieldConfig from './fieldConfig/index'
+// import { approverConfigVar } from './constant';
 
 const RadioGroup = Radio.Group;
 
+const approverConfigData:any = {
+  approverConfig: {},
+  buttonConfigs: {},
+  fieldPermConfig: {}
+}
+
+function setApprovalConfigData(key: string, data: Object) {
+  approverConfigData[key] = {
+    ...approverConfigData[key],
+    ...data
+  }
+}
+
 export default function ApproveDreawer() {
+
   const [useApprover, setApprover] = useState<string>('approver');
+
   const renderContent = () => {
     switch (useApprover) {
       case 'approver':
-        return <ApproverConfig />;
+        return <ApproverConfig setApprovalConfigData={setApprovalConfigData}/>;
       case 'approverBtn':
-        return <ApproverBtnConfig />;
+        return <ApproverBtnConfig setApprovalConfigData={setApprovalConfigData}/>;
       case 'fieldPermissions':
-        return <FieldConfig />;
+        return <FieldConfig setApprovalConfigData={setApprovalConfigData}/>;
       case 'advancedSettings':
         return <div>高级设置</div>;
       default:
@@ -30,7 +46,7 @@ export default function ApproveDreawer() {
   };
 
   function handleSubmit() {
-    console.log('999 000 ===')
+    console.log('999 000 ===', approverConfigData)
   }
 
   return (

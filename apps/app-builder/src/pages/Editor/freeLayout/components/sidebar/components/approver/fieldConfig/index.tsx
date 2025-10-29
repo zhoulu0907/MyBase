@@ -104,7 +104,7 @@ interface ChildComponentRef {
   getTbData: () => any[];
 }
 
-export default function FieldConfig() {
+export default function FieldConfig({setApprovalConfigData}: any) {
     let [nodeSwitch, setNodeSwitch] = useState(true)
     let editRef = useRef<ChildComponentRef>()
     let hiddenRef = useRef<ChildComponentRef>()
