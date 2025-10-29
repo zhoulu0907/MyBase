@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.api.dto.node.base;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class ApproverConfigDTO {
      * user: 指定成员
      * role: 指定角色
      */
+    @NotBlank(message = "审批人类型不能为空")
     private String approverType;
 
     /**
@@ -38,5 +40,6 @@ public class ApproverConfigDTO {
      * : 会签（所有人都需要审批）
      * any_sign: 或签（任意一人审批即可）
      */
+    @NotBlank(message = "审批方式不能为空")
     private String approvalMode;
 }

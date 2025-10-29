@@ -50,10 +50,12 @@ public class DataQueryMultipleNodeComponent extends SkippableNodeComponent {
         List<Conditions> conditions = nodeData.getFilterCondition();
         // 数据方法参数
         EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
-        if (nodeData.getMainEntityId() != null) {
+        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getDataType())) {
             reqDTO.setEntityId(nodeData.getMainEntityId());
-        } else {
+        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getDataType())) {
             reqDTO.setEntityId(nodeData.getSubEntityId());
+        } else {
+            throw new IllegalArgumentException("参数dataType错误: " + nodeData.getDataType());
         }
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
             OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);

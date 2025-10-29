@@ -15,10 +15,20 @@ import java.util.List;
 @Data
 public class DataQueryNodeData extends NodeData implements Serializable {
 
+    /**
+     * mainEntity
+     * subEntity
+     */
+    private String dataType;
+
     private Long mainEntityId;
 
     private Long subEntityId;
 
+    /**
+     * all
+     * condition
+     */
     private String filterType;
 
     private List<Conditions> filterCondition;
