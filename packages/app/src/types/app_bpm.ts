@@ -12,5 +12,5 @@ export interface SaveRequest {
     version: string;
     versionAlias: string;
     versionStatus: string;
-    xid: string;
+    id: string;
 }

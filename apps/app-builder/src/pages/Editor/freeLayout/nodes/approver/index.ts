@@ -5,7 +5,7 @@ import approver from '../../assets/bpmLogo/approver.png';
 
 export const ApproverNodeRegistry: FlowNodeRegistry = {
   type: 'approver',
-  title: '审批人',
+  name: '审批人',
   category: 'interaction',
   meta: {
     isStart: false,
@@ -35,7 +35,7 @@ export const ApproverNodeRegistry: FlowNodeRegistry = {
       id: `executor_${nanoid(5)}`,
       type: 'executor',
       data: {
-        title: '审批人'
+        name: '审批人'
       }
     };
   }

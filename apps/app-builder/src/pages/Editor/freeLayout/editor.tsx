@@ -19,31 +19,37 @@ import { SidebarProvider, SidebarRenderer } from './components/sidebar';
 import LeftNavBar from './components/left-nav-bar/index';
 import { GlobalConfigProvider } from './components/globalConfig/components/globalConfigProvider';
 import { getByBusinessId, save } from '../../../../../../packages/app/src/services/index';
-// import type { WorkflowJSON } from '@flowgram.ai/free-layout-editor';
-import type { WorkflowJSON } from './editorType';
+import { useLocation } from 'react-router-dom';
+import type { WorkflowJSON, FlowData } from './editorType';
 const sourceNodeIDMap = new Map();
 export const Editor = () => {
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const pageSetId = searchParams.get('pageSetId') || '';
 
+  const [flowData, setFlowData] = useState<FlowData>({});
   // 数据请求
   const getFlowData = async () => {
     try {
-      const res = await getByBusinessId({ businessId: '85239398472974337' });
+      // 85239398472974337
+      const res = await getByBusinessId({ businessId: pageSetId });
       let useJsonData = {};
-      console.log(res);
+      // 如果没有数据就用初始化数据
       if (!res.bpmDefJson) {
         useJsonData = initialData;
       } else {
+        // 否则用查询数据
         const bpmDefJson = JSON.parse(res.bpmDefJson);
         useJsonData = normalizeNodes(bpmDefJson);
       }
-
-      console.log(useJsonData);
-
+      // 保存流程数据
+      if (res.businessId) {
+        setFlowData(res);
+      }
       setIsLoading(true);
       ref?.current?.document.fromJSON(useJsonData);
-
       setTimeout(() => {
         // 加载后触发画布的 fitview 让节点自动居中
         ref?.current?.document.fitView();
@@ -58,24 +64,19 @@ export const Editor = () => {
 
   // 格式化数据
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
-    console.log(obj);
-
+    // 处理连线数据的type
     obj?.edges.forEach((item) => {
       if (item?.type) {
         sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
       } else {
-        item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID);
+        item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
       }
     });
+    // 处理节点数据
     const newNodes = obj?.nodes.map((node) => {
       if ('name' in node) {
         return { ...node, data: { ...(node.data || {}), name: node.name } };
       } else if (node.data && 'name' in node.data) {
-        // const name = node.data.name;
-        // delete node.data.name;
-        // if (Object.keys(node.data).length === 0) {
-        //   delete node.data;
-        // }
         return { ...node, name: node.data.name };
       }
       return node;
@@ -86,24 +87,22 @@ export const Editor = () => {
 
   // 保存数据
   const onSave = () => {
-    console.log(sourceNodeIDMap);
-
     const data = ref?.current?.document.toJSON();
     const useJsonData = normalizeNodes(data);
+    const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
     const params = {
-      xid: '1431276185660297216',
-      flowCode: '1024001',
-      flowName: '串行-简单',
-      version: 'V1',
-      versionAlias: '流程版本V1',
-      versionStatus: 'designing',
-      businessId: '85239398472974337',
+      id: id || '',
+      flowCode: flowCode || '',
+      flowName: flowName || '',
+      version: version || '',
+      versionAlias: versionAlias || '',
+      versionStatus: versionStatus || '',
+      businessId: businessId || '',
       bpmDefJson: JSON.stringify(useJsonData)
     };
     save(params).then((res: any) => {
       console.log(res);
     });
-    console.log(useJsonData, '保存数据');
   };
   return (
     <div className="doc-free-feature-overview">

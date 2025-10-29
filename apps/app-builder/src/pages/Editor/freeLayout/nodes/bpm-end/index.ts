@@ -8,7 +8,7 @@ import { formMeta } from './form-meta';
 import { WorkflowNodeType } from '../constants';
 
 export const BpmEndNodeRegistry: FlowNodeRegistry = {
-  type: WorkflowNodeType.BpmEnd,
+  type: WorkflowNodeType.End,
   meta: {
     isNodeEnd: true,
     deleteDisable: true,
@@ -25,7 +25,8 @@ export const BpmEndNodeRegistry: FlowNodeRegistry = {
       borderWidth: 0,
       borderRadius: 15,
       cursor: 'move'
-    }
+    },
+    defaultPorts: [{ type: 'input', location: 'top' }]
   },
   info: {
     icon: '',
