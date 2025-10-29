@@ -47,7 +47,7 @@ export default function ApproveDreawer({handleConfigSubmit}: any) {
 
   function handleSubmit() {
     console.log('approverConfigData ===', approverConfigData)
-    handleConfigSubmit && handleConfigSubmit(approverConfigData, {})
+    handleConfigSubmit && handleConfigSubmit(approverConfigData, [])
   }
 
   return (
