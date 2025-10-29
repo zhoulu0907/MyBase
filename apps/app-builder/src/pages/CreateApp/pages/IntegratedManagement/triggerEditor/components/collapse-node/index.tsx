@@ -1,5 +1,5 @@
-import { type FlowNodeEntity, FlowNodeTransformData, FlowNodeRenderData } from '@flowgram.ai/fixed-layout-editor';
 import { IconLeft, IconUp } from '@arco-design/web-react/icon';
+import { type FlowNodeEntity, FlowNodeRenderData, FlowNodeTransformData } from '@flowgram.ai/fixed-layout-editor';
 import styles from './index.module.less';
 
 export interface CollapseProps {
@@ -13,8 +13,6 @@ export function CollapseNode(props: CollapseProps): JSX.Element {
   const { activateNode, collapseNode, hoverActivated } = props;
   const activateData = activateNode?.getData(FlowNodeRenderData);
   const transform = collapseNode.getData(FlowNodeTransformData);
-
-  console.log('props', props);
 
   const collapseBlock = () => {
     transform.collapsed = true;

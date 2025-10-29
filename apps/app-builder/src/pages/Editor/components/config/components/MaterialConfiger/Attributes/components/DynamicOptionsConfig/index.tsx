@@ -1,6 +1,6 @@
-import { Button, Form, Input, Space } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Space } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 
@@ -15,17 +15,24 @@ export interface DynamicOptionsConfigProps {
 
 const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handlePropsChange, item, configs, id }) => {
   const selectKey = 'defaultValue';
-  const [selectOptionsConfig, setSelectOptionsConfig] = useState<any[]>(configs[selectKey] || []);
+  const [selectOptionsConfig, setSelectOptionsConfig] = useState<any[]>([]);
+
+  useEffect(() => {
+    setSelectOptionsConfig(configs[selectKey]);
+    return () => {
+      setSelectOptionsConfig([]);
+    }
+  }, [configs[selectKey]]);
 
   return (
     <>
       <FormItem layout="vertical" labelAlign="left" label={'自定义配置'} className={styles.formItem}>
-        <Form.List initialValue={configs[selectKey]} field={`${id}-${selectKey}`}>
+        <Form.List initialValue={selectOptionsConfig} field={`${id}-${selectKey}`}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
-                list={configs[selectKey]}
-                setList={() => {}}
+                list={selectOptionsConfig}
+                setList={() => { }}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -56,7 +63,7 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                   }
                 }}
               >
-                {configs[selectKey].map((_col: any, idx: number) => (
+                {selectOptionsConfig.map((_col: any, idx: number) => (
                   <div key={idx} className={styles.tableColumnItem}>
                     <Space>
                       <IconDragDotVertical
@@ -82,7 +89,7 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                       /> */}
                       <Input
                         size="small"
-                        value={configs[selectKey][idx].label}
+                        value={selectOptionsConfig[idx].label}
                         onChange={(e) => {
                           const newList = [...selectOptionsConfig];
                           newList[idx] = {
@@ -104,6 +111,10 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                         className={styles.tableColumnItemButton}
                         onClick={() => {
                           const newList = [...selectOptionsConfig];
+                          if (newList.length <= 2) {
+                            Message.warning('下拉选项不能少于2个');
+                            return;
+                          }
                           newList.splice(idx, 1);
                           setSelectOptionsConfig(newList);
                           handlePropsChange(selectKey, newList);

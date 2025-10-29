@@ -1,22 +1,21 @@
-import { menuEditorSignal } from '@/store/singals/menu_editor';
-import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
-import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
-import { EDITOR_TYPES } from '@onebase/ui-kit';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './index.module.less';
-import DynamicIcon from '@/components/DynamicIcon';
-import { menuIconList } from '@/components/MenuIcon/const';
-import { useSignals } from '@preact/signals-react/runtime';
+import CreateGroupIcon from '@/assets/images/addfolder.svg';
+import CreatePageIcon from '@/assets/images/addpage.svg';
+import DeleteMenuIcon from '@/assets/images/app_delete.svg';
+import CopyIcon from '@/assets/images/copy_comp_icon.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
-import CopyIcon from '@/assets/images/copy_comp_icon.svg';
-import DeleteMenuIcon from '@/assets/images/app_delete.svg';
-import CreateGroupIcon from '@/assets/images/addfolder.svg';
-import CreatePageIcon from '@/assets/images/addpage.svg';
+import DynamicIcon from '@/components/DynamicIcon';
+import { menuIconList } from '@/components/MenuIcon/const';
+import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
+import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
+import { getPageSetId, menuSignal, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
+import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
 
@@ -36,16 +35,16 @@ interface MenuItemProps {
   label: string;
   menuIcon: string;
   isGroup: boolean;
-  onClick: () => void;
-  triggerCreate: (formType: string) => void;
-  triggerRename: () => void;
-  triggerCopy: () => void;
-  triggerHide: (menuID: string, isVisible: number) => void;
-  triggerDelete: (menuID: string) => void;
+  onClick?: () => void;
+  triggerCreate?: (formType: string) => void;
+  triggerRename?: () => void;
+  triggerCopy?: () => void;
+  triggerHide?: (menuID: string, isVisible: number) => void;
+  triggerDelete?: (menuID: string) => void;
   maxWidth: number;
-  renameForm: FormInstance;
-  copyForm: FormInstance;
-  createForm: FormInstance;
+  renameForm?: FormInstance;
+  copyForm?: FormInstance;
+  createForm?: FormInstance;
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
@@ -67,9 +66,9 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   copyForm,
   createForm
 }) => {
-  useSignals()
+  useSignals();
   const navigate = useNavigate();
-  const { curMenuId } = menuEditorSignal;
+  const { curMenu } = menuSignal;
 
   const [popupVisible, setPopupVisible] = useState(false);
 
@@ -84,11 +83,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             handleEditPageSet();
           }}
         >
-          <img src={EditIcon} alt='编辑' />
+          <img src={EditIcon} alt="编辑" />
           编辑
         </MenuItem>
       )}
-      <MenuItem
+      {(renameForm && triggerRename) && <MenuItem
         className={styles.menuContent}
         key="rename"
         onClick={(e) => {
@@ -101,21 +100,25 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           renameForm.setFieldValue('menuIcon', menuIcon);
         }}
       >
-        <img src={RenameIcon} alt='重命名' />
+        <img src={RenameIcon} alt="重命名" />
         重命名
-      </MenuItem>
+      </MenuItem>}
       <MenuItem
         className={styles.menuContent}
         key="visible"
         onClick={(e) => {
           e.stopPropagation();
-          triggerHide(menuID, isVisible);
+          triggerHide && triggerHide(menuID, isVisible);
         }}
       >
-        {isVisible === VisibleType.HIDDEN ? <img src={VisibleIcon} alt='隐藏' /> : <img src={HiddenIcon} alt='取消隐藏' />}
+        {isVisible === VisibleType.HIDDEN ? (
+          <img src={VisibleIcon} alt="隐藏" />
+        ) : (
+          <img src={HiddenIcon} alt="取消隐藏" />
+        )}
         {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
       </MenuItem>
-      {!isGroup && (
+      {(!isGroup && copyForm && triggerCopy) && (
         <MenuItem
           className={styles.menuContent}
           key="copy"
@@ -127,11 +130,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             copyForm.setFieldValue('menuId', menuID);
           }}
         >
-          <img src={CopyIcon} alt='复制' />
+          <img src={CopyIcon} alt="复制" />
           复制
         </MenuItem>
       )}
-      {isGroup && (
+      {(isGroup && createForm && triggerCreate) && (
         <MenuItem
           className={styles.menuContent}
           key="createPage"
@@ -142,12 +145,12 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             createForm.setFieldValue('parentId', menuID);
           }}
         >
-          <img src={CreatePageIcon} alt='新建页面' />
+          <img src={CreatePageIcon} alt="新建页面" />
           新建页面
         </MenuItem>
       )}
 
-      {isGroup && (
+      {(isGroup && createForm && triggerCreate)  && (
         <MenuItem
           className={styles.menuContent}
           key="createGroup"
@@ -158,12 +161,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             createForm.setFieldValue('parentId', menuID);
           }}
         >
-          <img src={CreateGroupIcon} alt='新建分组' />
+          <img src={CreateGroupIcon} alt="新建分组" />
           新建分组
         </MenuItem>
       )}
-
-      <MenuItem
+      {triggerDelete && <MenuItem
         className={styles.menuContent}
         key="delete"
         onClick={(e) => {
@@ -172,9 +174,9 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         }}
         style={{ color: 'red' }}
       >
-        <img src={DeleteMenuIcon} alt='删除' />
+        <img src={DeleteMenuIcon} alt="删除" />
         删除
-      </MenuItem>
+      </MenuItem>}
     </Menu>
   );
 
@@ -195,7 +197,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
   return (
     <div
-      className={styles.myMenuItem}
+      className={`${styles.myMenuItem} ${isVisible === VisibleType.HIDDEN ? 'menu-hidden' : ''}`}
       onContextMenu={(e) => {
         // 支持右键弹出菜单
         setPopupVisible(true);
@@ -213,10 +215,10 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           }}
         >
           <DynamicIcon
-            IconComponent={menuIconList.find(icon => icon.code === menuIcon)?.icon}
+            IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
             theme="outline"
             size="18"
-            fill={curMenuId.value === menuID ? 'rgb(var(--primary-6))' : '#333'}
+            fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
             style={{ marginRight: 16 }}
           />
           {label}

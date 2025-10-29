@@ -181,13 +181,17 @@ export function getPrecedingNodes(
  * @param validateOnly 是否只做校验（可选，默认为 true）
  */
 export async function validateNodeForm(form: any, payloadForm: any, validateOnly: boolean = false) {
+  const nodeId = payloadForm.getFieldValue('id');
   try {
-    form.setValueIn('invalid', false);
     await payloadForm.validate({ validateOnly });
+    // form.setValueIn('invalid', false);
+    triggerEditorSignal.setInvalidNode(nodeId, false);
   } catch (error: any) {
-    // console.warn('validateNodeForm error: ', error.errors);
+    console.warn('validateNodeForm error: ', error.errors);
+
     // 捕获校验错误并设置 invalid
-    form.setValueIn('invalid', true);
+    // form.setValueIn('invalid', true);
+    triggerEditorSignal.setInvalidNode(nodeId, true);
   }
 }
 

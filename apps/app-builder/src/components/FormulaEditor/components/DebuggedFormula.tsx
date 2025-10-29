@@ -3,7 +3,6 @@ import { IconArrowRight, IconLoading, IconPlusCircle } from "@arco-design/web-re
 import styles from "./DebuggedFormula.module.less";
 import { debugFormula, type fieldListWithNodeData } from "@onebase/app";
 import { useRef, useState } from "react";
-const FormItem = Form.Item;
 
 interface variableItem {
   fieldName: string,
@@ -89,17 +88,24 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         title: data.fieldName,
         dataIndex: data.fieldName,
         key: data.fieldName,
-        width: 120,
+        width: 150,
         render: (_:any, record:any, index:number) => (
           <Form.Item
+            className={styles.bodycellFormItem}
             field={`tableRows${rootField}[${index}].${data.fieldName}`} 
-            rules={[{ required: true}]}
+            rules={[{ required: true, message: `请输入${data.fieldName}`}]}
           >
             <Input />
           </Form.Item>
         ),
     }));
-    return columns;
+    const indexColumn = {
+      title: '',
+      fixed: 'left',
+      width: 8,
+      render: (_:any, record: any, index:number) => index + 1,
+    };
+    return [indexColumn, ...columns];
   }
 
    //生成新增行的空数据结构
@@ -119,21 +125,23 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
       <div className={styles.content}>
           <Form className={styles.variablesDisplay} form={form} ref={formRef} >
           {entityFields.map((item) => {
-            return <FormItem label={item.fieldName} field={item.fieldName} rules={[{required: true}]}>
+            return <Form.Item label={item.fieldName} field={item.fieldName} rules={[{required: true}]}>
               {renderFormItem(item.fieldType)}
-            </FormItem>
+            </Form.Item>
           })}
           {/* 表格 */}
          {Object.keys(tableData)?.map((key) => {
           return (
             <>
-              <Typography.Title heading={6}>{key}</Typography.Title>
+              <Typography.Title heading={6} className={styles.title}>{key}</Typography.Title>
               <Form.List field="tableRows" initialValue={tableData[key].fieldList.length > 0 ? [getNewRow(tableData[key].fieldList)] : []}>
                  {(fields, {add}) => {
                   return (
                     <>
                     <Table
-                      border={false}
+                      className={styles.variableTable}
+                      border
+                      borderCell
                       columns={getColumns(key,tableData[key].fieldList)}
                       data={fields.map(item => item.key)}
                       rowKey="id"
@@ -154,7 +162,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         </Form>
         <div className={styles.calculateIcon} onClick={handleFormula} >
           <span>公式计算</span>
-          <IconArrowRight style={{ fontSize: 30, color: "#4FAE7B" }}/>
+          <IconArrowRight style={{ fontSize: 50, color: "#4FAE7B", fontWeight:"bold" }}/>
         </div>
         <div className={styles.rightContent}>
             {loading ? <IconLoading fontSize={24} /> : displayValue}

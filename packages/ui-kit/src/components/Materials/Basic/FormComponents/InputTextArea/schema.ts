@@ -33,19 +33,19 @@ import type {
   ILayoutConfigType,
   INumberConfigType,
   IPlaceholderConfigType,
+  ISecurityConfigType,
   ISelectConfigType,
   IStatusConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  ISecurityConfigType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputTextAreaSchema {
@@ -123,7 +123,7 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -261,18 +261,18 @@ const XInputTextArea: XInputTextAreaSchema = {
       name: '安全',
       type: CONFIG_TYPES.SECURITY
     },
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '多行文本',
-      display: true,
+      display: true
     },
     dataField: [],
     placeholder: '请输入文字',
     tooltip: '',
-    labelColSpan: 100,
+    labelColSpan: 200,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
@@ -290,7 +290,7 @@ const XInputTextArea: XInputTextAreaSchema = {
       type: ''
     },
     verify: {
-      required: false,
+      required: false
     }
   }
 };

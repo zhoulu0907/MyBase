@@ -4,7 +4,6 @@ import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
-import { menuEditorSignal } from '@/store/singals/menu_editor';
 import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
@@ -17,6 +16,7 @@ import {
   getEntityListByApp,
   getPageSetId,
   listApplicationMenu,
+  menuSignal,
   MenuType,
   PageType,
   RootParentPage,
@@ -36,6 +36,7 @@ import {
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -44,6 +45,8 @@ import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;
@@ -68,6 +71,8 @@ interface Options {
 }
 
 const PageManagerPage: FC = () => {
+  useSignals();
+
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -85,12 +90,15 @@ const PageManagerPage: FC = () => {
 
   const [title, setTitle] = useState('');
   const [showGuide, setShowGuide] = useState<boolean>(false);
-  const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
+  const pageSetTypeOptions = [
+    { label: '普通表单', value: PageType.NORMAL },
+    { label: '流程表单', value: PageType.BPM }
+  ];
 
   const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
-  const [curMenu, setCurMenu] = useState<ApplicationMenu>();
+  const { curMenu, setCurMenu } = menuSignal;
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -141,7 +149,6 @@ const PageManagerPage: FC = () => {
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
               setCurMenu(menu);
-              menuEditorSignal.setCurMenuId(menu.id);
             }
           }}
           triggerCreate={triggerCreate}
@@ -180,7 +187,6 @@ const PageManagerPage: FC = () => {
     if (res && res.length > 0) {
       setCurMenu(findFirstPage(res));
 
-      menuEditorSignal.setCurMenuId(findFirstPage(res)?.id);
       setSearchResult(false);
     }
 
@@ -297,6 +303,7 @@ const PageManagerPage: FC = () => {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: createForm.getFieldValue('pageSetType'),
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
@@ -325,7 +332,7 @@ const PageManagerPage: FC = () => {
       if (pageSetId && menuResp.menuType === MenuType.PAGE) {
         sessionStorage.setItem(
           'EDITOR_PAGE_INFO',
-          JSON.stringify({ id: curMenu?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
+          JSON.stringify({ id: curMenu.value?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
         );
         navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
       }
@@ -381,20 +388,20 @@ const PageManagerPage: FC = () => {
     const res = await deleteApplicationMenu(req);
     if (res) {
       Message.success('删除成功');
-      setCurMenu(undefined);
+      setCurMenu({} as ApplicationMenu);
     }
 
     getMenuList();
   };
 
   const handleEditPageSet = async (name: string, icon: string) => {
-    if (!curMenu?.id) {
+    if (!curMenu.value?.id) {
       Message.error('请选择菜单');
       return;
     }
 
     const req: GetPageSetIdReq = {
-      menuId: curMenu?.id
+      menuId: curMenu.value?.id
     };
     const pageSetId = await getPageSetId(req);
 
@@ -404,7 +411,7 @@ const PageManagerPage: FC = () => {
     }
 
     // 把编辑页菜单数据保存起来；
-    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu?.id, name, icon }));
+    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 
@@ -530,11 +537,11 @@ const PageManagerPage: FC = () => {
               />
             </div>
           </div>
-
+          <TaskCenterSide setCurMenu={setCurMenu} styles_tree={styles.tree} />
           <Tree
             blockNode
             draggable
-            selectedKeys={[curMenu?.id!]}
+            selectedKeys={[curMenu.value?.id!]}
             treeData={treeData}
             className={`menuTree ${styles.tree}`}
             showLine={false}
@@ -609,24 +616,25 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {curMenu?.id && (
+                  {curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0 && (
                     <>
                       <div className={styles.contentHeader}>
-                        <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                        <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
                         <Button
                           className={styles.editButton}
                           type="primary"
                           icon={<img src={EditIcon} alt="编辑页面" />}
-                          onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}
+                          onClick={() => handleEditPageSet(curMenu.value?.menuName, curMenu.value?.menuIcon)}
                         >
                           {t('createApp.editPage')}
                         </Button>
                       </div>
                       <div className={styles.contentBody}>
-                        <PreviewContainer menuId={curMenu?.id} runtime={true} />
+                        <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
                       </div>
                     </>
                   )}
+                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id} />}
                 </>
               )}
             </>
@@ -662,7 +670,7 @@ const PageManagerPage: FC = () => {
         }}
         form={createForm}
         entityListOptions={entityListOptions}
-        pageTypeOptions={pageTypeOptions}
+        pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}

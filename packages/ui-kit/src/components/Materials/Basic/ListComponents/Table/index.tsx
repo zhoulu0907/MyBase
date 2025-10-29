@@ -15,6 +15,7 @@ import {
   dataMethodDelete,
   dataMethodPage,
   getEntityFieldsWithChildren,
+  menuSignal,
   type AppEntityField,
   type DeleteMethodParam,
   type PageMethodParam
@@ -22,8 +23,8 @@ import {
 import { pagesRuntimeSignal } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { RedirectMethod } from '../../../constants';
-import type { XTableConfig } from './schema';
 import './index.css';
+import type { XTableConfig } from './schema';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -34,12 +35,18 @@ const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth 
 type XTableSelectProps = {
   showSelect: boolean;
   selectedDataId: string | null;
-  setSelectData: (value: any) => void
-}
+  setSelectData: (value: any) => void;
+};
 
 const XTable = memo(
   (
-    props: XTableConfig & { runtime?: boolean; showFromPageData?: Function; showAddBtn?: boolean; refresh?: number; xTableSelectProps?: XTableSelectProps }
+    props: XTableConfig & {
+      runtime?: boolean;
+      showFromPageData?: Function;
+      showAddBtn?: boolean;
+      refresh?: number;
+      xTableSelectProps?: XTableSelectProps;
+    }
   ) => {
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
@@ -73,6 +80,8 @@ const XTable = memo(
       operationButtonShowType,
       refresh
     } = props;
+
+    const { curMenu } = menuSignal;
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
     // 实际查询用的参数
@@ -113,16 +122,16 @@ const XTable = memo(
                       <>
                         {(operationButtonShowType === TableOperationButtonStyle.ICON ||
                           operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                            <DynamicIcon
-                              IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                              theme="outline"
-                              size="16"
-                              fill={opearate.iconColor}
-                              style={{
-                                marginRight: 4
-                              }}
-                            />
-                          )}
+                          <DynamicIcon
+                            IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                            theme="outline"
+                            size="16"
+                            fill={opearate.iconColor}
+                            style={{
+                              marginRight: 4
+                            }}
+                          />
+                        )}
                         {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
                           operationButtonShowType === TableOperationButtonStyle.ALL) &&
                           opearate.buttonName}
@@ -160,16 +169,16 @@ const XTable = memo(
                     >
                       {(operationButtonShowType === TableOperationButtonStyle.ICON ||
                         operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                          <DynamicIcon
-                            IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                            theme="outline"
-                            size="16"
-                            fill={opearate.iconColor}
-                            style={{
-                              marginRight: 4
-                            }}
-                          />
-                        )}
+                        <DynamicIcon
+                          IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                          theme="outline"
+                          size="16"
+                          fill={opearate.iconColor}
+                          style={{
+                            marginRight: 4
+                          }}
+                        />
+                      )}
                       {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
                         operationButtonShowType === TableOperationButtonStyle.ALL) &&
                         opearate.buttonName}
@@ -219,7 +228,7 @@ const XTable = memo(
               }}
             />
           )
-        }
+        };
         setFinalColumns([checkboxColumnRender, ...(columns as any)]);
       }
     }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
@@ -261,6 +270,7 @@ const XTable = memo(
         return;
       }
       const req: PageMethodParam = {
+        menuId: curMenu.value?.id,
         entityId: metaData,
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
@@ -307,8 +317,7 @@ const XTable = memo(
 
             // 人员选择单选 TODO
             const userSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
+              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
@@ -335,6 +344,7 @@ const XTable = memo(
       }
       console.log('删除数据 id: ', id);
       const req: DeleteMethodParam = {
+        menuId: curMenu.value?.id,
         entityId: metaData,
         id: id
       };
@@ -448,7 +458,7 @@ const XTable = memo(
         </div>
         <div>
           <Form.Item
-            className='tableFormItem'
+            className="tableFormItem"
             label={label.display && label.text}
             layout={'vertical'}
             style={{

@@ -404,7 +404,7 @@ const MyAppPage: React.FC = () => {
                         <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
                           <DynamicIcon
                             IconComponent={appIconMap[item.iconName as keyof typeof appIconMap]}
-                            theme="filled"
+                            theme="outline"
                             size="32"
                             fill="#F2F3F5"
                           />
@@ -412,7 +412,6 @@ const MyAppPage: React.FC = () => {
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.infoHeader}>
                             <div className={styles.myAppTitle}>{item.appName}</div>
-                            {/* TODO */}
                             <Tag
                               color={TagColor[item.appStatus]}
                               style={{

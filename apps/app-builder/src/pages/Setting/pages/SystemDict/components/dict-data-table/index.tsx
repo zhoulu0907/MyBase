@@ -1,6 +1,6 @@
-import StatusTag, { getStatusLabel } from '@/components/StatusTag';
-import { Input, Pagination, Popconfirm, Table } from '@arco-design/web-react';
-import { type DictData, StatusEnum } from '@onebase/platform-center';
+import StatusTag from '@/components/StatusTag';
+import { Input, Pagination, Table } from '@arco-design/web-react';
+import { type DictData } from '@onebase/platform-center';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import s from '../../index.module.less';
@@ -15,9 +15,6 @@ interface DictionaryTableProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   onBatchConfig: () => void;
-  onEdit: (item: DictData) => void;
-  onDelete: (id: number) => void;
-  onUpdateStatus: (id: number, status: number) => void;
 }
 
 export default function DictionaryTable({
@@ -29,27 +26,13 @@ export default function DictionaryTable({
   onPageSizeChange,
   searchValue,
   onSearchChange,
-  onBatchConfig,
-  onEdit,
-  onDelete,
-  onUpdateStatus
+  onBatchConfig
 }: DictionaryTableProps) {
-  const getNextStatus = (status: number) => {
-    return status === StatusEnum.ENABLE ? StatusEnum.DISABLE : StatusEnum.ENABLE;
-  };
-  const handleStatusUpdate = (record: DictData) => {
-    onUpdateStatus(record.id, getNextStatus(record.status));
-  };
-
-  const getNextStatusLabel = (status: StatusEnum) => {
-    const nextStatus = getNextStatus(status);
-    return getStatusLabel(nextStatus);
-  };
   const columns = [
     {
       title: '颜色标识',
       dataIndex: 'colorType',
-      width: 100,
+      width: 120,
       render: (val: string) => <div style={{ width: 16, height: 16, borderRadius: 50, backgroundColor: val }} />
     },
     { title: '字典值', dataIndex: 'label' },
@@ -59,31 +42,6 @@ export default function DictionaryTable({
       title: '状态',
       dataIndex: 'status',
       render: (val: number) => <StatusTag status={val} />
-    },
-    {
-      title: '操作',
-      dataIndex: 'id',
-      render: (_: any, record: DictData) => (
-        <>
-          <Button permission={ACTIONS.UPDATE} type="text" style={{ marginRight: 8 }} onClick={() => onEdit(record)}>
-            编辑
-          </Button>
-          <Button permission={ACTIONS.DELETE} type="text" onClick={() => onDelete(record.id!)}>
-            删除
-          </Button>
-          <Popconfirm
-            focusLock
-            title={`确定要${getNextStatusLabel(record.status)}这条数据吗？`}
-            onOk={() => {
-              handleStatusUpdate(record);
-            }}
-          >
-            <Button permission={ACTIONS.STATUS} type="text">
-              {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
-            </Button>
-          </Popconfirm>
-        </>
-      )
     }
   ];
 

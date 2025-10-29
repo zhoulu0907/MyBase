@@ -7,6 +7,7 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission } from '@/utils/permission';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
+import StatusTag from '@/components/StatusTag';
 
 interface DictionaryListProps {
   list: DictItem[];
@@ -55,6 +56,7 @@ export default function DictionaryListProps({
             title={item.name}
             active={item.id === activeId}
             onClick={() => onSelect(item.id)}
+            children={<StatusTag status={item.status} type="tag" />}
           ></ListItem>
         ))}
       </PlaceholderPanel>

@@ -133,7 +133,7 @@ const FlowExecuteRecordPage: React.FC = () => {
       },
       {
         name: '执行失败',
-        frequency: statisticRes?.faied || 0,
+        frequency: statisticRes?.failed || 0,
         type: Number(statisticRes?.compareFailed || '0.00') >= 0 ? 'rise' : 'decline',
         value: compareFailed,
         describe: '较昨日'
