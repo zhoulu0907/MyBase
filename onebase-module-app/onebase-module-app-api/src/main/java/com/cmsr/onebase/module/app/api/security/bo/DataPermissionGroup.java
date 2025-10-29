@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.runtime.dto;
+package com.cmsr.onebase.module.app.api.security.bo;
 
 import lombok.Data;
 
@@ -9,7 +9,7 @@ import java.util.List;
  * @Date：2025/10/18 14:54
  */
 @Data
-public class DataPermissionItem {
+public class DataPermissionGroup {
 
     private List<DataPermissionTag> scopTags;
 
