@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.enums.dict.DictOwnerTypeEnum;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeListReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
@@ -62,10 +63,14 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
         // 字典所有者类型过滤条件
         if (reqVO.getDictOwnerType() != null && !reqVO.getDictOwnerType().trim().isEmpty()) {
             configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_TYPE, reqVO.getDictOwnerType());
-        }
-
-        // 字典所有者ID过滤条件
-        if (reqVO.getDictOwnerId() != null) {
+            
+            // 仅当字典所有者类型为 app 时才过滤字典所有者ID
+            // 租户类型字典是公共字典，不限制 dictOwnerId
+            if (DictOwnerTypeEnum.isApp(reqVO.getDictOwnerType()) && reqVO.getDictOwnerId() != null) {
+                configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
+            }
+        } else if (reqVO.getDictOwnerId() != null) {
+            // 如果未指定字典所有者类型，但指定了字典所有者ID，则过滤字典所有者ID
             configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
         }
 
@@ -141,10 +146,14 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
         // 字典所有者类型过滤条件
         if (reqVO.getDictOwnerType() != null && !reqVO.getDictOwnerType().trim().isEmpty()) {
             configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_TYPE, reqVO.getDictOwnerType());
-        }
-
-        // 字典所有者ID过滤条件
-        if (reqVO.getDictOwnerId() != null) {
+            
+            // 仅当字典所有者类型为 app 时才过滤字典所有者ID
+            // 租户类型字典是公共字典，不限制 dictOwnerId
+            if (DictOwnerTypeEnum.isApp(reqVO.getDictOwnerType()) && reqVO.getDictOwnerId() != null) {
+                configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
+            }
+        } else if (reqVO.getDictOwnerId() != null) {
+            // 如果未指定字典所有者类型，但指定了字典所有者ID，则过滤字典所有者ID
             configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
         }
 
