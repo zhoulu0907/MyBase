@@ -1,7 +1,9 @@
 package com.cmsr.onebase.framework.security.runtime;
 
-import com.cmsr.onebase.framework.security.runtime.dto.*;
 import com.cmsr.onebase.framework.security.runtime.service.RTPermissionService;
+import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
+import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
+import com.cmsr.onebase.module.app.api.security.bo.MenuPermission;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -29,21 +31,7 @@ public class RTSecurityContext {
         return RTPermissionService.instance.checkMenuEntity(applicationId, menuId, entityId);
     }
 
-    public static AccessibleMenus getAccessibleMenus() {
-        RTLoginUser loginUser = getLoginUser();
-        Long userId = loginUser.getUserId();
-        Long applicationId = loginUser.getApplicationId();
-        return RTPermissionService.instance.getAccessibleMenus(userId, applicationId);
-    }
-
-    public static AccessibleViews getAccessibleViews(Long menuId) {
-        RTLoginUser loginUser = getLoginUser();
-        Long userId = loginUser.getUserId();
-        Long applicationId = loginUser.getApplicationId();
-        return RTPermissionService.instance.getAccessibleViews(userId, applicationId, menuId);
-    }
-
-    public static MenuOperation getMenuOperation(Long menuId) {
+    public static MenuPermission getMenuOperation(Long menuId) {
         RTLoginUser loginUser = getLoginUser();
         Long userId = loginUser.getUserId();
         Long applicationId = loginUser.getApplicationId();

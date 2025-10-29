@@ -59,7 +59,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getUpdateType())) {
             reqDTO.setEntityId(nodeData.getSubEntityId());
         } else {
-            throw new IllegalStateException("updateType 类型错误: " + nodeData.getUpdateType());
+            throw new IllegalArgumentException("updateType 类型错误: " + nodeData.getUpdateType());
         }
         //
         List<Conditions> conditions = nodeData.getFilterCondition();

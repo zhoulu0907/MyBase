@@ -15,12 +15,22 @@ import java.util.List;
 @Data
 public class DataQueryMultipleNodeData extends NodeData implements Serializable {
 
+    /**
+     * mainEntity
+     * subEntity
+     */
+    private String dataType;
+
     private Long mainEntityId;
 
     private Long subEntityId;
 
     private Integer maxCount;
 
+    /**
+     * all
+     * condition
+     */
     private String filterType;
 
     private List<Conditions> filterCondition;

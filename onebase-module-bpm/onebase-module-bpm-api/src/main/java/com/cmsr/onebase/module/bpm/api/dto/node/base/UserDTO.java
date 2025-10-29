@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.api.dto.node.base;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
@@ -14,10 +15,12 @@ public class UserDTO {
     /**
      * 用户ID
      */
+    @NotBlank(message = "用户ID不能为空")
     private Long userId;
 
     /**
      * 用户姓名
      */
+    @NotBlank(message = "用户姓名不能为空")
     private String name;
 }
