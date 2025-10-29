@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Collapse, Empty, Input, Modal, Spin, Tabs, Tag, Typography, Space } from '@arco-design/web-react';
+import { Button, Collapse, Empty, Input, Modal, Spin, Tabs, Typography, Space } from '@arco-design/web-react';
 import type { DictData, DictItem } from '@onebase/platform-center';
 import { getAllDictList, getDictDataListByType } from '@onebase/platform-center';
 import styles from './index.module.less';
@@ -8,27 +8,33 @@ import { useAppStore } from '@/store/store_app';
 
 export interface SelectDictModalProps {
   visible: boolean;
-  onOk: (dictTypeId: number | undefined, dict?: DictItem) => void;
+  onOk: (dictTypeId: string | number, dict?: DictItem) => void;
   onCancel: () => void;
 }
 
 // 预览展示的最大数量
 const PREVIEW_MAX = 5;
 
+const DICT_OWNER_TYPE = {
+  APP: 'app',
+  TENANT: 'tenant'
+};
+
 export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictModalProps) {
-  const [activeTab, setActiveTab] = useState<'app' | 'tenant'>('app');
+  const [activeTab, setActiveTab] = useState<string>(DICT_OWNER_TYPE.APP);
   const [loadingList, setLoadingList] = useState(false);
+  const [showMoreMap, setShowMoreMap] = useState<Record<string, boolean>>({});
   const [dictList, setDictList] = useState<DictItem[]>([]);
-  const [expandedKeys, setExpandedKeys] = useState<number[]>([]);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [previewMap, setPreviewMap] = useState<Record<string, { loading: boolean; data: DictData[] }>>({});
-  const [selectedId, setSelectedId] = useState<number | undefined>();
+  const [selectedId, setSelectedId] = useState<string | number>('');
   const [search, setSearch] = useState('');
 
   const navigate = useNavigate();
   const { curAppId } = useAppStore();
 
   // 加载字典列表
-  const loadList = async (ownerType: 'app' | 'tenant') => {
+  const loadList = async (ownerType: string) => {
     setLoadingList(true);
     try {
       const list = await getAllDictList({ dictOwnerType: ownerType });
@@ -41,18 +47,17 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
   useEffect(() => {
     if (!visible) return;
     // 打开或切换tab时重置并加载
-    setSelectedId(undefined);
+    setSelectedId('');
     setExpandedKeys([]);
     setPreviewMap({});
+    setShowMoreMap({});
     loadList(activeTab);
   }, [visible, activeTab]);
 
   // 展开时按需加载预览
   const handleExpand = (key: string, keys: string[]) => {
-    const numberKeys = keys.map((k) => Number(k));
-    setExpandedKeys(numberKeys);
-    const newlyOpened = Number(key);
-    const dict = dictList.find((d) => d.id === newlyOpened);
+    setExpandedKeys(keys);
+    const dict = dictList.find((d) => d.id === key);
     if (!dict) return;
     const cacheKey = dict.type;
     if (previewMap[cacheKey]?.data) return; // 已加载
@@ -65,6 +70,13 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
       .catch(() => {
         setPreviewMap((prev) => ({ ...prev, [cacheKey]: { loading: false, data: [] } }));
       });
+  };
+
+  const handleMore = (dictType: string) => {
+    setShowMoreMap((prev) => ({
+      ...prev,
+      [dictType]: !prev[dictType]
+    }));
   };
 
   const filteredList = useMemo(() => {
@@ -111,9 +123,9 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
       className={styles.selectDictModal}
       unmountOnExit
     >
-      <Tabs activeTab={activeTab} onChange={(k) => setActiveTab(k as 'app' | 'tenant')} type="line">
-        <Tabs.TabPane key="app" title="自定义字典" />
-        <Tabs.TabPane key="tenant" title="公共字典" />
+      <Tabs activeTab={activeTab} onChange={(k) => setActiveTab(k as string)} type="line">
+        <Tabs.TabPane key={DICT_OWNER_TYPE.APP} title="自定义字典" />
+        <Tabs.TabPane key={DICT_OWNER_TYPE.TENANT} title="公共字典" />
       </Tabs>
 
       <div className={styles.toolbar}>
@@ -128,11 +140,12 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
         ) : filteredList.length === 0 ? (
           <Empty description="暂无字典" />
         ) : (
-          <Collapse activeKey={expandedKeys.map(String)} onChange={handleExpand} accordion expandIconPosition="left">
+          <Collapse activeKey={expandedKeys} onChange={handleExpand} accordion expandIconPosition="left">
             {filteredList.map((item) => {
               const cache = previewMap[item.type];
               const preview = cache?.data?.slice(0, PREVIEW_MAX) || [];
-              const hasMore = (cache?.data?.length || 0) > PREVIEW_MAX;
+              const remainData = cache?.data?.slice(PREVIEW_MAX) || [];
+              const hasMore = remainData.length > 0;
               return (
                 <Collapse.Item
                   key={String(item.id)}
@@ -151,19 +164,30 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
                     ) : preview.length === 0 ? (
                       <Typography.Text type="secondary">暂无字典值</Typography.Text>
                     ) : (
-                      <div>
-                        {preview.map((d: DictData) => (
-                          <div key={d.id || `${d.label}-${d.value}`} className={styles.previewItem}>
-                            <span className={`${styles.dot} ${styles[`dot-${(d.status ?? 1) as 1 | 0}`]}`} />
-                            <span className={styles.label}>{d.label}</span>
-                            <Tag size="small" color="arcoblue" bordered>
-                              {d.value}
-                            </Tag>
+                      <>
+                        <div>
+                          {preview.map((d: DictData) => (
+                            <div key={d.id} className={styles.previewItem}>
+                              <span className={styles.dot} style={{ backgroundColor: d.colorType }} />
+                              <span className={styles.label}>{d.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className={`${styles.moreContent} ${showMoreMap[item.type] ? styles.expanded : ''}`}>
+                          {remainData.map((d: DictData) => (
+                            <div key={d.id} className={styles.previewItem}>
+                              <span className={styles.dot} style={{ backgroundColor: d.colorType }} />
+                              <span className={styles.label}>{d.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                        {hasMore && (
+                          <div className={styles.more} onClick={() => handleMore(item.type)}>
+                            {showMoreMap[item.type] ? '收起' : '更多'}
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      </>
                     )}
-                    {hasMore && <div className={styles.more}>更多</div>}
                   </div>
                 </Collapse.Item>
               );
