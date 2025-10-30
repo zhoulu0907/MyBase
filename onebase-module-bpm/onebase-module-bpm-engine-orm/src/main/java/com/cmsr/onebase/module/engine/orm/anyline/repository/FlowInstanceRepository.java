@@ -15,6 +15,8 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * WarmFlow 流程实例 Repository
  *
@@ -94,6 +96,17 @@ public class FlowInstanceRepository extends DataRepository<FlowInstance> {
         }
         return condition;
     }
-
+    /**
+     * 获取流程实例任务
+     * @param id
+     * @param appId
+     * @return
+     */
+    public FlowInstance getInstanceTask(Long id, String appId){
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.and(FlowInstance.ID, id);
+        configStore.and(Compare.EQUAL,"ext::json->>'appId'",appId);
+        return findOne(configStore);
+    }
 
 }

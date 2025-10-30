@@ -34,13 +34,6 @@ public class AppAuthDataGroupRepository extends DataRepository<AuthDataGroupDO> 
         return this.findAllByConfig(configs);
     }
 
-    public List<AuthDataGroupDO> findByApplicationIdAndRoleId(Long applicationId, Long roleId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.eq("role_id", roleId);
-        return this.findAllByConfig(configs);
-    }
-
     public List<AuthDataGroupDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.param("applicationId", applicationId);
