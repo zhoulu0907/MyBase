@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
 import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
@@ -121,6 +122,7 @@ public class DataMethodApiImpl implements DataMethodApi {
             methodCoreContext.setData(dataByName);
             methodCoreContext.setMethodCode(null);
             methodCoreContext.setClientTypeEnum(ClientTypeEnum.BUILD);
+            methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
 
             Map<String, Object> resultMap = metadataDataMethodCoreService.createData(

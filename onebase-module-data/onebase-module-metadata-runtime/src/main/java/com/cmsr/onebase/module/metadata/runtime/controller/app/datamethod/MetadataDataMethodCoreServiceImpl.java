@@ -100,7 +100,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         Map<String, Object> data = metadataDataMethodCoreContext.getData();
         String methodCode = metadataDataMethodCoreContext.getMethodCode();
 
-        Map<String, Object> result = metadataDataMethodCreate.executeProcess(MetadataDataMethodOpEnum.CREATE, entityId, data, methodCode);
+        Map<String, Object> result = metadataDataMethodCreate.executeProcess(metadataDataMethodCoreContext);
         return result;
     }
 

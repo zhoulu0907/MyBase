@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -86,7 +87,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         methodCoreContext.setData(dataByName);
         methodCoreContext.setMethodCode(reqVO.getMethodCode());
         methodCoreContext.setBusinessTraceId(reqVO.getBusinessTraceId());
-
+        methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
         // 调用core模块的基础服务
         Map<String, Object> resultData = coreDataMethodService.createData(
@@ -125,6 +126,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                     subMethodCoreContext.setEntityId(subEntityId);
                     subMethodCoreContext.setData(subDataByName);
                     subMethodCoreContext.setMethodCode(reqVO.getMethodCode());
+                    methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
                     // 调用core模块的基础服务
                     Map<String, Object> subResultData = coreDataMethodService.createData(
@@ -248,6 +250,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                     metadataDataMethodCoreContext.setEntityId(subEntityId);
                     metadataDataMethodCoreContext.setData(subDataByName);
                     metadataDataMethodCoreContext.setMethodCode(reqVO.getMethodCode());
+                    methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
                    coreDataMethodService.createData(
                            metadataDataMethodCoreContext

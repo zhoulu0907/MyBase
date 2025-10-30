@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationManager;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -66,6 +67,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     protected ValidationManager validationManager;
 
     // ========== 公共方法 ==========
+
+    @Override
+    public Map<String, Object> executeProcess(MetadataDataMethodCoreContext methodCoreContext) {
+
+        return executeProcess(methodCoreContext.getMetadataDataMethodOpEnum(), methodCoreContext.getEntityId(), null, methodCoreContext.getData(), methodCoreContext.getMethodCode());
+
+    }
 
     /**
      * 校验实体存在
@@ -350,10 +358,10 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     /**
      * 执行统一的数据处理流程（用于create操作）
      */
-    public Map<String, Object> executeProcess(MetadataDataMethodOpEnum operationType, Long entityId, Map<String, Object> data,
-                                               String methodCode) {
-        return executeProcess(operationType, entityId, null, data, methodCode);
-    }
+//    public Map<String, Object> executeProcess(MetadataDataMethodOpEnum operationType, Long entityId, Map<String, Object> data,
+//                                               String methodCode) {
+//        return executeProcess(operationType, entityId, null, data, methodCode);
+//    }
 
     /**
      * 执行统一的数据处理流程（用于update/delete/get操作）
