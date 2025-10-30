@@ -108,6 +108,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
                         shape="circle"
                         size="mini"
                         status="danger"
+                        disabled={radioConfig.length <= 2}
                         className={styles.tableColumnItemButton}
                         onClick={() => {
                           const newList = [...radioConfig];
@@ -125,7 +126,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
               <Button
                 type="outline"
                 onClick={() => {
-                  const newLabel = '新选项';
+                  const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
                   const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${radioKey}[0]`;
                   const newList = [
                     ...radioConfig,

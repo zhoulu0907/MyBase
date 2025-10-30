@@ -102,7 +102,9 @@ export default function EditorHeader() {
     clearComponents: clearFormComponents,
     clearPageComponentSchemas: clearFromPageComponentSchemas,
     layoutSubComponents: fromLayoutSubComponents,
-    clearLayoutSubComponents: clearFromLayoutSubComponents
+    clearLayoutSubComponents: clearFromLayoutSubComponents,
+    subTableComponents: fromSubTableComponents,
+    clearSubTableComponents: clearFromSubTableComponents,
   } = useFormEditorSignal;
 
   const {
@@ -261,7 +263,7 @@ export default function EditorHeader() {
       formComponents: formComponents.value,
       formPageComponentSchemas: cloneDeep(formPageComponentSchemas.value),
       fromColComponentsMap: cloneDeep(fromLayoutSubComponents.value),
-
+      fromSubTableComponentsMap: cloneDeep(fromSubTableComponents.value),
       listComponents: listComponents.value,
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
