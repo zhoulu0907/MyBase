@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { HashRouter } from 'react-router-dom';
 import { qiankunWindow, renderWithQiankun } from 'vite-plugin-qiankun/dist/helper';
 import App from './App.tsx';
 import './index.css';
@@ -21,7 +22,9 @@ async function mount(props: any) {
 
   root.render(
     <StrictMode>
-      <App props={props} />
+      <HashRouter>
+        <App props={props} />
+      </HashRouter>
     </StrictMode>
   );
 

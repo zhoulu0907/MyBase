@@ -11,5 +11,5 @@ export default defineConfig({
   loader: {
     '.css': 'copy',
     '.svg': 'dataurl'
-  },
+  }
 });

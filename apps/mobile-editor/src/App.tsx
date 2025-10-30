@@ -1,3 +1,6 @@
+import { Route, Routes } from 'react-router-dom';
+import { FormEditor } from './pages/FormEditor';
+
 interface AppProps {
   props: any;
   //   myName: string;
@@ -7,9 +10,9 @@ interface AppProps {
 const App: React.FC<AppProps> = ({ props }) => {
   return (
     <>
-      <div>
-        <h1>Hello World</h1>
-      </div>
+      <Routes>
+        <Route path="/onebase/editor/form_editor" element={<FormEditor />} />
+      </Routes>
     </>
   );
 };

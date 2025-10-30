@@ -1,0 +1,25 @@
+.fieldCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .fieldItem {
+    width: 110px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 400;
+    color: #1d2129;
+    cursor: grab;
+    transition: box-shadow 0.2s;
+    margin-bottom: 4px;
+    padding: 0 12px;
+    border-radius: 4px;
+    line-height: 30px;
+    .ellipsis {
+      width: 100%;
+    }
+  }
+}

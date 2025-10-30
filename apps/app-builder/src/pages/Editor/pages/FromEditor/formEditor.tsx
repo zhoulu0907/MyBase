@@ -1,13 +1,12 @@
 import { loadMicroApp, type MicroApp } from 'qiankun';
 import React, { useEffect, useRef } from 'react';
 import EditorConfig from '../../components/config';
-import EditorPanel from '../../components/panel/Panel';
-import EditorWorkspace from '../../components/workspace/Workspace';
-
+// import EditorPanel from '../../components/panel/Panel';
 import globalState from '@/store/microService/state';
 import { EditMode } from '@onebase/common';
-import { currentEditorSignal } from '@onebase/ui-kit';
+import { currentEditorSignal, EditorPanel } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
+import EditorWorkspace from '../../components/workspace/Workspace';
 import styles from './index.module.less';
 
 const FormEditor: React.FC = () => {
@@ -53,22 +52,32 @@ const FormEditor: React.FC = () => {
   }, [editMode.value]);
 
   return (
-    <div className={styles.formEditorPage}>
-      {editMode.value === EditMode.PC && (
-        <>
+    <>
+      <div className={styles.formEditorPage}>
+        <div
+          className={styles.leftContainer}
+          style={{
+            display: editMode.value == EditMode.PC ? 'flex' : 'none'
+          }}
+        >
           <EditorPanel />
           <EditorWorkspace />
-        </>
-      )}
-      {editMode.value === EditMode.MOBILE && (
-        <>
+        </div>
+
+        <div
+          className={styles.leftContainer}
+          style={{
+            display: editMode.value == EditMode.MOBILE ? 'flex' : 'none'
+          }}
+        >
           <div id="mobile-editor"></div>
-        </>
-      )}
-      {/* <EditorPanel />
-      <EditorWorkspace /> */}
-      <EditorConfig />
-    </div>
+        </div>
+
+        <div className={styles.rightContainer}>
+          <EditorConfig />
+        </div>
+      </div>
+    </>
   );
 };
 
