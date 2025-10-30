@@ -114,6 +114,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                         shape="circle"
                         size="mini"
                         status="danger"
+                        disabled={configs[checkboxKey].length <= 2}
                         className={styles.tableColumnItemButton}
                         onClick={() => {
                           const newList = [...checkboxConfig];
@@ -131,7 +132,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
               <Button
                 type="outline"
                 onClick={() => {
-                  const newLabel = '新选项';
+                  const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
                   const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${checkboxKey}[0]`;
                   const newList = [
                     ...checkboxConfig,
