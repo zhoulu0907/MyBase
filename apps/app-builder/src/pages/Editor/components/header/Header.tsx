@@ -377,7 +377,6 @@ export default function EditorHeader() {
           onChange={(key) => {
             setActiveTab(key);
             clearCurComponentID();
-            console.log(key, EDITOR_TYPES.FORM_EDITOR, '-----------');
             switch (key) {
               case EDITOR_TYPES.FORM_EDITOR:
                 navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
