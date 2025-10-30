@@ -29,7 +29,7 @@ public class FlowTaskRepository extends DataRepository<FlowTask> {
     }
     public PageResult<FlowTaskExt> getTodoTaskPage(BpmFlowTodoTaskPageReqVO reqVO, List<String> permissionList) {
         // 构建基础SQL
-        String baseSql = buildBaseSql();
+        String baseSql = buildBaseSqlV2();
 
         // 构建动态条件
         ConfigStore condition = buildDynamicCondition(reqVO,permissionList);
@@ -49,12 +49,31 @@ public class FlowTaskRepository extends DataRepository<FlowTask> {
                      t.flow_status,
                      t2.ext ,
                      t.create_time
-                     from   bpm_flow_task t
+                     from  bpm_flow_task t
                      left join bpm_flow_user t1 on t.id = t1.associated
                      left join bpm_flow_instance t2 on t.instance_id  = t2.id
                      where t.node_type = 1 and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0
                 """;
     }
+
+    private String buildBaseSqlV2() {
+        return """
+                  select 
+                    distinct
+                     t3.*,
+                     t.id,
+                     t.instance_id,
+                     t.flow_status,
+                     t2.ext ,
+                     t.create_time
+                     from  bpm_flow_task t
+                     left join bpm_flow_user t1 on t.id = t1.associated
+                     left join bpm_flow_instance t2 on t.instance_id = t2.id
+                     left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.id
+                     where t.node_type = 1 and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0
+                """;
+    }
+
     private ConfigStore buildDynamicCondition(BpmFlowTodoTaskPageReqVO reqVO,List<String> permissionList) {
         DefaultConfigStore condition = new DefaultConfigStore();
         // 设置分页参数
@@ -62,30 +81,34 @@ public class FlowTaskRepository extends DataRepository<FlowTask> {
         navi.setCurPage(reqVO.getPageNo());
         navi.setPageRows(reqVO.getPageSize());
         condition.setPageNavi(navi);
-        condition.and(Compare.EQUAL, "t2.ext::json->>'appId'", reqVO.getAppId());//设置appId
+        condition.and(Compare.EQUAL, "t3.app_id'", reqVO.getAppId());
+
        // 动态添加其他查询条件
         if (reqVO.getProcessTitle() != null && !reqVO.getProcessTitle().isEmpty()) {
-            condition.and(Compare.LIKE, "t2.ext::json->'processInfo'->>'processTitle'", reqVO.getProcessTitle());
+            condition.and(Compare.LIKE, "t3.business_title", reqVO.getProcessTitle());
         }
         if (reqVO.getInitiator() != null && !reqVO.getInitiator().isEmpty()) {
-            condition.and(Compare.LIKE, "t2.ext::json->'processInfo'->>'initiator'", reqVO.getInitiator());
+            condition.and(Compare.LIKE, "t3.initiator_name'", reqVO.getInitiator());
         }
         if (reqVO.getFormSummary() != null && !reqVO.getFormSummary().isEmpty()) {
-            condition.and(Compare.LIKE, "t2.ext::json->'processInfo'->>'formSummary'", reqVO.getFormSummary());
-        }
-        if (reqVO.getSubmitTime() != null && reqVO.getSubmitTime().length == 2) {
-            condition.and(Compare.BETWEEN, "(t2.ext::json->'processInfo'->>'submitTime')::timestamp",reqVO.getSubmitTime()[0], reqVO.getSubmitTime()[1]);
+            condition.and(Compare.LIKE, "t3.form_summary'", reqVO.getFormSummary());
         }
 
-        if(permissionList!= null && !permissionList.isEmpty()){
+        if (reqVO.getSubmitTime() != null && reqVO.getSubmitTime().length == 2) {
+            condition.and(Compare.BETWEEN, "t3.submit_time", reqVO.getSubmitTime()[0], reqVO.getSubmitTime()[1]);
+        }
+
+        if( permissionList!= null && !permissionList.isEmpty()){
             condition.and(Compare.IN, "t1.processed_by", permissionList);
         }
+
         // 设置排序
         if("asc".equals(reqVO.getSortType())){
             condition.order("t.create_time asc");
-        }else{
+        } else{
             condition.order("t.create_time desc");
         }
+
         return condition;
     }
     public List<FlowTask>  getByInsId (Long instanceId){

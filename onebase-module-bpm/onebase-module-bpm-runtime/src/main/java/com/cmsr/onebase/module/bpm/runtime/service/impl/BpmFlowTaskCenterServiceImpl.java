@@ -3,8 +3,11 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsExtRepository;
+import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowInstanceExtVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
 import com.cmsr.onebase.module.engine.orm.anyline.dataobject.ext.FlowTaskExt;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
@@ -15,18 +18,15 @@ import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowInstanceReposit
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowTodoTaskPageReqVO;
-import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.entity.DataSet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.enums.UserType;
+import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
 import org.dromara.warm.flow.core.utils.StreamUtils;
 import org.springframework.beans.BeanUtils;
@@ -34,9 +34,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -55,6 +53,15 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource
     private UserService flowUserservice;
 
+    @Resource
+    private TaskService taskService;
+
+    @Resource
+    private UserService userService;
+
+    @Resource
+    private BpmFlowInsExtRepository insExtRepository;
+
     /**
      * 获取流程待办分页
      *
@@ -66,7 +73,27 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         //        SysUser sysUser = SecurityUtils.getLoginUser().getUser();  todo 获取当前登录人运行态的权限待开发
 //        List<String> permissionList = permissionList(String.valueOf(sysUser.getUserId()), sysUser.getDeptId(), sysUser);
 //        reqVO.setPermissionList(permissionList);
+
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+
+        // 当前用户所有流程用户信息
+        List<User> flowUsers = userService.listByProcessedBys(null, String.valueOf(loginUserId));
+        Set<Long> taskIds = new HashSet<>();
+
+        // 获取所有任务ID列表
+        for (User flowUser : flowUsers) {
+            if (flowUser.getAssociated() != null) {
+                taskIds.add(flowUser.getAssociated());
+            }
+        }
+
+        // 构建分页查询条件
+//        flowTaskRepository.findPageWithConditions(, );
+//        taskService.page(taskIds, pageReqVO).
+//        pageReqVO.setTaskIds(taskIds);
+
         List<String> permissionList = new ArrayList<>();
+        permissionList.add(String.valueOf(loginUserId));
         PageResult<FlowTaskExt> pageResult = flowTaskRepository.getTodoTaskPage(pageReqVO, permissionList);
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
