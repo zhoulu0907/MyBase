@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
@@ -20,6 +22,8 @@ import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
+import com.cmsr.onebase.module.system.api.dept.DeptApi;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -80,6 +85,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private BpmFlowInsExtRepository flowInsExtRepository;
+
+    @Resource
+    private DeptApi deptApi;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -211,6 +219,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         BpmSubmitRespVO respVO = new BpmSubmitRespVO();
         String entityDataId = null;
 
+        Definition def = defExtService.getByFormPathAndStatus(reqVO.getBusinessId(), PublishStatus.PUBLISHED.getKey());
+        if (def == null) {
+            throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
+        }
+
         // 业务状态
         BpmBusinessStatusEnum businessStatus = BpmBusinessStatusEnum.IN_APPROVAL;
 
@@ -237,11 +250,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         if (StringUtils.isBlank(entityDataId)) {
             throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_ID_NOT_EXISTS);
-        }
-
-        Definition def = defExtService.getByFormPathAndStatus(reqVO.getBusinessId(), PublishStatus.PUBLISHED.getKey());
-        if (def == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
         }
 
         BpmFlowInsBizExtDO flowInsExtDO = new BpmFlowInsBizExtDO();
@@ -298,16 +306,38 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             flowInsExtDO.setSubmitTime(LocalDateTime.now());
         }
 
-        // 保存扩展信息 todo：处理Mock的参数值
+
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String initiatorName = SecurityFrameworkUtils.getLoginUserNickname();
+        Long deptId = SecurityFrameworkUtils.getLoginUserDeptId();
+        String businessTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
+
+        // 任选3个字段，todo 从全局配置里选择，关联实体查询
+        String formSummary = reqVO.getEntity().getData().entrySet().stream()
+                .limit(3)
+                .map(Map.Entry::getValue)
+                .map(Object::toString)
+                .collect(Collectors.joining(" "));
+
+        if (StringUtils.isBlank(formSummary)) {
+            formSummary = reqVO.getFormName();
+        }
+
+        CommonResult<DeptRespDTO> deptRespDTO = deptApi.getDept(deptId);
+        if (!deptRespDTO.isSuccess()) {
+            throw exception(ErrorCodeConstants.DEPT_API_CALL_FAILED);
+        }
+
+        // 保存扩展信息
         flowInsExtDO.setBusinessId(entityDataId);
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
-        flowInsExtDO.setBusinessTitle("流程标题");
-        flowInsExtDO.setInitiatorId(1L);
-        flowInsExtDO.setInitiatorName("发起人");
-        flowInsExtDO.setInitiatorDeptId(1L);
-        flowInsExtDO.setInitiatorDeptName("发起人部门");
+        flowInsExtDO.setBusinessTitle(businessTitle);
+        flowInsExtDO.setInitiatorId(loginUserId);
+        flowInsExtDO.setInitiatorName(initiatorName);
+        flowInsExtDO.setInitiatorDeptId(deptId);
+        flowInsExtDO.setInitiatorDeptName(deptRespDTO.getData().getName());
         flowInsExtDO.setFormName(reqVO.getFormName());
-        flowInsExtDO.setFormSummary("摘要");
+        flowInsExtDO.setFormSummary(formSummary);
         flowInsExtDO.setInstanceId(instance.getId());
         flowInsExtDO.setAppId(extDto.getAppId());
 
