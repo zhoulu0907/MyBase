@@ -452,14 +452,32 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                     .skipType(SkipType.PASS.getKey())
                     .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
                     .hisStatus("已" + buttonEnum.getName());
+
+            taskService.skip(skipParams, task);
         } else if (buttonEnum == BpmActionButtonEnum.REJECT) {
+            String nodeCode = task.getNodeCode();
+            boolean hasRejectNode = false;
+
+
+            List<Skip> skipList = FlowEngine.skipService().getByDefIdAndNowNodeCode(task.getDefinitionId(), nodeCode);
+            for (Skip skip : skipList) {
+                if (skip.getSkipType().equals(SkipType.REJECT.getKey())) {
+                    hasRejectNode = true;
+                    break;
+                }
+            }
+
             skipParams = skipParams.message(comment)
                     .skipType(SkipType.REJECT.getKey())
                     .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
                     .hisStatus("已" + buttonEnum.getName());
-        }
 
-        taskService.skip(skipParams, task);
+            if (hasRejectNode) {
+                taskService.skip(skipParams, task);
+            } else {
+                taskService.rejectLast(task, skipParams);
+            }
+        }
 
         // todo：更新实体数据
     }
@@ -485,7 +503,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // todo： 按照时间排序，已办、待办按照时间排序
         Map<String, BaseNodeExtDTO> nodeDtoMap = new HashMap<>();
-        Map<String, BpmOperatorRecordRespVO.OperatorRecord> recordMap = new HashMap<>();
+        Map<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap = new HashMap<>();
 
         for (NodeJson nodeJson : defJson.getNodeList()) {
             BaseNodeExtDTO extDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
@@ -494,14 +512,14 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 进行组装
         for (HisTask hisTask : hisTasks) {
-            String nodeCode = hisTask.getNodeCode();
+            Long taskId = hisTask.getTaskId();
 
             // 跳过非中间节点
             if (!NodeType.isBetween(hisTask.getNodeType())) {
                 continue;
             }
 
-            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
+            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(taskId);
 
             if (record == null) {
                 BaseNodeExtDTO extDTO = nodeDtoMap.get(hisTask.getNodeCode());
@@ -514,7 +532,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 }
 
                 operatorRecords.add(record);
-                recordMap.put(nodeCode, record);
+                recordMap.put(taskId, record);
             }
 
             if (record.getOperators() == null) {
@@ -534,8 +552,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 处理待办数据
         for (Task task : tasks) {
-            String nodeCode = task.getNodeCode();
-            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
+            Long taskId = task.getId();
+            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(taskId);
             BaseNodeExtDTO extDTO = nodeDtoMap.get(task.getNodeCode());
             String nodeType = extDTO.getNodeType();
 
@@ -549,7 +567,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 }
 
                 operatorRecords.add(record);
-                recordMap.put(nodeCode, record);
+                recordMap.put(taskId, record);
             }
 
             // 查找有权限的用户
