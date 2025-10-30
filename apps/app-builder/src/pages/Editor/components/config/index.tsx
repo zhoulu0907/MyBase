@@ -9,6 +9,7 @@ interface EditorConfigProps {}
 
 export default function EditorConfig({}: EditorConfigProps) {
   useSignals();
+
   const { curComponentID } = usePageEditorSignal();
 
   const [isFormEditor, setIsFormEditor] = useState(false);

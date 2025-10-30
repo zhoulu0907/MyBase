@@ -1,6 +1,6 @@
 import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@onebase/ui-kit';
 import { Drawer } from '@arco-design/web-react';
+import { FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect } from 'react';
 
 const DetailDrawer: React.FC<{
@@ -34,7 +34,7 @@ const DetailDrawer: React.FC<{
             <h4>字段列表:</h4>
             {selectedNode?.fields?.length &&
               selectedNode.fields.map((field, index) => (
-                <div key={index} className="field-item">
+                <div key={`field-${index}`} className="field-item">
                   <span className="field-name">{field.fieldName}</span>
                   <span className="field-type">{field.fieldType}</span>
                   {field.isSystemField === FIELD_TYPE.SYSTEM && <span className="system-tag">系统</span>}

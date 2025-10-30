@@ -21,8 +21,7 @@ import ConditionEditor from '../../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { clearDataOriginNodeId, validateNodeForm } from '../../utils';
-import { updateDataDeleteOutputs } from './output';
+import { validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -67,23 +66,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      mainEntityId: undefined,
-      subEntityId: undefined,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
 
     setMainEntityList([]);
     setSubEntityList([]);
     setValidationTypes([]);
 
     getEntityList(curDataType);
-
-    clearDataOriginNodeId(node.id);
   };
 
   const init = async () => {
@@ -169,18 +157,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'filterCondition']);
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subEntityId: undefined,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
+
     setSubEntityList([]);
     setValidationTypes([]);
-
-    clearDataOriginNodeId(node.id);
 
     const fieldIds: string[] = [];
 
@@ -239,25 +218,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleSubEntityIdChange = (_curSubEntityId: string) => {
     payloadForm.clearFields(['filterCondition']);
-
-    clearDataOriginNodeId(node.id);
-
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      dataNodeId: undefined,
-      sortBy: [],
-      filterCondition: []
-    });
   };
 
   const handleFilterTypeChange = (_value: FILTER_TYPE) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      filterCondition: []
-    });
-
     payloadForm.clearFields(['filterCondition']);
   };
 
@@ -276,54 +239,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     return [];
   }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId]);
 
-  const conditionFieldsForEditor = useMemo((): ConditionField[] => {
-    if (dataType === DATA_SOURCE_TYPE.FORM) {
-      return (
-        (mainEntityFields.children || [])?.map((item) => ({
-          label: item.title as string,
-          value: item.key as string,
-          fieldType: item.fieldType
-        })) || []
-      );
-    }
-    if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
-      const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
-      if (curSubEntityFields) {
-        return (
-          (curSubEntityFields.children || [])?.map((item) => ({
-            label: item.title as string,
-            value: item.key as string,
-            fieldType: item.fieldType
-          })) || []
-        );
-      }
-
-      return [];
-    }
-
-    return [];
-  }, [dataType, mainEntityFields, subEntityFields, mainEntityId, subEntityId]);
-
-  // 使用 useEffect 更新条件字段状态和输出，避免在渲染过程中直接更新状态
-  useEffect(() => {
-    // 只在有实际数据时才更新 triggerNodeOutputSignal，避免初始化时载入空数据
-    if (conditionFieldsForEditor.length > 0) {
-      updateDataDeleteOutputs(node.id);
-    }
-  }, [conditionFieldsForEditor, node.id]);
-
-  // 表单内容改变
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (_changeValue: any, values: any) => {
-    // 校验表单
-    // validateNodeForm(form, payloadForm, false);
-
-    // handlePropsOnChange(values);
-  };
-
   const getInitData = () => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
   };
@@ -333,13 +248,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form
-            form={payloadForm}
-            layout="vertical"
-            onValuesChange={onValuesChange}
-            initialValues={getInitData()}
-            requiredSymbol={{ position: 'end' }}
-          >
+          <Form form={payloadForm} layout="vertical" initialValues={getInitData()} requiredSymbol={{ position: 'end' }}>
             <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>

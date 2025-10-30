@@ -4,15 +4,18 @@ import {
   getFuncPermission,
   updatePagePermission,
   updateOperationPermission,
+  updateViewPermission,
   FunPermissionViewVisit,
   FunOperationPermission,
   FunViewPermission,
+  FunViewCustomPermission,
   type AuthOperationVO,
   type GetPermissionReq,
   type FuncPermissionResponse,
   type UpdatePagePermissionReq,
   type UpdateOperationPermissionReq,
-  type AuthViewVO
+  type AuthViewVO,
+  type UpdateViewPermissionReq
 } from '@onebase/app';
 import styles from './index.module.less';
 import { IconEmpty } from '@arco-design/web-react/icon';
@@ -26,6 +29,16 @@ interface IProps {
   roleId: string;
 }
 
+// 操作权限 Array
+const PERMISSION_DICT = [
+  { value: 'create', label: '新增' },
+  { value: 'edit', label: '编辑' },
+  { value: 'delete', label: '删除' },
+  { value: 'import', label: '导入' },
+  { value: 'export', label: '导出' },
+  { value: 'share', label: '分享' }
+];
+
 // 功能权限
 const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const [form] = Form.useForm();
@@ -34,9 +47,11 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   const [operationOptions, setOperationOptions] = useState<any[]>();
   const [funcPermission, setFuncPermission] = useState<FuncPermissionResponse>(); // 功能权限
+
+  // 视图权限
   const [viewPermissionOptions, setViewPermissionOptions] = useState<any[]>();
-  const [isCustomAllViewsAllowed, setIsCustomAllViewsAllowed] = useState<boolean>(true);
-  // 自定义权限是否全选
+  const [isCustomAllViewsAllowed, setIsCustomAllViewsAllowed] = useState<boolean>(false); // 默认所有视图权限
+  const [viewPermIndeterminate, setViewPermIndeterminate] = useState<boolean>(false);
 
   useEffect(() => {
     if (appId && menuId && roleId) {
@@ -46,32 +61,38 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   useEffect(() => {
     if (funcPermission) {
-      // 组装 options 操作权限
-      const operationOptions = funcPermission.authOperations.map((item: AuthOperationVO) => ({
-        label: item.displayName,
-        value: item.operationCode
-      }));
-      const viewOptions = funcPermission.authViewVO.authViews?.map((item: AuthViewVO) => ({
-        label: item.viewDisplayName,
-        value: item.viewId,
-        isAllowed: item.isAllowed
-      }));
-      setOperationOptions(operationOptions); // 存在 state 里
-      setViewPermissionOptions(viewOptions);
+      const authViews = funcPermission.authViewVO.authViews ?? [];
+      const viewOptions: Array<any> = [];
+      const viewDefaultChecked: Array<number | undefined> = [];
+      authViews.forEach((view) => {
+        viewOptions.push({
+          label: view.viewDisplayName,
+          value: view.viewId,
+          isAllowed: view.isAllowed
+        });
 
-      // 设置默认值
-      const defaultChecked = funcPermission.authOperations
-        .filter((item: AuthOperationVO) => item.isAllowed === FunOperationPermission.canOperateAllowed)
-        .map((item: AuthOperationVO) => item.operationCode);
-      const viewDefaultChecked = funcPermission.authViewVO.authViews
-        ?.filter((item: AuthViewVO) => item.isAllowed === FunPermissionViewVisit.canVisit)
-        .map((item: AuthViewVO) => item.viewId);
+        if (view.isAllowed === FunPermissionViewVisit.canVisit) {
+          viewDefaultChecked.push(view.viewId);
+        }
+      });
+      setViewPermIndeterminate(!!(viewDefaultChecked.length && viewDefaultChecked.length !== authViews.length));
+      setIsCustomAllViewsAllowed(viewDefaultChecked.length === authViews.length);
+      setViewPermissionOptions(viewOptions);
+      // const viewOptions = funcPermission.authViewVO.authViews?.map((item: AuthViewVO) => ({
+      //   label: item.viewDisplayName,
+      //   value: item.viewId,
+      //   isAllowed: item.isAllowed
+      // }));
+      // setViewPermissionOptions(viewOptions);
+      // const viewDefaultChecked = funcPermission.authViewVO.authViews
+      //   ?.filter((item: AuthViewVO) => item.isAllowed === FunPermissionViewVisit.canVisit)
+      //   .map((item: AuthViewVO) => item.viewId);
       form.setFieldsValue({
         isPageAllowed: funcPermission.isPageAllowed,
-        authOperations: defaultChecked,
+        authOperations: funcPermission.authOperationTags,
         isAllViewsAllowed: funcPermission.authViewVO.isAllViewsAllowed,
-        authViews: viewDefaultChecked
-        // authViewVO: funcPermission.authViewVO.authViews
+        authViews: viewDefaultChecked,
+        authViewVO: funcPermission.authViewVO.authViews
       });
     }
   }, [funcPermission]);
@@ -110,16 +131,8 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
 
   const changeOperationPermission = async (values: any) => {
-    const updateOperations = funcPermission?.authOperations
-      .map((op: AuthOperationVO) => {
-        const newIsAllowed = values.includes(op.operationCode)
-          ? FunOperationPermission.canOperateAllowed
-          : FunOperationPermission.notOperateAllowed;
-        return newIsAllowed !== op.isAllowed ? { ...op, isAllowed: newIsAllowed } : null;
-      })
-      .filter(Boolean);
     const params: UpdateOperationPermissionReq = {
-      authOperations: updateOperations,
+      operationTags: values,
       permissionReq: {
         applicationId: appId,
         menuId,
@@ -132,17 +145,19 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   const changeViewPermission = (value: any) => {
     if (value) {
-      form.setFieldValue('isAllViewsAllowed', value);
-      const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
-      form.setFieldValue('authViews', allViewIds);
+      form.setFieldValue('isAllViewsAllowed', FunViewPermission.AllViewVisitAllowed);
+      // const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
+      form.setFieldValue('authViews', []);
+      udateViewPermission();
     } else {
-      form.setFieldValue('isAllViewsAllowed', value);
+      form.setFieldValue('isAllViewsAllowed', FunViewPermission.ViewCustomFieldPermission);
     }
   };
 
   const changeAllViewPermission = (checked: any) => {
     // 实现全选/取消全选逻辑
     setIsCustomAllViewsAllowed(checked);
+    setViewPermIndeterminate(false);
     if (checked) {
       // 全选：选中所有视图权限
       const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
@@ -151,6 +166,39 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       // 取消全选：清空所有视图权限
       form.setFieldValue('authViews', []);
     }
+    udateViewPermission();
+  };
+
+  const handleViewPermissionChange = (values: any) => {
+    setIsCustomAllViewsAllowed(viewPermissionOptions?.length === values.length);
+    setViewPermIndeterminate(!!(values.length && viewPermissionOptions?.length !== values.length));
+    form.setFieldValue('authViews', values);
+    udateViewPermission();
+  };
+
+  const udateViewPermission = async () => {
+    const authViews = form.getFieldValue('authViews');
+    const isAllViewsAllowed = form.getFieldValue('isAllViewsAllowed');
+    const params: UpdateViewPermissionReq = {
+      permissionReq: {
+        applicationId: appId,
+        menuId,
+        roleId
+      },
+      isAllViewsAllowed: isAllViewsAllowed
+    };
+
+    if (!isAllViewsAllowed) {
+      const viewPermission = viewPermissionOptions?.map((item: any) => ({
+        viewDisplayName: item.label,
+        viewId: item.value,
+        isAllowed: authViews.includes(item.value)
+          ? FunViewCustomPermission.canViewAllowed
+          : FunViewCustomPermission.notViewAllowed
+      }));
+      params.authViews = viewPermission;
+    }
+    await updateViewPermission(params);
   };
 
   return (
@@ -182,16 +230,14 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             <div className={styles.itemHeader}>
               <div className={styles.left}>操作权限</div>
               <div className={styles.right}>
-                {funcPermission?.authOperations.every(
-                  (op: AuthOperationVO) => op.isAllowed === FunOperationPermission.canOperateAllowed
-                ) && '全部可操作'}
+                {PERMISSION_DICT.every((op) => funcPermission?.authOperationTags?.includes(op.value)) && '全部可操作'}
               </div>
             </div>
             <div className={styles.itemContent}>
               <Form.Item field="authOperations" noStyle>
                 <CheckboxGroup
                   disabled={!isPageAllowed}
-                  options={operationOptions}
+                  options={PERMISSION_DICT}
                   onChange={(values) => changeOperationPermission(values)}
                 />
               </Form.Item>
@@ -215,27 +261,27 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                   <Radio value={FunViewPermission.ViewCustomFieldPermission}>自定义权限</Radio>
                 </RadioGroup>
               </Form.Item>
-              {isAllViewsAllowed === FunViewPermission.ViewCustomFieldPermission &&
-                !!form.getFieldValue('authViews')?.length && (
-                  <div className={styles.checkboxGroup}>
-                    <Checkbox
-                      style={{ marginBottom: '5px' }}
-                      checked={isCustomAllViewsAllowed}
-                      onChange={(value) => changeAllViewPermission(value)}
-                    >
-                      <span>全选</span>
-                    </Checkbox>
-                    <Form.Item field="authViews" noStyle>
-                      <CheckboxGroup
-                        direction="vertical"
-                        options={viewPermissionOptions || []}
-                        onChange={(values) => {
-                          setIsCustomAllViewsAllowed(viewPermissionOptions?.length === values.length);
-                        }}
-                      />
-                    </Form.Item>
-                  </div>
-                )}
+              {isAllViewsAllowed === FunViewPermission.ViewCustomFieldPermission && (
+                <div className={styles.checkboxGroup}>
+                  <Checkbox
+                    style={{ marginBottom: '5px' }}
+                    checked={isCustomAllViewsAllowed}
+                    indeterminate={viewPermIndeterminate}
+                    onChange={(value) => changeAllViewPermission(value)}
+                  >
+                    <span>全选</span>
+                  </Checkbox>
+                  <Form.Item field="authViews" noStyle>
+                    <CheckboxGroup
+                      direction="vertical"
+                      options={viewPermissionOptions || []}
+                      onChange={(values) => {
+                        handleViewPermissionChange(values);
+                      }}
+                    />
+                  </Form.Item>
+                </div>
+              )}
             </div>
           </div>
         </Form>

@@ -72,6 +72,7 @@ export interface ITableDataConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABLE_DATA;
+  advanced?: boolean;
 }
 
 export interface IRadioDataConfigType {
@@ -97,6 +98,7 @@ export interface IBooleanConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SWITCH_INPUT;
+  advanced?: boolean;
 }
 
 /**
@@ -390,4 +392,31 @@ export interface ICollapsedConfigType<KeyType> {
     text: string;
     value: KeyType;
   }>;
+}
+
+export interface ITableOperationConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_OPERATION;
+  advanced?: boolean;
+}
+
+// 按钮权限配置
+export interface ITableButtonConfigType<KeyType> {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_BUTTON;
+  advanced: boolean;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 自动编号规则配置
+export interface IAutoCodeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.AUTO_CODE_RULES;
 }

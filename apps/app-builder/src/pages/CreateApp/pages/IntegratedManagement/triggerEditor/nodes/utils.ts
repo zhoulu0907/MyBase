@@ -1,5 +1,5 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import type { FlowNodeJSON, FlowNodeEntity } from '@flowgram.ai/fixed-layout-editor';
+import type { FlowNodeEntity, FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
   getEntityFields,
@@ -7,8 +7,8 @@ import {
   type ConditionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
+import { NodeType } from '@onebase/common';
 import { v4 as uuidv4 } from 'uuid';
-import { NodeType } from './const';
 
 export const generateNodeId = (nodeType: NodeType) => {
   const uuid = uuidv4().replaceAll('-', '');
@@ -40,7 +40,7 @@ export const clearDataOriginNodeId = (nodeId: string) => {
             .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
             .filter((c: any) => c.value && !c.value.startsWith(nodeId));
           if (newConditions.length > 0) {
-            newFilterCondition.push(newConditions);
+            newFilterCondition.push({ conditions: newConditions });
           }
         }
       }
@@ -56,7 +56,6 @@ export const clearDataOriginNodeId = (nodeId: string) => {
 };
 
 // 判断bolcks 是否包含当前节点
-
 const enum JudgeStatus {
   NO_FOUND = 0,
   // 在blocks的第一层中找到了目标节点
@@ -163,11 +162,6 @@ export function getPrecedingNodes(
         // 在当前节点的下游blocks中
         const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
         nodes.push(...blocks);
-      } else {
-        // console.log('ele: ', ele);
-        // // 如果不包含 不向下递归搜索
-        // const blocks = getPrecedingNodes(targetNodeId, ele.blocks, nodeTypes);
-        // nodes.push(...blocks);
       }
     } else {
       // 不包含blocks的节点
@@ -187,13 +181,17 @@ export function getPrecedingNodes(
  * @param validateOnly 是否只做校验（可选，默认为 true）
  */
 export async function validateNodeForm(form: any, payloadForm: any, validateOnly: boolean = false) {
+  const nodeId = payloadForm.getFieldValue('id');
   try {
-    form.setValueIn('invalid', false);
     await payloadForm.validate({ validateOnly });
+    // form.setValueIn('invalid', false);
+    triggerEditorSignal.setInvalidNode(nodeId, false);
   } catch (error: any) {
-    // console.warn('validateNodeForm error: ', error.errors);
+    console.warn('validateNodeForm error: ', error.errors);
+
     // 捕获校验错误并设置 invalid
-    form.setValueIn('invalid', true);
+    // form.setValueIn('invalid', true);
+    triggerEditorSignal.setInvalidNode(nodeId, true);
   }
 }
 
@@ -339,4 +337,53 @@ export const getHasLoop = (nodes: any[]): boolean => {
     }
   }
   return hasLoop;
+};
+
+export const searchNodeById = (nodeId: string, nodes: any[]) => {
+  let node: any = undefined;
+  for (let item of nodes) {
+    if (item.id === nodeId) {
+      node = item;
+      break;
+    }
+    if (item.blocks?.length) {
+      node = searchNodeById(nodeId, item.blocks);
+      if (node !== undefined) {
+        break;
+      }
+    }
+  }
+  return node;
+};
+
+// 新增节点时 判断是否已有节点名称
+export const hasNodeTitle = (title: string, nodes: any[]): boolean => {
+  let hasTitle = false;
+  for (let ele of nodes) {
+    if (ele.data.title === title) {
+      hasTitle = true;
+      return hasTitle;
+    }
+    if (ele.blocks?.length) {
+      hasTitle = hasNodeTitle(title, ele.blocks);
+    }
+  }
+  return hasTitle;
+};
+
+// 新增节点时 返回未被命名的节点名称
+export const getNodeTitle = (title: string): string => {
+  if (!title) {
+    return '';
+  }
+  const nodes = triggerEditorSignal.nodes.value;
+  const hasTitle = hasNodeTitle(title, nodes);
+  if (hasTitle) {
+    let i = 0;
+    do {
+      i++;
+    } while (hasNodeTitle(`${title}_${i}`, nodes));
+    return `${title}_${i}`;
+  }
+  return title;
 };

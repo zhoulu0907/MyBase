@@ -61,7 +61,6 @@ const FieldDetailDrawer: React.FC<FieldDetailDrawerProps> = ({ visible, setVisib
 
     // 根据字段类型设置不同的颜色
     if (fieldType === 'TEXT' || fieldType === 'LONG_TEXT') {
-      color = 'blue';
     } else if (fieldType === 'NUMBER' || fieldType === 'CURRENCY') {
       color = 'green';
     } else if (fieldType === 'DATE' || fieldType === 'DATETIME') {

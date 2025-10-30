@@ -1,4 +1,6 @@
-@workspace-padding: 24px;
+@import '../../../variables.less';
+
+@workspace-padding: 16px;
 
 .previewPage {
   width: 100%;
@@ -7,8 +9,8 @@
   display: block;
   padding: @workspace-padding;
   box-sizing: border-box;
-  //   background-color: #ffffff;
   position: relative;
+  border-radius: 4px;
 
   overflow-y: auto;
 
@@ -30,7 +32,7 @@
   background-color: #fff;
 
   min-width: 348px;
-  min-height: calc(100vh - var(--editor-header-height) - @workspace-padding * 2);
+  min-height: calc(100vh - @content-header-height - @workspace-padding * 2 - @header-height);
   width: 100%;
   padding: 16px;
   box-sizing: border-box;

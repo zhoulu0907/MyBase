@@ -1,4 +1,4 @@
-import { EDITOR_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -6,13 +6,16 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   COMPONENT_GROUP_NAME,
+  COMPONENT_MAP,
   EditRender,
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
   getComponentSchema,
   getComponentWidth,
-  type GridItem,
-  usePageEditorSignal
+  usePageEditorSignal,
+  WIDTH_VALUES,
+  WIDTH_OPTIONS,
+  type GridItem
 } from '@onebase/ui-kit';
 
 import EmptyIcon from '@/assets/images/empty.svg';
@@ -29,16 +32,30 @@ import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
-import type { AppEntityField } from '@onebase/app';
+import {
+  getEntityFieldOptions,
+  getAutoNumberConfig,
+  ENTITY_TYPE,
+  type AppEntityField,
+  type EntityFieldOption
+} from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
-import { COMPONENT_MAP } from '../panel/components/metadata/component_map';
 import View from '../view';
 import styles from './index.module.less';
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
   const [isFormEditor, setIsFormEditor] = useState(false);
+  const [pageSetId, setPageSetId] = useState('');
+
+  useEffect(() => {
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
+    }
+  }, []);
 
   useSignals();
 
@@ -58,7 +75,8 @@ export default function EditorWorkspace() {
     setShowDeleteButton,
     layoutSubComponents,
     setLayoutSubComponents,
-    delLayoutSubComponents
+    delLayoutSubComponents,
+    setSubTableComponents
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -205,10 +223,27 @@ export default function EditorWorkspace() {
     }
   };
 
+  const getFieldOptions = async (fieldId: string) => {
+    const options = await getEntityFieldOptions(fieldId);
+    if (!options) return [];
+
+    return options.map((option: EntityFieldOption) => ({
+      label: option.optionLabel,
+      value: option.optionValue,
+      chosen: false,
+      selected: false
+    }));
+  };
+
+  const getAutoConfig = async (fieldId: string) => {
+    const autoConfig = await getAutoNumberConfig(fieldId);
+    return autoConfig?.rules || [];
+  };
+
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
-        <div className={styles.workspaceHeaderLeft}>{isFormEditor && <View />}</div>
+        <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
         <div className={styles.workspaceHeaderRight}>
           {/* TODO 撤回重做 */}
           <div className={styles.editorStepCtrl}>
@@ -237,11 +272,10 @@ export default function EditorWorkspace() {
         className={styles.workspaceBody}
         id="workspace-body"
         onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
-          // 点击空白区域取消选中
-          console.log('点击空白区域取消选中');
-
           const target = e.target as HTMLElement;
           if (target.id === 'workspace-content') {
+            // 点击空白区域取消选中
+            console.log('点击空白区域取消选中');
             clearCurComponentID();
             setShowDeleteButton(false);
           }
@@ -252,51 +286,116 @@ export default function EditorWorkspace() {
           list={components}
           setList={(newList) => {
             const entityList: GridItem[] = [];
-            newList.forEach((item) => {
+            newList.forEach(async (item) => {
+              // console.log(item);
               if (item.type == 'entity') {
-                item.fields
-                  .filter(
-                    (field: AppEntityField) =>
-                      field.fieldName !== 'lock_version' &&
-                      field.fieldName !== 'deleted' &&
-                      field.fieldName !== 'parent_id' &&
-                      field.isSystemField !== 1
-                  )
-                  .forEach((field: AppEntityField) => {
-                    let cpType = COMPONENT_MAP[field.fieldType];
-                    let cpID = `${cpType}-${uuidv4()}`;
-                    console.log('cpType', cpType, field);
-                    const schema = getComponentSchema(cpType as any);
+                if (item.entityType === ENTITY_TYPE.SUB) {
+                  const cpName = item.entityName || '子表单';
+                  const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
+                  const cpID = `${cpType}-${uuidv4()}`;
 
-                    schema.config.cpName = field.displayName;
-                    schema.config.id = cpID;
-                    schema.config.dataField = [item.entityId, field.fieldId];
-                    schema.config.label.text = field.displayName;
-                    const props = {
-                      id: cpID,
-                      type: cpType,
-                      ...schema
+                  // 子表单 配置
+                  const schema = getComponentSchema(cpType as any);
+                  schema.config.cpName = cpName;
+                  schema.config.id = cpID;
+                  schema.config.label.text = cpName;
+                  schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                  schema.config.subTable = item.id;
+
+                  const props = {
+                    id: cpID,
+                    type: cpType,
+                    ...schema
+                  };
+                  setPageComponentSchemas(cpID!, props);
+                  setShowDeleteButton(false);
+
+                  const subFields = item.fields.filter((field: AppEntityField) => field.isSystemField !== 1);
+                  // 子表单的每个表单项配置
+                  const subFieldComponents = subFields.map((ele: AppEntityField) => {
+                    const subType = COMPONENT_MAP[ele.fieldType];
+                    const subSchema = getComponentSchema(subType as any);
+                    const subId = `${subType}-${uuidv4()}`;
+                    subSchema.config.cpName = ele.displayName;
+                    subSchema.config.id = subId;
+                    subSchema.config.label.text = ele.displayName;
+                    subSchema.config.label.display = false;
+                    subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                    subSchema.config.dataField = [item.entityId, ele.fieldId];
+                    subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
+                    const subProps = {
+                      id: subId,
+                      type: subType,
+                      ...subSchema
                     };
-
-                    setPageComponentSchemas(cpID!, props);
-                    setCurComponentID(cpID!);
-
-                    setCurComponentSchema(props);
-                    setShowDeleteButton(false);
-
-                    entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
+                    setPageComponentSchemas(subId, subProps);
+                    return { id: subId, type: subType, displayName: ele.displayName };
                   });
-                // 移除当前item
-                newList.splice(newList.indexOf(item), 1);
+                  setSubTableComponents(cpID, subFieldComponents);
+
+                  entityList.push({ displayName: cpName, id: cpID, type: cpType });
+
+                  newList.splice(newList.indexOf(item), 1);
+                } else if (item.entityType === ENTITY_TYPE.MAIN) {
+                  item.fields
+                    .filter(
+                      (field: AppEntityField) =>
+                        field.fieldName !== 'lock_version' &&
+                        field.fieldName !== 'deleted' &&
+                        field.fieldName !== 'parent_id' &&
+                        field.isSystemField !== 1
+                    )
+                    .forEach(async (field: AppEntityField) => {
+                      let cpType = COMPONENT_MAP[field.fieldType];
+                      let cpID = `${cpType}-${uuidv4()}`;
+                      console.log('cpType', cpType, field);
+
+                      const schema = getComponentSchema(cpType as any);
+                      // 单选、多选列表配置
+                      if (
+                        field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
+                        field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
+                      ) {
+                        getFieldOptions(field.fieldId).then((options: any) => {
+                          schema.config.defaultValue = options;
+                        });
+                      }
+
+                      // 自动编码
+                      if (field.fieldType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
+                        getAutoConfig(field.fieldId).then((rules: any) => {
+                          schema.config.autoCodeConfig = rules;
+                          schema.config.autoCodeDisabled = rules && rules.length > 0 ? true : false;
+                        });
+                      }
+
+                      schema.config.cpName = field.displayName;
+                      schema.config.id = cpID;
+                      schema.config.dataField = [item.entityId, field.fieldId];
+                      schema.config.label.text = field.displayName;
+                      const props = {
+                        id: cpID,
+                        type: cpType,
+                        ...schema
+                      };
+
+                      setPageComponentSchemas(cpID!, props);
+                      //   setCurComponentID(cpID!);
+                      //   setCurComponentSchema(props);
+                      setShowDeleteButton(false);
+
+                      entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
+                    });
+                  // 移除当前item
+                  newList.splice(newList.indexOf(item), 1);
+                }
               }
             });
             newList.push(...entityList);
 
             setComponents(newList);
           }}
-          onAdd={(e) => {
-            // console.log('onAdd', e);
-
+          onAdd={async (e) => {
             let cpID = e.item.id || e.item.getAttribute('data-cp-id');
             const itemType = e.item.getAttribute('data-cp-type');
             const itemDisplayName = e.item.getAttribute('data-cp-displayname');
@@ -330,6 +429,17 @@ export default function EditorWorkspace() {
                 console.log('dataField:  ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];
                 schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+                if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
+                  const options = await getFieldOptions(fieldID);
+                  schema.config.defaultValue = options;
+                }
+
+                if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+                  const rules = await getAutoConfig(fieldID);
+                  schema.config.autoCodeConfig = rules;
+                  schema.config.autoCodeDisabled = rules && rules.length > 0 ? true : false;
+                }
               }
 
               if (dataLabel) {
@@ -345,7 +455,6 @@ export default function EditorWorkspace() {
 
               setPageComponentSchemas(cpID!, props);
               setCurComponentID(cpID!);
-
               setCurComponentSchema(props);
               setShowDeleteButton(false);
             }
@@ -355,7 +464,6 @@ export default function EditorWorkspace() {
           forceFallback={true}
           className={styles.workspaceContent}
           onStart={(e) => {
-            // console.log('onStart', e);
             const cpID = e.item.getAttribute('data-cp-id') || '';
             setCurComponentID(cpID);
             const curComponentSchema = pageComponentSchemas[cpID] || {};
@@ -392,8 +500,6 @@ export default function EditorWorkspace() {
 
                   setCurComponentSchema(curComponentSchema);
 
-                  // console.log('当前组件的ID: ', cp.id);
-                  // console.log('当前组件的配置: ', curComponentSchema);
                   setShowDeleteButton(true);
                 }}
               >

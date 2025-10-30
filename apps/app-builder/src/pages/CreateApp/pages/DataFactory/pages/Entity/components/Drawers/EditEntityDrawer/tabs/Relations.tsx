@@ -91,7 +91,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
                 name={relation.id}
                 header={
                   <div className={styles['relation-header']}>
-                    <span className={styles['relation-name']}>{relation.relationName}</span>
+                    <span className={styles['relation-name']}>{relationshipTypeMap[relation.relationshipType]}</span>
                   </div>
                 }
                 className={styles['relation-item']}

@@ -1,8 +1,9 @@
-import iconEditSVG from '@/assets/images/app_edit_black.svg';
+import DynamicIcon from '@/components/DynamicIcon';
 import MenuComp from '@/components/MenuIcon';
-import { Form, Input, Modal, Select, TreeSelect, Button, type FormInstance } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import { menuIconList } from '@/components/MenuIcon/const';
+import { Button, Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
 import { RootParentPage } from '@onebase/app';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface CreateModalProps {
@@ -10,7 +11,7 @@ interface CreateModalProps {
   handleCreate: () => void;
   onCancel: () => void;
   form: FormInstance;
-  pageTypeOptions: { label: string; value: any }[];
+  pageSetTypeOptions: { label: string; value: any }[];
   visibleCreateForm: string;
   initValue: { pageType: number; menuName: string; parentId: string };
   treeData: any[];
@@ -22,7 +23,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   handleCreate,
   onCancel,
   form,
-  pageTypeOptions,
+  pageSetTypeOptions,
   visibleCreateForm,
   initValue,
   treeData,
@@ -35,16 +36,21 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'icon-yemian' : 'icon-wenjianjia_seo-folder');
+      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'page' : 'seo-folder');
     }
   }, [menuIcon, visibleCreateForm]);
+
+  const handleCloseModal = () => {
+    setMenuIcon('');
+    onCancel();
+  };
 
   return (
     <Modal
       title={title}
       visible={visibleCreateForm !== ''}
       onOk={handleCreate}
-      onCancel={onCancel}
+      onCancel={handleCloseModal}
       closable={!visibleMenuIcon}
       autoFocus={false}
       focusLock={true}
@@ -52,7 +58,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       className={styles.createModal}
       footer={
         <div style={{ textAlign: 'right', visibility: !visibleMenuIcon ? 'visible' : 'hidden' }}>
-          <Button type="default" onClick={onCancel} style={{ marginRight: 12 }}>
+          <Button type="default" onClick={handleCloseModal} style={{ marginRight: 12 }}>
             取消
           </Button>
           <Button type="primary" onClick={handleCreate}>
@@ -77,11 +83,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
         >
           <Form.Item
             label="页面类型"
-            field="pageType"
+            field="pageSetType"
             hidden={visibleCreateForm === 'group'}
             rules={[{ required: true, message: '请选择页面类型' }]}
           >
-            <Select options={pageTypeOptions} placeholder="请选择页面类型" allowClear />
+            <Select options={pageSetTypeOptions} placeholder="请选择页面类型" allowClear />
           </Form.Item>
 
           <Form.Item
@@ -113,24 +119,30 @@ const CreateModal: React.FC<CreateModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: '#F2F3F5'
+                  backgroundColor: '#F2F3F5',
+                  cursor: 'pointer'
                 }}
+                onClick={() => setVisibleMenuIcon(true)}
               >
                 {menuIcon ? (
-                  <i className={`iconfont ${menuIcon}`} style={{ fontSize: 16 }} />
+                  <DynamicIcon
+                    IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
+                    theme="outline"
+                    size="18"
+                    fill="#333"
+                  />
                 ) : (
-                  <i
-                    className={`iconfont ${visibleCreateForm === 'page' ? 'icon-yemian' : 'icon-wenjianjia_seo-folder'}`}
-                    style={{ fontSize: 16 }}
+                  <DynamicIcon
+                    IconComponent={
+                      menuIconList.find((icon) => icon.code === (visibleCreateForm === 'page' ? 'page' : 'seo-folder'))
+                        ?.icon
+                    }
+                    theme="outline"
+                    size="18"
+                    fill="#333"
                   />
                 )}
               </div>
-              <img
-                src={iconEditSVG}
-                alt="选择菜单图标"
-                style={{ cursor: 'pointer' }}
-                onClick={() => setVisibleMenuIcon(true)}
-              />
             </div>
           </Form.Item>
           <Form.Item label="父级页面" field="parentId">

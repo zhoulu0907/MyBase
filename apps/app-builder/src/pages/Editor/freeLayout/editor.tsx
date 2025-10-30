@@ -8,6 +8,9 @@ import {
   FreeLayoutEditorProvider,
   type FreeLayoutPluginContext
 } from '@flowgram.ai/free-layout-editor';
+
+import {useFlowPageEditorSignal} from '@onebase/ui-kit';
+import { Button } from '@douyinfe/semi-ui';
 import '@flowgram.ai/free-layout-editor/index.css';
 import './styles/index.css';
 import { nodeRegistries } from './nodes';
@@ -23,6 +26,7 @@ import type { WorkflowJSON, FlowData } from './editorType';
 import { getAppIdByPageSetId } from '@onebase/app';
 const sourceNodeIDMap = new Map();
 export const Editor = () => {
+  const { setFlowId } = useFlowPageEditorSignal;
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
@@ -93,7 +97,7 @@ export const Editor = () => {
       bpmDefJson: JSON.stringify(useJsonData)
     };
     save(params).then((res: any) => {
-      console.log(res);
+      setFlowId(res);
     });
   };
   return (

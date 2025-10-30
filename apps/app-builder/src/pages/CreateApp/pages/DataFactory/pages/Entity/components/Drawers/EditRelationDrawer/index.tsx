@@ -22,7 +22,7 @@ interface RelationFormValues {
   targetEntityId?: string;
   targetFieldId?: string;
   relationName?: string;
-  relationshipId?: string;
+  id?: string;
   target?: { cell: string; port: string };
   source?: { cell: string; port: string };
 }
@@ -57,7 +57,6 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
   // 初始化实体选项
   useEffect(() => {
-    console.log('curDataSourceId=====', curDataSourceId);
     if (visible && curDataSourceId) {
       loadEntities();
     }
@@ -140,7 +139,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       setSubmitting(true);
 
       const updateData = {
-        id: relationData?.relationshipId,
+        id: relationData?.id,
         ...values,
         appId: curAppId
       };
@@ -170,7 +169,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     setDeleteLoading(true);
 
     try {
-      const res = await deleteRelation(relationData?.relationshipId || '');
+      const res = await deleteRelation(relationData?.id || '');
 
       setDeleteModalVisible(false);
       if (res) {
@@ -194,7 +193,8 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       mask={false}
       footer={
         <div className={styles.footer}>
-          <Button type="text" status="danger" onClick={() => openDeleteModal()} style={{ float: 'left' }}>
+          {/* 本期不支持删除 */}
+          <Button type="text" status="danger" onClick={() => openDeleteModal()} style={{ float: 'left' }} disabled>
             删除
           </Button>
           <Space>

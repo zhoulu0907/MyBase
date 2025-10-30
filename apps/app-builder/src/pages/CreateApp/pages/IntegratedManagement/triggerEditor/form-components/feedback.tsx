@@ -6,12 +6,12 @@ interface StatePanelProps {
   warnings?: FieldState['warnings'];
 }
 
-const Error = styled.span`
+const ErrorStyle = styled.span`
   font-size: 12px;
   color: red;
 `;
 
-const Warning = styled.span`
+const WarningStyle = styled.span`
   font-size: 12px;
   color: orange;
 `;
@@ -24,10 +24,10 @@ export const Feedback = ({ errors, warnings }: StatePanelProps) => {
   return (
     <div>
       <div>
-        <Error>{renderFeedbacks(errors)}</Error>
+        <ErrorStyle>{renderFeedbacks(errors)}</ErrorStyle>
       </div>
       <div>
-        <Warning>{renderFeedbacks(warnings)}</Warning>
+        <WarningStyle>{renderFeedbacks(warnings)}</WarningStyle>
       </div>
     </div>
   );

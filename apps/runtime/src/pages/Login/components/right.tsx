@@ -1,22 +1,43 @@
-import LogoSVG from '@/assets/images/ob_logo.svg';
-import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import { getApplication } from '@onebase/app';
+import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
+import type { IIconBase } from '@icon-park/react/lib/runtime';
+
+interface DynamicIconProps extends IIconBase {
+  IconComponent: React.ComponentType<any>;
+  theme?: 'outline' | 'filled' | 'two-tone' | 'multi-color';
+  size?: number | string;
+  fill?: string;
+  style?: React.CSSProperties;
+}
+
+interface APP_INFO {
+  appName: string;
+  iconName: string;
+  iconColor: string;
+}
 
 const { Paragraph } = Typography;
-const TabPane = Tabs.TabPane;
 
 const Right: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
+
+  const [appInfo, setAppInfo] = useState<APP_INFO>({
+    appName: '',
+    iconName: '',
+    iconColor: ''
+  });
 
   // 从路由中获取 appid 参数
   const { appId } = useParams<{ appId?: string }>();
@@ -26,9 +47,7 @@ const Right: React.FC = () => {
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
 
   // 状态管理
-  const [loginType, setLoginType] = useState<'account' | 'mobile'>('account');
   const [loading, setLoading] = useState(false);
-  const [smsCountdown, setSmsCountdown] = useState(0);
 
   // 组件初始化时设置保存的账号
   useEffect(() => {
@@ -47,56 +66,32 @@ const Right: React.FC = () => {
       }
       return;
     }
+
+    handleGetApplication();
   }, []);
+
+  const handleGetApplication = async () => {
+    const redirectURL = getHashQueryParam('redirectURL');
+    if (redirectURL) {
+      const startIndex = redirectURL.indexOf('/runtime/');
+      const runtimeLength = '/runtime/'.length;
+      const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
+      const endIndex = endRedirectURL?.indexOf('/');
+      const applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
+
+      if (applicationId) {
+        const res = await getApplication({ id: applicationId });
+        if (res) {
+          setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+        }
+      }
+    }
+  };
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
     const account = form.getFieldValue('account') || '';
     saveRememberMe(account, checked);
-  };
-
-  // 发送短信验证码
-  const sendSmsCode = async () => {
-    try {
-      const mobile = form.getFieldValue('mobile');
-      if (!mobile) {
-        Message.error('请先输入手机号');
-        return;
-      }
-
-      // 验证手机号格式
-      const mobileRegex = /^1[3-9]\d{9}$/;
-      if (!mobileRegex.test(mobile)) {
-        Message.error('请输入正确的手机号');
-        return;
-      }
-
-      setLoading(true);
-
-      // TODO: 调用发送短信验证码接口
-      // await smsService.sendSmsCode({ mobile });
-
-      // 模拟发送短信验证码
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      Message.success('验证码已发送');
-      setSmsCountdown(60);
-
-      // 倒计时
-      const timer = setInterval(() => {
-        setSmsCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } catch (error) {
-      Message.error('发送失败，请重试');
-    } finally {
-      setLoading(false);
-    }
   };
 
   // 账号密码登录
@@ -132,7 +127,7 @@ const Right: React.FC = () => {
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantWebsite
+            tenantId: response.tenantId
           },
           rememberMe
         );
@@ -186,11 +181,33 @@ const Right: React.FC = () => {
     }
   };
 
+  const DynamicIcon = ({ IconComponent, ...rest }: DynamicIconProps) => {
+    if (!IconComponent) return null;
+    return <IconComponent {...rest} />;
+  };
+
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
-        <img src={LogoSVG} alt="logo" />
-        <h1 className={styles.title}>欢迎登录数智化底座</h1>
+        {appInfo.iconName && (
+          <div className={styles.appInfo}>
+            <div
+              className={styles.appIcon}
+              style={{
+                background: appInfo.iconColor || 'transparent'
+              }}
+            >
+              <DynamicIcon
+                IconComponent={appIconMap[appInfo.iconName as keyof typeof appIconMap]}
+                theme="outline"
+                size="40"
+                fill="#F2F3F5"
+              />
+            </div>
+            <div className={styles.appName}>{appInfo.appName}</div>
+          </div>
+        )}
+        <h1 className={styles.title}>欢迎登录</h1>
 
         <Form
           form={form}
@@ -241,128 +258,6 @@ const Right: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
-
-        {/* <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
-          <TabPane key="account" title={t('auth.accountLogin')}>
-            <Form
-              form={form}
-              layout="vertical"
-              onSubmit={handleLoginClick}
-              autoComplete="off"
-              className={styles.loginForm}
-            >
-              <Form.Item
-                field="username"
-                initialValue=""
-                rules={[
-                  { required: true, message: '请输入账号' },
-                  { minLength: 3, message: '账号至少3个字符' }
-                ]}
-              >
-                <Input placeholder={t('auth.userAccount')} allowClear size="large" />
-              </Form.Item>
-
-              <Form.Item
-                field="password"
-                initialValue=""
-                rules={[
-                  { required: true, message: '请输入密码' },
-                  { minLength: 6, message: '密码至少6个字符' }
-                ]}
-              >
-                <Input.Password placeholder={t('auth.password')} allowClear size="large" />
-              </Form.Item>
-
-              <Form.Item>
-                <Space className={styles.formActions}>
-                  <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
-                    {t('auth.rememberMe')}
-                  </Checkbox>
-                  <Button type="text" size="small">
-                    {t('auth.forgotPassword')}
-                  </Button>
-                </Space>
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  long
-                  loading={loading}
-                  size="large"
-                  className={styles.loginButton}
-                >
-                  {t('auth.loginButton')}
-                </Button>
-              </Form.Item>
-            </Form>
-          </TabPane>
-
-          <TabPane key="mobile" title={t('auth.smsLogin')}>
-            <Form
-              form={form}
-              layout="vertical"
-              onSubmit={handleLoginClick}
-              autoComplete="off"
-              className={styles.loginForm}
-            >
-              <Form.Item
-                field="mobile"
-                rules={[
-                  { required: true, message: '请输入手机号' },
-                  {
-                    validator: (value: string | undefined) => {
-                      if (!value) return Promise.resolve();
-                      const mobileRegex = /^1[3-9]\d{9}$/;
-                      if (!mobileRegex.test(value)) {
-                        return Promise.reject('请输入正确的手机号');
-                      }
-                      return Promise.resolve();
-                    }
-                  }
-                ]}
-              >
-                <Input placeholder={t('auth.mobile')} allowClear size="large" maxLength={11} />
-              </Form.Item>
-
-              <Form.Item
-                field="smsCode"
-                rules={[
-                  { required: true, message: '请输入短信验证码' },
-                  { length: 6, message: '验证码为6位数字' }
-                ]}
-              >
-                <Space align="center" className={styles.smsContainer}>
-                  <Input placeholder={t('auth.smsCode')} allowClear size="large" maxLength={6} />
-                  <Button
-                    type="secondary"
-                    size="large"
-                    disabled={smsCountdown > 0}
-                    loading={loading}
-                    onClick={sendSmsCode}
-                    className={styles.smsButton}
-                  >
-                    {smsCountdown > 0 ? `${smsCountdown}s` : t('auth.getSmsCode')}
-                  </Button>
-                </Space>
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  long
-                  loading={loading}
-                  size="large"
-                  className={styles.loginButton}
-                >
-                  {t('auth.loginButton')}
-                </Button>
-              </Form.Item>
-            </Form>
-          </TabPane>
-        </Tabs> */}
       </div>
 
       {/* 滑块验证码组件 */}

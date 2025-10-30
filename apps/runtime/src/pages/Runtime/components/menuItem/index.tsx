@@ -1,4 +1,8 @@
+import { menuSignal } from '@/store/menu';
+import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
+import DynamicIcon from '../DynamicIcon';
+import { menuIconList } from '../DynamicIcon/const';
 import styles from './index.module.less';
 
 /**
@@ -16,7 +20,10 @@ interface MenuItemProps {
   maxWidth: number;
 }
 
-const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuIcon, onClick, maxWidth }) => {
+const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onClick, maxWidth }) => {
+  useSignals();
+  const { curMenu } = menuSignal;
+
   return (
     <div className={styles.runtimeMenuItem} onClick={onClick} role="menuitem" tabIndex={0}>
       <div
@@ -25,7 +32,13 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuIcon, onClick, ma
           maxWidth: maxWidth + 'px'
         }}
       >
-        <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
+        <DynamicIcon
+          IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
+          theme="outline"
+          size="18"
+          fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
+          style={{ marginRight: 16 }}
+        />
         {label}
       </div>
     </div>

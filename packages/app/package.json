@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "axios": "^1.10.0",
+    "@preact/signals-react": "^3.2.1",
     "@onebase/common": "workspace:*"
   },
   "devDependencies": {

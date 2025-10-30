@@ -30,13 +30,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputTimePickerSchema {
@@ -96,7 +96,7 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -152,17 +152,17 @@ const XTimePicker: XInputTimePickerSchema = {
     ...baseDefault,
     label: {
       text: '时间选择',
-      display: true,
+      display: true
     },
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
-    labelColSpan: 100,
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    labelColSpan: 200,
     saveWithHidden: false,
     verify: {
-      required: false,
+      required: false
     }
   }
 };

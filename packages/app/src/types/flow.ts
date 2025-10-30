@@ -2,7 +2,7 @@ export interface FlowMgmt {
   id: string;
   applicationId: string;
   processName: string;
-  processStatus: ProcessStatus;
+  enableStatus: ProcessStatus;
   processDescription: string;
   triggerType: string;
   createTime: string;
@@ -32,7 +32,7 @@ export interface TriggerConfig {
 export interface CreateFlowMgmtReq {
   applicationId: string;
   processName: string;
-  processStatus: ProcessStatus;
+  enableStatus: ProcessStatus;
   processDescription?: string;
   triggerType: string;
   triggerConfig?: TriggerConfig;
@@ -42,7 +42,7 @@ export interface UpdateFlowMgmtReq {
   id: string;
   applicationId: string;
   processName: string;
-  processStatus: ProcessStatus;
+  enableStatus: ProcessStatus;
   processDescription?: string;
   triggerType: TriggerType;
   triggerConfig?: TriggerConfig;
@@ -56,7 +56,7 @@ export interface RenameFlowMgmtReq {
 export interface UpdateFlowMgmtDefinitionReq {
   id: string | undefined;
   processDefinition: string;
-  processStatus: number | string;
+  enableStatus: number | string;
 }
 
 // 数据源类型   表单、数据节点、关联表、子表
@@ -79,14 +79,54 @@ export interface SelectOption {
   value: string;
 }
 
-// 弹窗类型
-export enum MODAL_TYPE {
-  CONFIRM = 'confirm',
-  INFOR = 'infor',
-  CUSTOM = 'custom'
-}
-
 export enum CAL_TYPE {
   FORMULA = 'FORMULA',
   DATASUMMARY = 'DATASUMMARY'
+}
+
+// 触发事件
+export enum TRIGGER_EVENTS {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete'
+}
+
+// 跳转节点 目标页面类型
+export enum TARGET_PAGE_TYPE {
+  INSIDE = 'inside', // 系统内页面
+  OUTSIDE= 'outside' // 外部链接
+}
+
+// 打开方式
+export enum OPEN_PAGE_TYPE {
+  CURRENT_WINDOW = 'currentWindow', // 当前窗口覆盖
+  NEW_WINDOW = 'newWindow', // 新窗口打开
+  MODAL = 'MODAL', // 弹窗打开
+  DRAWER = 'drawer', // 侧边栏打开
+}
+
+// 弹窗尺寸
+export enum MODAL_SIZE_TYPE {
+  SMALL = 'small',
+  MEDIUN = 'medium',
+  LARGE = 'large',
+  CUSTOM = 'custom',
+}
+
+// 无权限时
+export enum UNAUTHORIZED_EVENT {
+  PROMPT = 'prompt',
+  JUMP = 'jump'
+}
+
+//  刷新节点 刷新范围
+export enum REFRESH_TYPE {
+  CURRENT_PAGE = 'currentPage', // 当前页面
+  SPECIFY_PAGE = 'specifyPage', // 指定页面
+  SPECIFY_COMPONENT = 'specifyComponent', // 页面内指定组件
+}
+// 刷新策略
+export enum REFRESH_STRATEGY {
+  RESERVE = 'reserve', // 保留状态刷新
+  RESET = 'reset', // 重置状态刷新
 }

@@ -1,12 +1,12 @@
 import { Form, InputNumber } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputNumberConfig } from './schema';
 import '../index.css';
 
-const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) => {
+const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     placeholder,
@@ -21,11 +21,23 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
     layout,
     labelColSpan = 0,
     unit,
-    runtime = true
+    runtime = true,
+    detailMode
   } = props;
 
+  const { form } = Form.useFormContext();
+  const [fieldId, setFieldId] = useState('');
+
+  const fieldValue = Form.useWatch(fieldId, form);
+
+  useEffect(() => {
+    if (dataField.length > 0) {
+      setFieldId(dataField[dataField.length - 1]);
+    }
+  }, [dataField]);
+
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
         field={
@@ -40,9 +52,6 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
         rules={[
           {
             required: verify?.required,
-            type: 'number',
-            min: verify?.min,
-            max: verify?.max
           }
         ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -51,23 +60,24 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {
-          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
-            <InputNumber
-              defaultValue={defaultValue}
-              placeholder={placeholder}
-              step={step}
-              min={verify?.min}
-              max={verify?.max}
-              precision={precision}
-              style={{
-                width: '100%',
-                textAlignLast: align,
-                pointerEvents: runtime ? 'unset' : 'none'
-              }}
-              suffix={unit}
-            />
-        }
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+          <div>{fieldValue || '--'}</div>
+        ) : (
+          <InputNumber
+            defaultValue={defaultValue}
+            placeholder={placeholder}
+            step={step}
+            min={verify?.min}
+            max={verify?.max}
+            precision={precision}
+            style={{
+              width: '100%',
+              textAlignLast: align,
+              pointerEvents: runtime ? 'unset' : 'none'
+            }}
+            suffix={unit}
+          />
+        )}
       </Form.Item>
     </div>
   );

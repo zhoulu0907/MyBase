@@ -1,13 +1,13 @@
-import type { EdgeData, EntityERProps, EntityNode, Entity } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import type { EdgeData, Entity, EntityERProps, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
-import { useNewNodeStore } from '@/store/store_entity';
+import { newFieldSignal } from '@/store/singals/new_field';
 import { Button, Message } from '@arco-design/web-react';
-import React, { useEffect, useRef, useState } from 'react';
-import { useModalManager, MODAL_TYPE } from '../hooks/useModalManager';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
+import { MODAL_TYPE, useModalManager } from '../hooks/useModalManager';
 // import FieldDetailDrawer from '../components/Drawers/FieldDetailDrawer';
 import ERchart from '../components/ERchart';
 import CreateEntityModal from '../components/Modals/CreateEntityModal';
@@ -21,6 +21,7 @@ import {
   CreateRelationModal,
   DeleteConfirmModal
 } from '../components/Modals';
+import type { DatasourceRecord } from './EntityPageContainer';
 import styles from '../index.module.less';
 
 const relationshipTypeMap: Record<string, string> = {
@@ -35,10 +36,10 @@ export const EntityERContainer: React.FC<{
   setRefreshEntityList: (refresh: boolean) => void;
   onlyUpdateNode: boolean;
   setOnlyUpdateNode: (onlyUpdateNode: boolean) => void;
-}> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode }) => {
+  dsData: DatasourceRecord;
+}> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode, dsData }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
-  const { clearNewNodes } = useNewNodeStore();
 
   // 使用统一的弹窗/抽屉管理器
   const { openModal, closeModal, isModalOpen, getModalData, setModalDataValue } = useModalManager();
@@ -47,32 +48,45 @@ export const EntityERContainer: React.FC<{
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
   const chartRef = useRef<any>(null);
-  const loadEntityList = async () => {
-    const res = await getEntityGraph(curDataSourceId);
-    console.log('loadEntityList', res);
-    if (res?.entities || res?.relationships) {
-      setData({
-        nodes:
-          res?.entities.map((item: unknown) => {
-            const entityItem = item as Record<string, unknown>;
-            const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
-            return {
-              ...entityItem,
-              positionX: pos?.x,
-              positionY: pos?.y
-            };
-          }) || [],
-        edges:
-          res?.relationships.map((item: unknown) => {
-            const relationItem = item as Record<string, unknown>;
-            return {
-              ...relationItem,
-              label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
-            };
-          }) || []
-      });
+  const prevDataSourceIdRef = useRef<string>('');
+
+  const loadEntityList = useCallback(async (dataSourceId: string) => {
+    if (!dataSourceId) {
+      return;
     }
-  };
+
+    try {
+      const res = await getEntityGraph(dataSourceId);
+
+      if (res?.entities || res?.relationships) {
+        setData({
+          nodes:
+            res?.entities.map((item: unknown) => {
+              const entityItem = item as Record<string, unknown>;
+              const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
+              return {
+                ...entityItem,
+                positionX: pos?.x,
+                positionY: pos?.y
+              };
+            }) || [],
+          edges:
+            res?.relationships.map((item: unknown) => {
+              const relationItem = item as Record<string, unknown>;
+              return {
+                ...relationItem,
+                label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
+              };
+            }) || []
+        });
+      } else {
+        setData({ nodes: [], edges: [] });
+      }
+    } catch (error) {
+      console.error('加载实体列表失败:', error);
+      setData({ nodes: [], edges: [] });
+    }
+  }, []);
 
   // 打开节点编辑抽屉
   const handleOpenNodeEditDrawer = (editData: Partial<EntityNode>) => {
@@ -98,7 +112,13 @@ export const EntityERContainer: React.FC<{
   };
 
   // 字段点击
-  const handleFieldClick = (fieldId: string) => {
+  const handleFieldClick = (fieldId: string, entityId?: string) => {
+    // 点击字段移除新增标记
+    if (entityId && newFieldSignal.isNewField(entityId, fieldId)) {
+      setTimeout(() => {
+        newFieldSignal.removeNewField(entityId, fieldId);
+      }, 500);
+    }
     openModal(MODAL_TYPE.EDIT_FIELD, { selectedFieldId: fieldId });
   };
 
@@ -166,7 +186,7 @@ export const EntityERContainer: React.FC<{
     const res = await deleteEntity(nodeId);
     if (res) {
       Message.success('删除节点成功');
-      loadEntityList();
+      loadEntityList(curDataSourceId);
     }
     closeModal();
     setDeleteLoading(false);
@@ -197,18 +217,29 @@ export const EntityERContainer: React.FC<{
   // };
 
   useEffect(() => {
-    if (refreshEntityList) {
-      loadEntityList();
+    if (refreshEntityList && curDataSourceId) {
+      loadEntityList(curDataSourceId);
       setRefreshEntityList(false);
     }
   }, [refreshEntityList]);
 
+  // 数据源ID变化
   useEffect(() => {
-    if (curDataSourceId) {
-      loadEntityList();
-      clearNewNodes();
+    if (!dsData?.id) {
+      setData({ nodes: [], edges: [] });
+      return;
     }
-  }, [curDataSourceId]);
+
+    if (prevDataSourceIdRef.current && prevDataSourceIdRef.current !== dsData?.id) {
+      console.log('数据源切换，清理旧实体数据');
+      setData({ nodes: [], edges: [] });
+      newFieldSignal.clearAllNewFields();
+    }
+
+    prevDataSourceIdRef.current = dsData?.id;
+
+    loadEntityList(dsData?.id);
+  }, [dsData]);
 
   return (
     <div style={{ height: '100%' }} className={styles['entity-page-container']}>
@@ -229,7 +260,7 @@ export const EntityERContainer: React.FC<{
       />
       <Button
         type="primary"
-        className={styles['entity-page-create-button']}
+        className={styles.entityPageCreateButton}
         onClick={() => {
           openModal(MODAL_TYPE.CREATE_ENTITY);
         }}

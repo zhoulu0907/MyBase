@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.1",
+    "@icon-park/react": "^1.4.2",
     "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",

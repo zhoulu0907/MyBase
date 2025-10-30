@@ -5,6 +5,7 @@ import {
   labelColSpanConfig,
   layoutConfig,
   listTypeConfig,
+  uploadTypeConfig,
   statusConfig,
   widthConfig,
   type ICommonBaseType,
@@ -38,13 +39,13 @@ import type {
   ITooltipConfigType,
   IUploadCompressConfigType,
   IUploadSizeConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputImgUploadSchema {
@@ -109,15 +110,15 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-    * required：是否必填，未填写时提交报错
-    * maxCount：最大上传数量，默认：-1 不限制
-    * maxSize：最大图片大小单位：MB，默认：10，最大100
-    */
+   * required：是否必填，未填写时提交报错
+   * maxCount：最大上传数量，默认：-1 不限制
+   * maxSize：最大图片大小单位：MB，默认：10，最大100
+   */
   verify: {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
     maxSize: TNumberDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -140,6 +141,8 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
    * 可选值: 'text' | 'picture-card' | 'picture-list'
    */
   listType?: TSelectDefaultType<TUploadSelectKeyType>;
+
+  uploadType?: TSelectDefaultType<TUploadSelectKeyType>;
 
   /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
@@ -178,15 +181,16 @@ const XImgUpload: XInputImgUploadSchema = {
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    uploadTypeConfig,
     listTypeConfig,
     statusConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '图片上传',
-      display: true,
+      display: true
     },
     dataField: [],
     tooltip: '',
@@ -194,14 +198,15 @@ const XImgUpload: XInputImgUploadSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     uploadCompress: -1,
-    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
+    uploadType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
-    labelColSpan: 100,
+    labelColSpan: 200,
     verify: {
       required: false,
       maxCount: -1,
-      maxSize: 10,
+      maxSize: 10
     }
   }
 };

@@ -1,31 +1,31 @@
-import { useEffect, useState, memo } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { cloneDeep } from 'lodash-es';
-import { ReactSortable } from 'react-sortablejs';
-import { Collapse, Divider } from '@arco-design/web-react';
+import { Collapse, Divider, Tooltip } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
+import { cloneDeep } from 'lodash-es';
+import { memo, useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   COMPONENT_GROUP_NAME,
   EditRender,
+  getComponentConfig,
   getComponentSchema,
   getComponentWidth,
-  getComponentConfig,
   type GridItem,
   usePageEditorSignal
 } from '@/index';
 
-import type { XCollapseLayoutConfig } from './schema';
-import { STATUS_OPTIONS, STATUS_VALUES, COLLAPSED_VALUES, COLLAPSED_OPTIONS } from '../../../constants';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
+import { COLLAPSED_OPTIONS, COLLAPSED_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import type { XCollapseLayoutConfig } from './schema';
 import './index.css';
 
 const CollapseItem = Collapse.Item;
 
-const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean }) => {
+const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { id, label, colCount = 1, status, collapsed, runtime = true } = props;
   useSignals();
 
@@ -40,7 +40,7 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
     layoutSubComponents,
     setLayoutSubComponents,
     showDeleteButton,
-    setShowDeleteButton,
+    setShowDeleteButton
   } = usePageEditorSignal();
 
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
@@ -61,11 +61,11 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
   // 组件状态同步到子组件
   useEffect(() => {
     if (colComponents[0]) {
-      colComponents[0].forEach(comp => {
+      colComponents[0].forEach((comp) => {
         const schema = pageComponentSchemas[comp.id];
         schema.config.status = status;
         setPageComponentSchemas(comp.id, schema);
-      })
+      });
     }
   }, [status]);
 
@@ -82,7 +82,6 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
 
   // 复制组件
   const handleCopyComponent = (comp: any, originId: string, index: number = 0) => {
-
     // ID 映射表，记录旧 ID 到新 ID 的映射
     const idMap = new Map<string, string>();
     idMap.set(originId, comp.id);
@@ -96,9 +95,7 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
       if (!originalComp) return;
 
       // 深拷贝组件配置
-      const schemaConfig = cloneDeep(
-        getComponentConfig(pageComponentSchemas[oldId], comp.type)
-      );
+      const schemaConfig = cloneDeep(getComponentConfig(pageComponentSchemas[oldId], comp.type));
       const schema = getComponentSchema(comp.type);
 
       schema.config = schemaConfig;
@@ -121,8 +118,8 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
 
       // 2. 复制子组件结构
       if (layoutSubComponents[oldId]) {
-        const newSubComponents = layoutSubComponents[oldId].map(row =>
-          row.map(item => {
+        const newSubComponents = layoutSubComponents[oldId].map((row) =>
+          row.map((item) => {
             // 为每个子组件创建新 ID
             const childNewId = idMap.get(item.id) || `${item.type}-${uuidv4()}`;
 
@@ -194,15 +191,23 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
 
   return (
     <Collapse
-      className='XCollapseLayout'
+      className="XCollapseLayout"
       bordered={false}
       activeKey={activeKey}
-      expandIconPosition='right'
-      expandIcon={<img src={IconCollapsedDown} alt='' />}
+      expandIconPosition="right"
+      expandIcon={<img src={IconCollapsedDown} alt="" />}
       onChange={(_, key) => setActiveKey(key)}
       style={{ opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1 }}
     >
-      <CollapseItem header={label.text} name='1' contentStyle={{ backgroundColor: '#fff', paddingLeft: 13, paddingTop: 5, borderTop: '1px solid #ccc' }}>
+      <CollapseItem
+        header={
+          <Tooltip content={label.text}>
+            <div className="collapse-title-ellipsis">{label.text}</div>
+          </Tooltip>
+        }
+        name="1"
+        contentStyle={{ backgroundColor: '#fff', paddingLeft: 13, paddingTop: 5, borderTop: '1px solid #ccc' }}
+      >
         {colComponents.map((_colComponents, index) => (
           <div className="item" key={index}>
             <ReactSortable
@@ -214,7 +219,7 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
               }}
               onAdd={(e) => {
                 // 允许拖入的组件
-                console.debug("onAdd", e.item.getAttribute('data-cp-type'));
+                console.debug('onAdd', e.item.getAttribute('data-cp-type'));
 
                 let cpID = e.item.id || e.item.getAttribute('data-cp-id');
                 const itemType = e.item.getAttribute('data-cp-type');
@@ -267,7 +272,7 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
                     data-cp-type={cp.type}
                     data-cp-displayname={cp.displayName}
                     data-cp-id={cp.id}
-                    className='componentItem'
+                    className="componentItem"
                     style={{
                       width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
                       borderColor: curComponentID === cp.id ? '#009E9E' : 'transparent',
@@ -290,11 +295,11 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
 
                     {/* 操作按钮 */}
                     {curComponentID === cp.id && showDeleteButton && (
-                      <div className='operationArea'>
+                      <div className="operationArea">
                         {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                           <>
                             <div
-                              className='copyButton'
+                              className="copyButton"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 console.debug('取消隐藏组件: ', cp);
@@ -303,12 +308,12 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
                             >
                               <img src={CompShowIcon} alt="component show" />
                             </div>
-                            <Divider className='divider' type="vertical" />
+                            <Divider className="divider" type="vertical" />
                           </>
                         )}
 
                         <div
-                          className='copyButton'
+                          className="copyButton"
                           onClick={(e) => {
                             e.stopPropagation();
                             console.log('复制组件: ', cp);
@@ -317,10 +322,10 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
                         >
                           <img src={CompCopyIcon} alt="component copy" />
                         </div>
-                        <Divider className='divider' type="vertical" />
+                        <Divider className="divider" type="vertical" />
 
                         <div
-                          className='deleteButton'
+                          className="deleteButton"
                           onClick={(e) => {
                             e.stopPropagation();
                             console.log('删除组件: ', cp.id);

@@ -7,6 +7,7 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  autoCodeConfig,
   type ICommonBaseType,
   type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
@@ -26,6 +27,7 @@ import {
 } from '../../../constants';
 import type {
   IAlignConfigType,
+  IAutoCodeConfigType,
   IBooleanConfigType,
   IColorConfigType,
   IDataFieldConfigType,
@@ -37,14 +39,14 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 // 输入框组件的schema
@@ -72,6 +74,7 @@ export type TXautoCodeEditData = Array<
   | IColorConfigType
   | IDataFieldConfigType
   | IVerifyConfigType
+  | IAutoCodeConfigType
 >;
 
 export interface XautoCodeConfig extends ICommonBaseType {
@@ -121,13 +124,17 @@ export interface XautoCodeConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
    */
   layout?: TLayoutSelectKeyType;
+
+  // 编码规则
+  autoCodeConfig?: any[],
+  autoCodeDisabled?: boolean,
 
   /**
    * 内容对齐方式：左、中、右
@@ -180,6 +187,7 @@ const XautoCode: XautoCodeSchema = {
     //   name: '占位符',
     //   type: CONFIG_TYPES.PLACEHOLDER_INPUT
     // },
+    autoCodeConfig,
     {
       key: 'tooltip',
       name: '描述信息',
@@ -209,13 +217,13 @@ const XautoCode: XautoCodeSchema = {
     },
     statusConfig,
     alignConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '自动编号',
-      display: true,
+      display: true
     },
     dataField: [],
     placeholder: '',
@@ -224,12 +232,14 @@ const XautoCode: XautoCodeSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100,
+    labelColSpan: 200,
     maxLength: 40,
+    autoCodeConfig: [],
+    autoCodeDisabled: false,
     verify: {
       required: false
     }

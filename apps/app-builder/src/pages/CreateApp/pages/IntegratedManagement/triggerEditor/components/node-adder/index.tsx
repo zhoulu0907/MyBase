@@ -7,7 +7,7 @@ import { readData } from '../../shortcuts/utils';
 import { NodeList } from '../node-list';
 import { PasteIcon, Wrap } from './styles';
 import { generateNodeId } from './utils';
-import { getIsLoop, getHasLoop } from '../../nodes/utils';
+import { getIsLoop, getHasLoop, getNodeTitle } from '../../nodes/utils';
 
 const generateNewIdForChildren = (n: FlowNodeEntity): FlowNodeEntity => {
   if (n.blocks) {
@@ -38,6 +38,8 @@ export default function Adder(props: { from: FlowNodeEntity; to?: FlowNodeEntity
   );
 
   const add = (addProps: any) => {
+    const title = getNodeTitle(addProps.data?.title);
+    addProps.data = { ...addProps.data, title };
     const blocks = addProps.blocks ? addProps.blocks : undefined;
     const block = operation.addFromNode(from, {
       ...addProps,
@@ -117,7 +119,7 @@ export default function Adder(props: { from: FlowNodeEntity; to?: FlowNodeEntity
             }}
             style={{
               backgroundColor: '#fff',
-              color: '#3370ff',
+              color: 'rgb(var(--primary-6))',
               borderRadius: 15
             }}
           />

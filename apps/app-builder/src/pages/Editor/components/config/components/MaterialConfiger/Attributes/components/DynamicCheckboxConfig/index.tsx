@@ -1,5 +1,5 @@
 // import { useAppEntityStore } from '@/store/store_entity';
-import { Button, Form, Input, Checkbox, Space, Message } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, Message, Space } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 // import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
@@ -107,7 +107,6 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                           handlePropsChange(checkboxKey, newList);
                         }}
                         className={styles.tableColumnItemInput}
-                        // TODO(mickey): 国际化
                         placeholder={'新选项'}
                       />
                       <Button
@@ -115,6 +114,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                         shape="circle"
                         size="mini"
                         status="danger"
+                        disabled={configs[checkboxKey].length <= 2}
                         className={styles.tableColumnItemButton}
                         onClick={() => {
                           const newList = [...checkboxConfig];
@@ -132,8 +132,8 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
               <Button
                 type="outline"
                 onClick={() => {
-                  const newLabel = '新选项';
-                  const newValue = _fields[_fields.length - 1].field;
+                  const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
+                  const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${checkboxKey}[0]`;
                   const newList = [
                     ...checkboxConfig,
                     { label: item.displayName || newLabel, value: item.fieldName || newValue }

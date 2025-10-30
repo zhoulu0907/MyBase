@@ -1,6 +1,6 @@
 // 字典
 export interface DictItem {
-  id: number;
+  id: string;
   name: string; // 字典名称
   type: string; // 字典编码
   status: number; // 字典状态
@@ -10,7 +10,7 @@ export interface DictItem {
 
 // 字典数据
 export interface DictData {
-  id: number;
+  id: string;
   sort: number;
   label: string;
   value: string;
@@ -18,8 +18,16 @@ export interface DictData {
   status: number;
   remark?: string;
   createTime?: string;
+  colorType?: string;
 }
 
 export type DictForm = Partial<DictItem>;
 
 export type DictDataForm = Partial<DictData>;
+
+// 批量操作字典数据参数
+export interface BatchConfigDictDataParams {
+  createList: DictData[];
+  updateList: DictData[];
+  deleteIds: string[];
+}

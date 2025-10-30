@@ -4,6 +4,14 @@
   box-sizing: border-box;
   border-radius: 8px;
 
+  .collapse-title-ellipsis {
+    width: 100%;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .item {
     min-height: 200px;
     width: 100%;

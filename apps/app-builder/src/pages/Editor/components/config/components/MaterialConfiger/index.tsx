@@ -31,12 +31,10 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
       <div className={styles.componentInfo}>
         <Tabs defaultActiveTab="attributes" type="line" size="default">
           <TabPane key="attributes" title={<TabTitle title={t('editor.attribute')} />}>
-            <div style={{ width: '270px', height: '100%' }}>
-              <Attributes cpID={cpID} />
-            </div>
+            <Attributes cpID={cpID} />
           </TabPane>
           <TabPane key="advanced" title={<TabTitle title={t('editor.advanced')} />}>
-            <Advanced />
+            <Advanced cpID={cpID} />
           </TabPane>
         </Tabs>
       </div>

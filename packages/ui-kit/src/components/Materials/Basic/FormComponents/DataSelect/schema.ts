@@ -1,48 +1,48 @@
 import {
-    baseConfig,
-    baseDefault,
-    dataFieldConfig,
-    labelColSpanConfig,
-    layoutConfig,
-    selectDataResourceConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  labelColSpanConfig,
+  layoutConfig,
+  selectDataResourceConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    PAGINATION_POSITION_OPTIONS,
-    PAGINATION_POSITION_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  PAGINATION_POSITION_OPTIONS,
+  PAGINATION_POSITION_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IBooleanConfigType,
-    IDataFieldConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    ISelectConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType,
-    IVerifyConfigType,
-    ISelectDataSourceConfigType
+  IBooleanConfigType,
+  IDataFieldConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  ISelectConfigType,
+  ISelectDataSourceConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IVerifyConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType
 } from '../../../types';
 import { XTableConfig } from '../../ListComponents/Table/schema';
 
@@ -117,7 +117,7 @@ export interface XDataSelectConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
-  }
+  };
   /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
@@ -137,20 +137,27 @@ export interface XDataSelectConfig extends ICommonBaseType {
   /**
    * 选择的数据源
    */
-  selectedDataSource?: TTextDefaultType;
+  selectedDataSource?: {
+    entityId: TTextDefaultType;
+    entityName: TTextDefaultType;
+  };
 
-   /**
+  /**
    * 选择的数据源 属性类型待定
    */
   isSetted: TBooleanDefaultType;
   displayFields: {
     label: TTextDefaultType;
     value: TTextDefaultType;
+    dataValue?: TTextDefaultType;
   }[];
-  fillFormField: TBooleanDefaultType;
+  displayFieldsOptions: any[];
+  fillFormFieldOptions: any[];
+  fillRuleSetting: any[];
+  dataFields: any[];
   selectDataFields: TTextDefaultType[];
   filterData: TBooleanDefaultType;
-  sortDataRule: TTextDefaultType[];
+  filterCondition: any[];
   operationAuth: TBooleanDefaultType;
   fastFilter: TBooleanDefaultType;
 
@@ -194,7 +201,7 @@ const XDataSelect: XDataSelectSchema = {
     ...baseDefault,
     label: {
       text: '选择数据',
-      display: true,
+      display: true
     },
     dataField: [],
     description: '',
@@ -202,45 +209,60 @@ const XDataSelect: XDataSelectSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '选择数据',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
-    labelColSpan: 100,
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    labelColSpan: 200,
     saveWithHidden: false,
     verify: {
       required: false,
       noRepeat: false
     },
-    selectedDataSource: '',
+    selectedDataSource: {
+      entityId: '',
+      entityName: ''
+    },
 
     // 选择数据属性 待定
     isSetted: false,
     displayFields: [],
-    fillFormField: false,
+    displayFieldsOptions: [],
+    fillFormFieldOptions: [],
+    fillRuleSetting: [],
+    dataFields: [],
     selectDataFields: [],
     filterData: false,
-    sortDataRule: [],
+    filterCondition: [],
     operationAuth: false,
     fastFilter: false,
     dynamicTableConfig: {
       ...baseDefault,
-        label: '',
-        stripe: true,
-        border: true,
-        borderCell: true,
-        showHeader: true,
-        hover: true,
-        showTotal: true,
-        showOpearate: true,
-        fixedOpearate: true,
-        saveWithHidden: false,
-        width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
-        status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-        pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
-        pageSize: 5,
-        metaData: '',
-        labelColSpan: 100,
-        defaultValue: [],
-        columns: [],
-        searchItems: []}
+      label: {
+        text: '',
+        display: true
+      },
+      stripe: true,
+      border: true,
+      borderCell: true,
+      showHeader: true,
+      hover: true,
+      showTotal: true,
+      showOpearate: true,
+      fixedOpearate: true,
+      saveWithHidden: false,
+      width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+      status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+      pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
+      pageSize: 5,
+      metaData: '',
+      labelColSpan: 200,
+      defaultValue: [],
+      columns: [],
+      searchItems: [],
+      sortByObject: {
+        fieldName: '',
+        sortBy: 1
+      },
+      operationButton: []
+    }
   }
 };
 

@@ -1,4 +1,5 @@
 import { Button, Card, Pagination, Space, Table, Typography } from '@arco-design/web-react';
+import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { IconArrowLeft, IconArrowUp, IconSave } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
 import EditVersionModal from '../modals/EditVersionModal';
@@ -60,10 +61,6 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
     console.log('启用版本:', record);
   };
 
-  // const handleCompareVersion = (record: VersionRecord) => {
-  //   console.log('版本比对:', record);
-  // };
-
   const handleAccessVersion = (record: VersionRecord) => {
     console.log('访问版本:', record);
   };
@@ -103,7 +100,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
     }
   };
 
-  const columns = [
+  const columns: ColumnProps<VersionRecord>[] = [
     {
       title: '版本名称',
       dataIndex: 'versionName',
@@ -192,19 +189,28 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
           版本管理
         </Typography.Title>
         <Space>
-          <Button type="outline" icon={<IconArrowLeft />} className={styles.actionButton}>
+          <Button icon={<IconArrowLeft />} className={styles.actionButton}>
             版本回退
           </Button>
-          <Button type="outline" icon={<IconSave />} onClick={handleSaveVersion} className={styles.actionButton}>
+          <Button icon={<IconSave />} onClick={handleSaveVersion} className={styles.actionButton}>
             保存版本
           </Button>
-          <Button type="primary" icon={<IconArrowUp />} onClick={handlePublishVersion} className={styles.publishButton}>
+          <Button type="primary" icon={<IconArrowUp />} onClick={handlePublishVersion}>
             发布版本
           </Button>
         </Space>
       </div>
 
-      <Table columns={columns} data={list} rowKey="id" pagination={false} className={styles.versionTable} />
+      <Table
+        scroll={{
+          y: 300
+        }}
+        columns={columns}
+        data={list}
+        rowKey="id"
+        pagination={false}
+        className={styles.versionTable}
+      />
 
       <div className={styles.pagination}>
         <Pagination

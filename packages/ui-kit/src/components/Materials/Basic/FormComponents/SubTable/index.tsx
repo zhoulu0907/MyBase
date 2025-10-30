@@ -1,297 +1,420 @@
-import { useEffect, useState } from 'react';
-import { nanoid } from 'nanoid';
-import { ReactSortable } from 'react-sortablejs';
-import { IconPlus } from '@arco-design/web-react/icon';
-import { useSignals } from '@preact/signals-react/runtime';
-
-import { Layout, Message, Table, Button, Popconfirm, Form, Grid } from '@arco-design/web-react';
-import { getComponentConfig } from 'src/components/Materials/schema';
-import EditRender from 'src/components/render/EditRender';
-import DragableTable from './dragableTable';
-import { usePageEditorSignal } from 'src/hooks/useSignal';
-import { COMPONENT_GROUP_NAME } from 'src/utils/const';
-import { STATUS_OPTIONS, STATUS_VALUES, LAYOUT_VALUES, LAYOUT_OPTIONS } from '../../../constants';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { getComponentSchema } from '../../../schema';
+import { Divider, Layout, Form, Button, Table } from '@arco-design/web-react';
+import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
 import { type XSubTableConfig } from './schema';
+import { useSignals } from '@preact/signals-react/runtime';
+import { usePageEditorSignal } from 'src/hooks/useSignal';
+import { ReactSortable } from 'react-sortablejs';
+import { getComponentConfig } from 'src/components/Materials/schema';
+import { getComponentSchema } from '../../../schema';
+import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
+import EditRender from 'src/components/render/EditRender';
+import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { v4 as uuidv4 } from 'uuid';
+import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import { useEffect, useState } from 'react';
+import PreviewRender from 'src/components/render/PreviewRender';
+import { pagesRuntimeSignal } from '@onebase/common';
 import './index.css';
 
-const leftPanelWidth = 318;
-const rightPanelWidth = 310;
-const canvasPaddingWidth = 40 + 32 + 10;
-const canvasMarginWidth = 10;
-const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
-
-const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
-  const { colCount, id, runtime = true, label, layout, tooltip, labelColSpan = 100, status, verify } = props;
-
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
-
   const {
+    curComponentID,
     setCurComponentID,
+    clearCurComponentID,
     setCurComponentSchema,
     pageComponentSchemas,
     setPageComponentSchemas,
+    delPageComponentSchemas,
+    showDeleteButton,
     setShowDeleteButton,
-    layoutSubComponents,
-    setLayoutSubComponents
+    subTableComponents,
+    setSubTableComponents
   } = usePageEditorSignal();
+  const { subTableDataLength } = pagesRuntimeSignal;
+  const { id, label, tooltip, labelColSpan = 100, status, verify, runtime = true, detailMode } = props;
 
-  const [columns, setColumns] = useState<any[]>([]);
-  const [tableData, setTableData] = useState<any[]>([]);
-
-  // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
-  const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
-
-  useEffect(() => {
-    if (colComponents[0].length === 0) return;
-    const index = {
-      id: 'index',
-      title: '序号',
-      dataIndex: 'index',
-      align: 'center',
-      width: 65,
-      render: (_: any, __: any, rowIndex: number) => rowIndex + 1,
-    };
-    const operation = {
-      id: 'operation',
-      title: '操作',
-      dataIndex: 'operation',
-      align: 'center',
-      fixed: 'right',
-      width: 150,
-      render: (_: any, record: any) => (
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-          <Button size="small" type="text" onClick={() => handleCopy(record)}>
-            复制
-          </Button>
-          <Popconfirm
-            title="确认删除吗?"
-            disabled={colComponents[0].length === 1}
-            onOk={() => handleDelete(record.key)}
-          >
-            <Button size="small" type="text" disabled={colComponents[0].length === 1} status="danger">
-              删除
-            </Button>
-          </Popconfirm>
-        </div>
-      ),
+  // 判断拖拽的组件是否是表单组件
+  const isFormComponent = (type: string): boolean => {
+    let isForm = false;
+    const keys = Object.keys(FORM_COMPONENT_TYPES);
+    for (let key of keys) {
+      if (type === FORM_COMPONENT_TYPES[key as keyof typeof FORM_COMPONENT_TYPES]) {
+        isForm = true;
+      }
     }
 
-    const copyData = [...colComponents[0]];
-
-    const customData = copyData.map(comp => {
-
-      const { id: cpID, type: itemType, displayName } = comp;
-
-      const schemaConfig = getComponentConfig(pageComponentSchemas[cpID], itemType);
-      const schema = getComponentSchema(itemType as any);
-
-      schema.config = schemaConfig;
-      schema.config.cpName = displayName;
-      schema.config.id = cpID;
-
-      const props = {
-        id: cpID,
-        type: itemType,
-        ...schema,
-        config: {
-          ...schema.config,
-          label: {
-            ...schema.config.label,
-            display: false
-          },
-          status
-        },
-      };
-
-      setPageComponentSchemas(cpID, props);
-
-      if (tableData.length === 0) {
-        const defaultData = [{ [comp.id]: '', key: nanoid() }];
-        setTableData(defaultData);
-      } else if (tableData.length === 1) {
-        setTableData(prev => {
-          // 创建第一个对象的副本并添加新字段
-          const updatedFirstItem = { ...prev[0], [comp.id]: '' };
-          // 创建新数组，替换第一个元素
-          return [updatedFirstItem];
-        });
-      }
-
-      return {
-        ...comp,
-        id: comp.id,
-        title: displayName,
-        dataIndex: comp.id,
-        align: 'center',
-        width: 200,
-        render: (_: any, _record: any) => (
-          <div key={comp.id}>
-            <EditRender runtime={runtime} cpId={comp.id} cpType={comp.type} pageComponentSchema={props} />
-          </div>
-        )
-      }
-    });
-
-    const newColumns = [index, ...customData, operation];
-    setColumns(newColumns);
-  }, [colComponents[0], runtime, status]);
-
-  // 如果列数变了，就重新初始化列
-  useEffect(() => {
-    const currentColumns = layoutSubComponents[id];
-    if (!currentColumns || currentColumns.length !== colCount) {
-      const newColumns = Array.from({ length: colCount }, () => []);
-      setLayoutSubComponents(id, newColumns);
-    }
-  }, [colCount, id, colComponents]);
-
-  // 复制
-  const handleCopy = (record: any) => {
-    Message.success('复制成功');
-    setTableData(prev => [...prev, { ...record, key: nanoid() }]);
+    return isForm;
   };
 
-  // 删除
-  const handleDelete = (key: string) => {
-    setTableData(prev => prev.filter(item => item.key !== key));
-    Message.success('删除成功');
+  // 取消隐藏组件
+  const handleShowComponent = (componentId: string) => {
+    const schema = pageComponentSchemas[componentId];
+    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+    setPageComponentSchemas(componentId, schema);
+    setCurComponentID(componentId);
+    setCurComponentSchema(schema);
+    setShowDeleteButton(false);
+  };
+  // 复制组件
+  const handleCopyComponent = (comp: any, originId: string, index: number) => {
+    // ID 映射表，记录旧 ID 到新 ID 的映射
+  };
+  // 删除组件
+  const handleDeleteComponent = (componentId: string) => {
+    // 从组件列表中移除 遍历，过滤掉 id 匹配的组件
+    const updatedColumns = subTableComponents[id].filter((cp) => cp.id !== componentId);
+    setSubTableComponents(id, updatedColumns);
+    delPageComponentSchemas(componentId);
+
+    // 如果删除的是当前选中的组件，清除选中状态
+    if (curComponentID === componentId) {
+      delPageComponentSchemas(componentId);
+      clearCurComponentID();
+    }
+  };
+
+  // 拖拽添加
+  const onSubAdd = (e: any) => {
+    const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
+    const itemType = e.item.getAttribute('data-cp-type');
+    // 不允许拖拽主、子表嵌套
+    if (
+      itemType === 'entity' ||
+      itemType == ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
+      itemType == ENTITY_COMPONENT_TYPES.SUB_ENTITY
+    ) {
+      return;
+    }
+    // 只能拖拽表单 && 不能是子表单
+    const isForm = isFormComponent(itemType || '');
+    if (!itemType || !isForm || itemType === FORM_COMPONENT_TYPES.SUB_TABLE) {
+      if (cpID) {
+        const updatedColumns = subTableComponents[cpID]?.filter((cp) => cp.id !== cpID);
+        if (updatedColumns) {
+          setSubTableComponents(id, updatedColumns);
+        }
+        delPageComponentSchemas(cpID);
+        clearCurComponentID();
+      }
+      return;
+    }
+
+    const entityId = e.item.getAttribute('data-entity-id');
+    // 拖拽的子表项必须是同一个子表
+    if (entityId) {
+      const sameField = subTableComponents[id]?.every((ele) => {
+        const dataField = pageComponentSchemas[ele.id].config.dataField;
+        return !dataField || dataField?.[0] === entityId;
+      });
+      if (!sameField) {
+        return;
+      }
+    }
+
+    // 表单项配置
+    const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
+    const schema = getComponentSchema(itemType as any);
+
+    const fieldId = e.item.getAttribute('data-field-id');
+    const itemDisplayName = e.item.getAttribute('data-label') || e.item.getAttribute('data-cp-displayname');
+    schema.config = schemaConfig;
+    schema.config.cpName = itemDisplayName;
+    schema.config.label.text = itemDisplayName;
+    schema.config.label.display = false;
+    schema.config.dataField = [entityId, fieldId];
+    schema.config.id = cpID;
+    const props = {
+      id: cpID,
+      type: itemType,
+      ...schema
+    };
+    const newSub = { id: cpID, type: itemType, displayName: itemDisplayName };
+    setSubTableComponents(id, [...subTableComponents[id], newSub]);
+    setPageComponentSchemas(cpID!, props);
+    setCurComponentID(cpID!);
+    setCurComponentSchema(props);
+    setShowDeleteButton(false);
+  };
+
+  // 子表单内排序 拖拽选中
+  const onSubStart = (e: any) => {
+    const cpID = e.item.getAttribute('data-id') || '';
+    setCurComponentID(cpID);
+    const curComponentSchema = pageComponentSchemas[cpID] || {};
+    setCurComponentSchema(curComponentSchema);
+    setShowDeleteButton(true);
+  };
+  // 子表单里的元素 点击事件
+  const onSubComponentClick = (e: React.MouseEvent<HTMLDivElement>, cp: GridItem) => {
+    e.stopPropagation();
+    setCurComponentID(cp.id);
+    const curComponentSchema = pageComponentSchemas[cp.id];
+    setCurComponentSchema(curComponentSchema);
+    setShowDeleteButton(true);
+  };
+
+  /**
+   * 预览
+   */
+  const [subTableData, setSubTableData] = useState<any[]>([]);
+  const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
+  const { form } = Form.useFormContext();
+
+  useEffect(() => {
+    if (runtime) {
+      getTableColumns();
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('subTableDataLength: ', subTableDataLength.value);
+
+    let newSubTableData: any[] = [];
+    for (let i = 0; i < subTableDataLength.value[id]; i++) {
+      newSubTableData.push({ key: `${i}` });
+    }
+    setSubTableData(newSubTableData);
+  }, [subTableDataLength.value]);
+
+  // 获取表格配置 columns
+  const getTableColumns = () => {
+    let tableColumns = [];
+    for (let column of subTableComponents[id] || []) {
+      const displayName = pageComponentSchemas[column.id].config.label.text || column.displayName;
+      const required = pageComponentSchemas[column.id].config?.verify?.required;
+      const tableColumn = {
+        title: (
+          <>
+            {displayName}
+            {required && <span style={{ color: 'red', paddingLeft: '4px' }}>*</span>}
+          </>
+        ),
+        dataIndex: column.id,
+        key: column.id,
+        render: (_text: string, _record: any, index: number) => {
+          const config = {
+            ...pageComponentSchemas[column.id].config,
+            dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`]
+          };
+          const pageSchema = { ...pageComponentSchemas[column.id], config };
+          return (
+            <PreviewRender
+              cpId={column.id}
+              cpType={column.type}
+              detailMode={detailMode}
+              pageComponentSchema={pageSchema}
+              runtime={true}
+            />
+          );
+        }
+      };
+      tableColumns.push(tableColumn);
+    }
+    if (runtime && !detailMode) {
+      tableColumns.push({
+        title: '操作',
+        dataIndex: 'action',
+        width: 100,
+        fixed: 'right',
+        render: (_col: any, _record: any, index: number) => {
+          return (
+            <Button type="text" status="danger" icon={<IconDelete />} onClick={() => handleDelete(index)}></Button>
+          );
+        }
+      });
+    }
+    setSubTableColumns(tableColumns);
   };
 
   // 新增
   const handleAdd = () => {
-    setTableData(prev => [...prev, { ...tableData[0], key: nanoid() }]);
+    const keys = subTableComponents[id].map((ele) => ele.id);
+    let newData: any = {};
+    keys.forEach((key) => {
+      newData[key] = undefined;
+    });
+    setSubTableData((prevData) => [...prevData, newData]);
+  };
+  // 删除
+  const handleDelete = (index: number) => {
+    setSubTableData((prevData) => prevData.filter((_, i) => i !== index));
+
+    const formData = form.getFieldsValue();
+
+    const filterFormData = formData[id].filter((_: any, i: number) => i !== index);
+
+    const updateFormData = {
+      ...formData,
+      [id]: filterFormData
+    };
+
+    form.setFieldsValue(updateFormData);
   };
 
   return (
-    <Layout className="XSubTable">
-      {colComponents.map((_colComponents, index) => (
-        <div key={index} className="item">
-          <ReactSortable
-            id={`workspace-content-${id}-${index}`}
-            list={colComponents[index]}
-            setList={(newList) => {
-              // 使用函数式更新确保状态更新的原子性
-              //   setColComponentsMap(id, (prevColumns: any[][]) => {
-              //     const updatedColumns = [...(prevColumns || [])];
-              //     updatedColumns[index] = newList;
-              //     return updatedColumns;
-              //   });
-
-              //   const updatecolComponents = colComponents;
-              //   updatecolComponents[index] = newList;
-              //   setLayoutSubComponents(id, updatecolComponents);
-              colComponents[index] = newList;
-            }}
-            onAdd={(e) => {
-              // 允许拖入的组件
-              const validata = ['XInputText', 'XInputTextArea', 'XInputNumber', 'XDatePicker', 'XRadio', 'XCheckbox', 'XSelectOne', 'XSelectMutiple', 'XImgUpload', 'XFileUpload', 'XUserSelect', 'XDeptSelect'];
-              console.debug("onAdd", e.item.getAttribute('data-cp-type'));
-
-              const cpID = e.item.id || e.item.getAttribute('data-cp-id');
-              console.log(`拖入组件${id}内， 索引为${index}， 拖入组件为 ${cpID}`);
-              const itemType = e.item.getAttribute('data-cp-type') || '';
-              if (!validata.includes(itemType)) {
-                return Message.warning('不支持的组件类型');
-              }
-
-              const itemDisplayName = e.item.getAttribute('data-cp-displayname');
-              const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
-              const schema = getComponentSchema(itemType as any);
-
-              schema.config = schemaConfig;
-              schema.config.cpName = itemDisplayName;
-              schema.config.id = cpID;
-
-              const props = {
-                id: cpID,
-                type: itemType,
-                ...schema
-              };
-
-              setPageComponentSchemas(cpID!, props);
-
-              const containerType = FORM_COMPONENT_TYPES.SUB_TABLE;
-
-              const containerSchemaConfig = getComponentConfig(pageComponentSchemas[id], containerType);
-              const containerSchema = getComponentSchema(containerType);
-
-              containerSchema.config = containerSchemaConfig;
-              containerSchema.config.cpName = '子表单';
-              containerSchema.config.id = id;
-
-              const containerProps = {
-                id,
-                type: containerType,
-                ...containerSchema
-              };
-
-              setCurComponentID(id);
-              setCurComponentSchema(containerProps);
-
-              setShowDeleteButton(false);
-            }}
-            onRemove={(e) => {
-              const cpID = e.item.getAttribute('data-cp-id');
-              console.log(`删除组件${id}内， 索引为${index}， 删除组件为 ${cpID}`);
-            }}
-            group={{
-              name: COMPONENT_GROUP_NAME
-            }}
-            sort={true}
-            forceFallback={true}
-            animation={150}
-            fallbackOnBody={true}
-            swapThreshold={0.65}
-            className="content"
-          // onStart={(e) => {
-          //   console.log('onStart', e);
-          //   const cpID = e.item.getAttribute('data-id') || '';
-          //   setCurComponentID(cpID);
-          //   const curComponentSchema = pageComponentSchemas[cpID] || {};
-          //   setCurComponentSchema(curComponentSchema);
-          //   setShowDeleteButton(true);
-          // }}
-          >
-            <Form.Item
-              label={label.display && label.text}
-              // field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SUB_TABLE}_${nanoid()}`}
-              layout={layout}
-              tooltip={tooltip}
-              labelCol={{
-                style: { width: labelColSpan, flex: 'none' }
+    <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
+      <Form.Item
+        label={label.display && label.text}
+        layout="vertical"
+        rules={[{ required: verify?.required }]}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
+        }}
+        wrapperCol={{ style: { flex: 1 } }}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          width: '100%',
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
+      >
+        {runtime ? (
+          <>
+            <div className="subTableContent">
+              <Table
+                columns={subTableColumns}
+                data={subTableData}
+                size="small"
+                scroll={{ x: 'max-content' }}
+                style={{
+                  width: '100%'
+                }}
+                rowKey="id"
+                pagination={false}
+              />
+            </div>
+            <div className="subTableFooter">
+              {!detailMode && (
+                <Button
+                  type="outline"
+                  icon={<IconPlus />}
+                  style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
+                  onClick={handleAdd}
+                >
+                  新增一项
+                </Button>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="simulate-header">
+              {subTableComponents[id] &&
+                subTableComponents[id].map((cp, index) => (
+                  <div key={`header-${index}`} className="simulate-header-item">
+                    {pageComponentSchemas[cp.id].config.label.text || pageComponentSchemas[cp.id].config.displayName}
+                  </div>
+                ))}
+            </div>
+            <ReactSortable
+              id={`workspace-content-subtable-${id}`}
+              list={subTableComponents[id] || []}
+              setList={(newList) => {
+                const dataFieldPage = subTableComponents[id]?.find(
+                  (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
+                );
+                // 已有的数据源子表id
+                const dataField = pageComponentSchemas?.[dataFieldPage?.id].config?.dataField?.[0];
+                /**
+                 * 不允许拖拽主、子表嵌套
+                 * 拖拽的子表项必须是同一个子表
+                 */
+                setSubTableComponents(
+                  id,
+                  newList.filter(
+                    (ele) => ele.type !== 'entity' && (!ele.entityID || !dataField || ele.entityID === dataField)
+                  )
+                );
               }}
-              wrapperCol={{ style: { flex: 1 } }}
-              rules={[{ required: verify?.required }]}
-              hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-              style={{
-                margin: 0,
-                width: '100%',
-                flexDirection: 'row',
-                flexWrap: 'nowrap',
-                display: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? 'flex' : 'unset',
-                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+              onAdd={onSubAdd}
+              group={{
+                name: COMPONENT_GROUP_NAME
               }}
+              sort={true}
+              forceFallback={true}
+              animation={150}
+              fallbackOnBody={true}
+              swapThreshold={0.65}
+              className="XSubTable-content"
+              onStart={onSubStart}
             >
-              <div style={{
-                width: '100%',
-                minHeight: 130,
-                display: 'flex',
-                alignItems: 'center',
-                maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0) + 2}px)`,
-              }}>
-                {
-                  runtime ? <Table columns={columns} data={tableData} scroll={{ x: 'max-content' }} style={{ width: `calc(100% - ${LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0}px)` }} /> :
-                    <DragableTable id={id} status={status} columns={columns} data={tableData} runtime={runtime} setColumns={setColumns} />
-                }
-              </div>
-              <Button type='outline' icon={<IconPlus />} style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }} onClick={handleAdd}>新增一项</Button>
-            </Form.Item>
+              {subTableComponents[id] &&
+                subTableComponents[id].map((cp: GridItem, index: number) => (
+                  <div
+                    key={cp.id}
+                    data-cp-type={cp.type}
+                    data-cp-displayname={cp.displayName}
+                    data-cp-id={cp.id}
+                    className="componentItem"
+                    style={{
+                      borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
+                    }}
+                    onClick={(e) => {
+                      onSubComponentClick(e, cp);
+                    }}
+                  >
+                    <EditRender
+                      runtime={runtime}
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={pageComponentSchemas[cp.id]}
+                    />
 
-          </ReactSortable>
-        </div>
-      ))}
+                    {/* 操作按钮 */}
+                    {curComponentID === cp.id && showDeleteButton && (
+                      <div className="operationArea">
+                        {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                          <>
+                            <div
+                              className="copyButton"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.debug('取消隐藏组件: ', cp);
+                                handleShowComponent(cp.id);
+                              }}
+                            >
+                              <img src={CompShowIcon} alt="component show" />
+                            </div>
+                            <Divider className="divider" type="vertical" />
+                          </>
+                        )}
+
+                        <div
+                          className="copyButton"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('复制组件: ', cp);
+                            handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
+                          }}
+                        >
+                          <img src={CompCopyIcon} alt="component copy" />
+                        </div>
+                        <Divider className="divider" type="vertical" />
+
+                        <div
+                          className="deleteButton"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('删除组件: ', cp.id);
+                            handleDeleteComponent(cp.id);
+                          }}
+                        >
+                          <img src={CompDeleteIcon} alt="component delete" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </ReactSortable>
+          </>
+        )}
+      </Form.Item>
     </Layout>
   );
 };

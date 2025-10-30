@@ -57,6 +57,11 @@ export interface Application {
    * 更新人
    */
   updateUser?: string;
+  /**
+   * 版本号
+   */
+  versionNumber?: string;
+
 }
 
 /**

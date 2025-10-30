@@ -101,7 +101,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
 
   const handleDelete = async () => {
     setDeleteLoading(true);
-    const res = await deleteEntity(node.entityId);
+    const res = await deleteEntity(node.id);
 
     setDeleteLoading(false);
     setDeleteModalVisible(false);
@@ -178,7 +178,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
           <Button
             type="primary"
             onClick={() => {
-              onSave({ ...form.getFieldsValue(), id: node.entityId });
+              onSave({ ...form.getFieldsValue(), id: node.id || node.entityId });
               successCallback?.();
             }}
           >

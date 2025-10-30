@@ -33,19 +33,19 @@ import type {
   ILayoutConfigType,
   INumberConfigType,
   IPlaceholderConfigType,
+  ISecurityConfigType,
   ISelectConfigType,
   IStatusConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  ISecurityConfigType,
-  IVerifyConfigType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputNumberSchema {
@@ -124,7 +124,7 @@ export interface XInputNumberConfig extends ICommonBaseType {
     required: TBooleanDefaultType;
     min: TNumberDefaultType;
     max: TNumberDefaultType;
-  }
+  };
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -252,13 +252,13 @@ const XInputNumber: XInputNumberSchema = {
       name: '安全',
       type: CONFIG_TYPES.SECURITY
     },
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
       text: '数字录入',
-      display: true,
+      display: true
     },
     dataField: [],
     placeholder: '请输入数字',
@@ -267,14 +267,14 @@ const XInputNumber: XInputNumberSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     step: 1,
-    precision: 2,
+    precision: 0,
     unit: '',
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100,
+    labelColSpan: 200,
     security: {
       display: false,
       type: ''
@@ -282,7 +282,7 @@ const XInputNumber: XInputNumberSchema = {
     verify: {
       required: false,
       min: 0,
-      max: 100,
+      max: Infinity
     }
   }
 };

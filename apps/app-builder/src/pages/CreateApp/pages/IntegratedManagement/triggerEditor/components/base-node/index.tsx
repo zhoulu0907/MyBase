@@ -1,14 +1,16 @@
-import { useCallback, useContext } from 'react';
-
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { ConfigProvider } from '@douyinfe/semi-ui';
 import { FlowNodeEntity, useNodeRender } from '@flowgram.ai/fixed-layout-editor';
-
-import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { NodeRenderContext, SidebarContext } from '../../context';
+import { NodeType } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
+import { useCallback } from 'react';
+import { NodeRenderContext } from '../../context';
 import styles from './index.module.less';
 import { ErrorIcon } from './styles';
 
 export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
+  useSignals();
+
   /**
    * Provides methods related to node rendering
    * 提供节点渲染相关的方法
@@ -29,12 +31,12 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
   /**
    * Sidebar control
    */
-  const sidebar = useContext(SidebarContext);
   const { setNodeId } = triggerEditorSignal;
 
   return (
     <ConfigProvider getPopupContainer={getPopupContainer}>
-      {form?.getValueIn('invalid') && <ErrorIcon />}
+      {triggerEditorSignal.isInvalidNode(node.id) && <ErrorIcon />}
+
       <div
         /*
          * onMouseEnter is added to a fixed layout node primarily to listen for hover highlighting of branch lines
@@ -43,15 +45,15 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
         onMouseEnter={nodeRender.onMouseEnter}
         onMouseLeave={nodeRender.onMouseLeave}
         className={
-          nodeRender.activated && !form?.getValueIn('invalid')
-            ? `${styles.baseNodeStyle} ${styles.activated}`
-            : styles.baseNodeStyle
+          // if-block 样式 没有边框 阴影
+          nodeRender.activated && !triggerEditorSignal.isInvalidNode(node.id)
+            ? `${styles.baseNodeStyle} ${styles.activated} ${nodeRender.type === NodeType.IF_BLOCK ? styles.noShadow : ''}`
+            : `${styles.baseNodeStyle} ${nodeRender.type === NodeType.IF_BLOCK ? styles.noShadow : ''}`
         }
         onClick={() => {
           if (nodeRender.dragging) {
             return;
           }
-          //   sidebar.setNodeId(nodeRender.node.id);
           console.log('onClick', nodeRender.node.id);
           setNodeId(nodeRender.node.id);
         }}
@@ -62,10 +64,9 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
            * isBlockIcon: 整个 condition 分支的 头部节点
            * isBlockOrderIcon: 分支的第一个节点
            */
-          ...(nodeRender.isBlockOrderIcon || nodeRender.isBlockIcon ? {} : {}),
           ...nodeRender.node.getNodeRegistry().meta.style,
           opacity: nodeRender.dragging ? 0.3 : 1,
-          outline: form?.getValueIn('invalid') ? '1px solid red' : 'none'
+          outline: triggerEditorSignal.isInvalidNode(node.id) ? '1px solid rgb(var(--red-6))' : 'none'
         }}
       >
         <NodeRenderContext.Provider value={nodeRender}>{form?.render()}</NodeRenderContext.Provider>

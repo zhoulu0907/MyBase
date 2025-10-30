@@ -270,3 +270,21 @@ export const getEntityListByApp = (appId: string) => {
 export const getAppEntities = (appId: string) => {
   return metadataService.post(`/entity-relationship/app-entities?appId=${appId}`);
 };
+
+/**
+ * 按字段ID获取选项列表
+ * fieldId
+ * @returns 字段配置信息
+ */
+export const getEntityFieldOptions = (fieldId: string) => {
+  return metadataService.post(`/entity-field/option/list?fieldId=${fieldId}`);
+};
+
+/**
+ * 按字段ID获取自动编号配置与规则
+ * fieldId
+ * @returns 自动编号配置规则
+ */
+export const getAutoNumberConfig = (fieldId:string) =>{
+  return metadataService.post(`/auto-number/config/get?fieldId=${fieldId}`);
+}

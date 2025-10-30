@@ -35,11 +35,6 @@ export const createTriggerEditorSignal = () => {
     flowId.value = id;
   };
 
-  //   const pageId = signal<string>();
-  //   const setPageId = (id: string) => {
-  //     pageId.value = id;
-  //   };
-
   const mainEntities = signal<any[]>([]);
   const setMainEntities = (entities: any[]) => {
     mainEntities.value = entities;
@@ -48,6 +43,14 @@ export const createTriggerEditorSignal = () => {
   const subEntities = signal<any[]>([]);
   const setSubEntities = (entities: any[]) => {
     subEntities.value = entities;
+  };
+
+  const invalidNodes = signal<Record<string, boolean>>({});
+  const setInvalidNode = (nodeId: string, invalid: boolean) => {
+    invalidNodes.value = { ...invalidNodes.value, [nodeId]: invalid };
+  };
+  const isInvalidNode = (nodeId: string) => {
+    return invalidNodes.value[nodeId] == true || false;
   };
 
   return {
@@ -66,8 +69,9 @@ export const createTriggerEditorSignal = () => {
     flowId,
     setFlowId,
 
-    // pageId,
-    // setPageId,
+    invalidNodes,
+    setInvalidNode,
+    isInvalidNode,
 
     mainEntities,
     setMainEntities,

@@ -13,6 +13,7 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   UPLOAD_OPTIONS,
+  UPLOAD_TYPE_OPTIONS,
   UPLOAD_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
@@ -20,7 +21,9 @@ import {
   TABS_POSITION_OPTIONS,
   TABS_POSITION_VALUES,
   COLLAPSED_OPTIONS,
-  COLLAPSED_VALUES
+  COLLAPSED_VALUES,
+  BUTTON_OPTIONS,
+  BUTTON_VALUES
 } from './constants';
 import type {
   IAlignConfigType,
@@ -46,7 +49,9 @@ import type {
   ITabsPositionConfigType,
   IImageConfigType,
   IFileConfigType,
-  ICollapsedConfigType
+  ICollapsedConfigType,
+  ITableButtonConfigType,
+  ITableOperationConfigType,
 } from './types';
 
 export interface ICommonBaseType {
@@ -243,6 +248,28 @@ export const listTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
     {
       key: UPLOAD_OPTIONS.CARD,
       text: UPLOAD_OPTIONS.CARD,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
+    }
+  ]
+};
+export const uploadTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
+  key: 'uploadType',
+  name: '上传方式',
+  type: CONFIG_TYPES.STATUS_RADIO,
+  range: [
+    {
+      key: UPLOAD_OPTIONS.TEXT,
+      text: UPLOAD_TYPE_OPTIONS.TEXT,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+    },
+    {
+      key: UPLOAD_OPTIONS.LIST,
+      text: UPLOAD_TYPE_OPTIONS.LIST,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
+    },
+    {
+      key: UPLOAD_OPTIONS.CARD,
+      text: UPLOAD_TYPE_OPTIONS.CARD,
       value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
     }
   ]
@@ -486,3 +513,36 @@ export const collapsedConfig: ICollapsedConfigType<TCollapsedSelectKeyType> = {
     }
   ]
 };
+
+export type TButtonSelectKeyType = (typeof BUTTON_VALUES)[keyof typeof BUTTON_VALUES];
+export const tableButtonPermissionConfig: ITableButtonConfigType<TButtonSelectKeyType> = {
+  key: 'advancedButtonPermission',
+  name: '按钮权限配置',
+  type: CONFIG_TYPES.TABLE_BUTTON,
+  advanced: true,
+  range: [
+    {
+      key: BUTTON_OPTIONS.HIDDEN,
+      text: BUTTON_OPTIONS.HIDDEN,
+      value: BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN]
+    },
+    {
+      key: BUTTON_OPTIONS.DISABLED,
+      text: BUTTON_OPTIONS.DISABLED,
+      value: BUTTON_VALUES[BUTTON_OPTIONS.DISABLED]
+    }
+  ]
+};
+
+export const tableOperationConfig: ITableOperationConfigType = {
+  key: 'tableOperation',
+  name: '操作栏配置',
+  type: CONFIG_TYPES.TABLE_OPERATION,
+  advanced: true,
+};
+
+export const autoCodeConfig:any = {
+  key: 'rules',
+  name:'编号规则配置',
+  type: CONFIG_TYPES.AUTO_CODE_RULES
+}

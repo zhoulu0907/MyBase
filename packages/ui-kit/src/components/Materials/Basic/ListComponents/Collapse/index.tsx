@@ -5,7 +5,7 @@ import { type XCollapseConfig } from './schema';
 
 const CollapseItem = Collapse.Item;
 
-const XCollapse = memo((props: XCollapseConfig & { runtime?: boolean }) => {
+const XCollapse = memo((props: XCollapseConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, runtime = true } = props;
 
   return (

@@ -1,12 +1,12 @@
 @import '../../../../styles/variables.less';
 
-.node-content {
+.nodeContent {
   width: 280px;
   height: auto;
   background-color: #fff;
-  border: 1px solid #39b85f;
+  border: 1px solid rgba(var(--primary-6), 1);
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(var(--primary-10), 0.3);
   padding: 0;
   margin: 0;
   overflow: hidden;
@@ -14,20 +14,17 @@
   display: flex;
   flex-direction: column;
   font-size: 12px;
-  // position: relative
-  .node-header {
-    background: #c0dcc8a5;
-    // color: white;
+  .nodeHeader {
+    background: rgba(var(--primary-3), 0.2);
     padding: 12px 16px;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     font-size: 14px;
     font-weight: 500;
-    border-top: 4px solid #39b85f;
-    // cursor: pointer;
+    border-top: 4px solid rgba(var(--primary-6), 1);
   }
-  .node-title {
+  .nodeTitle {
     font-weight: 500;
     font-size: 14px;
     white-space: nowrap;
@@ -36,7 +33,7 @@
     flex: 1;
     text-align: left;
   }
-  .node-isNew {
+  .nodeIsNew {
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -44,42 +41,40 @@
     display: inline-block;
     position: absolute;
   }
-  .refresh-icon {
+  .fieldIsNew {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #f5222d;
+    display: inline-block;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+  .refreshIcon {
     width: 12px;
     height: 12px;
     margin-right: 10px;
     cursor: pointer;
     border-radius: 50%;
-    background-color: #39b85f;
+    background-color: rgba(var(--primary-6), 1);
     color: #fff;
     padding: 2px;
   }
-  .more-icon {
+  .moreIcon {
     width: 16px;
     height: 16px;
     margin-left: 6px;
     cursor: pointer;
   }
-  // TODO 样式未生效
-  .more-icon-popover :deep(.arco-popover-content-rt) {
-    padding: 0 !important;
-    background-color: #fff !important;
-    border: 1px solid #39b85f;
-    border-radius: 4px;
-  }
 }
 
-.customize-btn {
-  background: transparent;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
+.nodeSelected {
+  box-shadow:
+    0 0 0 4px rgba(var(--primary-8), 0.2),
+    0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
-.node-body {
+.nodeBody {
   background: white;
   padding: 0;
   flex: 1;
@@ -88,30 +83,30 @@
   flex-direction: column;
 }
 
-.field-section {
+.fieldSection {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.field-section-header {
+.fieldSectionHeader {
   display: flex;
   align-items: center;
   padding: 12px 16px;
 }
 
-.section-title {
+.sectionTitle {
   flex: 1;
   font-size: 13px;
   font-weight: 500;
   color: #262626;
 }
 
-.section-count {
+.sectionCount {
   color: #8c8c8c;
   font-size: 12px;
   margin-left: 4px;
 }
 
-.collapse-icon {
+.collapseIcon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,7 +124,7 @@
   display: none;
 }
 
-.field-section-content {
+.fieldSectionContent {
   max-height: auto;
   overflow: hidden;
   transition: max-height 0.3s ease-in-out;
@@ -139,7 +134,7 @@
   }
 }
 
-.field-item {
+.fieldItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -148,27 +143,27 @@
   color: #8c8c8c;
 }
 
-.system-field:not(:last-child) {
+.systemField:not(:last-child) {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.custom-field {
+.customField {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.field-name {
+.fieldName {
   font-weight: 500;
 }
 
-.field-type {
+.fieldType {
   color: #8c8c8c;
 }
 
-.field-section {
+.fieldSection {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.field-section-header {
+.fieldSectionHeader {
   display: flex;
   align-items: center;
   padding: 12px 16px;
@@ -176,24 +171,24 @@
   user-select: none;
 }
 
-.section-title {
+.sectionTitle {
   flex: 1;
   font-size: 13px;
   font-weight: 500;
   color: #262626;
 }
 
-.section-count {
+.sectionCount {
   color: #8c8c8c;
   font-size: 12px;
   margin-left: 4px;
 }
 
-.field-section-content {
+.fieldSectionContent {
   padding: 0 16px;
 }
 
-.field-item {
+.fieldItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -202,22 +197,33 @@
   color: #8c8c8c;
 }
 
-.custom-field {
+.customField {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.field-name {
+.fieldName {
   font-weight: 500;
+  position: relative;
 }
 
-.clickable-field {
+.field-isNew {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #f5222d;
+  display: inline-block;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.clickableField {
   cursor: pointer;
   transition: background-color 0.2s ease;
-  
+
   &:hover {
     background-color: #f5f5f5;
   }
-  
+
   &:active {
     background-color: #e6f7ff;
   }
