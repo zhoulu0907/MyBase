@@ -220,21 +220,6 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
           nextRecordStartValue: false,
           resetCycle: AUTO_CODE_RESET_CYCLE.NONE
         }
-      },
-      {
-        id: 'rule-2',
-        itemType: AUTO_CODE_RULE_TYPE.DATE,
-        config: { dateFormat: DATE_FORMAT_DEFAULT }
-      },
-      {
-        id: 'rule-3',
-        itemType: AUTO_CODE_RULE_TYPE.TEXT,
-        config: { fixedText: '' }
-      },
-      {
-        id: 'rule-4',
-        itemType: AUTO_CODE_RULE_TYPE.FIELD_REF,
-        config: { fieldName: '', fieldPath: [] }
       }
     ];
   };
