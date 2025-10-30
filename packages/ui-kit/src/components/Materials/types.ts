@@ -413,3 +413,10 @@ export interface ITableButtonConfigType<KeyType> {
     value: KeyType;
   }>;
 }
+
+// 自动编号规则配置
+export interface IAutoCodeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.AUTO_CODE_RULES;
+}
