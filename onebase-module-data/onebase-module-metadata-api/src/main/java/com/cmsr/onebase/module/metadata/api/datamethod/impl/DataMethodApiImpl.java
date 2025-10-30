@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.datamethod;
+package com.cmsr.onebase.module.metadata.api.datamethod.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
