@@ -21,6 +21,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthViewDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
+import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
@@ -72,6 +73,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     @Resource
     private MetadataEntityFieldApi metadataEntityFieldApi;
+
+    @Resource
+    private AppCacheProvider appCacheProvider;
 
     @Override
     public AuthDetailFunctionPermissionVO getFunctionPermission(AuthPermissionReq reqVO) {
@@ -168,6 +172,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authPermissionDO.setIsPageAllowed(reqVO.getIsPageAllowed());
             authPermissionRepository.update(authPermissionDO);
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
     @Override
@@ -182,6 +187,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authPermissionDO.setOperationTags(JsonUtils.toJsonString(reqVO.getOperationTags()));
             authPermissionRepository.update(authPermissionDO);
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
     @Override
@@ -218,18 +224,20 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             }
             authDataGroupRepository.update(authDataGroupDO);
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteDataGroup(Long id) {
+        AuthDataGroupDO dataGroupDO = authDataGroupRepository.findById(id);
         authDataGroupRepository.deleteById(id);
+        appCacheProvider.roleMenuChanged(dataGroupDO.getApplicationId(), dataGroupDO.getRoleId(), dataGroupDO.getMenuId());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateField(AuthUpdateFieldReqVO reqVO) {
-        // IsAllFieldsAllowed 1 所有字段内容可操作   0 自定义权限
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
         if (authPermissionDO == null) {
             authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
@@ -247,6 +255,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 upsetAuthField(reqVO.getPermissionReq(), authField);
             }
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
     private void upsetAuthField(AuthPermissionReq permissionReq, AuthFieldVO authFieldVO) {
@@ -294,6 +303,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 upsetViewField(reqVO.getPermissionReq(), authView);
             }
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
 
