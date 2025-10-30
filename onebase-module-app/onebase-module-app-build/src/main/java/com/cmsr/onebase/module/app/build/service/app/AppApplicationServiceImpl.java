@@ -144,7 +144,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
             applicationDO.setAppCode(AppUtils.createAppCode());
         }
         // 新增发布模式，新增空间id
-        applicationDO.setPublishModel(createReqVO.getPublishModel()==null? CommonPublishModelEnum.InnerModel.getValue() :createReqVO.getPublishModel());
+        applicationDO.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         applicationDO.setTenantId(TenantContextHolder.getRequiredTenantId());
 
         applicationDO = applicationRepository.insert(applicationDO);
@@ -188,7 +188,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
-        updateObj.setPublishModel(createReqVO.getPublishModel()==null?CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
+        updateObj.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
     }
@@ -264,5 +264,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
             }
         }
         throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
+    }
+    @Override
+    public List<ApplicationDO> getSimpleAppList(Integer status) {
+        return applicationRepository.getSimpleAppList(status);
     }
 }

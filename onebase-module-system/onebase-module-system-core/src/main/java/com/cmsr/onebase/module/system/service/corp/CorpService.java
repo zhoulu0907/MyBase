@@ -53,7 +53,7 @@ public interface CorpService {
      * 创建企业管理员
      *
      */
-    CorpUserRespVO createUser( CorpUserReqVO reqVO);
+    CorpAdminUserRespVO createUser( CorpAdminReqVO reqVO);
     /**
      * 创建企业管理员
      *
@@ -70,5 +70,11 @@ public interface CorpService {
      * 一页式创建企业
      *
      */
-    CorpUserRespVO createCorpCombined(CorpCombinedVo reqVO);
+    CorpAdminUserRespVO createCorpCombined(CorpCombinedVo reqVO);
+
+    /**
+     * 获取企业精简信息列表-不分页
+     *
+     */
+    List<CorpDO> getSimpleCorpList(Integer staus);
 }

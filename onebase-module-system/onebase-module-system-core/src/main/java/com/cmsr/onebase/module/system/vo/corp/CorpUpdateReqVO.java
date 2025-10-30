@@ -14,9 +14,9 @@ public class CorpUpdateReqVO {
     @Schema(description = "企业名称", example = "")
     private String corpName;
 
-    @NotBlank(message = "企业编号不能为空")
-    @Schema(description = "企业编号", example = "ALIBABA")
-    private String corpCode;
+    @NotBlank(message = "企业Id不能为空")
+    @Schema(description = "企业Id", example = "ALIBABA")
+    private String corpId;
 
     @NotBlank(message = "行业类型不能为空")
     @Schema(description = "行业类型", example = "1")
@@ -30,7 +30,7 @@ public class CorpUpdateReqVO {
     @Schema(description = "地址", example = "")
     private String address;
 
-    @NotBlank(message = "用户数量不能为空")
-    @Schema(description = "用户数量", example = "100")
-    private Integer userCount;
+    @NotBlank(message = "用户数量上限不能为空")
+    @Schema(description = "用户数量上限")
+    private Integer userLimit;
 }

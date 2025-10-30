@@ -7,16 +7,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Schema(description = "企业应用关联创建VO")
+@Schema(description = "企业应用关联创建/修改 Request VO")
 @Data
-public class CorpAppRelationInertReqVO {
-
-    @Schema(description = "企业id", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
-    @NotNull(message = "企业id不能为空")
-    private Long corpId;
-
+public class AppAuthTimeReqVO {
     @Schema(description = "应用id")
-    @NotNull(message = "企业id list不能为空")
+    @NotNull(message = "应用id list不能为空")
     private  List<Long> applicationIdList;
 
 

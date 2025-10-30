@@ -1,6 +1,7 @@
-package com.cmsr.onebase.module.system.service.corpAppRelation;
+package com.cmsr.onebase.module.system.service.corpapprelation;
 
 
+import com.cmsr.onebase.framework.common.enums.CorpReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -10,10 +11,8 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationUpdateReqVO;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationVO;
+import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -63,6 +63,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             corpAppRelationDO.setAuthorizationTime(createReqVO.getAuthorizationTime());
             corpAppRelationDO.setExpiresTime(createReqVO.getAuthorizationTime().plusYears(CorpConstant.EXPIRESYEAR));
             corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
+            corpAppRelationDO.setCorpId(createReqVO.getCorpId());
             corpAppRelationDataRepository.insert(corpAppRelationDO);
         });
     }
@@ -109,26 +110,64 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
                         Function.identity()
                 ));
     }
+    /**
+     * 获取app应用状态描述
+     * @param
+     * @return Map<Long, String> key为企业ID，value为企业名称
+     */
+    public String getCorpStatus(Integer status, LocalDateTime expiresTime) {
+        String statusDesc = "";
+        if (status != null && status.equals(CorpStatusEnum.DISABLE.getValue())) {
+            statusDesc = CorpReationStatusEnum.DISABLE.getName();
+        } else if (expiresTime != null) {
+            if (expiresTime.isAfter(java.time.LocalDateTime.now())) {
+                statusDesc = CorpReationStatusEnum.ENABLE.getName();
+            } else {
+                statusDesc = CorpReationStatusEnum.EXPIRES.getName();
+            }
+        }
+        return statusDesc;
+    }
 
     @Override
-    public PageResult<CorpAppRelationVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
+    public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
+        // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO);
         Map<Long, ApplicationDO> applicationMap = getApplicationNameMap();
-        // 将 DO 对象转换为 VO 对象
-        return new PageResult<CorpAppRelationVO>(
-                pageResult.getList().stream()
-                        .map(corpDO -> {
-                            CorpAppRelationVO respVO = BeanUtils.toBean(corpDO, CorpAppRelationVO.class);
-                            ApplicationDO appDo = applicationMap.get(corpDO.getApplicationId());
-                            if (appDo != null) {
-                                respVO.setApplicationName(appDo.getAppName());
-                                respVO.setApplicationCode(appDo.getAppCode());
-                                respVO.setVersionNumber(appDo.getVersionNumber());
-                            }
-                            return respVO;
-                        })
-                        .collect(java.util.stream.Collectors.toList()),
-                pageResult.getTotal()
-        );
+
+        // 转换为 VO 对象并根据 applicationName 过滤
+        List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
+                .map(corpDO -> {
+                    CorpApplicationRespVO respVO = BeanUtils.toBean(corpDO, CorpApplicationRespVO.class);
+                    ApplicationDO appDo = applicationMap.get(corpDO.getApplicationId());
+                    if (appDo != null) {
+                        respVO.setApplicationName(appDo.getAppName());
+                        respVO.setApplicationCode(appDo.getAppCode());
+                        respVO.setApplicationUid(appDo.getAppUid());
+                        respVO.setApplicationId(appDo.getId());
+                        respVO.setId(appDo.getId());
+                        respVO.setVersionNumber(appDo.getVersionNumber());
+                        // 获取app应用状态描述
+                        Integer status = appDo.getAppStatus();
+                        respVO.setStatusDesc(getCorpStatus(status, corpDO.getExpiresTime()));
+                    }
+                    return respVO;
+                })
+                // 添加 applicationName 过滤条件
+                .filter(respVO -> {
+                    // 如果未设置过滤条件，则不过滤
+                    if (pageReqVO.getApplicationName() == null || pageReqVO.getApplicationName().trim().isEmpty()) {
+                        return true;
+                    }
+                    // 比较应用名称是否匹配（不区分大小写）
+                    return respVO.getApplicationName() != null &&
+                            respVO.getApplicationName().toLowerCase().contains(
+                                    pageReqVO.getApplicationName().toLowerCase().trim());
+                })
+                .collect(Collectors.toList());
+
+        // 返回过滤后的结果和总数
+        return new PageResult<>(filteredList, (long) filteredList.size());
     }
 }
+

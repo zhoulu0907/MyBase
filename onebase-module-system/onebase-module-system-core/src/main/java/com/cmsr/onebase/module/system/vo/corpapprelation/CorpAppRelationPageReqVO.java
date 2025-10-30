@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-@Schema(description = "企业应用关联表分页 Request VO")
+@Schema(description = "企业应用关联表分页")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -20,5 +20,7 @@ public class CorpAppRelationPageReqVO extends PageParam {
 
     @Schema(description = "应用名称" )
     private String applicationName;
+
+
 
 }

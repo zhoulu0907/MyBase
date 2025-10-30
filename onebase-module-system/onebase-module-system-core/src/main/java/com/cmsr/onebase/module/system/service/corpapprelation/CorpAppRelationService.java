@@ -1,10 +1,8 @@
-package com.cmsr.onebase.module.system.service.corpAppRelation;
+package com.cmsr.onebase.module.system.service.corpapprelation;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationUpdateReqVO;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationVO;
+import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.validation.Valid;
 
 
@@ -49,5 +47,5 @@ public interface CorpAppRelationService {
      * @param pageReqVO 分页查询
      * @return 企业应用关联分页
      */
-    PageResult<CorpAppRelationVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO);
+    PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO);
 }

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.vo.corp;
 
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -13,10 +13,10 @@ public class CorpCombinedVo {
 
     @Schema(description = "企业管理员")
     @NotNull(message = "企业管理员不能为空")
-    public CorpUserReqVO corpUserReqVO;
+    public CorpAdminReqVO corpAdminReqVO;
 
-    @Schema(description = "应用id")
-    @NotNull(message = "企业id list不能为空")
-    public CorpAppRelationInertReqVO corpAppRelationInertReqVO;
+    @Schema(description = "授权应用")
+    @NotNull(message = "授权应用不能为空")
+    public AppAuthTimeReqVO appAuthTimeReqVO;
 
 }

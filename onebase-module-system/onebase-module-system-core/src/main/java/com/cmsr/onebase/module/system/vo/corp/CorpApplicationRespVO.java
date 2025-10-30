@@ -12,6 +12,8 @@ public class CorpApplicationRespVO {
     private Long id;
     @Schema(description = "应用名称")
     private String applicationName;
+    @Schema(description = "应用uid")
+    private String applicationUid;
     @Schema(description = "应用编码")
     private String applicationCode;
     @Schema(description = "应用Id")
@@ -22,7 +24,7 @@ public class CorpApplicationRespVO {
     private String versionNumber;
     @Schema(description = "过期时间")
     private LocalDateTime expiresTime;
-    @Schema(description = "状态")
-    private Integer status;
+    @Schema(description = "状态描述")
+    private String statusDesc;
 
 }

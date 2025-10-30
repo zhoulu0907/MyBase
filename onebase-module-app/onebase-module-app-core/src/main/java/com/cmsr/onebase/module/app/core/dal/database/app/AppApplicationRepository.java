@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.core.dal.database.app;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import org.anyline.data.param.ConfigStore;
@@ -11,6 +12,7 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -72,4 +74,11 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
         return countByConfig(configs);
     }
 
+    public List<ApplicationDO> getSimpleAppList(Integer status) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("tenant_id", TenantContextHolder.getRequiredTenantId());
+        configStore.eq("staus", status);
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
 }

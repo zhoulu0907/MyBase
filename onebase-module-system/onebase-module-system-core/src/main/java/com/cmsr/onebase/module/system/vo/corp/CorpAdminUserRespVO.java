@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-public class CorpUserRespVO {
+public class CorpAdminUserRespVO {
     @Schema(description = "管理员账号")
     private String username;
     @Schema(description = "管理员密码")

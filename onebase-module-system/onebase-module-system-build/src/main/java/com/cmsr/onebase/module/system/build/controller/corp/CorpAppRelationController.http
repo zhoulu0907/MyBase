@@ -18,7 +18,7 @@ tenant-id: {{adminTenantId}}
     "corpReqVO":{
      "corpLogo":"xx",
      "corpName":"xx",
-      "corpCode":"xx",
+      "corpId":"xx",
       "industryType":"0",
       "status":0,
       "address":"xxxxxx",

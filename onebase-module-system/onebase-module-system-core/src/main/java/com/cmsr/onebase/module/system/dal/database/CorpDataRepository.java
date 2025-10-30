@@ -1,12 +1,16 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.enterprise.CorpDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpPageReqVO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+
+import java.util.List;
 
 /**
  * 企业数据访问层
@@ -66,5 +70,12 @@ public class CorpDataRepository extends DataRepository<CorpDO> {
         configStore.eq("corp_name", name);
 
         return findOne(configStore);
+    }
+
+    public List<CorpDO> getSimpleCorpList(Integer staus) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("staus", staus)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
     }
 }

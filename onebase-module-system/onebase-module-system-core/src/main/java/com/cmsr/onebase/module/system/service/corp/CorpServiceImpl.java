@@ -10,15 +10,15 @@ import com.cmsr.onebase.module.system.dal.dataobject.enterprise.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
-import com.cmsr.onebase.module.system.service.corpAppRelation.CorpAppRelationService;
+import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.corp.*;
+import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
@@ -30,8 +30,8 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
@@ -63,21 +63,23 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CorpUserRespVO createCorpCombined(CorpCombinedVo corpCombinReqVO) {
+    public CorpAdminUserRespVO createCorpCombined(CorpCombinedVo corpCombinReqVO) {
         // 保存基础数据
-        createCorp(corpCombinReqVO.getCorpReqVO());
+        Long corpId = createCorp(corpCombinReqVO.getCorpReqVO());
         // 保存系统管理员
-        CorpUserRespVO vo = createUser(corpCombinReqVO.getCorpUserReqVO());
+        CorpAdminUserRespVO vo = createUser(corpCombinReqVO.getCorpAdminReqVO());
         // 保存关联关系
-        createCorpAppRelation(corpCombinReqVO.getCorpAppRelationInertReqVO());
+        AppAuthTimeReqVO appAuthTimeReqVO = corpCombinReqVO.getAppAuthTimeReqVO();
+        createCorpAppRelation(appAuthTimeReqVO, corpId);
         return vo;
     }
+
 
     public Long createCorp(CorpReqVO reqVO) {
         //用于校验企业名称是否已存在
         validCorpNameDuplicate(reqVO.getCorpName());
         //用于校验企业用户数量是否超过限制（如大于500）
-        validCorpUserCountDuplicate(reqVO.getUserCount());
+        validCorpUserCountDuplicate(reqVO.getUserLimit());
         CorpDO enterprise = BeanUtils.toBean(reqVO, CorpDO.class);
         return corpDataRepository.insert(enterprise).getId();
     }
@@ -102,7 +104,7 @@ public class CorpServiceImpl implements CorpService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateCorp(CorpUpdateReqVO reqVO) {
-        validCorpUserCountDuplicate(reqVO.getUserCount());
+        validCorpUserCountDuplicate(reqVO.getUserLimit());
         CorpDO checkEnterprise = corpDataRepository.findById(reqVO.getId());
         if (checkEnterprise == null) {
             throw exception(ENTERPRRISE_NO_EXISTS, reqVO.getCorpName());
@@ -111,8 +113,10 @@ public class CorpServiceImpl implements CorpService {
         corpDataRepository.update(corpDO);
     }
 
-    public void createCorpAppRelation(CorpAppRelationInertReqVO createReqVO) {
-        corpAppRelationService.createCorpAppRelation(createReqVO);
+    public void createCorpAppRelation(AppAuthTimeReqVO createReqVO, Long corpId) {
+        CorpAppRelationInertReqVO createCorpAppRelation = BeanUtils.toBean(createReqVO, CorpAppRelationInertReqVO.class);
+        createCorpAppRelation.setCorpId(corpId);
+        corpAppRelationService.createCorpAppRelation(createCorpAppRelation);
     }
 
     @Override
@@ -161,7 +165,7 @@ public class CorpServiceImpl implements CorpService {
     }
 
     @Override
-    public CorpUserRespVO createUser(CorpUserReqVO reqVO) {
+    public CorpAdminUserRespVO createUser(CorpAdminReqVO reqVO) {
         // 2.2.1 判断如果不存在，在进行插入
         AdminUserDO existUser = adminUserService.getUserByUsername(reqVO.getUsername());
         if (existUser != null) {
@@ -178,7 +182,7 @@ public class CorpServiceImpl implements CorpService {
         }
         // todo  adminUserService.createUser(user);
         AdminUserDO adminUserDO = new AdminUserDO();
-        CorpUserRespVO vo = new CorpUserRespVO();
+        CorpAdminUserRespVO vo = new CorpAdminUserRespVO();
         vo.setUsername(reqVO.getUsername());
         vo.setPassword(password);
         vo.setId(adminUserDO.getId());
@@ -205,7 +209,7 @@ public class CorpServiceImpl implements CorpService {
     @Override
     public PageResult<CorpApplicationRespVO> selectCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
         // 调用数据仓库进行分页查询
-        PageResult<CorpAppRelationVO> pageResult = corpAppRelationService.getCorpAppRelationPage(pageReqVO);
+        PageResult<CorpAppRelationVO> pageResult = null;//corpAppRelationService.getCorpAppRelationPage(pageReqVO);
         // 如果入参包含应用名称查询条件，进行返回值过滤
         List<CorpAppRelationVO> filteredList = pageResult.getList();
         if (pageReqVO.getApplicationName() != null && !pageReqVO.getApplicationName().trim().isEmpty()) {
@@ -233,6 +237,17 @@ public class CorpServiceImpl implements CorpService {
                         .collect(java.util.stream.Collectors.toList()),
                 Long.valueOf(filteredList.size()) // 转换为 Long 类型
         );
+    }
+
+    /**
+     * 获取企业精简列表
+     *
+     * @return List<CorpDO>
+     */
+    @Override
+    public List<CorpDO> getSimpleCorpList(Integer staus) {
+        List<CorpDO> corpDOList =corpDataRepository.getSimpleCorpList(staus);
+        return corpDOList;
     }
 
 

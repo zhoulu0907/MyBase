@@ -1,10 +1,15 @@
 package com.cmsr.onebase.module.system.build.controller.corp;
 
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.dal.dataobject.enterprise.CorpDO;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.vo.corp.*;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptListReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptSimpleRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,15 +19,18 @@ import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
  * 管理后台 - 企业 Controller
  *
- * @author matianyu
- * @date 2025-08-20
+ * @author ggq
+ * @date 2025-10-20
  */
-@Tag(name = "管理后台 - 企业")
+@Tag(name = "平台服务-企业")
 @RestController
 @RequestMapping("/system/corp/")
 @Validated
@@ -33,9 +41,8 @@ public class CorpController {
 
     @PostMapping("create")
     @Operation(summary = "创建企业")
-    @PermitAll
-    //@PreAuthorize("@ss.hasPermission('system:corp:create')")
-    public CommonResult<CorpUserRespVO> createCorpCombined(@RequestBody @Valid CorpCombinedVo reqVO) {
+    @PreAuthorize("@ss.hasPermission('system:corp:create')")
+    public CommonResult<CorpAdminUserRespVO> createCorpCombined(@RequestBody @Valid CorpCombinedVo reqVO) {
         return success(corpService.createCorpCombined(reqVO));
     }
 
@@ -57,8 +64,8 @@ public class CorpController {
         return success(true);
     }
 
-    @PostMapping("update_status")
-    @Operation(summary = "企业禁用")
+    @PostMapping("update-status")
+    @Operation(summary = "企业启用/禁用")
     @PreAuthorize("@ss.hasPermission('system:corp:update')")
     public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id,@RequestParam("status") Long status) {
         corpService.updateStatus(id,status);
@@ -73,12 +80,12 @@ public class CorpController {
         return success(pageResult);
     }
 
-    @GetMapping("corp_application_page")
-    @Operation(summary = "获得企业应用列表")
+    @GetMapping(value = {"/simple-list"})
     @PreAuthorize("@ss.hasPermission('system:corp:query')")
-    public CommonResult<PageResult<CorpApplicationRespVO>> corpApplicationPage(@Valid CorpAppRelationPageReqVO pageReqVO) {
-        PageResult<CorpApplicationRespVO> pageResult = corpService.selectCorpAppRelationPage(pageReqVO);
-        return success(pageResult);
+    @Operation(summary = "获取企业精简信息列表-不分页", description = "只包含被开启的企业，主要用于前端的下拉选项")
+    public CommonResult<List<CorpSimpleRespVO>> getSimpleCorpList() {
+        List<CorpDO> list = corpService.getSimpleCorpList(CommonStatusEnum.ENABLE.getStatus());
+        return success(BeanUtils.toBean(list, CorpSimpleRespVO.class));
     }
 
     @GetMapping("get")

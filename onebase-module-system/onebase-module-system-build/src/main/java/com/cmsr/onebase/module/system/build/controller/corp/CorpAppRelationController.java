@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.system.build.controller.corpAppRelation;
-
+package com.cmsr.onebase.module.system.build.controller.corp;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.service.corpAppRelation.CorpAppRelationService;
+import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
+import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationUpdateReqVO;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "企业应用关联表")
+@Tag(name = "平台服务-企业应用关系")
 @RestController
 @Validated
 @RequestMapping("/system/corp-app-relation")
@@ -31,6 +31,13 @@ public class CorpAppRelationController   {
     @Resource
     private CorpAppRelationService corpAppRelationService;
 
+    @PostMapping("/create")
+    @PreAuthorize("@ss.hasPermission('system:corp-app-relation:create')")
+    @Operation(summary = "新增企业应用关联")
+    public CommonResult<Boolean> createCorpApplication(@Valid @RequestBody CorpAppRelationInertReqVO corpAppRelationInertReqVO) {
+        corpAppRelationService.createCorpAppRelation(corpAppRelationInertReqVO);
+        return success(true);
+    }
 
     @PostMapping("/update")
     @PreAuthorize("@ss.hasPermission('system:corp-app-relation:update')")
@@ -48,18 +55,12 @@ public class CorpAppRelationController   {
         return success(true);
     }
 
-    @GetMapping("/get")
-    @PreAuthorize("@ss.hasPermission('system:corp-app-relation:query')")
-    @Operation(summary = "获得企业关联应用")
-    public CommonResult<CorpAppRelationVO> getCorpApplication(@RequestParam("id") Long id) {
-        return success(corpAppRelationService.getCorpAppRelation(id));
-    }
-
-    @GetMapping("/page")
-    @PreAuthorize("@ss.hasPermission('system:corp-app-relation:query')")
-    @Operation(summary = "获得企业关联应用分页")
-    public CommonResult<PageResult<CorpAppRelationVO>> getCorpApplication(@Valid CorpAppRelationPageReqVO pageReqVO) {
-        PageResult<CorpAppRelationVO> pageResult = corpAppRelationService.getCorpAppRelationPage(pageReqVO);
+    @GetMapping("corp-applications-page")
+    @Operation(summary = "获得企业授权应用列表-分页")
+    @PreAuthorize("@ss.hasPermission('system:corp:query')")
+    public CommonResult<PageResult<CorpApplicationRespVO>> corpApplicationPage(@Valid CorpAppRelationPageReqVO pageReqVO) {
+       PageResult<CorpApplicationRespVO> pageResult = corpAppRelationService.getCorpAppRelationPage(pageReqVO);
         return success(pageResult);
     }
+
 }
