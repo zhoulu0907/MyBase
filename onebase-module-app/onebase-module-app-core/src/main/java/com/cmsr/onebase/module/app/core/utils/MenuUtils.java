@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.build.util;
+package com.cmsr.onebase.module.app.core.utils;
 
 import java.util.UUID;
 

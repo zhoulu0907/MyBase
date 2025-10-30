@@ -1,6 +1,5 @@
-package com.cmsr.onebase.module.app.build.vo.menu;
+package com.cmsr.onebase.module.app.runtime.vo.menu;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -38,14 +37,7 @@ public class MenuListRespVO {
     @Schema(description = "菜单图标")
     private String menuIcon;
 
-    @Schema(description = "菜单可见")
-    private Integer isVisible;
-
     @Schema(description = "子菜单")
     public LinkedList<MenuListRespVO> children = null;
-
-    @Schema(description = "过滤标记（辅助字段，不返回给前端）", hidden = true)
-    @JsonIgnore
-    private boolean filter = false;
 
 }

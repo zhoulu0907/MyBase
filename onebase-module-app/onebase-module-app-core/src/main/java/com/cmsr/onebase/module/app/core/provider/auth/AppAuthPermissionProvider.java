@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.core.dal.provider.auth;
+package com.cmsr.onebase.module.app.core.provider.auth;
 
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
@@ -30,6 +30,17 @@ public class AppAuthPermissionProvider {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    public List<AuthPermissionDO> findPermissions(Long applicationId, Set<Long> roleIds) {
+        List<AuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIds(applicationId, roleIds);
+        return permissionDOS.stream().map(permissionDO -> {
+            if (permissionDO.getId() == null) {
+                return AuthDefaultFactory.createAuthPermissionDO();
+            } else {
+                return permissionDO;
+            }
+        }).toList();
+    }
 
     public List<AuthPermissionDO> findPermissions(Long applicationId, Set<Long> roleIds, Long menuId) {
         List<AuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);

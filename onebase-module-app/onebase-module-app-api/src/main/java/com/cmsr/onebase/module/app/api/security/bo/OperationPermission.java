@@ -7,7 +7,7 @@ import lombok.Data;
  * @Date：2025/10/25 19:45
  */
 @Data
-public class MenuPermission {
+public class OperationPermission {
 
     private boolean pageAllowed = false;
 
@@ -41,15 +41,15 @@ public class MenuPermission {
     }
 
     public void allDeny() {
-       pageAllowed = false ;
-       allViewsAllowed = false;
-       allFieldsAllowed = false;
-       canCreate = false;
-       canEdit = false;
-       canDelete = false;
-       canImport = false;
-       canExport = false;
-       canShare = false;
+        pageAllowed = false;
+        allViewsAllowed = false;
+        allFieldsAllowed = false;
+        canCreate = false;
+        canEdit = false;
+        canDelete = false;
+        canImport = false;
+        canExport = false;
+        canShare = false;
     }
 
 

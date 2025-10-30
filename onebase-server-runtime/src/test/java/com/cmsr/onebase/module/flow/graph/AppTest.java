@@ -2,24 +2,14 @@ package com.cmsr.onebase.module.flow.graph;
 
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
-import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
-import com.cmsr.onebase.module.app.api.security.bo.DataPermissionGroup;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
-import com.cmsr.onebase.module.app.api.security.bo.MenuPermission;
-import com.cmsr.onebase.module.app.core.biz.auth.AppAuthSecurityApiImpl;
+import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
-import com.cmsr.onebase.module.app.core.dal.provider.auth.AppAuthDataGroupProvider;
-import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
-import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
-import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
-import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
-import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
-import com.cmsr.onebase.module.flow.core.job.FlowJobMessageHandler;
+import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
+import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
+import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuService;
+import com.cmsr.onebase.module.app.runtime.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -27,11 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 
 /**
@@ -52,31 +38,38 @@ public class AppTest {
     @Autowired
     private AppAuthSecurityApiImpl appAuthSecurityApi;
 
+    @Autowired
+    private AppMenuService appMenuService;
+
     @Test
     public void testSimple() throws IOException {
-        List<AuthDataGroupDO> authDataGroupDOS = appAuthDataGroupRepository.findByAppIdAndRoleIdsAndMenuId(
-                46699591748616192L,
-                Set.of(46699591748616193L, 46699591748616194L, 104446011218624512L),
-                46699591748616194L);
-        System.out.println(authDataGroupDOS);
+        TenantContextHolder.setIgnore(true);
+        RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
+        List<MenuListRespVO> menuListRespVOS = appMenuService.listApplicationMenu();
+        System.out.println(menuListRespVOS);
+    }
 
-        List<DataPermissionGroup> dataGroups = appAuthDataGroupProvider.findDataGroups(46699591748616192L,
-                Set.of(46699591748616193L, 46699591748616194L, 104446011218624512L),
-                46699591748616194L);
-        System.out.println(dataGroups);
+    @Test
+    public void testSimple2() throws IOException {
+        TenantContextHolder.setIgnore(true);
+        RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
+        MenuPermissionVO menuPermission = appMenuService.getMenuPermission(47012574606491648L);
+        System.out.println(menuPermission);
     }
 
     @Test
     public void testGraph() throws IOException {
-        DataPermission menuDataPermission = appAuthSecurityApi.getMenuDataPermission(3386012505007460352L, 46699591748616192L, 95847916169691136L);
-        System.out.println(menuDataPermission);
+        TenantContextHolder.setIgnore(true);
+        RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
+        MenuPermissionVO menuPermissionVO = appMenuService.getMenuPermission(95847916169691136L);
+        System.out.println(menuPermissionVO);
     }
 
     @Test
     public void testGraph2() throws IOException {
         TenantContextHolder.setIgnore(true);
-        MenuPermission menuPermission = appAuthSecurityApi.getMenuPermission(3386012505007460352L, 46699591748616192L, 47012574606491648L);
-        System.out.println(menuPermission);
+        OperationPermission operationPermission = appAuthSecurityApi.getMenuOperationPermission(3386012505007460352L, 46699591748616192L, 47012574606491648L);
+        System.out.println(operationPermission);
     }
 
     @Test
@@ -89,7 +82,7 @@ public class AppTest {
     @Test
     public void testGraph4() throws IOException {
         TenantContextHolder.setIgnore(true);
-        RTSecurityContext.mockLoginUser(3386012505007460352L,46699591748616192L);
+        RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
         FieldPermission fieldPermission = RTSecurityContext.getMenuFieldPermission(47012574606491648L);
         System.out.println(fieldPermission);
     }
