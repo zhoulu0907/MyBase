@@ -112,11 +112,14 @@
   },
   "sider": {
     "platformInfo": "平台信息",
+    "application": "应用管理",
     "user": "用户管理",
     "role": "角色管理",
     "organization": "组织管理",
     "systemDict": "数据字典管理",
-    "tenant": "租户信息"
+    "spaceInfo": "空间信息",
+    "enterprise": "企业管理",
+    "tenant": "个人中心"
   },
   "myApp": {
     "createApp": "零代码创建"

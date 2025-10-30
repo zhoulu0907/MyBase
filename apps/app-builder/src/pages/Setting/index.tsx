@@ -5,6 +5,7 @@ import AppBreadcrumb from '../../components/Breadcrumb';
 import AppHeader from './components/header';
 import AppSider from './components/sider';
 
+import ApplicationPage from './pages/Application';
 import OrganizationPage from './pages/Organization';
 import RolePage from './pages/Role';
 import SystemDictPage from './pages/SystemDict';
@@ -34,10 +35,13 @@ const SettingPage: React.FC = () => {
           <Content className={styles.content}>
             <div className={styles.contentInner}>
               <Routes>
+                <Route path="application" element={<ApplicationPage />} />
                 <Route path="user" element={<UserPage />} />
                 <Route path="role" element={<RolePage />} />
                 <Route path="organization" element={<OrganizationPage />} />
                 <Route path="system-dict" element={<SystemDictPage />} />
+                <Route path="spaceInfo" element={<TenantPage />} />
+                <Route path="enterprise" element={<TenantPage />} />
                 <Route path="tenant" element={<TenantPage />} />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>

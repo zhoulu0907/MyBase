@@ -1,5 +1,6 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import {
+  IconApps,
   IconFile,
   IconIdcard,
   IconList,
@@ -35,6 +36,13 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const defaultMenuItems = useMemo(
     () => [
       {
+        key: 'application',
+        title: '应用管理',
+        icon: <IconApps style={iconStyle} />,
+        path: '/onebase/setting/application',
+        permissionKey: TENANT_MENUS.INFO
+      },
+      {
         key: 'user',
         title: '用户管理',
         icon: <IconUserGroup style={iconStyle} />,
@@ -63,8 +71,22 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         permissionKey: TENANT_MENUS.DICT
       },
       {
-        key: '租户信息',
-        title: '租户信息',
+        key: '空间信息',
+        title: '空间信息',
+        icon: <IconIdcard style={iconStyle} />,
+        path: '/onebase/setting/spaceInfo',
+        permissionKey: TENANT_MENUS.INFO
+      },
+      {
+        key: '企业管理',
+        title: '企业管理',
+        icon: <IconIdcard style={iconStyle} />,
+        path: '/onebase/setting/enterprise',
+        permissionKey: TENANT_MENUS.INFO
+      },
+      {
+        key: '个人中心',
+        title: '个人中心',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/tenant',
         permissionKey: TENANT_MENUS.INFO

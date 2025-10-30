@@ -59,6 +59,9 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'platform-info':
           title = t('sider.platformInfo');
           break;
+        case 'application':
+          title = t('sider.application');
+          break;
         case 'user':
           title = t('sider.user');
           break;
@@ -70,6 +73,12 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
           break;
         case 'system-dict':
           title = t('sider.systemDict');
+          break;
+        case 'spaceInfo':
+          title = t('sider.spaceInfo');
+          break;
+        case 'enterprise':
+          title = t('sider.enterprise');
           break;
         case 'tenant':
           title = t('sider.tenant');

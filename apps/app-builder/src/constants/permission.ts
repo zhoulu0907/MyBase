@@ -15,6 +15,7 @@ export enum PERMISSION_TYPES {
 
 /** 菜单-租户管理 */
 export const TENANT_MENUS = {
+  APP: 'tenant:app', // todo
   USER: 'tenant:user',
   ROLE: 'tenant:role',
   DEPT: 'tenant:dept',
@@ -38,7 +39,7 @@ export const TENANT_USER_PERMISSION = {
   STATUS: TENANT_USER_STATUS
 }
 
-/** 租户管理-角色管理 */ 
+/** 租户管理-角色管理 */
 export const TENANT_ROLE_QUERY = 'tenant:role:query'; // 查询角色
 export const TENANT_ROLE_CREATE = 'tenant:role:create'; // 新增角色
 export const TENANT_ROLE_UPDATE = 'tenant:role:update'; // 修改角色
