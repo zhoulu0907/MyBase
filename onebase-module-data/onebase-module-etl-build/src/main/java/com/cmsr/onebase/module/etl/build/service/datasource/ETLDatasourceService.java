@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.build.service.datasource;
 
-import com.cmsr.onebase.module.etl.build.controller.datasource.vo.ETLDatasourceReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 
 import java.util.List;
