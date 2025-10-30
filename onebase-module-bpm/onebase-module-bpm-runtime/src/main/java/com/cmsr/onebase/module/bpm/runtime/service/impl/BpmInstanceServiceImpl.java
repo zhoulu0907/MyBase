@@ -24,6 +24,8 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDT
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
+import com.cmsr.onebase.module.system.api.user.AdminUserApi;
+import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -88,6 +90,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private DeptApi deptApi;
+
+    @Resource
+    private AdminUserApi adminUserApi;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -491,6 +496,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             record.getOperators().add(operatorInfo);
         }
 
+        // 处理待办数据
         for (Task task : tasks) {
             String nodeCode = task.getNodeCode();
             BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
@@ -533,6 +539,62 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 }
             }
         }
+
+        // 只运行一次的循环，为了让代码看起来层级简单些
+        do {
+            if (CollectionUtils.isEmpty(operatorRecords)) {
+                break;
+            }
+
+            Set<Long> userIds = new HashSet<>();
+
+            for (BpmOperatorRecordRespVO.OperatorRecord operatorRecord : operatorRecords) {
+                if (CollectionUtils.isNotEmpty(operatorRecord.getOperators())) {
+                    for (BpmOperatorRecordRespVO.OperatorInfo operatorInfo : operatorRecord.getOperators()) {
+                        userIds.add(Long.parseLong(operatorInfo.getOperator()));
+                    }
+                }
+            }
+
+            if (CollectionUtils.isEmpty(userIds)) {
+                break;
+            }
+
+            CommonResult<List<AdminUserRespDTO>> result = adminUserApi.getUserList(userIds);
+
+            // todo: 抛出异常？
+            if (!result.isSuccess()) {
+                log.warn("获取用户列表失败，userIds: {}", userIds);
+                break;
+            }
+
+            if (CollectionUtils.isEmpty(result.getData())) {
+                break;
+            }
+
+            List<AdminUserRespDTO> users = result.getData();
+
+
+            Map<Long, String> userMap = new HashMap<>();
+
+            for (AdminUserRespDTO user : users) {
+                userMap.put(user.getId(), user.getNickname());
+            }
+
+            for (BpmOperatorRecordRespVO.OperatorRecord operatorRecord : operatorRecords) {
+                if (CollectionUtils.isNotEmpty(operatorRecord.getOperators())) {
+                    for (BpmOperatorRecordRespVO.OperatorInfo operatorInfo : operatorRecord.getOperators()) {
+                        String nickName = userMap.get(Long.parseLong(operatorInfo.getOperator()));
+
+                        if (nickName != null) {
+                            operatorInfo.setOperator(nickName);
+                        }
+                    }
+                }
+            }
+
+            break;
+        } while (false);
 
         return operatorRecords;
     }
