@@ -4,10 +4,8 @@ import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepos
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
-import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,13 +32,14 @@ public class AppAuthPermissionProvider {
     private RedissonClient redissonClient;
 
     public List<AuthPermissionDO> findPermissions(Long applicationId, Set<Long> roleIds, Long menuId) {
-        //这里有问题，是某个角色没有，才给默认值，用表连接，如果连接没有到，就是默认的 角色 left join perm表，没有的，就是默认的
         List<AuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
-        if (CollectionUtils.isEmpty(permissionDOS)) {
-            AuthPermissionReq req = new AuthPermissionReq();
-            permissionDOS = List.of(AuthDefaultFactory.createAuthPermissionDO(req));
-        }
-        return permissionDOS;
+        return permissionDOS.stream().map(permissionDO -> {
+            if (permissionDO.getId() == null) {
+                return AuthDefaultFactory.createAuthPermissionDO();
+            } else {
+                return permissionDO;
+            }
+        }).toList();
     }
 
 

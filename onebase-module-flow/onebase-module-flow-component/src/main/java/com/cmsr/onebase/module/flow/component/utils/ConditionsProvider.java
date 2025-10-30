@@ -21,6 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -114,8 +117,23 @@ public class ConditionsProvider {
         }
         String resultType = respDTO.getData().getResultType();
         Object result = respDTO.getData().getResult();
-
+        if (isValidISODateTime(result)) {
+            result = toLocalDateTime(result.toString());
+        }
         return result;
+    }
+
+    public static boolean isValidISODateTime(Object input) {
+        if (input == null) {
+            return false;
+        }
+        String regex = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$";
+        return input.toString().matches(regex);
+    }
+
+    public static LocalDateTime toLocalDateTime(String input) {
+        Instant instant = Instant.parse(input);
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
     private void formatRuleItemForValue(ExpressionItem expressionItem, Map<String, Object> vars) {
@@ -164,7 +182,14 @@ public class ConditionsProvider {
             Object value = getVariableByExpression(exp, dataMap);
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            //TODO 公式
+            Map valueMap = (Map) expressionItem.getValue();
+            String formula = MapUtils.getString(valueMap, "formula");
+            Map parameters = MapUtils.getMap(valueMap, "parameters");
+            FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
+            reqDTO.setFormula(formula);
+            reqDTO.setParameters(parameters);
+            reqDTO.setContextData(dataMap);
+            expressionItem.setValue(callFormula(reqDTO));
         }
         return expressionItem;
     }
