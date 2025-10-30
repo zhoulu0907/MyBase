@@ -22,6 +22,7 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDT
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
@@ -31,10 +32,7 @@ import org.dromara.warm.flow.core.entity.*;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
-import org.dromara.warm.flow.core.service.DefService;
-import org.dromara.warm.flow.core.service.HisTaskService;
-import org.dromara.warm.flow.core.service.InsService;
-import org.dromara.warm.flow.core.service.TaskService;
+import org.dromara.warm.flow.core.service.*;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,6 +68,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private TaskService taskService;
+
+    @Resource
+    private UserService userService;
 
     @Resource
     private DataMethodApi dataMethodApi;
@@ -287,9 +288,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 //                    .handler(completeTaskBo.getHandler())
                     .variable(variables)
                     .skipType(SkipType.PASS.getKey())
-                    .message("提交")
-                    .flowStatus(businessStatus.getCode());
-//                    .hisStatus(TaskStatusEnum.PASS.getStatus())
+                    .message("已提交")
+                    .flowStatus(businessStatus.getCode())
+                    .hisStatus("已提交");
 //                    .hisTaskExt(completeTaskBo.getFileId());
             taskService.skip(skipParams, task);
 
@@ -323,12 +324,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     public void execTask(ExecTaskReqVO reqVO) {
         String taskId = reqVO.getTaskId();
 
-        // 查找task是否存在
-        Task task = taskService.getById(taskId);
-        if (task == null) {
-            throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
-        }
-
         BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(reqVO.getButtonType());
         if (buttonEnum == null) {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
@@ -337,16 +332,34 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         // 暂时只支持同意和拒绝和保存 todo：判断当前节点是否支持该按钮
         if (!BpmActionButtonEnum.APPROVE.equals(buttonEnum)
                 && !BpmActionButtonEnum.REJECT.equals(buttonEnum)
-                && !BpmActionButtonEnum.SAVE.equals(buttonEnum)) {
+                && !BpmActionButtonEnum.SAVE.equals(buttonEnum)
+                && !BpmActionButtonEnum.SUBMIT.equals(buttonEnum)) {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
         }
 
-        // todo 保存暂时只有发起节点会有
+        // 查找task是否存在
+        Task task = taskService.getById(taskId);
+        if (task == null) {
+            throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
+        }
 
-        // todo: 判断执行权限，应该在permissonHandler里处理，暂时先直接放行
+        List<User> users = userService.getByAssociateds(List.of(task.getId()));
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        boolean hasPermission = false;
+
+        for (User user : users) {
+            if (user.getProcessedBy().equals(String.valueOf(loginUserId))) {
+                // 说明是当前登录用户拥有权限
+                hasPermission = true;
+                break;
+            }
+        }
+
+        if (!hasPermission) {
+            throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY);
+        }
 
         // todo： 判断字段读写权限
-
 
         Map<String, Object> variables = new HashMap<>();
 
@@ -371,15 +384,15 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         if (buttonEnum == BpmActionButtonEnum.APPROVE) {
-            // 同意按钮，判断是否有审批意见
             skipParams = skipParams.message(comment)
                     .skipType(SkipType.PASS.getKey())
-                    .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode());
+                    .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
+                    .hisStatus("已" + buttonEnum.getName());
         } else if (buttonEnum == BpmActionButtonEnum.REJECT) {
-            // 拒绝按钮，判断是否有审批意见
             skipParams = skipParams.message(comment)
-                    .skipType(SkipType.PASS.getKey())
-                    .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode());
+                    .skipType(SkipType.REJECT.getKey())
+                    .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
+                    .hisStatus("已" + buttonEnum.getName());
         }
 
         taskService.skip(skipParams, task);
@@ -406,22 +419,23 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         // 查出待办
         List<Task> tasks = taskService.getByInsId(instanceId);
 
-        for (HisTask hisTask : hisTasks) {
-            log.info("已办: {}", hisTask.getCreateTime());
-        }
-
         // todo： 按照时间排序，已办、待办按照时间排序
         Map<String, String> nodeTypeMap = new HashMap<>();
         Map<String, BpmOperatorRecordRespVO.OperatorRecord> recordMap = new HashMap<>();
 
         for (NodeJson nodeJson : defJson.getNodeList()) {
-            BaseNodeExtDTO nodeExt = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
-            nodeTypeMap.put(nodeJson.getNodeCode(), nodeExt.getNodeType());
+            BaseNodeExtDTO extDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
+            nodeTypeMap.put(nodeJson.getNodeCode(), extDTO.getNodeType());
         }
 
         // 进行组装
         for (HisTask hisTask : hisTasks) {
             String nodeCode = hisTask.getNodeCode();
+
+            // 跳过非中间节点
+            if (!NodeType.isBetween(hisTask.getNodeType())) {
+                continue;
+            }
 
             BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
 
@@ -440,36 +454,53 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             operatorInfo.setOperator(hisTask.getApprover());
             operatorInfo.setOperatorTime(hisTask.getUpdateTime());
             operatorInfo.setComment(hisTask.getMessage());
+            operatorInfo.setTaskStatus(hisTask.getFlowStatus());
 
-            // todo: 待完善 设置处理人
-            if (StringUtils.isBlank(operatorInfo.getOperator())) {
-                operatorInfo.setOperator("处理人");
-            }
+            record.setDisplayStatus(operatorInfo.getTaskStatus());
 
             record.getOperators().add(operatorInfo);
         }
 
         for (Task task : tasks) {
             String nodeCode = task.getNodeCode();
-
             BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
+            String nodeType = nodeTypeMap.get(task.getNodeCode());
 
             if (record == null) {
                 record = new BpmOperatorRecordRespVO.OperatorRecord();
                 record.setNodeName(task.getNodeName());
-                record.setNodeType(nodeTypeMap.get(task.getNodeCode()));
+                record.setNodeType(nodeType);
                 operatorRecords.add(record);
             }
 
-            if (record.getOperators() == null) {
-                record.setOperators(new ArrayList<>());
-            }
+            // 查找有权限的用户
+            List<User> users = userService.getByAssociateds(List.of(task.getId()));
 
-            for (User user : task.getUserList()) {
-                BpmOperatorRecordRespVO.OperatorInfo operatorInfo = new BpmOperatorRecordRespVO.OperatorInfo();
-                operatorInfo.setOperator(user.getProcessedBy());
-                operatorInfo.setOperatorTime(task.getUpdateTime());
-                record.getOperators().add(operatorInfo);
+            if (CollectionUtils.isNotEmpty(users)) {
+                if (record.getOperators() == null) {
+                    record.setOperators(new ArrayList<>());
+                }
+
+                for (User user : users) {
+                    BpmOperatorRecordRespVO.OperatorInfo operatorInfo = new BpmOperatorRecordRespVO.OperatorInfo();
+                    operatorInfo.setOperator(user.getProcessedBy());
+                    operatorInfo.setOperatorTime(task.getUpdateTime());
+
+                    // 判断下节点类型
+                    if (Objects.equals(nodeType, BpmNodeTypeEnum.INITIATION.getCode())) {
+                        operatorInfo.setTaskStatus("待提交");
+                    } else if (Objects.equals(nodeType, BpmNodeTypeEnum.APPROVER.getCode())) {
+                        operatorInfo.setTaskStatus("审批中");
+                    } else {
+                        // todo
+                        operatorInfo.setTaskStatus("待处理");
+                    }
+
+                    // 只要有待办，展示状态与任务状态一致
+                    record.setDisplayStatus(operatorInfo.getTaskStatus());
+
+                    record.getOperators().add(operatorInfo);
+                }
             }
         }
 

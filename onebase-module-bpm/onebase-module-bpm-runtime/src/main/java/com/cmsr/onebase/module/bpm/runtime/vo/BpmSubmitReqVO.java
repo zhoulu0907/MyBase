@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -19,6 +20,7 @@ public class BpmSubmitReqVO {
     /**
      * 是否草稿
      */
+    @JsonProperty("isDraft")
     private boolean isDraft;
 
     /**
