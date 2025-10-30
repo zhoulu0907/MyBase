@@ -2,7 +2,9 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ETLServiceImpl implements ETLService {
     @Override
     public PageResult<ETLBriefVO> getETLPage(ETLPageReqVO pageReqVO) {
