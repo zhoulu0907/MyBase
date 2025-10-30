@@ -3,6 +3,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Schema(description = "我创建的流程 - 响应VO")
 @Data
@@ -19,7 +21,7 @@ public class BpmMyCreatedVO {
 
 
     @Schema(description = "当前节点处理人")
-    private String currentNodeHandler;
+    private List<Map<String, Object>> currentNodeHandler;
 
     @Schema(description = "发起时间")
     private LocalDateTime submitTime;
@@ -32,7 +34,4 @@ public class BpmMyCreatedVO {
 
     @Schema(description = "任务id")
     private Long taskId;
-
-    @Schema(description = "流程实例id")
-    private Long instanceId;
 }

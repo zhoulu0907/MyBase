@@ -27,12 +27,12 @@ public class FlowTaskRepository extends DataRepository<FlowTask> {
     public FlowTaskRepository() {
         super(FlowTask.class);
     }
-    public PageResult<FlowTaskExt> getTodoTaskPage(BpmFlowTodoTaskPageReqVO reqVO, List<String> permissionList) {
+    public PageResult<FlowTaskExt> getTodoTaskPage(BpmFlowTodoTaskPageReqVO reqVO, String permission) {
         // 构建基础SQL
-        String baseSql = buildBaseSqlV2();
+        String baseSql = buildBaseSql();
 
         // 构建动态条件
-        ConfigStore condition = buildDynamicCondition(reqVO,permissionList);
+        ConfigStore condition = buildDynamicCondition(reqVO,permission);
         // 执行查询
         DataSet dataSet = querys(baseSql, condition);
         return new PageResult<>(
@@ -42,64 +42,57 @@ public class FlowTaskRepository extends DataRepository<FlowTask> {
     }
     private String buildBaseSql() {
         return """
-                  select 
+                  select
                     distinct
-                     t.id,
-                     t.instance_id,
-                     t.flow_status,
-                     t2.ext ,
-                     t.create_time
-                     from  bpm_flow_task t
-                     left join bpm_flow_user t1 on t.id = t1.associated
-                     left join bpm_flow_instance t2 on t.instance_id  = t2.id
-                     where t.node_type = 1 and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0
+                    t3.business_title,
+                    t3.initiator_id,
+                    t3.initiator_name,
+                    t3.initiator_dept_id,
+                    t3.initiator_dept_name,
+                    t3.submit_Time,
+                    t3.form_Summary,
+                    t3.form_Name,
+                    t.id,
+                    t.instance_id,
+                    t.flow_status,
+                    t.create_time
+                    from  bpm_flow_task t
+                    left join bpm_flow_user t1 on t.id = t1.associated
+                    left join bpm_flow_instance t2 on t.instance_id = t2.id
+                    left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
+                    where t.node_type = 1 and t.flow_status !='draft'
+                    and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0 and t3.deleted = 0
                 """;
     }
 
-    private String buildBaseSqlV2() {
-        return """
-                  select 
-                    distinct
-                     t3.*,
-                     t.id,
-                     t.instance_id,
-                     t.flow_status,
-                     t2.ext ,
-                     t.create_time
-                     from  bpm_flow_task t
-                     left join bpm_flow_user t1 on t.id = t1.associated
-                     left join bpm_flow_instance t2 on t.instance_id = t2.id
-                     left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.id
-                     where t.node_type = 1 and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0
-                """;
-    }
-
-    private ConfigStore buildDynamicCondition(BpmFlowTodoTaskPageReqVO reqVO,List<String> permissionList) {
+    private ConfigStore buildDynamicCondition(BpmFlowTodoTaskPageReqVO reqVO,String permission) {
         DefaultConfigStore condition = new DefaultConfigStore();
         // 设置分页参数
         PageNavi navi = new DefaultPageNavi();
         navi.setCurPage(reqVO.getPageNo());
         navi.setPageRows(reqVO.getPageSize());
         condition.setPageNavi(navi);
-        condition.and(Compare.EQUAL, "t3.app_id'", reqVO.getAppId());
+        condition.and(Compare.EQUAL, "(t3.app_id)::varchar", reqVO.getAppId());
 
        // 动态添加其他查询条件
         if (reqVO.getProcessTitle() != null && !reqVO.getProcessTitle().isEmpty()) {
             condition.and(Compare.LIKE, "t3.business_title", reqVO.getProcessTitle());
         }
         if (reqVO.getInitiator() != null && !reqVO.getInitiator().isEmpty()) {
-            condition.and(Compare.LIKE, "t3.initiator_name'", reqVO.getInitiator());
+            condition.and(Compare.LIKE, "t3.initiator_name", reqVO.getInitiator());
         }
         if (reqVO.getFormSummary() != null && !reqVO.getFormSummary().isEmpty()) {
-            condition.and(Compare.LIKE, "t3.form_summary'", reqVO.getFormSummary());
+            condition.and(Compare.LIKE, "t3.form_summary", reqVO.getFormSummary());
         }
 
-        if (reqVO.getSubmitTime() != null && reqVO.getSubmitTime().length == 2) {
-            condition.and(Compare.BETWEEN, "t3.submit_time", reqVO.getSubmitTime()[0], reqVO.getSubmitTime()[1]);
+        if (reqVO.getSubmitTimeStart() != null ) {
+            condition.and(Compare.GREAT_EQUAL, "t3.submit_time", reqVO.getSubmitTimeStart());
         }
-
-        if( permissionList!= null && !permissionList.isEmpty()){
-            condition.and(Compare.IN, "t1.processed_by", permissionList);
+        if (reqVO.getSubmitTimeEnd() != null ) {
+            condition.and(Compare.LESS_EQUAL, "t3.submit_time", reqVO.getSubmitTimeEnd());
+        }
+        if (permission != null ) {
+            condition.and(Compare.EQUAL, "t1.processed_by", permission);
         }
 
         // 设置排序
