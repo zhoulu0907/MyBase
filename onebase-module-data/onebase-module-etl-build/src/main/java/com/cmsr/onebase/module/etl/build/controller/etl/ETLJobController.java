@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.build.controller.etl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.etl.build.service.etl.ETLService;
+import com.cmsr.onebase.module.etl.build.service.etl.ETLJobService;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLBriefVO;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "数据工厂 - 数据流管理")
 @RestController
-@RequestMapping("/datafactory/etl")
+@RequestMapping("/etl/job")
 @Validated
-public class ETLController {
+public class ETLJobController {
 
     @Resource
-    private ETLService etlService;
+    private ETLJobService etlJobService;
 
     @GetMapping("/page")
     @Operation(summary = "分页查询数据流")
     public CommonResult<PageResult<ETLBriefVO>> pageQueryFlow(@Validated ETLPageReqVO pageReqVO) {
-        return CommonResult.success(etlService.getETLPage(pageReqVO));
+        return CommonResult.success(etlJobService.getETLPage(pageReqVO));
     }
 
 
