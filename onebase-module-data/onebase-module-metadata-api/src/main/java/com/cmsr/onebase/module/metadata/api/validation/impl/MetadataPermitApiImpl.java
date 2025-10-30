@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.validation;
+package com.cmsr.onebase.module.metadata.api.validation.impl;
 
 import com.cmsr.onebase.module.metadata.api.validation.MetadataPermitApi;
 import com.cmsr.onebase.module.metadata.api.validation.dto.PermitRefOtftRespDTO;
