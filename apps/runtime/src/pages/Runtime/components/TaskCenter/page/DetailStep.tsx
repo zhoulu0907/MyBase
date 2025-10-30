@@ -176,9 +176,7 @@ const DetailStep: FC = ({ stepData }) => {
     //   <Step disabled={true} title="Processing" description={renderDespUsers()} />
     //   <Step disabled={true} title="Pending" description={renderDescript()} />
     // </Steps>
-    <>
       <ProcessFlow data={stepData} />
-    </>
   );
 };
 export default DetailStep;
