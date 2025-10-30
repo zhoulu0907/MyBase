@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { Radio, Form, Select } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
-
+import { type ApproverConfig } from '../constant';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
 
-const SimpleMode = ({ setApprovalConfigData, approverConfig }: any) => {
+const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) => {
   const [userOptions, setUserOptions] = useState([]);
   const [roleOptions, setRoleOptions] = useState([]);
   const [simpleCkType, setSimpleCkType] = useState<string>(approverConfig?.approverType || 'user');
@@ -239,6 +239,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: any) => {
   useEffect(() => {
     let selOptions: any[] = [];
     let itemKey = '';
+    let dataKey = simpleCkType === 'user' ? 'users' : 'roles'; // 动态决定数据键名
     if (simpleCkType === 'user') {
       selOptions = userOptions;
       itemKey = 'userId';
@@ -248,7 +249,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: any) => {
     }
     setApprovalConfigData('approverConfig', {
       approverType: simpleCkType,
-      users: selOptions.filter((item: any) => {
+      [dataKey]: selOptions.filter((item: any) => {
         if (Array.isArray(formRes[simpleCkType])) {
           return formRes[simpleCkType].indexOf(item[itemKey]) > -1;
         }
@@ -264,7 +265,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: any) => {
   }, []);
 
   const setInitData = () => {
-    const { approverType, users } = approverConfig;
+    const { approverType, users = [], roles = [] } = approverConfig;
     if (approverType) {
       setSimpleCkType(approverType);
       if (approverType === 'user') {
@@ -273,7 +274,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: any) => {
         });
       } else if (approverType === 'role') {
         form.setFieldsValue({
-          role: users.map((item: any) => item.roleId)
+          role: roles.map((item: any) => item.roleId)
         });
       }
     }
