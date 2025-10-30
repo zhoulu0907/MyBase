@@ -91,19 +91,30 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     public void createDefaultRole(Long applicationId) {
         appCommonService.validateApplicationExist(applicationId);
         Long userId = SecurityFrameworkUtils.getLoginUserId();
-        for (AuthRoleTypeEnum roleType : List.of(AuthRoleTypeEnum.SYSTEM_ADMIN, AuthRoleTypeEnum.SYSTEM_USER)) {
+
+        {
             AuthRoleDO authRoleDO = new AuthRoleDO();
             authRoleDO.setApplicationId(applicationId);
-            authRoleDO.setRoleCode(roleType.getCode());
-            authRoleDO.setRoleName(roleType.getName());
-            authRoleDO.setRoleType(roleType.getValue());
+            authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
+            authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_ADMIN.getName());
+            authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_ADMIN.getValue());
             authRoleRepository.insert(authRoleDO);
-            if(!AuthRoleTypeEnum.isSystemAdminRole(roleType.getCode())){
-                AuthRoleUserDO entity = new AuthRoleUserDO();
-                entity.setUserId(userId);
-                entity.setRoleId(authRoleDO.getId());
-                appAuthRoleUserRepository.insert(entity);
-            }
+            //创建者是管理员
+            AuthRoleUserDO entity = new AuthRoleUserDO();
+            entity.setUserId(userId);
+            entity.setRoleId(authRoleDO.getId());
+        }
+        {
+            AuthRoleDO authRoleDO = new AuthRoleDO();
+            authRoleDO.setApplicationId(applicationId);
+            authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_USER.getCode());
+            authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_USER.getName());
+            authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_USER.getValue());
+            authRoleRepository.insert(authRoleDO);
+            //创建者是用户
+            AuthRoleUserDO entity = new AuthRoleUserDO();
+            entity.setUserId(userId);
+            entity.setRoleId(authRoleDO.getId());
         }
     }
 

@@ -13,11 +13,17 @@ public class EntityTriggerRespDTO {
 
     private String traceId;
 
-    private boolean success;
+    private Long processId;
+
+    private boolean success = true;
+
+    private boolean triggered = false;
 
     private String code;
 
     private String message;
+
+    private String detail;
 
     private Exception cause;
 
@@ -27,21 +33,9 @@ public class EntityTriggerRespDTO {
         this.traceId = traceId;
     }
 
-    public EntityTriggerRespDTO(String traceId, boolean success) {
+    public EntityTriggerRespDTO(String traceId, Long processId) {
         this.traceId = traceId;
-        this.success = success;
-    }
-
-    public EntityTriggerRespDTO(String traceId, boolean success, String message) {
-        this.traceId = traceId;
-        this.success = success;
-        this.message = message;
-    }
-
-    public EntityTriggerRespDTO(String traceId, boolean success, Exception cause) {
-        this.traceId = traceId;
-        this.success = success;
-        this.cause = cause;
+        this.processId = processId;
     }
 
 }

@@ -77,6 +77,11 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateEntityRelationship(@Valid EntityRelationshipSaveReqVO updateReqVO) {
+        // 校验ID不能为空
+        if (!StringUtils.hasText(updateReqVO.getId())) {
+            throw new IllegalArgumentException("更新操作必须提供实体关系ID");
+        }
+        
         // 校验存在
         validateEntityRelationshipExists(Long.valueOf(updateReqVO.getId()));
 

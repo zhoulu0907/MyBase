@@ -12,5 +12,7 @@ public class LoadPageSetRespVO {
 
     private String mainMetadata;
 
+    private Integer pageSetType;
+
     private List<PageDTO> pages;
 }

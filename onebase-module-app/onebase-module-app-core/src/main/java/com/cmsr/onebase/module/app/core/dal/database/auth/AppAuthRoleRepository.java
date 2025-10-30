@@ -46,18 +46,20 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
     }
 
 
-    public List<AuthRoleDO> findByApplicationIdAndUserId(Long applicationId, Long userId) {
+    public List<AuthRoleDO> findByUserIdAndApplicationId(Long userId, Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.param("application_id", applicationId);
         configs.param("user_id", userId);
+        configs.param("application_id", applicationId);
         String sql = """
                 select
-                	aar.id, aar.role_code, aar.role_name
+                	aar.id, aar.role_code, aar.role_type, aar.role_name
                 from
                 	app_auth_role_user aaru ,
                 	app_auth_role aar
                 where
                 	aaru.role_id = aar.id
+                    and aaru.deleted = 0
+                    and aar.deleted = 0
                 	and aaru.user_id = #{user_id}
                 	and aar.application_id = #{application_id}
                 """;
@@ -65,6 +67,7 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
             AuthRoleDO authRoleDO = new AuthRoleDO();
             authRoleDO.setId(row.getLong("id"));
             authRoleDO.setRoleCode(row.getString("role_code"));
+            authRoleDO.setRoleType(row.getInt("role_type"));
             authRoleDO.setRoleName(row.getString("role_name"));
             return authRoleDO;
         }).toList();

@@ -6,6 +6,7 @@ import lombok.Data;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class DynamicDataUpdateReqVO {
     private Map<Long, Object> data;
 
     @Schema(description = "子表数据对象")
-    private List<SubEntityVo> subEntities;
+    private List<SubEntityVo> subEntities = new ArrayList<>();
 
     @Schema(description = "方法编码（可选）")
     private String methodCode;

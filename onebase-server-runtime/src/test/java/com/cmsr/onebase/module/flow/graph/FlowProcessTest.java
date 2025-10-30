@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
@@ -39,6 +40,7 @@ public class FlowProcessTest {
     @Autowired
     private FlowJobMessageHandler flowJobMessageHandler;
 
+
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
         String json = flowProcessDO.getProcessDefinition();
@@ -64,6 +66,20 @@ public class FlowProcessTest {
                 "50028191407505411", 30
         ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        System.out.println(respDTO);
+    }
+
+    @Test
+    public void testSimple22() throws IOException {
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(101573932216057856L);
+        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        reqDTO.setFieldData(Map.of(
+                104845168301834240L, "yy",
+                "104951150916075520", "yy"
+        ));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);
     }

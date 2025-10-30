@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.app.build.controller.auth;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthPermissionService;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
-import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -11,8 +11,6 @@ import jakarta.validation.Valid;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * @Author：huangjie
@@ -28,18 +26,13 @@ public class AppAuthPermissionController {
     @Resource
     private AppAuthPermissionService authPermissionService;
 
-    @GetMapping("/get-permission-scope")
-    @Operation(summary = "获取可配置的权限范围")
-    public CommonResult<List<AuthPermissionScope>> getPermissionScope() {
-        return CommonResult.success(authPermissionService.getPermissionScope());
-    }
 
     /**
      * 获取角色-菜单的功能权限
      */
     @GetMapping("/get-function")
     @Operation(summary = "获取角色-菜单的功能权限")
-    public CommonResult<AuthDetailFunctionPermissionVO> getFunctionPermission(@Valid AuthPermissionReqVO reqVO) {
+    public CommonResult<AuthDetailFunctionPermissionVO> getFunctionPermission(@Valid AuthPermissionReq reqVO) {
         return CommonResult.success(authPermissionService.getFunctionPermission(reqVO));
     }
 
@@ -48,7 +41,7 @@ public class AppAuthPermissionController {
      */
     @GetMapping("/get-data")
     @Operation(summary = "获取角色-菜单的数据权限")
-    public CommonResult<AuthDetailDataPermissionVO> getDataPermission(@Valid AuthPermissionReqVO reqVO) {
+    public CommonResult<AuthDetailDataPermissionVO> getDataPermission(@Valid AuthPermissionReq reqVO) {
         return CommonResult.success(authPermissionService.getDataPermission(reqVO));
     }
 
@@ -57,7 +50,7 @@ public class AppAuthPermissionController {
      */
     @GetMapping("/get-field")
     @Operation(summary = "获取角色-字段的权限")
-    public CommonResult<AuthDetailFieldPermissionVO> getFieldPermission(@Valid AuthPermissionReqVO reqVO) {
+    public CommonResult<AuthDetailFieldPermissionVO> getFieldPermission(@Valid AuthPermissionReq reqVO) {
         return CommonResult.success(authPermissionService.getFieldPermission(reqVO));
     }
 
