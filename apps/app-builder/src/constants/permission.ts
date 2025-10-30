@@ -23,6 +23,8 @@ export const TENANT_MENUS = {
   INFO: 'tenant:info',
 }
 
+// todo 应用管理
+
 /** 租户管理-用户管理 */
 export const TENANT_USER_QUERY = 'tenant:user:query'; // 查询用户
 export const TENANT_USER_CREATE = 'tenant:user:create'; // 增加用户
@@ -58,11 +60,13 @@ export const TENANT_ROLE_PERMISSION = {
 /** 租户管理-组织管理 */
 export const TENANT_DEPT_QUERY = 'tenant:dept:query';
 export const TENANT_DEPT_CREATE = 'tenant:dept:create';
+export const TENANT_DEPT_SUB_DEPT = 'tenant:dept:update'; // todo 添加子部门 待确认
 export const TENANT_DEPT_UPDATE = 'tenant:dept:update';
 export const TENANT_DEPT_DELETE = 'tenant:dept:delete';
 export const TENANT_DEPT_PERMISSION = {
   QUERY: TENANT_DEPT_QUERY,
   CREATE: TENANT_DEPT_CREATE,
+  SUB_DEPT: TENANT_DEPT_SUB_DEPT,
   UPDATE: TENANT_DEPT_UPDATE,
   DELETE: TENANT_DEPT_DELETE
 }
