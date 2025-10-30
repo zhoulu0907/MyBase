@@ -92,8 +92,8 @@ public class FormulaUserServiceImpl implements FormulaUserService {
                 }
             } catch (Exception e) {
                 log.warn("获取上级部门信息失败，loginUserId: {}", loginUserId, e);
-                parameters.putIfAbsent("parentDeptId", 0L);
-                parameters.putIfAbsent("parentDeptName", "");
+                parameters.putIfAbsent("deptno", 0L);
+                parameters.putIfAbsent("name", "");
             }
             return;
         }
@@ -123,14 +123,14 @@ public class FormulaUserServiceImpl implements FormulaUserService {
                 if (dept != null && dept.getLeaderUserId() != null) {
                     AdminUserRespDTO supervisor = adminUserApi.getUser(dept.getLeaderUserId()).getCheckedData();
                     if (supervisor != null) {
-                        parameters.put("supervisorId", supervisor.getId());
-                        parameters.put("supervisorName", supervisor.getNickname());
+                        parameters.put("id", supervisor.getId());
+                        parameters.put("name", supervisor.getNickname());
                     }
                 }
             } catch (Exception e) {
                 log.warn("获取直属上级信息失败，loginUserId: {}", loginUserId, e);
-                parameters.putIfAbsent("supervisorId", 0L);
-                parameters.putIfAbsent("supervisorName", "");
+                parameters.putIfAbsent("id", 0L);
+                parameters.putIfAbsent("name", "");
             }
         }
     }

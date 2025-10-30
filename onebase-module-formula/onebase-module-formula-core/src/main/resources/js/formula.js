@@ -4559,40 +4559,40 @@ function _typeof(o) {
     return text.substring(0, num_chars);
   }
 
-  function GETUSER(id,name,type) {
+  function GETUSER(id,name) {
     console.log(id,name);
     var user = {
       name: name,
       id: id,
     }
-    if (type == "name") {
-      return name;
-    } else if ( type == "id") {
-      return id;
-    }
-    return null;
+    return user;
   }
 
-  function GETDEPT(deptno,name,type) {
+  function GETDEPT(deptno,name) {
     console.log(deptno,name);
-    if (type == "name") {
-      return name;
-    } else if ( type == "deptno") {
-      return deptno;
+    var dept = {
+      name: name,
+      deptno: deptno,
     }
     return null;
   }
-
-  function GETUPDEPT(deptno,name,type) {
+  function GETUPDEPT(deptno,name) {
     console.log(deptno,name);
-    if (type == "name") {
-      return name;
-    } else if ( type == "deptno") {
-      return deptno;
+    var dept = {
+      name: name,
+      deptno: deptno,
     }
     return null;
   }
 
+  function GETSUPERVISOR(deptno,name) {
+    console.log(deptno,name);
+    var dept = {
+      name: name,
+      deptno: deptno,
+    }
+    return null;
+  }
 
 
   function LEN(text) {
@@ -10704,6 +10704,7 @@ function _typeof(o) {
   exports.LEFT = LEFT;
   exports.GETUSER = GETUSER;
   exports.GETDEPT = GETDEPT;
+  exports.GETUPDEPT = GETUPDEPT;
   exports.LEN = LEN;
   exports.LINEST = LINEST;
   exports.LN = LN;

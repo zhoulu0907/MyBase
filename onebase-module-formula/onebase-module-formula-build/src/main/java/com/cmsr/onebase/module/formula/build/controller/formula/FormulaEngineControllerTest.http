@@ -192,7 +192,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETUSER(id,name,'id')",
+{ "formula": "GETUSER(id,name)",
   "parameters": {}
 }
 
@@ -202,7 +202,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETDEPT(deptno,name,'deptno')",
+{ "formula": "GETDEPT(deptno,name)",
   "parameters": {}
 }
 
@@ -364,7 +364,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "COUNT(1,2,'a',3)" }
+ { "formula": "COUNT(1,2,'a',3)" }
 
 ### LOG
 POST {{baseUrl}}/formula/engine/execute-formula

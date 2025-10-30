@@ -40,9 +40,9 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     private final FormulaEngineProperties properties;
 
-    private final String                  formulaJsScript;
+    private final String formulaJsScript;
 
-    private final Pattern                 dangerousPatternRegex;
+    private final Pattern dangerousPatternRegex;
 
     @Resource
     private FormulaUserService formulaUserService;
@@ -152,7 +152,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     @Override
     public Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters, Map<String, Object> contextData) {
-        formula = handleFormulaParameters(formula,parameters);
+        formula = handleFormulaParameters(formula, parameters);
         formula = handleFormulaContextData(formula, contextData);
         return executeFormulaWithParams(formula, parameters);
     }
@@ -308,21 +308,41 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
         if (result.isNumber()) {
-            if (result.fitsInDouble()) {
-                return result.asDouble();
-            }
-            if (result.fitsInLong()) {
+            // 优先检查是否适合long类型（整数）
+            if (result.fitsInLong() || result.fitsInInt()) {
                 return result.asLong();
             }
-            if (result.fitsInInt()) {
-                return result.asInt();
+            // 然后检查是否适合double类型（小数）
+            if (result.fitsInDouble() || result.fitsInFloat()) {
+                return result.asDouble();
             }
+            return result.asDouble();
         }
 
+        if (result.isDate()) {
+            java.time.format.DateTimeFormatter inputFormatter =
+                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            return java.time.LocalDateTime.parse(result.toString(), inputFormatter);
+        }
+        // 对于JavaScript对象，检查是否包含value属性，如果包含则返回value的值
+        if (result.hasMembers()) {
+            // 检查是否有value属性，如果有则返回value的值
+            if (result.hasMember("value")) {
+                Value valueMember = result.getMember("value");
+                return convertResult(valueMember); // 递归转换value成员
+            }
+
+            // 如果没有value属性，按原逻辑处理
+            Map<String, Object> resultMap = new HashMap<>();
+            for (String key : result.getMemberKeys()) {
+                Value member = result.getMember(key);
+                resultMap.put(key, convertResult(member)); // 递归转换成员
+            }
+            return resultMap;
+        }
         if (result.isString()) {
             return result.asString();
         }
-
         // 对于其他类型，转换为字符串
         return result.toString();
     }
@@ -338,12 +358,12 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     /**
      * 替换公式中的参数占位符，例如：
      * {
-     *     "formula": "COUNT($数据查询节点(多条).关联主表ID)",
-     *     "parameters":
-     *     {
-     *       "$数据查询节点(多条)": "r_id",
-     *       "$数据查询节点(多条).关联主表ID": "f_id"
-     *     }
+     * "formula": "COUNT($数据查询节点(多条).关联主表ID)",
+     * "parameters":
+     * {
+     * "$数据查询节点(多条)": "r_id",
+     * "$数据查询节点(多条).关联主表ID": "f_id"
+     * }
      * }
      * 执行完成后 "formula": "COUNT($r_id.f_id)",
      *
@@ -417,25 +437,25 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      * 新的解析方法，用于处理流程公式中的上下文数据
      * 该方法会将字段引用直接替换为值列表，例如将 COUNT(f_id) 转换为 COUNT(1,2,3)，例如：
      * {
-     *  "formula": "COUNT($r_id1.f_id)",
-     *  "contextData":
-     *     {
-     *       "r_id1": [
-     *           {"f_id": 1},
-     *           {"f_id": 2},
-     *           {"f_id": 3}
-     *       ],
-     *       "r_id2": [
-     *           {"f_id": 4},
-     *           {"f_id": 5},
-     *           {"f_id": 6}
-     *       ],
-     *       "r_id3": {"f_id": 4}
-     *     }
+     * "formula": "COUNT($r_id1.f_id)",
+     * "contextData":
+     * {
+     * "r_id1": [
+     * {"f_id": 1},
+     * {"f_id": 2},
+     * {"f_id": 3}
+     * ],
+     * "r_id2": [
+     * {"f_id": 4},
+     * {"f_id": 5},
+     * {"f_id": 6}
+     * ],
+     * "r_id3": {"f_id": 4}
+     * }
      * }
      * 执行完成后 "formula": "COUNT(1,2,3)"
      *
-     * @param formula    原始公式
+     * @param formula     原始公式
      * @param contextData 上下文数据
      * @return 解析替换后的公式
      */
@@ -511,8 +531,8 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     /**
      * 处理公式中的参数映射，将形如"$数据查询节点(多条).关联主表ID"的参数替换为对应的字段名"f_id"
      * 例如：将"COUNT($数据查询节点(多条).关联主表ID)"转换为"COUNT(值1, 值2，...)"
-     * 
-     * @param formula 公式字符串
+     *
+     * @param formula    公式字符串
      * @param parameters 参数映射
      * @return 处理后的公式
      */
@@ -522,7 +542,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
         String result = formula;
-        
+
         // 收集所有以$开头的键
         List<String> keys = new ArrayList<>();
         for (String key : parameters.keySet()) {
@@ -530,11 +550,11 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                 keys.add(key);
             }
         }
-        
+
         if (keys.isEmpty()) {
             return result;
         }
-        
+
         // 按键长度倒序排列，避免短键先替换影响长键
         keys.sort((a, b) -> Integer.compare(b.length(), a.length()));
 
@@ -543,7 +563,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             if (valObj == null) {
                 continue;
             }
-            
+
             String val = String.valueOf(valObj).trim();
             if (val.isEmpty()) {
                 continue;
@@ -560,4 +580,3 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         return result;
     }
 }
-
