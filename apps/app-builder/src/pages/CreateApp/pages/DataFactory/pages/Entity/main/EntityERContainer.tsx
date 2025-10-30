@@ -1,6 +1,7 @@
 import type { EdgeData, Entity, EntityERProps, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
+import { newFieldSignal } from '@/store/singals/new_field';
 import { Button, Message } from '@arco-design/web-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
@@ -49,46 +50,43 @@ export const EntityERContainer: React.FC<{
   const chartRef = useRef<any>(null);
   const prevDataSourceIdRef = useRef<string>('');
 
-  const loadEntityList = useCallback(
-    async (dataSourceId: string) => {
-      if (!dataSourceId) {
-        return;
-      }
+  const loadEntityList = useCallback(async (dataSourceId: string) => {
+    if (!dataSourceId) {
+      return;
+    }
 
-      try {
-        const res = await getEntityGraph(dataSourceId);
+    try {
+      const res = await getEntityGraph(dataSourceId);
 
-        if (res?.entities || res?.relationships) {
-          setData({
-            nodes:
-              res?.entities.map((item: unknown) => {
-                const entityItem = item as Record<string, unknown>;
-                const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
-                return {
-                  ...entityItem,
-                  positionX: pos?.x,
-                  positionY: pos?.y
-                };
-              }) || [],
-            edges:
-              res?.relationships.map((item: unknown) => {
-                const relationItem = item as Record<string, unknown>;
-                return {
-                  ...relationItem,
-                  label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
-                };
-              }) || []
-          });
-        } else {
-          setData({ nodes: [], edges: [] });
-        }
-      } catch (error) {
-        console.error('加载实体列表失败:', error);
+      if (res?.entities || res?.relationships) {
+        setData({
+          nodes:
+            res?.entities.map((item: unknown) => {
+              const entityItem = item as Record<string, unknown>;
+              const pos = JSON.parse((entityItem?.displayConfig as string) || '{}');
+              return {
+                ...entityItem,
+                positionX: pos?.x,
+                positionY: pos?.y
+              };
+            }) || [],
+          edges:
+            res?.relationships.map((item: unknown) => {
+              const relationItem = item as Record<string, unknown>;
+              return {
+                ...relationItem,
+                label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
+              };
+            }) || []
+        });
+      } else {
         setData({ nodes: [], edges: [] });
       }
-    },
-    [dsData]
-  );
+    } catch (error) {
+      console.error('加载实体列表失败:', error);
+      setData({ nodes: [], edges: [] });
+    }
+  }, []);
 
   // 打开节点编辑抽屉
   const handleOpenNodeEditDrawer = (editData: Partial<EntityNode>) => {
@@ -114,7 +112,13 @@ export const EntityERContainer: React.FC<{
   };
 
   // 字段点击
-  const handleFieldClick = (fieldId: string) => {
+  const handleFieldClick = (fieldId: string, entityId?: string) => {
+    // 点击字段移除新增标记
+    if (entityId && newFieldSignal.isNewField(entityId, fieldId)) {
+      setTimeout(() => {
+        newFieldSignal.removeNewField(entityId, fieldId);
+      }, 500);
+    }
     openModal(MODAL_TYPE.EDIT_FIELD, { selectedFieldId: fieldId });
   };
 
@@ -229,6 +233,7 @@ export const EntityERContainer: React.FC<{
     if (prevDataSourceIdRef.current && prevDataSourceIdRef.current !== dsData?.id) {
       console.log('数据源切换，清理旧实体数据');
       setData({ nodes: [], edges: [] });
+      newFieldSignal.clearAllNewFields();
     }
 
     prevDataSourceIdRef.current = dsData?.id;
