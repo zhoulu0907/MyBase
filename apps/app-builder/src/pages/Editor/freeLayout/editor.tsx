@@ -8,7 +8,6 @@ import {
   FreeLayoutEditorProvider,
   type FreeLayoutPluginContext
 } from '@flowgram.ai/free-layout-editor';
-import { Button } from '@douyinfe/semi-ui';
 import '@flowgram.ai/free-layout-editor/index.css';
 import './styles/index.css';
 import { nodeRegistries } from './nodes';
