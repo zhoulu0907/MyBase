@@ -1,13 +1,7 @@
 package com.cmsr.onebase.module.formula.service.engine;
 
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
 import com.cmsr.onebase.module.formula.service.user.FormulaUserService;
-import com.cmsr.onebase.module.system.api.dept.DeptApi;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
-import com.cmsr.onebase.module.system.api.permission.RoleApi;
-import com.cmsr.onebase.module.system.api.user.AdminUserApi;
-import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
@@ -326,12 +320,6 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
         // 对于JavaScript对象，检查是否包含value属性，如果包含则返回value的值
         if (result.hasMembers()) {
-            // 检查是否有value属性，如果有则返回value的值
-            if (result.hasMember("value")) {
-                Value valueMember = result.getMember("value");
-                return convertResult(valueMember); // 递归转换value成员
-            }
-
             // 如果没有value属性，按原逻辑处理
             Map<String, Object> resultMap = new HashMap<>();
             for (String key : result.getMemberKeys()) {

@@ -206,13 +206,15 @@ Content-Type: application/json
   "parameters": {}
 }
 
-### GETSUPERVISOR
+### GETUPDEPT
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETSUPERVISOR(18)" }
+{ "formula": "GETUPDEPT(deptno,name)",
+  "parameters": {}
+}
 
 ### GETROLE
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -220,15 +222,19 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETROLE(18)" }
+{ "formula": "GETROLE(userId)",
+  "parameters": {"userId":12}
+}
 
-### GETUPDEPT
+### GETSUPERVISOR
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETUPDEPT(100)" }
+{ "formula": "GETSUPERVISOR(id,name)",
+  "parameters": {"id": 107}
+}
 
 ### ISINROLE
 POST {{baseUrl}}/formula/engine/execute-formula

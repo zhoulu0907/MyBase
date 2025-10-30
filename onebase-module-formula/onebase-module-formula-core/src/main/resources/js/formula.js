@@ -4574,24 +4574,24 @@ function _typeof(o) {
       name: name,
       deptno: deptno,
     }
-    return null;
+    return dept;
   }
   function GETUPDEPT(deptno,name) {
     console.log(deptno,name);
-    var dept = {
+    var updept = {
       name: name,
       deptno: deptno,
     }
-    return null;
+    return updept;
   }
 
-  function GETSUPERVISOR(deptno,name) {
-    console.log(deptno,name);
-    var dept = {
+  function GETSUPERVISOR(id,name) {
+    console.log(id,name);
+    var user = {
       name: name,
-      deptno: deptno,
+      id: id,
     }
-    return null;
+    return user;
   }
 
 
@@ -10705,6 +10705,7 @@ function _typeof(o) {
   exports.GETUSER = GETUSER;
   exports.GETDEPT = GETDEPT;
   exports.GETUPDEPT = GETUPDEPT;
+  exports.GETSUPERVISOR = GETSUPERVISOR;
   exports.LEN = LEN;
   exports.LINEST = LINEST;
   exports.LN = LN;

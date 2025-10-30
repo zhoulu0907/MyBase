@@ -120,6 +120,18 @@ public class FormulaUserServiceImpl implements FormulaUserService {
         // 检查公式是否包含直属上级相关函数
         if (formula.contains(GETSUPERVISOR)) {
             try {
+                Object idObj = parameters.get("id");
+                Long userId = null;
+                if (idObj instanceof Long) {
+                    userId = (Long) idObj;
+                } else if (idObj instanceof Integer) {
+                    userId = ((Integer) idObj).longValue();
+                }
+                
+                if (userId != null) {
+                    user = adminUserApi.getUser(userId).getCheckedData();
+                    dept = deptApi.getDept(user.getDeptId()).getCheckedData();
+                }
                 if (dept != null && dept.getLeaderUserId() != null) {
                     AdminUserRespDTO supervisor = adminUserApi.getUser(dept.getLeaderUserId()).getCheckedData();
                     if (supervisor != null) {
