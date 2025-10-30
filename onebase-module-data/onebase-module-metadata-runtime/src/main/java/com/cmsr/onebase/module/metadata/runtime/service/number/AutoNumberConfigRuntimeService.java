@@ -1,18 +1,18 @@
-package com.cmsr.onebase.module.metadata.build.service.number;
+package com.cmsr.onebase.module.metadata.runtime.service.number;
 
-import com.cmsr.onebase.module.metadata.build.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.number.vo.AutoNumberConfigWithRulesRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 
 import java.util.List;
 
 /**
- * 自动编号配置 Build Service 接口
+ * 自动编号配置 Runtime Service 接口
  *
  * @author bty418
- * @date 2025-09-17
+ * @date 2025-10-30
  */
-public interface AutoNumberConfigBuildService {
+public interface AutoNumberConfigRuntimeService {
 
     /**
      * 新增或更新自动编号配置
@@ -68,3 +68,4 @@ public interface AutoNumberConfigBuildService {
      */
     Long saveAutoNumberConfig(MetadataAutoNumberConfigDO config);
 }
+

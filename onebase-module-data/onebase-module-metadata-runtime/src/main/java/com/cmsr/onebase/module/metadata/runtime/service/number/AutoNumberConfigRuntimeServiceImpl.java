@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.metadata.build.service.number;
+package com.cmsr.onebase.module.metadata.runtime.service.number;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.number.vo.AutoNumberConfigWithRulesRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberConfigRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberRuleItemRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberStateRepository;
@@ -15,14 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 自动编号配置 Build Service 实现类
+ * 自动编号配置 Runtime Service 实现类
  *
  * @author bty418
- * @date 2025-09-17
+ * @date 2025-10-30
  */
 @Slf4j
 @Service
-public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildService {
+public class AutoNumberConfigRuntimeServiceImpl implements AutoNumberConfigRuntimeService {
 
     @Resource
     private MetadataAutoNumberConfigRepository configRepository;
@@ -84,12 +84,6 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
         ruleItemRepository.deleteByConfigId(configId);
     }
 
-    /**
-     * 获取自动编号配置及其规则项
-     *
-     * @param fieldId 字段ID
-     * @return 自动编号配置及规则项响应VO，如果配置不存在则返回null
-     */
     @Override
     public AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(Long fieldId) {
         // 根据字段ID获取配置
@@ -115,3 +109,4 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
         return upsert(config);
     }
 }
+

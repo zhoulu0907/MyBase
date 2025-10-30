@@ -1,9 +1,9 @@
-package com.cmsr.onebase.module.metadata.build.controller.admin.number;
+package com.cmsr.onebase.module.metadata.runtime.controller.app.number;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.metadata.build.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.number.vo.AutoNumberConfigWithRulesRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
-import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberConfigBuildService;
+import com.cmsr.onebase.module.metadata.runtime.service.number.AutoNumberConfigRuntimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -15,20 +15,26 @@ import org.springframework.web.bind.annotation.*;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
- * 管理后台 - 自动编号配置
+ * 运行态 - 自动编号配置
  *
- * @author matianyu
- * @date 2025-08-20
+ * @author bty418
+ * @date 2025-10-30
  */
-@Tag(name = "管理后台 - 自动编号配置")
+@Tag(name = "运行态 - 自动编号配置")
 @RestController
-@RequestMapping("/metadata/auto-number/config")
+@RequestMapping("/metadata-runtime/auto-number/config")
 @Validated
-public class AutoNumberConfigController {
+public class AutoNumberConfigRuntimeController {
 
     @Resource
-    private AutoNumberConfigBuildService configService;
+    private AutoNumberConfigRuntimeService configService;
 
+    /**
+     * 按字段ID获取自动编号配置与规则
+     *
+     * @param fieldId 字段ID
+     * @return 自动编号配置与规则响应VO
+     */
     @PostMapping("/get")
     @Operation(summary = "按字段ID获取自动编号配置与规则")
     @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")
@@ -37,6 +43,12 @@ public class AutoNumberConfigController {
         return success(result);
     }
 
+    /**
+     * 保存/更新自动编号配置
+     *
+     * @param req 自动编号配置请求
+     * @return 配置ID
+     */
     @PostMapping("/upsert")
     @Operation(summary = "保存/更新自动编号配置")
     @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
@@ -45,5 +57,4 @@ public class AutoNumberConfigController {
         return success(id);
     }
 }
-
 
