@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
 
-public interface ETLService {
+public interface ETLJobService {
 
     PageResult<ETLBriefVO> getETLPage(ETLPageReqVO pageReqVO);
 

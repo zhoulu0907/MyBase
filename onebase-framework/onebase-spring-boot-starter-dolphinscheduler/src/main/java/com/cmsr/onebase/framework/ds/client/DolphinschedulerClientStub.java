@@ -31,7 +31,11 @@ public interface DolphinschedulerClientStub {
     Call<Result<Object>> deleteWorkflow(@Path("projectCode") Long projectCode,
                                         @Path("workflowCode") Long workflowCode);
 
-    @GET("projects/{projectCode}/workflow-definition//query-by-name")
+    @GET("projects/{projectCode}/workflow-definition/{code}")
+    Call<Result<WorkflowDefinitionResp>> queryWorkflowByCode(@Path("projectCode") Long projectCode,
+                                                             @Path("code") Long workflowCode);
+
+    @GET("projects/{projectCode}/workflow-definition/query-by-name")
     Call<Result<WorkflowDefinitionResp>> queryWorkflowByName(@Path("projectCode") Long projectCode,
                                                              @Query("name") String name);
 

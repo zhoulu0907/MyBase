@@ -15,7 +15,7 @@ import java.util.List;
 
 @Tag(name = "数据工厂 - 数据源管理")
 @RestController
-@RequestMapping("/datafactory/datasource")
+@RequestMapping("/etl/datasource")
 @Validated
 public class ETLDatasourceController {
 

@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ETLServiceImpl implements ETLService {
+public class ETLJobServiceImpl implements ETLJobService {
     @Override
     public PageResult<ETLBriefVO> getETLPage(ETLPageReqVO pageReqVO) {
         return null;
