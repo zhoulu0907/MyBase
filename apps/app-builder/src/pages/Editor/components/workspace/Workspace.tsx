@@ -32,7 +32,13 @@ import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
-import { getEntityFieldOptions, ENTITY_TYPE, type AppEntityField, type EntityFieldOption } from '@onebase/app';
+import {
+  getEntityFieldOptions,
+  getAutoNumberConfig,
+  ENTITY_TYPE,
+  type AppEntityField,
+  type EntityFieldOption
+} from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
@@ -229,6 +235,11 @@ export default function EditorWorkspace() {
     }));
   };
 
+  const getAutoConfig = async (fieldId: string) => {
+    const autoConfig = await getAutoNumberConfig(fieldId);
+    return autoConfig?.rules || [];
+  };
+
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
@@ -325,7 +336,7 @@ export default function EditorWorkspace() {
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
 
                   newList.splice(newList.indexOf(item), 1);
-                } else if (item.entityType === '主表') {
+                } else if (item.entityType === ENTITY_TYPE.MAIN) {
                   item.fields
                     .filter(
                       (field: AppEntityField) =>
@@ -340,13 +351,20 @@ export default function EditorWorkspace() {
                       console.log('cpType', cpType, field);
 
                       const schema = getComponentSchema(cpType as any);
-
+                      // 单选、多选列表配置
                       if (
                         field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
                         field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
                       ) {
                         getFieldOptions(field.fieldId).then((options: any) => {
                           schema.config.defaultValue = options;
+                        });
+                      }
+
+                      // 自动编码
+                      if (field.fieldType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
+                        getAutoConfig(field.fieldId).then((rules: any) => {
+                          schema.config.rules = rules;
                         });
                       }
 
@@ -414,6 +432,11 @@ export default function EditorWorkspace() {
                 if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
                   const options = await getFieldOptions(fieldID);
                   schema.config.defaultValue = options;
+                }
+
+                if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+                  const rules = await getAutoConfig(fieldID);
+                  schema.config.rules = rules;
                 }
               }
 
