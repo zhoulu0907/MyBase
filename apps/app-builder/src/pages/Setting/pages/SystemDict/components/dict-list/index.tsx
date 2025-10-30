@@ -11,10 +11,10 @@ import StatusTag from '@/components/StatusTag';
 
 interface DictionaryListProps {
   list: DictItem[];
-  activeId: number | undefined;
+  activeId: string | undefined;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onSelect: (id: number | undefined) => void;
+  onSelect: (id: string | undefined) => void;
   onAdd: () => void;
 }
 

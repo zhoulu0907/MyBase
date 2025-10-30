@@ -1,14 +1,14 @@
 import React from 'react';
 import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
-import { Button, Checkbox, Form, Input, Select, Space, Tooltip } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, Select, Space } from '@arco-design/web-react';
 import { IconSelectAll, IconSettings, IconEdit } from '@arco-design/web-react/icon';
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
-import { systemFieldsLength } from './utils/transform';
+import { systemFieldsLength } from '../utils/transform';
 import { ModalPopover } from '@/components/ModalPopover';
-import styles from './index.module.less';
-import type { FieldFormValues, ColumnConfig } from './types';
-import { CHECK_CONST } from './utils/const';
+import type { FieldFormValues, ColumnConfig } from '../types';
+import { CHECK_CONST } from '../utils/const';
+import styles from '../index.module.less';
 
 interface TableColumnsProps {
   fieldTypeOptions: { label: string; value: string }[];

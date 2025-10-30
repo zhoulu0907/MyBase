@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Input, Switch, Form, Message } from '@arco-design/web-react';
-import styles from './index.module.less';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
+import styles from '../index.module.less';
 
 // 字段约束配置接口
 interface FieldConstraintConfig {

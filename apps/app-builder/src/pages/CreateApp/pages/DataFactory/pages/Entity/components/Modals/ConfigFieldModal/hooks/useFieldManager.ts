@@ -81,12 +81,16 @@ export const useFieldManager = (
 
   // 处理配置确认
   const handleConfigConfirm = useCallback(
-    (fieldType: string, fieldId: string, configData: unknown) => {
+    (fieldType: string, fieldId: string, configData: unknown, dictTypeId?: string | number) => {
       let fieldConfig = {};
       switch (fieldType) {
         case ENTITY_FIELD_TYPE.SELECT.VALUE:
         case ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE:
-          fieldConfig = { options: configData };
+          if (dictTypeId) {
+            fieldConfig = { dictTypeId, options: [] };
+          } else {
+            fieldConfig = { options: configData };
+          }
           break;
         case ENTITY_FIELD_TYPE.AUTO_CODE.VALUE:
           fieldConfig = { autoNumber: configData };

@@ -2,19 +2,20 @@ import React, { useMemo } from 'react';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import FieldConstraint from './FieldConstraint';
 import { AutoCodeConfig, MultiPicklistConfig, PicklistConfig } from './FieldTypeConfig';
-import styles from './index.module.less';
-import type { FieldConfigPopoverProps } from './types';
+import type { FieldConfigPopoverProps } from '../types';
+import styles from '../index.module.less';
 
 const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
   ({ fieldType, fieldId, field, onConfirm, onCancel, fields }) => {
     // 根据字段类型渲染对应的配置组件
     const configComponent = useMemo(() => {
-      console.log('renderConfigComponent called for:', fieldType);
       switch (fieldType) {
         case ENTITY_FIELD_TYPE.SELECT.VALUE:
           return (
             <PicklistConfig
-              onConfirm={(options) => onConfirm(ENTITY_FIELD_TYPE.SELECT.VALUE, fieldId, options)}
+              onConfirm={(options, dictTypeId) =>
+                onConfirm(ENTITY_FIELD_TYPE.SELECT.VALUE, fieldId, options, dictTypeId)
+              }
               initialOptions={field?.options}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.SELECT.VALUE)}
             />
@@ -23,7 +24,9 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
         case ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE:
           return (
             <MultiPicklistConfig
-              onConfirm={(options) => onConfirm(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE, fieldId, options)}
+              onConfirm={(options, dictTypeId) =>
+                onConfirm(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE, fieldId, options, dictTypeId)
+              }
               initialOptions={field?.options}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE)}
             />
