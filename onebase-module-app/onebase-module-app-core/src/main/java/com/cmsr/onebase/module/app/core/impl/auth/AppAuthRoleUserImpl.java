@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.core.biz.auth;
+package com.cmsr.onebase.module.app.core.impl.auth;
 
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;

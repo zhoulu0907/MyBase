@@ -3,7 +3,7 @@ package com.cmsr.onebase.framework.security.runtime.service;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
-import com.cmsr.onebase.module.app.api.security.bo.MenuPermission;
+import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -54,8 +54,8 @@ public class RTPermissionService implements ApplicationContextAware {
         return appAuthSecurityApi.checkMenuEntity(applicationId, menuId, entityId);
     }
 
-    public MenuPermission getMenuOperation(Long userId, Long applicationId, Long menuId) {
-        return appAuthSecurityApi.getMenuPermission(userId, applicationId, menuId);
+    public OperationPermission getMenuOperation(Long userId, Long applicationId, Long menuId) {
+        return appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId);
     }
 
     public DataPermission getMenuDataPermission(Long userId, Long applicationId, Long menuId) {

@@ -3,7 +3,7 @@ package com.cmsr.onebase.framework.security.runtime;
 import com.cmsr.onebase.framework.security.runtime.service.RTPermissionService;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
-import com.cmsr.onebase.module.app.api.security.bo.MenuPermission;
+import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -34,7 +34,7 @@ public class RTSecurityContext {
         return RTPermissionService.getInstance().checkMenuEntity(applicationId, menuId, entityId);
     }
 
-    public static MenuPermission getMenuOperation(Long menuId) {
+    public static OperationPermission getMenuOperation(Long menuId) {
         RTLoginUser loginUser = getLoginUser();
         Long userId = loginUser.getUserId();
         Long applicationId = loginUser.getApplicationId();

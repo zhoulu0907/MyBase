@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.core.biz.app;
+package com.cmsr.onebase.module.app.core.impl.app;
 
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;

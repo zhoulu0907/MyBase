@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.core.dal.provider.auth;
+package com.cmsr.onebase.module.app.core.provider.auth;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionFilter;

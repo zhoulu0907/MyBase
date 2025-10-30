@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.core.dal.provider.auth;
+package com.cmsr.onebase.module.app.core.provider.auth;
 
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermissionItem;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
