@@ -17,9 +17,10 @@ interface PageProps {
   setPopVisible: Function;
   onBack: Function;
   instanceId: string;
+  taskId: string;
 }
 
-const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, instanceId }) => {
+const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, instanceId, taskId }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -65,7 +66,15 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           title=""
           style={{ maxWidth: '420px', width: '420px' }}
           className="dt-ok-confirm"
-          content={<DetailOKConfirm ref={confirmRef} setPopupVisible={setPopupVisible} onBack={onBack} />}
+          content={
+            <DetailOKConfirm
+              ref={confirmRef}
+              setPopupVisible={setPopupVisible}
+              onBack={onBack}
+              taskId={taskId}
+              instanceId={instanceId}
+            />
+          }
           onOk={() => {
             handleConfirmOK();
           }}

@@ -93,7 +93,8 @@ const WillDo: FC = ({ appId }) => {
   let [tbRowSelection, setTbRowSelection] = useState<any>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<any>();
   const [data, setData] = useState<any>();
-  const [instanceId, setInstanceId] = useState();
+  const [instanceId, setInstanceId] = useState('');
+  const [taskId, setTaskId] = useState('');
   let [detailPopVisible, setPopVisible] = useState(false);
   let [approveVisible, setApproveVisible] = useState(false);
 
@@ -119,6 +120,7 @@ const WillDo: FC = ({ appId }) => {
   function handleDetailPage(row: any) {
     console.log('click to detail page === row ===', row);
     setInstanceId(row?.instanceId);
+    setTaskId(row?.taskId);
     setPopVisible(true);
   }
 
@@ -179,6 +181,7 @@ const WillDo: FC = ({ appId }) => {
           setPopVisible={setPopVisible}
           onBack={onBack}
           instanceId={instanceId}
+          taskId={taskId}
         />
       )}
       {approveVisible && <BatchApproveModal approveVisible={approveVisible} setApproveVisible={setApproveVisible} />}

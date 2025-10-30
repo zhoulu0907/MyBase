@@ -13,7 +13,7 @@ const maxImgSizeMB = 20
 const maxFileSizeMB = 50
 
 const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
-    const { setPopupVisible, onBack } = props;
+    const { setPopupVisible, onBack, taskId, instanceId } = props;
     const [form] = Form.useForm();
     const [imgUpList, setImgUpList] = useState<any>()
 
@@ -24,24 +24,21 @@ const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
     }));
 
     const fetchExec = async () => {
-        try {
-          await form.validate();
-          const nameValue = form.getFieldValue('name');
-          // todo：模拟参数
-          const req = {
-            buttonType: 'approve',
-            taskId: '1432895487027056640',
-            instanceId: '1432895485789736960',
-            comment: nameValue
-          };
-          const res = await fetchExecTask(req);
-          setPopupVisible(false);
-          onBack();
-        } catch (error) {
-          console.log('表单验证失败:', error);
-        }
-      
-
+      try {
+        await form.validate();
+        const nameValue = form.getFieldValue('name');
+        const req = {
+          buttonType: 'approve',
+          taskId,
+          instanceId,
+          comment: nameValue
+        };
+        await fetchExecTask(req);
+        setPopupVisible(false);
+        onBack();
+      } catch (error) {
+        console.log('表单验证失败:', error);
+      }
     };
     const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
         const formData = new FormData();
