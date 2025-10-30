@@ -97,8 +97,7 @@ export const Editor = () => {
       bpmDefJson: JSON.stringify(useJsonData)
     };
     save(params).then((res: any) => {
-      console.log(res);
-      setFlowId(res)
+      setFlowId(res);
     });
   };
   return (
