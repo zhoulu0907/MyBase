@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.datamethod;
+package com.cmsr.onebase.module.metadata.api.datamethod.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
