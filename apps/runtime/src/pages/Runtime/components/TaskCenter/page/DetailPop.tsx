@@ -16,9 +16,10 @@ interface PageProps {
   detailPopVisible: boolean;
   setPopVisible: Function;
   onBack: Function;
+  instanceId: string;
 }
 
-const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack }) => {
+const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, instanceId }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -83,52 +84,11 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   }
 
   const fetchStepData = async () => {
-    // todo：模拟参数
-    const res = await getOperatorRecord({ instanceId: '1432895485789736960' });
-    const mockRes = {
-      code: 0,
-      data: [
-        {
-          nodeName: '发起节点',
-          nodeType: 'initiation',
-          operators: [
-            {
-              operator: '处理人',
-              operatorTime: 1761670506018,
-              comment: '提交'
-            }
-          ]
-        },
-        {
-          nodeName: '开始',
-          nodeType: 'start',
-          operators: [
-            {
-              operator: '处理人',
-              operatorTime: 1761670505828
-            }
-          ]
-        },
-        {
-          nodeName: '组长审批',
-          nodeType: 'approver',
-          operators: [
-            {
-              operator: '处理人',
-              operatorTime: 1761718370646,
-              comment: '同意测试'
-            }
-          ]
-        }
-      ],
-      msg: ''
-    };
-
-    setStepData(res?.data || mockRes);
+    const res = await getOperatorRecord({instanceId });
+    setStepData(res);
   };
 
   useEffect(() => {
-    //发请求，请求详情以及审批记录
     fetchStepData();
   }, []);
 

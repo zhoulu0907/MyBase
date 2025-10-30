@@ -1,29 +1,35 @@
-import { useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { Steps, Avatar } from '@arco-design/web-react';
 import { IconDownload, IconEye } from '@arco-design/web-react/icon';
-import '../style/tcPage.less';
+import dayjs from 'dayjs';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
+import '../style/tcPage.less';
+
 
 const Step = Steps.Step;
 const AvatarGroup = Avatar.Group;
 
 const DetailStep: FC = ({ stepData }) => {
-  const [current, setCurrent] = useState(5);
+  const [current, setCurrent] = useState(0);
 
-  function renderDescript() {
+  function renderDescript(value) {
     return (
       <>
         <div className="flex-bw-center">
           <p className="photo-img"></p>
           <div style={{ flex: 1 }}>
-            <p>张三</p>
+            {/* <p>{value?.nodeName}</p> */}
             <p className="flex-bw-center">
-              <span className="sp-options">审批意见</span>
-              <span className="gray-color">2025-02-02 12:11</span>
+              <span className="sp-options">{value?.operators[0]?.comment}</span>
+              <span className="gray-color">
+                {value?.operators[0]?.operatorTime
+                  ? dayjs(value?.operators[0]?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
+                  : '-'}
+              </span>
             </p>
           </div>
         </div>
-        <div className="flex-bw-center no-photo" style={{ marginTop: '8px' }}>
+        {/* <div className="flex-bw-center no-photo" style={{ marginTop: '8px' }}>
           <p className="photo-img"></p>
           <div className="arco-upload-list arco-upload-list-type-picture-card">
             <div className="arco-upload-list-item arco-upload-list-item-done">
@@ -81,7 +87,7 @@ const DetailStep: FC = ({ stepData }) => {
               </span>
             </li>
           </ul>
-        </div>
+        </div> */}
       </>
     );
   }
@@ -136,51 +142,41 @@ const DetailStep: FC = ({ stepData }) => {
     );
   }
 
-  const getNodeStatus = (node) => {
-    const { operators } = node;
-
-    if (!operators || operators.length === 0) {
-      return 'pending'; // 审批中
-    }
-
-    const latestOperator = operators[operators.length - 1];
-    const { comment } = latestOperator;
-
-    if (comment === '拒绝') {
-      return 'rejected';
-    } else if (comment === '同意测试' || !comment) {
-      return 'approved';
-    } else {
-      return 'pending';
-    }
+  const ProcessFlow = ({ data }) => {
+    return (
+      <Steps current={current} onChange={setCurrent} direction="vertical" className="rgt-sp-steps">
+        {data?.map((item, index) => {
+          if (index === data.length - 1) {
+            return <Step key={index} disabled={true} title={item?.nodeName} description={renderDescript(item)} />;
+          }
+          return (
+            <Step
+              key={index}
+              disabled={true}
+              title={item?.nodeName}
+              description={renderDescript(item)}
+              className="succss-box"
+            />
+          );
+        })}
+      </Steps>
+    );
   };
 
-  // const ProcessFlow = ({ data }) => {
-  //   const statusComponentMap = {
-  //     rejected: <Step disabled={true} title="红色拒绝" description={renderDescript()} className="refuse-box" />,
-  //     approved: <Step disabled={true} title="绿色成功" description={renderDescript()} className="succss-box" />,
-  //     pending: <Step disabled={true} title="Processing" description={renderDespUsers()} />
-  //   };
-  //   return (
-  //     <div>
-  //       {data?.map((node, index) => {
-  //         const status = getNodeStatus(node);
-  //         const StepComponent = statusComponentMap[status];
-  //         return <StepComponent key={index} node={node} />;
-  //       })}
-  //     </div>
-  //   );
-  // };
+  useEffect(() => {
+    setCurrent(stepData?.length);
+  }, [stepData]);
 
   return (
-    <Steps current={current} onChange={setCurrent} direction="vertical" className="rgt-sp-steps">
-      <Step disabled={true} title="绿色成功" description={renderDescript()} className="succss-box" />
-      <Step disabled={true} title="灰色成功" description={renderDescript()} className="succss-gray-box" />
-      <Step disabled={true} title="红色撤回" description={renderDescript()} className="back-box" />
-      <Step disabled={true} title="红色拒绝" description={renderDescript()} className="refuse-box" />
-      <Step disabled={true} title="Processing" description={renderDespUsers()} />
-      <Step disabled={true} title="Pending" description={renderDescript()} />
-    </Steps>
+    // <Steps current={current} onChange={setCurrent} direction="vertical" className="rgt-sp-steps">
+    //   <Step disabled={true} title="绿色成功" description={renderDescript()} className="succss-box" />
+    //   <Step disabled={true} title="灰色成功" description={renderDescript()} className="succss-gray-box" />
+    //   <Step disabled={true} title="红色撤回" description={renderDescript()} className="back-box" />
+    //   <Step disabled={true} title="红色拒绝" description={renderDescript()} className="refuse-box" />
+    //   <Step disabled={true} title="Processing" description={renderDespUsers()} />
+    //   <Step disabled={true} title="Pending" description={renderDescript()} />
+    // </Steps>
+      <ProcessFlow data={stepData} />
   );
 };
 export default DetailStep;
