@@ -18,6 +18,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -94,8 +96,8 @@ const Runtime: React.FC = () => {
     const res = await listApplicationMenu(req);
 
     // 处理数据
-    const pageList = res && res.length > 0 ? dealPage(res) : [];
-
+    const resPageList = res && res.length > 0 ? dealPage(res) : [];
+    const pageList = getMenuArr().concat(resPageList);
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
     setTreeData(treeData);
 
@@ -156,6 +158,65 @@ const Runtime: React.FC = () => {
       children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth) : []
     }));
   };
+
+
+  function getMenuArr() {
+    return [
+      {
+        id: 'TASK-ineedtodo',
+        isVisible: 1,
+        menuCode: 'ineedtodo',
+        menuIcon: 'ineedtodo-icon',
+        menuName: '待我处理',
+        menuSort: 1,
+        menuType: 1,
+        parentId: '0'
+      },
+      {
+        id: 'TASK-ihavedone',
+        isVisible: 1,
+        menuCode: 'ihavedone',
+        menuIcon: 'ihavedone-icon',
+        menuName: '我已处理',
+        menuSort: 2,
+        menuType: 1,
+        parentId: '0'
+      },
+      {
+        id: 'TASK-icreated',
+        isVisible: 1,
+        menuCode: 'icreated',
+        menuIcon: 'icreated-icon',
+        menuName: '我创建的',
+        menuSort: 3,
+        menuType: 1,
+        parentId: '0'
+      },
+      {
+        id: 'TASK-icopied',
+        isVisible: 1,
+        menuCode: 'icopied',
+        menuIcon: 'icopied-icon',
+        menuName: '抄送我的',
+        menuSort: 4,
+        menuType: 1,
+        parentId: '0'
+      },
+      {
+        id: 'TASK-taskproxy',
+        isVisible: 1,
+        menuCode: 'taskproxy',
+        menuIcon: 'taskproxy-icon',
+        menuName: '流程代理',
+        menuSort: 5,
+        menuType: 1,
+        parentId: '0'
+      }
+    ];
+  }
+  function handleRename() {
+    console.log('handle re name function.');
+  }
 
   // 登出处理
   const handleLogout = () => {
@@ -224,10 +285,17 @@ const Runtime: React.FC = () => {
                 </div>
               </div>
             )}
+            {curMenu?.value?.id && curMenu?.value?.id?.indexOf('TASK-') >= 0 ? (
+              <TaskCenterPage curMenuId={curMenu.value.id} />
+            ) : (
+              <div className={styles.contentBody}>
+                <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
+              </div>
+            )}
 
-            <div className={styles.contentBody}>
+            {/* <div className={styles.contentBody}>
               <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
-            </div>
+            </div> */}
           </Content>
         </Layout>
       </Layout>
