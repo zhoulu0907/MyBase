@@ -23,7 +23,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.INPUT_NUMBER]: '数字录入',
   [FORM_COMPONENT_TYPES.DATE_PICKER]: '日期',
   [FORM_COMPONENT_TYPES.DATE_RANGE_PICKER]: '日期区间',
-  // [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
+  [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
   [FORM_COMPONENT_TYPES.STATIC_TEXT]: '静态文本',
   [FORM_COMPONENT_TYPES.TIME_PICKER]: '时间',
   [FORM_COMPONENT_TYPES.SWITCH]: '开关',
@@ -165,14 +165,14 @@ const allTemplate = {
           icon: 'date_picker_cp.svg',
           category: 'base'
         },
-        // {
-        //   type: FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
-        //   h: 36,
-        //   w: 118,
-        //   displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_TIME_PICKER],
-        //   icon: 'time_picker_cp.svg',
-        //   category: 'base'
-        // },
+        {
+          type: FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_TIME_PICKER],
+          icon: 'time_picker_cp.svg',
+          category: 'base'
+        },
         {
           type: FORM_COMPONENT_TYPES.TIME_PICKER,
           h: 36,
