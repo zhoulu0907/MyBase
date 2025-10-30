@@ -30,6 +30,7 @@ import {
   useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
+import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -201,27 +202,47 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setDrawerVisible(false);
       setRefresh(Date.now());
     } else {
-      const req: InsertMethodParams = {
-        menuId: menuId,
-        entityId: mainMetaData,
-        data: formData,
-        subEntities: subFormData
-      };
+      
+      try {
+        let res = null;
+        if (curPage?.value?.pageSetType === 2) {
+          const reqFlow = {
+            isDraft: false,
+            formName: curPage?.value?.pages?.find((page: any) => page.pageType === 'form')?.pageName || '',
+            businessId: curPage?.value?.id,
+            entity: {
+              entityId: mainMetaData,
+              data: formData
+            }
+          };
+          res = await fetchSubmitInstance(reqFlow);
+          setPageType(EDITOR_TYPES.FORM_EDITOR);
 
-      const res = await dataMethodInsert(req);
-      console.log(res);
+        } else {
+          const req: InsertMethodParams = {
+            menuId: menuId,
+            entityId: mainMetaData,
+            data: formData,
+            subEntities: subFormData
+          };
+          res = await dataMethodInsert(req);
 
-      const createFlows = (flowRes || []).filter(
-        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
-      );
-      setFlows(createFlows);
+          setPageType(EDITOR_TYPES.LIST_EDITOR);
+        }
 
-      if (res) {
-        Message.success('创建成功');
+        const createFlows = (flowRes || []).filter(
+          (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
+        );
+        setFlows(createFlows);
+
+        if (res) {
+          Message.success('创建成功');
+        }
+      } catch (error) {
+        Message.error('创建失败')
       }
     }
 
-    setPageType(EDITOR_TYPES.LIST_EDITOR);
   };
 
   const cancelSubmitForm = () => {

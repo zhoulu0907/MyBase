@@ -34,4 +34,9 @@ export interface GetDonePageList {
 export interface GetOperatorRecord {
   instanceId: string;
 }
-
+export interface SubMitInstanceReq {
+  isDraft?: boolean;
+  formName: string;
+  businessId: string;
+  entity: any;
+}
