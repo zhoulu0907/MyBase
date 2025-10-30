@@ -31,6 +31,11 @@ public class BpmOperatorRecordRespVO {
         private String displayStatus;
 
         /**
+         * 审批方式，仅审批类型节点展示
+         */
+        private String approveMode;
+
+        /**
          * 操作人信息
          */
         private List<OperatorInfo> operators;

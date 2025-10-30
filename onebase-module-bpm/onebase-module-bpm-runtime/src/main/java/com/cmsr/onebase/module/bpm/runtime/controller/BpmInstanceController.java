@@ -59,10 +59,11 @@ public class BpmInstanceController {
         List<BpmOperatorRecordRespVO.OperatorRecord> records = bpmExecService.getOperatorRecord(instanceId);
         return CommonResult.success(records);
     }
-    @PostMapping("/get-form-detail")
-    public CommonResult<BpmFlowTaskDetailVO> getFormDetail(@RequestBody @Validated BpmFlowTaskDetailReqVO reqVO) {
-        log.info("获取流程详情: {}", reqVO);
-        return CommonResult.success(bpmExecService.getFormDetail(reqVO));
+
+    @GetMapping("/get-form-detail")
+    public CommonResult<BpmFlowTaskDetailVO> getFormDetail(@RequestParam("taskId") String taskId, @RequestParam("instanceId") Long instanceId) {
+        log.info("获取流程详情: {}, {}", taskId, instanceId);
+        return CommonResult.success(bpmExecService.getFormDetail(taskId, instanceId));
     }
 
 }

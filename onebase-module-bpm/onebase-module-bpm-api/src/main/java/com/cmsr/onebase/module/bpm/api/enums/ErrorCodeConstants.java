@@ -71,4 +71,12 @@ public interface ErrorCodeConstants {
     ErrorCode FLOW_NODE_TYPE_MUST_BE_INITIATION = new ErrorCode(1_009_002_012, "流程节点类型必须为提交节点");
 
     ErrorCode FLOW_TASK_NOT_EXISTS = new ErrorCode(1_009_002_013, "流程任务不存在");
+
+    ErrorCode FLOW_NOT_BIND_ENTITY_ID = new ErrorCode(1_009_002_014, "流程未绑定实体ID");
+
+    ErrorCode INVALID_ENTITY_ID = new ErrorCode(1_009_002_015, "无效的实体ID");
+
+    // ============= 系统相关错误 =============
+
+    ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");
 }
