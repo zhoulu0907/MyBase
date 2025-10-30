@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.domain.query;
 
+import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import lombok.Data;
 
@@ -17,6 +18,11 @@ public class MetadataDataMethodCoreContext {
      * 操作类型
      */
     private MetadataDataMethodOpEnum metadataDataMethodOpEnum;
+
+    /**
+     * 被调用的模块类型，默认runtime
+     */
+    private ClientTypeEnum clientTypeEnum = ClientTypeEnum.RUNTIME;
     /**
      * 实体ID
      */
@@ -33,6 +39,11 @@ public class MetadataDataMethodCoreContext {
      * 方法编码（可选）
      */
     private String methodCode;
+
+    /**
+     * 菜单ID（如果是runtime调用，必填）
+     */
+    private Long menuId;
 
 
 
