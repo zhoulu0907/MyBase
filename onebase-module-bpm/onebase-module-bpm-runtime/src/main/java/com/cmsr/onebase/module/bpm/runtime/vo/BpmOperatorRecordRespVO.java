@@ -26,6 +26,11 @@ public class BpmOperatorRecordRespVO {
         private String nodeType;
 
         /**
+         * 展示状态
+         */
+        private String displayStatus;
+
+        /**
          * 操作人信息
          */
         private List<OperatorInfo> operators;
@@ -42,6 +47,11 @@ public class BpmOperatorRecordRespVO {
          * 处理时间
          */
         private LocalDateTime operatorTime;
+
+        /**
+         * 任务状态
+         */
+        private String taskStatus;
 
         /**
          * 审批意见
