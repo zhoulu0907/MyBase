@@ -17,13 +17,28 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     user: [{ required: true, message: '请选择审批人' }],
     role: [{ required: true, message: '请选择角色' }]
   };
-  let [formRes, setFormRes] = useState<any>({});
+  const [formRes, setFormRes] = useState<any>({});
 
   function initUserData() {
     let userRes = {
       code: 0,
       data: {
         list: [
+          {
+            "id": "113389937034330112",
+            "username": "liyang",
+            "nickname": "李洋",
+            "deptId": "114",
+            "deptName": "测试一级",
+            "email": "",
+            "mobile": "15011111111",
+            "sex": 0,
+            "avatar": "",
+            "status": 1,
+            "loginIp": "",
+            "createTime": 1761787363630,
+            "adminType": 2
+          },
           {
             id: '101802183959412736',
             username: 'gaoguoqing',
@@ -327,8 +342,8 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
             rules={approverFormRules.user}
             wrapperCol={{ style: { width: '100%' } }}
           >
-            <Select mode="multiple" placeholder="选择审批人" defaultValue={['Beijing', 'Shenzhen']} allowClear>
-              {userOptions.map((option: any) => (
+            <Select mode="multiple" placeholder="选择审批人" allowClear>
+              {userOptions?.map((option: any) => (
                 <Option key={option?.userId} value={option?.userId}>
                   {option.name}
                 </Option>
@@ -344,8 +359,8 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
             rules={approverFormRules.role}
             wrapperCol={{ style: { width: '100%' } }}
           >
-            <Select mode="multiple" placeholder="选择角色" defaultValue={['Beijing', 'Shenzhen']} allowClear>
-              {roleOptions.map((option: any) => (
+            <Select mode="multiple" placeholder="选择角色" allowClear>
+              {roleOptions?.map((option: any) => (
                 <Option key={option?.roleId} value={option?.roleId}>
                   {option.roleName}
                 </Option>
