@@ -77,6 +77,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 todoTaskVO.setId(flowTaskExt.getId());
                 todoTaskVO.setTaskId(flowTaskExt.getId());
                 todoTaskVO.setInstanceId(flowTaskExt.getInstanceId());
+                todoTaskVO.setCurrentNodeStatus(flowTaskExt.getFlowStatus());
 
                 // 解析ext字段中的JSON数据
                 if (StringUtils.isNotBlank(flowTaskExt.getExt())) {

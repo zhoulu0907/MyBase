@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 /**
  * 流程实例管理Controller
@@ -48,6 +50,14 @@ public class BpmInstanceController {
         log.info("执行流程实例的操作按钮: {}", reqVO);
         bpmExecService.execTask(reqVO);
         return CommonResult.success(true);
+    }
+
+    @GetMapping("/get-operator-record")
+    @Operation(summary = "获取流程实例的操作记录")
+    public CommonResult<List<BpmOperatorRecordRespVO.OperatorRecord>> getOperatorRecord(@RequestParam("instanceId") Long instanceId) {
+        log.info("获取流程实例的操作记录: {}", instanceId);
+        List<BpmOperatorRecordRespVO.OperatorRecord> records = bpmExecService.getOperatorRecord(instanceId);
+        return CommonResult.success(records);
     }
     @PostMapping("/get-form-detail")
     public CommonResult<BpmFlowTaskDetailVO> getFormDetail(@RequestBody @Validated BpmFlowTaskDetailReqVO reqVO) {

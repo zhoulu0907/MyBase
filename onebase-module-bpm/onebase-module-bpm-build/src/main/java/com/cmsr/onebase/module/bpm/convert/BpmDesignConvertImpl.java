@@ -74,6 +74,9 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
             if (extDto != null) {
                 flowDesignVO.setVersionAlias(extDto.getVersionAlias());
+
+                // todo：应用ID校验
+                flowDesignVO.setAppId(extDto.getAppId());
             }
         }
 
@@ -112,6 +115,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
         if (flowDesignVO.getVersionAlias() != null) {
             extDto.setVersionAlias(flowDesignVO.getVersionAlias());
+            extDto.setAppId(flowDesignVO.getAppId());
         }
 
         defJson.setExt(JsonUtils.toJsonString(extDto));
@@ -251,7 +255,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             nodeJson.setFormCustom("Y");
 
             // 设置ext：使用策略管理器构建扩展信息
-            nodeJson.setExt(strategyManager.buildNodeExtData(nodeVO));
+            strategyManager.buildNodeExtData(nodeJson, nodeVO);
 
             // 添加到映射
             nodeJsonMap.put(nodeJson.getNodeCode(), nodeJson);
