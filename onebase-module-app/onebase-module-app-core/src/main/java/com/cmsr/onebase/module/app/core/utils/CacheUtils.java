@@ -4,7 +4,6 @@ import org.redisson.codec.Kryo5Codec;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 /**
  * @Author：huangjie
@@ -32,10 +31,8 @@ public class CacheUtils {
         return "app:auth:field:permission:" + userId + ":" + applicationId + ":" + menuId;
     }
 
-    public static String keyForPageView(Long userId, Long applicationId, Long menuId) {
-        return "app:auth:page:view:" + userId + ":" + applicationId + ":" + menuId;
+    public static String keyForPagePermission(Long userId, Long applicationId, Long menuId) {
+        return "app:auth:page:permission:" + userId + ":" + applicationId + ":" + menuId;
     }
-
-
 
 }
