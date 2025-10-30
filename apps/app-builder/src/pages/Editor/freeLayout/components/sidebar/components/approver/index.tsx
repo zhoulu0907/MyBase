@@ -31,7 +31,6 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
       fieldPermConfig: {}
     }
   );
-  console.log(approverConfigData);
 
   function setApprovalConfigData<T extends keyof ApproverConfigDataType>(
     key: T,

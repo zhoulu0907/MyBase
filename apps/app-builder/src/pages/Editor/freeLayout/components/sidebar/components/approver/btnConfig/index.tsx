@@ -214,10 +214,10 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       title: '显示名称',
       dataIndex: 'displayName',
       editable: true,
-      render: (_: any, row: any) => {
+      render: (val: any, row: any) => {
         return (
           <>
-            {_}
+            {val}
             <IconEdit />
           </>
         );
@@ -227,13 +227,13 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       title: '默认审批意见',
       dataIndex: 'defaultApprovalComment',
       editable: true,
-      render: (_: any, row: any) => {
+      render: (val: any, row: any) => {
         if (row?.key === '3' || row?.key === '7') {
           return <></>;
         } else {
           return (
             <>
-              {_}
+              {val}
               <IconEdit />
             </>
           );
@@ -243,7 +243,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
     {
       title: '审批意见必填',
       dataIndex: 'approvalCommentRequired',
-      render: (_: any, row: any) => {
+      render: (val: any, row: any) => {
         if (row?.key === '3' || row?.key === '7') {
           return <></>;
         } else {
@@ -251,7 +251,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
             <Switch
               onChange={(flag: boolean) => handleSwitchChange(row, 'approvalCommentRequired', flag)}
               size="small"
-              checked={_}
+              checked={val}
             />
           );
         }
@@ -260,9 +260,9 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
     {
       title: '批量审批',
       dataIndex: 'batchApproval',
-      render: (_: any, row: any) => {
+      render: (val: any, row: any) => {
         if (row?.key === '1' || row?.key === '2') {
-          return <Checkbox onChange={(flag: boolean) => handleSwitchChange(row, 'batchApproval', flag)} checked={_} />;
+          return <Checkbox onChange={(flag: boolean) => handleSwitchChange(row, 'batchApproval', flag)} checked={val} />;
         } else {
           return <></>;
         }
@@ -271,17 +271,17 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
     {
       title: '启用按钮',
       dataIndex: 'enabled',
-      render: (_: any, row: any) => {
+      render: (val: any, row: any) => {
         if (row?.key === '4') {
           return (
             <div className="back-settings">
-              <Switch onChange={(flag: boolean) => handleSwitchChange(row, 'enabled', flag)} size="small" checked={_} />
+              <Switch onChange={(flag: boolean) => handleSwitchChange(row, 'enabled', flag)} size="small" checked={val} />
               <IconSettings onClick={() => setSettingShow(true)} />
             </div>
           );
         } else {
           return (
-            <Switch onChange={(flag: boolean) => handleSwitchChange(row, 'enabled', flag)} size="small" checked={_} />
+            <Switch onChange={(flag: boolean) => handleSwitchChange(row, 'enabled', flag)} size="small" checked={val} />
           );
         }
       }
@@ -293,7 +293,6 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
   function handleSwitchChange(row: any, type: string, flag: boolean) {
     let _row = { ...row };
     _row[type] = flag;
-    // console.log('', )
     handleSave(_row);
   }
 

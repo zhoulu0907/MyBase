@@ -8,13 +8,12 @@ import './inner.style.less'
 const Option = Select.Option;
 
 export default function ConditionModal({modalShow, setModalShow}:any) {
-    let [conditionArr, setConditionArr] = useState([[{_key: uuidv4()}]])
+    const [conditionArr, setConditionArr] = useState([[{_key: uuidv4()}]])
 
     function handleAddSpace(type: string, itemArr?:Array<any>, pi?:number) {
         let _arr:Array<any> = []
         let condition_arr = _arr.concat(conditionArr)
         let _key = uuidv4()
-        // console.log(type, itemArr)
         if (type === 'OR') {
             condition_arr.push([{_key}])
             setConditionArr(condition_arr)
@@ -29,7 +28,6 @@ export default function ConditionModal({modalShow, setModalShow}:any) {
         if (Array.isArray(itemArr)) {
             let _arr:Array<any> = []
             let condition_arr = _arr.concat(conditionArr)
-            console.log(pi, ci);
             if (Array.isArray(condition_arr[pi])) {
                 condition_arr[pi].splice(ci, 1)
                 // 如果itemArr里面的项都删除光了，那么这个空itemArr可能需要一起移除
@@ -49,12 +47,8 @@ export default function ConditionModal({modalShow, setModalShow}:any) {
     }
     function handleOk() {
         let arr = filterArrItem(conditionArr)
-        console.log('arr ====', arr)
     }
-
-    useEffect(() => {
-        console.log('condition arr ===', conditionArr)
-    }, [conditionArr])
+    
     return <Modal
         className='condition-modal-box'
         title={

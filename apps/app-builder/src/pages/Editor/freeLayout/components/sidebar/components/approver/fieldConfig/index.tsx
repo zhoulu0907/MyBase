@@ -7,9 +7,9 @@ import './style.less';
 
 const FieldTable = forwardRef(({ editable, onTableChange, value }: any, ref) => {
   // keyArr是专门给FieldModal弹窗用的，帮助弹窗反选
-  let [curKeyArr, setCurKeyArr] = useState([]);
-  let [selectRowkeyArr, setSelectRowKeyArr] = useState([]);
-  let [fmVisible, setFmVisible] = useState(false);
+  const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
+  const [selectRowkeyArr, setSelectRowKeyArr] = useState([]);
+  const [fmVisible, setFmVisible] = useState(false);
 
   const columns: TableColumnProps[] = [
     {
@@ -20,9 +20,9 @@ const FieldTable = forwardRef(({ editable, onTableChange, value }: any, ref) => 
       title: '操作',
       width: 95,
       dataIndex: 'fieldId',
-      render: (_: any, row: any) => {
+      render: (val: any, row: any) => {
         return (
-          <Button type="text" onClick={() => handleDelRow(_)}>
+          <Button type="text" onClick={() => handleDelRow(val)}>
             删除
           </Button>
         );
@@ -56,7 +56,7 @@ const FieldTable = forwardRef(({ editable, onTableChange, value }: any, ref) => 
 
   useEffect(() => {
     if (Array.isArray(tbData)) {
-      let cur_key_arr: any = [];
+      let cur_key_arr: any[] = [];
       tbData.forEach((item: any) => {
         cur_key_arr.push(item.fieldId);
       });
@@ -73,9 +73,7 @@ const FieldTable = forwardRef(({ editable, onTableChange, value }: any, ref) => 
     <>
       <p style={{ paddingBottom: '6px' }}>{editable ? '可编辑字段' : '隐藏字段'}</p>
       <div className="flex-btw">
-        <Button onClick={handleAddFiled} type="primary" icon={<IconPlus />}>
-          添加字段
-        </Button>
+        <Button onClick={handleAddFiled} type="primary" icon={<IconPlus />}>添加字段</Button>
         {selectRowkeyArr?.length > 0 && (
           <Button type="primary" className="gray-btn" onClick={() => handleDelRow(selectRowkeyArr)}>
             批量删除
@@ -135,9 +133,9 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig }: 
   }, [nodeSwitch]);
 
   function saveData() {
-    let editTable: any = editRef?.current?.getTbData() || [];
-    let hiddenTable: any = hiddenRef?.current?.getTbData() || [];
-    let fieldPermConfig = {
+    const editTable: any = editRef?.current?.getTbData() || [];
+    const hiddenTable: any = hiddenRef?.current?.getTbData() || [];
+    const fieldPermConfig = {
       useNodeConfig: nodeSwitch,
       fieldConfigs: [...editTable, ...hiddenTable]
     };

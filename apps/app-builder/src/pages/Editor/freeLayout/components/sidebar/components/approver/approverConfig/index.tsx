@@ -14,7 +14,7 @@ const RadioGroup = Radio.Group;
 export default function Approver({ setApprovalConfigData, approverConfig }: ApproverConfig) {
   const initMode = approverConfig.approvalMode || approverConfigVar.approvalMode['a'];
   const [configMode, setConfigMode] = useState<string>('simple');
-  let [approvalMode, setApprovalMode] = useState(initMode);
+  const [approvalMode, setApprovalMode] = useState(initMode);
 
   function changeApprovalMode(val: string) {
     setApprovalMode(val);
