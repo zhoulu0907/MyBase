@@ -15,27 +15,24 @@ public class CacheUtils {
 
     public static Duration CACHE_TIMEOUT = Duration.of(15, ChronoUnit.MINUTES);
 
-    /**
-     * 缓存应用菜单，key是applicationId
-     */
-    public static String REDIS_APPLICATION_MENU_KEY = "app:application:menu:%s";
+    public static String keyForMenu(Long menuId) {
+        return "app:auth:menu:" + menuId;
+    }
 
+    public static String keyForOperationPermission(Long userId, Long applicationId, Long menuId) {
+        return "app:auth:operation:permission:" + userId + ":" + applicationId + ":" + menuId;
+    }
 
-    /**
-     * 用户角色缓存key  applicationId, userId
-     */
-    public static String REDIS_USER_ROLE_KEY = "app:auth:user:role:%s:%s";
+    public static String keyForDataPermission(Long userId, Long applicationId, Long menuId) {
+        return "app:auth:data:permission:" + userId + ":" + applicationId + ":" + menuId;
+    }
 
+    public static String keyForFieldPermission(Long userId, Long applicationId, Long menuId) {
+        return "app:auth:field:permission:" + userId + ":" + applicationId + ":" + menuId;
+    }
 
-    /**
-     * 菜单缓存key  menuId
-     */
-    public static String REDIS_MENU_KEY = "app:menu:%s";
-
-    /**
-     * 角色可访问菜单缓存key  applicationId, roleId
-     */
-    public static String REDIS_ROLE_ACCESSIBLE_MENU_KEY = "app:auth:menu:accessible:%s:%s";
-
+    public static String keyForPagePermission(Long userId, Long applicationId, Long menuId) {
+        return "app:auth:page:permission:" + userId + ":" + applicationId + ":" + menuId;
+    }
 
 }

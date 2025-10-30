@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.service.number;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberConfigRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberRuleItemRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberStateRepository;
@@ -83,17 +84,29 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
         ruleItemRepository.deleteByConfigId(configId);
     }
 
+    /**
+     * 获取自动编号配置及其规则项
+     *
+     * @param fieldId 字段ID
+     * @return 自动编号配置及规则项响应VO，如果配置不存在则返回null
+     */
     @Override
-    public Object getAutoNumberConfigWithRules(Long fieldId) {
-        // 这里应该返回 AutoNumberConfigWithRulesRespVO，但为了简化暂时返回null
-        // 实际项目中需要创建相应的VO并组装数据
+    public AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(Long fieldId) {
+        // 根据字段ID获取配置
         MetadataAutoNumberConfigDO config = getByFieldId(fieldId);
         if (config == null) {
             return null;
         }
+        
+        // 获取该配置下的所有规则项
         List<MetadataAutoNumberRuleItemDO> rules = listRules(config.getId());
-        // 返回组装好的VO，这里简化返回
-        return config;
+        
+        // 组装返回VO
+        AutoNumberConfigWithRulesRespVO respVO = new AutoNumberConfigWithRulesRespVO();
+        respVO.setConfig(config);
+        respVO.setRules(rules);
+        
+        return respVO;
     }
 
     @Override

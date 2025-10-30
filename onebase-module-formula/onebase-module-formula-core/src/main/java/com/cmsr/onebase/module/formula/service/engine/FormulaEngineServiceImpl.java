@@ -1,12 +1,7 @@
 package com.cmsr.onebase.module.formula.service.engine;
 
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
-import com.cmsr.onebase.module.system.api.dept.DeptApi;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
-import com.cmsr.onebase.module.system.api.permission.RoleApi;
-import com.cmsr.onebase.module.system.api.user.AdminUserApi;
-import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.cmsr.onebase.module.formula.service.user.FormulaUserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
@@ -38,26 +33,13 @@ import static com.cmsr.onebase.module.formula.enums.FormulaConstants.*;
 public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     private final FormulaEngineProperties properties;
-    private final String                  formulaJsScript;
-    private final Pattern                 dangerousPatternRegex;
 
-    /**
-     * 注入用户API
-     */
-    @Resource
-    private AdminUserApi adminUserApi;
+    private final String formulaJsScript;
 
-    /**
-     * 注入用户API
-     */
-    @Resource
-    private RoleApi RoleApi;
+    private final Pattern dangerousPatternRegex;
 
-    /**
-     * 注入部门API
-     */
     @Resource
-    private DeptApi deptApi;
+    private FormulaUserService formulaUserService;
 
     public FormulaEngineServiceImpl(FormulaEngineProperties properties) {
         this.properties = properties;
@@ -133,7 +115,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                     }
 
 
-                    enrichParametersWithUserInfo(formula, parameters);
+                    formulaUserService.enrichParametersWithUserInfo(formula, parameters);
 
                     // 检查公式中是否包含$字符，如果包含则进行参数替换
                     if (formula.contains("$")) {
@@ -164,7 +146,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     @Override
     public Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters, Map<String, Object> contextData) {
-        formula = handleFormulaParameters(formula,parameters);
+        formula = handleFormulaParameters(formula, parameters);
         formula = handleFormulaContextData(formula, contextData);
         return executeFormulaWithParams(formula, parameters);
     }
@@ -320,21 +302,35 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
         if (result.isNumber()) {
-            if (result.fitsInDouble()) {
-                return result.asDouble();
-            }
-            if (result.fitsInLong()) {
+            // 优先检查是否适合long类型（整数）
+            if (result.fitsInLong() || result.fitsInInt()) {
                 return result.asLong();
             }
-            if (result.fitsInInt()) {
-                return result.asInt();
+            // 然后检查是否适合double类型（小数）
+            if (result.fitsInDouble() || result.fitsInFloat()) {
+                return result.asDouble();
             }
+            return result.asDouble();
         }
 
+        if (result.isDate()) {
+            java.time.format.DateTimeFormatter inputFormatter =
+                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            return java.time.LocalDateTime.parse(result.toString(), inputFormatter);
+        }
+        // 对于JavaScript对象，检查是否包含value属性，如果包含则返回value的值
+        if (result.hasMembers()) {
+            // 如果没有value属性，按原逻辑处理
+            Map<String, Object> resultMap = new HashMap<>();
+            for (String key : result.getMemberKeys()) {
+                Value member = result.getMember(key);
+                resultMap.put(key, convertResult(member)); // 递归转换成员
+            }
+            return resultMap;
+        }
         if (result.isString()) {
             return result.asString();
         }
-
         // 对于其他类型，转换为字符串
         return result.toString();
     }
@@ -345,108 +341,17 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      * @param formula    公式
      * @param parameters 参数映射
      */
-    private void enrichParametersWithUserInfo(String formula, Map<String, Object> parameters) {
-        // 获取当前登录用户信息
-        Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
-        if (loginUserId == null) {
-            return;
-        }
 
-        // 检查公式是否包含用户相关函数
-        if (formula.contains(GETUSER)) {
-            try {
-                AdminUserRespDTO user = adminUserApi.getUser(loginUserId).getCheckedData();
-                if (user != null) {
-                    parameters.put("id", user.getId());
-                    parameters.put("name", user.getNickname());
-                }
-            } catch (Exception e) {
-                log.warn("获取用户信息失败，loginUserId: {}", loginUserId, e);
-                // 即使获取用户信息失败，也要确保id和name变量在JS环境中存在默认值
-                parameters.putIfAbsent("id", 0L);
-                parameters.putIfAbsent("name", "");
-            }
-            return;
-        }
-
-        // 检查公式是否包含部门相关函数
-        if (formula.contains(GETDEPT)) {
-            try {
-                AdminUserRespDTO user = adminUserApi.getUser(loginUserId).getCheckedData();
-                if (user != null && user.getDeptId() != null) {
-                    DeptRespDTO dept = deptApi.getDept(user.getDeptId()).getCheckedData();
-                    if (dept != null) {
-                        parameters.put("deptId", dept.getId());
-                        parameters.put("name", dept.getName());
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("获取部门信息失败，loginUserId: {}", loginUserId, e);
-                parameters.putIfAbsent("deptId", 0L);
-                parameters.putIfAbsent("name", "");
-            }
-            return;
-        }
-
-        // 检查公式是否包含上级部门相关函数
-        if (formula.contains(GETUPDEPT)) {
-            try {
-                AdminUserRespDTO user = adminUserApi.getUser(loginUserId).getCheckedData();
-                if (user != null && user.getDeptId() != null) {
-                    DeptRespDTO dept = deptApi.getDept(user.getDeptId()).getCheckedData();
-                    if (dept != null && dept.getParentId() != null) {
-                        DeptRespDTO parentDept = deptApi.getDept(dept.getParentId()).getCheckedData();
-                        if (parentDept != null) {
-                            parameters.put("parentDeptId", parentDept.getId());
-                            parameters.put("parentDeptName", parentDept.getName());
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("获取上级部门信息失败，loginUserId: {}", loginUserId, e);
-                parameters.putIfAbsent("parentDeptId", 0L);
-                parameters.putIfAbsent("parentDeptName", "");
-            }
-            return;
-        }
-
-        // 检查公式是否包含角色相关函数
-        if (formula.contains(GETROLE)) {
-            // 角色信息已在PermissionService中处理，此处可扩展具体实现
-        }
-
-        // 检查公式是否包含直属上级相关函数
-        if (formula.contains(GETSUPERVISOR)) {
-            try {
-                AdminUserRespDTO user = adminUserApi.getUser(loginUserId).getCheckedData();
-                if (user != null && user.getDeptId() != null) {
-                    DeptRespDTO dept = deptApi.getDept(user.getDeptId()).getCheckedData();
-                    if (dept != null && dept.getLeaderUserId() != null) {
-                        AdminUserRespDTO supervisor = adminUserApi.getUser(dept.getLeaderUserId()).getCheckedData();
-                        if (supervisor != null) {
-                            parameters.put("supervisorId", supervisor.getId());
-                            parameters.put("supervisorName", supervisor.getNickname());
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("获取直属上级信息失败，loginUserId: {}", loginUserId, e);
-                parameters.putIfAbsent("supervisorId", 0L);
-                parameters.putIfAbsent("supervisorName", "");
-            }
-            return;
-        }
-    }
 
     /**
      * 替换公式中的参数占位符，例如：
      * {
-     *     "formula": "COUNT($数据查询节点(多条).关联主表ID)",
-     *     "parameters":
-     *     {
-     *       "$数据查询节点(多条)": "r_id",
-     *       "$数据查询节点(多条).关联主表ID": "f_id"
-     *     }
+     * "formula": "COUNT($数据查询节点(多条).关联主表ID)",
+     * "parameters":
+     * {
+     * "$数据查询节点(多条)": "r_id",
+     * "$数据查询节点(多条).关联主表ID": "f_id"
+     * }
      * }
      * 执行完成后 "formula": "COUNT($r_id.f_id)",
      *
@@ -520,25 +425,25 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      * 新的解析方法，用于处理流程公式中的上下文数据
      * 该方法会将字段引用直接替换为值列表，例如将 COUNT(f_id) 转换为 COUNT(1,2,3)，例如：
      * {
-     *  "formula": "COUNT($r_id1.f_id)",
-     *  "contextData":
-     *     {
-     *       "r_id1": [
-     *           {"f_id": 1},
-     *           {"f_id": 2},
-     *           {"f_id": 3}
-     *       ],
-     *       "r_id2": [
-     *           {"f_id": 4},
-     *           {"f_id": 5},
-     *           {"f_id": 6}
-     *       ],
-     *       "r_id3": {"f_id": 4}
-     *     }
+     * "formula": "COUNT($r_id1.f_id)",
+     * "contextData":
+     * {
+     * "r_id1": [
+     * {"f_id": 1},
+     * {"f_id": 2},
+     * {"f_id": 3}
+     * ],
+     * "r_id2": [
+     * {"f_id": 4},
+     * {"f_id": 5},
+     * {"f_id": 6}
+     * ],
+     * "r_id3": {"f_id": 4}
+     * }
      * }
      * 执行完成后 "formula": "COUNT(1,2,3)"
      *
-     * @param formula    原始公式
+     * @param formula     原始公式
      * @param contextData 上下文数据
      * @return 解析替换后的公式
      */
@@ -614,8 +519,8 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     /**
      * 处理公式中的参数映射，将形如"$数据查询节点(多条).关联主表ID"的参数替换为对应的字段名"f_id"
      * 例如：将"COUNT($数据查询节点(多条).关联主表ID)"转换为"COUNT(值1, 值2，...)"
-     * 
-     * @param formula 公式字符串
+     *
+     * @param formula    公式字符串
      * @param parameters 参数映射
      * @return 处理后的公式
      */
@@ -625,7 +530,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
         String result = formula;
-        
+
         // 收集所有以$开头的键
         List<String> keys = new ArrayList<>();
         for (String key : parameters.keySet()) {
@@ -633,11 +538,11 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                 keys.add(key);
             }
         }
-        
+
         if (keys.isEmpty()) {
             return result;
         }
-        
+
         // 按键长度倒序排列，避免短键先替换影响长键
         keys.sort((a, b) -> Integer.compare(b.length(), a.length()));
 
@@ -646,7 +551,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             if (valObj == null) {
                 continue;
             }
-            
+
             String val = String.valueOf(valObj).trim();
             if (val.isEmpty()) {
                 continue;
@@ -663,4 +568,3 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         return result;
     }
 }
-
