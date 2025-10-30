@@ -7,8 +7,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
@@ -94,19 +93,19 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     // ========== 动态数据操作方法实现 ==========
 
     @Override
-    public Map<String, Object> createData(MetadataDataMethodCoreContext metadataDataMethodCoreContext) {
-        Map<String, Object> result = metadataDataMethodCreate.executeProcess(metadataDataMethodCoreContext);
+    public Map<String, Object> createData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
+        Map<String, Object> result = metadataDataMethodCreate.executeProcess(metadataDataMethodRequestContext);
         return result;
     }
 
     @Override
-    public Map<String, Object> updateData(MetadataDataMethodCoreContext metadataDataMethodCoreContext) {
+    public Map<String, Object> updateData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
         // 使用新的统一流程处理更新操作
-        return metadataDataMethodUpdate.executeProcess(metadataDataMethodCoreContext);
+        return metadataDataMethodUpdate.executeProcess(metadataDataMethodRequestContext);
     }
 
     @Override
-    public Boolean deleteData(MetadataDataMethodCoreContext methodCoreContext) {
+    public Boolean deleteData(MetadataDataMethodRequestContext methodCoreContext) {
         metadataDataMethodDelete.executeProcess(methodCoreContext);
         return true;
     }
@@ -114,7 +113,12 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     @Override
     public Map<String, Object> getData(Long entityId, Object id, String methodCode) {
 
-        Map<String, Object> result = metadataDataMethodQuery.executeProcess(MetadataDataMethodOpEnum.GET,entityId,id,null,null);
+        MetadataDataMethodRequestContext requestContext = new MetadataDataMethodRequestContext();
+        requestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.GET);
+        requestContext.setEntityId(entityId);
+        requestContext.setId(id);
+
+        Map<String, Object> result = metadataDataMethodQuery.doExecuteProcess(requestContext);
         return result;
     }
 

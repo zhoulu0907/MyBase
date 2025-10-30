@@ -7,7 +7,8 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationManager;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -17,7 +18,6 @@ import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceSer
 import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import jakarta.annotation.Resource;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
@@ -69,9 +69,9 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     // ========== 公共方法 ==========
 
     @Override
-    public Map<String, Object> executeProcess(MetadataDataMethodCoreContext methodCoreContext) {
+    public Map<String, Object> executeProcess(MetadataDataMethodRequestContext methodCoreContext) {
 
-        return executeProcess(methodCoreContext.getMetadataDataMethodOpEnum(), methodCoreContext.getEntityId(), null, methodCoreContext.getData(), methodCoreContext.getMethodCode());
+        return doExecuteProcess(methodCoreContext);
 
     }
 
@@ -365,29 +365,28 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
 
     /**
      * 执行统一的数据处理流程（用于update/delete/get操作）
-     *
-     * @param operationType 操作类型
-     * @param entityId 实体ID
-     * @param id 数据ID（update/delete/get操作必填）
-     * @param data 数据
-     * @param methodCode 方法代码
-     * @return 处理结果
+     * @param requestContext 请求上下文
+     * @return 标准处理结果
      */
-    public Map<String, Object> executeProcess(MetadataDataMethodOpEnum operationType, Long entityId, Object id, Map<String, Object> data,
-                                              String methodCode) {
+    public Map<String, Object> doExecuteProcess(MetadataDataMethodRequestContext requestContext) {
+
+        MetadataDataMethodOpEnum operationType = requestContext.getMetadataDataMethodOpEnum();
+        Long entityId = requestContext.getEntityId();
+        Object id =  requestContext.getId();
+        Map<String, Object> data = requestContext.getData();
+        String methodCode = requestContext.getMethodCode();
         log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，数据ID：" + id + "，方法：" + methodCode);
 
         try {
+
             //1. 校验实体存在
             MetadataBusinessEntityDO entity = validateEntityExists(entityId);
 
             //2. 校验字段列表存在
             List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-
             //3. 初始化上下文
-            ProcessContext context = initializeContext(operationType, entity, fields, data, methodCode);
+            ProcessContext context = initializeContext(entity, fields,requestContext);
             context.setId(id); // 设置数据ID
-
 
             //4. 请求数据完整性校验（基础属性）
             validateDataIntegrity(data, fields);
@@ -400,38 +399,30 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 6. 功能权限校验
             validatePermission(context);//todo 暂未实现
 
-            // 7. 数据标准化与补全
-            standardizeData(context);//todo 暂未实现
-
-            // 8. 初步数据校验------数据校验规则 ----核心功能!!!
-            validateData(context);//todo 暂未实现
-
-            // 9. 唯一性校验和条件校验
-            validateUniqueness(context);//todo 暂未实现
+            // 7. 初步数据校验------数据校验规则 ----核心功能!!!
+            validateData(context);
 
             try{
-                // 10. 前置自动化工作流触发
+                // 8. 前置自动化工作流触发
                 executePreWorkflow(context);//暂未实现
             }catch (Exception e){
                 log.error("执行前置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
 //                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
             }
 
-            // 11. 数据编号
+            // 9. 数据编号
             generateDataNumber(context);
 
-            // 12. 数据存储
+            // 10. 数据存储
             storeData(context);
 
             try{
                 // 13. 后置自动化工作流触发
-                executePostWorkflow(context);//todo 暂未实现
+                executePostWorkflow(context);
             }catch (Exception e){
                 log.error("执行后置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
 //                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
             }
-
-
 
             getData(context);
 
@@ -512,25 +503,17 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     /**
      * 1. 初始化上下文
      */
-   protected ProcessContext initializeContext(MetadataDataMethodOpEnum operationType, MetadataBusinessEntityDO entityDO, List<MetadataEntityFieldDO> fields, Map<String, Object> data,
-                                              String methodCode) {
-       // Create a new ProcessContext instance
+   protected ProcessContext initializeContext(MetadataBusinessEntityDO entityDO, List<MetadataEntityFieldDO> fields, MetadataDataMethodRequestContext requestContext) {
        ProcessContext processContext = new ProcessContext();
        processContext.setEntity(entityDO);
 
        processContext.setFields(fields);
-       // Set operation type
-       processContext.setOperationType(operationType);
+       processContext.setOperationType(requestContext.getMetadataDataMethodOpEnum());
 
-       // Set entity details
        processContext.setEntityId(entityDO.getId());
 
-       // Set data and method code
-       processContext.setData(data);
-       processContext.setMethodCode(methodCode);
-
-       // Return the populated context
-
+       processContext.setData(requestContext.getData());
+       processContext.setMethodCode(requestContext.getMethodCode());
 
        // 5. 获取临时数据源服务
        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entityDO.getDatasourceId());
@@ -739,20 +722,21 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     /**
      * 流程上下文
      */
-    @Data
-    protected static class ProcessContext {
-        private MetadataDataMethodOpEnum operationType;
-        private Long entityId;
-        private Object id; // 数据ID，用于update/delete/get操作
-        private Map<String, Object> data;
-        private String methodCode;
-        // 核心上下文字段
-        private MetadataBusinessEntityDO entity;
-        private List<MetadataEntityFieldDO> fields; // 实体字段列表
-        private Map<String, Object> processedData; // 处理后的数据
-        private AnylineService<?> temporaryService;
-
-    }
+//    @Data
+//    protected static class ProcessContext {
+//        private MetadataDataMethodOpEnum operationType;
+//        private Long entityId;
+//        private Object id; // 数据ID，用于update/delete/get操作
+//        private Map<String, Object> data;
+//        private String methodCode;
+//        // 核心上下文字段
+//        private MetadataBusinessEntityDO entity;
+//        private List<MetadataEntityFieldDO> fields; // 实体字段列表
+//        private Map<String, Object> processedData; // 处理后的数据
+//        private AnylineService<?> temporaryService;
+//        private Long menuId;
+//
+//    }
 
     // 将name：value的格式变成id：value的格式
     public Map convertNameToId(Long entityId, Map<String, Object> map){

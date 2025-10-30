@@ -5,12 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
 import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import org.springframework.stereotype.Service;
 
-import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
@@ -80,14 +79,14 @@ public class DataMethodApiImpl implements DataMethodApi {
         for (RowData row : result.getRowDataList()) {
             Object idObj = dataMethodAssembler.tryParseId(row.getRowId());
             try {
-                MetadataDataMethodCoreContext metadataDataMethodCoreContext = new MetadataDataMethodCoreContext();
-                metadataDataMethodCoreContext.setEntityId(reqDTO.getEntityId());
-                metadataDataMethodCoreContext.setId(idObj);
-                metadataDataMethodCoreContext.setMethodCode(null);
-                metadataDataMethodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
-                metadataDataMethodCoreContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
+                MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+                metadataDataMethodRequestContext.setEntityId(reqDTO.getEntityId());
+                metadataDataMethodRequestContext.setId(idObj);
+                metadataDataMethodRequestContext.setMethodCode(null);
+                metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
+                metadataDataMethodRequestContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
 
-                Boolean ok = metadataDataMethodCoreService.deleteData(metadataDataMethodCoreContext);
+                Boolean ok = metadataDataMethodCoreService.deleteData(metadataDataMethodRequestContext);
                 if (Boolean.TRUE.equals(ok)) { success++; }
             } catch (Exception e) {
                 log.warn("删除失败 rowId:{} - {}", row.getRowId(), e.getMessage());
@@ -119,7 +118,7 @@ public class DataMethodApiImpl implements DataMethodApi {
         for (Map<String, Object> dataByName : dataByNameList) {
 
 
-            MetadataDataMethodCoreContext methodCoreContext = new MetadataDataMethodCoreContext();
+            MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
             methodCoreContext.setEntityId(reqDTO.getEntityId());
             methodCoreContext.setData(dataByName);
             methodCoreContext.setMethodCode(null);
@@ -181,16 +180,16 @@ public class DataMethodApiImpl implements DataMethodApi {
             try {
                 Map<String, Object> payloadSource = singlePayload ? updateDataList.get(0) : updateDataList.get(i);
                 Map<String, Object> payload = new HashMap<>(payloadSource);
-                MetadataDataMethodCoreContext metadataDataMethodCoreContext = new MetadataDataMethodCoreContext();
-                metadataDataMethodCoreContext.setEntityId(reqDTO.getEntityId());
-                metadataDataMethodCoreContext.setId(idObj);
-                metadataDataMethodCoreContext.setData(payload);
-                metadataDataMethodCoreContext.setMethodCode(null);
-                metadataDataMethodCoreContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
-                metadataDataMethodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
+                MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+                metadataDataMethodRequestContext.setEntityId(reqDTO.getEntityId());
+                metadataDataMethodRequestContext.setId(idObj);
+                metadataDataMethodRequestContext.setData(payload);
+                metadataDataMethodRequestContext.setMethodCode(null);
+                metadataDataMethodRequestContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
+                metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
 
                 Map<String, Object> updated = metadataDataMethodCoreService.updateData(
-                        metadataDataMethodCoreContext);
+                        metadataDataMethodRequestContext);
                 if (updated != null) {
                     updatedList.add(updated);
                 }

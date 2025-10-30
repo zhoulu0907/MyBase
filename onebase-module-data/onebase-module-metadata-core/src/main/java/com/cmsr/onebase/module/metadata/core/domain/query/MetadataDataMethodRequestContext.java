@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class MetadataDataMethodCoreContext {
+public class MetadataDataMethodRequestContext {
 
     /**
      * 操作追踪ID

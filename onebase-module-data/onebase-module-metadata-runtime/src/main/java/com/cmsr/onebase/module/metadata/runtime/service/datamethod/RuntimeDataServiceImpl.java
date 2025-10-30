@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
@@ -82,7 +82,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
             }
         });
 
-        MetadataDataMethodCoreContext methodCoreContext = new MetadataDataMethodCoreContext();
+        MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
         methodCoreContext.setEntityId(reqVO.getEntityId());
         methodCoreContext.setData(dataByName);
         methodCoreContext.setMethodCode(reqVO.getMethodCode());
@@ -122,7 +122,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                         }
                     });
 
-                    MetadataDataMethodCoreContext subMethodCoreContext = new MetadataDataMethodCoreContext();
+                    MetadataDataMethodRequestContext subMethodCoreContext = new MetadataDataMethodRequestContext();
                     subMethodCoreContext.setEntityId(subEntityId);
                     subMethodCoreContext.setData(subDataByName);
                     subMethodCoreContext.setMethodCode(reqVO.getMethodCode());
@@ -145,7 +145,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         // 将 field_id -> value 转换为 field_name -> value
         Map<String, Object> dataByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getData());
 
-        MetadataDataMethodCoreContext methodCoreContext = new MetadataDataMethodCoreContext();
+        MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
         methodCoreContext.setEntityId(reqVO.getEntityId());
         methodCoreContext.setId(reqVO.getId());
         methodCoreContext.setData(dataByName);
@@ -247,31 +247,31 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                    //插入数据不包含id字段，说明数据表不存在则插入
                     subDataByName.put("parent_id",reqVO.getId());
 
-                    MetadataDataMethodCoreContext metadataDataMethodCoreContext
-                            = new MetadataDataMethodCoreContext();
-                    metadataDataMethodCoreContext.setEntityId(subEntityId);
-                    metadataDataMethodCoreContext.setData(subDataByName);
-                    metadataDataMethodCoreContext.setMethodCode(reqVO.getMethodCode());
+                    MetadataDataMethodRequestContext metadataDataMethodRequestContext
+                            = new MetadataDataMethodRequestContext();
+                    metadataDataMethodRequestContext.setEntityId(subEntityId);
+                    metadataDataMethodRequestContext.setData(subDataByName);
+                    metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
                     methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
                    coreDataMethodService.createData(
-                           metadataDataMethodCoreContext
+                           metadataDataMethodRequestContext
                    );
                }else{
                    //插入数据包含id字段，说明数据表已经存在则修改
                     subDataByName.remove("id");
 
-                    MetadataDataMethodCoreContext metadataDataMethodCoreContext = new MetadataDataMethodCoreContext();
+                    MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
 
-                    metadataDataMethodCoreContext.setEntityId(subEntityId);
-                    metadataDataMethodCoreContext.setId(id);
-                    metadataDataMethodCoreContext.setData(subDataByName);
-                    metadataDataMethodCoreContext.setMethodCode(reqVO.getMethodCode());
-                    metadataDataMethodCoreContext.setMenuId(reqVO.getMenuId());
-                    metadataDataMethodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
+                    metadataDataMethodRequestContext.setEntityId(subEntityId);
+                    metadataDataMethodRequestContext.setId(id);
+                    metadataDataMethodRequestContext.setData(subDataByName);
+                    metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
+                    metadataDataMethodRequestContext.setMenuId(reqVO.getMenuId());
+                    metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
 
                     coreDataMethodService.updateData(
-                            metadataDataMethodCoreContext
+                            metadataDataMethodRequestContext
                     );
                     processedIds.add(id.toString());
                 }
@@ -315,16 +315,16 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
 
     @Override
     public Boolean deleteData(DynamicDataDeleteReqVO reqVO) {
-        MetadataDataMethodCoreContext metadataDataMethodCoreContext = new MetadataDataMethodCoreContext();
-        metadataDataMethodCoreContext.setEntityId(reqVO.getEntityId());
-        metadataDataMethodCoreContext.setId(reqVO.getId());
-        metadataDataMethodCoreContext.setMethodCode(reqVO.getMethodCode());
-        metadataDataMethodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
+        MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+        metadataDataMethodRequestContext.setEntityId(reqVO.getEntityId());
+        metadataDataMethodRequestContext.setId(reqVO.getId());
+        metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
+        metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
 
 
         // 调用core模块的基础服务
         return coreDataMethodService.deleteData(
-                metadataDataMethodCoreContext
+                metadataDataMethodRequestContext
         );
     }
 
