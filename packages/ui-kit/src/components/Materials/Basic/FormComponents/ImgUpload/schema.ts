@@ -5,6 +5,7 @@ import {
   labelColSpanConfig,
   layoutConfig,
   listTypeConfig,
+  uploadTypeConfig,
   statusConfig,
   widthConfig,
   type ICommonBaseType,
@@ -141,6 +142,8 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
    */
   listType?: TSelectDefaultType<TUploadSelectKeyType>;
 
+  uploadType?: TSelectDefaultType<TUploadSelectKeyType>;
+
   /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
@@ -178,6 +181,7 @@ const XImgUpload: XInputImgUploadSchema = {
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    uploadTypeConfig,
     listTypeConfig,
     statusConfig,
     widthConfig
@@ -195,6 +199,7 @@ const XImgUpload: XInputImgUploadSchema = {
     defaultValue: '',
     uploadCompress: -1,
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
+    uploadType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     labelColSpan: 200,

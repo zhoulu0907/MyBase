@@ -176,6 +176,12 @@ export const UPLOAD_OPTIONS = {
   CARD: '平铺'
 } as const;
 
+export const UPLOAD_TYPE_OPTIONS = {
+  TEXT: '点击',
+  LIST: '拖拽',
+  CARD: '卡片'
+} as const;
+
 export const UPLOAD_VALUES = {
   [UPLOAD_OPTIONS.TEXT]: 'text',
   [UPLOAD_OPTIONS.LIST]: 'picture-list',
