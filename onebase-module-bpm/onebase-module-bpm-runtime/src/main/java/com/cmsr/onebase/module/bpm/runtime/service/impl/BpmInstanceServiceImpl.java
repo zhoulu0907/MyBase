@@ -455,12 +455,12 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         List<Task> tasks = taskService.getByInsId(instanceId);
 
         // todo： 按照时间排序，已办、待办按照时间排序
-        Map<String, String> nodeTypeMap = new HashMap<>();
+        Map<String, BaseNodeExtDTO> nodeDtoMap = new HashMap<>();
         Map<String, BpmOperatorRecordRespVO.OperatorRecord> recordMap = new HashMap<>();
 
         for (NodeJson nodeJson : defJson.getNodeList()) {
             BaseNodeExtDTO extDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
-            nodeTypeMap.put(nodeJson.getNodeCode(), extDTO.getNodeType());
+            nodeDtoMap.put(nodeJson.getNodeCode(), extDTO);
         }
 
         // 进行组装
@@ -475,10 +475,17 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
 
             if (record == null) {
+                BaseNodeExtDTO extDTO = nodeDtoMap.get(hisTask.getNodeCode());
                 record = new BpmOperatorRecordRespVO.OperatorRecord();
                 record.setNodeName(hisTask.getNodeName());
-                record.setNodeType(nodeTypeMap.get(hisTask.getNodeCode()));
+                record.setNodeType(extDTO.getNodeType());
+
+                if (extDTO instanceof ApproverNodeExtDTO approverNodeExtDTO) {
+                    record.setApproveMode(approverNodeExtDTO.getApproverConfig().getApprovalMode());
+                }
+
                 operatorRecords.add(record);
+                recordMap.put(nodeCode, record);
             }
 
             if (record.getOperators() == null) {
@@ -500,13 +507,20 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         for (Task task : tasks) {
             String nodeCode = task.getNodeCode();
             BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
-            String nodeType = nodeTypeMap.get(task.getNodeCode());
+            BaseNodeExtDTO extDTO = nodeDtoMap.get(task.getNodeCode());
+            String nodeType = extDTO.getNodeType();
 
             if (record == null) {
                 record = new BpmOperatorRecordRespVO.OperatorRecord();
                 record.setNodeName(task.getNodeName());
                 record.setNodeType(nodeType);
+
+                if (extDTO instanceof ApproverNodeExtDTO approverNodeExtDTO) {
+                    record.setApproveMode(approverNodeExtDTO.getApproverConfig().getApprovalMode());
+                }
+
                 operatorRecords.add(record);
+                recordMap.put(nodeCode, record);
             }
 
             // 查找有权限的用户
