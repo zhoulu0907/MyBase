@@ -2,15 +2,12 @@ import { Button, Divider, Message, Popconfirm, Space, Tag } from '@arco-design/w
 import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
   deleteDataGroup,
-  FieldType,
   getDataPermission,
   getEntityById,
   getEntityFields,
   getEntityFieldsWithChildren,
   getFieldCheckTypeApi,
   getPageSetId,
-  getScopeTypeApi,
-  IsOperable,
   loadPageSet,
   updateDataGroupPermission,
   type AppEntityField,
@@ -22,16 +19,14 @@ import {
   type GetPermissionReq,
   type LoadPageSetReq,
   type MetadataEntityPair,
-  type ScopeTypeOption,
-  type UpdateDataGroupPermissionReq,
-  type ValidationTypeItem
+  type UpdateDataGroupPermissionReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
 
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import styles from './index.module.less';
-import { PERMISSION_SCOPE } from '@/constants/permission';
+import { OPERATION_OPTIONS, PERMISSION_SCOPE } from '@/constants/permission';
 
 const initialFormValues: AuthDataGroupVO = {
   id: '',
@@ -43,26 +38,8 @@ const initialFormValues: AuthDataGroupVO = {
   scopeValue: '',
   dataFilters: [],
   filterCondition: [],
-  isOperable: IsOperable.allowed
+  operationTags: []
 };
-
-const opCodeOptions = [
-  {
-    label: '公式',
-    value: FieldType.FORMULA
-  },
-  {
-    label: '静态值',
-    value: FieldType.VALUE
-  },
-  {
-    label: '变量',
-    value: FieldType.VARIABLES
-  }
-];
-
-// 权限范围自定义权限
-const CUSTOMCONDITION = 'customCondition';
 
 interface IProps {
   appId: string;
@@ -76,7 +53,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
   const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
-  const [dataPermissionScopeType, SetDataPermissionScopeType] = useState<ScopeTypeOption[]>([]);
   const [DataPermission, setDataPermission] = useState<AuthDataGroupVO[]>([]);
 
   const [editingPermData, setEditingPermData] = useState<AuthDataGroupVO | null>(null);
@@ -87,7 +63,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   useEffect(() => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
-      getScopeType();
       getSetIdFromMenuId();
     }
   }, [appId, menuId, roleId]);
@@ -106,7 +81,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     // 后端返回默认权限组
     // setDataPermission(addDisabled);
     // 前端生成默认权限组
-    setDataPermission((prevDataPermission) => {
+    setDataPermission(() => {
       // 保留第一个默认权限组，将获取到的数据添加到后面
       // const defaultPermission = prevDataPermission[0];
       return [...addDisabled];
@@ -155,15 +130,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       // 创建模式下清空编辑数据
       // setEditingPermData(null);
       setEditingPermData({ ...initialFormValues });
-    }
-  };
-
-  const getScopeType = async () => {
-    try {
-      const scopeTypeResq = await getScopeTypeApi();
-      await SetDataPermissionScopeType(scopeTypeResq);
-    } catch (error) {
-      console.error('获取权限范围失败 error:', error);
     }
   };
 
@@ -320,7 +286,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const formattedData = dataPermissionRoles.map((item: AuthDataPermissionPersonVO) => ({
         PersonId: item.id,
         fieldName: item.fieldName,
-        displayName: item.displayName,
+        displayName: item.displayName?.replace(/\s*id$/i, ''),
         entityID: item.entityId
       }));
 
@@ -352,7 +318,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         submitData.scopeValue = JSON.stringify(values.scopeValue);
       }
     }
-    if (values.customCondition) submitData.scopeTags.push(CUSTOMCONDITION);
   };
 
   const processDataFilters = (values: AuthDataGroupVO, submitData: AuthDataGroupVO) => {
@@ -491,26 +456,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     return result;
   };
 
-  // 添加这个方法到 DataPermission 组件中
-  const getVariable = (value: string, fieldValueType: string) => {
-    if (value === null || value === undefined) return '';
-
-    // 如果是变量类型（variables），尝试解析为字段名
-    if (fieldValueType === 'variables') {
-      // 假设 value 是类似 "entity-16935056057237504.29169768621965312" 的 key
-      const key = String(value);
-      const parts = key.split('.');
-      const fieldId = parts[1];
-
-      // 查找对应的字段名（需要 appEntityFields 数据）
-      const field = appEntityFields.find((f) => f.fieldId === fieldId);
-      if (field) {
-        return field.displayName || field.fieldName;
-      }
-      return key; // 如果找不到，返回原始 key
-    }
-  };
-
   const handleModalSubmit = async (values?: AuthDataGroupVO) => {
     if (!values) return;
 
@@ -610,62 +555,31 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     </Popconfirm>
                   </div>
                 </div>
-                <Divider />
+                <Divider style={{ margin: '10px 0' }} />
                 <div className={styles.bottom}>
-                  <span className={styles.name}>操作权限：</span>
-                  <span className={styles.desc}>
-                    <Space wrap>
-                      当前角色可
-                      <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
-                        查看
-                      </Tag>
-                      <Tag visible={!!perm.isOperable} color="#F2F3F5" style={{ color: '#1D2129' }}>
-                        操作
-                      </Tag>
-                      {perm.scopeTags.map((tag: string) => (
-                        <Tag color="#E8F3FF" style={{ color: '#3C7EFF' }}>
-                          {PERMISSION_SCOPE[tag]}
-                        </Tag>
+                  <Space direction="vertical">
+                    <Space>
+                      <span className={styles.name}>操作范围：</span>
+                      {perm.scopeTags?.map((tag: string) => (
+                        <Tag key={tag}>{PERMISSION_SCOPE[tag]}</Tag>
                       ))}
-                      {/* 是
-                      <Tag color="#FFF7E8" style={{ color: '#FF7D00' }}>
-                        {(perm.scopeLevel &&
-                          dataPermissionScopeType.find((item) => item.value === perm.scopeLevel)?.label) ||
-                          perm.scopeLevel}
-                      </Tag> */}
-                      {perm.dataFilters && perm.dataFilters.length > 0 && (
-                        <>
-                          且
-                          {perm.dataFilters.map((group: AuthDataFilterVO, groupIndex: number) => (
-                            <span key={`groupIndex-${groupIndex}`}>
-                              {group.map((filter: AuthDataFilterVO) => (
-                                <Tag color="#E8FFEA" style={{ color: '#00B42A', margin: '0 4px' }} key={filter.id}>
-                                  {filter.fieldName}
-                                  {/* {filter.fieldOperator} */}{' '}
-                                  {filterFieldCheckType
-                                    .find((item) => item.fieldId === filter.fieldId + '')
-                                    ?.validationTypes?.find(
-                                      (type: ValidationTypeItem) => type.code === filter.fieldOperator
-                                    )?.name || filter.fieldOperator}{' '}
-                                  {filter.fieldOperator !== 'IS_EMPTY' && filter.fieldOperator !== 'IS_NOT_EMPTY' && (
-                                    <>
-                                      {filter.fieldValueType
-                                        ? opCodeOptions.find((option) => option.value === filter.fieldValueType)
-                                            ?.label || filter.fieldValueType
-                                        : ''}{' '}
-                                      {getVariable(filter.fieldValue || '', filter.fieldValueType)}
-                                    </>
-                                  )}
-                                </Tag>
-                              ))}
-                              {groupIndex < perm.dataFilters!.length - 1 && <span>或</span>}
-                            </span>
-                          ))}
-                        </>
-                      )}
-                      的数据
                     </Space>
-                  </span>
+                    <Space>
+                      <span className={styles.name}>数据过滤：</span>
+                      {perm.dataFilters && perm.dataFilters.length > 0 ? (
+                        <span className={styles.name}>自定义</span>
+                      ) : (
+                        '-'
+                      )}
+                    </Space>
+                    <Space>
+                      <span className={styles.name}>操作权限：</span>
+                      <Tag>查看</Tag>
+                      {perm.operationTags?.map((tag: string) => (
+                        <Tag key={tag}>{OPERATION_OPTIONS[tag]}</Tag>
+                      ))}
+                    </Space>
+                  </Space>
                 </div>
               </div>
             ))}
@@ -687,7 +601,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             dataPermissionPerson={dataPermissionPerson}
             appEntityFields={appEntityFields}
             filterFieldCheckType={filterFieldCheckType}
-            dataPermissionScope={dataPermissionScopeType}
             variableOptions={variableOptions}
             handleModalSubmit={(values: AuthDataGroupVO) => handleModalSubmit(values)}
             handleModalCancel={() => handleModalCancel()}

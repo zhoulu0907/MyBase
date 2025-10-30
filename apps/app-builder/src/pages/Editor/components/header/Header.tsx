@@ -65,6 +65,13 @@ const tabData = [
     activeIcon: activeListDesignSVG
   },
   {
+    key: EDITOR_TYPES.FLOW_EDITOR,
+    title: '流程设计',
+    alt: 'flow Design',
+    defaultIcon: defaultListDesignSVG,
+    activeIcon: activeListDesignSVG
+  },
+  {
     key: EDITOR_TYPES.PAGE_SETTING,
     title: '页面设置',
     alt: 'Page Setting',
@@ -140,6 +147,8 @@ export default function EditorHeader() {
       setActiveTab(EDITOR_TYPES.PAGE_SETTING);
     } else if (hash.includes(EDITOR_TYPES.METADATA_MANAGE)) {
       setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
+    } else if (hash.includes(EDITOR_TYPES.FLOW_EDITOR)) {
+      setActiveTab(EDITOR_TYPES.FLOW_EDITOR);
     }
   }, []);
 
@@ -344,6 +353,7 @@ export default function EditorHeader() {
           onChange={(key) => {
             setActiveTab(key);
             clearCurComponentID();
+            console.log(key,EDITOR_TYPES.FORM_EDITOR,'-----------')
             switch (key) {
               case EDITOR_TYPES.FORM_EDITOR:
                 navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
@@ -356,6 +366,9 @@ export default function EditorHeader() {
                 break;
               case EDITOR_TYPES.METADATA_MANAGE:
                 navigate(`/onebase/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetId=${pageSetId}`);
+                break;
+              case EDITOR_TYPES.FLOW_EDITOR:
+                navigate(`/onebase/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}`);
                 break;
               default:
                 break;

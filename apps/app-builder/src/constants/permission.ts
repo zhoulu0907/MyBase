@@ -109,3 +109,9 @@ export const PERMISSION_SCOPE: Record<string, string> = {
   subDepartmentSubmit: '下级部门提交',
   customCondition: '自定义条件'
 };
+
+/** 数据权限-操作权限 */
+export const OPERATION_OPTIONS: Record<string, string> = {
+  edit: '编辑',
+  delete: '删除'
+};

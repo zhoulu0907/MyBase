@@ -27,7 +27,9 @@ export enum VisibleType {
 
 export enum PageType {
   // 普通表单
-  NORMAL = 1
+  NORMAL = 1,
+  // 流程表单
+  BPM = 2
 }
 
 export enum CATEGORY_TYPE {
@@ -53,7 +55,7 @@ export const RootParentPage = {
 export interface CreateApplicationMenuReq {
   applicationId: string;
   parentId?: string;
-  pageType?: number;
+  pageSetType?: number;
   menuName: string;
   menuType: MenuType;
   menuIcon: string;
