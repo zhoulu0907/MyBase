@@ -89,7 +89,7 @@ export const Editor = () => {
       version: version || '',
       versionAlias: versionAlias || '',
       versionStatus: versionStatus || '',
-      businessId: businessId || '',
+      businessId: businessId || pageSetId,
       appId,
       bpmDefJson: JSON.stringify(useJsonData)
     };
