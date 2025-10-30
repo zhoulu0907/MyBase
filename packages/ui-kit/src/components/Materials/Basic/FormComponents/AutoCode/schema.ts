@@ -187,6 +187,7 @@ const XautoCode: XautoCodeSchema = {
     //   name: '占位符',
     //   type: CONFIG_TYPES.PLACEHOLDER_INPUT
     // },
+    autoCodeConfig,
     {
       key: 'tooltip',
       name: '描述信息',
@@ -214,7 +215,6 @@ const XautoCode: XautoCodeSchema = {
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
-    autoCodeConfig,
     statusConfig,
     alignConfig,
     widthConfig
