@@ -3,12 +3,16 @@ package com.cmsr.onebase.module.engine.orm.anyline.repository;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseEntity;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowInstance;
 import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
 import jakarta.annotation.Resource;
+import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.*;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * WarmFlow 流程实例 Repository
@@ -49,6 +53,18 @@ public class FlowInstanceRepository extends DataRepository<FlowInstance> {
             configs.order(BaseEntity.CREATE_TIME, Order.TYPE.DESC);
         }
         return findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
+    }
+    /**
+     * 获取流程实例任务
+     * @param id
+     * @param appId
+     * @return
+     */
+    public FlowInstance getInstanceTask(Long id, String appId){
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.and(FlowInstance.ID, id);
+        configStore.and(Compare.EQUAL,"ext::json->>'appId'",appId);
+        return findOne(configStore);
     }
 
 }
