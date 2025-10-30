@@ -20,9 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -177,9 +175,6 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 processedData.put(fieldName, field.getDefaultValue());
             }
         }
-
-        // 处理自动编号字段
-        processAutoNumberFields(fields, processedData);
 
         // 处理复杂类型字段（数组、对象等）的JSON序列化
         processComplexTypeFields(fields, processedData);
