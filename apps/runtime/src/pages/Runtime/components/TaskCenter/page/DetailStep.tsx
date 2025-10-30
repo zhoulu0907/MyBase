@@ -1,8 +1,8 @@
 import { useEffect, useState, type FC } from 'react';
 import { Steps, Avatar } from '@arco-design/web-react';
 import { IconDownload, IconEye } from '@arco-design/web-react/icon';
-import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import dayjs from 'dayjs';
+import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import '../style/tcPage.less';
 
 

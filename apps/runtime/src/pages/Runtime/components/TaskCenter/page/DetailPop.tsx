@@ -16,9 +16,10 @@ interface PageProps {
   detailPopVisible: boolean;
   setPopVisible: Function;
   onBack: Function;
+  instanceId: string;
 }
 
-const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack }) => {
+const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, instanceId }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -83,13 +84,11 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   }
 
   const fetchStepData = async () => {
-    // todo：模拟参数
-    const res = await getOperatorRecord({ instanceId: '1432895485789736960' });
+    const res = await getOperatorRecord({instanceId });
     setStepData(res);
   };
 
   useEffect(() => {
-    //发请求，请求详情以及审批记录
     fetchStepData();
   }, []);
 

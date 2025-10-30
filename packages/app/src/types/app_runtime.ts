@@ -40,3 +40,21 @@ export interface SubMitInstanceReq {
   businessId: string;
   entity: any;
 }
+
+export enum FLOWSTATUS_TYPE {
+  IN_APPROVAL = 'in_approval',
+  DRAFT = 'draft',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  WITHDRAWN = 'withdrawn',
+  TERMINATED = 'terminated'
+}
+
+export const FlowStatusMap = {
+  [FLOWSTATUS_TYPE.IN_APPROVAL]: '审批中',
+  [FLOWSTATUS_TYPE.DRAFT]: '草稿',
+  [FLOWSTATUS_TYPE.APPROVED]: '已通过',
+  [FLOWSTATUS_TYPE.REJECTED]: '已拒绝',
+  [FLOWSTATUS_TYPE.WITHDRAWN]: '已撤回',
+  [FLOWSTATUS_TYPE.TERMINATED]: '已终止'
+};

@@ -3,12 +3,12 @@ import { Table, type TableColumnProps, Button, Tag, Link } from '@arco-design/we
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import BatchApproveModal from '../modal/batchApprove';
+import { FLOWSTATUS_TYPE, FlowStatusMap } from '@onebase/app';
 import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
-// import { getTodoPageList } from '../../../../../../../../packages/app/src/services/app_runtime';
 import dayjs from 'dayjs';
 import '../style/tcPage.less';
 
-const WillDo: FC = () => {
+const WillDo: FC = ({ appId }) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -25,13 +25,35 @@ const WillDo: FC = () => {
       )
     },
     {
-      title: '当前节点状态',
-      dataIndex: 'address',
-      render: (val, record) => (
-        <Tag color="blue" size="medium">
-          {val}
-        </Tag>
-      )
+      title: '流程状态',
+      dataIndex: 'flowStatus',
+      render: (val, record) => {
+        if (val === FLOWSTATUS_TYPE.APPROVED) {
+          return (
+            <Tag color="green" size="medium">
+              {FlowStatusMap[val]}
+            </Tag>
+          );
+        } else if (val === FLOWSTATUS_TYPE.IN_APPROVAL) {
+          return (
+            <Tag color="blue" size="medium">
+              {FlowStatusMap[val]}
+            </Tag>
+          );
+        } else if (val === FLOWSTATUS_TYPE.REJECTED || val === FLOWSTATUS_TYPE.WITHDRAWN) {
+          return (
+            <Tag color="red" size="medium">
+              {FlowStatusMap[val]}
+            </Tag>
+          );
+        } else {
+          return (
+            <Tag color="gray" size="medium">
+              {FlowStatusMap[val]}
+            </Tag>
+          );
+        }
+      }
     },
     {
       title: '表单摘要',
@@ -68,38 +90,10 @@ const WillDo: FC = () => {
       )
     }
   ];
-  const mockData = [
-    {
-      key: '1',
-      name: 'Jane Doe',
-      salary: 23000,
-      address: '32 Park Road, London',
-      email: '3jane.doe@example.com',
-      email1: 'e@example.com',
-      email2: 'ample.com'
-    },
-    {
-      key: '2',
-      name: 'Alisa Ross',
-      salary: 25000,
-      address: '35 Park Road, London',
-      email: '6alisa.ross@example.com',
-      email1: '12e@example.com',
-      email2: '3333ample.com'
-    },
-    {
-      key: '3',
-      name: 'Kevin Sandra',
-      salary: 22000,
-      address: '31 Park Road, London',
-      email: '1kevin.sandra@example.com',
-      email1: 'aaae@example.com',
-      email2: 'bbbample.com'
-    }
-  ];
   let [tbRowSelection, setTbRowSelection] = useState<any>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<any>();
   const [data, setData] = useState<any>();
+  const [instanceId, setInstanceId] = useState();
   let [detailPopVisible, setPopVisible] = useState(false);
   let [approveVisible, setApproveVisible] = useState(false);
 
@@ -124,13 +118,13 @@ const WillDo: FC = () => {
 
   function handleDetailPage(row: any) {
     console.log('click to detail page === row ===', row);
+    setInstanceId(row?.instanceId);
     setPopVisible(true);
   }
 
   const fetchFormData = async () => {
-    // todo：模拟参数
     const req = {
-      appId: '1332334434343'
+      appId,
       //   pageNo: 1,
       //   pageSize: 10,
       //   processTitle: '',
@@ -141,17 +135,13 @@ const WillDo: FC = () => {
       //   submitTimeEnd: ''
     };
     const res = await getTodoPageList(req);
-    console.log(res, '==========');
     setData(res?.list);
-
-    // setData(mockData)
   };
 
-  const onBack=()=>{
-      setPopVisible(false);
-      fetchFormData();
-  
-  }
+  const onBack = () => {
+    setPopVisible(false);
+    fetchFormData();
+  };
 
   useEffect(() => {
     fetchFormData();
@@ -184,7 +174,12 @@ const WillDo: FC = () => {
       )}
       <Table className="task-tb-box" rowKey="name" rowSelection={tbRowSelection} columns={columns} data={data} />
       {detailPopVisible && (
-        <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible} onBack={onBack} />
+        <DetailPop
+          detailPopVisible={detailPopVisible}
+          setPopVisible={setPopVisible}
+          onBack={onBack}
+          instanceId={instanceId}
+        />
       )}
       {approveVisible && <BatchApproveModal approveVisible={approveVisible} setApproveVisible={setApproveVisible} />}
     </section>

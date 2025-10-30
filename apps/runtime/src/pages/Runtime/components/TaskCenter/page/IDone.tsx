@@ -8,12 +8,12 @@ import dayjs from 'dayjs';
 const HandleStatus = {
   APPROVE: 'approve',
   EXECUT: 'execut',
-  REFUSE:'refuse',
-  GOBACK:'goback',
-  PASSON:'passon'
-}
+  REFUSE: 'refuse',
+  GOBACK: 'goback',
+  PASSON: 'passon'
+};
 
-const IDone: FC = () => {
+const IDone: FC = ({ appId }) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -66,35 +66,6 @@ const IDone: FC = () => {
       )
     }
   ];
-  const mockData = [
-    {
-      key: '1',
-      name: 'Jane Doe',
-      salary: 23000,
-      address: '32 Park Road, London',
-      handleOperation: 'approve',
-      email1: 'e@example.com',
-      email2: 'ample.com'
-    },
-    {
-      key: '2',
-      name: 'Alisa Ross',
-      salary: 25000,
-      address: '35 Park Road, London',
-      handleOperation: 'goback',
-      email1: '12e@example.com',
-      email2: '3333ample.com'
-    },
-    {
-      key: '3',
-      name: 'Kevin Sandra',
-      salary: 22000,
-      address: '31 Park Road, London',
-      handleOperation: '1kevin.sandra@example.com',
-      email1: 'aaae@example.com',
-      email2: 'bbbample.com'
-    }
-  ];
   let [detailPopVisible, setPopVisible] = useState(false);
   const [data, setData] = useState<any>();
   function handleDetailPage(row: any) {
@@ -102,7 +73,6 @@ const IDone: FC = () => {
     setPopVisible(true);
   }
   const fetchFormData = async () => {
-    //todo：模拟参数
     const req = {
       appId: '1332334434343'
       //   pageNo: 1,

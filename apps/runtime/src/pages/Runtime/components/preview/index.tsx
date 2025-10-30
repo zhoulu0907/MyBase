@@ -1,6 +1,7 @@
 import ExecuteFlows from '@/utils/flow';
 import { Button, Drawer, Form, Message } from '@arco-design/web-react';
 import {
+  PageType,
   CATEGORY_TYPE,
   dataMethodData,
   dataMethodInsert,
@@ -205,10 +206,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       
       try {
         let res = null;
-        if (curPage?.value?.pageSetType === 2) {
+        if (curPage?.value?.pageSetType === PageType.BPM) {
           const reqFlow = {
             isDraft: false,
-            formName: curPage?.value?.pages?.find((page: any) => page.pageType === 'form')?.pageName || '',
+            formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
             businessId: curPage?.value?.id,
             entity: {
               entityId: mainMetaData,
@@ -217,7 +218,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           };
           res = await fetchSubmitInstance(reqFlow);
           setPageType(EDITOR_TYPES.FORM_EDITOR);
-
         } else {
           const req: InsertMethodParams = {
             menuId: menuId,
