@@ -252,7 +252,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             pointerEvents: runtime ? 'unset' : 'none'
           }}
           disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT]}
-          drag
+          drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >
           <div className="uplaodTrigger">

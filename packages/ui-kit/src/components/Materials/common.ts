@@ -254,7 +254,7 @@ export const listTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
 };
 export const uploadTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
   key: 'uploadType',
-  name: '上传样式',
+  name: '上传方式',
   type: CONFIG_TYPES.STATUS_RADIO,
   range: [
     {
