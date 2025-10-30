@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Slf4j
 public class ETLRelatedTableRepository extends DataRepository<ETLRelatedTableDO> {
-    public ETLRelatedTableRepository(Class<ETLRelatedTableDO> defaultClazz) {
-        super(defaultClazz);
+
+    public ETLRelatedTableRepository() {
+        super(ETLRelatedTableDO.class);
     }
+
 }
