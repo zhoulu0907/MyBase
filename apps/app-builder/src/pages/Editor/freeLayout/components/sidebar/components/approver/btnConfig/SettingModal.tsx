@@ -5,7 +5,7 @@ const RadioGroup = Radio.Group;
 const Option = Select.Option;
 
 export default function SettingModal({settingsShow, setSettingShow}:any) {
-    let [radioVal, setRadioVal] = useState('LAST-NODE')
+    const [radioVal, setRadioVal] = useState('LAST-NODE')
 
     function handleRadio(val:any) {
         setRadioVal(val)
