@@ -47,4 +47,6 @@ public interface ErrorCodeConstants {
     ErrorCode PRIMARY_KEY_UPDATE_NOT_ALLOWED = new ErrorCode(1_003_006_002, "不允许更新主键字段");
     ErrorCode DATA_NOT_EXISTS = new ErrorCode(1_003_006_003, "数据不存在");
 
+    ErrorCode DATA_METHOD_EXEC_FAIL = new ErrorCode(1_003_006_004, "数据方法执行失败");
+
 }
