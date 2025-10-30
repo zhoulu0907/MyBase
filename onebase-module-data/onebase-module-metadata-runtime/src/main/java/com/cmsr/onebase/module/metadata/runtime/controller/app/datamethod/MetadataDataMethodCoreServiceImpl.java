@@ -95,35 +95,19 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Override
     public Map<String, Object> createData(MetadataDataMethodCoreContext metadataDataMethodCoreContext) {
-
-        Long entityId = metadataDataMethodCoreContext.getEntityId();
-        Map<String, Object> data = metadataDataMethodCoreContext.getData();
-        String methodCode = metadataDataMethodCoreContext.getMethodCode();
-
         Map<String, Object> result = metadataDataMethodCreate.executeProcess(metadataDataMethodCoreContext);
         return result;
     }
 
     @Override
     public Map<String, Object> updateData(MetadataDataMethodCoreContext metadataDataMethodCoreContext) {
-
-        Long entityId = metadataDataMethodCoreContext.getEntityId();
-        Object id = metadataDataMethodCoreContext.getId();
-        Map<String, Object> data = metadataDataMethodCoreContext.getData();
-        String methodCode = metadataDataMethodCoreContext.getMethodCode();
-
-
         // 使用新的统一流程处理更新操作
-        return metadataDataMethodUpdate.executeProcess(MetadataDataMethodOpEnum.UPDATE, entityId, id, data, methodCode);
+        return metadataDataMethodUpdate.executeProcess(metadataDataMethodCoreContext);
     }
 
     @Override
     public Boolean deleteData(MetadataDataMethodCoreContext methodCoreContext) {
-
-        Long entityId =  methodCoreContext.getEntityId();
-        Object id = methodCoreContext.getId();
-        String methodCode = methodCoreContext.getMethodCode();
-        metadataDataMethodDelete.executeProcess(MetadataDataMethodOpEnum.DELETE, entityId, id, null, methodCode);
+        metadataDataMethodDelete.executeProcess(methodCoreContext);
         return true;
     }
 

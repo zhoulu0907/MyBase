@@ -84,6 +84,8 @@ public class DataMethodApiImpl implements DataMethodApi {
                 metadataDataMethodCoreContext.setEntityId(reqDTO.getEntityId());
                 metadataDataMethodCoreContext.setId(idObj);
                 metadataDataMethodCoreContext.setMethodCode(null);
+                metadataDataMethodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
+                metadataDataMethodCoreContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
 
                 Boolean ok = metadataDataMethodCoreService.deleteData(metadataDataMethodCoreContext);
                 if (Boolean.TRUE.equals(ok)) { success++; }
@@ -185,6 +187,7 @@ public class DataMethodApiImpl implements DataMethodApi {
                 metadataDataMethodCoreContext.setData(payload);
                 metadataDataMethodCoreContext.setMethodCode(null);
                 metadataDataMethodCoreContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
+                metadataDataMethodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
 
                 Map<String, Object> updated = metadataDataMethodCoreService.updateData(
                         metadataDataMethodCoreContext);

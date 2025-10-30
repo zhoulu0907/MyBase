@@ -151,6 +151,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         methodCoreContext.setData(dataByName);
         methodCoreContext.setMethodCode(reqVO.getMethodCode());
         methodCoreContext.setMenuId(reqVO.getMenuId());
+        methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
+
 
         // 调用core模块的基础服务 更新主表信息
         Map<String, Object> resultData = coreDataMethodService.updateData(methodCoreContext);
@@ -266,6 +268,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                     metadataDataMethodCoreContext.setData(subDataByName);
                     metadataDataMethodCoreContext.setMethodCode(reqVO.getMethodCode());
                     metadataDataMethodCoreContext.setMenuId(reqVO.getMenuId());
+                    metadataDataMethodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
 
                     coreDataMethodService.updateData(
                             metadataDataMethodCoreContext
@@ -316,6 +319,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         metadataDataMethodCoreContext.setEntityId(reqVO.getEntityId());
         metadataDataMethodCoreContext.setId(reqVO.getId());
         metadataDataMethodCoreContext.setMethodCode(reqVO.getMethodCode());
+        metadataDataMethodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
 
 
         // 调用core模块的基础服务
