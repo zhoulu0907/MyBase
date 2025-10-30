@@ -1,14 +1,12 @@
 package com.cmsr.onebase.module.engine.orm.anyline.dataobject.ext;
 
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowInstance;
 import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-
 @Data
-public class FlowTaskExt extends FlowTask {
-
+public class FlowInstanceExt extends FlowInstance {
     /**
      * 应用ID
      */
