@@ -71,4 +71,39 @@ public class AppAuthPermissionRepository extends DataRepository<AuthPermissionDO
     }
 
 
+    public List<AuthPermissionDO> findByAppIdAndRoleIds(Long applicationId, Set<Long> roleIds) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.param("applicationId", applicationId);
+        configs.param("roleIds", roleIds);
+        String sql = """
+                select
+                	r.role_code,
+                	r.role_type,
+                	g.*
+                from
+                	app_auth_role r
+                left join app_auth_permission g
+                on
+                	r.application_id = g.application_id
+                	and r.id = g.role_id
+                where
+                	r.deleted = 0
+                	and (g.deleted = 0 or g.deleted is null)
+                	and r.application_id = #{applicationId}
+                	and r.id in (#{roleIds})
+                """;
+        DataSet dataSet = this.querys(sql, configs);
+        return dataSet.stream().map(dataRow -> {
+            AuthPermissionDO permissionDO = new AuthPermissionDO();
+            permissionDO.setId(dataRow.getLong("id"));
+            permissionDO.setApplicationId(dataRow.getLong("application_id"));
+            permissionDO.setRoleId(dataRow.getLong("role_id"));
+            permissionDO.setMenuId(dataRow.getLong("menu_id"));
+            permissionDO.setIsPageAllowed(dataRow.getInt("is_page_allowed"));
+            permissionDO.setIsAllViewsAllowed(dataRow.getInt("is_all_views_allowed"));
+            permissionDO.setIsAllFieldsAllowed(dataRow.getInt("is_all_fields_allowed"));
+            permissionDO.setOperationTags(dataRow.getString("operation_tags"));
+            return permissionDO;
+        }).toList();
+    }
 }
