@@ -9,7 +9,7 @@ import java.util.Set;
  * @Date：2025/10/27 10:02
  */
 @Data
-public class UserRole {
+public class UserRoleDTO {
 
     private boolean adminRole;
 

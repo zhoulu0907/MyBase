@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
-import com.cmsr.onebase.module.app.build.util.MenuUtils;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
@@ -13,6 +12,7 @@ import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
+import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
@@ -57,7 +57,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuListRespList.addAll(levelOneMenus);
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : menuListRespList) {
-            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO, menuDOS);
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getId(), menuDOS);
             respVO.setChildren(children);
         }
         filterMenuByName(menuListRespList, name);
@@ -65,13 +65,13 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
 
-    private LinkedList<MenuListRespVO> recursiveGetChildren(MenuListRespVO parent, List<MenuDO> menuDOS) {
+    private LinkedList<MenuListRespVO> recursiveGetChildren(Long parentId, List<MenuDO> menuDOS) {
         LinkedList<MenuListRespVO> children = new LinkedList<>();
         for (MenuDO menuDO : menuDOS) {
-            if (Objects.equals(menuDO.getParentId(), parent.getId())) {
+            if (Objects.equals(menuDO.getParentId(), parentId)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
-                child.setChildren(recursiveGetChildren(child, menuDOS));
+                child.setChildren(recursiveGetChildren(child.getId(), menuDOS));
                 children.add(child);
             }
         }
