@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.build.controller.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.etl.build.controller.datasource.vo.ETLDatasourceReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.ETLDatasourceService;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import io.swagger.v3.oas.annotations.Operation;

@@ -33,6 +33,8 @@ public class StartNodeVOStrategy extends AbstractNodeVOStrategy<StartNodeVO, Sta
         // 设置节点类型
         extDTO.setNodeType(getSupportedNodeType());
         extDTO.setMeta(nodeVO.getMeta());
+        extDTO.setButtonConfigs(this.buildDefaultButtonConfigs());
+
         return extDTO;
     }
 

@@ -32,6 +32,14 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-orm</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware.kryo</groupId>
+            <artifactId>kryo5</artifactId>
+        </dependency>
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

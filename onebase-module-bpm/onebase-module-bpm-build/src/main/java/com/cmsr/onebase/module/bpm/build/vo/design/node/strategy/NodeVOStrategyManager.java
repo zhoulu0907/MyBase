@@ -1,17 +1,22 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.dromara.warm.flow.core.dto.NodeJson;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * 节点配置VO策略管理器
@@ -128,46 +133,33 @@ public class NodeVOStrategyManager {
      * @param nodeVO 节点配置VO
      * @return 扩展数据JSON字符串
      */
-    public String buildNodeExtData(BaseNodeVO nodeVO) {
+    public void buildNodeExtData(NodeJson nodeJson, BaseNodeVO nodeVO) {
         if (nodeVO == null) {
-            log.warn("节点VO为空，返回默认扩展数据");
-            return null;
+            log.error("节点VO为空");
+            throw exception(ErrorCodeConstants.MISSING_NODE_VO_DATA);
         }
 
         String nodeType = nodeVO.getType();
 
-        if (StringUtils.isBlank(nodeType)) {
-            log.warn("节点类型为空，返回默认扩展数据");
-            return null;
-        }
-
         NodeVOStrategy<? extends BaseNodeVO, ? extends BaseNodeExtDTO> strategy = strategyMap.get(nodeType.toLowerCase());
         if (strategy == null) {
-            log.warn("未找到节点类型 '{}' 对应的策略，返回默认扩展数据", nodeType);
-            return buildDefaultExtData(nodeVO);
+            log.error("未找到节点类型 '{}' 对应的策略，返回默认扩展数据", nodeType);
+            throw exception(ErrorCodeConstants.UNSUPPORT_NODE_TYPE);
         }
 
-        try {
-            // 使用策略构建扩展数据
-            @SuppressWarnings("unchecked")
-            NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO> rawStrategy = (NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO>) strategy;
-            BaseNodeExtDTO extData = rawStrategy.buildExtData(nodeVO);
+        // 使用策略构建扩展数据
+        @SuppressWarnings("unchecked")
+        NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO> rawStrategy = (NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO>) strategy;
+        BaseNodeExtDTO extData = rawStrategy.buildExtData(nodeVO);
 
-            return JsonUtils.toJsonString(extData);
-        } catch (Exception e) {
-            log.error("构建节点扩展数据失败: nodeType={}", nodeType, e);
-            return buildDefaultExtData(nodeVO);
+        String ext = JsonUtils.toJsonString(extData);
+        nodeJson.setExt(ext);
+
+        // 权限
+        NodePermFlagDTO permFlagDTO = rawStrategy.buildPermissionFlag(extData);
+
+        if (permFlagDTO != null) {
+            nodeJson.setPermissionFlag(JsonUtils.toJsonString(permFlagDTO));
         }
-    }
-
-    /**
-     * 构建默认的扩展数据
-     */
-    private String buildDefaultExtData(BaseNodeVO nodeVO) {
-        BaseNodeExtDTO extDto = new BaseNodeExtDTO();
-        extDto.setNodeType(nodeVO.getType());
-        extDto.setMeta(nodeVO.getMeta());
-
-        return JsonUtils.toJsonString(extDto);
     }
 }

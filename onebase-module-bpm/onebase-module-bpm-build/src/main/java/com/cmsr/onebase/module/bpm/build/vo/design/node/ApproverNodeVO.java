@@ -5,6 +5,8 @@ import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeDataVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -18,8 +20,10 @@ import java.util.List;
 @Data
 public class ApproverNodeVO extends BaseNodeVO {
     /**
-     * 节点自定义配置
+     * 节点自定义配置，必须传，如果没有自定义配置，则传空对象
      */
+    @Valid
+    @NotNull(message = "节点自定义配置不能为空")
     private ApproverNodeDataVO data;
 
     /**
@@ -33,16 +37,22 @@ public class ApproverNodeVO extends BaseNodeVO {
         /**
          * 审批人配置
          */
+        @Valid
+        @NotNull(message = "审批人配置不能为空")
         private ApproverConfigDTO approverConfig;
 
         /**
          * 按钮配置
          */
+        @Valid
+        @NotNull(message = "按钮配置不能为空")
         private List<ApproverNodeBtnCfgDTO> buttonConfigs;
 
         /**
          * 字段权限配置
          */
+        @Valid
+        @NotNull(message = "字段权限配置不能为空")
         private FieldPermCfgDTO fieldPermConfig;
     }
 }

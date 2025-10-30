@@ -2,11 +2,19 @@ package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.impl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverConfigDTO;
+import com.cmsr.onebase.module.bpm.api.dto.node.base.RoleDTO;
+import com.cmsr.onebase.module.bpm.api.dto.node.base.UserDTO;
+import com.cmsr.onebase.module.bpm.api.enums.ApproverTypeEnum;
+import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.ApproverNodeVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.AbstractNodeVOStrategy;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
 
 /**
  * 审批人节点配置策略实现
@@ -55,16 +63,55 @@ public class ApproverNodeVOStrategy extends AbstractNodeVOStrategy<ApproverNodeV
         extDTO.setNodeType(getSupportedNodeType());
 
         // 设置审批人配置
-        if (nodeVO.getData() != null) {
-            extDTO.setApproverConfig(nodeVO.getData().getApproverConfig());
-            extDTO.setButtonConfigs(nodeVO.getData().getButtonConfigs());
-            extDTO.setFieldPermConfig(nodeVO.getData().getFieldPermConfig());
-        }
+        ApproverNodeVO.ApproverNodeDataVO dataVO = nodeVO.getData();
+
+        // 校验审批人配置
+        validateApproverConfig(dataVO.getApproverConfig());
+        // 校验按钮配置
+        validateButtonConfigs(dataVO.getButtonConfigs());
+        // 校验字段权限配置
+        validateFieldPermConfig(dataVO.getFieldPermConfig());
+
+        // 去除提交按钮
+        dataVO.getButtonConfigs().removeIf(buttonConfig -> BpmActionButtonEnum.SUBMIT.getCode().equals(buttonConfig.getButtonType()));
+
+        extDTO.setApproverConfig(nodeVO.getData().getApproverConfig());
+        extDTO.setButtonConfigs(nodeVO.getData().getButtonConfigs());
+        extDTO.setFieldPermConfig(nodeVO.getData().getFieldPermConfig());
 
         // 设置元数据
         extDTO.setMeta(nodeVO.getMeta());
 
         return extDTO;
+    }
+
+    @Override
+    public NodePermFlagDTO buildPermissionFlag(ApproverNodeExtDTO extDTO) {
+        NodePermFlagDTO nodePermTagDTO = new NodePermFlagDTO();
+        ApproverConfigDTO approverConfig = extDTO.getApproverConfig();
+
+        String approverType = approverConfig.getApproverType();
+        ApproverTypeEnum approverTypeEnum = ApproverTypeEnum.getByCode(approverType);
+
+        if (approverTypeEnum == ApproverTypeEnum.USER) {
+            for (UserDTO user : approverConfig.getUsers()) {
+                if (nodePermTagDTO.getUserIds() == null) {
+                    nodePermTagDTO.setUserIds(new ArrayList<>());
+                }
+
+                nodePermTagDTO.getUserIds().add(user.getUserId());
+            }
+        } else if (approverTypeEnum == ApproverTypeEnum.ROLE) {
+            for (RoleDTO role : approverConfig.getRoles()) {
+                if (nodePermTagDTO.getRoleIds() == null) {
+                    nodePermTagDTO.setRoleIds(new ArrayList<>());
+                }
+
+                nodePermTagDTO.getRoleIds().add(role.getRoleId());
+            }
+        }
+
+        return nodePermTagDTO;
     }
 
     @Override

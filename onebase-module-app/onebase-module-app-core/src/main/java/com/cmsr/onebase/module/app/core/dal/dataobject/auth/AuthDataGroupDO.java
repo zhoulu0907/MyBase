@@ -43,6 +43,9 @@ public class AuthDataGroupDO extends TenantBaseDO {
     @Column(name = "scope_value", length = 256, comment = "字段对应的权限范围值")
     private String scopeValue;
 
+    @Column(name = "data_filter", length = 256, comment = "数据过滤")
+    private String dataFilter;
+
     @Column(name = "operation_tags", nullable = false, comment = "操作标签")
     private String operationTags;
 

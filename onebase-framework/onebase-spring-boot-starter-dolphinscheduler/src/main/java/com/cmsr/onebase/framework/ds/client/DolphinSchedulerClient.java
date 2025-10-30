@@ -11,6 +11,7 @@ import com.cmsr.onebase.framework.ds.model.task.TaskLocation;
 import com.cmsr.onebase.framework.ds.model.task.TaskRelation;
 import com.cmsr.onebase.framework.ds.model.task.def.AbstractTask;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDefinitionResp;
+import com.cmsr.onebase.framework.ds.model.workflow.sub.ComplementTime;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +31,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -62,6 +64,9 @@ public class DolphinSchedulerClient {
     @Value("${onebase.scheduler.env}")
     private Long environmentCode;
 
+    @Value("${onebase.scheduler.worker-group:default}")
+    private String workerGroup;
+
     private DolphinschedulerClientStub dsClientStub;
 
     @PostConstruct
@@ -73,12 +78,7 @@ public class DolphinSchedulerClient {
                     .build();
             return chain.proceed(request);
         });
-        OkHttpClient httpClient = httpClientBuilder
-                .addInterceptor(chain -> {
-                    Request request = chain.request();
-                    return chain.proceed(request);
-                })
-                .build();
+        OkHttpClient httpClient = httpClientBuilder.build();
 
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
         retrofitBuilder.client(httpClient);
@@ -101,9 +101,12 @@ public class DolphinSchedulerClient {
                                         AbstractTask task,
                                         String description) {
         // 1. verify-name unique
-        Result<Object> uniqueResp = execute(dsClientStub.verifyNameUniqueInProject(projectCode, flowName));
-        if (uniqueResp.getFailed()) {
-            throw DolphinschedulerException.of("名称%s已存在", flowName);
+        Result<WorkflowDefinitionResp> uniqueResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
+        if (uniqueResp.getSuccess()) {
+            WorkflowDefinitionResp existingData = uniqueResp.getData();
+            if (existingData != null) {
+                return existingData.getCode();
+            }
         }
         // 2. generate unique task code
         Result<List<Long>> genTaskCodes = execute(dsClientStub.generateTaskCodes(projectCode, 1));
@@ -133,18 +136,50 @@ public class DolphinSchedulerClient {
     }
 
     /**
-     * 上线工作流，包括调度
+     * 上线工作流
      */
-    public void onlineWorkflow(Long projectCode, Long workflowCode, Schedule schedule) {
-        // 0. 清理调度任务
+    public void onlineWorkflow(Long projectCode, Long workflowCode) {
         offlineWorkflow(projectCode, workflowCode);
-        // 1. 上线工作流
         Result<Boolean> releaseResult = execute(dsClientStub.releaseWorkflow(projectCode, workflowCode,
                 // magic string: flowName, DS required for this, but no usage at all.
                 "flowName", "ONLINE"));
         if (releaseResult.getFailed()) {
             throw DolphinschedulerException.of("工作流【%s】上线失败", workflowCode);
         }
+    }
+
+    public List<Long> runWorkflowManually(Long projectCode, Long workflowCode, LocalDateTime startTime, LocalDateTime endTime) {
+        ComplementTime complementTime = null;
+        String execType = "START_PROCESS";
+        if (startTime != null && endTime != null) {
+            complementTime = new ComplementTime();
+            complementTime.setComplementStartDate(startTime);
+            complementTime.setComplementEndDate(endTime);
+            execType = "COMPLEMENT_DATA";
+        }
+
+
+        Result<List<Long>> executeResult = execute(dsClientStub.manuallyStartWorkflow(projectCode, workflowCode, environmentCode, tenantCode,
+                complementTime,
+                "CONTINUE", "NONE",
+                "RUN_MODE_SERIAL", "MEDIUM", workerGroup,
+                execType, "DESC_ORDER"
+        ));
+
+        if (executeResult.getFailed()) {
+            log.error("工作流运行失败{}, {}", workflowCode, executeResult.getMsg());
+            throw DolphinschedulerException.of("工作流【%s】运行提交失败, %s", workflowCode);
+        }
+
+        return executeResult.getData();
+    }
+
+    /**
+     * 上线工作流，包括调度
+     */
+    public void onlineWorkflowWithSchedule(Long projectCode, Long workflowCode, Schedule schedule) {
+        // 1. 上线工作流
+        onlineWorkflow(projectCode, workflowCode);
         // 2. 创建调度信息
         Result<ScheduleInfoResp> createScheduleResp = execute(dsClientStub.createSchedule(projectCode, workflowCode, environmentCode, tenantCode, schedule,
                 "CONTINUE", "NONE", "MEDIUM", 0L, "default"));
@@ -168,7 +203,8 @@ public class DolphinSchedulerClient {
         // 2. 删除工作流，若存在
         Result<Object> deleted = execute(dsClientStub.deleteWorkflow(projectCode, workflowCode));
         if (deleted.getFailed()) {
-            throw DolphinschedulerException.of("删除工作流【%s】失败", workflowCode);
+            log.error("删除工作流【{}】失败, {}", workflowCode, deleted.getMsg());
+            throw DolphinschedulerException.of("删除工作流【%s】失败, %s", workflowCode, deleted.getMsg());
         }
     }
 
@@ -180,50 +216,41 @@ public class DolphinSchedulerClient {
      */
     private void offlineWorkflow(Long projectCode, Long workflowCode) {
         // 0. 获取调度相关信息
-        Integer scheduleCode = null;
-        Result<PageInfo<ScheduleInfoResp>> scheduleQueryResp = executeIgnoreErr(dsClientStub.queryScheduleByWorkflow(projectCode, workflowCode, 1, 1));
+        Result<PageInfo<ScheduleInfoResp>> scheduleQueryResp = execute(dsClientStub.queryScheduleByWorkflow(projectCode, workflowCode, 1, 1));
         if (scheduleQueryResp.getFailed()) {
             // anyway if getSchedule failed, consider this as no schedule.
             log.warn("获取工作流【{}】调度信息失败,{}", workflowCode, scheduleQueryResp.getMsg());
-        } else {
-            List<ScheduleInfoResp> scheduleList = scheduleQueryResp.getData().getTotalList();
-            if (CollectionUtils.isNotEmpty(scheduleList)) {
-                scheduleCode = scheduleList.get(0).getId();
-            }
+            throw DolphinschedulerException.of("获取工作流【%s】调度信息失败, %s", workflowCode, scheduleQueryResp.getMsg());
         }
-        if (scheduleCode != null) {
+        List<ScheduleInfoResp> scheduleList = scheduleQueryResp.getData().getTotalList();
+        if (CollectionUtils.isNotEmpty(scheduleList)) {
+            Integer scheduleCode = scheduleList.get(0).getId();
             // 1. 下线调度若存在
-            Result<Boolean> offlineScheduleResp = executeIgnoreErr(dsClientStub.offlineSchedule(projectCode, scheduleCode));
+            Result<Boolean> offlineScheduleResp = execute(dsClientStub.offlineSchedule(projectCode, scheduleCode));
             if (offlineScheduleResp.getFailed()) {
                 log.warn("下线工作流【{}】对应调度【{}】失败,{}", workflowCode, scheduleCode, offlineScheduleResp.getMsg());
+                throw DolphinschedulerException.of("下线工作流【%s】对应调度【%s】失败, %s", workflowCode, offlineScheduleResp.getMsg());
             }
             // 2. 删除调度若存在
-            Result<Boolean> deleteScheduleResp = executeIgnoreErr(dsClientStub.deleteSchedule(projectCode, scheduleCode, scheduleCode));
+            Result<Boolean> deleteScheduleResp = execute(dsClientStub.deleteSchedule(projectCode, scheduleCode, scheduleCode));
             if (deleteScheduleResp.getFailed()) {
                 log.warn("删除工作流【{}】对应调度【{}】失败,{}", workflowCode, scheduleCode, deleteScheduleResp.getMsg());
+                throw DolphinschedulerException.of("删除工作流【%s】对应调度【%s】失败, %s", workflowCode, deleteScheduleResp.getMsg());
             }
         }
         // 3. 下线工作流若存在
-        Result<Boolean> releaseResult = executeIgnoreErr(dsClientStub.releaseWorkflow(projectCode, workflowCode,
+        Result<Boolean> releaseResult = execute(dsClientStub.releaseWorkflow(projectCode, workflowCode,
                 // magic string: flowName, DS required for this, but no usage at all.
                 "flowName", "OFFLINE"));
         if (releaseResult.getFailed()) {
-            log.warn("工作流【{}】下线失败，下线接口调用失败", workflowCode);
+            log.warn("工作流【{}】下线失败，下线接口调用失败, {}", workflowCode, releaseResult.getMsg());
+            throw DolphinschedulerException.of("工作流【%s】下线失败, %s", workflowCode, releaseResult.getMsg());
         }
     }
 
     private <T> String wrapSingleton2ListedJsonString(T args) {
         List<T> array = Collections.singletonList(args);
         return JsonUtils.toJsonString(array);
-    }
-
-    private <T> Result<T> executeIgnoreErr(Call<Result<T>> call) {
-        try {
-            return execute(call);
-        } catch (Exception e) {
-            log.warn("调用小海豚失败", e);
-            return Result.newEmpty();
-        }
     }
 
     private <T> Result<T> execute(Call<Result<T>> call) {

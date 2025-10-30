@@ -8,14 +8,21 @@ import com.cmsr.onebase.module.app.build.vo.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.*;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthFieldDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthViewDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
-import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
+import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
@@ -28,8 +35,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @Author：huangjie
@@ -38,9 +46,6 @@ import java.util.stream.Collectors;
 @Setter
 @Service
 public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
-
-    @Resource
-    private AppAuthDataFilterRepository authDataFilterRepository;
 
     @Resource
     private AppAuthDataGroupRepository authDataGroupRepository;
@@ -69,8 +74,11 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Resource
     private MetadataEntityFieldApi metadataEntityFieldApi;
 
+    @Resource
+    private AppCacheProvider appCacheProvider;
+
     @Override
-    public AuthDetailFunctionPermissionVO getFunctionPermission(AuthPermissionReqVO reqVO) {
+    public AuthDetailFunctionPermissionVO getFunctionPermission(AuthPermissionReq reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
         appCommonService.validateRoleExist(reqVO.getRoleId());
         appCommonService.validateMenuExist(reqVO.getMenuId());
@@ -97,7 +105,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
 
     @Override
-    public AuthDetailDataPermissionVO getDataPermission(AuthPermissionReqVO reqVO) {
+    public AuthDetailDataPermissionVO getDataPermission(AuthPermissionReq reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
         appCommonService.validateRoleExist(reqVO.getRoleId());
         //
@@ -111,25 +119,31 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         }
         List<AuthDataGroupVO> authDataGroupVOS = authDataGroupDOS.stream().map(authDataGroupDO -> {
             AuthDataGroupVO authDataGroupVO = BeanUtils.toBean(authDataGroupDO, AuthDataGroupVO.class);
-            authDataGroupVO.setScopeTags(JsonUtils.parseObject(authDataGroupDO.getScopeTags(), new TypeReference<List<String>>() {
-            }));
-            authDataGroupVO.setOperationTags(JsonUtils.parseObject(authDataGroupDO.getOperationTags(), new TypeReference<List<String>>() {
-            }));
+
+            if (StringUtils.isNotBlank(authDataGroupDO.getScopeTags())) {
+                authDataGroupVO.setScopeTags(JsonUtils.parseArray(authDataGroupDO.getScopeTags(), String.class));
+            } else {
+                authDataGroupVO.setScopeTags(Collections.emptyList());
+            }
+            if (StringUtils.isNotBlank(authDataGroupDO.getDataFilter())) {
+                authDataGroupVO.setDataFilters(JsonUtils.parseObject(authDataGroupDO.getDataFilter(), new TypeReference<List<List<AuthDataFilterVO>>>() {
+                }));
+            } else {
+                authDataGroupVO.setDataFilters(Collections.emptyList());
+            }
+            if (StringUtils.isNotBlank(authDataGroupDO.getOperationTags())) {
+                authDataGroupVO.setOperationTags(JsonUtils.parseArray(authDataGroupDO.getOperationTags(), String.class));
+            } else {
+                authDataGroupVO.setOperationTags(Collections.emptyList());
+            }
             return authDataGroupVO;
         }).toList();
-
-        for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
-            List<AuthDataFilterDO> dataFilterDOS = authDataFilterRepository.findByGroupId(authDataGroupVO.getId());
-            List<AuthDataFilterVO> dataFilterVOS = BeanUtils.toBean(dataFilterDOS, AuthDataFilterVO.class);
-            List<List<AuthDataFilterVO>> dataFilters = groupAndOrder(dataFilterVOS);
-            authDataGroupVO.setDataFilters(dataFilters);
-        }
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
         return dataPermissionVO;
     }
 
     @Override
-    public AuthDetailFieldPermissionVO getFieldPermission(AuthPermissionReqVO reqVO) {
+    public AuthDetailFieldPermissionVO getFieldPermission(AuthPermissionReq reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
         appCommonService.validateRoleExist(reqVO.getRoleId());
         MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
@@ -158,6 +172,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authPermissionDO.setIsPageAllowed(reqVO.getIsPageAllowed());
             authPermissionRepository.update(authPermissionDO);
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
     @Override
@@ -172,6 +187,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authPermissionDO.setOperationTags(JsonUtils.toJsonString(reqVO.getOperationTags()));
             authPermissionRepository.update(authPermissionDO);
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
     @Override
@@ -184,43 +200,44 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authDataGroupDO.setRoleId(reqVO.getPermissionReq().getRoleId());
             authDataGroupDO.setMenuId(reqVO.getPermissionReq().getMenuId());
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
-            authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
-            authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
+            if (reqVO.getAuthDataGroup().getScopeTags() != null) {
+                authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
+            }
+            if (reqVO.getAuthDataGroup().getOperationTags() != null) {
+                authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
+            }
+            if (reqVO.getAuthDataGroup().getDataFilters() != null) {
+                authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
+            }
             authDataGroupRepository.insert(authDataGroupDO);
-            //
-            updateAuthDataFilter(dataGroupId, reqVO.getAuthDataGroup().getDataFilters());
         } else {
             AuthDataGroupDO authDataGroupDO = authDataGroupRepository.findById(dataGroupId);
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
-            authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
-            authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
+            if (reqVO.getAuthDataGroup().getScopeTags() != null) {
+                authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
+            }
+            if (reqVO.getAuthDataGroup().getOperationTags() != null) {
+                authDataGroupDO.setOperationTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getOperationTags()));
+            }
+            if (reqVO.getAuthDataGroup().getDataFilters() != null) {
+                authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
+            }
             authDataGroupRepository.update(authDataGroupDO);
-            //
-            updateAuthDataFilter(dataGroupId, reqVO.getAuthDataGroup().getDataFilters());
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteDataGroup(Long id) {
+        AuthDataGroupDO dataGroupDO = authDataGroupRepository.findById(id);
         authDataGroupRepository.deleteById(id);
-        authDataFilterRepository.deleteByGroupId(id);
+        appCacheProvider.roleMenuChanged(dataGroupDO.getApplicationId(), dataGroupDO.getRoleId(), dataGroupDO.getMenuId());
     }
-
-//    @Override
-//    public List<AuthPermissionScope> getPermissionScope() {
-//        return Arrays.stream(AuthPermissionScopeEnum.values()).map(v -> {
-//            AuthPermissionScope scope = new AuthPermissionScope();
-//            scope.setLabel(v.getLabel());
-//            scope.setValue(v.getCode());
-//            return scope;
-//        }).toList();
-//    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateField(AuthUpdateFieldReqVO reqVO) {
-        // IsAllFieldsAllowed 1 所有字段内容可操作   0 自定义权限
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
         if (authPermissionDO == null) {
             authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
@@ -238,9 +255,10 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 upsetAuthField(reqVO.getPermissionReq(), authField);
             }
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
-    private void upsetAuthField(AuthPermissionReqVO permissionReq, AuthFieldVO authFieldVO) {
+    private void upsetAuthField(AuthPermissionReq permissionReq, AuthFieldVO authFieldVO) {
         AuthFieldDO authFieldDO = null;
         if (authFieldVO.getId() != null) {
             authFieldDO = authFieldRepository.findById(authFieldVO.getId());
@@ -285,10 +303,11 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 upsetViewField(reqVO.getPermissionReq(), authView);
             }
         }
+        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
 
 
-    private void upsetViewField(AuthPermissionReqVO permissionReq, AuthViewVO authViewVO) {
+    private void upsetViewField(AuthPermissionReq permissionReq, AuthViewVO authViewVO) {
         AuthViewDO authViewDO = null;
         if (authViewVO.getId() != null) {
             authViewDO = authViewRepository.findById(authViewVO.getId());
@@ -312,7 +331,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
 
-    private List<AuthViewVO> queryAuthViews(Long menuId, AuthPermissionReqVO reqVO) {
+    private List<AuthViewVO> queryAuthViews(Long menuId, AuthPermissionReq reqVO) {
         List<AuthViewDO> viewDOS = authViewRepository.findByQuery(reqVO);
         List<PageDO> pages = queryAlFormPages(menuId);
         List<Pair<PageDO, AuthViewDO>> pairs = AuthUtils.leftOuterJoin(pages, viewDOS, (page, view) -> page.getId().equals(view.getViewId()));
@@ -348,30 +367,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         return pageDOS.stream().filter(pageDO -> "form".equals(pageDO.getPageType())).toList();
     }
 
-    /**
-     * 根据 conditionGroup的值分组，值相同的在一组，conditionGroup的值小的在前面
-     * 每个组再根据 conditionOrder 排序，conditionOrder的值小的在前面
-     *
-     * @param dataFilterVOS
-     * @return
-     */
-    private List<List<AuthDataFilterVO>> groupAndOrder(List<AuthDataFilterVO> dataFilterVOS) {
-        if (dataFilterVOS == null || dataFilterVOS.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return dataFilterVOS.stream()
-                .sorted(Comparator.comparing(AuthDataFilterVO::getConditionGroup)
-                        .thenComparing(AuthDataFilterVO::getConditionOrder))
-                .collect(Collectors.groupingBy(
-                        AuthDataFilterVO::getConditionGroup,
-                        LinkedHashMap::new,
-                        Collectors.toList()))
-                .values()
-                .stream()
-                .collect(Collectors.toList());
-    }
-
-    private Pair<List<AuthFieldVO>, List<AuthFieldVO>> queryAuthFields(Long entityId, AuthPermissionReqVO reqVO) {
+    private Pair<List<AuthFieldVO>, List<AuthFieldVO>> queryAuthFields(Long entityId, AuthPermissionReq reqVO) {
         List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
         List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
         List<Pair<EntityFieldRespDTO, AuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
@@ -407,57 +403,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         reqDTO.setIsSystemField(0);
         List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO);
         return entityFieldRespDTOS;
-    }
-
-
-    private void updateAuthDataFilter(Long groupId, List<List<AuthDataFilterVO>> authDataFilters) {
-        if (authDataFilters == null || authDataFilters.isEmpty()) {
-            authDataFilterRepository.deleteByGroupId(groupId);
-        }
-        List<AuthDataFilterDO> authDataFilterDOS = authDataFilterRepository.findByGroupId(groupId);
-        List<AuthDataFilterVO> authDataFilterVOS = formatAuthDataFilterVO(authDataFilters);
-        List<Pair<AuthDataFilterDO, AuthDataFilterVO>> pairs = AuthUtils.fullOuterJoin(authDataFilterDOS, authDataFilterVOS,
-                (authDataFilterDO, authDataFilterVO) -> authDataFilterDO.getId().equals(authDataFilterVO.getId())
-        );
-        for (Pair<AuthDataFilterDO, AuthDataFilterVO> pair : pairs) {
-            AuthDataFilterDO authDataFilterDO = pair.getLeft();
-            AuthDataFilterVO authDataFilterVO = pair.getRight();
-            if (authDataFilterDO != null && authDataFilterVO != null) {
-                copyFields(groupId, authDataFilterVO, authDataFilterDO);
-                authDataFilterRepository.update(authDataFilterDO);
-            } else if (authDataFilterDO == null && authDataFilterVO != null) {
-                authDataFilterDO = new AuthDataFilterDO();
-                copyFields(groupId, authDataFilterVO, authDataFilterDO);
-                authDataFilterRepository.insert(authDataFilterDO);
-            } else if (authDataFilterDO != null && authDataFilterVO == null) {
-                authDataFilterRepository.deleteById(authDataFilterDO.getId());
-            }
-        }
-    }
-
-    private void copyFields(Long groupId, AuthDataFilterVO authDataFilterVO, AuthDataFilterDO authDataFilterDO) {
-        authDataFilterDO.setGroupId(groupId);
-        authDataFilterDO.setConditionGroup(authDataFilterVO.getConditionGroup());
-        authDataFilterDO.setConditionOrder(authDataFilterVO.getConditionOrder());
-        authDataFilterDO.setFieldId(authDataFilterVO.getFieldId());
-        authDataFilterDO.setFieldValueType(authDataFilterVO.getFieldValueType());
-        authDataFilterDO.setFieldOperator(authDataFilterVO.getFieldOperator());
-        authDataFilterDO.setFieldValue(authDataFilterVO.getFieldValue());
-    }
-
-    private List<AuthDataFilterVO> formatAuthDataFilterVO(List<List<AuthDataFilterVO>> authDataFilters) {
-        if (CollectionUtils.isEmpty(authDataFilters)) {
-            return Collections.emptyList();
-        }
-        for (int i = 0; i < authDataFilters.size(); i++) {
-            List<AuthDataFilterVO> authDataFilterVOS = authDataFilters.get(i);
-            for (int j = 0; j < authDataFilterVOS.size(); j++) {
-                AuthDataFilterVO authDataFilterVO = authDataFilterVOS.get(j);
-                authDataFilterVO.setConditionGroup(i + 1);
-                authDataFilterVO.setConditionOrder(j + 1);
-            }
-        }
-        return authDataFilters.stream().flatMap(Collection::stream).toList();
     }
 
 
