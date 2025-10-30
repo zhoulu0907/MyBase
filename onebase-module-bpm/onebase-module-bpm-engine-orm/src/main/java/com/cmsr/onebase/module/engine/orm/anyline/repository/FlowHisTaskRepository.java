@@ -46,17 +46,14 @@ public class FlowHisTaskRepository extends DataRepository<FlowHisTask> {
                     t3.form_Summary,
                     t3.form_Name,
                     t.*
-                FROM (
-                    SELECT *,
-                       ROW_NUMBER() OVER (PARTITION BY instance_id ORDER BY id DESC) as rn
-                    FROM bpm_flow_his_task
-                    WHERE deleted = 0
-                    and approver = '%d'
-                    ) t
+                FROM bpm_flow_his_task t
                 LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id
                 left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
-                WHERE t.rn = 1
+                WHERE
                 and t1.deleted = 0
+                and t.deleted = 0
+                and t3.deleted = 0
+                and t.node_type in ('1','3','4')
                 """, userId);
     }
     private ConfigStore buildDynamicCondition(BpmFlowDoneTaskPageReqVO reqVO){
