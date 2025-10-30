@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Collapse, Empty, Input, Modal, Spin, Tabs, Typography, Space } from '@arco-design/web-react';
 import type { DictData, DictItem } from '@onebase/platform-center';
 import { getAllDictList, getDictDataListByType } from '@onebase/platform-center';
-import styles from './index.module.less';
+import { TokenManager } from '@onebase/common';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '@/store/store_app';
 import { StatusEnum } from '@onebase/platform-center';
+import styles from './index.module.less';
 
 export interface SelectDictModalProps {
+  appId: string;
   visible: boolean;
   onOk: (dict?: DictItem) => void;
   onCancel: () => void;
@@ -21,7 +22,7 @@ const DICT_OWNER_TYPE = {
   TENANT: 'tenant'
 };
 
-export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictModalProps) {
+export default function SelectDictModal({ appId, visible, onOk, onCancel }: SelectDictModalProps) {
   const [activeTab, setActiveTab] = useState<string>(DICT_OWNER_TYPE.APP);
   const [loadingList, setLoadingList] = useState(false);
   const [showMoreMap, setShowMoreMap] = useState<Record<string, boolean>>({});
@@ -32,13 +33,12 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
   const [search, setSearch] = useState('');
 
   const navigate = useNavigate();
-  const { curAppId } = useAppStore();
+  const tenantId = TokenManager.getTenantInfo()?.tenantId;
 
-  // 加载字典列表
   const loadList = async (ownerType: string) => {
     setLoadingList(true);
     try {
-      const list = await getAllDictList({ dictOwnerType: ownerType });
+      const list = await getAllDictList({ dictOwnerType: ownerType, dictOwnerId: getDictOwnerId() });
       const enabledList = list.filter((d) => d.status === StatusEnum.ENABLE);
       setDictList(enabledList || []);
     } finally {
@@ -56,13 +56,16 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
     loadList(activeTab);
   }, [visible, activeTab]);
 
+  const getDictOwnerId = () => {
+    return activeTab === DICT_OWNER_TYPE.APP ? appId : tenantId;
+  };
   // 展开时按需加载预览
   const handleExpand = (key: string, keys: string[]) => {
     setExpandedKeys(keys);
     const dict = dictList.find((d) => d.id === key);
     if (!dict) return;
     const cacheKey = dict.type;
-    if (previewMap[cacheKey]?.data) return; // 已加载
+    if (previewMap[cacheKey]?.data) return;
 
     setPreviewMap((prev) => ({ ...prev, [cacheKey]: { loading: true, data: [] } }));
     getDictDataListByType(dict.type)
@@ -88,10 +91,11 @@ export default function SelectDictModal({ visible, onOk, onCancel }: SelectDictM
 
   const footer = (
     <div className={styles.footerBar}>
+      {/* TODO: 跳转到数据字典管理页面 */}
       <Button
         type="text"
         size="small"
-        onClick={() => navigate(`/onebase/create-app/data-factory?appId=${curAppId || ''}`)}
+        onClick={() => navigate(`/onebase/create-app/data-factory?appId=${appId || ''}`)}
       >
         数据字典管理
       </Button>

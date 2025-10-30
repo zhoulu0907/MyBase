@@ -3,6 +3,7 @@ import { Button, Input, Select, Dropdown, Menu, Cascader } from '@arco-design/we
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit, IconBook } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
+import { useAppStore } from '@/store/store_app';
 import SelectDictModal from '@/components/SelectDictModal';
 import type { DictItem } from '@onebase/platform-center';
 import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from '../types';
@@ -51,7 +52,7 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
   const [optionType, setOptionType] = useState(CONFIG_TYPE.CUSTOM);
   const [selectDictModalVisible, setSelectDictModalVisible] = useState(false);
   const [selectDict, setSelectDict] = useState<DictItem | null>(null);
-
+  const { curAppId } = useAppStore();
   const addOption = () => {
     const newopt = { optionLabel: `选项${options.length + 1}`, optionValue: `选项${options.length + 1}` };
     setOptions([...options, newopt]);
@@ -164,7 +165,12 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
       </div>
 
       {/* 选择字典弹窗 */}
-      <SelectDictModal visible={selectDictModalVisible} onOk={handleSelectDictOk} onCancel={handleSelectDictCancel} />
+      <SelectDictModal
+        appId={curAppId}
+        visible={selectDictModalVisible}
+        onOk={handleSelectDictOk}
+        onCancel={handleSelectDictCancel}
+      />
     </div>
   );
 };

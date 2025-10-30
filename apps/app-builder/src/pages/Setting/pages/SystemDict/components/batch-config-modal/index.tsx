@@ -106,7 +106,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       id: `temp-${Date.now()}-${visibleValues.length}`,
       label: '',
       value: '',
-      colorType: colorMode ? getColorByIndex(visibleValues.length) : 'rgb(var(--primary-6))', // 根据彩色模式分配颜色
+      colorType: colorMode ? getColorByIndex(visibleValues.length) : '',
       status: 1,
       sort: visibleValues.length + 1
     };
@@ -159,7 +159,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       // 关闭彩色模式时，将所有颜色重置为默认颜色
       const newValues = dictValues.map((item) => ({
         ...item,
-        colorType: 'rgb(var(--primary-6))'
+        colorType: ''
       }));
       setDictValues(newValues);
       syncFormData(newValues);
@@ -178,7 +178,6 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
 
   // 处理拖拽排序
   const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    console.log('oldIndex', oldIndex, newIndex);
     const visibleValues = getVisibleDictValues();
     const newVisibleValues = arrayMove([...visibleValues], oldIndex, newIndex);
     const sortableValues = newVisibleValues.map((item, index) => ({
