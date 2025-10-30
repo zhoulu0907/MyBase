@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
+import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
 
@@ -34,6 +35,14 @@ public interface NodeVOStrategy<T extends BaseNodeVO, E extends BaseNodeExtDTO> 
      * @return 扩展数据对象
      */
     E buildExtData(T nodeVO);
+
+    /**
+     * 将扩展数据对象转换为权限标签字符串
+     *
+     * @param extDTO 扩展数据对象
+     * @return 权限标签字符串
+     */
+    NodePermFlagDTO buildPermissionFlag(E extDTO);
 
     /**
      * 获取支持的节点类型

@@ -26,7 +26,7 @@ public class EntityVO {
      * 数据内容
      */
     @NotEmpty(message = "实体数据内容不能为空")
-    private Map<Long, Object> entityData;
+    private Map<Long, Object> data;
 
     /**
      * 子实体数据列表

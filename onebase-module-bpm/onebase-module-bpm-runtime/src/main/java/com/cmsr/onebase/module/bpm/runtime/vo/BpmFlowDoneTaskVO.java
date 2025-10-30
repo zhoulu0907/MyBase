@@ -28,7 +28,7 @@ public class BpmFlowDoneTaskVO {
     private LocalDateTime handleTime;
 
     @Schema(description = "处理操作")
-    private String handleOperation;
+    private String taskStatus; //已办flow_status
 
     @Schema(description = "任务id")
     private Long taskId;

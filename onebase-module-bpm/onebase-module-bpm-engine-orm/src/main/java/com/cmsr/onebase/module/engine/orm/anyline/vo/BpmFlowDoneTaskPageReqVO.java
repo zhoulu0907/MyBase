@@ -31,9 +31,13 @@ public class BpmFlowDoneTaskPageReqVO extends PageParam {
     @Schema(description = "处理操作：PASS通过 REJECT退回 NONE无动作")
     private String skipType;
 
-    @Schema(description = "处理时间范围" ,example = "[2025-08-01 00:00:00,2025-08-18 23:59:59]")
+    @Schema(description = "处理时间 - 开始（包含）", example = "2025-08-01 00:00:00")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime[] handleTime;
+    private LocalDateTime handleTimeStart;
+
+    @Schema(description = "处理时间 - 结束（包含）", example = "2025-08-18 23:59:59")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    private LocalDateTime handleTimeEnd;
 
     @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
             example = "desc", defaultValue = "desc")

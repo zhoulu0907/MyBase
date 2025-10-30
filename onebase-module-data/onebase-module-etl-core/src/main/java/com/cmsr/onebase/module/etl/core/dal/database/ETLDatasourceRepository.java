@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Repository
 @Slf4j
 public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
+
     public ETLDatasourceRepository() {
         super(ETLDatasourceDO.class);
     }

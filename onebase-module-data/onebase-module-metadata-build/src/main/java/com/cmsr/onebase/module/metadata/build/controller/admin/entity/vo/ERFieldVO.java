@@ -51,6 +51,9 @@ public class ERFieldVO {
     @Schema(description = "排序顺序", example = "1")
     private Integer sortOrder;
 
+    @Schema(description = "关联的字典类型ID", example = "1024")
+    private Long dictTypeId;
+
     @Schema(description = "字段选项列表（单/多选字段专用）")
     private List<FieldOptionRespVO> options;
 }

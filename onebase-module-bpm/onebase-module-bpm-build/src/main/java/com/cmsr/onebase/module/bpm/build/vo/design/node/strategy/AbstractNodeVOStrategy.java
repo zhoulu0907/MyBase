@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
+import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.*;
 import com.cmsr.onebase.module.bpm.api.enums.ApprovalModeEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ApproverTypeEnum;
@@ -62,6 +63,11 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
      */
     @Override
     public abstract E buildExtData(T nodeVO);
+
+    @Override
+    public NodePermFlagDTO buildPermissionFlag(E extDTO) {
+        return null;
+    }
 
     /**
      * 默认的按钮配置构建方法

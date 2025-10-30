@@ -255,7 +255,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             nodeJson.setFormCustom("Y");
 
             // 设置ext：使用策略管理器构建扩展信息
-            nodeJson.setExt(strategyManager.buildNodeExtData(nodeVO));
+            strategyManager.buildNodeExtData(nodeJson, nodeVO);
 
             // 添加到映射
             nodeJsonMap.put(nodeJson.getNodeCode(), nodeJson);
