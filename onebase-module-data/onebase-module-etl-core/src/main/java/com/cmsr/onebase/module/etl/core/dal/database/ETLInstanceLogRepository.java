@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Slf4j
 public class ETLInstanceLogRepository extends DataRepository<ETLInstanceLogDO> {
-    public ETLInstanceLogRepository(Class<ETLInstanceLogDO> defaultClazz) {
-        super(defaultClazz);
+
+    public ETLInstanceLogRepository() {
+        super(ETLInstanceLogDO.class);
     }
 }

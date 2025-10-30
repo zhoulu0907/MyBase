@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
@@ -8,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.warm.flow.core.dto.NodeJson;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -131,7 +133,7 @@ public class NodeVOStrategyManager {
      * @param nodeVO 节点配置VO
      * @return 扩展数据JSON字符串
      */
-    public String buildNodeExtData(BaseNodeVO nodeVO) {
+    public void buildNodeExtData(NodeJson nodeJson, BaseNodeVO nodeVO) {
         if (nodeVO == null) {
             log.error("节点VO为空");
             throw exception(ErrorCodeConstants.MISSING_NODE_VO_DATA);
@@ -150,6 +152,14 @@ public class NodeVOStrategyManager {
         NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO> rawStrategy = (NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO>) strategy;
         BaseNodeExtDTO extData = rawStrategy.buildExtData(nodeVO);
 
-        return JsonUtils.toJsonString(extData);
+        String ext = JsonUtils.toJsonString(extData);
+        nodeJson.setExt(ext);
+
+        // 权限
+        NodePermFlagDTO permFlagDTO = rawStrategy.buildPermissionFlag(extData);
+
+        if (permFlagDTO != null) {
+            nodeJson.setPermissionFlag(JsonUtils.toJsonString(permFlagDTO));
+        }
     }
 }
