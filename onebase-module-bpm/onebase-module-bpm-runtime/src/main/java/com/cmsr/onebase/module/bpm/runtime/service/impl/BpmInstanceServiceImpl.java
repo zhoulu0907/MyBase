@@ -229,6 +229,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
         }
 
+        // 实体ID todo：校验，应该和businessID有关联关系
+        Long entityId = reqVO.getEntity().getEntityId();
+
         // 业务状态
         BpmBusinessStatusEnum businessStatus = BpmBusinessStatusEnum.IN_APPROVAL;
 
@@ -239,7 +242,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         EntityVO entityVO = reqVO.getEntity();
 
         InsertDataReqDTO insertDataReqDTO = new InsertDataReqDTO();
-        insertDataReqDTO.setEntityId(entityVO.getEntityId());
+        insertDataReqDTO.setEntityId(entityId);
         insertDataReqDTO.setData(new ArrayList<>());
         insertDataReqDTO.getData().add(entityVO.getData());
 
@@ -260,8 +263,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         BpmFlowInsBizExtDO flowInsExtDO = new BpmFlowInsBizExtDO();
         Map<String, Object> variables = new HashMap<>();
 
+        // 传应用ID和实体ID
         BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
         variables.put("appId", extDto.getAppId());
+        variables.put("entityId", entityId);
 
         entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
 
@@ -310,7 +315,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             // 设置发起时间
             flowInsExtDO.setSubmitTime(LocalDateTime.now());
         }
-
 
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         String initiatorName = SecurityFrameworkUtils.getLoginUserNickname();
@@ -376,6 +380,25 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         Task task = taskService.getById(taskId);
         if (task == null) {
             throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
+        }
+
+        // 校验实体ID
+        if (reqVO.getEntity() != null) {
+            Instance instance = insService.getById(task.getInstanceId());
+
+            if (instance == null) {
+                throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+            }
+
+            Long entityId = (Long) instance.getVariableMap().get("entityId");
+
+            if (entityId == null) {
+                throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+            }
+
+            if (!entityId.equals(reqVO.getEntity().getEntityId())) {
+                throw exception(ErrorCodeConstants.INVALID_ENTITY_ID);
+            }
         }
 
         List<User> users = userService.getByAssociateds(List.of(task.getId()));
