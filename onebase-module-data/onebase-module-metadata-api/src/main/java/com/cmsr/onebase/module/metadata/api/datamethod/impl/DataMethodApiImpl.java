@@ -120,6 +120,7 @@ public class DataMethodApiImpl implements DataMethodApi {
             methodCoreContext.setEntityId(reqDTO.getEntityId());
             methodCoreContext.setData(dataByName);
             methodCoreContext.setMethodCode(null);
+            methodCoreContext.setClientTypeEnum(ClientTypeEnum.BUILD);
 
 
             Map<String, Object> resultMap = metadataDataMethodCoreService.createData(
