@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodCoreContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSystemMethodCoreService;
@@ -99,7 +100,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         Map<String, Object> data = metadataDataMethodCoreContext.getData();
         String methodCode = metadataDataMethodCoreContext.getMethodCode();
 
-        Map<String, Object> result = metadataDataMethodCreate.executeProcess(OperationType.CREATE, entityId, data, methodCode);
+        Map<String, Object> result = metadataDataMethodCreate.executeProcess(MetadataDataMethodOpEnum.CREATE, entityId, data, methodCode);
         return result;
     }
 
@@ -111,8 +112,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         Map<String, Object> data = metadataDataMethodCoreContext.getData();
         String methodCode = metadataDataMethodCoreContext.getMethodCode();
 
+
         // 使用新的统一流程处理更新操作
-        return metadataDataMethodUpdate.executeProcess(OperationType.UPDATE, entityId, id, data, methodCode);
+        return metadataDataMethodUpdate.executeProcess(MetadataDataMethodOpEnum.UPDATE, entityId, id, data, methodCode);
     }
 
     @Override
@@ -121,14 +123,14 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         Long entityId =  methodCoreContext.getEntityId();
         Object id = methodCoreContext.getId();
         String methodCode = methodCoreContext.getMethodCode();
-        metadataDataMethodDelete.executeProcess(OperationType.DELETE, entityId, id, null, methodCode);
+        metadataDataMethodDelete.executeProcess(MetadataDataMethodOpEnum.DELETE, entityId, id, null, methodCode);
         return true;
     }
 
     @Override
     public Map<String, Object> getData(Long entityId, Object id, String methodCode) {
 
-        Map<String, Object> result = metadataDataMethodQuery.executeProcess(OperationType.GET,entityId,id,null,null);
+        Map<String, Object> result = metadataDataMethodQuery.executeProcess(MetadataDataMethodOpEnum.GET,entityId,id,null,null);
         return result;
     }
 

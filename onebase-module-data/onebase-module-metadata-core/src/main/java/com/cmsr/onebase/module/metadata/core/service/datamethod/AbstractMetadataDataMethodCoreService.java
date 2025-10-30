@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationManager;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
@@ -349,7 +350,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     /**
      * 执行统一的数据处理流程（用于create操作）
      */
-    public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Map<String, Object> data,
+    public Map<String, Object> executeProcess(MetadataDataMethodOpEnum operationType, Long entityId, Map<String, Object> data,
                                                String methodCode) {
         return executeProcess(operationType, entityId, null, data, methodCode);
     }
@@ -364,8 +365,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      * @param methodCode 方法代码
      * @return 处理结果
      */
-    public Map<String, Object> executeProcess(OperationType operationType, Long entityId, Object id, Map<String, Object> data,
-                                               String methodCode) {
+    public Map<String, Object> executeProcess(MetadataDataMethodOpEnum operationType, Long entityId, Object id, Map<String, Object> data,
+                                              String methodCode) {
         log.info("开始执行" + operationType.getDescription() + "，实体ID：" + entityId + "，数据ID：" + id + "，方法：" + methodCode);
 
         try {
@@ -409,10 +410,10 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             }
 
             // 11. 数据编号
-            generateDataNumber(context);//todo 暂未实现
+            generateDataNumber(context);
 
             // 12. 数据存储
-            storeData(context);//todo 实现了create的方法
+            storeData(context);
 
             try{
                 // 13. 后置自动化工作流触发
@@ -503,7 +504,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     /**
      * 1. 初始化上下文
      */
-   protected ProcessContext initializeContext(OperationType operationType, MetadataBusinessEntityDO entityDO, List<MetadataEntityFieldDO> fields, Map<String, Object> data,
+   protected ProcessContext initializeContext(MetadataDataMethodOpEnum operationType, MetadataBusinessEntityDO entityDO, List<MetadataEntityFieldDO> fields, Map<String, Object> data,
                                               String methodCode) {
        // Create a new ProcessContext instance
        ProcessContext processContext = new ProcessContext();
@@ -562,13 +563,13 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
         Map<String, Object> data = context.getData();
         List<MetadataEntityFieldDO> fields = context.getFields();
         Object id = context.getId();
-        OperationType operationType = context.getOperationType();
+        MetadataDataMethodOpEnum operationType = context.getOperationType();
 
         log.info("开始执行数据校验：entityId={}, 操作类型={}, 字段数量={}", entityId, operationType.getDescription(), fields.size());
 
         // 对于UPDATE操作，需要将ID添加到data中，以便唯一性校验时能够排除当前记录
         Map<String, Object> dataForValidation = data;
-        if (operationType == OperationType.UPDATE && id != null) {
+        if (operationType == MetadataDataMethodOpEnum.UPDATE && id != null) {
             // 查找主键字段名
             String primaryKeyField = fields.stream()
                 .filter(f -> f.getIsPrimaryKey() != null && f.getIsPrimaryKey() == 1)
@@ -607,7 +608,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      */
     protected void generateDataNumber(ProcessContext context) {
         // 只有在创建操作时才处理自动编号字段
-        if (context.getOperationType() == OperationType.CREATE) {
+        if (context.getOperationType() == MetadataDataMethodOpEnum.CREATE) {
             processAutoNumberFields(context.getFields(), context.getProcessedData());
             log.info("新增操作：已触发自动编号规则");
         } else {
@@ -708,7 +709,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
     /**
      * 操作类型枚举
      */
-    protected enum OperationType {
+    public enum OperationType {
         CREATE("创建数据"),
         UPDATE("更新数据"),
         DELETE("删除数据"),
@@ -732,7 +733,7 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
      */
     @Data
     protected static class ProcessContext {
-        private OperationType operationType;
+        private MetadataDataMethodOpEnum operationType;
         private Long entityId;
         private Object id; // 数据ID，用于update/delete/get操作
         private Map<String, Object> data;

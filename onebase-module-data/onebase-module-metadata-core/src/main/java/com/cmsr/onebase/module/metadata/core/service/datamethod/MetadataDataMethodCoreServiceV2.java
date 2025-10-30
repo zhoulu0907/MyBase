@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+
 import java.util.Map;
 
 public interface MetadataDataMethodCoreServiceV2 {
@@ -13,6 +15,6 @@ public interface MetadataDataMethodCoreServiceV2 {
      * @param methodCode
      * @return
      */
-    Map<String, Object> executeProcess(AbstractMetadataDataMethodCoreService.OperationType operationType, Long entityId, Map<String, Object> data,
+    Map<String, Object> executeProcess(MetadataDataMethodOpEnum operationType, Long entityId, Map<String, Object> data,
                                        String methodCode);
 }
