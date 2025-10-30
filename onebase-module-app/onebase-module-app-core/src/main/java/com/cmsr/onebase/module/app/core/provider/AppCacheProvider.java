@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/10/30 14:04
  */
+@Slf4j
 @Setter
 @Service
 public class AppCacheProvider {
@@ -44,7 +46,10 @@ public class AppCacheProvider {
         List<Long> menuIds = findAllMenuIds(applicationId);
         for (Long userId : userIds) {
             for (Long menuId : menuIds) {
-                allCacheKeys(userId, applicationId, menuId).forEach(key -> redissonClient.getBucket(key).delete());
+                allCacheKeys(userId, applicationId, menuId).forEach(key -> {
+                    log.info("usersChanged 删除缓存：{}", key);
+                    redissonClient.getBucket(key).delete();
+                });
             }
         }
     }
@@ -56,7 +61,10 @@ public class AppCacheProvider {
     public void roleMenuChanged(Long applicationId, Long roleId, Long menuId) {
         List<Long> userIds = findAllUserIds(roleId);
         for (Long userId : userIds) {
-            allCacheKeys(userId, applicationId, menuId).forEach(key -> redissonClient.getBucket(key).delete());
+            allCacheKeys(userId, applicationId, menuId).forEach(key -> {
+                log.info("roleMenuChanged 删除缓存：{}", key);
+                redissonClient.getBucket(key).delete();
+            });
         }
     }
 
@@ -65,7 +73,7 @@ public class AppCacheProvider {
                 CacheUtils.keyForDataPermission(userId, applicationId, menuId),
                 CacheUtils.keyForFieldPermission(userId, applicationId, menuId),
                 CacheUtils.keyForOperationPermission(userId, applicationId, menuId),
-                CacheUtils.keyForPageView(userId, applicationId, menuId)
+                CacheUtils.keyForPagePermission(userId, applicationId, menuId)
         );
     }
 }
