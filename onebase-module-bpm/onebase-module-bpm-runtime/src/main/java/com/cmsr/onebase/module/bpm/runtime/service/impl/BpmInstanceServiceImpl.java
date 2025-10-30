@@ -97,6 +97,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Resource
     private AdminUserApi adminUserApi;
 
+    @Resource
     private MetadataDataMethodCoreService metadataDataMethodCoreService;
 
     @Transactional(rollbackFor = Exception.class)
@@ -642,17 +643,38 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     }
 
     @Override
-    public BpmFlowTaskDetailVO getFormDetail(BpmFlowTaskDetailReqVO reqVO) {
+    public BpmFlowTaskDetailVO getFormDetail(String taskId, Long instanceId) {
         BpmFlowTaskDetailVO vo = new BpmFlowTaskDetailVO();
         NodeJson currNodeJson = null;
-        Task task = taskService.getById(reqVO.getTaskId());
-        if (task == null) {
-            return vo;
-        }
-        String nodeCode = task.getNodeCode();//当前节点
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
-        Instance instance = insService.getById(reqVO.getInstanceId());
-        if(instance != null){
+        Task task = taskService.getById(taskId);
+
+        // 任务不存在
+        if (task == null) {
+           throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
+        }
+
+        // 以任务里的数据为准
+        instanceId = task.getInstanceId();
+        Instance instance = insService.getById(instanceId);
+
+        if (instance == null) {
+            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+        }
+
+        Long entityId = (Long) instance.getVariableMap().get("entityId");
+
+        if (entityId == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+        }
+
+        // 查询下是否是当前用户的待办任务，如果不是则不显示按钮
+        List<User> users = userService.getByProcessedBys(task.getId(), List.of(String.valueOf(loginUserId)));
+
+        // 测试按钮显示
+        if (CollectionUtils.isNotEmpty(users)) {
+            String nodeCode = task.getNodeCode();
             DefJson defJson = FlowEngine.jsonConvert.strToBean(instance.getDefJson(), DefJson.class);
             // 找到对应节点的配置
             for (NodeJson nodeJson : defJson.getNodeList()) {
@@ -661,6 +683,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                     break;
                 }
             }
+
             BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(currNodeJson.getExt(), BaseNodeExtDTO.class);
             String userId = String.valueOf(WebFrameworkUtils.getLoginUserId());
             List<BaseNodeBtnCfgDTO> buttonConfigs = new ArrayList<>();
@@ -671,11 +694,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 // 审批节点
                 if (approverNodeExtDTO.getButtonConfigs() != null) {
                     buttonConfigs.addAll(approverNodeExtDTO.getButtonConfigs());
-                }
-            } else if (nodeExtDTO instanceof StartNodeExtDTO startNodeExtDTO) {
-                // 开始节点
-                if (startNodeExtDTO.getButtonConfigs() != null) {
-                    buttonConfigs.addAll(startNodeExtDTO.getButtonConfigs());
                 }
             } else if (nodeExtDTO instanceof InitiationNodeExtDTO initiationNodeExtDTO) {
                 // 发起节点
@@ -689,17 +707,30 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 }
             } else {
                 // 未知节点
-                throw exception(ErrorCodeConstants.UNSUPPORT_NODE_TYPE);
+                log.info("未知节点类型，nodeCode: {}", nodeCode);
             }
-            vo.setButtonConfigs(buttonConfigs);
-            vo.setCurrentStatus(instance.getFlowStatus());
+
+            for (BaseNodeBtnCfgDTO buttonConfig : buttonConfigs) {
+                if (!buttonConfig.getEnabled()) {
+                    continue;
+                }
+
+                if (vo.getButtonConfigs() == null) {
+                    vo.setButtonConfigs(new ArrayList<>());
+                }
+
+                vo.getButtonConfigs().add(buttonConfig);
+            }
         }
+
+        vo.setCurrentStatus(instance.getFlowStatus());
 
         //查询流程扩展信息
         ConfigStore configStore= new DefaultConfigStore();
-        configStore.and("instance_id", reqVO.getInstanceId());
-        BpmFlowInsBizExtDO flowInsExtDO =  flowInsExtRepository.findOne(configStore);
-        if(flowInsExtDO!= null){
+        configStore.and("instance_id", instanceId);
+        BpmFlowInsBizExtDO flowInsExtDO = flowInsExtRepository.findOne(configStore);
+
+        if (flowInsExtDO != null) {
             vo.setBpmVersion(flowInsExtDO.getBpmVersion());
             vo.setInitiatorId(flowInsExtDO.getInitiatorId());
             vo.setInitiatorName(flowInsExtDO.getInitiatorName());
@@ -709,8 +740,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             vo.setInitiatorId(flowInsExtDO.getInitiatorId());
             vo.setInitiatorName(flowInsExtDO.getInitiatorName());
         }
+
+        String entityDataId = instance.getBusinessId();
+
         //查询form信息
-        Map<String, Object> data = metadataDataMethodCoreService.getData(reqVO.getEntityId(),reqVO.getDataId(),null);
+        Map<String, Object> data = metadataDataMethodCoreService.getData(entityId, entityDataId,null);
         if (data != null && !data.isEmpty()){
             vo.setFormData(data);
         }
