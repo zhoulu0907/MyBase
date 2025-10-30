@@ -364,7 +364,8 @@ export default function EditorWorkspace() {
                       // 自动编码
                       if (field.fieldType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
                         getAutoConfig(field.fieldId).then((rules: any) => {
-                          schema.config.rules = rules;
+                          schema.config.autoCodeConfig = rules;
+                          schema.config.autoCodeDisabled = rules && rules.length > 0 ? true : false;
                         });
                       }
 
@@ -436,7 +437,8 @@ export default function EditorWorkspace() {
 
                 if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
                   const rules = await getAutoConfig(fieldID);
-                  schema.config.rules = rules;
+                  schema.config.autoCodeConfig = rules;
+                  schema.config.autoCodeDisabled = rules && rules.length > 0 ? true : false;
                 }
               }
 

@@ -540,3 +540,9 @@ export const tableOperationConfig: ITableOperationConfigType = {
   type: CONFIG_TYPES.TABLE_OPERATION,
   advanced: true,
 };
+
+export const autoCodeConfig:any = {
+  key: 'rules',
+  name:'编号规则配置',
+  type: CONFIG_TYPES.AUTO_CODE_RULES
+}

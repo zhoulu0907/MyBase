@@ -85,6 +85,8 @@ export const CONFIG_TYPES = {
   FILE: 'File',
   // 折叠面板展开状态
   COLLAPSED: 'Collapsed',
+  // 自动编号规则
+  AUTO_CODE_RULES: 'autoCodeRules',
 
   TABLE_OPERATION: 'TableOperation',
   TABLE_BUTTON: 'advancedButtonPermission'

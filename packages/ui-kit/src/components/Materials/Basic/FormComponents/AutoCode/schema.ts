@@ -7,6 +7,7 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  autoCodeConfig,
   type ICommonBaseType,
   type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
@@ -26,6 +27,7 @@ import {
 } from '../../../constants';
 import type {
   IAlignConfigType,
+  IAutoCodeConfigType,
   IBooleanConfigType,
   IColorConfigType,
   IDataFieldConfigType,
@@ -72,6 +74,7 @@ export type TXautoCodeEditData = Array<
   | IColorConfigType
   | IDataFieldConfigType
   | IVerifyConfigType
+  | IAutoCodeConfigType
 >;
 
 export interface XautoCodeConfig extends ICommonBaseType {
@@ -128,6 +131,10 @@ export interface XautoCodeConfig extends ICommonBaseType {
    * 可选值: 'vertical' | 'horizontal'
    */
   layout?: TLayoutSelectKeyType;
+
+  // 编码规则
+  autoCodeConfig?: any[],
+  autoCodeDisabled?: boolean,
 
   /**
    * 内容对齐方式：左、中、右
@@ -207,6 +214,7 @@ const XautoCode: XautoCodeSchema = {
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    autoCodeConfig,
     statusConfig,
     alignConfig,
     widthConfig
@@ -230,6 +238,8 @@ const XautoCode: XautoCodeSchema = {
     bgColor: '',
     labelColSpan: 200,
     maxLength: 40,
+    autoCodeConfig: [],
+    autoCodeDisabled: false,
     verify: {
       required: false
     }
