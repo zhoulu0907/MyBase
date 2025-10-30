@@ -77,6 +77,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
           <div>{fieldValue || '--'}</div>
         ) : (
           <TextArea
+            key={`${minRows}-${maxRows}`}
             defaultValue={defaultValue}
             placeholder={placeholder}
             maxLength={maxLength}
