@@ -2,8 +2,8 @@ import React from 'react';
 import { Table } from '@arco-design/web-react';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
-import styles from './index.module.less';
-import type { SortableTableProps } from './types';
+import type { SortableTableProps } from '../types';
+import styles from '../index.module.less';
 
 // 拖拽手柄组件
 const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles.dragHandle} />);

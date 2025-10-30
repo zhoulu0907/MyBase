@@ -7,6 +7,8 @@ import { useFieldStore } from '@/store/store_field';
 import React, { useEffect, useState } from 'react';
 import styles from './ERnode.module.less';
 import { useNewNodeStore } from '@/store/store_entity';
+import { useSignals } from '@preact/signals-react/runtime';
+import { newFieldSignal } from '@/store/singals/new_field';
 // X6 节点组件接口
 interface X6NodeProps {
   node: Node;
@@ -22,12 +24,15 @@ interface NodeData {
   onNodeAddField?: (data: Partial<EntityNode>) => void;
   onNodeAddRelation?: (id: string) => void;
   onNodeAddMasterDetail?: (id: string) => void;
-  onFieldClick?: (fieldId: string) => void;
+  onFieldClick?: (fieldId: string, entityId?: string) => void;
   onStatusChange?: (data: Partial<EntityNode>) => void;
   onUpdatePorts?: (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => void;
 }
 
 const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
+  // 启用 signal 的响应式更新
+  useSignals();
+
   const [nodeCollapsed, setNodeCollapsed] = useState({
     system: true,
     custom: false
@@ -135,8 +140,8 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     e.stopPropagation();
     const data = node.getData() as NodeData;
     const onFieldClick = data?.onFieldClick;
-    if (onFieldClick) {
-      onFieldClick(fieldId);
+    if (onFieldClick && nodeData) {
+      onFieldClick(fieldId, nodeData.entityId);
     }
   };
 
@@ -236,18 +241,24 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
               </div>
             </div>
             <div className={`${styles.fieldSectionContent} ${nodeCollapsed.custom ? styles.collapsed : ''}`}>
-              {customFields.map((field, index) => (
-                <div
-                  key={index}
-                  className={`${styles.fieldItem} ${styles.customField} ${styles.clickableField}`}
-                  onClick={(e) => handleFieldClick(field.fieldId, e)}
-                >
-                  <span className={styles.fieldName}>{field.displayName}</span>
-                  <span className={styles.fieldType}>
-                    {fieldTypes.find((item) => item.fieldType === field.fieldType)?.displayName || field.fieldType}
-                  </span>
-                </div>
-              ))}
+              {customFields.map((field, index) => {
+                const isNew = newFieldSignal.isNewField(nodeData.entityId, field.fieldId);
+                return (
+                  <div
+                    key={index}
+                    className={`${styles.fieldItem} ${styles.customField} ${styles.clickableField}`}
+                    onClick={(e) => handleFieldClick(field.fieldId, e)}
+                  >
+                    <span className={styles.fieldName}>
+                      {isNew && <span className={styles.fieldIsNew} />}
+                      {field.displayName}
+                    </span>
+                    <span className={styles.fieldType}>
+                      {fieldTypes.find((item) => item.fieldType === field.fieldType)?.displayName || field.fieldType}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

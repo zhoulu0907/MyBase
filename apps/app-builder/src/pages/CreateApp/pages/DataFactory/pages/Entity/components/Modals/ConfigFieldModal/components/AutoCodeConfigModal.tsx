@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { Modal, Radio, InputNumber, Checkbox, Select, Form, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
-import styles from './index.module.less';
-import type { AutoNumberRule, AutoNumberRuleResponce } from './types';
-import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, DIGIT_DEFAULT } from './utils/const';
+import type { AutoNumberRule, AutoNumberRuleResponce } from '../types';
+import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, DIGIT_DEFAULT } from '../utils/const';
+import styles from '../index.module.less';
 
 interface AutoCodeConfigModalProps {
   visible: boolean;

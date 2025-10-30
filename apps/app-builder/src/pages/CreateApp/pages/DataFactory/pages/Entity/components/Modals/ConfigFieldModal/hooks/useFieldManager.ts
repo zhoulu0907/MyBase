@@ -3,6 +3,7 @@ import { Form, Message } from '@arco-design/web-react';
 import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import { batchSaveFields } from '@onebase/app';
 import { useAppStore } from '@/store/store_app';
+import { newFieldSignal } from '@/store/singals/new_field';
 import { systemFieldsLength } from '../utils/transform';
 import { useFieldData } from './useFieldData';
 import { useFieldOperations } from './useFieldOperations';
@@ -166,7 +167,15 @@ export const useFieldManager = (
         items: fieldDataList
       };
 
-      await batchSaveFields(params);
+      const result = await batchSaveFields(params);
+
+      // 使用接口返回的 createdIds 标记新增字段
+      if (result?.createdIds && Array.isArray(result.createdIds)) {
+        result.createdIds.forEach((fieldId: string) => {
+          newFieldSignal.addNewField(entity.entityId as string, fieldId);
+        });
+      }
+
       Message.success('保存成功');
       setVisible?.(false);
       fieldValidation.clearErrors();

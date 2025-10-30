@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import FieldConstraint from './FieldConstraint';
 import { AutoCodeConfig, MultiPicklistConfig, PicklistConfig } from './FieldTypeConfig';
-import styles from './index.module.less';
-import type { FieldConfigPopoverProps } from './types';
+import type { FieldConfigPopoverProps } from '../types';
+import styles from '../index.module.less';
 
 const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
   ({ fieldType, fieldId, field, onConfirm, onCancel, fields }) => {
