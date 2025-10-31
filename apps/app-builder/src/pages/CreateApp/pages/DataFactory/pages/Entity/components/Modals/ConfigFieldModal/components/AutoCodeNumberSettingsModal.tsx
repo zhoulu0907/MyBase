@@ -2,17 +2,22 @@ import React, { useEffect } from 'react';
 import { Modal, Radio, InputNumber, Checkbox, Select, Form, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import type { AutoNumberRule, AutoNumberRuleResponce } from '../types';
-import { AUTO_CODE_NUMBER_MODE, AUTO_CODE_RESET_CYCLE, DIGIT_DEFAULT } from '../utils/const';
+import {
+  AUTO_CODE_NUMBER_MODE,
+  AUTO_CODE_RESET_CYCLE,
+  CONSTANTS,
+  AUTO_CODE_NUMBER_DEFAULT_CONFIG
+} from '../utils/const';
 import styles from '../index.module.less';
 
-interface AutoCodeConfigModalProps {
+interface AutoCodeNumberSettingsModalProps {
   visible: boolean;
   onVisibleChange: (visible: boolean) => void;
   onConfirm: (config: AutoNumberRule) => void;
   initialConfig?: AutoNumberRuleResponce;
 }
 
-const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
+const AutoCodeNumberSettingsModal: React.FC<AutoCodeNumberSettingsModalProps> = ({
   visible,
   onVisibleChange,
   onConfirm,
@@ -22,12 +27,7 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
   const numberMode = Form.useWatch(['numberMode'], form)?.numberMode;
 
   const initialValues = {
-    isEnabled: 1,
-    numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-    digitWidth: DIGIT_DEFAULT,
-    overflowContinue: 1,
-    initialValue: 1,
-    resetCycle: AUTO_CODE_RESET_CYCLE.NONE,
+    ...AUTO_CODE_NUMBER_DEFAULT_CONFIG,
     rules: []
   };
 
@@ -43,24 +43,23 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
     onVisibleChange(false);
   };
 
-  // 当弹窗显示时，设置表单初始值
   useEffect(() => {
-    console.log('useEffect', visible, initialConfig, form);
-    if (visible && initialConfig) {
-      const values = {
-        initialValue: initialConfig.startValue,
-        numberMode: initialConfig.mode || AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-        digitWidth: initialConfig.digitWidth || DIGIT_DEFAULT,
-        overflowContinue: initialConfig.overflowContinue || 1,
-        resetCycle: initialConfig.resetCycle || AUTO_CODE_RESET_CYCLE.NONE,
-        nextRecordStartValue: initialConfig?.nextRecordStartValue || 1
-      };
-      form.setFieldsValue(values);
-    } else if (visible) {
-      // 设置默认值
-      form.setFieldsValue(initialValues);
+    if (visible) {
+      // 每次打开弹窗时先重置表单，避免数据残留
+      form.resetFields();
+
+      if (initialConfig) {
+        const config = initialConfig as AutoNumberRuleResponce & { startValue?: number };
+        const values = {
+          ...config,
+          initialValue: config.startValue
+        };
+        form.setFieldsValue(values);
+      } else {
+        form.setFieldsValue(initialValues);
+      }
     }
-  }, [visible, initialConfig, form]);
+  }, [visible, initialConfig]);
 
   return (
     <Modal
@@ -72,8 +71,16 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
       cancelText="取消"
       className={styles.autoNumberConfigModal}
       style={{ width: 500 }}
+      getPopupContainer={() => document.body}
+      unmountOnExit
     >
-      <Form form={form} layout="horizontal" className={styles.autoNumberConfigForm} labelAlign="left">
+      <Form
+        id="auto-code-form"
+        form={form}
+        layout="horizontal"
+        className={styles.autoNumberConfigForm}
+        labelAlign="left"
+      >
         <Form.Item label="编号方式" field="numberMode" rules={[{ required: true, message: '请选择编号方式' }]}>
           <Radio.Group>
             <Radio value={AUTO_CODE_NUMBER_MODE.NATURAL}>自然数编号</Radio>
@@ -94,9 +101,17 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
               <InputNumber min={2} max={5} style={{ width: 120 }} placeholder="请输入位数" />
             </Form.Item>
 
-            <Form.Item label="" field="overflowContinue" className={styles.checkboxWithHelp}>
-              <Checkbox>编号超出位数后继续递增</Checkbox>
-              <IconQuestionCircle className={styles.helpIcon} />
+            <Form.Item
+              field="overflowContinue"
+              className={styles.checkboxWithHelp}
+              triggerPropName="checked"
+              normalize={(v) => (v ? CONSTANTS.ENABLED : CONSTANTS.DISABLED)}
+              formatter={(v) => v === CONSTANTS.ENABLED || v === true}
+            >
+              <Checkbox>
+                编号超出位数后继续递增
+                <IconQuestionCircle className={styles.helpIcon} />
+              </Checkbox>
             </Form.Item>
           </>
         )}
@@ -117,11 +132,19 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
           <InputNumber min={1} style={{ width: 120 }} placeholder="请输入开始值" />
         </Form.Item>
 
-        <Form.Item label="" field="nextRecordStartValue" className={styles.checkboxWithHelp}>
-          <Checkbox>下一条记录以修改后的开始值编号</Checkbox>
-          <Tooltip content="请设置下一条记录的编号，设置的编号不得小于开始值，未设置时默认使用初始值。">
-            <IconQuestionCircle className={styles.helpIcon} />
-          </Tooltip>
+        <Form.Item
+          field="nextRecordStartValue"
+          className={styles.checkboxWithHelp}
+          triggerPropName="checked"
+          normalize={(v) => (v ? CONSTANTS.ENABLED : CONSTANTS.DISABLED)}
+          formatter={(v) => v === CONSTANTS.ENABLED || v === true}
+        >
+          <Checkbox>
+            <span>下一条记录以修改后的开始值编号</span>
+            <Tooltip content="请设置下一条记录的编号，设置的编号不得小于开始值，未设置时默认使用初始值。">
+              <IconQuestionCircle className={styles.helpIcon} />
+            </Tooltip>
+          </Checkbox>
         </Form.Item>
 
         <Form.Item label="周期重置" field="resetCycle" rules={[{ required: true, message: '请选择周期重置方式' }]}>
@@ -137,4 +160,4 @@ const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
   );
 };
 
-export default AutoCodeConfigModal;
+export default AutoCodeNumberSettingsModal;

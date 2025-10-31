@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Input, Select, Dropdown, Menu, Cascader } from '@arco-design/web-react';
-import { IconDelete, IconDragDotVertical, IconPlus, IconEdit, IconBook } from '@arco-design/web-react/icon';
+import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
-import AutoCodeConfigModal from './AutoCodeConfigModal';
-import { useAppStore } from '@/store/store_app';
-import SelectDictModal from '@/components/SelectDictModal';
-import type { DictItem } from '@onebase/platform-center';
+import AutoCodeNumberSettingsModal from './AutoCodeNumberSettingsModal';
 import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from '../types';
 import {
   convertAutoCodeCompoToAutoNumberRule,
@@ -17,174 +14,19 @@ import {
   AUTO_CODE_RESET_CYCLE,
   AUTO_CODE_RULE_TYPE,
   DATE_FORMAT_DEFAULT,
-  DIGIT_DEFAULT
+  AUTO_CODE_NUMBER_DEFAULT_CONFIG
 } from '../utils/const';
 import styles from '../index.module.less';
 
-// 选项配置组件
-interface OptionConfigProps {
-  onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (options: object[], dictTypeId?: string | number) => void;
-  initialOptions?: { optionLabel: string; optionValue: string }[] | undefined;
-  onCancel?: () => void; // 新增：取消回调
-}
-
-const initialThreeOptions = [
-  { optionLabel: '选项1', optionValue: '选项1' },
-  { optionLabel: '选项2', optionValue: '选项2' },
-  { optionLabel: '选项3', optionValue: '选项3' }
-];
-
-const configTypeOptions = [
-  { label: '自定义', value: 'CUSTOM' },
-  { label: '引用字典', value: 'DICT' }
-];
-
-const CONFIG_TYPE = {
-  CUSTOM: 'CUSTOM',
-  DICT: 'DICT'
-};
-
-export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onConfirm, onCancel, initialOptions }) => {
-  const [options, setOptions] = useState(
-    initialOptions && initialOptions?.length > 0 ? initialOptions : initialThreeOptions
-  );
-  const [optionType, setOptionType] = useState(CONFIG_TYPE.CUSTOM);
-  const [selectDictModalVisible, setSelectDictModalVisible] = useState(false);
-  const [selectDict, setSelectDict] = useState<DictItem | null>(null);
-  const { curAppId } = useAppStore();
-  const addOption = () => {
-    const newopt = { optionLabel: `选项${options.length + 1}`, optionValue: `选项${options.length + 1}` };
-    setOptions([...options, newopt]);
-  };
-
-  const removeOption = (index: number) => {
-    if (options.length > 1) {
-      const newOptions = options.filter((_, i) => i !== index);
-      setOptions(newOptions);
-    }
-  };
-
-  const updateOption = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = { optionLabel: value, optionValue: value };
-    setOptions(newOptions);
-  };
-
-  const handleConfirm = () => {
-    if (optionType === CONFIG_TYPE.DICT && selectDict) {
-      const dictTypeId = selectDict.id;
-      onConfirm([], dictTypeId);
-    } else {
-      onConfirm(options);
-    }
-    if (onVisibleChange) {
-      onVisibleChange(false);
-    }
-  };
-
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    } else if (onVisibleChange) {
-      onVisibleChange(false);
-    }
-  };
-
-  const handleSelectDictOk = (dict?: DictItem) => {
-    if (dict) {
-      setSelectDict(dict);
-    }
-    setSelectDictModalVisible(false);
-  };
-
-  const handleSelectDictCancel = () => {
-    setSelectDictModalVisible(false);
-  };
-
-  return (
-    <div className={styles.fieldTypeConfig}>
-      <h4>选项配置</h4>
-      <Select value={optionType} onChange={setOptionType} style={{ width: '100%', marginBottom: 16 }}>
-        {configTypeOptions.map((option) => (
-          <Select.Option key={option.value} value={option.value}>
-            {option.label}
-          </Select.Option>
-        ))}
-      </Select>
-
-      <div>
-        {optionType === CONFIG_TYPE.CUSTOM &&
-          options.map((option, index) => (
-            <div key={index} className={styles.optionItem}>
-              <Input
-                value={option.optionLabel}
-                onChange={(value) => updateOption(index, value)}
-                placeholder="请输入选项内容"
-                className={styles.optionInput}
-              />
-              {options.length > 1 && index > 1 && (
-                <Button
-                  type="text"
-                  status="danger"
-                  icon={<IconDelete />}
-                  onClick={() => removeOption(index)}
-                  className={styles.deleteBtn}
-                />
-              )}
-            </div>
-          ))}
-
-        {optionType === CONFIG_TYPE.DICT && (
-          <div className={styles.optionItem}>
-            <Button
-              type="outline"
-              icon={<IconBook />}
-              onClick={() => setSelectDictModalVisible(true)}
-              className={styles.selectDictBtn}
-            >
-              选择数据字典
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {optionType === CONFIG_TYPE.CUSTOM && (
-        <Button type="dashed" icon={<IconPlus />} onClick={addOption} className={styles.addOptionBtn}>
-          新增选项
-        </Button>
-      )}
-
-      <div className={styles.fieldTypeConfigFooter}>
-        <Button type="outline" size="small" onClick={handleCancel}>
-          取消
-        </Button>
-        <Button type="primary" size="small" onClick={handleConfirm}>
-          确定
-        </Button>
-      </div>
-
-      {/* 选择字典弹窗 */}
-      <SelectDictModal
-        appId={curAppId}
-        visible={selectDictModalVisible}
-        onOk={handleSelectDictOk}
-        onCancel={handleSelectDictCancel}
-      />
-    </div>
-  );
-};
-
-// 自动编号规则配置组件
-interface AutoCodeConfigProps {
+interface AutoCodeRuleConfigProps {
   onVisibleChange?: (visible: boolean) => void;
   onConfirm: (config: AutoNumberRule) => void;
   initialConfig?: AutoNumberRule;
-  onCancel?: () => void; // 新增：取消回调
+  onCancel?: () => void;
   fields: { label: string; value: string }[];
 }
 
-const dataOptions = [
+const DATE_FORMAT_OPTIONS = [
   { label: '年月日', value: '年月日' },
   { label: '年月', value: '年月' },
   { label: '年', value: '年' },
@@ -193,40 +35,36 @@ const dataOptions = [
   { label: '自定义', value: '自定义' }
 ];
 
-export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
+export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   onVisibleChange,
   onConfirm,
   onCancel,
   initialConfig,
   fields
 }) => {
-  // 初始化规则：如果传入的是 AutoNumberRule 格式，则转换为数组格式
+  // 默认规则
   const getInitialRules = (): AutoCodeRule[] => {
     if (initialConfig) {
-      // 如果传入的是 AutoNumberRule 格式，转换为数组格式
       return convertAutoNumberRuleToAutoCodeComp(initialConfig, fields);
     }
 
-    // 默认规则
     return [
       {
         id: 'rule-1',
         itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
         config: {
-          numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-          digitWidth: DIGIT_DEFAULT,
-          continueIncrement: true,
-          startValue: 1,
-          nextRecordStartValue: false,
-          resetCycle: AUTO_CODE_RESET_CYCLE.NONE
+          ...AUTO_CODE_NUMBER_DEFAULT_CONFIG
         }
       }
     ];
   };
 
   const [rules, setRules] = useState<AutoCodeRule[]>(getInitialRules());
+  const [autoCodeModalVisible, setAutoCodeModalVisible] = useState(false);
+  const [editingRuleId, setEditingRuleId] = useState<string>('');
 
-  const autoCodeConfig = rules[0].config;
+  const autoCodeConfig =
+    rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.config || rules[0].config;
 
   const getDisplayText = (config: AutoCodeRule['config']) => {
     const numberingMethodText = config.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
@@ -235,8 +73,6 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
     return `${numberingMethodText},${digitsText},${resetText}`;
   };
 
-  const [autoCodeModalVisible, setAutoCodeModalVisible] = useState(false);
-  const [editingRuleId, setEditingRuleId] = useState<string>('');
   const [displayText, setDisplayText] = useState(getDisplayText(autoCodeConfig));
 
   const addRule = (type: AutoCodeRule['itemType']) => {
@@ -253,9 +89,14 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
     setAutoCodeModalVisible(true);
   };
 
-  const handleAutoCodeConfigConfirm = (config: AutoNumberRule) => {
-    updateRule(editingRuleId, { config: config as unknown as Record<string, unknown> });
-    setDisplayText(getDisplayText(config as unknown as AutoCodeRule['config']));
+  const handleAutoCodeNumberSettingsConfirm = (config: AutoNumberRule) => {
+    const ruleConfig: AutoCodeRule['config'] = {
+      ...config,
+      startValue: config.initialValue
+    };
+
+    updateRule(editingRuleId, { config: ruleConfig });
+    setDisplayText(getDisplayText(ruleConfig));
     setEditingRuleId('');
   };
 
@@ -323,7 +164,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, dateFormat: value } })}
               className={styles.ruleInput}
             >
-              {dataOptions.map((option) => (
+              {DATE_FORMAT_OPTIONS.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
                   {option.label}
                 </Select.Option>
@@ -451,11 +292,11 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
         </div>
       </div>
 
-      {/* 自动编号配置弹窗 */}
-      <AutoCodeConfigModal
+      {/* 自动编号设置弹窗 */}
+      <AutoCodeNumberSettingsModal
         visible={autoCodeModalVisible}
         onVisibleChange={setAutoCodeModalVisible}
-        onConfirm={handleAutoCodeConfigConfirm}
+        onConfirm={handleAutoCodeNumberSettingsConfirm}
         initialConfig={
           rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)
             ?.config as unknown as AutoNumberRuleResponce
@@ -465,24 +306,3 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   );
 };
 
-// 单选列表配置组件
-export const PicklistConfig: React.FC<{
-  visible?: boolean;
-  onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (options: object[], dictTypeId?: string | number) => void;
-  initialOptions?: { optionLabel: string; optionValue: string }[];
-  onCancel?: () => void;
-}> = (props) => {
-  return <OptionConfig {...props} />;
-};
-
-// 多选列表配置组件
-export const MultiPicklistConfig: React.FC<{
-  visible?: boolean;
-  onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (options: object[], dictTypeId?: string | number) => void;
-  initialOptions?: { optionLabel: string; optionValue: string }[];
-  onCancel?: () => void;
-}> = (props) => {
-  return <OptionConfig {...props} />;
-};

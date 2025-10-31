@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import FieldConstraint from './FieldConstraint';
-import { AutoCodeConfig, MultiPicklistConfig, PicklistConfig } from './FieldTypeConfig';
+import { AutoCodeRuleConfig } from './AutoCodeRuleConfig';
+import { MultiPicklistConfig, PicklistConfig } from './PicklistConfig';
 import type { FieldConfigPopoverProps } from '../types';
 import styles from '../index.module.less';
 
@@ -13,9 +14,9 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
         case ENTITY_FIELD_TYPE.SELECT.VALUE:
           return (
             <PicklistConfig
-              onConfirm={(options, dictTypeId) =>
-                onConfirm(ENTITY_FIELD_TYPE.SELECT.VALUE, fieldId, options, dictTypeId)
-              }
+              onConfirm={(options, dictTypeId) => {
+                onConfirm(ENTITY_FIELD_TYPE.SELECT.VALUE, fieldId, options, dictTypeId);
+              }}
               initialOptions={field?.options}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.SELECT.VALUE)}
             />
@@ -24,9 +25,9 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
         case ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE:
           return (
             <MultiPicklistConfig
-              onConfirm={(options, dictTypeId) =>
-                onConfirm(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE, fieldId, options, dictTypeId)
-              }
+              onConfirm={(options, dictTypeId) => {
+                onConfirm(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE, fieldId, options, dictTypeId);
+              }}
               initialOptions={field?.options}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE)}
             />
@@ -34,9 +35,9 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
 
         case ENTITY_FIELD_TYPE.AUTO_CODE.VALUE:
           return (
-            <AutoCodeConfig
+            <AutoCodeRuleConfig
               onConfirm={(rules) => onConfirm(ENTITY_FIELD_TYPE.AUTO_CODE.VALUE, fieldId, rules)}
-              initialConfig={field?.autoNumberConfig}
+              initialConfig={field?.autoNumber || field?.autoNumberConfig}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.AUTO_CODE.VALUE)}
               fields={fields}
             />

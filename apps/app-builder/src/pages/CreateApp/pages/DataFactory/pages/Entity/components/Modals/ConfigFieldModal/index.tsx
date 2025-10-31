@@ -73,7 +73,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
         confirmLoading={fieldManager.loading}
         style={{ width: 1400 }}
       >
-        <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }}>
+        <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }} id="field-config-form">
           <Form.List field="fields">
             {() => {
               return (
