@@ -181,7 +181,14 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                     } else {
                         // 退化：直接LIKE
                         if (names.contains(rawKey)) {
-                            configs.and(Compare.LIKE, rawKey, rawVal);
+                            String fieldType = fields.stream().filter(field ->
+                                    rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
+                            if("DATE".equals(fieldType)){
+                                String toChar = "to_char(" + rawKey + ",'YYYY/MM/DD')";
+                                configs.and(Compare.LIKE, toChar, rawVal);
+                            }else{
+                                configs.and(Compare.LIKE, rawKey, rawVal);
+                            }
                         }
                     }
                 }
@@ -222,7 +229,14 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                         applyOperatorCondition(countConfigs, fieldName, operator, value);
                     } else {
                         if (existingFieldNames.contains(rawKey)) {
-                            countConfigs.and(Compare.LIKE, rawKey, rawVal);
+                            String fieldType = fields.stream().filter(field ->
+                                    rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
+                            if("DATE".equals(fieldType)){
+                                String toChar = "to_char(" + rawKey + ",'YYYY/MM/DD')";
+                                countConfigs.and(Compare.LIKE, toChar, rawVal);
+                            }else {
+                                countConfigs.and(Compare.LIKE, rawKey, rawVal);
+                            }
                         }
                     }
                 }
