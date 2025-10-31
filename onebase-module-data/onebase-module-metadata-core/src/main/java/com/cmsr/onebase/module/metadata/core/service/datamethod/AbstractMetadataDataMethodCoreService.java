@@ -386,8 +386,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             // 7. 初步数据校验------数据校验规则 ----核心功能!!!
             validateData(context);
 
-            // 8. 前置自动化工作流触发
-            executePreWorkflow(context);//暂未实现
+            // 10. 前置自动化工作流触发
+            executePreWorkflow(context);
 
             // 9. 数据编号
             generateDataNumber(context);
@@ -395,7 +395,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             // 10. 数据存储
             storeData(context);
 
-            // 11. 后置自动化工作流触发
+            // 13. 后置自动化工作流触发
             executePostWorkflow(context);
 
 

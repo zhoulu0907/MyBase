@@ -47,6 +47,19 @@ public interface ErrorCodeConstants {
     ErrorCode PRIMARY_KEY_UPDATE_NOT_ALLOWED = new ErrorCode(1_003_006_002, "不允许更新主键字段");
     ErrorCode DATA_NOT_EXISTS = new ErrorCode(1_003_006_003, "数据不存在");
 
-    ErrorCode DATA_METHOD_EXEC_FAIL = new ErrorCode(1_003_006_004, "数据方法执行失败");
+    // ========== 前置后置流程触发相关 1-003-008-000 ==========
+    ErrorCode PROCESS_ERROR_BEFORE_CREATE = new ErrorCode(1_003_008_000, "数据插入前置工作流触发失败，接口返回：{}");
+    ErrorCode PROCESS_ERROR_AFTER_CREATE = new ErrorCode(1_003_008_001, "数据插入前置工作流触发失败，接口返回：{}");
+    ErrorCode PROCESS_ERROR_BEFORE_UPDATE = new ErrorCode(1_003_008_002, "数据更新前置工作流触发失败，接口返回：{}");
+    ErrorCode PROCESS_ERROR_AFTER_UPDATE = new ErrorCode(1_003_008_003, "数据更新后置工作流触发失败，接口返回：{}");
+    ErrorCode PROCESS_ERROR_BEFORE_DELETE = new ErrorCode(1_003_008_004, "数据删除前置工作流触发失败，接口返回：{}");
+    ErrorCode PROCESS_ERROR_AFTER_DELETE = new ErrorCode(1_003_008_005, "数据删除后置工作流触发失败，接口返回：{}");
+
+    // ========== 数据CRUD相关 1-003-009-000 ==========
+    ErrorCode DB_OPERATION_ERROR_CREATE = new ErrorCode(1_003_009_000, "数据插入失败：{}");
+    ErrorCode DB_OPERATION_ERROR_UPDATE = new ErrorCode(1_003_009_001, "数据更新失败：{}");
+    ErrorCode DB_OPERATION_ERROR_DELETE = new ErrorCode(1_003_009_002, "数据删除失败：{}");
+    ErrorCode DB_OPERATION_ERROR_QUERY = new ErrorCode(1_003_009_003, "数据查询失败：{}");
+
 
 }

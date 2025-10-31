@@ -28,7 +28,8 @@ import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
+
 @Slf4j
 @Component
 public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCoreService {
@@ -354,10 +355,15 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(!respDTO.isTriggered()){
+            log.info("BEFORE_CREATE 数据创建前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            return;
+        }
         if(respDTO.isSuccess()){
             log.info("BEFORE_CREATE 数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
             log.info("BEFORE_CREATE 数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+            throw  exception(PROCESS_ERROR_BEFORE_CREATE,respDTO.getMessage());
         }
     }
 
@@ -372,10 +378,15 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(!respDTO.isTriggered()){
+            log.info("AFTER_CREATE 数据创建后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            return;
+        }
         if(respDTO.isSuccess()){
             log.info("AFTER_CREATE 数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
             log.error("AFTER_CREATE 数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+            throw  exception(PROCESS_ERROR_AFTER_CREATE,respDTO.getMessage());
         }
     }
 
