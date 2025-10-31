@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,7 @@ import java.util.List;
 @Component
 @Slf4j
 public class DolphinSchedulerClient {
+    private static final String STATUS_ONLINE = "ONLINE";
     private static final String EXECUTION_TYPE_SERIAL_WAIT = "SERIAL_WAIT";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -103,10 +105,9 @@ public class DolphinSchedulerClient {
         // 1. verify-name unique
         Result<WorkflowDefinitionResp> uniqueResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
         if (uniqueResp.getSuccess()) {
+            // remove data if exists
             WorkflowDefinitionResp existingData = uniqueResp.getData();
-            if (existingData != null) {
-                return existingData.getCode();
-            }
+            purgeWorkflow(projectCode, existingData.getCode());
         }
         // 2. generate unique task code
         Result<List<Long>> genTaskCodes = execute(dsClientStub.generateTaskCodes(projectCode, 1));
@@ -215,37 +216,68 @@ public class DolphinSchedulerClient {
      * @param workflowCode 工作流CODE
      */
     private void offlineWorkflow(Long projectCode, Long workflowCode) {
-        // 0. 获取调度相关信息
+        // 0. 查询工作流，保证工作流存在
+        WorkflowDefinitionResp workflowDef = queryWorkflowByCode(projectCode, workflowCode);
+        // 1. 若存在调度，则下线调度
+        //  1.1. 获取调度信息，判断调度存在，是否需要下线
         Result<PageInfo<ScheduleInfoResp>> scheduleQueryResp = execute(dsClientStub.queryScheduleByWorkflow(projectCode, workflowCode, 1, 1));
         if (scheduleQueryResp.getFailed()) {
-            // anyway if getSchedule failed, consider this as no schedule.
-            log.warn("获取工作流【{}】调度信息失败,{}", workflowCode, scheduleQueryResp.getMsg());
+            log.warn("获取工作流【{}】调度信息失败, {}", workflowCode, scheduleQueryResp.getMsg());
             throw DolphinschedulerException.of("获取工作流【%s】调度信息失败, %s", workflowCode, scheduleQueryResp.getMsg());
         }
-        List<ScheduleInfoResp> scheduleList = scheduleQueryResp.getData().getTotalList();
+        PageInfo<ScheduleInfoResp> schedulePage = scheduleQueryResp.getData();
+        List<ScheduleInfoResp> scheduleList = null;
+        if (schedulePage != null) {
+            scheduleList = schedulePage.getTotalList();
+        }
+        boolean isScheduleExists = false;
+        boolean isScheduleOnline = false;
+        Integer scheduleCode = null;
         if (CollectionUtils.isNotEmpty(scheduleList)) {
-            Integer scheduleCode = scheduleList.get(0).getId();
-            // 1. 下线调度若存在
+            ScheduleInfoResp scheduleResp = scheduleList.get(0);
+            isScheduleExists = true;
+            scheduleCode = scheduleResp.getId();
+            isScheduleOnline = StringUtils.equals(STATUS_ONLINE, scheduleResp.getReleaseState());
+        }
+        // 1.2. 如果调度已上线，则下线
+        if (isScheduleOnline) {
             Result<Boolean> offlineScheduleResp = execute(dsClientStub.offlineSchedule(projectCode, scheduleCode));
             if (offlineScheduleResp.getFailed()) {
-                log.warn("下线工作流【{}】对应调度【{}】失败,{}", workflowCode, scheduleCode, offlineScheduleResp.getMsg());
+                log.warn("下线工作流【{}】对应调度【{}】失败, {}", workflowCode, scheduleCode, offlineScheduleResp.getMsg());
                 throw DolphinschedulerException.of("下线工作流【%s】对应调度【%s】失败, %s", workflowCode, offlineScheduleResp.getMsg());
             }
-            // 2. 删除调度若存在
+        }
+        //  1.3. 如果调度存在，则删除
+        if (isScheduleExists) {
             Result<Boolean> deleteScheduleResp = execute(dsClientStub.deleteSchedule(projectCode, scheduleCode, scheduleCode));
             if (deleteScheduleResp.getFailed()) {
                 log.warn("删除工作流【{}】对应调度【{}】失败,{}", workflowCode, scheduleCode, deleteScheduleResp.getMsg());
                 throw DolphinschedulerException.of("删除工作流【%s】对应调度【%s】失败, %s", workflowCode, deleteScheduleResp.getMsg());
             }
         }
-        // 3. 下线工作流若存在
-        Result<Boolean> releaseResult = execute(dsClientStub.releaseWorkflow(projectCode, workflowCode,
-                // magic string: flowName, DS required for this, but no usage at all.
-                "flowName", "OFFLINE"));
-        if (releaseResult.getFailed()) {
-            log.warn("工作流【{}】下线失败，下线接口调用失败, {}", workflowCode, releaseResult.getMsg());
-            throw DolphinschedulerException.of("工作流【%s】下线失败, %s", workflowCode, releaseResult.getMsg());
+        // 2. 下线工作流若存在
+        if (StringUtils.equals(STATUS_ONLINE, workflowDef.getReleaseState())) {
+            Result<Boolean> releaseResult = execute(dsClientStub.releaseWorkflow(projectCode, workflowCode,
+                    // magic string: flowName, DS required for this, but no usage at all.
+                    "flowName", "OFFLINE"));
+            if (releaseResult.getFailed()) {
+                log.warn("工作流【{}】下线失败，下线接口调用失败, {}", workflowCode, releaseResult.getMsg());
+                throw DolphinschedulerException.of("工作流【%s】下线失败, %s", workflowCode, releaseResult.getMsg());
+            }
         }
+    }
+
+    private WorkflowDefinitionResp queryWorkflowByCode(Long projectCode, Long workflowCode) {
+        Result<WorkflowDefinitionResp> queryResp = execute(dsClientStub.queryWorkflowByCode(projectCode, workflowCode));
+
+        if (queryResp.getFailed()) {
+            throw DolphinschedulerException.of("工作流【%s】查询失败！%s", workflowCode, queryResp.getMsg());
+        }
+        WorkflowDefinitionResp workflowDef = queryResp.getData();
+        if (workflowDef == null) {
+            throw DolphinschedulerException.of("工作流【%s】不存在！", workflowCode, queryResp.getMsg());
+        }
+        return workflowDef;
     }
 
     private <T> String wrapSingleton2ListedJsonString(T args) {

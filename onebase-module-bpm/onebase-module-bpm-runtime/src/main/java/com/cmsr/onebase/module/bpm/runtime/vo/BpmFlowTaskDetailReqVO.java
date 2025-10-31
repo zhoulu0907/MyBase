@@ -7,14 +7,11 @@ import lombok.Data;
 @Data
 public class BpmFlowTaskDetailReqVO {
     @NotBlank(message = "任务ID不能为空")
-    private   String taskId;
+    private String taskId;
 
     @NotBlank(message = "实例ID不能为空")
-    private   String instanceId;
-
-    @NotNull(message = "实体ID不能为空")
-    private   Long entityId;
+    private String instanceId;
 
     @NotNull(message = "数据ID不能为空")
-    private   Long dataId;
+    private Long dataId;
 }

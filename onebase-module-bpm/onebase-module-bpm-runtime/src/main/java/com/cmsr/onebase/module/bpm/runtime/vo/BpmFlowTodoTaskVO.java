@@ -20,7 +20,7 @@ public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO {
     private String initiator;
 
     @Schema(description = "当前节点状态")
-    private String currentNodeStatus;
+    private String flowStatus;
 
     @Schema(description = "表单摘要")
     private String formSummary;

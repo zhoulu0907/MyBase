@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.enums.ApprovalModeEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
 import jakarta.annotation.PostConstruct;
@@ -12,9 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.NodeJson;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -160,6 +164,16 @@ public class NodeVOStrategyManager {
 
         if (permFlagDTO != null) {
             nodeJson.setPermissionFlag(JsonUtils.toJsonString(permFlagDTO));
+        }
+
+        if (extData instanceof ApproverNodeExtDTO approverNodeExtDTO) {
+
+            String approvalMode = approverNodeExtDTO.getApproverConfig().getApprovalMode();
+
+            // 设置会签参数，默认为或签
+            if (Objects.equals(approvalMode, ApprovalModeEnum.COUNTER_SIGN.getCode())) {
+                nodeJson.setNodeRatio(new BigDecimal("100"));
+            }
         }
     }
 }
