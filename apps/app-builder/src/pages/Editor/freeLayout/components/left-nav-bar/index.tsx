@@ -59,36 +59,7 @@ const LeftNavBar: React.FC = () => {
     <div className={styles.leftNav}>
       <div className={classNames(styles.process, styles.processNodeTitle)}>流程节点</div>
       <div className={styles.innerNodesBox}>
-        {nodeList.map((item, i) => (
-          <div key={i}>
-            <div className={styles.navTitleColor}> {item.navTitle}</div>
-            {/* 左侧子节点 */}
-            {item.navList.map((nodeItem, index) => (
-              <Button
-                className={styles.nodeItem}
-                key={index}
-                onMouseDown={(e) =>
-                  startDragSerivce.startDragCard('node', e, {
-                    data: {
-                      title: `${nodeItem.title}`
-                    }
-                  })
-                }
-              >
-                <img
-                  src={nodeItem.img}
-                  alt=""
-                  style={{ display: 'inline-block', verticalAlign: 'middle' }}
-                  loading="lazy"
-                  width="20px"
-                  height="20px"
-                />
-                <span style={{ fontSize: '10px', marginLeft: '2px' }}>{nodeItem.title}</span>
-              </Button>
-            ))}
-          </div>
-        ))}
-        {nodeList.map((item, i) => (
+        {nodeList?.map((item, i) => (
           <div key={i}>
             <div className={styles.navTitleColor}> {item.navTitle}</div>
             {/* 左侧子节点 */}

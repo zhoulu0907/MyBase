@@ -22,6 +22,7 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
 
   const handleSubmit = (data: any, errmsg: string[]) => {
     nodeRender.updateData(Object.assign({}, nodeRender.data, data));
+    console.log(nodeRender.data,'更新后的data');
   };
 
   return (
@@ -39,7 +40,7 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
         {nodeRender?.type === WorkflowNodeType.APPROVER && (
           <ApproveDreawer handleConfigSubmit={handleSubmit} configData={nodeRender.data || {}} />
         )}
-        {nodeRender?.type === WorkflowNodeType.INITIATION && <Launch />}
+        {nodeRender?.type === WorkflowNodeType.INITIATION && <Launch handleConfigSubmit={handleSubmit} />}
       </div>
     </NodeRenderContext.Provider>
   );
