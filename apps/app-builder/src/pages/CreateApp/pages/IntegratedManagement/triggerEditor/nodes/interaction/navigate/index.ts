@@ -1,11 +1,11 @@
-import iconInteraction from '@/assets/flow/nodes/nagivate.svg';
+import iconInteraction from '@/assets/flow/nodes/navigate.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
 import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
-export const NagivateNodeRegistry: FlowNodeRegistry = {
-  type: NodeType.NAGIVATE,
+export const NavigateNodeRegistry: FlowNodeRegistry = {
+  type: NodeType.NAVIGATE,
   title: '跳转节点',
   category: 'interaction',
   meta: {
@@ -29,8 +29,8 @@ export const NagivateNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: generateNodeId(NodeType.NAGIVATE),
-      type: NodeType.NAGIVATE,
+      id: generateNodeId(NodeType.NAVIGATE),
+      type: NodeType.NAVIGATE,
       data: {
         title: '跳转节点'
       }
