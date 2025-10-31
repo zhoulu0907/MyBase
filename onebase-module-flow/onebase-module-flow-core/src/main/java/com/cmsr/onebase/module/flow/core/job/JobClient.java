@@ -56,18 +56,15 @@ public class JobClient {
     }
 
 
-    public String startJob(Long processId, String jobId, JobCreateRequest jobCreateRequest) {
-        dolphinSchedulerClient.purgeWorkflow(flowProjectCode, Long.parseLong(jobId));
-        return startJob(processId, jobId, jobCreateRequest);
-    }
-
-    public void deleteJob(Long processId) {
-        Long jobId = dolphinSchedulerClient.queryWorkflowByName(flowProjectCode, String.valueOf(processId));
-        dolphinSchedulerClient.purgeWorkflow(flowProjectCode, jobId);
-    }
-
-    public void deleteJob(String jobId) {
-        dolphinSchedulerClient.purgeWorkflow(flowProjectCode, Long.parseLong(jobId));
+    public void deleteJob(Long processId, String jobId) {
+        String flowName = String.valueOf(processId);
+        Long dsJobId = dolphinSchedulerClient.queryWorkflowByName(flowProjectCode, flowName);
+        if (dsJobId != null) {
+            dolphinSchedulerClient.purgeWorkflow(flowProjectCode, dsJobId);
+        }
+        if (jobId != null && !jobId.equals("0") && dsJobId != null && !jobId.equals(dsJobId.toString())) {
+            dolphinSchedulerClient.purgeWorkflow(flowProjectCode, Long.parseLong(jobId));
+        }
     }
 
 }

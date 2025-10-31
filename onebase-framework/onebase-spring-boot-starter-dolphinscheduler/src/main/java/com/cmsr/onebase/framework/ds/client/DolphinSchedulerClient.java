@@ -139,12 +139,14 @@ public class DolphinSchedulerClient {
 
     public Long queryWorkflowByName(Long projectCode, String flowName) {
         Result<WorkflowDetailedResp> queryResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
-        if (queryResp.getFailed()) {
-            throw DolphinschedulerException.of("工作流【%s】查询失败！%s", flowName, queryResp.getMsg());
+        if (queryResp.getFailed() && queryResp.getMsg().contains("does not exist")) {
+            //throw DolphinschedulerException.of("工作流【%s】查询失败！%s", flowName, queryResp.getMsg());
+            return null;
         }
         WorkflowDefinitionResp workflowDef = queryResp.getData().getWorkflowDefinition();
         if (workflowDef == null) {
-            throw DolphinschedulerException.of("工作流【%s】不存在！", flowName, queryResp.getMsg());
+            //throw DolphinschedulerException.of("工作流【%s】不存在！", flowName, queryResp.getMsg());
+            return null;
         }
         return workflowDef.getCode();
     }
