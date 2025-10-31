@@ -3,10 +3,10 @@ import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
+import { LISTTYPE } from '@onebase/app';
 import DetailTable from './DetailTable';
 import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
-// import { getFormDetail, getOperatorRecord } from '../../../../../../../../packages/app/src/services/app_runtime';
 import { getFormDetail, getOperatorRecord } from '@onebase/app/src/services/app_runtime';
 
 const Row = Grid.Row;
@@ -15,11 +15,13 @@ const Col = Grid.Col;
 interface PageProps {
   detailPopVisible: boolean;
   setPopVisible: Function;
-  onBack: Function;
-  instanceId: string;
+  onBack?: Function;
+  taskId?: string;
+  rowData?: any;
+  listType?: string;
 }
 
-const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, instanceId }) => {
+const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, taskId, rowData, listType }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -36,7 +38,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   function renderTitle() {
     return (
       <>
-        <span>Basic Information </span>
+        <span>{rowData?.processTitle} </span>
         <div>
           {drawWidth !== '100%' ? (
             <IconFullscreen onClick={() => toggleFullScreen('FULLSCREEN')} />
@@ -65,7 +67,15 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           title=""
           style={{ maxWidth: '420px', width: '420px' }}
           className="dt-ok-confirm"
-          content={<DetailOKConfirm ref={confirmRef} setPopupVisible={setPopupVisible} onBack={onBack} />}
+          content={
+            <DetailOKConfirm
+              ref={confirmRef}
+              setPopupVisible={setPopupVisible}
+              onBack={onBack}
+              taskId={taskId}
+              instanceId={rowData?.instanceId}
+            />
+          }
           onOk={() => {
             handleConfirmOK();
           }}
@@ -84,13 +94,17 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   }
 
   const fetchStepData = async () => {
-    const res = await getOperatorRecord({instanceId });
+    const res = await getOperatorRecord({ instanceId: rowData?.instanceId });
     setStepData(res);
   };
 
   useEffect(() => {
-    fetchStepData();
-  }, []);
+    if (listType === LISTTYPE.WILLDO || listType === LISTTYPE.IDONE) {
+      fetchStepData();
+    } else {
+      //根据列表类型请求对应的详情
+    }
+  }, [listType]);
 
   return (
     <section>
@@ -99,7 +113,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
         width={drawWidth}
         title={renderTitle()}
         visible={detailPopVisible}
-        footer={renderDrawerFooter()}
+        footer={listType === LISTTYPE.WILLDO ? renderDrawerFooter() : null}
         onOk={() => {
           setPopVisible(false);
         }}
