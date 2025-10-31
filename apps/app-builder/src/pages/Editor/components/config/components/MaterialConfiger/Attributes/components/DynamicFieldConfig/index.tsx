@@ -1,10 +1,9 @@
-import { useAppEntityStore } from '@/store/store_entity';
 import { Cascader, Form } from '@arco-design/web-react';
 import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 import { useSignals } from '@preact/signals-react/runtime';
-import { usePageEditorSignal, useFormEditorSignal } from '@onebase/ui-kit';
+import { usePageEditorSignal, useFormEditorSignal, useAppEntityStore } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 
@@ -20,6 +19,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
   const { subTableComponents } = useFormEditorSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
   const [entityTree, setEntityTree] = useState<any[]>([]);
+  const [isInSubTable, setIsInSubTable] = useState<boolean>(false);
 
   useEffect(() => {
     if (mainEntity) {
@@ -27,6 +27,25 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
       initTreeData();
     }
   }, [mainEntity]);
+
+  useEffect(() => {
+    getIsInSubTable();
+  }, []);
+
+  // 判断是否是在子表单中
+  const getIsInSubTable = () => {
+    const keys = Object.keys(subTableComponents.value);
+    let flag = false;
+    for (let key of keys) {
+      if (subTableComponents.value[key]) {
+        const isada = subTableComponents.value[key]?.find((ele: any) => ele.id === configs.id);
+        if (isada) {
+          flag = true;
+        }
+      }
+    }
+    setIsInSubTable(flag);
+  };
 
   const initTreeData = async () => {
     const mainEntityTree = mainEntity.fields
@@ -91,7 +110,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
         style={{
           width: '100%'
         }}
-        options={entityTree}
+        options={isInSubTable ? entityTree.filter((ele) => ele.value !== mainEntity.entityId) : entityTree}
         onChange={(value) => {
           handleDataFieldChange(value);
           handlePropsChange(item.key, value);

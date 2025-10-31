@@ -15,6 +15,7 @@ import {
   usePageEditorSignal,
   WIDTH_VALUES,
   WIDTH_OPTIONS,
+  useAppEntityStore,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -36,6 +37,7 @@ import {
   getEntityFieldOptions,
   getAutoNumberConfig,
   ENTITY_TYPE,
+  ENTITY_TYPE_VALUE,
   type AppEntityField,
   type EntityFieldOption
 } from '@onebase/app';
@@ -58,6 +60,8 @@ export default function EditorWorkspace() {
   }, []);
 
   useSignals();
+
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
     curComponentID,
@@ -287,113 +291,133 @@ export default function EditorWorkspace() {
           setList={(newList) => {
             const entityList: GridItem[] = [];
             newList.forEach(async (item) => {
-              // console.log(item);
-              if (item.type == 'entity') {
-                if (item.entityType === ENTITY_TYPE.SUB) {
-                  const cpName = item.entityName || '子表单';
-                  const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
-                  const cpID = `${cpType}-${uuidv4()}`;
+              console.log('workspaceitem', item);
+              if (item.type == ENTITY_TYPE_VALUE.MAIN || item.entityType === ENTITY_TYPE.MAIN) {
+                // 主表业务实体
+                const fieldList = item.fields.filter(
+                  (field: AppEntityField) =>
+                    field.fieldName !== 'lock_version' &&
+                    field.fieldName !== 'deleted' &&
+                    field.fieldName !== 'parent_id' &&
+                    field.isSystemField !== 1
+                );
+                fieldList.forEach(async (field: AppEntityField) => {
+                  let cpType = COMPONENT_MAP[field.fieldType];
+                  let cpID = `${cpType}-${uuidv4()}`;
 
-                  // 子表单 配置
                   const schema = getComponentSchema(cpType as any);
-                  schema.config.cpName = cpName;
-                  schema.config.id = cpID;
-                  schema.config.label.text = cpName;
-                  schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-                  schema.config.subTable = item.id;
+                  // 单选、多选列表配置
+                  if (
+                    field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
+                    field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
+                  ) {
+                    getFieldOptions(field.fieldId).then((options: any) => {
+                      schema.config.defaultValue = options;
+                    });
+                  }
 
+                  // 自动编码
+                  if (field.fieldType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
+                    getAutoConfig(field.fieldId).then((autoCodeConfig: any) => {
+                      schema.config.autoCodeConfig = autoCodeConfig;
+                      schema.config.autoCodeDisabled = autoCodeConfig && autoCodeConfig.config ? true : false;
+                    });
+                  }
+
+                  schema.config.cpName = field.displayName;
+                  schema.config.id = cpID;
+                  schema.config.dataField = [item.entityId, field.fieldId];
+                  schema.config.label.text = field.displayName;
                   const props = {
                     id: cpID,
                     type: cpType,
                     ...schema
                   };
+
                   setPageComponentSchemas(cpID!, props);
+                  //   setCurComponentID(cpID!);
+                  //   setCurComponentSchema(props);
                   setShowDeleteButton(false);
 
-                  const subFields = item.fields.filter((field: AppEntityField) => field.isSystemField !== 1);
-                  // 子表单的每个表单项配置
-                  const subFieldComponents = subFields.map((ele: AppEntityField) => {
-                    const subType = COMPONENT_MAP[ele.fieldType];
-                    const subSchema = getComponentSchema(subType as any);
-                    const subId = `${subType}-${uuidv4()}`;
-                    subSchema.config.cpName = ele.displayName;
-                    subSchema.config.id = subId;
-                    subSchema.config.label.text = ele.displayName;
-                    subSchema.config.label.display = false;
-                    subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-                    subSchema.config.dataField = [item.entityId, ele.fieldId];
-                    subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
-                    const subProps = {
-                      id: subId,
-                      type: subType,
-                      ...subSchema
-                    };
-                    setPageComponentSchemas(subId, subProps);
-                    return { id: subId, type: subType, displayName: ele.displayName };
-                  });
-                  setSubTableComponents(cpID, subFieldComponents);
+                  entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
+                });
+              } else if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
+                // 子表业务实体
+                const cpName = item.entityName || '子表单';
+                const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
+                const cpID = `${cpType}-${uuidv4()}`;
 
-                  entityList.push({ displayName: cpName, id: cpID, type: cpType });
+                // 子表单 配置
+                const schema = getComponentSchema(cpType as any);
+                schema.config.cpName = cpName;
+                schema.config.id = cpID;
+                schema.config.label.text = cpName;
+                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                schema.config.subTable = item.id;
 
-                  newList.splice(newList.indexOf(item), 1);
-                } else if (item.entityType === ENTITY_TYPE.MAIN) {
-                  item.fields
-                    .filter(
-                      (field: AppEntityField) =>
-                        field.fieldName !== 'lock_version' &&
-                        field.fieldName !== 'deleted' &&
-                        field.fieldName !== 'parent_id' &&
-                        field.isSystemField !== 1
-                    )
-                    .forEach(async (field: AppEntityField) => {
-                      let cpType = COMPONENT_MAP[field.fieldType];
-                      let cpID = `${cpType}-${uuidv4()}`;
-                      console.log('cpType', cpType, field);
+                const props = {
+                  id: cpID,
+                  type: cpType,
+                  ...schema
+                };
+                setPageComponentSchemas(cpID!, props);
+                setShowDeleteButton(false);
 
-                      const schema = getComponentSchema(cpType as any);
-                      // 单选、多选列表配置
-                      if (
-                        field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
-                        field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
-                      ) {
-                        getFieldOptions(field.fieldId).then((options: any) => {
-                          schema.config.defaultValue = options;
-                        });
-                      }
-
-                      // 自动编码
-                      if (field.fieldType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
-                        getAutoConfig(field.fieldId).then((autoCodeConfig: any) => {
-                          schema.config.autoCodeConfig = autoCodeConfig;
-                          schema.config.autoCodeDisabled = autoCodeConfig && autoCodeConfig.config ? true : false;
-                        });
-                      }
-
-                      schema.config.cpName = field.displayName;
-                      schema.config.id = cpID;
-                      schema.config.dataField = [item.entityId, field.fieldId];
-                      schema.config.label.text = field.displayName;
-                      const props = {
-                        id: cpID,
-                        type: cpType,
-                        ...schema
-                      };
-
-                      setPageComponentSchemas(cpID!, props);
-                      //   setCurComponentID(cpID!);
-                      //   setCurComponentSchema(props);
-                      setShowDeleteButton(false);
-
-                      entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
+                const subFieldList = item.fields.filter(
+                  (field: AppEntityField) =>
+                    field.fieldName !== 'lock_version' &&
+                    field.fieldName !== 'deleted' &&
+                    field.fieldName !== 'parent_id' &&
+                    field.isSystemField !== 1
+                );
+                // 子表单的每个表单项配置
+                const subFieldComponents = subFieldList.map((ele: AppEntityField) => {
+                  const subType = COMPONENT_MAP[ele.fieldType];
+                  const subSchema = getComponentSchema(subType as any);
+                  const subId = `${subType}-${uuidv4()}`;
+                  // 单选、多选列表配置
+                  if (
+                    ele.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE ||
+                    ele.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
+                  ) {
+                    getFieldOptions(ele.fieldId).then((options: any) => {
+                      schema.config.defaultValue = options;
                     });
-                  // 移除当前item
-                  newList.splice(newList.indexOf(item), 1);
-                }
+                  }
+
+                  // 自动编码
+                  if (ele.fieldType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
+                    getAutoConfig(ele.fieldId).then((autoCodeConfig: any) => {
+                      schema.config.autoCodeConfig = autoCodeConfig;
+                      schema.config.autoCodeDisabled = autoCodeConfig && autoCodeConfig.config ? true : false;
+                    });
+                  }
+
+                  subSchema.config.cpName = ele.displayName;
+                  subSchema.config.id = subId;
+                  subSchema.config.label.text = ele.displayName;
+                  subSchema.config.label.display = false;
+                  subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                  subSchema.config.dataField = [item.entityId, ele.fieldId];
+                  subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
+                  const subProps = {
+                    id: subId,
+                    type: subType,
+                    ...subSchema
+                  };
+                  setPageComponentSchemas(subId, subProps);
+                  return { id: subId, type: subType, displayName: ele.displayName };
+                });
+                setSubTableComponents(cpID, subFieldComponents);
+                entityList.push({ displayName: cpName, id: cpID, type: cpType });
+              } else if (item.entityID && item.entityID !== mainEntity.entityId) {
+                // 子表 数据字段  不做任何操作
+              } else {
+                // 主表字段、普通字段
+                entityList.push(item);
               }
             });
-            newList.push(...entityList);
-
-            setComponents(newList);
+            setComponents(entityList);
           }}
           onAdd={async (e) => {
             let cpID = e.item.id || e.item.getAttribute('data-cp-id');
@@ -417,14 +441,20 @@ export default function EditorWorkspace() {
                 return;
               }
             }
-            if (itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY || itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY) {
+
+            // 子表字段不允许
+            if (
+              (entityID && entityID !== mainEntity.entityId) ||
+              itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
+              itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
+            ) {
               console.log('entity id', entityID);
             } else {
               const schema = getComponentSchema(itemType as any);
               schema.config.cpName = itemDisplayName;
               schema.config.id = cpID;
 
-              // 主子表 字段组件
+              // 主表 字段组件
               if (entityID && fieldID) {
                 console.log('dataField:  ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];

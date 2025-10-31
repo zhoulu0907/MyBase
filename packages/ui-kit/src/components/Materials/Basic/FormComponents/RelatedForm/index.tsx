@@ -1,7 +1,6 @@
 import { Form, Select } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useState } from 'react';
-// import { useAppEntityStore } from 'src/store/store_entity';
 import { dataMethodPage, menuSignal, type AppEntityField, type PageMethodParam } from '@onebase/app';
 import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
@@ -9,7 +8,6 @@ import '../index.css';
 import { type XRelatedFormConfig } from './schema';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  //   const { appEntities } = useAppEntityStore();
 
   const {
     label,

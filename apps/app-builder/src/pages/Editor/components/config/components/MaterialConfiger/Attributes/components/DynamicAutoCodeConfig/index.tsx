@@ -11,13 +11,12 @@ import {
   AUTO_CODE_RULE_TYPE,
   AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RESET_CYCLE,
-  DATE_FORMAT_DEFAULT,
   DIGIT_DEFAULT
 } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/const';
 import AutoCodeConfigModal from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/components/AutoCodeConfigModal';
 import { findFieldPath } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/transform';
 import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
-import { useAppEntityStore } from '@/store/store_entity';
+import { useAppEntityStore } from '@onebase/ui-kit';
 
 export interface DynamicAutoCodeConfigProps {
   handlePropsChange: (key: string, value: any) => void;

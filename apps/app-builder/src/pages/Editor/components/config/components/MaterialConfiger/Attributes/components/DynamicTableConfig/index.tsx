@@ -1,8 +1,7 @@
-import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { FilterEntityFields, getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
-import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import { ENTITY_FIELD_TYPE, useAppEntityStore } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
