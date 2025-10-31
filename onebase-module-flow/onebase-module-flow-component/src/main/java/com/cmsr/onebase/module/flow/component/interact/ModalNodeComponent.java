@@ -11,7 +11,6 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,7 +33,7 @@ public class ModalNodeComponent extends SkippableNodeComponent {
         ModalNodeData nodeData = (ModalNodeData) executeContext.getNodeData(this.getTag());
         NodeActionEnum nodeActionEnum = super.nodeAction();
         if (nodeActionEnum == NodeActionEnum.DO_PROCESS) {
-            Map<String, Object> outputParams = createOutputParams(nodeData);
+            Map<String, Object> outputParams = nodeData.toMap();
             variableContext.setOutputParams(outputParams);
             executeContext.setExecutionEndNodeType("modal");
             executeContext.setExecutionEndNodeTag(this.getTag());
@@ -51,22 +50,5 @@ public class ModalNodeComponent extends SkippableNodeComponent {
             executeContext.restExecutionEndNodeTag();
         }
     }
-
-    private Map<String, Object> createOutputParams(ModalNodeData nodeData) {
-        Map<String, Object> outputParams = new HashMap<>();
-        outputParams.put("closeWarn", nodeData.getCloseWarn());
-        outputParams.put("modalType", nodeData.getModalType());
-        outputParams.put("cancelWarn", nodeData.getCancelWarn());
-        outputParams.put("modalTitle", nodeData.getModalTitle());
-        outputParams.put("okText", nodeData.getOkText());
-        outputParams.put("cancelText", nodeData.getCancelText());
-        outputParams.put("title", nodeData.getTitle());
-        outputParams.put("prompt", nodeData.getPrompt());
-        outputParams.put("afterCancel", nodeData.getAfterCancel());
-        outputParams.put("arrange", nodeData.getArrange());
-        outputParams.put("fields", nodeData.getFields());
-        return outputParams;
-    }
-
 
 }

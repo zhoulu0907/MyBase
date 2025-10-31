@@ -62,9 +62,14 @@ public class ExecuteContext implements Serializable {
     @Getter
     private volatile String executionEndNodeTag;
 
+    private volatile long lastLogTime;
 
     private volatile List<String> logs = new CopyOnWriteArrayList<>();
 
+    public ExecuteContext() {
+        lastLogTime = System.currentTimeMillis();
+        logs.add("[0] 流程执行开始");
+    }
 
     public void setNodeDataMap(Map<String, NodeData> nodeData) {
         this.nodeDataMap = Collections.unmodifiableMap(nodeData);
@@ -108,7 +113,10 @@ public class ExecuteContext implements Serializable {
     }
 
     public void addLog(String log) {
-        this.logs.add(log);
+        long currentTime = System.currentTimeMillis();
+        long elapsed = currentTime - lastLogTime;
+        String formattedLog = String.format("[%d] %s", elapsed, log);
+        this.logs.add(formattedLog);
     }
 
     public String getLogText() {

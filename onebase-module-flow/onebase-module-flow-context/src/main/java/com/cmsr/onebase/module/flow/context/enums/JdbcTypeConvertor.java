@@ -147,8 +147,14 @@ public class JdbcTypeConvertor {
         if (value instanceof LocalDate) {
             return value;
         }
-        if (value instanceof java.sql.Date) {
-            return ((java.sql.Date) value).toLocalDate();
+        if (value instanceof java.sql.Date v) {
+            return v.toLocalDate();
+        }
+        if (value instanceof java.util.Date v) {
+            return LocalDate.ofInstant(v.toInstant(), ZoneId.systemDefault());
+        }
+        if (value instanceof LocalDateTime v) {
+            return v.toLocalDate();
         }
         String stringValue = value.toString();
         try {
