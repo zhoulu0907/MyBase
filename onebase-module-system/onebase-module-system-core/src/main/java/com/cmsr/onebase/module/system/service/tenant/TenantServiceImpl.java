@@ -16,7 +16,7 @@ import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.enterprise.CorpDO;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -480,7 +480,7 @@ public class TenantServiceImpl implements TenantService {
      *
      * @return Map<tenantId, count>
      */
-    public Map<Integer, Integer> findCorpCount() {
+    public Map<Long, Integer> findCorpCount() {
         List<CorpDO> corpList = corpService.findCorpAll();
         return corpList.stream()
                 .collect(Collectors.groupingBy(
@@ -523,7 +523,7 @@ public class TenantServiceImpl implements TenantService {
             userNicknameMap = users.stream()
                     .collect(Collectors.toMap(AdminUserDO::getId, AdminUserDO::getNickname));
         }
-        Map<Integer, Integer> coupCountMap = findCorpCount();
+        Map<Long, Integer> coupCountMap = findCorpCount();
         Map<Integer, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称
         Map<Long, String> finalUserNicknameMap = userNicknameMap;

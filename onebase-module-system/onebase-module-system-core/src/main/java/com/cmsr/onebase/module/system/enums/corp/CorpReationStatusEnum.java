@@ -1,18 +1,21 @@
-package com.cmsr.onebase.framework.common.enums;
+package com.cmsr.onebase.module.system.enums.corp;
 
 import com.cmsr.onebase.framework.common.core.ArrayValuable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
+
 @Getter
 @AllArgsConstructor
-public enum CorpStatusEnum implements ArrayValuable<Integer> {
+public enum CorpReationStatusEnum implements ArrayValuable<Integer> {
+    ALL(0, "全部"),
+    ENABLE(1, "已启用"),
+    DISABLE(2, "已禁用"),
+    EXPIRES(3, "已过期");
 
-    ENABLE(1, "启用"),
-    DISABLE(0, "停用");
 
-    public static final Integer[] ARRAYS = Arrays.stream(values()).map(CorpStatusEnum::getValue).toArray(Integer[]::new);
+    public static final Integer[] ARRAYS = Arrays.stream(values()).map(CorpReationStatusEnum::getValue).toArray(Integer[]::new);
 
     /**
      * 值

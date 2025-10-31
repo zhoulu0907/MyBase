@@ -10,5 +10,5 @@ public interface AppApplicationApi {
 
     Long countApplicationByTenantId(Long tenantId);
 
-    List finAppApplicationAll();
+    List finAppApplicationByAppName(String appName);
 }

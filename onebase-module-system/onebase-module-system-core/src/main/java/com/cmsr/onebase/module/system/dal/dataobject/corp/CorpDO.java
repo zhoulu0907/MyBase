@@ -1,5 +1,5 @@
-// 8. 创建 enterprise 模块的 DO 对象
-package com.cmsr.onebase.module.system.dal.dataobject.enterprise;
+// 8. 创建 corp 模块的 DO 对象
+package com.cmsr.onebase.module.system.dal.dataobject.corp;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Column;
@@ -34,17 +34,11 @@ public class CorpDO extends BaseDO {
     @Column(name = "admin_id")
     private String adminId;
 
-    @Column(name = "phone")
-    private String phone;
-
-    @Column(name = "email")
-    private String email;
-
     @Column(name = "user_limit")
     private Integer userLimit;
 
     @Column(name = "tenant_id")
-    private Integer tenantId;
+    private Long tenantId;
 
 
 }

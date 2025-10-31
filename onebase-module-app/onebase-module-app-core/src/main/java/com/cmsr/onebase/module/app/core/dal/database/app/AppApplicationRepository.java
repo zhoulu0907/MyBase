@@ -81,4 +81,14 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
+
+    public List<ApplicationDO> finAppApplicationByAppName(String appName) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("tenant_id", TenantContextHolder.getRequiredTenantId());
+        if (StringUtils.isNotBlank(appName)) {
+            configStore.and(Compare.LIKE, "app_name",  appName);
+        }
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
 }

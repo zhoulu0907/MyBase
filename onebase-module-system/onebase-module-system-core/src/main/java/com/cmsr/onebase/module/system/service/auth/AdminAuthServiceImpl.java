@@ -158,7 +158,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     @Override
-    public AuthLoginRespVO enterpriseLogin(AuthLoginReqVO reqVO) {
+    public AuthLoginRespVO corpLogin(AuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
         // 2. 使用账号密码，进行登录
@@ -341,6 +341,4 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
-
-
 }

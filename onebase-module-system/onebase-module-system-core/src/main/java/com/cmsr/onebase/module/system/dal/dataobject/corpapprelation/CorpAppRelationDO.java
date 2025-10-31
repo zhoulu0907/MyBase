@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant;
+package com.cmsr.onebase.module.system.dal.dataobject.corpapprelation;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,7 +35,7 @@ public class CorpAppRelationDO extends BaseDO {
      * 空间id
      */
     @Column(name = "tenant_id", length = 10)
-    private Integer tenantId;
+    private Long tenantId;
 
     @Column
     @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)

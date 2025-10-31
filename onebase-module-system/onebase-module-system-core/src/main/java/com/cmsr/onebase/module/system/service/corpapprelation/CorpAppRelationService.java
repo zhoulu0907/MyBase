@@ -48,4 +48,6 @@ public interface CorpAppRelationService {
      * @return 企业应用关联分页
      */
     PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO);
+
+    void deleteCorpAppRelationByCorpId(Long corpID);
 }

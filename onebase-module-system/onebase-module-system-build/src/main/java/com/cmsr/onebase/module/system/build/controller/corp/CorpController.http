@@ -37,6 +37,23 @@ tenant-id: {{adminTenantId}}
     }
 }
 
+
+### 创建企业 /admin-api/system/corp/update
+
+POST {{baseUrl}}/system/corp/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+{
+    "id": 115175715731800064,
+    "corpId": "mn-100100-up",
+    "corpName": "admin123-up111",
+    "industryType": 1,
+    "address": "admin123-up",
+    "status": 1,
+    "userLimit":200
+}
+
 ### 获取企业分页 /admin-api/system/tenant/page
 GET {{baseUrl}}/system/tenant/page?pageNum=1&pageSize=10
 Content-Type: application/json

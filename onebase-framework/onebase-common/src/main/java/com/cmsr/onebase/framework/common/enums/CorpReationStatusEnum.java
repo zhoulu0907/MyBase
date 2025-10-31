@@ -20,7 +20,7 @@ public enum CorpReationStatusEnum implements ArrayValuable<Integer> {
     /**
      * 值
      */
-    private final Integer value;
+    private final int value;
     /**
      * 名
      */

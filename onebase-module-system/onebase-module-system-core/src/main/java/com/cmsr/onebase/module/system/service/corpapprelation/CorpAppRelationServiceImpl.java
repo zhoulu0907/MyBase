@@ -9,7 +9,7 @@ import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.applicationauthtenant.CorpAppRelationDO;
+import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -64,6 +65,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             corpAppRelationDO.setExpiresTime(createReqVO.getAuthorizationTime().plusYears(CorpConstant.EXPIRESYEAR));
             corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
             corpAppRelationDO.setCorpId(createReqVO.getCorpId());
+            corpAppRelationDO.setTenantId(TenantContextHolder.getTenantId());
             corpAppRelationDataRepository.insert(corpAppRelationDO);
         });
     }
@@ -102,16 +104,35 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @param
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
-    private Map<Long, ApplicationDO> getApplicationNameMap() {
-        List<ApplicationDO> pageDOList = appApplicationApi.finAppApplicationAll();
+    private Map<Long, ApplicationDO> getApplicationDoMap(String appName) {
+        List<ApplicationDO> pageDOList = appApplicationApi.finAppApplicationByAppName(appName);
         return pageDOList.stream()
                 .collect(Collectors.toMap(
                         ApplicationDO::getId,
                         Function.identity()
                 ));
     }
+
+
+    @Override
+    public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
+        Map<Long, ApplicationDO> applicationMap = getApplicationDoMap(pageReqVO.getApplicationName());
+        List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
+        // 查询原始分页数据
+        PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
+        // 转换为 VO 对象并根据 applicationName 过滤
+        List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
+                .map(corpDO -> convertToRespVO(corpDO, applicationMap))
+                .collect(Collectors.toList());
+        // 返回过滤后的结果和总数
+        return new PageResult<>(filteredList, pageResult.getTotal());
+    }
+
+
+
     /**
      * 获取app应用状态描述
+     *
      * @param
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
@@ -129,45 +150,33 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         return statusDesc;
     }
 
+    /**
+     * 转换企业应用关联DO为响应VO对象
+     *
+     * @param corpDO         企业应用关联DO对象
+     * @param applicationMap 应用信息映射表
+     * @return CorpApplicationRespVO 响应VO对象
+     */
+    private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDO> applicationMap) {
+        CorpApplicationRespVO respVO = BeanUtils.toBean(corpDO, CorpApplicationRespVO.class);
+        ApplicationDO appDo = applicationMap.get(corpDO.getApplicationId());
+        if (appDo != null) {
+            respVO.setApplicationName(appDo.getAppName());
+            respVO.setApplicationCode(appDo.getAppCode());
+            respVO.setApplicationUid(appDo.getAppUid());
+            respVO.setApplicationId(appDo.getId());
+            respVO.setId(appDo.getId());
+            respVO.setVersionNumber(appDo.getVersionNumber());
+            // 获取app应用状态描述
+            Integer status = corpDO.getStatus();
+            respVO.setStatusDesc(getCorpStatus(status, corpDO.getExpiresTime()));
+        }
+        return respVO;
+    }
+
     @Override
-    public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
-        // 查询原始分页数据
-        PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO);
-        Map<Long, ApplicationDO> applicationMap = getApplicationNameMap();
-
-        // 转换为 VO 对象并根据 applicationName 过滤
-        List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
-                .map(corpDO -> {
-                    CorpApplicationRespVO respVO = BeanUtils.toBean(corpDO, CorpApplicationRespVO.class);
-                    ApplicationDO appDo = applicationMap.get(corpDO.getApplicationId());
-                    if (appDo != null) {
-                        respVO.setApplicationName(appDo.getAppName());
-                        respVO.setApplicationCode(appDo.getAppCode());
-                        respVO.setApplicationUid(appDo.getAppUid());
-                        respVO.setApplicationId(appDo.getId());
-                        respVO.setId(appDo.getId());
-                        respVO.setVersionNumber(appDo.getVersionNumber());
-                        // 获取app应用状态描述
-                        Integer status = appDo.getAppStatus();
-                        respVO.setStatusDesc(getCorpStatus(status, corpDO.getExpiresTime()));
-                    }
-                    return respVO;
-                })
-                // 添加 applicationName 过滤条件
-                .filter(respVO -> {
-                    // 如果未设置过滤条件，则不过滤
-                    if (pageReqVO.getApplicationName() == null || pageReqVO.getApplicationName().trim().isEmpty()) {
-                        return true;
-                    }
-                    // 比较应用名称是否匹配（不区分大小写）
-                    return respVO.getApplicationName() != null &&
-                            respVO.getApplicationName().toLowerCase().contains(
-                                    pageReqVO.getApplicationName().toLowerCase().trim());
-                })
-                .collect(Collectors.toList());
-
-        // 返回过滤后的结果和总数
-        return new PageResult<>(filteredList, (long) filteredList.size());
+    public void deleteCorpAppRelationByCorpId(Long corpID) {
+        corpAppRelationDataRepository.deleteCorpAppRelationByCorpId(corpID);
     }
 }
 

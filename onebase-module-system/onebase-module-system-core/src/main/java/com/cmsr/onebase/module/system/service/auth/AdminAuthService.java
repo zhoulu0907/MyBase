@@ -97,5 +97,5 @@ public interface AdminAuthService {
      * @param reqVO 登录信息
      * @return 登录结果
      */
-    AuthLoginRespVO enterpriseLogin(@Valid AuthLoginReqVO reqVO);
+    AuthLoginRespVO corpLogin(@Valid AuthLoginReqVO reqVO);
 }

@@ -76,8 +76,8 @@ public class AuthController {
     @PostMapping("/corp-login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")
-    public CommonResult<AuthLoginRespVO> enterpriseLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {
-        return success(authService.enterpriseLogin(reqVO));
+    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {
+        return success(authService.corpLogin(reqVO));
     }
 
     @PostMapping("/logout")

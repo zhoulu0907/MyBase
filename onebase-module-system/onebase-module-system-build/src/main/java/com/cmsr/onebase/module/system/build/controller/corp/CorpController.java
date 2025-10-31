@@ -4,17 +4,13 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.dataobject.enterprise.CorpDO;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.vo.corp.*;
-import com.cmsr.onebase.module.system.vo.dept.DeptListReqVO;
-import com.cmsr.onebase.module.system.vo.dept.DeptSimpleRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -55,6 +51,15 @@ public class CorpController {
         return success(true);
     }
 
+
+    @PostMapping("update-status")
+    @Operation(summary = "企业启用/禁用")
+    @PreAuthorize("@ss.hasPermission('system:corp:update')")
+    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
+        corpService.updateStatus(id, status);
+        return success(true);
+    }
+
     @PostMapping("delete")
     @Operation(summary = "删除企业")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
@@ -64,25 +69,17 @@ public class CorpController {
         return success(true);
     }
 
-    @PostMapping("update-status")
-    @Operation(summary = "企业启用/禁用")
-    @PreAuthorize("@ss.hasPermission('system:corp:update')")
-    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id,@RequestParam("status") Long status) {
-        corpService.updateStatus(id,status);
-        return success(true);
-    }
-
     @GetMapping("page")
-    @Operation(summary = "获得企业分页")
+    @Operation(summary = "获得企业列表-分页")
     @PreAuthorize("@ss.hasPermission('system:corp:query')")
-    public CommonResult<PageResult<CorpRespVO>> getCorpPage(@Valid  CorpPageReqVO pageReqVO) {
+    public CommonResult<PageResult<CorpRespVO>> getCorpPage(@Valid CorpPageReqVO pageReqVO) {
         PageResult<CorpRespVO> pageResult = corpService.getCorpPage(pageReqVO);
         return success(pageResult);
     }
 
     @GetMapping(value = {"/simple-list"})
-    @PreAuthorize("@ss.hasPermission('system:corp:query')")
     @Operation(summary = "获取企业精简信息列表-不分页", description = "只包含被开启的企业，主要用于前端的下拉选项")
+    @PreAuthorize("@ss.hasPermission('system:corp:query')")
     public CommonResult<List<CorpSimpleRespVO>> getSimpleCorpList() {
         List<CorpDO> list = corpService.getSimpleCorpList(CommonStatusEnum.ENABLE.getStatus());
         return success(BeanUtils.toBean(list, CorpSimpleRespVO.class));
@@ -95,5 +92,4 @@ public class CorpController {
         CorpRespVO corp = corpService.getCorp(id);
         return success(corp);
     }
-
 }
