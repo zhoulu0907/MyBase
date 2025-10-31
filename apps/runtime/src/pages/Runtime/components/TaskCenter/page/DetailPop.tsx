@@ -3,7 +3,7 @@ import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
-import { LISTTYPE } from '@onebase/app';
+import { LISTTYPE, FlowStatusMap } from '@onebase/app';
 import DetailTable from './DetailTable';
 import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
@@ -26,6 +26,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   let [isShowRight, setIsShowRight] = useState(true);
   const [popupVisible, setPopupVisible] = useState(false);
   const [stepData, setStepData] = useState();
+  const [detailData, setDetailData] = useState();
   let confirmRef = useRef<any>(null);
 
   function toggleFullScreen(type: string) {
@@ -97,10 +98,15 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
     const res = await getOperatorRecord({ instanceId: rowData?.instanceId });
     setStepData(res);
   };
+  const fetchDetailData = async () => {
+    const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: rowData?.taskId });
+    setDetailData(res);
+  };
 
   useEffect(() => {
-    if (listType === LISTTYPE.WILLDO || listType === LISTTYPE.IDONE) {
+    if (listType === LISTTYPE.WILLDO || listType === LISTTYPE.IDONE || listType === LISTTYPE.ICREATED) {
       fetchStepData();
+      fetchDetailData();
     } else {
       //根据列表类型请求对应的详情
     }
@@ -127,23 +133,24 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
               <p className="gray-color">当前状态</p>
               <div style={{ padding: '4px 0' }}>
                 <Tag color="arcoblue" defaultChecked checkable={false}>
-                  Lark
+                  {detailData?.currentStatus && FlowStatusMap[detailData?.currentStatus]}
                 </Tag>
               </div>
             </Col>
             <Col span={6}>
               <p className="gray-color">发起人</p>
               <div className="photo-box">
-                <p className="photo-img"></p>某某人
+                <p className="photo-img"></p>
+                {detailData?.initiatorDeptName}
               </div>
             </Col>
             <Col span={6}>
               <p className="gray-color">发起部门</p>
-              <div className="photo-box">科创中心</div>
+              <div className="photo-box">{detailData?.initiatorDeptName}</div>
             </Col>
             <Col span={6}>
               <p className="gray-color">流程版本号</p>
-              <div className="photo-box">V1</div>
+              <div className="photo-box">{detailData?.bpmVersion}</div>
             </Col>
           </Row>
           <div className="draw-content">
