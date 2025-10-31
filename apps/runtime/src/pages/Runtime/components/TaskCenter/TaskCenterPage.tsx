@@ -5,7 +5,7 @@ import Done from './page/IDone';
 import ICreated from './page/ICreated';
 import ICopied from './page/ICopied';
 import TaskProxy from './page/TaskProxy';
-
+import { TASKMENU_TYPE } from '@onebase/app';
 const TaskCenterPage: FC<any> = ({ curMenuId }) => {
   const location = useLocation();
   const pathParts = location.pathname.split('/').filter((part) => part !== '');
@@ -13,18 +13,18 @@ const TaskCenterPage: FC<any> = ({ curMenuId }) => {
   const appId = runtimeIndex !== -1 && pathParts[runtimeIndex + 1] ? pathParts[runtimeIndex + 1] : null;
 
   function renderPage() {
-    if (curMenuId === 'TASK-ineedtodo') {
+    if (curMenuId === TASKMENU_TYPE.TASKINEEDTODO) {
       return <WillDo appId={appId} />;
-    } else if (curMenuId === 'TASK-ihavedone') {
+    } else if (curMenuId === TASKMENU_TYPE.TASKIHAVEDONE) {
       return <Done appId={appId} />;
-    } else if (curMenuId === 'TASK-icreated') {
+    } else if (curMenuId === TASKMENU_TYPE.TASKICREATED) {
       return <ICreated />;
-    } else if (curMenuId === 'TASK-icopied') {
+    } else if (curMenuId === TASKMENU_TYPE.TASKICOPIED) {
       return <ICopied />;
-    } else if (curMenuId === 'TASK-taskproxy') {
+    } else if (curMenuId === TASKMENU_TYPE.TASKTASKPROXY) {
       return <TaskProxy />;
     } else {
-      return <section>123</section>;
+      return <></>;
     }
   }
   return <>{renderPage()}</>;

@@ -8,6 +8,7 @@ import {
   listApplicationMenu,
   MenuType,
   VisibleType,
+  TASKMENU_TYPE,
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
@@ -163,7 +164,7 @@ const Runtime: React.FC = () => {
   function getMenuArr() {
     return [
       {
-        id: 'TASK-ineedtodo',
+        id: TASKMENU_TYPE.TASKINEEDTODO,
         isVisible: 1,
         menuCode: 'ineedtodo',
         menuIcon: 'ineedtodo-icon',
@@ -173,7 +174,7 @@ const Runtime: React.FC = () => {
         parentId: '0'
       },
       {
-        id: 'TASK-ihavedone',
+        id: TASKMENU_TYPE.TASKIHAVEDONE,
         isVisible: 1,
         menuCode: 'ihavedone',
         menuIcon: 'ihavedone-icon',
@@ -183,7 +184,7 @@ const Runtime: React.FC = () => {
         parentId: '0'
       },
       {
-        id: 'TASK-icreated',
+        id: TASKMENU_TYPE.TASKICREATED,
         isVisible: 1,
         menuCode: 'icreated',
         menuIcon: 'icreated-icon',
@@ -193,7 +194,7 @@ const Runtime: React.FC = () => {
         parentId: '0'
       },
       {
-        id: 'TASK-icopied',
+        id: TASKMENU_TYPE.TASKICOPIED,
         isVisible: 1,
         menuCode: 'icopied',
         menuIcon: 'icopied-icon',
@@ -203,7 +204,7 @@ const Runtime: React.FC = () => {
         parentId: '0'
       },
       {
-        id: 'TASK-taskproxy',
+        id: TASKMENU_TYPE.TASKTASKPROXY,
         isVisible: 1,
         menuCode: 'taskproxy',
         menuIcon: 'taskproxy-icon',
