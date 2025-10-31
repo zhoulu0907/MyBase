@@ -64,6 +64,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     protected ValidationManager validationManager;
     @Resource
     protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionManager permissionManager;
+    @Resource
+    protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionQueryHelper permissionQueryHelper;
 
     // ========== 公共方法 ==========
 
@@ -659,5 +661,77 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             }
         }
         return newData;
+    }
+
+    // ========== 权限查询辅助方法 ==========
+
+    /**
+     * 应用查询权限过滤
+     * 
+     * 在查询前调用，向 ConfigStore 添加数据权限过滤条件
+     * 供子类在 queryData、getData 等查询方法中使用
+     *
+     * @param configStore Anyline 查询配置
+     * @param context 处理上下文
+     */
+    protected void applyQueryPermissionFilter(org.anyline.data.param.ConfigStore configStore,
+                                               ProcessContext context) {
+        if (context.getMetadataPermissionContext() == null) {
+            log.debug("权限上下文为空，跳过查询权限过滤");
+            return;
+        }
+
+        permissionQueryHelper.applyQueryPermissionFilter(
+                configStore,
+                context.getMetadataPermissionContext(),
+                context.getLoginUserCtx(),
+                context.getFields()
+        );
+    }
+
+    /**
+     * 过滤查询结果中的字段
+     * 
+     * 在查询后调用，移除用户无权读取的字段
+     * 供子类在 getData 等单条查询方法中使用
+     *
+     * @param data 查询结果数据
+     * @param context 处理上下文
+     * @return 过滤后的数据
+     */
+    protected Map<String, Object> filterQueryResultFields(Map<String, Object> data,
+                                                           ProcessContext context) {
+        if (context.getMetadataPermissionContext() == null) {
+            return data;
+        }
+
+        return permissionQueryHelper.filterQueryResult(
+                data,
+                context.getMetadataPermissionContext(),
+                context.getFields()
+        );
+    }
+
+    /**
+     * 批量过滤查询结果列表中的字段
+     * 
+     * 在查询后调用，移除用户无权读取的字段
+     * 供子类在 queryData 等列表查询方法中使用
+     *
+     * @param dataList 查询结果列表
+     * @param context 处理上下文
+     * @return 过滤后的数据列表
+     */
+    protected List<Map<String, Object>> filterQueryResultListFields(List<Map<String, Object>> dataList,
+                                                                      ProcessContext context) {
+        if (context.getMetadataPermissionContext() == null) {
+            return dataList;
+        }
+
+        return permissionQueryHelper.filterQueryResultList(
+                dataList,
+                context.getMetadataPermissionContext(),
+                context.getFields()
+        );
     }
 }

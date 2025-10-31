@@ -43,7 +43,9 @@
 
 ## 三、核心组件
 
-### 3.1 PermissionChecker 接口
+### 3.1 权限校验组件
+
+#### 3.1.1 PermissionChecker 接口
 
 权限校验器的统一接口，定义了所有权限校验器必须实现的方法。
 
@@ -129,12 +131,48 @@ public interface PermissionChecker {
 - 实现权限缓存机制
 - 支持权限继承和覆盖规则
 
-### 3.5 PermissionDeniedException（权限异常）
+#### 3.1.5 PermissionDeniedException（权限异常）
 
 权限校验失败时抛出的统一异常，包含：
 - 权限类型（permissionType）
 - 被拒绝的具体权限标识（deniedPermission）
 - 详细错误消息
+
+### 3.2 权限查询组件
+
+#### 3.2.1 DataPermissionFilterBuilder（数据权限过滤器）
+
+**职责**：根据数据权限配置，构建 SQL 查询条件
+
+**功能**：
+- 将数据权限配置转换为 Anyline ConfigStore 查询条件
+- 支持权限标签（全部数据、本人提交、本部门提交等）
+- 支持权限级别（本人、指定部门、指定人员等）
+- 支持自定义过滤条件
+
+**使用场景**：在查询时过滤用户无权访问的数据行
+
+#### 3.2.2 FieldPermissionFilter（字段权限过滤器）
+
+**职责**：过滤查询结果中的字段
+
+**功能**：
+- 移除用户无权读取的字段
+- 保留系统字段（ID、created_at等）
+- 支持单条数据和列表数据的过滤
+
+**使用场景**：在查询后过滤用户无权查看的字段
+
+#### 3.2.3 PermissionQueryHelper（权限查询辅助类）
+
+**职责**：提供统一的权限查询接口
+
+**功能**：
+- 应用数据权限过滤（查询前）
+- 应用字段权限过滤（查询后）
+- 获取可查询的字段列表
+
+**使用场景**：供业务服务层调用，简化权限过滤的使用
 
 ## 四、权限模型
 
@@ -220,7 +258,7 @@ public class FieldPermissionItem {
 
 ## 五、使用示例
 
-### 5.1 在业务服务中使用
+### 5.1 权限校验使用示例
 
 ```java
 @Service
@@ -256,7 +294,58 @@ MetadataPermissionContext permissionContext = permissionContextBuilder
 requestContext.setPermissionContext(permissionContext);
 ```
 
-### 5.3 快速检查单个操作权限
+### 5.3 权限查询使用示例
+
+#### 5.3.1 单条数据查询
+
+```java
+@Override
+protected Map<String, Object> getData(ProcessContext context) {
+    // 1. 准备查询
+    AnylineService<?> temporaryService = context.getTemporaryService();
+    String tableName = context.getEntity().getTableName();
+    Object id = context.getId();
+    
+    // 2. 执行查询
+    Map<String, Object> resultData = queryDataByIdWithService(
+            temporaryService, tableName, id, context.getFields());
+    
+    // 3. 应用字段权限过滤
+    resultData = filterQueryResultFields(resultData, context);
+    
+    return resultData;
+}
+```
+
+#### 5.3.2 分页查询
+
+```java
+protected Map<String, Object> queryData(ProcessContext context) {
+    // 1. 构建查询条件
+    ConfigStore configs = new DefaultConfigStore();
+    
+    // 1.1 添加业务过滤条件
+    // ... 业务过滤逻辑 ...
+    
+    // 1.2 应用数据权限过滤（关键步骤）
+    applyQueryPermissionFilter(configs, context);
+    
+    // 2. 执行查询
+    DataSet dataSet = temporaryService.querys(tableName, configs);
+    
+    // 3. 转换结果
+    List<Map<String, Object>> list = convertDataSetToList(dataSet);
+    
+    // 4. 应用字段权限过滤（关键步骤）
+    list = filterQueryResultListFields(list, context);
+    
+    return buildPageResult(list, total);
+}
+```
+
+详细的权限查询使用指南请参考：[权限查询框架使用指南.md](./权限查询框架使用指南.md)
+
+### 5.4 快速检查单个操作权限
 
 ```java
 @Resource
