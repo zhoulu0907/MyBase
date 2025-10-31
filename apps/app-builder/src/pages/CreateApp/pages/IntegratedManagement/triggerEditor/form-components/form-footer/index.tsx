@@ -278,7 +278,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         const fields = nodeInfo.props.form.getFieldValue('fields');
         param = { ...param, fields };
       }
-      if (curNode && curNode.type === NodeType.NAGIVATE) {
+      if (curNode && curNode.type === NodeType.NAVIGATE) {
         const paramFields = nodeInfo.props.form.getFieldValue('paramFields');
         param = { ...param, paramFields };
       }
