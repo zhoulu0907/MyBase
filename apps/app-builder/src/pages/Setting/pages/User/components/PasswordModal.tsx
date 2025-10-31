@@ -15,7 +15,15 @@ const PasswordModal: React.FC<ResetPasswordModalProps> = ({ visible, onCancel, o
   };
 
   return (
-    <Modal title="重置密码" visible={visible} onCancel={onCancel} onOk={handleOk} autoFocus={false} focusLock={true}>
+    <Modal
+      title="重置密码"
+      visible={visible}
+      onCancel={onCancel}
+      onOk={handleOk}
+      autoFocus={false}
+      focusLock={true}
+      okButtonProps={{ status: 'danger' }}
+    >
       <Form form={form} layout="vertical">
         <Form.Item
           label="新密码"

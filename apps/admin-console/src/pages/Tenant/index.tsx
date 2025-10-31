@@ -784,7 +784,7 @@ const TenantManagement: React.FC = () => {
       </Modal>
 
       {/* 删除弹窗 */}
-      <Modal title={`确认要删除空间（${currentTenant?.name}）吗？`} visible={confirmDeleteVisible} onOk={confirmDelete} onCancel={() => setConfirmDeleteVisible(false)}>
+      <Modal title={`确认要删除空间（${currentTenant?.name}）吗？`} okButtonProps={{ status: 'danger' }} visible={confirmDeleteVisible} onOk={confirmDelete} onCancel={() => setConfirmDeleteVisible(false)}>
         <div style={{ marginBottom: 20 }}>
           <p>
             删除空间，该空间下的企业、用户等数据将被永久删除，操作不可逆，请谨慎操作。

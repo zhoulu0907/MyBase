@@ -32,13 +32,17 @@ export const TENANT_USER_UPDATE = 'tenant:user:update'; // 修改用户
 export const TENANT_USER_DELETE = 'tenant:user:delete'; // 删除用户
 export const TENANT_USER_STATUS = 'tenant:user:enable'; // 启用/禁用用户
 export const TENANT_USER_RESET = 'tenant:user:reset'; // 重置密码
+export const TENANT_USER_IMPORT = 'tenant:user:import'; // 数据导入 // todo
+export const TENANT_USER_EXPORT = 'tenant:user:import'; // 数据导出 // todo
 export const TENANT_USER_PERMISSION = {
   QUERY: TENANT_USER_QUERY,
   CREATE: TENANT_USER_CREATE,
   UPDATE: TENANT_USER_UPDATE,
   DELETE: TENANT_USER_DELETE,
   RESET: TENANT_USER_RESET,
-  STATUS: TENANT_USER_STATUS
+  STATUS: TENANT_USER_STATUS,
+  IMPORT: TENANT_USER_IMPORT,
+  EXPORT: TENANT_USER_EXPORT
 }
 
 /** 租户管理-角色管理 */
