@@ -6,7 +6,7 @@ import { WorkflowNodeType } from '../constants';
 export const InitiateNodeRegistry: FlowNodeRegistry = {
   type: WorkflowNodeType.INITIATION,
   id:'initiation',
-  title: '发起',
+  name: '发起',
   category: 'interaction',
   meta: {
     isStart: false,
