@@ -82,7 +82,7 @@ export const useFieldManager = (
 
   // 处理配置确认
   const handleConfigConfirm = useCallback(
-    (fieldType: string, fieldId: string, configData: unknown, dictTypeId?: string | number) => {
+    (fieldType: string, fieldId: string, configData: unknown, dictTypeId?: string) => {
       let fieldConfig = {};
       switch (fieldType) {
         case ENTITY_FIELD_TYPE.SELECT.VALUE:
