@@ -67,7 +67,7 @@ export default function RoleModal({ visible, onCancel, onOk, confirmLoading, ini
 
   return (
     <Modal
-      title={modalTitle}
+      title={<div style={{ textAlign: 'left' }}>{modalTitle}</div>}
       visible={visible}
       onOk={handleConfirm}
       onCancel={handleCancel}
