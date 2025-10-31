@@ -8,7 +8,7 @@ import java.util.List;
 
 @Schema(description = "数据工厂 - 数据流 VO")
 @Data
-public class ETLBriefVO {
+public class ETLWorkflowBriefVO {
 
     @Schema(description = "数据流ID")
     private Long id;

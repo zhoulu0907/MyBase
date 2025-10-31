@@ -18,6 +18,9 @@ public class ETLWorkflowDO extends TenantBaseDO {
     @Column(name = "config")
     private String config;
 
+    @Column(name = "is_enabled")
+    private Integer isEnabled;
+
     // FIXED, OBSERVE, MANUALLY(default)
     @Column(name = "schedule_strategy")
     private String scheduleStrategy;

@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.ds.model.common.Result;
 import com.cmsr.onebase.framework.ds.model.schedule.ScheduleInfoResp;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDefinitionResp;
+import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDetailedResp;
 import com.cmsr.onebase.framework.ds.model.workflow.sub.ComplementTime;
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -36,8 +37,8 @@ public interface DolphinschedulerClientStub {
                                                              @Path("code") Long workflowCode);
 
     @GET("projects/{projectCode}/workflow-definition/query-by-name")
-    Call<Result<WorkflowDefinitionResp>> queryWorkflowByName(@Path("projectCode") Long projectCode,
-                                                             @Query("name") String name);
+    Call<Result<WorkflowDetailedResp>> queryWorkflowByName(@Path("projectCode") Long projectCode,
+                                                           @Query("name") String name);
 
     // online or offline diff by param
     @POST("projects/{projectCode}/workflow-definition/{workflowCode}/release")

@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Table(name = "etl_workflow_table")
-public class ETLWorkflowTable extends TenantBaseDO {
+public class ETLWorkflowTableDO extends TenantBaseDO {
 
     @Column(name = "application_id")
     private Long applicationId;

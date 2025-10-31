@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(name = "etl_schedule_job")
-public class ETLScheduleJob extends TenantBaseDO {
+public class ETLScheduleJobDO extends TenantBaseDO {
 
     @Column(name = "application_id")
     private Long applicationId;

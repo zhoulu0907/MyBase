@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(name = "etl_execution_log")
-public class ETLExecutionLog extends TenantBaseDO {
+public class ETLExecutionLogDO extends TenantBaseDO {
 
     @Column(name = "application_id")
     private Long applicationId;
