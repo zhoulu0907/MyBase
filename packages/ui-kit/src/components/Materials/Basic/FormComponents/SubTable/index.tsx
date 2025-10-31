@@ -291,7 +291,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 style={{
                   width: '100%'
                 }}
-                border={true}
+                border={{
+                  headerCell: true,
+                  wrapper: true,
+                }}
                 rowKey="id"
                 pagination={false}
               />
