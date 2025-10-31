@@ -2,11 +2,11 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject.sub;
 
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class ObserveSchedule implements ScheduleConfig {
-    private List<String> updateTrigger;
+    private Set<String> triggers;
 
     @Override
     public boolean isScheduled() {

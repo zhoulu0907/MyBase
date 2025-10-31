@@ -5,13 +5,11 @@ import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 import lombok.Data;
 
 @Data
-public class ETLScheduleVO {
-    private Long etlId;
+public class ETLScheduleConfigVO {
 
     private String etlName;
 
-    private ScheduleType updateStrategy;
+    private ScheduleType scheduleStrategy;
 
     private ScheduleConfig config;
-
 }

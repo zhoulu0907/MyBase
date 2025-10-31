@@ -33,7 +33,7 @@ public interface DolphinschedulerClientStub {
                                         @Path("workflowCode") Long workflowCode);
 
     @GET("projects/{projectCode}/workflow-definition/{code}")
-    Call<Result<WorkflowDefinitionResp>> queryWorkflowByCode(@Path("projectCode") Long projectCode,
+    Call<Result<WorkflowDetailedResp>> queryWorkflowByCode(@Path("projectCode") Long projectCode,
                                                              @Path("code") Long workflowCode);
 
     @GET("projects/{projectCode}/workflow-definition/query-by-name")

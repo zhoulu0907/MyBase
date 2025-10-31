@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLPageReqVO;
-import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLScheduleVO;
+import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLScheduleConfigVO;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLWorkflowBriefVO;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLWorkflowDetailVO;
 
@@ -20,7 +20,7 @@ public interface ETLWorkflowService {
 
     void startWorkflowManually(Long etlId);
 
-    void configScheduleStrategy(ETLScheduleVO scheduleVO);
+    void configScheduleStrategy(ETLScheduleConfigVO scheduleVO);
 
     void getWorkflowExecutionLogs(Long etlId);
 
