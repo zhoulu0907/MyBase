@@ -26,4 +26,8 @@ public class ProcessContext {
     private Map<String, Object> processedData; // 处理后的数据
     private AnylineService<?> temporaryService;
     private Long menuId;
+    /**
+     * 子表上下文数据
+     */
+    private List<MetadataDataMethodSubEntityContext> subEntities;
 }

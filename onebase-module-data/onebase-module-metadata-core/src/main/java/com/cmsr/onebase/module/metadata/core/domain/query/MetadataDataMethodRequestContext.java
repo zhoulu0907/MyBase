@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -44,6 +45,13 @@ public class MetadataDataMethodRequestContext {
      * 菜单ID（如果是runtime调用，必填）
      */
     private Long menuId;
+
+    /**
+     * 子表上下文数据
+     */
+    private List<MetadataDataMethodSubEntityContext> subEntities;
+
+
 
 
 

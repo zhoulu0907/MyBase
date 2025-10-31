@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
@@ -22,6 +23,7 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -89,6 +91,17 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         methodCoreContext.setBusinessTraceId(reqVO.getBusinessTraceId());
         methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
+        if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+            List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+                MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+                metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+                metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+                return metadataDataMethodSubEntityContext;
+            }).collect(Collectors.toList());
+            methodCoreContext.setSubEntities(entityContexts);
+        }
+
+
         // 调用core模块的基础服务
         Map<String, Object> resultData = coreDataMethodService.createData(
                 methodCoreContext
@@ -153,6 +166,15 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         methodCoreContext.setMenuId(reqVO.getMenuId());
         methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
 
+        if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+            List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+                MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+                metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+                metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+                return metadataDataMethodSubEntityContext;
+            }).collect(Collectors.toList());
+            methodCoreContext.setSubEntities(entityContexts);
+        }
 
         // 调用core模块的基础服务 更新主表信息
         Map<String, Object> resultData = coreDataMethodService.updateData(methodCoreContext);
@@ -270,6 +292,16 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                     metadataDataMethodRequestContext.setMenuId(reqVO.getMenuId());
                     metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
 
+                    if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+                        List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+                            MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+                            metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+                            metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+                            return metadataDataMethodSubEntityContext;
+                        }).collect(Collectors.toList());
+                        methodCoreContext.setSubEntities(entityContexts);
+                    }
+
                     coreDataMethodService.updateData(
                             metadataDataMethodRequestContext
                     );
@@ -320,6 +352,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         metadataDataMethodRequestContext.setId(reqVO.getId());
         metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
         metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
+
 
 
         // 调用core模块的基础服务

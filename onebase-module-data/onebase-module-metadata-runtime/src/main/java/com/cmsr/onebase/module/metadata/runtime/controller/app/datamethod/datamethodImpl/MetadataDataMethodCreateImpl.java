@@ -317,6 +317,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
             log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
 
+
+            super.storeData(context);
+
             // 8. 查询插入后的完整数据
             Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
             log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
@@ -334,6 +337,11 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             return buildDataResponse(entity, resultData, fields);
 
         });
+    }
+
+    @Override
+    protected void handleSubEntities(ProcessContext context) {
+
     }
 
     @Override

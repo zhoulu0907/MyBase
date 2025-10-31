@@ -132,10 +132,16 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             }
             boolean ok = deleteCount > 0;
             if(ok){
-                processCascadeDelete(context);//级联删除
+               super.storeData(context);
             }
             return ok;
         });
+    }
+
+    @Override
+    protected void handleSubEntities(ProcessContext context) {
+        //处理子表逻辑
+        processCascadeDelete(context);//级联删除
     }
 
     /**
