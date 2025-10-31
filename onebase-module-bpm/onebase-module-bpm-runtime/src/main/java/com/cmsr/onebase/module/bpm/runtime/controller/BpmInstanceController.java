@@ -65,5 +65,17 @@ public class BpmInstanceController {
         log.info("获取流程详情: {}, {}", taskId, instanceId);
         return CommonResult.success(bpmExecService.getFormDetail(taskId, instanceId));
     }
+    /**
+     * 流程预览
+     *
+     * @param flowCode 流程编码
+     */
+    @GetMapping("/flow-preview")
+    @Operation(summary = "流程预览")
+    public CommonResult<List<BpmFlowPreviewVO>> flowPreview(@RequestParam  String flowCode) {
+      log.info("流程预览: flowCode{}");
+        return CommonResult.success(bpmExecService.flowPreview(flowCode)) ;
+
+    }
 
 }
