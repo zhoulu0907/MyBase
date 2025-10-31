@@ -211,12 +211,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       style={style}
     >
       <Tooltip content={menuName} position="top">
-        <div
-          className={styles.menuName}
-          style={{
-            maxWidth: maxWidth + 'px'
-          }}
-        >
+        <div className={styles.menuName}>
           <DynamicIcon
             IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
             theme="outline"
@@ -224,7 +219,9 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
             style={{ marginRight: 16 }}
           />
-          {label}
+          <span className={styles.name} style={{ maxWidth: maxWidth + 'px' }}>
+            {label}
+          </span>
         </div>
       </Tooltip>
       {isVisible === VisibleType.HIDDEN && (

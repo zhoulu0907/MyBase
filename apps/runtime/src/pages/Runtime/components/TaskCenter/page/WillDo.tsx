@@ -3,10 +3,22 @@ import { Table, type TableColumnProps, Button, Tag, Link } from '@arco-design/we
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import BatchApproveModal from '../modal/batchApprove';
-import { FLOWSTATUS_TYPE, FlowStatusMap } from '@onebase/app';
+import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
 import dayjs from 'dayjs';
 import '../style/tcPage.less';
+
+ const getTimeAgo = (time) => {
+   const now = Date.now();
+   const diff = now - time;
+   const minutes = Math.floor(diff / 60000);
+   const hours = Math.floor(minutes / 60);
+   const days = Math.floor(hours / 24);
+   if (days > 0) return `${days}天前`;
+   if (hours > 0) return `${hours}小时前`;
+   if (minutes > 0) return `${minutes}分钟前`;
+   return '刚刚';
+ };
 
 const WillDo: FC = ({ appId }) => {
   const columns: TableColumnProps[] = [
@@ -62,9 +74,7 @@ const WillDo: FC = ({ appId }) => {
     {
       title: '到达时间',
       dataIndex: 'arrivalTime',
-      render: (value: number) => {
-        return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
-      }
+      render: (value: number) => <span style={{ color: '#FF7D00' }}>{getTimeAgo(value)}</span>
     },
     {
       title: '发起时间',
@@ -93,7 +103,7 @@ const WillDo: FC = ({ appId }) => {
   let [tbRowSelection, setTbRowSelection] = useState<any>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<any>();
   const [data, setData] = useState<any>();
-  const [instanceId, setInstanceId] = useState('');
+  const [rowData, setRowData] = useState();
   const [taskId, setTaskId] = useState('');
   let [detailPopVisible, setPopVisible] = useState(false);
   let [approveVisible, setApproveVisible] = useState(false);
@@ -119,14 +129,14 @@ const WillDo: FC = ({ appId }) => {
 
   function handleDetailPage(row: any) {
     console.log('click to detail page === row ===', row);
-    setInstanceId(row?.instanceId);
     setTaskId(row?.taskId);
     setPopVisible(true);
+    setRowData(row);
   }
 
   const fetchFormData = async () => {
     const req = {
-      appId,
+      appId
       //   pageNo: 1,
       //   pageSize: 10,
       //   processTitle: '',
@@ -180,8 +190,9 @@ const WillDo: FC = ({ appId }) => {
           detailPopVisible={detailPopVisible}
           setPopVisible={setPopVisible}
           onBack={onBack}
-          instanceId={instanceId}
           taskId={taskId}
+          rowData={rowData}
+          listType={LISTTYPE.WILLDO}
         />
       )}
       {approveVisible && <BatchApproveModal approveVisible={approveVisible} setApproveVisible={setApproveVisible} />}

@@ -3,13 +3,14 @@
  */
 import { Radio } from '@arco-design/web-react';
 import styles from './index.module.less';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../../../header';
 import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
 import { ApproveDrawerTab } from './constant';
+import { useLocation } from 'react-router-dom';
 import type {
   ApproverConfigDataType,
   ApproverConfigType,
@@ -17,10 +18,15 @@ import type {
   FieldPermConfigType,
   ApproveDrawerProps
 } from './constant';
+import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 
 const RadioGroup = Radio.Group;
 
 export default function ApproveDreawer({ handleConfigSubmit, configData }: ApproveDrawerProps) {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const pageSetId = searchParams.get('pageSetId') || '';
+  const [ckOptions, setCkOptions] = useState([]);
   const [useApprover, setApprover] = useState<string>('approver');
   const [approverConfigData, setApproverConfigData] = useState<ApproverConfigDataType>(
     configData || {
@@ -28,9 +34,12 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
         approvalMode: 'any_sign'
       },
       buttonConfigs: [],
-      fieldPermConfig: {}
+      fieldPermConfig: {
+        useNodeConfig: false
+      }
     }
   );
+  const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
 
   function setApprovalConfigData<T extends keyof ApproverConfigDataType>(
     key: T,
@@ -51,8 +60,15 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
       return newData;
     });
   }
-  const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
+  const getMainMetaData = async () => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+    const { parentFields } = await getEntityFieldsWithChildren(mainMetaData);
+    setCkOptions(parentFields);
+  };
 
+  useEffect(() => {
+    getMainMetaData();
+  }, []);
   const renderContent = () => {
     switch (useApprover) {
       case ApproveDrawerTab.APPROVER:
@@ -60,7 +76,13 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
       case ApproveDrawerTab.APPROVER_BTN:
         return <ApproverBtnConfig setApprovalConfigData={setApprovalConfigData} buttonConfigs={buttonConfigs || []} />;
       case ApproveDrawerTab.FIELD_PERMISSIONS:
-        return <FieldConfig setApprovalConfigData={setApprovalConfigData} fieldPermConfig={fieldPermConfig || {}} />;
+        return (
+          <FieldConfig
+            setApprovalConfigData={setApprovalConfigData}
+            fieldPermConfig={fieldPermConfig || {}}
+            ckOptions={ckOptions}
+          />
+        );
       case ApproveDrawerTab.ADVANCED_SETTINGS:
         return <div>高级设置</div>;
       default:

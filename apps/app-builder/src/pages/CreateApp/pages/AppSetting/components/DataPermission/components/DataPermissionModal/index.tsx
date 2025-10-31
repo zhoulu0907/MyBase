@@ -45,8 +45,8 @@ const PERMISSIONSCOPE_DICT = [
   { value: 'subDepartmentSubmit', label: '下级部门提交', disabled: false }
 ];
 const OperationOptions = [
-  { value: 'EDIT', label: '可编辑', disabled: false },
-  { value: 'DELETE', label: '可删除', disabled: false }
+  { value: 'edit', label: '可编辑', disabled: false },
+  { value: 'delete', label: '可删除', disabled: false }
 ];
 const dataPermissionScope: ScopeTypeOption[] = [
   { label: '本人', value: 'self' },
