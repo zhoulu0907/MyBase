@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.*;
 import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
@@ -15,9 +17,6 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
-import com.cmsr.onebase.module.metadata.core.domain.query.QueryRequest;
-import com.cmsr.onebase.module.metadata.core.domain.query.QueryResult;
-import com.cmsr.onebase.module.metadata.core.domain.query.RowData;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.query.MetadataQueryService;
 import com.cmsr.onebase.module.metadata.api.datamethod.assembler.DataMethodAssembler;

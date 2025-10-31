@@ -22,6 +22,8 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.service.AnylineService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -475,7 +477,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         processContext.setData(requestContext.getData());
         processContext.setMethodCode(requestContext.getMethodCode());
         processContext.setId(requestContext.getId());
-
+        processContext.setSubEntities(requestContext.getSubEntities());
         // 5. 获取临时数据源服务
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entityDO.getDatasourceId());
         if (datasource == null) {
@@ -557,37 +559,18 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      */
     protected void storeData(ProcessContext context) {
 
-        MetadataBusinessEntityDO entity = context.getEntity();
-
-        Map<String, Object> processedData = context.getProcessedData();
-
-        Long entityId = context.getEntityId();
-        List<MetadataEntityFieldDO> fields = context.getFields();
-
-        // 5. 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-        if (datasource == null) {
-            throw exception(DATASOURCE_NOT_EXISTS);
+        //处理子表逻辑
+        if (CollectionUtils.isNotEmpty(context.getSubEntities())) {
+            handleSubEntities(context);
         }
 
-        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-        log.info("成功切换到数据源：{}", datasource.getCode());
+    }
 
-        // 6. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-        TenantUtils.executeIgnore(() -> {
-
-            // 7. 执行插入
-            if (log.isDebugEnabled()) {
-                log.debug("createData -> processedData before insert: {}", processedData);
-            }
-
-
-            // 8. 查询插入后的完整数据
-            Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
-//            log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
-
-
-        }); // TenantUtils.executeIgnore 闭合
+    /**
+     * 处理子表逻辑
+     * @param context
+     */
+    protected  void handleSubEntities(ProcessContext context){
 
     }
 

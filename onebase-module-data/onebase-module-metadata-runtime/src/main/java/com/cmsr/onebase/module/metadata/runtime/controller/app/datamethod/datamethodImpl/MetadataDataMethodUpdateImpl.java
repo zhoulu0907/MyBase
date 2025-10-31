@@ -194,9 +194,15 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
             DataRow dataRow = new DataRow(processedData);
             long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
             log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
+            super.storeData(context);
 
             return null;
         });
+    }
+
+    @Override
+    protected void handleSubEntities(ProcessContext context) {
+        //todo 处理子表逻辑
     }
 
     @Override
