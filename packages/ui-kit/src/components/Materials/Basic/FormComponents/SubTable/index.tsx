@@ -202,6 +202,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ),
         dataIndex: column.id,
         key: column.id,
+        bodyCellStyle:{
+          padding: '4px 0'
+        },
         render: (_text: string, _record: any, index: number) => {
           const config = {
             ...pageComponentSchemas[column.id].config,
@@ -272,7 +275,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         labelCol={{
           style: { width: labelColSpan, flex: 'unset' }
         }}
-        wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           width: '100%',
