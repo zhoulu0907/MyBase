@@ -15,12 +15,13 @@ public interface ETLErrorCodeConstants {
     ErrorCode DATASOURCE_NOT_EXIST                  = new ErrorCode(110201, "数据源不存在");
     ErrorCode DATASOURCE_CODE_DUPLICATE             = new ErrorCode(110202, "数据源编码重复");
     ErrorCode DATASOURCE_PROPERTY_INSUFFICIENT      = new ErrorCode(110203, "数据源信息不齐全");
+    ErrorCode DATASOURCE_STATUS_CHANGE_ERR          = new ErrorCode(110204, "数据源状态转换异常");
 
     // 元数据采集异常
     ErrorCode INVALID_COLLECT_STATUS                = new ErrorCode(110501, "无效的采集状态");
     ErrorCode METADATA_EMPTY                        = new ErrorCode(110502, "目标元数据信息不存在");
     ErrorCode METADATA_COLLECT_FAILED               = new ErrorCode(110503, "元数据采集失败");
-    ErrorCode METADATA_COLLECT_RUNNING              = new ErrorCode(110504, "元数据采集运行中，请勿重复提交");
+    ErrorCode METADATA_COLLECT_RUNNING              = new ErrorCode(110504, "元数据采集运行中，请5分钟后再试");
 
     // 元数据类型异常
     ErrorCode ILLEGAL_METADATA_TYPE                 = new ErrorCode(110601, "元数据类型异常");

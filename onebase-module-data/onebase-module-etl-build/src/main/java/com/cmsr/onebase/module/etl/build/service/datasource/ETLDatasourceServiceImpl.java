@@ -1,9 +1,13 @@
 package com.cmsr.onebase.module.etl.build.service.datasource;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
@@ -12,6 +16,8 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.service.collector.MetadataCollectorService;
+import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourceRespVO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import jakarta.annotation.PostConstruct;
@@ -21,7 +27,6 @@ import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -80,31 +85,58 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public Boolean pingDatasource(ETLDatasourceReqVO requestVO) {
-        ETLDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, ETLDatasourceDO.class);
-        validDatasourceTypeSupported(datasourceDO.getDatasourceType());
+    public Boolean pingDatasource(ETLDatasourcePingVO pingVO) {
+        validDatasourceTypeSupported(pingVO.getDatasourceType());
+        ETLDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, ETLDatasourceDO.class);
         return metadataCollectorService.testConnection(datasourceDO);
     }
 
     @Override
-    public Long createDatasource(ETLDatasourceReqVO requestVO) {
-        validDatasourceCodeDuplicate(requestVO.getDatasourceCode(), null);
-        validDatasourceTypeSupported(requestVO.getDatasourceType());
+    public ETLDatasourceRespVO queryDatasourceDetail(Long datasourceId) {
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
+        ETLDatasourceRespVO respVO = BeanUtils.toBean(datasourceDO, ETLDatasourceRespVO.class);
+        return respVO;
+    }
 
-        ETLDatasourceDO datasourceDO = BeanUtils.toBean(requestVO, ETLDatasourceDO.class);
-        datasourceDO.setId(null);
+    @Override
+    public PageResult<ETLDatasourceRespVO> getETLDatasourcePage(ETLDatasourcePageReqVO pageReqVO) {
+        PageResult<ETLDatasourceDO> pageDOs = datasourceRepository.getETLDatasourcePage(pageReqVO);
+        List<ETLDatasourceRespVO> respVOs = pageDOs.getList()
+                .stream().map(dataobject -> {
+                    ETLDatasourceRespVO respVO = BeanUtils.toBean(dataobject, ETLDatasourceRespVO.class);
+                    // fill respVO with creator/updater information...
+                    return respVO;
+                }).toList();
+
+        return new PageResult<>(respVOs, pageDOs.getTotal());
+    }
+
+    @Override
+    public Long createDatasource(ETLDatasourceCreateReqVO createReqVO) {
+        validDatasourceCodeDuplicate(createReqVO.getDatasourceCode(), null);
+        validDatasourceTypeSupported(createReqVO.getDatasourceType());
+
+        ETLDatasourceDO datasourceDO = BeanUtils.toBean(createReqVO, ETLDatasourceDO.class);
+        // initialize collect status to `none`, infer datasource will be empty.
+        datasourceDO.setCollectStatus(CollectStatus.NONE);
         datasourceDO = datasourceRepository.insert(datasourceDO);
         return datasourceDO.getId();
     }
 
     @Override
-    public void updateDatasource(ETLDatasourceReqVO requestVO) {
-        validDatasourceCodeDuplicate(requestVO.getDatasourceCode(), requestVO.getId());
-        validDatasourceTypeSupported(requestVO.getDatasourceType());
+    public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
+        validDatasourceCodeDuplicate(updateReqVO.getDatasourceCode(), updateReqVO.getId());
+        validDatasourceTypeSupported(updateReqVO.getDatasourceType());
 
-        ETLDatasourceDO oldDatasource = datasourceRepository.findById(requestVO.getId());
-        oldDatasource.setDatasourceCode(requestVO.getDatasourceCode());
-        oldDatasource.setDatasourceName(requestVO.getDatasourceName());
+        ETLDatasourceDO oldDatasource = datasourceRepository.findById(updateReqVO.getId());
+        oldDatasource.setDatasourceCode(updateReqVO.getDatasourceCode());
+        oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
+        oldDatasource.setConfig(JsonUtils.toJsonString(updateReqVO.getConfig()));
+        oldDatasource.setReadonly(updateReqVO.getReadonly());
+        // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
 
         datasourceRepository.update(oldDatasource);
@@ -112,51 +144,29 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public void deleteDatasource(Long datasourceId) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
-        if (datasourceDO == null) {
+        boolean entityExists = datasourceRepository.existsById(datasourceId);
+        if (entityExists) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-
-        deleteAllRelated(datasourceId);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    private void deleteAllRelated(Long datasourceId) {
-        tableRepository.deleteAllByDatasourceId(datasourceId);
-        schemaRepository.deleteAllByDatasourceId(datasourceId);
-        catalogRepository.deleteAllByDatasourceId(datasourceId);
-        datasourceRepository.deleteById(datasourceId);
+        // check datasource(catalog, schema, table) not reffered by elsewhere
+        // so far, delete datasource in application is not supported;
+        throw new UnsupportedOperationException("暂不支持对数据源进行删除");
     }
 
     @Override
     public void executeMetadataCollectJob(Long datasourceId) {
-        // 托管给MetadataCollectorService
-        metadataCollectorService.submitCollectJob(datasourceId);
-    }
-
-    @Override
-    public Boolean preCheckCollectStatus(Long id) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(id);
-        // 1. 检查数据源是否存在
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        if (datasourceDO.getCollectStatus() == CollectStatus.RUNNING) {
-            // 1. 检查任务状态
-            // TODO
-        }
-        return Boolean.TRUE;
+        // 托管给MetadataCollectorService
+        metadataCollectorService.submitCollectJob(datasourceDO);
     }
 
-    private void validDatasourceCodeDuplicate(String datasourceCode, Long datasourceId) {
-        if (datasourceId == null) {
-            if (datasourceRepository.findOneByDatasourceCode(datasourceCode) != null) {
-                throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
-            }
-        } else {
-            if (datasourceRepository.findOneByDatasourceCodeAndIdNe(datasourceCode, datasourceId) != null) {
-                throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
-            }
+    private void validDatasourceCodeDuplicate(String datasourceCode, Long filterId) {
+        boolean exists = datasourceRepository.existsByDatasourceCodeFilterById(datasourceCode, filterId);
+        if (exists) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
         }
     }
 

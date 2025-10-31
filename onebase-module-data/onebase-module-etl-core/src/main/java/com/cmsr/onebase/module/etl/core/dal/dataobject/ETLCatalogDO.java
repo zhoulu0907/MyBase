@@ -5,32 +5,19 @@ import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.MetaCatalog;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.anyline.metadata.Catalog;
 import org.apache.commons.lang3.StringUtils;
 
-@Table(name = "etl_catalog")
 @Data
-@EqualsAndHashCode(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "etl_catalog")
 public class ETLCatalogDO extends TenantBaseDO {
 
-    public ETLCatalogDO setId(Long id) {
-        super.setId(id);
-        return this;
-    }
+    @Column(name = "application_id")
+    private Long applicationId;
 
     @Column(name = "datasource_id")
     private Long datasourceId;
-
-    @Column(name = "fqn_hash")
-    private String fqnHash;
 
     @Column(name = "catalog_name")
     private String catalogName;
@@ -38,14 +25,14 @@ public class ETLCatalogDO extends TenantBaseDO {
     @Column(name = "display_name")
     private String displayName;
 
-    @Column(name = "description")
-    private String description;
-
     @Column(name = "meta_info")
     private String metaInfo;
 
-    @Column(name = "meta_type")
-    private String metaType;
+    @Column(name = "remarks")
+    private String remarks;
+
+    @Column(name = "declaration")
+    private String declaration;
 
     public MetaCatalog getMetaInfo() {
         return JsonUtils.parseObject(metaInfo, MetaCatalog.class);
@@ -55,32 +42,34 @@ public class ETLCatalogDO extends TenantBaseDO {
         this.metaInfo = JsonUtils.toJsonString(metaInfo);
     }
 
-    public static ETLCatalogDO convert(Long datasourceId, Catalog catalog) {
+    public static ETLCatalogDO convert(Long applicationId, Long datasourceId, Catalog catalog) {
         ETLCatalogDO catalogDO = new ETLCatalogDO();
+        catalogDO.setApplicationId(applicationId);
         catalogDO.setDatasourceId(datasourceId);
         String name = catalog.getName();
         catalogDO.setCatalogName(name);
+        catalogDO.setDisplayName(name);
         String comment = catalog.getComment();
-        catalogDO.setDescription(comment);
-        if (StringUtils.isNotBlank(comment)) {
-            catalogDO.setDisplayName(comment);
-        } else {
-            catalogDO.setDisplayName(name);
-        }
-        String metaType = catalog.keyword();
-        catalogDO.setMetaType(metaType);
-        MetaCatalog metaCatalog = MetaCatalog.convert(catalog);
-        catalogDO.setMetaInfo(metaCatalog);
+        catalogDO.setRemarks(comment);
+        catalogDO.setDeclaration(comment);
+        MetaCatalog metaInfo = MetaCatalog.convert(catalog);
+        catalogDO.setMetaInfo(metaInfo);
+
         return catalogDO;
     }
 
-    public static void applyChanges(ETLCatalogDO oldCatalogDO, ETLCatalogDO newCatalogDO) {
-        String oldName = oldCatalogDO.getCatalogName();
-        String oldDisplayName = oldCatalogDO.getDisplayName();
-        String oldComment = oldCatalogDO.getDescription();
-        if (!StringUtils.equals(oldDisplayName, oldName) && !StringUtils.equals(oldDisplayName, oldComment)) {
-            newCatalogDO.setDisplayName(oldDisplayName);
+    public static void applyChanges(ETLCatalogDO oldDO, ETLCatalogDO newDO) {
+        String oldCatalogName = oldDO.getCatalogName();
+        String oldDisplayName = oldDO.getDisplayName();
+        String oldRemarks = oldDO.getRemarks();
+        String oldDeclaration = oldDO.getDeclaration();
+        // 采集中，保留用户自定义的别名及备注
+        if (!StringUtils.equals(oldDisplayName, oldCatalogName)) {
+            newDO.setDisplayName(oldDisplayName);
         }
-        newCatalogDO.setId(oldCatalogDO.getId());
+        if (StringUtils.isNotBlank(oldDeclaration) && !StringUtils.equals(oldDeclaration, oldRemarks)) {
+            newDO.setDeclaration(oldDeclaration);
+        }
+        newDO.setId(oldDO.getId());
     }
 }

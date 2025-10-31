@@ -5,7 +5,6 @@ import lombok.Getter;
 
 @Getter
 public enum MetadataType {
-
     TABLE("table", true),
     VIEW("view", false);
 

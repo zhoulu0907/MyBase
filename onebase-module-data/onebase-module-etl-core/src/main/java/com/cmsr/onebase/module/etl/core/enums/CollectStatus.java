@@ -12,10 +12,10 @@ public enum CollectStatus {
     REQUIRED("required", "需重新采集");
 
     @Getter
-    private String value;
+    private final String value;
 
     @Getter
-    private String description;
+    private final String description;
 
     CollectStatus(String value, String description) {
         this.value = value;
