@@ -300,7 +300,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
               </Menu>
             }
           >
-            <Button type="dashed" icon={<IconPlus />} className={styles.addRuleBtn}>
+            <Button type="outline" icon={<IconPlus />} className={styles.addRuleBtn}>
               添加规则
             </Button>
           </Dropdown>
