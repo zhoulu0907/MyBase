@@ -150,6 +150,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             bpmMyCreatedVO.setId(flowInstance.getId());
             bpmMyCreatedVO.setProcessTitle(flowInstance.getBusinessTitle());
             bpmMyCreatedVO.setFlowStatus(flowInstance.getFlowStatus());
+            bpmMyCreatedVO.setFormSummary(flowInstance.getFormSummary());
             bpmMyCreatedVO.setSubmitTime(flowInstance.getSubmitTime());
             bpmMyCreatedVO.setCreateTime(flowInstance.getCreateTime());
             bpmMyCreatedVO.setUpdateTime(flowInstance.getUpdateTime());
