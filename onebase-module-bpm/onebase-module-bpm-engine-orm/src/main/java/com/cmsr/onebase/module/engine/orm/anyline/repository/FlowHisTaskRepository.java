@@ -50,6 +50,7 @@ public class FlowHisTaskRepository extends DataRepository<FlowHisTask> {
                 LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id
                 left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
                 WHERE
+                t.approver = '%d'
                 and t1.deleted = 0
                 and t.deleted = 0
                 and t3.deleted = 0
