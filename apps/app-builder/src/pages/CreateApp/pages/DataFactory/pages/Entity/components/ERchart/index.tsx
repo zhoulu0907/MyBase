@@ -4,7 +4,7 @@ import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
 import DetailDrawer from '../Drawers/DetailDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
-import { FIELD_TYPE } from '@onebase/ui-kit';
+import { FIELD_TYPE, useNewNodeStore } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
@@ -15,7 +15,6 @@ import {
   toggleNodeShadow,
   toggleEdgeSelected
 } from './utils';
-import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
 const LINE_HEIGHT = 34.8;

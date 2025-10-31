@@ -99,7 +99,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);
 
-  const handlePropsChange = (key: string, value: string | number | boolean | any[]) => {
+  const handlePropsChange = (key: string, value: any) => {
     console.log(`更新了属性: ${key} 值为: `, value);
 
     const newCurComponentSchema = {
