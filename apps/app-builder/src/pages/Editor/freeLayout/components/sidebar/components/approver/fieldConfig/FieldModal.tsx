@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 const CheckboxGroup = Checkbox.Group;
 
 export default function FieldModal({fmVisible, setFmVisible, curKeyArr, isEdit, mergeDataToTable}: any) {
-    let [ckedKey, setCkedKey] = useState(curKeyArr)
-    let [checkedItem, setCheckedItem] = useState([])
+    const [ckedKey, setCkedKey] = useState(curKeyArr)
+    const [checkedItem, setCheckedItem] = useState([])
     const ckOptions = [
         {
             label: 'Jane Doe',

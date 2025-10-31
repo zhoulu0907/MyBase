@@ -26,3 +26,68 @@ export enum ApproveDrawerTab {
   FIELD_PERMISSIONS = 'fieldPermissions',
   ADVANCED_SETTINGS = 'advancedSettings'
 }
+
+interface User {
+  userId?: string;
+  name?: string;
+  roleId?: string;
+  roleName?: string;
+}
+
+export interface ApproverConfigType {
+  approverType?: string;
+  users?: User[];
+  roles?: User[];
+  approvalMode?: string;
+}
+
+export interface ButtonConfigType {
+  buttonName?: string;
+  buttonType?: string;
+  displayName?: string;
+  defaultApprovalComment?: string;
+  approvalCommentRequired?: boolean;
+  enabled?: boolean;
+  batchApproval?: boolean;
+}
+
+interface FieldConfig {
+  fieldId?: string;
+  fieldName?: string;
+  fieldPermType?: string;
+}
+
+export interface FieldPermConfigType {
+  useNodeConfig?: boolean;
+  fieldConfigs?: FieldConfig[];
+}
+
+export interface ApproverConfigDataType {
+  approverConfig?: ApproverConfigType;
+  buttonConfigs?: ButtonConfigType[];
+  fieldPermConfig?: FieldPermConfigType;
+  name?: string;
+}
+
+export interface ApproveDrawerProps {
+  configData: ApproverConfigDataType;
+  handleConfigSubmit: (data: ApproverConfigDataType, other: any[]) => void;
+}
+
+type ConfigKey = 'approverConfig' | 'buttonConfigs' | 'fieldPermConfig';
+
+export interface BaseConfig<T> {
+  setApprovalConfigData: (key: ConfigKey, data: T) => void;
+}
+
+export interface ApproverConfig extends BaseConfig<ApproverConfigType> {
+  approverConfig: ApproverConfigType;
+}
+
+export interface BtnConfig extends BaseConfig<ButtonConfigType[]> {
+  buttonConfigs: ButtonConfigType[];
+}
+
+export interface FieldConfigType extends BaseConfig<FieldPermConfigType> {
+  fieldPermConfig: FieldPermConfigType;
+}

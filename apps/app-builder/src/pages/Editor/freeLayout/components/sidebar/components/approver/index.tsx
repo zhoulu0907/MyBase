@@ -10,72 +10,57 @@ import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
 import { ApproveDrawerTab } from './constant';
-// import { approverConfigVar } from './constant';
+import type {
+  ApproverConfigDataType,
+  ApproverConfigType,
+  ButtonConfigType,
+  FieldPermConfigType,
+  ApproveDrawerProps
+} from './constant';
 
 const RadioGroup = Radio.Group;
-// todo(gjc):
-// 1. approverConfigData类型不要写any
-const approverConfigData: any = {
-  approverConfig: {
-    approvalMode: 'any_sign'
-  },
-  buttonConfigs: [],
-  // fieldPermConfig: {}
 
-  fieldPermConfig: {
-    useNodeConfig: true,
-    fieldConfigs: [
-      {
-        fieldId: '1',
-        fieldName: '申请人姓名',
-        fieldPermType: 'read'
-      },
-      {
-        fieldId: '2',
-        fieldName: '所属部门',
-        fieldPermType: 'read'
-      },
-      {
-        fieldId: '3',
-        fieldName: '申请事由',
-        fieldPermType: 'read'
-      },
-      {
-        fieldId: '4',
-        fieldName: '申请金额',
-        fieldPermType: 'read'
-      },
-      {
-        fieldId: '5',
-        fieldName: '审批备注',
-        fieldPermType: 'write'
-      }
-    ]
-  }
-};
-
-function setApprovalConfigData(key: string, data: Object) {
-  if (key === 'buttonConfigs') {
-    approverConfigData.buttonConfigs = data;
-  } else {
-    approverConfigData[key] = {
-      ...approverConfigData[key],
-      ...data
-    };
-  }
-}
-
-export default function ApproveDreawer({ handleConfigSubmit }: any) {
+export default function ApproveDreawer({ handleConfigSubmit, configData }: ApproveDrawerProps) {
   const [useApprover, setApprover] = useState<string>('approver');
+  const [approverConfigData, setApproverConfigData] = useState<ApproverConfigDataType>(
+    configData || {
+      approverConfig: {
+        approvalMode: 'any_sign'
+      },
+      buttonConfigs: [],
+      fieldPermConfig: {}
+    }
+  );
+
+  function setApprovalConfigData<T extends keyof ApproverConfigDataType>(
+    key: T,
+    data: T extends 'buttonConfigs' ? ButtonConfigType[] : ApproverConfigType | FieldPermConfigType
+  ) {
+    setApproverConfigData((prev) => {
+      const newData = { ...prev };
+      if (key === 'buttonConfigs') {
+        newData.buttonConfigs = data as ButtonConfigType[];
+      } else if (key === 'approverConfig') {
+        newData.approverConfig = Object.assign({}, newData.approverConfig, data) as ApproverConfigType;
+      } else if (key === 'fieldPermConfig') {
+        newData.fieldPermConfig = {
+          ...newData.fieldPermConfig,
+          ...data
+        } as FieldPermConfigType;
+      }
+      return newData;
+    });
+  }
+  const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
 
   const renderContent = () => {
     switch (useApprover) {
       case ApproveDrawerTab.APPROVER:
-        return <ApproverConfig setApprovalConfigData={setApprovalConfigData} />;
+        return <ApproverConfig setApprovalConfigData={setApprovalConfigData} approverConfig={approverConfig || {}} />;
       case ApproveDrawerTab.APPROVER_BTN:
-        return <ApproverBtnConfig setApprovalConfigData={setApprovalConfigData} />;
+        return <ApproverBtnConfig setApprovalConfigData={setApprovalConfigData} buttonConfigs={buttonConfigs || []} />;
       case ApproveDrawerTab.FIELD_PERMISSIONS:
-        return <FieldConfig setApprovalConfigData={setApprovalConfigData} />;
+        return <FieldConfig setApprovalConfigData={setApprovalConfigData} fieldPermConfig={fieldPermConfig || {}} />;
       case ApproveDrawerTab.ADVANCED_SETTINGS:
         return <div>高级设置</div>;
       default:

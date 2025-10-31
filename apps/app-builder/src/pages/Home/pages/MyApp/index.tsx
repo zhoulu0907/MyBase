@@ -382,8 +382,8 @@ const MyAppPage: React.FC = () => {
           </div>
 
           {/* 我的应用列表 */}
-          <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
-            <div className={styles.myAppList} ref={appContainerRef}>
+          <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中..." ref={appContainerRef}>
+            <div className={styles.myAppList}>
               {applicationEmpty && !loading && (
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />

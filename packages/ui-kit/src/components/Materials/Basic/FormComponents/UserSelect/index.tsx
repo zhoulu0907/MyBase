@@ -147,6 +147,9 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         ) : (
           <Select
             placeholder="请选择"
+            showSearch={true}
+            filterOption={false}
+            onSearch={debouncedSearch}
             onPopupScroll={scrollHandler}
             getPopupContainer={getPopupContainer}
             style={{
