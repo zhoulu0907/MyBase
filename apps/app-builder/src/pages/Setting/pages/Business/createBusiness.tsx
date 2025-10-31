@@ -1,187 +1,184 @@
 import styles from "./createBusiness.module.less";
-import { useState } from 'react';
-import {
-    Steps,
-    Input,
-    Select,
-    Checkbox,
-    Button,
-    Form,
-    Space,
-    Typography,
-    Message
-} from '@arco-design/web-react';
+import { useMemo, useRef, useState } from 'react';
+import { Steps, Button, Form, Space, Tag, Message } from '@arco-design/web-react';
 import { useNavigate } from "react-router-dom";
+import { steps } from "./constants";
+import { CreateSuccess } from "./components/createApp/createSuccess";
+import { BasicInformation } from "./components/createApp/basicInformation";
+import { AuthorizedApp } from "./components/createApp/authorizedApp";
+import { AdminInformation } from "./components/createApp/adminInfomation";
+import { CreateAppModal } from "./components/modal/createAppModal";
+import type { AppItem, AuthorizedAppRef } from "./types/appItem";
 
+interface applicationTableData {
+    key: number;
+    appName: string;
+    appId: string;
+    version: string;
+    effectTime: string;
+    expireTime: string;
+}
 
-// 步骤配置
-const steps = [
-    { title: '基本信息' },
-    { title: '管理员信息' },
-    { title: '授权应用' },
-    { title: '完成' }
-];
+interface ICreateBusinessPageProps {
+}
 
-// 行业类型选项
-const industryOptions = [
-    { label: '工业', value: 'industry' },
-    { label: '金融', value: 'finance' },
-    { label: '教育', value: 'education' },
-    { label: '医疗', value: 'medical' },
-];
-
-// 联系地址选项（省/市层级示例）
-const addressOptions = [
-    { label: '请选择', value: '' },
-    { label: '北京市', value: 'beijing' },
-    { label: '上海市', value: 'shanghai' },
-    { label: '广东省', value: 'guangdong' },
-];
-
-const CreateBusinessPage: React.FC = () => {
-    const [currentStep, setCurrentStep] = useState(1);
+const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
+    // 1. 创建 ref 关联 AuthorizedApp 组件
+    const authorizedAppRef = useRef<AuthorizedAppRef>(null);
+    const [currentStep, setCurrentStep] = useState<number>(1);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [tableData, setTableData] = useState<applicationTableData[]>([]);
+    const [searchInputValue, setSearchInputValue] = useState<string>(''); // 输入框显示的值
     const navigate = useNavigate();
-    const [form] = Form.useForm();
+    const [basicInfoForm] = Form.useForm();
+    const [adminInfoForm] = Form.useForm();
+    const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
 
-    const noLabelLayout = {
-        wrapperCol: {
-            span: 19,
-            offset: 5,
+    //点击创建应用的第三步中table的编辑button
+    const handleEdit = (name: string) => {
+        navigate(`${name}`)
+    }
+
+    const handleDelete = (key: number) => {
+        if (!key) return;
+        const newTableData = tableData.filter(item => item.key !== key);
+        setTableData(newTableData);
+        Message.success('移除成功');
+    }
+
+    const columns = [
+        {
+            title: '应用名称',
+            dataIndex: 'appName',
+            width: 180,
+            render: (text: string) => (
+                <Space size={12} align="center">{text}</Space>
+            ),
         },
-    };
-    // 步骤切换
-    const handleNext = () => {
-        if (currentStep < steps.length - 1) {
+        {
+            title: '应用ID',
+            dataIndex: 'appId',
+            width: 180,
+        },
+        {
+            title: '版本号',
+            dataIndex: 'version',
+            width: 100,
+            render: (text: string) => (
+                <Tag color="gray" size="small">{text}</Tag>
+            ),
+        },
+        {
+            title: '授权启效时间',
+            dataIndex: 'effectTime',
+            width: 200,
+        },
+        {
+            title: '过期时间',
+            dataIndex: 'expireTime',
+            width: 200,
+        },
+        {
+            title: '操作',
+            width: 140,
+            render: (_: any, record: any) => (
+                <Space size="mini">
+                    <Button type="text" onClick={() => handleEdit(record)}>
+                        编辑
+                    </Button>
+                    <Button type="text" onClick={() => handleDelete(record.key)}>
+                        移除
+                    </Button>
+                </Space>
+            ),
+        },
+    ];
+
+    // steps切换
+    const handleNext = async () => {
+        if (currentStep < steps.length) {
             setCurrentStep(currentStep + 1);
         }
+        const values = await basicInfoForm.validate();
     };
 
+    //点击创建应用的上一步button
     const handlePrev = () => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
-        }else {
+        } else {
             navigate("..");
         }
     };
 
-    const handleSubmit = async () => {
-        const values = await form.validate();
-        Message.success({
-            content: '表单提交成功',
-        });
-        console.log('最终表单数据:', values);
+    // 处理分页变化
+    const handlePageChange = async (pageNo: number) => {
+        try {
+            setCurrentPage(pageNo);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    //点击搜索
+    const handleSearchInput = (searchValue: string) => {
+        setSearchInputValue(searchValue);
+    }
+
+    const displayData = useMemo(() => {
+        if (!searchInputValue.trim()) {
+        return tableData;
+        }
+        // 有搜索值时，过滤原始数据
+        const lowerKey = searchInputValue.toLowerCase();
+        return tableData.filter(item => 
+        item.appName.toLowerCase().includes(lowerKey)
+        );
+    }, [tableData, searchInputValue]); 
+
+    //点击modal的取消按钮
+    const handleCloseModal = () => {
+        setAddAppModalVisible(false);
+    }
+    // 提交新应用（弹窗确认后调用）
+    const handleAddSubmit = (newAppData: any) => {
+        const newData: AppItem = {
+            key: displayData.length + 1,
+            appId: "113",
+            effectTime: newAppData.appTime.effectTime,
+            expireTime: newAppData.appTime.expireTime,
+            appName: newAppData.appName[0],
+            version: "V2.3"
+        };
+        authorizedAppRef.current?.addNewApp(newData);
+        setAddAppModalVisible(false);
     };
 
     const renderContent = (currentStep: number) => {
         return (
-            <div className={styles.content}>
-                <Form form={form}>
+            <div className={currentStep === 3 ? "" : styles.content}>
+                <div>
                     {/* 第一步：基本信息 */}
                     {currentStep === 1 && (
-                        <>
-                        <Form.Item
-                            label="企业名称"
-                            field="enterpriseName"
-                            rules={[{ required: true, message: '请输入企业名称' }]}
-                        >
-                            <Input placeholder="输入企业名称" maxLength={50}/>
-                        </Form.Item>
-                        <Form.Item
-                            label="企业ID"
-                            field="enterpriseId"
-                            rules={[{ required: true, message: '请输入企业ID' }]}
-                        >
-                            <Input placeholder="输入企业ID" />
-                        </Form.Item>
-                        <Form.Item
-                            label="行业类型"
-                            field="industry"
-                            rules={[{ required: true, message: '请选择行业类型' }]}
-                        >
-                            <Select
-                                options={industryOptions}
-                                placeholder="行业类型"
-                            />
-                        </Form.Item>
-                        <Form.Item label="联系地址" field="address" rules={[{ required: true }]}>
-                        <Select placeholder="请选择" />
-                        </Form.Item>
-                        <Form.Item label="" field="detailAddress" {...noLabelLayout}>
-                            <Input.TextArea placeholder="请输入详细地址" autoSize={{ minRows: 2, maxRows: 6 }} />
-                        </Form.Item>
-                        <Form.Item label="用户上限" field="userLimit" rules={[{ required: true }]}>
-                            <Input value="2000" />
-                        </Form.Item>
-                        <Form.Item label="状态" field="status">
-                            <Checkbox defaultChecked>启用</Checkbox>
-                        </Form.Item>
-                        </>
+                        <BasicInformation basicInfoForm={basicInfoForm} />
                     )}
-
                     {/* 第二步：管理员信息 */}
                     {currentStep === 2 && (
-                        <>
-                            <Form.Item
-                                label="姓名"
-                                field="adminName"
-                                rules={[{ required: true, message: '请输入姓名' }]}
-                            >
-                                <Input placeholder="输入姓名" />
-                            </Form.Item>
-                                <Form.Item
-                                label="账号"
-                                field=""
-                                rules={[{ required: true, message: '请输入账号' }]}
-                                >
-                                <Input placeholder="输入账号" />
-                            </Form.Item>
-                            <Form.Item
-                                label="手机号"
-                                field="adminPhone"
-                                rules={[
-                                    { required: true, message: '请输入手机号' },
-                                ]}
-                            >
-                                <Input placeholder="输入手机号" maxLength={11} />
-                            </Form.Item>
-                            <Form.Item
-                                label="邮箱"
-                                field="adminEmail"
-                                rules={[
-                                    { required: true, message: '请输入邮箱' },
-                                    { type: 'email', message: '请输入正确的邮箱格式' }
-                                ]}
-                            >
-                                <Input placeholder="输入邮箱" />
-                            </Form.Item>
-                        </>
+                        <AdminInformation adminInfoForm={adminInfoForm} />
                     )}
-
-                    {/* 第三步：确认信息 */}
+                    {/* 第三步： 授权应用 */}
                     {currentStep === 3 && (
-                        <div style={{ backgroundColor: '#f5f7fa', padding: '20px', borderRadius: 4 }}>
-                            <Typography.Title level={5} style={{ marginBottom: 16 }}>
-                                确认以下信息无误
-                            </Typography.Title>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '12px 0' }}>
-                                <Typography.Text type="secondary">企业名称：</Typography.Text>
-                                <Typography.Text>{form.getFieldValue('enterpriseName') || '-'}</Typography.Text>
-
-                                <Typography.Text type="secondary">企业ID：</Typography.Text>
-                                <Typography.Text>{form.getFieldValue('enterpriseId') || '-'}</Typography.Text>
-
-                                <Typography.Text type="secondary">行业类型：</Typography.Text>
-                                <Typography.Text>
-                                    {industryOptions.find(item => item.value === form.getFieldValue('industry'))?.label || '-'}
-                                </Typography.Text>
-
-                                <Typography.Text type="secondary">管理员：</Typography.Text>
-                                <Typography.Text>{form.getFieldValue('adminName') || '-'}</Typography.Text>
-                            </div>
-                        </div>
+                        <AuthorizedApp ref={authorizedAppRef} onEdit={handleEdit} setAddAppModalVisible={setAddAppModalVisible}/>
                     )}
-                </Form>
+                    {/* 第四步：确认信息 */}
+                    {currentStep === 4 && (
+                        <CreateSuccess 
+                         basicInfoForm={basicInfoForm} 
+                         setCurrentStep={setCurrentStep} 
+                         setAddAppModalVisible={setAddAppModalVisible}
+                        />
+                    )}
+                </div>
             </div>
         )
     }
@@ -199,27 +196,30 @@ const CreateBusinessPage: React.FC = () => {
                     />
                 ))}
             </Steps>
+            {/* 内容展示区域 */}
             <div className={styles.BusinessInformation}>
                 {/* 内容区域 */}
                 {renderContent(currentStep)}
                 {/* 底部操作按钮 */}
-                <div className={styles.footerButton}>
-                    <Space size={16}>
-                        <Button
-                            onClick={handlePrev}
-                            disabled={currentStep === 0}
-                        >
-                            {currentStep === 1 ? "返回" : "上一步"}
-                        </Button>
-                        <Button
-                            type="primary"
-                            onClick={handleNext}
-                            disabled={currentStep === steps.length - 1}
-                        >
-                            下一步
-                        </Button>
-                    </Space>
-                </div>
+                {currentStep !== 4 &&
+                    <div className={styles.footerButton}>
+                        <Space size={16}>
+                            <Button
+                                onClick={handlePrev}
+                            >
+                                {currentStep === 1 ? "返回" : "上一步"}
+                            </Button>
+                            <Button
+                                type="primary"
+                                onClick={handleNext}
+                                disabled={currentStep === steps.length}
+                            >
+                                下一步
+                            </Button>
+                        </Space>
+                    </div>}
+                            {/* 创建应用modal */}
+                <CreateAppModal visible={addAppModalVisible} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
             </div>
         </div>
     );

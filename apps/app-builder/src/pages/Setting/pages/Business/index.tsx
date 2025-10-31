@@ -1,12 +1,39 @@
-import { Button, Dropdown, Input, Menu, Select, Space, Table, Tag, Modal, Message, Typography } from "@arco-design/web-react";
-import { IconMore, IconPlus } from "@arco-design/web-react/icon";
+import { Button, Dropdown, Input, Menu, Space, Tag, Modal, Message } from "@arco-design/web-react";
+import { IconMore } from "@arco-design/web-react/icon";
 import styles from "./index.module.less";
 import StatusTag from "@/components/StatusTag";
 import { Outlet, useMatch, useNavigate } from "react-router-dom";
+import { CommonTable } from "./components/table/commonTable";
+import { TopHeader } from "./components/topHeader";
+import { useEffect, useMemo, useState } from "react";
 
-const BusinessPage: React.FC = () => {
+interface businessTableItem {
+    key: number,
+    logo: string,
+    name: string,
+    id: string,
+    industry: string,
+    apps: string,
+    admin: string,
+    status: number,
+    createTime: string
+}
+interface IBusinessPageProps {
+
+}
+
+const BusinessPage: React.FC<IBusinessPageProps> = () => {
     const navigate = useNavigate();
+    const [editable, setEditable] = useState<boolean>(false);
+    const [tableData, setTableData] = useState<businessTableItem[]>([]);
+    const [searchInputValue, setSearchInputValue] = useState<string>("");
     const isCreatePage = useMatch('onebase/setting/business/create-business');
+
+    const handleEdit = (name: string) => {
+        setEditable(true);
+        const encodedName = encodeURIComponent(name);
+        navigate(`${encodedName}`);
+    }
 
     const businessManageColumns = [
         {
@@ -55,7 +82,7 @@ const BusinessPage: React.FC = () => {
             title: '操作',
             render: (_: any, record: any) => (
                 <Space size={4}>
-                    <Button size="small" type="text">编辑</Button>
+                    <Button size="small" type="text" onClick={handleEdit.bind(null, record.name)}>编辑</Button>
                     <Button size="small" type="text">应用授权</Button>
                     <Dropdown
                         trigger="click"
@@ -69,7 +96,7 @@ const BusinessPage: React.FC = () => {
         }
     ];
     // 模拟数据
-    const businessManagementData = [1, 2, 3, 4, 5].map((_, index) => ({
+    const initialBusinessManagementData = [1, 2, 3, 4, 5].map((_, index) => ({
         key: index,
         logo: '',
         name: '玩贝斯软件公司',
@@ -80,6 +107,21 @@ const BusinessPage: React.FC = () => {
         status: 1,
         createTime: '2025-03-29 12:46:21'
     }));
+
+    useEffect(() => {
+        setTableData(initialBusinessManagementData)
+    }, [])
+
+    const displayBusinessData = useMemo(() => {
+        if (!searchInputValue.trim()) {
+        return tableData;
+        }
+        // 有搜索值时，过滤原始数据
+        const lowerKey = searchInputValue.toLowerCase();
+        return tableData.filter(item => 
+        item.name.toLowerCase().includes(lowerKey)
+        );
+    }, [tableData, searchInputValue]); 
 
     //创建企业
     const handleCreateBusiness = () => {
@@ -133,36 +175,21 @@ const BusinessPage: React.FC = () => {
         </Menu>
     );
 
-    return (
-        <div>
-        {
-            !isCreatePage ? 
+    const renderContent = () => {
+        if(editable) {
+            return <Outlet />
+        }
+        if(isCreatePage) {
+            return <Outlet />
+        }
+        return (
             <div className={styles.businessManagement}>
-                <div className={styles.topHeader}>
-                    {/*顶部左侧 新建企业*/}
-                    <div className={styles.createBusiness}>
-                        <Button type="primary" icon={<IconPlus />} onClick={handleCreateBusiness}>创建企业</Button>
-                        <div className={styles.linkContent}>
-                            <span>企业用户登录地址:</span>
-                            <Typography.Paragraph copyable className={styles.link}>www.onebase.com/enterprise</Typography.Paragraph>
-                        </div>
-                    </div>
-                    {/* 顶部右侧 搜索*/}
-                    <div className={styles.searchContent}>
-                        <Select
-                            className={styles.selectStatus}
-                            defaultValue="all"
-                            options={[{ label: '全部状态', value: 'all' }]}
-                        />
-                        <Input.Search allowClear placeholder='输入企业名称' className={styles.searchInput} />
-                    </div>
-                </div>
-                {/* 企业管理数据展示 */}
-                <Table
-                    border={false}
+                {/* 头部渲染 */}
+                <TopHeader title="创建企业" onAdd={handleCreateBusiness} setSearchInputValue={setSearchInputValue}/>
+                <CommonTable 
+                    data={displayBusinessData}
                     columns={businessManageColumns}
-                    data={businessManagementData}
-                    pagination={{
+                    pageination={{
                         sizeCanChange: true,
                         showTotal: true,
                         total: 100,
@@ -172,8 +199,12 @@ const BusinessPage: React.FC = () => {
                     }}
                 />
             </div> 
-            : <Outlet />
-        }
+        )
+    }
+
+    return (
+        <div>
+            {renderContent()}
         </div>
     )
 }

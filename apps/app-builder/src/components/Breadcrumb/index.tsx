@@ -81,7 +81,7 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
           title = t('sider.createBusiness');
           break;
         default:
-          title = segment;
+          title = decodeURIComponent(segment);
       }
 
       result.push({

@@ -14,6 +14,7 @@ import UserPage from './pages/User';
 import styles from './index.module.less';
 import BusinessPage from './pages/Business';
 import CreateBusinessPage from './pages/Business/createBusiness';
+import EnterpriseInfoPage from './pages/Business/components/enterprise-information';
 
 const Content = Layout.Content;
 
@@ -43,6 +44,7 @@ const SettingPage: React.FC = () => {
                 <Route path="tenant" element={<TenantPage />} />
                 <Route path="business" element = {<BusinessPage />}>
                   <Route path="create-business" element = {<CreateBusinessPage />} />
+                  <Route path=":enterpriseName" element={<EnterpriseInfoPage />} />
                 </Route>
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>
