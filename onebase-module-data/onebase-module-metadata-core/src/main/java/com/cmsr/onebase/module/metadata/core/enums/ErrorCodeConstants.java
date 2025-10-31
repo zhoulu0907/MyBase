@@ -61,5 +61,8 @@ public interface ErrorCodeConstants {
     ErrorCode DB_OPERATION_ERROR_DELETE = new ErrorCode(1_003_009_002, "数据删除失败：{}");
     ErrorCode DB_OPERATION_ERROR_QUERY = new ErrorCode(1_003_009_003, "数据查询失败：{}");
 
+    ErrorCode DATA_METHOD_EXEC_FAIL = new ErrorCode(1_003_006_004, "数据方法执行失败");
+
+
 
 }
