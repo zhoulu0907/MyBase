@@ -92,7 +92,6 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
   }, [keyword]);
 
   useEffect(() => {
-    console.log('baseCategories: ', baseCategories);
     if (!keyword) return setComponents(baseCategories); // 没关键词直接返回原数据
 
     const lowerKeyword = keyword.toLowerCase();

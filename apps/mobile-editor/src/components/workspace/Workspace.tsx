@@ -1,29 +1,23 @@
 import {
-  currentEditorSignal,
+  COMPONENT_GROUP_NAME,
+  COMPONENT_MAP,
   EDITOR_TYPES,
+  EditRender,
+  ENTITY_COMPONENT_TYPES,
   ENTITY_FIELD_TYPE,
   FORM_COMPONENT_TYPES,
+  getComponentConfig,
+  getComponentSchema,
+  getComponentWidth,
   STATUS_OPTIONS,
-  STATUS_VALUES
+  STATUS_VALUES,
+  type GridItem
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  COMPONENT_GROUP_NAME,
-  COMPONENT_MAP,
-  EditRender,
-  ENTITY_COMPONENT_TYPES,
-  getComponentConfig,
-  getComponentSchema,
-  getComponentWidth,
-  usePageEditorSignal,
-  type GridItem
-} from '@onebase/ui-kit';
-
-import EmptyIcon from '@/assets/images/empty.svg';
 import MobileIcon from '@/assets/images/mobile_icon.svg';
 import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
 import PCIcon from '@/assets/images/pc_icon.svg';
@@ -36,29 +30,25 @@ import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
+import type { EditorProps } from '@/common/props';
 import { Divider } from '@arco-design/web-react';
 import { getEntityFieldOptions, type AppEntityField, type EntityFieldOption } from '@onebase/app';
 import { EditMode, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
-// import View from '../view';
+import View from '../view';
 import styles from './index.module.less';
 
-export default function EditorWorkspace() {
+interface EditorWorkspaceProps {
+  props: EditorProps;
+}
+
+const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
   useSignals();
 
-  const [showEmpty, setShowEmpty] = useState(true);
-  const [isFormEditor, setIsFormEditor] = useState(false);
-  const [pageSetId, setPageSetId] = useState('');
-
-  useEffect(() => {
-    const pageSetId = getHashQueryParam('pageSetId');
-    if (pageSetId) {
-      setPageSetId(pageSetId);
-    }
-  }, []);
-
   const {
+    editMode,
+    setEditMode,
     curComponentID,
     setCurComponentID,
     clearCurComponentID,
@@ -74,11 +64,24 @@ export default function EditorWorkspace() {
     setShowDeleteButton,
     layoutSubComponents,
     setLayoutSubComponents,
-    delLayoutSubComponents
-  } = usePageEditorSignal();
+    delLayoutSubComponents,
 
-  //   const [pageMode, setPageMode] = useState<string>('pc');
-  const { editMode, setEditMode } = currentEditorSignal;
+    pageViews,
+    curViewId,
+    setCurViewId,
+    updatePageViewName
+  } = props;
+
+  const [showEmpty, setShowEmpty] = useState(true);
+  const [isFormEditor, setIsFormEditor] = useState(false);
+  const [pageSetId, setPageSetId] = useState('');
+
+  useEffect(() => {
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
+    }
+  }, []);
 
   useEffect(() => {
     if (components.length === 0) {
@@ -243,7 +246,20 @@ export default function EditorWorkspace() {
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
-        {/* <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div> */}
+        <div className={styles.workspaceHeaderLeft}>
+          {isFormEditor && pageSetId && (
+            <View
+              pageSetId={pageSetId}
+              components={components}
+              pageComponentSchemas={pageComponentSchemas}
+              layoutSubComponents={layoutSubComponents}
+              pageViews={pageViews}
+              curViewId={curViewId}
+              setCurViewId={setCurViewId}
+              updatePageViewName={updatePageViewName}
+            />
+          )}
+        </div>
         <div className={styles.workspaceHeaderRight}>
           {/* TODO 撤回重做 */}
           <div className={styles.editorStepCtrl}>
@@ -255,13 +271,13 @@ export default function EditorWorkspace() {
             <>
               <img
                 className={styles.pageModeIcon}
-                src={editMode.value === EditMode.MOBILE ? PCIcon : PCActiveIcon}
-                onClick={() => editMode.value === EditMode.MOBILE && switchEditMode(EditMode.PC)}
+                src={editMode === EditMode.MOBILE ? PCIcon : PCActiveIcon}
+                onClick={() => editMode === EditMode.MOBILE && switchEditMode(EditMode.PC)}
               />
               <img
                 className={styles.pageModeIcon}
-                src={editMode.value === EditMode.PC ? MobileIcon : MobileActiveIcon}
-                onClick={() => editMode.value === EditMode.PC && switchEditMode(EditMode.MOBILE)}
+                src={editMode === EditMode.PC ? MobileIcon : MobileActiveIcon}
+                onClick={() => editMode === EditMode.PC && switchEditMode(EditMode.MOBILE)}
               />
             </>
           </div>
@@ -576,7 +592,7 @@ export default function EditorWorkspace() {
             ))}
         </ReactSortable>
 
-        {showEmpty && (
+        {/* {showEmpty && (
           <div className={styles.formEmpty}>
             <div className={styles.formEmptyContent}>
               <img src={EmptyIcon} alt="页面无组件" />
@@ -585,8 +601,10 @@ export default function EditorWorkspace() {
               开始使用吧！
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
-}
+};
+
+export default EditorWorkspace;

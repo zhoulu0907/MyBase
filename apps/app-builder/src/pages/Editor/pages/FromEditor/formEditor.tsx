@@ -4,7 +4,7 @@ import EditorConfig from '../../components/config';
 // import EditorPanel from '../../components/panel/Panel';
 import globalState from '@/store/microService/state';
 import { EditMode } from '@onebase/common';
-import { currentEditorSignal, EditorPanel } from '@onebase/ui-kit';
+import { currentEditorSignal, EditorPanel, usePageEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import EditorWorkspace from '../../components/workspace/Workspace';
 import styles from './index.module.less';
@@ -12,7 +12,21 @@ import styles from './index.module.less';
 const FormEditor: React.FC = () => {
   useSignals();
 
-  const { editMode } = currentEditorSignal;
+  const { editMode, setEditMode, curComponentID, setCurComponentID, clearCurComponentID, setCurComponentSchema } =
+    currentEditorSignal;
+  const {
+    components,
+    setComponents,
+    addComponents,
+    delComponents,
+    showDeleteButton,
+    setShowDeleteButton,
+    layoutSubComponents,
+    setLayoutSubComponents,
+    delLayoutSubComponents
+  } = usePageEditorSignal();
+  const { pageComponentSchemas, setPageComponentSchemas, delPageComponentSchemas } = usePageEditorSignal();
+  const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
   const microAppRef = useRef<MicroApp | null>(null);
 
@@ -48,8 +62,54 @@ const FormEditor: React.FC = () => {
       return () => {
         microApp?.unmount();
       };
+    } else {
+      microAppRef.current?.unmount();
     }
   }, [editMode.value]);
+
+  useEffect(() => {
+    console.log('components: ', components);
+
+    globalState.setGlobalState({
+      editMode: editMode.value,
+      setEditMode: setEditMode,
+
+      curComponentID: curComponentID.value,
+      setCurComponentID: setCurComponentID,
+      clearCurComponentID: clearCurComponentID,
+      setCurComponentSchema: setCurComponentSchema,
+
+      pageComponentSchemas: pageComponentSchemas,
+      setPageComponentSchemas: setPageComponentSchemas,
+      delPageComponentSchemas: delPageComponentSchemas,
+
+      components: components,
+      setComponents: setComponents,
+      addComponents: addComponents,
+      delComponents: delComponents,
+
+      showDeleteButton: showDeleteButton,
+      setShowDeleteButton: setShowDeleteButton,
+
+      layoutSubComponents: layoutSubComponents,
+      setLayoutSubComponents: setLayoutSubComponents,
+      delLayoutSubComponents: delLayoutSubComponents,
+
+      pageViews: pageViews.value,
+      curViewId: curViewId.value,
+      setCurViewId: setCurViewId,
+      updatePageViewName: updatePageViewName
+    });
+  }, [
+    editMode.value,
+    curComponentID.value,
+    pageComponentSchemas,
+    components,
+    showDeleteButton,
+    layoutSubComponents,
+    pageViews.value,
+    curViewId.value
+  ]);
 
   return (
     <>

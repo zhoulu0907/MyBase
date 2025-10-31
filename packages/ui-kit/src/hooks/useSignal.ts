@@ -31,6 +31,10 @@ export function usePageEditorSignal() {
     ? useListEditorSignal.pageComponentSchemas.value
     : useFormEditorSignal.pageComponentSchemas?.value;
 
+  const loadPageComponentSchemas = useList
+    ? useListEditorSignal.loadPageComponentSchemas
+    : useFormEditorSignal.loadPageComponentSchemas;
+
   const setPageComponentSchemas = useList
     ? useListEditorSignal.setPageComponentSchemas
     : useFormEditorSignal.setPageComponentSchemas;
@@ -46,6 +50,10 @@ export function usePageEditorSignal() {
   const layoutSubComponents = useList
     ? useListEditorSignal.layoutSubComponents.value
     : useFormEditorSignal.layoutSubComponents?.value;
+
+  const loadLayoutSubComponents = useList
+    ? useListEditorSignal.loadLayoutSubComponents
+    : useFormEditorSignal.loadLayoutSubComponents;
 
   const setLayoutSubComponents = useList
     ? useListEditorSignal.setLayoutSubComponents
@@ -73,10 +81,12 @@ export function usePageEditorSignal() {
     delComponents,
     clearComponents,
     pageComponentSchemas,
+    loadPageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
     clearPageComponentSchemas,
     layoutSubComponents,
+    loadLayoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
     clearLayoutSubComponents

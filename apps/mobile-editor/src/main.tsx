@@ -46,15 +46,13 @@ renderWithQiankun({
   unmount,
   update(props: any) {
     console.log('sub-app update', props);
-    // // 重新渲染以更新 props
-    // const container = props?.container
-    //   ? props.container
-    //   : document.getElementById("root")!;
+    // 重新渲染以更新 props
+    // const container = props?.container ? props.container : document.getElementById('root')!;
     // const root = containerMap.get(container as HTMLElement);
     // if (root) {
     //   root.render(
     //     <StrictMode>
-    //       <App myName={props?.myName} onCountChange={props?.onCountChange} />
+    //       <App props={props} />
     //     </StrictMode>
     //   );
     // }
