@@ -132,7 +132,8 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             }
             boolean ok = deleteCount > 0;
             if(ok){
-               super.storeData(context);
+//               super.storeData(context);
+                handleSubEntities(context);
             }
             return ok;
         });
