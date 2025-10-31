@@ -24,6 +24,7 @@ public class FormTriggerReqVO {
     @Schema(description = "输入参数，表单数据，用于条件过滤")
     private Map<Long, String> inputParams;
 
+    @Schema(description = "输入字段，表单字段，表单数据收集")
     private List<ModalNodeData.Field> inputFields;
 
 }

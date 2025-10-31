@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
@@ -11,6 +12,9 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
 import com.cmsr.onebase.module.flow.core.job.FlowJobMessageHandler;
+import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
+import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
+import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -40,6 +44,8 @@ public class FlowProcessTest {
     @Autowired
     private FlowJobMessageHandler flowJobMessageHandler;
 
+    @Autowired
+    private FlowProcessExecService flowProcessExecService;
 
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
@@ -90,5 +96,18 @@ public class FlowProcessTest {
         jobMessage.setJobType("fld");
         jobMessage.setProcessId(89995954500108288L);
         flowJobMessageHandler.executeFlow(jobMessage);
+    }
+
+    @Test
+    public void testSimple4() throws IOException {
+        TenantContextHolder.setIgnore(true);
+        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+        reqVO.setProcessId(114994365031546880L);  // 114994365031546880L 114959369637036032L
+        Map<Long, String> inputParams = Map.of(
+                46999569445519360L, "班级名称"
+        );
+        reqVO.setInputParams(inputParams);
+        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
+        System.out.println(respVO);
     }
 }
