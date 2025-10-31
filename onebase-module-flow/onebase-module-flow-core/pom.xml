@@ -36,6 +36,11 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-dolphinscheduler</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-context</artifactId>
             <version>${revision}</version>
         </dependency>

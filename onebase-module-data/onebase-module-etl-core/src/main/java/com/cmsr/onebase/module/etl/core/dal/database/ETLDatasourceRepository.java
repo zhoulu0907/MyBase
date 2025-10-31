@@ -1,11 +1,14 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
+import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -18,34 +21,53 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
         super(ETLDatasourceDO.class);
     }
 
-    public ETLDatasourceDO findOneByDatasourceCode(String datasourceCode) {
+    public boolean existsByDatasourceCodeFilterById(String datasourceCode, Long datasourceId) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("datasource_code", datasourceCode);
-        return findOne(cs);
+        if (datasourceId != null) {
+            cs.ne("id", datasourceId);
+        }
+        ETLDatasourceDO datasourceDO = findOne(cs);
+        return datasourceDO != null;
     }
 
-    public ETLDatasourceDO findOneByDatasourceCodeAndIdNe(String datasourceCode, Long datasourceId) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("datasource_code", datasourceCode);
-        cs.ne("id", datasourceId);
-        return findOne(cs);
-    }
-
-    public void updateCollectStatusById(Long datasourceId, CollectStatus collectStatus, LocalDateTime plannedStartTime) {
+    public void changeCollectStatusById(Long datasourceId, CollectStatus collectStatus) {
         ETLDatasourceDO datasourceDO = findById(datasourceId);
-        datasourceDO.setCollectStatus(collectStatus);
-        LocalDateTime nowTime = LocalDateTime.now();
+        LocalDateTime currentTime = LocalDateTime.now();
         switch (collectStatus) {
-            case RUNNING, REQUIRED: {
-                datasourceDO.setCollectStartTime(nowTime);
+            case RUNNING: {
+                datasourceDO.setCollectStartTime(currentTime);
                 datasourceDO.setCollectEndTime(null);
                 break;
             }
             case SUCCESS, FAILED: {
-                datasourceDO.setCollectEndTime(nowTime);
+                datasourceDO.setCollectEndTime(currentTime);
                 break;
             }
         }
+        datasourceDO.setCollectStatus(collectStatus);
         update(datasourceDO);
+    }
+
+    public PageResult<ETLDatasourceDO> getETLDatasourcePage(ETLDatasourcePageReqVO pageReqVO) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("application_id", pageReqVO.getApplicationId());
+        if (StringUtils.isNotBlank(pageReqVO.getDatasourceCode())) {
+            cs.like("datasource_code", pageReqVO.getDatasourceCode());
+        }
+        if (StringUtils.isNotBlank(pageReqVO.getDatasourceName())) {
+            cs.like("datasource_name", pageReqVO.getDatasourceName());
+        }
+        if (StringUtils.isNotBlank(pageReqVO.getDatasourceType())) {
+            cs.eq("datasource_type", pageReqVO.getDatasourceType());
+        }
+        if (pageReqVO.getReadonly() != null) {
+            cs.eq("readonly", pageReqVO.getReadonly());
+        }
+        if (StringUtils.isNotBlank(pageReqVO.getCollectStatus())) {
+            cs.eq("collect_status", pageReqVO.getCollectStatus());
+        }
+
+        return findPageWithConditions(cs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 }

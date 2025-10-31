@@ -19,6 +19,8 @@ public class BpmMyCreatedVO {
     @Schema(description = "流程状态编码")
     private String flowStatus;
 
+    @Schema(description = "表单摘要")
+    private String formSummary;
 
     @Schema(description = "当前节点处理人")
     private List<Map<String, Object>> currentNodeHandler;
@@ -31,6 +33,9 @@ public class BpmMyCreatedVO {
 
     @Schema(description = "更新时间（处理时间）")
     private LocalDateTime updateTime;
+
+    @Schema(description = "流程实例id")
+    private Long instanceId;
 
     @Schema(description = "任务id")
     private Long taskId;

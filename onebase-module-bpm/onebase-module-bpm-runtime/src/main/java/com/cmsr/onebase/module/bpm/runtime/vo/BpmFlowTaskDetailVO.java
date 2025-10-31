@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.bpm.runtime.vo;
 
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -32,6 +31,12 @@ public class BpmFlowTaskDetailVO {
 
     @Schema(description = "发起时间")
     private LocalDateTime submitTime;
+
+    @Schema(description = "当前待办任务ID")
+    private Long taskId;
+
+    @Schema(description = "流程实例ID")
+    private Long instanceId;
 
     @Schema(description = "按钮信息")
     List<BaseNodeBtnCfgDTO> buttonConfigs;

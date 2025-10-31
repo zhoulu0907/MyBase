@@ -671,20 +671,12 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     }
 
     @Override
-    public BpmFlowTaskDetailVO getFormDetail(String taskId, Long instanceId) {
+    public BpmFlowTaskDetailVO getFormDetail(Long instanceId) {
         BpmFlowTaskDetailVO vo = new BpmFlowTaskDetailVO();
         NodeJson currNodeJson = null;
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        boolean hasPermission = false;
 
-        Task task = taskService.getById(taskId);
-
-        // 任务不存在
-        if (task == null) {
-           throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
-        }
-
-        // 以任务里的数据为准
-        instanceId = task.getInstanceId();
         Instance instance = insService.getById(instanceId);
 
         if (instance == null) {
@@ -697,12 +689,35 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
         }
 
-        // 查询下是否是当前用户的待办任务，如果不是则不显示按钮
-        List<User> users = userService.getByProcessedBys(task.getId(), List.of(String.valueOf(loginUserId)));
+        // 查询该实例的待办任务, todo: 优化这段的代码写法
+        List<Task> tasks = taskService.getByInsId(instanceId);
+        Task todoTask = null;
 
-        // 测试按钮显示
-        if (CollectionUtils.isNotEmpty(users)) {
-            String nodeCode = task.getNodeCode();
+        if (CollectionUtils.isNotEmpty(tasks)) {
+            List<Long> taskIds = new ArrayList<>();
+            Map<Long, Task> taskMap = new HashMap<>();
+
+            for (Task task : tasks) {
+              taskIds.add(task.getId());
+              taskMap.put(task.getId(), task);
+            }
+
+            List<User> users = userService.getByAssociateds(taskIds);
+
+            if (CollectionUtils.isNotEmpty(users)) {
+                for (User user : users) {
+                    if (Objects.equals(user.getProcessedBy(), String.valueOf(loginUserId))) {
+                        hasPermission = true;
+                        todoTask = taskMap.get(user.getAssociated());
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 按钮显示
+        if (hasPermission && todoTask != null) {
+            String nodeCode = todoTask.getNodeCode();
             DefJson defJson = FlowEngine.jsonConvert.strToBean(instance.getDefJson(), DefJson.class);
             // 找到对应节点的配置
             for (NodeJson nodeJson : defJson.getNodeList()) {
@@ -749,6 +764,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
                 vo.getButtonConfigs().add(buttonConfig);
             }
+
+            vo.setTaskId(todoTask.getId());
         }
 
         vo.setCurrentStatus(instance.getFlowStatus());
@@ -776,8 +793,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         if (data != null && !data.isEmpty()){
             vo.setFormData(data);
         }
-        return vo;
 
+        vo.setInstanceId(instanceId);
+
+        return vo;
     }
 
     @Override

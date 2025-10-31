@@ -55,11 +55,9 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
     @Setter
     private String topic = RocketMQConstants.CHANGE_EVENTS_TOPIC;
 
-
     @Setter
     @Autowired
     private FlowProcessRepository flowProcessRepository;
-
 
     @Setter
     @Autowired
@@ -114,7 +112,6 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
     }
 
     public void onApplicationChange(Long applicationId) {
-        deleteJob(applicationId);
         List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             startJob(flowProcessDO);
@@ -154,7 +151,6 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
         jobCreateRequest.setStartTime(startTimeNodeData.getStartTime().trim());
         jobCreateRequest.setEndTime(startTimeNodeData.getEndTime().trim());
         jobCreateRequest.setCrontab(startTimeNodeData.createCronExpression().trim());
-        jobCreateRequest.setTimezoneId(TimeZone.getDefault().getID());
         return jobCreateRequest;
     }
 
@@ -181,7 +177,6 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
         jobCreateRequest.setStartTime("2010-10-01 00:00:00");
         jobCreateRequest.setEndTime("2050-12-30 23:59:59");
         jobCreateRequest.setCrontab(startDateFieldNodeData.createCronExpression());
-        jobCreateRequest.setTimezoneId(TimeZone.getDefault().getID());
         return jobCreateRequest;
     }
 

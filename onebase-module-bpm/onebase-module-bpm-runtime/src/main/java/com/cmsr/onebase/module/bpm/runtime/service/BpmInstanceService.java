@@ -46,13 +46,5 @@ public interface BpmInstanceService {
      * @param taskId     任务ID
      * @param instanceId 流程实例ID
      */
-    BpmFlowTaskDetailVO getFormDetail(String taskId, Long instanceId);
-    /**
-     * 流程预览
-     *
-     * @param flowCode 流程编码
-     * @param appId    应用ID
-     * @return 流程图
-     */
-    List<BpmFlowPreviewVO> flowPreview(String flowCode);
+    BpmFlowTaskDetailVO getFormDetail(Long instanceId);
 }
