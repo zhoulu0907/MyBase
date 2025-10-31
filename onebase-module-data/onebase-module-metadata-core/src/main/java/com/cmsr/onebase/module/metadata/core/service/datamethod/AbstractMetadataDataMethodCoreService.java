@@ -401,13 +401,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 9. 唯一性校验和条件校验
             validateUniqueness(context);//todo 暂未实现
 
-            try{
-                // 10. 前置自动化工作流触发
-                executePreWorkflow(context);//暂未实现
-            }catch (Exception e){
-                log.error("执行前置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
-//                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
-            }
+            // 10. 前置自动化工作流触发
+            executePreWorkflow(context);
 
             // 11. 数据编号
             generateDataNumber(context);
@@ -415,15 +410,8 @@ public abstract class AbstractMetadataDataMethodCoreService  implements Metadata
             // 12. 数据存储
             storeData(context);
 
-            try{
-                // 13. 后置自动化工作流触发
-                executePostWorkflow(context);//todo 暂未实现
-            }catch (Exception e){
-                log.error("执行后置工作流异常，实体ID：" + entityId + "，方法：" + methodCode + "，异常：" + ExceptionUtil.getRootCause(e));
-//                throw new RuntimeException("执行前置工作流异常：" + e.getMessage(), e);
-            }
-
-
+            // 13. 后置自动化工作流触发
+            executePostWorkflow(context);
 
             getData(context);
 
