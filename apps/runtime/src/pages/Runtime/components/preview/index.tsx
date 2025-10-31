@@ -1,6 +1,7 @@
 import ExecuteFlows from '@/utils/flow';
 import { Button, Drawer, Form, Message } from '@arco-design/web-react';
 import {
+  PageType,
   CATEGORY_TYPE,
   dataMethodData,
   dataMethodInsert,
@@ -27,8 +28,10 @@ import {
   STATUS_VALUES,
   useEditorSignalMap,
   useListEditorSignal,
+  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
+import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -152,7 +155,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           if (Object.values(item).every((v: any) => v === undefined)) {
             return;
           }
-          subTableRows.push(item);
+          const keys = Object.keys(item);
+          let temp: any = {};
+          for (let key of keys) {
+            const newKey = key.slice(key.lastIndexOf('.') + 1);
+            temp[newKey] = item[key];
+          }
+          subTableRows.push(temp);
         }
         subFormData.push({
           subEntityId: subEntityId,
@@ -194,27 +203,46 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setDrawerVisible(false);
       setRefresh(Date.now());
     } else {
-      const req: InsertMethodParams = {
-        menuId: menuId,
-        entityId: mainMetaData,
-        data: formData,
-        subEntities: subFormData
-      };
+      
+      try {
+        let res = null;
+        if (curPage?.value?.pageSetType === PageType.BPM) {
+          const reqFlow = {
+            isDraft: false,
+            formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
+            businessId: curPage?.value?.id,
+            entity: {
+              entityId: mainMetaData,
+              data: formData
+            }
+          };
+          res = await fetchSubmitInstance(reqFlow);
+          setPageType(EDITOR_TYPES.FORM_EDITOR);
+        } else {
+          const req: InsertMethodParams = {
+            menuId: menuId,
+            entityId: mainMetaData,
+            data: formData,
+            subEntities: subFormData
+          };
+          res = await dataMethodInsert(req);
 
-      const res = await dataMethodInsert(req);
-      console.log(res);
+          setPageType(EDITOR_TYPES.LIST_EDITOR);
+        }
 
-      const createFlows = (flowRes || []).filter(
-        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
-      );
-      setFlows(createFlows);
+        const createFlows = (flowRes || []).filter(
+          (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
+        );
+        setFlows(createFlows);
 
-      if (res) {
-        Message.success('创建成功');
+        if (res) {
+          Message.success('创建成功');
+        }
+      } catch (error) {
+        Message.error('创建失败')
       }
     }
 
-    setPageType(EDITOR_TYPES.LIST_EDITOR);
   };
 
   const cancelSubmitForm = () => {
@@ -298,13 +326,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               pagesRuntimeSignal.setSubTableDataLength(key, (subEntity.subData || []).length);
 
               for (let idx = 0; idx < (subEntity.subData || []).length; idx++) {
-                schema?.config?.columns.forEach((column: any) => {
-                  //   console.log('column: ', column);
-                  //   const fieldName = targetSubEntity.childFields.find(
-                  //     (ele: any) => ele.fieldId == column.dataIndex
-                  //   )?.fieldName;
-                  formValues[`${key}.${idx}.${column.dataIndex}`] = subEntity.subData[idx]?.[column.dataIndex];
-                });
+                const keys = Object.keys((subEntity.subData || [])[idx]);
+                for (let ele in componentSchemas) {
+                  const config = componentSchemas[ele]?.config;
+                  const fieldId = config?.dataField?.[1];
+                  if (keys.includes(fieldId)) {
+                    formValues[`${key}.${idx}.${fieldId}`] = subEntity.subData[idx]?.[fieldId];
+                  }
+                }
               }
             }
           });

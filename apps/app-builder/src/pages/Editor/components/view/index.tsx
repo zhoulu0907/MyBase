@@ -92,6 +92,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     const newPageComponentSchemas = {} as { [key: string]: EditConfig };
     const oldLayoutSubComponents = useEditorSignalMap.get(id)?.layoutSubComponents.value;
     const newLayoutSubComponents = {} as { [key: string]: any[][] };
+    const oldSubTableComponents = useEditorSignalMap.get(id)?.subTableComponents.value;
+    const newSubTableComponents = {} as { [key: string]: any[] };
 
     // 创建一个 string-string 的 map
     const idMap: { [key: string]: string } = {};
@@ -143,6 +145,16 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
       newLayoutSubComponents[newCpID] = newSubComponents;
     });
 
+    // 替换 subTableComponents 的id
+    Object.entries(oldSubTableComponents).forEach((item:any) => {
+      if (!idMap[item.id]) {
+        return;
+      }
+      const newCpID = idMap[item.id];
+      const newSubComponents  = {...item,id:newCpID}
+      newLayoutSubComponents[newCpID] = newSubComponents;
+    });
+
     // 创建视图副本
     usePageViewEditorSignal.addPageView(newView);
     // 复制组件
@@ -150,6 +162,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     useEditorSignalMap.get(newId)!.setComponents(newComponents);
     useEditorSignalMap.get(newId)!.loadPageComponentSchemas(newPageComponentSchemas);
     useEditorSignalMap.get(newId)!.loadLayoutSubComponents(newLayoutSubComponents);
+    useEditorSignalMap.get(newId)!.loadSubTableComponents(newSubTableComponents);
 
     // 切换到新视图
     switchToView(newId);
@@ -160,6 +173,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     useFormEditorSignal.setComponents(useEditorSignalMap.get(id)!.components.value);
     useFormEditorSignal.loadPageComponentSchemas(useEditorSignalMap.get(id)!.pageComponentSchemas.value);
     useFormEditorSignal.loadLayoutSubComponents(useEditorSignalMap.get(id)!.layoutSubComponents.value);
+    useFormEditorSignal.loadSubTableComponents(useEditorSignalMap.get(id)!.subTableComponents.value);
   };
 
   const dropList = (

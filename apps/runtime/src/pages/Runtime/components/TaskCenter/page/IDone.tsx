@@ -3,17 +3,11 @@ import { Table, type TableColumnProps, Button, Link } from '@arco-design/web-rea
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import { getDonePageList } from '@onebase/app/src/services/app_runtime';
+import { LISTTYPE, TaskStatusMap } from '@onebase/app';
 // import { getDonePageList } from '../../../../../../../../packages/app/src/services/app_runtime';
 import dayjs from 'dayjs';
-const HandleStatus = {
-  APPROVE: 'approve',
-  EXECUT: 'execut',
-  REFUSE:'refuse',
-  GOBACK:'goback',
-  PASSON:'passon'
-}
 
-const IDone: FC = () => {
+const IDone: FC = ({ appId }) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -31,11 +25,16 @@ const IDone: FC = () => {
     },
     {
       title: '处理操作',
-      dataIndex: 'handleOperation',
+      dataIndex: 'taskStatus',
       render: (val, record) => {
-        if (val === HandleStatus.APPROVE || val === HandleStatus.EXECUT) {
+        if (val === TaskStatusMap.SUBMITTED || val === TaskStatusMap.AGREED || val === TaskStatusMap.PASS) {
           return <span style={{ color: '#00B42A' }}>{val}</span>;
-        } else if (val === HandleStatus.GOBACK || val === HandleStatus.REFUSE) {
+        } else if (
+          val === TaskStatusMap.REJECTED ||
+          val === TaskStatusMap.RETURNED ||
+          val === TaskStatusMap.WITHDRAWN ||
+          val === TaskStatusMap.AUTOREJECTED
+        ) {
           return <span style={{ color: '#F53F3F' }}>{val}</span>;
         } else {
           return <span style={{ color: '#4E5969' }}>{val}</span>;
@@ -66,45 +65,17 @@ const IDone: FC = () => {
       )
     }
   ];
-  const mockData = [
-    {
-      key: '1',
-      name: 'Jane Doe',
-      salary: 23000,
-      address: '32 Park Road, London',
-      handleOperation: 'approve',
-      email1: 'e@example.com',
-      email2: 'ample.com'
-    },
-    {
-      key: '2',
-      name: 'Alisa Ross',
-      salary: 25000,
-      address: '35 Park Road, London',
-      handleOperation: 'goback',
-      email1: '12e@example.com',
-      email2: '3333ample.com'
-    },
-    {
-      key: '3',
-      name: 'Kevin Sandra',
-      salary: 22000,
-      address: '31 Park Road, London',
-      handleOperation: '1kevin.sandra@example.com',
-      email1: 'aaae@example.com',
-      email2: 'bbbample.com'
-    }
-  ];
   let [detailPopVisible, setPopVisible] = useState(false);
   const [data, setData] = useState<any>();
+  const [rowData, setRowData] = useState();
   function handleDetailPage(row: any) {
     console.log('click to detail page === row ===', row);
+    setRowData(row);
     setPopVisible(true);
   }
   const fetchFormData = async () => {
-    //todo：模拟参数
     const req = {
-      appId: '1332334434343'
+      appId
       //   pageNo: 1,
       //   pageSize: 10,
       //   processTitle: '',
@@ -132,7 +103,14 @@ const IDone: FC = () => {
         <TableSearch uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: false }} />
       </div>
       <Table className="task-tb-box created-tb" columns={columns} data={data} />
-      {detailPopVisible && <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible} />}
+      {detailPopVisible && (
+        <DetailPop
+          detailPopVisible={detailPopVisible}
+          setPopVisible={setPopVisible}
+          listType={LISTTYPE.IDONE}
+          rowData={rowData}
+        />
+      )}
     </section>
   );
 };

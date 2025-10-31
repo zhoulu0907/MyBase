@@ -2,10 +2,10 @@ import React, { memo, useCallback } from 'react';
 import { Button, Form, Modal } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useFieldStore } from '@/store/store_field';
-import FieldConfigPopover from './FieldConfigPopover';
+import FieldConfigPopover from './components/FieldConfigPopover';
 import styles from './index.module.less';
-import SortableTable from './SortableTable';
-import TableColumns from './TableColumns';
+import SortableTable from './components/SortableTable';
+import TableColumns from './components/TableColumns';
 import { useFieldManager } from './hooks/useFieldManager';
 import type { ConfigFieldModalProps } from './types';
 import { FIELD_TYPES_NEED_CONFIG } from './utils/const';
@@ -73,7 +73,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
         confirmLoading={fieldManager.loading}
         style={{ width: 1400 }}
       >
-        <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }}>
+        <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }} id="field-config-form">
           <Form.List field="fields">
             {() => {
               return (

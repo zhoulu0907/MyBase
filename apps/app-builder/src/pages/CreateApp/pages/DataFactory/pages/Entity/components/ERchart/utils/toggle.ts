@@ -1,4 +1,5 @@
 import { Node, Edge } from '@antv/x6';
+import { EDGE_NORMAL_STYLE, EDGE_SELECTED_STYLE } from './constants';
 
 // 切换节点阴影（选中）效果，供画布事件调用
 export const toggleNodeShadow = (node: Node, selected: boolean) => {
@@ -19,17 +20,11 @@ export const toggleEdgeSelected = (edge: Edge, selected: boolean) => {
 
   if (selected) {
     edge.setAttrs({
-      line: {
-        stroke: 'rgba(var(--primary-7), 0.8)',
-        strokeWidth: 3
-      }
+      line: EDGE_SELECTED_STYLE
     });
   } else {
     edge.setAttrs({
-      line: {
-        stroke: 'rgba(var(--primary-6), 1)',
-        strokeWidth: 2
-      }
+      line: EDGE_NORMAL_STYLE
     });
   }
 };

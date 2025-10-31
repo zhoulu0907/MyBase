@@ -101,7 +101,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
 
   const handleDelete = async () => {
     setDeleteLoading(true);
-    const res = await deleteEntity(node.entityId);
+    const res = await deleteEntity(node.id);
 
     setDeleteLoading(false);
     setDeleteModalVisible(false);

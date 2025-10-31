@@ -18,7 +18,7 @@ const Advanced = ({ cpID }: AdvancedProps) => {
   const [editData, setEditData] = useState<any>([]);
   const [configs, setConfigs] = useState<any>({});
 
-  const handlePropsChange = (key: string, value: string | number | boolean | any[]) => {
+  const handlePropsChange = (key: string, value: any) => {
     console.log(`更新了属性: ${key} 值为: `, value);
 
     const newCurComponentSchema = {

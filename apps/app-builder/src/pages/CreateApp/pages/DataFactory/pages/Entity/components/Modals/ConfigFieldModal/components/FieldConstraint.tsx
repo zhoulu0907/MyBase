@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Input, Switch, Form, Message } from '@arco-design/web-react';
-import styles from './index.module.less';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
+import styles from '../index.module.less';
 
 // 字段约束配置接口
 interface FieldConstraintConfig {
@@ -65,7 +65,7 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
     <div className={styles.fieldConstraintConfig}>
       <h4>字段约束</h4>
 
-      <Form form={form} initialValues={initialValues} layout="vertical">
+      <Form form={form} initialValues={initialValues} layout="vertical" id="field-constraint-form">
         {/* 长度范围配置 */}
         <div className={styles.constraintSection}>
           <div className={styles.constraintHeader}>

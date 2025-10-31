@@ -109,7 +109,9 @@
 
     .myAppList {
       width: 100%;
-      height: calc(100vh - @myAppPageHeaderHeight - @myAppFilterHeight - @myAppPaginationHeight - 100px);
+      // height: calc(100vh - @myAppPageHeaderHeight - @myAppFilterHeight - @myAppPaginationHeight - 100px);
+      min-height: 500px;
+      height: 100%;
       overflow-y: auto;
       box-sizing: border-box;
       display: grid;
@@ -117,6 +119,7 @@
       grid-auto-rows: min-content;
       padding: 2px 2px 0;
       gap: 28px 24px;
+      padding-bottom: 10px;
 
       /* 滚动条美化：变细 */
       &::-webkit-scrollbar {

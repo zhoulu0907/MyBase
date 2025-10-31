@@ -279,3 +279,12 @@ export const getAppEntities = (appId: string) => {
 export const getEntityFieldOptions = (fieldId: string) => {
   return metadataService.post(`/entity-field/option/list?fieldId=${fieldId}`);
 };
+
+/**
+ * 按字段ID获取自动编号配置与规则
+ * fieldId
+ * @returns 自动编号配置规则
+ */
+export const getAutoNumberConfig = (fieldId:string) =>{
+  return metadataService.post(`/auto-number/config/get?fieldId=${fieldId}`);
+}

@@ -106,7 +106,6 @@ export default function ConditionMode() {
         if (oldIndex !== newIndex) {
             let _arr:any = []
             const newData = arrayMove(_arr.concat(data), oldIndex, newIndex).filter((el) => !!el);
-            console.log('New Data: ', newData);
             setData(newData);
         }
     }

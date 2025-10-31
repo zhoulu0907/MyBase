@@ -131,7 +131,7 @@ const PageManagerPage: FC = () => {
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
-  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
+  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false, style: React.CSSProperties = {}): any[] => {
     return menus.map((menu) => ({
       key: menu.id,
       title: (
@@ -158,6 +158,7 @@ const PageManagerPage: FC = () => {
           renameForm={renameForm}
           copyForm={copyForm}
           createForm={createForm}
+          style={style}
         />
       ),
       menuType: menu.menuType,
@@ -180,7 +181,11 @@ const PageManagerPage: FC = () => {
     const processedRes = addParentIdToChildren(res, RootParentPage.id);
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
 
-    const treeData = convertMenuToTreeData(res, initTreeItemWidth, true);
+    const menuStyles = {
+      height: '40px',
+      padding: '9px 12px',
+    };
+    const treeData = convertMenuToTreeData(res, initTreeItemWidth, true, menuStyles);
     setTreeData(treeData);
 
     if (res && res.length > 0) {

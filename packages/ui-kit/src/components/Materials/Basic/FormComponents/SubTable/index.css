@@ -2,46 +2,98 @@
   width: 100%;
   min-height: 200px;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  align-items: flex-start;
-  justify-content: flex-start;
-
-  border-radius: 4px;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
   box-sizing: border-box;
-  padding: 6px;
-  position: relative;
+  padding: 10px 5px;
+}
 
-    .arco-form-label-item {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    
-    label {
-      white-space: nowrap;
+.XSubTable .XSubTable-content {
+  min-height: 150px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.componentItem {
+  flex: 1;
+  cursor: move;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  position: relative;
+}
+
+/* 操作 */
+.operationArea {
+  position: absolute;
+  top: -18px;
+  right: 16px;
+  height: 24px;
+  padding: 4px;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+
+  .divider {
+    margin: 0 4px;
+  }
+
+  .copyButton,
+  .deleteButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: #4e5969;
+    background-color: #fff;
+
+    &:hover {
+      transform: scale(1.1);
     }
   }
 
-  .subTableContent {
-    width: 100%;
-    min-height: 120px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: center;
+  .deleteButton {
+    color: #f53f3f;
   }
+}
+.simulate-header {
+  background-color: #f2f3f5;
+  display: flex;
+  align-items: center;
+  line-height: 32px;
+  height: 32px;
+  border-radius: 4px 4px 0 0;
+}
+.simulate-header-item {
+  flex: 1;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border-right: 1px solid #e5e6eb
+}
 
-  .subTableFooter {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: flex-start;
-    /* justify-content: center; */
-  }
+.subTableContent {
+  width: 100%;
+  min-height: 120px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+}
 
-  .arco-table-td {
-    padding: 0;
-  }
+.subTableFooter {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  /* justify-content: center; */
 }

@@ -4,7 +4,7 @@ import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
 import DetailDrawer from '../Drawers/DetailDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
-import { FIELD_TYPE } from '@onebase/ui-kit';
+import { FIELD_TYPE, useNewNodeStore } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
@@ -15,7 +15,6 @@ import {
   toggleNodeShadow,
   toggleEdgeSelected
 } from './utils';
-import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
 const LINE_HEIGHT = 34.8;
@@ -240,8 +239,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         target: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` },
         attrs: {
           line: {
-            stroke: 'rgba(var(--primary-6), 1)',
-            strokeWidth: 2,
+            stroke: 'rgb(var(--gray-5))',
+            strokeWidth: 1,
             targetMarker: { name: 'block', width: 12, height: 8 }
           }
         },
@@ -258,7 +257,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                 attrs: {
                   label: {
                     text: edgeData.label,
-                    fill: 'rgba(var(--primary-6), 1)',
+                    fill: 'rgb(var(--primary-6))',
                     fontSize: 12,
                     textAnchor: 'middle',
                     textVerticalAnchor: 'middle'

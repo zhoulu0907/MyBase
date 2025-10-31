@@ -3,10 +3,10 @@ import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
+import { LISTTYPE, FlowStatusMap } from '@onebase/app';
 import DetailTable from './DetailTable';
 import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
-// import { getFormDetail, getOperatorRecord } from '../../../../../../../../packages/app/src/services/app_runtime';
 import { getFormDetail, getOperatorRecord } from '@onebase/app/src/services/app_runtime';
 
 const Row = Grid.Row;
@@ -15,14 +15,18 @@ const Col = Grid.Col;
 interface PageProps {
   detailPopVisible: boolean;
   setPopVisible: Function;
-  onBack: Function;
+  onBack?: Function;
+  taskId?: string;
+  rowData?: any;
+  listType?: string;
 }
 
-const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack }) => {
+const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, taskId, rowData, listType }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [popupVisible, setPopupVisible] = useState(false);
   const [stepData, setStepData] = useState();
+  const [detailData, setDetailData] = useState();
   let confirmRef = useRef<any>(null);
 
   function toggleFullScreen(type: string) {
@@ -35,7 +39,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   function renderTitle() {
     return (
       <>
-        <span>Basic Information </span>
+        <span>{rowData?.processTitle} </span>
         <div>
           {drawWidth !== '100%' ? (
             <IconFullscreen onClick={() => toggleFullScreen('FULLSCREEN')} />
@@ -64,7 +68,15 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           title=""
           style={{ maxWidth: '420px', width: '420px' }}
           className="dt-ok-confirm"
-          content={<DetailOKConfirm ref={confirmRef} setPopupVisible={setPopupVisible} onBack={onBack} />}
+          content={
+            <DetailOKConfirm
+              ref={confirmRef}
+              setPopupVisible={setPopupVisible}
+              onBack={onBack}
+              taskId={taskId}
+              instanceId={rowData?.instanceId}
+            />
+          }
           onOk={() => {
             handleConfirmOK();
           }}
@@ -83,54 +95,22 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   }
 
   const fetchStepData = async () => {
-    // todo：模拟参数
-    const res = await getOperatorRecord({ instanceId: '1432895485789736960' });
-    const mockRes = {
-      code: 0,
-      data: [
-        {
-          nodeName: '发起节点',
-          nodeType: 'initiation',
-          operators: [
-            {
-              operator: '处理人',
-              operatorTime: 1761670506018,
-              comment: '提交'
-            }
-          ]
-        },
-        {
-          nodeName: '开始',
-          nodeType: 'start',
-          operators: [
-            {
-              operator: '处理人',
-              operatorTime: 1761670505828
-            }
-          ]
-        },
-        {
-          nodeName: '组长审批',
-          nodeType: 'approver',
-          operators: [
-            {
-              operator: '处理人',
-              operatorTime: 1761718370646,
-              comment: '同意测试'
-            }
-          ]
-        }
-      ],
-      msg: ''
-    };
-
-    setStepData(res?.data || mockRes);
+    const res = await getOperatorRecord({ instanceId: rowData?.instanceId });
+    setStepData(res);
+  };
+  const fetchDetailData = async () => {
+    const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: rowData?.taskId });
+    setDetailData(res);
   };
 
   useEffect(() => {
-    //发请求，请求详情以及审批记录
-    fetchStepData();
-  }, []);
+    if (listType === LISTTYPE.WILLDO || listType === LISTTYPE.IDONE || listType === LISTTYPE.ICREATED) {
+      fetchStepData();
+      fetchDetailData();
+    } else {
+      //根据列表类型请求对应的详情
+    }
+  }, [listType]);
 
   return (
     <section>
@@ -139,7 +119,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
         width={drawWidth}
         title={renderTitle()}
         visible={detailPopVisible}
-        footer={renderDrawerFooter()}
+        footer={listType === LISTTYPE.WILLDO ? renderDrawerFooter() : null}
         onOk={() => {
           setPopVisible(false);
         }}
@@ -153,23 +133,24 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
               <p className="gray-color">当前状态</p>
               <div style={{ padding: '4px 0' }}>
                 <Tag color="arcoblue" defaultChecked checkable={false}>
-                  Lark
+                  {detailData?.currentStatus && FlowStatusMap[detailData?.currentStatus]}
                 </Tag>
               </div>
             </Col>
             <Col span={6}>
               <p className="gray-color">发起人</p>
               <div className="photo-box">
-                <p className="photo-img"></p>某某人
+                <p className="photo-img"></p>
+                {detailData?.initiatorDeptName}
               </div>
             </Col>
             <Col span={6}>
               <p className="gray-color">发起部门</p>
-              <div className="photo-box">科创中心</div>
+              <div className="photo-box">{detailData?.initiatorDeptName}</div>
             </Col>
             <Col span={6}>
               <p className="gray-color">流程版本号</p>
-              <div className="photo-box">V1</div>
+              <div className="photo-box">{detailData?.bpmVersion}</div>
             </Col>
           </Row>
           <div className="draw-content">

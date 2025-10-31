@@ -67,11 +67,6 @@ export interface XSubTableConfig extends ICommonBaseType {
   };
 
   /**
-   * 数据字段
-   */
-  dataField: TTextDefaultType;
-
-  /**
    * 描述信息（鼠标悬浮时显示）
    */
   tooltip?: TTextAreaDefaultType;
@@ -104,14 +99,6 @@ export interface XSubTableConfig extends ICommonBaseType {
     maxLength: TTextDefaultType;
     allowNull: TBooleanDefaultType;
   };
-
-  /**
-   * 表单的布局：水平、垂直（默认）
-   * 可选值: 'vertical' | 'horizontal'
-   */
-  layout?: TLayoutSelectKeyType;
-
-  columns: any[];
 }
 
 export interface XSubTableSchema {
@@ -134,7 +121,7 @@ const XSubTable: XSubTableSchema = {
     },
     subTableConfig,
     // labelColSpanConfig,
-    layoutConfig,
+    // layoutConfig,
     {
       key: 'verify',
       name: '校验',
@@ -149,9 +136,7 @@ const XSubTable: XSubTableSchema = {
       text: '子表单',
       display: true
     },
-    dataField: '',
     tooltip: '',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 200,
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
@@ -161,16 +146,6 @@ const XSubTable: XSubTableSchema = {
       maxLength: '',
       allowNull: false
     },
-    columns: [
-      {
-        title: '序号',
-        dataIndex: 'index'
-      },
-      {
-        title: '操作',
-        dataIndex: 'operation'
-      }
-    ]
   }
 };
 

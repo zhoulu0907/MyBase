@@ -5,19 +5,22 @@
 import { useContext } from 'react';
 import { Divider, Button } from '@arco-design/web-react';
 import styles from './index.module.less';
-import { SidebarContext, NodeRenderContext } from '../../context';
+import { SidebarContext } from '../../context';
 
-export default function BottomBtn({handleSubmit}: any) {
+export default function BottomBtn({ handleSubmit }: any) {
   const { setNodeId } = useContext(SidebarContext);
-  // const { configForm, setconfigFormForm } = useContext(NodeRenderContext); // 在这里设置和获取form
   const handleClose = () => {
     setNodeId(undefined);
+  };
+  const submit = () => {
+    handleSubmit();
+    handleClose();
   };
   return (
     <div className={styles.bottomBtn}>
       <Divider />
       <div className={styles.btnBox}>
-        <Button className={styles.submit} type="primary" onClick={handleSubmit}>
+        <Button className={styles.submit} type="primary" onClick={submit}>
           确定
         </Button>
         <Button type="secondary" onClick={handleClose}>

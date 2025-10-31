@@ -74,7 +74,7 @@ export interface EntityERProps {
   onNodeAddRelation?: (id: string) => void;
   onNodeAddMasterDetail?: (id: string) => void;
   onNodeAddRule?: (id: string) => void;
-  onFieldClick?: (id: string) => void;
+  onFieldClick?: (id: string, entityId?: string) => void;
   onEdgeEdit?: (data: EdgeData) => void;
   onlyUpdateNode?: boolean;
   updateEntityPosition?: (data: EntityNode, x: number, y: number) => void;

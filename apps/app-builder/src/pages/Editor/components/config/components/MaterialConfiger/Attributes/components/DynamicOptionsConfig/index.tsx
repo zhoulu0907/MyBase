@@ -109,12 +109,9 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                         size="mini"
                         status="danger"
                         className={styles.tableColumnItemButton}
+                        disabled={selectOptionsConfig.length <= 2}
                         onClick={() => {
                           const newList = [...selectOptionsConfig];
-                          if (newList.length <= 2) {
-                            Message.warning('下拉选项不能少于2个');
-                            return;
-                          }
                           newList.splice(idx, 1);
                           setSelectOptionsConfig(newList);
                           handlePropsChange(selectKey, newList);

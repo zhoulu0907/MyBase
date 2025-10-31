@@ -2,7 +2,7 @@
   background-color: #fff;
   height: calc(100% - 200px);
   padding: 16px 32px;
-  .radioGroup{
+  .radioGroup {
     width: 100%;
     display: flex;
     border-radius: 4px;
@@ -13,7 +13,7 @@
       background-color: #fff;
       text-align: center;
       &:hover {
-        background: #4fae7b;
+        background: rgb(var(--primary-6));
         color: #fff;
       }
       &::after {
@@ -21,11 +21,13 @@
       }
     }
     :global(.arco-radio-checked) {
-      background: #4fae7b;
+      background: rgb(var(--primary-6));
       color: #fff;
     }
   }
-  .content{
+  .content {
     margin-top: 16px;
+    height: calc(100% - 14px);
+    overflow-y: auto;
   }
 }

@@ -67,6 +67,24 @@ export function usePageEditorSignal() {
     ? useListEditorSignal.clearLayoutSubComponents
     : useFormEditorSignal.clearLayoutSubComponents;
 
+  // 子表单
+  const subTableComponents = useList
+    ? useListEditorSignal.subTableComponents.value
+    : useFormEditorSignal.subTableComponents?.value;
+
+  const setSubTableComponents = useList
+    ? useListEditorSignal.setSubTableComponents
+    : useFormEditorSignal.setSubTableComponents;
+
+  const delSubTableComponents = useList
+    ? useListEditorSignal.delSubTableComponents
+    : useFormEditorSignal.delSubTableComponents;
+
+  const clearSubTableComponents = useList
+    ? useListEditorSignal.clearSubTableComponents
+    : useFormEditorSignal.clearSubTableComponents;
+
+
   return {
     curComponentID,
     setCurComponentID,
@@ -89,6 +107,10 @@ export function usePageEditorSignal() {
     loadLayoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
-    clearLayoutSubComponents
+    clearLayoutSubComponents,
+    subTableComponents,
+    setSubTableComponents,
+    delSubTableComponents,
+    clearSubTableComponents,
   };
 }

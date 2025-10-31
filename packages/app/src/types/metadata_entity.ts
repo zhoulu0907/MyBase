@@ -4,6 +4,12 @@ export const ENTITY_TYPE = {
   INDEP: '独立表'
 };
 
+export const ENTITY_TYPE_VALUE = {
+  MAIN: 'main',
+  SUB: 'sub',
+  INDEP: 'indep'
+}
+
 export interface MetadataEntityPair {
   entityId: string;
 

@@ -42,9 +42,10 @@ interface MenuItemProps {
   triggerHide?: (menuID: string, isVisible: number) => void;
   triggerDelete?: (menuID: string) => void;
   maxWidth: number;
-  renameForm?: FormInstance;
-  copyForm?: FormInstance;
-  createForm?: FormInstance;
+  renameForm: FormInstance;
+  copyForm: FormInstance;
+  createForm: FormInstance;
+  style?: React.CSSProperties;
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
@@ -64,7 +65,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   maxWidth,
   renameForm,
   copyForm,
-  createForm
+  createForm,
+  style
 }) => {
   useSignals();
   const navigate = useNavigate();
@@ -150,7 +152,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </MenuItem>
       )}
 
-      {(isGroup && createForm && triggerCreate)  && (
+      {(isGroup && createForm && triggerCreate) && (
         <MenuItem
           className={styles.menuContent}
           key="createGroup"
@@ -206,14 +208,10 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       onClick={onClick}
       role="menuitem"
       tabIndex={0}
+      style={style}
     >
       <Tooltip content={menuName} position="top">
-        <div
-          className={styles.menuName}
-          style={{
-            maxWidth: maxWidth + 'px'
-          }}
-        >
+        <div className={styles.menuName}>
           <DynamicIcon
             IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
             theme="outline"
@@ -221,7 +219,9 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
             style={{ marginRight: 16 }}
           />
-          {label}
+          <span className={styles.name} style={{ maxWidth: maxWidth + 'px' }}>
+            {label}
+          </span>
         </div>
       </Tooltip>
       {isVisible === VisibleType.HIDDEN && (

@@ -107,6 +107,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XInputPhone: <img src={PhoneInputIcon} alt="XInputPhone" />,
   XDatePicker: <img src={DatePickerIcon} alt="XDatePicker" />,
   XDateRangePicker: <img src={DatePickerIcon} alt="XDateRangePicker" />,
+  XDateTimePicker: <img src={TimePickerIcon} alt="XDateTimePicker" />,
   XTimePicker: <img src={TimePickerIcon} alt="XTimePicker" />,
   XRadio: <img src={RadioIcon} alt="XRadio" />,
   XSwitch: <img src={SwitchIcon} alt="XSwitch" />,

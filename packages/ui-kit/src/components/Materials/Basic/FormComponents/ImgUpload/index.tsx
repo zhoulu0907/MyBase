@@ -17,6 +17,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     status,
     tooltip,
     listType,
+    uploadType,
     verify,
     layout,
     labelColSpan = 0,
@@ -251,11 +252,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             pointerEvents: runtime ? 'unset' : 'none'
           }}
           disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT]}
-          drag
+          drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >
           <div className="uplaodTrigger">
-            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
+            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
               <div className="uplaodTriggerText">
                 <div className="uplaodTriggerText-content">
                   <IconImage />
@@ -263,7 +264,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 </div>
               </div>
             )}
-            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
+            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
               <div className="uplaodTriggerList">
                 <div className="uplaodTriggerList-content">
                   <IconPlus />
@@ -275,7 +276,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 </div>
               </div>
             )}
-            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
+            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
               <div className="uplaodTriggerPicture">
                 <div className="uplaodTriggerPicture-content">
                   <IconImage />

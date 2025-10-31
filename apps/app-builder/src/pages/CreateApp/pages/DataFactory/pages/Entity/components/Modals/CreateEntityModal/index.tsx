@@ -1,4 +1,4 @@
-import { DS_RESOURCE_TYPE } from '@onebase/ui-kit';
+import { DS_RESOURCE_TYPE, useNewNodeStore } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import styles from '../modal.module.less';
 import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { getNewNodePosition } from '../../ERchart/utils/nodePositionCalculator';
-import { useNewNodeStore } from '@/store/store_entity';
 
 interface EntityFormValues {
   source: string;
