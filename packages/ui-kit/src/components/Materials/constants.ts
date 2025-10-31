@@ -85,6 +85,8 @@ export const CONFIG_TYPES = {
   FILE: 'File',
   // 折叠面板展开状态
   COLLAPSED: 'Collapsed',
+  // 自动编号规则
+  AUTO_CODE_RULES: 'autoCodeRules',
 
   TABLE_OPERATION: 'TableOperation',
   TABLE_BUTTON: 'advancedButtonPermission'
@@ -174,6 +176,12 @@ export const UPLOAD_OPTIONS = {
   TEXT: '文本',
   LIST: '列表',
   CARD: '平铺'
+} as const;
+
+export const UPLOAD_TYPE_OPTIONS = {
+  TEXT: '点击',
+  LIST: '拖拽',
+  CARD: '卡片'
 } as const;
 
 export const UPLOAD_VALUES = {

@@ -5,7 +5,15 @@ import InfoPanel from '@/components/InfoPanel';
 import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-data-table';
 import DictList from '@/pages/Setting/pages/SystemDict/components/dict-list';
 import { Divider, Empty, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
-import type { DictData, DictItem, PageParam } from '@onebase/platform-center';
+import {
+  StatusEnum,
+  type DictData,
+  type DictItem,
+  type PageParam,
+  type BatchConfigDictDataParams,
+  type PageResult
+} from '@onebase/platform-center';
+import { TokenManager } from '@onebase/common';
 import {
   createDict,
   createDictData,
@@ -23,9 +31,11 @@ import { useEffect, useState } from 'react';
 import DictDataModal from '@/pages/Setting/pages/SystemDict/components/dict-data-modal';
 import DictModal from '@/pages/Setting/pages/SystemDict/components/dict-modal';
 import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-config-modal';
-import styles from '../../index.module.less';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
+import StatusTag, { StatusLabelEnum } from '@/components/StatusTag';
+import { useAppStore } from '@/store/store_app';
+import styles from '../../index.module.less';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -42,17 +52,17 @@ export interface DictManagerConfig {
   };
   // API 配置
   api?: {
-    getDictList?: () => Promise<DictItem[]>;
-    getDictDataList?: (params: any) => Promise<{ list: DictData[]; total: number }>;
-    createDict?: (data: DictItem) => Promise<any>;
-    updateDict?: (data: DictItem) => Promise<any>;
-    deleteDict?: (id: number) => Promise<any>;
-    createDictData?: (data: DictData) => Promise<any>;
-    updateDictData?: (data: DictData) => Promise<any>;
-    deleteDictData?: (id: number) => Promise<any>;
-    updateDictDataStatus?: (params: { id: number; status: number }) => Promise<any>;
-    batchConfigDictData?: (data: DictData[]) => Promise<any>;
-    batchUpdateDictData?: (data: DictData[]) => Promise<any>;
+    getDictList?: (params: Record<string, string>) => Promise<DictItem[]>;
+    getDictDataList?: (params: PageParam & { dictType: string }) => Promise<PageResult<DictData>>;
+    createDict?: (data: Partial<DictItem>) => Promise<void>;
+    updateDict?: (data: Partial<DictItem>) => Promise<void>;
+    deleteDict?: (id: string) => Promise<void>;
+    createDictData?: (data: Partial<DictData>) => Promise<void>;
+    updateDictData?: (data: Partial<DictData>) => Promise<void>;
+    deleteDictData?: (id: string) => Promise<void>;
+    updateDictDataStatus?: (params: { id: string; status: number }) => Promise<void>;
+    batchConfigDictData?: (data: BatchConfigDictDataParams) => Promise<void>;
+    batchUpdateDictData?: (data: DictData[]) => Promise<void>;
   };
   // UI 配置
   ui?: {
@@ -90,7 +100,13 @@ interface DictManagerProps {
   onDictDataChange?: (data: DictData[]) => void;
 }
 
+// 扩展 DictData，支持删除标记
+interface DictDataWithDelete extends DictData {
+  isDelete?: boolean;
+}
+
 export default function DictManager({ config = {}, onDictChange, onDictDataChange }: DictManagerProps) {
+  const { curAppId } = useAppStore();
   // 合并默认配置
   const finalConfig: Required<DictManagerConfig> = {
     permissions: {
@@ -126,12 +142,12 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     tabs: {
       enabled: false,
       systemDictTab: {
-        key: 'system',
-        title: '系统字典',
+        key: 'tenant',
+        title: '公共字典',
         ...config.tabs?.systemDictTab
       },
       customDictTab: {
-        key: 'custom',
+        key: 'app',
         title: '自定义字典',
         ...config.tabs?.customDictTab
       },
@@ -144,10 +160,9 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   // Tabs 相关状态
   const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs.systemDictTab?.key || '');
-
   // 字典相关状态
   const [dictList, setDictList] = useState<DictItem[]>([]);
-  const [activeDictId, setActiveDictId] = useState<number | undefined>(undefined);
+  const [activeDictId, setActiveDictId] = useState<string | undefined>(undefined);
   const [showEmpty, setShowEmpty] = useState<boolean>(false);
   const [activeDict, setActiveDict] = useState<DictItem | undefined>(undefined);
   const [tableData, setTableData] = useState<DictData[]>([]);
@@ -166,6 +181,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   const [editItem, setEditItem] = useState<DictData | null>(null);
   const [batchConfigModalVisible, setBatchConfigModalVisible] = useState(false);
   const [batchConfigLoading, setBatchConfigLoading] = useState(false);
+  const getTenantInfo = TokenManager.getTenantInfo();
 
   // 获取当前tab的配置
   const getCurrentTabConfig = () => {
@@ -191,14 +207,21 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     }
   }, [activeDictId]);
 
+  const getDictOwnerId = () => {
+    return activeTab === finalConfig.tabs.systemDictTab?.key ? getTenantInfo?.tenantId : curAppId;
+  };
+
   const loadDictList = async () => {
     try {
-      const data = await currentTabConfig.api.getDictList();
-      setDictList(data);
-      if (activeDictId && data.findIndex((item) => item.id === activeDictId) > -1) {
+      const data = await currentTabConfig.api?.getDictList?.({
+        dictOwnerType: activeTab,
+        dictOwnerId: getDictOwnerId() as string
+      });
+      setDictList(data || []);
+      if (activeDictId && data && data.findIndex((item) => item.id === activeDictId) > -1) {
         setActiveDictId(activeDictId);
         setActiveDict(dictList.find((t) => t.id === activeDictId));
-      } else if (data.length > 0) {
+      } else if (data && data.length > 0) {
         setActiveDictId(data[0].id);
       }
     } catch (error) {
@@ -263,10 +286,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     );
   }, [dictList, dictSearch]);
 
-  const debouncedLoadTableData = debounce((keyword: string) => {
-    loadTableData(keyword);
-  }, 300);
-
   useEffect(() => {
     if (activeDictId !== undefined) {
       debouncedLoadTableData(dictDataSearch);
@@ -276,14 +295,32 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     };
   }, [dictDataSearch]);
 
+  const debouncedLoadTableData = debounce((keyword: string) => {
+    loadTableData(keyword);
+  }, 300);
+
   const handleDictDataSearch = (value: string) => {
     setDictDataSearch(value);
     setCurrentPage(1);
   };
 
-  // 编辑/删除字典按钮
+  const getStatusButtonText = (status: number) => {
+    const isEnable = status === StatusEnum.ENABLE;
+    return isEnable ? StatusLabelEnum.DISABLE : StatusLabelEnum.ENABLE;
+  };
+
+  // 禁用/编辑/删除字典按钮
   const OperationButtons = (
     <Space size="small">
+      <Button
+        permission={currentTabConfig.permissions.update}
+        type="secondary"
+        onClick={() => {
+          handleUpdateDictStatus(activeDict?.id!, activeDict?.status as StatusEnum);
+        }}
+      >
+        {getStatusButtonText(activeDict?.status as StatusEnum)}
+      </Button>
       <Button
         permission={currentTabConfig.permissions.update}
         type="secondary"
@@ -306,7 +343,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     </Space>
   );
 
-  const handleDictSelect = (id: number | undefined) => {
+  const handleDictSelect = (id: string | undefined) => {
     setActiveDictId(id);
     setCurrentPage(1);
     setShowEmpty(false);
@@ -316,8 +353,32 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     setCurrentPage(page);
   };
 
+  const handleUpdateDictStatus = (id: string, status: StatusEnum) => {
+    const label = getStatusButtonText(status);
+    Modal.confirm({
+      title: `确认${label}`,
+      content: `确定要${label}这条数据吗？`,
+      okText: '确认',
+      cancelText: '取消',
+      onOk: async () => {
+        handleUpdateDictStatusOk(id, status);
+      }
+    });
+  };
+
+  const handleUpdateDictStatusOk = async (id: string, status: StatusEnum) => {
+    try {
+      const params = { ...activeDict, status: status === StatusEnum.ENABLE ? StatusEnum.DISABLE : StatusEnum.ENABLE };
+      await currentTabConfig.api?.updateDict?.(params);
+      Message.success('操作成功');
+      loadDictList();
+    } catch (error) {
+      console.error('操作失败:', error);
+    }
+  };
+
   // 删除字典
-  const handleDeleteDict = async (id: number) => {
+  const handleDeleteDict = async (id: string) => {
     Modal.confirm({
       title: '确认删除',
       content: '确定要删除这条数据吗？',
@@ -329,9 +390,9 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     });
   };
 
-  const handleDeleteDictOk = async (id: number) => {
+  const handleDeleteDictOk = async (id: string) => {
     try {
-      await currentTabConfig.api.deleteDict(id);
+      await currentTabConfig.api?.deleteDict?.(id);
       Message.success('删除成功');
       setShowEmpty(true);
       setDictList(dictList.filter((t) => t.id !== id));
@@ -341,7 +402,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   };
 
   // 删除字典数据
-  const handleDeleteDictData = async (id: number) => {
+  const handleDeleteDictData = async (id: string) => {
     Modal.confirm({
       title: '确认删除',
       content: '确定要删除这条数据吗？',
@@ -349,7 +410,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       cancelText: '取消',
       onOk: async () => {
         try {
-          await currentTabConfig.api.deleteDictData(id);
+          await currentTabConfig.api?.deleteDictData?.(id);
           Message.success('删除成功');
 
           const params: PageParam & { dictType: string } = {
@@ -357,7 +418,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
             pageNo: currentPage,
             pageSize
           };
-          const res = await currentTabConfig.api.getDictDataList(params);
+          const res = await currentTabConfig.api?.getDictDataList?.(params);
           setTableData(res.list);
           setTotal(res.total);
           onDictDataChange?.(res.list);
@@ -374,12 +435,20 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     setModalLoading(true);
     try {
       if (editDict && editDict.id) {
-        await currentTabConfig.api.updateDict({ ...editDict, ...values });
+        await currentTabConfig.api?.updateDict({ ...editDict, ...values });
         setDictList((prev) => prev.map((t) => (t.id === editDict.id ? { ...t, ...values } : t)));
       } else {
-        await currentTabConfig.api.createDict(values);
-        const data = await currentTabConfig.api.getDictList();
-        setDictList(data);
+        await currentTabConfig.api?.createDict({
+          ...values,
+          dictOwnerType: activeTab,
+          dictOwnerId: getDictOwnerId()
+        });
+
+        const data = await currentTabConfig.api?.getDictList?.({
+          dictOwnerType: activeTab,
+          dictOwnerId: getDictOwnerId() as string
+        });
+        setDictList(data || []);
       }
       setAddDictModalVisible(false);
       setEditDict(null);
@@ -422,12 +491,12 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     }
   };
 
-  const handleUpdateDictDataStatus = (id: number, status: number) => {
+  const handleUpdateDictDataStatus = (id: string, status: number) => {
     const params = {
       id,
       status
     };
-    currentTabConfig.api.updateDictDataStatus(params).then(() => {
+    currentTabConfig.api?.updateDictDataStatus?.(params).then(() => {
       Message.success('操作成功');
       loadTableData();
     });
@@ -439,7 +508,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   };
 
   // 批量配置确认
-  const handleBatchConfigOk = async (values: any[]) => {
+  const handleBatchConfigOk = async (values: DictData[]) => {
     setBatchConfigLoading(true);
     try {
       if (!activeDict?.type) {
@@ -448,20 +517,21 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       }
 
       // 分离新增和更新的数据
-      const newItems = values
-        .filter((item) => item.id.startsWith('temp-'))
+      const valuesWithDelete = values as DictDataWithDelete[];
+      const newItems = valuesWithDelete
+        .filter((item) => item?.id?.startsWith('temp-'))
         .map((item) => ({
           ...item,
           id: '',
           dictType: activeDict.type
         }));
-      const updateItems = values
-        .filter((item) => !item.id.startsWith('temp-') && !item.isDelete)
+      const updateItems = valuesWithDelete
+        .filter((item) => !item?.id?.startsWith('temp-') && !item?.isDelete)
         .map((item) => ({
           ...item,
           dictType: activeDict.type
         }));
-      const deleteItems = values.filter((item) => item.isDelete).map((item) => item.id);
+      const deleteItems = valuesWithDelete.filter((item) => item.isDelete).map((item) => item.id);
 
       console.log('batchConfigDictData', newItems, updateItems, deleteItems);
       await currentTabConfig.api?.batchConfigDictData({
@@ -475,7 +545,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       loadTableData();
     } catch (error) {
       console.error('批量配置失败:', error);
-      Message.error('批量配置失败');
     } finally {
       setBatchConfigLoading(false);
     }
@@ -483,11 +552,11 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   return (
     <div className={`${styles.systemDictPage} ${finalConfig.className}`} style={finalConfig.style}>
-      {finalConfig.tabs.enabled ? (
-        <Tabs activeTab={activeTab} onChange={setActiveTab} type="line" className={styles.tabsContainer}>
-          <Tabs.TabPane key={finalConfig.tabs.systemDictTab.key} title={finalConfig.tabs.systemDictTab.title}>
-            <Layout className={styles.pageLayout}>
-              <Sider width={252} className={styles.leftPanel}>
+      <Layout className={styles.pageLayout}>
+        <Sider width={252} className={styles.leftPanel}>
+          {finalConfig.tabs.enabled ? (
+            <Tabs activeTab={activeTab} onChange={setActiveTab} type="line" className={styles.tabsContainer}>
+              <Tabs.TabPane key={finalConfig.tabs.systemDictTab.key} title={finalConfig.tabs.systemDictTab.title}>
                 <DictList
                   list={filteredDictList}
                   activeId={activeDictId || undefined}
@@ -499,43 +568,8 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                   }}
                   onSelect={(id) => handleDictSelect(id)}
                 />
-              </Sider>
-              <Content className={styles.rightPanel}>
-                {!activeDictId || showEmpty ? (
-                  <Empty description={finalConfig.ui.emptyText} />
-                ) : (
-                  <>
-                    <Header>
-                      <InfoPanel
-                        title={activeDict?.name}
-                        description={activeDict?.remark}
-                        rightChildren={OperationButtons}
-                        wrapperClassName={styles.infoPanel}
-                      />
-                      <Divider style={{ margin: '16px 0' }} />
-                    </Header>
-                    <DictionaryTable
-                      data={tableData}
-                      currentPage={currentPage}
-                      pageSize={pageSize}
-                      total={total}
-                      onPageChange={handlePageChange}
-                      onPageSizeChange={setPageSize}
-                      searchValue={dictDataSearch}
-                      onSearchChange={handleDictDataSearch}
-                      onBatchConfig={handleBatchConfig}
-                      onEdit={(item) => handleDictDataEdit(item)}
-                      onDelete={(id) => handleDeleteDictData(id)}
-                      onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
-                    />
-                  </>
-                )}
-              </Content>
-            </Layout>
-          </Tabs.TabPane>
-          <Tabs.TabPane key={finalConfig.tabs.customDictTab.key} title={finalConfig.tabs.customDictTab.title}>
-            <Layout className={styles.pageLayout}>
-              <Sider width={252} className={styles.leftPanel}>
+              </Tabs.TabPane>
+              <Tabs.TabPane key={finalConfig.tabs.customDictTab.key} title={finalConfig.tabs.customDictTab.title}>
                 <DictList
                   list={filteredDictList}
                   activeId={activeDictId || undefined}
@@ -547,44 +581,9 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                   }}
                   onSelect={(id) => handleDictSelect(id)}
                 />
-              </Sider>
-              <Content className={styles.rightPanel}>
-                {!activeDictId || showEmpty ? (
-                  <Empty description={finalConfig.ui.emptyText} />
-                ) : (
-                  <>
-                    <Header>
-                      <InfoPanel
-                        title={activeDict?.name}
-                        description={activeDict?.remark}
-                        rightChildren={OperationButtons}
-                        wrapperClassName={styles.infoPanel}
-                      />
-                      <Divider style={{ margin: '16px 0' }} />
-                    </Header>
-                    <DictionaryTable
-                      data={tableData}
-                      currentPage={currentPage}
-                      pageSize={pageSize}
-                      total={total}
-                      onPageChange={handlePageChange}
-                      onPageSizeChange={setPageSize}
-                      searchValue={dictDataSearch}
-                      onSearchChange={handleDictDataSearch}
-                      onBatchConfig={handleBatchConfig}
-                      onEdit={(item) => handleDictDataEdit(item)}
-                      onDelete={(id) => handleDeleteDictData(id)}
-                      onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
-                    />
-                  </>
-                )}
-              </Content>
-            </Layout>
-          </Tabs.TabPane>
-        </Tabs>
-      ) : (
-        <Layout className={styles.pageLayout}>
-          <Sider width={252} className={styles.leftPanel}>
+              </Tabs.TabPane>
+            </Tabs>
+          ) : (
             <DictList
               list={filteredDictList}
               activeId={activeDictId || undefined}
@@ -596,40 +595,38 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
               }}
               onSelect={(id) => handleDictSelect(id)}
             />
-          </Sider>
-          <Content className={styles.rightPanel}>
-            {!activeDictId || showEmpty ? (
-              <Empty description={finalConfig.ui.emptyText} />
-            ) : (
-              <>
-                <Header>
-                  <InfoPanel
-                    title={activeDict?.name}
-                    description={activeDict?.remark}
-                    rightChildren={OperationButtons}
-                    wrapperClassName={styles.infoPanel}
-                  />
-                  <Divider style={{ margin: '16px 0' }} />
-                </Header>
-                <DictionaryTable
-                  data={tableData}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  total={total}
-                  onPageChange={handlePageChange}
-                  onPageSizeChange={setPageSize}
-                  searchValue={dictDataSearch}
-                  onSearchChange={handleDictDataSearch}
-                  onBatchConfig={handleBatchConfig}
-                  onEdit={(item) => handleDictDataEdit(item)}
-                  onDelete={(id) => handleDeleteDictData(id)}
-                  onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
+          )}
+        </Sider>
+        <Content className={styles.rightPanel}>
+          {!activeDictId || showEmpty ? (
+            <Empty description={finalConfig.ui.emptyText} />
+          ) : (
+            <>
+              <Header>
+                <InfoPanel
+                  title={activeDict?.name}
+                  description={activeDict?.remark}
+                  rightChildren={OperationButtons}
+                  wrapperClassName={styles.infoPanel}
+                  titleChildren={<StatusTag status={activeDict?.status} type="tag" />}
                 />
-              </>
-            )}
-          </Content>
-        </Layout>
-      )}
+                <Divider style={{ margin: '16px 0' }} />
+              </Header>
+              <DictionaryTable
+                data={tableData}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={handlePageChange}
+                onPageSizeChange={setPageSize}
+                searchValue={dictDataSearch}
+                onSearchChange={handleDictDataSearch}
+                onBatchConfig={handleBatchConfig}
+              />
+            </>
+          )}
+        </Content>
+      </Layout>
       {addDictModalVisible && (
         <DictModal
           visible={addDictModalVisible}
@@ -679,7 +676,6 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         onCancel={() => setBatchConfigModalVisible(false)}
         onOk={handleBatchConfigOk}
         loading={batchConfigLoading}
-        initialValues={tableData}
         dictType={activeDict?.type || ''}
       />
     </div>

@@ -1,0 +1,115 @@
+import { Button } from '@arco-design/web-react';
+import { WorkflowDragService, useService } from '@flowgram.ai/free-layout-editor';
+
+import React from 'react';
+import styles from './index.module.less';
+import approver from './../../assets/bpmLogo/approver.png';
+import executor_big from './../../assets/bpmLogo/executor_big.png';
+import automation from './../../assets/bpmLogo/automation.png';
+import ccto from './../../assets/bpmLogo/ccto.png';
+import conditional_branch from './../../assets/bpmLogo/conditional_branch.png';
+import parallel_branch from './../../assets/bpmLogo/parallel_branch.png';
+import sink_node from './../../assets/bpmLogo/sink_node.png';
+import wait from './../../assets/bpmLogo/wait.png';
+import task from './../../assets/bpmLogo/task.png';
+import message from './../../assets/bpmLogo/message.png';
+import subprocessTwo from './../../assets/bpmLogo/subprocessTwo.png';
+import copy from './../../assets/bpmLogo/copy.png';
+import deleteIcon from './../../assets/bpmLogo/deleteIcon.png';
+import classNames from 'classnames';
+
+/**
+ * 流程编辑页面
+ * 集成触发器编辑器作为主内容
+ */
+const LeftNavBar: React.FC = () => {
+  const nodeList = [
+    {
+      navTitle: '人工节点',
+      navList: [
+        { img: approver, title: '审批人' },
+        { img: executor_big, title: '执行人' },
+        { img: ccto, title: '抄送人' }
+      ]
+    },
+    {
+      navTitle: '分支节点',
+      navList: [
+        { img: conditional_branch, title: '条件分支' },
+        { img: parallel_branch, title: '并行分支' },
+        { img: sink_node, title: '汇聚节点' }
+      ]
+    },
+    {
+      navTitle: '逻辑节点',
+      navList: [
+        { img: subprocessTwo, title: '子流程' },
+        { img: wait, title: '等待' },
+        { img: automation, title: '自动化' },
+        { img: task, title: '任务' }
+      ]
+    },
+    {
+      navTitle: '消息节点',
+      navList: [{ img: message, title: '消息通知' }]
+    }
+  ];
+  const startDragSerivce = useService<WorkflowDragService>(WorkflowDragService);
+  return (
+    <div className={styles.leftNav}>
+      <div className={classNames(styles.process, styles.processNodeTitle)}>流程节点</div>
+      {nodeList.map((item, i) => (
+        <div key={i}>
+          <div className={styles.navTitleColor}> {item.navTitle}</div>
+          {/* 左侧子节点 */}
+          {item.navList.map((nodeItem, index) => (
+            <Button
+              style={{
+                width: '90px',
+                border: '1px solid #e5e6eb',
+                marginBottom: '15px',
+                color: '#4e5969',
+                borderRadius: '4px',
+                background: '#fff',
+                padding: '4px 0 4px 7px',
+                textAlign: 'left',
+                lineHeight: '20px'
+              }}
+              key={index}
+              onMouseDown={(e) =>
+                startDragSerivce.startDragCard('node', e, {
+                  data: {
+                    title: `${nodeItem.title}`
+                  }
+                })
+              }
+            >
+              <img
+                src={nodeItem.img}
+                alt=""
+                style={{ display: 'inline-block', verticalAlign: 'middle' }}
+                loading="lazy"
+                width="20px"
+                height="20px"
+              />
+              <span style={{ fontSize: '10px', marginLeft: '2px' }}>{nodeItem.title}</span>
+            </Button>
+          ))}
+        </div>
+      ))}
+      <div className={styles.line}></div>
+      <div className={styles.remark}>
+        <div className={styles.copy}>
+          <img src={copy} alt="" loading="lazy" width="12px" height="13px" />
+          <span>复制</span>
+        </div>
+        <div>
+          <img src={deleteIcon} alt="" loading="lazy" width="13px" height="13px" />
+          <span className={styles.delete}>删除</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LeftNavBar;

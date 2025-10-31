@@ -13,6 +13,7 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   UPLOAD_OPTIONS,
+  UPLOAD_TYPE_OPTIONS,
   UPLOAD_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
@@ -247,6 +248,28 @@ export const listTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
     {
       key: UPLOAD_OPTIONS.CARD,
       text: UPLOAD_OPTIONS.CARD,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
+    }
+  ]
+};
+export const uploadTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
+  key: 'uploadType',
+  name: '上传方式',
+  type: CONFIG_TYPES.STATUS_RADIO,
+  range: [
+    {
+      key: UPLOAD_OPTIONS.TEXT,
+      text: UPLOAD_TYPE_OPTIONS.TEXT,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+    },
+    {
+      key: UPLOAD_OPTIONS.LIST,
+      text: UPLOAD_TYPE_OPTIONS.LIST,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
+    },
+    {
+      key: UPLOAD_OPTIONS.CARD,
+      text: UPLOAD_TYPE_OPTIONS.CARD,
       value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
     }
   ]
@@ -517,3 +540,9 @@ export const tableOperationConfig: ITableOperationConfigType = {
   type: CONFIG_TYPES.TABLE_OPERATION,
   advanced: true,
 };
+
+export const autoCodeConfig:any = {
+  key: 'rules',
+  name:'编号规则配置',
+  type: CONFIG_TYPES.AUTO_CODE_RULES
+}

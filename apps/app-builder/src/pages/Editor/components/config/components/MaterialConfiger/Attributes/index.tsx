@@ -26,9 +26,9 @@ import DynamicImageConfig from './components/DynamicImageConfig';
 import DynamicOptionsConfig from './components/DynamicOptionsConfig';
 import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
-import DynamicSubTableConfig from './components/DynamicSubTableConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import DynamicTabsConfig from './components/DynamicTabsConfig';
+import DynamicAutoCodeConfig from './components/DynamicAutoCodeConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -202,7 +202,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 item.type !== CONFIG_TYPES.SUB_TABLE &&
                 item.type !== CONFIG_TYPES.IMAGE &&
                 item.type !== CONFIG_TYPES.FILE &&
-                item.type !== CONFIG_TYPES.TABS
+                item.type !== CONFIG_TYPES.TABS &&
+                item.type !== CONFIG_TYPES.AUTO_CODE_RULES
               ) {
                 return (
                   <FormItem
@@ -665,18 +666,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 );
               }
 
-              // 子表数据配置
-              if (item.type === CONFIG_TYPES.SUB_TABLE) {
-                return (
-                  <DynamicSubTableConfig
-                    key={index}
-                    id={cpID}
-                    handlePropsChange={handlePropsChange}
-                    item={item}
-                    configs={configs}
-                  />
-                );
-              }
               if (item.type === CONFIG_TYPES.IMAGE) {
                 return (
                   <DynamicImageConfig
@@ -711,6 +700,18 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     configs={configs}
                   />
                 );
+              }
+
+              // 自动编号规则配置
+              if (item.type == CONFIG_TYPES.AUTO_CODE_RULES){
+                return(
+                  <DynamicAutoCodeConfig  
+                    key={index}
+                    id={cpID}
+                    handlePropsChange={handlePropsChange}
+                    item={item}
+                    configs={configs} />
+                )
               }
             })}
         </Form>

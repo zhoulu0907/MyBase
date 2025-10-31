@@ -104,6 +104,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
     console.log('mainMetaDataFields: ', mainMetaDataFields);
+    console.log('menuId: ', menuId);
 
     const formData = {} as any;
     Object.entries(fields).forEach(([key, value]) => {
@@ -117,6 +118,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     if (editTargetId) {
       const req: UpdateMethodParams = {
+        menuId: menuId,
         entityId: mainMetaData,
         id: editTargetId,
         data: formData
@@ -129,6 +131,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setEditTargetId('');
     } else {
       const req: InsertMethodParams = {
+        menuId: menuId,
         entityId: mainMetaData,
         data: formData
       };
@@ -166,6 +169,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const handleGetData = async (entityId: string, id: string) => {
     const req: DataMethodParam = {
+      menuId: menuId,
       entityId: entityId,
       id: id
     };
@@ -230,29 +234,29 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 {/* {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && ( */}
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                   STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: getComponentWidth(
-                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                          cp.type
-                        )
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: getComponentWidth(
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                        cp.type
+                      )
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                      }
+                      runtime={runtime}
+                      showFromPageData={() => {
+                        setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        runtime={runtime}
-                        showFromPageData={() => {
-                          setPageType(EDITOR_TYPES.FORM_EDITOR);
-                        }}
-                      />
-                    </div>
-                  )}
+                    />
+                  </div>
+                )}
               </Fragment>
             ))}
 

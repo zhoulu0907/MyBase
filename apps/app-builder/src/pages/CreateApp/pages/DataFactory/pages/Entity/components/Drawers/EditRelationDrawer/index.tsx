@@ -22,7 +22,7 @@ interface RelationFormValues {
   targetEntityId?: string;
   targetFieldId?: string;
   relationName?: string;
-  relationshipId?: string;
+  id?: string;
   target?: { cell: string; port: string };
   source?: { cell: string; port: string };
 }
@@ -139,7 +139,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       setSubmitting(true);
 
       const updateData = {
-        id: relationData?.relationshipId,
+        id: relationData?.id,
         ...values,
         appId: curAppId
       };
@@ -169,7 +169,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     setDeleteLoading(true);
 
     try {
-      const res = await deleteRelation(relationData?.relationshipId || '');
+      const res = await deleteRelation(relationData?.id || '');
 
       setDeleteModalVisible(false);
       if (res) {

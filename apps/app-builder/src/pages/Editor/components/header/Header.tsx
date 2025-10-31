@@ -17,6 +17,7 @@ import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react'
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 
 import {
+  PageType,
   AppStatus,
   ENTITY_TYPE,
   getAppIdByPageSetId,
@@ -25,11 +26,13 @@ import {
   getEntityFieldsWithChildren,
   getPageSetMetaData,
   updateApplicationMenu,
+  fetchPublish,
   type ChildEntity,
   type GetApplicationReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
+
+import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   startLoadPageSet,
@@ -38,6 +41,7 @@ import {
   useListEditorSignal,
   usePageEditorSignal,
   usePageViewEditorSignal,
+  useFlowPageEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
@@ -49,7 +53,7 @@ import { useResourceStore } from '@/store/store_resource';
 
 const BreadcrumbItem = Breadcrumb.Item;
 
-const tabData = [
+const baseTabData = [
   {
     key: EDITOR_TYPES.FORM_EDITOR,
     title: '表单设计',
@@ -61,6 +65,13 @@ const tabData = [
     key: EDITOR_TYPES.LIST_EDITOR,
     title: '列表设计',
     alt: 'List Design',
+    defaultIcon: defaultListDesignSVG,
+    activeIcon: activeListDesignSVG
+  },
+  {
+    key: EDITOR_TYPES.FLOW_EDITOR,
+    title: '流程设计',
+    alt: 'flow Design',
     defaultIcon: defaultListDesignSVG,
     activeIcon: activeListDesignSVG
   },
@@ -81,11 +92,13 @@ const tabData = [
 ];
 
 export default function EditorHeader() {
+  const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
 
   const { clearCurComponentID } = usePageEditorSignal();
   const { curViewId } = usePageViewEditorSignal;
+  const { flowId } = useFlowPageEditorSignal;
 
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
@@ -95,7 +108,9 @@ export default function EditorHeader() {
     clearComponents: clearFormComponents,
     clearPageComponentSchemas: clearFromPageComponentSchemas,
     layoutSubComponents: fromLayoutSubComponents,
-    clearLayoutSubComponents: clearFromLayoutSubComponents
+    clearLayoutSubComponents: clearFromLayoutSubComponents,
+    subTableComponents: fromSubTableComponents,
+    clearSubTableComponents: clearFromSubTableComponents,
   } = useFormEditorSignal;
 
   const {
@@ -120,7 +135,7 @@ export default function EditorHeader() {
   const [appIcon, setAppIcon] = useState('');
   const [iconColor, setIconColor] = useState('');
   const [appStatus, setAppStatus] = useState(0);
-
+  const [tabData, setTabData] = useState(baseTabData);
   // 重命名弹窗
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
 
@@ -140,6 +155,8 @@ export default function EditorHeader() {
       setActiveTab(EDITOR_TYPES.PAGE_SETTING);
     } else if (hash.includes(EDITOR_TYPES.METADATA_MANAGE)) {
       setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
+    } else if (hash.includes(EDITOR_TYPES.FLOW_EDITOR)) {
+      setActiveTab(EDITOR_TYPES.FLOW_EDITOR);
     }
   }, []);
 
@@ -252,7 +269,7 @@ export default function EditorHeader() {
       formComponents: formComponents.value,
       formPageComponentSchemas: cloneDeep(formPageComponentSchemas.value),
       fromColComponentsMap: cloneDeep(fromLayoutSubComponents.value),
-
+      fromSubTableComponentsMap: cloneDeep(fromSubTableComponents.value),
       listComponents: listComponents.value,
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
@@ -262,6 +279,14 @@ export default function EditorHeader() {
 
     startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
   };
+    const handleExecTask = async () => {
+        try {
+          const res = await fetchPublish({ id: flowId });
+          Message.success('发布成功');
+        } catch (error) {
+        }
+
+    };
 
   const clearAllData = () => {
     clearFromLayoutSubComponents();
@@ -310,6 +335,14 @@ export default function EditorHeader() {
     setVisibleRenameForm(false);
   };
 
+  useEffect(() => {
+    if (curPage?.value?.pageSetType === PageType.NORMAL) {
+      setTabData(baseTabData.filter((tab) => tab.key !== EDITOR_TYPES.FLOW_EDITOR));
+    } else {
+      setTabData(baseTabData);
+    }
+  }, [curPage?.value?.pageSetType]);
+
   return (
     <div className={styles.editorHeader}>
       {/* 左侧 */}
@@ -357,6 +390,9 @@ export default function EditorHeader() {
               case EDITOR_TYPES.METADATA_MANAGE:
                 navigate(`/onebase/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetId=${pageSetId}`);
                 break;
+              case EDITOR_TYPES.FLOW_EDITOR:
+                navigate(`/onebase/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}`);
+                break;
               default:
                 break;
             }
@@ -396,6 +432,16 @@ export default function EditorHeader() {
         >
           保存
         </Button>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button
+            type="primary"
+            onClick={() => {
+              handleExecTask();
+            }}
+          >
+            发布
+          </Button>
+        )}
 
         <PartPreview
           pageType={activeTab}

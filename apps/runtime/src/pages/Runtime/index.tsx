@@ -8,6 +8,7 @@ import {
   listApplicationMenu,
   MenuType,
   VisibleType,
+  TASKMENU_TYPE,
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
@@ -18,6 +19,8 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -97,8 +100,8 @@ const Runtime: React.FC = () => {
     const res = await listApplicationMenu(req);
 
     // 处理数据
-    const pageList = res && res.length > 0 ? dealPage(res) : [];
-
+    const resPageList = res && res.length > 0 ? dealPage(res) : [];
+    const pageList = getMenuArr().concat(resPageList);
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
     setTreeData(treeData);
 
@@ -161,6 +164,65 @@ const Runtime: React.FC = () => {
     }));
   };
 
+
+  function getMenuArr() {
+    return [
+      {
+        id: TASKMENU_TYPE.TASKINEEDTODO,
+        isVisible: 1,
+        menuCode: 'ineedtodo',
+        menuIcon: 'ineedtodo-icon',
+        menuName: '待我处理',
+        menuSort: 1,
+        menuType: 1,
+        parentId: '0'
+      },
+      {
+        id: TASKMENU_TYPE.TASKIHAVEDONE,
+        isVisible: 1,
+        menuCode: 'ihavedone',
+        menuIcon: 'ihavedone-icon',
+        menuName: '我已处理',
+        menuSort: 2,
+        menuType: 1,
+        parentId: '0'
+      },
+      {
+        id: TASKMENU_TYPE.TASKICREATED,
+        isVisible: 1,
+        menuCode: 'icreated',
+        menuIcon: 'icreated-icon',
+        menuName: '我创建的',
+        menuSort: 3,
+        menuType: 1,
+        parentId: '0'
+      },
+      {
+        id: TASKMENU_TYPE.TASKICOPIED,
+        isVisible: 1,
+        menuCode: 'icopied',
+        menuIcon: 'icopied-icon',
+        menuName: '抄送我的',
+        menuSort: 4,
+        menuType: 1,
+        parentId: '0'
+      },
+      {
+        id: TASKMENU_TYPE.TASKTASKPROXY,
+        isVisible: 1,
+        menuCode: 'taskproxy',
+        menuIcon: 'taskproxy-icon',
+        menuName: '流程代理',
+        menuSort: 5,
+        menuType: 1,
+        parentId: '0'
+      }
+    ];
+  }
+  function handleRename() {
+    console.log('handle re name function.');
+  }
+
   // 登出处理
   const handleLogout = () => {
     // 清除 token
@@ -192,7 +254,7 @@ const Runtime: React.FC = () => {
               blockNode
               draggable
               treeData={treeData}
-              selectedKeys={[curMenu.value.menuCode!]}
+              selectedKeys={[curMenu.value?.menuCode!]}
               expandedKeys={expandedKeys}
               onExpand={setExpandedKeys}
               className={`menuTree ${styles.tree}`}
@@ -214,9 +276,9 @@ const Runtime: React.FC = () => {
             />
           </Sider>
           <Content className={styles.content}>
-            {curMenu.value.id && (
+            {curMenu.value?.id && (
               <div className={styles.contentHeader}>
-                <div className={styles.contentTitle}>{curMenu.value.menuName}</div>
+                <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
                 <div className={styles.userInfo}>
                   {nickname || '未登录'}
 
@@ -228,10 +290,17 @@ const Runtime: React.FC = () => {
                 </div>
               </div>
             )}
+            {curMenu?.value?.id && curMenu?.value?.id?.indexOf('TASK-') >= 0 ? (
+              <TaskCenterPage curMenuId={curMenu.value.id} />
+            ) : (
+              <div className={styles.contentBody}>
+                <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
+              </div>
+            )}
 
-            <div className={styles.contentBody}>
-              <PreviewContainer menuId={curMenu.value.id || ''} runtime={true} />
-            </div>
+            {/* <div className={styles.contentBody}>
+              <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
+            </div> */}
           </Content>
         </Layout>
       </Layout>
