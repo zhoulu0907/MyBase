@@ -25,4 +25,7 @@ public interface ETLErrorCodeConstants {
 
     // 元数据类型异常
     ErrorCode ILLEGAL_METADATA_TYPE                 = new ErrorCode(110601, "元数据类型异常");
+
+    // 调度类异常
+    ErrorCode ILLEGAL_SCHEDULE_TYPE                 = new ErrorCode(110901, "非法的调度类型");
 }
