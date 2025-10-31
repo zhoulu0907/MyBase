@@ -4,8 +4,14 @@ import { IconQuestionCircle, IconPlus } from '@arco-design/web-react/icon';
 import FieldModal from './FieldModal';
 import { type FieldConfigType } from '../constant';
 import './style.less';
-
-const FieldTable = forwardRef(({ editable, onTableChange, value }: any, ref) => {
+/**
+ * @param editable 是否可编辑
+ * @param onTableChange 表格数据变化时回调
+ * @param value 表格数据
+ * @param ckOptions 字段配置
+ * @param invert 排除数据 为了弹窗数据去重
+ */
+const FieldTable = forwardRef(({ editable, onTableChange, value, ckOptions, invert }: any, ref) => {
   // keyArr是专门给FieldModal弹窗用的，帮助弹窗反选
   const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
   const [selectRowkeyArr, setSelectRowKeyArr] = useState([]);
@@ -73,7 +79,9 @@ const FieldTable = forwardRef(({ editable, onTableChange, value }: any, ref) => 
     <>
       <p style={{ paddingBottom: '6px' }}>{editable ? '可编辑字段' : '隐藏字段'}</p>
       <div className="flex-btw">
-        <Button onClick={handleAddFiled} type="primary" icon={<IconPlus />}>添加字段</Button>
+        <Button onClick={handleAddFiled} type="primary" icon={<IconPlus />}>
+          添加字段
+        </Button>
         {selectRowkeyArr?.length > 0 && (
           <Button type="primary" className="gray-btn" onClick={() => handleDelRow(selectRowkeyArr)}>
             批量删除
@@ -94,9 +102,11 @@ const FieldTable = forwardRef(({ editable, onTableChange, value }: any, ref) => 
       {fmVisible && (
         <FieldModal
           fmVisible={fmVisible}
+          ckOptions={ckOptions}
           setFmVisible={setFmVisible}
           isEdit={editable}
           curKeyArr={curKeyArr}
+          invert={invert}
           mergeDataToTable={mergeDataToTable}
         />
       )}
@@ -109,7 +119,7 @@ interface ChildComponentRef {
   getTbData: () => any[];
 }
 
-export default function FieldConfig({ setApprovalConfigData, fieldPermConfig }: FieldConfigType) {
+export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ckOptions }: FieldConfigType) {
   let [nodeSwitch, setNodeSwitch] = useState(fieldPermConfig.useNodeConfig);
   let editRef = useRef<ChildComponentRef>();
   let hiddenRef = useRef<ChildComponentRef>();
@@ -157,9 +167,23 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig }: 
           </p>
         </div>
       </div>
-      <FieldTable editable={true} ref={editRef} onTableChange={saveData} value={writeArr} />
+      <FieldTable
+        editable={true}
+        ref={editRef}
+        onTableChange={saveData}
+        value={writeArr}
+        invert={hiddenArr}
+        ckOptions={ckOptions}
+      />
       <div style={{ height: 24 }}></div>
-      <FieldTable editable={false} ref={hiddenRef} onTableChange={saveData} value={hiddenArr} />
+      <FieldTable
+        editable={false}
+        ref={hiddenRef}
+        onTableChange={saveData}
+        value={hiddenArr}
+        invert={writeArr}
+        ckOptions={ckOptions}
+      />
     </div>
   );
 }
