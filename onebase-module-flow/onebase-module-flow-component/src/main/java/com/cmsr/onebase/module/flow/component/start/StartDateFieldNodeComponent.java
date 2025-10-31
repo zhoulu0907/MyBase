@@ -21,6 +21,7 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeComponent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import java.util.Map;
  * @Author：huangjie
  * @Date：2025/9/5 9:24
  */
+@Setter
 @Slf4j
 @LiteflowComponent("startDateField")
 public class StartDateFieldNodeComponent extends NodeComponent {
@@ -50,8 +52,8 @@ public class StartDateFieldNodeComponent extends NodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("StartDateFieldNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("时间字段触发开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         variableContext.putInputVariables(this.getTag());
         StartDateFieldNodeData nodeData = (StartDateFieldNodeData) executeContext.getNodeData(this.getTag());

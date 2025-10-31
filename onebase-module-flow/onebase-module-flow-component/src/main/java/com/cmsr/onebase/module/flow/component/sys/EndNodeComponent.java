@@ -15,8 +15,8 @@ public class EndNodeComponent extends NodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("EndNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("结束节点开始执行");
         executeContext.setExecuteEnd(true);
     }
 

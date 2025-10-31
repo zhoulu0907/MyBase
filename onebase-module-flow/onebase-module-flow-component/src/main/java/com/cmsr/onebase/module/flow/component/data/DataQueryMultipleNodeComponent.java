@@ -40,8 +40,8 @@ public class DataQueryMultipleNodeComponent extends SkippableNodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("DataQueryMultipleNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("数据查询节点（多条）开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataQueryMultipleNodeData nodeData = (DataQueryMultipleNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
@@ -64,6 +64,7 @@ public class DataQueryMultipleNodeComponent extends SkippableNodeComponent {
         reqDTO.setOrderDtos(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));
         reqDTO.setNum(nodeData.getMaxCountWithDefault(500));
         List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
+        executeContext.addLog("数据查询节点（多条），查询返回数据量: " + fieldDataRespDTOSS.size());
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOSS)) {
             variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOSS));
         }

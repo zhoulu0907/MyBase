@@ -8,8 +8,10 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Author：huangjie
@@ -35,7 +37,9 @@ public class ExecuteContext implements Serializable {
     @Getter
     private volatile boolean debugMode = false;
 
-    // 节点配置数据
+    /**
+     * 节点配置数据
+     */
     private Map<String, NodeData> nodeDataMap = new HashMap<>();
 
     //节点执行的结果
@@ -51,10 +55,15 @@ public class ExecuteContext implements Serializable {
     @Getter
     private volatile String executionEndNodeType;
 
-    // 上次执行结束节点
+    /**
+     * 上次执行结束节点
+     */
     @Setter
     @Getter
     private volatile String executionEndNodeTag;
+
+
+    private volatile List<String> logs = new CopyOnWriteArrayList<>();
 
 
     public void setNodeDataMap(Map<String, NodeData> nodeData) {
@@ -96,5 +105,13 @@ public class ExecuteContext implements Serializable {
 
     public void restExecutionUuid() {
         this.executionUuid = null;
+    }
+
+    public void addLog(String log) {
+        this.logs.add(log);
+    }
+
+    public String getLogText() {
+        return String.join("\n", logs);
     }
 }
