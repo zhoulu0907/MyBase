@@ -15,7 +15,7 @@ import { TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import styles from './index.module.less';
@@ -43,7 +43,10 @@ const Runtime: React.FC = () => {
   useSignals();
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { appId } = useParams<{ appId?: string }>();
+  const [search] = useSearchParams();
+  const curMenuId = search.get('curMenu');
   const { t } = useI18n();
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
@@ -101,40 +104,40 @@ const Runtime: React.FC = () => {
 
     // 如果菜单列表不为空，默认选中第一个菜单
     if (pageList && pageList.length > 0) {
-      // 处理第一个菜单为分组的情况 分组里没有页面的情况
-      const currentMenu = dealMenu(pageList);
-      if (currentMenu) {
-        // 默认展开当前页面
-        if (currentMenu.parentId) {
-          const parentCode = dealCode(currentMenu.parentId, pageList);
-          if (parentCode) {
-            setExpandedKeys((prev) => [...prev, parentCode]);
-          }
-        }
-        setCurMenu(currentMenu);
-      }
-    }
-  };
-  // 递归处理 获取第一个页面
-  const dealMenu = (array: ApplicationMenu[]) => {
-    // menu.menuType == MenuType.PAGE
-    for (let item of array) {
-      if (item.menuType == MenuType.PAGE) {
-        return item;
-      } else if (item.children && item.children.length) {
-        return dealMenu(item.children);
+      // 初始化页面没有curMenuId就处理第一个菜单为分组的情况 分组里没有页面的情况
+      const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+      if (curMenuObj) {
+        setExpandedKeys(curMenuObj.parentIds);
+        setCurMenu(curMenuObj.node);
       }
     }
   };
 
-  const dealCode = (id: string, array: ApplicationMenu[]): any => {
-    for (let item of array) {
-      if (item.id == id) {
-        return item.menuCode;
-      } else if (item.children && item.children.length) {
-        return dealMenu(item.children);
+  //返回当前 menu 对象和链路上所有父节点 code
+  const findMenuWithParents = (
+    nodes: ApplicationMenu[],
+    accIds: string[],
+    targetId?: string
+  ): { node: ApplicationMenu; parentIds: string[] } | null => {
+    for (const n of nodes) {
+      if (targetId ? n.id === targetId : n.menuType === MenuType.PAGE) {
+        return { node: n, parentIds: accIds };
+      }
+
+      if (n.children && n.children.length) {
+        const res = findMenuWithParents(n.children, accIds.concat(n.menuCode), targetId);
+        if (res) return res;
       }
     }
+    return null;
+  };
+
+  // 更新当前路由的 curMenu（不刷新页面）
+  const handleCurMenuUrl = (curMenuId: string) => {
+    const sp = new URLSearchParams(location.search);
+    sp.set('curMenu', String(curMenuId));
+    const to = `${location.pathname}?${sp.toString()}`;
+    navigate(to, { replace: true });
   };
 
   const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number): any[] => {
@@ -148,6 +151,7 @@ const Runtime: React.FC = () => {
           label={menu.menuName}
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
+              handleCurMenuUrl(menu.id);
               setCurMenu(menu);
             }
           }}
