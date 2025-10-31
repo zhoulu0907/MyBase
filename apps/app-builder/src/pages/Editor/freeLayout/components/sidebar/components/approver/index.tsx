@@ -34,13 +34,12 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
         approvalMode: 'any_sign'
       },
       buttonConfigs: [],
-      fieldPermConfig: {}
+      fieldPermConfig: {
+        useNodeConfig: false
+      }
     }
   );
-
-  useEffect(() => {
-    getMainMetaData();
-  }, []);
+  const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
 
   function setApprovalConfigData<T extends keyof ApproverConfigDataType>(
     key: T,
@@ -67,8 +66,9 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
     setCkOptions(parentFields);
   };
 
-  const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
-
+  useEffect(() => {
+    getMainMetaData();
+  }, []);
   const renderContent = () => {
     switch (useApprover) {
       case ApproveDrawerTab.APPROVER:

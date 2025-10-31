@@ -41,7 +41,7 @@ export default function FieldModal({
   }
   function handleDelCked(item: any) {
     let key = item?.value;
-    if (key !== undefined) {
+    if (key) {
       let key_arr: Array<any> = [];
       key_arr = key_arr.concat(ckedKey);
       let idx = key_arr.indexOf(key);
@@ -109,9 +109,6 @@ export default function FieldModal({
                 </div>
               );
             })}
-            {/* <div className='flex-btw arco-checkbox li'>
-                        <span>sdfsfs</span><IconClose />
-                    </div> */}
           </div>
         </section>
       </div>
