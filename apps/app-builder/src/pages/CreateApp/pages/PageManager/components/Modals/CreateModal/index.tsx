@@ -81,14 +81,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
             transform: visibleMenuIcon ? 'translateX(-100%)' : ''
           }}
         >
-          <Form.Item
-            label="页面类型"
-            field="pageSetType"
-            hidden={visibleCreateForm === 'group'}
-            rules={[{ required: true, message: '请选择页面类型' }]}
-          >
-            <Select options={pageSetTypeOptions} placeholder="请选择页面类型" allowClear />
-          </Form.Item>
+          {visibleCreateForm !== 'group' && (
+            <Form.Item label="页面类型" field="pageSetType" rules={[{ required: true, message: '请选择页面类型' }]}>
+              <Select options={pageSetTypeOptions} placeholder="请选择页面类型" allowClear />
+            </Form.Item>
+          )}
 
           <Form.Item
             label={visibleCreateForm === 'page' ? '页面名称' : '分组名称'}
