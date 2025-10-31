@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Radio, Form, Select } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { type ApproverConfig } from '../constant';
-import type { PageParam } from '@onebase/platform-center';
-import { getUserPage } from '@onebase/platform-center';
+import { getUserPage, type PageParam } from '@onebase/platform-center';
 import { getAppIdByPageSetId, listRole, type ListRoleReq } from '@onebase/app';
-import { useLocation } from 'react-router-dom';
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -35,8 +34,8 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     };
     getUserPage(params).then((res:any) => {
       if (Array.isArray(res?.list)) {
-        let selectArr: any[] = [];
-        res.list.forEach((item: any) => {
+        const selectArr: any[] = [];
+        res.list?.forEach((item: any) => {
           selectArr.push({
             userId: item.id,
             name: item.nickname
@@ -60,8 +59,8 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
         };
         listRole(params).then((roleRes:any) => {
           if (Array.isArray(roleRes)) {
-            let selectArr: any[] = [];
-            roleRes.forEach((item: any) => {
+            const selectArr: any[] = [];
+            roleRes?.forEach((item: any) => {
               selectArr.push({
                 roleId: item.id,
                 roleName: item.roleName
