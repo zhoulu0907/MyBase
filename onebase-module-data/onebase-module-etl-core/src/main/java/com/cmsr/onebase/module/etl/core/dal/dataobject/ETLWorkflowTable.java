@@ -1,0 +1,23 @@
+package com.cmsr.onebase.module.etl.core.dal.dataobject;
+
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+@Data
+@Table(name = "etl_workflow_table")
+public class ETLWorkflowTable extends TenantBaseDO {
+
+    @Column(name = "application_id")
+    private Long applicationId;
+
+    @Column(name = "workflow_id")
+    private Long workflowId;
+
+    @Column(name = "relation")
+    private String relation;
+
+    @Column(name = "table_id")
+    private Long tableId;
+}

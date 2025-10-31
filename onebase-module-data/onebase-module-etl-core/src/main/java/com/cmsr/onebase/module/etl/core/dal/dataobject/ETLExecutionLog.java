@@ -3,27 +3,22 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Table(name = "etl_instance_log")
 @Data
-@EqualsAndHashCode(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ETLInstanceLogDO extends TenantBaseDO {
+@Table(name = "etl_execution_log")
+public class ETLExecutionLog extends TenantBaseDO {
 
-    @Column(name = "etl_id")
-    private Long ETLId;
+    @Column(name = "application_id")
+    private Long applicationId;
 
-    @Column(name = "busi_date")
-    private LocalDateTime busiDate;
+    @Column(name = "workflow_id")
+    private Long workflowId;
+
+    @Column(name = "business_date")
+    private LocalDateTime bussinessDate;
 
     @Column(name = "start_time")
     private LocalDateTime startTime;
@@ -31,8 +26,8 @@ public class ETLInstanceLogDO extends TenantBaseDO {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "duration")
-    private Long duration;
+    @Column(name = "duration_time")
+    private Long durationTime;
 
     @Column(name = "trigger_type")
     private String triggerType;
@@ -42,4 +37,5 @@ public class ETLInstanceLogDO extends TenantBaseDO {
 
     @Column(name = "task_status")
     private String taskStatus;
+
 }
