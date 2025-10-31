@@ -3,9 +3,7 @@ package com.cmsr.onebase.module.etl.build.controller.etl;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.ETLWorkflowService;
-import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLPageReqVO;
-import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLWorkflowBriefVO;
-import com.cmsr.onebase.module.etl.build.service.etl.vo.ETLWorkflowDetailVO;
+import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -34,13 +32,15 @@ public class ETLWorkflowController {
     }
 
     @PostMapping("/create")
-    public CommonResult<Long> createWorkflow() {
-        return CommonResult.success(null);
+    public CommonResult<Long> createWorkflow(@Validated @RequestBody ETLWorkflowCreateVO createVO) {
+        Long workflow = etlWorkflowService.createWorkflow(createVO);
+        return CommonResult.success(workflow);
     }
 
     @PostMapping("/update")
-    public CommonResult<Boolean> updateWorkflow() {
-        return CommonResult.success(null);
+    public CommonResult<Boolean> updateWorkflow(@Validated @RequestBody ETLWorkflowUpdateVO updateVO) {
+        etlWorkflowService.updateWorkflow(updateVO);
+        return CommonResult.success(Boolean.TRUE);
     }
 
     @PostMapping("/delete")
