@@ -102,9 +102,14 @@ public class JdbcTypeConvertor {
             return LocalDateTime.parse(stringValue, TIMESTAMP_FORMATTER_NANO);
         } catch (DateTimeParseException e) {
         }
+        try {
+            Instant instant = Instant.parse(stringValue);
+            return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        } catch (DateTimeParseException e) {
+
+        }
         throw new IllegalArgumentException("无效的TIMESTAMP格式: " + stringValue);
     }
-
 
     /**
      * 转换VARCHAR类型的值

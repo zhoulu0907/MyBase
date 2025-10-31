@@ -5,11 +5,11 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 public enum CollectStatus {
-    NONE("NONE", "未采集"),
-    SUCCESS("SUCCESS", "采集成功"),
-    FAILED("FAILED", "采集失败"),
-    RUNNING("RUNNING", "采集中"),
-    REQUIRED("REQUIRED", "需重新采集");
+    NONE("none", "未采集"),
+    SUCCESS("success", "采集成功"),
+    FAILED("failed", "采集失败"),
+    RUNNING("running", "采集中"),
+    REQUIRED("required", "需重新采集");
 
     @Getter
     private String value;

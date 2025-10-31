@@ -5,15 +5,17 @@ import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.security.bo.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthFieldProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
 import com.cmsr.onebase.module.app.core.provider.menu.AppMenuProvider;
-import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
+import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,6 +65,11 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     @Override
     public OperationPermission getMenuOperationPermission(Long userId, Long applicationId, Long menuId) {
+        String redisKey = CacheUtils.keyForOperationPermission(userId, applicationId, menuId);
+        RBucket<OperationPermission> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
+        if (bucket.isExists()) {
+            return bucket.get();
+        }
         OperationPermission operationPermission = new OperationPermission();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
@@ -102,11 +109,18 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
                 }
             }
         }
+        bucket.set(operationPermission, CacheUtils.CACHE_EXPIRE_TIME);
         return operationPermission;
     }
 
     @Override
     public DataPermission getMenuDataPermission(Long userId, Long applicationId, Long menuId) {
+        String redisKey = CacheUtils.keyForDataPermission(userId, applicationId, menuId);
+        RBucket<DataPermission> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
+        if (bucket.isExists()) {
+            return bucket.get();
+        }
+        //
         DataPermission dataPermission = new DataPermission();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
@@ -125,11 +139,19 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         dataPermission.setGroups(dataGroups);
         dataPermission.setAllAllowed(false);
         dataPermission.setAllDenied(false);
+        //
+        bucket.set(dataPermission, CacheUtils.CACHE_EXPIRE_TIME);
         return dataPermission;
     }
 
     @Override
     public FieldPermission getMenuFieldPermission(Long userId, Long applicationId, Long menuId) {
+        String redisKey = CacheUtils.keyForFieldPermission(userId, applicationId, menuId);
+        RBucket<FieldPermission> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
+        if (bucket.isExists()) {
+            return bucket.get();
+        }
+        //
         FieldPermission fieldPermission = new FieldPermission();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
@@ -155,7 +177,11 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         }
         Set<Long> roleIds = userRoleDTO.getRoleIds();
         List<FieldPermissionItem> fields = appAuthFieldProvider.findFields(applicationId, roleIds, menuId);
+        fieldPermission.setAllAllowed(false);
+        fieldPermission.setAllDenied(false);
         fieldPermission.setFields(fields);
+        //
+        bucket.set(fieldPermission, CacheUtils.CACHE_EXPIRE_TIME);
         return fieldPermission;
     }
 
