@@ -22,7 +22,7 @@ export default function Header() {
     <div className={styles.sidebarHeader}>
       <div className={styles.leftTitle}>
         <div className={styles.icon}> {getIcon(node)}</div>
-        <div className={styles.title}>{data.title}</div>
+        <div className={styles.title}>{data.name}</div>
         <img className={styles.edit} src={edit} />
       </div>
       <img className={styles.close} src={close} alt="" onClick={handleClose} />
