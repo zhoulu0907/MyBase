@@ -39,7 +39,6 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
   );
 
   useEffect(() => {
-    console.log('第一次获取数据');
     getMainMetaData();
   }, []);
 
