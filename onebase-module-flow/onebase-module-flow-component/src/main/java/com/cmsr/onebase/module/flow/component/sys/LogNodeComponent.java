@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.component.sys;
 
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
+import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +15,8 @@ public class LogNodeComponent extends SkippableNodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("LogNodeComponent process: {}", this.getTag());
+        ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("日志节点开始执行");
     }
 
 }

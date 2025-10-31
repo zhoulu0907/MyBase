@@ -37,6 +37,8 @@ public class JsonGraphNode implements Serializable {
             @JsonSubTypes.Type(value = IfCaseNodeData.class, name = "ifCase"),
             @JsonSubTypes.Type(value = LoopNodeData.class, name = "loop"),
             @JsonSubTypes.Type(value = ModalNodeData.class, name = "modal"),
+            @JsonSubTypes.Type(value = NavigateNodeData.class, name = "navigate"),
+            @JsonSubTypes.Type(value = RefreshNodeData.class, name = "refresh"),
             @JsonSubTypes.Type(value = StartDateFieldNodeData.class, name = "startDateField"),
             @JsonSubTypes.Type(value = StartEntityNodeData.class, name = "startEntity"),
             @JsonSubTypes.Type(value = StartFormNodeData.class, name = "startForm"),

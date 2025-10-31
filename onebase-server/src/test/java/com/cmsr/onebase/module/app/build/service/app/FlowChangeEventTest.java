@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.build.service.app;
 
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
+import com.cmsr.onebase.module.flow.core.event.FlowChangeEventJobHandler;
 import com.cmsr.onebase.module.flow.core.event.FlowChangeEventPublisher;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
@@ -23,7 +24,7 @@ public class FlowChangeEventTest {
     private FlowChangeEventPublisher flowChangeEventPublisher;
 
     @Autowired
-    private AppAuthRoleRepository appAuthRoleRepository;
+    private FlowChangeEventJobHandler flowChangeEventJobHandler;
 
     @Test
     public void test() {
@@ -32,7 +33,8 @@ public class FlowChangeEventTest {
 
     @Test
     public void test2() {
-        List<AuthRoleDO> list = appAuthRoleRepository.findByApplicationIdAndUserId(6943244133695488L, 114L);
-        System.out.println(list);
+        flowChangeEventJobHandler.onApplicationChange(46699591748616192L);
     }
+
+
 }

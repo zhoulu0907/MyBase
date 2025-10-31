@@ -1,9 +1,8 @@
 package com.cmsr.onebase.module.bpm.runtime.service;
 
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmSubmitRespVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ListActButtonRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.*;
+
+import java.util.List;
 
 /**
  * 流程执行服务接口
@@ -33,4 +32,18 @@ public interface BpmInstanceService {
      * @param reqVO 执行操作按钮请求VO
      */
     void execTask(ExecTaskReqVO reqVO);
+
+    /**
+     * 获取流程实例的操作记录
+     *
+     * @param instanceId 流程实例ID
+     */
+    List<BpmOperatorRecordRespVO.OperatorRecord> getOperatorRecord(Long instanceId);
+
+    /**
+     * 获取流程实例的表单详情
+     *
+     * @param instanceId 流程实例ID
+     */
+    BpmFlowTaskDetailVO getFormDetail(Long instanceId);
 }

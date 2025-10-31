@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.ds.model.common.Result;
 import com.cmsr.onebase.framework.ds.model.schedule.ScheduleInfoResp;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDefinitionResp;
+import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDetailedResp;
 import com.cmsr.onebase.framework.ds.model.workflow.sub.ComplementTime;
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -31,9 +32,13 @@ public interface DolphinschedulerClientStub {
     Call<Result<Object>> deleteWorkflow(@Path("projectCode") Long projectCode,
                                         @Path("workflowCode") Long workflowCode);
 
-    @GET("projects/{projectCode}/workflow-definition/verify-name")
-    Call<Result<Object>> verifyNameUniqueInProject(@Path("projectCode") Long projectCode,
-                                                   @Query("name") String name);
+    @GET("projects/{projectCode}/workflow-definition/{code}")
+    Call<Result<WorkflowDefinitionResp>> queryWorkflowByCode(@Path("projectCode") Long projectCode,
+                                                             @Path("code") Long workflowCode);
+
+    @GET("projects/{projectCode}/workflow-definition/query-by-name")
+    Call<Result<WorkflowDetailedResp>> queryWorkflowByName(@Path("projectCode") Long projectCode,
+                                                           @Query("name") String name);
 
     // online or offline diff by param
     @POST("projects/{projectCode}/workflow-definition/{workflowCode}/release")
@@ -94,7 +99,7 @@ public interface DolphinschedulerClientStub {
                                                    @Field("workerGroup") String workerGroup, // default
                                                    @Field("execType") String execType,
                                                    @Field("executionOrder") String executionOrder // DESC_ORDER
-                                                      );
+    );
 
     // WorkflowInstance manualy start, no usage for now
     @POST("projects/{projectCode}/executors/start-workflow-instance")

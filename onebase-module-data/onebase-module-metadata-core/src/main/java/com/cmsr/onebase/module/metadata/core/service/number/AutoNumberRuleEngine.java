@@ -110,13 +110,53 @@ public class AutoNumberRuleEngine {
             format = "yyyyMMdd";
         }
         
+        // 兼容性处理：将前端传来的中文格式描述映射为标准日期格式化字符串
+        format = mapChineseFormatToPattern(format);
+        
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
             return now.format(formatter);
         } catch (Exception e) {
-            log.error("Failed to format date with pattern: {}", format, e);
+            log.error("Failed to format date with pattern: {}, 请检查日期格式配置", format, e);
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), 
-                    "日期格式化失败: " + format);
+                    "日期格式化失败，格式: " + ruleItem.getFormat());
+        }
+    }
+    
+    /**
+     * 将中文格式描述映射为标准日期格式化字符串
+     *
+     * @param chineseFormat 中文格式描述或标准格式字符串
+     * @return 标准日期格式化字符串
+     */
+    private String mapChineseFormatToPattern(String chineseFormat) {
+        if (chineseFormat == null) {
+            return "yyyyMMdd";
+        }
+        
+        // 常见中文格式映射
+        switch (chineseFormat) {
+            case "年月日":
+                return "yyyyMMdd";
+            case "年月":
+                return "yyyyMM";
+            case "年":
+                return "yyyy";
+            case "年-月-日":
+                return "yyyy-MM-dd";
+            case "年/月/日":
+                return "yyyy/MM/dd";
+            case "时分秒":
+                return "HHmmss";
+            case "时分":
+                return "HHmm";
+            case "年月日时分秒":
+                return "yyyyMMddHHmmss";
+            case "年月日 时分秒":
+                return "yyyyMMdd HHmmss";
+            default:
+                // 如果不是中文格式，直接返回（可能是标准格式字符串）
+                return chineseFormat;
         }
     }
 

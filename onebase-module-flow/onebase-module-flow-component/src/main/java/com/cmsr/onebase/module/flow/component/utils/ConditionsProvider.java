@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
@@ -102,11 +103,23 @@ public class ConditionsProvider {
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(vars);
-            CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
-            if (respDTO.getData() == null) {
-                throw new IllegalCallerException("公式错误: " + formula + ", 错误信息: " + respDTO.getMsg());
-            }
-            expressionItem.setValue(respDTO.getData().getResult());
+            String jdbcType = expressionItem.getJdbcType() == null ? null : expressionItem.getJdbcType().getCode();
+            expressionItem.setValue(callFormula(reqDTO, jdbcType));
+        }
+    }
+
+
+    private Object callFormula(FormulaExecuteReqDTO reqDTO, String jdbcType) {
+        CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
+        if (respDTO.getData() == null) {
+            throw new IllegalCallerException("调用公式错误: " + reqDTO.getFormula() + ", 错误信息: " + respDTO.getMsg());
+        }
+        //String resultType = respDTO.getData().getResultType();
+        Object result = respDTO.getData().getResult();
+        if (StringUtils.isNotBlank(jdbcType)) {
+            return JdbcTypeConvertor.convert(jdbcType, result);
+        } else {
+            return result;
         }
     }
 
@@ -126,11 +139,8 @@ public class ConditionsProvider {
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(vars);
-            CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
-            if (respDTO.getData() == null) {
-                throw new IllegalCallerException("公式错误: " + formula + ", 错误信息: " + respDTO.getMsg());
-            }
-            expressionItem.setValue(respDTO.getData().getResult());
+            String jdbcType = expressionItem.getJdbcType() == null ? null : expressionItem.getJdbcType().getCode();
+            expressionItem.setValue(callFormula(reqDTO, jdbcType));
         }
     }
 
@@ -160,7 +170,14 @@ public class ConditionsProvider {
             Object value = getVariableByExpression(exp, dataMap);
             expressionItem.setValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            //TODO 公式
+            Map valueMap = (Map) expressionItem.getValue();
+            String formula = MapUtils.getString(valueMap, "formula");
+            Map parameters = MapUtils.getMap(valueMap, "parameters");
+            FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
+            reqDTO.setFormula(formula);
+            reqDTO.setParameters(parameters);
+            reqDTO.setContextData(dataMap);
+            expressionItem.setValue(callFormula(reqDTO, conditionItem.getJdbcType()));
         }
         return expressionItem;
     }

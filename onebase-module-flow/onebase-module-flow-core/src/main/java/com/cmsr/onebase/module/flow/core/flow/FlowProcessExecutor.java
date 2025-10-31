@@ -59,7 +59,8 @@ public class FlowProcessExecutor {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
-
+        ExecuteContext executeContext = new ExecuteContext();
+        executeContext.setProcessId(processId);
         try {
             //初始化变量上下文
             VariableContext variableContext = new VariableContext();
@@ -67,9 +68,7 @@ public class FlowProcessExecutor {
             //初始化执行上下文
             Map<String, NodeData> nodeData = graphFlowCache.findNodeData(processId);
             traceId = validateAndGenerateTraceId(traceId, processId);
-            ExecuteContext executeContext = new ExecuteContext();
             executeContext.setTraceId(traceId);
-            executeContext.setProcessId(processId);
             executeContext.setNodeDataMap(nodeData);
             //执行上下文添加执行UUID
             executeContext.setExecutionUuid(UUID.randomUUID().toString());
@@ -80,14 +79,16 @@ public class FlowProcessExecutor {
             ExecutorResult result = executeFlow(processId, variableContext, executeContext);
             //处理结果到日志
             executionLog.setExecutionResult(result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
-            executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(result.getCause()));
+            executionLog.setErrorMessage(ExceptionUtils.getMessage(result.getCause()));
             return result;
         } catch (Exception e) {
             log.error("执行流程异常", e);
             executionLog.setExecutionResult(ExecutionResultEnum.FAILED.getCode());
-            executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
+            executionLog.setErrorMessage(ExceptionUtils.getMessage(e));
             return ExecutorResult.error(processId, "执行流程异常", e);
         } finally {
+            executeContext.addLog("流程执行结束");
+            executionLog.setLogText(executeContext.getLogText());
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
             executionLog.setDurationTime(duration.toMillis());
@@ -106,18 +107,20 @@ public class FlowProcessExecutor {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
-
+        ExecuteContext executeContext = new ExecuteContext();
         try {
             //初始化变量上下文
             VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
             if (variableContext == null) {
+                executionLog.setErrorMessage("执行上下文不存在或已过期: " + executionUuid);
                 return ExecutorResult.error(processId, "执行上下文不存在或已过期: " + executionUuid);
             }
             variableContext.setInputFields(inputFields);
             variableContext.setOutputParams(Collections.emptyMap());
             //初始化执行上下文
-            ExecuteContext executeContext = contextProvider.restoreExecuteContext(executionUuid);
+            executeContext = contextProvider.restoreExecuteContext(executionUuid);
             if (executeContext == null) {
+                executionLog.setErrorMessage("执行上下文不存在或已过期: " + executionUuid);
                 return ExecutorResult.error(processId, "执行上下文不存在或已过期: " + executionUuid);
             }
             //重置执行结果
@@ -131,14 +134,16 @@ public class FlowProcessExecutor {
             ExecutorResult result = executeFlow(processId, variableContext, executeContext);
             //处理结果到日志
             executionLog.setExecutionResult(result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
-            executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(result.getCause()));
+            executionLog.setErrorMessage(ExceptionUtils.getMessage(result.getCause()));
             return result;
         } catch (Exception e) {
             log.error("执行流程异常", e);
             executionLog.setExecutionResult(ExecutionResultEnum.FAILED.getCode());
-            executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
+            executionLog.setErrorMessage(ExceptionUtils.getMessage(e));
             return ExecutorResult.error(processId, "执行流程异常", e);
         } finally {
+            executeContext.addLog("流程执行结束");
+            executionLog.setLogText(executeContext.getLogText());
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
             executionLog.setDurationTime(duration.toMillis());

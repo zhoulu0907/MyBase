@@ -46,10 +46,10 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
     }
 
 
-    public List<AuthRoleDO> findByApplicationIdAndUserId(Long applicationId, Long userId) {
+    public List<AuthRoleDO> findByUserIdAndApplicationId(Long userId, Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.param("application_id", applicationId);
         configs.param("user_id", userId);
+        configs.param("application_id", applicationId);
         String sql = """
                 select
                 	aar.id, aar.role_code, aar.role_type, aar.role_name

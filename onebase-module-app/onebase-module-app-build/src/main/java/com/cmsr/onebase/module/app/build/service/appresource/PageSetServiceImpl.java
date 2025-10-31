@@ -99,6 +99,7 @@ public class PageSetServiceImpl implements PageSetService {
     public String createPageSet(CreatePageSetDTO createPageSetDTO) {
         PageSetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, PageSetDO.class);
         pageSetDO.setPageSetCode(UUID.randomUUID().toString());
+        pageSetDO.setPageSetType(createPageSetDTO.getPageSetType());
         pageSetDO = pageSetDataRepository.insert(pageSetDO);
 
         // 创建空的表单设计页面和列表设计页面
@@ -332,6 +333,7 @@ public class PageSetServiceImpl implements PageSetService {
 
         LoadPageSetRespVO loadPageSetRespVO = new LoadPageSetRespVO();
         loadPageSetRespVO.setId(pageSetDO.getId());
+        loadPageSetRespVO.setPageSetType(pageSetDO.getPageSetType());
         List<PageDTO> pageDTOs = new ArrayList<>();
 
         // 读取每个页面的组件和配置

@@ -32,8 +32,8 @@ public class SwitchConditionNodeComponent extends NodeSwitchComponent {
 
     @Override
     public String processSwitch() throws Exception {
-        // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("分支节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         SwitchConditionNodeData nodeData = (SwitchConditionNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
@@ -41,10 +41,13 @@ public class SwitchConditionNodeComponent extends NodeSwitchComponent {
 
         //
         if (executeContext.hasNodeProcessResult(this.getTag())) {
-            return (String) executeContext.getNodeProcessResult(this.getTag());
+            String result = (String) executeContext.getNodeProcessResult(this.getTag());
+            executeContext.addLog("分支节点已执行过，直接返回结果: " + result);
+            return result;
         }
         //
         String result = "tag:" + evaluateSwitchCondition(nodeData, expressionContext);
+        executeContext.addLog("分支节点执行完毕，结果为: " + result);
         //
         executeContext.putNodeProcessResult(this.getTag(), result);
         return result;
