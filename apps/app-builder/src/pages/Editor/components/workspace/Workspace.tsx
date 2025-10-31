@@ -237,7 +237,7 @@ export default function EditorWorkspace() {
 
   const getAutoConfig = async (fieldId: string) => {
     const autoConfig = await getAutoNumberConfig(fieldId);
-    return autoConfig?.rules || [];
+    return autoConfig || {};
   };
 
   return (
@@ -363,9 +363,9 @@ export default function EditorWorkspace() {
 
                       // 自动编码
                       if (field.fieldType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
-                        getAutoConfig(field.fieldId).then((rules: any) => {
-                          schema.config.autoCodeConfig = rules;
-                          schema.config.autoCodeDisabled = rules && rules.length > 0 ? true : false;
+                        getAutoConfig(field.fieldId).then((autoCodeConfig: any) => {
+                          schema.config.autoCodeConfig = autoCodeConfig;
+                          schema.config.autoCodeDisabled = autoCodeConfig && autoCodeConfig.config ? true : false;
                         });
                       }
 
@@ -436,9 +436,9 @@ export default function EditorWorkspace() {
                 }
 
                 if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-                  const rules = await getAutoConfig(fieldID);
-                  schema.config.autoCodeConfig = rules;
-                  schema.config.autoCodeDisabled = rules && rules.length > 0 ? true : false;
+                  const autoCodeConfig = await getAutoConfig(fieldID);
+                  schema.config.autoCodeConfig = autoCodeConfig;
+                  schema.config.autoCodeDisabled = autoCodeConfig && autoCodeConfig.config ? true : false;
                 }
               }
 
