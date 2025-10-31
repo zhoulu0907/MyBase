@@ -30,7 +30,7 @@ export default function FieldModal({
   });
   const useCkOptions = ckOptions.map((item: any) => {
     return {
-      label: item.fieldName,
+      label: item.displayName,
       value: item.fieldId,
       disabled: invertKey.includes(item.fieldId)
     };
