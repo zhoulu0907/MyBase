@@ -80,6 +80,7 @@ export default function EditorWorkspace() {
     layoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
+    subTableComponents,
     setSubTableComponents
   } = usePageEditorSignal();
 
@@ -414,6 +415,27 @@ export default function EditorWorkspace() {
                 // 子表 数据字段  不做任何操作
               } else {
                 // 主表字段、普通字段
+
+                // 从子表单拖出来的数据
+                const keys = Object.keys(subTableComponents);
+                for (let key of keys) {
+                  if (subTableComponents[key]) {
+                    const currentSub = subTableComponents[key]?.find((ele: any) => ele.id === item.id);
+                    if (currentSub) {
+                      const config = {
+                        ...pageComponentSchemas[currentSub.id].config,
+                        dataField: [],
+                        label: {
+                          text: pageComponentSchemas[currentSub.id].config?.label?.text,
+                          display: true
+                        }
+                      };
+                      setPageComponentSchemas(currentSub.id, { ...pageComponentSchemas[currentSub.id], config });
+                      const newList = subTableComponents[key].filter((ele) => ele.id !== currentSub.id);
+                      setSubTableComponents(key, newList);
+                    }
+                  }
+                }
                 entityList.push(item);
               }
             });

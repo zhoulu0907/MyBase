@@ -134,7 +134,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config.cpName = itemDisplayName;
     schema.config.label.text = itemDisplayName;
     schema.config.label.display = false;
-    schema.config.dataField = [entityId, fieldId];
+    schema.config.dataField = entityId ? [entityId, fieldId] : [];
     schema.config.id = cpID;
     const props = {
       id: cpID,
@@ -345,9 +345,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 setSubTableComponents(id, newSubList);
               }}
               onAdd={onSubAdd}
-              group={{
-                name: 'subtable-list'
-              }}
+              group={{ name: COMPONENT_GROUP_NAME }}
               sort={true}
               forceFallback={true}
               animation={150}
