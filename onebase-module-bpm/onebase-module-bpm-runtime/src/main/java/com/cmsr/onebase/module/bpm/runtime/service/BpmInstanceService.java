@@ -40,11 +40,10 @@ public interface BpmInstanceService {
      */
     List<BpmOperatorRecordRespVO.OperatorRecord> getOperatorRecord(Long instanceId);
 
-    /*
+    /**
      * 获取流程实例的表单详情
      *
-     * @param taskId     任务ID
      * @param instanceId 流程实例ID
      */
-    BpmFlowTaskDetailVO getFormDetail(String taskId, Long instanceId);
+    BpmFlowTaskDetailVO getFormDetail(Long instanceId);
 }
