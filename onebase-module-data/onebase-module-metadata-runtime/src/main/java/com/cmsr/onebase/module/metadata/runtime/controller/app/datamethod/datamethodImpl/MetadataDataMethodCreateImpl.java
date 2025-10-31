@@ -178,9 +178,6 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             }
         }
 
-        // 处理自动编号字段
-        processAutoNumberFields(fields, processedData);
-
         // 处理复杂类型字段（数组、对象等）的JSON序列化
         processComplexTypeFields(fields, processedData);
 

@@ -1880,7 +1880,17 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     }
                     rule.setTextValue(textValue);
                     
-                    rule.setRefFieldId(ruleReq.getRefFieldId());
+                    // 兼容性处理：FIELD_REF类型的规则项支持从format字段获取引用字段ID
+                    Long refFieldId = ruleReq.getRefFieldId();
+                    if ("FIELD_REF".equalsIgnoreCase(ruleReq.getItemType()) && refFieldId == null && ruleReq.getFormat() != null) {
+                        try {
+                            refFieldId = Long.parseLong(ruleReq.getFormat());
+                            log.info("FIELD_REF规则项从format字段解析出引用字段ID: {}", refFieldId);
+                        } catch (NumberFormatException e) {
+                            log.warn("FIELD_REF规则项的format字段无法解析为字段ID: {}", ruleReq.getFormat());
+                        }
+                    }
+                    rule.setRefFieldId(refFieldId);
                     // 使用新的枚举值：1-启用，0-禁用
                     rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
                     rule.setAppId(entityField != null ? entityField.getAppId() : null);
