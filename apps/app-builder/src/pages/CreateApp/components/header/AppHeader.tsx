@@ -9,10 +9,9 @@ import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
-import { menuEditorSignal } from '@/store/singals/menu_editor';
 import { UserPermissionManager } from '@/utils/permission';
 import { Button, Layout, Menu, Tabs } from '@arco-design/web-react';
-import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app';
+import { AppStatus, getApplication, menuSignal, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -32,7 +31,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const location = useLocation();
   const { t } = useI18n();
   const { curAppId, setCurAppId, curAppInfo, setCurAppInfo } = useAppStore();
-  const { curMenu } = menuEditorSignal;
+  const { curMenu } = menuSignal;
 
   // Tab 切换
   // 根据当前路径设置 activeTab

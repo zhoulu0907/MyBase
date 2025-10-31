@@ -576,7 +576,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                       <span className={styles.name}>操作权限：</span>
                       <Tag>查看</Tag>
                       {perm.operationTags?.map((tag: string) => (
-                        <Tag key={tag}>{OPERATION_OPTIONS[tag]}</Tag>
+                        <Tag key={tag}>{OPERATION_OPTIONS[tag.toLowerCase()]}</Tag>
                       ))}
                     </Space>
                   </Space>
