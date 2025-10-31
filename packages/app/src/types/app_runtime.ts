@@ -58,3 +58,26 @@ export const FlowStatusMap = {
   [FLOWSTATUS_TYPE.WITHDRAWN]: '已撤回',
   [FLOWSTATUS_TYPE.TERMINATED]: '已终止'
 };
+
+export const TaskStatusMap = {
+  SUBMITTED: '已提交',
+  AGREED: '已同意',
+  PASS: '自动通过',
+  REJECTED: '已拒绝',
+  RETURNED: '已退回',
+  WITHDRAWN: '已撤回',
+  AUTOREJECTED: '自动拒绝'
+};
+
+export enum TASKMENU_TYPE {
+  TASKINEEDTODO = 'TASK-ineedtodo',
+  TASKIHAVEDONE = 'TASK-ihavedone',
+  TASKICREATED = 'TASK-icreated',
+  TASKICOPIED = 'TASK-icopied',
+  TASKTASKPROXY = 'TASK-taskproxy',
+}
+
+export enum LISTTYPE {
+  WILLDO = 'willdo',
+  IDONE = 'idone'
+}
