@@ -87,7 +87,7 @@ export interface FieldConfigPopoverProps {
   fieldType: string;
   fieldId: string;
   field: FieldFormValues;
-  onConfirm: (fieldType: string, fieldId: string, configData: any, dictTypeId?: string | number) => void;
+  onConfirm: (fieldType: string, fieldId: string, configData: any, dictTypeId?: string) => void;
   onCancel: (fieldType: string) => void;
   fields: any[];
 }

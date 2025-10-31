@@ -8,7 +8,7 @@ import styles from '../index.module.less';
 
 interface PicklistOptionConfigProps {
   onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (options: object[], dictTypeId?: string | number) => void;
+  onConfirm: (options: object[], dictTypeId?: string) => void;
   initialOptions?: { optionLabel: string; optionValue: string }[];
   onCancel?: () => void;
 }
