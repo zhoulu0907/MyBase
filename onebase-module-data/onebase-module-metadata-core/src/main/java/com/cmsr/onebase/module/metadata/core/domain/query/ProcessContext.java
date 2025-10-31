@@ -30,4 +30,14 @@ public class ProcessContext {
      * 子表上下文数据
      */
     private List<MetadataDataMethodSubEntityContext> subEntities;
+
+    /**
+     * 当前登录用户
+     */
+    private LoginUserCtx loginUserCtx;
+
+    /**
+     * 当前登录用户的权限上下文
+     */
+    private MetadataPermissionContext metadataPermissionContext;
 }

@@ -51,6 +51,16 @@ public class MetadataDataMethodRequestContext {
      */
     private List<MetadataDataMethodSubEntityContext> subEntities;
 
+    /**
+     * 当前登录用户
+     */
+    private LoginUserCtx loginUserCtx;
+
+    /**
+     * 权限上下文
+     */
+    private MetadataPermissionContext permissionContext;
+
 
 
 

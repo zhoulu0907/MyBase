@@ -1,13 +1,21 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.security.runtime.RTLoginUser;
+import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
+import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
+import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
+import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
+import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
@@ -94,18 +102,34 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Override
     public Map<String, Object> createData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
-        Map<String, Object> result = metadataDataMethodCreate.executeProcess(metadataDataMethodRequestContext);
-        return result;
+
+        // 获取当前登录用户的运行时权限
+        this.fetchRuntimePermission(metadataDataMethodRequestContext);
+
+        // 使用统一流程处理新增操作
+        return metadataDataMethodCreate.executeProcess(metadataDataMethodRequestContext);
     }
+
+
 
     @Override
     public Map<String, Object> updateData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
+
+        // 获取当前登录用户的运行时权限
+        this.fetchRuntimePermission(metadataDataMethodRequestContext);
+
         // 使用新的统一流程处理更新操作
+
         return metadataDataMethodUpdate.executeProcess(metadataDataMethodRequestContext);
     }
 
     @Override
     public Boolean deleteData(MetadataDataMethodRequestContext methodCoreContext) {
+
+        // 获取当前登录用户的运行时权限
+        this.fetchRuntimePermission(methodCoreContext);
+
+        // 使用统一流程处理删除操作
         metadataDataMethodDelete.executeProcess(methodCoreContext);
         return true;
     }
@@ -465,15 +489,38 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         }
     }
 
-    // 校验方法已移动到 AbstractMetadataDataMethodCoreService
+    private void fetchRuntimePermission(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
+        // 仅 runtime 客户端需要校验权限
+        if (metadataDataMethodRequestContext.getClientTypeEnum() != ClientTypeEnum.RUNTIME) {
+            return;
+        }
 
-    // 数据处理方法已移动到 AbstractMetadataDataMethodCoreService
+        Long menuId = metadataDataMethodRequestContext.getMenuId();
+        if (menuId == null) {
+//            throw exception(METADATA_DATA_METHOD_RUNTIME_MENUID_REQUIRED);
+        }
 
-    // 处理更新数据方法已移动到 AbstractMetadataDataMethodCoreService
+        RTLoginUser loginUser = RTSecurityContext.getLoginUser();
 
-    // 主键相关方法已移动到 AbstractMetadataDataMethodCoreService
+        DataPermission menuDataPermission = RTSecurityContext.getMenuDataPermission(menuId);
+        FieldPermission menuFieldPermission = RTSecurityContext.getMenuFieldPermission(menuId);
+        OperationPermission menuOperation = RTSecurityContext.getMenuOperation(menuId);
 
-    // 查询和校验方法已移动到 AbstractMetadataDataMethodCoreService
+        MetadataPermissionContext metadataPermissionContext = new MetadataPermissionContext();
+        metadataPermissionContext.setDataPermission(menuDataPermission);
+        metadataPermissionContext.setFieldPermission(menuFieldPermission);
+        metadataPermissionContext.setOperationPermission(menuOperation);
+        metadataDataMethodRequestContext.setPermissionContext(metadataPermissionContext);
+        LoginUserCtx loginUserCtx = convertLoginUserCtx(loginUser);
+        metadataDataMethodRequestContext.setLoginUserCtx(loginUserCtx);
 
-    // 自动编号和表名处理方法已移动到 AbstractMetadataDataMethodCoreService
+    }
+
+    private LoginUserCtx convertLoginUserCtx(RTLoginUser loginUser) {
+        LoginUserCtx loginUserCtx = new LoginUserCtx();
+        loginUserCtx.setUserId(loginUser.getUserId());
+        loginUserCtx.setApplicationId(loginUser.getApplicationId());
+        return loginUserCtx;
+    }
+
 }

@@ -3,10 +3,12 @@ package com.cmsr.onebase.module.metadata.core.service.datamethod;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationManager;
@@ -60,6 +62,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     protected AutoNumberService autoNumberService;
     @Resource
     protected ValidationManager validationManager;
+    @Resource
+    protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionManager permissionManager;
 
     // ========== 公共方法 ==========
 
@@ -469,6 +473,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         ProcessContext processContext = new ProcessContext();
         processContext.setEntity(entityDO);
 
+
         processContext.setFields(fields);
         processContext.setOperationType(requestContext.getMetadataDataMethodOpEnum());
 
@@ -488,6 +493,9 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         log.info("成功切换到数据源：{}", datasource.getCode());
         processContext.setTemporaryService(temporaryService);
 
+        MetadataPermissionContext permissionContext = requestContext.getPermissionContext();
+        processContext.setMetadataPermissionContext(permissionContext);
+
         return processContext;
     }
 
@@ -496,8 +504,14 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      * 2. 功能权限校验
      */
     protected void validatePermission(ProcessContext context) {
+        log.info("开始执行权限校验：entityId={}, operationType={}", 
+                context.getEntityId(), 
+                context.getOperationType());
 
-        //todo
+        // 使用权限管理器执行完整的权限校验流程
+        permissionManager.checkPermission(context);
+
+        log.info("权限校验完成：entityId={}", context.getEntityId());
     }
 
     /**
