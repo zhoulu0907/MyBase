@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.etl.core.enums;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 public enum ScheduleType {
@@ -8,6 +9,7 @@ public enum ScheduleType {
     OBSERVE("observe"),
     MANUALLY("manually");
 
+    @Getter
     private final String value;
 
     ScheduleType(String value) {
