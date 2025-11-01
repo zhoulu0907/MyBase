@@ -225,6 +225,45 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       ]
     );
 
+    /**
+     * 根据字段ID和节点数据，获取应该连接的端口
+     * @param fieldId 字段ID
+     * @param nodeId 节点ID
+     * @param nodeData 节点数据
+     * @param isSource 是否为source端（true为source，false为target）
+     * @param systemCollapsed 系统字段是否折叠（默认true）
+     * @param customCollapsed 自定义字段是否折叠（默认false）
+     * @returns 端口ID
+     */
+    const getPortForField = (
+      fieldId: string,
+      nodeId: string,
+      nodeData: EntityNode,
+      isSource: boolean,
+      systemCollapsed: boolean = true,
+      customCollapsed: boolean = false
+    ): string => {
+      // 查找字段
+      const field = nodeData.fields.find((f) => f.fieldId === fieldId || f.fieldName === fieldId);
+      if (!field) {
+        // 如果找不到字段，使用原始端口
+        return `${fieldId}_${isSource ? 'source' : 'target'}`;
+      }
+
+      // 判断字段类型
+      const isSystemField = field.isSystemField === FIELD_TYPE.SYSTEM;
+      const isCollapsed = isSystemField ? systemCollapsed : customCollapsed;
+
+      // 如果该section折叠，使用聚合端口；否则使用字段端口
+      if (isCollapsed) {
+        const section = isSystemField ? 'system' : 'custom';
+        return `${nodeId}_${section}_fields_${isSource ? 'source' : 'target'}`;
+      }
+
+      // 展开状态，使用字段端口
+      return `${fieldId}_${isSource ? 'source' : 'target'}`;
+    };
+
     const createAndAddEdge = (
       graph: Graph,
       edgeData: {
@@ -233,11 +272,44 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         targetEntityId: string;
         targetFieldId: string;
         label?: string;
-      }
+      },
+      nodesData: EntityNode[],
+      systemCollapsed: boolean = true,
+      customCollapsed: boolean = false
     ) => {
+      // 查找源节点和目标节点数据
+      const sourceNode = nodesData.find((n) => n.entityId === edgeData.sourceEntityId);
+      const targetNode = nodesData.find((n) => n.entityId === edgeData.targetEntityId);
+
+      // 获取正确的端口（考虑折叠状态）
+      const sourcePort = sourceNode
+        ? getPortForField(
+            edgeData.sourceFieldId,
+            edgeData.sourceEntityId,
+            sourceNode,
+            true,
+            systemCollapsed,
+            customCollapsed
+          )
+        : `${edgeData.sourceFieldId}_source`;
+      const targetPort = targetNode
+        ? getPortForField(
+            edgeData.targetFieldId,
+            edgeData.targetEntityId,
+            targetNode,
+            false,
+            systemCollapsed,
+            customCollapsed
+          )
+        : `${edgeData.targetFieldId}_target`;
+
+      // 保存原始端口（用于后续展开时恢复）
+      const originalSource = { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` };
+      const originalTarget = { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` };
+
       const edge = graph.createEdge({
-        source: { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` },
-        target: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` },
+        source: { cell: edgeData.sourceEntityId, port: sourcePort },
+        target: { cell: edgeData.targetEntityId, port: targetPort },
         attrs: {
           line: {
             stroke: 'rgb(var(--gray-5))',
@@ -248,8 +320,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         connector: { name: 'smooth' },
         data: {
           ...edgeData,
-          originalSource: { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` },
-          originalTarget: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` }
+          originalSource,
+          originalTarget
         },
         labels: edgeData.label
           ? [
@@ -568,14 +640,19 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
       graphRef?.current?.clearCells();
 
-      // --- 添加节点 ---
+      // --- 1、添加节点 ---
       if (data.nodes && data.nodes.length > 0) {
         createAndAddNode(positioner, data.nodes);
       }
 
-      // --- 添加边 ---
+      // --- 2、更新连接桩位置（自定义字段的位置依赖系统字段的折叠状态）
+      if (data.nodes && data.nodes.length > 0 && collapseHandlerRef.current) {
+        collapseHandlerRef.current.updatePortsPosition(data.nodes, true);
+      }
+
+      // --- 3、添加边（根据新的连接桩位置）---
       if (data.edges && data.edges.length > 0) {
-        data.edges.forEach((edge) => createAndAddEdge(graphRef.current!, edge));
+        data.edges.forEach((edge) => createAndAddEdge(graphRef.current!, edge, data.nodes, true, false));
       }
 
       // 是否首次加载且有节点
@@ -612,7 +689,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       }
 
       try {
-        // 执行自动布局算法
         const newPositions = performAutoLayout(data.nodes, data.edges || [], {
           nodeWidth: NODE_WIDTH,
           horizontalSpacing: 50,
