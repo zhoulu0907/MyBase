@@ -21,6 +21,7 @@ export const useFieldManager = (
   const [form] = Form.useForm();
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
   const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // 使用数据管理hook
   const fieldData = useFieldData(visible, entity, onSuccess);
@@ -139,9 +140,16 @@ export const useFieldManager = (
 
   // 处理表单提交
   const handleSubmit = useCallback(async () => {
+    // 如果正在提交中，直接返回，防止重复点击
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
     try {
       // 检查实体是否存在
       if (!entity?.entityId) {
+        setSubmitting(false);
         return;
       }
 
@@ -194,6 +202,8 @@ export const useFieldManager = (
         });
       }
       fieldValidation.setAllErrors(map);
+    } finally {
+      setSubmitting(false);
     }
   }, [entity?.entityId, form, getCurrentTableData, curAppId, setVisible, onSuccess, fieldValidation]);
 
@@ -203,6 +213,7 @@ export const useFieldManager = (
     activeFields: fieldData.activeFields,
     originFields: fieldData.originFields,
     loading: fieldData.loading,
+    submitting,
     errors: fieldValidation.errors,
 
     // 操作

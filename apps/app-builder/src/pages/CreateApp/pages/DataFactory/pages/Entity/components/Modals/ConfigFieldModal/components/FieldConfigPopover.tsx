@@ -18,6 +18,7 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
                 onConfirm(ENTITY_FIELD_TYPE.SELECT.VALUE, fieldId, options, dictTypeId);
               }}
               initialOptions={field?.options}
+              initialDictTypeId={field?.dictTypeId}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.SELECT.VALUE)}
             />
           );
@@ -29,6 +30,7 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
                 onConfirm(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE, fieldId, options, dictTypeId);
               }}
               initialOptions={field?.options}
+              initialDictTypeId={field?.dictTypeId}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE)}
             />
           );

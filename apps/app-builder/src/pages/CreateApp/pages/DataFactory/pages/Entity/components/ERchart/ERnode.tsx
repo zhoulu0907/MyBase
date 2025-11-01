@@ -4,7 +4,7 @@ import { Button, Popover, Space, Switch } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';
 import { ENTITY_STATUS, FIELD_TYPE, SYSTEM_FIELD_MAP, useNewNodeStore } from '@onebase/ui-kit';
 import { useFieldStore } from '@/store/store_field';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styles from './ERnode.module.less';
 import { useSignals } from '@preact/signals-react/runtime';
 import { newFieldSignal } from '@/store/singals/new_field';
@@ -29,7 +29,6 @@ interface NodeData {
 }
 
 const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
-  // 启用 signal 的响应式更新
   useSignals();
 
   const [nodeCollapsed, setNodeCollapsed] = useState({
@@ -43,19 +42,10 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
 
   const { fieldTypes } = useFieldStore();
 
-  useEffect(() => {
-    // 系统字段默认折叠触发边重连
-    if (nodeCollapsed.system === true) {
-      node.getData()?.onUpdatePorts?.(nodeData?.entityId, 'system', nodeCollapsed.system);
-    }
-  }, []);
-
   if (!nodeData) {
     console.error('nodeData is undefined');
     return <div style={{ padding: '10px', color: 'red' }}>No data</div>;
   }
-
-  // const nodeId = nodeData.entityId;
 
   // 分离系统字段和自定义字段
   const systemFields = nodeData?.fields?.filter((field) => field.isSystemField === FIELD_TYPE.SYSTEM);

@@ -51,7 +51,7 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
       overflowContinue: (config.overflowContinue as number) || CONSTANTS.ENABLED,
       initialValue: (config.startValue as number) || START_VALUE_DEFAULT,
       resetCycle: (config.resetCycle as string) || AUTO_CODE_NUMBER_DEFAULT_CONFIG.resetCycle,
-      nextRecordStartValue: (config.nextRecordStartValue as number) || CONSTANTS.ENABLED,
+      resetOnInitialChange: (config.resetOnInitialChange as number) || CONSTANTS.ENABLED,
       rules: otherRules
     };
   }

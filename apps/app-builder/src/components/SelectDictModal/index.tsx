@@ -12,6 +12,7 @@ export interface SelectDictModalProps {
   visible: boolean;
   onOk: (dict?: DictItem) => void;
   onCancel: () => void;
+  dictTypeId?: string; // 回显参数：传入时自动选中并展开对应字典
 }
 
 // 预览展示的最大数量
@@ -22,7 +23,7 @@ const DICT_OWNER_TYPE = {
   TENANT: 'tenant'
 };
 
-export default function SelectDictModal({ appId, visible, onOk, onCancel }: SelectDictModalProps) {
+export default function SelectDictModal({ appId, visible, onOk, onCancel, dictTypeId }: SelectDictModalProps) {
   const [activeTab, setActiveTab] = useState<string>(DICT_OWNER_TYPE.APP);
   const [loadingList, setLoadingList] = useState(false);
   const [showMoreMap, setShowMoreMap] = useState<Record<string, boolean>>({});
@@ -46,15 +47,27 @@ export default function SelectDictModal({ appId, visible, onOk, onCancel }: Sele
     }
   };
 
+  // 弹窗打开或tab切换时重置并加载
   useEffect(() => {
     if (!visible) return;
-    // 打开或切换tab时重置并加载
-    setSelectedId('');
-    setExpandedKeys([]);
+    if (!dictTypeId) {
+      setSelectedId('');
+      setExpandedKeys([]);
+    }
     setPreviewMap({});
     setShowMoreMap({});
     loadList(activeTab);
   }, [visible, activeTab]);
+
+  // 当 dictTypeId 有值，选中字典
+  useEffect(() => {
+    if (!dictTypeId || dictList.length === 0 || loadingList) return;
+
+    const targetDict = dictList.find((d) => d.id === dictTypeId);
+    if (targetDict) {
+      setSelectedId(targetDict.id);
+    }
+  }, [dictTypeId, dictList]);
 
   const getDictOwnerId = () => {
     return activeTab === DICT_OWNER_TYPE.APP ? appId : tenantId;

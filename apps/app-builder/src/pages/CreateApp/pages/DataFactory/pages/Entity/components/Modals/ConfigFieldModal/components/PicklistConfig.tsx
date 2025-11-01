@@ -9,6 +9,7 @@ interface MultiPicklistConfigProps {
   onVisibleChange?: (visible: boolean) => void;
   onConfirm: (options: object[], dictTypeId?: string) => void;
   initialOptions?: { optionLabel: string; optionValue: string }[];
+  initialDictTypeId?: string;
   onCancel?: () => void;
 }
 
@@ -24,6 +25,7 @@ interface PicklistConfigProps {
   onVisibleChange?: (visible: boolean) => void;
   onConfirm: (options: object[], dictTypeId?: string) => void;
   initialOptions?: { optionLabel: string; optionValue: string }[];
+  initialDictTypeId?: string;
   onCancel?: () => void;
 }
 
