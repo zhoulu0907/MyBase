@@ -17,6 +17,7 @@ import { IconCopy } from '@arco-design/web-react/icon';
 import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
+import DynamicAutoCodeConfig from './components/DynamicAutoCodeConfig';
 import DynamicCarouselConfig from './components/DynamicCarouselConfig';
 import DynamicCheckboxConfig from './components/DynamicCheckboxConfig';
 import DynamicDataSourceConfig from './components/DynamicDataSourceConfig';
@@ -28,7 +29,6 @@ import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import DynamicTabsConfig from './components/DynamicTabsConfig';
-import DynamicAutoCodeConfig from './components/DynamicAutoCodeConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -241,14 +241,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     {(item.type === CONFIG_TYPES.TEXT_INPUT ||
                       item.type === CONFIG_TYPES.PLACEHOLDER_INPUT ||
                       item.type === CONFIG_TYPES.UPLOAD_COMPRESS) && (
-                        <Input
-                          placeholder={`请输入${item.name}`}
-                          value={configs[item.key]}
-                          onChange={(value) => {
-                            handlePropsChange(item.key, value);
-                          }}
-                        />
-                      )}
+                      <Input
+                        placeholder={`请输入${item.name}`}
+                        value={configs[item.key]}
+                        onChange={(value) => {
+                          handlePropsChange(item.key, value);
+                        }}
+                      />
+                    )}
                     {item.type === CONFIG_TYPES.LABEL_INPUT && (
                       <Input
                         placeholder={`请输入${item.name}`}
@@ -267,7 +267,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                             handlePropsChange(item.key, value);
                           }
                         }}
-                      // suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
+                        // suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
                       />
                     )}
 
@@ -323,7 +323,12 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                         >
                           {item.range.map((item: any) => (
                             <Option key={item.key} value={item.value}>
-                              <Tabs size='mini' defaultActiveTab="1" type={item.value} style={{ pointerEvents: 'none' }}>
+                              <Tabs
+                                size="mini"
+                                defaultActiveTab="1"
+                                type={item.value}
+                                style={{ pointerEvents: 'none' }}
+                              >
                                 <TabPane key="1" title="标签页1" />
                                 <TabPane key="2" title="标签页2" />
                               </Tabs>
@@ -348,33 +353,33 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       item.type === CONFIG_TYPES.FORM_LAYOUT ||
                       item.type === CONFIG_TYPES.COLLAPSED ||
                       item.type === CONFIG_TYPES.TEXT_ALIGN) && (
-                        <Radio.Group
-                          type="button"
-                          size="default"
-                          value={configs[item.key]}
-                          onChange={(value) => {
-                            handlePropsChange(item.key, value);
-                          }}
-                          style={{
-                            width: '100%',
-                            display: 'flex'
-                          }}
-                        >
-                          {item.range.map((item: any) => (
-                            <Radio
-                              key={item.key}
-                              value={item.value}
-                              style={{
-                                flex: 1,
-                                textAlign: 'center',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
-                            </Radio>
-                          ))}
-                        </Radio.Group>
-                      )}
+                      <Radio.Group
+                        type="button"
+                        size="default"
+                        value={configs[item.key]}
+                        onChange={(value) => {
+                          handlePropsChange(item.key, value);
+                        }}
+                        style={{
+                          width: '100%',
+                          display: 'flex'
+                        }}
+                      >
+                        {item.range.map((item: any) => (
+                          <Radio
+                            key={item.key}
+                            value={item.value}
+                            style={{
+                              flex: 1,
+                              textAlign: 'center',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
+                          </Radio>
+                        ))}
+                      </Radio.Group>
+                    )}
                     {item.type === CONFIG_TYPES.COLUMN_COUNT_RADIO && (
                       <Radio.Group
                         type="button"
@@ -532,6 +537,77 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           )}
                         </Col>
                       </Row>
+                    )}
+
+                    {item.type === CONFIG_TYPES.NUMBER_FORMAT && (
+                      <>
+                        <Row>
+                          <Col style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Checkbox
+                              checked={configs[item.key]['showPrecision']}
+                              onChange={(value) => {
+                                handlePropsChange(item.key, { ...configs[item.key], showPrecision: value });
+                              }}
+                              style={{ marginRight: 8 }}
+                            >
+                              保留小数点
+                            </Checkbox>
+                            <InputNumber
+                              size="mini"
+                              value={configs[item.key]['precision']}
+                              onChange={(value) => {
+                                handlePropsChange(item.key, { ...configs[item.key], precision: value });
+                              }}
+                              style={{ width: 80 }}
+                            />
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Checkbox
+                              checked={configs[item.key]['showPercent']}
+                              onChange={(value) => {
+                                handlePropsChange(item.key, { ...configs[item.key], showPercent: value });
+                              }}
+                            >
+                              显示为百分比
+                            </Checkbox>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Checkbox
+                              checked={configs[item.key]['showUnit']}
+                              onChange={(value) => {
+                                handlePropsChange(item.key, { ...configs[item.key], showUnit: value });
+                              }}
+                              style={{ marginRight: 8 }}
+                            >
+                              显示单位
+                            </Checkbox>
+                            <Input
+                              style={{ width: 80 }}
+                              size="mini"
+                              value={configs[item.key]['unitValue']}
+                              onChange={(value) => {
+                                handlePropsChange(item.key, { ...configs[item.key], unitValue: value });
+                              }}
+                            />
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Checkbox
+                              checked={configs[item.key]['useThousandsSeparator']}
+                              onChange={(value) => {
+                                handlePropsChange(item.key, { ...configs[item.key], useThousandsSeparator: value });
+                              }}
+                            >
+                              使用千分位分隔符
+                            </Checkbox>
+                          </Col>
+                        </Row>
+                      </>
                     )}
                   </FormItem>
                 );
@@ -703,15 +779,16 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               }
 
               // 自动编号规则配置
-              if (item.type == CONFIG_TYPES.AUTO_CODE_RULES){
-                return(
-                  <DynamicAutoCodeConfig  
+              if (item.type == CONFIG_TYPES.AUTO_CODE_RULES) {
+                return (
+                  <DynamicAutoCodeConfig
                     key={index}
                     id={cpID}
                     handlePropsChange={handlePropsChange}
                     item={item}
-                    configs={configs} />
-                )
+                    configs={configs}
+                  />
+                );
               }
             })}
         </Form>
