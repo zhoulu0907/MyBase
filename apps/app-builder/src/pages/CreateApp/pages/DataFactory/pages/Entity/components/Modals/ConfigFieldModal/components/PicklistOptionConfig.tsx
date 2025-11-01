@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Input, Select } from '@arco-design/web-react';
-import { IconDelete, IconPlus, IconBook } from '@arco-design/web-react/icon';
+import { IconDelete, IconPlus, IconBook, IconEdit } from '@arco-design/web-react/icon';
 import { useAppStore } from '@/store/store_app';
 import SelectDictModal from '@/components/SelectDictModal';
-import type { DictItem } from '@onebase/platform-center';
+import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
+import type { DictItem, DictData } from '@onebase/platform-center';
 import styles from '../index.module.less';
 
 interface PicklistOptionConfigProps {
   onVisibleChange?: (visible: boolean) => void;
   onConfirm: (options: object[], dictTypeId?: string) => void;
   initialOptions?: { optionLabel: string; optionValue: string }[];
+  initialDictTypeId?: string;
   onCancel?: () => void;
 }
 
@@ -33,15 +35,57 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
   onVisibleChange,
   onConfirm,
   onCancel,
-  initialOptions
+  initialOptions,
+  initialDictTypeId
 }) => {
   const [options, setOptions] = useState(
-    initialOptions && initialOptions.length > 0 ? initialOptions : DEFAULT_OPTIONS
+    initialDictTypeId
+      ? [] // 有字典ID时，初始为空，通过dictTypeId加载字典数据
+      : initialOptions && initialOptions.length > 0
+        ? initialOptions
+        : DEFAULT_OPTIONS
   );
-  const [optionType, setOptionType] = useState<typeof CONFIG_TYPE.CUSTOM | typeof CONFIG_TYPE.DICT>(CONFIG_TYPE.CUSTOM);
+  const [optionType, setOptionType] = useState<typeof CONFIG_TYPE.CUSTOM | typeof CONFIG_TYPE.DICT>(
+    initialDictTypeId ? CONFIG_TYPE.DICT : CONFIG_TYPE.CUSTOM
+  );
   const [selectDictModalVisible, setSelectDictModalVisible] = useState(false);
   const [selectDict, setSelectDict] = useState<DictItem | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showAllOptions, setShowAllOptions] = useState(false);
   const { curAppId } = useAppStore();
+
+  // 根据 dictTypeId 初始化字典数据
+  useEffect(() => {
+    const loadDictData = async () => {
+      if (initialDictTypeId) {
+        setLoading(true);
+        try {
+          const dictDetail = await getDictDetail(initialDictTypeId);
+          setSelectDict(dictDetail);
+
+          const dictDataList = await getDictDataListByType(dictDetail.type);
+
+          const dictOptions = dictDataList
+            .filter((item: DictData) => item.status === 1) // 只显示启用状态的字典数据
+            .map((item: DictData) => ({
+              optionLabel: item.label,
+              optionValue: item.value,
+              colorType: item.colorType
+            }));
+
+          setOptions(dictOptions);
+          setOptionType(CONFIG_TYPE.DICT);
+          setShowAllOptions(false); // 重置显示状态
+        } catch (error) {
+          console.error('加载字典数据失败:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadDictData();
+  }, [initialDictTypeId]);
 
   const addOption = () => {
     const newOption = { optionLabel: `选项${options.length + 1}`, optionValue: `选项${options.length + 1}` };
@@ -84,6 +128,23 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
   const handleSelectDictOk = (dict?: DictItem) => {
     if (dict) {
       setSelectDict(dict);
+      // 选择字典后，加载字典数据并设置选项
+      const loadDictOptions = async () => {
+        try {
+          const dictDataList = await getDictDataListByType(dict.type);
+          const dictOptions = dictDataList
+            .filter((item: DictData) => item.status === 1)
+            .map((item: DictData) => ({
+              optionLabel: item.label,
+              optionValue: item.value
+            }));
+          setOptions(dictOptions);
+          setShowAllOptions(false);
+        } catch (error) {
+          console.error('加载字典数据失败:', error);
+        }
+      };
+      loadDictOptions();
     }
     setSelectDictModalVisible(false);
   };
@@ -92,10 +153,22 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
     setSelectDictModalVisible(false);
   };
 
+  const handleOptionTypeChange = (newType: typeof CONFIG_TYPE.CUSTOM | typeof CONFIG_TYPE.DICT) => {
+    setOptionType(newType);
+    if (newType === CONFIG_TYPE.CUSTOM) {
+      if (!initialOptions || initialOptions.length === 0) {
+        setOptions(DEFAULT_OPTIONS);
+      } else {
+        setOptions(initialOptions);
+      }
+      setSelectDict(null);
+    }
+  };
+
   return (
     <div className={styles.fieldTypeConfig}>
       <h4>选项配置</h4>
-      <Select value={optionType} onChange={setOptionType} style={{ width: '100%', marginBottom: 16 }}>
+      <Select value={optionType} onChange={handleOptionTypeChange} style={{ width: '100%', marginBottom: 16 }}>
         {CONFIG_TYPE_OPTIONS.map((option) => (
           <Select.Option key={option.value} value={option.value}>
             {option.label}
@@ -126,15 +199,55 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
           ))}
 
         {optionType === CONFIG_TYPE.DICT && (
-          <div className={styles.optionItem}>
-            <Button
-              type="outline"
-              icon={<IconBook />}
-              onClick={() => setSelectDictModalVisible(true)}
-              className={styles.selectDictBtn}
-            >
-              选择数据字典
-            </Button>
+          <div>
+            {/* 字典选择输入框 */}
+            <div className={styles.dictSelectWrapper}>
+              {selectDict ? (
+                <Input
+                  readOnly
+                  value={selectDict.name}
+                  placeholder="请选择数据字典"
+                  className={styles.dictNameInput}
+                  suffix={<IconEdit className={styles.editIcon} onClick={() => setSelectDictModalVisible(true)} />}
+                  onClick={() => setSelectDictModalVisible(true)}
+                  disabled={loading}
+                />
+              ) : (
+                <Button
+                  type="outline"
+                  size="small"
+                  onClick={() => setSelectDictModalVisible(true)}
+                  className={styles.selectDictBtn}
+                >
+                  <IconBook /> 请选择数据字典
+                </Button>
+              )}
+              {loading && <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>加载中...</div>}
+            </div>
+
+            {/* 字典值列表 */}
+            {selectDict && options.length > 0 && (
+              <div className={styles.dictOptionsList}>
+                {(showAllOptions ? options : options.slice(0, 3)).map((option, displayIndex) => (
+                  <div key={displayIndex} className={styles.dictOptionItem}>
+                    <span className={styles.optionDot} style={{ backgroundColor: option.colorType }} />
+                    <span>{option.optionLabel}</span>
+                  </div>
+                ))}
+                {options.length > 3 && (
+                  <div className={styles.moreButtonWrapper}>
+                    <Button
+                      type="text"
+                      size="small"
+                      onClick={() => setShowAllOptions(!showAllOptions)}
+                      className={styles.moreButton}
+                    >
+                      {showAllOptions ? '收起' : '更多'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -158,6 +271,7 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
       <SelectDictModal
         appId={curAppId}
         visible={selectDictModalVisible}
+        dictTypeId={initialDictTypeId}
         onOk={handleSelectDictOk}
         onCancel={handleSelectDictCancel}
       />

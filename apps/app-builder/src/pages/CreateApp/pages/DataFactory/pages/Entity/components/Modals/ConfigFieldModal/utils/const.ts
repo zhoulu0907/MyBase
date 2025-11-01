@@ -44,7 +44,7 @@ export const AUTO_CODE_NUMBER_DEFAULT_CONFIG = {
   numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
   digitWidth: DIGIT_DEFAULT,
   overflowContinue: CONSTANTS.DISABLED,
-  nextRecordStartValue: CONSTANTS.DISABLED,
+  resetOnInitialChange: CONSTANTS.DISABLED,
   initialValue: START_VALUE_DEFAULT,
   resetCycle: AUTO_CODE_RESET_CYCLE.NONE
 } as const;
