@@ -168,16 +168,6 @@ export interface XInputNumberConfig extends ICommonBaseType {
    */
   step: TNumberDefaultType;
 
-  //   /**
-  //    * 数字精度：默认2
-  //    */
-  //   precision: TNumberDefaultType;
-
-  //   /**
-  //    * 单位
-  //    */
-  //   unit: TTextDefaultType;
-
   /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
@@ -279,8 +269,6 @@ const XInputNumber: XInputNumberSchema = {
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     step: 1,
-    // precision: 0,
-    // unit: '',
     saveWithHidden: false,
     color: '',
     bgColor: '',
