@@ -23,7 +23,7 @@ import java.util.Set;
 @Service
 public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
-    @Value("${etl-project}")
+    @Value("${onebase.scheduler.etl-project}")
     private Long etlProjectCode;
 
     @Resource
