@@ -80,12 +80,12 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "main_metadata", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面主元数据")
     private String mainMetadata;
 
-    /**
-     * 是否启用 BPM
-     * 例如: true 表示启用 BPM
-     */
-    @Column(name = "bpm_enabled", columnDefinition = "BOOLEAN NOT NULL", comment = "是否启用 BPM")
-    private Boolean bpmEnabled;
+//    /**
+//     * 是否启用 BPM
+//     * 例如: true 表示启用 BPM
+//     */
+//    @Column(name = "bpm_enabled", columnDefinition = "BOOLEAN NOT NULL", comment = "是否启用 BPM")
+//    private Boolean bpmEnabled;
 
     /**
      * 路由路径
@@ -101,12 +101,12 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "router_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由名称")
     private String routerName;
 
-    /**
-     * 路由元数据-是否需要认证
-     * 例如: true 表示需要登录
-     */
-    @Column(name = "router_meta_auth_required", columnDefinition = "BOOLEAN NOT NULL", comment = "路由元数据-是否需要认证")
-    private Boolean routerMetaAuthRequired;
+//    /**
+//     * 路由元数据-是否需要认证
+//     * 例如: true 表示需要登录
+//     */
+//    @Column(name = "router_meta_auth_required", columnDefinition = "BOOLEAN NOT NULL", comment = "路由元数据-是否需要认证")
+//    private Boolean routerMetaAuthRequired;
 
     /**
      * 路由元数据-页面标题

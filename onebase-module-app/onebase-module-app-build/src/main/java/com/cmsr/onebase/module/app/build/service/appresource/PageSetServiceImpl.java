@@ -126,7 +126,7 @@ public class PageSetServiceImpl implements PageSetService {
         formPageSetPageDO.setPageSetId(pageSetDO.getId());
         formPageSetPageDO.setPageType(formPageType);
         formPageSetPageDO.setPageId(formPageDO.getId());
-        formPageSetPageDO.setIsDefault(true);
+        formPageSetPageDO.setIsDefault(1);
         formPageSetPageDO.setDefaultSeq(1);
         pageSetPageDataRepository.insert(formPageSetPageDO);
 
@@ -134,7 +134,7 @@ public class PageSetServiceImpl implements PageSetService {
         listPageSetPageDO.setPageSetId(pageSetDO.getId());
         listPageSetPageDO.setPageType(listPageType);
         listPageSetPageDO.setPageId(listPageDO.getId());
-        listPageSetPageDO.setIsDefault(true);
+        listPageSetPageDO.setIsDefault(1);
         listPageSetPageDO.setDefaultSeq(2);
         pageSetPageDataRepository.insert(listPageSetPageDO);
 
@@ -262,7 +262,7 @@ public class PageSetServiceImpl implements PageSetService {
                 pageSetPageDO.setPageSetId(savePageSetReqVO.getId());
                 pageSetPageDO.setPageType(pageType);
                 pageSetPageDO.setPageId(pageDO.getId());
-                pageSetPageDO.setIsDefault(false);
+                pageSetPageDO.setIsDefault(0);
                 pageSetPageDO.setDefaultSeq(1);
                 pageSetPageDataRepository.insert(pageSetPageDO);
 
@@ -291,7 +291,6 @@ public class PageSetServiceImpl implements PageSetService {
             List<ComponentDO> componentDOs = new ArrayList<>();
             for (int idx = 0; idx < page.getComponents().size(); idx++) {
                 ComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx), ComponentDO.class);
-                componentDO.setInTable(false);
                 componentDO.setPageId(finalPageDO.getId());
                 componentDO.setComponentIndex(idx);
                 componentDOs.add(componentDO);
