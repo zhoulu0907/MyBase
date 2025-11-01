@@ -23,10 +23,10 @@ public interface ErrorCodeConstants {
 
     // ========== 实体字段相关 1-003-003-000 ==========
     ErrorCode ENTITY_FIELD_NOT_EXISTS = new ErrorCode(1_003_003_000, "实体字段不存在");
-    ErrorCode ENTITY_FIELD_NAME_DUPLICATE = new ErrorCode(1_003_003_001, "实体字段名称[{0}]已存在");
+    ErrorCode ENTITY_FIELD_NAME_DUPLICATE = new ErrorCode(1_003_003_001, "实体字段名称[{}]已存在");
     ErrorCode ENTITY_FIELD_CODE_DUPLICATE = new ErrorCode(1_003_003_002, "实体字段编码已存在");
-    ErrorCode ENTITY_FIELD_DISPLAY_NAME_DUPLICATE = new ErrorCode(1_003_003_003, "实体字段显示名称[{0}]已存在");
-    ErrorCode ENTITY_FIELD_NAME_IS_SYSTEM_RESERVED = new ErrorCode(1_003_003_004, "字段名[{0}]与系统保留字段冲突，不能使用");
+    ErrorCode ENTITY_FIELD_DISPLAY_NAME_DUPLICATE = new ErrorCode(1_003_003_003, "实体字段显示名称[{}]已存在");
+    ErrorCode ENTITY_FIELD_NAME_IS_SYSTEM_RESERVED = new ErrorCode(1_003_003_004, "字段名[{}]与系统保留字段冲突，不能使用");
 
     // ========== 数据源相关 1-003-004-000 ==========
     ErrorCode DATASOURCE_NOT_EXISTS = new ErrorCode(1_003_004_000, "数据源不存在");
@@ -44,7 +44,7 @@ public interface ErrorCodeConstants {
 
     // ========== 数据方法相关 1-003-006-000 ==========
     ErrorCode DATA_METHOD_NOT_EXISTS = new ErrorCode(1_003_006_000, "数据方法不存在");
-    ErrorCode FIELD_REQUIRED = new ErrorCode(1_003_006_001, "字段[{0}]为必填字段");
+    ErrorCode FIELD_REQUIRED = new ErrorCode(1_003_006_001, "字段[{}]为必填字段");
     ErrorCode PRIMARY_KEY_UPDATE_NOT_ALLOWED = new ErrorCode(1_003_006_002, "不允许更新主键字段");
     ErrorCode DATA_NOT_EXISTS = new ErrorCode(1_003_006_003, "数据不存在");
 
