@@ -70,6 +70,8 @@ export const CONFIG_TYPES = {
   SECURITY: 'Security',
   // 校验
   VERIFY: 'Verify',
+  // 数字格式
+  NUMBER_FORMAT: 'NumberFormat',
   // 选择数据源
   SELECT_DATA_SOURCE: 'SelectDataSource',
   // 子表单组件

@@ -21,6 +21,7 @@ import {
   type PageMethodParam
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { RedirectMethod } from '../../../constants';
 import './index.css';
@@ -48,6 +49,8 @@ const XTable = memo(
       xTableSelectProps?: XTableSelectProps;
     }
   ) => {
+    useSignals();
+
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
@@ -269,6 +272,7 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
+
       const req: PageMethodParam = {
         menuId: curMenu.value?.id,
         entityId: metaData,

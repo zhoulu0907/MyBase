@@ -141,7 +141,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
               <p className="gray-color">发起人</p>
               <div className="photo-box">
                 <p className="photo-img"></p>
-                {detailData?.initiatorDeptName}
+                {detailData?.initiatorName}
               </div>
             </Col>
             <Col span={6}>
@@ -156,19 +156,11 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           <div className="draw-content">
             <div className="draw-left">
               <Row className="" style={{ marginBottom: 16 }}>
-                <Col span={8}>
-                  <p className="gray-color">申请人</p>
+                <Col span={12}>
+                  <p className="gray-color">申请原因</p>
                   <div className="photo-box">
-                    <p className="photo-img"></p>某某人
+                    需要采购一批办公用品
                   </div>
-                </Col>
-                <Col span={8}>
-                  <p className="gray-color">申请部门</p>
-                  <div className="photo-box">科创中心</div>
-                </Col>
-                <Col span={8}>
-                  <p className="gray-color">申请日期</p>
-                  <div className="photo-box">2025-08-09 14:55</div>
                 </Col>
               </Row>
               <p className="gray-color photo-box">申请明细</p>

@@ -1,14 +1,14 @@
 import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
-import { menuSignal } from '@/store/menu';
 import { UserPermissionManager } from '@/utils/permission';
 import { Dropdown, Input, Layout, Menu, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   listApplicationMenu,
+  menuSignal,
   MenuType,
-  VisibleType,
   TASKMENU_TYPE,
+  VisibleType,
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
@@ -20,7 +20,6 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
-import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -164,7 +163,6 @@ const Runtime: React.FC = () => {
     }));
   };
 
-
   function getMenuArr() {
     return [
       {
@@ -218,9 +216,6 @@ const Runtime: React.FC = () => {
         parentId: '0'
       }
     ];
-  }
-  function handleRename() {
-    console.log('handle re name function.');
   }
 
   // 登出处理
