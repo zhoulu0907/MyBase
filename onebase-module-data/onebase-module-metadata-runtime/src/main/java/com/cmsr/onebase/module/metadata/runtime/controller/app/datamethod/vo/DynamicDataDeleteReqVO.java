@@ -15,6 +15,10 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "动态数据删除请求VO")
 public class DynamicDataDeleteReqVO {
 
+    @Schema(description = "菜单ID", requiredMode = Schema.RequiredMode.REQUIRED)
+//    @NotNull(message = "菜单ID不能为空")
+    private Long menuId;
+
     @Schema(description = "数据ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "数据ID不能为空")
     private Long id;

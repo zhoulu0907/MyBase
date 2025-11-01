@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,8 @@ import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
+
 @Slf4j
 @Component
 public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCoreService {
@@ -312,6 +314,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
             log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
 
+
+            super.storeData(context);
+
             // 8. 查询插入后的完整数据
             Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
             log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
@@ -332,6 +337,11 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
     }
 
     @Override
+    protected void handleSubEntities(ProcessContext context) {
+
+    }
+
+    @Override
     protected void executePreWorkflow(ProcessContext context) {
         Long entityId = context.getEntityId();
         Map<String, Object> data = context.getData();
@@ -342,10 +352,15 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(!respDTO.isTriggered()){
+            log.info("BEFORE_CREATE 数据创建前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            return;
+        }
         if(respDTO.isSuccess()){
             log.info("BEFORE_CREATE 数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
             log.info("BEFORE_CREATE 数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+            throw  exception(PROCESS_ERROR_BEFORE_CREATE,respDTO.getMessage());
         }
     }
 
@@ -360,10 +375,15 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(!respDTO.isTriggered()){
+            log.info("AFTER_CREATE 数据创建后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            return;
+        }
         if(respDTO.isSuccess()){
             log.info("AFTER_CREATE 数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
             log.error("AFTER_CREATE 数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+            throw  exception(PROCESS_ERROR_AFTER_CREATE,respDTO.getMessage());
         }
     }
 

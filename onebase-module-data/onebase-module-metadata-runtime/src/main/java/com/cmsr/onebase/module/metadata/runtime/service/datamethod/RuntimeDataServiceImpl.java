@@ -8,6 +8,9 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -81,11 +84,27 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
             }
         });
 
+        MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
+        methodCoreContext.setEntityId(reqVO.getEntityId());
+        methodCoreContext.setData(dataByName);
+        methodCoreContext.setMethodCode(reqVO.getMethodCode());
+        methodCoreContext.setBusinessTraceId(reqVO.getBusinessTraceId());
+        methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
+
+        if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+            List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+                MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+                metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+                metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+                return metadataDataMethodSubEntityContext;
+            }).collect(Collectors.toList());
+            methodCoreContext.setSubEntities(entityContexts);
+        }
+
+
         // 调用core模块的基础服务
         Map<String, Object> resultData = coreDataMethodService.createData(
-                reqVO.getEntityId(),
-                dataByName,
-                reqVO.getMethodCode()
+                methodCoreContext
         );
 
         // 获取主表业务数据id，作为子表parent_id字段的值
@@ -116,11 +135,15 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                         }
                     });
 
+                    MetadataDataMethodRequestContext subMethodCoreContext = new MetadataDataMethodRequestContext();
+                    subMethodCoreContext.setEntityId(subEntityId);
+                    subMethodCoreContext.setData(subDataByName);
+                    subMethodCoreContext.setMethodCode(reqVO.getMethodCode());
+                    methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
+
                     // 调用core模块的基础服务
                     Map<String, Object> subResultData = coreDataMethodService.createData(
-                            subEntityId,
-                            subDataByName,
-                            reqVO.getMethodCode()
+                            subMethodCoreContext
                     );
                 }
             }
@@ -135,13 +158,26 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         // 将 field_id -> value 转换为 field_name -> value
         Map<String, Object> dataByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getData());
 
+        MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
+        methodCoreContext.setEntityId(reqVO.getEntityId());
+        methodCoreContext.setId(reqVO.getId());
+        methodCoreContext.setData(dataByName);
+        methodCoreContext.setMethodCode(reqVO.getMethodCode());
+        methodCoreContext.setMenuId(reqVO.getMenuId());
+        methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
+
+        if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+            List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+                MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+                metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+                metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+                return metadataDataMethodSubEntityContext;
+            }).collect(Collectors.toList());
+            methodCoreContext.setSubEntities(entityContexts);
+        }
+
         // 调用core模块的基础服务 更新主表信息
-        Map<String, Object> resultData = coreDataMethodService.updateData(
-                reqVO.getEntityId(),
-                reqVO.getId(),
-                dataByName,
-                reqVO.getMethodCode()
-        );
+        Map<String, Object> resultData = coreDataMethodService.updateData(methodCoreContext);
 
         //查询关联关系 默认主表为source表
         DefaultConfigStore configStore = new DefaultConfigStore();
@@ -232,19 +268,42 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                 if(id == null){
                    //插入数据不包含id字段，说明数据表不存在则插入
                     subDataByName.put("parent_id",reqVO.getId());
+
+                    MetadataDataMethodRequestContext metadataDataMethodRequestContext
+                            = new MetadataDataMethodRequestContext();
+                    metadataDataMethodRequestContext.setEntityId(subEntityId);
+                    metadataDataMethodRequestContext.setData(subDataByName);
+                    metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
+                    methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
+
                    coreDataMethodService.createData(
-                           subEntityId,
-                           subDataByName,
-                           reqVO.getMethodCode()
+                           metadataDataMethodRequestContext
                    );
                }else{
                    //插入数据包含id字段，说明数据表已经存在则修改
                     subDataByName.remove("id");
+
+                    MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+
+                    metadataDataMethodRequestContext.setEntityId(subEntityId);
+                    metadataDataMethodRequestContext.setId(id);
+                    metadataDataMethodRequestContext.setData(subDataByName);
+                    metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
+                    metadataDataMethodRequestContext.setMenuId(reqVO.getMenuId());
+                    metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
+
+                    if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+                        List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+                            MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+                            metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+                            metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+                            return metadataDataMethodSubEntityContext;
+                        }).collect(Collectors.toList());
+                        methodCoreContext.setSubEntities(entityContexts);
+                    }
+
                     coreDataMethodService.updateData(
-                            subEntityId,
-                            id,
-                            subDataByName,
-                            reqVO.getMethodCode()
+                            metadataDataMethodRequestContext
                     );
                     processedIds.add(id.toString());
                 }
@@ -288,11 +347,17 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
 
     @Override
     public Boolean deleteData(DynamicDataDeleteReqVO reqVO) {
+        MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+        metadataDataMethodRequestContext.setEntityId(reqVO.getEntityId());
+        metadataDataMethodRequestContext.setId(reqVO.getId());
+        metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
+        metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
+
+
+
         // 调用core模块的基础服务
         return coreDataMethodService.deleteData(
-                reqVO.getEntityId(),
-                reqVO.getId(),
-                reqVO.getMethodCode()
+                metadataDataMethodRequestContext
         );
     }
 
