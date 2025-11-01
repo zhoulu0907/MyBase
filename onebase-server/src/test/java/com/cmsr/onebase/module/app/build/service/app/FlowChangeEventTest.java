@@ -36,5 +36,9 @@ public class FlowChangeEventTest {
         flowChangeEventJobHandler.onApplicationChange(46699591748616192L);
     }
 
+    @Test
+    public void test3() {
+        flowChangeEventJobHandler.onApplicationDelete(46699591748616192L);
+    }
 
 }
