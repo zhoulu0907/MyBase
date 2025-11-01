@@ -1,4 +1,4 @@
-import { menuSignal } from '@/store/menu';
+import { menuSignal } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
 import DynamicIcon from '../DynamicIcon';
