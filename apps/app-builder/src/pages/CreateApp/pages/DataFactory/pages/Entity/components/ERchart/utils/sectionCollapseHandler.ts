@@ -18,7 +18,7 @@ export class SectionCollapseHandler {
   }
 
   /**
-   * 只更新端口位置（不重连边），用于边创建前设置端口位置
+   * 更新连接桩位置
    * @param nodesData 所有节点数据
    * @param systemCollapsed 系统字段是否折叠（默认true）
    */
@@ -28,7 +28,7 @@ export class SectionCollapseHandler {
       const systemFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.SYSTEM);
       const customFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.CUSTOM);
 
-      // 更新自定义字段的端口位置（依赖系统字段的折叠状态）
+      // 更新自定义字段的连接桩位置（依赖系统字段的折叠状态）
       if (systemFields.length > 0 && customFields.length > 0) {
         this.updateCustomFieldsPorts(nodeId, systemCollapsed, systemFields, customFields);
       }
@@ -36,7 +36,7 @@ export class SectionCollapseHandler {
   }
 
   /**
-   * 批量初始化所有节点的折叠状态（用于初始化时避免闪烁）
+   * 批量初始化所有节点的折叠状态
    * @param nodesData 所有节点数据
    * @param systemCollapsed 系统字段是否折叠（默认true）
    * @param customCollapsed 自定义字段是否折叠（默认false）
@@ -49,12 +49,10 @@ export class SectionCollapseHandler {
     nodesData.forEach((nodeData) => {
       const nodeId = nodeData.entityId;
 
-      // 处理系统字段折叠
       if (nodeData.fields.some((f) => f.isSystemField === FIELD_TYPE.SYSTEM)) {
         this.applyCollapseState(nodeId, 'system', systemCollapsed, nodeData, edges);
       }
 
-      // 处理自定义字段折叠
       if (nodeData.fields.some((f) => f.isSystemField === FIELD_TYPE.CUSTOM)) {
         this.applyCollapseState(nodeId, 'custom', customCollapsed, nodeData, edges);
       }
@@ -62,7 +60,7 @@ export class SectionCollapseHandler {
   }
 
   /**
-   * 应用折叠状态（内部方法，用于批量初始化）
+   * 应用折叠状态(内部方法)
    */
   private applyCollapseState(
     nodeId: string,
@@ -85,10 +83,10 @@ export class SectionCollapseHandler {
       ])
     );
 
-    // 处理边重连（批量处理，使用静默模式）
+    // 处理边重连
     this.handleEdgeReconnection(edges, nodeId, aggregatePortId, portIdsInSection, isCollapsed, true);
 
-    // 当系统字段折叠状态改变时，需要重新计算自定义字段的端口位置
+    // 当系统字段折叠状态改变时，需要重新计算自定义字段的连接桩位置
     if (section === 'system') {
       this.updateCustomFieldsPorts(nodeId, isCollapsed, systemFields, customFields);
     }
@@ -97,7 +95,7 @@ export class SectionCollapseHandler {
   /**
    * 处理字段折叠/展开
    * @param nodeId 节点ID
-   * @param section 字段类型 ('system' | 'custom')
+   * @param section 字段类型
    * @param isCollapsed 是否折叠
    * @param nodeData 节点数据
    */
@@ -119,10 +117,10 @@ export class SectionCollapseHandler {
       ])
     );
 
-    // 处理边重连（正常模式，会触发重绘）
+    // 处理边重连
     this.handleEdgeReconnection(edges, nodeId, aggregatePortId, portIdsInSection, isCollapsed, false);
 
-    // 当系统字段折叠状态改变时，需要重新计算自定义字段的端口位置
+    // 当系统字段折叠状态改变时，需要重新计算自定义字段的连接桩位置
     if (section === 'system') {
       this.updateCustomFieldsPorts(nodeId, isCollapsed, systemFields, customFields);
     }
@@ -132,8 +130,8 @@ export class SectionCollapseHandler {
    * 处理边重连逻辑
    * @param edges 所有边
    * @param nodeId 节点ID
-   * @param aggregatePortId 聚合端口ID
-   * @param portIdsInSection 该section下的所有端口ID
+   * @param aggregatePortId 聚合连接桩ID
+   * @param portIdsInSection 该section下的所有连接桩ID
    * @param isCollapsed 是否折叠
    * @param silent 是否静默模式（不触发重绘）
    */
@@ -204,7 +202,7 @@ export class SectionCollapseHandler {
         }
       }
 
-      // 如果有需要更新的端口，添加到批量更新列表
+      // 如果有需要更新的连接桩，添加到批量更新列表
       if (updateInfo.source || updateInfo.target) {
         edgesToUpdate.push(updateInfo);
       }
@@ -212,7 +210,7 @@ export class SectionCollapseHandler {
 
     // 批量更新边（在静默模式下使用批量操作）
     if (silent) {
-      // 使用静默模式批量更新，避免触发多次重绘
+      // 静默模式
       edgesToUpdate.forEach(({ edge, source, target }) => {
         if (source) {
           edge.setSource(source, { silent: true });
@@ -222,7 +220,7 @@ export class SectionCollapseHandler {
         }
       });
     } else {
-      // 正常模式，逐条更新（会触发重绘，但用户操作时应该看到动画）
+      // 正常模式
       edgesToUpdate.forEach(({ edge, source, target }) => {
         if (source) {
           edge.setSource(source);
@@ -235,7 +233,7 @@ export class SectionCollapseHandler {
   }
 
   /**
-   * 更新自定义字段的端口位置
+   * 更新自定义字段的连接桩位置
    */
   private updateCustomFieldsPorts(
     nodeId: string,
@@ -254,15 +252,13 @@ export class SectionCollapseHandler {
         : LINE_TITLE_HEIGHT;
     const customTitleY = LINE_HEAD_HEIGHT + systemTitleOffset + LINE_TITLE_HEIGHT / 2;
 
-    // 更新自定义字段聚合端口位置
+    // 更新自定义字段聚合连接桩位置
     const node = this.graph.getCellById(nodeId);
     if (node && node.isNode()) {
       const nodeInstance = node as Node;
-      // 更新自定义字段聚合端口位置
       nodeInstance.setPortProp(`${nodeId}_custom_fields_source`, 'args', { x: NODE_WIDTH, y: customTitleY });
       nodeInstance.setPortProp(`${nodeId}_custom_fields_target`, 'args', { x: 0, y: customTitleY });
 
-      // 更新所有自定义字段的端口位置
       customFields.forEach((field, index) => {
         const accumulatedHeight = index * LINE_HEIGHT;
         const finalY = customTitleY + accumulatedHeight + LINE_HEIGHT / 2 + LINE_TITLE_HEIGHT / 2;
