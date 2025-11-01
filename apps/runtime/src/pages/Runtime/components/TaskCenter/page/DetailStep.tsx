@@ -18,9 +18,9 @@ const DetailStep: FC = ({ stepData }) => {
         <div className="flex-bw-center">
           <p className="photo-img"></p>
           <div style={{ flex: 1 }}>
-            {/* <p>{value?.nodeName}</p> */}
+            <p>{value?.operators[0]?.operator}</p>
             <p className="flex-bw-center">
-              <span className="sp-options">{value?.operators[0]?.comment}</span>
+              <span className="sp-options">{value?.operators[0]?.taskStatus}</span>
               <span className="gray-color">
                 {value?.operators[0]?.operatorTime
                   ? dayjs(value?.operators[0]?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
