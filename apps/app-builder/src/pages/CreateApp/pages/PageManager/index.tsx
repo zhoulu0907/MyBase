@@ -118,7 +118,6 @@ const PageManagerPage: FC = () => {
     }, undefined);
 
   useEffect(() => {
-    console.log('location.pathname', location.pathname);
     setCurMenu({} as ApplicationMenu);
   }, [location.pathname]);
 
