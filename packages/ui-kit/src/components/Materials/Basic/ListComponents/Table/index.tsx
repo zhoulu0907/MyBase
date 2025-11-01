@@ -273,8 +273,6 @@ const XTable = memo(
         return;
       }
 
-      console.log('curMenu: ', curMenu.value);
-
       const req: PageMethodParam = {
         menuId: curMenu.value?.id,
         entityId: metaData,
