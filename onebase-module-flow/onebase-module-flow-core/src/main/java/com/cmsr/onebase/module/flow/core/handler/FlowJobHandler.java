@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.event;
+package com.cmsr.onebase.module.flow.core.handler;
 
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
@@ -12,30 +12,21 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
-import com.cmsr.onebase.module.flow.core.enums.RocketMQConstants;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
+import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
 import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
+import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.apis.ClientConfiguration;
-import org.apache.rocketmq.client.apis.ClientServiceProvider;
-import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
-import org.apache.rocketmq.client.apis.consumer.FilterExpression;
-import org.apache.rocketmq.client.apis.consumer.MessageListener;
-import org.apache.rocketmq.client.apis.consumer.PushConsumer;
-import org.apache.rocketmq.client.apis.message.MessageView;
-import org.springframework.beans.factory.DisposableBean;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author：huangjie
@@ -44,16 +35,7 @@ import java.util.List;
 @Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowChangeEventJobHandler implements MessageListener, ApplicationRunner, DisposableBean {
-
-    private final ClientServiceProvider provider = ClientServiceProvider.loadService();
-
-    @Setter
-    @Value("${rocketmq.endpoints}")
-    private String endpoints;
-
-    @Setter
-    private String topic = RocketMQConstants.CHANGE_EVENTS_TOPIC;
+public class FlowJobHandler {
 
     @Setter
     @Autowired
@@ -71,54 +53,39 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
     @Autowired
     private JobClient jobClient;
 
-    private PushConsumer consumer;
+    @Setter
+    @Autowired
+    private RedissonClient redissonClient;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        ClientConfiguration clientConfiguration = ClientConfiguration.newBuilder()
-                .setEndpoints(endpoints)
-                .build();
-        String consumerGroup = RocketMQConstants.CHANGE_EVENTS_CONSUMER_GROUP_JOB;
-        FilterExpression filterExpression = new FilterExpression();
-        this.consumer = provider.newPushConsumerBuilder()
-                .setClientConfiguration(clientConfiguration)
-                .setConsumerGroup(consumerGroup)
-                .setSubscriptionExpressions(Collections.singletonMap(topic, filterExpression))
-                .setMessageListener(this)
-                .build();
-    }
-
-
-    @Override
-    public ConsumeResult consume(MessageView messageView) {
-        try {
-            FlowChangeEvent event = FlowChangeEvent.decode(messageView.getBody());
-            Long applicationId = event.getApplicationId();
-            if (event.getType().equals(FlowChangeEvent.UPDATE)) {
-                onApplicationChange(applicationId);
-            }
-            if (event.getType().equals(FlowChangeEvent.DELETE)) {
-                onApplicationDelete(applicationId);
-            }
-            return ConsumeResult.SUCCESS;
-        } catch (Exception e) {
-            log.error("处理RocketMQ消息异常：{}", e.getMessage(), e);
-            return ConsumeResult.FAILURE;
-        }
-    }
-
-    public void onApplicationDelete(Long applicationId) {
-        deleteJob(applicationId);
-    }
-
-    public void onApplicationChange(Long applicationId) {
+    public void onApplicationChange(Long applicationId) throws InterruptedException {
         List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
-            startJob(flowProcessDO);
+            RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(flowProcessDO.getId()));
+            if (lock.tryLock(60, TimeUnit.SECONDS)) {
+                try {
+                    //TODO 缓存处理下，或者流程处理下，如果最新上线过，不再上线了
+                    startJob(flowProcessDO);
+                } finally {
+                    lock.unlock();
+                }
+            }
         }
     }
 
-    public void startJob(FlowProcessDO flowProcessDO) {
+
+    public void onApplicationDelete(Long applicationId) throws InterruptedException {
+        RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(applicationId));
+        if (lock.tryLock(120, TimeUnit.SECONDS)) {
+            try {
+                jobClient.deleteJob(applicationId);
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+
+    private void startJob(FlowProcessDO flowProcessDO) throws InterruptedException {
         if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
             startTimeJob(flowProcessDO);
         }
@@ -128,7 +95,7 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
     }
 
     private void startTimeJob(FlowProcessDO flowProcessDO) {
-        JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
+        JsonGraph jsonGraph = FlowGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartTimeNodeData startTimeNodeData = (StartTimeNodeData) jsonGraph.getStartNode().getData();
         FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startTimeNodeData);
@@ -157,7 +124,7 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
     }
 
     private void startDateFieldJob(FlowProcessDO flowProcessDO) {
-        JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
+        JsonGraph jsonGraph = FlowGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartDateFieldNodeData startDateFieldNodeData = (StartDateFieldNodeData) jsonGraph.getStartNode().getData();
         FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
@@ -184,14 +151,5 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
         return jobCreateRequest;
     }
 
-    public void deleteJob(Long applicationId) {
-        jobClient.deleteJob(applicationId);
-    }
 
-    @Override
-    public void destroy() throws Exception {
-        if (consumer != null) {
-            consumer.close();
-        }
-    }
 }
