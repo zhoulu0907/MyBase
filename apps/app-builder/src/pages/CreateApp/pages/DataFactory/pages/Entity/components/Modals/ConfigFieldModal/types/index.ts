@@ -105,7 +105,7 @@ export interface AutoNumberRuleResponce {
   digitWidth: number;
   overflowContinue?: number;
   resetCycle?: string;
-  nextRecordStartValue?: number;
+  resetOnInitialChange?: number;
   startValue?: number;
 }
 // 创建自动编号规则
@@ -116,7 +116,7 @@ export interface AutoNumberRule {
   overflowContinue: number;
   initialValue: number;
   resetCycle: string;
-  nextRecordStartValue?: number;
+  resetOnInitialChange?: number;
   startValue?: number;
   rules: AutoNumberRuleItem[];
 }

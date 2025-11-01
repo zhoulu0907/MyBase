@@ -133,7 +133,7 @@ const AutoCodeNumberSettingsModal: React.FC<AutoCodeNumberSettingsModalProps> = 
         </Form.Item>
 
         <Form.Item
-          field="nextRecordStartValue"
+          field="resetOnInitialChange"
           className={styles.checkboxWithHelp}
           triggerPropName="checked"
           normalize={(v) => (v ? CONSTANTS.ENABLED : CONSTANTS.DISABLED)}
