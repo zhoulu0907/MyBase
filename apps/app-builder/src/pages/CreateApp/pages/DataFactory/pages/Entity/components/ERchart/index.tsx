@@ -225,16 +225,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       ]
     );
 
-    /**
-     * 根据字段ID和节点数据，获取应该连接的端口
-     * @param fieldId 字段ID
-     * @param nodeId 节点ID
-     * @param nodeData 节点数据
-     * @param isSource 是否为source端（true为source，false为target）
-     * @param systemCollapsed 系统字段是否折叠（默认true）
-     * @param customCollapsed 自定义字段是否折叠（默认false）
-     * @returns 端口ID
-     */
+    // 根据字段ID和节点数据，获取应该连接的连接桩
     const getPortForField = (
       fieldId: string,
       nodeId: string,
@@ -243,24 +234,21 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       systemCollapsed: boolean = true,
       customCollapsed: boolean = false
     ): string => {
-      // 查找字段
       const field = nodeData.fields.find((f) => f.fieldId === fieldId || f.fieldName === fieldId);
       if (!field) {
-        // 如果找不到字段，使用原始端口
         return `${fieldId}_${isSource ? 'source' : 'target'}`;
       }
 
-      // 判断字段类型
       const isSystemField = field.isSystemField === FIELD_TYPE.SYSTEM;
       const isCollapsed = isSystemField ? systemCollapsed : customCollapsed;
 
-      // 如果该section折叠，使用聚合端口；否则使用字段端口
+      // 折叠状态，使用聚合连接桩
       if (isCollapsed) {
         const section = isSystemField ? 'system' : 'custom';
         return `${nodeId}_${section}_fields_${isSource ? 'source' : 'target'}`;
       }
 
-      // 展开状态，使用字段端口
+      // 展开状态，使用字段连接桩
       return `${fieldId}_${isSource ? 'source' : 'target'}`;
     };
 
@@ -277,11 +265,10 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       systemCollapsed: boolean = true,
       customCollapsed: boolean = false
     ) => {
-      // 查找源节点和目标节点数据
       const sourceNode = nodesData.find((n) => n.entityId === edgeData.sourceEntityId);
       const targetNode = nodesData.find((n) => n.entityId === edgeData.targetEntityId);
 
-      // 获取正确的端口（考虑折叠状态）
+      // 获取连接桩
       const sourcePort = sourceNode
         ? getPortForField(
             edgeData.sourceFieldId,
@@ -303,7 +290,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           )
         : `${edgeData.targetFieldId}_target`;
 
-      // 保存原始端口（用于后续展开时恢复）
+      // 保存原始连接桩（用于后续展开时恢复）
       const originalSource = { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` };
       const originalTarget = { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` };
 
