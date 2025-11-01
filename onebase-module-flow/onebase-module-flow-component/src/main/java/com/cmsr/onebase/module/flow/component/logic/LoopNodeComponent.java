@@ -20,16 +20,18 @@ public class LoopNodeComponent extends NodeForComponent {
 
     @Override
     public int processFor() throws Exception {
-        // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("循环节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         LoopNodeData nodeData = (LoopNodeData) executeContext.getNodeData(this.getTag());
         //
         String dataNodeId = nodeData.getDataNodeId();
         List<Map<String, Object>> value = variableContext.getListVariableByTag(dataNodeId);
         if (value == null) {
+            executeContext.addLog("循环节点数据源为空");
             return 0;
         }
+        executeContext.addLog("循环节点循环数量：" + value.size());
         variableContext.putNodeVariables(this.getTag(), value);
         return value.size();
     }

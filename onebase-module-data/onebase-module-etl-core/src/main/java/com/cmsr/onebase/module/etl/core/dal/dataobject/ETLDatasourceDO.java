@@ -1,30 +1,21 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDateTime;
 
-@Table(name = "etl_datasource")
 @Data
-@EqualsAndHashCode(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "etl_datasource")
 public class ETLDatasourceDO extends TenantBaseDO {
 
-    public ETLDatasourceDO setId(Long id) {
-        super.setId(id);
-        return this;
-    }
+    @Column(name = "application_id")
+    private Long applicationId;
 
     @Column(name = "datasource_code")
     private String datasourceCode;
@@ -37,9 +28,6 @@ public class ETLDatasourceDO extends TenantBaseDO {
 
     @Column(name = "config")
     private String config;
-
-    @Column(name = "app_id")
-    private Long appId;
 
     @Column(name = "collect_status")
     private String collectStatus;
@@ -58,6 +46,9 @@ public class ETLDatasourceDO extends TenantBaseDO {
     }
 
     public void setReadonly(Boolean readonly) {
+        if (readonly == null) {
+            return;
+        }
         this.readonly = BooleanUtils.toInteger(readonly);
     }
 
@@ -67,5 +58,10 @@ public class ETLDatasourceDO extends TenantBaseDO {
 
     public void setCollectStatus(CollectStatus collectStatus) {
         this.collectStatus = collectStatus.getValue();
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJsonString(this);
     }
 }

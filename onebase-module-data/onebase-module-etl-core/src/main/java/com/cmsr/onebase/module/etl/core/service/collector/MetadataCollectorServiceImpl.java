@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.core.service.collector;
 
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
@@ -9,6 +10,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
+import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -64,28 +66,31 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
     }
 
     @Override
-    public void submitCollectJob(Long datasourceId) {
+    public void submitCollectJob(ETLDatasourceDO datasourceDO) {
+        Long datasourceId = datasourceDO.getId();
+        Long applicationId = datasourceDO.getApplicationId();
+        LocalDateTime planTime = LocalDateTime.now();
+        isAbleToSubmitJob(datasourceDO, planTime);
         log.info("提交元数据采集任务，数据源ID：{}", datasourceId);
         threadPoolTaskExecutor.submit(() -> {
-            LocalDateTime starTime = LocalDateTime.now();
-            datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.RUNNING, starTime);
-            boolean isJobSuccess = doCollection(datasourceId);
+
+            datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.RUNNING);
+            boolean isJobSuccess = doCollection(applicationId, datasourceId);
             LocalDateTime endTime = LocalDateTime.now();
-            Duration duration = Duration.between(starTime, endTime);
+            Duration duration = Duration.between(planTime, endTime);
             long timeCost = duration.toMillis();
             if (isJobSuccess) {
-                datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.SUCCESS, starTime);
+                datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.SUCCESS);
                 log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
             } else {
-                datasourceRepository.updateCollectStatusById(datasourceId, CollectStatus.FAILED, starTime);
+                datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.FAILED);
                 log.info("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
             }
         });
     }
 
-    public boolean doCollection(Long datasourceId) {
+    private boolean doCollection(Long applicationId, Long datasourceId) {
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
-        // TODO: add precheck etc. to prevent multiply submit. --> cause data duplication or error response.
         String datasourceKey = "metadata-collector-" + datasourceId;
         try {
             DataSourceHolder.reg(datasourceKey, datasource);
@@ -94,7 +99,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
             Catalog catalog = temporary.metadata().catalog();
             String catalogName = catalog.getName();
             ETLCatalogDO oldCatalogDO = catalogRepository.findOneByNameAndDatasourceId(datasourceId, catalogName);
-            ETLCatalogDO newCatalogDO = ETLCatalogDO.convert(datasourceId, catalog);
+            ETLCatalogDO newCatalogDO = ETLCatalogDO.convert(applicationId, datasourceId, catalog);
             Long catalogId;
             if (oldCatalogDO == null) {
                 newCatalogDO = catalogRepository.insert(newCatalogDO);
@@ -109,7 +114,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
             String schemaName = schema.getName();
             ETLSchemaDO oldSchemaDO = schemaRepository.findOneByNameAndCatalogIdAndDatasourceId(datasourceId, catalogId, schemaName);
             Long schemaId;
-            ETLSchemaDO newSchemaDO = ETLSchemaDO.convert(datasourceId, catalogId, schema);
+            ETLSchemaDO newSchemaDO = ETLSchemaDO.convert(applicationId, datasourceId, catalogId, schema);
             if (oldSchemaDO == null) {
                 newSchemaDO = schemaRepository.insert(newSchemaDO);
                 schemaId = newSchemaDO.getId();
@@ -126,7 +131,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                 String tableName = table.getName();
                 // 重新获取一遍，由于Anyline .tables()方法会忽略列(Column)
                 Map<String, Column> tableColumn = temporary.metadata().columns(table);
-                ETLTableDO newTableDO = ETLTableDO.convert(datasourceId, catalogId, schemaId, table, tableColumn);
+                ETLTableDO newTableDO = ETLTableDO.convert(applicationId, datasourceId, catalogId, schemaId, table, tableColumn);
                 if (tableDOs.containsKey(tableName)) {
                     ETLTableDO oldTableDO = tableDOs.get(tableName);
                     ETLTableDO.applyChanges(oldTableDO, newTableDO);
@@ -142,6 +147,21 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
             return false;
         } finally {
             unregisterDataSource(datasourceKey);
+        }
+    }
+
+    private void isAbleToSubmitJob(ETLDatasourceDO datasourceDO, LocalDateTime plannedTime) {
+        CollectStatus currentStatus = datasourceDO.getCollectStatus();
+        // case (none, required, success, failed) -> running
+        if (!CollectStatus.RUNNING.equals(currentStatus)) {
+            return;
+        }
+        // case running -> running
+        LocalDateTime perviousStartTime = datasourceDO.getCollectStartTime();
+        Duration timeBetween = Duration.between(perviousStartTime, plannedTime);
+        long minuteScale = timeBetween.toMinutes();
+        if (minuteScale < 5L) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_RUNNING);
         }
     }
 

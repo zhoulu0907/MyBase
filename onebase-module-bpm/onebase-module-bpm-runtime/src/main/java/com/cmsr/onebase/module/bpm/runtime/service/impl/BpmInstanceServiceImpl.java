@@ -452,14 +452,32 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                     .skipType(SkipType.PASS.getKey())
                     .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
                     .hisStatus("已" + buttonEnum.getName());
+
+            taskService.skip(skipParams, task);
         } else if (buttonEnum == BpmActionButtonEnum.REJECT) {
+            String nodeCode = task.getNodeCode();
+            boolean hasRejectNode = false;
+
+
+            List<Skip> skipList = FlowEngine.skipService().getByDefIdAndNowNodeCode(task.getDefinitionId(), nodeCode);
+            for (Skip skip : skipList) {
+                if (skip.getSkipType().equals(SkipType.REJECT.getKey())) {
+                    hasRejectNode = true;
+                    break;
+                }
+            }
+
             skipParams = skipParams.message(comment)
                     .skipType(SkipType.REJECT.getKey())
                     .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
                     .hisStatus("已" + buttonEnum.getName());
-        }
 
-        taskService.skip(skipParams, task);
+            if (hasRejectNode) {
+                taskService.skip(skipParams, task);
+            } else {
+                taskService.rejectLast(task, skipParams);
+            }
+        }
 
         // todo：更新实体数据
     }
@@ -485,7 +503,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // todo： 按照时间排序，已办、待办按照时间排序
         Map<String, BaseNodeExtDTO> nodeDtoMap = new HashMap<>();
-        Map<String, BpmOperatorRecordRespVO.OperatorRecord> recordMap = new HashMap<>();
+        Map<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap = new HashMap<>();
 
         for (NodeJson nodeJson : defJson.getNodeList()) {
             BaseNodeExtDTO extDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
@@ -494,14 +512,14 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 进行组装
         for (HisTask hisTask : hisTasks) {
-            String nodeCode = hisTask.getNodeCode();
+            Long taskId = hisTask.getTaskId();
 
             // 跳过非中间节点
             if (!NodeType.isBetween(hisTask.getNodeType())) {
                 continue;
             }
 
-            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
+            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(taskId);
 
             if (record == null) {
                 BaseNodeExtDTO extDTO = nodeDtoMap.get(hisTask.getNodeCode());
@@ -514,7 +532,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 }
 
                 operatorRecords.add(record);
-                recordMap.put(nodeCode, record);
+                recordMap.put(taskId, record);
             }
 
             if (record.getOperators() == null) {
@@ -534,8 +552,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 处理待办数据
         for (Task task : tasks) {
-            String nodeCode = task.getNodeCode();
-            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(nodeCode);
+            Long taskId = task.getId();
+            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(taskId);
             BaseNodeExtDTO extDTO = nodeDtoMap.get(task.getNodeCode());
             String nodeType = extDTO.getNodeType();
 
@@ -549,7 +567,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 }
 
                 operatorRecords.add(record);
-                recordMap.put(nodeCode, record);
+                recordMap.put(taskId, record);
             }
 
             // 查找有权限的用户
@@ -643,20 +661,12 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     }
 
     @Override
-    public BpmFlowTaskDetailVO getFormDetail(String taskId, Long instanceId) {
+    public BpmFlowTaskDetailVO getFormDetail(Long instanceId) {
         BpmFlowTaskDetailVO vo = new BpmFlowTaskDetailVO();
         NodeJson currNodeJson = null;
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        boolean hasPermission = false;
 
-        Task task = taskService.getById(taskId);
-
-        // 任务不存在
-        if (task == null) {
-           throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
-        }
-
-        // 以任务里的数据为准
-        instanceId = task.getInstanceId();
         Instance instance = insService.getById(instanceId);
 
         if (instance == null) {
@@ -669,12 +679,35 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
         }
 
-        // 查询下是否是当前用户的待办任务，如果不是则不显示按钮
-        List<User> users = userService.getByProcessedBys(task.getId(), List.of(String.valueOf(loginUserId)));
+        // 查询该实例的待办任务, todo: 优化这段的代码写法
+        List<Task> tasks = taskService.getByInsId(instanceId);
+        Task todoTask = null;
 
-        // 测试按钮显示
-        if (CollectionUtils.isNotEmpty(users)) {
-            String nodeCode = task.getNodeCode();
+        if (CollectionUtils.isNotEmpty(tasks)) {
+            List<Long> taskIds = new ArrayList<>();
+            Map<Long, Task> taskMap = new HashMap<>();
+
+            for (Task task : tasks) {
+              taskIds.add(task.getId());
+              taskMap.put(task.getId(), task);
+            }
+
+            List<User> users = userService.getByAssociateds(taskIds);
+
+            if (CollectionUtils.isNotEmpty(users)) {
+                for (User user : users) {
+                    if (Objects.equals(user.getProcessedBy(), String.valueOf(loginUserId))) {
+                        hasPermission = true;
+                        todoTask = taskMap.get(user.getAssociated());
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 按钮显示
+        if (hasPermission && todoTask != null) {
+            String nodeCode = todoTask.getNodeCode();
             DefJson defJson = FlowEngine.jsonConvert.strToBean(instance.getDefJson(), DefJson.class);
             // 找到对应节点的配置
             for (NodeJson nodeJson : defJson.getNodeList()) {
@@ -721,6 +754,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
                 vo.getButtonConfigs().add(buttonConfig);
             }
+
+            vo.setTaskId(todoTask.getId());
         }
 
         vo.setCurrentStatus(instance.getFlowStatus());
@@ -748,7 +783,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         if (data != null && !data.isEmpty()){
             vo.setFormData(data);
         }
-        return vo;
 
+        vo.setInstanceId(instanceId);
+
+        return vo;
     }
 }

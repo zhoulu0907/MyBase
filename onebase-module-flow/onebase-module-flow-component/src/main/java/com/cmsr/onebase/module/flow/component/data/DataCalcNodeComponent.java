@@ -35,9 +35,9 @@ public class DataCalcNodeComponent extends SkippableNodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("DataCalcNodeComponent process - 开始处理节点数据添加操作");
         // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("数据计算节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataCalcNodeData nodeData = (DataCalcNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
@@ -51,6 +51,7 @@ public class DataCalcNodeComponent extends SkippableNodeComponent {
         }
         List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
         Map<String, Object> dataMap = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getKey, ExpressionItem::getValue));
+        executeContext.addLog("数据计算节点执行返回数据：" + dataMap.size());
         variableContext.putNodeVariables(this.getTag(), dataMap);
     }
 

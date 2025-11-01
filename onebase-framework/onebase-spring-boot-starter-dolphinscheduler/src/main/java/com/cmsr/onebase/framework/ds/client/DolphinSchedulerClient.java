@@ -11,6 +11,7 @@ import com.cmsr.onebase.framework.ds.model.task.TaskLocation;
 import com.cmsr.onebase.framework.ds.model.task.TaskRelation;
 import com.cmsr.onebase.framework.ds.model.task.def.AbstractTask;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDefinitionResp;
+import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDetailedResp;
 import com.cmsr.onebase.framework.ds.model.workflow.sub.ComplementTime;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -95,6 +96,25 @@ public class DolphinSchedulerClient {
         this.dsClientStub = retrofitClient.create(DolphinschedulerClientStub.class);
     }
 
+    public List<Long> queryWorkflowCodeListByName(Long projectCode, String flowName) {
+        Result<PageInfo<WorkflowDefinitionResp>> pageResp =
+                execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, 1));
+        if (pageResp.getFailed()) {
+            throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+        }
+        PageInfo<WorkflowDefinitionResp> pageData = pageResp.getData();
+        Integer total = pageData.getTotal();
+        if (total == 0) {
+            return Collections.emptyList();
+        }
+        pageResp = execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, total));
+        if (pageResp.getFailed()) {
+            throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+        }
+        List<WorkflowDefinitionResp> workflowList = pageResp.getData().getTotalList();
+        return workflowList.stream().map(WorkflowDefinitionResp::getCode).toList();
+    }
+
     /**
      * 创建工作流
      */
@@ -103,10 +123,10 @@ public class DolphinSchedulerClient {
                                         AbstractTask task,
                                         String description) {
         // 1. verify-name unique
-        Result<WorkflowDefinitionResp> uniqueResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
+        Result<WorkflowDetailedResp> uniqueResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
         if (uniqueResp.getSuccess()) {
             // remove data if exists
-            WorkflowDefinitionResp existingData = uniqueResp.getData();
+            WorkflowDefinitionResp existingData = uniqueResp.getData().getWorkflowDefinition();
             purgeWorkflow(projectCode, existingData.getCode());
         }
         // 2. generate unique task code
@@ -134,6 +154,20 @@ public class DolphinSchedulerClient {
             throw DolphinschedulerException.of("创建工作流【%s】失败,响应信息: %s", flowName, response.getMsg());
         }
         return response.getData().getCode();
+    }
+
+    public Long queryWorkflowByName(Long projectCode, String flowName) {
+        Result<WorkflowDetailedResp> queryResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
+        if (queryResp.getFailed() && queryResp.getMsg().contains("does not exist")) {
+            //throw DolphinschedulerException.of("工作流【%s】查询失败！%s", flowName, queryResp.getMsg());
+            return null;
+        }
+        WorkflowDefinitionResp workflowDef = queryResp.getData().getWorkflowDefinition();
+        if (workflowDef == null) {
+            //throw DolphinschedulerException.of("工作流【%s】不存在！", flowName, queryResp.getMsg());
+            return null;
+        }
+        return workflowDef.getCode();
     }
 
     /**
@@ -268,12 +302,12 @@ public class DolphinSchedulerClient {
     }
 
     private WorkflowDefinitionResp queryWorkflowByCode(Long projectCode, Long workflowCode) {
-        Result<WorkflowDefinitionResp> queryResp = execute(dsClientStub.queryWorkflowByCode(projectCode, workflowCode));
+        Result<WorkflowDetailedResp> queryResp = execute(dsClientStub.queryWorkflowByCode(projectCode, workflowCode));
 
         if (queryResp.getFailed()) {
             throw DolphinschedulerException.of("工作流【%s】查询失败！%s", workflowCode, queryResp.getMsg());
         }
-        WorkflowDefinitionResp workflowDef = queryResp.getData();
+        WorkflowDefinitionResp workflowDef = queryResp.getData().getWorkflowDefinition();
         if (workflowDef == null) {
             throw DolphinschedulerException.of("工作流【%s】不存在！", workflowCode, queryResp.getMsg());
         }

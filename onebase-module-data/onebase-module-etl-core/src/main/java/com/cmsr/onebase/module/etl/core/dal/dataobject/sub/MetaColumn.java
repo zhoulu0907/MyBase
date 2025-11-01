@@ -19,6 +19,11 @@ public class MetaColumn {
     private String displayName;
 
     /**
+     * 用户自定义描述
+     */
+    private String declaration;
+
+    /**
      * 字段名
      */
     private String name;
@@ -80,8 +85,6 @@ public class MetaColumn {
      */
     private Object defaultValue;
 
-//    private Integer status;
-
     public static MetaColumn convert(Column column) {
         MetaColumn metaColumn = new MetaColumn();
         String columnName = column.getName();
@@ -112,7 +115,6 @@ public class MetaColumn {
         metaColumn.setPrimary(column.isPrimaryKey());
         metaColumn.setUnique(column.isUnique());
         metaColumn.setDefaultValue(column.getDefaultValue());
-//        metaColumn.setStatus(MetadataChange.ADD.getAffectLevel());
 
         return metaColumn;
     }
@@ -121,9 +123,12 @@ public class MetaColumn {
         String oldDisplayName = oldMeta.getDisplayName();
         String oldName = oldMeta.getName();
         String oldComment = oldMeta.getComment();
-
-        if (!StringUtils.equals(oldDisplayName, oldName) && !StringUtils.equals(oldDisplayName, oldComment)) {
+        String oldDeclaration = oldMeta.getDeclaration();
+        if (!StringUtils.equals(oldDisplayName, oldName)) {
             newMeta.setDisplayName(oldDisplayName);
+        }
+        if (!StringUtils.equals(oldComment, oldDeclaration)) {
+            newMeta.setDeclaration(oldDeclaration);
         }
     }
 

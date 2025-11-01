@@ -1,20 +1,35 @@
 package com.cmsr.onebase.module.etl.core.enums;
 
-public enum ScheduleType {
-    FIXED,
-    OBSERVE,
-    MANUALLY;
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
-    public enum Fixed {
-        ONCE,
-        DAILY,
-        WEEKLY,
-        MONTHLY,
-        ANNUALY,
-        CUSTOM;
+public enum ScheduleType {
+    FIXED("fixed"),
+    OBSERVE("observe"),
+    MANUALLY("manually");
+
+    @Getter
+    private final String value;
+
+    ScheduleType(String value) {
+        this.value = value;
     }
 
-    public enum Observe {
-        ADD, MODIFY, DELETE;
+    public static ScheduleType of(String scheduleType) {
+        if (StringUtils.isBlank(scheduleType)) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+        }
+
+        for (ScheduleType type : ScheduleType.values()) {
+            if (StringUtils.equals(type.value, scheduleType)) {
+                return type;
+            }
+        }
+        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+    }
+
+    public enum Fixed {
+        ;
     }
 }
