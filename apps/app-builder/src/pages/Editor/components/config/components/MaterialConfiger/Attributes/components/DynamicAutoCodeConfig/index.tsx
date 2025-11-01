@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { Form, Input, Select, Cascader, Button, Dropdown, Menu } from '@arco-design/web-react';
-import { ReactSortable } from 'react-sortablejs';
-import { IconDragDotVertical, IconPen, IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import styles from '../../index.module.less';
+import AutoCodeNumberSettingsModal from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/components/AutoCodeNumberSettingsModal';
 import type {
   AutoNumberRule,
   AutoNumberRuleResponce
 } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/types';
 import {
-  AUTO_CODE_RULE_TYPE,
   AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RESET_CYCLE,
+  AUTO_CODE_RULE_TYPE,
   DIGIT_DEFAULT
 } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/const';
-import AutoCodeConfigModal from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/components/AutoCodeConfigModal';
 import { findFieldPath } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/transform';
+import { Button, Cascader, Dropdown, Form, Input, Menu, Select } from '@arco-design/web-react';
+import { IconDelete, IconDragDotVertical, IconPen, IconPlus } from '@arco-design/web-react/icon';
 import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
 import { useAppEntityStore } from '@onebase/ui-kit';
+import React, { useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import styles from '../../index.module.less';
 
 export interface DynamicAutoCodeConfigProps {
   handlePropsChange: (key: string, value: any) => void;
@@ -306,7 +306,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
         )}
       </Form.Item>
       {/* 自动编号配置弹窗 */}
-      <AutoCodeConfigModal
+      <AutoCodeNumberSettingsModal
         visible={editRuleVisible}
         onVisibleChange={setEditRuleVisible}
         onConfirm={handleAutoCodeConfigConfirm}
