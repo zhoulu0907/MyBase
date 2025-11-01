@@ -1859,6 +1859,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             config.setOverflowContinue(autoNumber.getOverflowContinue());
             config.setInitialValue(autoNumber.getInitialValue() != null ? autoNumber.getInitialValue() : 1L);
             config.setResetCycle(autoNumber.getResetCycle());
+            config.setResetOnInitialChange(autoNumber.getResetOnInitialChange() != null ? autoNumber.getResetOnInitialChange() : 0);
             config.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             config.setAppId(entityField != null ? entityField.getAppId() : null);
 
@@ -1965,6 +1966,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setOverflowContinue(config.getOverflowContinue());
         vo.setInitialValue(config.getInitialValue());
         vo.setResetCycle(config.getResetCycle());
+        vo.setResetOnInitialChange(config.getResetOnInitialChange());
         vo.setRunMode(config.getRunMode());
         vo.setAppId(config.getAppId());
         vo.setCreateTime(config.getCreateTime());
@@ -2016,6 +2018,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setAppId(field.getAppId() != null ? String.valueOf(field.getAppId()) : null);
         vo.setStatus(field.getStatus());
         vo.setFieldCode(field.getFieldCode());
+        vo.setDictTypeId(field.getDictTypeId());
         // 注意：options、constraints、autoNumberConfig 将在 populateFieldRelatedData 中填充
         return vo;
     }
