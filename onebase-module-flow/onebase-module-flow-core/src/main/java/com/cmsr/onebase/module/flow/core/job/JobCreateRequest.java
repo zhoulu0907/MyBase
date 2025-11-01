@@ -23,4 +23,6 @@ public class JobCreateRequest {
 
     private String crontab;
 
+    private String oldJobId;
+
 }

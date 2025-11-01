@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,13 +58,25 @@ public class FlowJobHandler {
     @Autowired
     private RedissonClient redissonClient;
 
+    public void initAllProcess() {
+        //TODO 这里要用 TenantUtils.executeIgnore 去查询，但这个没有拆分出来，会导致依赖问题。
+        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus());
+        for (FlowProcessDO flowProcessDO : flowProcessDOS) {
+            try {
+                startJob(flowProcessDO);
+                log.info("加载flowProcess流程成功：{}", flowProcessDO.getId());
+            } catch (Exception e) {
+                log.error("初始化flowProcessDO异常：{}, {}", flowProcessDO, e.getMessage(), e);
+            }
+        }
+    }
+
     public void onApplicationChange(Long applicationId) throws InterruptedException {
         List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(flowProcessDO.getId()));
             if (lock.tryLock(60, TimeUnit.SECONDS)) {
                 try {
-                    //TODO 缓存处理下，或者流程处理下，如果最新上线过，不再上线了
                     startJob(flowProcessDO);
                 } finally {
                     lock.unlock();
@@ -102,13 +115,14 @@ public class FlowJobHandler {
         jobCreateRequest.setApplicationId(flowProcessDO.getApplicationId());
         jobCreateRequest.setProcessId(flowProcessDO.getId());
         jobCreateRequest.setProcessName(flowProcessDO.getProcessName());
+        jobCreateRequest.setOldJobId(flowProcessTimeDO == null ? null : flowProcessTimeDO.getJobId());
         String jobId = jobClient.startJob(jobCreateRequest);
         if (flowProcessTimeDO == null) {
             flowProcessTimeDO = new FlowProcessTimeDO();
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeRepository.insert(flowProcessTimeDO);
-        } else {
+        } else if (!StringUtils.equals(jobId, flowProcessTimeDO.getJobId())) {
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeRepository.update(flowProcessTimeDO);
         }
@@ -131,13 +145,14 @@ public class FlowJobHandler {
         jobCreateRequest.setApplicationId(flowProcessDO.getApplicationId());
         jobCreateRequest.setProcessId(flowProcessDO.getId());
         jobCreateRequest.setProcessName(flowProcessDO.getProcessName());
+        jobCreateRequest.setOldJobId(flowProcessDateFieldDO == null ? null : flowProcessDateFieldDO.getJobId());
         String jobId = jobClient.startJob(jobCreateRequest);
         if (flowProcessDateFieldDO == null) {
             flowProcessDateFieldDO = new FlowProcessDateFieldDO();
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
             flowProcessDateFieldDO.setJobId(jobId);
             flowProcessDateFieldRepository.insert(flowProcessDateFieldDO);
-        } else {
+        } else if (!StringUtils.equals(jobId, flowProcessDateFieldDO.getJobId())) {
             flowProcessDateFieldDO.setJobId(jobId);
             flowProcessDateFieldRepository.update(flowProcessDateFieldDO);
         }
