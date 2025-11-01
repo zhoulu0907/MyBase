@@ -271,6 +271,7 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
       <SelectDictModal
         appId={curAppId}
         visible={selectDictModalVisible}
+        dictTypeId={initialDictTypeId}
         onOk={handleSelectDictOk}
         onCancel={handleSelectDictCancel}
       />

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAppStore } from '@/store/store_app';
-import { getEntityFields, getEntityFieldsWithChildren, batchSaveFields } from '@onebase/app';
+import { getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
 import { FIELD_TYPE } from '@onebase/ui-kit';
 import type { FieldFormValues, FieldDataManager } from '../types';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
@@ -11,7 +10,6 @@ export const useFieldData = (
   entity: Partial<EntityNode>,
   onSuccess?: () => void
 ): FieldDataManager => {
-  const { curAppId } = useAppStore();
   const [fields, setFields] = useState<FieldFormValues[]>([]);
   const [originFields, setOriginFields] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
