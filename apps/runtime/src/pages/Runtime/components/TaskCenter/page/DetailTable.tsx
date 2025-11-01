@@ -62,7 +62,7 @@ const DetailTable:FC = () => {
     ];
 
     return <>
-        <Button type='outline' icon={<IconDownload />} className='left-export-btn'>导出Excel</Button>
+        {/* <Button type='outline' icon={<IconDownload />} className='left-export-btn'>导出Excel</Button> */}
         <Table className='detail-left-tb' columns={columns} data={data} />
         {/* <p className='gray-color photo-box'>附件</p>
         <ul className='fj-file-box'>
