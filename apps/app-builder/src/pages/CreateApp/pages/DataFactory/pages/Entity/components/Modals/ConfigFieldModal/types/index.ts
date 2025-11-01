@@ -19,6 +19,7 @@ export interface FieldFormValues {
   isDeleted?: boolean;
   displayName?: string;
   options?: { optionLabel: string; optionValue: string }[];
+  dictTypeId?: string; // 字典类型ID（用于引用字典）
   autoNumber?: AutoNumberRule; // 前端更新后的自动编号配置（提交给后端时使用）
   autoNumberConfig?: AutoNumberRule; // 后端返回的自动编号配置（用于初始化和回显）
   constraints?: {

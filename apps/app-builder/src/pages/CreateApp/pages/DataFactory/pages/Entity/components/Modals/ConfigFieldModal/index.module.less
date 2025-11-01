@@ -168,6 +168,53 @@
     width: 100%;
   }
 
+  // 字典选择相关样式
+  .dictSelectWrapper {
+    margin-bottom: 6px;
+
+    .dictNameInput {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .editIcon {
+      color: #999;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  }
+
+  // 字典选项列表样式
+  .dictOptionsList {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-fill-2);
+    border-radius: 4px;
+    padding: 4px 12px;
+
+    .dictOptionItem {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .optionDot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+    }
+
+    .moreButtonWrapper {
+      margin-top: 4px;
+
+      .moreButton {
+        padding: 0;
+        height: auto;
+      }
+    }
+  }
+
   .ruleContent {
     display: flex;
     align-items: center;
