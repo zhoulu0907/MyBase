@@ -18,38 +18,23 @@ public interface MetadataDataMethodCoreService {
 
     /**
      * 新增单条数据
-     *
-     * @param entityId 实体ID
-     * @param data 数据内容
-     * @param methodCode 方法编码（可选）
-     * @return 新增后的数据（包含主键等）
+     * @param metadataDataMethodRequestContext 请求上下文
+     * @return
      */
-//    Map<String, Object> createData(Long entityId, Map<String, Object> data, String methodCode);
-
     Map<String, Object> createData(MetadataDataMethodRequestContext metadataDataMethodRequestContext);
 
     /**
      * 更新单条数据
-     *
-     * @param entityId 实体ID
-     * @param id 数据ID
-     * @param data 数据内容
-     * @param methodCode 方法编码（可选）
-     * @return 更新后的数据
+     * @param metadataDataMethodRequestContext 请求上下文
+     * @return
      */
-//    Map<String, Object> updateData(Long entityId, Object id, Map<String, Object> data, String methodCode);
     Map<String, Object> updateData(MetadataDataMethodRequestContext metadataDataMethodRequestContext);
 
     /**
      * 删除单条数据
-     *
-     * @param entityId 实体ID
-     * @param id 数据ID
-     * @param methodCode 方法编码（可选）
-     * @return 删除是否成功
+     * @param metadataDataMethodRequestContext 请求上下文
+     * @return
      */
-//    Boolean deleteData(Long entityId, Object id, String methodCode);
-
     Boolean deleteData(MetadataDataMethodRequestContext metadataDataMethodRequestContext);
 
     /**
