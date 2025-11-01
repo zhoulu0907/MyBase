@@ -118,6 +118,11 @@ const PageManagerPage: FC = () => {
     }, undefined);
 
   useEffect(() => {
+    console.log('location.pathname', location.pathname);
+    setCurMenu({} as ApplicationMenu);
+  }, [location.pathname]);
+
+  useEffect(() => {
     if (curAppId !== '') {
       getMenuList();
       getEntityList();
@@ -132,7 +137,12 @@ const PageManagerPage: FC = () => {
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
-  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false, style: React.CSSProperties = {}): any[] => {
+  const convertMenuToTreeData = (
+    menus: ApplicationMenu[],
+    maxWidth: number,
+    showOption: boolean = false,
+    style: React.CSSProperties = {}
+  ): any[] => {
     return menus.map((menu) => ({
       key: menu.id,
       title: (
@@ -184,14 +194,13 @@ const PageManagerPage: FC = () => {
 
     const menuStyles = {
       height: '40px',
-      padding: '9px 12px',
+      padding: '9px 12px'
     };
     const treeData = convertMenuToTreeData(res, initTreeItemWidth, true, menuStyles);
     setTreeData(treeData);
 
     if (res && res.length > 0) {
       setCurMenu(findFirstPage(res));
-
       setSearchResult(false);
     }
 
@@ -634,6 +643,7 @@ const PageManagerPage: FC = () => {
                           {t('createApp.editPage')}
                         </Button>
                       </div>
+
                       <div className={styles.contentBody}>
                         <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
                       </div>

@@ -1,19 +1,12 @@
 import { useAppStore } from '@/store';
 import { Menu } from '@arco-design/web-react';
-import {
-  IconBranch,
-  IconPlayCircle,
-  IconQuestionCircle,
-  IconRefresh,
-  IconSettings,
-  IconTool
-} from '@arco-design/web-react/icon';
+import { IconBranch, IconPlayCircle, IconRefresh, IconTool } from '@arco-design/web-react/icon';
 import React from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import FlowEditorPage from './pages/flowEditor';
-import FlowManagementPage from './pages/flowManagement';
 import FlowExecuteRecordPage from './pages/flowExecuteRecord';
+import FlowManagementPage from './pages/flowManagement';
 
 const MenuItem = Menu.Item;
 
@@ -42,7 +35,8 @@ const IntegratedManagementPage: React.FC = () => {
           <MenuItem key="debug">
             <IconPlayCircle /> 调试中心
           </MenuItem>
-          <MenuItem key="record" 
+          <MenuItem
+            key="record"
             onClick={() => navigate(`/onebase/create-app/integrated-management/flow-execute-record?appId=${curAppId}`)}
           >
             <IconRefresh />
