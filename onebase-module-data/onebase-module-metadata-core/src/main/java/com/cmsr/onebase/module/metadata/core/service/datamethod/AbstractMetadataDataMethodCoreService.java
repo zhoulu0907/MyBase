@@ -387,7 +387,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             context.setProcessedData(processedData);
 
             // 6. 功能权限校验
-//            validatePermission(context);//todo 暂未实现
+            validatePermission(context);//todo 暂未实现
 
             // 7. 初步数据校验------数据校验规则 ----核心功能!!!
             validateData(context);
@@ -509,10 +509,6 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         log.info("开始执行权限校验：entityId={}, operationType={}", 
                 context.getEntityId(), 
                 context.getOperationType());
-
-        if (true) {
-            return;
-        }
 
         // 使用权限管理器执行完整的权限校验流程
         permissionManager.checkPermission(context);

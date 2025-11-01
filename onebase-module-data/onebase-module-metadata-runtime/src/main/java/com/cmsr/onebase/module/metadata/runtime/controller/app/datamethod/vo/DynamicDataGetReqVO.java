@@ -16,7 +16,7 @@ import jakarta.validation.constraints.NotNull;
 public class DynamicDataGetReqVO {
 
     @Schema(description = "菜单ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "菜单ID不能为空")
+//    @NotNull(message = "菜单ID不能为空")
     private Long menuId;
 
     @Schema(description = "数据ID", requiredMode = Schema.RequiredMode.REQUIRED)
