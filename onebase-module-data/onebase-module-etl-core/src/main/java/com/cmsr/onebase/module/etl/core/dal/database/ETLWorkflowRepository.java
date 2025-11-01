@@ -1,8 +1,13 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
+import com.cmsr.onebase.module.etl.core.vo.etl.ETLWorkflowPageReqVO;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 @Slf4j
@@ -13,4 +18,17 @@ public class ETLWorkflowRepository extends DataRepository<ETLWorkflowDO> {
         super(ETLWorkflowDO.class);
     }
 
+    public PageResult<ETLWorkflowDO> getWorkflowPage(ETLWorkflowPageReqVO pageReqVO) {
+        ConfigStore cs = new DefaultConfigStore();
+        if (StringUtils.isNotBlank(pageReqVO.getName())) {
+            cs.like("workflow_name", pageReqVO.getName());
+        }
+        if (StringUtils.isNotBlank(pageReqVO.getScheduleStrategy())) {
+            cs.eq("schedule_strategy", pageReqVO.getScheduleStrategy());
+        }
+        if (pageReqVO.getEnabled() != null) {
+            cs.eq("is_enabled", pageReqVO.getEnabled() ? 1 : 0);
+        }
+        return findPageWithConditions(cs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+    }
 }

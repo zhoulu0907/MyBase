@@ -36,8 +36,15 @@ public class DataSourceFactory {
         DatabaseType dbType = parseDatabaseType(databaseType);
         // 2. 创建DataSource
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
-        String jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);
+        String connectMode = (String) connectionProperties.get("connectMode");
+        String jdbcConnection;
+        if (StringUtils.equalsIgnoreCase("default", connectMode)) {
+            jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);
+        } else {
+            jdbcConnection = (String) connectionProperties.get("jdbcUrl");
+        }
 //        Driver declaredDriver = getDeclaredDriverInstance(dbType);
+
         String username = (String) connectionProperties.get("username");
         String password = (String) connectionProperties.get("password");
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
