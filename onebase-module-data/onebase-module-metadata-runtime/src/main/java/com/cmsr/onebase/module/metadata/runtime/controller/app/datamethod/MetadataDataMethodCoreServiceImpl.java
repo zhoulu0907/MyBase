@@ -491,9 +491,6 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     private void fetchRuntimePermission(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
-        if (true) {
-            return;
-        }
         // 仅 runtime 客户端需要校验权限
         if (metadataDataMethodRequestContext.getClientTypeEnum() != ClientTypeEnum.RUNTIME) {
             return;

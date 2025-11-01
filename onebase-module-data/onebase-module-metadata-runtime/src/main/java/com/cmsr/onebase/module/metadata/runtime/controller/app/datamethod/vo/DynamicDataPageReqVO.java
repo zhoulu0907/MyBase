@@ -17,7 +17,7 @@ import java.util.Map;
 public class DynamicDataPageReqVO {
 
     @Schema(description = "菜单ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "菜单ID不能为空")
+//    @NotNull(message = "菜单ID不能为空")
     private Long menuId;
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
