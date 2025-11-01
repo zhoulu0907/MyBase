@@ -101,14 +101,20 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
 
   const handleDelete = async () => {
     setDeleteLoading(true);
-    const res = await deleteEntity(node.id || node.entityId);
-    if (res) {
-      Message.success('删除成功');
-      onCancel();
-      successCallback?.();
+
+    try {
+      const res = await deleteEntity(node.id || node.entityId);
+      if (res) {
+        Message.success('删除成功');
+        onCancel();
+        successCallback?.();
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteModalVisible(false);
     }
-    setDeleteLoading(false);
-    setDeleteModalVisible(false);
   };
 
   useEffect(() => {
