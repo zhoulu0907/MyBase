@@ -159,7 +159,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
                 <Col span={12}>
                   <p className="gray-color">申请原因</p>
                   <div className="photo-box">
-                    <p className="photo-img"></p>需要采购一批办公用品
+                    需要采购一批办公用品
                   </div>
                 </Col>
               </Row>
