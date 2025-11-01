@@ -34,11 +34,17 @@ public interface DolphinschedulerClientStub {
 
     @GET("projects/{projectCode}/workflow-definition/{code}")
     Call<Result<WorkflowDetailedResp>> queryWorkflowByCode(@Path("projectCode") Long projectCode,
-                                                             @Path("code") Long workflowCode);
+                                                           @Path("code") Long workflowCode);
 
     @GET("projects/{projectCode}/workflow-definition/query-by-name")
     Call<Result<WorkflowDetailedResp>> queryWorkflowByName(@Path("projectCode") Long projectCode,
                                                            @Query("name") String name);
+
+    @GET("projects/{projectCode}/workflow-definition")
+    Call<Result<PageInfo<WorkflowDefinitionResp>>> queryWorkflowPage(@Path("projectCode") Long projectCode,
+                                                                     @Query("searchVal") String searchVal,
+                                                                     @Query("pageNo") Integer pageNo,
+                                                                     @Query("pageSize") Integer pageSize);
 
     // online or offline diff by param
     @POST("projects/{projectCode}/workflow-definition/{workflowCode}/release")

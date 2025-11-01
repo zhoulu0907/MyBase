@@ -96,6 +96,25 @@ public class DolphinSchedulerClient {
         this.dsClientStub = retrofitClient.create(DolphinschedulerClientStub.class);
     }
 
+    public List<Long> queryWorkflowCodeListByName(Long projectCode, String flowName) {
+        Result<PageInfo<WorkflowDefinitionResp>> pageResp =
+                execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, 1));
+        if (pageResp.getFailed()) {
+            throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+        }
+        PageInfo<WorkflowDefinitionResp> pageData = pageResp.getData();
+        Integer total = pageData.getTotal();
+        if (total == 0) {
+            return Collections.emptyList();
+        }
+        pageResp = execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, total));
+        if (pageResp.getFailed()) {
+            throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+        }
+        List<WorkflowDefinitionResp> workflowList = pageResp.getData().getTotalList();
+        return workflowList.stream().map(WorkflowDefinitionResp::getCode).toList();
+    }
+
     /**
      * 创建工作流
      */
