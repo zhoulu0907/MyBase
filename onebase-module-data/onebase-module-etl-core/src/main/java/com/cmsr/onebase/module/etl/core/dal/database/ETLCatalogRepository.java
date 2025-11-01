@@ -7,8 +7,8 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-@Repository
 @Slf4j
+@Repository
 public class ETLCatalogRepository extends DataRepository<ETLCatalogDO> {
 
     public ETLCatalogRepository() {

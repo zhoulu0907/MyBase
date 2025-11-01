@@ -11,12 +11,15 @@ import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
+import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -47,6 +50,9 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Autowired
     private AppAuthViewRepository appAuthViewRepository;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     @Override
     public List<MenuListRespVO> listApplicationMenu() {
@@ -113,6 +119,12 @@ public class AppMenuServiceImpl implements AppMenuService {
      * 要缓存
      */
     public Set<Long> findMenuViews(Long userId, Long applicationId, Long menuId) {
+        String redisKey = CacheUtils.keyForPagePermission(userId, applicationId, menuId);
+        RBucket<Set<Long>> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
+        if (bucket.isExists()) {
+            return bucket.get();
+        }
+        //
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         if (userRoleDTO.isAdminRole()) {
             return findMenuAllViews(applicationId, menuId);
@@ -122,8 +134,11 @@ public class AppMenuServiceImpl implements AppMenuService {
             return findMenuAllViews(applicationId, menuId);
         }
         Set<Long> roleIds = userRoleDTO.getRoleIds();
-        return appAuthViewRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId)
+        Set<Long> result = appAuthViewRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId)
                 .stream().map(viewDO -> viewDO.getViewId()).collect(Collectors.toSet());
+        //
+        bucket.set(result, CacheUtils.CACHE_EXPIRE_TIME);
+        return result;
     }
 
     private Set<Long> findMenuAllViews(Long applicationId, Long menuId) {

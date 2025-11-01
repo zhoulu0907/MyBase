@@ -154,6 +154,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             bpmMyCreatedVO.setSubmitTime(flowInstance.getSubmitTime());
             bpmMyCreatedVO.setCreateTime(flowInstance.getCreateTime());
             bpmMyCreatedVO.setUpdateTime(flowInstance.getUpdateTime());
+            bpmMyCreatedVO.setInstanceId(flowInstance.getId());
+
             //设置当前节点处理人
             List<FlowTask> flowTaskList = flowTaskRepository.getByInsId(flowInstance.getId());
             if (CollectionUtils.isNotEmpty(flowTaskList)) {

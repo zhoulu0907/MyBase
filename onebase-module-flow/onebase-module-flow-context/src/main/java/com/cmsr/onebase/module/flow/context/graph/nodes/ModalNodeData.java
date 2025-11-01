@@ -4,7 +4,9 @@ import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -46,5 +48,21 @@ public class ModalNodeData extends NodeData implements Serializable {
 
         private String value;
 
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("closeWarn", closeWarn);
+        map.put("modalType", modalType);
+        map.put("cancelWarn", cancelWarn);
+        map.put("modalTitle", modalTitle);
+        map.put("okText", okText);
+        map.put("cancelText", cancelText);
+        map.put("title", title);
+        map.put("prompt", prompt);
+        map.put("afterCancel", afterCancel);
+        map.put("arrange", arrange);
+        map.put("fields", fields);
+        return map;
     }
 }

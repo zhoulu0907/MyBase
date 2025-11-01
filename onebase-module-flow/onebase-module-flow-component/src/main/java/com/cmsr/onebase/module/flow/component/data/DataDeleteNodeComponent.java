@@ -38,8 +38,8 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("DataDeleteNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("数据删除节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataDeleteeNodeData nodeData = (DataDeleteeNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
@@ -60,7 +60,8 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
             reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
-        TenantUtils.executeIgnore(() -> dataMethodApi.deleteDataByCondition(reqDTO));
+        Integer result = TenantUtils.executeIgnore(() -> dataMethodApi.deleteDataByCondition(reqDTO));
+        executeContext.addLog("数据删除节点, 删除数量: " + result);
     }
 
 }

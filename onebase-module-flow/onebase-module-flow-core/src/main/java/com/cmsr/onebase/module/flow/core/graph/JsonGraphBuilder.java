@@ -21,6 +21,9 @@ public class JsonGraphBuilder {
     }
 
     private static void addJsonGraphLoopVariable(JsonGraph jsonGraph) {
+        if (jsonGraph == null || jsonGraph.getNodes() == null) {
+            return;
+        }
         for (JsonGraphNode node : jsonGraph.getNodes()) {
             recursiveNode(node, new InLoopDepth());
         }

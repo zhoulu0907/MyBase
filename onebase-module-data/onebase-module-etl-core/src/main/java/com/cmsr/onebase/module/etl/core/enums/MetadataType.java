@@ -5,13 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum MetadataType {
-    //
-    CATALOG("CATALOG", false),
-    //
-    SCHEMA("SCHEMA", false),
-    //
-    TABLE("TABLE", true),
-    VIEW("VIEW", false);
+    TABLE("table", true),
+    VIEW("view", false);
 
     private String value;
     private boolean writeable;

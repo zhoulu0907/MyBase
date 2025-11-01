@@ -13,11 +13,8 @@ public class CacheUtils {
 
     public static Kryo5Codec KRYO5_CODEC = new Kryo5Codec();
 
-    public static Duration CACHE_TIMEOUT = Duration.of(15, ChronoUnit.MINUTES);
-
-    public static String keyForMenu(Long menuId) {
-        return "app:auth:menu:" + menuId;
-    }
+    //TODO 调试阶段把时间设置都很短
+    public static Duration CACHE_EXPIRE_TIME = Duration.of(5, ChronoUnit.SECONDS);
 
     public static String keyForOperationPermission(Long userId, Long applicationId, Long menuId) {
         return "app:auth:operation:permission:" + userId + ":" + applicationId + ":" + menuId;
