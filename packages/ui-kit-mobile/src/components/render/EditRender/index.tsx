@@ -1,0 +1,46 @@
+import { FORM_COMPONENT_TYPES, FormComp, getComponentConfig } from 'src/components/Materials';
+
+import React from 'react';
+
+// TODO(mickey): 解决样式隔离问题
+import '@arco-design/mobile-react/dist/style.css';
+import setRootPixel from '@arco-design/mobile-react/tools/flexible';
+setRootPixel();
+
+/**
+ * 组件渲染的通用属性
+ */
+interface ComponentRenderProps {
+  /** 组件ID */
+  cpId: string;
+  /** 组件类型 */
+  cpType: string;
+  /** 组件schema映射 */
+  pageComponentSchema: any;
+  /** 组件预览状态 */
+  runtime: boolean;
+}
+
+/**
+ * ComponentRender 组件
+ * 用于渲染传入的组件，支持适配各类组件
+ */
+const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime }) => {
+  // 获取组件配置
+  const componentConfig = getComponentConfig(pageComponentSchema, cpType);
+
+  // 渲染对应的组件
+  const renderComponent = () => {
+    switch (cpType) {
+      case FORM_COMPONENT_TYPES.INPUT_TEXT:
+        return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+
+      default:
+        return <div>未知组件类型: {cpType}</div>;
+    }
+  };
+
+  return <>{renderComponent()}</>;
+};
+
+export default ComponentEditRender;

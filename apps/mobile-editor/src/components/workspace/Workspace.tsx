@@ -2,17 +2,16 @@ import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
   EDITOR_TYPES,
-  EditRender,
   ENTITY_COMPONENT_TYPES,
   ENTITY_FIELD_TYPE,
   FORM_COMPONENT_TYPES,
   getComponentConfig,
   getComponentSchema,
-  getComponentWidth,
   STATUS_OPTIONS,
   STATUS_VALUES,
   type GridItem
 } from '@onebase/ui-kit';
+import { EditRender } from '@onebase/ui-kit-mobile';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -516,7 +515,8 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
                 data-cp-id={cp.id}
                 className={styles.componentItem}
                 style={{
-                  width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
+                  width: '100%',
+                  //   width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
                   borderColor: curComponentID === cp.id ? '#009E9E' : '',
                   borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
                 }}
