@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import jakarta.annotation.Resource;
@@ -29,7 +30,7 @@ import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 
 @Slf4j
 @Component
@@ -131,10 +132,16 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             }
             boolean ok = deleteCount > 0;
             if(ok){
-                processCascadeDelete(context);//级联删除
+               super.storeData(context);
             }
             return ok;
         });
+    }
+
+    @Override
+    protected void handleSubEntities(ProcessContext context) {
+        //处理子表逻辑
+        processCascadeDelete(context);//级联删除
     }
 
     /**
@@ -383,10 +390,15 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
         reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(!respDTO.isTriggered()){
+            log.info("BEFORE_DELETE 数据删除前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            return;
+        }
         if(respDTO.isSuccess()){
             log.info("BEFORE_DELETE 数据删除触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
             log.error("BEFORE_DELETE 数据删除触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+            throw  exception(PROCESS_ERROR_BEFORE_DELETE,respDTO.getMessage());
         }
     }
 
@@ -418,10 +430,15 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
         reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(!respDTO.isTriggered()){
+            log.info("AFTER_DELETE 数据删除后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            return;
+        }
         if(respDTO.isSuccess()){
             log.info("AFTER_DELETE 数据删除触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
             log.error("AFTER_DELETE 数据删除触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+            throw  exception(PROCESS_ERROR_AFTER_DELETE,respDTO.getMessage());
         }
     }
 
