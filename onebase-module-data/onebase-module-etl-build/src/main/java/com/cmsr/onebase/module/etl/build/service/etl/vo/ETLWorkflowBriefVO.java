@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Schema(description = "数据工厂 - 数据流 VO")
@@ -17,7 +18,7 @@ public class ETLWorkflowBriefVO {
     private String name;
 
     @Schema(description = "是否启用")
-    private Boolean isEnabled;
+    private Boolean enabled;
 
     @Schema(description = "更新策略")
     private String scheduleStrategy;
@@ -26,10 +27,10 @@ public class ETLWorkflowBriefVO {
     private String status;
 
     @Schema(description = "输入数据源")
-    private List<String> sourceTables;
+    private List<String> sourceTables = Collections.emptyList();
 
     @Schema(description = "输出数据源")
-    private String targetTable;
+    private String targetTable = "";
 
     @Schema(description = "最后数据更新时间")
     private LocalDateTime lastSuccessTime;

@@ -20,6 +20,9 @@ public class ETLDatasourcePageReqVO extends PageParam {
     @Schema(description = "数据源名称信息")
     private String datasourceName;
 
+    @Schema(description = "数据源描述")
+    private String declaration;
+
     @Schema(description = "数据源类型信息")
     private String datasourceType;
 

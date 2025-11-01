@@ -3,9 +3,12 @@ package com.cmsr.onebase.module.etl.build.service.etl.vo;
 import lombok.Data;
 
 @Data
-public class ETLWorkflowDetailVO extends ETLWorkflowBriefVO {
+public class ETLWorkflowDetailVO {
 
-    // TODO: 暂时用Object替代;
-    private Object config;
+    private Long id;
+
+    private String workflowName;
+
+    private String config;
 
 }

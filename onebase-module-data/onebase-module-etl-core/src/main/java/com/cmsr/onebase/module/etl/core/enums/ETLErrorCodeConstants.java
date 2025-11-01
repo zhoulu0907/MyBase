@@ -17,6 +17,7 @@ public interface ETLErrorCodeConstants {
     ErrorCode DATASOURCE_CODE_DUPLICATE             = new ErrorCode(110202, "数据源编码重复");
     ErrorCode DATASOURCE_PROPERTY_INSUFFICIENT      = new ErrorCode(110203, "数据源信息不齐全");
     ErrorCode DATASOURCE_STATUS_CHANGE_ERR          = new ErrorCode(110204, "数据源状态转换异常");
+    ErrorCode DATASOURCE_IN_USAGE                   = new ErrorCode(110205, "数据源已在使用中");
 
     // 元数据采集异常
     ErrorCode INVALID_COLLECT_STATUS                = new ErrorCode(110501, "无效的采集状态");

@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.ETLWorkflowService;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
+import com.cmsr.onebase.module.etl.core.vo.etl.ETLWorkflowPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -18,34 +19,37 @@ import org.springframework.web.bind.annotation.*;
 public class ETLWorkflowController {
 
     @Resource
-    private ETLWorkflowService etlWorkflowService;
+    private ETLWorkflowService workflowService;
 
     @GetMapping("/page")
     @Operation(summary = "分页查询数据流")
-    public CommonResult<PageResult<ETLWorkflowBriefVO>> pageQueryFlow(@Validated ETLPageReqVO pageReqVO) {
-        return CommonResult.success(null);
+    public CommonResult<PageResult<ETLWorkflowBriefVO>> pageQueryFlow(@Validated ETLWorkflowPageReqVO pageReqVO) {
+        PageResult<ETLWorkflowBriefVO> workflowPage = workflowService.getWorkflowPage(pageReqVO);
+        return CommonResult.success(workflowPage);
     }
 
     @GetMapping("/{workflowId}")
     public CommonResult<ETLWorkflowDetailVO> queryWorkflowDetailedInfo(@PathVariable("workflowId") @NotNull Long workflowId) {
-        return CommonResult.success(null);
+        ETLWorkflowDetailVO workflowDetail = workflowService.getWorkflowDetail(workflowId);
+        return CommonResult.success(workflowDetail);
     }
 
     @PostMapping("/create")
     public CommonResult<Long> createWorkflow(@Validated @RequestBody ETLWorkflowCreateVO createVO) {
-        Long workflow = etlWorkflowService.createWorkflow(createVO);
+        Long workflow = workflowService.createWorkflow(createVO);
         return CommonResult.success(workflow);
     }
 
     @PostMapping("/update")
     public CommonResult<Boolean> updateWorkflow(@Validated @RequestBody ETLWorkflowUpdateVO updateVO) {
-        etlWorkflowService.updateWorkflow(updateVO);
+        workflowService.updateWorkflow(updateVO);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @PostMapping("/delete")
-    public CommonResult<Boolean> deleteWorkflow() {
-        return CommonResult.success(null);
+    public CommonResult<Boolean> deleteWorkflow(@RequestParam("id") Long id) {
+        workflowService.deleteWorkflow(id);
+        return CommonResult.success(Boolean.TRUE);
     }
 
     @GetMapping("/logs")

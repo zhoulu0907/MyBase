@@ -8,10 +8,7 @@ import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
@@ -27,6 +24,7 @@ import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -48,27 +46,29 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     private ETLTableRepository tableRepository;
 
     @Resource
+    private ETLWorkflowTableRepository workflowTableRepository;
+
+    @Resource
     private MetadataCollectorService metadataCollectorService;
 
     private Map<String, String> supportedDbs = Maps.newHashMap();
 
     @PostConstruct
-    public void init() {
-        for (DatabaseType db : DatabaseType.values()) {
+    public void init() throws ClassNotFoundException {
+        DatabaseType[] dbs = {
+                DatabaseType.PostgreSQL,
+                DatabaseType.KingBase,
+                DatabaseType.ORACLE,
+                DatabaseType.MySQL
+        };
+        for (DatabaseType db : dbs) {
             // 跳过非常规类型
-            if (db == DatabaseType.NONE || db == DatabaseType.COMMON) {
-                continue;
-            }
             if (StringUtils.isBlank(db.driver())) {
                 continue;
             }
             String driverName = db.driver();
-            try {
-                ClassUtils.getClass(driverName);
-                supportedDbs.put(db.name(), db.title());
-            } catch (ClassNotFoundException ex) {
-                // do nothing, just pass
-            }
+            ClassUtils.getClass(driverName);
+            supportedDbs.put(db.name(), db.title());
         }
     }
 
@@ -97,19 +97,16 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        ETLDatasourceRespVO respVO = BeanUtils.toBean(datasourceDO, ETLDatasourceRespVO.class);
-        return respVO;
+        return BeanUtils.toBean(datasourceDO, ETLDatasourceRespVO.class);
     }
 
     @Override
     public PageResult<ETLDatasourceRespVO> getETLDatasourcePage(ETLDatasourcePageReqVO pageReqVO) {
         PageResult<ETLDatasourceDO> pageDOs = datasourceRepository.getETLDatasourcePage(pageReqVO);
         List<ETLDatasourceRespVO> respVOs = pageDOs.getList()
-                .stream().map(dataobject -> {
-                    ETLDatasourceRespVO respVO = BeanUtils.toBean(dataobject, ETLDatasourceRespVO.class);
-                    // fill respVO with creator/updater information...
-                    return respVO;
-                }).toList();
+                .stream()
+                .map(dataobject -> BeanUtils.toBean(dataobject, ETLDatasourceRespVO.class))
+                .toList();
 
         return new PageResult<>(respVOs, pageDOs.getTotal());
     }
@@ -134,6 +131,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         ETLDatasourceDO oldDatasource = datasourceRepository.findById(updateReqVO.getId());
         oldDatasource.setDatasourceCode(updateReqVO.getDatasourceCode());
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
+        oldDatasource.setDeclaration(updateReqVO.getDeclaration());
         oldDatasource.setConfig(JsonUtils.toJsonString(updateReqVO.getConfig()));
         oldDatasource.setReadonly(updateReqVO.getReadonly());
         // udpate collect status to `required`, demonds user to execute at least once
@@ -148,9 +146,19 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (entityExists) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        // check datasource(catalog, schema, table) not reffered by elsewhere
-        // so far, delete datasource in application is not supported;
-        throw new UnsupportedOperationException("暂不支持对数据源进行删除");
+        boolean existsTableReffered = workflowTableRepository.existsByDatasourceId(datasourceId);
+        if (existsTableReffered) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_IN_USAGE);
+        }
+        deleteAllRelated(datasourceId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    private void deleteAllRelated(Long datasourceId) {
+        tableRepository.deleteAllByDatasourceId(datasourceId);
+        schemaRepository.deleteAllByDatasourceId(datasourceId);
+        catalogRepository.deleteAllByDatasourceId(datasourceId);
+        datasourceRepository.deleteById(datasourceId);
     }
 
     @Override

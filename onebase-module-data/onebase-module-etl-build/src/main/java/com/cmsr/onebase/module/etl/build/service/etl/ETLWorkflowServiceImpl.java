@@ -2,21 +2,32 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLExecutionLogRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLScheduleJobRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLWorkflowRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLWorkflowTableRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.*;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
+import com.cmsr.onebase.module.etl.core.vo.etl.ETLWorkflowPageReqVO;
 import jakarta.annotation.Resource;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class ETLWorkflowServiceImpl implements ETLWorkflowService {
+
+    @Value("${etl-project}")
+    private Long etlProjectCode;
+
+    @Resource
+    private DolphinSchedulerClient dolphinSchedulerClient;
 
     @Resource
     private ETLWorkflowRepository workflowRepository;
@@ -30,14 +41,50 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Resource
     private ETLExecutionLogRepository executionLogRepository;
 
+    @Resource
+    private ETLTableRepository tableRepository;
+
     @Override
-    public PageResult<ETLWorkflowBriefVO> getWorkflowPage(ETLPageReqVO pageReqVO) {
-        return null;
+    public PageResult<ETLWorkflowBriefVO> getWorkflowPage(ETLWorkflowPageReqVO pageReqVO) {
+        PageResult<ETLWorkflowDO> pageDOs = workflowRepository.getWorkflowPage(pageReqVO);
+        List<ETLWorkflowBriefVO> pageVOs = new ArrayList<>();
+        for (ETLWorkflowDO workflowDO : pageDOs.getList()) {
+            ETLWorkflowBriefVO briefVO = new ETLWorkflowBriefVO();
+            Long workflowId = workflowDO.getId();
+            briefVO.setId(workflowId);
+            briefVO.setName(workflowDO.getWorkflowName());
+            briefVO.setEnabled(workflowDO.isEnabled());
+            briefVO.setScheduleStrategy(workflowDO.getScheduleStrategy());
+            ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByWorkflowId(workflowId);
+            briefVO.setStatus(scheduleJobDO.getJobStatus());
+            briefVO.setLastSuccessTime(scheduleJobDO.getLastSuccessTime());
+            Set<Long> relatedSourceTableIds = workflowTableRepository.findSourceTableIdsByWorkflowId(workflowId);
+            if (CollectionUtils.isNotEmpty(relatedSourceTableIds)) {
+                List<String> sourceTableNames = tableRepository.getNameByIds(relatedSourceTableIds);
+                briefVO.setSourceTables(sourceTableNames);
+            }
+            Long relatedTargetTableId = workflowTableRepository.findTargetTableIdByWorkflowId(workflowId);
+            if (relatedTargetTableId != null) {
+                String targetTableName = tableRepository.getNameById(relatedTargetTableId);
+                briefVO.setTargetTable(targetTableName);
+            }
+            pageVOs.add(briefVO);
+        }
+        return new PageResult<>(pageVOs, pageDOs.getTotal());
     }
 
     @Override
-    public ETLWorkflowDetailVO getWorkflowDetail() {
-        return null;
+    public ETLWorkflowDetailVO getWorkflowDetail(Long workflowId) {
+        ETLWorkflowDO workflowDO = workflowRepository.findById(workflowId);
+        if (workflowDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NOT_EXIST);
+        }
+        ETLWorkflowDetailVO workflowDetailVO = new ETLWorkflowDetailVO();
+        workflowDetailVO.setId(workflowDO.getId());
+        workflowDetailVO.setWorkflowName(workflowDO.getWorkflowName());
+        workflowDetailVO.setConfig(workflowDO.getConfig());
+
+        return workflowDetailVO;
     }
 
     @Override
@@ -56,13 +103,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void updateWorkflow(ETLWorkflowUpdateVO updateVO) {
         Long workflowId = updateVO.getWorkflowId();
-        ETLWorkflowDO oldWorkflow = workflowRepository.findById(workflowId);
-        if (oldWorkflow == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NOT_EXIST);
-        }
-        if (oldWorkflow.getIsEnabled() == 1) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ENABLED);
-        }
+        ETLWorkflowDO oldWorkflow = getOperableWorkflow(workflowId);
         if (!Objects.equals(oldWorkflow.getApplicationId(), updateVO.getApplicationId())) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATA_CONFLICT);
         }
@@ -73,12 +114,16 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     @Override
-    public void deleteWorkflow(Long etlId) {
-
+    public void deleteWorkflow(Long workflowId) {
+        getOperableWorkflow(workflowId);
+        executionLogRepository.deleteByWorkflowId(workflowId);
+        workflowTableRepository.deleteByWorkflowId(workflowId);
+        scheduleJobRepository.deleteByWorkflowId(workflowId);
+        workflowRepository.deleteById(workflowId);
     }
 
     @Override
-    public void startWorkflowManually(Long etlId) {
+    public void startWorkflowManually(Long workflowId) {
 
     }
 
@@ -88,12 +133,23 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     @Override
-    public void getWorkflowExecutionLogs(Long etlId) {
+    public void getWorkflowExecutionLogs(Long workflowId) {
 
     }
 
     @Override
-    public PageResult<Object> previewOutputData(Long id) {
+    public PageResult<Object> previewOutputData(Long workflowId) {
         return null;
+    }
+
+    private ETLWorkflowDO getOperableWorkflow(Long workflowId) {
+        ETLWorkflowDO workflowDO = workflowRepository.findById(workflowId);
+        if (workflowDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NOT_EXIST);
+        }
+        if (workflowDO.isEnabled()) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ENABLED);
+        }
+        return workflowDO;
     }
 }
