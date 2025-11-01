@@ -1,11 +1,11 @@
 import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
-import { menuSignal } from '@/store/menu';
 import { UserPermissionManager } from '@/utils/permission';
 import { Dropdown, Input, Layout, Menu, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   listApplicationMenu,
+  menuSignal,
   MenuType,
   TASKMENU_TYPE,
   VisibleType,
