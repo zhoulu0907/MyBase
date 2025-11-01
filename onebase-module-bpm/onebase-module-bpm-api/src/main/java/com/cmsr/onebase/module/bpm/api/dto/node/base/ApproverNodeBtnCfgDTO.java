@@ -15,5 +15,5 @@ public class ApproverNodeBtnCfgDTO extends BaseNodeBtnCfgDTO {
      * 是否开启批量审批
      */
     @NotNull(message = "是否开启批量审批不能为空")
-    private Boolean batchApproval;
+    private Boolean batchApproval = false;
 }
