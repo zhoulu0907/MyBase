@@ -47,16 +47,23 @@ const FormEditor: React.FC = () => {
 
   useEffect(() => {
     if (editMode.value === EditMode.MOBILE) {
-      const microApp = loadMicroApp({
-        name: 'mobile-editor',
-        entry: '//localhost:4400',
-        container: '#mobile-editor',
-        props: {
-          onGlobalStateChange: globalState.onGlobalStateChange,
-          setGlobalState: globalState.setGlobalState,
-          offGlobalStateChange: globalState.offGlobalStateChange
+      const microApp = loadMicroApp(
+        {
+          name: 'mobile-editor',
+          entry: '//localhost:4400',
+          container: '#mobile-editor',
+          props: {
+            onGlobalStateChange: globalState.onGlobalStateChange,
+            setGlobalState: globalState.setGlobalState,
+            offGlobalStateChange: globalState.offGlobalStateChange
+          }
+        },
+        {
+          sandbox: {
+            experimentalStyleIsolation: true
+          }
         }
-      });
+      );
       microAppRef.current = microApp;
 
       return () => {

@@ -24,5 +24,15 @@ export default defineConfig({
       '@assets': path.join(__dirname, './src/assets')
     }
   },
-  assetsInclude: ['**/*.svg']
+  assetsInclude: ['**/*.svg'],
+  css: {
+    preprocessorOptions: {
+      less: {
+        javascriptEnabled: true,
+        modifyVars: {
+          prefix: 'pc'
+        }
+      }
+    }
+  }
 });
