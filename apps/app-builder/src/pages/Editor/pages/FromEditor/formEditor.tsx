@@ -50,7 +50,7 @@ const FormEditor: React.FC = () => {
       const microApp = loadMicroApp(
         {
           name: 'mobile-editor',
-          entry: '//localhost:4400',
+          entry: (window as any).global_config?.MOBILE_EDITOR_URL,
           container: '#mobile-editor',
           props: {
             onGlobalStateChange: globalState.onGlobalStateChange,
