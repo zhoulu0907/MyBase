@@ -8,12 +8,18 @@ import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
@@ -25,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
@@ -36,6 +43,12 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
     @Autowired
     private FlowProcessExecApiImpl flowProcessExecApi;
+
+    @Resource
+    private MetadataEntityRelationshipRepository entityRelationshipRepository;
+
+    @Resource
+    private MetadataEntityFieldRepository entityFieldRepository;
 
     /**
      * 校验创建数据的完整性
@@ -339,6 +352,65 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
     @Override
     protected void handleSubEntities(ProcessContext context) {
 
+        // 已经插入到数据库的父表数据行
+        Map parentData = context.getProcessedData();
+
+        // 关联关系
+        Long partentEntityId = context.getEntityId();
+        List<MetadataEntityRelationshipDO> relationshipDOS = entityRelationshipRepository.getRelationshipsByEntityId(partentEntityId);
+
+        //查询子表和主表的关联字段 构建关联条件后插入数据库
+        List<MetadataDataMethodSubEntityContext> subEntityVos = context.getSubEntities();
+        for(MetadataDataMethodSubEntityContext subEntityContext: subEntityVos){
+            Long subEntityId  = subEntityContext.getEntityId();
+            List<Map<Long, Object>> subData = subEntityContext.getSubData();
+
+            String parentRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
+                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null);
+            MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.findById(Long.valueOf(parentRelFieldId));
+            String parentFiledName = parentEntityFieldDO.getFieldName();// 主表关联字段名称
+            Object parentValue = parentData.get(parentFiledName);
+
+            String subRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
+                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null);
+            MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.findById(Long.valueOf(subRelFieldId));
+            String subRelFieldName = subEntityFieldDO.getFieldName();// 子表关联字段名称
+
+            List<MetadataEntityFieldDO> subEntityFields = getEntityFields(subEntityId);
+            MetadataBusinessEntityDO subEntity = validateEntityExists(subEntityId);
+
+            // 逐条插入子表数据
+            for(Map<Long,Object> row: subData){
+                // key类型：Long 转 String
+                Map covertedRow = row.entrySet().stream().collect(Collectors.toMap(
+                        entry ->
+                        entry.getKey().toString(),
+                        Map.Entry::getValue));
+
+                Map rowToInsert = processDataAndSetDefaults(covertedRow,subEntityFields); //设置默认值
+                rowToInsert.put(subRelFieldName,parentValue); //关联字段值
+
+                DataRow dataRow = new DataRow(rowToInsert);
+
+                // 检查DataRow中的数据
+                log.info("DataRow创建后的数据: {}", dataRow);
+                rowToInsert.forEach((key, value) -> {
+                    Object dataRowValue = dataRow.get(key);
+                    if (dataRowValue != null) {
+                        log.info("DataRow中字段 {} 的值类型: {}, 值: {}", key, dataRowValue.getClass().getName(), dataRowValue);
+                    } else {
+                        log.info("DataRow中字段 {} 的值为null", key);
+                    }
+                });
+                // 执行插入
+                AnylineService<?> temporaryService = context.getTemporaryService();
+                Object insertResult = temporaryService.insert(quoteTableName(subEntity.getTableName()), dataRow);
+                log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", subEntityId, subEntity.getTableName(), insertResult);
+            }
+
+        }
     }
 
     @Override
