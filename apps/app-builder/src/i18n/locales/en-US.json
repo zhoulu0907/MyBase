@@ -117,7 +117,8 @@
     "role": "Role Management",
     "organization": "Organization Management",
     "systemDict": "System Dictionary",
-    "spaceInfo": "Space Management",
+    "spaceInfo": "Space Info",
+    "enterpriseInfo": "Enterprise Info",
     "enterprise": "Enterprise Management",
     "tenant": "Personal Center"
   },

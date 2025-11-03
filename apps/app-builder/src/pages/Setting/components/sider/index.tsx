@@ -75,6 +75,13 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         title: '空间信息',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/spaceInfo',
+        permissionKey: TENANT_MENUS.INFO // todo
+      },
+      {
+        key: '企业信息',
+        title: '企业信息',
+        icon: <IconIdcard style={iconStyle} />,
+        path: '/onebase/setting/enterpriseInfo',
         permissionKey: TENANT_MENUS.INFO
       },
       {

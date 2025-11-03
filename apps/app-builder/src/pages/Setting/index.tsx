@@ -9,6 +9,8 @@ import ApplicationPage from './pages/Application';
 import OrganizationPage from './pages/Organization';
 import RolePage from './pages/Role';
 import SystemDictPage from './pages/SystemDict';
+import SpaceInfo from './pages/SpaceInfo';
+import EnterpriseInfo from './pages/EnterpriseInfo';
 import TenantPage from './pages/Tenant';
 import UserPage from './pages/User';
 
@@ -40,7 +42,8 @@ const SettingPage: React.FC = () => {
                 <Route path="role" element={<RolePage />} />
                 <Route path="organization" element={<OrganizationPage />} />
                 <Route path="system-dict" element={<SystemDictPage />} />
-                <Route path="spaceInfo" element={<TenantPage />} />
+                <Route path="spaceInfo" element={<SpaceInfo />} />
+                <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="enterprise" element={<TenantPage />} />
                 <Route path="tenant" element={<TenantPage />} />
                 <Route path="" element={<Navigate to="user" replace />} />

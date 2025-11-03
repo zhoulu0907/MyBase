@@ -118,6 +118,7 @@
     "organization": "组织管理",
     "systemDict": "数据字典管理",
     "spaceInfo": "空间信息",
+    "enterpriseInfo": "企业信息",
     "enterprise": "企业管理",
     "tenant": "个人中心"
   },

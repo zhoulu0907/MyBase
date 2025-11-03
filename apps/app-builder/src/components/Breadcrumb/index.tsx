@@ -77,6 +77,9 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'spaceInfo':
           title = t('sider.spaceInfo');
           break;
+        case 'enterpriseInfo':
+          title = t('sider.enterpriseInfo');
+          break;
         case 'enterprise':
           title = t('sider.enterprise');
           break;

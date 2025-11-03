@@ -3,7 +3,7 @@ import { Input, Pagination, Table } from '@arco-design/web-react';
 import { type DictData } from '@onebase/platform-center';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
-import s from '../../index.module.less';
+import styles from '../../index.module.less';
 
 interface DictionaryTableProps {
   data: DictData[];
@@ -47,21 +47,21 @@ export default function DictionaryTable({
 
   return (
     <>
-      <div className={s.tableHeader}>
+      <div className={styles.tableHeader}>
         <Button permission={ACTIONS.CREATE} type="primary" onClick={onBatchConfig}>
           字典值配置
         </Button>
         <Input.Search
+          className={styles.searchInput}
           value={searchValue}
           onChange={onSearchChange}
-          placeholder="搜索字典值"
-          style={{ width: 200 }}
+          placeholder="输入字典值"
           allowClear
         />
       </div>
-      <div className={s.tableContainer}>
+      <div className={styles.tableContainer}>
         <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} />
-        <div className={s.paginationContainer}>
+        <div className={styles.paginationContainer}>
           <Pagination
             total={total}
             pageSize={pageSize}
