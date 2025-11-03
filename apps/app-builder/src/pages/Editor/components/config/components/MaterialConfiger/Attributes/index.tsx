@@ -112,7 +112,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       }
     }
     setIsInSubTable(inSubTable);
-  }, [curComponentID, subTableComponents]);
+  }, [curComponentID]);
 
   const handlePropsChange = (key: string, value: any) => {
     console.log(`更新了属性: ${key} 值为: `, value);
