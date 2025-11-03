@@ -1,9 +1,6 @@
 package com.cmsr.onebase.module.bpm.api.dto.node;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverConfigDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.FieldPermCfgDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.dto.node.base.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -36,4 +33,11 @@ public class ApproverNodeExtDTO extends BaseNodeExtDTO {
      * 字段权限配置
      */
     private FieldPermCfgDTO fieldPermConfig;
+
+    /**
+     * 全局设置
+     */
+    @Valid
+    @NotNull(message = "全局设置不能为空")
+    private GlobalConfigDTO globalConfig;
 }

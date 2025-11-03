@@ -16,7 +16,7 @@ public class GlobalConfigExtDTO {
     /**
      * 自动审批配置
      */
-     private List<String> autoApprove;//todo  列出字段
+     private AutoApproveDTO autoApprove;
      /**
      * 审批人为空时
      */
@@ -67,4 +67,26 @@ public class GlobalConfigExtDTO {
 
 
     }
+    @Data
+    public static class AutoApproveDTO {
+
+        /**
+         * 发起人自动审批
+         * 当前节点人员为发起人时，自动审批
+         */
+        private Boolean initAutoApprove;
+
+        /**
+         * 重复人员自动审批
+         * 当前节点人员已在前面审批节点中进行过操作时，自动审批
+         */
+        private Boolean dupUserAutoApprove;
+        /**
+         * 相邻节点重复人员自动审批
+         * 当前节点人员已在上一审批节点中进行过操作时，自动审批
+         */
+        private Boolean adjDupUserAutoApprove;
+
+    }
+
 }

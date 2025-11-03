@@ -48,10 +48,10 @@ public interface BpmInstanceService {
      */
     BpmFlowTaskDetailVO getFormDetail(Long instanceId);
     /**
-     * 流程预览
+     * 流程预测
      *
      * @param flowCode 流程编码
      * @return 流程图
      */
-    List<BpmFlowPreviewVO> flowPreview(String flowCode);
+    List<BpmFlowPreviewVO> flowPredict(String businessId);
 }

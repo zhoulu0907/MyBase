@@ -28,10 +28,10 @@ public class BpmFlowPreviewVO {
     @Data
     public static class HandlerInfo {
         @Schema(description = "处理人ID")
-        private Long userId;
+        private Long handlerId;
 
         @Schema(description = "处理人名称")
-        private String userName;
+        private String handlerName;
 
         @Schema(description = "处理人头像")
         private String userAvatar;

@@ -800,12 +800,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     }
 
     @Override
-    public List<BpmFlowPreviewVO> flowPreview(String flowCode) {
-        // 获取流程节点
-        Definition definition = defService.getPublishByFlowCode(flowCode);
+    public List<BpmFlowPreviewVO> flowPredict(String businessId) {
+        Definition definition = defExtService.getByFormPathAndStatus(businessId, PublishStatus.PUBLISHED.getKey());
         if (definition == null) {
-            log.error(ErrorCodeConstants.FLOW_NOT_EXISTS.getMsg());
-            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
+            log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
+            throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
         }
 
         Node startNode = nodeService.getStartNode(definition.getId());
@@ -856,7 +855,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 previewVO.setNodeName(currentNode.getNodeName());
                 // 设置是否为当前节点
                 previewVO.setCurrentNode(currentNodeCode.equals(targetCurrentNodeCode));
-                // TODO: 设置审批人信息
                 if(StringUtils.isNotEmpty(currentNode.getPermissionFlag())){
                     try {
                         // 直接解析 JSON 字符串为 Map
@@ -873,8 +871,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                                 List<BpmFlowPreviewVO.HandlerInfo> handlers = new ArrayList<>();
                                 admins.getData().forEach(user -> {
                                     BpmFlowPreviewVO.HandlerInfo handlerInfo = new BpmFlowPreviewVO.HandlerInfo();
-                                    handlerInfo.setUserId(user.getId());
-                                    handlerInfo.setUserName(user.getNickname());
+                                    handlerInfo.setHandlerId(user.getId());
+                                    handlerInfo.setHandlerName(user.getNickname());
                                     handlerInfo.setUserAvatar(user.getAvatar());
                                     handlers.add(handlerInfo);
                                 });
@@ -898,8 +896,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                                     List<BpmFlowPreviewVO.HandlerInfo> handlers = new ArrayList<>();
                                     admins.getData().forEach(user -> {
                                         BpmFlowPreviewVO.HandlerInfo handlerInfo = new BpmFlowPreviewVO.HandlerInfo();
-                                        handlerInfo.setUserId(user.getId());
-                                        handlerInfo.setUserName(user.getNickname());
+                                        handlerInfo.setHandlerId(user.getId());
+                                        handlerInfo.setHandlerName(user.getNickname());
                                         handlerInfo.setUserAvatar(user.getAvatar());
                                         handlers.add(handlerInfo);
                                     });

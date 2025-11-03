@@ -68,13 +68,13 @@ public class BpmInstanceController {
     /**
      * 流程预览
      *
-     * @param flowCode 流程编码
+     * @param businessId
      */
-    @GetMapping("/flow-preview")
-    @Operation(summary = "流程预览")
-    public CommonResult<List<BpmFlowPreviewVO>> flowPreview(@RequestParam  String flowCode) {
-      log.info("流程预览: flowCode{}");
-        return CommonResult.success(bpmExecService.flowPreview(flowCode)) ;
+    @GetMapping("/flow-predict")
+    @Operation(summary = "流程预测")
+    public CommonResult<List<BpmFlowPreviewVO>> flowPredict(@RequestParam  String businessId) {
+      log.info("流程预测: flowCode{}");
+        return CommonResult.success(bpmExecService.flowPredict(businessId)) ;
 
     }
 
