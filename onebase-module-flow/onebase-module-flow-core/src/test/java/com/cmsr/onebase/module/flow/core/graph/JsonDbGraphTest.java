@@ -24,7 +24,7 @@ public class JsonDbGraphTest {
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
         String json = flowProcessDO.getProcessDefinition();
-        JsonGraph jsonGraph = JsonGraphBuilder.build(json);
+        JsonGraph jsonGraph = FlowGraphBuilder.build(json);
         System.out.println(jsonGraph.toFlowChain());
     }
 

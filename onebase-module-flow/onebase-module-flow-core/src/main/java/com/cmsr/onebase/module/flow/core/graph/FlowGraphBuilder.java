@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Author：huangjie
  * @Date：2025/9/28 15:12
  */
-public class JsonGraphBuilder {
+public class FlowGraphBuilder {
 
     public static JsonGraph build(String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);

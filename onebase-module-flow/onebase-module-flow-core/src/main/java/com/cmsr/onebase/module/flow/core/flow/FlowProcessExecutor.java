@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
-import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
@@ -40,7 +40,7 @@ public class FlowProcessExecutor {
     private FlowExecutor flowExecutor;
 
     @Autowired
-    private GraphFlowCache graphFlowCache;
+    private FlowProcessCache flowProcessCache;
 
     @Autowired
     private ContextProvider contextProvider;
@@ -55,7 +55,7 @@ public class FlowProcessExecutor {
      * 执行新流程（基于traceId和输入参数）
      */
     public ExecutorResult execute(String traceId, Long processId, Map<String, Object> inputParams) {
-        if (!graphFlowCache.isProcessExist(processId)) {
+        if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
@@ -66,7 +66,7 @@ public class FlowProcessExecutor {
             VariableContext variableContext = new VariableContext();
             variableContext.setInputParams(inputParams);
             //初始化执行上下文
-            Map<String, NodeData> nodeData = graphFlowCache.findNodeData(processId);
+            Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
             traceId = validateAndGenerateTraceId(traceId, processId);
             executeContext.setTraceId(traceId);
             executeContext.setNodeDataMap(nodeData);
@@ -103,7 +103,7 @@ public class FlowProcessExecutor {
      * 理论上可以根据trace id 恢复完整的执行情况
      */
     public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputFields) {
-        if (!graphFlowCache.isProcessExist(processId)) {
+        if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
@@ -185,7 +185,7 @@ public class FlowProcessExecutor {
      * 创建新的执行日志
      */
     private FlowExecutionLogDO createNewExecutionLog(Long processId) {
-        Long applicationId = graphFlowCache.findApplicationByProcessId(processId);
+        Long applicationId = flowProcessCache.findApplicationByProcessId(processId);
         FlowExecutionLogDO log = new FlowExecutionLogDO();
         log.setApplicationId(applicationId);
         log.setProcessId(processId);

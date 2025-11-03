@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
@@ -9,7 +8,7 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
+import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
 import com.cmsr.onebase.module.flow.core.job.FlowJobMessageHandler;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
@@ -50,7 +49,7 @@ public class FlowProcessTest {
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
         String json = flowProcessDO.getProcessDefinition();
-        JsonGraph jsonGraph = JsonGraphBuilder.build(json);
+        JsonGraph jsonGraph = FlowGraphBuilder.build(json);
         System.out.println(jsonGraph.toFlowChain());
     }
 

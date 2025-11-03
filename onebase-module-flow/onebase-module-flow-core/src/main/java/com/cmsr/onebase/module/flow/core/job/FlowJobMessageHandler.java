@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.enums.RocketMQConstants;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
-import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +56,7 @@ public class FlowJobMessageHandler implements MessageListener, ApplicationRunner
     private FlowProcessExecutor flowProcessExecutor;
 
     @Autowired
-    private GraphFlowCache graphFlowCache;
+    private FlowProcessCache flowProcessCache;
 
     @Autowired
     private RedisConnectionFactory redisConnectionFactory;
@@ -125,7 +125,7 @@ public class FlowJobMessageHandler implements MessageListener, ApplicationRunner
 
     private Map<String, Object> createDateFieldInputParams(FlowJobMessage message) {
         Long processId = message.getProcessId();
-        StartDateFieldNodeData startDateFieldNodeData = graphFlowCache.findStartDateFieldNodeDataByProcessId(processId);
+        StartDateFieldNodeData startDateFieldNodeData = flowProcessCache.findStartDateFieldNodeDataByProcessId(processId);
         if (startDateFieldNodeData == null) {
             throw new RuntimeException("实体时间字段触发流程未找到:" + processId);
         }
@@ -134,7 +134,7 @@ public class FlowJobMessageHandler implements MessageListener, ApplicationRunner
 
     private Map<String, Object> createTimeInputParams(FlowJobMessage message) {
         Long processId = message.getProcessId();
-        StartTimeNodeData startTimeNodeData = graphFlowCache.findStartTimeNodeDataByProcessId(processId);
+        StartTimeNodeData startTimeNodeData = flowProcessCache.findStartTimeNodeDataByProcessId(processId);
         if (startTimeNodeData == null) {
             throw new RuntimeException("定时任务流程未找到:" + processId);
         }
