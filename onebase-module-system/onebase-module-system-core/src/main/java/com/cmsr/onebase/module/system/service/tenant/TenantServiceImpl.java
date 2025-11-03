@@ -13,7 +13,6 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
@@ -496,12 +495,7 @@ public class TenantServiceImpl implements TenantService {
      * @return
      */
     public Map<Integer, Integer> findAppCount() {
-        List<ApplicationDO> allList = appApplicationApi.findAppApplicationAll();
-        return allList.stream()
-                .collect(Collectors.groupingBy(
-                        app -> app.getTenantId().intValue(),  // Long转Integer
-                        Collectors.summingInt(app -> 1)       // Integer计数替代Long计数
-                ));
+        return appApplicationApi.findAppApplicationAll();
     }
 
     @Override

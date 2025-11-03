@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.api.app;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -12,5 +13,5 @@ public interface AppApplicationApi {
 
     List finAppApplicationByAppName(String appName);
 
-    List findAppApplicationAll();
+    Map<Integer,Integer> findAppApplicationAll();
 }

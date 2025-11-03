@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 
+import com.cmsr.onebase.module.app.core.dto.app.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
@@ -49,16 +50,15 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public void createCorpAppRelation(@Valid CorpAppRelationInertReqVO createReqVO) {
-
-        // 先删除后插入
-        ConfigStore configs = new DefaultConfigStore();
-        configs.in("application_id", createReqVO.getApplicationIdList());
-        configs.eq("corp_id", createReqVO.getCorpId());
-        configs.eq("tenant_id", TenantContextHolder.getRequiredTenantId());
-        corpAppRelationDataRepository.deleteByConfig(configs);
-
         // 插入
         createReqVO.getApplicationIdList().forEach(appliationId -> {
+            // 先删除后插入
+            ConfigStore configs = new DefaultConfigStore();
+            configs.eq("application_id", appliationId );
+            configs.eq("corp_id", createReqVO.getCorpId());
+            configs.eq("tenant_id", TenantContextHolder.getRequiredTenantId());
+            corpAppRelationDataRepository.deleteByConfig(configs);
+
             // 验证是否重复提交，先删除后插入
             CorpAppRelationDO corpAppRelationDO = BeanUtils.toBean(createReqVO, CorpAppRelationDO.class);
             corpAppRelationDO.setApplicationId(appliationId);
@@ -105,11 +105,11 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @param
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
-    private Map<Long, ApplicationDO> getApplicationDoMap(String appName) {
-        List<ApplicationDO> pageDOList = appApplicationApi.finAppApplicationByAppName(appName);
+    private Map<Long, ApplicationDTO> getApplicationDoMap(String appName) {
+        List<ApplicationDTO> pageDOList = appApplicationApi.finAppApplicationByAppName(appName);
         return pageDOList.stream()
                 .collect(Collectors.toMap(
-                        ApplicationDO::getId,
+                        ApplicationDTO::getId,
                         Function.identity()
                 ));
     }
@@ -117,7 +117,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
-        Map<Long, ApplicationDO> applicationMap = getApplicationDoMap(pageReqVO.getApplicationName());
+        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getApplicationName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
@@ -158,9 +158,9 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @param applicationMap 应用信息映射表
      * @return CorpApplicationRespVO 响应VO对象
      */
-    private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDO> applicationMap) {
+    private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDTO> applicationMap) {
         CorpApplicationRespVO respVO = BeanUtils.toBean(corpDO, CorpApplicationRespVO.class);
-        ApplicationDO appDo = applicationMap.get(corpDO.getApplicationId());
+        ApplicationDTO appDo = applicationMap.get(corpDO.getApplicationId());
         if (appDo != null) {
             respVO.setApplicationName(appDo.getAppName());
             respVO.setApplicationCode(appDo.getAppCode());
