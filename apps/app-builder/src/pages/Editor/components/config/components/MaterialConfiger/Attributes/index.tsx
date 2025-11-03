@@ -84,10 +84,12 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   const { t } = useI18n();
 
   useSignals();
-  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal();
+  const { curComponentID, curComponentSchema, setCurComponentSchema, setPageComponentSchemas, subTableComponents } =
+    usePageEditorSignal();
 
   const [editData, setEditData] = useState<any>([]);
   const [configs, setConfigs] = useState<any>({});
+  const [isInSubTable, setIsInSubTable] = useState<boolean>(false);
 
   useEffect(() => {
     if (!cpID) {
@@ -98,6 +100,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     setEditData(curComponentSchema.editData);
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);
+
+  useEffect(() => {
+    const keys = Object.keys(subTableComponents) || [];
+    let inSubTable = false;
+    for (let key of keys) {
+      for (let item of subTableComponents[key] || []) {
+        if (item.id === curComponentID) {
+          inSubTable = true;
+        }
+      }
+    }
+    setIsInSubTable(inSubTable);
+  }, [curComponentID, subTableComponents]);
 
   const handlePropsChange = (key: string, value: any) => {
     console.log(`更新了属性: ${key} 值为: `, value);
@@ -211,7 +226,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     label={
                       <>
                         {item.name}
-                        {item.type === CONFIG_TYPES.LABEL_INPUT &&
+                        {!isInSubTable &&
+                          item.type === CONFIG_TYPES.LABEL_INPUT &&
                           typeof configs[item.key]['display'] === 'boolean' && (
                             <Checkbox
                               checked={configs[item.key]['display']}
