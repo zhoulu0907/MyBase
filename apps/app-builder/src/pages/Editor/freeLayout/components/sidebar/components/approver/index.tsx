@@ -39,6 +39,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
       }
     }
   );
+  const [editValue, setEditValue] = useState('');
   const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
 
   function setApprovalConfigData<T extends keyof ApproverConfigDataType>(
@@ -92,12 +93,12 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
 
   function handleSubmit() {
     console.log('approverConfigData ===', approverConfigData);
-    handleConfigSubmit && handleConfigSubmit(approverConfigData, []);
+    handleConfigSubmit && handleConfigSubmit(approverConfigData, editValue);
   }
 
   return (
     <>
-      <Header />
+      <Header changeName={(name) => setEditValue(name)} />
       <div className={styles.approver}>
         <RadioGroup
           className={styles.radioGroup}
