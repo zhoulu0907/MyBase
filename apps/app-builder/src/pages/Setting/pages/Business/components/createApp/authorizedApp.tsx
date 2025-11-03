@@ -102,7 +102,6 @@ export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
     return (
         <div className={className ? className : styles.authorizedApp}>
             <TopHeader
-                className={styles.headerSection}
                 title="添加应用"
                 onAdd={handleAddApplication}
                 isBusiness={false}

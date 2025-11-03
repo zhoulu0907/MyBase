@@ -156,7 +156,7 @@ const AuthorizedApplication = () => {
     
     return (
         <div className={styles.authorizedApplication}>
-            <Tabs activeTab={currentTab} onChange={setCurrentTab} type='rounded' 
+            <Tabs activeTab={currentTab} onChange={setCurrentTab} type='rounded'
             extra={
                 <TopHeader
                     title=""
@@ -168,19 +168,26 @@ const AuthorizedApplication = () => {
             >
                 {statusMapping.map(item => {
                     return <Tabs.TabPane key={item.value} title={item.label}>
-                        <CommonTable
-                            data={currentTableData}
-                            columns={authorizedApplicationColumns}
-                            pageination={{
-                                sizeCanChange: true,
-                                showTotal: true,
-                                total: currentTableData.length,
-                                pageSize: 5,
-                                current: currentPage,
-                                pageSizeChangeResetCurrent: true,
-                                onChange: setCurrentPage,
-                            }}
-                        />
+                            <div style={{ 
+                                tableLayout: 'fixed',
+                                width: '100%',
+                                maxWidth: "1200px" // 强制最大宽度，与容器一致
+                            }}>
+                                <CommonTable
+                                    data={currentTableData}
+                                    columns={authorizedApplicationColumns}
+                                    scroll={{x: 1200}}
+                                    pageination={{
+                                        sizeCanChange: true,
+                                        showTotal: true,
+                                        total: currentTableData.length,
+                                        pageSize: 5,
+                                        current: currentPage,
+                                        pageSizeChangeResetCurrent: true,
+                                        onChange: setCurrentPage,
+                                    }}
+                                />
+                        </div>
                     </Tabs.TabPane>
                 })}
             </Tabs>

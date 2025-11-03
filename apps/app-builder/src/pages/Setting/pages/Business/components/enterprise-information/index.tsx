@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Image, Space } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import EditableFormItem from '../formItem';
@@ -168,7 +168,7 @@ const EnterpriseInfoPage: React.FC = () => {
               </Button>}
           </Tabs.TabPane>
           <Tabs.TabPane key="authorized" title="授权应用">
-            <AuthorizedApp className ={styles.authorizedApp} onEdit={handleEdit} setAddAppModalVisible={(()=>null)}/>
+            <AuthorizedApp className ={styles.tabPanel} onEdit={handleEdit} setAddAppModalVisible={(()=>null)}/>
           </Tabs.TabPane>
         </Tabs>
       </Card>

@@ -4,11 +4,14 @@ interface ICommonTableProps {
     data: any[];
     columns: any[];
     pageination: any;
+    scroll?: {x: number}
 }
 export const CommonTable:React.FC<ICommonTableProps> = ({
     data,
     columns,
     pageination,
+    scroll,
+    ...rest
 }) => {
     const defaultPageination = {
         sizeCanChange: true,
@@ -26,6 +29,8 @@ export const CommonTable:React.FC<ICommonTableProps> = ({
             columns={columns}
             data={data}
             pagination={pageination ? pageination : defaultPageination}
+            scroll={scroll}
+            {...rest}
         />
     );
 };

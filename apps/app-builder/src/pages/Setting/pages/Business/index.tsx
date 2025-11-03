@@ -185,7 +185,7 @@ const BusinessPage: React.FC<IBusinessPageProps> = () => {
         return (
             <div className={styles.businessManagement}>
                 {/* 头部渲染 */}
-                <TopHeader title="创建企业" className={styles.headerSection} onAdd={handleCreateBusiness} setSearchInputValue={setSearchInputValue}/>
+                <TopHeader title="创建企业" onAdd={handleCreateBusiness} setSearchInputValue={setSearchInputValue}/>
                 <CommonTable 
                     data={displayBusinessData}
                     columns={businessManageColumns}

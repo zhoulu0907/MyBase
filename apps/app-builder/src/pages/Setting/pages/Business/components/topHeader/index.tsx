@@ -9,12 +9,11 @@ interface topHeaderProps {
     onAdd?: () => void;
     setSearchInputValue: (value: string)=>void;
     isBusiness?:boolean;
-    className?: string;
 }
 
-export const TopHeader:React.FC<topHeaderProps> = ({type, title, className, onAdd, isBusiness = true, setSearchInputValue}) => {
+export const TopHeader:React.FC<topHeaderProps> = ({type, title, onAdd, isBusiness = true, setSearchInputValue}) => {
     return (
-      <div className={`${styles.topHeader} ${className || ''}`}>
+      <div className={styles.topHeader}>
         {/*顶部左侧 新建企业*/}
         <div className={styles.createBusiness}>
             {type !== "authorized-application" && <Button type="primary" icon={<IconPlus />} onClick={onAdd}>{title}</Button>}
