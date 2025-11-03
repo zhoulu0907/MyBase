@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
-import com.cmsr.onebase.module.flow.core.job.FlowJobMessageHandler;
+import com.cmsr.onebase.module.flow.core.job.FlowJobExecutor;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -41,7 +41,7 @@ public class FlowProcessTest {
     private FlowProcessExecApiImpl flowProcessExecApi;
 
     @Autowired
-    private FlowJobMessageHandler flowJobMessageHandler;
+    private FlowJobExecutor flowJobExecutor;
 
     @Autowired
     private FlowProcessExecService flowProcessExecService;
@@ -94,7 +94,7 @@ public class FlowProcessTest {
         FlowJobMessage jobMessage = new FlowJobMessage();
         jobMessage.setJobType("fld");
         jobMessage.setProcessId(89995954500108288L);
-        flowJobMessageHandler.executeFlow(jobMessage);
+        flowJobExecutor.executeFlow(jobMessage);
     }
 
     @Test
