@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.vo;
 
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.MetaColumn;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaColumn;
 import com.cmsr.onebase.module.etl.core.vo.sub.ColumnDefine;
 import lombok.Data;
 import org.anyline.entity.DataRow;
