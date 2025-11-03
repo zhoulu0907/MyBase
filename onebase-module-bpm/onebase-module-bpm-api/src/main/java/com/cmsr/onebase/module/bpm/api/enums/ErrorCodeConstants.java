@@ -76,6 +76,8 @@ public interface ErrorCodeConstants {
 
     ErrorCode INVALID_ENTITY_ID = new ErrorCode(1_009_002_015, "无效的实体ID");
 
+    ErrorCode APPROVER_NODE_REQUIRED_ENABLED_BTN = new ErrorCode(1_009_002_016, "审批节点至少开启一个按钮");
+
     // ============= 系统相关错误 =============
 
     ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");

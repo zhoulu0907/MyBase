@@ -34,6 +34,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -96,6 +97,25 @@ public class DolphinSchedulerClient {
         this.dsClientStub = retrofitClient.create(DolphinschedulerClientStub.class);
     }
 
+    public List<Long> queryWorkflowCodeListByName(Long projectCode, String flowName) {
+        List<WorkflowDefinitionResp> result = new ArrayList<>();
+        Result<PageInfo<WorkflowDefinitionResp>> pageResp =
+                execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, 1000));
+        if (pageResp.getFailed()) {
+            throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+        }
+        int totalPage = pageResp.getData().getTotalPage();
+        result.addAll(pageResp.getData().getTotalList());
+        for (int i = 2; i <= totalPage; i++) {
+            pageResp = execute(dsClientStub.queryWorkflowPage(projectCode, flowName, i, 1000));
+            if (pageResp.getFailed()) {
+                throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+            }
+            result.addAll(pageResp.getData().getTotalList());
+        }
+        return result.stream().map(WorkflowDefinitionResp::getCode).toList();
+    }
+
     /**
      * 创建工作流
      */
@@ -139,12 +159,14 @@ public class DolphinSchedulerClient {
 
     public Long queryWorkflowByName(Long projectCode, String flowName) {
         Result<WorkflowDetailedResp> queryResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
-        if (queryResp.getFailed()) {
-            throw DolphinschedulerException.of("工作流【%s】查询失败！%s", flowName, queryResp.getMsg());
+        if (queryResp.getFailed() && queryResp.getMsg().contains("does not exist")) {
+            //throw DolphinschedulerException.of("工作流【%s】查询失败！%s", flowName, queryResp.getMsg());
+            return null;
         }
         WorkflowDefinitionResp workflowDef = queryResp.getData().getWorkflowDefinition();
         if (workflowDef == null) {
-            throw DolphinschedulerException.of("工作流【%s】不存在！", flowName, queryResp.getMsg());
+            //throw DolphinschedulerException.of("工作流【%s】不存在！", flowName, queryResp.getMsg());
+            return null;
         }
         return workflowDef.getCode();
     }
@@ -281,12 +303,12 @@ public class DolphinSchedulerClient {
     }
 
     private WorkflowDefinitionResp queryWorkflowByCode(Long projectCode, Long workflowCode) {
-        Result<WorkflowDefinitionResp> queryResp = execute(dsClientStub.queryWorkflowByCode(projectCode, workflowCode));
+        Result<WorkflowDetailedResp> queryResp = execute(dsClientStub.queryWorkflowByCode(projectCode, workflowCode));
 
         if (queryResp.getFailed()) {
             throw DolphinschedulerException.of("工作流【%s】查询失败！%s", workflowCode, queryResp.getMsg());
         }
-        WorkflowDefinitionResp workflowDef = queryResp.getData();
+        WorkflowDefinitionResp workflowDef = queryResp.getData().getWorkflowDefinition();
         if (workflowDef == null) {
             throw DolphinschedulerException.of("工作流【%s】不存在！", workflowCode, queryResp.getMsg());
         }

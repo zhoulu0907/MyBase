@@ -5,9 +5,10 @@ import com.cmsr.onebase.framework.common.exception.ErrorCode;
 public interface ETLErrorCodeConstants {
     // TODO: 后续规范化后需要修改
 
-    // 数据源信息
+    // 通用异常
     ErrorCode UNKNOWN_ERROR                         = new ErrorCode(110000, "未知内部异常");
     ErrorCode DATASOURCE_ILLEGAL                    = new ErrorCode(110001, "数据源信息非法");
+    ErrorCode DATA_CONFLICT                         = new ErrorCode(110002, "未知异常，数据冲突");
     // 数据源类型异常
     ErrorCode DATASOURCE_NOT_SUPPORTED              = new ErrorCode(110101, "数据源类型不支持");
     ErrorCode ILLEGAL_DATASOURCE_TYPE               = new ErrorCode(110102, "数据源类型异常");
@@ -25,4 +26,11 @@ public interface ETLErrorCodeConstants {
 
     // 元数据类型异常
     ErrorCode ILLEGAL_METADATA_TYPE                 = new ErrorCode(110601, "元数据类型异常");
+
+    // 工作流异常
+    ErrorCode WORKFLOW_NOT_EXIST                    = new ErrorCode(110700, "ETL流程不存在");
+    ErrorCode WORKFLOW_ENABLED                      = new ErrorCode(110701, "ETL流程已启用，请下线后再试");
+
+    // 调度类异常
+    ErrorCode ILLEGAL_SCHEDULE_TYPE                 = new ErrorCode(110901, "非法的调度类型");
 }

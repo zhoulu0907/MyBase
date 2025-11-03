@@ -33,9 +33,9 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * @Author：huangjie
@@ -107,7 +107,7 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
         }
     }
 
-    private void onApplicationDelete(Long applicationId) {
+    public void onApplicationDelete(Long applicationId) {
         deleteJob(applicationId);
     }
 
@@ -131,15 +131,17 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
         JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartTimeNodeData startTimeNodeData = (StartTimeNodeData) jsonGraph.getStartNode().getData();
         FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
-        String jobId;
+        JobCreateRequest jobCreateRequest = consumerSettingParams(startTimeNodeData);
+        jobCreateRequest.setApplicationId(flowProcessDO.getApplicationId());
+        jobCreateRequest.setProcessId(flowProcessDO.getId());
+        jobCreateRequest.setProcessName(flowProcessDO.getProcessName());
+        String jobId = jobClient.startJob(jobCreateRequest);
         if (flowProcessTimeDO == null) {
-            jobId = jobClient.startJob(flowProcessDO.getId(), consumerSettingParams(startTimeNodeData));
             flowProcessTimeDO = new FlowProcessTimeDO();
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeRepository.insert(flowProcessTimeDO);
         } else {
-            jobId = jobClient.startJob(flowProcessDO.getId(), flowProcessTimeDO.getJobId(), consumerSettingParams(startTimeNodeData));
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeRepository.update(flowProcessTimeDO);
         }
@@ -158,15 +160,17 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
         JsonGraph jsonGraph = JsonGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartDateFieldNodeData startDateFieldNodeData = (StartDateFieldNodeData) jsonGraph.getStartNode().getData();
         FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId());
-        String jobId;
+        JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
+        jobCreateRequest.setApplicationId(flowProcessDO.getApplicationId());
+        jobCreateRequest.setProcessId(flowProcessDO.getId());
+        jobCreateRequest.setProcessName(flowProcessDO.getProcessName());
+        String jobId = jobClient.startJob(jobCreateRequest);
         if (flowProcessDateFieldDO == null) {
-            jobId = jobClient.startJob(flowProcessDO.getId(), consumerSettingParams(startDateFieldNodeData));
             flowProcessDateFieldDO = new FlowProcessDateFieldDO();
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
             flowProcessDateFieldDO.setJobId(jobId);
             flowProcessDateFieldRepository.insert(flowProcessDateFieldDO);
         } else {
-            jobId = jobClient.startJob(flowProcessDO.getId(), flowProcessDateFieldDO.getJobId(), consumerSettingParams(startDateFieldNodeData));
             flowProcessDateFieldDO.setJobId(jobId);
             flowProcessDateFieldRepository.update(flowProcessDateFieldDO);
         }
@@ -174,37 +178,14 @@ public class FlowChangeEventJobHandler implements MessageListener, ApplicationRu
 
     private JobCreateRequest consumerSettingParams(StartDateFieldNodeData startDateFieldNodeData) {
         JobCreateRequest jobCreateRequest = new JobCreateRequest();
-        jobCreateRequest.setStartTime("2010-10-01 00:00:00");
+        jobCreateRequest.setStartTime(LocalDateTime.now().format(JobClient.DATETIME_FORMATTER));
         jobCreateRequest.setEndTime("2050-12-30 23:59:59");
         jobCreateRequest.setCrontab(startDateFieldNodeData.createCronExpression());
         return jobCreateRequest;
     }
 
-
     public void deleteJob(Long applicationId) {
-        List<FlowProcessDO> processDOS = flowProcessRepository.findByApplicationId(applicationId);
-        for (FlowProcessDO flowProcessDO : processDOS) {
-            if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
-                deleteTimeJob(flowProcessDO);
-            }
-            if (FlowTriggerTypeEnum.isDateField(flowProcessDO.getTriggerType())) {
-                deleteDateFieldJob(flowProcessDO);
-            }
-        }
-    }
-
-    private void deleteTimeJob(FlowProcessDO flowProcessDO) {
-        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
-        jobClient.deleteJob(flowProcessTimeDO.getJobId());
-        flowProcessTimeDO.setJobId("0");
-        flowProcessTimeRepository.update(flowProcessTimeDO);
-    }
-
-    private void deleteDateFieldJob(FlowProcessDO flowProcessDO) {
-        FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId());
-        jobClient.deleteJob(flowProcessDateFieldDO.getJobId());
-        flowProcessDateFieldDO.setJobId("0");
-        flowProcessDateFieldRepository.update(flowProcessDateFieldDO);
+        jobClient.deleteJob(applicationId);
     }
 
     @Override

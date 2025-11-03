@@ -143,6 +143,10 @@ public class FlowChangeEventCacheHandler implements MessageListener, Application
     private void onProcessUpdate(FlowProcessDO processDO) {
         log.info("处理流程更新事件：{}", processDO.getId());
         JsonGraph jsonGraph = JsonGraphBuilder.build(processDO.getProcessDefinition());
+        if (jsonGraph == null) {
+            log.error("流程定义错误：{}", processDO);
+            return;
+        }
         String flowChain = jsonGraph.toFlowChain();
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
