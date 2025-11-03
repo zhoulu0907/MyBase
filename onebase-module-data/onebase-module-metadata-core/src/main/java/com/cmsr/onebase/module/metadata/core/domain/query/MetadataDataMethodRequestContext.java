@@ -61,6 +61,11 @@ public class MetadataDataMethodRequestContext {
      */
     private MetadataPermissionContext permissionContext;
 
+    /**
+     * 权限校验开关， 默认false
+     */
+    private boolean enableAuthCheck;
+
 
 
 

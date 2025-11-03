@@ -42,6 +42,7 @@ import org.anyline.entity.PageNavi;
 import org.anyline.entity.DefaultPageNavi;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -95,6 +96,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     @Resource
     private UidGenerator uidGenerator;
 
+    @Value("${metadata.runtime.enable-auth-check:false}")
+    private boolean enableAuthCheck;
+
     @Resource
     private com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService autoNumberService;
     // ========== 动态数据操作方法实现 ==========
@@ -116,7 +120,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     public Map<String, Object> updateData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
         // 获取当前登录用户的运行时权限
-        this.fetchRuntimePermission(metadataDataMethodRequestContext);
+//        this.fetchRuntimePermission(metadataDataMethodRequestContext);
 
         // 使用新的统一流程处理更新操作
 
@@ -491,7 +495,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     private void fetchRuntimePermission(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
-        if (true) {
+        metadataDataMethodRequestContext.setEnableAuthCheck(enableAuthCheck);
+
+        if (!enableAuthCheck) {
             return;
         }
         // 仅 runtime 客户端需要校验权限
