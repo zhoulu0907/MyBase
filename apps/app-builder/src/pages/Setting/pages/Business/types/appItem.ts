@@ -14,7 +14,7 @@ export interface AuthorizedAppRef {
 export interface IAuthorizedAppProps {
     className?: string;
     setAddAppModalVisible: (visible:boolean) => void;
-    onEdit: (name: string)=>void;
+    onEdit: (record?: AppItem)=> void;
 }
 
 export interface statusProps {

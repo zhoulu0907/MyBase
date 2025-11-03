@@ -6,15 +6,10 @@ interface UseTableDataReturn {
   displayData: AppItem[];
   searchValue: string;
   currentPage: number;
-  // 内部搜索逻辑（仅处理表格过滤）
   setSearchValue: (value: string) => void;
-  // 内部分页逻辑
   setCurrentPage: (page: number) => void;
-  // 内部编辑（返回要编辑的项）
   getEditItem: (key: string | number) => AppItem | undefined;
-  // 内部删除（直接修改表格数据）
   removeItem: (key: string | number) => void;
-  // 内部新增（仅在表格数据中添加，如需外部交互可调用此方法后触发回调）
   addItem: (newItem: AppItem) => void;
 }
 

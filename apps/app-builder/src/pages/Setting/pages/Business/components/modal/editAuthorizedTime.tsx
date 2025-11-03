@@ -1,0 +1,48 @@
+import { DatePicker, Form, Modal } from "@arco-design/web-react";
+
+interface IEditAuthorizedModal {
+    visible: boolean;
+    setVisible: (visible: boolean) =>void;
+    onUpdateData: (data: any)=>void;
+}
+export const EditAuthorizedTime:React.FC<IEditAuthorizedModal> = ({visible, setVisible, onUpdateData}) => {
+    const [editForm] = Form.useForm();
+
+    const handleUpdateData = async() => {
+        const values = await editForm.validate();
+        onUpdateData(values);
+    }
+    return (
+        <Modal
+            title={
+                <div style={{ textAlign: 'left' }}>
+                编辑授权时间
+                </div>
+            } 
+            visible={visible}
+            onCancel={()=>setVisible(false)}
+            onOk={handleUpdateData}
+            >
+            <Form form={editForm}>
+                <Form.Item
+                    label="授权时间"
+                    field="appTime"
+                    rules={[{ required: true, message: '请选择授权时间' }]}
+                    normalize={(value) => {
+                    return {
+                        effectTime: value && value[0],
+                        expireTime: value && value[1]
+                        };
+                    }}
+                    formatter={(value) => {
+                    return value && value.effectTime ? [value.effectTime, value.expireTime] : [];
+                    }}
+                >
+                    <DatePicker.RangePicker showTime />
+                </Form.Item>
+            </Form>
+        </Modal>
+    )
+}
+
+export default EditAuthorizedTime;

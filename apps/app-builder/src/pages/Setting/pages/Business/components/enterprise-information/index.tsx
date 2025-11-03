@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Image, Space } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import EditableFormItem from '../formItem';
 import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useParams } from 'react-router-dom';
+import EditAuthorizedTime from '../modal/editAuthorizedTime';
+import { CreateAppModal } from '../modal/createAppModal';
+import type { AppItem, AuthorizedAppRef } from '../../types/appItem';
+import { useTableData } from '../../hooks/useTable';
 
 // 企业信息数据模型
 interface EnterpriseInfo {
@@ -30,10 +34,13 @@ const EnterpriseInfoPage: React.FC = () => {
   };
 
   const {activeTab} = useParams();
+  const authorizedAppRef = useRef<AuthorizedAppRef>(null);
+  const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
   const [formData, setFormData] = React.useState<EnterpriseInfo>(enterpriseData);
-
+  const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
+  const {displayData} = useTableData();
   // 处理表单数据变更
   const handleChange = (field: keyof EnterpriseInfo, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -47,7 +54,31 @@ const EnterpriseInfoPage: React.FC = () => {
     setIsEdited(!isEdited);
   };
 
-  const handleEdit = () => {
+  //点击modal的取消按钮
+  const handleCloseModal = () => {
+      setAddAppModalVisible(false);
+  }
+
+
+  const handleEdit = (record?: any) => {
+    setVisible(true);
+  }
+
+  // 提交新应用（弹窗确认后调用）
+  const handleAddSubmit = (newAppData: any) => {
+      const newData: AppItem = {
+          key: displayData.length + 1,
+          appId: "113",
+          effectTime: newAppData.appTime.effectTime,
+          expireTime: newAppData.appTime.expireTime,
+          appName: newAppData.appName[0],
+          version: "V2.3"
+      };
+      authorizedAppRef.current?.addNewApp(newData);
+      setAddAppModalVisible(false);
+  };
+
+  const handleUpdateTime = () => {
 
   }
 
@@ -168,10 +199,13 @@ const EnterpriseInfoPage: React.FC = () => {
               </Button>}
           </Tabs.TabPane>
           <Tabs.TabPane key="authorized" title="授权应用">
-            <AuthorizedApp className ={styles.tabPanel} onEdit={handleEdit} setAddAppModalVisible={(()=>null)}/>
+            <AuthorizedApp ref={authorizedAppRef} className ={styles.tabPanel} onEdit={handleEdit} setAddAppModalVisible={setAddAppModalVisible}/>
           </Tabs.TabPane>
         </Tabs>
       </Card>
+      <EditAuthorizedTime visible={visible} setVisible={setVisible} onUpdateData={handleUpdateTime} />
+       {/* 创建应用modal */}
+      <CreateAppModal visible={addAppModalVisible} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
     </div>
   );
 };

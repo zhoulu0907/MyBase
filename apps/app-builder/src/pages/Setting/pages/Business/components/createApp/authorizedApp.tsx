@@ -43,7 +43,7 @@ export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
     //处理编辑
     const handleEditAuthorizedApp = (key: string | number) => {
         const item = getEditItem(key);
-        onEdit(item?.appName ? item.appName : "");
+        onEdit(item);
     };
 
     //点击创建应用打开modal
