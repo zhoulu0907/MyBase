@@ -475,6 +475,13 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      */
     protected ProcessContext initializeContext(MetadataBusinessEntityDO entityDO, List<MetadataEntityFieldDO> fields, MetadataDataMethodRequestContext requestContext) {
         ProcessContext processContext = new ProcessContext();
+        processContext.setRequestContext(requestContext);
+
+        //如果追踪ID为空，那么创建一个新的追踪ID。如果不为空，则使用传入的追踪ID。
+        if (requestContext.getTraceId() == null) {
+            requestContext.setTraceId(UUID.randomUUID().toString());
+        }
+        processContext.setTraceId(requestContext.getTraceId());
         processContext.setEntity(entityDO);
 
 

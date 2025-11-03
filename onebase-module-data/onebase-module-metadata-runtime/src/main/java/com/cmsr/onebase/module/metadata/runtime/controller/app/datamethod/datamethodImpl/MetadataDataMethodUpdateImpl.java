@@ -213,7 +213,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         data.put("id",context.getId());//存放id字段
         Map fieldData = convertNameToId(entityId,data);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setTraceId(context.getRequestContext().getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
         reqDTO.setFieldData(fieldData);
@@ -237,7 +237,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         data.put("id",context.getId());//存放id字段
         Map fieldData = convertNameToId(entityId,data);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setTraceId(context.getRequestContext().getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
         reqDTO.setFieldData(fieldData);

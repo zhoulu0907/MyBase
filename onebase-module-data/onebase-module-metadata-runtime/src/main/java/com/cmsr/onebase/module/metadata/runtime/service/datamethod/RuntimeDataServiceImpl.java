@@ -88,7 +88,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         methodCoreContext.setEntityId(reqVO.getEntityId());
         methodCoreContext.setData(dataByName);
         methodCoreContext.setMethodCode(reqVO.getMethodCode());
-        methodCoreContext.setBusinessTraceId(reqVO.getBusinessTraceId());
+        methodCoreContext.setTraceId(reqVO.getTraceId());
         methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
         if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
