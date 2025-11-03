@@ -116,7 +116,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     public Map<String, Object> updateData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
         // 获取当前登录用户的运行时权限
-        this.fetchRuntimePermission(metadataDataMethodRequestContext);
+//        this.fetchRuntimePermission(metadataDataMethodRequestContext);
 
         // 使用新的统一流程处理更新操作
 
@@ -491,9 +491,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     private void fetchRuntimePermission(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
-        if (true) {
-            return;
-        }
+//        if (true) {
+//            return;
+//        }
         // 仅 runtime 客户端需要校验权限
         if (metadataDataMethodRequestContext.getClientTypeEnum() != ClientTypeEnum.RUNTIME) {
             return;

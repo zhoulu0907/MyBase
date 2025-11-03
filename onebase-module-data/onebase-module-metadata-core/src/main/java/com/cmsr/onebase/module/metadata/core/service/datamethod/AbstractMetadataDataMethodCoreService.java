@@ -511,7 +511,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                 context.getOperationType());
 
         // 使用权限管理器执行完整的权限校验流程
-//        permissionManager.checkPermission(context);
+        permissionManager.checkPermission(context);
 
         log.info("权限校验完成：entityId={}", context.getEntityId());
     }
