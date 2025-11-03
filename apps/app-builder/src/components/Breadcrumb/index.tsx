@@ -45,7 +45,7 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
     // 如果路径以/onebase开头，移除/onebase
     const segments = pathSegments[0] === 'onebase' ? pathSegments.slice(1) : pathSegments;
 
-    let currentPath = '/onebase';
+    let currentPath = '/onebase/setting';
     segments.forEach((segment, index) => {
       if (segment == 'setting') {
         return;
@@ -85,6 +85,9 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
           break;
         case 'tenant':
           title = t('sider.tenant');
+          break;
+        case 'edit':
+          title = t('sider.edit');
           break;
         default:
           title = segment;

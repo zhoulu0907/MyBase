@@ -12,6 +12,7 @@ import SystemDictPage from './pages/SystemDict';
 import SpaceInfo from './pages/SpaceInfo';
 import EnterpriseInfo from './pages/EnterpriseInfo';
 import TenantPage from './pages/Tenant';
+import TenantEditPage from './pages/Tenant/edit';
 import UserPage from './pages/User';
 
 import styles from './index.module.less';
@@ -46,6 +47,7 @@ const SettingPage: React.FC = () => {
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="enterprise" element={<TenantPage />} />
                 <Route path="tenant" element={<TenantPage />} />
+                <Route path="tenant/edit" element={<TenantEditPage />} />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>
             </div>
