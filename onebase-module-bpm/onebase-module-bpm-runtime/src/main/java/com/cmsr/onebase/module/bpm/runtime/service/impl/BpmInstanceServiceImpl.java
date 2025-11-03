@@ -13,7 +13,7 @@ import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.api.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
@@ -89,7 +89,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     private HisTaskService hisTaskService;
 
     @Resource
-    private BpmFlowInsExtRepository flowInsExtRepository;
+    private BpmFlowInsBizExtRepository flowInsExtRepository;
 
     @Resource
     private DeptApi deptApi;

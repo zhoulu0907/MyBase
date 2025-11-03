@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
  * @date 2025-10-28
  */
 @Repository
-public class BpmFlowInsExtRepository extends DataRepository<BpmFlowInsBizExtDO> {
-    public BpmFlowInsExtRepository() {
+public class BpmFlowInsBizExtRepository extends DataRepository<BpmFlowInsBizExtDO> {
+    public BpmFlowInsBizExtRepository() {
         super(BpmFlowInsBizExtDO.class);
     }
 }
