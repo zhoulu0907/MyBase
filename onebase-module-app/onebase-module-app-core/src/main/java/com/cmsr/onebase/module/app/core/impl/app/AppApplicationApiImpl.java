@@ -28,6 +28,12 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     public List<ApplicationDO> finAppApplicationByAppName(String appName) {
+
         return  appApplicationRepository.finAppApplicationByAppName(appName);
+    }
+
+    @Override
+    public List<ApplicationDO> findAppApplicationAll() {
+        return  appApplicationRepository.finAppApplicationAll();
     }
 }

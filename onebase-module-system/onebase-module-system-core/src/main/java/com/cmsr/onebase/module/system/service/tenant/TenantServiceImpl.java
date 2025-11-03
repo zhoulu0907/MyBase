@@ -86,6 +86,7 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     @Lazy // 延迟，避免循环依赖报错
     private AdminUserService userService;
+
     @Resource
     private RoleService roleService;
     @Resource
@@ -495,7 +496,7 @@ public class TenantServiceImpl implements TenantService {
      * @return
      */
     public Map<Integer, Integer> findAppCount() {
-        List<ApplicationDO> allList = null;// appApplicationApi.finAppApplicationAll();
+        List<ApplicationDO> allList = appApplicationApi.findAppApplicationAll();
         return allList.stream()
                 .collect(Collectors.groupingBy(
                         app -> app.getTenantId().intValue(),  // Long转Integer

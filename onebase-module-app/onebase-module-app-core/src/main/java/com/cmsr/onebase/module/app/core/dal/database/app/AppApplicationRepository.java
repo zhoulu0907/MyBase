@@ -91,4 +91,10 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
+
+    public List<ApplicationDO> finAppApplicationAll() {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
 }
