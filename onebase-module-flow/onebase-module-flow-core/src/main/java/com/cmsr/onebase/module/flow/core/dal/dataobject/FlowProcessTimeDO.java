@@ -17,4 +17,6 @@ public class FlowProcessTimeDO extends BaseDO {
     @Column(name = "job_id", length = 64)
     private String jobId;
 
+    @Column(name = "job_status", length = 19)
+    private String jobStatus;
 }
