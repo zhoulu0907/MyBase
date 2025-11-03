@@ -30,12 +30,21 @@ export const AUTO_CODE_RESET_CYCLE = {
 } as const;
 
 export const DIGIT_DEFAULT = 4;
+export const START_VALUE_DEFAULT = 1;
 export const DATE_FORMAT_DEFAULT = '年月日';
-
-// TODO 待确认后补充
-export const RULE_ENABLED = {
-  ENABLE: 1,
-  DISABLE: 0
+export const CHECK_CONST = { IS_TRUE: 1, IS_FALSE: 0 };
+export const CONSTANTS = {
+  ENABLED: 1,
+  DISABLED: 0
 } as const;
 
-export const CHECK_CONST = { IS_TRUE: 1, IS_FALSE: 0 };
+// 自动编号默认配置
+export const AUTO_CODE_NUMBER_DEFAULT_CONFIG = {
+  isEnabled: CONSTANTS.ENABLED,
+  numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
+  digitWidth: DIGIT_DEFAULT,
+  overflowContinue: CONSTANTS.DISABLED,
+  resetOnInitialChange: CONSTANTS.DISABLED,
+  initialValue: START_VALUE_DEFAULT,
+  resetCycle: AUTO_CODE_RESET_CYCLE.NONE
+} as const;

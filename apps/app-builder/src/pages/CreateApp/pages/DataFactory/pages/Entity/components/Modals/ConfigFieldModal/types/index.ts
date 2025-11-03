@@ -19,7 +19,9 @@ export interface FieldFormValues {
   isDeleted?: boolean;
   displayName?: string;
   options?: { optionLabel: string; optionValue: string }[];
-  autoNumberConfig?: AutoNumberRule;
+  dictTypeId?: string; // 字典类型ID（用于引用字典）
+  autoNumber?: AutoNumberRule; // 前端更新后的自动编号配置（提交给后端时使用）
+  autoNumberConfig?: AutoNumberRule; // 后端返回的自动编号配置（用于初始化和回显）
   constraints?: {
     lengthEnabled: number;
     minLength: number;
@@ -86,7 +88,7 @@ export interface FieldConfigPopoverProps {
   fieldType: string;
   fieldId: string;
   field: FieldFormValues;
-  onConfirm: (fieldType: string, fieldId: string, configData: any) => void;
+  onConfirm: (fieldType: string, fieldId: string, configData: any, dictTypeId?: string) => void;
   onCancel: (fieldType: string) => void;
   fields: any[];
 }
@@ -100,11 +102,12 @@ export interface SortableTableProps {
 
 // 创建自动编号规则返回值
 export interface AutoNumberRuleResponce {
-  mode?: string;
+  numberMode?: string;
   digitWidth: number;
   overflowContinue?: number;
   resetCycle?: string;
-  nextRecordStartValue?: number;
+  resetOnInitialChange?: number;
+  startValue?: number;
 }
 // 创建自动编号规则
 export interface AutoNumberRule {
@@ -114,7 +117,7 @@ export interface AutoNumberRule {
   overflowContinue: number;
   initialValue: number;
   resetCycle: string;
-  nextRecordStartValue?: number;
+  resetOnInitialChange?: number;
   startValue?: number;
   rules: AutoNumberRuleItem[];
 }

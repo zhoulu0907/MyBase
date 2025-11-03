@@ -322,6 +322,12 @@ export interface IVerifyConfigType {
   type: typeof CONFIG_TYPES.VERIFY;
 }
 
+export interface INumberFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.NUMBER_FORMAT;
+}
+
 // 文本输入框配置
 // export interface ISupportFileTypeConfigType {
 //   key: string;

@@ -16,6 +16,7 @@ import { NodeWrapperStyle } from './styles';
 import './node-wrapper.less';
 import iconCopy from '../../assets/copy.svg';
 import iconDelete from '../../assets/delete.svg';
+import { WorkflowNodeType } from '../../nodes/constants';
 
 export interface NodeWrapperProps {
   isScrollToView?: boolean;
@@ -66,16 +67,19 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
 
   return (
     <>
-      {(isHover || selected) && (
-        <div className="showMore" ref={childRef} onMouseOut={onMouseOut}>
-          <div className="iconBox" onClick={copyNode}>
-            <img src={iconCopy} />
+      {(isHover || selected) &&
+        nodeRender.type !== WorkflowNodeType.START &&
+        nodeRender.type !== WorkflowNodeType.END &&
+        nodeRender.type !== WorkflowNodeType.INITIATION && (
+          <div className="showMore" ref={childRef} onMouseOut={onMouseOut}>
+            <div className="iconBox" onClick={copyNode}>
+              <img src={iconCopy} />
+            </div>
+            <div className="iconBox" onClick={deleteNode}>
+              <img src={iconDelete} />
+            </div>
           </div>
-          <div className="iconBox" onClick={deleteNode}>
-            <img src={iconDelete} />
-          </div>
-        </div>
-      )}
+        )}
       <NodeWrapperStyle
         className={selected ? 'selected' : ''}
         ref={nodeRef}

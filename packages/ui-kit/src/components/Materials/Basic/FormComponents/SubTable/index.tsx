@@ -17,10 +17,15 @@ import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { useEffect, useState } from 'react';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { ENTITY_TYPE_VALUE } from '@onebase/app';
+import { useAppEntityStore } from 'src/signals/store_entity'
+
 import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
+  const { mainEntity, subEntities } = useAppEntityStore();
+
   const {
     curComponentID,
     setCurComponentID,
@@ -82,11 +87,16 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   const onSubAdd = (e: any) => {
     const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
     const itemType = e.item.getAttribute('data-cp-type');
-    // 不允许拖拽主、子表嵌套
+    const fieldId = e.item.getAttribute('data-field-id');
+    const entityId = e.item.getAttribute('data-entity-id');
+
+    // 不允许拖拽主、子表嵌套、主表字段
     if (
-      itemType === 'entity' ||
+      itemType === ENTITY_TYPE_VALUE.MAIN ||
+      itemType === ENTITY_TYPE_VALUE.SUB ||
       itemType == ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
-      itemType == ENTITY_COMPONENT_TYPES.SUB_ENTITY
+      itemType == ENTITY_COMPONENT_TYPES.SUB_ENTITY ||
+      entityId && entityId === mainEntity.entityId
     ) {
       return;
     }
@@ -104,7 +114,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       return;
     }
 
-    const entityId = e.item.getAttribute('data-entity-id');
     // 拖拽的子表项必须是同一个子表
     if (entityId) {
       const sameField = subTableComponents[id]?.every((ele) => {
@@ -120,13 +129,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
     const schema = getComponentSchema(itemType as any);
 
-    const fieldId = e.item.getAttribute('data-field-id');
     const itemDisplayName = e.item.getAttribute('data-label') || e.item.getAttribute('data-cp-displayname');
     schema.config = schemaConfig;
     schema.config.cpName = itemDisplayName;
     schema.config.label.text = itemDisplayName;
     schema.config.label.display = false;
-    schema.config.dataField = [entityId, fieldId];
+    schema.config.dataField = entityId ? [entityId, fieldId] : [];
     schema.config.id = cpID;
     const props = {
       id: cpID,
@@ -172,8 +180,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   }, []);
 
   useEffect(() => {
-    console.log('subTableDataLength: ', subTableDataLength.value);
-
     let newSubTableData: any[] = [];
     for (let i = 0; i < subTableDataLength.value[id]; i++) {
       newSubTableData.push({ key: `${i}` });
@@ -196,6 +202,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ),
         dataIndex: column.id,
         key: column.id,
+        bodyCellStyle:{
+          padding: '4px 0'
+        },
         render: (_text: string, _record: any, index: number) => {
           const config = {
             ...pageComponentSchemas[column.id].config,
@@ -266,7 +275,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         labelCol={{
           style: { width: labelColSpan, flex: 'unset' }
         }}
-        wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           width: '100%',
@@ -284,6 +292,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 scroll={{ x: 'max-content' }}
                 style={{
                   width: '100%'
+                }}
+                border={{
+                  headerCell: true,
+                  wrapper: true,
                 }}
                 rowKey="id"
                 pagination={false}
@@ -320,22 +332,25 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
                 );
                 // 已有的数据源子表id
-                const dataField = pageComponentSchemas?.[dataFieldPage?.id].config?.dataField?.[0];
+                const dataField = pageComponentSchemas?.[dataFieldPage?.id]?.config?.dataField?.[0];
                 /**
                  * 不允许拖拽主、子表嵌套
                  * 拖拽的子表项必须是同一个子表
                  */
-                setSubTableComponents(
-                  id,
-                  newList.filter(
-                    (ele) => ele.type !== 'entity' && (!ele.entityID || !dataField || ele.entityID === dataField)
-                  )
-                );
+                const newSubList = (newList || []).filter((ele) => {
+                  // 主表、子表
+                  const isTable = ele.type === ENTITY_TYPE_VALUE.MAIN || ele.type === ENTITY_TYPE_VALUE.SUB;
+                  // 主表数据
+                  const isMain = ele.entityID === mainEntity.entityId;
+                  // 同一个子表
+                  const isSub = !ele.entityID || !dataField || ele.entityID === dataField
+                  return !isTable && !isMain && isSub;
+                })
+
+                setSubTableComponents(id, newSubList);
               }}
               onAdd={onSubAdd}
-              group={{
-                name: COMPONENT_GROUP_NAME
-              }}
+              group={{ name: COMPONENT_GROUP_NAME }}
               sort={true}
               forceFallback={true}
               animation={150}

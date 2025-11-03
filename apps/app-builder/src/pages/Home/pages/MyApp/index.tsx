@@ -222,7 +222,7 @@ const MyAppPage: React.FC = () => {
   };
 
   /* 跳转到编辑页 */
-  const nagivateToAppPage = (appId: string) => {
+  const navigateToAppPage = (appId: string) => {
     setCurAppId(appId);
     const newWindow = window.open('', '_blank');
     if (newWindow) {
@@ -232,7 +232,7 @@ const MyAppPage: React.FC = () => {
     }
   };
 
-  const nagivateToDataFactory = (appId: string) => {
+  const navigateToDataFactory = (appId: string) => {
     setCurAppId(appId);
     const newWindow = window.open('', '_blank');
     if (newWindow) {
@@ -272,7 +272,7 @@ const MyAppPage: React.FC = () => {
           key="1"
           onClick={(e) => {
             e.stopPropagation();
-            nagivateToAppPage(item.id);
+            navigateToAppPage(item.id);
           }}
         >
           编辑
@@ -382,7 +382,13 @@ const MyAppPage: React.FC = () => {
           </div>
 
           {/* 我的应用列表 */}
-          <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中..." ref={appContainerRef}>
+          <Spin
+            loading={loading}
+            size={40}
+            style={{ width: '100%', height: '100%' }}
+            tip="加载中..."
+            ref={appContainerRef}
+          >
             <div className={styles.myAppList}>
               {applicationEmpty && !loading && (
                 <div className={styles.applicationEmpty}>
@@ -467,7 +473,7 @@ const MyAppPage: React.FC = () => {
                       type="outline"
                       long
                       onClick={() => {
-                        nagivateToDataFactory(item.id);
+                        navigateToDataFactory(item.id);
                       }}
                     >
                       进入应用

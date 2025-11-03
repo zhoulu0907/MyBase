@@ -40,6 +40,18 @@ export interface SubMitInstanceReq {
   businessId: string;
   entity: any;
 }
+export interface GetMyCreatePageListReq {
+  pageNo?: number;
+  pageSize?: number;
+  processTitle?: string;
+  initiator?: string;
+  formSummary?: string;
+  sortType?: string;
+  appId: string;
+  submitTimeStart?: string;
+  submitTimeEnd?: string;
+  flowStatus?:string;
+}
 
 export enum FLOWSTATUS_TYPE {
   IN_APPROVAL = 'in_approval',
@@ -79,5 +91,6 @@ export enum TASKMENU_TYPE {
 
 export enum LISTTYPE {
   WILLDO = 'willdo',
-  IDONE = 'idone'
+  IDONE = 'idone',
+  ICREATED = 'icreated'
 }

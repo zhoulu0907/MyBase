@@ -36,7 +36,8 @@ export interface XColumnLayoutConfig extends ICommonBaseType {
    * 布局宽度
    */
   width: TSelectDefaultType<TColumnLayouTWidthSelectKeyType>;
-
+  // 页面类型
+  pageType?:string;
 }
 
 export interface XColumnLayoutSchema {

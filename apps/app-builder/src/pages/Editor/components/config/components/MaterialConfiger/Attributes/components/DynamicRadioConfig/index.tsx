@@ -1,4 +1,3 @@
-// import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Form, Input, Radio, Space } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 // import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
