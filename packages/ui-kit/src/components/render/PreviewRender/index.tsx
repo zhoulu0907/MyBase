@@ -233,7 +233,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} pageType={pageType} />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
         return (
