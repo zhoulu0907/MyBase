@@ -30,7 +30,7 @@ export const ApproverNodeRegistry: FlowNodeRegistry = {
   canDelete(ctx, node) {
     return node.parent !== ctx.document.root;
   },
-  onAdd(ctx, from) {
+  onAdd() {
     return {
       id: `executor_${nanoid(5)}`,
       type: 'executor',
