@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.api.dto.node;
+package com.cmsr.onebase.module.bpm.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class GlobalConfigExtDTO {
      /**
      * 审批人为空时
      */
-     private String autoApproveIsNll;
+     private String autoApproveIsEmpty;
      /**
      * 流程撤回规则
      */
@@ -32,25 +32,13 @@ public class GlobalConfigExtDTO {
         /**
          * 流程发起人终止权限
          */
-      private  String  InitiTermiFlowPerm ;
+      private  String  initiTermiFlowPerm ;
 
       /**
       * 表单摘要
       */
-      private  List<FieldConfigDTO>  formSummary;
+      private  List<FieldConfigDTO>  formSummaryConfigs;
 
-
-    @Data
-      public static class FlowRecallRule {
-          /**
-          * 撤回权限
-          */
-         private String  recallPermission;
-         /**
-          * 撤回时机
-          */
-         private String  recallTiming;
-      }
     @Data
     public static class FieldConfigDTO {
         /**

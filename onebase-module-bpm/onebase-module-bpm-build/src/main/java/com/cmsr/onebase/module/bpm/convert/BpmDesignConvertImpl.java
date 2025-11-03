@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.bpm.convert;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
+import com.cmsr.onebase.module.bpm.api.dto.node.base.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.api.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
@@ -112,10 +113,11 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
         // 构建ext
         BpmDefinitionExtDTO extDto = new BpmDefinitionExtDTO();
-
+        BpmGlobalConfigDTO globalConfigDTO = JsonUtils.parseObject(flowDesignVO.getGlobalConfig(), BpmGlobalConfigDTO.class);
         if (flowDesignVO.getVersionAlias() != null) {
             extDto.setVersionAlias(flowDesignVO.getVersionAlias());
             extDto.setAppId(flowDesignVO.getAppId());
+            extDto.setGlobalConfig(globalConfigDTO);
         }
 
         defJson.setExt(JsonUtils.toJsonString(extDto));

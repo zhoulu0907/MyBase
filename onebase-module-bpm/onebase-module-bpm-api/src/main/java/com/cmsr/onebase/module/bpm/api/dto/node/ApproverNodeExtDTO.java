@@ -34,10 +34,4 @@ public class ApproverNodeExtDTO extends BaseNodeExtDTO {
      */
     private FieldPermCfgDTO fieldPermConfig;
 
-    /**
-     * 全局设置
-     */
-    @Valid
-    @NotNull(message = "全局设置不能为空")
-    private GlobalConfigDTO globalConfig;
 }

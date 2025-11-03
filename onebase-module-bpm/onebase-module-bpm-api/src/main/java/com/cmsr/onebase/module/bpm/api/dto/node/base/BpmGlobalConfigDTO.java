@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.api.dto.node.base;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.GlobalConfigExtDTO;
+import com.cmsr.onebase.module.bpm.api.dto.GlobalConfigExtDTO;
 import lombok.Data;
 /**
  * 全局设置
@@ -9,7 +9,7 @@ import lombok.Data;
  * @date 2025/10/24
  */
 @Data
-public class GlobalConfigDTO {
+public class BpmGlobalConfigDTO {
     /**
      * 是否使用全局配置
      */
@@ -17,5 +17,5 @@ public class GlobalConfigDTO {
     /**
      * 全局配置
      */
-    private GlobalConfigExtDTO globalConfig;
+    private GlobalConfigExtDTO globalConfigs;
 }

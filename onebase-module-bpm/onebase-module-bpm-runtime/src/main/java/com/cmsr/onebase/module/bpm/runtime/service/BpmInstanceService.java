@@ -50,7 +50,7 @@ public interface BpmInstanceService {
     /**
      * 流程预测
      *
-     * @param flowCode 流程编码
+     * @param businessId
      * @return 流程图
      */
     List<BpmFlowPreviewVO> flowPredict(String businessId);

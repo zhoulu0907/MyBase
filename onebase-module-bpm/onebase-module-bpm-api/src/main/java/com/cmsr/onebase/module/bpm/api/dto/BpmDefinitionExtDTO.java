@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.api.dto;
 
+import com.cmsr.onebase.module.bpm.api.dto.node.base.BpmGlobalConfigDTO;
 import lombok.Data;
 
 /**
@@ -24,4 +25,8 @@ public class BpmDefinitionExtDTO {
      * 流程定义JSON，完整存储前端定义的JSON数据
      */
     private String bpmDefJson;
+    /**
+     * 全局配置
+     */
+    private BpmGlobalConfigDTO globalConfig;
 }

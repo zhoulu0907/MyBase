@@ -848,7 +848,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             // 不添加开始节点和结束节点到结果中
             boolean isStartNode = nodeService.getStartNode(definitionId).getNodeCode().equals(currentNodeCode);
             boolean isEndNode = nodeService.getEndNode(definitionId).getNodeCode().equals(currentNodeCode);
-
+            BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(currentNode.getExt(), BaseNodeExtDTO.class);
+            
             if (!isStartNode && !isEndNode) {
                 BpmFlowPreviewVO previewVO = new BpmFlowPreviewVO();
                 previewVO.setNodeCode(currentNode.getNodeCode());
@@ -910,8 +911,25 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                     } catch (Exception e) {
                         log.error("解析 permissionFlag JSON 失败: {}", currentNode.getPermissionFlag(), e);
                     }
+                //如果是发起节点设置处理人是当前登录人
+                } else if (nodeExtDTO.getNodeType().equals(BpmNodeTypeEnum.INITIATION.getCode())) {
+                    List<Long> ids = new ArrayList<>();
+                    ids.add(WebFrameworkUtils.getLoginUserId());
+                    CommonResult<List<AdminUserRespDTO>> admins = adminUserApi.getUserList(ids);
+                    if(admins.isSuccess()) {
+                        List<BpmFlowPreviewVO.HandlerInfo> handlers = new ArrayList<>();
+                        admins.getData().forEach(user -> {
+                            BpmFlowPreviewVO.HandlerInfo handlerInfo = new BpmFlowPreviewVO.HandlerInfo();
+                            handlerInfo.setHandlerId(user.getId());
+                            handlerInfo.setHandlerName(user.getNickname());
+                            handlerInfo.setUserAvatar(user.getAvatar());
+                            handlers.add(handlerInfo);
+                        });
+                        previewVO.setHandlers(handlers);
+                    }
 
                 }
+
 
                 result.add(previewVO);
             }
