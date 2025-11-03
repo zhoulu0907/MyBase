@@ -238,6 +238,7 @@ const XTable = memo(
 
     useEffect(() => {
       if (finalColumns && metaData) {
+        console.log('finalColumns: ', finalColumns);
         handlePage();
       }
     }, [finalColumns, tablePageNo, metaData, sortByObject]);
@@ -325,7 +326,7 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key].userName;
+                newItem[key] = newItem[key].userName || newItem[key];
               }
             }
           }
