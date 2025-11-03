@@ -4,18 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Service;
+import java.util.stream.Collectors;
 
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
+import com.cmsr.onebase.module.metadata.core.domain.query.*;
+import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
-import com.cmsr.onebase.module.metadata.core.domain.query.QueryRequest;
-import com.cmsr.onebase.module.metadata.core.domain.query.QueryResult;
-import com.cmsr.onebase.module.metadata.core.domain.query.RowData;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.query.MetadataQueryService;
 import com.cmsr.onebase.module.metadata.api.datamethod.assembler.DataMethodAssembler;
@@ -23,6 +25,9 @@ import com.cmsr.onebase.module.metadata.api.datamethod.assembler.DataMethodAssem
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 
 /**
  * 数据方法API实现类（运行态）
@@ -77,10 +82,18 @@ public class DataMethodApiImpl implements DataMethodApi {
         for (RowData row : result.getRowDataList()) {
             Object idObj = dataMethodAssembler.tryParseId(row.getRowId());
             try {
-                Boolean ok = metadataDataMethodCoreService.deleteData(reqDTO.getEntityId(), idObj, null);
+                MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+                metadataDataMethodRequestContext.setEntityId(reqDTO.getEntityId());
+                metadataDataMethodRequestContext.setId(idObj);
+                metadataDataMethodRequestContext.setMethodCode(null);
+                metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
+                metadataDataMethodRequestContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
+                metadataDataMethodRequestContext.setTraceId(reqDTO.getTraceId());
+                Boolean ok = metadataDataMethodCoreService.deleteData(metadataDataMethodRequestContext);
                 if (Boolean.TRUE.equals(ok)) { success++; }
             } catch (Exception e) {
                 log.warn("删除失败 rowId:{} - {}", row.getRowId(), e.getMessage());
+                throw exception(DB_OPERATION_ERROR_DELETE,e.getMessage());
             }
         }
         log.info("删除完成 成功:{} / 总:{}", success, result.getRowDataList().size());
@@ -107,11 +120,27 @@ public class DataMethodApiImpl implements DataMethodApi {
 
         List<Map<String, Object>> resultList = new ArrayList<>();
         for (Map<String, Object> dataByName : dataByNameList) {
-            Map<String, Object> resultMap = metadataDataMethodCoreService.createData(
-                    reqDTO.getEntityId(), dataByName, null);
-            if (resultMap != null) {
-                resultList.add(resultMap);
+
+
+            MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
+            methodCoreContext.setEntityId(reqDTO.getEntityId());
+            methodCoreContext.setData(dataByName);
+            methodCoreContext.setMethodCode(null);
+            methodCoreContext.setClientTypeEnum(ClientTypeEnum.BUILD);
+            methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
+            methodCoreContext.setTraceId(reqDTO.getTraceId());
+
+            try{
+                Map<String, Object> resultMap = metadataDataMethodCoreService.createData(
+                        methodCoreContext);
+                if (resultMap != null) {
+                    resultList.add(resultMap);
+                }
+            }catch (Exception e){
+                log.warn("插入失败 data:{} - {}", dataByName, e.getMessage());
+                throw exception(DB_OPERATION_ERROR_CREATE,e.getMessage());
             }
+
         }
 
         QueryResult qr = dataMethodAssembler.buildQueryResultFromCoreMultiResult(reqDTO.getEntityId(), resultList);
@@ -161,13 +190,22 @@ public class DataMethodApiImpl implements DataMethodApi {
             try {
                 Map<String, Object> payloadSource = singlePayload ? updateDataList.get(0) : updateDataList.get(i);
                 Map<String, Object> payload = new HashMap<>(payloadSource);
+                MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+                metadataDataMethodRequestContext.setEntityId(reqDTO.getEntityId());
+                metadataDataMethodRequestContext.setId(idObj);
+                metadataDataMethodRequestContext.setData(payload);
+                metadataDataMethodRequestContext.setMethodCode(null);
+                metadataDataMethodRequestContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
+                metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
+                metadataDataMethodRequestContext.setTraceId(reqDTO.getTraceId());
                 Map<String, Object> updated = metadataDataMethodCoreService.updateData(
-                        reqDTO.getEntityId(), idObj, payload, null);
+                        metadataDataMethodRequestContext);
                 if (updated != null) {
                     updatedList.add(updated);
                 }
             } catch (Exception e) {
                 log.warn("更新失败 rowId:{} - {}", row.getRowId(), e.getMessage());
+                throw exception(DB_OPERATION_ERROR_UPDATE,e.getMessage());
             }
         }
         QueryResult qr = dataMethodAssembler.buildQueryResultFromCoreMultiResult(reqDTO.getEntityId(), updatedList);

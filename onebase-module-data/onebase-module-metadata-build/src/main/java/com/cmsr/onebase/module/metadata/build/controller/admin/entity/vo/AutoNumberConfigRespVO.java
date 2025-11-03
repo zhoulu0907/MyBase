@@ -38,6 +38,9 @@ public class AutoNumberConfigRespVO {
     @Schema(description = "重置周期", example = "NEVER")
     private String resetCycle;
 
+    @Schema(description = "下一条记录以修改后的开始值编号(1-是, 0-否)", example = "0")
+    private Integer resetOnInitialChange;
+
     @Schema(description = "是否启用(1-启用, 0-禁用)", example = "1")
     private Integer isEnabled;
 

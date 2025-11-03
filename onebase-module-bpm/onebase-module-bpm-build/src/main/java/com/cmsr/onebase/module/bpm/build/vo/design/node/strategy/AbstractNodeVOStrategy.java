@@ -178,8 +178,18 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
             throw exception(ErrorCodeConstants.MISSING_NODE_BTN_CFG);
         }
 
+        int enabledCount = 0;
         for (ApproverNodeBtnCfgDTO buttonConfig : buttonConfigs) {
             validateBaseButtonConfig(buttonConfig);
+
+            if (buttonConfig.getEnabled()) {
+                enabledCount++;
+            }
+        }
+
+        if (enabledCount == 0) {
+            log.error("审批按钮配置中必须开启至少一个按钮");
+            throw exception(ErrorCodeConstants.APPROVER_NODE_REQUIRED_ENABLED_BTN);
         }
     }
 
