@@ -368,6 +368,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                   <PreviewRender
                     cpId={cp.id}
                     cpType={cp.type}
+                    pageType={pageType}
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
                     showFromPageData={showFromPageData}
@@ -397,6 +398,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     <PreviewRender
                       cpId={cp.id}
                       cpType={cp.type}
+                      pageType={pageType}
                       pageComponentSchema={
                         useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
                       }

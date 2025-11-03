@@ -11,7 +11,7 @@ import { STATUS_VALUES, STATUS_OPTIONS } from '@/components/Materials/constants'
 import './index.css';
 
 const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
-  const { colCount, id } = props;
+  const { colCount, id, pageType } = props;
 
   useSignals();
 
@@ -22,7 +22,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
     layoutSubComponents,
     setLayoutSubComponents,
     setShowDeleteButton
-  } = usePageEditorSignal();
+  } = usePageEditorSignal(pageType);
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
