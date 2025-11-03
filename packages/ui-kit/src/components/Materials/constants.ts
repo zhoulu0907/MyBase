@@ -177,7 +177,7 @@ export const ALIGN_VALUES = {
 export const UPLOAD_OPTIONS = {
   TEXT: '文本',
   LIST: '列表',
-  CARD: '平铺'
+  CARD: '卡片'
 } as const;
 
 export const UPLOAD_TYPE_OPTIONS = {

@@ -241,14 +241,14 @@ export const listTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
     //   value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
     // },
     {
-      key: UPLOAD_OPTIONS.LIST,
-      text: UPLOAD_OPTIONS.LIST,
-      value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
-    },
-    {
       key: UPLOAD_OPTIONS.CARD,
       text: UPLOAD_OPTIONS.CARD,
       value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
+    },
+    {
+      key: UPLOAD_OPTIONS.LIST,
+      text: UPLOAD_OPTIONS.LIST,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
     }
   ]
 };
