@@ -2,25 +2,21 @@ package com.cmsr.onebase.module.bpm.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowHisTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowTodoTaskPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -36,8 +32,7 @@ public class BpmFlowTaskCenterController {
     private BpmFlowTaskCenterService flowTaskCenterService;
     @GetMapping("/todo/page")
     @Operation(summary = "分页查询待办信息")
-    //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
-    public CommonResult<PageResult<BpmFlowTodoTaskVO>> todo(@Valid BpmFlowTodoTaskPageReqVO reqVO) {
+    public CommonResult<PageResult<BpmFlowTodoTaskVO>> todo(@Valid BpmTodoTaskPageReqVO reqVO) {
         log.info("分页查询待办信息: {}", reqVO);
         PageResult<BpmFlowTodoTaskVO> pageResult = flowTaskCenterService.getTodoPage(reqVO);
         return success(pageResult);
@@ -45,8 +40,7 @@ public class BpmFlowTaskCenterController {
 
     @GetMapping("/done/page")
     @Operation(summary = "分页查询已办信息")
-    //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
-    public CommonResult<PageResult<BpmFlowDoneTaskVO>> done(@Valid BpmFlowDoneTaskPageReqVO reqVO) {
+    public CommonResult<PageResult<BpmFlowDoneTaskVO>> done(@Valid BpmDoneTaskPageReqVO reqVO) {
         log.info("分页查询已办信息: {}", reqVO);
         PageResult<BpmFlowDoneTaskVO> pageResult = flowTaskCenterService.getDonePage(reqVO);
         return success(pageResult);
@@ -54,21 +48,9 @@ public class BpmFlowTaskCenterController {
 
     @GetMapping("/my-create/page")
     @Operation(summary = "分页查询我创建的流程信息")
-    //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
     public CommonResult<PageResult<BpmMyCreatedVO>> myCreate(@Valid BpmMyCreatedPageReqVO reqVO) {
         log.info("分页查询我创建的流程信息: {}", reqVO);
         PageResult<BpmMyCreatedVO> pageResult = flowTaskCenterService.getMyCreatedPage(reqVO);
         return success(pageResult);
-    }
-
-    @PostMapping("/his/get")
-    @Operation(summary = "查询流程历史信息")
-    //@PreAuthorize("@ss.hasPermission('bpm:engine:execute')")formula
-    public CommonResult<List<BpmFlowHisTaskVO>> getHisTask
-            (   @RequestParam @NotNull(message = "实例ID不能为空") Long instanceId,
-                @RequestParam @NotNull(message = "应用ID不能为空") String appId){
-        log.info("查询流程历史信息实例ID: {},应用Id{}", instanceId, appId);
-        List<FlowHisTask> list = flowTaskCenterService.getHisTaskByInstanceId(instanceId,appId);
-        return success(BeanUtils.toBean(list,BpmFlowHisTaskVO.class));
     }
 }
