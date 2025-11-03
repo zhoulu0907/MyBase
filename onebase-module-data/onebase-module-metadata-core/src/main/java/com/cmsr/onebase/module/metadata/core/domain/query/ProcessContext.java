@@ -14,6 +14,7 @@ public class ProcessContext {
     /**
      * 请求上下文
      */
+    private String traceId;
     private MetadataDataMethodRequestContext requestContext;
     private MetadataDataMethodOpEnum operationType;
     private Long entityId;

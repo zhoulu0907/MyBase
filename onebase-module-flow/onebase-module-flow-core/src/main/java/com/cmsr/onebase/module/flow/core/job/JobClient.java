@@ -42,6 +42,13 @@ public class JobClient {
     public String startJob(JobCreateRequest jobCreateRequest) {
         try {
             String flowName = jobCreateRequest.getApplicationId() + "-" + jobCreateRequest.getProcessId();
+            if (jobCreateRequest.getOldJobId() != null) {
+                Long dsJobId = dolphinSchedulerClient.queryWorkflowByName(flowProjectCode, flowName);
+                //TODO 问下xym 是否是先下线~~
+                if (dsJobId != null && dsJobId.toString().equals(jobCreateRequest.getOldJobId())) {
+                    return dsJobId.toString();
+                }
+            }
             Map<String, Object> body = new HashMap<>();
             body.put("processId", jobCreateRequest.getProcessId());
             body.put("token", flowToken);

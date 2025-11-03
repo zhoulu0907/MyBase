@@ -88,7 +88,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         methodCoreContext.setEntityId(reqVO.getEntityId());
         methodCoreContext.setData(dataByName);
         methodCoreContext.setMethodCode(reqVO.getMethodCode());
-        methodCoreContext.setBusinessTraceId(reqVO.getBusinessTraceId());
+        methodCoreContext.setTraceId(reqVO.getTraceId());
         methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
         if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
@@ -107,47 +107,47 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                 methodCoreContext
         );
 
-        // 获取主表业务数据id，作为子表parent_id字段的值
-        Map<String,Object> map = (Map<String,Object>)resultData.get("data");
-        String parentId = (String)map.get("id");
-
-        // 处理子表插入数据
-        List<SubEntityVo> subEntities = reqVO.getSubEntities();
-        if(subEntities!=null){
-            for(SubEntityVo subEntityVo: subEntities){
-                //子实体Id
-                Long subEntityId = subEntityVo.getSubEntityId();
-                //该子实体对应多条数据待插入
-                List<Map<Long,Object>> list  = subEntityVo.getSubData();
-                for(Map<Long,Object> data: list){
-                    // 将 field_id -> value 转换为 field_name -> value
-                    Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
-
-                    subDataByName.put("parent_id",parentId);
-                    log.info("字段ID映射为名称后的数据: {}", subDataByName);
-
-                    // 打印每个字段值的类型
-                    subDataByName.forEach((key, value) -> {
-                        if (value != null) {
-                            log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
-                        } else {
-                            log.info("字段 {} 的值为null", key);
-                        }
-                    });
-
-                    MetadataDataMethodRequestContext subMethodCoreContext = new MetadataDataMethodRequestContext();
-                    subMethodCoreContext.setEntityId(subEntityId);
-                    subMethodCoreContext.setData(subDataByName);
-                    subMethodCoreContext.setMethodCode(reqVO.getMethodCode());
-                    methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
-
-                    // 调用core模块的基础服务
-                    Map<String, Object> subResultData = coreDataMethodService.createData(
-                            subMethodCoreContext
-                    );
-                }
-            }
-        }
+//        // 获取主表业务数据id，作为子表parent_id字段的值
+//        Map<String,Object> map = (Map<String,Object>)resultData.get("data");
+//        String parentId = (String)map.get("id");
+//
+//        // 处理子表插入数据
+//        List<SubEntityVo> subEntities = reqVO.getSubEntities();
+//        if(subEntities!=null){
+//            for(SubEntityVo subEntityVo: subEntities){
+//                //子实体Id
+//                Long subEntityId = subEntityVo.getSubEntityId();
+//                //该子实体对应多条数据待插入
+//                List<Map<Long,Object>> list  = subEntityVo.getSubData();
+//                for(Map<Long,Object> data: list){
+//                    // 将 field_id -> value 转换为 field_name -> value
+//                    Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
+//
+//                    subDataByName.put("parent_id",parentId);
+//                    log.info("字段ID映射为名称后的数据: {}", subDataByName);
+//
+//                    // 打印每个字段值的类型
+//                    subDataByName.forEach((key, value) -> {
+//                        if (value != null) {
+//                            log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
+//                        } else {
+//                            log.info("字段 {} 的值为null", key);
+//                        }
+//                    });
+//
+//                    MetadataDataMethodRequestContext subMethodCoreContext = new MetadataDataMethodRequestContext();
+//                    subMethodCoreContext.setEntityId(subEntityId);
+//                    subMethodCoreContext.setData(subDataByName);
+//                    subMethodCoreContext.setMethodCode(reqVO.getMethodCode());
+//                    methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
+//
+//                    // 调用core模块的基础服务
+//                    Map<String, Object> subResultData = coreDataMethodService.createData(
+//                            subMethodCoreContext
+//                    );
+//                }
+//            }
+//        }
 
         // 转换为VO
         return convertToDynamicDataRespVO(resultData);

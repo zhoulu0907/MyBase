@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class GraphFlowCache {
+public class FlowProcessCache {
 
     private ConcurrentHashMap<Long, Long> processApplicationCache = new ConcurrentHashMap<>();
 
@@ -135,5 +135,9 @@ public class GraphFlowCache {
 
     public Long findApplicationByProcessId(Long processId) {
         return processApplicationCache.get(processId);
+    }
+
+    public Set<Long> getAllApplicationId() {
+         return processApplicationCache.values().stream().collect(Collectors.toSet());
     }
 }
