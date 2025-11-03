@@ -102,9 +102,14 @@ public class JdbcTypeConvertor {
             return LocalDateTime.parse(stringValue, TIMESTAMP_FORMATTER_NANO);
         } catch (DateTimeParseException e) {
         }
+        try {
+            Instant instant = Instant.parse(stringValue);
+            return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        } catch (DateTimeParseException e) {
+
+        }
         throw new IllegalArgumentException("无效的TIMESTAMP格式: " + stringValue);
     }
-
 
     /**
      * 转换VARCHAR类型的值
@@ -142,8 +147,14 @@ public class JdbcTypeConvertor {
         if (value instanceof LocalDate) {
             return value;
         }
-        if (value instanceof java.sql.Date) {
-            return ((java.sql.Date) value).toLocalDate();
+        if (value instanceof java.sql.Date v) {
+            return v.toLocalDate();
+        }
+        if (value instanceof java.util.Date v) {
+            return LocalDate.ofInstant(v.toInstant(), ZoneId.systemDefault());
+        }
+        if (value instanceof LocalDateTime v) {
+            return v.toLocalDate();
         }
         String stringValue = value.toString();
         try {

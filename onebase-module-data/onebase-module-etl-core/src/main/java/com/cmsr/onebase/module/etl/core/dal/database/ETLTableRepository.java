@@ -4,11 +4,9 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -56,26 +54,4 @@ public class ETLTableRepository extends DataRepository<ETLTableDO> {
         return tableDO;
     }
 
-
-    //
-//    @Override
-//    public List<ETLTableDO> upsertBatch(List<ETLTableDO> tableDOList) {
-//        if (CollectionUtils.isEmpty(tableDOList)) return List.of();
-//
-//        // 1. 根据是否有主键,拆分 insert / update
-//        List<ETLTableDO> insertBatch = tableDOList.stream().filter(o -> o.getId() == null).toList();
-//        List<ETLTableDO> updateBatch = tableDOList.stream().filter(o -> o.getId() != null).toList();
-//        List<ETLTableDO> results = Lists.newArrayList();
-//        try {
-//            // 1. 先执行update
-//
-//            results.addAll(updateBatch);
-//            // 2. 再执行insert
-//            List<ETLTableDO> inserted = insertBatch(insertBatch);
-//            results.addAll(inserted);
-//        } catch (Exception e) {
-//            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_FAILED);
-//        }
-//        return results;
-//    }
 }

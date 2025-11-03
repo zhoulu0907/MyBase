@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Schema(description = "数据工厂 - 分页查询数据流VO")
+@Schema(description = "ETL - 分页查询 VO")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ETLPageReqVO extends PageParam {
@@ -14,6 +14,11 @@ public class ETLPageReqVO extends PageParam {
     private String name;
 
     @Schema(description = "数据流分类")
-    private String updateStrategy;
+    private String scheduleStrategy;
 
+    @Schema(description = "是否启用")
+    private String isEnabled;
+
+    @Schema(description = "最近一次任务状态")
+    private String jobStatus;
 }

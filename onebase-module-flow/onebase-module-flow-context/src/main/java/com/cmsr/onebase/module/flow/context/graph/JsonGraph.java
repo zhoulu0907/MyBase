@@ -53,7 +53,7 @@ public class JsonGraph {
     private String nodeDefine(int deep, JsonGraphNode node) {
         if (StringUtils.equalsAny(node.getType(),
                 "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate",
-                "modal",
+                "modal", "refresh","navigate",
                 "startDateField", "startForm", "startEntity", "startTime", "startAPI", "startBPM",
                 "end", "log")) {
             return toDefine(node);

@@ -32,15 +32,16 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
 
     @Override
     public boolean processBoolean() throws Exception {
-        // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("条件节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         IfCaseNodeData nodeData = (IfCaseNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
         //
         if (executeContext.hasNodeProcessResult(this.getTag())) {
-            return (Boolean) executeContext.getNodeProcessResult(this.getTag());
+            Boolean result = (Boolean) executeContext.getNodeProcessResult(this.getTag());
+            executeContext.addLog("条件节点已执行过，直接返回结果: " + result);
         }
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
@@ -48,6 +49,7 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
         boolean evaluated = expressionExecutor.evaluate(orExpression, expressionContext);
         //
         executeContext.putNodeProcessResult(this.getTag(), evaluated);
+        executeContext.addLog("条件节点执行完毕，结果为: " + evaluated);
         return evaluated;
     }
 

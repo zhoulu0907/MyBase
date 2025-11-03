@@ -44,8 +44,8 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("DataUpdateNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("数据更新节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataUpdateNodeData nodeData = (DataUpdateNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
@@ -70,6 +70,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         reqDTO.setData(buildSingleReqData(fields, expressionContext));
         //
         List<List<EntityFieldDataRespDTO>> respDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.updateData(reqDTO));
+        executeContext.addLog("数据更新节点更新数据量: " + respDTOSS.size());
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(respDTOSS));
     }
 

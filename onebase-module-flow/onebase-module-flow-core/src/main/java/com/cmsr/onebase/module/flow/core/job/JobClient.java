@@ -1,36 +1,85 @@
 package com.cmsr.onebase.module.flow.core.job;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
+import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
+import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
 import lombok.Setter;
-import org.apache.commons.lang3.math.NumberUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/3 10:07
  */
+@Slf4j
 @Setter
 @Component
 public class JobClient {
 
-    public static final String JOB_EXECUTOR_INFO_TIME = "flow_process_time_job";
+    public static DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public static final String JOB_EXECUTOR_INFO_DATE_FIELD = "flow_process_date_field_job";
+    @Value("${onebase.scheduler.flow-project}")
+    private Long flowProjectCode;
 
-    public String startJob(Long processId, JobCreateRequest jobCreateRequest) {
-        return null;
-    }
+    @Value("${onebase.scheduler.flow-url}")
+    private String flowUrl;
 
+    @Value("${onebase.scheduler.flow-token}")
+    private String flowToken;
 
-    public String startJob(Long processId, String jobId, JobCreateRequest jobCreateRequest) {
-        Long jobIdLong = NumberUtils.toLong(jobId, 0);
-        if (jobIdLong == 0) {
-            return startJob(processId, jobCreateRequest);
+    @Autowired
+    private DolphinSchedulerClient dolphinSchedulerClient;
+
+    public String startJob(JobCreateRequest jobCreateRequest) {
+        try {
+            String flowName = jobCreateRequest.getApplicationId() + "-" + jobCreateRequest.getProcessId();
+            if (jobCreateRequest.getOldJobId() != null) {
+                Long dsJobId = dolphinSchedulerClient.queryWorkflowByName(flowProjectCode, flowName);
+                //TODO 问下xym 是否是先下线~~
+                if (dsJobId != null && dsJobId.toString().equals(jobCreateRequest.getOldJobId())) {
+                    return dsJobId.toString();
+                }
+            }
+            Map<String, Object> body = new HashMap<>();
+            body.put("processId", jobCreateRequest.getProcessId());
+            body.put("token", flowToken);
+            HttpTask httpTask = HttpTask.ofUrl(flowUrl)
+                    .method(HttpTask.HttpMethod.POST)
+                    .body(JsonUtils.toJsonString(body));
+            Long jobId = dolphinSchedulerClient.createSingletonWorkflow(flowProjectCode, flowName, httpTask, jobCreateRequest.getProcessName());
+            Schedule schedule = new Schedule();
+            schedule.setStartTime(LocalDateTime.parse(jobCreateRequest.getStartTime(), DATETIME_FORMATTER));
+            schedule.setEndTime(LocalDateTime.parse(jobCreateRequest.getEndTime(), DATETIME_FORMATTER));
+            schedule.setCrontab(jobCreateRequest.getCrontab());
+            dolphinSchedulerClient.onlineWorkflowWithSchedule(flowProjectCode, jobId, schedule);
+            return String.valueOf(jobId);
+        } catch (Exception e) {
+            log.error("启动工作流失败: {}", jobCreateRequest, e);
+            throw new RuntimeException("启动工作流失败: " + jobCreateRequest, e);
         }
-        return null;
     }
 
-    public void deleteJob(String jobId) {
 
+    public void deleteJob(Long applicationId) {
+        try {
+            String flowName = String.valueOf(applicationId);
+            List<Long> jobIds = dolphinSchedulerClient.queryWorkflowCodeListByName(flowProjectCode, flowName);
+            for (Long jobId : jobIds) {
+                dolphinSchedulerClient.purgeWorkflow(flowProjectCode, jobId);
+            }
+        } catch (Exception e) {
+            log.error("删除工作流失败: {}", applicationId, e);
+            throw new RuntimeException("删除工作流失败: " + applicationId, e);
+        }
     }
 
 }

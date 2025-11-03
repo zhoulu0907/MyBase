@@ -1,13 +1,17 @@
 package com.cmsr.onebase.module.etl.build.controller.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceReqVO;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.datasource.ETLDatasourceService;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourceRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,58 +19,67 @@ import java.util.List;
 
 @Tag(name = "数据工厂 - 数据源管理")
 @RestController
-@RequestMapping("/datafactory/datasource")
+@RequestMapping("/etl/datasource")
 @Validated
 public class ETLDatasourceController {
 
     @Resource
-    private ETLDatasourceService ETLDatasourceService;
+    private ETLDatasourceService etlDatasourceService;
 
+    // GETs
     @GetMapping("/supported")
     @Operation(summary = "获取所有支持的数据源类型")
     public CommonResult<List<DatabaseTypeVO>> getSupportedDatabaseTypes() {
-        List<DatabaseTypeVO> supportedDatabaseTypes = ETLDatasourceService.getSupportedDatabaseTypes();
+        List<DatabaseTypeVO> supportedDatabaseTypes = etlDatasourceService.getSupportedDatabaseTypes();
         return CommonResult.success(supportedDatabaseTypes);
     }
 
     @PostMapping("/ping")
     @Operation(summary = "测试数据源连接")
-    public CommonResult<Boolean> testConnection(@Valid @RequestBody ETLDatasourceReqVO requestVO) {
-        Boolean connected = ETLDatasourceService.pingDatasource(requestVO);
+    public CommonResult<Boolean> testConnection(@Validated @RequestBody ETLDatasourcePingVO requestVO) {
+        Boolean connected = etlDatasourceService.pingDatasource(requestVO);
         return CommonResult.success(connected);
     }
 
+    @GetMapping("/page")
+    public CommonResult<PageResult<ETLDatasourceRespVO>> getETLDatasourcePage(@Validated ETLDatasourcePageReqVO pageReqVO) {
+        PageResult<ETLDatasourceRespVO> pageResult = etlDatasourceService.getETLDatasourcePage(pageReqVO);
+        return CommonResult.success(pageResult);
+    }
+
+    @GetMapping("/{id}")
+    public CommonResult<ETLDatasourceRespVO> queryDatasourceDetail(@PathVariable("id") Long datasourceId) {
+        ETLDatasourceRespVO datasourceVO = etlDatasourceService.queryDatasourceDetail(datasourceId);
+        return CommonResult.success(datasourceVO);
+    }
+
+    // POSTs
     @PostMapping("/create")
     @Operation(summary = "创建数据源")
-//    @PreAuthorize("@ss.hasPermission('datafactory:datasource:create')")
-    public CommonResult<Long> createDataFactoryDatasource(@Valid @RequestBody ETLDatasourceReqVO requestVO) {
-        Long datasourceId = ETLDatasourceService.createDatasource(requestVO);
+    public CommonResult<Long> createETLDatasource(@Validated @RequestBody ETLDatasourceCreateReqVO createReqVO) {
+        Long datasourceId = etlDatasourceService.createDatasource(createReqVO);
         return CommonResult.success(datasourceId);
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新数据源")
-    public CommonResult<Boolean> updateDataFactoryDatasource(@Valid @RequestBody ETLDatasourceReqVO requestVO) {
-        ETLDatasourceService.updateDatasource(requestVO);
+    public CommonResult<Boolean> updateETLDatasource(@Validated @RequestBody ETLDatasourceUpdateReqVO updateReqVO) {
+        etlDatasourceService.updateDatasource(updateReqVO);
         return CommonResult.success(Boolean.TRUE);
-    }
-
-    @PostMapping("/collect/precheck")
-    public CommonResult<Boolean> precheckCollectStatus(@RequestParam("id") Long id) {
-        Boolean runnable = ETLDatasourceService.preCheckCollectStatus(id);
-        return CommonResult.success(runnable);
     }
 
     @PostMapping("/collect")
     @Operation(summary = "采集元数据信息")
     public CommonResult<Boolean> runMetadataCollect(@RequestParam("id") Long id) {
-        ETLDatasourceService.executeMetadataCollectJob(id);
+        etlDatasourceService.executeMetadataCollectJob(id);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @PostMapping("/delete")
     @Operation(summary = "删除数据源")
-    public CommonResult<Boolean> deleteDataFactoryDatasource(@RequestParam("id") Long id) {
+    public CommonResult<Boolean> deleteETLDatasource(@RequestParam("id") Long id) {
+        etlDatasourceService.deleteDatasource(id);
         return CommonResult.success(Boolean.TRUE);
     }
+
 }

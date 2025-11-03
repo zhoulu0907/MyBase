@@ -3,9 +3,11 @@ package com.cmsr.onebase.framework.ds;
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DolphinschedulerClientTest {
@@ -36,6 +38,15 @@ public class DolphinschedulerClientTest {
         Long workflowId = client.createSingletonWorkflow(TEST_PROJECT_CODE, "测试创建", httpTask, null);
         assert workflowId != null;
         this.workflowCode = workflowId;
+    }
+
+    @Test
+    @Order(0)
+    public void testPageQuery() {
+        String flowName = "测试";
+        List<Long> workflowList = client.queryWorkflowCodeListByName(TEST_PROJECT_CODE, flowName);
+
+        assert CollectionUtils.isNotEmpty(workflowList);
     }
 
     @Test

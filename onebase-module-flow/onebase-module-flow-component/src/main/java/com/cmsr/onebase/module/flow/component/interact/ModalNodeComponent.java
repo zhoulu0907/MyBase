@@ -11,7 +11,6 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,41 +28,27 @@ public class ModalNodeComponent extends SkippableNodeComponent {
     public void process() throws Exception {
         // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("弹窗节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         ModalNodeData nodeData = (ModalNodeData) executeContext.getNodeData(this.getTag());
         NodeActionEnum nodeActionEnum = super.nodeAction();
         if (nodeActionEnum == NodeActionEnum.DO_PROCESS) {
-            Map<String, Object> outputParams = createOutputParams(nodeData);
+            Map<String, Object> outputParams = nodeData.toMap();
             variableContext.setOutputParams(outputParams);
             executeContext.setExecutionEndNodeType("modal");
             executeContext.setExecutionEndNodeTag(this.getTag());
             contextProvider.storeExecuteContext(executeContext.getExecutionUuid(), executeContext);
             contextProvider.storeVariableContext(executeContext.getExecutionUuid(), variableContext);
+            executeContext.addLog("弹窗节点返回暂停执行, 返回窗口信息");
             this.setIsEnd(true);
         }
         if (nodeActionEnum == NodeActionEnum.DO_RESET) {
+            executeContext.addLog("弹窗节点返回重置执行");
             variableContext.putNodeVariables(this.getTag(), variableContext.getInputFields());
             variableContext.setInputFields(Collections.emptyMap());
             executeContext.restExecutionUuid();
             executeContext.restExecutionEndNodeTag();
         }
     }
-
-    private Map<String, Object> createOutputParams(ModalNodeData nodeData) {
-        Map<String, Object> outputParams = new HashMap<>();
-        outputParams.put("closeWarn", nodeData.getCloseWarn());
-        outputParams.put("modalType", nodeData.getModalType());
-        outputParams.put("cancelWarn", nodeData.getCancelWarn());
-        outputParams.put("modalTitle", nodeData.getModalTitle());
-        outputParams.put("okText", nodeData.getOkText());
-        outputParams.put("cancelText", nodeData.getCancelText());
-        outputParams.put("title", nodeData.getTitle());
-        outputParams.put("prompt", nodeData.getPrompt());
-        outputParams.put("afterCancel", nodeData.getAfterCancel());
-        outputParams.put("arrange", nodeData.getArrange());
-        outputParams.put("fields", nodeData.getFields());
-        return outputParams;
-    }
-
 
 }

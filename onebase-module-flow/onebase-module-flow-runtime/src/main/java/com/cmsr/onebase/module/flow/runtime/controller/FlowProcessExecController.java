@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.flow.core.event.FlowChangeEventCacheHandler;
+import com.cmsr.onebase.module.flow.core.handler.FlowCacheHandler;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -29,7 +29,7 @@ public class FlowProcessExecController {
     private FlowProcessExecService flowProcessExecService;
 
     @Autowired
-    private FlowChangeEventCacheHandler flowChangeEventCacheHandler;
+    private FlowCacheHandler flowCacheHandler;
 
     @GetMapping("/form/query")
     @Operation(summary = "查询页面触发列表")
@@ -48,14 +48,14 @@ public class FlowProcessExecController {
     @PostMapping("/flow-handler/update")
     @Operation(summary = "更新流程")
     public CommonResult<String> updateProcess(@RequestParam("applicationId") Long applicationId) {
-        String result = flowChangeEventCacheHandler.onApplicationChange(applicationId);
+        String result = flowCacheHandler.onApplicationChange(applicationId);
         return CommonResult.success(result);
     }
 
     @PostMapping("/flow-handler/delete")
     @Operation(summary = "删除流程")
     public CommonResult<String> deleteProcess(@RequestParam("applicationId") Long applicationId) {
-        String result = flowChangeEventCacheHandler.onApplicationDelete(applicationId);
+        String result = flowCacheHandler.onApplicationDelete(applicationId);
         return CommonResult.success(result);
     }
 

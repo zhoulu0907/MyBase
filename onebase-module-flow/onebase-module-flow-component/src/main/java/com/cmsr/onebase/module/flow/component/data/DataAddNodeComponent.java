@@ -43,9 +43,9 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
 
     @Override
     public void process() throws Exception {
-        log.info("DataAddNodeComponent process - 开始处理节点数据添加操作");
         // 获取上下文和节点数据
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        executeContext.addLog("数据新增节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
         DataAddNodeData nodeData = (DataAddNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
@@ -70,16 +70,14 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         } else {
             reqData = buildSingleReqData(conditionItems, expressionContext);
         }
-
         if (CollectionUtils.isEmpty(reqData)) {
+            executeContext.addLog("数据添加节点结束执行, 未包含请求数据");
             return;
         }
-
-
         reqDTO.setData(reqData);
-
         try {
             List<List<EntityFieldDataRespDTO>> respDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.insertData(reqDTO));
+            executeContext.addLog("数据添加节点结束执行, 响应结果数量: " + respDTOSS.size());
             // 处理响应结果
             processResponse(respDTOSS, variableContext, batchType);
         } catch (Exception e) {
@@ -110,7 +108,6 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
             }
             reqData.add(data);
         }
-
         return reqData;
     }
 

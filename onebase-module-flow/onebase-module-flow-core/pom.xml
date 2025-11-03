@@ -36,6 +36,11 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-dolphinscheduler</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-context</artifactId>
             <version>${revision}</version>
         </dependency>
@@ -43,11 +48,6 @@
         <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-spring-boot-starter</artifactId>
-        </dependency>
-        <!-- RocketMQ消息队列 -->
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-client-java</artifactId>
         </dependency>
         <!-- 测试依赖 -->
         <dependency>

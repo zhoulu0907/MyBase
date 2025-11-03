@@ -23,8 +23,8 @@ public class PageSetPageDO extends TenantBaseDO {
     @Column(name = "page_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
     private String pageType;
 
-    @Column(name = "is_default", columnDefinition = "BOOLEAN NOT NULL", comment = "是否默认")
-    private Boolean isDefault;
+    @Column(name = "is_default", columnDefinition = "INT(2) NOT NULL", comment = "是否默认")
+    private Integer isDefault;
 
     @Column(name = "default_seq", columnDefinition = "INTEGER NOT NULL", comment = "默认顺序")
     private Integer defaultSeq;
