@@ -32,6 +32,7 @@ import type {
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
+  INumberFormatConfigType,
   IPlaceholderConfigType,
   ISecurityConfigType,
   ISelectConfigType,
@@ -71,6 +72,7 @@ export type TXInputNumberEditData = Array<
   | IDataFieldConfigType
   | ISecurityConfigType
   | IVerifyConfigType
+  | INumberFormatConfigType
 >;
 
 export interface XInputNumberConfig extends ICommonBaseType {
@@ -126,6 +128,19 @@ export interface XInputNumberConfig extends ICommonBaseType {
     max: TNumberDefaultType;
   };
 
+  numberFormat: {
+    showUnit: TBooleanDefaultType;
+    unitValue: TTextDefaultType;
+    // 保留小数点位数
+    showPrecision: TBooleanDefaultType;
+    // 小数点位数
+    precision: TNumberDefaultType;
+    // 是否显示为百分比
+    showPercent: TBooleanDefaultType;
+    // 是否应用千分位分隔符
+    useThousandsSeparator: TBooleanDefaultType;
+  };
+
   /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
@@ -152,16 +167,6 @@ export interface XInputNumberConfig extends ICommonBaseType {
    * 数字步长：默认1
    */
   step: TNumberDefaultType;
-
-  /**
-   * 数字精度：默认2
-   */
-  precision: TNumberDefaultType;
-
-  /**
-   * 单位
-   */
-  unit: TTextDefaultType;
 
   /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
@@ -231,19 +236,14 @@ const XInputNumber: XInputNumberSchema = {
       type: CONFIG_TYPES.NUMBER_INPUT
     },
     {
-      key: 'precision',
-      name: '数字精度',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
-      key: 'unit',
-      name: '单位',
-      type: CONFIG_TYPES.TEXT_INPUT
-    },
-    {
       key: 'verify',
       name: '校验',
       type: CONFIG_TYPES.VERIFY
+    },
+    {
+      key: 'numberFormat',
+      name: '格式',
+      type: CONFIG_TYPES.NUMBER_FORMAT
     },
     statusConfig,
     alignConfig,
@@ -269,8 +269,6 @@ const XInputNumber: XInputNumberSchema = {
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     step: 1,
-    precision: 0,
-    unit: '',
     saveWithHidden: false,
     color: '',
     bgColor: '',
@@ -283,6 +281,14 @@ const XInputNumber: XInputNumberSchema = {
       required: false,
       min: 0,
       max: Infinity
+    },
+    numberFormat: {
+      showUnit: false,
+      unitValue: '',
+      showPrecision: false,
+      precision: 0,
+      showPercent: false,
+      useThousandsSeparator: false
     }
   }
 };

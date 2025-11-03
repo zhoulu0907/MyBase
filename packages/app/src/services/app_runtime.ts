@@ -4,7 +4,8 @@ import {
   GetFormDetailReq,
   GetDonePageList,
   GetOperatorRecord,
-  SubMitInstanceReq
+  SubMitInstanceReq,
+  GetMyCreatePageListReq
 } from '../types';
 import { runtimeListdataService } from './clients';
 
@@ -13,6 +14,9 @@ export const getTodoPageList = (params: GetRunTimePageSetIdReq) => {
 };
 export const getDonePageList = (params: GetDonePageList) => {
   return runtimeListdataService.get('/task-center/done/page', params);
+};
+export const getMyCreatePageList = (params: GetMyCreatePageListReq) => {
+  return runtimeListdataService.get('/task-center/my-create/page', params);
 };
 export const fetchExecTask = (params: FetchExecTaskReq) => {
   return runtimeListdataService.post('/instance/exec-task', params);

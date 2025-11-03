@@ -2,15 +2,15 @@ import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import FieldCard from '@/components/FieldCard';
-import { useAppEntityStore } from '@/store/store_entity';
 import { Collapse, Input, Layout } from '@arco-design/web-react';
-import { FilterEntityFields, type AppEntityField } from '@onebase/app';
+import { FilterEntityFields, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
   ENTITY_COMPONENT_TYPES,
-  FORM_COMPONENT_TYPES
+  FORM_COMPONENT_TYPES,
+  useAppEntityStore
 } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -181,8 +181,8 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                         {
                           ...mainEntity,
                           id: mainEntity.entityId,
-                          type: 'entity',
-                          displayName: 'entity'
+                          type: ENTITY_TYPE_VALUE.MAIN,
+                          displayName: ENTITY_TYPE_VALUE.MAIN
                         }
                       ]}
                       setList={() => {}}
@@ -223,8 +223,8 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                       ...subEntities.entities.map((subEntity) => ({
                         ...subEntity,
                         id: subEntity.entityId,
-                        type: 'entity',
-                        displayName: 'entity'
+                        type: ENTITY_TYPE_VALUE.SUB,
+                        displayName: ENTITY_TYPE_VALUE.SUB
                       }))
                     ]}
                     setList={() => {}}

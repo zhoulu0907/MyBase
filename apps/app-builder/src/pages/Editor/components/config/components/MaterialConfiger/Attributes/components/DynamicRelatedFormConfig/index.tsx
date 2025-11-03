@@ -1,4 +1,4 @@
-import { useAppEntityStore } from '@/store/store_entity';
+import { useAppEntityStore } from '@onebase/ui-kit';
 import { Form, Select, Space } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';

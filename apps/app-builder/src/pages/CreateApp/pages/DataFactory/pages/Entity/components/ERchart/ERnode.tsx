@@ -2,11 +2,10 @@ import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/inter
 import { Node } from '@antv/x6';
 import { Button, Popover, Space, Switch } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';
-import { ENTITY_STATUS, FIELD_TYPE, SYSTEM_FIELD_MAP } from '@onebase/ui-kit';
+import { ENTITY_STATUS, FIELD_TYPE, SYSTEM_FIELD_MAP, useNewNodeStore } from '@onebase/ui-kit';
 import { useFieldStore } from '@/store/store_field';
 import React, { useState } from 'react';
 import styles from './ERnode.module.less';
-import { useNewNodeStore } from '@/store/store_entity';
 import { useSignals } from '@preact/signals-react/runtime';
 import { newFieldSignal } from '@/store/singals/new_field';
 // X6 节点组件接口

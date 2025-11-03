@@ -167,23 +167,27 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
           </p>
         </div>
       </div>
-      <FieldTable
-        editable={true}
-        ref={editRef}
-        onTableChange={saveData}
-        value={writeArr}
-        invert={hiddenArr}
-        ckOptions={ckOptions}
-      />
-      <div style={{ height: 24 }}></div>
-      <FieldTable
-        editable={false}
-        ref={hiddenRef}
-        onTableChange={saveData}
-        value={hiddenArr}
-        invert={writeArr}
-        ckOptions={ckOptions}
-      />
+      {nodeSwitch && (
+        <>
+          <FieldTable
+            editable={true}
+            ref={editRef}
+            onTableChange={saveData}
+            value={writeArr}
+            invert={hiddenArr}
+            ckOptions={ckOptions}
+          />
+          <div style={{ height: 24 }}></div>
+          <FieldTable
+            editable={false}
+            ref={hiddenRef}
+            onTableChange={saveData}
+            value={hiddenArr}
+            invert={writeArr}
+            ckOptions={ckOptions}
+          />
+        </>
+      )}
     </div>
   );
 }

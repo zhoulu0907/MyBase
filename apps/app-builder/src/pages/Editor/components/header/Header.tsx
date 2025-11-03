@@ -6,13 +6,12 @@ import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
-import { appIconMap } from '@onebase/ui-kit';
+import { appIconMap, useAppEntityStore } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
 import { useBasicEditorStore } from '@/store';
 import { useAppStore } from '@/store/store_app';
-import { useAppEntityStore } from '@/store/store_entity';
 import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 

@@ -46,7 +46,8 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
         onMouseLeave={nodeRender.onMouseLeave}
         className={
           // if-block 样式 没有边框 阴影
-          nodeRender.activated && !triggerEditorSignal.isInvalidNode(node.id)
+          (nodeRender.activated || nodeRender.node.id === triggerEditorSignal.nodeId.value) &&
+          !triggerEditorSignal.isInvalidNode(node.id)
             ? `${styles.baseNodeStyle} ${styles.activated} ${nodeRender.type === NodeType.IF_BLOCK ? styles.noShadow : ''}`
             : `${styles.baseNodeStyle} ${nodeRender.type === NodeType.IF_BLOCK ? styles.noShadow : ''}`
         }
