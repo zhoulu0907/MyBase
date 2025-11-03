@@ -23,7 +23,7 @@ public class DynamicDataCreateReqVO {
      * 业务追踪ID： 代表一次业务操作以及其带来的连锁反应的唯一标识；
      */
     @Schema(description = "业务追踪ID")
-    private String businessTraceId;
+    private String traceId;
 
     @Schema(description = "菜单ID", requiredMode = Schema.RequiredMode.REQUIRED)
 //    @NotNull(message = "菜单ID不能为空")
