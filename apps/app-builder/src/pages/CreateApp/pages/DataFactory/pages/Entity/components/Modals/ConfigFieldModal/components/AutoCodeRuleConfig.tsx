@@ -79,7 +79,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
     const newRule: AutoCodeRule = {
       id: 'rule-' + Date.now().toString(),
       itemType: type,
-      config: {}
+      config: type === AUTO_CODE_RULE_TYPE.DATE ? { dateFormat: DATE_FORMAT_DEFAULT } : {}
     };
     setRules([...rules, newRule]);
   };
