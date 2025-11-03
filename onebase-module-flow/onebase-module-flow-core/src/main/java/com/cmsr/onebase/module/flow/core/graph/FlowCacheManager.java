@@ -59,7 +59,7 @@ public class FlowCacheManager implements ApplicationRunner, Runnable {
         flowCacheHandler.initAllProcess();
         flowJobHandler.initAllProcess();
         initRedisVersionKey();
-        taskScheduler.scheduleAtFixedRate(this, Duration.of(60, ChronoUnit.SECONDS));
+        taskScheduler.scheduleAtFixedRate(this, Duration.of(10, ChronoUnit.SECONDS));
     }
 
 
