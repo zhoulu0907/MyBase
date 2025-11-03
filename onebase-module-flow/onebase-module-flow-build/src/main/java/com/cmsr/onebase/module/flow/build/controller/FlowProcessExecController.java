@@ -1,11 +1,10 @@
 package com.cmsr.onebase.module.flow.build.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.flow.core.handler.FlowCacheHandler;
+import com.cmsr.onebase.module.flow.core.graph.FlowVersionUpdate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Setter;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,15 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class FlowProcessExecController {
 
     @Autowired
-    private ObjectProvider<FlowCacheHandler> objectProviderFlowCacheHandler;
+    private FlowVersionUpdate flowVersionUpdate;
 
 
     @PostMapping("/flow-handler/update")
     @Operation(summary = "更新流程")
-    public CommonResult<String> updateProcess(@RequestParam("applicationId") Long applicationId) {
-        FlowCacheHandler flowCacheHandler = objectProviderFlowCacheHandler.getObject();
-        String result = flowCacheHandler.onApplicationChange(applicationId);
-        return CommonResult.success(result);
+    public CommonResult<Boolean> updateProcess(@RequestParam("applicationId") Long applicationId) {
+        flowVersionUpdate.updateApplicationVersion(applicationId);
+        return CommonResult.success(Boolean.TRUE);
     }
 
 }
