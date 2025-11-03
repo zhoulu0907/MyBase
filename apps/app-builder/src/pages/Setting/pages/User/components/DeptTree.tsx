@@ -40,11 +40,11 @@ const DeptTreeCmp: React.FC<DeptTreeProps> = ({ selectedDeptId, onDeptSelect, to
   return (
     <div>
       <Input.Search
+        className={s.inputSearch}
         placeholder="输入部门名称"
         allowClear
         value={search}
         onChange={setSearch}
-        style={{ marginBottom: 12 }}
       />
       <ListItem
         onClick={() => {

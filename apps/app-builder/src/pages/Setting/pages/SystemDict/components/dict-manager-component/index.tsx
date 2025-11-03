@@ -293,7 +293,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   // 禁用/编辑/删除字典按钮
   const OperationButtons = (
     <Space size="small">
-      <Button
+      {/* <Button
         permission={currentTabConfig.permissions.update}
         type="secondary"
         onClick={() => {
@@ -301,7 +301,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         }}
       >
         {getStatusButtonText(activeDict?.status as StatusEnum)}
-      </Button>
+      </Button> */}
       <Button
         permission={currentTabConfig.permissions.update}
         type="secondary"
@@ -607,11 +607,11 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
           initialValues={
             editDict
               ? {
-                  type: editDict.type,
-                  name: editDict.name,
-                  remark: editDict.remark,
-                  status: editDict.status
-                }
+                type: editDict.type,
+                name: editDict.name,
+                remark: editDict.remark,
+                status: editDict.status
+              }
               : undefined
           }
           onOk={handleDictModalOk}
@@ -628,13 +628,13 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         initialValues={
           editItem
             ? {
-                label: editItem.label,
-                value: editItem.value,
-                remark: editItem.remark,
-                sort: editItem.sort,
-                status: editItem.status,
-                dictType: editItem.dictType
-              }
+              label: editItem.label,
+              value: editItem.value,
+              remark: editItem.remark,
+              sort: editItem.sort,
+              status: editItem.status,
+              dictType: editItem.dictType
+            }
             : undefined
         }
         onOk={handleDictDataModalOk}

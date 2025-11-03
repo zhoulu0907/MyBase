@@ -137,7 +137,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
     return roleList.filter((role) => role.name?.toLowerCase().includes(searchValue.toLowerCase()));
   }, [roleList, searchValue]);
 
-  const listTitle = `全部(${filteredRoleList?.length})`;
+  const listTitle = `全部角色(${filteredRoleList?.length})`;
 
   const roleListItems = useMemo(() => {
     return filteredRoleList?.map((item) => (

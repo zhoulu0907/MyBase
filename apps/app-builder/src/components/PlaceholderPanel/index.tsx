@@ -12,23 +12,27 @@ interface PlaceholderPanelProps {
   isEmpty?: boolean;
   children?: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
+  spinStyle?: React.CSSProperties;
 }
 const PlaceholderPanel: React.FC<PlaceholderPanelProps> = ({
   isLoading,
   isEmpty,
   hasPermission,
   children,
-  className
+  className,
+  style,
+  spinStyle
 }) => {
   return (
-    <div className={`${className} placeholder-panel`}>
+    <div className={`${className ? className : ''} placeholder-panel`} style={style}>
       {!hasPermission ? (
         <Empty description="无权限" />
       ) : isLoading ? (
-        <Spin size={40}>{children}</Spin>
+        <Spin size={40} style={spinStyle}>{children}</Spin>
       ) : isEmpty ? (
         <Empty description="暂无数据" />
-      ) :  children}
+      ) : children}
     </div>
   );
 };

@@ -112,11 +112,16 @@
   },
   "sider": {
     "platformInfo": "Platform Info",
+    "application": "Application Management",
     "user": "User Management",
     "role": "Role Management",
     "organization": "Organization Management",
     "systemDict": "System Dictionary",
-    "tenant": "Tenant Info"
+    "spaceInfo": "Space Info",
+    "enterpriseInfo": "Enterprise Info",
+    "enterprise": "Enterprise Management",
+    "tenant": "Personal Center",
+    "edit": "Edit"
   },
   "myApp": {
     "createApp": "Create App"
