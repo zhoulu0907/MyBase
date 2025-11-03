@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
+import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -35,7 +36,7 @@ public class ETLWorkflowTableRepository extends DataRepository<ETLWorkflowTableD
     public Set<Long> findSourceTableIdsByWorkflowId(Long workflowId) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("workflow_id", workflowId);
-        cs.eq("relation", "source");
+        cs.eq("relation", ETLConstants.WORKFLOW_TABLE_RELATION_SOURCE);
         List<ETLWorkflowTableDO> relations = findAllByConfig(cs);
         return relations.stream()
                 .map(ETLWorkflowTableDO::getTableId)
@@ -45,7 +46,7 @@ public class ETLWorkflowTableRepository extends DataRepository<ETLWorkflowTableD
     public Long findTargetTableIdByWorkflowId(Long workflowId) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("workflow_id", workflowId);
-        cs.eq("relation", "target");
+        cs.eq("relation", ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
         return findOne(cs).getTableId();
     }
 }

@@ -20,8 +20,9 @@ public class ETLScheduleJobRepository extends DataRepository<ETLScheduleJobDO> {
         deleteByConfig(cs);
     }
 
-    public ETLScheduleJobDO findByWorkflowId(Long workflowId) {
+    public ETLScheduleJobDO findByApplicationIdAndWorkflowId(Long applicationId, Long workflowId) {
         ConfigStore cs = new DefaultConfigStore();
+        cs.eq("application_id", applicationId);
         cs.eq("workflow_id", workflowId);
 
         return findOne(cs);

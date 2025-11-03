@@ -2,14 +2,23 @@ package com.cmsr.onebase.module.etl.build.service.etl.vo;
 
 import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.ScheduleConfig;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class ETLScheduleConfigVO {
 
-    private String etlName;
+    @NotNull
+    private Long workflowId;
 
-    private ScheduleType scheduleStrategy;
+    @NotBlank
+    private String scheduleStrategy;
 
+    @NotNull
     private ScheduleConfig config;
+
+    public ScheduleType getScheduleStrategy() {
+        return ScheduleType.of(this.scheduleStrategy);
+    }
 }
