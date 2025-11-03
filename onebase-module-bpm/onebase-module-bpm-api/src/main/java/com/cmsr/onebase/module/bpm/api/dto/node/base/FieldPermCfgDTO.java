@@ -21,7 +21,7 @@ public class FieldPermCfgDTO {
      * 是否使用节点配置
      */
     @NotNull(message = "是否使用节点配置不能为空")
-    private Boolean useNodeConfig;
+    private Boolean useNodeConfig = false;
 
     /**
      * 字段配置列表

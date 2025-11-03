@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,8 @@ import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
+
 @Slf4j
 @Component
 public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCoreService {
@@ -193,26 +195,38 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
             DataRow dataRow = new DataRow(processedData);
             long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
             log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
+            super.storeData(context);
 
             return null;
         });
     }
 
     @Override
+    protected void handleSubEntities(ProcessContext context) {
+        //todo 处理子表逻辑
+    }
+
+    @Override
     protected void executePreWorkflow(ProcessContext context) {
         Long entityId = context.getEntityId();
         Map<String, Object> data = context.getData();
+        data.put("id",context.getId());//存放id字段
         Map fieldData = convertNameToId(entityId,data);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setTraceId(context.getRequestContext().getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(!respDTO.isTriggered()){
+            log.info("BEFORE_UPDATE 数据更新前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            return;
+        }
         if(respDTO.isSuccess()){
             log.info("BEFORE_UPDATE 数据更新触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
             log.error("BEFORE_UPDATE 数据更新触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+            throw  exception(PROCESS_ERROR_BEFORE_UPDATE,respDTO.getMessage());
         }
     }
 
@@ -220,17 +234,23 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
     protected void executePostWorkflow(ProcessContext context) {
         Long entityId = context.getEntityId();
         Map<String, Object> data = context.getData();
+        data.put("id",context.getId());//存放id字段
         Map fieldData = convertNameToId(entityId,data);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setTraceId(context.getRequestContext().getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        if(!respDTO.isTriggered()){
+            log.info("AFTER_UPDATE 数据更新后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            return;
+        }
         if(respDTO.isSuccess()){
             log.info("AFTER_UPDATE 数据更新触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
         }else{
             log.info("AFTER_UPDATE 数据更新触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+            throw  exception(PROCESS_ERROR_AFTER_UPDATE,respDTO.getMessage());
         }
     }
 

@@ -8,6 +8,6 @@ public class FixedDurationSchedule implements ScheduleConfig {
 
     @Override
     public boolean isScheduled() {
-        return false;
+        return true;
     }
 }
