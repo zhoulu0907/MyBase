@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Image, Space } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import EditableFormItem from '../formItem';
 import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
+import { useParams } from 'react-router-dom';
 
 // 企业信息数据模型
 interface EnterpriseInfo {
@@ -28,6 +29,8 @@ const EnterpriseInfoPage: React.FC = () => {
     status: '已启用'
   };
 
+  const {activeTab} = useParams();
+  const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
   const [formData, setFormData] = React.useState<EnterpriseInfo>(enterpriseData);
 
@@ -43,6 +46,10 @@ const EnterpriseInfoPage: React.FC = () => {
     }
     setIsEdited(!isEdited);
   };
+
+  const handleEdit = () => {
+
+  }
 
   const data = [
     {
@@ -130,11 +137,11 @@ const EnterpriseInfoPage: React.FC = () => {
   ]
 
   return (
-    <div>
+    <div className={styles.enterpriseWrapper}>
       {/* 主内容卡片 */}
       <Card bordered={false}>
         {/* 标签页组件 */}
-        <Tabs defaultActiveTab="basic" >
+        <Tabs activeTab={currentTab} onChange={setCurrentTab}>
           <Tabs.TabPane key="basic" title="基本信息">
             {/* 企业Logo展示 */}
             <Descriptions data={data} column={1} border={false} className={styles.infoPreview}/>
@@ -160,9 +167,8 @@ const EnterpriseInfoPage: React.FC = () => {
                 编辑
               </Button>}
           </Tabs.TabPane>
-          
           <Tabs.TabPane key="authorized" title="授权应用">
-            <AuthorizedApp  />
+            <AuthorizedApp className ={styles.authorizedApp} onEdit={handleEdit} setAddAppModalVisible={(()=>null)}/>
           </Tabs.TabPane>
         </Tabs>
       </Card>

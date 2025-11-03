@@ -8,7 +8,7 @@ interface ICommonTableProps {
 export const CommonTable:React.FC<ICommonTableProps> = ({
     data,
     columns,
-    pageination
+    pageination,
 }) => {
     const defaultPageination = {
         sizeCanChange: true,

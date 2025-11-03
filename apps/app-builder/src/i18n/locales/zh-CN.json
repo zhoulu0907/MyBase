@@ -118,7 +118,8 @@
     "systemDict": "数据字典管理",
     "tenant": "租户信息",
     "business": "企业管理",
-    "createBusiness":"创建企业"
+    "createBusiness":"创建企业",
+    "authorizedApplication":"授权应用"
   },
   "myApp": {
     "createApp": "零代码创建"

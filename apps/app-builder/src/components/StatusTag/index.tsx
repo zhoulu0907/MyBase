@@ -10,12 +10,13 @@ export interface StatusTagProps {
 
 export enum StatusLabelEnum {
   ENABLE = '启用',
-  DISABLE = '禁用'
+  DISABLE = '禁用',
+  EXPIRED = '过期'
 }
 
 export const getStatusLabel = (status: StatusEnum): string => {
   const isEnable = status === StatusEnum.ENABLE;
-  const text = isEnable ? StatusLabelEnum.ENABLE : StatusLabelEnum.DISABLE;
+  const text = isEnable ? StatusLabelEnum.ENABLE : (status === StatusEnum.EXPIRED ? StatusLabelEnum.EXPIRED : StatusLabelEnum.DISABLE);
   return text;
 };
 
@@ -27,7 +28,7 @@ const statusColorMap: Record<StatusEnum, string> = {
 export const StatusTag: React.FC<StatusTagProps> = ({ status, type = 'text' }) => {
   const isEnable = status === StatusEnum.ENABLE;
   const text = getStatusLabel(status);
-  const dotClass = isEnable ? s.enable : s.disable;
+  const dotClass = isEnable ? s.enable : (status === StatusEnum.EXPIRED ? s.expired : s.disable);
 
   return type === 'tag' ? (
     <Tag color={statusColorMap[status]}>{text}</Tag>

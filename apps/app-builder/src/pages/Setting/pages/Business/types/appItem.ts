@@ -12,6 +12,13 @@ export interface AuthorizedAppRef {
 };
 
 export interface IAuthorizedAppProps {
+    className?: string;
     setAddAppModalVisible: (visible:boolean) => void;
     onEdit: (name: string)=>void;
+}
+
+export interface statusProps {
+  label: string;
+  value: string;
+  status: number;
 }

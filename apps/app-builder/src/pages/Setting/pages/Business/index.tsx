@@ -29,10 +29,10 @@ const BusinessPage: React.FC<IBusinessPageProps> = () => {
     const [searchInputValue, setSearchInputValue] = useState<string>("");
     const isCreatePage = useMatch('onebase/setting/business/create-business');
 
-    const handleEdit = (name: string) => {
+    const handleEdit = (name: string, activeTab: string) => {
         setEditable(true);
         const encodedName = encodeURIComponent(name);
-        navigate(`${encodedName}`);
+        navigate(`${encodedName}/${activeTab === "basic" ? "基本信息" : "授权应用"}`);
     }
 
     const businessManageColumns = [
@@ -82,8 +82,8 @@ const BusinessPage: React.FC<IBusinessPageProps> = () => {
             title: '操作',
             render: (_: any, record: any) => (
                 <Space size={4}>
-                    <Button size="small" type="text" onClick={handleEdit.bind(null, record.name)}>编辑</Button>
-                    <Button size="small" type="text">应用授权</Button>
+                    <Button size="small" type="text" onClick={handleEdit.bind(null, record.name,"basic")}>编辑</Button>
+                    <Button size="small" type="text" onClick={handleEdit.bind(null, record.name ,"authorized")}>应用授权</Button>
                     <Dropdown
                         trigger="click"
                         droplist={actionMenu(record)}
@@ -185,14 +185,14 @@ const BusinessPage: React.FC<IBusinessPageProps> = () => {
         return (
             <div className={styles.businessManagement}>
                 {/* 头部渲染 */}
-                <TopHeader title="创建企业" onAdd={handleCreateBusiness} setSearchInputValue={setSearchInputValue}/>
+                <TopHeader title="创建企业" className={styles.headerSection} onAdd={handleCreateBusiness} setSearchInputValue={setSearchInputValue}/>
                 <CommonTable 
                     data={displayBusinessData}
                     columns={businessManageColumns}
                     pageination={{
                         sizeCanChange: true,
                         showTotal: true,
-                        total: 100,
+                        total: displayBusinessData.length,
                         pageSize: 10,
                         current: 1,
                         pageSizeChangeResetCurrent: true

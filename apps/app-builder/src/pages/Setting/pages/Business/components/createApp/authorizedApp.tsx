@@ -8,7 +8,7 @@ import type { IAuthorizedAppProps, AuthorizedAppRef } from "../../types/appItem"
 
 
 export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
-  ({ setAddAppModalVisible, onEdit}, ref) => {
+  ({ setAddAppModalVisible, onEdit, className}, ref) => {
     // 模拟表格数据（5条示例数据）
     const initialAppData = Array(5).fill().map((_, index) => ({
         key: index + 1,
@@ -100,9 +100,9 @@ export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
     ];
 
     return (
-        <div className={styles.authorizedApp}>
-            {/* 头部渲染 */}
+        <div className={className ? className : styles.authorizedApp}>
             <TopHeader
+                className={styles.headerSection}
                 title="添加应用"
                 onAdd={handleAddApplication}
                 isBusiness={false}

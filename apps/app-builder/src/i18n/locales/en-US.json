@@ -116,7 +116,10 @@
     "role": "Role Management",
     "organization": "Organization Management",
     "systemDict": "System Dictionary",
-    "tenant": "Tenant Info"
+    "tenant": "Tenant Info",
+    "business": "Business",
+    "createBusiness":"Create Business",
+    "authorizedApplication": "Authorized Application"
   },
   "myApp": {
     "createApp": "Create App"

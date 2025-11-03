@@ -80,6 +80,9 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case "create-business":
           title = t('sider.createBusiness');
           break;
+        case "authorized-application":
+          title = t('sider.authorizedApplication');
+          break;
         default:
           title = decodeURIComponent(segment);
       }

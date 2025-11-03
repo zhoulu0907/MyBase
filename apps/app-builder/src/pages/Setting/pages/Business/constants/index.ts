@@ -1,3 +1,5 @@
+import type { statusProps } from "../types/appItem";
+
 // 步骤配置
 export const steps = [
     { title: '基本信息' },
@@ -29,3 +31,17 @@ export const noLabelLayout = {
         offset: 5,
     },
 };
+
+export const statusMapping:statusProps[] = [
+    {label:"全部", value: "all", status: 3},
+    {label:"已启用", value: "started", status:0},
+    {label:"已禁用", value: "disabled", status: 1},
+    {label:"已过期", value: "expired", status: 2},
+]
+
+export const statusOptions = [
+    { label: '全部状态', value: 'all' },
+    { label: '开发中', value: 'develop' },
+    { label: '迭代中', value: 'fixing' },
+    { label: '已发布', value: 'published' }
+]
