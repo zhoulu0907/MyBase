@@ -5,10 +5,7 @@ import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
-import com.cmsr.onebase.module.etl.core.vo.DataPreviewVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourceRespVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLTablePreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.*;
 
 import java.util.List;
 
@@ -18,9 +15,9 @@ public interface ETLDatasourceService {
 
     Boolean pingDatasource(ETLDatasourcePingVO pingVO);
 
-    ETLDatasourceRespVO queryDatasourceDetail(Long datasourceId);
+    DatasourceRespVO queryDatasourceDetail(Long datasourceId);
 
-    PageResult<ETLDatasourceRespVO> getETLDatasourcePage(ETLDatasourcePageReqVO pageReqVO);
+    PageResult<DatasourceRespVO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO);
 
     Long createDatasource(ETLDatasourceCreateReqVO createReqVO);
 
@@ -30,5 +27,11 @@ public interface ETLDatasourceService {
 
     void executeMetadataCollectJob(Long datasourceId);
 
-    DataPreviewVO previewTable(ETLTablePreviewVO tablePreviewVO);
+    DataPreviewVO previewTable(TablePreviewVO tablePreviewVO);
+
+    List<MetaBriefVO> listDatasources(Long applicationId);
+
+    List<MetaBriefVO> listDatasourceTables(Long datasourceId);
+
+    List<ColumnDefine> listTableColumns(Long tableId);
 }

@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.etl.core.service;
 
-import com.cmsr.onebase.module.etl.core.vo.DataPreviewVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLTablePreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DataPreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.TablePreviewVO;
 
 public interface DataInspectService {
-    DataPreviewVO previewData(ETLTablePreviewVO previewVO);
+    DataPreviewVO previewData(TablePreviewVO previewVO);
 }

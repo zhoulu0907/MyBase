@@ -64,4 +64,11 @@ public class ETLTableRepository extends DataRepository<ETLTableDO> {
         List<ETLTableDO> tables = findAllByIds(ids);
         return tables.stream().map(ETLTableDO::getDisplayName).toList();
     }
+
+    public List<ETLTableDO> findAllByDatasourceId(Long datasourceId) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("datasource_id", datasourceId);
+
+        return findAllByConfig(cs);
+    }
 }

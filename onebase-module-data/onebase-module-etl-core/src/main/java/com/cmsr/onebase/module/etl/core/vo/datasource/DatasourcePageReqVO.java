@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ETLDatasourcePageReqVO extends PageParam {
+public class DatasourcePageReqVO extends PageParam {
 
     @NotNull
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED)

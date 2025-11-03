@@ -7,10 +7,7 @@ import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
-import com.cmsr.onebase.module.etl.core.vo.DataPreviewVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourceRespVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLTablePreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -44,14 +41,14 @@ public class ETLDatasourceController {
     }
 
     @GetMapping("/page")
-    public CommonResult<PageResult<ETLDatasourceRespVO>> getETLDatasourcePage(@Validated ETLDatasourcePageReqVO pageReqVO) {
-        PageResult<ETLDatasourceRespVO> pageResult = etlDatasourceService.getETLDatasourcePage(pageReqVO);
+    public CommonResult<PageResult<DatasourceRespVO>> getETLDatasourcePage(@Validated DatasourcePageReqVO pageReqVO) {
+        PageResult<DatasourceRespVO> pageResult = etlDatasourceService.getETLDatasourcePage(pageReqVO);
         return CommonResult.success(pageResult);
     }
 
     @GetMapping("/{id}")
-    public CommonResult<ETLDatasourceRespVO> queryDatasourceDetail(@PathVariable("id") Long datasourceId) {
-        ETLDatasourceRespVO datasourceVO = etlDatasourceService.queryDatasourceDetail(datasourceId);
+    public CommonResult<DatasourceRespVO> queryDatasourceDetail(@PathVariable("id") Long datasourceId) {
+        DatasourceRespVO datasourceVO = etlDatasourceService.queryDatasourceDetail(datasourceId);
         return CommonResult.success(datasourceVO);
     }
 
@@ -84,9 +81,26 @@ public class ETLDatasourceController {
         return CommonResult.success(Boolean.TRUE);
     }
 
+    @GetMapping("/list")
+    public CommonResult<List<MetaBriefVO>> listDatasources(@RequestParam("applicationId") Long applicationId) {
+        List<MetaBriefVO> briefVOList = etlDatasourceService.listDatasources(applicationId);
+        return CommonResult.success(briefVOList);
+    }
+
+    @GetMapping("/tables")
+    public CommonResult<List<MetaBriefVO>> listDatasourceTables(@RequestParam("id") Long id) {
+        List<MetaBriefVO> briefVOList = etlDatasourceService.listDatasourceTables(id);
+        return CommonResult.success(briefVOList);
+    }
+
+    @GetMapping("/table/columns")
+    public CommonResult<List<ColumnDefine>> listTableColumns(@RequestParam("tableId") Long tableId) {
+        return CommonResult.success(null);
+    }
+
     @PostMapping("/preview")
     @Operation(summary = "预览表数据")
-    public CommonResult<DataPreviewVO> previewTableData(@Validated @RequestBody ETLTablePreviewVO tablePreviewVO) {
+    public CommonResult<DataPreviewVO> previewTableData(@Validated @RequestBody TablePreviewVO tablePreviewVO) {
         DataPreviewVO dataPreviewVO = etlDatasourceService.previewTable(tablePreviewVO);
         return CommonResult.success(dataPreviewVO);
     }

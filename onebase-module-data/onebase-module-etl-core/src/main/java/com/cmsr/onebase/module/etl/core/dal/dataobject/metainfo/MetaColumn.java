@@ -100,7 +100,7 @@ public class MetaColumn {
                 columnName));
         UUID nameBaseUUID = UUID.nameUUIDFromBytes(metaColumn.getFullyQualifiedName().getBytes(StandardCharsets.UTF_8));
         metaColumn.setId(nameBaseUUID.toString());
-        metaColumn.setKeyword(column.keyword());
+        metaColumn.setKeyword(column.keyword().toLowerCase());
         String comment = column.getComment();
         metaColumn.setComment(comment);
         if (StringUtils.isNotBlank(comment)) {
@@ -108,8 +108,7 @@ public class MetaColumn {
         } else {
             metaColumn.setDisplayName(columnName);
         }
-        metaColumn.setOriginType(column.getOriginType());
-        metaColumn.setCompatibleType(column.getTypeName());
+        metaColumn.setOriginType(column.getOriginType().toLowerCase());
         metaColumn.setPosition(column.getPosition());
         metaColumn.setNullable(column.getNullable());
         metaColumn.setIgnoreLength(column.ignoreLength());

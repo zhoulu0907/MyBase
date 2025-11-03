@@ -10,14 +10,13 @@ import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePing
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaColumn;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.service.DataInspectService;
 import com.cmsr.onebase.module.etl.core.service.MetadataCollectorService;
-import com.cmsr.onebase.module.etl.core.vo.DataPreviewVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourceRespVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLTablePreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import jakarta.annotation.PostConstruct;
@@ -98,20 +97,20 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public ETLDatasourceRespVO queryDatasourceDetail(Long datasourceId) {
+    public DatasourceRespVO queryDatasourceDetail(Long datasourceId) {
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        return BeanUtils.toBean(datasourceDO, ETLDatasourceRespVO.class);
+        return BeanUtils.toBean(datasourceDO, DatasourceRespVO.class);
     }
 
     @Override
-    public PageResult<ETLDatasourceRespVO> getETLDatasourcePage(ETLDatasourcePageReqVO pageReqVO) {
+    public PageResult<DatasourceRespVO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO) {
         PageResult<ETLDatasourceDO> pageDOs = datasourceRepository.getETLDatasourcePage(pageReqVO);
-        List<ETLDatasourceRespVO> respVOs = pageDOs.getList()
+        List<DatasourceRespVO> respVOs = pageDOs.getList()
                 .stream()
-                .map(dataobject -> BeanUtils.toBean(dataobject, ETLDatasourceRespVO.class))
+                .map(dataobject -> BeanUtils.toBean(dataobject, DatasourceRespVO.class))
                 .toList();
 
         return new PageResult<>(respVOs, pageDOs.getTotal());
@@ -178,8 +177,57 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public DataPreviewVO previewTable(ETLTablePreviewVO tablePreviewVO) {
+    public DataPreviewVO previewTable(TablePreviewVO tablePreviewVO) {
         return dataInspectService.previewData(tablePreviewVO);
+    }
+
+    @Override
+    public List<MetaBriefVO> listDatasources(Long applicationId) {
+        List<ETLDatasourceDO> datasourceDOList = datasourceRepository.findAllByApplicationId(applicationId);
+
+        return datasourceDOList.stream()
+                .map(datasourceDO -> {
+                    MetaBriefVO briefVO = new MetaBriefVO();
+                    briefVO.setId(String.valueOf(datasourceDO.getId()));
+                    briefVO.setName(datasourceDO.getDatasourceName());
+                    return briefVO;
+                }).toList();
+    }
+
+    @Override
+    public List<MetaBriefVO> listDatasourceTables(Long datasourceId) {
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
+
+        List<ETLTableDO> tableDOList = tableRepository.findAllByDatasourceId(datasourceId);
+
+        return tableDOList.stream()
+                .map(tableDO -> {
+                    MetaBriefVO briefVO = new MetaBriefVO();
+                    briefVO.setId(String.valueOf(tableDO.getId()));
+                    briefVO.setName(tableDO.getDisplayName());
+                    return briefVO;
+                }).toList();
+    }
+
+    @Override
+    public List<ColumnDefine> listTableColumns(Long tableId) {
+        ETLTableDO tableDO = tableRepository.findById(tableId);
+        if (tableDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
+        }
+
+        List<MetaColumn> columns = tableDO.getMetaInfo().getColumns();
+        return columns.stream()
+                .map(metaColumn -> {
+                    ColumnDefine columnDefine = new ColumnDefine();
+                    columnDefine.setId(metaColumn.getId());
+                    columnDefine.setName(metaColumn.getDisplayName());
+                    columnDefine.setType(metaColumn.getCompatibleType());
+                    return columnDefine;
+                }).toList();
     }
 
     private void validDatasourceCodeDuplicate(String datasourceCode, Long filterId) {

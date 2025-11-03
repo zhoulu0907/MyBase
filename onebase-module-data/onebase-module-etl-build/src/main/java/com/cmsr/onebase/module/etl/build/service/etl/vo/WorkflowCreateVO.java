@@ -8,7 +8,7 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
-public class ETLWorkflowCreateVO {
+public class WorkflowCreateVO {
 
     @NotNull
     private Long applicationId;

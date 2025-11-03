@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.ETLWorkflowService;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
-import com.cmsr.onebase.module.etl.core.vo.etl.ETLWorkflowPageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -23,25 +23,25 @@ public class ETLWorkflowController {
 
     @GetMapping("/page")
     @Operation(summary = "分页查询数据流")
-    public CommonResult<PageResult<ETLWorkflowBriefVO>> pageQueryFlow(@Validated ETLWorkflowPageReqVO pageReqVO) {
-        PageResult<ETLWorkflowBriefVO> workflowPage = workflowService.getWorkflowPage(pageReqVO);
+    public CommonResult<PageResult<WorkflowBriefVO>> pageQueryFlow(@Validated WorkflowPageReqVO pageReqVO) {
+        PageResult<WorkflowBriefVO> workflowPage = workflowService.getWorkflowPage(pageReqVO);
         return CommonResult.success(workflowPage);
     }
 
     @GetMapping("/{workflowId}")
-    public CommonResult<ETLWorkflowDetailVO> queryWorkflowDetailedInfo(@PathVariable("workflowId") @NotNull Long workflowId) {
-        ETLWorkflowDetailVO workflowDetail = workflowService.getWorkflowDetail(workflowId);
+    public CommonResult<WorkflowDetailVO> queryWorkflowDetailedInfo(@PathVariable("workflowId") @NotNull Long workflowId) {
+        WorkflowDetailVO workflowDetail = workflowService.getWorkflowDetail(workflowId);
         return CommonResult.success(workflowDetail);
     }
 
     @PostMapping("/create")
-    public CommonResult<Long> createWorkflow(@Validated @RequestBody ETLWorkflowCreateVO createVO) {
+    public CommonResult<Long> createWorkflow(@Validated @RequestBody WorkflowCreateVO createVO) {
         Long workflow = workflowService.createWorkflow(createVO);
         return CommonResult.success(workflow);
     }
 
     @PostMapping("/update")
-    public CommonResult<Boolean> updateWorkflow(@Validated @RequestBody ETLWorkflowUpdateVO updateVO) {
+    public CommonResult<Boolean> updateWorkflow(@Validated @RequestBody WorkflowUpdateVO updateVO) {
         workflowService.updateWorkflow(updateVO);
         return CommonResult.success(Boolean.TRUE);
     }
@@ -78,7 +78,7 @@ public class ETLWorkflowController {
 
     @PostMapping("/{workflowId}/schedule")
     public CommonResult<Boolean> configScheduleStrategy(@PathVariable("workflowId") Long workflowId,
-                                                        @Validated @RequestBody ETLScheduleConfigVO scheduleConfigVO) {
+                                                        @Validated @RequestBody ScheduleConfigVO scheduleConfigVO) {
         // TODO:
         scheduleConfigVO.setWorkflowId(workflowId);
         workflowService.configScheduleStrategy(scheduleConfigVO);

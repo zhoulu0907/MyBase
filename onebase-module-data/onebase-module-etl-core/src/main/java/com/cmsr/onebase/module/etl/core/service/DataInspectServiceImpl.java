@@ -6,8 +6,8 @@ import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import com.cmsr.onebase.module.etl.core.vo.DataPreviewVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLTablePreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DataPreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.TablePreviewVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -33,7 +33,7 @@ public class DataInspectServiceImpl implements DataInspectService {
     private ETLTableRepository tableRepository;
 
     @Override
-    public DataPreviewVO previewData(ETLTablePreviewVO previewVO) {
+    public DataPreviewVO previewData(TablePreviewVO previewVO) {
         Long datasourceId = previewVO.getDatasourceId();
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {

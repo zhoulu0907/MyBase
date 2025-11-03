@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
-import com.cmsr.onebase.module.etl.core.vo.etl.ETLWorkflowPageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,11 +48,11 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     private ETLTableRepository tableRepository;
 
     @Override
-    public PageResult<ETLWorkflowBriefVO> getWorkflowPage(ETLWorkflowPageReqVO pageReqVO) {
+    public PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
         PageResult<ETLWorkflowDO> pageDOs = workflowRepository.getWorkflowPage(pageReqVO);
-        List<ETLWorkflowBriefVO> pageVOs = new ArrayList<>();
+        List<WorkflowBriefVO> pageVOs = new ArrayList<>();
         for (ETLWorkflowDO workflowDO : pageDOs.getList()) {
-            ETLWorkflowBriefVO briefVO = new ETLWorkflowBriefVO();
+            WorkflowBriefVO briefVO = new WorkflowBriefVO();
             Long workflowId = workflowDO.getId();
             Long applicationId = workflowDO.getApplicationId();
             briefVO.setId(workflowId);
@@ -83,9 +83,9 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     @Override
-    public ETLWorkflowDetailVO getWorkflowDetail(Long workflowId) {
+    public WorkflowDetailVO getWorkflowDetail(Long workflowId) {
         ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
-        ETLWorkflowDetailVO workflowDetailVO = new ETLWorkflowDetailVO();
+        WorkflowDetailVO workflowDetailVO = new WorkflowDetailVO();
         workflowDetailVO.setId(workflowDO.getId());
         workflowDetailVO.setFlowName(workflowDO.getWorkflowName());
         workflowDetailVO.setConfig(workflowDO.getConfig());
@@ -94,7 +94,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     @Override
-    public Long createWorkflow(ETLWorkflowCreateVO createVO) {
+    public Long createWorkflow(WorkflowCreateVO createVO) {
         validateWorkflowNameUnique(createVO.getFlowName(), null);
         ETLWorkflowDO workflowDO = new ETLWorkflowDO();
         Long applicationId = createVO.getApplicationId();
@@ -116,7 +116,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     @Override
-    public void updateWorkflow(ETLWorkflowUpdateVO updateVO) {
+    public void updateWorkflow(WorkflowUpdateVO updateVO) {
         Long workflowId = updateVO.getId();
         validateWorkflowNameUnique(updateVO.getFlowName(), workflowId);
         ETLWorkflowDO oldWorkflow = getOperableWorkflow(workflowId);
@@ -159,7 +159,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     @Override
-    public void configScheduleStrategy(ETLScheduleConfigVO scheduleVO) {
+    public void configScheduleStrategy(ScheduleConfigVO scheduleVO) {
         Long workflowId = scheduleVO.getWorkflowId();
         ETLWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
         // TODO:

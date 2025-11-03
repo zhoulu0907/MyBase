@@ -2,23 +2,23 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
-import com.cmsr.onebase.module.etl.core.vo.etl.ETLWorkflowPageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 
 public interface ETLWorkflowService {
 
-    PageResult<ETLWorkflowBriefVO> getWorkflowPage(ETLWorkflowPageReqVO pageReqVO);
+    PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO);
 
-    ETLWorkflowDetailVO getWorkflowDetail(Long workflowId);
+    WorkflowDetailVO getWorkflowDetail(Long workflowId);
 
-    Long createWorkflow(ETLWorkflowCreateVO createVO);
+    Long createWorkflow(WorkflowCreateVO createVO);
 
-    void updateWorkflow(ETLWorkflowUpdateVO updateVO);
+    void updateWorkflow(WorkflowUpdateVO updateVO);
 
     void deleteWorkflow(Long workflowId);
 
     void startWorkflowManually(Long workflowId);
 
-    void configScheduleStrategy(ETLScheduleConfigVO scheduleVO);
+    void configScheduleStrategy(ScheduleConfigVO scheduleVO);
 
     void getWorkflowExecutionLogs(Long workflowId);
 

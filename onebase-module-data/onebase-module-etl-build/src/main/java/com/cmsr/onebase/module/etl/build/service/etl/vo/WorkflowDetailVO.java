@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 @Data
-public class ETLWorkflowDetailVO {
+public class WorkflowDetailVO {
 
     private Long id;
 

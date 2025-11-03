@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
-import com.cmsr.onebase.module.etl.core.vo.etl.ETLWorkflowPageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -20,7 +20,7 @@ public class ETLWorkflowRepository extends DataRepository<ETLWorkflowDO> {
         super(ETLWorkflowDO.class);
     }
 
-    public PageResult<ETLWorkflowDO> getWorkflowPage(ETLWorkflowPageReqVO pageReqVO) {
+    public PageResult<ETLWorkflowDO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
         ConfigStore cs = new DefaultConfigStore();
         if (StringUtils.isNotBlank(pageReqVO.getName())) {
             cs.like("workflow_name", pageReqVO.getName());

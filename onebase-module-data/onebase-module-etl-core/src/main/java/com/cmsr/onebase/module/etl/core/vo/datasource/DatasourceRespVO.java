@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Schema(description = "数据工厂 - 数据源创建/修改 VO")
 @Data
-public class ETLDatasourceRespVO {
+public class DatasourceRespVO {
 
     @Schema(description = "数据源ID")
     private Long id;
