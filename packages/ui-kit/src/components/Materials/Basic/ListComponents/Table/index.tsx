@@ -238,7 +238,6 @@ const XTable = memo(
 
     useEffect(() => {
       if (finalColumns && metaData) {
-        console.log('finalColumns: ', finalColumns);
         handlePage();
       }
     }, [finalColumns, tablePageNo, metaData, sortByObject]);
