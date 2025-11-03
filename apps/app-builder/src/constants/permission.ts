@@ -21,6 +21,8 @@ export const TENANT_MENUS = {
   DEPT: 'tenant:dept',
   DICT: 'tenant:dict',
   INFO: 'tenant:info',
+  BUSINESS: 'tenant:business',
+  AUTHORIZED: 'tenant:authorized'
 }
 
 // todo 应用管理

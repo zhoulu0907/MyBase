@@ -16,6 +16,10 @@ import TenantEditPage from './pages/Tenant/edit';
 import UserPage from './pages/User';
 
 import styles from './index.module.less';
+import BusinessPage from './pages/Business';
+import CreateBusinessPage from './pages/Business/createBusiness';
+import EnterpriseInfoPage from './pages/Business/components/enterprise-information';
+import AuthorizedApplication from './pages/Business/components/authorizedApp';
 
 const Content = Layout.Content;
 
@@ -47,6 +51,11 @@ const SettingPage: React.FC = () => {
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="enterprise" element={<TenantPage />} />
                 <Route path="tenant" element={<TenantPage />} />
+                <Route path="business" element = {<BusinessPage />}>
+                  <Route path="create-business" element = {<CreateBusinessPage />} />
+                  <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
+                </Route>
+                <Route path="authorized-application" element = {<AuthorizedApplication />}></Route>
                 <Route path="tenant/edit" element={<TenantEditPage />} />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>
