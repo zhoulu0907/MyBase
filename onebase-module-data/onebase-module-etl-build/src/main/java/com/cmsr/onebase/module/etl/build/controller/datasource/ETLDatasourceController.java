@@ -95,7 +95,8 @@ public class ETLDatasourceController {
 
     @GetMapping("/table/columns")
     public CommonResult<List<ColumnDefine>> listTableColumns(@RequestParam("tableId") Long tableId) {
-        return CommonResult.success(null);
+        List<ColumnDefine> columnDefines = etlDatasourceService.listTableColumns(tableId);
+        return CommonResult.success(columnDefines);
     }
 
     @PostMapping("/preview")
