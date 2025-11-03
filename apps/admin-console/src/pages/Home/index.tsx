@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AppBreadcrumb from '../../components/Breadcrumb';
 import PlatformInfo from '../PlatformInfo';
-import Tenant from '../Tenant/index';
+import Tenant from '../Tenant';
+import TenantCreate from '../Tenant/create';
+import TenantEdit from '../Tenant/edit';
 import Administrator from '../Administrator';
 import AppHeader from './components/header';
 import AppSider from './components/sider';
@@ -32,6 +34,8 @@ const Home: React.FC = () => {
               <Routes>
                 <Route path="platform-info" element={<PlatformInfo />} />
                 <Route path="tenant" element={<Tenant />} />
+                <Route path="tenant/create" element={<TenantCreate />} />
+                <Route path="tenant/edit" element={<TenantEdit />} />
                 <Route path="administrator" element={<Administrator />} />
                 {/* <Route path="" element={<Welcome />} /> */}
               </Routes>

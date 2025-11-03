@@ -61,6 +61,12 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'administrator':
           title = t('breadcrumb.administrator');
           break;
+        case 'create':
+          title = t('breadcrumb.create');
+          break;
+        case 'edit':
+          title = t('breadcrumb.edit');
+          break;
         default:
           title = segment;
       }

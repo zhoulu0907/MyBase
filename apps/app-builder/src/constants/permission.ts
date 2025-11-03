@@ -15,6 +15,7 @@ export enum PERMISSION_TYPES {
 
 /** 菜单-租户管理 */
 export const TENANT_MENUS = {
+  APP: 'tenant:app', // todo
   USER: 'tenant:user',
   ROLE: 'tenant:role',
   DEPT: 'tenant:dept',
@@ -24,6 +25,8 @@ export const TENANT_MENUS = {
   AUTHORIZED: 'tenant:authorized'
 }
 
+// todo 应用管理
+
 /** 租户管理-用户管理 */
 export const TENANT_USER_QUERY = 'tenant:user:query'; // 查询用户
 export const TENANT_USER_CREATE = 'tenant:user:create'; // 增加用户
@@ -31,16 +34,20 @@ export const TENANT_USER_UPDATE = 'tenant:user:update'; // 修改用户
 export const TENANT_USER_DELETE = 'tenant:user:delete'; // 删除用户
 export const TENANT_USER_STATUS = 'tenant:user:enable'; // 启用/禁用用户
 export const TENANT_USER_RESET = 'tenant:user:reset'; // 重置密码
+export const TENANT_USER_IMPORT = 'tenant:user:import'; // 数据导入 // todo
+export const TENANT_USER_EXPORT = 'tenant:user:import'; // 数据导出 // todo
 export const TENANT_USER_PERMISSION = {
   QUERY: TENANT_USER_QUERY,
   CREATE: TENANT_USER_CREATE,
   UPDATE: TENANT_USER_UPDATE,
   DELETE: TENANT_USER_DELETE,
   RESET: TENANT_USER_RESET,
-  STATUS: TENANT_USER_STATUS
+  STATUS: TENANT_USER_STATUS,
+  IMPORT: TENANT_USER_IMPORT,
+  EXPORT: TENANT_USER_EXPORT
 }
 
-/** 租户管理-角色管理 */ 
+/** 租户管理-角色管理 */
 export const TENANT_ROLE_QUERY = 'tenant:role:query'; // 查询角色
 export const TENANT_ROLE_CREATE = 'tenant:role:create'; // 新增角色
 export const TENANT_ROLE_UPDATE = 'tenant:role:update'; // 修改角色
@@ -59,11 +66,13 @@ export const TENANT_ROLE_PERMISSION = {
 /** 租户管理-组织管理 */
 export const TENANT_DEPT_QUERY = 'tenant:dept:query';
 export const TENANT_DEPT_CREATE = 'tenant:dept:create';
+export const TENANT_DEPT_SUB_DEPT = 'tenant:dept:update'; // todo 添加子部门 待确认
 export const TENANT_DEPT_UPDATE = 'tenant:dept:update';
 export const TENANT_DEPT_DELETE = 'tenant:dept:delete';
 export const TENANT_DEPT_PERMISSION = {
   QUERY: TENANT_DEPT_QUERY,
   CREATE: TENANT_DEPT_CREATE,
+  SUB_DEPT: TENANT_DEPT_SUB_DEPT,
   UPDATE: TENANT_DEPT_UPDATE,
   DELETE: TENANT_DEPT_DELETE
 }
@@ -114,6 +123,6 @@ export const PERMISSION_SCOPE: Record<string, string> = {
 
 /** 数据权限-操作权限 */
 export const OPERATION_OPTIONS: Record<string, string> = {
-  EDIT: '编辑',
-  DELETE: '删除'
+  edit: '编辑',
+  delete: '删除'
 };

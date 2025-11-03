@@ -188,7 +188,7 @@ const Runtime: React.FC = () => {
               blockNode
               draggable
               treeData={treeData}
-              selectedKeys={[curMenu.value.menuCode!]}
+              selectedKeys={[curMenu.value?.menuCode!]}
               expandedKeys={expandedKeys}
               onExpand={setExpandedKeys}
               className={`menuTree ${styles.tree}`}
@@ -210,9 +210,9 @@ const Runtime: React.FC = () => {
             />
           </Sider>
           <Content className={styles.content}>
-            {curMenu.value.id && (
+            {curMenu.value?.id && (
               <div className={styles.contentHeader}>
-                <div className={styles.contentTitle}>{curMenu.value.menuName}</div>
+                <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
                 <div className={styles.userInfo}>
                   {nickname || '未登录'}
 
@@ -226,7 +226,7 @@ const Runtime: React.FC = () => {
             )}
 
             <div className={styles.contentBody}>
-              <PreviewContainer menuId={curMenu.value.id || ''} runtime={true} />
+              <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
             </div>
           </Content>
         </Layout>

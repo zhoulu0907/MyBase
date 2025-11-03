@@ -1,5 +1,5 @@
 import { emailValidator, phoneValidator } from '@/utils/validator';
-import { Button, Form, Grid, Input, Message, Modal, Select, Switch, TreeSelect } from '@arco-design/web-react';
+import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import { createUser, getSimpleRoleList, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
@@ -107,7 +107,7 @@ export default function UserFormModal({
 
   return (
     <Modal
-      title={isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}
+      title={<div style={{ textAlign: 'left' }}>{isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}</div>}
       visible={visible}
       onCancel={onCancel}
       onOk={handleSubmit}
@@ -118,10 +118,10 @@ export default function UserFormModal({
       footer={
         isDetail
           ? [
-              <Button key="close" onClick={onCancel}>
-                关闭
-              </Button>
-            ]
+            <Button key="close" onClick={onCancel}>
+              关闭
+            </Button>
+          ]
           : undefined
       }
     >
@@ -149,15 +149,14 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
           <Col span={12}>
-            {mode === 'create' && (
-              <Form.Item
-                label="密码"
-                field="password"
-                rules={mode === 'create' && !isDetail ? [{ required: true, message: '请输入密码' }] : []}
-              >
-                <Input.Password placeholder="请输入" autoComplete="new-password" />
-              </Form.Item>
-            )}
+            {/* todo 接口未返回密码字段 */}
+            <Form.Item
+              label="密码"
+              field="password"
+              rules={[{ required: true, message: '请输入密码' }]}
+            >
+              <Input.Password placeholder="请输入" autoComplete="new-password" />
+            </Form.Item>
           </Col>
         </Row>
         <Row gutter={24}>
@@ -182,7 +181,8 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
         </Row>
-        <Row gutter={24}>
+        {/* 新版UI去掉 */}
+        {/* <Row gutter={24}>
           <Col span={12}>
             <Form.Item label="角色" field="roleIds">
               <Select
@@ -202,11 +202,10 @@ export default function UserFormModal({
               </Select>
             </Form.Item>
           </Col>
-        </Row>
-        <Row gutter={24}>
+        </Row> */}
+        <Row gutter={24} justify="start">
           <Col span={12}>
-            <span style={{ marginRight: 8 }}>启用状态</span>
-            <Form.Item label=" " style={{ marginBottom: 0 }} triggerPropName="checked">
+            <Form.Item label="启用状态" triggerPropName="checked" layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 12 }} >
               <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
             </Form.Item>
           </Col>
