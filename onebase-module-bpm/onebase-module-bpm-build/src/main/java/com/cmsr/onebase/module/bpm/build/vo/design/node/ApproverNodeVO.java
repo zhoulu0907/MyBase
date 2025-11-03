@@ -20,7 +20,7 @@ import java.util.List;
 @Data
 public class ApproverNodeVO extends BaseNodeVO {
     /**
-     * 节点自定义配置，必须传，如果没有自定义配置，则传空对象
+     * 节点自定义配置，必须传
      */
     @Valid
     @NotNull(message = "节点自定义配置不能为空")
@@ -52,7 +52,6 @@ public class ApproverNodeVO extends BaseNodeVO {
          * 字段权限配置
          */
         @Valid
-        @NotNull(message = "字段权限配置不能为空")
         private FieldPermCfgDTO fieldPermConfig;
     }
 }

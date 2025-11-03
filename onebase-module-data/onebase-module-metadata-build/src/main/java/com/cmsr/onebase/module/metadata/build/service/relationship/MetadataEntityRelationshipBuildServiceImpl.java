@@ -439,15 +439,28 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
      * @return 子表实体ID
      */
     private Long createNewChildEntity(ParentChildRelationshipSaveReqVO createReqVO) {
+        // 获取主表实体信息
+        MetadataBusinessEntityDO parentEntity = businessEntityService.getBusinessEntity(Long.valueOf(createReqVO.getParentEntityId()));
+        if (parentEntity == null) {
+            throw new IllegalArgumentException("主表实体不存在，实体ID: " + createReqVO.getParentEntityId());
+        }
+        
+        log.info("创建子表实体，主表ID: {}, 主表数据源ID: {}", parentEntity.getId(), parentEntity.getDatasourceId());
+        
         BusinessEntitySaveReqVO entityReqVO = BeanUtils.toBean(createReqVO, BusinessEntitySaveReqVO.class, req -> {
             req.setDisplayName(createReqVO.getChildTableName());
             req.setCode(createReqVO.getChildTableCode());
             req.setDescription(createReqVO.getChildTableDescription());
             req.setEntityType(1); // 自建表
             req.setRunMode(0); // 默认运行模式
+            // 关键修复：使用主表的datasourceId，确保主子表在同一个数据源下
+            req.setDatasourceId(String.valueOf(parentEntity.getDatasourceId()));
         });
 
-        return businessEntityBuildService.createBusinessEntity(entityReqVO);
+        Long childEntityId = businessEntityBuildService.createBusinessEntity(entityReqVO);
+        log.info("子表实体创建成功，子表ID: {}, 数据源ID: {}", childEntityId, parentEntity.getDatasourceId());
+        
+        return childEntityId;
     }
 
     /**

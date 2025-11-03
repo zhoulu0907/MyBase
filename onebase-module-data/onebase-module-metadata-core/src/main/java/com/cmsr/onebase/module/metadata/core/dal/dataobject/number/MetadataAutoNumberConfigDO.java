@@ -28,6 +28,7 @@ public class MetadataAutoNumberConfigDO extends TenantBaseDO {
     public static final String OVERFLOW_CONTINUE = "overflow_continue";
     public static final String INITIAL_VALUE = "initial_value";
     public static final String RESET_CYCLE = "reset_cycle";
+    public static final String RESET_ON_INITIAL_CHANGE = "reset_on_initial_change";
     public static final String IS_ENABLED = "is_enabled";
     public static final String RUN_MODE = "run_mode";
     public static final String APP_ID = "app_id";
@@ -44,6 +45,11 @@ public class MetadataAutoNumberConfigDO extends TenantBaseDO {
     private Long initialValue;
     @Column(name = RESET_CYCLE)
     private String resetCycle;
+    /**
+     * 下一条记录以修改后的开始值编号：1-是，0-否
+     */
+    @Column(name = RESET_ON_INITIAL_CHANGE)
+    private Integer resetOnInitialChange;
     /**
      * 是否启用：1-启用，0-禁用
      * @see CommonStatusEnum

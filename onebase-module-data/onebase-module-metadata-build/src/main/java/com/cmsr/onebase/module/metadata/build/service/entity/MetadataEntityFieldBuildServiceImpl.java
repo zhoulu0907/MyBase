@@ -65,6 +65,7 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUS
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NAME_DUPLICATE;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_DISPLAY_NAME_DUPLICATE;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NAME_IS_SYSTEM_RESERVED;
 
 /**
  * 实体字段 Service 实现类
@@ -72,6 +73,22 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENT
 @Service
 @Slf4j
 public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldBuildService {
+
+    /**
+     * 系统保留字段名列表
+     */
+    private static final Set<String> SYSTEM_RESERVED_FIELD_NAMES = Set.of(
+            "id",
+            "owner_id",
+            "owner_dept",
+            "creator",
+            "updater",
+            "created_time",
+            "updated_time",
+            "lock_version",
+            "deleted",
+            "parent_id"
+    );
 
     @Resource
     private MetadataEntityFieldRepository metadataEntityFieldRepository;
@@ -918,6 +935,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createEntityField(@Valid EntityFieldSaveReqVO createReqVO) {
+        // 校验字段名不能与系统保留字段冲突
+        validateFieldNameNotSystemReserved(createReqVO.getFieldName());
         // 校验字段名唯一性
         validateEntityFieldNameUnique(null, createReqVO.getEntityId(), createReqVO.getFieldName());
         validateEntityFieldDisplayNameUnique(null, createReqVO.getEntityId(), createReqVO.getDisplayName());
@@ -968,6 +987,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     public void updateEntityField(@Valid EntityFieldSaveReqVO updateReqVO) {
         // 校验存在
         validateEntityFieldExists(updateReqVO.getId());
+        // 校验字段名不能与系统保留字段冲突
+        validateFieldNameNotSystemReserved(updateReqVO.getFieldName());
         // 校验字段名唯一性
         validateEntityFieldNameUnique(updateReqVO.getId(), updateReqVO.getEntityId(), updateReqVO.getFieldName());
     validateEntityFieldDisplayNameUnique(updateReqVO.getId(), updateReqVO.getEntityId(), updateReqVO.getDisplayName());
@@ -1076,7 +1097,23 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         long count = metadataEntityFieldRepository.countByConfig(configStore);
         if (count > 0) {
-            throw exception(ENTITY_FIELD_NAME_DUPLICATE);
+            throw exception(ENTITY_FIELD_NAME_DUPLICATE, fieldName);
+        }
+    }
+
+    /**
+     * 校验字段名是否与系统保留字段冲突
+     *
+     * @param fieldName 字段名
+     */
+    private void validateFieldNameNotSystemReserved(String fieldName) {
+        if (fieldName == null || fieldName.trim().isEmpty()) {
+            return;
+        }
+        
+        String trimmedFieldName = fieldName.trim();
+        if (SYSTEM_RESERVED_FIELD_NAMES.contains(trimmedFieldName)) {
+            throw exception(ENTITY_FIELD_NAME_IS_SYSTEM_RESERVED, trimmedFieldName);
         }
     }
 
@@ -1096,7 +1133,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         long count = metadataEntityFieldRepository.countByConfig(configStore);
         if (count > 0) {
-            throw exception(ENTITY_FIELD_DISPLAY_NAME_DUPLICATE);
+            throw exception(ENTITY_FIELD_DISPLAY_NAME_DUPLICATE, displayName.trim());
         }
     }
 
@@ -1859,6 +1896,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             config.setOverflowContinue(autoNumber.getOverflowContinue());
             config.setInitialValue(autoNumber.getInitialValue() != null ? autoNumber.getInitialValue() : 1L);
             config.setResetCycle(autoNumber.getResetCycle());
+            config.setResetOnInitialChange(autoNumber.getResetOnInitialChange() != null ? autoNumber.getResetOnInitialChange() : 0);
             config.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             config.setAppId(entityField != null ? entityField.getAppId() : null);
 
@@ -1965,6 +2003,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setOverflowContinue(config.getOverflowContinue());
         vo.setInitialValue(config.getInitialValue());
         vo.setResetCycle(config.getResetCycle());
+        vo.setResetOnInitialChange(config.getResetOnInitialChange());
         vo.setRunMode(config.getRunMode());
         vo.setAppId(config.getAppId());
         vo.setCreateTime(config.getCreateTime());
@@ -2016,6 +2055,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setAppId(field.getAppId() != null ? String.valueOf(field.getAppId()) : null);
         vo.setStatus(field.getStatus());
         vo.setFieldCode(field.getFieldCode());
+        vo.setDictTypeId(field.getDictTypeId());
         // 注意：options、constraints、autoNumberConfig 将在 populateFieldRelatedData 中填充
         return vo;
     }
@@ -2356,6 +2396,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             if (fieldName == null || fieldName.trim().isEmpty()) {
                 continue;
             }
+
+            // 校验字段名不能与系统保留字段冲突
+            validateFieldNameNotSystemReserved(fieldName);
 
             // 统计字段名出现次数
             fieldNameCountMap.put(fieldName, fieldNameCountMap.getOrDefault(fieldName, 0) + 1);

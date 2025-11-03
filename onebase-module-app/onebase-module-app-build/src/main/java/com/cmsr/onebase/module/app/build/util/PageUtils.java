@@ -15,10 +15,8 @@ public class PageUtils {
         pageDO.setMargin("0");
         pageDO.setBackgroundColor("#FFFFFF");
         pageDO.setMainMetadata("{}");
-        pageDO.setBpmEnabled(false);
         pageDO.setRouterPath(routerPath);
         pageDO.setRouterName(pageName);
-        pageDO.setRouterMetaAuthRequired(false);
         pageDO.setRouterMetaTitle(pageName);
         pageDO.setPageType(pageType);
 
