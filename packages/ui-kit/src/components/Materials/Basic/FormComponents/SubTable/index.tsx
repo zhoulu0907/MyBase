@@ -24,6 +24,7 @@ import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
+  const { id, label, tooltip, labelColSpan = 100, status, verify, runtime = true, detailMode, pageType } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
@@ -38,9 +39,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
-  } = usePageEditorSignal();
+  } = usePageEditorSignal(pageType);
   const { subTableDataLength } = pagesRuntimeSignal;
-  const { id, label, tooltip, labelColSpan = 100, status, verify, runtime = true, detailMode } = props;
 
   // 判断拖拽的组件是否是表单组件
   const isFormComponent = (type: string): boolean => {
