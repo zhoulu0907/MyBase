@@ -16,7 +16,7 @@ import './index.css';
 const TabPane = Tabs.TabPane;
 
 const XPreviewTabsLayout = memo((props: XTabsLayoutConfig) => {
-  const { id, defaultValue = [], type, colCount, tabPosition } = props;
+  const { id, defaultValue = [], type, colCount, tabPosition, pageType } = props;
   useSignals();
 
   const {
@@ -26,7 +26,7 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig) => {
     layoutSubComponents,
     setLayoutSubComponents,
     setShowDeleteButton,
-  } = usePageEditorSignal();
+  } = usePageEditorSignal(pageType);
 
   const [activeTab, setActiveTab] = useState('1');
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
