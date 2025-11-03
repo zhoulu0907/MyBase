@@ -1,12 +1,16 @@
-package com.cmsr.onebase.module.engine.orm.anyline.dataobject.ext;
+package com.cmsr.onebase.module.bpm.core.dto;
 
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowInstance;
 import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+
+/**
+ * 流程实例
+ */
 @Data
-public class FlowInstanceExt extends FlowInstance {
+public class BpmInstanceDTO extends FlowInstance {
     /**
      * 应用ID
      */

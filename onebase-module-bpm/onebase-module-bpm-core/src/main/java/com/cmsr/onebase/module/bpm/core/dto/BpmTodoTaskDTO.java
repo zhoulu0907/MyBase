@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.engine.orm.anyline.dataobject.ext;
+package com.cmsr.onebase.module.bpm.core.dto;
 
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
 import jakarta.persistence.Column;
@@ -6,8 +6,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 待办任务
+ */
 @Data
-public class FlowTaskExt extends FlowTask {
+public class BpmTodoTaskDTO extends FlowTask {
 
     /**
      * 应用ID
