@@ -292,7 +292,6 @@ export default function EditorWorkspace() {
           setList={(newList) => {
             const entityList: GridItem[] = [];
             newList.forEach(async (item) => {
-              console.log('workspaceitem', item);
               if (item.type == ENTITY_TYPE_VALUE.MAIN || item.entityType === ENTITY_TYPE.MAIN) {
                 // 主表业务实体
                 const fieldList = item.fields.filter(
