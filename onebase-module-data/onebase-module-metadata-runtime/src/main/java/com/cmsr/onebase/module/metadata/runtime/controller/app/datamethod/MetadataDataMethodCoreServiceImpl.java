@@ -42,6 +42,7 @@ import org.anyline.entity.PageNavi;
 import org.anyline.entity.DefaultPageNavi;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -94,6 +95,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     @Resource
     private UidGenerator uidGenerator;
+
+    @Value("${metadata.runtime.enable-auth-check:false}")
+    private boolean enableAuthCheck;
 
     @Resource
     private com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService autoNumberService;
@@ -491,9 +495,11 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     private void fetchRuntimePermission(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
-//        if (true) {
-//            return;
-//        }
+        metadataDataMethodRequestContext.setEnableAuthCheck(enableAuthCheck);
+
+        if (!enableAuthCheck) {
+            return;
+        }
         // 仅 runtime 客户端需要校验权限
         if (metadataDataMethodRequestContext.getClientTypeEnum() != ClientTypeEnum.RUNTIME) {
             return;
