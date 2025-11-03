@@ -3,10 +3,10 @@ import { Layout, Menu, Tooltip } from '@arco-design/web-react';
 import { IconBook, IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
 import DataDictPage from './pages/DataDict';
 import DataSourcePage from './pages/DataSource';
 import EntityPage from './pages/Entity';
+import styles from './index.module.less';
 
 const DataFactoryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('check-entity');
@@ -49,10 +49,10 @@ const DataFactoryPage: React.FC = () => {
   }
 
   return (
-    <Layout className={styles['data-factory-page']}>
-      <Layout.Sider breakpoint="xl" width={48} className={styles['sider']}>
+    <Layout className={styles.dataFactoryPage}>
+      <Layout.Sider breakpoint="xl" width={48} className={styles.sider}>
         {/* 左侧菜单 */}
-        <Menu className={styles['menu']} mode="pop" onClickMenuItem={handleMenuClick} selectedKeys={[activeTab]}>
+        <Menu className={styles.menu} mode="pop" onClickMenuItem={handleMenuClick} selectedKeys={[activeTab]}>
           <Menu.Item key="check-entity">
             <Tooltip content="业务实体管理" position="right">
               <IconCommon />
@@ -72,7 +72,7 @@ const DataFactoryPage: React.FC = () => {
       </Layout.Sider>
 
       {/* 右侧内容 */}
-      <Layout.Content className={styles['content']}>
+      <Layout.Content className={styles.content}>
         {activeTab === 'data-source' && <DataSourcePage />}
         {activeTab === 'check-entity' && <EntityPage appId={appId} />}
         {activeTab === 'data-dict' && <DataDictPage />}

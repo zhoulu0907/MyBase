@@ -166,37 +166,39 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
   ];
 
   return (
-    <div>
-      <div className={styles.operationHeader}>
-        <div className={styles.operationHeaderLeft}>数据源管理</div>
+    <div className={styles.dataSourceContainer}>
+      <div className={styles.dataSourceContent}>
+        <div className={styles.operationHeader}>
+          <div className={styles.operationHeaderLeft}>数据源管理</div>
 
-        <Button
-          type="primary"
-          hidden={true}
-          onClick={() => {
-            handlePageType('create-ds');
+          <Button
+            type="primary"
+            hidden={true}
+            onClick={() => {
+              handlePageType('create-ds');
+            }}
+          >
+            <IconPlus />
+            创建数据源
+          </Button>
+        </div>
+        <Table
+          columns={columns}
+          data={dataSourceList}
+          pagination={{
+            total,
+            pageSize: page.pageSize,
+            current: page.pageNo,
+            onChange: (current, pageSize) => {
+              setPage({ pageNo: current, pageSize });
+              getTableData();
+            }
           }}
-        >
-          <IconPlus />
-          创建数据源
-        </Button>
+          loading={tableLoading}
+          style={{ margin: '0 16px' }}
+          rowKey="id"
+        />
       </div>
-      <Table
-        columns={columns}
-        data={dataSourceList}
-        pagination={{
-          total,
-          pageSize: page.pageSize,
-          current: page.pageNo,
-          onChange: (current, pageSize) => {
-            setPage({ pageNo: current, pageSize });
-            getTableData();
-          }
-        }}
-        loading={tableLoading}
-        style={{ margin: '0 16px' }}
-        rowKey="id"
-      />
 
       {/* 删除确认对话框 */}
       <Modal
