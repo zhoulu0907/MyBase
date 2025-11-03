@@ -412,23 +412,12 @@ const MyAppPage: React.FC = () => {
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.infoHeader}>
                             <div className={styles.myAppTitle}>{item.appName}</div>
-                            <Tag
-                              color={TagColor[item.appStatus]}
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 400
-                              }}
-                            >
+                            {/* TODO */}
+                            {/* <Tag color={TagColor[item.appStatus]} className={styles.tag}>
                               SaaS模式
-                            </Tag>
+                            </Tag> */}
                           </div>
-                          <Tag
-                            color={TagColor[item.appStatus]}
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 400
-                            }}
-                          >
+                          <Tag color={TagColor[item.appStatus]} className={styles.tag}>
                             {item.appStatusText}
                           </Tag>
                           <Divider type="vertical" style={{ margin: '0 4px 0 6px', height: '8px' }} />
