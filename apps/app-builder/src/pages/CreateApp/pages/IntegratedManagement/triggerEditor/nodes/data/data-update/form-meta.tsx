@@ -22,7 +22,6 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
-import { updateDataUpdateOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
@@ -414,7 +413,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item label="更新规则" field="fields">
+              <Form.Item label="更新规则" field="fields" rules={[{ required: true, message: '请填写更新规则' }]}>
                 <FieldEditor nodeId={node.id} fieldList={fieldDataList} form={payloadForm} />
               </Form.Item>
             </Grid.Row>
