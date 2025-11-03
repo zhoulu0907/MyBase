@@ -4,8 +4,12 @@ import lombok.Data;
 import org.anyline.metadata.Column;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
 @Data
 public class MetaColumn {
+    private String id;
 
     private String fullyQualifiedName;
 
@@ -94,6 +98,8 @@ public class MetaColumn {
                 column.getSchemaName(),
                 column.getTableName(),
                 columnName));
+        UUID nameBaseUUID = UUID.nameUUIDFromBytes(metaColumn.getFullyQualifiedName().getBytes(StandardCharsets.UTF_8));
+        metaColumn.setId(nameBaseUUID.toString());
         metaColumn.setKeyword(column.keyword());
         String comment = column.getComment();
         metaColumn.setComment(comment);
@@ -130,6 +136,8 @@ public class MetaColumn {
         if (!StringUtils.equals(oldComment, oldDeclaration)) {
             newMeta.setDeclaration(oldDeclaration);
         }
+        // 保持老ID
+        newMeta.setId(oldMeta.getId());
     }
 
     public boolean equals(Object other) {

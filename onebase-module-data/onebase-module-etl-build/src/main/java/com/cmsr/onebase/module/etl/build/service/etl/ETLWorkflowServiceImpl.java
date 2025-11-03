@@ -2,14 +2,11 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
-import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.ScheduleConfig;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
@@ -58,11 +55,11 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             Long workflowId = workflowDO.getId();
             Long applicationId = workflowDO.getApplicationId();
             briefVO.setId(workflowId);
-            briefVO.setName(workflowDO.getWorkflowName());
-            briefVO.setEnabled(workflowDO.isEnabled());
+            briefVO.setFlowName(workflowDO.getWorkflowName());
+            briefVO.setEnableStatus(workflowDO.isEnabled());
             briefVO.setScheduleStrategy(workflowDO.getScheduleStrategy());
-            ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(applicationId,workflowId);
-            briefVO.setStatus(scheduleJobDO.getJobStatus());
+            ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(applicationId, workflowId);
+            briefVO.setIsSyncDone(scheduleJobDO.getJobStatus());
             briefVO.setLastSuccessTime(scheduleJobDO.getLastSuccessTime());
             Set<Long> relatedSourceTableIds = workflowTableRepository.findSourceTableIdsByWorkflowId(workflowId);
             if (CollectionUtils.isNotEmpty(relatedSourceTableIds)) {
@@ -81,10 +78,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public ETLWorkflowDetailVO getWorkflowDetail(Long workflowId) {
-        ETLWorkflowDO workflowDO = workflowRepository.findById(workflowId);
-        if (workflowDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NOT_EXIST);
-        }
+        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
         ETLWorkflowDetailVO workflowDetailVO = new ETLWorkflowDetailVO();
         workflowDetailVO.setId(workflowDO.getId());
         workflowDetailVO.setWorkflowName(workflowDO.getWorkflowName());
@@ -143,54 +137,51 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public void startWorkflowManually(Long workflowId) {
+        // 必须是已启用的ETL
+        ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
+        Long applicationId = workflowDO.getApplicationId();
+        ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(applicationId, workflowId);
 
+        Long jobId = Long.parseLong(scheduleJobDO.getJobId());
+        // TODO: 添加记录到数据库？
+        //      etl_execution_log <applicationId, workflowId, businessDate, startTime, triggerType, triggerUser, taskStatus>
+        dolphinSchedulerClient.runWorkflowManually(etlProjectCode, jobId, null, null);
     }
 
     @Override
     public void configScheduleStrategy(ETLScheduleConfigVO scheduleVO) {
         Long workflowId = scheduleVO.getWorkflowId();
-        ETLWorkflowDO workflowDO = workflowRepository.findById(scheduleVO.getWorkflowId());
-        if (workflowDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NOT_EXIST);
-        }
-        workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
-        ScheduleConfig scheduleConfig = scheduleVO.getConfig();
-        workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleConfig));
-
-        if (!workflowDO.isEnabled()) { // 未上线，则结束
-            return;
-        }
-        ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
-        if (scheduleJobDO == null) { // 上线情况下，调度若不存在则属于状态异常
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
-        }
-        Long jobId = Long.valueOf(scheduleJobDO.getJobId());
-        if (!scheduleConfig.isScheduled()) { // 非调度类，仅上线
-            dolphinSchedulerClient.onlineWorkflow(etlProjectCode, jobId);
-        }
-        Schedule schedule = new Schedule();
-        // TODO: online schedule with schedule
-
-        workflowRepository.update(workflowDO);
+        ETLWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
+        // TODO:
     }
 
     @Override
     public void getWorkflowExecutionLogs(Long workflowId) {
-
+        // TODO:
     }
 
     @Override
-    public PageResult<Object> previewOutputData(Long workflowId) {
-        return null;
+    public void enableWorkflow(Long workflowId) {
+        // TODO:
+    }
+
+    @Override
+    public void disableWorkflow(Long workflowId) {
+        ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
     }
 
     private ETLWorkflowDO getOperableWorkflow(Long workflowId) {
+        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        if (workflowDO.isEnabled()) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ENABLED);
+        }
+        return workflowDO;
+    }
+
+    private ETLWorkflowDO getWorkflowById(Long workflowId) {
         ETLWorkflowDO workflowDO = workflowRepository.findById(workflowId);
         if (workflowDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NOT_EXIST);
-        }
-        if (workflowDO.isEnabled()) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ENABLED);
         }
         return workflowDO;
     }

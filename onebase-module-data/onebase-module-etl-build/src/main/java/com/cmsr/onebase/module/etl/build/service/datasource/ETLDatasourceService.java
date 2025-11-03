@@ -5,8 +5,10 @@ import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
+import com.cmsr.onebase.module.etl.core.vo.DataPreviewVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourceRespVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.ETLTablePreviewVO;
 
 import java.util.List;
 
@@ -27,4 +29,6 @@ public interface ETLDatasourceService {
     void deleteDatasource(Long datasourceId);
 
     void executeMetadataCollectJob(Long datasourceId);
+
+    DataPreviewVO previewTable(ETLTablePreviewVO tablePreviewVO);
 }

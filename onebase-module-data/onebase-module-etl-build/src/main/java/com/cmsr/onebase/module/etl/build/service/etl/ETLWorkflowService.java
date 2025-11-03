@@ -14,13 +14,15 @@ public interface ETLWorkflowService {
 
     void updateWorkflow(ETLWorkflowUpdateVO updateVO);
 
-    void deleteWorkflow(Long etlId);
+    void deleteWorkflow(Long workflowId);
 
-    void startWorkflowManually(Long etlId);
+    void startWorkflowManually(Long workflowId);
 
     void configScheduleStrategy(ETLScheduleConfigVO scheduleVO);
 
-    void getWorkflowExecutionLogs(Long etlId);
+    void getWorkflowExecutionLogs(Long workflowId);
 
-    PageResult<Object> previewOutputData(Long id);
+    void enableWorkflow(Long workflowId);
+
+    void disableWorkflow(Long workflowId);
 }

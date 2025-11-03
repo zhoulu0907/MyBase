@@ -14,17 +14,20 @@ public class ETLWorkflowBriefVO {
     @Schema(description = "数据流ID")
     private Long id;
 
+    @Schema(description = "应用ID")
+    private Long applicationId;
+
     @Schema(description = "数据流名称")
-    private String name;
+    private String flowName;
 
     @Schema(description = "是否启用")
-    private Boolean enabled;
+    private Boolean enableStatus;
 
     @Schema(description = "更新策略")
     private String scheduleStrategy;
 
     @Schema(description = "最近一次的执行状态")
-    private String status;
+    private String isSyncDone;
 
     @Schema(description = "输入数据源")
     private List<String> sourceTables = Collections.emptyList();

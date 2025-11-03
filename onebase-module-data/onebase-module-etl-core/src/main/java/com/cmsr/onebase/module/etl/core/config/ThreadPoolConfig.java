@@ -8,8 +8,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
+// TODO: this class should be placed in infra/base
+
 @Configuration
-@ConditionalOnMissingBean
+@ConditionalOnMissingBean(value = ThreadPoolTaskExecutor.class)
 public class ThreadPoolConfig {
 
     @Value("${spring.task.execution.pool.core-size:10}")

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.service.collector;
+package com.cmsr.onebase.module.etl.core.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;

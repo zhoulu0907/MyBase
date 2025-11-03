@@ -12,9 +12,12 @@ import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import com.cmsr.onebase.module.etl.core.service.collector.MetadataCollectorService;
+import com.cmsr.onebase.module.etl.core.service.DataInspectService;
+import com.cmsr.onebase.module.etl.core.service.MetadataCollectorService;
+import com.cmsr.onebase.module.etl.core.vo.DataPreviewVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourceRespVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.ETLTablePreviewVO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import jakarta.annotation.PostConstruct;
@@ -50,6 +53,9 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Resource
     private MetadataCollectorService metadataCollectorService;
+
+    @Resource
+    private DataInspectService dataInspectService;
 
     private Map<String, String> supportedDbs = Maps.newHashMap();
 
@@ -169,6 +175,11 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         }
         // 托管给MetadataCollectorService
         metadataCollectorService.submitCollectJob(datasourceDO);
+    }
+
+    @Override
+    public DataPreviewVO previewTable(ETLTablePreviewVO tablePreviewVO) {
+        return dataInspectService.previewData(tablePreviewVO);
     }
 
     private void validDatasourceCodeDuplicate(String datasourceCode, Long filterId) {

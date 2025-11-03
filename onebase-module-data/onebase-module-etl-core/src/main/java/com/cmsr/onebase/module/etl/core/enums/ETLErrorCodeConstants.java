@@ -27,6 +27,7 @@ public interface ETLErrorCodeConstants {
 
     // 元数据类型异常
     ErrorCode ILLEGAL_METADATA_TYPE                 = new ErrorCode(110601, "元数据类型异常");
+    ErrorCode TABLE_NOT_EXIST                       = new ErrorCode(110602, "数据表不存在");
 
     // 工作流异常
     ErrorCode WORKFLOW_NOT_EXIST                    = new ErrorCode(110700, "ETL流程不存在");

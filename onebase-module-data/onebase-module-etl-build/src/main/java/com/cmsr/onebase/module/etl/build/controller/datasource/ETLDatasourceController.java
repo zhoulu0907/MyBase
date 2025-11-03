@@ -7,8 +7,10 @@ import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
+import com.cmsr.onebase.module.etl.core.vo.DataPreviewVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourceRespVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.ETLTablePreviewVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -82,4 +84,10 @@ public class ETLDatasourceController {
         return CommonResult.success(Boolean.TRUE);
     }
 
+    @PostMapping("/preview")
+    @Operation(summary = "预览表数据")
+    public CommonResult<DataPreviewVO> previewTableData(@Validated @RequestBody ETLTablePreviewVO tablePreviewVO) {
+        DataPreviewVO dataPreviewVO = etlDatasourceService.previewTable(tablePreviewVO);
+        return CommonResult.success(dataPreviewVO);
+    }
 }

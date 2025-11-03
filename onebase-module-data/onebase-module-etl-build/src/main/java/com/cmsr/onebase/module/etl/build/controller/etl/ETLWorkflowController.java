@@ -54,26 +54,34 @@ public class ETLWorkflowController {
 
     @GetMapping("/logs")
     public CommonResult<PageResult<Object>> queryWorkflowExecutionLogs() {
+        // TODO:
         return CommonResult.success(null);
     }
 
-    @PostMapping("/start")
-    public CommonResult<Boolean> startWorkflowManually() {
-        return CommonResult.success(null);
+    @PostMapping("/{workflowId}/start")
+    public CommonResult<Boolean> startWorkflowManually(@PathVariable("workflowId") Long workflowId) {
+        workflowService.startWorkflowManually(workflowId);
+        return CommonResult.success(Boolean.TRUE);
     }
 
-    @PostMapping("/enable")
-    public CommonResult<Boolean> enableWorkflow() {
-        return CommonResult.success(null);
+    @PostMapping("/{workflowId}/enable")
+    public CommonResult<Boolean> enableWorkflow(@PathVariable("workflowId") Long workflowId) {
+        workflowService.enableWorkflow(workflowId);
+        return CommonResult.success(Boolean.TRUE);
     }
 
-    @PostMapping("/disable")
-    public CommonResult<Boolean> disableWorkflow() {
-        return CommonResult.success(null);
+    @PostMapping("/{workflowId}/disable")
+    public CommonResult<Boolean> disableWorkflow(@PathVariable("workflowId") Long workflowId) {
+        workflowService.disableWorkflow(workflowId);
+        return CommonResult.success(Boolean.TRUE);
     }
 
-    @PostMapping("/schedule")
-    public CommonResult<Boolean> configScheduleStrategy() {
-        return CommonResult.success(null);
+    @PostMapping("/{workflowId}/schedule")
+    public CommonResult<Boolean> configScheduleStrategy(@PathVariable("workflowId") Long workflowId,
+                                                        @Validated @RequestBody ETLScheduleConfigVO scheduleConfigVO) {
+        // TODO:
+        scheduleConfigVO.setWorkflowId(workflowId);
+        workflowService.configScheduleStrategy(scheduleConfigVO);
+        return CommonResult.success(Boolean.TRUE);
     }
 }
