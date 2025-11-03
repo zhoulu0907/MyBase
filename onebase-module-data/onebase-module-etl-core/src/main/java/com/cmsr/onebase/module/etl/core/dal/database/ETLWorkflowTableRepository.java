@@ -43,10 +43,10 @@ public class ETLWorkflowTableRepository extends DataRepository<ETLWorkflowTableD
                 .collect(Collectors.toSet());
     }
 
-    public Long findTargetTableIdByWorkflowId(Long workflowId) {
+    public ETLWorkflowTableDO findTargetTableIdByWorkflowId(Long workflowId) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("workflow_id", workflowId);
         cs.eq("relation", ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
-        return findOne(cs).getTableId();
+        return findOne(cs);
     }
 }

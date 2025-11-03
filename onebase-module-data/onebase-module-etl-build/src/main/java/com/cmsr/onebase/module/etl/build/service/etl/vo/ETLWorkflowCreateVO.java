@@ -14,7 +14,7 @@ public class ETLWorkflowCreateVO {
     private Long applicationId;
 
     @NotBlank(message = "ETL名称不能为空")
-    private String name;
+    private String flowName;
 
     @NotBlank(message = "ETL配置不能为空")
     private String config;

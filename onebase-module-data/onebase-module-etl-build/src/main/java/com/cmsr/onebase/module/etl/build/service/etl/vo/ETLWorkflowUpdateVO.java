@@ -7,6 +7,6 @@ import lombok.Data;
 public class ETLWorkflowUpdateVO extends ETLWorkflowCreateVO {
 
     @NotNull
-    private Long workflowId;
+    private Long id;
 
 }

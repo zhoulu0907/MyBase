@@ -21,7 +21,7 @@ public class ETLWorkflowBriefVO {
     private String flowName;
 
     @Schema(description = "是否启用")
-    private Boolean enableStatus;
+    private Integer enableStatus;
 
     @Schema(description = "更新策略")
     private String scheduleStrategy;
@@ -33,7 +33,7 @@ public class ETLWorkflowBriefVO {
     private List<String> sourceTables = Collections.emptyList();
 
     @Schema(description = "输出数据源")
-    private String targetTable = "";
+    private String targetTable;
 
     @Schema(description = "最后数据更新时间")
     private LocalDateTime lastSuccessTime;

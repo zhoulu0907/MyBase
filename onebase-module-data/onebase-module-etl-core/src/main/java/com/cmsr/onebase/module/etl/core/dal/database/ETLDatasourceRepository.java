@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -67,6 +68,8 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
         if (StringUtils.isNotBlank(pageReqVO.getCollectStatus())) {
             cs.eq("collect_status", pageReqVO.getCollectStatus());
         }
+        cs.order("create_time", Order.TYPE.DESC);
+        cs.order("update_time", Order.TYPE.DESC);
 
         return findPageWithConditions(cs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }

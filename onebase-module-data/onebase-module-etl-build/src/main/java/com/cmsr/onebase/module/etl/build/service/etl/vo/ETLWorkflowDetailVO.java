@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.etl.build.service.etl.vo;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 @Data
@@ -7,8 +9,11 @@ public class ETLWorkflowDetailVO {
 
     private Long id;
 
-    private String workflowName;
+    private String flowName;
 
     private String config;
 
+    public JsonNode getConfig() {
+        return JsonUtils.parseTree(this.config);
+    }
 }
