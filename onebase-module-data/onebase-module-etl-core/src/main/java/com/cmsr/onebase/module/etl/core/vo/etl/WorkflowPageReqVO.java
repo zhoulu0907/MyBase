@@ -11,11 +11,11 @@ import lombok.EqualsAndHashCode;
 public class WorkflowPageReqVO extends PageParam {
 
     @Schema(description = "数据流名称")
-    private String name;
+    private String flowName;
 
     @Schema(description = "数据流分类")
     private String scheduleStrategy;
 
     @Schema(description = "是否启用")
-    private Boolean enabled;
+    private Integer enableStatus;
 }

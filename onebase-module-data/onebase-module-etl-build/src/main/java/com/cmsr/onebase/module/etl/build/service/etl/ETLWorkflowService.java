@@ -2,10 +2,12 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
+import com.cmsr.onebase.module.etl.core.vo.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 
 public interface ETLWorkflowService {
 
+    // ETL流程相关
     PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO);
 
     WorkflowDetailVO getWorkflowDetail(Long workflowId);
@@ -16,13 +18,17 @@ public interface ETLWorkflowService {
 
     void deleteWorkflow(Long workflowId);
 
-    void startWorkflowManually(Long workflowId);
-
-    void configScheduleStrategy(ScheduleConfigVO scheduleVO);
-
-    void getWorkflowExecutionLogs(Long workflowId);
-
     void enableWorkflow(Long workflowId);
 
     void disableWorkflow(Long workflowId);
+
+    // ETL调度相关
+    ScheduleRespVO getWorkflowSchedule(Long workflowId);
+
+    void configScheduleStrategy(ScheduleConfigVO scheduleVO);
+
+    // ETL实例相关
+    void startWorkflowManually(Long workflowId);
+
+    PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long workflowId);
 }
