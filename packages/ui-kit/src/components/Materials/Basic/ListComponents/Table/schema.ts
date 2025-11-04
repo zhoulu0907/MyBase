@@ -44,6 +44,7 @@ import type {
   TSelectDefaultType,
   TTextDefaultType
 } from '../../../types';
+import {type FormInstance} from '@arco-design/web-react';
 
 export interface XTableSchema {
   editData: TXTableEditData;
@@ -195,6 +196,11 @@ export interface XTableConfig extends ICommonBaseType {
     fieldName: TTextDefaultType;
     sortBy: TNumberDefaultType;
   };
+}
+
+export interface TableSearchConfig {
+  searchItems?: any[];
+  form: FormInstance;
 }
 
 export interface OperationButtonConfig {

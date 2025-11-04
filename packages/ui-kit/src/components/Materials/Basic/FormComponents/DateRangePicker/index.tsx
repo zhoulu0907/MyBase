@@ -69,6 +69,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={[validStartTime, validEndTime]}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
@@ -77,7 +78,6 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
         ) : (
           <DatePicker.RangePicker
             mode={currentDateType}
-            defaultValue={[validStartTime, validEndTime]}
             showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
             getPopupContainer={getPopupContainer}
             style={{

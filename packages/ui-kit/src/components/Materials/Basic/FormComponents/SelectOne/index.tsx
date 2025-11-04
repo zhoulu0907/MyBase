@@ -17,6 +17,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
     labelColSpan = 0,
     showSearch,
     defaultValue,
+    defaultOptions,
     runtime = true,
     detailMode
   } = props;
@@ -59,9 +60,10 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{defaultValue.find((item: any) => item.value == fieldValue)?.label || '--'}</div>
+          <div>{defaultOptions.find((item: any) => item.value == fieldValue)?.label || '--'}</div>
         ) : (
           <Select
             placeholder="请选择"
@@ -70,7 +72,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             allowClear
-            options={defaultValue}
+            options={defaultOptions}
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

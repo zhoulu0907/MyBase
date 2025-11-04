@@ -15,7 +15,7 @@ export interface DynamicRadioConfigProps {
 }
 
 const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChange, item, configs, id }) => {
-  const radioKey = 'defaultValue';
+  const radioKey = 'defaultOptions';
   const [radioConfig, setRadioConfig] = useState<any[]>(configs[radioKey] || []);
 
   console.log({
