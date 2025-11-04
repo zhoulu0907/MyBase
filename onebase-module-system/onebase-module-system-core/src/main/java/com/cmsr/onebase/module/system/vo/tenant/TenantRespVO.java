@@ -85,7 +85,7 @@ public class TenantRespVO {
     private String accessUrl;
 
     @Schema(description = "saas功能是否开启默认0，开启1")
-    private Integer saasEnabled;
+    private String saasEnabled;
 
     @Schema(description = "用户logo")
     private String logoUrl;

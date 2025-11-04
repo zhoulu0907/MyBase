@@ -75,7 +75,7 @@ public class CorpServiceImpl implements CorpService {
         //用于校验企业名称是否已存在
         validCorpNameDuplicate(reqVO.getCorpName());
         //用于校验企业ID是否已存在
-        validCorpIdDuplicate(reqVO.getCorpId());
+        validCorpIdDuplicate(reqVO.getCorpCode());
         //用于校验企业用户数量是否超过限制（如大于500）
         validCorpUserCountDuplicate(reqVO.getUserLimit());
 
@@ -101,13 +101,13 @@ public class CorpServiceImpl implements CorpService {
         }
     }
 
-    private void validCorpIdDuplicate(String corpId) {
-        if (StringUtils.isBlank(corpId)) {
+    private void validCorpIdDuplicate(String corpCode) {
+        if (StringUtils.isBlank(corpCode)) {
             return;
         }
-        CorpDO corpDO = corpDataRepository.findCorpByCorpId(corpId);
+        CorpDO corpDO = corpDataRepository.findCorpByCorpCode(corpCode);
         if (corpDO != null) {
-            throw exception(CORP_ID_EXISTS, corpId);
+            throw exception(CORP_ID_EXISTS, corpCode);
         }
     }
 
@@ -127,7 +127,7 @@ public class CorpServiceImpl implements CorpService {
     public void updateCorpAdminIdById(Long corpId, Long adminId) {
         //  企业修改管理员Id
         DataRow row = new DataRow();
-        row.put("admin_id", adminId);
+        row.put(CorpDO.ADMIN_ID, adminId);
         corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, corpId));
 
     }
@@ -206,7 +206,7 @@ public class CorpServiceImpl implements CorpService {
     public void updateStatus(Long id, Long status) {
         //  企业禁用/开启
         DataRow row = new DataRow();
-        row.put("status", status);
+        row.put(CorpDO.STATUS, status);
         corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, id));
     }
 

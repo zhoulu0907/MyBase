@@ -47,12 +47,8 @@ public class ApplicationCreateReqVO {
     @Schema(description = "数据源信息")
     private DatasourceSaveReqDTO datasourceSaveReq;
 
-    @Schema(description = "空间Id")
-    private Long tenantId;
-
     @Schema(description = "发布模式")
     @NotBlank(message = "发布模式不能为空")
-    private Integer publishModel;
-
+    private String publishModel;
 
 }

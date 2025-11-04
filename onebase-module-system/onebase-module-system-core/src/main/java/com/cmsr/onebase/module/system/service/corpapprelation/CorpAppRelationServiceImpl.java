@@ -7,7 +7,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-
 import com.cmsr.onebase.module.app.core.dto.app.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
@@ -22,7 +21,6 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +104,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
     private Map<Long, ApplicationDTO> getApplicationDoMap(String appName) {
-        List<ApplicationDTO> pageDOList = appApplicationApi.finAppApplicationByAppName(appName);
+        List<ApplicationDTO> pageDOList = appApplicationApi.findAppApplicationByAppName(appName);
         return pageDOList.stream()
                 .collect(Collectors.toMap(
                         ApplicationDTO::getId,

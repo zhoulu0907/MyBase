@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
-import com.cmsr.onebase.framework.common.enums.CommonSaasEnum;
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
@@ -13,6 +13,7 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.ComponentDO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
@@ -40,10 +41,7 @@ import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantRespVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.*;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -193,7 +191,6 @@ public class TenantServiceImpl implements TenantService {
             if (existTenantCount >= totalTenantLimit) {
                 throw exception(LICENSE_TENANT_COUNT_NOT_ENOUGH);
             }
-
             // 获取license总人数限制
             Integer totalUserLimit = license.getUserLimit();
 
@@ -208,7 +205,7 @@ public class TenantServiceImpl implements TenantService {
 
 
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
-        tenant.setSaasEnabled(createReqVO.getSaasEnabled() == null ? CommonSaasEnum.DISABLE.getValue() : createReqVO.getSaasEnabled());
+        tenant.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         tenant = tenantDataRepository.insert(tenant);
 
         // 创建租户的管理员1
@@ -217,7 +214,7 @@ public class TenantServiceImpl implements TenantService {
             // 创建角色
             Long roleId = createTenantAdminRole();
             // 创建用户，并分配角色
-            Long userId = createSystemUser(roleId, createReqVO);
+            createSystemUser(roleId, createReqVO);
         });
         return tenant.getId();
     }
@@ -229,19 +226,20 @@ public class TenantServiceImpl implements TenantService {
         return existTenantCount;
     }
 
-    private Long createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
-
-        UserInsertReqVO reqVO = new UserInsertReqVO();
-        reqVO.setUsername(insertReqVO.getAdminUserName());
-        reqVO.setNickname(insertReqVO.getAdminNickName());
-        reqVO.setMobile(insertReqVO.getAdminMobile());
-        reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-        reqVO.setPassword(TENANT_ADMIN_PASSWORD);
-        // 创建用户
-        Long userId = userService.createUser(reqVO);
-        // 分配角色
-        permissionService.assignUserRoles(userId, singleton(roleId));
-        return userId;
+    private void createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
+        List<TenantAdminUserReqVO> adminUserReqVOList = insertReqVO.getTenantAdminUserReqVOList();
+        adminUserReqVOList.forEach(adminUserReqVO -> {
+            UserInsertReqVO reqVO = new UserInsertReqVO();
+            reqVO.setUsername(adminUserReqVO.getAdminUserName());
+            reqVO.setNickname(adminUserReqVO.getAdminNickName());
+            reqVO.setMobile(adminUserReqVO.getAdminMobile());
+            reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
+            reqVO.setPassword(TENANT_ADMIN_PASSWORD);
+            // 创建用户
+            Long userId = userService.createUser(reqVO);
+            // 分配角色
+            permissionService.assignUserRoles(userId, singleton(roleId));
+        });
     }
 
     private Long createTenantAdminRole() {
@@ -297,7 +295,7 @@ public class TenantServiceImpl implements TenantService {
         DataRow row = new DataRow();
         row.put(TenantDO.ID, updateObj.getId());
         if (updateObj.getAdminUserId() != null) {
-            row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
+           // row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
         }
         if (StringUtils.isNotEmpty(updateObj.getName())) {
             row.put(TenantDO.NAME, updateObj.getName());
@@ -313,42 +311,39 @@ public class TenantServiceImpl implements TenantService {
         }
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
         // 修改租户管理员
-        if (StringUtils.isNotBlank(updateReqVO.getAdminUserName())) {
+        if (updateReqVO.getTenantAdminUserReqVOList() != null && updateReqVO.getTenantAdminUserReqVOList().size() > 0) {
             TenantUtils.execute(updateObj.getId(), () -> {
-                Long roleId;
-                Long userId = null;
-                // 获取旧的租户管理员
-                AdminUserDO oldAdminUser = userService.getUser(tenant.getAdminUserId());
-                // 判断管理员是否发生变更
-                if (!updateReqVO.getAdminUserName().equals(oldAdminUser.getUsername())) {
-                    // 管理员变了，把旧管理员角色移除，并降级为自定义
-                    roleId = getAdminRoleAndDeleteOldUserRole(tenant);
 
+
+                // 管理员变了，把旧管理员角色移除，并降级为自定义
+                Long  roleId = getAdminRoleAndDeleteOldUserRole(tenant);
+                // 判断管理员是否发生变更
+
+                updateReqVO.getTenantAdminUserReqVOList().forEach(adminUserReqVO -> {
+                    UserInsertReqVO reqVO = new UserInsertReqVO();
                     // 已存在的用户
-                    AdminUserDO newAdminUser = userService.getUserByUsername(updateReqVO.getAdminUserName());
+                    AdminUserDO newAdminUser = userService.getUserByUsername(adminUserReqVO.getAdminUserName());
                     // 判断前端上送的管理员是否已存在，存在则分配角色且不是老用户
                     if (newAdminUser == null) {
                         // 新管理员用户不存在，创建用户，并分配角色
-                        TenantInsertReqVO reqVO = new TenantInsertReqVO();
-                        reqVO.setAdminUserName(updateReqVO.getAdminUserName());
-                        reqVO.setAdminNickName(updateReqVO.getAdminNickName());
-                        reqVO.setAdminMobile(updateReqVO.getAdminMobile());
-                        userId = createSystemUser(roleId, reqVO);
+                        UserInsertReqVO userInsertReqVO = new UserInsertReqVO();
+                        userInsertReqVO.setUsername(adminUserReqVO.getAdminUserName());
+                        userInsertReqVO.setNickname(adminUserReqVO.getAdminNickName());
+                        userInsertReqVO.setMobile(adminUserReqVO.getAdminMobile());
+                        userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
+                        userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
+                        // 创建用户
+                        Long userId = userService.createUser(reqVO);
+                        permissionService.assignUserRoles(userId, singleton(roleId));
+
                     } else {
                         // 新管理员用户存在，直接分配角色
                         permissionService.assignUserRoles(newAdminUser.getId(), singleton(roleId));
-                        userId = newAdminUser.getId();
+                        Long userId = newAdminUser.getId();
                         // 将新管理员设置为内置用户类型
                         userService.updateAdminType(userId, AdminTypeEnum.SYSTEM.getType());
                     }
-                }
-
-                // 修改租户的管理员
-                updateObj.setAdminUserId(userId);
-                if (updateObj.getAdminUserId() != null) {
-                    row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
-                    tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
-                }
+                });
             });
         }
     }
@@ -362,13 +357,6 @@ public class TenantServiceImpl implements TenantService {
         } else {
             roleId = roleDO.getId();
         }
-        // 移除旧用户租户管理员角色
-        UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(tenant.getAdminUserId(), roleId);
-        if (userRoleDO != null) {
-            permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
-        }
-        // 将旧管理员设置为普通用户,降级
-        userService.updateAdminType(tenant.getAdminUserId(), AdminTypeEnum.CUSTOM.getType());
         return roleId;
     }
 
@@ -539,7 +527,7 @@ public class TenantServiceImpl implements TenantService {
                     }
                     tenantRespVO.setAppCount(appCount);
                     if (tenantRespVO.getSaasEnabled() == null) {
-                        tenantRespVO.setSaasEnabled(CommonSaasEnum.DISABLE.getValue());
+                        tenantRespVO.setSaasEnabled(CommonPublishModelEnum.InnerModel.getValue());
                     }
                     // 设置联系人昵称
                     if (tenantDO.getAdminUserId() != null) {

@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.module.system.enums.tenant.SortEnum;
 import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
@@ -177,8 +178,11 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
         // 排除平台租户
         configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
 
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-
+        if(pageReqVO.getSortType().equals(SortEnum.DESC.getValue())){
+            configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        }else{
+            configStore.order(BaseDO.CREATE_TIME, Order.TYPE.ASC);
+        }
         return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 }

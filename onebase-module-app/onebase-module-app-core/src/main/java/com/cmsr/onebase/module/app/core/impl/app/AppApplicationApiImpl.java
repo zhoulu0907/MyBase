@@ -31,8 +31,8 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
-    public List<ApplicationDTO> finAppApplicationByAppName(String appName) {
-        List<ApplicationDO> applicationList = appApplicationRepository.finAppApplicationByAppName(appName);
+    public List<ApplicationDTO> findAppApplicationByAppName(String appName) {
+        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
