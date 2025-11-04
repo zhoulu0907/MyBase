@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Table(name = "etl_flink_mapping")
 @Data
-public class ETLFlinkMapping extends TenantBaseDO {
+public class ETLFlinkMappingDO extends TenantBaseDO {
 
     @Column(name = "datasource_type")
     private String datasourceType;
