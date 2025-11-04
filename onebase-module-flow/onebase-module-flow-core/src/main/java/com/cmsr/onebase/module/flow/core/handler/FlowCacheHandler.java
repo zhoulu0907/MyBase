@@ -66,10 +66,11 @@ public class FlowCacheHandler {
     }
 
     public String onApplicationDelete(Long applicationId) {
-        Set<Long> ids = flowProcessCache.deleteByApplicationId(applicationId);
+        Set<Long> ids = flowProcessCache.findProcessByApplicationId(applicationId);
         ids.forEach(id -> {
             String chainId = FlowUtils.toFlowChainId(id);
             FlowBus.removeChain(chainId);
+            flowProcessCache.deleteByProcessId(id);
         });
         return "删除：" + ids;
     }

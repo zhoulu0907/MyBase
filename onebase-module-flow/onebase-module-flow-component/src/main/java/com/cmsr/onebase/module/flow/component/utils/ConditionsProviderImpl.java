@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.component.utils;
 
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
@@ -33,7 +34,7 @@ import java.util.Map;
  */
 @Setter
 @Component
-public class ConditionsProvider {
+public class ConditionsProviderImpl implements ConditionsProvider {
 
 
     @Autowired
@@ -48,6 +49,7 @@ public class ConditionsProvider {
      *
      * @return
      */
+    @Override
     public OrExpression formatConditionsForExpression(List<Conditions> conditions, Map<String, Object> vars) {
         OrExpression orExpression = ConditionsSupport.convertToOrExpresses(conditions);
         if (orExpression == null) {
@@ -67,6 +69,7 @@ public class ConditionsProvider {
      *
      * @return
      */
+    @Override
     public OrExpression formatConditionsForValue(List<Conditions> conditions, Map<String, Object> vars) {
         OrExpression orExpression = ConditionsSupport.convertToOrExpresses(conditions);
         for (AndExpression andExpression : orExpression.getAndExpressions()) {
@@ -77,6 +80,7 @@ public class ConditionsProvider {
         return orExpression;
     }
 
+    @Override
     public List<ExpressionItem> formatConditionItemsForValue(List<ConditionItem> conditionItems, Map<String, Object> vars) {
         List<ExpressionItem> expressionItems = new ArrayList<>();
         for (ConditionItem conditionItem : conditionItems) {
@@ -160,7 +164,7 @@ public class ConditionsProvider {
         }
     }
 
-
+    @Override
     public ExpressionItem formatConditionItemForValue(ConditionItem conditionItem, Map<String, Object> dataMap) {
         ExpressionItem expressionItem = ConditionsSupport.convertToExpressesItem(conditionItem);
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {

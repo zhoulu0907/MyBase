@@ -12,13 +12,14 @@ import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RMap;
+import org.redisson.api.RMapCache;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author：huangjie
@@ -26,7 +27,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class FlowVersionUpdate {
+public class FlowVersionProvider {
 
     @Setter
     @Autowired
@@ -44,7 +45,7 @@ public class FlowVersionUpdate {
     @Autowired
     private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
 
-    public void updateApplicationVersion(Long applicationId) {
+    public void onApplicationUpdate(Long applicationId) {
         log.info("更新应用版本：{}", applicationId);
         List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
@@ -55,8 +56,8 @@ public class FlowVersionUpdate {
                 updateDateFieldJob(flowProcessDO);
             }
         }
-        RMap<Long, Long> rMap = redissonClient.getMap(FlowUtils.REDIS_APPLICATION_VERSION_KEY);
-        rMap.put(applicationId, System.currentTimeMillis());
+        RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CACHE_KEY);
+        mapCache.put(applicationId, System.currentTimeMillis(), FlowUtils.VERSION_TIMEOUT_HOUR, TimeUnit.HOURS);
         RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
         ChangeEvent changeEvent = new ChangeEvent();
         changeEvent.setEventType(ChangeEvent.UPDATE_EVENT);
@@ -80,4 +81,16 @@ public class FlowVersionUpdate {
             flowProcessDateFieldRepository.update(flowProcessDateFieldDO);
         }
     }
+
+    public void onApplicationDelete(Long applicationId) {
+        RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CACHE_KEY);
+        mapCache.put(applicationId, -1L, FlowUtils.VERSION_TIMEOUT_HOUR, TimeUnit.HOURS);
+        RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
+        ChangeEvent changeEvent = new ChangeEvent();
+        changeEvent.setEventType(ChangeEvent.DELETE_EVENT);
+        changeEvent.setApplicationId(applicationId);
+        changeEvent.setVersion(-1L);
+        topic.publish(changeEvent);
+    }
+
 }
