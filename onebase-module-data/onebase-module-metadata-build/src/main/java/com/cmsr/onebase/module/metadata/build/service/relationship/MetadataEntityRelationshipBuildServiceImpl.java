@@ -268,6 +268,10 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         result.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
         result.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
 
+        // 查询源字段和目标字段的展示名称
+        result.setSourceFieldDisplayName(getFieldDisplayNameById(relationshipDO.getSourceFieldId()));
+        result.setTargetFieldDisplayName(getFieldDisplayNameById(relationshipDO.getTargetFieldId()));
+
         // 验证关键字段
         if (result.getId() == null) {
             log.error("转换后的响应VO中id字段为空，原始DO的id: {}", relationshipDO.getId());
@@ -372,6 +376,31 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             return null;
         } catch (Exception e) {
             log.warn("获取字段名称失败，字段ID: {}, 错误: {}", fieldId, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 根据字段ID获取字段展示名称
+     *
+     * @param fieldId 字段ID
+     * @return 字段展示名称
+     */
+    private String getFieldDisplayNameById(String fieldId) {
+        if (!StringUtils.hasText(fieldId)) {
+            return null;
+        }
+
+        try {
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and("id", Long.valueOf(fieldId));
+            MetadataEntityFieldDO field = entityFieldService.getEntityField(fieldId);
+            return field != null ? field.getDisplayName() : null;
+        } catch (NumberFormatException e) {
+            log.warn("无效的字段ID: {}", fieldId);
+            return null;
+        } catch (Exception e) {
+            log.warn("获取字段展示名称失败，字段ID: {}, 错误: {}", fieldId, e.getMessage());
             return null;
         }
     }

@@ -42,11 +42,17 @@ public class EntityRelationshipRespVO {
     @Schema(description = "源字段名称", example = "id")
     private String sourceFieldName;
 
+    @Schema(description = "源字段展示名称", example = "主键ID")
+    private String sourceFieldDisplayName;
+
     @Schema(description = "目标字段ID", example = "3010")
     private String targetFieldId;
 
     @Schema(description = "目标字段名称", example = "userId")
     private String targetFieldName;
+
+    @Schema(description = "目标字段展示名称", example = "用户ID")
+    private String targetFieldDisplayName;
 
     @Schema(description = "级联类型", example = "READ")
     private String cascadeType;

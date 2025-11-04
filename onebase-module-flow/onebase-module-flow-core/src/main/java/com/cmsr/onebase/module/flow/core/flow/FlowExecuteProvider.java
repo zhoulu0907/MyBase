@@ -1,10 +1,8 @@
-package com.cmsr.onebase.module.flow.core.job;
+package com.cmsr.onebase.module.flow.core.flow;
 
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
-import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
-import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
@@ -24,7 +22,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowJobExecutor {
+public class FlowExecuteProvider {
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
@@ -32,7 +30,7 @@ public class FlowJobExecutor {
     @Autowired
     private FlowProcessCache flowProcessCache;
 
-    public ExecutorResult executeFlow(FlowJobMessage jobMessage) {
+    public ExecutorResult executeFlow(ExecutorRequest jobMessage) {
         ExecutorResult executorResult;
         try {
             Map<String, Object> inputParams;
@@ -53,7 +51,7 @@ public class FlowJobExecutor {
         return executorResult;
     }
 
-    private Map<String, Object> createDateFieldInputParams(FlowJobMessage message) {
+    private Map<String, Object> createDateFieldInputParams(ExecutorRequest message) {
         Long processId = message.getProcessId();
         StartDateFieldNodeData startDateFieldNodeData = flowProcessCache.findStartDateFieldNodeDataByProcessId(processId);
         if (startDateFieldNodeData == null) {
@@ -62,7 +60,7 @@ public class FlowJobExecutor {
         return Collections.emptyMap();
     }
 
-    private Map<String, Object> createTimeInputParams(FlowJobMessage message) {
+    private Map<String, Object> createTimeInputParams(ExecutorRequest message) {
         Long processId = message.getProcessId();
         StartTimeNodeData startTimeNodeData = flowProcessCache.findStartTimeNodeDataByProcessId(processId);
         if (startTimeNodeData == null) {
