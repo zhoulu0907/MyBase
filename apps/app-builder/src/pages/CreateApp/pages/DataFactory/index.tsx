@@ -35,9 +35,16 @@ const DataFactoryPage: React.FC = () => {
 
   return (
     <Layout className={styles.dataFactoryPage}>
-      <Layout.Sider breakpoint="xl" width={48} className={styles.sider}>
+      <Layout.Sider breakpoint="xl" className={styles.sider} collapsed={collapsed}>
         {/* 左侧菜单 */}
-        <Menu className={styles.menu} mode="pop" onClickMenuItem={handleMenuClick} selectedKeys={[activeTab]}>
+        <div className={styles.title}> {collapsed ? null : '数据资产'}</div>
+        <Menu
+          className={styles.menu}
+          mode="pop"
+          onClickMenuItem={handleMenuClick}
+          selectedKeys={[activeTab]}
+          collapse={collapsed}
+        >
           <Menu.Item key="check-entity">
             <Tooltip content="业务实体管理" position="right">
               <IconCommon />
