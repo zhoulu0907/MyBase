@@ -36,11 +36,13 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     }
   }, [dataField]);
 
+  const field = fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`
+
   return (
     <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`}
+        field={field}
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -53,12 +55,12 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div style={{ marginLeft: '10px' }}>{fieldValue || '--'}</div>
         ) : (
           <Input
-            defaultValue={defaultValue}
             placeholder={placeholder}
             maxLength={maxLength}
             style={{

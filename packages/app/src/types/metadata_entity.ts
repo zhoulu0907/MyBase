@@ -38,6 +38,9 @@ export interface MetadataEntityField {
   status: number;
   fieldCode?: string;
   disabled?: boolean;
+  options?: any[];
+  constraints?: any;
+  autoNumberConfig?:any;
 }
 
 export interface AppEntities {
@@ -63,7 +66,7 @@ export interface ChildEntity {
   targetFieldName: string;
 }
 
-export interface AppEntityField {
+export interface AppEntityField extends MetadataEntityField {
   id: string;
   fieldId: string; // 字段ID
   fieldName: string; // 字段名称

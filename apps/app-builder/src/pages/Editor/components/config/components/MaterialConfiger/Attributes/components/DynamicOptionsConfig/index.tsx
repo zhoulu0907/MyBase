@@ -14,14 +14,11 @@ export interface DynamicOptionsConfigProps {
 }
 
 const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handlePropsChange, item, configs, id }) => {
-  const selectKey = 'defaultValue';
+  const selectKey = 'defaultOptions';
   const [selectOptionsConfig, setSelectOptionsConfig] = useState<any[]>([]);
 
   useEffect(() => {
-    setSelectOptionsConfig(configs[selectKey]);
-    return () => {
-      setSelectOptionsConfig([]);
-    }
+    setSelectOptionsConfig(configs[selectKey] || []);
   }, [configs[selectKey]]);
 
   return (

@@ -7,6 +7,7 @@ import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { appIconMap, useAppEntityStore } from '@onebase/ui-kit';
+import { getEntityFields } from '@onebase/app';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
@@ -109,7 +110,7 @@ export default function EditorHeader() {
     layoutSubComponents: fromLayoutSubComponents,
     clearLayoutSubComponents: clearFromLayoutSubComponents,
     subTableComponents: fromSubTableComponents,
-    clearSubTableComponents: clearFromSubTableComponents,
+    clearSubTableComponents: clearFromSubTableComponents
   } = useFormEditorSignal;
 
   const {
@@ -234,22 +235,30 @@ export default function EditorHeader() {
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
 
-    console.log('当前主表及所有子表数据: ', entityWithChildren);
+    // 主表数据
+    const parentFields = await getEntityFields({ entityId: entityWithChildren.entityId });
 
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
-        fields: entityWithChildren.parentFields
+        fields: parentFields.map((item: any) => ({ ...item, fieldId: item.id }))
       });
 
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
-        const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity) => ({
+        // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
+        const allChildFields = await Promise.all(
+          entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
+            const childFields = await getEntityFields({ entityId: entity.childEntityId });
+            return childFields.map((item: any) => ({ ...item, fieldId: item.id }));
+          })
+        );
+        const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
           entityId: entity.childEntityId,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,
-          fields: entity.childFields
+          fields: allChildFields[index]
         }));
 
         setSubEntities({
@@ -278,14 +287,12 @@ export default function EditorHeader() {
 
     startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
   };
-    const handleExecTask = async () => {
-        try {
-          const res = await fetchPublish({ id: flowId });
-          Message.success('发布成功');
-        } catch (error) {
-        }
-
-    };
+  const handleExecTask = async () => {
+    try {
+      const res = await fetchPublish({ id: flowId });
+      Message.success('发布成功');
+    } catch (error) {}
+  };
 
   const clearAllData = () => {
     clearFromLayoutSubComponents();

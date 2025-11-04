@@ -94,7 +94,8 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue?: { label: string; value: string; [property: string]: any }[];
+  defaultValue: any;
+  defaultOptions: { label: string; value: any; [property: string]: any }[];
 
   /**
    * 字段宽度
@@ -188,7 +189,8 @@ const XCheckbox: XInputCheckboxSchema = {
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     labelColSpan: 200,
-    defaultValue: [
+    defaultValue: undefined,
+    defaultOptions: [
       {
         label: '选项一',
         value: '选项一'

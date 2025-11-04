@@ -60,12 +60,12 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <Input
-            defaultValue={defaultValue}
             style={{
               width: '100%',
               color,

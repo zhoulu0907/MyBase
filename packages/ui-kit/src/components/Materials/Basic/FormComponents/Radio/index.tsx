@@ -15,6 +15,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     tooltip,
     status,
     defaultValue,
+    defaultOptions,
     verify,
     layout,
     labelColSpan = 0,
@@ -39,14 +40,14 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div>{defaultValue?.find((op) => op.chosen)?.label || '--'}</div>
+          <div>{defaultOptions?.find((op) => op.chosen)?.label || '--'}</div>
         ) : (
           <RadioGroup
             direction={direction}
-            options={defaultValue}
-            defaultValue={defaultValue?.find((op) => op.chosen)?.value}
+            options={defaultOptions}
             style={{
               pointerEvents: runtime ? 'unset' : 'none'
             }}

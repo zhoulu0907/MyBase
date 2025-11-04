@@ -133,7 +133,7 @@ export interface XautoCodeConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   // 编码规则
-  autoCodeConfig?: any[],
+  autoCodeConfig?: any,
   autoCodeDisabled?: boolean,
 
   /**
@@ -238,7 +238,7 @@ const XautoCode: XautoCodeSchema = {
     bgColor: '',
     labelColSpan: 200,
     maxLength: 40,
-    autoCodeConfig: [],
+    autoCodeConfig: {},
     autoCodeDisabled: false,
     verify: {
       required: false

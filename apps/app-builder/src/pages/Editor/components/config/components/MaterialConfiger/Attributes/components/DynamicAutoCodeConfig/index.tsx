@@ -55,20 +55,25 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
   const [displayText, setDisplayText] = useState(getDisplayText(configs[autoCodeKey]?.config));
 
   useEffect(() => {
-    if (configs[autoCodeKey]) {
-      const config = configs[autoCodeKey]?.config || {
-        // 默认值
+    const keys = Object.keys(configs[autoCodeKey] || {});
+    if (keys?.length) {
+      const newRules = configs[autoCodeKey].rules || [];
+      const newConfig = { ...configs[autoCodeKey], itemType: AUTO_CODE_RULE_TYPE.SEQUENCE };
+      setDisplayText(getDisplayText(newConfig));
+      setRules([newConfig, ...newRules]);
+    } else {
+      // 默认值
+      const newConfig = {
         numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
         digitWidth: DIGIT_DEFAULT,
         continueIncrement: true,
         startValue: 1,
         nextRecordStartValue: false,
-        resetCycle: AUTO_CODE_RESET_CYCLE.NONE
+        resetCycle: AUTO_CODE_RESET_CYCLE.NONE,
+        itemType: AUTO_CODE_RULE_TYPE.SEQUENCE
       };
-      const newRules =
-        configs[autoCodeKey]?.rules?.filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE) || [];
-      const newConfig = { ...config, itemType: AUTO_CODE_RULE_TYPE.SEQUENCE };
-      setRules([newConfig, ...newRules]);
+      setDisplayText(getDisplayText(newConfig));
+      setRules([newConfig]);
     }
   }, [configs[autoCodeKey]]);
 
@@ -122,25 +127,31 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
     setEditRuleVisible(true);
   };
   // 自动编号 删除
-  const removeRule = (id: string) => {
-    setRules(rules.filter((rule) => rule.id !== id));
+  const removeRule = (index: number) => {
+    const newConfig = rules.filter((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.[0] || {
+      ...configs[autoCodeKey]
+    };
+    const newRules = rules
+      .filter((_ele: any, i: number) => i !== index)
+      .filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE);
+
+    handlePropsChange(autoCodeKey, { ...newConfig, rules: newRules });
   };
   const updateRule = (index: number, value: any) => {
-    const newConfig = {
-      config: rules.filter((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.[0] || {
-        ...configs[autoCodeKey]?.config
-      },
-      rules: rules
-        .map((ele: any, i: number) => {
-          // 先赋值 后过滤
-          if (i === index) {
-            return { ...ele, format: value };
-          }
-          return ele;
-        })
-        .filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE)
+    const newConfig = rules.filter((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.[0] || {
+      ...configs[autoCodeKey]
     };
-    handlePropsChange(autoCodeKey, newConfig);
+    const newRules = rules
+      .map((ele: any, i: number) => {
+        // 先赋值 后过滤
+        if (i === index) {
+          return { ...ele, format: value };
+        }
+        return ele;
+      })
+      .filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE);
+
+    handlePropsChange(autoCodeKey, { ...newConfig, rules: newRules });
   };
 
   // 渲染每一项规则
@@ -201,6 +212,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
               placeholder="请选择字段"
               className={styles.ruleInput}
               options={entityTree}
+              animation
               value={findFieldPath(rule.format, entityTree)}
               onChange={(value) => updateRule(index, value?.[1] || '')}
             />
@@ -211,11 +223,9 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
 
   const handleAutoCodeConfigConfirm = (config: AutoNumberRule) => {
     setDisplayText(getDisplayText(config));
-    const newConfig = {
-      config: { ...config },
-      rules: configs[autoCodeKey]?.rules || []
-    };
-    handlePropsChange(autoCodeKey, newConfig);
+    const newConfig = { ...config };
+    const newRules = rules.filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE);
+    handlePropsChange(autoCodeKey, { ...newConfig, rules: newRules });
   };
 
   return (
@@ -231,6 +241,9 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
           onAdd={(e) => {
             console.log('onAdd: ', e);
           }}
+          group={{
+            name: 'autocode-col-item'
+          }}
           onSort={(e) => {
             const newList = [...rules];
             // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
@@ -244,33 +257,33 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
               // 插入到新位置
               movedList.splice(newIndex, 0, movedItem);
               // 更新属性
-              const newConfig = {
-                config: movedList.filter((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.[0] || {
-                  ...configs[autoCodeKey]?.config
-                },
-                rules: movedList.filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE)
+              const newConfig = movedList.filter((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.[0] || {
+                ...configs[autoCodeKey]
               };
-              handlePropsChange(autoCodeKey, newConfig);
+              const newRules = movedList.filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE);
+              handlePropsChange(autoCodeKey, { ...newConfig, rules: newRules });
             }
           }}
         >
           {rules.map((rule: any, index: number) => (
             <div key={index} className={styles.autoCodeItem}>
-              <IconDragDotVertical
-                // 支持拖拽的图标，别误删了：）
-                className="autocode-item-handle"
-                style={{
-                  cursor: 'move',
-                  color: '#555'
-                }}
-              />
+              {!configs[autoCodeDisabledKey] && (
+                <IconDragDotVertical
+                  // 支持拖拽的图标，别误删了：）
+                  className="autocode-item-handle"
+                  style={{
+                    cursor: 'move',
+                    color: '#555'
+                  }}
+                />
+              )}
               {renderRuleConfig(rule, index)}
               {!configs[autoCodeDisabledKey] && (
                 <Button
                   type="text"
                   status="danger"
                   icon={<IconDelete />}
-                  onClick={() => removeRule(rule.id!)}
+                  onClick={() => removeRule(index)}
                   disabled={rules.length <= 1 || rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE}
                   className={styles.ruleActionBtn}
                 />
