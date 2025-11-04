@@ -198,7 +198,7 @@ const XImgUpload: XInputImgUploadSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     uploadCompress: -1,
-    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
+    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
     uploadType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,

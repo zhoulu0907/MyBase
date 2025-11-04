@@ -17,6 +17,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     labelColSpan = 0,
     showSearch,
     defaultValue,
+    defaultOptions,
     runtime = true,
     detailMode
   } = props;
@@ -59,11 +60,12 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap>
-            {fieldValue && defaultValue && fieldValue.map((ele: any, index: number) => <Tag key={index}>
-              {defaultValue.find((e: any) => e.value === ele)?.label}
+            {fieldValue && defaultOptions && fieldValue.map((ele: any, index: number) => <Tag key={index}>
+              {defaultOptions.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>
         ) : (
@@ -76,7 +78,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             placeholder="请选择"
-            options={defaultValue}
+            options={defaultOptions}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

@@ -17,7 +17,7 @@ import './index.css';
 const CollapseItem = Collapse.Item;
 
 const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
-  const { id, label, colCount = 1, status, collapsed } = props;
+  const { id, label, colCount = 1, status, collapsed, pageType } = props;
   useSignals();
 
   const {
@@ -27,7 +27,7 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
     layoutSubComponents,
     setLayoutSubComponents,
     setShowDeleteButton,
-  } = usePageEditorSignal();
+  } = usePageEditorSignal(pageType);
 
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
   const [activeKey, setActiveKey] = useState<string[]>([]);

@@ -81,12 +81,12 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{detailValue(fieldValue) || '--'}</div>
         ) : (
           <InputNumber
-            defaultValue={defaultValue}
             placeholder={placeholder}
             step={step}
             min={verify?.min}

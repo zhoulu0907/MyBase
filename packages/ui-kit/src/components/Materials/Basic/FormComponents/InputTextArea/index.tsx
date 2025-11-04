@@ -72,13 +72,13 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <TextArea
             key={`${minRows}-${maxRows}`}
-            defaultValue={defaultValue}
             placeholder={placeholder}
             maxLength={maxLength}
             allowClear

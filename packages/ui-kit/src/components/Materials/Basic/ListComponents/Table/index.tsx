@@ -325,7 +325,7 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key].userName;
+                newItem[key] = newItem[key].userName || newItem[key];
               }
             }
           }

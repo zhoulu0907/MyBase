@@ -1,5 +1,15 @@
-import { Button, Message, Popconfirm, Table, type TableColumnProps } from '@arco-design/web-react';
-import { IconPlusCircle } from '@arco-design/web-react/icon';
+import {
+  Button,
+  Dropdown,
+  Input,
+  Menu,
+  Message,
+  Popconfirm,
+  Select,
+  Table,
+  type TableColumnProps
+} from '@arco-design/web-react';
+import { IconDown, IconPlus, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
   getDeptUser,
   getRoleUser,
@@ -40,6 +50,26 @@ const UserMembers = (props: IProps) => {
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
   const [selectedMembers, setSelectedMembers] = useState<AuthRoleUsersPageRespVO[]>([]);
+
+  // Search
+  const [searchPlaceholder, setSearchPlaceholder] = useState<string>('成员');
+  const [addSelect, setAddSelect] = useState<string>('specifiedPerson'); //添加
+  const [selectRowkeyArr, setSelectRowKeyArr] = useState([]);
+
+  const dropList = (
+    <Menu
+      onClickMenuItem={(key) => {
+        setAddSelect(key);
+      }}
+    >
+      <Menu.Item key="specifiedPerson">
+        <IconPlus /> 添加成员
+      </Menu.Item>
+      <Menu.Item key="specifiedDepartment">
+        <IconPlus /> 添加部门
+      </Menu.Item>
+    </Menu>
+  );
 
   useEffect(() => {
     if (memberList && roleInfo?.id) {
@@ -162,7 +192,9 @@ const UserMembers = (props: IProps) => {
             handleDeleteUser(_record.id);
           }}
         >
-          <Button type="text">移除</Button>
+          <Button type="text" status="danger">
+            移除
+          </Button>
         </Popconfirm>
       )
     }
@@ -187,12 +219,44 @@ const UserMembers = (props: IProps) => {
     getRoleUserList(current, pageSize);
   };
 
+  // Search
+  const handleSearchChange = (value: string) => {
+    value === 'member' ? setSearchPlaceholder('成员姓名') : setSearchPlaceholder('部门');
+  };
+
+  // Multiple Options
+  const handleTbSelect = (keyArr: any) => {
+    setSelectRowKeyArr(keyArr);
+  };
+
   return (
     <div className={styles.adminWrapper}>
       <div className={styles.header}>
-        <Button type="primary" icon={<IconPlusCircle />} onClick={handleMembersVisible}>
-          添加成员
-        </Button>
+        <Input
+          style={{ width: 284 }}
+          addBefore={
+            <Select
+              className={styles.searchSelect}
+              defaultValue={'member'}
+              onChange={(value) => handleSearchChange(value)}
+            >
+              <Select.Option value="member">搜索成员</Select.Option>
+              <Select.Option value="dept">搜索部门</Select.Option>
+            </Select>
+          }
+          allowClear={true}
+          placeholder={`请输入${searchPlaceholder}`}
+        />
+        <div>
+          {selectRowkeyArr.length > 0 && (
+            <Button type="outline" status="danger" style={{ marginRight: '16px' }}>
+              批量删除
+            </Button>
+          )}
+          <Dropdown.Button type="primary" droplist={dropList} icon={<IconDown />} onClick={handleMembersVisible}>
+            {addSelect === 'specifiedPerson' ? '添加成员' : '添加部门'}
+          </Dropdown.Button>
+        </div>
       </div>
       <Table
         className={styles.table}
@@ -201,12 +265,18 @@ const UserMembers = (props: IProps) => {
         loading={userLoading}
         pagination={{ ...pagination, showTotal: true, onChange: handlePageChange }}
         rowKey="id"
+        rowSelection={{
+          type: 'checkbox',
+          onChange: (keyArr: any) => handleTbSelect(keyArr)
+        }}
       />
       <AddMembers
         visible={membersVisible}
         data={deptData}
+        title={addSelect}
         loading={memberLoading}
         selectedMembers={selectedMembers || []}
+        isFromPermission={true}
         onExpand={handleExpand}
         onSearch={debouncedUpdate}
         onConfirm={handleAddUser}
