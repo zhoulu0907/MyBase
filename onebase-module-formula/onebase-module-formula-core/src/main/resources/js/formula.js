@@ -667,6 +667,44 @@ function _typeof(o) {
   function ISBLANK(value) {
     return value === null;
   }
+
+  function RANDOMBETWEEN(min, max, volatile) {
+    // 参数检查
+    if (arguments.length < 2 || arguments.length > 3) {
+      return value;
+    }
+    
+    min = parseNumber(min);
+    max = parseNumber(max);
+    
+    if (anyIsError(min, max)) {
+      return value;
+    }
+    
+    // 检查最小值是否大于最大值
+    if (min > max) {
+      return num;
+    }
+    
+    // 处理 volatile 参数，默认为 true
+    if (arguments.length < 3) {
+      volatile = true;
+    } else {
+      volatile = parseBool(volatile);
+      if (volatile instanceof Error) {
+        return volatile;
+      }
+    }
+    
+    try {
+      // 生成指定范围内的随机整数
+      var randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
+      return randomInt;
+    } catch (e) {
+      return value;
+    }
+  }
+
   function ISERR(value$1) {
     return [ value, ref, div0, num, name, nil ].indexOf(value$1) >= 0 || typeof value$1 === "number" && (isNaN(value$1) || !isFinite(value$1));
   }
@@ -4439,6 +4477,296 @@ function _typeof(o) {
     }
     return String.fromCharCode(number);
   }
+
+  function ENCODEURL(text) {
+    if (arguments.length !== 1) {
+      return value;
+    }
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    try {
+      return encodeURIComponent(text);
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function REGEXEXTRACTALL(text, regex_pattern) {
+    if (arguments.length !== 2) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern, 'g');
+      var matches = text.match(regex);
+      
+      if (matches === null) {
+        return [];
+      }
+      
+      return matches;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function REGEXEXTRACT(text, regex_pattern) {
+    if (arguments.length !== 2) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern);
+      var match = text.match(regex);
+      
+      if (match === null) {
+        return "";
+      }
+      
+      return match[0];
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function REGEXMATCH(text, regex_pattern) {
+    if (arguments.length !== 2) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern);
+      return regex.test(text);
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function REGEXREPLACE(text, regex_pattern, replacement) {
+    if (arguments.length !== 3) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    replacement = parseString(replacement);
+    if (replacement instanceof Error) {
+      return replacement;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern, 'g');
+      return text.replace(regex, replacement);
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function RMBCAP(number) {
+    if (arguments.length !== 1) {
+      return value;
+    }
+    
+    number = parseNumber(number);
+    if (number instanceof Error) {
+      return number;
+    }
+    
+    // 检查是否为负数
+    var isNegative = number < 0;
+    number = Math.abs(number);
+    
+    // 分离整数和小数部分
+    var integerPart = Math.floor(number);
+    var decimalPart = Math.round((number - integerPart) * 100);
+    
+    // 数字对应的大写
+    var digits = ["零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
+    var units = ["", "拾", "佰", "仟"];
+    var bigUnits = ["", "万", "亿"];
+    
+    // 转换整数部分
+    function convertInteger(num) {
+      if (num === 0) return "零";
+      
+      var str = "";
+      var zero = false;
+      var unitIndex = 0;
+      var bigUnitIndex = 0;
+      
+      while (num > 0) {
+        var digit = num % 10;
+        
+        if (digit === 0) {
+          zero = true;
+        } else {
+          if (zero) {
+            str = digits[0] + str;
+            zero = false;
+          }
+          
+          if (unitIndex === 0 && bigUnitIndex > 0) {
+            str = bigUnits[bigUnitIndex] + str;
+          }
+          
+          str = digits[digit] + units[unitIndex] + str;
+        }
+        
+        unitIndex++;
+        if (unitIndex === 4) {
+          unitIndex = 0;
+          bigUnitIndex++;
+        }
+        
+        num = Math.floor(num / 10);
+      }
+      
+      // 处理万、亿单位
+      if (bigUnitIndex > 0 && str.indexOf(bigUnits[bigUnitIndex]) === -1) {
+        str = bigUnits[bigUnitIndex] + str;
+      }
+      
+      return str;
+    }
+    
+    // 转换小数部分
+    function convertDecimal(decimal) {
+      if (decimal === 0) return "整";
+      
+      var str = "";
+      var jiao = Math.floor(decimal / 10);
+      var fen = decimal % 10;
+      
+      if (jiao > 0) {
+        str += digits[jiao] + "角";
+      }
+      
+      if (fen > 0) {
+        str += digits[fen] + "分";
+      }
+      
+      return str;
+    }
+    
+    try {
+      var result = "人民币";
+      
+      if (isNegative) {
+        result += "负";
+      }
+      
+      result += convertInteger(integerPart);
+      
+      // 添加元
+      if (integerPart > 0) {
+        result += "元";
+      }
+      
+      result += convertDecimal(decimalPart);
+      
+      // 如果没有小数部分，添加"整"
+      if (decimalPart === 0 && integerPart > 0) {
+        result += "整";
+      }
+      
+      // 特殊情况：0
+      if (integerPart === 0 && decimalPart === 0) {
+        result = "人民币零元整";
+      }
+      
+      return result;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function UUID() {
+    if (arguments.length !== 0) {
+      return value;
+    }
+    
+    try {
+      // 生成 UUID 版本 4 (随机)
+      var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0;
+        var v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      
+      return uuid;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function TIMESTAMP(date) {
+    if (arguments.length !== 1) {
+      return value;
+    }
+    
+    // 如果是字符串，尝试转换为日期对象
+    if (typeof date === 'string') {
+      date = new Date(date);
+    }
+    
+    // 如果是数字，假设它是已经是一个时间戳
+    if (typeof date === 'number') {
+      date = new Date(date);
+    }
+    
+    // 检查是否为有效的日期对象
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return value;
+    }
+    
+    try {
+      // 返回时间戳（毫秒）
+      return date.getTime();
+    } catch (e) {
+      return value;
+    }
+  }
+
   function CLEAN(text) {
     if (anyIsError(text)) {
       return text;
@@ -4584,7 +4912,10 @@ function _typeof(o) {
     }
     return updept;
   }
-
+  function GETROLE(arr) {
+    console.log(arr);
+    return arr;
+  }
   function GETSUPERVISOR(id,name) {
     console.log(id,name);
     var user = {
@@ -4594,6 +4925,15 @@ function _typeof(o) {
     return user;
   }
 
+  function ISINROLE(isInRole) {
+    console.log(isInRole);
+    return isInRole;
+  }
+
+  function ISINDEPT(isInDept) {
+    console.log(isInDept);
+    return isInDept;
+  }
 
   function LEN(text) {
     if (arguments.length === 0) {
@@ -4663,6 +5003,132 @@ function _typeof(o) {
     }
     return old_text.substr(0, num_chars - 1) + new_text + old_text.substr(num_chars - 1 + length);
   }
+
+  function TEXTSPLIT(text, col_delimiter, row_delimiter, ignore_empty, match_mode, match_end) {
+    // 参数处理
+    if (arguments.length < 2) {
+      return na;
+    }
+
+    // 处理文本参数
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+
+    // 处理列分隔符
+    col_delimiter = parseString(col_delimiter);
+    if (col_delimiter instanceof Error) {
+      return col_delimiter;
+    }
+
+    // 处理行分隔符（可选）
+    if (row_delimiter !== undefined) {
+      row_delimiter = parseString(row_delimiter);
+      if (row_delimiter instanceof Error) {
+        return row_delimiter;
+      }
+    }
+
+    // 处理忽略空值参数（可选，默认为false）
+    if (ignore_empty === undefined) {
+      ignore_empty = false;
+    } else {
+      ignore_empty = parseBool(ignore_empty);
+    }
+
+    // 处理匹配模式参数（可选，默认为0）
+    if (match_mode === undefined) {
+      match_mode = 0;
+    } else {
+      match_mode = parseNumber(match_mode);
+      if (match_mode instanceof Error) {
+        return match_mode;
+      }
+    }
+
+    // 处理匹配结束参数（可选，默认为false）
+    if (match_end === undefined) {
+      match_end = false;
+    } else {
+      match_end = parseBool(match_end);
+    }
+
+    try {
+      var result = [];
+      
+      // 如果有行分隔符，则先按行分割
+      var rows;
+      if (row_delimiter !== undefined && row_delimiter !== "") {
+        rows = splitWithMode(text, row_delimiter, match_mode, match_end);
+      } else {
+        // 没有行分隔符，整段文本作为一行
+        rows = [text];
+      }
+
+      // 对每一行按列分隔符进行分割
+      for (var i = 0; i < rows.length; i++) {
+        var cols = splitWithMode(rows[i], col_delimiter, match_mode, match_end);
+        
+        // 根据ignore_empty参数决定是否过滤空值
+        if (ignore_empty) {
+          cols = cols.filter(function(cell) {
+            return cell !== "";
+          });
+        }
+        
+        result.push(cols);
+      }
+
+      // 如果ignore_empty为true且所有元素都被过滤掉，则返回空数组
+      if (ignore_empty) {
+        var hasContent = false;
+        for (var r = 0; r < result.length; r++) {
+          if (result[r].length > 0) {
+            hasContent = true;
+            break;
+          }
+        }
+        if (!hasContent) {
+          return [];
+        }
+      }
+
+      return result;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  // 辅助函数：根据不同的匹配模式进行分割
+  function splitWithMode(text, delimiter, match_mode, match_end) {
+    if (match_mode === 0) {
+      // 精确匹配
+      return text.split(delimiter);
+    } else if (match_mode === 1) {
+      // 通配符匹配 (* 和 ?)
+      var escapedDelimiter = escapeRegExp(delimiter).replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
+      var regex = new RegExp(escapedDelimiter, 'g');
+      return text.split(regex);
+    } else if (match_mode === 2) {
+      // 正则表达式
+      try {
+        var regex = new RegExp(delimiter, match_end ? '' : 'g');
+        return text.split(regex);
+      } catch (e) {
+        return [text]; // 正则表达式无效时返回原文本
+      }
+    } else {
+      // 默认使用精确匹配
+      return text.split(delimiter);
+    }
+  }
+
+  // 辅助函数：转义正则表达式特殊字符
+  function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   function REPT(text, number_times) {
     var someError = anyError(text, number_times);
     if (someError) {
@@ -10531,6 +10997,14 @@ function _typeof(o) {
   exports.CEILINGMATH = CEILINGMATH;
   exports.CEILINGPRECISE = CEILINGPRECISE;
   exports.CHAR = CHAR;
+  exports.ENCODEURL = ENCODEURL;
+  exports.REGEXEXTRACTALL = REGEXEXTRACTALL;
+  exports.REGEXEXTRACT = REGEXEXTRACT;
+  exports.REGEXMATCH = REGEXMATCH;
+  exports.REGEXREPLACE = REGEXREPLACE;
+  exports.RMBCAP = RMBCAP;
+  exports.UUID = UUID;
+  exports.TIMESTAMP = TIMESTAMP;
   exports.CHIDIST = CHIDIST;
   exports.CHIDISTRT = CHIDISTRT;
   exports.CHIINV = CHIINV;
@@ -10700,12 +11174,16 @@ function _typeof(o) {
   exports.ISTEXT = ISTEXT;
   exports.KURT = KURT;
   exports.LARGE = LARGE;
+  exports.RANDOMBETWEEN = RANDOMBETWEEN;
   exports.LCM = LCM;
   exports.LEFT = LEFT;
   exports.GETUSER = GETUSER;
   exports.GETDEPT = GETDEPT;
   exports.GETUPDEPT = GETUPDEPT;
+  exports.GETROLE = GETROLE;
   exports.GETSUPERVISOR = GETSUPERVISOR;
+  exports.ISINROLE = ISINROLE;
+  exports.ISINDEPT = ISINDEPT;
   exports.LEN = LEN;
   exports.LINEST = LINEST;
   exports.LN = LN;
@@ -10849,6 +11327,7 @@ function _typeof(o) {
   exports.TDISTRT = TDISTRT;
   exports.TEXT = TEXT;
   exports.TEXTJOIN = TEXTJOIN;
+  exports.TEXTSPLIT = TEXTSPLIT;
   exports.TIME = TIME;
   exports.TIMEVALUE = TIMEVALUE;
   exports.TINV = TINV;
