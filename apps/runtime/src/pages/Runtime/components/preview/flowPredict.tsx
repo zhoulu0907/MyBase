@@ -36,7 +36,7 @@ const FlowPredict = ({ businessId }) => {
   };
 
   const fetchData = async () => {
-    const res = await fetchFlowPredict({ businessId: '113771690916872193' });
+    const res = await fetchFlowPredict({ businessId });
     setStepData(res);
     setCurrent(res?.length - 1);
   };
