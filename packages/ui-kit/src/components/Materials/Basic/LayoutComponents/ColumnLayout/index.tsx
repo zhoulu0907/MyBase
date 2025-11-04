@@ -245,8 +245,10 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                   data-cp-id={cp.id}
                   className="componentItem"
                   style={{
-                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
-                    borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
+                    width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
+                    borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent',
+                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                    margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
