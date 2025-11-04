@@ -9,6 +9,10 @@ import lombok.Data;
 @Data
 public class UserMemberDTO {
 
+    public static final String MEMBER_TYPE_USER = "user";
+
+    public static final String MEMBER_TYPE_DEPT = "dept";
+
     private Long Id;
 
     private Long memberId;
@@ -16,5 +20,7 @@ public class UserMemberDTO {
     private String memberName;
 
     private String memberType;
+
+    private Integer isIncludeChild;
 
 }

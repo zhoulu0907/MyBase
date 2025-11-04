@@ -14,15 +14,16 @@ public class AuthRoleMembersPageRespVO {
     @Schema(description = "用户ID")
     private Long id;
 
-    @Schema(description = "用户名")
-    private String nickname;
+    @Schema(description = "成员名称")
+    private String name;
 
-    @Schema(description = "手机号码")
-    private String mobile;
+    @Schema(description = "成员类型")
+    private String type;
+
+    @Schema(description = "成员类型名称")
+    private String typeName;
 
     @Schema(description = "部门名称")
     private String deptName;
 
-    @Schema(description = "用户邮箱", example = "a@b.cn")
-    private String email;
 }

@@ -32,6 +32,8 @@ public interface AppAuthRoleService {
 
     void deleteRoleDept(AuthRoleDeleteDeptReqVO reqVO);
 
+    void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO);
+
     void deleteRole(Long roleId);
 
     DeptAndUsersRespDTO listDeptUsers(AuthRoleDeptAndUsersReqVO reqVO);

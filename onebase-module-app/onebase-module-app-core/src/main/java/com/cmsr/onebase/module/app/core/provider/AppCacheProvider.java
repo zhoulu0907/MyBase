@@ -79,4 +79,6 @@ public class AppCacheProvider {
 
     public void deptsChanged(Long applicationId, List<Long> deptIds) {
     }
+
+
 }

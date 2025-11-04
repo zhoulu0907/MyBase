@@ -17,5 +17,8 @@ public class AuthRoleMembersPageReqVO extends PageParam {
     @NotNull(message = "角色ID不能为空")
     private Long roleId;
 
+    @Schema(description = "成员名称")
+    private String memberName;
+
 
 }

@@ -10,7 +10,6 @@ import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.Order;
 import org.anyline.entity.PageNavi;
 import org.anyline.service.AnylineService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -28,56 +27,53 @@ public class AppSqlQueryRepository {
 
     public PageResult<UserMemberDTO> findUserMemberDTOByRoleId(Long roleId, String memberName, PageParam pageParam) {
         ConfigStore configs = new DefaultConfigStore();
-        PageNavi page = new DefaultPageNavi(pageParam.getPageNo(), pageParam.getPageSize());
-        configs.setPageNavi(page);
         configs.param("roleId", roleId);
-        //configs.param("memberName", memberName);
+        configs.param("memberName", memberName);
         configs.order("update_time", Order.TYPE.DESC);
+        configs.page(pageParam.getPageNo(), pageParam.getPageSize());
         String sql = """
-                select id, member_id, member_type, update_time from (
+                select * from (
                 select
                 	aaru.id,
                 	aaru.role_id as member_id,
+                	aaru.update_time,
+                	-1 as is_include_child,
                 	u.nickname as member_name,
-                	'user' as member_type,
-                	aaru.update_time
+                	'user' as member_type
                 from
                 	app_auth_role_user aaru,
                 	system_users u
                 where
                 	aaru.user_id = u.id
                 	and aaru.role_id = #{roleId}
+                	${and u.nickname like '%'|| :memberName ||'%'}
                 	and aaru.deleted = 0 and u.deleted = 0
                 union all
                 select
                 	aard.id,
                 	aard.dept_id as member_id,
+                	aard.update_time,
+                	aard.is_include_child,
                 	d.name as member_name,
-                	'dept' as member_type,
-                	aard.update_time
+                	'dept' as member_type
                 from
                 	app_auth_role_dept aard,
                 	system_dept d
                 where
                 	aard.dept_id = d.id
-                	and
-                	aard.role_id = #{roleId}
+                	and aard.role_id = #{roleId}
+                	${and d.name like '%'|| :memberName ||'%'}
                 	and aard.deleted = 0 and d.deleted = 0
                 ) as combined_result
                 """;
-        DataSet dataSet;
-        if (StringUtils.isEmpty(memberName)) {
-            dataSet = anylineService.querys(sql, configs);
-        } else {
-            //dataSet = anylineService.querys(sql, configs,"member_name like '%' || #{memberName} || '%')");
-            dataSet = anylineService.querys(sql, configs);
-        }
+        DataSet dataSet = anylineService.querys(sql, configs);
         List<UserMemberDTO> userMemberDTOS = dataSet.stream().map(row -> {
             UserMemberDTO userMemberDTO = new UserMemberDTO();
             userMemberDTO.setId(row.getLong("id"));
             userMemberDTO.setMemberId(row.getLong("member_id"));
             userMemberDTO.setMemberName(row.getString("member_name"));
             userMemberDTO.setMemberType(row.getString("member_type"));
+            userMemberDTO.setIsIncludeChild(row.getInt("is_include_child"));
             return userMemberDTO;
         }).toList();
         return new PageResult(userMemberDTOS, dataSet.total());

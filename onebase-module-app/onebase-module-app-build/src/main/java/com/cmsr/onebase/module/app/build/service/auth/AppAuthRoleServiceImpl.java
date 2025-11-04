@@ -10,8 +10,10 @@ import com.cmsr.onebase.module.app.build.vo.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
+import com.cmsr.onebase.module.app.core.dto.auth.UserMemberDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
@@ -54,6 +56,9 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Resource
     private AppCacheProvider appCacheProvider;
 
+    @Resource
+    private AppSqlQueryRepository appSqlQueryRepository;
+
     @Override
     public List<AuthRoleListRespVO> getRoleList(Long applicationId) {
         appCommonService.validateApplicationExist(applicationId);
@@ -85,8 +90,22 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     public PageResult<AuthRoleMembersPageRespVO> pageRoleMembers(AuthRoleMembersPageReqVO reqVO) {
         appCommonService.validateRoleExist(reqVO.getRoleId());
-
-        return null;
+        PageResult<UserMemberDTO> result = appSqlQueryRepository.findUserMemberDTOByRoleId(reqVO.getRoleId(), reqVO.getMemberName(), reqVO);
+        List<AuthRoleMembersPageRespVO> voResult = result.getList().stream().map(v -> {
+            AuthRoleMembersPageRespVO vo = new AuthRoleMembersPageRespVO();
+            vo.setId(v.getId());
+            vo.setName(v.getMemberName());
+            vo.setType(v.getMemberType());
+            if (UserMemberDTO.MEMBER_TYPE_USER.equals(v.getMemberType())) {
+                vo.setTypeName("成员");
+            } else if (v.getIsIncludeChild() != null && v.getIsIncludeChild() == 0) {
+                vo.setTypeName("本部门");
+            } else if (v.getIsIncludeChild() != null && v.getIsIncludeChild() == 1) {
+                vo.setTypeName("本部门及子部门");
+            }
+            return vo;
+        }).toList();
+        return new PageResult(voResult, result.getTotal());
     }
 
     @Override
@@ -106,7 +125,6 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     public void createDefaultRole(Long applicationId) {
         appCommonService.validateApplicationExist(applicationId);
         Long userId = SecurityFrameworkUtils.getLoginUserId();
-
         {
             AuthRoleDO authRoleDO = new AuthRoleDO();
             authRoleDO.setApplicationId(applicationId);
@@ -172,6 +190,21 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         appAuthRoleDeptRepository.deleteRoleDept(reqVO.getRoleId(), reqVO.getDeptIds());
         appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds());
+    }
+
+    @Override
+    public void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO) {
+        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        for (UserMemberDTO member : reqVO.getMembers()) {
+            if (UserMemberDTO.MEMBER_TYPE_USER.equalsIgnoreCase(member.getMemberType())) {
+                appAuthRoleUserRepository.deleteRoleUser(reqVO.getRoleId(), member.getMemberId());
+                appCacheProvider.usersChanged(authRoleDO.getApplicationId(), List.of(member.getMemberId()));
+            }
+            if (UserMemberDTO.MEMBER_TYPE_DEPT.equalsIgnoreCase(member.getMemberType())) {
+                appAuthRoleDeptRepository.deleteRoleDept(reqVO.getRoleId(), member.getMemberId());
+                appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), List.of(member.getMemberId()));
+            }
+        }
     }
 
     @Override
