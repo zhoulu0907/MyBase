@@ -1,27 +1,28 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { copyToClipboard, getDomainPrefix, simplifyUrl } from '@/utils/date';
 import {
+  Avatar,
+  Button,
+  Checkbox,
   Form,
   Input,
-  Button,
-  Upload,
-  Select,
   Message,
+  Select,
   Space,
-  Checkbox,
   Tabs,
   Tag,
-  Avatar,
   Tooltip,
+  Upload
 } from '@arco-design/web-react';
 import { IconCopy, IconUpload } from '@arco-design/web-react/icon';
 import {
+  getPlatformTenantAdminInfoApi,
   getPlatformTenantAdminListApi,
   updatePlatformTenantApi,
-  type UpdateTenantParams,
-  getPlatformTenantAdminInfoApi
+  type UpdateTenantParams
 } from '@onebase/platform-center';
-import { copyToClipboard, getDomainPrefix, simplifyUrl } from '@/utils/date';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import WorkspaceSecurity from './components/security';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -42,13 +43,13 @@ const EditTenant = () => {
   const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${tenantInfo?.id}/${tenantInfo?.website}/`;
   const displayUrl = simplifyUrl(fullUrl);
 
-  console.log(fullUrl === displayUrl)
+  console.log(fullUrl === displayUrl);
 
   useEffect(() => {
     if (id) {
       getTenantInfo(id);
       getPlatformAdminList();
-    };
+    }
   }, [id]);
 
   useEffect(() => {
@@ -64,14 +65,13 @@ const EditTenant = () => {
         saas: false
       };
       form.setFieldsValue(initialValues);
-
     }
   }, [tenantInfo]);
 
   const getTenantInfo = async (id: string) => {
     const res = await getPlatformTenantAdminInfoApi({ id });
     setTenantInfo(res);
-    console.log(res, 999)
+    console.log(res, 999);
   };
 
   // 获取管理员列表
@@ -134,124 +134,123 @@ const EditTenant = () => {
 
   return (
     <div className={styles.editPage}>
-      <Tabs defaultActiveTab='1' destroyOnHide={false}>
+      <Tabs defaultActiveTab="1" destroyOnHide={false}>
         <Tabs.TabPane key="1" title="基本信息">
-          <Form
-            form={form}
-            layout="horizontal"
-            autoComplete="off"
-            initialValues={{
-              name: tenantInfo?.name,
-              id: tenantInfo?.id,
-              logo: '',
-              url: tenantInfo?.website,
-              userLimit: 5000,
-              admin: [tenantInfo?.adminNickName],
-              status: tenantInfo?.status === 1,
-              saas: false
-            }}
-          >
-            <Form.Item
-              label="空间名称"
-              field="name"
-              rules={[{ required: isEdit, message: '请输入空间名称' }]}
+          <div className={styles.basicInfoForm}>
+            <Form
+              form={form}
+              layout="horizontal"
+              autoComplete="off"
+              initialValues={{
+                name: tenantInfo?.name,
+                id: tenantInfo?.id,
+                logo: '',
+                url: tenantInfo?.website,
+                userLimit: 5000,
+                admin: [tenantInfo?.adminNickName],
+                status: tenantInfo?.status === 1,
+                saas: false
+              }}
             >
-              {isEdit ? <Input placeholder="输入空间名称" /> : <span>{tenantInfo?.name}</span>}
-            </Form.Item>
+              <Form.Item label="空间名称" field="name" rules={[{ required: isEdit, message: '请输入空间名称' }]}>
+                {isEdit ? <Input placeholder="输入空间名称" /> : <span>{tenantInfo?.name}</span>}
+              </Form.Item>
 
-            <Form.Item label="空间 Logo" field="logo">
-              {isEdit ? <>
-                <Upload
-                  listType="picture-card"
-                  action="/"
-                  showUploadList={false}
-                >
-                  <Button type='outline' icon={<IconUpload />}>上传图片</Button>
-                </Upload>
-                <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
-              </> : <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>}
-            </Form.Item>
+              <Form.Item label="空间 Logo" field="logo">
+                {isEdit ? (
+                  <>
+                    <Upload listType="picture-card" action="/" showUploadList={false}>
+                      <Button type="outline" icon={<IconUpload />}>
+                        上传图片
+                      </Button>
+                    </Upload>
+                    <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
+                  </>
+                ) : (
+                  <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
+                )}
+              </Form.Item>
 
-            <Form.Item
-              label="空间ID"
-              field="id"
-            >
-              {isEdit ? <Input type="number" disabled /> : <span>{tenantInfo?.id}</span>}
-            </Form.Item>
+              <Form.Item label="空间ID" field="id">
+                {isEdit ? <Input type="number" disabled /> : <span>{tenantInfo?.id}</span>}
+              </Form.Item>
 
-            <Form.Item
-              label="访问地址"
-              field="url"
-              rules={[{ required: isEdit, message: '请输入访问地址' }]}
-            >
-              {isEdit ? <Input prefix="http://" placeholder="www.onebase.com/" /> :
-                <div className={styles.urlWrapper}>
-                  <Tooltip content={displayUrl}><span className={styles.url}>{displayUrl}</span></Tooltip>
-                  <IconCopy className={styles.copyIcon} onClick={() => copyToClipboard(fullUrl)} />
-                </div>}
-            </Form.Item>
+              <Form.Item label="访问地址" field="url" rules={[{ required: isEdit, message: '请输入访问地址' }]}>
+                {isEdit ? (
+                  <Input prefix="http://" placeholder="www.onebase.com/" />
+                ) : (
+                  <div className={styles.urlWrapper}>
+                    <Tooltip content={displayUrl}>
+                      <span className={styles.url}>{displayUrl}</span>
+                    </Tooltip>
+                    <IconCopy className={styles.copyIcon} onClick={() => copyToClipboard(fullUrl)} />
+                  </div>
+                )}
+              </Form.Item>
 
-            <Form.Item
-              label="用户上限"
-              field="userLimit"
-              rules={[{ required: isEdit, message: '请输入用户上限' }]}
-            >
-              {isEdit ? <Input type="number" /> : <span>{tenantInfo?.userLimit || 5000}</span>}
-            </Form.Item>
+              <Form.Item label="用户上限" field="userLimit" rules={[{ required: isEdit, message: '请输入用户上限' }]}>
+                {isEdit ? <Input type="number" /> : <span>{tenantInfo?.userLimit || 5000}</span>}
+              </Form.Item>
 
-            <Form.Item
-              label="管理员"
-              field="admin"
-              rules={[{ required: isEdit, message: '请选择管理员' }]}
-              extra={isEdit && "当前用户将作为空间所有者"}
-            >
-              {isEdit ? <Select
-                placeholder="选择管理员"
-                mode="multiple"
-                allowClear
-                style={{ width: '100%' }}
+              <Form.Item
+                label="管理员"
+                field="admin"
+                rules={[{ required: isEdit, message: '请选择管理员' }]}
+                extra={isEdit && '当前用户将作为空间所有者'}
               >
-                <Option key="1" value="王少青">王少青</Option>
-                <Option key="2" value="张三">张三</Option>
-                <Option key="3" value="李四">李四</Option>
-              </Select> :
-                <div className={styles.tagWrapper}>
-                  {Array(3).fill('').map((tag, index) => <Tag className={styles.adminTag} key={index} size='large' style={{ borderRadius: 16 }}>
-                    <Avatar size={24} style={{ marginRight: 4 }}>A</Avatar>王少青
-                  </Tag>)}
-                </div>}
-            </Form.Item>
+                {isEdit ? (
+                  <Select placeholder="选择管理员" mode="multiple" allowClear style={{ width: '100%' }}>
+                    <Option key="1" value="王少青">
+                      王少青
+                    </Option>
+                    <Option key="2" value="张三">
+                      张三
+                    </Option>
+                    <Option key="3" value="李四">
+                      李四
+                    </Option>
+                  </Select>
+                ) : (
+                  <div className={styles.tagWrapper}>
+                    {Array(3)
+                      .fill('')
+                      .map((tag, index) => (
+                        <Tag className={styles.adminTag} key={index} size="large" style={{ borderRadius: 16 }}>
+                          <Avatar size={24} style={{ marginRight: 4 }}>
+                            A
+                          </Avatar>
+                          王少青
+                        </Tag>
+                      ))}
+                  </div>
+                )}
+              </Form.Item>
 
-            <Form.Item
-              label="状态"
-              field="status"
-              triggerPropName="checked"
-              rules={[{ required: isEdit }]}
-            >
-              {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.status ? '已启用' : '未启用'}</span>}
-            </Form.Item>
+              <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: isEdit }]}>
+                {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.status ? '已启用' : '未启用'}</span>}
+              </Form.Item>
 
-            <Form.Item
-              label="SaaS 功能"
-              field="saas"
-              triggerPropName="checked"
-              rules={[{ required: isEdit }]}
-            >
-              {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.saas ? '已启用' : '未启用'}</span>}
-            </Form.Item>
+              <Form.Item label="SaaS 功能" field="saas" triggerPropName="checked" rules={[{ required: isEdit }]}>
+                {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.saas ? '已启用' : '未启用'}</span>}
+              </Form.Item>
 
-            <Form.Item wrapperCol={{ offset: 5 }}>
-              <Space >
-                <Button onClick={() => setIsEdit(pre => !pre)}>{isEdit ? '取消' : '编辑'}</Button>
-                {isEdit && <Button type="primary" onClick={handleSave}>
-                  保存修改
-                </Button>}
-              </Space>
-            </Form.Item>
-          </Form>
+              <Form.Item wrapperCol={{ offset: 5 }}>
+                <Space>
+                  <Button onClick={() => setIsEdit((pre) => !pre)}>{isEdit ? '取消' : '编辑'}</Button>
+                  {isEdit && (
+                    <Button type="primary" onClick={handleSave}>
+                      保存修改
+                    </Button>
+                  )}
+                </Space>
+              </Form.Item>
+            </Form>
+          </div>
+        </Tabs.TabPane>
+        <Tabs.TabPane key="2" title="安全设置">
+          <WorkspaceSecurity />
         </Tabs.TabPane>
       </Tabs>
-
     </div>
   );
 };
