@@ -88,8 +88,9 @@ public class ETLDatasourceController {
     }
 
     @GetMapping("/tables")
-    public CommonResult<List<MetaBriefVO>> listDatasourceTables(@RequestParam("id") Long id) {
-        List<MetaBriefVO> briefVOList = etlDatasourceService.listDatasourceTables(id);
+    public CommonResult<List<MetaBriefVO>> listDatasourceTables(@RequestParam("id") Long id,
+                                                                @RequestParam(value = "writable", required = false) Integer writable) {
+        List<MetaBriefVO> briefVOList = etlDatasourceService.listDatasourceTables(id, writable);
         return CommonResult.success(briefVOList);
     }
 

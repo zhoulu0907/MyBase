@@ -14,15 +14,16 @@ public class ETLFlinkMappingRepository extends DataRepository<ETLFlinkMappingDO>
         super(ETLFlinkMappingDO.class);
     }
 
+    // TODO: cachable method
     public String findFlinkTypeByDatasourceTypeAndOriginType(String databaseType, String originType) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("database_type", databaseType);
         cs.eq("origin_type", originType);
 
         ETLFlinkMappingDO mapping = findOne(cs);
-        if (mapping == null) {
+        if (mapping == null) { // by default, using string to capture this type
             log.error("Unable to find compatible field mapping in Flink, database type: {}, origin field type: {}", databaseType, originType);
-            return null;
+            return "string";
         }
         return mapping.getFlinkType();
     }

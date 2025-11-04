@@ -131,14 +131,20 @@ public class AnyLineDBInfoListener implements DMListener {
      */
     private void injectTenantIdToSingleEntity(Object obj) {
         boolean shouldIgnore = isTableTenantIgnored(obj);
-        log.info("injectTenantIdToOneEntity--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (ConfigTable.IS_DEBUG) {
+            log.info("injectTenantIdToOneEntity--------------> isTableTenantIgnored: {}", shouldIgnore);
+        }
         if (!shouldIgnore) {
             if (obj instanceof TenantBaseDO tenantBaseDO) {
                 tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
-                log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), tenantBaseDO.getTenantId());
+                if (ConfigTable.IS_DEBUG) {
+                    log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), tenantBaseDO.getTenantId());
+                }
             } else if (obj instanceof BaseEntity baseEntity) {
                 baseEntity.setTenantIdByListener(TenantContextHolder.getRequiredTenantId());
-                log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), baseEntity.getTenantId());
+                if (ConfigTable.IS_DEBUG) {
+                    log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), baseEntity.getTenantId());
+                }
             }
         }
     }

@@ -102,7 +102,9 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        return BeanUtils.toBean(datasourceDO, DatasourceRespVO.class);
+        DatasourceRespVO datasourceRespVO = DatasourceRespVO.convertFrom(datasourceDO);
+        datasourceRespVO.setConfig(datasourceDO.getConfig());
+        return datasourceRespVO;
     }
 
     @Override
@@ -110,7 +112,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         PageResult<ETLDatasourceDO> pageDOs = datasourceRepository.getETLDatasourcePage(pageReqVO);
         List<DatasourceRespVO> respVOs = pageDOs.getList()
                 .stream()
-                .map(dataobject -> BeanUtils.toBean(dataobject, DatasourceRespVO.class))
+                .map(DatasourceRespVO::convertFrom)
                 .toList();
 
         return new PageResult<>(respVOs, pageDOs.getTotal());
@@ -195,13 +197,17 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public List<MetaBriefVO> listDatasourceTables(Long datasourceId) {
+    public List<MetaBriefVO> listDatasourceTables(Long datasourceId, Integer writable) {
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
+        Boolean isWritable = writable != null && writable != 0;
+        if (datasourceDO.getReadonly() && isWritable) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_READONLY);
+        }
 
-        List<ETLTableDO> tableDOList = tableRepository.findAllByDatasourceId(datasourceId);
+        List<ETLTableDO> tableDOList = tableRepository.findAllByDatasourceId(datasourceId, isWritable);
 
         return tableDOList.stream()
                 .map(tableDO -> {

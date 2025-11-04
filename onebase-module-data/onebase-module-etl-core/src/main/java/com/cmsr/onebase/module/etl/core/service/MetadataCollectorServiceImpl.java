@@ -6,6 +6,8 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaColumn;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaTable;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.google.common.collect.Lists;
@@ -125,19 +127,23 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                 schemaId = oldSchemaDO.getId();
             }
             // Table
-            Map<String, Table> tables = temporary.metadata().tables(Table.TYPE.VIEW.value());
+            Map<String, Table<?>> tables = temporary.metadata().tables(Table.TYPE.VIEW.value());
             Map<String, ETLTableDO> tableDOs = tableRepository.findAllByCatalogIdAndSchemaIdAndDatasourceId(datasourceId, catalogId, schemaId);
             List<ETLTableDO> tableDOList = Lists.newArrayList();
-            for (Table table : tables.values()) {
+            for (Table<?> table : tables.values()) {
                 String tableName = table.getName();
                 // 重新获取一遍，由于Anyline .tables()方法会忽略列(Column)
                 Map<String, Column> tableColumn = temporary.metadata().columns(table);
                 ETLTableDO newTableDO = ETLTableDO.convert(applicationId, datasourceId, catalogId, schemaId, table, tableColumn);
-                newTableDO.getMetaInfo().getColumns().forEach(metaColumn -> {
+                MetaTable metaInfo = newTableDO.getMetaInfo();
+                List<MetaColumn> columns = metaInfo.getColumns();
+                for (MetaColumn metaColumn : columns) {
                     String originType = metaColumn.getOriginType();
                     String compatibleType = flinkMappingRepository.findFlinkTypeByDatasourceTypeAndOriginType(databaseType, originType);
                     metaColumn.setCompatibleType(compatibleType);
-                });
+                }
+                metaInfo.setColumns(columns);
+                newTableDO.setMetaInfo(metaInfo);
                 if (tableDOs.containsKey(tableName)) {
                     ETLTableDO oldTableDO = tableDOs.get(tableName);
                     ETLTableDO.applyChanges(oldTableDO, newTableDO);

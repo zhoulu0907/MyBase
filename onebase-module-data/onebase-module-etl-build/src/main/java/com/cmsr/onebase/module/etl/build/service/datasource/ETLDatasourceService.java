@@ -31,7 +31,7 @@ public interface ETLDatasourceService {
 
     List<MetaBriefVO> listDatasources(Long applicationId);
 
-    List<MetaBriefVO> listDatasourceTables(Long datasourceId);
+    List<MetaBriefVO> listDatasourceTables(Long datasourceId, Integer writable);
 
     List<ColumnDefine> listTableColumns(Long tableId);
 }

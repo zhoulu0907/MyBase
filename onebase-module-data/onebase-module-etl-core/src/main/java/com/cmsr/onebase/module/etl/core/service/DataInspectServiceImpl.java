@@ -48,8 +48,8 @@ public class DataInspectServiceImpl implements DataInspectService {
         DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
 
         try {
-            AnylineService temporary = ServiceProxy.temporary(dataSource);
-            Table table = temporary.metadata().table(tableDO.getTableName());
+            AnylineService<?> temporary = ServiceProxy.temporary(dataSource);
+            Table<?> table = temporary.metadata().table(tableDO.getTableName());
             DataPreviewVO dataPreviewVO = DataPreviewVO.of(tableDO);
             ConfigStore cs = new DefaultConfigStore();
             // TODO: 魔法值，后续需要做成配置
