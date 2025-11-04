@@ -49,13 +49,13 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <Input
             readOnly={true}
-            defaultValue={defaultValue}
             placeholder={placeholder}
             style={{
               width: '100%',

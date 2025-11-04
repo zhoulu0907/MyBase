@@ -96,6 +96,7 @@ export interface XInputSelectOneConfig extends ICommonBaseType {
    * 默认值
    */
   defaultValue?: any;
+  defaultOptions: { label: string; value: any; [property: string]: any }[];
 
   /**
    * 字段宽度
@@ -178,7 +179,8 @@ const XSelectOne: XInputSelectOneSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: [
+    defaultValue: undefined,
+    defaultOptions: [
       {
         label: '已完成',
         value: '已完成'

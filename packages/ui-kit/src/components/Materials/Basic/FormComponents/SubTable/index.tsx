@@ -24,6 +24,7 @@ import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
+  const { id, label, tooltip, labelColSpan = 100, status, verify, runtime = true, detailMode, pageType } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
@@ -38,9 +39,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
-  } = usePageEditorSignal();
+  } = usePageEditorSignal(pageType);
   const { subTableDataLength } = pagesRuntimeSignal;
-  const { id, label, tooltip, labelColSpan = 100, status, verify, runtime = true, detailMode } = props;
 
   // 判断拖拽的组件是否是表单组件
   const isFormComponent = (type: string): boolean => {
@@ -128,9 +128,48 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     // 表单项配置
     const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
     const schema = getComponentSchema(itemType as any);
-
     const itemDisplayName = e.item.getAttribute('data-label') || e.item.getAttribute('data-cp-displayname');
     schema.config = schemaConfig;
+
+    // 当前实体
+    const currentEntity = subEntities.entities.find((ele)=>ele.entityId===entityId);
+    // 当前字段
+    const currentField = currentEntity?.fields?.find((ele)=>ele.fieldId===fieldId);
+    if (currentField) {
+      // 数据长度 dataLength
+      // 小数位数 decimalPlaces
+      // 默认值 defaultValue
+      schema.config.defaultValue = currentField.defaultValue;
+      // 字段描述 description
+      schema.config.tooltip = currentField.description;
+      // 是否必填：1-是，0-不是 isRequired
+      schema.config.verify.required = currentField.isRequired;
+      // 是否唯一：1-是，0-不是 isUnique
+      schema.config.verify.noRepeat = currentField.isUnique;
+
+      // 字段选项列表（单/多选字段专用） options
+      if (
+        itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
+        itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
+      ) {
+        if (currentField.options?.length) {
+          schema.config.defaultOptions = currentField.options.map((e) => ({
+            chosen: currentField.defaultValue && e.optionValue === currentField.defaultValue,
+            label: e.optionLabel,
+            value: e.optionValue
+          }));
+        }
+      }
+      // 字段约束配置（长度/正则） constraints
+      schema.config.constraints = currentField.constraints;
+      // 自动编号完整配置（含规则项） autoNumberConfig
+      if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+        schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
+        schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
+      }
+      // 关联的字典类型ID    dictTypeId
+    }
+
     schema.config.cpName = itemDisplayName;
     schema.config.label.text = itemDisplayName;
     schema.config.label.display = false;

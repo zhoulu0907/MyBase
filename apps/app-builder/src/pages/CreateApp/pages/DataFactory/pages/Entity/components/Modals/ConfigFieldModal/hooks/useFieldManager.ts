@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Form, Message } from '@arco-design/web-react';
+import { Form, Message, Modal } from '@arco-design/web-react';
 import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import { batchSaveFields } from '@onebase/app';
 import { useAppStore } from '@/store/store_app';
@@ -129,7 +129,7 @@ export const useFieldManager = (
     setConfigPopoverVisible(null);
     setConstraintsPopoverVisible(null);
     fieldValidation.clearErrors();
-  }, [form, setVisible, fieldValidation]);
+  }, [form, setVisible]);
 
   // 渲染字段配置 popover 内容
   const renderFieldConfigContent = useCallback(() => {
@@ -138,62 +138,82 @@ export const useFieldManager = (
     return null;
   }, []);
 
+  // 保存
+  const executeSave = useCallback(async () => {
+    if (!entity?.entityId) {
+      return;
+    }
+
+    // 获取最新数据，再进行过滤
+    const mergedFields = getCurrentTableData();
+    const nonSystemFields = mergedFields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
+
+    const fieldDataList = nonSystemFields.map((field: FieldFormValues) => {
+      const fieldData = {
+        appId: curAppId,
+        entityId: entity.entityId,
+        ...field,
+        isSystemField: FIELD_TYPE.CUSTOM,
+        isDeleted: field.isDeleted || false
+      };
+
+      return field.id && field.id.startsWith('field-') ? { ...fieldData, id: '' } : { ...fieldData, id: field.id };
+    });
+
+    const params = {
+      appId: curAppId,
+      entityId: entity.entityId,
+      items: fieldDataList
+    };
+
+    const result = await batchSaveFields(params);
+
+    // 使用接口返回的 createdIds 标记新增字段
+    if (result?.createdIds && Array.isArray(result.createdIds)) {
+      result.createdIds.forEach((fieldId: string) => {
+        newFieldSignal.addNewField(entity.entityId as string, fieldId);
+      });
+    }
+
+    Message.success('保存成功');
+    setVisible?.(false);
+    fieldValidation.clearErrors();
+    onSuccess?.();
+  }, [entity?.entityId, getCurrentTableData, curAppId, setVisible]);
+
   // 处理表单提交
   const handleSubmit = useCallback(async () => {
-    // 如果正在提交中，直接返回，防止重复点击
+    // 防止重复点击
     if (submitting) {
       return;
     }
 
-    setSubmitting(true);
     try {
       // 检查实体是否存在
       if (!entity?.entityId) {
-        setSubmitting(false);
         return;
       }
 
-      // 验证表单
-      const formValues = await form.validate();
-      console.log('formValues', formValues);
+      await form.validate();
 
-      // 获取最新数据，再进行过滤（参考原始版本）
-      const mergedFields = getCurrentTableData();
-      const nonSystemFields = mergedFields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
-
-      const fieldDataList = nonSystemFields.map((field: FieldFormValues) => {
-        const fieldData = {
-          appId: curAppId,
-          entityId: entity.entityId,
-          ...field,
-          isSystemField: FIELD_TYPE.CUSTOM,
-          isDeleted: field.isDeleted || false
-        };
-
-        return field.id && field.id.startsWith('field-') ? { ...fieldData, id: '' } : { ...fieldData, id: field.id };
+      Modal.confirm({
+        title: '确认保存',
+        content: '确定要保存字段配置吗？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: async () => {
+          setSubmitting(true);
+          try {
+            await executeSave();
+          } catch (error) {
+            console.error('executeSave error', error);
+          } finally {
+            setSubmitting(false);
+          }
+        }
       });
-
-      const params = {
-        appId: curAppId,
-        entityId: entity.entityId,
-        items: fieldDataList
-      };
-
-      const result = await batchSaveFields(params);
-
-      // 使用接口返回的 createdIds 标记新增字段
-      if (result?.createdIds && Array.isArray(result.createdIds)) {
-        result.createdIds.forEach((fieldId: string) => {
-          newFieldSignal.addNewField(entity.entityId as string, fieldId);
-        });
-      }
-
-      Message.success('保存成功');
-      setVisible?.(false);
-      fieldValidation.clearErrors();
-      onSuccess?.();
     } catch (error) {
-      // 手动渲染错误（参考原始版本）
+      // 手动渲染错误
       const errs = (error && (error as Record<string, unknown>).errors) || [];
       const map: Record<string, string> = {};
       if (typeof errs === 'object') {
@@ -202,10 +222,8 @@ export const useFieldManager = (
         });
       }
       fieldValidation.setAllErrors(map);
-    } finally {
-      setSubmitting(false);
     }
-  }, [entity?.entityId, form, getCurrentTableData, curAppId, setVisible, onSuccess, fieldValidation]);
+  }, [submitting, entity?.entityId, form, executeSave]);
 
   return {
     // 数据

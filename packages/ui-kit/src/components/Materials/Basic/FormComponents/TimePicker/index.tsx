@@ -23,12 +23,12 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
           <div>{defaultValue || '--'}</div>
         ) : (
           <TimePicker
-            defaultValue={defaultValue}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

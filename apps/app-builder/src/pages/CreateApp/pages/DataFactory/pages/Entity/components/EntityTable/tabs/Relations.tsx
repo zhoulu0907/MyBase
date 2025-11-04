@@ -20,11 +20,11 @@ interface RelationData {
   id: string;
   sourceEntityName: string;
   sourceEntityId: string;
-  sourceFieldName: string;
+  sourceFieldDisplayName: string;
   sourceFieldId: string;
   targetEntityName: string;
   targetEntityId: string;
-  targetFieldName: string;
+  targetFieldDisplayName: string;
   targetFieldId: string;
   relationshipType: string;
 }
@@ -100,8 +100,8 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
     },
     {
       title: '源字段',
-      dataIndex: 'sourceFieldName',
-      key: 'sourceFieldName'
+      dataIndex: 'sourceFieldDisplayName',
+      key: 'sourceFieldDisplayName'
     },
     {
       title: '关联类型',
@@ -116,8 +116,8 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
     },
     {
       title: '目标字段',
-      dataIndex: 'targetFieldName',
-      key: 'targetFieldName'
+      dataIndex: 'targetFieldDisplayName',
+      key: 'targetFieldDisplayName'
     },
     {
       title: '操作',

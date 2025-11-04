@@ -58,13 +58,13 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <DatePicker
             showTime
-            defaultValue={defaultValue}
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

@@ -235,20 +235,20 @@ export const listTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
   name: '展示样式',
   type: CONFIG_TYPES.STATUS_RADIO,
   range: [
+    // {
+    //   key: UPLOAD_OPTIONS.TEXT,
+    //   text: UPLOAD_OPTIONS.TEXT,
+    //   value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+    // },
     {
-      key: UPLOAD_OPTIONS.TEXT,
-      text: UPLOAD_OPTIONS.TEXT,
-      value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+      key: UPLOAD_OPTIONS.CARD,
+      text: UPLOAD_OPTIONS.CARD,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
     },
     {
       key: UPLOAD_OPTIONS.LIST,
       text: UPLOAD_OPTIONS.LIST,
       value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
-    },
-    {
-      key: UPLOAD_OPTIONS.CARD,
-      text: UPLOAD_OPTIONS.CARD,
-      value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
     }
   ]
 };
