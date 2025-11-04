@@ -1,10 +1,12 @@
 import { Button, Dropdown, Menu, Message, Switch, Typography } from '@arco-design/web-react';
-import { IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
+import { IconCheckCircleFill, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import { ETL_FLOW_STATUS, ETL_SCHEDULE_STRATEGY, type ETLFlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
-import styles from './index.module.less';
 
+import etlCardArrowDown from '@/assets/images/etl_card_arrow_down.svg';
+import etlTable from '@/assets/images/etl_table.svg';
+import styles from './index.module.less';
 /**
  * ETLFlowCard 组件
  * 用于流程管理页面的卡片展示
@@ -81,8 +83,21 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
       </div>
       <div className={styles.cardBody}>
         <div className={styles.cardBodyRow}>
-          <div> 输入源: {data.sourceTables.join(',')}</div>
-          <div> 输出源: {data.targetTable}</div>
+          <img className={styles.cardBodyRowArrowDown} src={etlCardArrowDown} alt=""></img>
+          <div className={styles.cardBodyRowDataSource}>
+            <span>输入源:</span>
+            <img src={etlTable} alt="" />
+            <span>{data.sourceTables.join(',')}</span>
+          </div>
+          <div className={styles.cardBodyRowDataSource}>
+            <span>输出源: </span>
+            <img src={etlTable} alt="" />
+            <span>{data.targetTable}</span>
+          </div>
+          <div className={styles.cardBodyRowSyncDone}>
+            <IconCheckCircleFill style={{ fontSize: '12px', color: '#00B42A', marginRight: '4px' }} />
+            数据同步完成
+          </div>
         </div>
       </div>
       <div className={styles.cardFooter}>
