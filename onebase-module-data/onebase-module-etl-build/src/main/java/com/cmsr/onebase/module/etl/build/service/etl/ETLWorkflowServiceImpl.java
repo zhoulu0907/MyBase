@@ -2,7 +2,10 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
+import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
+import com.cmsr.onebase.framework.ds.model.task.def.FlinkTask;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
@@ -11,9 +14,11 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
+import com.cmsr.onebase.module.etl.core.vo.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,6 +105,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         Long applicationId = createVO.getApplicationId();
         workflowDO.setApplicationId(applicationId);
         workflowDO.setWorkflowName(createVO.getFlowName());
+        workflowDO.setDeclaration(createVO.getDeclaration());
         workflowDO.setConfig(createVO.getConfig());
         workflowDO.setIsEnabled(0);
         workflowDO.setScheduleStrategy(ScheduleType.MANUALLY.getValue());
@@ -111,6 +117,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         scheduleJobDO.setApplicationId(applicationId);
         scheduleJobDO.setWorkflowId(workflowId);
         scheduleJobDO.setJobStatus(ScheduleJobStatus.INITIALIZED.getValue());
+        scheduleJobRepository.insert(scheduleJobDO);
 
         return workflowId;
     }
@@ -124,6 +131,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATA_CONFLICT);
         }
         oldWorkflow.setWorkflowName(updateVO.getFlowName());
+        oldWorkflow.setDeclaration(updateVO.getDeclaration());
         oldWorkflow.setConfig(updateVO.getConfig());
 
         workflowRepository.update(oldWorkflow);
@@ -144,13 +152,86 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     @Override
+    public void enableWorkflow(Long workflowId) {
+        ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
+        syncEnableStatus(workflowDO);
+    }
+
+    private void syncEnableStatus(ETLWorkflowDO workflowDO) {
+        Long workflowId = workflowDO.getId();
+        ScheduleType scheduleType = ScheduleType.of(workflowDO.getScheduleConfig());
+        ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
+        if (scheduleJobDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+        }
+        Long jobId;
+        String jobIdStr = scheduleJobDO.getJobId();
+        if (StringUtils.isBlank(jobIdStr)) {
+            // create
+            // TODO: this is a sample code to add flink task.
+            FlinkTask flinkTask = new FlinkTask();
+            flinkTask.setProgramType("JAVA");
+            flinkTask.setMainClass("org.example.flink.Application");
+            flinkTask.withResource("onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar");
+            flinkTask.withResource("onebase-ds/default/resources/postgresql-42.7.7.jar");
+            flinkTask.setMainClass("onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar");
+            flinkTask.setDeployMode("local");
+            jobId = dolphinSchedulerClient.createSingletonWorkflow(etlProjectCode,
+                    String.valueOf(workflowId),
+                    flinkTask,
+                    workflowDO.getWorkflowName() + "：" + workflowDO.getDeclaration());
+            scheduleJobDO.setJobId(String.valueOf(jobId));
+            scheduleJobRepository.update(scheduleJobDO);
+        } else {
+            jobId = Long.parseLong(jobIdStr);
+        }
+        // online
+        if (ScheduleType.MANUALLY.equals(scheduleType)) { // 手动执行则仅上线
+            dolphinSchedulerClient.onlineWorkflow(etlProjectCode, jobId);
+        } else {
+            Schedule schedule = new Schedule();
+            // TODO: transform scheduleConfig(String) to Schedule
+            dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
+        }
+        workflowDO.setIsEnabled(1);
+        workflowRepository.update(workflowDO);
+    }
+
+    @Override
+    public void disableWorkflow(Long workflowId) {
+        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        if (!workflowDO.isEnabled()) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_DISABLED);
+        }
+        ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
+        if (scheduleJobDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+        }
+        Long jobId = Long.parseLong(scheduleJobDO.getJobId());
+        dolphinSchedulerClient.purgeWorkflow(etlProjectCode, jobId);
+        workflowDO.setIsEnabled(0);
+        workflowRepository.update(workflowDO);
+    }
+
+    @Override
+    public void configScheduleStrategy(ScheduleConfigVO scheduleVO) {
+        ETLWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
+        workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
+        workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
+        workflowRepository.update(workflowDO);
+        if (workflowDO.isEnabled()) {
+            syncEnableStatus(workflowDO);
+        }
+    }
+
+    @Override
     public void startWorkflowManually(Long workflowId) {
         // 必须是已启用的ETL
         ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
         Long applicationId = workflowDO.getApplicationId();
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(applicationId, workflowId);
         if (scheduleJobDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_IS_OFFLINE);
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ALREADY_OFFLINE);
         }
         Long jobId = Long.parseLong(scheduleJobDO.getJobId());
         // TODO: 添加记录到数据库？
@@ -159,25 +240,23 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     @Override
-    public void configScheduleStrategy(ScheduleConfigVO scheduleVO) {
-        Long workflowId = scheduleVO.getWorkflowId();
-        ETLWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
+    public PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long workflowId) {
         // TODO:
+        return null;
     }
 
     @Override
-    public void getWorkflowExecutionLogs(Long workflowId) {
-        // TODO:
-    }
+    public ScheduleRespVO getWorkflowSchedule(Long workflowId) {
+        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        ScheduleRespVO scheduleRespVO = new ScheduleRespVO();
+        scheduleRespVO.setApplicationId(workflowDO.getApplicationId());
+        scheduleRespVO.setWorkflowId(workflowId);
+        scheduleRespVO.setFlowName(workflowDO.getWorkflowName());
+        scheduleRespVO.setEnableStatus(workflowDO.getIsEnabled());
+        scheduleRespVO.setScheduleStrategy(workflowDO.getScheduleStrategy());
+        scheduleRespVO.setConfig(workflowDO.getConfig());
 
-    @Override
-    public void enableWorkflow(Long workflowId) {
-        // TODO:
-    }
-
-    @Override
-    public void disableWorkflow(Long workflowId) {
-        ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
+        return scheduleRespVO;
     }
 
     private void validateWorkflowNameUnique(String flowName, Long filterId) {
@@ -187,6 +266,12 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         }
     }
 
+    /**
+     * 获得一个可以操作(offline)的Workflow对象
+     *
+     * @param workflowId Worflow ID
+     * @return Workflow对象
+     */
     private ETLWorkflowDO getOperableWorkflow(Long workflowId) {
         ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
         if (workflowDO.isEnabled()) {
