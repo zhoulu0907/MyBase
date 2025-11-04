@@ -848,28 +848,31 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 // 解析权限标志
                 NodePermFlagDTO permFlagDTO = JsonUtils.parseObject(currentNode.getPermissionFlag(), NodePermFlagDTO.class);
 
+                // 用户ID去重
+                Set<Long> approverUserIds = new HashSet<>();
+
                 if (CollectionUtils.isNotEmpty(permFlagDTO.getUserIds())) {
                     // 处理用户列表
-                    for (Long userId : permFlagDTO.getUserIds()) {
-                        BpmPredictRespVO.HandlerInfo handlerInfo = new BpmPredictRespVO.HandlerInfo();
-                        handlerInfo.setHandlerId(userId);
-                        nodeInfo.getHandlers().add(handlerInfo);
-                        allUserIds.add(userId);
-                    }
+                    approverUserIds.addAll(permFlagDTO.getUserIds());
                 } else if (CollectionUtils.isNotEmpty(permFlagDTO.getRoleIds())) {
                     // 处理角色列表
                     CommonResult<Set<Long>> result = permissionApi.getUserRoleIdListByRoleIds(permFlagDTO.getRoleIds());
 
                     if (result.isSuccess()) {
-                        for (Long userId : result.getData()) {
-                            BpmPredictRespVO.HandlerInfo handlerInfo = new BpmPredictRespVO.HandlerInfo();
-                            handlerInfo.setHandlerId(userId);
-                            nodeInfo.getHandlers().add(handlerInfo);
-                            allUserIds.add(userId);
-                        }
+                        approverUserIds.addAll(result.getData());
                     }
                 } else {
                     // todo: 支持更多类型的权限
+                }
+
+                if (!approverUserIds.isEmpty()) {
+                    allUserIds.addAll(approverUserIds);
+
+                    for (Long userId : approverUserIds) {
+                        BpmPredictRespVO.HandlerInfo handlerInfo = new BpmPredictRespVO.HandlerInfo();
+                        handlerInfo.setHandlerId(userId);
+                        nodeInfo.getHandlers().add(handlerInfo);
+                    }
                 }
             } else {
                 // todo: 支持更多类型的节点
@@ -895,7 +898,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                         handler.setHandlerName(user.getNickname());
                         handler.setUserAvatar(user.getAvatar());
                     } else {
-                        // todo：处理用户不存在的情况
+                        // todo：处理用户不存在的情况，名称先设置成 "-"
+                        handler.setHandlerName("-");
                         log.warn("用户不存在，userId: {}", handler.getHandlerId());
                     }
                 }
