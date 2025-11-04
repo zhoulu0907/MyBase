@@ -44,12 +44,21 @@ public class SecurityConfigController {
     }
 
     @GetMapping("/items")
-    @Operation(summary = "根据租户ID和分类ID获取安全配置项")
+    @Operation(summary = "根据分类ID获取获取当前租户的安全配置项")
     @Parameter(name = "categoryId", description = "分类ID", required = true, example = "1")
     @PreAuthorize("@ss.hasPermission('infra:security-config:query')")
     public CommonResult<List<SecurityConfigItemRespVO>> getTenantConfigItems(@RequestParam("categoryId") Long categoryId) {
         Long tenantId = TenantContextHolder.getTenantId();
         List<SecurityConfigItemRespVO> items = securityConfigService.getTenantConfigItems(tenantId, categoryId);
+        return success(items);
+    }
+
+    @GetMapping("/tenant-items")
+    @Operation(summary = "获取当前租户的所有安全配置项")
+    @PreAuthorize("@ss.hasPermission('infra:security-config:query')")
+    public CommonResult<List<SecurityConfigItemRespVO>> getSecurityConfigsByTenant() {
+        Long tenantId = TenantContextHolder.getTenantId();
+        List<SecurityConfigItemRespVO> items = securityConfigService.getSecurityConfigsByTenant(tenantId);
         return success(items);
     }
 
