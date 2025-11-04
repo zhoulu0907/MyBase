@@ -91,6 +91,6 @@ public class TenantRespVO {
     private String logoUrl;
 
     @Schema(description = "企业数")
-    private Integer CorpCount;
+    private Integer corpCount;
 
 }
