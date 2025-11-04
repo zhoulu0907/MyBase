@@ -1,14 +1,13 @@
-package com.cmsr.onebase.module.etl.core.service.collector;
+package com.cmsr.onebase.module.etl.core.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaColumn;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaTable;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.google.common.collect.Lists;
@@ -49,6 +48,9 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
     @Resource
     private ETLTableRepository tableRepository;
 
+    @Resource
+    private ETLFlinkMappingRepository flinkMappingRepository;
+
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
@@ -69,13 +71,14 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
     public void submitCollectJob(ETLDatasourceDO datasourceDO) {
         Long datasourceId = datasourceDO.getId();
         Long applicationId = datasourceDO.getApplicationId();
+        String databaseType = datasourceDO.getDatasourceType();
         LocalDateTime planTime = LocalDateTime.now();
         isAbleToSubmitJob(datasourceDO, planTime);
         log.info("提交元数据采集任务，数据源ID：{}", datasourceId);
         threadPoolTaskExecutor.submit(() -> {
 
             datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.RUNNING);
-            boolean isJobSuccess = doCollection(applicationId, datasourceId);
+            boolean isJobSuccess = doCollection(applicationId, datasourceId, databaseType);
             LocalDateTime endTime = LocalDateTime.now();
             Duration duration = Duration.between(planTime, endTime);
             long timeCost = duration.toMillis();
@@ -89,7 +92,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
         });
     }
 
-    private boolean doCollection(Long applicationId, Long datasourceId) {
+    private boolean doCollection(Long applicationId, Long datasourceId, String databaseType) {
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
         String datasourceKey = "metadata-collector-" + datasourceId;
         try {
@@ -124,14 +127,23 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                 schemaId = oldSchemaDO.getId();
             }
             // Table
-            Map<String, Table> tables = temporary.metadata().tables(Table.TYPE.VIEW.value());
+            Map<String, Table<?>> tables = temporary.metadata().tables(Table.TYPE.VIEW.value());
             Map<String, ETLTableDO> tableDOs = tableRepository.findAllByCatalogIdAndSchemaIdAndDatasourceId(datasourceId, catalogId, schemaId);
             List<ETLTableDO> tableDOList = Lists.newArrayList();
-            for (Table table : tables.values()) {
+            for (Table<?> table : tables.values()) {
                 String tableName = table.getName();
                 // 重新获取一遍，由于Anyline .tables()方法会忽略列(Column)
                 Map<String, Column> tableColumn = temporary.metadata().columns(table);
                 ETLTableDO newTableDO = ETLTableDO.convert(applicationId, datasourceId, catalogId, schemaId, table, tableColumn);
+                MetaTable metaInfo = newTableDO.getMetaInfo();
+                List<MetaColumn> columns = metaInfo.getColumns();
+                for (MetaColumn metaColumn : columns) {
+                    String originType = metaColumn.getOriginType();
+                    String compatibleType = flinkMappingRepository.findFlinkTypeByDatasourceTypeAndOriginType(databaseType, originType);
+                    metaColumn.setCompatibleType(compatibleType);
+                }
+                metaInfo.setColumns(columns);
+                newTableDO.setMetaInfo(metaInfo);
                 if (tableDOs.containsKey(tableName)) {
                     ETLTableDO oldTableDO = tableDOs.get(tableName);
                     ETLTableDO.applyChanges(oldTableDO, newTableDO);

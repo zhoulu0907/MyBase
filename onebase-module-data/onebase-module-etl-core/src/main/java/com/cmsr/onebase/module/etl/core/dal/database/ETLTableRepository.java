@@ -9,6 +9,7 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,4 +55,23 @@ public class ETLTableRepository extends DataRepository<ETLTableDO> {
         return tableDO;
     }
 
+    public String getNameById(Long id) {
+        ETLTableDO tableDO = findById(id);
+        return tableDO.getDisplayName();
+    }
+
+    public List<String> getNameByIds(Collection<Long> ids) {
+        List<ETLTableDO> tables = findAllByIds(ids);
+        return tables.stream().map(ETLTableDO::getDisplayName).toList();
+    }
+
+    public List<ETLTableDO> findAllByDatasourceId(Long datasourceId, Boolean writable) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("datasource_id", datasourceId);
+        if (writable) {
+            cs.eq("table_type", "table");
+        }
+
+        return findAllByConfig(cs);
+    }
 }
