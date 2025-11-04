@@ -36,7 +36,14 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
         return <FormComp.XInputTextArea cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case
+      case FORM_COMPONENT_TYPES.INPUT_EMAIL:
+        return <FormComp.XInputEmail cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.INPUT_PHONE:
+        return <FormComp.XInputPhone cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.INPUT_NUMBER:
+        return <FormComp.XInputNumber cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.SELECT_ONE:
+        return <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;
