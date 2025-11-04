@@ -88,19 +88,6 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateConfig(Long tenantId, SecurityConfigUpdateReqVO updateReqVO) {
-        // 接口3：根据租户id、config_key更新infra_security_config数据
-        updateSingleConfig(tenantId, updateReqVO);
-
-        // 清除相关缓存
-        clearRelatedCache(tenantId);
-
-        log.info("更新租户安全配置，租户ID: {}, 配置键: {}, 配置值: {}", 
-                tenantId, updateReqVO.getConfigKey(), updateReqVO.getConfigValue());
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     public void batchUpdateConfig(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList) {
         // 接口4：批量更新租户安全配置
         if (updateReqVOList == null || updateReqVOList.isEmpty()) {
