@@ -333,7 +333,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {updateType === DATA_SOURCE_TYPE.FORM && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                  从
+                  更新
                 </Grid.Col>
                 <Grid.Col span={19}>
                   <Form.Item
@@ -351,7 +351,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </Form.Item>
                 </Grid.Col>
                 <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                  <span>中查询数据</span>
+                  <span>的数据</span>
                 </Grid.Col>
               </Grid.Row>
             )}

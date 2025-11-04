@@ -12,10 +12,10 @@ import {
   getComponentConfig,
   getComponentSchema,
   getComponentWidth,
-  usePageEditorSignal,
-  WIDTH_VALUES,
-  WIDTH_OPTIONS,
   useAppEntityStore,
+  usePageEditorSignal,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
   type GridItem
 } from '@onebase/ui-kit';
 
