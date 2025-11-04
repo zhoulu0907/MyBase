@@ -32,7 +32,7 @@ const EnterpriseInfoPage: React.FC = () => {
   }
 
   useEffect(()=>{
-    fetchCorpDetail()
+    fetchCorpDetail();
   },[])
 
 

@@ -12,20 +12,8 @@ import type { AppItem, AuthorizedAppRef } from "./types/appItem";
 import EditAuthorizedTime from "./components/modal/editAuthorizedTime";
 import { useTableData } from "./hooks/useTable";
 
-interface applicationTableData {
-    key: number;
-    appName: string;
-    appId: string;
-    version: string;
-    effectTime: string;
-    expireTime: string;
-}
-
-interface ICreateBusinessPageProps {
-}
 
 const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
-    // 1. 创建 ref 关联 AuthorizedApp 组件
     const authorizedAppRef = useRef<AuthorizedAppRef>(null);
     const [currentStep, setCurrentStep] = useState<number>(1);
     const navigate = useNavigate();

@@ -131,27 +131,6 @@ const BusinessPage: React.FC = () => {
         fetchTableDataList();
     }, [])
 
-    // const getCropList = async (pageNo: number = 1, pageSize: number = 10) => {
-    //     setLoading(true);
-    //     try {
-    //         const res = await getCorpListPageinationApi({ pageNo, pageSize });
-    //         if (res && Array.isArray(res.data)) {
-    //             setTableData(res.data);
-    //             setPagination((prevPagination) => ({
-    //                 ...prevPagination,
-    //                 current: pageNo,
-    //                 total: res.total
-    //             }));
-    //         } else {
-    //             console.warn('Invalid response format:', res);
-    //         }
-    //     } catch (error: any) {
-    //         Message.error(error.message);
-    //     } finally {
-    //         setLoading(false)
-    //     }
-    // };
-
     const handlePageChange = (current: number, pageSize: number) => {
         fetchTableDataList(current, pageSize);
     };
@@ -169,9 +148,9 @@ const BusinessPage: React.FC = () => {
     }
 
     // 禁用
-    const handleDisabled = (record: any) => {
+    const handleDisabled = (record: cropItem) => {
         Modal.confirm({
-            title: `禁用企业(${record.name})? `,
+            title: `禁用企业(${record.corpName})? `,
             content: '禁用后企业用户无法登录，再次启用时企业可恢复正常使用',
             okButtonProps: {
                 status: 'danger',
@@ -210,7 +189,7 @@ const BusinessPage: React.FC = () => {
             onOk: async () => {
                 if (inputValue !== record.corpName) {
                     Message.error('输入的企业名称不一致，请重新输入');
-                    return false; // 返回 false 阻止 Modal 关闭
+                    return false; 
                 }
                 try {
                     await deleteCorpApi(record.corpId);
