@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.app.core.dal.database.auth;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDeptDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -17,51 +17,52 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
+public class AppAuthRoleDeptRepository extends DataRepository<AuthRoleDeptDO> {
 
-    public AppAuthRoleUserRepository() {
-        super(AuthRoleUserDO.class);
+    public AppAuthRoleDeptRepository() {
+        super(AuthRoleDeptDO.class);
     }
 
-    public void addRoleUser(Long roleId, List<Long> userIds) {
-        for (Long userId : userIds) {
+    public void addRoleDept(Long roleId, List<Long> deptIds, Integer isIncludeChild) {
+        for (Long deptId : deptIds) {
             ConfigStore configStore = new DefaultConfigStore();
             configStore.eq("role_id", roleId);
-            configStore.eq("user_id", userId);
+            configStore.eq("dept_id", deptId);
             if (this.countByConfig(configStore) == 0) {
-                AuthRoleUserDO authRoleUserDO = new AuthRoleUserDO();
-                authRoleUserDO.setRoleId(roleId);
-                authRoleUserDO.setUserId(userId);
-                this.insert(authRoleUserDO);
+                AuthRoleDeptDO authRoleDeptDO = new AuthRoleDeptDO();
+                authRoleDeptDO.setRoleId(roleId);
+                authRoleDeptDO.setDeptId(deptId);
+                authRoleDeptDO.setIsIncludeChild(isIncludeChild);
+                this.insert(authRoleDeptDO);
             }
         }
 
     }
 
-    public List<AuthRoleUserDO> findByRoleId(Long roleId) {
+    public List<AuthRoleDeptDO> findByRoleId(Long roleId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
         return findAllByConfig(configStore);
     }
 
-    public PageResult<AuthRoleUserDO> findByRoleId(Long roleId, PageParam pageParam) {
+    public PageResult<AuthRoleDeptDO> findByRoleId(Long roleId, PageParam pageParam) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
         return this.findPageWithConditions(configStore, pageParam.getPageNo(), pageParam.getPageSize());
     }
 
 
-    public void deleteRoleUser(Long roleId, List<Long> userIds) {
+    public void deleteRoleDept(Long roleId, List<Long> deptIds) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
-        configStore.in("user_id", userIds);
+        configStore.in("dept_id", deptIds);
         this.deleteByConfig(configStore);
     }
 
-    public void deleteRoleUser(Long roleId, Long userId) {
+    public void deleteRoleDept(Long roleId, Long deptId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
-        configStore.eq("user_id", userId);
+        configStore.eq("dept_id", deptId);
         this.deleteByConfig(configStore);
     }
 
@@ -72,9 +73,9 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
     }
 
 
-    public void deleteByUserId(Long userId) {
+    public void deleteByDeptId(Long deptId) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("user_id", userId);
+        configStore.eq("dept_id", deptId);
         this.deleteByConfig(configStore);
     }
 

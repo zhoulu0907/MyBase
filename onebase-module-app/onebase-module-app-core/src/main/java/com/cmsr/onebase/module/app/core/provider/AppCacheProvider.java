@@ -76,4 +76,9 @@ public class AppCacheProvider {
                 CacheUtils.keyForPagePermission(userId, applicationId, menuId)
         );
     }
+
+    public void deptsChanged(Long applicationId, List<Long> deptIds) {
+    }
+
+
 }
