@@ -75,43 +75,4 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
         }).toList();
     }
 
-    /**
-     * 查询所有有效的模板
-     *
-     * @return 模板列表
-     */
-    @TenantIgnore
-    public List<SecurityConfigTemplateDO> findAllActive() {
-        ConfigStore configs = new DefaultConfigStore();
-        
-        String sql = """
-                SELECT
-                    id,
-                    category_id,
-                    config_key,
-                    config_name,
-                    data_type,
-                    default_value,
-                    description,
-                    sort_order
-                FROM infra_security_config_template
-                WHERE deleted = 0
-                ORDER BY category_id ASC, sort_order ASC
-                """;
-        
-        DataSet dataSet = this.querys(sql, configs);
-        return dataSet.stream().map(dataRow -> {
-            SecurityConfigTemplateDO templateDO = new SecurityConfigTemplateDO();
-            templateDO.setId(dataRow.getLong("id"));
-            templateDO.setCategoryId(dataRow.getLong("category_id"));
-            templateDO.setConfigKey(dataRow.getString("config_key"));
-            templateDO.setConfigName(dataRow.getString("config_name"));
-            templateDO.setDataType(dataRow.getString("data_type"));
-            templateDO.setDefaultValue(dataRow.getString("default_value"));
-            templateDO.setDescription(dataRow.getString("description"));
-            templateDO.setSortOrder(dataRow.getInt("sort_order"));
-            return templateDO;
-        }).toList();
-    }
-
 }

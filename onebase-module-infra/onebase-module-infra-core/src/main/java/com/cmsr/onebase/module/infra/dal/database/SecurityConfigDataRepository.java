@@ -24,32 +24,6 @@ public class SecurityConfigDataRepository extends DataRepository<SecurityConfigD
     }
 
     /**
-     * 根据租户ID查询配置
-     *
-     * @param tenantId 租户ID
-     * @return 配置列表
-     */
-    public List<SecurityConfigDO> findByTenantId(Long tenantId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(SecurityConfigDO.TENANT_ID, tenantId);
-        return findAllByConfig(configStore);
-    }
-
-    /**
-     * 根据租户ID和配置键列表查询配置
-     *
-     * @param tenantId   租户ID
-     * @param configKeys 配置键列表
-     * @return 配置列表
-     */
-    public List<SecurityConfigDO> findByTenantIdAndKeys(Long tenantId, List<String> configKeys) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(SecurityConfigDO.TENANT_ID, tenantId);
-        configStore.in(SecurityConfigDO.CONFIG_KEY, configKeys);
-        return findAllByConfig(configStore);
-    }
-
-    /**
      * 根据租户ID和配置键查询配置
      *
      * @param tenantId  租户ID

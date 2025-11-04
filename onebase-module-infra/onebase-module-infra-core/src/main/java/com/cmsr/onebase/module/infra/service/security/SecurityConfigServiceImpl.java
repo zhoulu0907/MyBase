@@ -86,31 +86,8 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void copyTemplateToTenant(Long tenantId) {
-        // 接口3：从infra_security_config_template表中复制deleted=0的所有数据插入到infra_security_config表中
-        List<SecurityConfigTemplateDO> templates = templateDataRepository.findAllActive();
-
-        List<SecurityConfigDO> configs = new ArrayList<>();
-        for (SecurityConfigTemplateDO template : templates) {
-            SecurityConfigDO config = SecurityConfigDO.builder()
-                    .tenantId(tenantId)
-                    .configKey(template.getConfigKey())
-                    .configValue(template.getDefaultValue())
-                    .build();
-            configs.add(config);
-        }
-
-        if (!configs.isEmpty()) {
-            securityConfigDataRepository.insertBatch(configs);
-        }
-
-        log.info("从模板复制租户安全配置完成，租户ID: {}, 配置项数量: {}", tenantId, configs.size());
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     public void updateConfig(Long tenantId, SecurityConfigUpdateReqVO updateReqVO) {
-        // 接口4：根据租户id、config_key更新infra_security_config数据
+        // 接口3：根据租户id、config_key更新infra_security_config数据
         updateSingleConfig(tenantId, updateReqVO);
 
         // 清除相关缓存

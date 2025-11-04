@@ -32,14 +32,7 @@ public interface SecurityConfigService {
     List<SecurityConfigItemRespVO> getTenantConfigItems(Long tenantId, Long categoryId);
 
     /**
-     * 接口3：从模板复制所有配置到租户（deleted=0）
-     *
-     * @param tenantId 租户ID
-     */
-    void copyTemplateToTenant(Long tenantId);
-
-    /**
-     * 接口4：根据租户ID和配置键更新配置值（单个）
+     * 接口3：根据租户ID和配置键更新配置值（单个）
      *
      * @param tenantId    租户ID
      * @param updateReqVO 更新请求

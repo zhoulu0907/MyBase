@@ -53,15 +53,6 @@ public class SecurityConfigController {
         return success(items);
     }
 
-    @PostMapping("/copy")
-    @Operation(summary = "从模板复制配置到租户")
-    @PreAuthorize("@ss.hasPermission('infra:security-config:create')")
-    public CommonResult<Boolean> copyTemplateToTenant() {
-        Long tenantId = TenantContextHolder.getTenantId();
-        securityConfigService.copyTemplateToTenant(tenantId);
-        return success(true);
-    }
-
     @PostMapping("/batch-update")
     @Operation(summary = "批量更新租户安全配置")
     @PreAuthorize("@ss.hasPermission('infra:security-config:update')")
