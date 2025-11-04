@@ -95,5 +95,5 @@ export enum LISTTYPE {
   ICREATED = 'icreated'
 }
 export const ButtonTypeMap = {
-  AGREED: '同意'
+  APPROVE: 'approve'
 };

@@ -94,7 +94,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
                 onCancel={() => setPopupVisibleByIndex(index, false)}
               >
                 <Button
-                  type={item?.buttonName === ButtonTypeMap.AGREED ? 'primary' : 'outline'}
+                  type={item?.buttontype === ButtonTypeMap.APPROVE ? 'primary' : 'outline'}
                   onClick={() => setPopupVisibleByIndex(index, true)}
                 >
                   {item?.buttonName}
