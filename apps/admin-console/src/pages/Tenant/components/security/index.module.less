@@ -1,0 +1,64 @@
+.workspaceSecurityPage {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 80vh;
+  width: 100%;
+
+  .sider {
+    width: 200px;
+    height: 100%;
+  }
+
+  .content {
+    height: 100%;
+    width: calc(100vw - 500px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    .contentHeader {
+      width: 100%;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .contentTitle {
+        font-size: 18px;
+        font-weight: 600;
+      }
+    }
+
+    .contentBody {
+      width: 100%;
+      height: calc(100% - 40px);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+
+      .contentBodyItem {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 16px;
+
+        .contentBodyItemTitle {
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .contentBodyItemContent {
+          font-size: 14px;
+          font-weight: 400;
+        }
+      }
+    }
+  }
+}
