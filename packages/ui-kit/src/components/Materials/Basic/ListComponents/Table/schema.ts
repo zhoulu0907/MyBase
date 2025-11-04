@@ -198,11 +198,6 @@ export interface XTableConfig extends ICommonBaseType {
   };
 }
 
-export interface TableSearchConfig {
-  searchItems?: any[];
-  form: FormInstance;
-}
-
 export interface OperationButtonConfig {
   type: string;
   buttonName: string;
