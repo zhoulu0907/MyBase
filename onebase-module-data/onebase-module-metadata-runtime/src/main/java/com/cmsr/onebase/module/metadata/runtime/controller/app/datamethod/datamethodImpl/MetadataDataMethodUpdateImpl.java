@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -101,6 +102,12 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                 processedData.put(fieldName, entry.getValue());
             }
         }
+
+        // 设置更新时间
+        LocalDateTime dateTime = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String now = dateTime.format(dateTimeFormatter);
+        processedData.put("updated_time",now);
 
         // 处理复杂类型字段（数组、对象等）的JSON序列化
         processComplexTypeFields(fields, processedData);
@@ -275,7 +282,8 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                     ConfigStore configStore = new DefaultConfigStore();
                     configStore.and(primaryKeyFieldName, primaryKeyFieldValue);
 
-                    DataRow dataRow = new DataRow(nameValueParis);
+                    Map updateData = processDataAndSetDefaults(nameValueParis,subEntityFields);// 内含设置更新时间
+                    DataRow dataRow = new DataRow(updateData);
                     AnylineService<?> temporaryService = context.getTemporaryService();
                     long updateCount = temporaryService.update(quoteTableName(subEntity.getTableName()), dataRow, configStore);
                     log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", subEntityId, subEntity.getTableName(), updateCount);
@@ -377,7 +385,9 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         Map<String, Object> processedData = convertFieldIdToFieldName(data, fields);
 
         // 获取当前时间
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dateTime = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String now = dateTime.format(dateTimeFormatter);
 
         // 仅确定一个实际主键字段名，避免系统字段被误配置为主键导致被赋予雪花ID
         String realPrimaryKey = getPrimaryKeyFieldName(fields);
