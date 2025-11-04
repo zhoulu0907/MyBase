@@ -26,8 +26,8 @@ const EtlDataFactoryPage: React.FC = () => {
       enableStatus: ETL_FLOW_STATUS.ENABLED,
       scheduleStrategy: ETL_SCHEDULE_STRATEGY.FIXED,
       lastSuccessTime: '2021-01-01',
-      sourceTables: ['1', '2'],
-      targetTable: '1',
+      sourceTables: ['生产管理系统', '年度计划表'],
+      targetTable: '生产计划表',
       isSyncDone: IS_SYNC_DONE.NO
     }
   ]);

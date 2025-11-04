@@ -9,7 +9,7 @@ const Col = Grid.Col;
 
 const ScheduleStrategyOptions = [
   { label: '定时更新-按设定时间自动更新', value: ETL_SCHEDULE_STRATEGY.FIXED },
-  { label: '源表更新-当源表数据变化时更新', value: ETL_SCHEDULE_STRATEGY.OBSERVE },
+  //   { label: '源表更新-当源表数据变化时更新', value: ETL_SCHEDULE_STRATEGY.OBSERVE },
   { label: '手动更新-需要手动触发更新', value: ETL_SCHEDULE_STRATEGY.MANUALLY }
 ];
 
