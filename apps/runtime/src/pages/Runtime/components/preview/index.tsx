@@ -368,6 +368,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                   <PreviewRender
                     cpId={cp.id}
                     cpType={cp.type}
+                    pageType={pageType}
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
                     showFromPageData={showFromPageData}
@@ -379,7 +380,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           ))}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
-          <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
+          <Form layout="inline" form={form}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
@@ -397,6 +398,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     <PreviewRender
                       cpId={cp.id}
                       cpType={cp.type}
+                      pageType={pageType}
                       pageComponentSchema={
                         useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
                       }

@@ -12,10 +12,10 @@ import {
   getComponentConfig,
   getComponentSchema,
   getComponentWidth,
-  usePageEditorSignal,
-  WIDTH_VALUES,
-  WIDTH_OPTIONS,
   useAppEntityStore,
+  usePageEditorSignal,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -34,10 +34,10 @@ import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
 import {
-  getEntityFieldOptions,
-  getAutoNumberConfig,
   ENTITY_TYPE,
   ENTITY_TYPE_VALUE,
+  getAutoNumberConfig,
+  getEntityFieldOptions,
   type AppEntityField,
   type EntityFieldOption
 } from '@onebase/app';
@@ -533,9 +533,10 @@ export default function EditorWorkspace() {
                 data-cp-id={cp.id}
                 className={styles.componentItem}
                 style={{
-                  width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
+                  width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                   borderColor: curComponentID === cp.id ? '#009E9E' : '',
-                  borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
+                  borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                  margin: '4px'
                 }}
                 onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                   e.stopPropagation();
