@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
@@ -9,9 +8,9 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraphBuilder;
-import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
-import com.cmsr.onebase.module.flow.core.job.FlowJobMessageHandler;
+import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorRequest;
+import com.cmsr.onebase.module.flow.core.flow.FlowExecuteProvider;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -42,7 +41,7 @@ public class FlowProcessTest {
     private FlowProcessExecApiImpl flowProcessExecApi;
 
     @Autowired
-    private FlowJobMessageHandler flowJobMessageHandler;
+    private FlowExecuteProvider flowExecuteProvider;
 
     @Autowired
     private FlowProcessExecService flowProcessExecService;
@@ -50,7 +49,7 @@ public class FlowProcessTest {
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
         String json = flowProcessDO.getProcessDefinition();
-        JsonGraph jsonGraph = JsonGraphBuilder.build(json);
+        JsonGraph jsonGraph = FlowGraphBuilder.build(json);
         System.out.println(jsonGraph.toFlowChain());
     }
 
@@ -92,10 +91,10 @@ public class FlowProcessTest {
 
     @Test
     public void testSimple3() throws IOException {
-        FlowJobMessage jobMessage = new FlowJobMessage();
+        ExecutorRequest jobMessage = new ExecutorRequest();
         jobMessage.setJobType("fld");
         jobMessage.setProcessId(89995954500108288L);
-        flowJobMessageHandler.executeFlow(jobMessage);
+        flowExecuteProvider.executeFlow(jobMessage);
     }
 
     @Test

@@ -13,7 +13,7 @@ public class MetadataDataMethodRequestContext {
     /**
      * 操作追踪ID
      */
-    private String businessTraceId;
+    private String traceId;
 
     /**
      * 操作类型

@@ -17,6 +17,8 @@ public interface ETLErrorCodeConstants {
     ErrorCode DATASOURCE_CODE_DUPLICATE             = new ErrorCode(110202, "数据源编码重复");
     ErrorCode DATASOURCE_PROPERTY_INSUFFICIENT      = new ErrorCode(110203, "数据源信息不齐全");
     ErrorCode DATASOURCE_STATUS_CHANGE_ERR          = new ErrorCode(110204, "数据源状态转换异常");
+    ErrorCode DATASOURCE_IN_USAGE                   = new ErrorCode(110205, "数据源已在使用中");
+    ErrorCode DATASOURCE_READONLY                   = new ErrorCode(110206, "数据源为只读数据源");
 
     // 元数据采集异常
     ErrorCode INVALID_COLLECT_STATUS                = new ErrorCode(110501, "无效的采集状态");
@@ -26,11 +28,14 @@ public interface ETLErrorCodeConstants {
 
     // 元数据类型异常
     ErrorCode ILLEGAL_METADATA_TYPE                 = new ErrorCode(110601, "元数据类型异常");
+    ErrorCode TABLE_NOT_EXIST                       = new ErrorCode(110602, "数据表不存在");
 
     // 工作流异常
     ErrorCode WORKFLOW_NOT_EXIST                    = new ErrorCode(110700, "ETL流程不存在");
-    ErrorCode WORKFLOW_ENABLED                      = new ErrorCode(110701, "ETL流程已启用，请下线后再试");
+    ErrorCode WORKFLOW_NAME_DUPLICATE               = new ErrorCode(110701, "ETL流程名称重复");
+    ErrorCode WORKFLOW_ENABLED                      = new ErrorCode(110704, "ETL流程已启用，请下线后再试");
 
     // 调度类异常
     ErrorCode ILLEGAL_SCHEDULE_TYPE                 = new ErrorCode(110901, "非法的调度类型");
+    ErrorCode WORKFLOW_IS_OFFLINE                   = new ErrorCode(110902, "ETL流程已下线");
 }

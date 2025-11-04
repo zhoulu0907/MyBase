@@ -88,7 +88,7 @@ public class DataMethodApiImpl implements DataMethodApi {
                 metadataDataMethodRequestContext.setMethodCode(null);
                 metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
                 metadataDataMethodRequestContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
-
+                metadataDataMethodRequestContext.setTraceId(reqDTO.getTraceId());
                 Boolean ok = metadataDataMethodCoreService.deleteData(metadataDataMethodRequestContext);
                 if (Boolean.TRUE.equals(ok)) { success++; }
             } catch (Exception e) {
@@ -128,7 +128,7 @@ public class DataMethodApiImpl implements DataMethodApi {
             methodCoreContext.setMethodCode(null);
             methodCoreContext.setClientTypeEnum(ClientTypeEnum.BUILD);
             methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
-
+            methodCoreContext.setTraceId(reqDTO.getTraceId());
 
             try{
                 Map<String, Object> resultMap = metadataDataMethodCoreService.createData(
@@ -197,7 +197,7 @@ public class DataMethodApiImpl implements DataMethodApi {
                 metadataDataMethodRequestContext.setMethodCode(null);
                 metadataDataMethodRequestContext.setClientTypeEnum(ClientTypeEnum.BUILD);//编辑态调用
                 metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
-
+                metadataDataMethodRequestContext.setTraceId(reqDTO.getTraceId());
                 Map<String, Object> updated = metadataDataMethodCoreService.updateData(
                         metadataDataMethodRequestContext);
                 if (updated != null) {

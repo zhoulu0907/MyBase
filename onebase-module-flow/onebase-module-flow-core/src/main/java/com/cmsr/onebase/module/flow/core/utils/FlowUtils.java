@@ -8,6 +8,11 @@ import java.time.Duration;
  */
 public class FlowUtils {
 
+    public static final String REDIS_APPLICATION_VERSION_KEY = "flow:application:version";
+
+    public static final String REDIS_VERSION_CHANGE_TOPIC_KEY = "flow:version:change:topic";
+
+
     public static final int MAX_QUERY_CALL_COUNT = 10;
 
     public static final Duration REDIS_TRACE_TIMEOUT = Duration.ofHours(4);
@@ -22,5 +27,13 @@ public class FlowUtils {
 
     public static String toRedisTraceKey(String traceId) {
         return "flow:trace:" + traceId;
+    }
+
+    public static String toRedisProcessLockKey(Long processId) {
+        return "flow:process:lock:" + processId;
+    }
+
+    public static String toRedisApplicationLockKey(Long processId) {
+        return "flow:application:lock:" + processId;
     }
 }

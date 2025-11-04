@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.flow.sched.controller;
 
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
-import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
-import com.cmsr.onebase.module.flow.core.job.FlowJobMessageHandler;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorRequest;
+import com.cmsr.onebase.module.flow.core.flow.FlowExecuteProvider;
 import com.cmsr.onebase.module.flow.sched.controller.vo.RunFlowReq;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class FlowController {
 
     @Autowired
-    private FlowJobMessageHandler flowJobMessageHandler;
+    private FlowExecuteProvider flowExecuteProvider;
 
     @PostMapping("/run")
     public ResponseEntity<String> runFlow(@RequestBody RunFlowReq runFlowReq) {
-        FlowJobMessage jobMessage = new FlowJobMessage();
+        ExecutorRequest jobMessage = new ExecutorRequest();
         jobMessage.setJobType(runFlowReq.getJobType());
         jobMessage.setProcessId(runFlowReq.getProcessId());
-        ExecutorResult executorResult = flowJobMessageHandler.executeFlow(jobMessage);
+        ExecutorResult executorResult = flowExecuteProvider.executeFlow(jobMessage);
         if (executorResult.isSuccess()) {
             return ResponseEntity.ok(executorResult.toString());
         } else {
