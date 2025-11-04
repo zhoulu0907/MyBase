@@ -4,14 +4,13 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
+import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
-import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
-import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -80,6 +79,7 @@ public class AppApplicationController {
     public CommonResult<Long> generateId() {
         return CommonResult.success(appApplicationService.generateId());
     }
+
     @GetMapping(value = {"/simple-list"})
     @Operation(summary = "获取应用精简信息列表-不分页", description = "只包含被开启的应用，主要用于前端的下拉选项")
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList() {

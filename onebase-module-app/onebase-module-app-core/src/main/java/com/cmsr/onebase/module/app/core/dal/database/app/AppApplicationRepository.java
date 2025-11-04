@@ -63,30 +63,30 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
 
     public ApplicationDO findByUidAndIdNot(String uid, Long id) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("app_uid", uid);
-        configs.ne("id", id);
+        configs.eq(ApplicationDO.APP_UID, uid);
+        configs.ne(ApplicationDO.ID, id);
         return findOne(configs);
     }
 
     public Long countByTenantId(Long tenantId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("tenant_id", tenantId);
+        configs.eq(ApplicationDO.TENANT_ID, tenantId);
         return countByConfig(configs);
     }
 
     public List<ApplicationDO> getSimpleAppList(Integer status) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("tenant_id", TenantContextHolder.getRequiredTenantId());
-        configStore.eq("staus", status);
+        configStore.eq(ApplicationDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
+        configStore.eq(ApplicationDO.APP_STATUS, status);
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
 
     public List<ApplicationDO> finAppApplicationByAppName(String appName) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("tenant_id", TenantContextHolder.getRequiredTenantId());
+        configStore.eq(ApplicationDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         if (StringUtils.isNotBlank(appName)) {
-            configStore.and(Compare.LIKE, "app_name",  appName);
+            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
         }
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.enums.CorpReationStatusEnum;
+import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -10,7 +10,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRela
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
@@ -39,14 +38,14 @@ public class CorpAppRelationDataRepository extends DataRepository<CorpAppRelatio
         // 添加状态查询条件
         if (pageReqVO.getStatus() != null) {
             Integer status = pageReqVO.getStatus();
-            if (status.equals(CorpReationStatusEnum.DISABLE.getValue())) {
+            if (status.equals(CorpAppReationStatusEnum.DISABLE.getValue())) {
                 // 查询企业状态为禁用的记录
                 configStore.eq("status", CorpStatusEnum.DISABLE.getValue());
             } else {
-                if (status.equals(CorpReationStatusEnum.ENABLE.getValue())) {
+                if (status.equals(CorpAppReationStatusEnum.ENABLE.getValue())) {
                     // 查询有效期内的（未过期的）
                     configStore.gt("expires_time", java.time.LocalDateTime.now());
-                } else if (status.equals(CorpReationStatusEnum.EXPIRES.getValue())) {
+                } else if (status.equals(CorpAppReationStatusEnum.EXPIRES.getValue())) {
                     // 查询已过期的
                     configStore.le("expires_time", java.time.LocalDateTime.now());
                     configStore.eq("status", CorpStatusEnum.ENABLE.getValue());

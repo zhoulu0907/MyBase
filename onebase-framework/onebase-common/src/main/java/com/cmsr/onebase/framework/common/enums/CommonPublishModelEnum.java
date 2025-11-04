@@ -1,11 +1,15 @@
 package com.cmsr.onebase.framework.common.enums;
 
-import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.core.ArrayValuable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
+
+/**
+ * 通用发布模式枚举
+ *
+ */
 @Getter
 @AllArgsConstructor
 public enum CommonPublishModelEnum implements ArrayValuable<Integer> {

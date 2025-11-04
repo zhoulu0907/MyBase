@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.service.corpapprelation;
 
 
-import com.cmsr.onebase.framework.common.enums.CorpReationStatusEnum;
+import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -22,7 +22,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,12 +140,12 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     public String getCorpStatus(Integer status, LocalDateTime expiresTime) {
         String statusDesc = "";
         if (status != null && status.equals(CorpStatusEnum.DISABLE.getValue())) {
-            statusDesc = CorpReationStatusEnum.DISABLE.getName();
+            statusDesc = CorpAppReationStatusEnum.DISABLE.getName();
         } else if (expiresTime != null) {
             if (expiresTime.isAfter(java.time.LocalDateTime.now())) {
-                statusDesc = CorpReationStatusEnum.ENABLE.getName();
+                statusDesc = CorpAppReationStatusEnum.ENABLE.getName();
             } else {
-                statusDesc = CorpReationStatusEnum.EXPIRES.getName();
+                statusDesc = CorpAppReationStatusEnum.EXPIRES.getName();
             }
         }
         return statusDesc;
