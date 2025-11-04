@@ -40,6 +40,8 @@ public interface ErrorCodeConstants {
 
     ErrorCode FLOW_ENTITY_DATA_ID_NOT_EXISTS = new ErrorCode(1_009_001_011, "流程实体数据ID不存在");
 
+    ErrorCode FAILED_TO_GET_NODE_TYPE = new ErrorCode(1_009_001_012, "获取节点类型失败");
+
 
     // ============= 校验 =============
 
@@ -77,6 +79,8 @@ public interface ErrorCodeConstants {
     ErrorCode INVALID_ENTITY_ID = new ErrorCode(1_009_002_015, "无效的实体ID");
 
     ErrorCode APPROVER_NODE_REQUIRED_ENABLED_BTN = new ErrorCode(1_009_002_016, "审批节点至少开启一个按钮");
+
+    ErrorCode NO_BUTTON_PERMISSION = new ErrorCode(1_009_002_017, "没有按钮权限");
 
     // ============= 系统相关错误 =============
 
