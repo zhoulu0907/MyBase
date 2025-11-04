@@ -9,8 +9,8 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
-import com.cmsr.onebase.module.flow.core.job.FlowJobMessage;
-import com.cmsr.onebase.module.flow.core.job.FlowJobExecutor;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorRequest;
+import com.cmsr.onebase.module.flow.core.flow.FlowExecuteProvider;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -41,7 +41,7 @@ public class FlowProcessTest {
     private FlowProcessExecApiImpl flowProcessExecApi;
 
     @Autowired
-    private FlowJobExecutor flowJobExecutor;
+    private FlowExecuteProvider flowExecuteProvider;
 
     @Autowired
     private FlowProcessExecService flowProcessExecService;
@@ -55,7 +55,10 @@ public class FlowProcessTest {
 
     @Test
     public void testSimple() throws IOException {
-        testToFlowChain(84076905441918976L);
+         testSimple2();
+        testSimple2();
+        testSimple2();
+        testSimple2();
     }
 
 
@@ -91,10 +94,10 @@ public class FlowProcessTest {
 
     @Test
     public void testSimple3() throws IOException {
-        FlowJobMessage jobMessage = new FlowJobMessage();
+        ExecutorRequest jobMessage = new ExecutorRequest();
         jobMessage.setJobType("fld");
         jobMessage.setProcessId(89995954500108288L);
-        flowJobExecutor.executeFlow(jobMessage);
+        flowExecuteProvider.executeFlow(jobMessage);
     }
 
     @Test

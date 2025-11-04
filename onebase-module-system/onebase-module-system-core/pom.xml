@@ -40,6 +40,11 @@
             <artifactId>onebase-module-app-api</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- 租户基础 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -147,7 +152,7 @@
             <artifactId>captcha-spring-boot-starter</artifactId> <!-- 验证码，一般用于登录使用 -->
         </dependency>
 
-<!--        <dependency>-->
+        <!--        <dependency>-->
 <!--            <groupId>org.dromara.hutool</groupId>-->
 <!--            <artifactId>hutool-extra</artifactId> &lt;!&ndash; 邮件 &ndash;&gt;-->
 <!--        </dependency>-->

@@ -96,7 +96,6 @@ public class TenantController {
     @GetMapping("/get")
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
     public CommonResult<TenantRespVO> getTenant() {
         return success(tenantService.getTenantWithAppCount(TenantContextHolder.getTenantId()));
     }

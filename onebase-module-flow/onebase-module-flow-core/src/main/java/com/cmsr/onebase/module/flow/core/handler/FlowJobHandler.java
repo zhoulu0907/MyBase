@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
+import com.cmsr.onebase.module.flow.core.enums.FlowJobStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
@@ -18,7 +19,6 @@ import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,22 +108,28 @@ public class FlowJobHandler {
     }
 
     private void startTimeJob(FlowProcessDO flowProcessDO) {
+        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
+        if (flowProcessTimeDO != null
+                && flowProcessTimeDO.getJobId() != null
+                && FlowJobStatusEnum.isDeployed(flowProcessTimeDO.getJobStatus())) {
+            return;
+        }
         JsonGraph jsonGraph = FlowGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartTimeNodeData startTimeNodeData = (StartTimeNodeData) jsonGraph.getStartNode().getData();
-        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startTimeNodeData);
         jobCreateRequest.setApplicationId(flowProcessDO.getApplicationId());
         jobCreateRequest.setProcessId(flowProcessDO.getId());
         jobCreateRequest.setProcessName(flowProcessDO.getProcessName());
-        jobCreateRequest.setOldJobId(flowProcessTimeDO == null ? null : flowProcessTimeDO.getJobId());
         String jobId = jobClient.startJob(jobCreateRequest);
         if (flowProcessTimeDO == null) {
             flowProcessTimeDO = new FlowProcessTimeDO();
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
             flowProcessTimeDO.setJobId(jobId);
+            flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessTimeRepository.insert(flowProcessTimeDO);
-        } else if (!StringUtils.equals(jobId, flowProcessTimeDO.getJobId())) {
+        } else {
             flowProcessTimeDO.setJobId(jobId);
+            flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessTimeRepository.update(flowProcessTimeDO);
         }
     }
@@ -138,22 +144,28 @@ public class FlowJobHandler {
     }
 
     private void startDateFieldJob(FlowProcessDO flowProcessDO) {
+        FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId());
+        if (flowProcessDateFieldDO != null
+                && flowProcessDateFieldDO.getJobId() != null
+                && FlowJobStatusEnum.isDeployed(flowProcessDateFieldDO.getJobStatus())) {
+            return;
+        }
         JsonGraph jsonGraph = FlowGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartDateFieldNodeData startDateFieldNodeData = (StartDateFieldNodeData) jsonGraph.getStartNode().getData();
-        FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
         jobCreateRequest.setApplicationId(flowProcessDO.getApplicationId());
         jobCreateRequest.setProcessId(flowProcessDO.getId());
         jobCreateRequest.setProcessName(flowProcessDO.getProcessName());
-        jobCreateRequest.setOldJobId(flowProcessDateFieldDO == null ? null : flowProcessDateFieldDO.getJobId());
         String jobId = jobClient.startJob(jobCreateRequest);
         if (flowProcessDateFieldDO == null) {
             flowProcessDateFieldDO = new FlowProcessDateFieldDO();
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
             flowProcessDateFieldDO.setJobId(jobId);
+            flowProcessDateFieldDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessDateFieldRepository.insert(flowProcessDateFieldDO);
-        } else if (!StringUtils.equals(jobId, flowProcessDateFieldDO.getJobId())) {
+        } else {
             flowProcessDateFieldDO.setJobId(jobId);
+            flowProcessDateFieldDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessDateFieldRepository.update(flowProcessDateFieldDO);
         }
     }
