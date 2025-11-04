@@ -1,40 +1,40 @@
 import { useState, type FC, forwardRef, useImperativeHandle } from 'react';
-import { Form, Input, Upload, Message,Button } from '@arco-design/web-react';
+import { Form, Input, Upload, Message, Button } from '@arco-design/web-react';
 import { IconFileImage, IconAttachment } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
-// import { fetchExecTask } from '../../../../../../../../packages/app/src/services/app_runtime';
 import { fetchExecTask } from '@onebase/app/src/services/app_runtime';
 
-import '../style/detailOkConfirm.less'
+import '../style/detailOkConfirm.less';
 
 const FormItem = Form.Item;
 
-const maxImgSizeMB = 20
-const maxFileSizeMB = 50
+const maxImgSizeMB = 20;
+const maxFileSizeMB = 50;
 
-const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
-    const { setPopupVisible, onBack, taskId, instanceId } = props;
-    const [form] = Form.useForm();
-    const [imgUpList, setImgUpList] = useState<any>()
+const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
+  const { onSetPopupVisible, onBack, taskId, instanceId } = props;
+  const [form] = Form.useForm();
+  const [imgUpList, setImgUpList] = useState<any>();
 
-    useImperativeHandle(ref, () => ({
-        childMethod: () => {           
-            fetchExec();
-        }
-    }));
+  useImperativeHandle(ref, () => ({
+    childMethod: (value: any) => {
+      fetchExec(value);
+    }
+  }));
 
-    const fetchExec = async () => {
-      try {
-        await form.validate();
-        const nameValue = form.getFieldValue('name');
-        const req = {
-          buttonType: 'approve',
-          taskId,
-          instanceId,
-          comment: nameValue
-        };
-        await fetchExecTask(req);
-        setPopupVisible(false);
+  const fetchExec = async (value: any) => {
+    const buttonType = value?.buttonType;
+    try {
+      await form.validate();
+      const nameValue = form.getFieldValue('name');
+      const req = {
+        buttonType,
+        taskId,
+        instanceId,
+        comment: nameValue
+      };
+      await fetchExecTask(req);
+        onSetPopupVisible(false);
         onBack();
       } catch (error) {
         console.log('表单验证失败:', error);

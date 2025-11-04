@@ -30,3 +30,6 @@ export const getOperatorRecord = (params: GetOperatorRecord) => {
 export const fetchSubmitInstance = (params: SubMitInstanceReq) => {
   return runtimeListdataService.post('/instance/submit', params);
 };
+export const fetchFlowPredict = (params: GetOperatorRecord) => {
+  return runtimeListdataService.post('/instance/flow-predict', params);
+};

@@ -128,7 +128,6 @@ const WillDo: FC = ({ appId }) => {
   }
 
   function handleDetailPage(row: any) {
-    console.log('click to detail page === row ===', row);
     setTaskId(row?.taskId);
     setPopVisible(true);
     setRowData(row);

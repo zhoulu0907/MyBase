@@ -24,11 +24,16 @@ interface PageProps {
 const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, taskId, rowData, listType }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
-  const [popupVisible, setPopupVisible] = useState(false);
   const [stepData, setStepData] = useState();
-  const [detailData, setDetailData] = useState();
+  const [detailData, setDetailData] = useState<any>();
   let confirmRef = useRef<any>(null);
-
+  const [popupVisibleMap, setPopupVisibleMap] = useState({});
+  const setPopupVisibleByIndex = (index, visible) => {
+    setPopupVisibleMap((prev) => ({
+      ...prev,
+      [index]: visible
+    }));
+  };
   function toggleFullScreen(type: string) {
     if (type === 'FULLSCREEN') {
       setDrawWidth('100%');
@@ -51,8 +56,8 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
       </>
     );
   }
-  function handleConfirmOK() {
-    confirmRef.current.childMethod();
+  function handleConfirmOK(value: any) {
+    confirmRef.current.childMethod(value);
   }
   function handlePreview() {
     console.log('handle Preview ...');
@@ -64,32 +69,39 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           <img src={ProPreviewImg} style={{ marginRight: '3px' }} />
           流程预览
         </Button>
-        <Popconfirm
-          title=""
-          style={{ maxWidth: '420px', width: '420px' }}
-          className="dt-ok-confirm"
-          content={
-            <DetailOKConfirm
-              ref={confirmRef}
-              setPopupVisible={setPopupVisible}
-              onBack={onBack}
-              taskId={taskId}
-              instanceId={rowData?.instanceId}
-            />
-          }
-          onOk={() => {
-            handleConfirmOK();
-          }}
-          popupVisible={popupVisible}
-          onCancel={() => setPopupVisible(false)}
-        >
-          <Button type="primary" onClick={() => setPopupVisible(true)}>
-            同意
-          </Button>
-        </Popconfirm>
-        <Button type="outline" onClick={() => setPopVisible(false)}>
-          拒绝
-        </Button>
+        {detailData?.buttonConfigs &&
+          detailData?.buttonConfigs?.map((item, index) => {
+            return (
+              <Popconfirm
+                title=""
+                key={index}
+                style={{ maxWidth: '420px', width: '420px' }}
+                className="dt-ok-confirm"
+                content={
+                  <DetailOKConfirm
+                    ref={confirmRef}
+                    onSetPopupVisible={(visible) => setPopupVisibleByIndex(index, visible)}
+                    onBack={onBack}
+                    taskId={taskId}
+                    instanceId={rowData?.instanceId}
+                    itemData={item}
+                  />
+                }
+                onOk={() => {
+                  handleConfirmOK(item);
+                }}
+                popupVisible={!!popupVisibleMap[index]}
+                onCancel={() => setPopupVisibleByIndex(index, false)}
+              >
+                <Button
+                  type={item?.buttonName === '同意' ? 'primary' : 'outline'}
+                  onClick={() => setPopupVisibleByIndex(index, true)}
+                >
+                  {item?.buttonName}
+                </Button>
+              </Popconfirm>
+            );
+          })}
       </>
     );
   }
@@ -158,9 +170,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
               <Row className="" style={{ marginBottom: 16 }}>
                 <Col span={12}>
                   <p className="gray-color">申请原因</p>
-                  <div className="photo-box">
-                    需要采购一批办公用品
-                  </div>
+                  <div className="photo-box">需要采购一批办公用品</div>
                 </Col>
               </Row>
               <p className="gray-color photo-box">申请明细</p>
