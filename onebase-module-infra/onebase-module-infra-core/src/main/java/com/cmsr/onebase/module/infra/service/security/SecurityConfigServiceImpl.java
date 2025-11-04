@@ -66,15 +66,15 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             return new ArrayList<>();
         }
 
-        // 组装返回数据（default_value字段已通过SQL的COALESCE处理了兜底逻辑）
+        // 组装返回数据：defaultValue=模板默认值；configValue=租户有效值（租户配置或默认值）
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
             SecurityConfigItemRespVO itemVO = new SecurityConfigItemRespVO();
             itemVO.setConfigKey(template.getConfigKey());
             itemVO.setConfigName(template.getConfigName());
             itemVO.setDataType(template.getDataType());
-            itemVO.setDefaultValue(template.getDefaultValue()); // 已包含兜底逻辑
-            itemVO.setConfigValue(template.getDefaultValue()); // 已包含兜底逻辑
+            itemVO.setDefaultValue(template.getDefaultValue());
+            itemVO.setConfigValue(template.getConfigValue());
             itemVO.setDescription(template.getDescription());
             itemVO.setSortOrder(template.getSortOrder());
             itemVO.setId(template.getId());
@@ -156,18 +156,19 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             return new ArrayList<>();
         }
 
-        // 组装返回数据（default_value字段已通过SQL的COALESCE处理了兜底逻辑）
+        // 组装返回数据：defaultValue=模板默认值；configValue=租户有效值（租户配置或默认值）
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
             SecurityConfigItemRespVO itemVO = new SecurityConfigItemRespVO();
             itemVO.setConfigKey(template.getConfigKey());
             itemVO.setConfigName(template.getConfigName());
             itemVO.setDataType(template.getDataType());
-            itemVO.setDefaultValue(template.getDefaultValue()); // 已包含兜底逻辑
-            itemVO.setConfigValue(template.getDefaultValue()); // 已包含兜底逻辑
+            itemVO.setDefaultValue(template.getDefaultValue());
+            itemVO.setConfigValue(template.getConfigValue());
             itemVO.setDescription(template.getDescription());
             itemVO.setSortOrder(template.getSortOrder());
             itemVO.setId(template.getId());
+            itemVO.setCategoryId(template.getCategoryId());
 
             configItems.add(itemVO);
         }

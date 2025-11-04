@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -56,10 +57,16 @@ public class SecurityConfigTemplateDO extends BaseDO {
     private String dataType;
 
     /**
-     * 默认值
+     * 模板默认值（来自模板表infra_security_config_template.default_value）
      */
     @Column(name = DEFAULT_VALUE)
     private String defaultValue;
+
+    /**
+     * 有效配置值（租户配置值优先，若无则回落到模板默认值）。非持久化字段，仅用于查询结果承载。
+     */
+    @Transient
+    private String configValue;
 
     /**
      * 描述
