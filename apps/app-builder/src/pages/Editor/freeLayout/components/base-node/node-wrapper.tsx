@@ -31,7 +31,6 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const { children, isScrollToView = false } = props;
   const nodeRender = useNodeRenderContext();
   const { node, selected, startDrag, ports, selectNode, nodeRef, onFocus, onBlur, readonly } = nodeRender;
-
   const [isDragging, setIsDragging] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const sidebar = useContext(SidebarContext);
@@ -41,7 +40,12 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const meta = node.getNodeMeta<FlowNodeMeta>();
   const childRef = useRef<HTMLDivElement>(null);
   const portsRender = ports.map((p) => (
-    <WorkflowPortRender key={p.id} entity={p} onClick={!readonly ? onPortClick : undefined} />
+    <WorkflowPortRender
+      className={'nodePort' + ((selected && 'selectedPort') || '')}
+      key={p.id}
+      entity={p}
+      onClick={!readonly ? onPortClick : undefined}
+    />
   ));
   const onMouseOver = useCallback(() => {
     setIsHover(true);
