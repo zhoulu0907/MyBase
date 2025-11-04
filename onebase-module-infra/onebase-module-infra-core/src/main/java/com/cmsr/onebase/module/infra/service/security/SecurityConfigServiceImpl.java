@@ -12,8 +12,8 @@ import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigUpdateReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -40,9 +40,8 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
     @Resource
     private SecurityConfigDataRepository securityConfigDataRepository;
-    
-    @Resource
-    private RedisTemplate<String, Object> redisTemplate;
+
+    private static final String cacheNames = "infra:security:tenant-config#30m";
 
     @Override
     public List<SecurityConfigCategoryRespVO> getAllCategories() {
@@ -58,7 +57,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     }
 
     @Override
-    @Cacheable(cacheNames = "infra:security:tenant-config#30m", key = "#tenantId")
+    @Cacheable(cacheNames = cacheNames, key = "#tenantId")
     public List<SecurityConfigItemRespVO> getSecurityConfigsByTenant(Long tenantId) {
         // 获取租户所有安全配置项，用于安全逻辑判断（使用Redis分布式缓存，TTL=30分钟）
         log.info("从数据库加载租户安全配置，tenantId: {}", tenantId);
@@ -90,6 +89,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = cacheNames, key = "#tenantId")
     public void batchUpdateConfig(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList) {
         // 接口4：批量更新租户安全配置
         if (updateReqVOList == null || updateReqVOList.isEmpty()) {
@@ -102,10 +102,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             updateSingleConfig(tenantId, updateReqVO);
         }
 
-        // 清除相关缓存
-        clearRelatedCache(tenantId);
-
-        log.info("批量更新租户安全配置完成，tenantId: {}, 配置项数量: {}", tenantId, updateReqVOList.size());
+        log.info("批量更新租户安全配置完成，tenantId: {}, 配置项数量: {}，已自动清除缓存", tenantId, updateReqVOList.size());
     }
 
     /**
@@ -165,24 +162,6 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         }
 
         return configItems;
-    }
-
-    // 保留方法占位（如后续需要在SpEL中复用键规则，可参考：tenantId + "_" + categoryId）
-
-    /**
-     * 清除租户相关缓存
-     *
-     * @param tenantId 租户ID
-     */
-    private void clearRelatedCache(Long tenantId) {
-        // 清除该租户的Redis缓存：infra:security:tenant-config#30m::tenantId
-        final String cacheKey = "infra:security:tenant-config#30m::" + tenantId;
-        try {
-            Boolean deleted = redisTemplate.delete(cacheKey);
-            log.info("清理租户安全配置缓存，tenantId: {}, cacheKey: {}, deleted: {}", tenantId, cacheKey, deleted);
-        } catch (Exception e) {
-            log.error("清理租户缓存失败，tenantId: {}, cacheKey: {}", tenantId, cacheKey, e);
-        }
     }
 
 }
