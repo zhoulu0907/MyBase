@@ -83,13 +83,15 @@ public class FlowCacheManager implements ApplicationRunner, Runnable, MessageLis
         Long applicationId = msg.getApplicationId();
         Long version = msg.getVersion();
         try {
-            switch (msg.getEventType()) {
-                case ChangeEvent.UPDATE_EVENT:
-                    onApplicationUpdate(applicationId, version);
-                    break;
-                case ChangeEvent.DELETE_EVENT:
-                    onApplicationDelete(applicationId);
-                    break;
+            synchronized (this) {
+                switch (msg.getEventType()) {
+                    case ChangeEvent.UPDATE_EVENT:
+                        onApplicationUpdate(applicationId, version);
+                        break;
+                    case ChangeEvent.DELETE_EVENT:
+                        onApplicationDelete(applicationId);
+                        break;
+                }
             }
         } catch (Exception e) {
             log.error("更新版本异常：{}", msg, e);
