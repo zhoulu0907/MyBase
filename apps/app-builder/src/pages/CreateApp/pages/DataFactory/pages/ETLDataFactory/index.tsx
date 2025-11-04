@@ -4,6 +4,7 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { ETL_FLOW_STATUS, ETL_SCHEDULE_STRATEGY, IS_SYNC_DONE, type ETLFlowMgmt } from '@onebase/app';
 import React, { useState } from 'react';
 import ETLFlowCard from './components/card';
+import CreateModal from './components/createModal';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
@@ -33,6 +34,8 @@ const EtlDataFactoryPage: React.FC = () => {
 
   const { curAppId } = useAppStore();
 
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+
   //   const debouncedSearch = useCallback(
   //     debounce((processName: string, enableStatus: ProcessStatus | undefined, triggerType: TriggerType | undefined) => {
   //       getFlowMgmtList(processName, enableStatus, triggerType);
@@ -44,6 +47,18 @@ const EtlDataFactoryPage: React.FC = () => {
   //     return () => debouncedSearch.cancel();
   //   }, [debouncedSearch]);
 
+  const handleOpenCreateModal = () => {
+    setCreateModalVisible(true);
+  };
+
+  const handleCreateETLFlow = () => {
+    setCreateModalVisible(false);
+  };
+
+  const handleCancelCreateETLFlow = () => {
+    setCreateModalVisible(false);
+  };
+
   return (
     <div className={styles.etlDataFactoryPage}>
       <div className={styles.header}>数据工厂</div>
@@ -51,7 +66,7 @@ const EtlDataFactoryPage: React.FC = () => {
         <div className={styles.content}>
           <div className={styles.contentHeader}>
             <div className={styles.contentHeaderLeft}>
-              <Button type="primary" icon={<IconPlus />}>
+              <Button type="primary" icon={<IconPlus />} onClick={handleOpenCreateModal}>
                 新建流程
               </Button>
             </div>
@@ -106,6 +121,8 @@ const EtlDataFactoryPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <CreateModal visible={createModalVisible} onOk={handleCreateETLFlow} onCancel={handleCancelCreateETLFlow} />
     </div>
   );
 };
