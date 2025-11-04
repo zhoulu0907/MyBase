@@ -120,7 +120,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     public Map<String, Object> updateData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
         // 获取当前登录用户的运行时权限
-//        this.fetchRuntimePermission(metadataDataMethodRequestContext);
+        this.fetchRuntimePermission(metadataDataMethodRequestContext);
 
         // 使用新的统一流程处理更新操作
 
@@ -507,7 +507,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
         Long menuId = metadataDataMethodRequestContext.getMenuId();
         if (menuId == null) {
-//            throw exception(METADATA_DATA_METHOD_RUNTIME_MENUID_REQUIRED);
+            throw exception(METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED);
         }
 
         RTLoginUser loginUser = RTSecurityContext.getLoginUser();

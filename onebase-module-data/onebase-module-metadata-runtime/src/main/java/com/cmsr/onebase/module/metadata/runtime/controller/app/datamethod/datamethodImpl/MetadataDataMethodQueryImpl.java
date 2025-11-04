@@ -64,13 +64,13 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
      */
     protected void validatePermission(ProcessContext context) {
 
-        /**
-         * 查询的功能权限校验
-         */
-        TenantContextHolder.setIgnore(true);
-        RTSecurityContext.mockLoginUser(3386012505007460352L,46699591748616192L);
-        FieldPermission fieldPermission = RTSecurityContext.getMenuFieldPermission(47012574606491648L);
-        System.out.println(fieldPermission);
+//        /**
+//         * 查询的功能权限校验
+//         */
+//        TenantContextHolder.setIgnore(true);
+//        RTSecurityContext.mockLoginUser(3386012505007460352L,46699591748616192L);
+//        FieldPermission fieldPermission = RTSecurityContext.getMenuFieldPermission(47012574606491648L);
+//        System.out.println(fieldPermission);
 
 
     }
