@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
-@Table(name = "etl_definition")
+@Table(name = "etl_workflow")
 public class ETLWorkflowDO extends TenantBaseDO {
 
     @Column(name = "application_id")
@@ -29,6 +29,10 @@ public class ETLWorkflowDO extends TenantBaseDO {
 
     @Column(name = "schedule_config")
     private String scheduleConfig;
+
+    public Boolean isEnabled() {
+        return isEnabled == 1;
+    }
 
     public void setConfig(JsonNode config) {
         this.config = JsonUtils.toJsonString(config);

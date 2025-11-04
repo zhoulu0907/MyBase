@@ -8,16 +8,13 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
-public class ETLWorkflowUpdateVO {
-
-    @NotNull
-    private Long workflowId;
+public class WorkflowCreateVO {
 
     @NotNull
     private Long applicationId;
 
     @NotBlank(message = "ETL名称不能为空")
-    private String name;
+    private String flowName;
 
     @NotBlank(message = "ETL配置不能为空")
     private String config;

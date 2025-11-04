@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.service.collector;
+package com.cmsr.onebase.module.etl.core.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
@@ -36,8 +36,15 @@ public class DataSourceFactory {
         DatabaseType dbType = parseDatabaseType(databaseType);
         // 2. 创建DataSource
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
-        String jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);
+        String connectMode = (String) connectionProperties.get("connectMode");
+        String jdbcConnection;
+        if (StringUtils.equalsIgnoreCase("default", connectMode)) {
+            jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);
+        } else {
+            jdbcConnection = (String) connectionProperties.get("jdbcUrl");
+        }
 //        Driver declaredDriver = getDeclaredDriverInstance(dbType);
+
         String username = (String) connectionProperties.get("username");
         String password = (String) connectionProperties.get("password");
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {

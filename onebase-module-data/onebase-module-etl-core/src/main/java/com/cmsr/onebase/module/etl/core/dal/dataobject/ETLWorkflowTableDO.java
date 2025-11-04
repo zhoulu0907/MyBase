@@ -18,6 +18,9 @@ public class ETLWorkflowTableDO extends TenantBaseDO {
     @Column(name = "relation")
     private String relation;
 
+    @Column(name = "datasource_id")
+    private Long datasourceId;
+
     @Column(name = "table_id")
     private Long tableId;
 }

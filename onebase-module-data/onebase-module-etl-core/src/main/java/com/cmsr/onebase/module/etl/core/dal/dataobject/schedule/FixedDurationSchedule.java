@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.dal.dataobject.sub;
+package com.cmsr.onebase.module.etl.core.dal.dataobject.schedule;
 
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.dal.dataobject.sub;
+package com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo;
 
 import com.google.common.collect.Lists;
 import lombok.Data;

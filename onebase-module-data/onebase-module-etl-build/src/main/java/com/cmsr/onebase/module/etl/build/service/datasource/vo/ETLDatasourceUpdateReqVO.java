@@ -28,6 +28,9 @@ public class ETLDatasourceUpdateReqVO {
     @Size(min = 1, max = 200, message = "数据源名称最大长度为200字符")
     private String datasourceName;
 
+    @Schema(description = "数据源描述")
+    private String declaration;
+
     @Schema(description = "数据源类型信息")
     @NotBlank(message = "数据源类型不能为空")
     private String datasourceType;
