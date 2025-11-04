@@ -23,4 +23,6 @@ public class UserMemberDTO {
 
     private Integer isIncludeChild;
 
+    private String deptName;
+
 }

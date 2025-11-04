@@ -26,7 +26,7 @@ public class RepositoryTest {
         PageParam pageParam = new PageParam();
         pageParam.setPageNo(1);
         pageParam.setPageSize(10);
-        PageResult<UserMemberDTO> result = appSqlQueryRepository.findUserMemberDTOByRoleId(6943244133695489L, "管理员", pageParam);
+        PageResult<UserMemberDTO> result = appSqlQueryRepository.findUserMemberDTOByRoleId(6943244133695489L, null, pageParam);
         System.out.println(result);
         System.out.println(result.getList());
         System.out.println(result.getTotal());

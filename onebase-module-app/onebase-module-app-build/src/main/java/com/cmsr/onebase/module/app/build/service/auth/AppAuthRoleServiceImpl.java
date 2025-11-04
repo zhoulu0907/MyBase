@@ -96,6 +96,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             vo.setId(v.getId());
             vo.setName(v.getMemberName());
             vo.setType(v.getMemberType());
+            vo.setDeptName(v.getDeptName());
             if (UserMemberDTO.MEMBER_TYPE_USER.equals(v.getMemberType())) {
                 vo.setTypeName("成员");
             } else if (v.getIsIncludeChild() != null && v.getIsIncludeChild() == 0) {
