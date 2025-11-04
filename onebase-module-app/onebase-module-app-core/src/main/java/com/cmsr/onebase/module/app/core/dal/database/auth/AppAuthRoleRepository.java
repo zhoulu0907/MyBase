@@ -72,4 +72,5 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
             return authRoleDO;
         }).toList();
     }
+
 }

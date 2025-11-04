@@ -43,6 +43,15 @@ public class AppAuthRoleController {
         return CommonResult.success(authRoleService.pageRoleUsers(reqVO));
     }
 
+    @GetMapping("/page-role-members")
+    @Operation(summary = "获取角色成员列表")
+    public CommonResult<PageResult<AuthRoleMembersPageRespVO>> pageRoleUsers(@Validated AuthRoleMembersPageReqVO reqVO) {
+        return CommonResult.success(authRoleService.pageRoleMembers(reqVO));
+    }
+
+
+
+
     @GetMapping("/list-dept-users")
     @Operation(summary = "获取部门用户列表")
     public CommonResult<DeptAndUsersRespDTO> listDeptUsers(@Validated AuthRoleDeptAndUsersReqVO reqVO) {
@@ -92,6 +101,33 @@ public class AppAuthRoleController {
     @Operation(summary = "角色删除成员")
     public CommonResult<Boolean> deleteRoleUser(@Valid @RequestBody AuthRoleDeleteUserReqVO reqVO) {
         authRoleService.deleteRoleUser(reqVO);
+        return CommonResult.success(true);
+    }
+
+
+    /**
+     * 角色添加成员
+     *
+     * @param reqVO
+     * @return
+     */
+    @PostMapping("/add-dept")
+    @Operation(summary = "角色添加成员")
+    public CommonResult<Boolean> addRoleDept(@Valid @RequestBody AuthRoleAddDeptReqVO reqVO) {
+        authRoleService.addRoleDept(reqVO);
+        return CommonResult.success(true);
+    }
+
+    /**
+     * 角色删除成员
+     *
+     * @param reqVO
+     * @return
+     */
+    @PostMapping("/delete-dept")
+    @Operation(summary = "角色删除成员")
+    public CommonResult<Boolean> deleteRoleDept(@Valid @RequestBody AuthRoleDeleteDeptReqVO reqVO) {
+        authRoleService.deleteRoleDept(reqVO);
         return CommonResult.success(true);
     }
 

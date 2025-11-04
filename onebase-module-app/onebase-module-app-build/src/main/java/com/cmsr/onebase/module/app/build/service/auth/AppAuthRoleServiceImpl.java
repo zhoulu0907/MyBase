@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
@@ -40,6 +41,9 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Resource
     private AppAuthRoleUserRepository appAuthRoleUserRepository;
+
+    @Resource
+    private AppAuthRoleDeptRepository appAuthRoleDeptRepository;
 
     @Resource
     private AppCommonService appCommonService;
@@ -76,6 +80,13 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             }
         }).toList();
         return new PageResult(respVOS, pageResult.getTotal());
+    }
+
+    @Override
+    public PageResult<AuthRoleMembersPageRespVO> pageRoleMembers(AuthRoleMembersPageReqVO reqVO) {
+        appCommonService.validateRoleExist(reqVO.getRoleId());
+
+        return null;
     }
 
     @Override
@@ -150,6 +161,20 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     }
 
     @Override
+    public void addRoleDept(AuthRoleAddDeptReqVO reqVO) {
+        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        appAuthRoleDeptRepository.addRoleDept(reqVO.getRoleId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
+        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds());
+    }
+
+    @Override
+    public void deleteRoleDept(AuthRoleDeleteDeptReqVO reqVO) {
+        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        appAuthRoleDeptRepository.deleteRoleDept(reqVO.getRoleId(), reqVO.getDeptIds());
+        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds());
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteRole(Long roleId) {
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(roleId);
@@ -157,7 +182,8 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_ALLOW_DELETE);
         }
         List<Long> userIds = appAuthRoleUserRepository.findByRoleId(roleId).stream().map(v -> v.getUserId()).toList();
-        appAuthRoleUserRepository.deleteById(roleId);
+        appAuthRoleUserRepository.deleteByRoleId(roleId);
+        appAuthRoleDeptRepository.deleteByRoleId(roleId);
         appAuthRoleRepository.deleteById(roleId);
         appCacheProvider.usersChanged(authRoleDO.getApplicationId(), userIds);
     }
