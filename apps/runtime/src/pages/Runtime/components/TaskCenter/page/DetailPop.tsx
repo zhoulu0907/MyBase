@@ -3,7 +3,7 @@ import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
-import { LISTTYPE, FlowStatusMap } from '@onebase/app';
+import { LISTTYPE, FlowStatusMap, ButtonTypeMap } from '@onebase/app';
 import DetailTable from './DetailTable';
 import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
@@ -94,7 +94,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
                 onCancel={() => setPopupVisibleByIndex(index, false)}
               >
                 <Button
-                  type={item?.buttonName === '同意' ? 'primary' : 'outline'}
+                  type={item?.buttonName === ButtonTypeMap.AGREED ? 'primary' : 'outline'}
                   onClick={() => setPopupVisibleByIndex(index, true)}
                 >
                   {item?.buttonName}
