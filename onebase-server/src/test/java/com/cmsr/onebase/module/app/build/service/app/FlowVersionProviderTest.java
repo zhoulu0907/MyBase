@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
-import com.cmsr.onebase.module.flow.core.graph.FlowVersionUpdate;
+import com.cmsr.onebase.module.flow.core.graph.FlowVersionProvider;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -13,13 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @Setter
 @SpringBootTest(classes = OneBaseServerApplication.class)
-public class FlowVersionUpdateTest {
+public class FlowVersionProviderTest {
 
     @Autowired
-    private FlowVersionUpdate flowVersionUpdate;
+    private FlowVersionProvider flowVersionProvider;
 
     @Test
     public void testUpdateApplicationVersion() {
-        flowVersionUpdate.updateApplicationVersion(46699591748616192L);
+        flowVersionProvider.onApplicationUpdate(46699591748616192L);
     }
 }

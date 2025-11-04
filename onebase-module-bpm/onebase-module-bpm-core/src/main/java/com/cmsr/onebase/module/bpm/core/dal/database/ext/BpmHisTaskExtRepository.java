@@ -93,9 +93,9 @@ public class BpmHisTaskExtRepository {
         }
         // 设置排序
         if("asc".equals(reqVO.getSortType())){
-            condition.order("t.create_time asc");
+            condition.order("t.update_time asc");
         }else{
-            condition.order("t.create_time desc");
+            condition.order("t.update_time desc");
         }
         return condition;
     }

@@ -42,4 +42,8 @@ public class ApplicationCreateRespVO {
 
     @Schema(description = "标签ID")
     private List<Long> tagIds;
+
+    @Schema(description = "发布模式")
+    private Integer publishModel;
+
 }
