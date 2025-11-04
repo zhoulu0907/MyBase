@@ -22,3 +22,26 @@ export interface statusProps {
   value: string;
   status: number;
 }
+
+export interface corpApplicationListProps {
+  appName: string;
+  appCount: string;
+  iconName: string;
+}
+
+export interface cropItem {
+  id: number;
+  address: string;
+  corpId: string;
+  corpName: string;
+  createTime:number;
+  industryType: number;
+  status: number;
+  userLimit:number;
+  adminName: string;
+  corpApplicationList: corpApplicationListProps[];
+}
+
+export interface OutletContextType {
+  corpId: number;
+}

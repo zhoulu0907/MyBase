@@ -4,13 +4,13 @@ import { CommonTable } from "../table/commonTable";
 import { TopHeader } from "../topHeader";
 import styles from "./authorizedApp.module.less"
 import { forwardRef, useImperativeHandle } from "react";
-import type { IAuthorizedAppProps, AuthorizedAppRef } from "../../types/appItem";
+import type { IAuthorizedAppProps, AuthorizedAppRef, AppItem } from "../../types/appItem";
 
 
 export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
   ({ setAddAppModalVisible, onEdit, className}, ref) => {
     // 模拟表格数据（5条示例数据）
-    const initialAppData = Array(5).fill().map((_, index) => ({
+    const initialAppData:AppItem[]= Array(5).fill().map((_, index) => ({
         key: index + 1,
         appName: "CustomerRM_1c",
         appId: 'CustomerRM_1c',
@@ -26,7 +26,7 @@ export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
         getEditItem,
         removeItem,
         addItem
-    } = useTableData(initialAppData);
+    } = useTableData<AppItem>(initialAppData);
 
     useImperativeHandle(ref, () => ({
       addNewApp: (newData) => {
@@ -108,6 +108,7 @@ export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
                 setSearchInputValue={setSearchValue}
             />
             <CommonTable
+                loading={false}
                 data={displayData}
                 columns={columns}
                 pageination={{

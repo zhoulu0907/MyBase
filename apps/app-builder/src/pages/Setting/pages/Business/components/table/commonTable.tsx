@@ -3,6 +3,7 @@ import { Table } from '@arco-design/web-react';
 interface ICommonTableProps {
     data: any[];
     columns: any[];
+    loading: boolean;
     pageination: any;
     scroll?: {x: number}
 }
@@ -11,6 +12,7 @@ export const CommonTable:React.FC<ICommonTableProps> = ({
     columns,
     pageination,
     scroll,
+    loading,
     ...rest
 }) => {
     const defaultPageination = {
@@ -24,8 +26,9 @@ export const CommonTable:React.FC<ICommonTableProps> = ({
 
     return (
         <Table
-            rowKey="key"
+            rowKey="id"
             border={false}
+            loading={loading}
             columns={columns}
             data={data}
             pagination={pageination ? pageination : defaultPageination}
