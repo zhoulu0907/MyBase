@@ -683,7 +683,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      * @param configStore Anyline 查询配置
      * @param context 处理上下文
      */
-    protected void applyQueryPermissionFilter(org.anyline.data.param.ConfigStore configStore,
+    public void applyQueryPermissionFilter(org.anyline.data.param.ConfigStore configStore,
                                                ProcessContext context) {
         if (context.getMetadataPermissionContext() == null) {
             log.debug("权限上下文为空，跳过查询权限过滤");
