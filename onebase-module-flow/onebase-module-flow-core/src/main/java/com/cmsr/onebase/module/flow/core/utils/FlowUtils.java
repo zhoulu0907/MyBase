@@ -10,6 +10,9 @@ public class FlowUtils {
 
     public static final String REDIS_APPLICATION_VERSION_KEY = "flow:application:version";
 
+    public static final String REDIS_VERSION_CHANGE_TOPIC_KEY = "flow:version:change:topic";
+
+
     public static final int MAX_QUERY_CALL_COUNT = 10;
 
     public static final Duration REDIS_TRACE_TIMEOUT = Duration.ofHours(4);

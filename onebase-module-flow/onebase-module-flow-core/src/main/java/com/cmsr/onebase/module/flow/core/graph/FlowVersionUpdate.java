@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMap;
+import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,12 @@ public class FlowVersionUpdate {
         }
         RMap<Long, Long> rMap = redissonClient.getMap(FlowUtils.REDIS_APPLICATION_VERSION_KEY);
         rMap.put(applicationId, System.currentTimeMillis());
+        RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
+        ChangeEvent changeEvent = new ChangeEvent();
+        changeEvent.setEventType(ChangeEvent.UPDATE_EVENT);
+        changeEvent.setApplicationId(applicationId);
+        changeEvent.setVersion(System.currentTimeMillis());
+        topic.publish(changeEvent);
     }
 
     private void updateTimeJob(FlowProcessDO flowProcessDO) {
