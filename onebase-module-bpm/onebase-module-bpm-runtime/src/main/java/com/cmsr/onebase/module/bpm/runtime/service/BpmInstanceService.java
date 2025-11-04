@@ -40,18 +40,18 @@ public interface BpmInstanceService {
      */
     List<BpmOperatorRecordRespVO.OperatorRecord> getOperatorRecord(Long instanceId);
 
-    /*
+    /**
      * 获取流程实例的表单详情
      *
-     * @param taskId     任务ID
      * @param instanceId 流程实例ID
      */
     BpmFlowTaskDetailVO getFormDetail(Long instanceId);
+
     /**
      * 流程预测
      *
-     * @param businessId
+     * @param reqVO 流程预测请求VO
      * @return 流程图
      */
-    List<BpmFlowPreviewVO> flowPredict(String businessId);
+    List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO);
 }

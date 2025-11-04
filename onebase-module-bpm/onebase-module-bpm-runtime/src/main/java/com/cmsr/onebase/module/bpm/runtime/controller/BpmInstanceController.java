@@ -70,12 +70,11 @@ public class BpmInstanceController {
      *
      * @param businessId
      */
-    @GetMapping("/flow-predict")
+    @PostMapping("/flow-predict")
     @Operation(summary = "流程预测")
-    public CommonResult<List<BpmFlowPreviewVO>> flowPredict(@RequestParam  String businessId) {
-      log.info("流程预测: flowCode{}");
-        return CommonResult.success(bpmExecService.flowPredict(businessId)) ;
-
+    public CommonResult<List<BpmPredictRespVO.NodeInfo>> flowPredict(@RequestBody @Validated BpmPredictReqVO reqVO) {
+        log.info("流程预测: {}", reqVO);
+        return CommonResult.success(bpmExecService.flowPredict(reqVO)) ;
     }
 
 }
