@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Button, Modal, Input, Space, List, Breadcrumb, Avatar, Typography, Spin } from '@arco-design/web-react';
-import { IconRight, IconClose } from '@arco-design/web-react/icon';
-import { formatDeptAndUsers } from './const';
+import { useState } from 'react';
+import { Button, Modal, Checkbox } from '@arco-design/web-react';
 import DeptMember from './deptMember';
 
 interface IData {
@@ -15,6 +13,7 @@ interface IProps {
   loading: boolean;
   visible: boolean;
   selectedMembers: any[];
+  isFromPermission?: boolean;
   onExpand: (value: string) => void;
   onSearch: (value: string) => void;
   onCancel: () => void;
@@ -31,6 +30,7 @@ const AddMembers = (props: IProps) => {
     data,
     loading,
     selectedMembers,
+    isFromPermission = false,
     onExpand,
     onSearch,
     onCancel,
@@ -42,6 +42,12 @@ const AddMembers = (props: IProps) => {
 
   const isSelectDepartment = title === 'specifiedDepartment';
   const isSelectPerson = title === 'specifiedPerson';
+  const modalTitle = (() => {
+  if (!isSelectDepartment && !isSelectPerson) return title;
+  const action = isFromPermission ? '添加' : '指定';
+  const subject = isSelectDepartment ? '部门' : '成员';
+  return `${action}${subject}`;
+})();
 
   // 点击取消时的处理函数
   const handleCancel = () => {
@@ -52,7 +58,7 @@ const AddMembers = (props: IProps) => {
   return (
     <Modal
       title={
-        <div style={{ textAlign: 'left' }}>{isSelectDepartment ? '指定部门' : isSelectPerson ? '指定成员' : title}</div>
+        <div style={{ textAlign: 'left' }}>{modalTitle}</div>
       }
       onOk={onCancel}
       onCancel={handleCancel}
@@ -65,13 +71,18 @@ const AddMembers = (props: IProps) => {
       style={{ width }}
       maskClosable={true}
       footer={
-        <div style={{ textAlign: 'right' }}>
-          <Button type="default" onClick={handleCancel} style={{ marginRight: 12 }}>
-            取消
-          </Button>
-          <Button type="primary" disabled={selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers)}>
-            确定
-          </Button>
+        <div style={{display: 'flex'}}>
+          <div style={{ flex: 1,textAlign: 'left' }}>
+            {(isFromPermission && isSelectDepartment) && <Checkbox>包含勾选部门及下级部门</Checkbox>}
+          </div>
+          <div>
+            <Button type="default" onClick={handleCancel} style={{ marginRight: 12 }}>
+              取消
+            </Button>
+            <Button type="primary" disabled={selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers)}>
+              确定
+            </Button>
+          </div>
         </div>
       }
     >
