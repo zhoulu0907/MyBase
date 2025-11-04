@@ -51,8 +51,6 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("system_notify_template");
         TENANT_IGNORE_TABLES.add("system_oauth2_client");
         TENANT_IGNORE_TABLES.add("system_license");
-        TENANT_IGNORE_TABLES.add("infra_codegen_column");
-        TENANT_IGNORE_TABLES.add("infra_codegen_table");
         TENANT_IGNORE_TABLES.add("infra_config");
         TENANT_IGNORE_TABLES.add("infra_data_source_config");
         TENANT_IGNORE_TABLES.add("infra_file_config");
