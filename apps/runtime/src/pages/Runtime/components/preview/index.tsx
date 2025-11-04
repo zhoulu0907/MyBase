@@ -1,5 +1,5 @@
 import ExecuteFlows from '@/utils/flow';
-import { Button, Drawer, Form, Message } from '@arco-design/web-react';
+import { Button, Drawer, Form, Message, Modal } from '@arco-design/web-react';
 import {
   PageType,
   CATEGORY_TYPE,
@@ -34,6 +34,7 @@ import {
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
+import FlowPredict from './flowPredict';
 import styles from './index.module.less';
 
 interface PreviewProps {
@@ -69,6 +70,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [refresh, setRefresh] = useState(Date.now());
+  const [isPredictVisible, setPredictVisible] = useState(false);
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -234,12 +236,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
         );
         setFlows(createFlows);
-
+        setPredictVisible(false)
         if (res) {
           Message.success('创建成功');
         }
       } catch (error) {
         Message.error('创建失败')
+        setPredictVisible(false)
       }
     }
 
@@ -347,6 +350,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     return res;
   };
 
+  const onSubmit = () => {
+    if (curPage?.value?.pageSetType === PageType.BPM) {
+      setPredictVisible(true);
+    } else {
+      submitForm();
+    }
+  };
+
   const toEditMode = () => {
     setDetailMode(false);
   };
@@ -413,7 +424,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
-              <Button type="primary" onClick={submitForm}>
+              <Button type="primary" onClick={onSubmit}>
                 提交
               </Button>
               <Button type="default" onClick={cancelSubmitForm}>
@@ -489,6 +500,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       {/* 信息收集弹窗 */}
       <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
+      {isPredictVisible && (
+        <Modal
+          title=""
+          visible={isPredictVisible}
+          onOk={() => submitForm()}
+          onCancel={() => setPredictVisible(false)}
+          autoFocus={false}
+          focusLock={true}
+        >
+          <FlowPredict businessId={curPage?.value?.id} />
+        </Modal>
+      )}
     </div>
   );
 };
