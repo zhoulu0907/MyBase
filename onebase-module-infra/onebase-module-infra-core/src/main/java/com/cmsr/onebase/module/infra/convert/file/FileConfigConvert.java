@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.convert.file;
 
-import com.cmsr.onebase.framework.common.consts.ConvertConstant;
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigSaveReqVO;
@@ -27,6 +27,6 @@ public interface FileConfigConvert {
     
     @Named("integerToBoolean")
     default Boolean integerToBoolean(Integer value) {
-        return value != null && value != ConvertConstant.ZERO;
+        return value != null && value != NumberConstant.ZERO;
     }
 }

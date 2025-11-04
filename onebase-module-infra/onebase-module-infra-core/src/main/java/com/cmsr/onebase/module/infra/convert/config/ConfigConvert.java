@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.convert.config;
 
-import com.cmsr.onebase.framework.common.consts.ConvertConstant;
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.config.ConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigRespVO;
@@ -31,18 +31,15 @@ public interface ConfigConvert {
     
     @Named("integerToBoolean")
     default Boolean integerToBoolean(Integer value) {
-        if (value == null) {
-            return null;
-        }
-        return value == ConvertConstant.ONE;
+        return value != null && value != NumberConstant.ZERO;
     }
     
     @Named("booleanToInteger")
     default Integer booleanToInteger(Boolean value) {
         if (value == null) {
-            return null;
+            return NumberConstant.ZERO;
         }
-        return value ? ConvertConstant.ONE : ConvertConstant.ZERO;
+        return value ? NumberConstant.ONE : NumberConstant.ZERO;
     }
 
 }

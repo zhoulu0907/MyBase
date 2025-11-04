@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.convert.license;
 
-import com.cmsr.onebase.framework.common.consts.ConvertConstant;
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.module.system.vo.license.LicenseExportRespVO;
 import com.cmsr.onebase.module.system.vo.license.LicensePageRespVO;
 import com.cmsr.onebase.module.system.vo.license.LicenseRespVO;
@@ -57,9 +57,6 @@ public interface LicenseConvert {
     
     @Named("integerToBoolean")
     default Boolean integerToBoolean(Integer value) {
-        if (value == null) {
-            return null;
-        }
-        return value == ConvertConstant.ONE;
+        return value != null && value != NumberConstant.ZERO;
     }
 }

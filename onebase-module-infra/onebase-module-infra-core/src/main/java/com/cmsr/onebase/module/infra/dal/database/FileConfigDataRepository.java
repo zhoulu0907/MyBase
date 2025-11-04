@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.consts.ConvertConstant;
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigPageReqVO;
@@ -75,7 +75,7 @@ public class FileConfigDataRepository extends DataRepository<FileConfigDO> {
      * @param id 配置ID
      */
     public void updateToMaster(Long id) {
-        FileConfigDO updateObj = new FileConfigDO().setId(id).setMaster(ConvertConstant.ONE);
+        FileConfigDO updateObj = new FileConfigDO().setId(id).setMaster(NumberConstant.ONE);
         update(updateObj);
     }
 }

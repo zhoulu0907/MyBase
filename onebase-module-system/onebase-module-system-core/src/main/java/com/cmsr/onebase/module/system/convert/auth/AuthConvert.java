@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.convert.auth;
 
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.consts.ConvertConstant;
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
@@ -107,9 +107,6 @@ public interface AuthConvert {
     
     @Named("integerToBoolean")
     default Boolean integerToBoolean(Integer value) {
-        if (value == null) {
-            return null;
-        }
-        return value == ConvertConstant.ONE;
+        return value != null && value != NumberConstant.ZERO;
     }
 }
