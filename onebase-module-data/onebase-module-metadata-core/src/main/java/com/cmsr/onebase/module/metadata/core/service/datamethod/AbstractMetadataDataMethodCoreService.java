@@ -420,8 +420,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
         } catch (Exception e) {
             log.error("执行元数据系统方法失败。请求上下文: [{}]", requestContext, e);
-//            throw exception(DATA_METHOD_EXEC_FAIL);
-            throw new RuntimeException("执行" + requestContext.getMetadataDataMethodOpEnum() + "异常：" + e.getMessage(), e);
+            throw exception(DATA_METHOD_EXEC_FAIL, e.getMessage());
+//            throw new RuntimeException("执行" + requestContext.getMetadataDataMethodOpEnum() + "异常：" + e.getMessage(), e);
         }
     }
 

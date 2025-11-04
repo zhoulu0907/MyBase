@@ -507,7 +507,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
         Long menuId = metadataDataMethodRequestContext.getMenuId();
         if (menuId == null) {
-//            throw exception(METADATA_DATA_METHOD_RUNTIME_MENUID_REQUIRED);
+            throw exception(METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED);
         }
 
         RTLoginUser loginUser = RTSecurityContext.getLoginUser();

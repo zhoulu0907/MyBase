@@ -352,7 +352,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         metadataDataMethodRequestContext.setId(reqVO.getId());
         metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
         metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
-
+        metadataDataMethodRequestContext.setMenuId(reqVO.getMenuId());
 
 
         // 调用core模块的基础服务
