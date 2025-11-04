@@ -1,18 +1,25 @@
 package com.cmsr.onebase.module.app.build.controller.app;
 
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
-import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
-import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
+import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
  * @Author：huangjie
@@ -52,7 +59,6 @@ public class AppApplicationController {
         return CommonResult.success(true);
     }
 
-
     @PostMapping("/update-name")
     @Operation(summary = "更新应用名称")
     public CommonResult<Boolean> updateApplicationName(@RequestParam("id") Long id,
@@ -61,7 +67,6 @@ public class AppApplicationController {
         return CommonResult.success(true);
     }
 
-
     @PostMapping("/delete")
     @Operation(summary = "删除应用")
     public CommonResult<Boolean> deleteApplication(@RequestParam("id") Long id,
@@ -69,12 +74,16 @@ public class AppApplicationController {
         appApplicationService.deleteApplication(id, name);
         return CommonResult.success(true);
     }
-
     @GetMapping("/id/generate")
     @Operation(summary = "发号器")
     public CommonResult<Long> generateId() {
-
         return CommonResult.success(appApplicationService.generateId());
     }
 
+    @GetMapping(value = {"/simple-list"})
+    @Operation(summary = "获取应用精简信息列表-不分页", description = "只包含被开启的应用，主要用于前端的下拉选项")
+    public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList() {
+        List<ApplicationDO> list = appApplicationService.getSimpleAppList(CommonStatusEnum.ENABLE.getStatus());
+        return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
+    }
 }

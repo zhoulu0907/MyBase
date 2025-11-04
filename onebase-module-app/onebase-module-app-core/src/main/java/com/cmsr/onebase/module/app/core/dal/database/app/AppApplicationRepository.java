@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.core.dal.database.app;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import org.anyline.data.param.ConfigStore;
@@ -11,6 +12,7 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -61,15 +63,38 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
 
     public ApplicationDO findByUidAndIdNot(String uid, Long id) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("app_uid", uid);
-        configs.ne("id", id);
+        configs.eq(ApplicationDO.APP_UID, uid);
+        configs.ne(ApplicationDO.ID, id);
         return findOne(configs);
     }
 
     public Long countByTenantId(Long tenantId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("tenant_id", tenantId);
+        configs.eq(ApplicationDO.TENANT_ID, tenantId);
         return countByConfig(configs);
     }
 
+    public List<ApplicationDO> getSimpleAppList(Integer status) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(ApplicationDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
+        configStore.eq(ApplicationDO.APP_STATUS, status);
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
+
+    public List<ApplicationDO> finAppApplicationByAppName(String appName) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(ApplicationDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
+        if (StringUtils.isNotBlank(appName)) {
+            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
+        }
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
+
+    public List<ApplicationDO> finAppApplicationAll() {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
 }

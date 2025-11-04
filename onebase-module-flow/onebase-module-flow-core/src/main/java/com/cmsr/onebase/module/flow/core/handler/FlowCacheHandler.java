@@ -57,7 +57,7 @@ public class FlowCacheHandler {
             oldProcessIds.remove(flowProcessDO.getId());
         }
         for (Long processId : oldProcessIds) {
-            onProcessDelete(applicationId, processId);
+            onProcessDelete(processId);
         }
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             onProcessUpdate(flowProcessDO);
@@ -70,7 +70,7 @@ public class FlowCacheHandler {
         ids.forEach(id -> {
             String chainId = FlowUtils.toFlowChainId(id);
             FlowBus.removeChain(chainId);
-            flowProcessCache.deleteByApplicationId(applicationId, id);
+            flowProcessCache.deleteByProcessId(id);
         });
         return "删除：" + ids;
     }
@@ -90,12 +90,12 @@ public class FlowCacheHandler {
         flowProcessCache.update(processDO.getApplicationId(), processDO.getId(), jsonGraph);
     }
 
-    private void onProcessDelete(Long applicationId, Long processId) {
+    private void onProcessDelete(Long processId) {
         log.info("发布流程删除事件：{}", processId);
         String chainId = FlowUtils.toFlowChainId(processId);
         FlowBus.removeChain(chainId);
         //
-        flowProcessCache.deleteByApplicationId(applicationId, processId);
+        flowProcessCache.deleteByProcessId(processId);
     }
 
 

@@ -8,7 +8,11 @@ import java.time.Duration;
  */
 public class FlowUtils {
 
-    public static final String REDIS_APPLICATION_VERSION_KEY = "flow:application:version";
+    public static final String REDIS_VERSION_CACHE_KEY = "flow:version:cache";
+
+    public static final String REDIS_VERSION_CHANGE_TOPIC_KEY = "flow:version:change:topic";
+
+    public static final int VERSION_TIMEOUT_HOUR = 12;
 
     public static final int MAX_QUERY_CALL_COUNT = 10;
 
@@ -28,9 +32,5 @@ public class FlowUtils {
 
     public static String toRedisProcessLockKey(Long processId) {
         return "flow:process:lock:" + processId;
-    }
-
-    public static String toRedisApplicationLockKey(Long processId) {
-        return "flow:application:lock:" + processId;
     }
 }

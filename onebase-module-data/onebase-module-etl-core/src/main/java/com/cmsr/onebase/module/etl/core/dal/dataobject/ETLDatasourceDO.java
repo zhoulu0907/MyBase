@@ -23,6 +23,9 @@ public class ETLDatasourceDO extends TenantBaseDO {
     @Column(name = "datasource_name")
     private String datasourceName;
 
+    @Column(name = "declaration")
+    private String declaration;
+
     @Column(name = "datasource_type")
     private String datasourceType;
 
