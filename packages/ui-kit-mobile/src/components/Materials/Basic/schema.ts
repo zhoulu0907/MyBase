@@ -1,7 +1,9 @@
-import XInputText from './FormComponents/InputText/schema';
+import XInputText from './FormComponents/InputText/schema'; 
+import XInputTextArea from './FormComponents/InputTextArea/schema';
 
 const baseSchema = {
-  XInputText
+  XInputText,
+  XInputTextArea
 };
 
 export default baseSchema;

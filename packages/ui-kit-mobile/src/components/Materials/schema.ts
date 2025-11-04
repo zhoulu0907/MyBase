@@ -7,7 +7,8 @@ export type ComponentSchema = typeof BasicSchema | any; // 可以根据需要扩
 
 // 创建组件配置映射
 const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
-  [ALL_COMPONENT_TYPES.INPUT_TEXT]: BasicSchema.XInputText
+  [ALL_COMPONENT_TYPES.INPUT_TEXT]: BasicSchema.XInputText,
+  [ALL_COMPONENT_TYPES.INPUT_TEXTAREA]: BasicSchema.XInputTextArea
 };
 
 /**
