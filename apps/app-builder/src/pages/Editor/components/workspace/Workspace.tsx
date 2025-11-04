@@ -12,10 +12,10 @@ import {
   getComponentConfig,
   getComponentSchema,
   getComponentWidth,
-  usePageEditorSignal,
-  WIDTH_VALUES,
-  WIDTH_OPTIONS,
   useAppEntityStore,
+  usePageEditorSignal,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -34,10 +34,10 @@ import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
 import {
-  getEntityFieldOptions,
-  getAutoNumberConfig,
   ENTITY_TYPE,
   ENTITY_TYPE_VALUE,
+  getAutoNumberConfig,
+  getEntityFieldOptions,
   type AppEntityField,
   type EntityFieldOption
 } from '@onebase/app';
