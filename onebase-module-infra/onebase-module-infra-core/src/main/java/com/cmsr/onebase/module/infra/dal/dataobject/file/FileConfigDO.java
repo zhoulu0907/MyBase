@@ -59,7 +59,7 @@ public class FileConfigDO extends BaseDO {
      * 由于我们可以配置多个文件配置，默认情况下，使用主配置进行文件的上传
      */
     @Column(name = COLUMN_MASTER)
-    private Boolean master;
+    private Integer master;
 
     /**
      * 支付渠道配置

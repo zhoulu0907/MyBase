@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.mail;
 
+import com.cmsr.onebase.framework.common.consts.ConvertConstant;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import cn.hutool.core.util.StrUtil;
@@ -124,7 +125,8 @@ public class MailSendServiceImpl implements MailSendService {
         return new MailAccount().setFrom(from).setAuth(true)
                 .setUser(account.getUsername()).setPass(account.getPassword())
                 .setHost(account.getHost()).setPort(account.getPort())
-                .setSslEnable(account.getSslEnable()).setStarttlsEnable(account.getStarttlsEnable());
+                .setSslEnable(account.getSslEnable()== ConvertConstant.ONE?true:false)
+                .setStarttlsEnable(account.getStarttlsEnable()==ConvertConstant.ONE?true:false);
     }
 
     @VisibleForTesting
