@@ -94,6 +94,6 @@ export enum LISTTYPE {
   IDONE = 'idone',
   ICREATED = 'icreated'
 }
-export const ButtonTypeMap = {
+export const BPMConfigButtonType = {
   APPROVE: 'approve'
 };
