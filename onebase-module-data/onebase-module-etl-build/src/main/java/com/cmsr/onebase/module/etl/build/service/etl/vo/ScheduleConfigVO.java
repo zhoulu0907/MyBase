@@ -10,6 +10,9 @@ import lombok.Data;
 public class ScheduleConfigVO {
 
     @NotNull
+    private Long applicationId;
+
+    @NotNull
     private Long workflowId;
 
     @NotBlank
@@ -17,6 +20,9 @@ public class ScheduleConfigVO {
 
     @NotNull
     private ScheduleConfig config;
+
+    @NotNull
+    private Integer enableStatus;
 
     public ScheduleType getScheduleStrategy() {
         return ScheduleType.of(this.scheduleStrategy);

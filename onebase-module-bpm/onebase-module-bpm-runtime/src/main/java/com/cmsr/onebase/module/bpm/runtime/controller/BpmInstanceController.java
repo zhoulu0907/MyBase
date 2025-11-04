@@ -65,5 +65,16 @@ public class BpmInstanceController {
         log.info("获取流程详情: {}", instanceId);
         return CommonResult.success(bpmExecService.getFormDetail(instanceId));
     }
+    /**
+     * 流程预览
+     *
+     * @param businessId
+     */
+    @PostMapping("/flow-predict")
+    @Operation(summary = "流程预测")
+    public CommonResult<List<BpmPredictRespVO.NodeInfo>> flowPredict(@RequestBody @Validated BpmPredictReqVO reqVO) {
+        log.info("流程预测: {}", reqVO);
+        return CommonResult.success(bpmExecService.flowPredict(reqVO)) ;
+    }
 
 }
