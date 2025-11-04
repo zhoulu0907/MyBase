@@ -61,6 +61,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     @Cacheable(cacheNames = "infra:security:tenant-config#30m", key = "#tenantId")
     public List<SecurityConfigItemRespVO> getSecurityConfigsByTenant(Long tenantId) {
         // 获取租户所有安全配置项，用于安全逻辑判断（使用Redis分布式缓存，TTL=30分钟）
+        log.info("从数据库加载租户安全配置，tenantId: {}", tenantId);
         List<SecurityConfigTemplateDO> templates = templateDataRepository.findByTenantId(tenantId);
         if (templates.isEmpty()) {
             return new ArrayList<>();
@@ -83,6 +84,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             configItems.add(itemVO);
         }
 
+        log.info("租户安全配置加载完成，tenantId: {}, 配置项数量: {}", tenantId, configItems.size());
         return configItems;
     }
 
@@ -94,6 +96,8 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             return;
         }
 
+        log.info("开始批量更新租户安全配置，tenantId: {}, 配置项数量: {}", tenantId, updateReqVOList.size());
+
         for (SecurityConfigUpdateReqVO updateReqVO : updateReqVOList) {
             updateSingleConfig(tenantId, updateReqVO);
         }
@@ -101,7 +105,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         // 清除相关缓存
         clearRelatedCache(tenantId);
 
-        log.info("批量更新租户安全配置，租户ID: {}, 配置项数量: {}", tenantId, updateReqVOList.size());
+        log.info("批量更新租户安全配置完成，tenantId: {}, 配置项数量: {}", tenantId, updateReqVOList.size());
     }
 
     /**
@@ -171,13 +175,13 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
      * @param tenantId 租户ID
      */
     private void clearRelatedCache(Long tenantId) {
-        // 清除该租户的Redis缓存：infra:security:tenant-config::tenantId
-        final String cacheKey = "infra:security:tenant-config::" + tenantId;
+        // 清除该租户的Redis缓存：infra:security:tenant-config#30m::tenantId
+        final String cacheKey = "infra:security:tenant-config#30m::" + tenantId;
         try {
-            redisTemplate.delete(cacheKey);
-            log.info("已清理租户安全配置缓存，tenantId: {}", tenantId);
+            Boolean deleted = redisTemplate.delete(cacheKey);
+            log.info("清理租户安全配置缓存，tenantId: {}, cacheKey: {}, deleted: {}", tenantId, cacheKey, deleted);
         } catch (Exception e) {
-            log.warn("清理租户缓存失败，tenantId: {}, cacheKey: {}", tenantId, cacheKey, e);
+            log.error("清理租户缓存失败，tenantId: {}, cacheKey: {}", tenantId, cacheKey, e);
         }
     }
 
