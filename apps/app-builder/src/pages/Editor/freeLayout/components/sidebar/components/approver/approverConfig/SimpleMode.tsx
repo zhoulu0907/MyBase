@@ -174,7 +174,11 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
             rules={approverFormRules.user}
             wrapperCol={{ style: { width: '100%' } }}
           >
-            <Select mode="multiple" placeholder="选择审批人" allowClear>
+            <Select mode="multiple" placeholder="选择审批人" 
+                    filterOption={(inputValue, option) =>
+                      option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
+                    }
+                    allowClear>
               {userOptions?.map((option: any) => (
                 <Option key={option?.userId} value={option?.userId}>
                   {option.name}
@@ -191,7 +195,11 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
             rules={approverFormRules.role}
             wrapperCol={{ style: { width: '100%' } }}
           >
-            <Select mode="multiple" placeholder="选择角色" allowClear>
+            <Select mode="multiple" placeholder="选择角色" 
+                    filterOption={(inputValue, option) =>
+                      option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
+                    }
+                    allowClear>
               {roleOptions?.map((option: any) => (
                 <Option key={option?.roleId} value={option?.roleId}>
                   {option.roleName}
