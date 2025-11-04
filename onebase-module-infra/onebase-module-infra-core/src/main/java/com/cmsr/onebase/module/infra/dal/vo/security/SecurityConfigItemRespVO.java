@@ -37,4 +37,7 @@ public class SecurityConfigItemRespVO {
     @Schema(description = "排序号", example = "1")
     private Integer sortOrder;
 
+    @Schema(description = "分类ID", example = "1")
+    private Long categoryId;
+
 }

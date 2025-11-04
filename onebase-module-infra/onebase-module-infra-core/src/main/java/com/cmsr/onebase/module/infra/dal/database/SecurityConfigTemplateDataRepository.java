@@ -75,4 +75,50 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
         }).toList();
     }
 
+    /**
+     * 根据租户ID查询所有安全配置项（带兜底策略）
+     * 优先从租户配置表查询，若不存在则从模板表获取默认值
+     *
+     * @param tenantId 租户ID
+     * @return 配置项列表，包含租户配置或模板默认值
+     */
+    @TenantIgnore
+    public List<SecurityConfigTemplateDO> findByTenantId(Long tenantId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.param("tenantId", tenantId);
+        
+        String sql = """
+                SELECT
+                    t.id,
+                    t.category_id,
+                    t.config_key,
+                    t.config_name,
+                    t.data_type,
+                    t.description,
+                    t.sort_order,
+                    COALESCE(c.config_value, t.default_value) AS default_value
+                FROM infra_security_config_template t
+                LEFT JOIN infra_security_config c
+                    ON t.config_key = c.config_key
+                    AND c.tenant_id = #{tenantId}
+                    AND c.deleted = 0
+                WHERE t.deleted = 0
+                ORDER BY t.category_id ASC, t.sort_order ASC
+                """;
+        
+        DataSet dataSet = this.querys(sql, configs);
+        return dataSet.stream().map(dataRow -> {
+            SecurityConfigTemplateDO templateDO = new SecurityConfigTemplateDO();
+            templateDO.setId(dataRow.getLong("id"));
+            templateDO.setCategoryId(dataRow.getLong("category_id"));
+            templateDO.setConfigKey(dataRow.getString("config_key"));
+            templateDO.setConfigName(dataRow.getString("config_name"));
+            templateDO.setDataType(dataRow.getString("data_type"));
+            templateDO.setDefaultValue(dataRow.getString("default_value")); // 已包含兜底逻辑
+            templateDO.setDescription(dataRow.getString("description"));
+            templateDO.setSortOrder(dataRow.getInt("sort_order"));
+            return templateDO;
+        }).toList();
+    }
+
 }

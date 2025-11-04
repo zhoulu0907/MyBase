@@ -47,4 +47,13 @@ public interface SecurityConfigService {
      */
     void batchUpdateConfig(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList);
 
+    /**
+     * 根据租户ID获取该租户的所有安全配置项（用于安全逻辑判断，带缓存）
+     * 如果租户配置不存在，则返回模板默认值
+     *
+     * @param tenantId 租户ID
+     * @return 安全配置项列表
+     */
+    List<SecurityConfigItemRespVO> getSecurityConfigsByTenant(Long tenantId);
+
 }
