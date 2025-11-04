@@ -1,16 +1,23 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -18,11 +25,11 @@ import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
@@ -34,6 +41,12 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
     @Autowired
     private FlowProcessExecApiImpl flowProcessExecApi;
+
+    @Resource
+    private MetadataEntityRelationshipRepository entityRelationshipRepository;
+
+    @Resource
+    private MetadataEntityFieldRepository entityFieldRepository;
 
     /**
      * 校验更新数据
@@ -203,7 +216,109 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
     @Override
     protected void handleSubEntities(ProcessContext context) {
-        //todo 处理子表逻辑
+        // 已经插入到数据库的父表数据行
+        Map parentData = context.getProcessedData();
+
+        // 关联关系
+        Long partentEntityId = context.getEntityId();
+        List<MetadataEntityRelationshipDO> relationshipDOS = entityRelationshipRepository.getRelationshipsByEntityId(partentEntityId);
+
+        //查询子表和主表的关联字段 构建关联条件
+        List<MetadataDataMethodSubEntityContext> subEntityVos = context.getSubEntities();
+        for(MetadataDataMethodSubEntityContext subEntityContext: subEntityVos) {
+            Long subEntityId = subEntityContext.getEntityId();
+            List<Map<Long, Object>> subData = subEntityContext.getSubData();
+
+            String parentRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
+                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null);
+            MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.findById(Long.valueOf(parentRelFieldId));
+            String parentFiledName = parentEntityFieldDO.getFieldName();// 主表关联字段名称
+
+
+            String subRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
+                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null);
+            MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.findById(Long.valueOf(subRelFieldId));
+            String subRelFieldName = subEntityFieldDO.getFieldName();// 子表关联字段名称
+
+            Object parentValue = new Object();
+            if("parent_id".equals(subRelFieldName)){
+                parentValue = context.getId();
+            }else{
+                parentValue = parentData.get(parentFiledName);
+            }
+
+            List<MetadataEntityFieldDO> subEntityFields = getEntityFields(subEntityId);
+            MetadataBusinessEntityDO subEntity = validateEntityExists(subEntityId);
+
+            List<MetadataEntityFieldDO> subFields = entityFieldRepository.getEntityFieldListByEntityId(subEntityId);
+            String primaryKeyFieldName = getPrimaryKeyFieldName(subFields);// 子表的主键字段名
+
+            List<String> processedIds = new ArrayList<String>();// 存放新增数据的id，修改已有数据的id集合
+
+            // 逐条插入子表数据
+            for (Map<Long, Object> row : subData) {
+                // key类型：Long 转 String
+                Map covertedRow = row.entrySet().stream().collect(Collectors.toMap(
+                        entry ->entry.getKey().toString(),
+                        Map.Entry::getValue));
+
+                Map<String,Object> nameValueParis = convertFieldIdToFieldName(covertedRow,subEntityFields);// id：value 转 name：value
+
+                boolean containsPrimaryKey = nameValueParis.entrySet().stream().anyMatch(entry ->
+                        entry.getKey().matches(primaryKeyFieldName));// 是否包括主键字段
+
+                if(containsPrimaryKey){
+                    // 执行更新
+                    Object primaryKeyFieldValue = nameValueParis.get(primaryKeyFieldName);
+                    ConfigStore configStore = new DefaultConfigStore();
+                    configStore.and(primaryKeyFieldName, primaryKeyFieldValue);
+
+                    DataRow dataRow = new DataRow(nameValueParis);
+                    AnylineService<?> temporaryService = context.getTemporaryService();
+                    long updateCount = temporaryService.update(quoteTableName(subEntity.getTableName()), dataRow, configStore);
+                    log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", subEntityId, subEntity.getTableName(), updateCount);
+
+                    // 将id放入processedIds
+                    processedIds.add(primaryKeyFieldValue.toString());
+                }else{
+                    // 执行插入
+                    Map<String,Object> rowToInsert = processInsertDataAndSetDefaults(nameValueParis,subEntityFields); //设置默认值
+                    rowToInsert.put(subRelFieldName,parentValue); //关联字段值
+                    DataRow dataRow = new DataRow(rowToInsert);
+                    AnylineService<?> temporaryService = context.getTemporaryService();
+                    Object insertResult = temporaryService.insert(quoteTableName(subEntity.getTableName()), dataRow);
+                    log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", subEntityId, subEntity.getTableName(), insertResult);
+
+                    // 将id放入processedIds
+                    String primaryKeyFieldValue = rowToInsert.get(primaryKeyFieldName).toString();
+                    processedIds.add(primaryKeyFieldValue.toString());
+                }
+            }
+
+            // 处理完插入和更新操作之后，删除多余的数据行
+            long deleteCount;
+
+            AnylineService<?> temporaryService = context.getTemporaryService();
+            DefaultConfigStore deleteConfig = new DefaultConfigStore();
+            deleteConfig.and(subRelFieldName, parentValue);
+            deleteConfig.notIn(primaryKeyFieldName,processedIds);
+
+            boolean hasDeletedField = subFields.stream()
+                    .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+            if (hasDeletedField) {
+                // 软删除：更新deleted字段为删除时间戳
+                DataRow updateData = new DataRow();
+                updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+                deleteCount = temporaryService.update(quoteTableName(subEntity.getTableName()), updateData, deleteConfig);
+                log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", subEntityId, subEntity.getTableName(), deleteCount);
+            } else {
+                // 物理删除：直接删除记录
+                deleteCount = temporaryService.delete(quoteTableName(subEntity.getTableName()), deleteConfig);
+                log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", subEntityId, subEntity.getTableName(), deleteCount);
+            }
+        }
     }
 
     @Override
@@ -254,5 +369,123 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         }
     }
 
+    /**
+     * 处理创建数据
+     */
+    protected Map<String, Object> processInsertDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
+        // 将字段ID映射为字段名
+        Map<String, Object> processedData = convertFieldIdToFieldName(data, fields);
+
+        // 获取当前时间
+        LocalDateTime now = LocalDateTime.now();
+
+        // 仅确定一个实际主键字段名，避免系统字段被误配置为主键导致被赋予雪花ID
+        String realPrimaryKey = getPrimaryKeyFieldName(fields);
+
+        for (MetadataEntityFieldDO field : fields) {
+            String fieldName = field.getFieldName();
+            if (fieldName == null) {
+                continue;
+            }
+
+            // 仅对真实主键字段生成雪花ID，避免误把deleted/lock_version等系统字段当作主键
+            if (fieldName != null && fieldName.equalsIgnoreCase(realPrimaryKey)) {
+                if (!processedData.containsKey(fieldName)) {
+                    // 生成雪花ID作为主键
+                    processedData.put(fieldName, uidGenerator.getUID());
+                }
+                continue;
+            }
+
+            // 处理系统字段 - 使用新的枚举值：1-是，0-否
+            if (BooleanStatusEnum.isYes(field.getIsSystemField())) {
+                switch (fieldName.toLowerCase()) {
+                    case "created_time":
+                    case "createtime":
+                        processedData.put(fieldName, now);
+                        break;
+                    case "updated_time":
+                    case "updatetime":
+                        processedData.put(fieldName, now);
+                        break;
+                    case "deleted":
+                        // deleted字段使用数字类型0，对应数据库中的int8类型
+                        processedData.put(fieldName, 0);
+                        break;
+                    case "lock_version":
+                    case "lockversion":
+                        processedData.put(fieldName, 0);
+                        break;
+                    case "tenant_id":
+                    case "tenantid":
+                        // 这里可以从当前上下文获取租户ID，暂时设置为1
+                        processedData.put(fieldName, 1L);
+                        break;
+                    case "owner_id":
+                    case "ownerid":
+                        // 设置为当前登录用户ID
+                        Long currentUserId = WebFrameworkUtils.getLoginUserId();
+                        if (currentUserId != null) {
+                            processedData.put(fieldName, currentUserId);
+                        } else {
+                            log.warn("无法获取当前用户ID，owner_id字段将使用默认值");
+                            if (StringUtils.hasText(field.getDefaultValue())) {
+                                processedData.put(fieldName, field.getDefaultValue());
+                            }
+                        }
+                        break;
+                    case "owner_dept":
+                    case "ownerdept":
+                        // 设置为当前登录用户的部门ID
+                        Long currentUserDeptId = SecurityFrameworkUtils.getLoginUserDeptId();
+                        if (currentUserDeptId != null) {
+                            processedData.put(fieldName, currentUserDeptId);
+                        } else {
+                            log.warn("无法获取当前用户部门ID，owner_dept字段将使用默认值1");
+                            // 如果获取不到就先写死为1
+                            processedData.put(fieldName, 1L);
+                        }
+                        break;
+                    case "creator":
+                        // 设置为当前登录用户ID
+                        Long creatorUserId = WebFrameworkUtils.getLoginUserId();
+                        if (creatorUserId != null) {
+                            processedData.put(fieldName, creatorUserId);
+                        } else {
+                            log.warn("无法获取当前用户ID，creator字段将使用默认值1");
+                            processedData.put(fieldName, 1L);
+                        }
+                        break;
+                    case "updater":
+                        // 设置为当前登录用户ID
+                        Long updaterUserId = WebFrameworkUtils.getLoginUserId();
+                        if (updaterUserId != null) {
+                            processedData.put(fieldName, updaterUserId);
+                        } else {
+                            log.warn("无法获取当前用户ID，updater字段将使用默认值1");
+                            processedData.put(fieldName, 1L);
+                        }
+                        break;
+                    default:
+                        // 其他系统字段按默认值处理
+                        if (StringUtils.hasText(field.getDefaultValue())) {
+                            processedData.put(fieldName, field.getDefaultValue());
+                        }
+                        break;
+                }
+                continue;
+            }
+
+            // 设置业务字段默认值
+            if (!processedData.containsKey(fieldName) && StringUtils.hasText(field.getDefaultValue())) {
+                processedData.put(fieldName, field.getDefaultValue());
+            }
+        }
+
+        // 处理复杂类型字段（数组、对象等）的JSON序列化
+        processComplexTypeFields(fields, processedData);
+
+        return processedData;
+    }
 
 }
