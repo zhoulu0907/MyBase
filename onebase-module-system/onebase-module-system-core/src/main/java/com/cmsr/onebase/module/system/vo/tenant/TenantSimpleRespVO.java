@@ -23,4 +23,7 @@ public class TenantSimpleRespVO {
 
     @Schema(description = "域名H5", example = "onebase")
     private String websiteH5;
+
+    @Schema(description = "管理员id")
+    private String adminUserId;
 }

@@ -31,6 +31,7 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.corp.CorpAdminReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
@@ -148,6 +149,24 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
         return user.getId();
+    }
+
+    @Override
+    public Long createCorpAdminUser(AdminUserDO userDO) {
+        // 校验用户名唯一
+        validateUsernameUnique(null, userDO.getUsername());
+        // 校验手机号唯一
+        validateMobileUnique(null, userDO.getMobile());
+        // 校验邮箱唯一
+        validateEmailUnique(null, userDO.getEmail());
+
+        userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+        if (userDO.getAdminType() == null) {
+            userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        }
+
+        AdminUserDO adminUserDO= adminUserDataRepository.insert(userDO);
+       return adminUserDO.getId();
     }
 
     @Transactional(rollbackFor = Exception.class)

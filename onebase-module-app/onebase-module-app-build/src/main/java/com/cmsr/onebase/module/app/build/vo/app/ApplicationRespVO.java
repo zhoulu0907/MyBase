@@ -65,4 +65,8 @@ public class ApplicationRespVO {
 
     @Schema(description = "更新人")
     private String updateUser;
+
+    @Schema(description = "发布模式")
+    private Integer publishModel;
+
 }
