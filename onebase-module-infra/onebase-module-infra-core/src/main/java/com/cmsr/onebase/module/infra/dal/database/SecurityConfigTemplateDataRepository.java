@@ -1,8 +1,11 @@
 package com.cmsr.onebase.module.infra.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTemplateDO;
+import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataSet;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,16 +27,52 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
     }
 
     /**
-     * 根据分类ID查询模板，按排序号升序
+     * 根据租户ID和分类ID查询安全配置项（带兜底策略）
+     * 优先从租户配置表查询，若不存在则从模板表获取默认值
      *
+     * @param tenantId   租户ID
      * @param categoryId 分类ID
-     * @return 模板列表
+     * @return 配置项列表，包含租户配置或模板默认值
      */
-    public List<SecurityConfigTemplateDO> findByCategoryId(Long categoryId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(SecurityConfigTemplateDO.CATEGORY_ID, categoryId);
-        configStore.order(SecurityConfigTemplateDO.SORT_ORDER, "ASC");
-        return findAllByConfig(configStore);
+    @TenantIgnore
+    public List<SecurityConfigTemplateDO> findByTenantIdAndCategoryId(Long tenantId, Long categoryId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.param("tenantId", tenantId);
+        configs.param("categoryId", categoryId);
+        
+        String sql = """
+                SELECT
+                    t.id,
+                    t.category_id,
+                    t.config_key,
+                    t.config_name,
+                    t.data_type,
+                    t.description,
+                    t.sort_order,
+                    COALESCE(c.config_value, t.default_value) AS default_value
+                FROM infra_security_config_template t
+                LEFT JOIN infra_security_config c
+                    ON t.config_key = c.config_key
+                    AND c.tenant_id = #{tenantId}
+                    AND c.deleted = 0
+                WHERE t.category_id = #{categoryId}
+                    AND t.deleted = 0
+                ORDER BY t.sort_order ASC
+                """;
+        
+        DataSet dataSet = this.querys(sql, configs);
+        return dataSet.stream().map(dataRow -> {
+            SecurityConfigTemplateDO templateDO = new SecurityConfigTemplateDO();
+            templateDO.setId(dataRow.getLong("id"));
+            templateDO.setCategoryId(dataRow.getLong("category_id"));
+            templateDO.setConfigKey(dataRow.getString("config_key"));
+            templateDO.setConfigName(dataRow.getString("config_name"));
+            templateDO.setDataType(dataRow.getString("data_type"));
+            templateDO.setDefaultValue(dataRow.getString("default_value")); // 已包含兜底逻辑
+            templateDO.setDescription(dataRow.getString("description"));
+            templateDO.setSortOrder(dataRow.getInt("sort_order"));
+            return templateDO;
+        }).toList();
     }
 
     /**
@@ -41,11 +80,38 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
      *
      * @return 模板列表
      */
+    @TenantIgnore
     public List<SecurityConfigTemplateDO> findAllActive() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.order(SecurityConfigTemplateDO.CATEGORY_ID, "ASC");
-        configStore.order(SecurityConfigTemplateDO.SORT_ORDER, "ASC");
-        return findAllByConfig(configStore);
+        ConfigStore configs = new DefaultConfigStore();
+        
+        String sql = """
+                SELECT
+                    id,
+                    category_id,
+                    config_key,
+                    config_name,
+                    data_type,
+                    default_value,
+                    description,
+                    sort_order
+                FROM infra_security_config_template
+                WHERE deleted = 0
+                ORDER BY category_id ASC, sort_order ASC
+                """;
+        
+        DataSet dataSet = this.querys(sql, configs);
+        return dataSet.stream().map(dataRow -> {
+            SecurityConfigTemplateDO templateDO = new SecurityConfigTemplateDO();
+            templateDO.setId(dataRow.getLong("id"));
+            templateDO.setCategoryId(dataRow.getLong("category_id"));
+            templateDO.setConfigKey(dataRow.getString("config_key"));
+            templateDO.setConfigName(dataRow.getString("config_name"));
+            templateDO.setDataType(dataRow.getString("data_type"));
+            templateDO.setDefaultValue(dataRow.getString("default_value"));
+            templateDO.setDescription(dataRow.getString("description"));
+            templateDO.setSortOrder(dataRow.getInt("sort_order"));
+            return templateDO;
+        }).toList();
     }
 
 }

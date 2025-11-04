@@ -21,8 +21,6 @@ import org.springframework.validation.annotation.Validated;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.util.cache.CacheUtils.buildAsyncReloadingCache;
 
@@ -172,41 +170,25 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
      * @return 配置项列表
      */
     private List<SecurityConfigItemRespVO> loadTenantConfigItems(Long tenantId, Long categoryId) {
-        // 1. 查询该分类下的所有模板
-        List<SecurityConfigTemplateDO> templates = templateDataRepository.findByCategoryId(categoryId);
+        // 使用新的带兜底策略的SQL查询方法
+        // 该方法会自动处理：如果租户配置存在则使用租户配置值，否则使用模板默认值
+        List<SecurityConfigTemplateDO> templates = templateDataRepository.findByTenantIdAndCategoryId(tenantId, categoryId);
         if (templates.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // 2. 提取所有配置键
-        List<String> configKeys = templates.stream()
-                .map(SecurityConfigTemplateDO::getConfigKey)
-                .collect(Collectors.toList());
-
-        // 3. 查询租户在该分类下的配置（通过配置键列表）
-        List<SecurityConfigDO> tenantConfigs = securityConfigDataRepository.findByTenantIdAndKeys(tenantId, configKeys);
-        Map<String, SecurityConfigDO> tenantConfigMap = tenantConfigs.stream()
-                .collect(Collectors.toMap(SecurityConfigDO::getConfigKey, config -> config));
-
-        // 4. 组装返回数据（兜底策略：租户配置不存在时使用模板默认值）
+        // 组装返回数据（default_value字段已通过SQL的COALESCE处理了兜底逻辑）
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
             SecurityConfigItemRespVO itemVO = new SecurityConfigItemRespVO();
             itemVO.setConfigKey(template.getConfigKey());
             itemVO.setConfigName(template.getConfigName());
             itemVO.setDataType(template.getDataType());
-            itemVO.setDefaultValue(template.getDefaultValue());
+            itemVO.setDefaultValue(template.getDefaultValue()); // 已包含兜底逻辑
+            itemVO.setConfigValue(template.getDefaultValue()); // 已包含兜底逻辑
             itemVO.setDescription(template.getDescription());
             itemVO.setSortOrder(template.getSortOrder());
-
-            // 兜底策略：如果租户有配置值，使用租户的值；否则使用默认值
-            SecurityConfigDO tenantConfig = tenantConfigMap.get(template.getConfigKey());
-            if (tenantConfig != null) {
-                itemVO.setId(tenantConfig.getId());
-                itemVO.setConfigValue(tenantConfig.getConfigValue());
-            } else {
-                itemVO.setConfigValue(template.getDefaultValue());
-            }
+            itemVO.setId(template.getId());
 
             configItems.add(itemVO);
         }

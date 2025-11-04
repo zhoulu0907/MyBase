@@ -63,16 +63,4 @@ public class SecurityConfigDataRepository extends DataRepository<SecurityConfigD
         return findOne(configStore);
     }
 
-    /**
-     * 根据租户ID删除所有配置
-     *
-     * @param tenantId 租户ID
-     * @return 删除数量
-     */
-    public long deleteByTenantId(Long tenantId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(SecurityConfigDO.TENANT_ID, tenantId);
-        return deleteByConfig(configStore);
-    }
-
 }

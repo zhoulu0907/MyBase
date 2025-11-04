@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.infra.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigCategoryDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -28,6 +29,7 @@ public class SecurityConfigCategoryDataRepository extends DataRepository<Securit
      *
      * @return 分类列表
      */
+    @TenantIgnore
     public List<SecurityConfigCategoryDO> findAllActive() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order(SecurityConfigCategoryDO.SORT_ORDER, "ASC");
