@@ -4,31 +4,29 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 全局配置流程撤回枚举
+ * 流程撤回权限枚举
+ *
+ * @author liyang
+ * @date 2025-11-04
  */
 @Getter
 @AllArgsConstructor
-public enum GlobalFlowRecallRulesEnum {
+public enum BpmWithdrawPermEnum {
     /**
      * 不允许撤回
      */
-    DISALLOWED("disallowed","不允许撤回"),
+    NONE("none", "不允许撤回"),
+
     /**
      * 仅允许发起节点撤回
      */
-    START_NODE_ONLY("start_node_only","仅允许发起节点撤回"),
+    INITIATION_NODE("initiation_node", "仅允许发起节点撤回"),
+
     /**
      * 允许所有节点撤回
      */
-    ALL_NODES("all_nodes","允许所有节点撤回"),
-    /**
-     * 未操作
-     */
-    UNPROCESSED("unprocessed","未操作"),
-    /**
-     * 未读
-     */
-    UNREAD("unread","未读");
+    ALL("all", "允许所有节点撤回");
+
     /**
      * 类型编码
      */
@@ -39,8 +37,14 @@ public enum GlobalFlowRecallRulesEnum {
      */
     private final String name;
 
-    public static GlobalFlowRecallRulesEnum getByCode(String code) {
-        for (GlobalFlowRecallRulesEnum type : values()) {
+    /**
+     * 根据编码获取枚举
+     *
+     * @param code 编码
+     * @return 枚举
+     */
+    public static BpmWithdrawPermEnum getByCode(String code) {
+        for (BpmWithdrawPermEnum type : values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }

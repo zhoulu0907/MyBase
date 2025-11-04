@@ -3,20 +3,24 @@ package com.cmsr.onebase.module.bpm.api.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * 流程退回规则枚举
+ *
+ * @author liyang
+ * @date 2025-11-04
+ */
 @Getter
 @AllArgsConstructor
-/**
- * 全局配置流程退回规则枚举
- */
-public enum GlobalFlowReturnRulesEnum {
+public enum BpmReturnRuleEnum {
     /**
      * 按顺序重新审批
      */
-    SEQUENTIAL("sequential","按流程顺序重新审批"),
+    SEQ("seq","按流程顺序重新审批"),
     /**
      * 直达当前节点
      */
     DIRECT("direct","直达当前节点");
+
     /**
      * 类型编码
      */
@@ -27,8 +31,8 @@ public enum GlobalFlowReturnRulesEnum {
      */
     private final String name;
 
-    public static GlobalFlowReturnRulesEnum getByCode(String code) {
-        for (GlobalFlowReturnRulesEnum type : values()) {
+    public static BpmReturnRuleEnum getByCode(String code) {
+        for (BpmReturnRuleEnum type : values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.bpm.convert;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.api.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.api.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
@@ -76,6 +76,13 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             if (extDto != null) {
                 flowDesignVO.setVersionAlias(extDto.getVersionAlias());
 
+                if (extDto.getGlobalConfig() != null) {
+                    flowDesignVO.setGlobalConfig(extDto.getGlobalConfig());
+                } else {
+                    // 返回默认值
+                    flowDesignVO.setGlobalConfig(new BpmGlobalConfigDTO());
+                }
+
                 // todo：应用ID校验
                 flowDesignVO.setAppId(extDto.getAppId());
             }
@@ -113,11 +120,10 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
         // 构建ext
         BpmDefinitionExtDTO extDto = new BpmDefinitionExtDTO();
-        BpmGlobalConfigDTO globalConfigDTO = JsonUtils.parseObject(flowDesignVO.getGlobalConfig(), BpmGlobalConfigDTO.class);
         if (flowDesignVO.getVersionAlias() != null) {
             extDto.setVersionAlias(flowDesignVO.getVersionAlias());
             extDto.setAppId(flowDesignVO.getAppId());
-            extDto.setGlobalConfig(globalConfigDTO);
+            extDto.setGlobalConfig(flowDesignVO.getGlobalConfig());
         }
 
         defJson.setExt(JsonUtils.toJsonString(extDto));
