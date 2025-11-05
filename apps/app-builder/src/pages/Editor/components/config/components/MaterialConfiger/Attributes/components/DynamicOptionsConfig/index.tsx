@@ -2,6 +2,8 @@ import { Button, Form, Input, Message, Space } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import { useSignals } from '@preact/signals-react/runtime';
+import { FORM_COMPONENT_TYPES, usePageEditorSignal, useFormEditorSignal, useAppEntityStore } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 
 const FormItem = Form.Item;
@@ -15,11 +17,50 @@ export interface DynamicOptionsConfigProps {
 
 const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handlePropsChange, item, configs, id }) => {
   const selectKey = 'defaultOptions';
+  useSignals();
+  const { mainEntity, subEntities } = useAppEntityStore();
+
   const [selectOptionsConfig, setSelectOptionsConfig] = useState<any[]>([]);
+  const [selectDisabled, setSelectDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     setSelectOptionsConfig(configs[selectKey] || []);
   }, [configs[selectKey]]);
+
+  useEffect(() => {
+    getDefaultOptions();
+  }, []);
+
+  const getDefaultOptions = () => {
+    const value = configs.dataField;
+    const isMainEntity = value?.includes(mainEntity.entityId);
+    const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
+    const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
+    const currentSubField = isSubEntity?.fields.find((ele: any) => value.includes(ele.fieldId));
+    if (isMainEntity && currentMainField) {
+      // 主表
+      if (currentMainField.options?.length) {
+        const newOptions = currentMainField.options?.map((e) => ({
+          chosen: currentMainField.defaultValue && e.optionValue === currentMainField.defaultValue,
+          label: e.optionLabel,
+          value: e.optionValue
+        }));
+        handlePropsChange(selectKey, newOptions);
+        setSelectDisabled(true);
+      }
+    } else if (isSubEntity && currentSubField) {
+      // 子表
+      if (currentSubField.options?.length) {
+        const newOptions = currentSubField.options?.map((e) => ({
+          chosen: currentSubField.defaultValue && e.optionValue === currentSubField.defaultValue,
+          label: e.optionLabel,
+          value: e.optionValue
+        }));
+        handlePropsChange(selectKey, newOptions);
+        setSelectDisabled(true);
+      }
+    }
+  };
 
   return (
     <>
@@ -29,12 +70,12 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={selectOptionsConfig}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
                 swap
-                sort={true}
+                sort={!selectDisabled}
                 handle=".table-col-item-handle"
                 className={styles.componentCollapseContent}
                 forceFallback={true}
@@ -86,6 +127,7 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                       /> */}
                       <Input
                         size="small"
+                        disabled={selectDisabled}
                         value={selectOptionsConfig[idx].label}
                         onChange={(e) => {
                           const newList = [...selectOptionsConfig];
@@ -100,21 +142,23 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                         className={styles.tableColumnItemInput}
                         placeholder={'新选项'}
                       />
-                      <Button
-                        icon={<IconDelete />}
-                        shape="circle"
-                        size="mini"
-                        status="danger"
-                        className={styles.tableColumnItemButton}
-                        disabled={selectOptionsConfig.length <= 2}
-                        onClick={() => {
-                          const newList = [...selectOptionsConfig];
-                          newList.splice(idx, 1);
-                          setSelectOptionsConfig(newList);
-                          handlePropsChange(selectKey, newList);
-                          remove(idx);
-                        }}
-                      />
+                      {!selectDisabled && (
+                        <Button
+                          icon={<IconDelete />}
+                          shape="circle"
+                          size="mini"
+                          status="danger"
+                          className={styles.tableColumnItemButton}
+                          disabled={selectOptionsConfig.length <= 2}
+                          onClick={() => {
+                            const newList = [...selectOptionsConfig];
+                            newList.splice(idx, 1);
+                            setSelectOptionsConfig(newList);
+                            handlePropsChange(selectKey, newList);
+                            remove(idx);
+                          }}
+                        />
+                      )}
                     </Space>
                   </div>
                 ))}

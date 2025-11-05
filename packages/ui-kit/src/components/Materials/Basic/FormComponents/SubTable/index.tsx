@@ -132,7 +132,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config = schemaConfig;
 
     // 当前实体
-    const currentEntity = subEntities.entities.find((ele)=>ele.entityId===entityId);
+    const currentEntity = subEntities.entities?.find((ele)=>ele.entityId===entityId);
     // 当前字段
     const currentField = currentEntity?.fields?.find((ele)=>ele.fieldId===fieldId);
     if (currentField) {
@@ -237,7 +237,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         title: (
           <>
             {displayName}
-            {required && <span style={{ color: 'red', paddingLeft: '4px' }}>*</span>}
+            {required ? <span style={{ color: 'red', paddingLeft: '4px' }}>*</span> : null}
           </>
         ),
         dataIndex: column.id,

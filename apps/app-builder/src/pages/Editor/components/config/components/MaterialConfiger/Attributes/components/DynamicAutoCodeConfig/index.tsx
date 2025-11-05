@@ -20,6 +20,7 @@ import styles from '../../index.module.less';
 
 export interface DynamicAutoCodeConfigProps {
   handlePropsChange: (key: string, value: any) => void;
+  handleConfigsChange: (config: any) => void;
   item: any;
   configs: any;
   id: string;
@@ -34,7 +35,13 @@ const dataOptions = [
   { label: '自定义', value: '自定义' }
 ];
 
-const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePropsChange, item, configs, id }) => {
+const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
+  handlePropsChange,
+  handleConfigsChange,
+  item,
+  configs,
+  id
+}) => {
   const autoCodeKey = 'autoCodeConfig';
   const autoCodeDisabledKey = 'autoCodeDisabled';
   const { mainEntity, subEntities } = useAppEntityStore();
@@ -55,8 +62,6 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
   const [displayText, setDisplayText] = useState(getDisplayText(configs[autoCodeKey]));
 
   useEffect(() => {
-    console.log('configs[autoCodeKey]', configs[autoCodeKey]);
-
     const keys = Object.keys(configs[autoCodeKey] || {});
     if (keys?.length) {
       const newRules = configs[autoCodeKey].rules || [];
@@ -84,6 +89,39 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
       initTreeData();
     }
   }, [mainEntity]);
+
+  useEffect(() => {
+    getConfigRulesOptions();
+  }, []);
+
+  const getConfigRulesOptions = () => {
+    const value = configs.dataField;
+    const isMainEntity = value?.includes(mainEntity.entityId);
+    const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
+    const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
+    const currentSubField = isSubEntity?.fields.find((ele: any) => value.includes(ele.fieldId));
+    if (isMainEntity && currentMainField) {
+      // 主表
+      if (currentMainField.autoNumberConfig?.id) {
+        const newAutoNumberConfig = { ...currentMainField.autoNumberConfig };
+        const newConfig = {
+          [autoCodeKey]: newAutoNumberConfig,
+          [autoCodeDisabledKey]: true
+        };
+        handleConfigsChange(newConfig);
+      }
+    } else if (isSubEntity && currentSubField) {
+      // 子表
+      if (currentSubField.autoNumberConfig?.id) {
+        const newAutoNumberConfig = { ...currentSubField.autoNumberConfig };
+        const newConfig = {
+          [autoCodeKey]: newAutoNumberConfig,
+          [autoCodeDisabledKey]: true
+        };
+        handleConfigsChange(newConfig);
+      }
+    }
+  };
 
   const initTreeData = async () => {
     const mainEntityTree = mainEntity.fields

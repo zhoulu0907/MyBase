@@ -486,7 +486,7 @@ export default function EditorWorkspace() {
                 // 主表 字段组件
                 if (entityID && fieldID) {
                   // 获取当前字段数据源配置
-                  const currentField = mainEntity.fields.find((ele: AppEntityField) => ele.fieldId === fieldID);
+                  const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldId === fieldID);
                   if (currentField) {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces

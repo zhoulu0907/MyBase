@@ -825,6 +825,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     key={index}
                     id={cpID}
                     handlePropsChange={handlePropsChange}
+                    handleConfigsChange={handleConfigsChange}
                     item={item}
                     configs={configs}
                   />
