@@ -26,6 +26,8 @@ const AutoCodeNumberSettingsModal: React.FC<AutoCodeNumberSettingsModalProps> = 
   const [form] = Form.useForm();
   const numberMode = Form.useWatch(['numberMode'], form)?.numberMode;
 
+  console.log('initialConfig',initialConfig)
+
   const initialValues = {
     ...AUTO_CODE_NUMBER_DEFAULT_CONFIG,
     rules: []
@@ -52,7 +54,7 @@ const AutoCodeNumberSettingsModal: React.FC<AutoCodeNumberSettingsModalProps> = 
         const config = initialConfig as AutoNumberRuleResponce & { startValue?: number };
         const values = {
           ...config,
-          initialValue: config.startValue
+          initialValue: config.startValue || initialConfig.initialValue
         };
         form.setFieldsValue(values);
       } else {

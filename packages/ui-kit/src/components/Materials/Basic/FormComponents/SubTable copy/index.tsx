@@ -540,7 +540,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   return (
     <Layout className="XSubTable">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         layout={layout}
         tooltip={tooltip}
         labelCol={{

@@ -10,7 +10,10 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         layout={layout}
         tooltip={tooltip}
         labelCol={{

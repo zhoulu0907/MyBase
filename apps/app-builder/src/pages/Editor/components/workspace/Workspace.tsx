@@ -291,9 +291,12 @@ export default function EditorWorkspace() {
                     // 字段描述 description
                     schema.config.tooltip = field.description;
                     // 是否必填：1-是，0-不是 isRequired
-                    schema.config.verify.required = field.isRequired;
                     // 是否唯一：1-是，0-不是 isUnique
-                    schema.config.verify.noRepeat = field.isUnique;
+                    schema.config.verify = {
+                      ...schema.config.verify,
+                      required: field.isRequired,
+                      noRepeat: field.isUnique
+                    }
 
                     // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
                     if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
@@ -370,10 +373,11 @@ export default function EditorWorkspace() {
                     subSchema.config.defaultValue = ele.defaultValue;
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
-                    // 是否必填：1-是，0-不是 isRequired
-                    subSchema.config.verify.required = ele.isRequired;
-                    // 是否唯一：1-是，0-不是 isUnique
-                    subSchema.config.verify.noRepeat = ele.isUnique;
+                    subSchema.config.verify = {
+                      ...subSchema.config.verify,
+                      required: ele.isRequired,
+                      noRepeat: ele.isUnique
+                    }
 
                     // 字段选项列表（单/多选字段专用） options
                     if (
@@ -491,9 +495,12 @@ export default function EditorWorkspace() {
                     // 字段描述 description
                     schema.config.tooltip = currentField.description;
                     // 是否必填：1-是，0-不是 isRequired
-                    schema.config.verify.required = currentField.isRequired;
                     // 是否唯一：1-是，0-不是 isUnique
-                    schema.config.verify.noRepeat = currentField.isUnique;
+                    schema.config.verify = {
+                      ...schema.config.verify,
+                      required: currentField.isRequired,
+                      noRepeat: currentField.isUnique
+                    }
 
                     // 字段选项列表（单/多选字段专用） options
                     if (

@@ -108,6 +108,7 @@ export interface AutoNumberRuleResponce {
   resetCycle?: string;
   resetOnInitialChange?: number;
   startValue?: number;
+  initialValue?:number
 }
 // 创建自动编号规则
 export interface AutoNumberRule {

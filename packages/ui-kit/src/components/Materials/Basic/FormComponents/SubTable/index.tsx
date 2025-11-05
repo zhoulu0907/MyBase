@@ -8,7 +8,7 @@ import { getComponentConfig } from 'src/components/Materials/schema';
 import { getComponentSchema } from '../../../schema';
 import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
 import EditRender from 'src/components/render/EditRender';
-import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { v4 as uuidv4 } from 'uuid';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
@@ -39,7 +39,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
-  } = usePageEditorSignal(pageType);
+  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
   const { subTableDataLength } = pagesRuntimeSignal;
 
   // 判断拖拽的组件是否是表单组件
@@ -143,9 +143,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       // 字段描述 description
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
-      schema.config.verify.required = currentField.isRequired;
       // 是否唯一：1-是，0-不是 isUnique
-      schema.config.verify.noRepeat = currentField.isUnique;
+      schema.config.verify = {
+        ...schema.config.verify,
+        required: currentField.isRequired,
+        noRepeat: currentField.isUnique
+      }
 
       // 字段选项列表（单/多选字段专用） options
       if (
@@ -213,9 +216,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   const { form } = Form.useFormContext();
 
   useEffect(() => {
-    if (runtime) {
-      getTableColumns();
-    }
+    getTableColumns();
   }, []);
 
   useEffect(() => {
@@ -307,7 +308,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   return (
     <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         layout="vertical"
         rules={[{ required: verify?.required }]}
         tooltip={tooltip}
