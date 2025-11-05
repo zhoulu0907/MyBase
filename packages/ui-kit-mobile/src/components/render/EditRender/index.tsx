@@ -44,7 +44,18 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XInputNumber cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.SELECT_ONE:
         return <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-
+      case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
+        return <FormComp.XSelectMutiple cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.CHECKBOX:
+        return <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.RADIO:
+        return <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.SWITCH:
+        return <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.DATE_PICKER:
+        return <FormComp.XDatePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.TIME_PICKER:
+        return <FormComp.XTimePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

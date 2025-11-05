@@ -36,12 +36,12 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
   return (
     <div className="formWrapper">
       <Input
+        label={label.display && label.text}
         defaultValue={defaultValue}
         placeholder={placeholder}
         maxLength={maxLength}
         style={{
           width: '100%',
-          color,
           textAlign: align,
           backgroundColor: bgColor,
           pointerEvents: runtime ? 'unset' : 'none'

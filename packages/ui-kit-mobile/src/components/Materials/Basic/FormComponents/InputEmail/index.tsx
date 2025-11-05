@@ -34,15 +34,25 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
-
+  console.log(label,
+    dataField,
+    tooltip,
+    status,
+    defaultValue,
+    layout,
+    labelColSpan,
+    runtime,
+    detailMode)
   return (
     <div className="formWrapper">
       <Input
+        label={label.display && label.text}
+        type="text"
         defaultValue={defaultValue}
         style={{
           width: '100%',
-          color,
           textAlign: align,
+          color: color,
           backgroundColor: bgColor,
           pointerEvents: runtime ? 'unset' : 'none'
         }}

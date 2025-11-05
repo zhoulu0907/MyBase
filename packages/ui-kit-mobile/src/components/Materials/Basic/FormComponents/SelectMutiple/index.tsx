@@ -1,13 +1,12 @@
-// import { Form } from '@arco-design/mobile-react';
 import { Cell, Picker } from '@arco-design/mobile-react';
-import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+// import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+// import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+// import { nanoid } from 'nanoid';
 import '../index.css';
-import type { XInputSelectOneConfig } from './schema';
+import type { XInputSelectMutipleConfig } from './schema';
 
-const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
@@ -24,7 +23,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
 
   // const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
-  const [singleVisible, setSingleVisible] = useState(false);
+  const [multipleVisible, setMultipleVisible] = useState(false);
 
   // const fieldValue = Form.useWatch(fieldId, form);
 
@@ -47,19 +46,19 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
       <Cell
         label={label.display && label.text}
         showArrow
-        // onClick={() => {setSingleVisible(true);}}
+        // onClick={() => {setMultipleVisible(true);}}
       />
       <Picker
-        cascade={false}
         data={defaultValue}
-        visible={singleVisible}
+        visible={multipleVisible}
         getContainer={getPopupContainer}
         contentStyle={{
           width: '100%',
           pointerEvents: runtime ? 'unset' : 'none'
         }}
-        onHide={() => setSingleVisible(false)}
+        onHide={() => setMultipleVisible(false)}
       />
+          
       {/* <Form.Item
         label={label.display && label.text}
         field={
@@ -71,7 +70,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           style: { width: labelColSpan, flex: 'unset' }
         }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required }, { maxLength: verify?.maxChecked }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -79,17 +78,22 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{defaultValue.find((item: any) => item.value == fieldValue)?.label || '--'}</div>
+          <Space wrap>
+            {fieldValue && defaultValue && fieldValue.map((ele: any, index: number) => <Tag key={index}>
+              {defaultValue.find((e: any) => e.value === ele)?.label}
+            </Tag>)}
+          </Space>
         ) : (
           <Select
-            placeholder="请选择"
+            mode="multiple"
+            allowClear
             showSearch={showSearch}
+            getPopupContainer={getPopupContainer}
             filterOption={(input, option) => {
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
-            allowClear
+            placeholder="请选择"
             options={defaultValue}
-            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'
@@ -101,4 +105,4 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
   );
 });
 
-export default XSelectOne;
+export default XSelectMutiple;

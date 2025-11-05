@@ -42,21 +42,14 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
   return (
     <div className="formWrapper">
       <Textarea
+        label={label.display && label.text}
         key={`${minRows}-${maxRows}`}
         defaultValue={defaultValue}
         placeholder={placeholder}
         maxLength={maxLength}
         clearable
         autosize
-        rows={minRows} // TODO: 需要根据minRows和maxRows动态设置rows
-        // showWordLimit
-        style={{
-          width: '100%',
-          color,
-          textAlign: align,
-          backgroundColor: bgColor,
-          pointerEvents: runtime ? 'unset' : 'none'
-        }}
+        rows={minRows}
       />
       {/* <Form.Item
         label={label.display && label.text}

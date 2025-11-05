@@ -11,7 +11,14 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.INPUT_TEXTAREA]: BasicSchema.XInputTextArea,
   [ALL_COMPONENT_TYPES.INPUT_EMAIL]: BasicSchema.XInputEmail,
   [ALL_COMPONENT_TYPES.INPUT_PHONE]: BasicSchema.XInputPhone,
-  [ALL_COMPONENT_TYPES.INPUT_NUMBER]: BasicSchema.XInputNumber
+  [ALL_COMPONENT_TYPES.INPUT_NUMBER]: BasicSchema.XInputNumber,
+  [ALL_COMPONENT_TYPES.DATE_PICKER]: BasicSchema.XDatePicker,
+  [ALL_COMPONENT_TYPES.TIME_PICKER]: BasicSchema.XTimePicker,
+  [ALL_COMPONENT_TYPES.CHECKBOX]: BasicSchema.XCheckbox,
+  [ALL_COMPONENT_TYPES.RADIO]: BasicSchema.XRadio,
+  [ALL_COMPONENT_TYPES.SWITCH]: BasicSchema.XSwitch,
+  [ALL_COMPONENT_TYPES.SELECT_ONE]: BasicSchema.XSelectOne,
+  [ALL_COMPONENT_TYPES.SELECT_MUTIPLE]: BasicSchema.XSelectMutiple
 };
 
 /**

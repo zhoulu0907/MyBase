@@ -38,6 +38,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
   return (
     <div className="formWrapper">
       <Input
+        label={label.display && label.text}
         type="tel"
         defaultValue={defaultValue}
         style={{
@@ -49,6 +50,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         }}
         placeholder={placeholder}
       />
+      
       {/* <Form.Item
         label={label.display && label.text}
         field={
