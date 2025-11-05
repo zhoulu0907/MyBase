@@ -64,6 +64,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
 
   const [editTargetId, setEditTargetId] = useState('');
 
@@ -129,6 +130,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   // 提交表单
   const submitForm = async () => {
+    setSubmitLoading(true);
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
     console.log('mainMetaDataFields: ', mainMetaDataFields.value);
@@ -204,8 +206,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setEditTargetId('');
       setDrawerVisible(false);
       setRefresh(Date.now());
+
+      setSubmitLoading(false);
+
+      if (curPage?.value?.pageSetType === PageType.BPM) {
+        setPageType(EDITOR_TYPES.FORM_EDITOR);
+      } else {
+        setPageType(EDITOR_TYPES.LIST_EDITOR);
+      }
     } else {
-      
       try {
         let res = null;
         if (curPage?.value?.pageSetType === PageType.BPM) {
@@ -236,16 +245,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
         );
         setFlows(createFlows);
-        setPredictVisible(false)
+        setPredictVisible(false);
         if (res) {
           Message.success('创建成功');
         }
+        setSubmitLoading(false);
       } catch (error) {
-        Message.error('创建失败')
-        setPredictVisible(false)
+        Message.error('创建失败');
+        setPredictVisible(false);
+        setSubmitLoading(false);
       }
     }
-
   };
 
   const cancelSubmitForm = () => {
@@ -424,7 +434,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
-              <Button type="primary" onClick={onSubmit}>
+              <Button type="primary" onClick={onSubmit} loading={submitLoading}>
                 提交
               </Button>
               <Button type="default" onClick={cancelSubmitForm}>
