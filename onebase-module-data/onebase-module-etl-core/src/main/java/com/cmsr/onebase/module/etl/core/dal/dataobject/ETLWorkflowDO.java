@@ -17,6 +17,9 @@ public class ETLWorkflowDO extends TenantBaseDO {
     @Column(name = "workflow_name")
     private String workflowName;
 
+    @Column(name = "declaration")
+    private String declaration;
+
     @Column(name = "config")
     private String config;
 

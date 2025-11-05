@@ -60,7 +60,7 @@ public class OAuth2ApproveDO extends BaseDO {
      * false - 拒绝
      */
     @Column(name = APPROVED)
-    private Boolean approved;
+    private Integer approved;
     /**
      * 过期时间
      */
