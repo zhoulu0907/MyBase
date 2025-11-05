@@ -10,8 +10,9 @@ import com.cmsr.onebase.module.app.build.vo.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppSqlQueryRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserMemberDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
@@ -94,6 +95,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         List<AuthRoleMembersPageRespVO> voResult = result.getList().stream().map(v -> {
             AuthRoleMembersPageRespVO vo = new AuthRoleMembersPageRespVO();
             vo.setId(v.getId());
+            vo.setMemberId(v.getMemberId());
             vo.setName(v.getMemberName());
             vo.setType(v.getMemberType());
             vo.setDeptName(v.getDeptName());
@@ -183,27 +185,33 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     public void addRoleDept(AuthRoleAddDeptReqVO reqVO) {
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         appAuthRoleDeptRepository.addRoleDept(reqVO.getRoleId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
-        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds());
+        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
     }
 
     @Override
     public void deleteRoleDept(AuthRoleDeleteDeptReqVO reqVO) {
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         appAuthRoleDeptRepository.deleteRoleDept(reqVO.getRoleId(), reqVO.getDeptIds());
-        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds());
+        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds(), 1);
     }
 
     @Override
     public void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO) {
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-        for (UserMemberDTO member : reqVO.getMembers()) {
+        for (AuthRoleDeleteMemberReqVO.DeleteMember member : reqVO.getMembers()) {
             if (UserMemberDTO.MEMBER_TYPE_USER.equalsIgnoreCase(member.getMemberType())) {
-                appAuthRoleUserRepository.deleteRoleUser(reqVO.getRoleId(), member.getMemberId());
-                appCacheProvider.usersChanged(authRoleDO.getApplicationId(), List.of(member.getMemberId()));
+                AuthRoleUserDO authRoleUserDO = appAuthRoleUserRepository.findById(member.getId());
+                if (authRoleUserDO != null) {
+                    appAuthRoleUserRepository.deleteById(member.getId());
+                    appCacheProvider.usersChanged(authRoleDO.getApplicationId(), List.of(authRoleUserDO.getUserId()));
+                }
             }
             if (UserMemberDTO.MEMBER_TYPE_DEPT.equalsIgnoreCase(member.getMemberType())) {
-                appAuthRoleDeptRepository.deleteRoleDept(reqVO.getRoleId(), member.getMemberId());
-                appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), List.of(member.getMemberId()));
+                AuthRoleDeptDO authRoleDeptDO = appAuthRoleDeptRepository.findById(member.getId());
+                if (authRoleDeptDO != null) {
+                    appAuthRoleDeptRepository.deleteById(member.getId());
+                    appCacheProvider.deptChanged(authRoleDO.getApplicationId(), authRoleDeptDO.getDeptId(), authRoleDeptDO.getIsIncludeChild());
+                }
             }
         }
     }
