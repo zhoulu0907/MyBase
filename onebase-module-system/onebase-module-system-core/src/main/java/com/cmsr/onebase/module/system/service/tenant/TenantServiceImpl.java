@@ -1,19 +1,23 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -21,6 +25,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
@@ -28,6 +33,7 @@ import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -36,10 +42,7 @@ import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantRespVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.*;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -81,6 +84,7 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     @Lazy // 延迟，避免循环依赖报错
     private AdminUserService userService;
+
     @Resource
     private RoleService roleService;
     @Resource
@@ -94,6 +98,13 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private TenantDataRepository tenantDataRepository;
+
+    @Resource
+    private CorpService corpService;
+
+    @Resource
+    private AdminUserRoleApi adminUserRoleApi;
+
 
     @Override
     public List<Long> getTenantIdList() {
@@ -184,7 +195,6 @@ public class TenantServiceImpl implements TenantService {
             if (existTenantCount >= totalTenantLimit) {
                 throw exception(LICENSE_TENANT_COUNT_NOT_ENOUGH);
             }
-
             // 获取license总人数限制
             Integer totalUserLimit = license.getUserLimit();
 
@@ -197,8 +207,8 @@ public class TenantServiceImpl implements TenantService {
             }
         }
 
-        // 创建租户
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
+        tenant.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         tenant = tenantDataRepository.insert(tenant);
 
         // 创建租户的管理员1
@@ -207,11 +217,7 @@ public class TenantServiceImpl implements TenantService {
             // 创建角色
             Long roleId = createTenantAdminRole();
             // 创建用户，并分配角色
-            Long userId = createSystemUser(roleId, createReqVO);
-            // 修改租户的管理员
-            TenantDO tenantDO = new TenantDO().setAdminUserId(userId);
-            tenantDO.setId(finalTenant.getId());
-            tenantDataRepository.update(tenantDO);
+            createSystemUser(roleId, createReqVO);
         });
         return tenant.getId();
     }
@@ -223,19 +229,20 @@ public class TenantServiceImpl implements TenantService {
         return existTenantCount;
     }
 
-    private Long createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
-
-        UserInsertReqVO reqVO = new UserInsertReqVO();
-        reqVO.setUsername(insertReqVO.getAdminUserName());
-        reqVO.setNickname(insertReqVO.getAdminNickName());
-        reqVO.setMobile(insertReqVO.getAdminMobile());
-        reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-        reqVO.setPassword(TENANT_ADMIN_PASSWORD);
-        // 创建用户
-        Long userId = userService.createUser(reqVO);
-        // 分配角色
-        permissionService.assignUserRoles(userId, singleton(roleId));
-        return userId;
+    private void createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
+        List<TenantAdminUserReqVO> adminUserReqVOList = insertReqVO.getTenantAdminUserReqVOList();
+        adminUserReqVOList.forEach(adminUserReqVO -> {
+            UserInsertReqVO reqVO = new UserInsertReqVO();
+            reqVO.setUsername(adminUserReqVO.getAdminUserName());
+            reqVO.setNickname(adminUserReqVO.getAdminNickName());
+            reqVO.setMobile(adminUserReqVO.getAdminMobile());
+            reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
+            reqVO.setPassword(TENANT_ADMIN_PASSWORD);
+            // 创建用户
+            Long userId = userService.createUser(reqVO);
+            // 分配角色
+            permissionService.assignUserRoles(userId, singleton(roleId));
+        });
     }
 
     private Long createTenantAdminRole() {
@@ -252,6 +259,7 @@ public class TenantServiceImpl implements TenantService {
     public void updateTenant(@Valid TenantUpdateReqVO updateReqVO) {
         // 校验存在
         TenantDO tenant = validateUpdateTenant(updateReqVO.getId());
+
         // 校验租户名称是否重复
         validTenantNameDuplicate(updateReqVO.getName(), updateReqVO.getId());
         // 校验租户域名是否重复
@@ -290,7 +298,7 @@ public class TenantServiceImpl implements TenantService {
         DataRow row = new DataRow();
         row.put(TenantDO.ID, updateObj.getId());
         if (updateObj.getAdminUserId() != null) {
-            row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
+           // row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
         }
         if (StringUtils.isNotEmpty(updateObj.getName())) {
             row.put(TenantDO.NAME, updateObj.getName());
@@ -306,42 +314,67 @@ public class TenantServiceImpl implements TenantService {
         }
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
         // 修改租户管理员
-        if (StringUtils.isNotBlank(updateReqVO.getAdminUserName())) {
+        if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null && updateReqVO.getTenantAdminUserUpdateReqVOSList().size() > 0) {
             TenantUtils.execute(updateObj.getId(), () -> {
-                Long roleId;
-                Long userId = null;
-                // 获取旧的租户管理员
-                AdminUserDO oldAdminUser = userService.getUser(tenant.getAdminUserId());
-                // 判断管理员是否发生变更
-                if (!updateReqVO.getAdminUserName().equals(oldAdminUser.getUsername())) {
-                    // 管理员变了，把旧管理员角色移除，并降级为自定义
-                    roleId = getAdminRoleAndDeleteOldUserRole(tenant);
 
+
+                // 管理员变了，把旧管理员角色移除，并降级为自定义
+                Long  roleId = getAdminRoleAndDeleteOldUserRole(tenant);
+                // 判断管理员是否发生变更
+              List<String> adminUserRespDTOS=  adminUserRoleApi.getUserRoleByRoleId(roleId);
+                List<Long> userIds = adminUserRespDTOS.stream()
+                        .map(Long::valueOf)
+                        .collect(Collectors.toList());
+                // 使用AdminUserService批量获取用户数据
+                List<AdminUserDO> users = userService.getUserList(userIds);
+                Map<String, Long> usernameIdMap = users.stream()
+                        .collect(Collectors.toMap(AdminUserDO::getUsername, AdminUserDO::getId));
+                // 删除处理
+                Map<String, String> adminUsernameMap = updateReqVO.getTenantAdminUserUpdateReqVOSList().stream()
+                        .collect(Collectors.toMap(TenantAdminUserUpdateReqVO::getAdminUserName, TenantAdminUserUpdateReqVO::getAdminUserName));
+
+// 获取需要删除的用户（在现有用户中但不在新管理员列表中的用户）
+                Map<String, Long> usersToDelete = usernameIdMap.entrySet().stream()
+                        .filter(entry -> !adminUsernameMap.containsKey(entry.getKey()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+
+                for (Long userId : usersToDelete.values()) {
+                    // 移除旧用户租户管理员角色
+                    UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(userId, roleId);
+                    if (userRoleDO != null) {
+                        permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
+                    }
+                    // 将旧管理员设置为普通用户,降级
+                    userService.updateAdminType(userId, AdminTypeEnum.CUSTOM.getType());
+
+                }
+
+                updateReqVO.getTenantAdminUserUpdateReqVOSList().forEach(adminUserReqVO -> {
+                    UserInsertReqVO reqVO = new UserInsertReqVO();
                     // 已存在的用户
-                    AdminUserDO newAdminUser = userService.getUserByUsername(updateReqVO.getAdminUserName());
+                    AdminUserDO newAdminUser = userService.getUserByUsername(adminUserReqVO.getAdminUserName());
                     // 判断前端上送的管理员是否已存在，存在则分配角色且不是老用户
                     if (newAdminUser == null) {
                         // 新管理员用户不存在，创建用户，并分配角色
-                        TenantInsertReqVO reqVO = new TenantInsertReqVO();
-                        reqVO.setAdminUserName(updateReqVO.getAdminUserName());
-                        reqVO.setAdminNickName(updateReqVO.getAdminNickName());
-                        reqVO.setAdminMobile(updateReqVO.getAdminMobile());
-                        userId = createSystemUser(roleId, reqVO);
+                        UserInsertReqVO userInsertReqVO = new UserInsertReqVO();
+                        userInsertReqVO.setUsername(adminUserReqVO.getAdminUserName());
+                        userInsertReqVO.setNickname(adminUserReqVO.getAdminNickName());
+                        userInsertReqVO.setMobile(adminUserReqVO.getAdminMobile());
+                        userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
+                        userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
+                        // 创建用户
+                        Long userId = userService.createUser(reqVO);
+                        permissionService.assignUserRoles(userId, singleton(roleId));
+
                     } else {
                         // 新管理员用户存在，直接分配角色
                         permissionService.assignUserRoles(newAdminUser.getId(), singleton(roleId));
-                        userId = newAdminUser.getId();
+                        Long userId = newAdminUser.getId();
                         // 将新管理员设置为内置用户类型
                         userService.updateAdminType(userId, AdminTypeEnum.SYSTEM.getType());
                     }
-                }
-
-                // 修改租户的管理员
-                updateObj.setAdminUserId(userId);
-                if (updateObj.getAdminUserId() != null) {
-                    row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
-                    tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
-                }
+                });
             });
         }
     }
@@ -355,13 +388,6 @@ public class TenantServiceImpl implements TenantService {
         } else {
             roleId = roleDO.getId();
         }
-        // 移除旧用户租户管理员角色
-        UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(tenant.getAdminUserId(), roleId);
-        if (userRoleDO != null) {
-            permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
-        }
-        // 将旧管理员设置为普通用户,降级
-        userService.updateAdminType(tenant.getAdminUserId(), AdminTypeEnum.CUSTOM.getType());
         return roleId;
     }
 
@@ -460,15 +486,63 @@ public class TenantServiceImpl implements TenantService {
         Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
         tenantRespVO.setExistUserCount(count);
-        AdminUserDO user = userService.getUser(tenantDO.getCreator());
-        tenantRespVO.setAdminNickName(user.getNickname());
+
         Long appCountResult = appApplicationApi.countApplicationByTenantId(id);
         // Long 转 Integer
         tenantRespVO.setAppCount(appCountResult != null ? appCountResult.intValue() : 0);
+        // 获取当前空间的管理员角色id
+        RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+        if(roleDO!=null) {
+            List<String> adminUserRespDTOS = adminUserRoleApi.getUserRoleByRoleId(roleDO.getId());
+            List<Long> userIds = adminUserRespDTOS.stream()
+                    .map(Long::valueOf)
+                    .collect(Collectors.toList());
+            // 使用AdminUserService批量获取用户数据
+            // 获取角色对应的管理员
+            // 获取租户管理员用户信息
+            List<TenantAdminUserResVO> adminUserList = new ArrayList<>();
+            if (userIds.size() > 0) {
+                List<AdminUserDO> adminUsers = userService.getUserList(userIds);
+                adminUserList = adminUsers.stream()
+                        .filter(Objects::nonNull)
+                        .map(uservo -> new TenantAdminUserResVO()
+                                .setAdminUserName(uservo.getUsername())
+                                .setAdminMobile(uservo.getMobile())
+                                .setAdminUserId(uservo.getId())
+                                .setAdminNickName(uservo.getNickname())
+                        )
+                        .collect(Collectors.toList());
+            }
+            tenantRespVO.setTenantAdminUserList(adminUserList);
+        }
         return tenantRespVO;
     }
 
+    /**
+     * 获取所有企业的数据，并根据tenantId分组获取条数
+     *
+     * @return Map<tenantId, count>
+     */
+    @TenantIgnore
+    public Map<Long, Integer> findCorpCount() {
+        List<CorpDO> corpList = corpService.findCorpAll();
+        return corpList.stream()
+                .collect(Collectors.groupingBy(
+                        CorpDO::getTenantId,
+                        Collectors.summingInt(corp -> 1) // 使用summingInt替代counting
+                ));
+    }
 
+    /**
+     * 获取所有应用
+     *
+     * @return
+     */
+    @TenantIgnore
+    public Map<Integer, Integer> findAppCount() {
+        return appApplicationApi.findAppApplicationAll();
+    }
+    @TenantIgnore
     @Override
     public PageResult<TenantRespVO> getTenantPage(TenantPageReqVO reqVO) {
         PageResult<TenantDO> tenantDOPageResult = tenantDataRepository.findPage(reqVO);
@@ -476,28 +550,26 @@ public class TenantServiceImpl implements TenantService {
             return PageResult.empty();
         }
 
-        // 获取联系人用户ID列表
-        Set<Long> contactUserIds = tenantDOPageResult.getList().stream()
-                .map(TenantDO::getAdminUserId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        // 批量查询用户信息
-        Map<Long, String> userNicknameMap = new HashMap<>();
-        if (CollUtil.isNotEmpty(contactUserIds)) {
-            List<AdminUserDO> users = userService.getUserListByIgnoreTenantId(contactUserIds);
-            userNicknameMap = users.stream()
-                    .collect(Collectors.toMap(AdminUserDO::getId, AdminUserDO::getNickname));
-        }
+        Map<Long, Integer> coupCountMap = findCorpCount();
+        Map<Integer, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称
-        Map<Long, String> finalUserNicknameMap = userNicknameMap;
+
         List<TenantRespVO> tenantRespVOList = tenantDOPageResult.getList().stream()
                 .map(tenantDO -> {
                     TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
-                    // 设置联系人昵称
-                    if (tenantDO.getAdminUserId() != null) {
-                        tenantRespVO.setAdminNickName(finalUserNicknameMap.get(tenantDO.getAdminUserId()));
+                    tenantRespVO.setLogoUrl(tenantDO.getLogoUrl());
+
+                    Integer corpCount = coupCountMap.get(tenantDO.getId());
+                    if (corpCount == null) {
+                        corpCount = CorpConstant.ZERO; // 默认值处理
                     }
+                    tenantRespVO.setCorpCount(corpCount);
+
+                    Integer appCount = appCountMap.get(tenantDO.getId());
+                    if (corpCount == null) {
+                        appCount = CorpConstant.ZERO; // 默认值处理
+                    }
+                    tenantRespVO.setAppCount(appCount);
                     return tenantRespVO;
                 })
                 .collect(Collectors.toList());

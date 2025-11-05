@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.ds.model.task.def;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.ds.model.common.TaskResource;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,15 +8,16 @@ import lombok.Setter;
 @Setter
 public class FlinkTask extends AbstractTask {
 
-    private String initScript;
-    private String rawScript;
+    private String initScript = "";
+    private String rawScript = "";
     private String programType;
     private String mainClass;
+    private TaskResource mainJar;
     private String deployMode;
-    private String yarnQueue;
-    private String flinkVersion;
-    private String jobManagerMemory;
-    private String taskManagerMemory;
+    private String yarnQueue = "";
+    private String flinkVersion = ">=1.12";
+    private String jobManagerMemory = "1G";
+    private String taskManagerMemory = "2G";
     private Integer slot;
     private Integer taskManager;
     private Integer parallelism;
@@ -24,5 +25,11 @@ public class FlinkTask extends AbstractTask {
     @Override
     public String grantTaskType() {
         return "FLINK";
+    }
+
+    public void setMainJar(String mainJar) {
+        TaskResource resourceJar = new TaskResource();
+        resourceJar.setResourceName(mainJar);
+        this.mainJar = resourceJar;
     }
 }

@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.corp.CorpAdminReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -28,6 +29,16 @@ public interface AdminUserService {
      * @return 用户编号
      */
     Long createUser(@Valid UserInsertReqVO createReqVO);
+
+
+
+    /**
+     * 创建用户
+     *
+     * @param createReqVO 用户信息
+     * @return 用户编号
+     */
+    Long createCorpAdminUser(@Valid AdminUserDO createReqVO);
 
     /**
      * 创建平台用户
@@ -281,4 +292,5 @@ public interface AdminUserService {
      */
     UserRespVO getUserWithRoles(Long id);
 
+    List<String> getUserRoleByRoleId(Long id);
 }

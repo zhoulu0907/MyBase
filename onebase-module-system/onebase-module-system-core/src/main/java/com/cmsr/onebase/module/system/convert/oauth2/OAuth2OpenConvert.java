@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.convert.oauth2;
 
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.core.KeyValue;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import cn.hutool.core.date.LocalDateTimeUtil;
@@ -46,7 +47,7 @@ public interface OAuth2OpenConvert {
         Map<String, OAuth2ApproveDO> approveMap = CollectionUtils.convertMap(approves, OAuth2ApproveDO::getScope);
         client.getScopes().forEach(scope -> {
             OAuth2ApproveDO approve = approveMap.get(scope);
-            scopes.add(new KeyValue<>(scope, approve != null ? approve.getApproved() : false));
+            scopes.add(new KeyValue<>(scope, approve != null && approve.getApproved() == NumberConstant.ONE?true:false));
         });
         // 拼接返回
         return new OAuth2OpenAuthorizeInfoRespVO(

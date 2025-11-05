@@ -150,6 +150,24 @@ public class AdminUserServiceImpl implements AdminUserService {
         return user.getId();
     }
 
+    @Override
+    public Long createCorpAdminUser(AdminUserDO userDO) {
+        // 校验用户名唯一
+        validateUsernameUnique(null, userDO.getUsername());
+        // 校验手机号唯一
+        validateMobileUnique(null, userDO.getMobile());
+        // 校验邮箱唯一
+        validateEmailUnique(null, userDO.getEmail());
+
+        userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+        if (userDO.getAdminType() == null) {
+            userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        }
+
+        AdminUserDO adminUserDO= adminUserDataRepository.insert(userDO);
+       return adminUserDO.getId();
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
@@ -766,6 +784,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 转换为响应对象
         return UserConvert.INSTANCE.convert(user, dept, roles);
+    }
+
+    @Override
+    public List<String> getUserRoleByRoleId(Long id) {
+        List<UserRoleDO> UserRoleDOList=  userRoleDataRepository.getUserRoleByRoleId(id);
+        List<String> userIdsList = UserRoleDOList.stream()
+                .map(userRole -> String.valueOf(userRole.getUserId()))
+                .collect(Collectors.toList());
+        return userIdsList;
+
+
     }
 
     /**

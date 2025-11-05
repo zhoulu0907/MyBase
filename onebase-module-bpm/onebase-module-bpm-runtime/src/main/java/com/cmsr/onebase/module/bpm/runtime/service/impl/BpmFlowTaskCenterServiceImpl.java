@@ -4,44 +4,52 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsExtRepository;
+import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmInstanceExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmTaskExtRepository;
+import com.cmsr.onebase.module.bpm.core.dto.BpmDoneTaskDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowInstanceExtVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
-import com.cmsr.onebase.module.engine.orm.anyline.dataobject.ext.FlowHisTaskExt;
-import com.cmsr.onebase.module.engine.orm.anyline.dataobject.ext.FlowInstanceExt;
-import com.cmsr.onebase.module.engine.orm.anyline.dataobject.ext.FlowTaskExt;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowInstance;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
+import com.cmsr.onebase.module.bpm.runtime.vo.ListNodesRespVO;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowHisTaskRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowInstanceRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowTodoTaskPageReqVO;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.dromara.warm.flow.core.FlowEngine;
+import org.dromara.warm.flow.core.dto.DefJson;
+import org.dromara.warm.flow.core.dto.NodeJson;
+import org.dromara.warm.flow.core.entity.Instance;
+import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
-import org.dromara.warm.flow.core.enums.UserType;
+import org.dromara.warm.flow.core.enums.NodeType;
+import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
 import org.dromara.warm.flow.core.utils.StreamUtils;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 @Service
 @Slf4j
@@ -49,13 +57,22 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
 
     @Resource
-    FlowInstanceRepository flowInstanceRepository;
+    private FlowInstanceRepository flowInstanceRepository;
 
     @Resource
-    FlowHisTaskRepository flowHisTaskRepository;
+    private FlowHisTaskRepository flowHisTaskRepository;
 
     @Resource
-    FlowTaskRepository flowTaskRepository;
+    private FlowTaskRepository flowTaskRepository;
+
+    @Resource
+    private BpmTaskExtRepository taskExtRepository;
+
+    @Resource
+    private BpmHisTaskExtRepository hisTaskExtRepository;
+
+    @Resource
+    private BpmInstanceExtRepository insExtRepository;
 
     @Resource
     private UserService flowUserservice;
@@ -67,10 +84,13 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     private UserService userService;
 
     @Resource
-    private BpmFlowInsExtRepository insExtRepository;
+    private InsService insService;
 
     @Resource
-    AdminUserApi adminUserApi;
+    private BpmFlowInsBizExtRepository insBizExtRepository;
+
+    @Resource
+    private AdminUserApi adminUserApi;
     /**
      * 获取流程待办分页
      *
@@ -78,12 +98,12 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      * @return
      */
     @Override
-    public PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmFlowTodoTaskPageReqVO pageReqVO) {
+    public PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmTodoTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
-        PageResult<FlowTaskExt> pageResult = flowTaskRepository.getTodoTaskPage(pageReqVO, String.valueOf(loginUserId));
+        PageResult<BpmTodoTaskDTO> pageResult = taskExtRepository.getTodoTaskPage(pageReqVO, String.valueOf(loginUserId));
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
-        for (FlowTaskExt flowTaskExt : pageResult.getList()) {
+        for (BpmTodoTaskDTO flowTaskExt : pageResult.getList()) {
             try {
                 BpmFlowTodoTaskVO todoTaskVO = getBpmFlowTodoTaskVO(flowTaskExt);
                 todoTaskList.add(todoTaskVO);
@@ -97,7 +117,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     }
 
     @NotNull
-    private static BpmFlowTodoTaskVO getBpmFlowTodoTaskVO(FlowTaskExt flowTaskExt) {
+    private static BpmFlowTodoTaskVO getBpmFlowTodoTaskVO(BpmTodoTaskDTO flowTaskExt) {
         BpmFlowTodoTaskVO todoTaskVO = new BpmFlowTodoTaskVO();
         todoTaskVO.setTaskId(flowTaskExt.getId());
         todoTaskVO.setInstanceId(flowTaskExt.getInstanceId());
@@ -109,6 +129,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setSubmitTime(flowTaskExt.getSubmitTime());
         todoTaskVO.setFormSummary(flowTaskExt.getFormSummary());
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
+        todoTaskVO.setBusinessId(flowTaskExt.getBusinessId());
         return todoTaskVO;
     }
 
@@ -119,10 +140,10 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      * @return
      */
     @Override
-    public PageResult<BpmFlowDoneTaskVO> getDonePage(BpmFlowDoneTaskPageReqVO pageReqVO) {
-        PageResult<FlowHisTaskExt> pageResult = flowHisTaskRepository.getDoneTaskPage(pageReqVO, WebFrameworkUtils.getLoginUserId());  //todo WebFrameworkUtils.getLoginUserId()需改为运行态
+    public PageResult<BpmFlowDoneTaskVO> getDonePage(BpmDoneTaskPageReqVO pageReqVO) {
+        PageResult<BpmDoneTaskDTO> pageResult = hisTaskExtRepository.getDoneTaskPage(pageReqVO, WebFrameworkUtils.getLoginUserId());  //todo WebFrameworkUtils.getLoginUserId()需改为运行态
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
-        for (FlowHisTaskExt flowHisTaskExt : pageResult.getList()) {
+        for (BpmDoneTaskDTO flowHisTaskExt : pageResult.getList()) {
             BpmFlowDoneTaskVO doneTaskVO = new BpmFlowDoneTaskVO();
             doneTaskVO.setTaskId(flowHisTaskExt.getId());
             doneTaskVO.setInstanceId(flowHisTaskExt.getInstanceId());
@@ -131,6 +152,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             doneTaskVO.setFormSummary(flowHisTaskExt.getFormSummary());
             doneTaskVO.setHandleTime(flowHisTaskExt.getUpdateTime());
             doneTaskVO.setTaskStatus(flowHisTaskExt.getFlowStatus());
+            doneTaskVO.setBusinessId(flowHisTaskExt.getBusinessId());
             doneTaskList.add(doneTaskVO);
         }
         return new PageResult<>(doneTaskList, pageResult.getTotal());
@@ -143,9 +165,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      * @return
      */
     public PageResult<BpmMyCreatedVO> getMyCreatedPage(BpmMyCreatedPageReqVO pageReqVO) {
-        PageResult<FlowInstanceExt> pageResult = flowInstanceRepository.getMyCreatePage(pageReqVO, WebFrameworkUtils.getLoginUserId());
+        PageResult<BpmInstanceDTO> pageResult = insExtRepository.getMyCreatePage(pageReqVO, WebFrameworkUtils.getLoginUserId());
         List<BpmMyCreatedVO> list = new ArrayList<>();
-        for (FlowInstanceExt flowInstance : pageResult.getList()) {
+        for (BpmInstanceDTO flowInstance : pageResult.getList()) {
             BpmMyCreatedVO bpmMyCreatedVO = new BpmMyCreatedVO();
             bpmMyCreatedVO.setId(flowInstance.getId());
             bpmMyCreatedVO.setProcessTitle(flowInstance.getBusinessTitle());
@@ -155,12 +177,14 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             bpmMyCreatedVO.setCreateTime(flowInstance.getCreateTime());
             bpmMyCreatedVO.setUpdateTime(flowInstance.getUpdateTime());
             bpmMyCreatedVO.setInstanceId(flowInstance.getId());
+            bpmMyCreatedVO.setBusinessId(flowInstance.getBusinessId());
 
             //设置当前节点处理人
-            List<FlowTask> flowTaskList = flowTaskRepository.getByInsId(flowInstance.getId());
+            List<Task> flowTaskList = taskService.getByInsId(flowInstance.getId());
+
             if (CollectionUtils.isNotEmpty(flowTaskList)) {
                 bpmMyCreatedVO.setTaskId(flowTaskList.get(0).getId());
-                List<Long> taskIds = StreamUtils.toList(flowTaskList, FlowTask::getId);
+                List<Long> taskIds = StreamUtils.toList(flowTaskList, Task::getId);
                 List<User> userList = flowUserservice.getByAssociateds(taskIds);
                 List<Long> processedByIds = userList.stream()
                         .map(user -> Long.valueOf(user.getProcessedBy()))
@@ -182,7 +206,33 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     }
 
     @Override
-    public List<FlowHisTask> getHisTaskByInstanceId(Long instanceId, String appId) {
-        return flowHisTaskRepository.getHisTaskByInstanceId(instanceId, appId);
+    public List<ListNodesRespVO.NodeVO> listNodes(Long instanceId) {
+        List<ListNodesRespVO.NodeVO> nodeVOs = new ArrayList<>();
+
+        Instance instance = insService.getById(instanceId);
+
+        if (instance == null) {
+            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+        }
+
+        String defJsonStr = instance.getDefJson();
+
+        DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+        for (NodeJson nodeJson : defJson.getNodeList()) {
+            // 只取中间节点
+            if (NodeType.isBetween(nodeJson.getNodeType())) {
+                ListNodesRespVO.NodeVO nodeVO = new ListNodesRespVO.NodeVO();
+                nodeVO.setNodeCode(nodeJson.getNodeCode());
+                nodeVO.setNodeName(nodeJson.getNodeName());
+
+                // 取实际的类型
+                BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
+                nodeVO.setNodeType(nodeExtDTO.getNodeType());
+
+                nodeVOs.add(nodeVO);
+            }
+        }
+
+        return nodeVOs;
     }
 }

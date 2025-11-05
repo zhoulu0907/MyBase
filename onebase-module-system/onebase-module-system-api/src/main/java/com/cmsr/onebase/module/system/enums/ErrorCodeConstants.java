@@ -182,5 +182,12 @@ public interface ErrorCodeConstants {
     ErrorCode LICENSE_EXPORT_ERROR = new ErrorCode(1_002_029_002, "License凭证导出失败");
     ErrorCode LICENSE_DECRYPT_ERROR = new ErrorCode(1_002_029_003, "文件解析失败，文件可能已损坏或不是有效的凭证文件");
     ErrorCode LICENSE_CREATE_ERROR = new ErrorCode(1_002_029_004, "License凭证生成失败");
+    // ========== 企业相关 1-002-029-000 ==========
+    ErrorCode CORP_NO_EXISTS = new ErrorCode(1_002_025_006, "【{}】企业不存在");
+    ErrorCode CORP_NAME_EXISTS = new ErrorCode(1_002_025_005, "名称为【{}】的企业已存在");
+    ErrorCode CORP_ID_EXISTS = new ErrorCode(1_002_025_008, "编码为【{}】的企业已存在");
+    ErrorCode CORP_USER_LIMIT_COUNT = new ErrorCode(1_002_025_007, "企业用户数【{}】，大于系统上限");
+    // ========== 企业应用关联 1-002-030-000 ==========
+    ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "企业应用关联表不存在");
 
 }

@@ -52,6 +52,7 @@ public class DataRuntimeTest {
         reqVO.setMenuId(113431890281824256L);
         reqVO.setEntityId(113429588179353600L);
         reqVO.setId(116480234742382592L);
+        reqVO.setMenuId(113431890281824256L);//订单表页面
 //        Map<Long, Object> data = new HashMap<>(){
 //            {
 //                put(113430189474775040L, "aaa");
@@ -61,6 +62,7 @@ public class DataRuntimeTest {
 //        };
 //        reqVO.setData(data);
         TenantContextHolder.setIgnore(true);
+        //用户：zhangxihui 应用：zxh1030
         RTSecurityContext.mockLoginUser(116683300797415424L, 113428849444978688L);
         boolean dynamicDataRespVO = runtimeDataService.deleteData(reqVO);
         System.out.println(dynamicDataRespVO);

@@ -84,7 +84,7 @@ public class DataPermissionChecker implements PermissionChecker {
             throw new PermissionDeniedException(
                     PERMISSION_TYPE,
                     "NO_GROUPS",
-                    "未配置数据权限规则"
+                    "无权访问任何数据"
             );
         }
 

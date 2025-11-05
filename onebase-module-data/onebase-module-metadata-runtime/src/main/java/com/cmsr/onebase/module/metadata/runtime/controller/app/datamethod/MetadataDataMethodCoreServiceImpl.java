@@ -120,7 +120,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     public Map<String, Object> updateData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
         // 获取当前登录用户的运行时权限
-//        this.fetchRuntimePermission(metadataDataMethodRequestContext);
+        this.fetchRuntimePermission(metadataDataMethodRequestContext);
 
         // 使用新的统一流程处理更新操作
 
@@ -200,7 +200,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                             String fieldType = fields.stream().filter(field ->
                                     rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
                             if("DATE".equals(fieldType)){
-                                String toChar = "to_char(" + rawKey + ",'YYYY/MM/DD')";
+                                String toChar = "to_char(" + rawKey + ",'YYYY-MM-DD')";
                                 configs.and(Compare.LIKE, toChar, rawVal);
                             }else{
                                 configs.and(Compare.LIKE, rawKey, rawVal);
@@ -248,7 +248,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                             String fieldType = fields.stream().filter(field ->
                                     rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
                             if("DATE".equals(fieldType)){
-                                String toChar = "to_char(" + rawKey + ",'YYYY/MM/DD')";
+                                String toChar = "to_char(" + rawKey + ",'YYYY-MM-DD')";
                                 countConfigs.and(Compare.LIKE, toChar, rawVal);
                             }else {
                                 countConfigs.and(Compare.LIKE, rawKey, rawVal);
@@ -507,7 +507,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
         Long menuId = metadataDataMethodRequestContext.getMenuId();
         if (menuId == null) {
-//            throw exception(METADATA_DATA_METHOD_RUNTIME_MENUID_REQUIRED);
+            throw exception(METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED);
         }
 
         RTLoginUser loginUser = RTSecurityContext.getLoginUser();

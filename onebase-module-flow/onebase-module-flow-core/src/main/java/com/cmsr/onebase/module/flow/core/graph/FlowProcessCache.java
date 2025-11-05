@@ -77,14 +77,6 @@ public class FlowProcessCache {
         processApplicationCache.put(processId, applicationId);
     }
 
-    public void deleteByApplicationId(Long applicationId, Long processId) {
-        flowNodeDataCache.remove(processId);
-        startTimeNodeDataCache.remove(processId);
-        startFormNodeDataCache.remove(processId);
-        startDateFieldNodeDataCache.remove(processId);
-        startEntityNodeDataCache.remove(processId);
-        processApplicationCache.remove(processId);
-    }
 
     public boolean isProcessExist(Long processId) {
         return flowNodeDataCache.containsKey(processId);
@@ -125,12 +117,13 @@ public class FlowProcessCache {
                 .collect(Collectors.toSet());
     }
 
-    public Set<Long> deleteByApplicationId(Long applicationId) {
-        Set<Long> processIds = findProcessByApplicationId(applicationId);
-        for (Long processId : processIds) {
-            deleteByApplicationId(applicationId, processId);
-        }
-        return processIds;
+    public void deleteByProcessId(Long processId) {
+        flowNodeDataCache.remove(processId);
+        startTimeNodeDataCache.remove(processId);
+        startFormNodeDataCache.remove(processId);
+        startDateFieldNodeDataCache.remove(processId);
+        startEntityNodeDataCache.remove(processId);
+        processApplicationCache.remove(processId);
     }
 
     public Long findApplicationByProcessId(Long processId) {
@@ -138,6 +131,6 @@ public class FlowProcessCache {
     }
 
     public Set<Long> getAllApplicationId() {
-         return processApplicationCache.values().stream().collect(Collectors.toSet());
+        return processApplicationCache.values().stream().collect(Collectors.toSet());
     }
 }

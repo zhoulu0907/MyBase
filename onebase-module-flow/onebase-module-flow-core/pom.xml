@@ -49,6 +49,10 @@
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-spring-boot-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
         <!-- 测试依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
