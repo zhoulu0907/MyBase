@@ -8,7 +8,7 @@ import { getComponentConfig } from 'src/components/Materials/schema';
 import { getComponentSchema } from '../../../schema';
 import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
 import EditRender from 'src/components/render/EditRender';
-import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { v4 as uuidv4 } from 'uuid';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
@@ -39,7 +39,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
-  } = usePageEditorSignal(pageType);
+  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
   const { subTableDataLength } = pagesRuntimeSignal;
 
   // 判断拖拽的组件是否是表单组件
@@ -216,9 +216,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   const { form } = Form.useFormContext();
 
   useEffect(() => {
-    if (runtime) {
-      getTableColumns();
-    }
+    getTableColumns();
   }, []);
 
   useEffect(() => {
