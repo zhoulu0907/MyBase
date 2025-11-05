@@ -1,25 +1,26 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { copyToClipboard, getDomainPrefix, simplifyUrl } from '@/utils/date';
 import {
+  Button,
+  Checkbox,
   Form,
   Input,
-  Button,
-  Upload,
-  Select,
   Message,
+  Select,
   Space,
-  Checkbox,
   Tabs,
   Tooltip,
+  Upload
 } from '@arco-design/web-react';
 import { IconCopy, IconUpload } from '@arco-design/web-react/icon';
 import {
+  getPlatformTenantAdminInfoApi,
   getPlatformTenantAdminListApi,
   updatePlatformTenantApi,
-  type UpdateTenantParams,
-  getPlatformTenantAdminInfoApi,
+  type UpdateTenantParams
 } from '@onebase/platform-center';
-import { copyToClipboard, getDomainPrefix, simplifyUrl } from '@/utils/date';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import WorkspaceSecurity from './components/security';
 import styles from './index.module.less';
 
 const EditTenant = () => {
@@ -42,7 +43,7 @@ const EditTenant = () => {
     if (id) {
       getTenantInfo(id);
       getPlatformAdminList();
-    };
+    }
   }, [id]);
 
   useEffect(() => {
@@ -63,7 +64,7 @@ const EditTenant = () => {
   const getTenantInfo = async (id: string) => {
     const res = await getPlatformTenantAdminInfoApi({ id });
     setTenantInfo(res);
-    console.log(res, 999)
+    console.log(res, 999);
   };
 
   // 获取管理员列表
@@ -115,7 +116,7 @@ const EditTenant = () => {
 
   return (
     <div className={styles.editPage}>
-      <Tabs defaultActiveTab='1' destroyOnHide={false}>
+      <Tabs defaultActiveTab="1" destroyOnHide={false}>
         <Tabs.TabPane key="1" title="基本信息">
           <Form
             form={form}
@@ -143,10 +144,7 @@ const EditTenant = () => {
               </> : <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>}
             </Form.Item>
 
-            <Form.Item
-              label="空间ID"
-              field="id"
-            >
+            <Form.Item label="空间ID" field="id">
               {isEdit ? <Input type="number" disabled /> : <span>{tenantInfo?.id}</span>}
             </Form.Item>
 
@@ -198,12 +196,7 @@ const EditTenant = () => {
                 </div>}
             </Form.Item>
 
-            <Form.Item
-              label="状态"
-              field="status"
-              triggerPropName="checked"
-              rules={[{ required: isEdit }]}
-            >
+            <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: isEdit }]}>
               {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.status ? '已启用' : '未启用'}</span>}
             </Form.Item>
 
@@ -217,18 +210,22 @@ const EditTenant = () => {
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 5 }}>
-              <Space >
-                <Button onClick={() => setIsEdit(pre => !pre)}>{isEdit ? '取消' : '编辑'}</Button>
-                {isEdit && <Button type="primary" onClick={handleSave}>
-                  保存修改
-                </Button>}
+              <Space>
+                <Button onClick={() => setIsEdit((pre) => !pre)}>{isEdit ? '取消' : '编辑'}</Button>
+                {isEdit && (
+                  <Button type="primary" onClick={handleSave}>
+                    保存修改
+                  </Button>
+                )}
               </Space>
             </Form.Item>
           </Form>
         </Tabs.TabPane>
+        <Tabs.TabPane key="2" title="安全设置">
+          <WorkspaceSecurity />
+        </Tabs.TabPane>
       </Tabs>
-
-    </div>
+    </div >
   );
 };
 
