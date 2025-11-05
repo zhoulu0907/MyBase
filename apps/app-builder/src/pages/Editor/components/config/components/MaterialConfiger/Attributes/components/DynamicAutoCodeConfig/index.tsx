@@ -52,9 +52,11 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
     const resetText = config.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
     return `${numberingMethodText},${digitsText},${resetText}`;
   };
-  const [displayText, setDisplayText] = useState(getDisplayText(configs[autoCodeKey]?.config));
+  const [displayText, setDisplayText] = useState(getDisplayText(configs[autoCodeKey]));
 
   useEffect(() => {
+    console.log('configs[autoCodeKey]', configs[autoCodeKey]);
+
     const keys = Object.keys(configs[autoCodeKey] || {});
     if (keys?.length) {
       const newRules = configs[autoCodeKey].rules || [];
@@ -324,8 +326,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
         onVisibleChange={setEditRuleVisible}
         onConfirm={handleAutoCodeConfigConfirm}
         initialConfig={
-          rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)
-            ?.config as unknown as AutoNumberRuleResponce
+          rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE) as unknown as AutoNumberRuleResponce
         }
       />
     </>

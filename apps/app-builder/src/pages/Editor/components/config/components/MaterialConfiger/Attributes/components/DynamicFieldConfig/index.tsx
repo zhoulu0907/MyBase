@@ -3,18 +3,26 @@ import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebas
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 import { useSignals } from '@preact/signals-react/runtime';
-import { usePageEditorSignal, useFormEditorSignal, useAppEntityStore } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, usePageEditorSignal, useFormEditorSignal, useAppEntityStore } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 
 export interface DynamicFieldConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
+  handleConfigsChange: (config: any) => void;
   item: any;
   configs: any;
 }
 
-const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChange, item, configs }) => {
+const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
+  handlePropsChange,
+  handleConfigsChange,
+  item,
+  configs
+}) => {
   useSignals();
+  const autoCodeKey = 'autoCodeConfig';
+  const autoCodeDisabledKey = 'autoCodeDisabled';
   const { curComponentSchema, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
   const { subTableComponents } = useFormEditorSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
@@ -99,6 +107,46 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
     }
   };
 
+  const handleAutoCode = (value: (string | string[])[]) => {
+    const type = configs.id.slice(0, configs.id.indexOf('-'));
+    // 当前组件是自动编号
+    if (type === FORM_COMPONENT_TYPES.AUTO_CODE) {
+      // 判断 value  先找表  在找字段
+      const isMainEntity = value?.includes(mainEntity.entityId);
+      const currentMainField = mainEntity.fields.find((ele: AppEntityField) => value.includes(ele.fieldId));
+      const isSubEntity = subEntities.entities.find((ele) => value?.includes(ele.entityId));
+      const currentSubField = isSubEntity?.fields.find((ele: AppEntityField) => value.includes(ele.fieldId));
+      if (isMainEntity && currentMainField?.autoNumberConfig?.id) {
+        // 主表
+        const newConfigs = {
+          ...configs,
+          [item.key]: value,
+          [autoCodeKey]: { ...currentMainField.autoNumberConfig },
+          [autoCodeDisabledKey]: true
+        };
+        handleConfigsChange(newConfigs);
+      } else if (isSubEntity && currentSubField?.autoNumberConfig?.id) {
+        // 子表
+        const newConfigs = {
+          ...configs,
+          [item.key]: value,
+          [autoCodeKey]: { ...currentSubField.autoNumberConfig },
+          [autoCodeDisabledKey]: true
+        };
+        handleConfigsChange(newConfigs);
+      } else {
+        const newConfigs = {
+          ...configs,
+          [item.key]: value,
+          [autoCodeDisabledKey]: false
+        };
+        handleConfigsChange(newConfigs);
+      }
+    } else {
+      handlePropsChange(item.key, value);
+    }
+  };
+
   return (
     <FormItem layout="vertical" labelAlign="left" label="数据字段配置" className={styles.formItem}>
       <Cascader
@@ -113,7 +161,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
         options={isInSubTable ? entityTree.filter((ele) => ele.value !== mainEntity.entityId) : entityTree}
         onChange={(value) => {
           handleDataFieldChange(value);
-          handlePropsChange(item.key, value);
+          handleAutoCode(value);
         }}
       />
     </FormItem>

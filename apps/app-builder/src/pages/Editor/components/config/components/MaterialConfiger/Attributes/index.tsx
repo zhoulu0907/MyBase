@@ -132,6 +132,22 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     setPageComponentSchemas(cpID, newCurComponentSchema);
   };
 
+  const handleConfigsChange = (config: any) => {
+    const newCurComponentSchema = {
+      id: cpID,
+      type: curComponentSchema.type,
+      editData: curComponentSchema.editData,
+      config: {
+        ...curComponentSchema.config,
+        ...config
+      },
+      layout: curComponentSchema.layout
+    };
+
+    setCurComponentSchema(newCurComponentSchema);
+    setPageComponentSchemas(cpID, newCurComponentSchema);
+  };
+
   const handleMultiPropsChange = (updates: { key: string; value: string | number | boolean | any[] }[]) => {
     console.log(`更新了属性: ${updates}`);
 
@@ -642,7 +658,13 @@ const Attributes = ({ cpID }: ConfigsProps) => {
 
               if (item.type === CONFIG_TYPES.FIELD_DATA) {
                 return (
-                  <DynamicFieldConfig key={index} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+                  <DynamicFieldConfig
+                    key={index}
+                    handlePropsChange={handlePropsChange}
+                    handleConfigsChange={handleConfigsChange}
+                    item={item}
+                    configs={configs}
+                  />
                 );
               }
 
