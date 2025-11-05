@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.infra.dal.vo.security;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ import lombok.Data;
  */
 @Schema(description = "管理后台 - 安全配置项 Response VO")
 @Data
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class SecurityConfigItemRespVO {
 
     @Schema(description = "配置ID", example = "1")
@@ -28,9 +30,6 @@ public class SecurityConfigItemRespVO {
     @Schema(description = "配置值", example = "8")
     private String configValue;
 
-    @Schema(description = "默认值", example = "8")
-    private String defaultValue;
-
     @Schema(description = "描述", example = "密码最小长度")
     private String description;
 
@@ -39,5 +38,14 @@ public class SecurityConfigItemRespVO {
 
     @Schema(description = "分类ID", example = "1")
     private Long categoryId;
+
+    @Schema(description = "全量选项", example = "描述1,描述2")
+    private String options;
+
+    @Schema(description = "最大值", example = "10000")
+    private Long maxvalue;
+
+    @Schema(description = "最小值", example = "1")
+    private Long minvalue;
 
 }

@@ -49,7 +49,9 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
                     t.data_type,
                     t.description,
                     t.sort_order,
-                    t.default_value AS default_value,
+                    t.options,
+                    t.max_value,
+                    t.min_value,
                     COALESCE(c.config_value, t.default_value) AS config_value_effective
                 FROM infra_security_config_template t
                 LEFT JOIN infra_security_config c
@@ -69,10 +71,12 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
             templateDO.setConfigKey(dataRow.getString("config_key"));
             templateDO.setConfigName(dataRow.getString("config_name"));
             templateDO.setDataType(dataRow.getString("data_type"));
-            templateDO.setDefaultValue(dataRow.getString("default_value"));
             templateDO.setConfigValue(dataRow.getString("config_value_effective"));
             templateDO.setDescription(dataRow.getString("description"));
             templateDO.setSortOrder(dataRow.getInt("sort_order"));
+            templateDO.setOptions(dataRow.getString("options"));
+            templateDO.setMaxValue(dataRow.getLong("max_value"));
+            templateDO.setMinValue(dataRow.getLong("min_value"));
             return templateDO;
         }).toList();
     }
@@ -98,7 +102,9 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
                     t.data_type,
                     t.description,
                     t.sort_order,
-                    t.default_value AS default_value,
+                    t.options,
+                    t.max_value,
+                    t.min_value,
                     COALESCE(c.config_value, t.default_value) AS config_value_effective
                 FROM infra_security_config_template t
                 LEFT JOIN infra_security_config c
@@ -117,10 +123,12 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
             templateDO.setConfigKey(dataRow.getString("config_key"));
             templateDO.setConfigName(dataRow.getString("config_name"));
             templateDO.setDataType(dataRow.getString("data_type"));
-            templateDO.setDefaultValue(dataRow.getString("default_value"));
             templateDO.setConfigValue(dataRow.getString("config_value_effective"));
             templateDO.setDescription(dataRow.getString("description"));
             templateDO.setSortOrder(dataRow.getInt("sort_order"));
+            templateDO.setOptions(dataRow.getString("options"));
+            templateDO.setMaxValue(dataRow.getLong("max_value"));
+            templateDO.setMinValue(dataRow.getLong("min_value"));
             return templateDO;
         }).toList();
     }

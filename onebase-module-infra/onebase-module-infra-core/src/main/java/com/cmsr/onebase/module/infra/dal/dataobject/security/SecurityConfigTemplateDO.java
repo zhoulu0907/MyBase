@@ -31,6 +31,9 @@ public class SecurityConfigTemplateDO extends BaseDO {
     public static final String DEFAULT_VALUE = "default_value";
     public static final String DESCRIPTION = "description";
     public static final String SORT_ORDER = "sort_order";
+    public static final String OPTIONS = "options";
+    public static final String MAXVALUE = "maxvalue";
+    public static final String MINVALUE = "minvalue";
 
     /**
      * 分类ID
@@ -68,6 +71,14 @@ public class SecurityConfigTemplateDO extends BaseDO {
     @Transient
     private String configValue;
 
+    @Column(name = OPTIONS)
+    private String options;
+
+    @Column(name = MAXVALUE)
+    private Long maxValue;
+
+    @Column(name = MINVALUE)
+    private Long minValue;
     /**
      * 描述
      */

@@ -73,12 +73,14 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             itemVO.setConfigKey(template.getConfigKey());
             itemVO.setConfigName(template.getConfigName());
             itemVO.setDataType(template.getDataType());
-            itemVO.setDefaultValue(template.getDefaultValue());
             itemVO.setConfigValue(template.getConfigValue());
             itemVO.setDescription(template.getDescription());
             itemVO.setSortOrder(template.getSortOrder());
             itemVO.setId(template.getId());
             itemVO.setCategoryId(template.getCategoryId());
+            itemVO.setOptions(template.getOptions());
+            itemVO.setMaxvalue(template.getMaxValue());
+            itemVO.setMinvalue(template.getMinValue());
 
             configItems.add(itemVO);
         }
@@ -151,12 +153,14 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             itemVO.setConfigKey(template.getConfigKey());
             itemVO.setConfigName(template.getConfigName());
             itemVO.setDataType(template.getDataType());
-            itemVO.setDefaultValue(template.getDefaultValue());
             itemVO.setConfigValue(template.getConfigValue());
             itemVO.setDescription(template.getDescription());
             itemVO.setSortOrder(template.getSortOrder());
             itemVO.setId(template.getId());
             itemVO.setCategoryId(template.getCategoryId());
+            itemVO.setOptions(template.getOptions());
+            itemVO.setMaxvalue(template.getMaxValue());
+            itemVO.setMinvalue(template.getMinValue());
 
             configItems.add(itemVO);
         }
