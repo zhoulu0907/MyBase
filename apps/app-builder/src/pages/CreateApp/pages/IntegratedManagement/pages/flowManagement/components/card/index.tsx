@@ -46,6 +46,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
       await disableFlowMgmt(id);
       Message.success('禁用成功');
     }
+    refreshList();
   };
 
   return (
