@@ -2,6 +2,7 @@ export * from './auth';
 export * from './common';
 export * from './dept';
 export * from './dict';
+export * from './infra';
 export * from './platformAdmin';
 export * from './platformInfo';
 export * from './platformTenant';

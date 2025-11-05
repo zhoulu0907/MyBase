@@ -1,4 +1,4 @@
-import { Button, Menu } from '@arco-design/web-react';
+import { Button, Form, InputNumber, Menu } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -6,8 +6,43 @@ const MenuItem = Menu.Item;
 
 interface WorkspaceSecurityProps {}
 
+const mockCategories = [
+  {
+    id: '1',
+    categoryName: '密码强度',
+    items: [
+      {
+        id: '1-1',
+        configKey: 'minLength',
+        configName: '最小密码长度',
+        dataType: 'INTEGER',
+        configValue: 8,
+        description: '最小密码长度为',
+        sortOrder: 1
+      },
+      {
+        id: '1-2',
+        configKey: 'maxLength',
+        configName: '最大密码长度',
+        dataType: 'INTEGER',
+        configValue: 16,
+        description: '最大密码长度为',
+        sortOrder: 2
+      }
+    ]
+  },
+  {
+    id: '2',
+    categoryName: '类别2'
+  },
+  {
+    id: '3',
+    categoryName: '类别3'
+  }
+];
+
 const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
-  useEffect(() => {}, []);
+  const [form] = Form.useForm();
 
   const [activeMenuItem, setActiveMenuItem] = useState<string>('');
   const handleClickMenuItem = (key: string) => {
@@ -19,26 +54,52 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
     console.log('保存');
   };
 
+  useEffect(() => {
+    const res = mockCategories
+      .find((category) => category.id === activeMenuItem)
+      ?.items?.reduce(
+        (acc, item) => {
+          acc[item.configKey] = item.configValue;
+          return acc;
+        },
+        {} as Record<string, any>
+      );
+    console.log('res', res);
+    form.setFieldsValue(res);
+  }, [activeMenuItem]);
+
   return (
     <div className={styles.workspaceSecurityPage}>
       <div className={styles.sider}>
         <Menu style={{ width: 200 }} mode="pop" onClickMenuItem={handleClickMenuItem}>
-          <MenuItem key="1">配置项1</MenuItem>
-          <MenuItem key="2">配置项2</MenuItem>
-          <MenuItem key="3">配置项3</MenuItem>
+          {mockCategories.map((category) => (
+            <MenuItem key={category.id}>{category.categoryName}</MenuItem>
+          ))}
         </Menu>
       </div>
       <div className={styles.content}>
         <div className={styles.contentHeader}>
-          <div className={styles.contentTitle}>{activeMenuItem}</div>
+          <div className={styles.contentTitle}>
+            {mockCategories.find((category) => category.id === activeMenuItem)?.categoryName}
+          </div>
           <Button type="primary" onClick={handleSave}>
             更新配置
           </Button>
         </div>
         <div className={styles.contentBody}>
           <div className={styles.contentBodyItem}>
-            <div className={styles.contentBodyItemTitle}>配置项1</div>
-            <div className={styles.contentBodyItemContent}>配置项1内容</div>
+            <Form form={form}>
+              {activeMenuItem &&
+                mockCategories
+                  .find((category) => category.id === activeMenuItem)
+                  ?.items?.map((item) => (
+                    <div key={item.configKey} className={styles.contentBodyItemContent}>
+                      <Form.Item field={item.configKey} label={item.configName} extra={item.description}>
+                        <InputNumber />
+                      </Form.Item>
+                    </div>
+                  ))}
+            </Form>
           </div>
         </div>
         <div className={styles.contentFooter}></div>
