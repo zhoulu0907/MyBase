@@ -125,7 +125,7 @@ const CreateModal: React.FC<CreateModalProps> = ({ visible, onOk, onCancel }) =>
                 <Col span={12}>
                   {repeatType === REPEAT_TYPE_OPTIONS.NONE && (
                     <Form.Item field="triggerTime" rules={[{ required: true, message: '请选择日期' }]}>
-                      <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " style={{ width: '100%' }} />
+                      <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: '100%' }} />
                     </Form.Item>
                   )}
 

@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { DATE_OPTIONS, DATE_VALUES, DATE_FORMAT,STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputDateRangePickerConfig } from './schema';
 
@@ -77,6 +77,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
           </div>
         ) : (
           <DatePicker.RangePicker
+            format={DATE_FORMAT[dateType]}
             mode={currentDateType}
             showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
             getPopupContainer={getPopupContainer}
