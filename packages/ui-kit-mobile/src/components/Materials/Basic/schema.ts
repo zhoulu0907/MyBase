@@ -4,6 +4,8 @@ import XInputEmail from './FormComponents/InputEmail/schema';
 import XInputPhone from './FormComponents/InputPhone/schema';
 import XInputNumber from './FormComponents/InputNumber/schema';
 import XDatePicker from './FormComponents/DatePicker/schema';
+import XDateRangePicker from './FormComponents/DateRangePicker/schema';
+import XDateTimePicker from './FormComponents/DateTimePicker/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
 import XSelectOne from './FormComponents/SelectOne/schema';
 import XSelectMutiple from './FormComponents/SelectMutiple/schema';
@@ -17,6 +19,8 @@ const baseSchema = {
   XInputPhone,
   XInputNumber,
   XDatePicker,
+  XDateRangePicker,
+  XDateTimePicker,
   XTimePicker,
   XSelectOne,
   XSelectMutiple,

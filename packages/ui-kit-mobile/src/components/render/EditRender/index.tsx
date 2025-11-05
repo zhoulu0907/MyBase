@@ -56,6 +56,10 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XDatePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.TIME_PICKER:
         return <FormComp.XTimePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
+          return <FormComp.XDateRangePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+          case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
+        return <FormComp.XDateTimePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />; 
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

@@ -14,6 +14,8 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.INPUT_NUMBER]: BasicSchema.XInputNumber,
   [ALL_COMPONENT_TYPES.DATE_PICKER]: BasicSchema.XDatePicker,
   [ALL_COMPONENT_TYPES.TIME_PICKER]: BasicSchema.XTimePicker,
+  [ALL_COMPONENT_TYPES.DATE_RANGE_PICKER]: BasicSchema.XDateRangePicker,
+  [ALL_COMPONENT_TYPES.DATE_TIME_PICKER]: BasicSchema.XDateTimePicker,
   [ALL_COMPONENT_TYPES.CHECKBOX]: BasicSchema.XCheckbox,
   [ALL_COMPONENT_TYPES.RADIO]: BasicSchema.XRadio,
   [ALL_COMPONENT_TYPES.SWITCH]: BasicSchema.XSwitch,
