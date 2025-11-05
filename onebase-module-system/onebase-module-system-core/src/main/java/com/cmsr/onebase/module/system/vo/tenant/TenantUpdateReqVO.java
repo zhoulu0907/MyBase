@@ -51,7 +51,8 @@ public class TenantUpdateReqVO {
     private String logoUrl;
 
     @Schema(description = "管理员集合")
-    private List<TenantAdminUserReqVO> TenantAdminUserReqVOList;
+    @NotNull(message = "管理员不能为空")
+    private List<TenantAdminUserUpdateReqVO> tenantAdminUserUpdateReqVOSList;
     // ========== 仅【创建】时，需要传递的字段 ==========
 
     // @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")

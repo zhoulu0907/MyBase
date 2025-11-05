@@ -292,4 +292,5 @@ public interface AdminUserService {
      */
     UserRespVO getUserWithRoles(Long id);
 
+    List<String> getUserRoleByRoleId(Long id);
 }

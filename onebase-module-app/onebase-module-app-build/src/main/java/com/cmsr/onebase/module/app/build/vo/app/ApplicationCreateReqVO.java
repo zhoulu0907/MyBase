@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.build.vo.app;
 
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
+import com.cmsr.onebase.framework.common.validation.InEnum;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -49,6 +51,7 @@ public class ApplicationCreateReqVO {
 
     @Schema(description = "发布模式")
     @NotBlank(message = "发布模式不能为空")
+    @InEnum(value = CommonPublishModelEnum.class, message = "返回值类型必须是 {value}")
     private String publishModel;
 
 }

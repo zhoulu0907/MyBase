@@ -158,6 +158,7 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @param pageReqVO 分页查询条件
      * @return 分页结果
      */
+
     public PageResult<TenantDO> findPage(TenantPageReqVO pageReqVO) {
         Integer status = pageReqVO.getStatus();
 
@@ -178,7 +179,7 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
         // 排除平台租户
         configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
 
-        if(pageReqVO.getSortType().equals(SortEnum.DESC.getValue())){
+        if(pageReqVO.getSortType()!=null && pageReqVO.getSortType().equals(SortEnum.DESC.getValue())){
             configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         }else{
             configStore.order(BaseDO.CREATE_TIME, Order.TYPE.ASC);

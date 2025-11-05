@@ -61,7 +61,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             CorpAppRelationDO corpAppRelationDO = BeanUtils.toBean(createReqVO, CorpAppRelationDO.class);
             corpAppRelationDO.setApplicationId(appliationId);
             corpAppRelationDO.setAuthorizationTime(createReqVO.getAuthorizationTime());
-            corpAppRelationDO.setExpiresTime(createReqVO.getAuthorizationTime().plusYears(CorpConstant.EXPIRESYEAR));
+            corpAppRelationDO.setExpiresTime(createReqVO.getExpiresTime());
             corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
             corpAppRelationDO.setCorpId(createReqVO.getCorpId());
             corpAppRelationDO.setTenantId(TenantContextHolder.getTenantId());
@@ -164,7 +164,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             respVO.setApplicationCode(appDo.getAppCode());
             respVO.setApplicationUid(appDo.getAppUid());
             respVO.setApplicationId(appDo.getId());
-            respVO.setId(appDo.getId());
+            respVO.setId(corpDO.getId());
             respVO.setVersionNumber(appDo.getVersionNumber());
             // 获取app应用状态描述
             Integer status = corpDO.getStatus();
@@ -176,6 +176,12 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     @Override
     public void deleteCorpAppRelationByCorpId(Long corpID) {
         corpAppRelationDataRepository.deleteCorpAppRelationByCorpId(corpID);
+    }
+
+    @Override
+    public List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO) {
+        List<CorpAppRelationDO> corpApplicationRespVOList= corpAppRelationDataRepository.getCorpAppRelationList(corpAppRelationPageReqVO);
+        return corpApplicationRespVOList;
     }
 }
 

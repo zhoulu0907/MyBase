@@ -31,7 +31,6 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.corp.CorpAdminReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
@@ -785,6 +784,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 转换为响应对象
         return UserConvert.INSTANCE.convert(user, dept, roles);
+    }
+
+    @Override
+    public List<String> getUserRoleByRoleId(Long id) {
+        List<UserRoleDO> UserRoleDOList=  userRoleDataRepository.getUserRoleByRoleId(id);
+        List<String> userIdsList = UserRoleDOList.stream()
+                .map(userRole -> String.valueOf(userRole.getUserId()))
+                .collect(Collectors.toList());
+        return userIdsList;
+
+
     }
 
     /**
