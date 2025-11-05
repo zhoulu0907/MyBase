@@ -24,7 +24,7 @@ import { Comment } from './comment';
 import { AutoLayout } from './auto-layout';
 import { GlobalConfig } from './globalConfig';
 
-export const DemoTools = ({ onSave }) => {
+export const DemoTools = ({ onSave }: { onSave: () => void }) => {
   const { history, playground } = useClientContext();
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);

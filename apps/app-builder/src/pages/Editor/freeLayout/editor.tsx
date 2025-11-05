@@ -2,15 +2,13 @@
  * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
  * SPDX-License-Identifier: MIT
  */
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useContext } from 'react';
 import {
   EditorRenderer,
   FreeLayoutEditorProvider,
   type FreeLayoutPluginContext
 } from '@flowgram.ai/free-layout-editor';
-
-import {useFlowPageEditorSignal} from '@onebase/ui-kit';
-import { Button } from '@douyinfe/semi-ui';
+import { useFlowPageEditorSignal } from '@onebase/ui-kit';
 import '@flowgram.ai/free-layout-editor/index.css';
 import './styles/index.css';
 import { nodeRegistries } from './nodes';
@@ -19,13 +17,14 @@ import { useEditorProps } from './hooks';
 import { DemoTools } from './components/tools';
 import { SidebarProvider, SidebarRenderer } from './components/sidebar';
 import LeftNavBar from './components/left-nav-bar/index';
-import { GlobalConfigProvider } from './components/globalConfig/components/globalConfigProvider';
 import { getByBusinessId, save } from '../../../../../../packages/app/src/services/index';
 import { useLocation } from 'react-router-dom';
 import type { WorkflowJSON, FlowData } from './editorType';
 import { getAppIdByPageSetId } from '@onebase/app';
+import { GlobalConfigContext } from './context/globalConfigContext';
 const sourceNodeIDMap = new Map();
 export const Editor = () => {
+  const { configData, setConfigData } = useContext(GlobalConfigContext);
   const { setFlowId } = useFlowPageEditorSignal;
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +36,9 @@ export const Editor = () => {
   const getFlowData = async () => {
     try {
       const res = await getByBusinessId({ businessId: pageSetId });
+      if (res.globalConfig) {
+        setConfigData(res.globalConfig);
+      }
       let useJsonData = {};
       if (!res.bpmDefJson) {
         useJsonData = initialData;
@@ -94,7 +96,8 @@ export const Editor = () => {
       versionStatus: versionStatus || '',
       businessId: businessId || pageSetId,
       appId,
-      bpmDefJson: JSON.stringify(useJsonData)
+      bpmDefJson: JSON.stringify(useJsonData),
+      globalConfig: configData
     };
     save(params).then((res: any) => {
       setFlowId(res);
@@ -102,19 +105,16 @@ export const Editor = () => {
   };
   return (
     <div className="doc-free-feature-overview">
-      {/* <Button onClick={() => onSave()}>保存</Button> */}
       {
         <FreeLayoutEditorProvider {...editorProps} ref={ref}>
-          <GlobalConfigProvider>
-            <SidebarProvider>
-              <div className="demo-container">
-                <EditorRenderer className="demo-editor" />
-              </div>
-              <DemoTools onSave={onSave} />
-              <LeftNavBar></LeftNavBar>
-              <SidebarRenderer />
-            </SidebarProvider>
-          </GlobalConfigProvider>
+          <SidebarProvider>
+            <div className="demo-container">
+              <EditorRenderer className="demo-editor" />
+            </div>
+            <DemoTools onSave={onSave} />
+            <LeftNavBar></LeftNavBar>
+            <SidebarRenderer />
+          </SidebarProvider>
         </FreeLayoutEditorProvider>
       }
     </div>

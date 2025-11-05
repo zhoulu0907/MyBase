@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: MIT
  */
 
-export { Editor as FlowEditor } from './editor';
+export { FreeLayout as FlowEditor } from './editorBox';
