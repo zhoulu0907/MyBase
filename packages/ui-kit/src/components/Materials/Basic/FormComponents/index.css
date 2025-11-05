@@ -20,7 +20,7 @@
 
       .tooltipLabelText {
         display: inline-block;
-        width: calc(100% - 18px);
+        max-width: calc(100% - 18px);
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
