@@ -262,7 +262,8 @@ const EnterpriseInfoPage: React.FC = () => {
                 onEdit={handleEdit} 
                 onSearch={handleSearchChange}
                 onChange={handlePageChange}
-                setAddAppModalVisible={setAddAppModalVisible}/>
+                setAddAppModalVisible={setAddAppModalVisible}
+              />
           </Tabs.TabPane>
         </Tabs>
       </Card>

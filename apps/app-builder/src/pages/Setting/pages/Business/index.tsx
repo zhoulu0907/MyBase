@@ -115,8 +115,8 @@ const BusinessPage: React.FC = () => {
         try {
             const res = await getCorpListApi(params);
             if (res && Array.isArray(res.list)) {
-                const newData = res.list.map((item:cropItem) => {
-                    return {...item, id:  101}
+                const newData = res.list.map((item:cropItem, index: number) => {
+                    return {...item, id: index+1}
                 })
                 setTableData(newData);
                 setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));
@@ -174,7 +174,7 @@ const BusinessPage: React.FC = () => {
                 status: 'danger',
             },
             onOk: async () => {
-                const params = {id: record.id, status: record.status};
+                const params = {id: record.id, status: 0};
                 try {
                     await disabledCorpApi(params);
                     // await updateCorpApi({...record, status: 0})

@@ -3,6 +3,7 @@ import { CommonTable } from "../table/commonTable";
 import { TopHeader } from "../topHeader";
 import styles from "./authorizedApp.module.less"
 import type { IAuthorizedAppProps } from "../../types/appItem";
+import {formatTimeYMDHMS} from "@onebase/common";
 
 
 export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading, tableData,pageination, setAddAppModalVisible, onChange, onSearch }) => {
@@ -22,12 +23,12 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading,
         },
         {
             title: '应用ID',
-            dataIndex: 'applicationUid',
+            dataIndex: 'applicationId',
             width: 180,
         },
         {
             title: '版本号',
-            dataIndex: 'version',
+            dataIndex: 'versionNumber',
             width: 100,
             render: (text: string) => (
                 <Tag color="gray" size="small">{text}</Tag>
@@ -35,13 +36,19 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading,
         },
         {
             title: '授权启效时间',
-            dataIndex: 'effectTime',
+            dataIndex: 'authorizationTime',
             width: 200,
+            render: (timeValue: string) => (
+                <div>{formatTimeYMDHMS(timeValue)}</div>
+            )
         },
         {
             title: '过期时间',
-            dataIndex: 'expireTime',
+            dataIndex: 'expiresTime',
             width: 200,
+            render: (timeValue: string) => (
+                <div>{formatTimeYMDHMS(timeValue)}</div>
+            )
         },
         {
             title: '操作',
