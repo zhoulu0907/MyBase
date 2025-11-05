@@ -21,7 +21,7 @@ const autoCheckArr = [
   },
 ];
 
-export default function HeigerConfig() {
+export default function AdvancedConfig() {
     const [timeModalShow, setTimeModalShow] = useState(false)
     function handleCheckChange(val:any) {
         console.log(val)
