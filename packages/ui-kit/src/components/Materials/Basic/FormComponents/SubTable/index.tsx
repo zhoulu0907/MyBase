@@ -143,9 +143,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       // 字段描述 description
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
-      schema.config.verify.required = currentField.isRequired;
       // 是否唯一：1-是，0-不是 isUnique
-      schema.config.verify.noRepeat = currentField.isUnique;
+      schema.config.verify = {
+        ...schema.config.verify,
+        required: currentField.isRequired,
+        noRepeat: currentField.isUnique
+      }
 
       // 字段选项列表（单/多选字段专用） options
       if (
