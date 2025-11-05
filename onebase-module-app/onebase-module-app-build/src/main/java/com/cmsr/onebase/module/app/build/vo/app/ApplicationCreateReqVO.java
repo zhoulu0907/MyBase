@@ -51,7 +51,7 @@ public class ApplicationCreateReqVO {
     private Long tenantId;
 
     @Schema(description = "发布模式")
-    @NotBlank(message = "发布模式不能为空")
+    // @NotBlank(message = "发布模式不能为空")
     private Integer publishModel;
 
 
