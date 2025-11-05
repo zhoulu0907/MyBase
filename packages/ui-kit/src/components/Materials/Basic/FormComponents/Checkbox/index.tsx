@@ -34,7 +34,10 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={fieldId}
         layout={layout}
         tooltip={tooltip}

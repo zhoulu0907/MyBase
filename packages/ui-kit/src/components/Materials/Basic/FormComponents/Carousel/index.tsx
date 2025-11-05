@@ -23,7 +23,10 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         layout={layout}
         tooltip={tooltip}
         labelCol={{
