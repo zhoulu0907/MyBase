@@ -200,7 +200,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                             String fieldType = fields.stream().filter(field ->
                                     rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
                             if("DATE".equals(fieldType)){
-                                String toChar = "to_char(" + rawKey + ",'YYYY/MM/DD')";
+                                String toChar = "to_char(" + rawKey + ",'YYYY-MM-DD')";
                                 configs.and(Compare.LIKE, toChar, rawVal);
                             }else{
                                 configs.and(Compare.LIKE, rawKey, rawVal);
@@ -248,7 +248,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                             String fieldType = fields.stream().filter(field ->
                                     rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
                             if("DATE".equals(fieldType)){
-                                String toChar = "to_char(" + rawKey + ",'YYYY/MM/DD')";
+                                String toChar = "to_char(" + rawKey + ",'YYYY-MM-DD')";
                                 countConfigs.and(Compare.LIKE, toChar, rawVal);
                             }else {
                                 countConfigs.and(Compare.LIKE, rawKey, rawVal);
