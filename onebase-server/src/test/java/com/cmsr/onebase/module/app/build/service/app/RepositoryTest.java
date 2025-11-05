@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.build.service.app;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppSqlQueryRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dto.auth.UserMemberDTO;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
