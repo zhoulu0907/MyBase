@@ -31,7 +31,7 @@ const WillDo: FC = ({ appId }) => {
       dataIndex: 'initiator',
       render: (val, record) => (
         <span className="flex-bw-center">
-          <img src="/src/assets/images/avatar.svg" />
+          <div className='photo-img'>{record?.avatar && <img src={record?.avatar} />}</div>
           {val}
         </span>
       )

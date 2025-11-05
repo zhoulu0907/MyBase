@@ -2,6 +2,7 @@ import { useEffect, useState, type FC } from 'react';
 import { Steps, Avatar } from '@arco-design/web-react';
 import { fetchFlowPredict } from '@onebase/app/src/services/app_runtime';
 import styles from './index.module.less';
+
 const Step = Steps.Step;
 
 const FlowPredict = ({ businessId }) => {
@@ -11,7 +12,7 @@ const FlowPredict = ({ businessId }) => {
   function renderDescript(value) {
     return (
       <div className={styles.predictBox}>
-        <img className={styles.predictImg} src="/src/assets/images/avatar.svg" />
+        <div className={styles.predictImg}>{value?.avatar && <img src={value?.avatar} />}</div>
         <div className={styles.predictText}>
           <div className={styles.predictName}>
             {value?.handlers?.map((handler) => handler?.handlerName).join('、') || '暂无处理人'}

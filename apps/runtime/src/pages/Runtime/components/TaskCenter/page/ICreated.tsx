@@ -64,7 +64,7 @@ const ICreated: FC = ({ appId }) => {
             <span className="flex-bw-center">
               {userNames.length > 0 ? (
                 <>
-                  <img src="/src/assets/images/avatar.svg" />
+                  <div className='photo-img'>{record?.avatar && <img src={record?.avatar} />}</div>
                   {userNames.join('、')}
                 </>
               ) : (
