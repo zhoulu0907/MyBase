@@ -76,15 +76,13 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
 
     public List<ApplicationDO> getSimpleAppList(Integer status) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(ApplicationDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         configStore.eq(ApplicationDO.APP_STATUS, status);
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
 
-    public List<ApplicationDO> finAppApplicationByAppName(String appName) {
+    public List<ApplicationDO> findAppApplicationByAppName(String appName) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(ApplicationDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         if (StringUtils.isNotBlank(appName)) {
             configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
         }
