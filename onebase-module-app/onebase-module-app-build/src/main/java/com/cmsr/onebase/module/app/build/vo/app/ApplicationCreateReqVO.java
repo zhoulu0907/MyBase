@@ -50,7 +50,6 @@ public class ApplicationCreateReqVO {
     private DatasourceSaveReqDTO datasourceSaveReq;
 
     @Schema(description = "发布模式")
-    @NotBlank(message = "发布模式不能为空")
     @InEnum(value = CommonPublishModelEnum.class, message = "返回值类型必须是 {value}")
     private String publishModel;
 

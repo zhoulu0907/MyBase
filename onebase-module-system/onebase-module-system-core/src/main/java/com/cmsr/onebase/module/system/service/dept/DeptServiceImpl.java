@@ -395,4 +395,32 @@ public class DeptServiceImpl implements DeptService {
         return respVO;
     }
 
+    @Override
+    public List<DeptDO> getParentDeptsListByUserId(Long userId) {
+        AdminUserDO adminUserDO = adminUserService.getUser(userId);
+        if (adminUserDO != null&& adminUserDO.getDeptId() != null) {
+            return getParentDeptsList(adminUserDO.getDeptId());
+        }
+        return List.of();
+    }
+
+    private List<DeptDO> getParentDeptsList(Long deptId) {
+        List<DeptDO> parentDepts = new ArrayList<>();
+        if (deptId == null) {
+            return parentDepts;
+        }
+        DeptDO dept = deptDataRepository.findById(deptId);
+        parentDepts.add(dept);
+        while (dept != null && dept.getParentId() != null) {
+            DeptDO parentDept = deptDataRepository.findById(dept.getParentId());
+            if (parentDept != null) {
+                parentDepts.add(parentDept);
+                dept = parentDept;
+            } else {
+                break;
+            }
+        }
+        return parentDepts;
+    }
+
 }
