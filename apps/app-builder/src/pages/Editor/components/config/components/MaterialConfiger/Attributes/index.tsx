@@ -133,6 +133,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   };
 
   const handleConfigsChange = (config: any) => {
+    console.log(`更新了属性: config值为: `, config);
+
     const newCurComponentSchema = {
       id: cpID,
       type: curComponentSchema.type,
