@@ -1,10 +1,11 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefinitionVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
-import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmGetReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
+import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmVersionMgmtPageReqVo;
 
 import java.util.List;
 
@@ -24,11 +25,12 @@ public interface BpmVersionMgmtService {
     void delete(BpmDeleteReqVo reqVo);
 
     /**
-     * 根据业务id获取流程版本列表
+     * 获取流程版本管理分页列表
      *
      * @param reqVo
+     * @return
      */
-    List<BpmDefVersionMgtVO> getByBusinessId(BpmGetReqVo reqVo);
+    PageResult<BpmDefVersionMgtVO> getVersionMgmtPage(BpmVersionMgmtPageReqVo reqVo);
     /**
      * 更新流程版本别名
      *
