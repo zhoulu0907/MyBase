@@ -125,10 +125,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               fill="#F2F3F5"
             />
           </div>
-          <div className={styles.appName}>
-            {curAppInfo?.appName}
-            xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-          </div>
+          <div className={styles.appName}>{curAppInfo?.appName}</div>
           {curAppInfo?.appStatus === AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
           {curAppInfo?.appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}
           {curAppInfo?.appStatus == AppStatus.EDITING_AFTER_PUBLISH && (
