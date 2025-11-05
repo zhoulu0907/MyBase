@@ -133,77 +133,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           )}
         </div>
 
-        <Tabs
-          className="createAppTabs"
-          style={{
-            position: 'absolute',
-            left: '45%'
-          }}
-          type="line"
-          activeTab={activeTab}
-          onChange={(key) => {
-            setActiveTab(key);
-            switch (key) {
-              case 'page-manager':
-                navigate(`/onebase/create-app/page-manager?appId=${curAppId}`);
-                break;
-              case 'integrated-management':
-                navigate(`/onebase/create-app/integrated-management?appId=${curAppId}`);
-                break;
-              case 'data-factory':
-                navigate(`/onebase/create-app/data-factory?appId=${curAppId}`);
-                break;
-              case 'app-setting':
-                navigate(`/onebase/create-app/app-setting?appId=${curAppId}`);
-                break;
-              default:
-                break;
-            }
-          }}
-          size="large"
-          renderTabTitle={(tabTitle, info) => {
-            const currentIndex = tabsList.findIndex((tab) => tab === info.key);
-            const tabBg = () => {
-              if (info.isActive) {
-                if (info.key === tabsList[0]) {
-                  return TabFirstSelectBgSVG;
-                } else if (info.key === tabsList[tabsList.length - 1]) {
-                  return TabLastSelectBgSVG;
-                } else {
-                  return TabMiddleSelectBgSVG;
-                }
-              } else {
-                if (currentIndex >= activeIndex) return;
-                return info.key === tabsList[0] ? TabFirstBgSVG : TabMiddleBgSVG;
-              }
-            };
-            return (
-              <span
-                style={{
-                  position: 'relative'
-                }}
-              >
-                {tabTitle}
-                <img
-                  src={tabBg()}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: -1
-                  }}
-                />
-              </span>
-            );
-          }}
-        >
-          <Tabs.TabPane key="data-factory" title={t('createApp.dataFactory')} />
-          <Tabs.TabPane key="page-manager" title={t('createApp.pageManager')} />
-          <Tabs.TabPane key="integrated-management" title={t('createApp.integratedManagement')} />
-          <Tabs.TabPane key="app-setting" title={t('createApp.appRelease')} />
-        </Tabs>
-
         <div className={styles.userInfo}>
           <Button type="secondary" size="small" onClick={toRuntime} className={styles.visitButton}>
             <div className={styles.visitButtonContent}>
@@ -221,6 +150,83 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           </Dropdown> */}
         </div>
       </div>
+
+      <Tabs
+        className="createAppTabs"
+        style={{
+          position: 'absolute',
+          width: '98%',
+          padding: '0px',
+          background: 'transparent',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+        type="line"
+        activeTab={activeTab}
+        onChange={(key) => {
+          setActiveTab(key);
+          switch (key) {
+            case 'page-manager':
+              navigate(`/onebase/create-app/page-manager?appId=${curAppId}`);
+              break;
+            case 'integrated-management':
+              navigate(`/onebase/create-app/integrated-management?appId=${curAppId}`);
+              break;
+            case 'data-factory':
+              navigate(`/onebase/create-app/data-factory?appId=${curAppId}`);
+              break;
+            case 'app-setting':
+              navigate(`/onebase/create-app/app-setting?appId=${curAppId}`);
+              break;
+            default:
+              break;
+          }
+        }}
+        size="large"
+        renderTabTitle={(tabTitle, info) => {
+          const currentIndex = tabsList.findIndex((tab) => tab === info.key);
+          const tabBg = () => {
+            if (info.isActive) {
+              if (info.key === tabsList[0]) {
+                return TabFirstSelectBgSVG;
+              } else if (info.key === tabsList[tabsList.length - 1]) {
+                return TabLastSelectBgSVG;
+              } else {
+                return TabMiddleSelectBgSVG;
+              }
+            } else {
+              if (currentIndex >= activeIndex) return;
+              return info.key === tabsList[0] ? TabFirstBgSVG : TabMiddleBgSVG;
+            }
+          };
+          return (
+            <span
+              style={{
+                position: 'relative'
+              }}
+            >
+              {tabTitle}
+              <img
+                src={tabBg()}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: -1
+                }}
+              />
+            </span>
+          );
+        }}
+      >
+        <Tabs.TabPane key="data-factory" title={t('createApp.dataFactory')} />
+        <Tabs.TabPane key="page-manager" title={t('createApp.pageManager')} />
+        <Tabs.TabPane key="integrated-management" title={t('createApp.integratedManagement')} />
+        <Tabs.TabPane key="app-setting" title={t('createApp.appRelease')} />
+      </Tabs>
     </Header>
   );
 };
