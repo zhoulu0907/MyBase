@@ -62,6 +62,26 @@ export const useFieldManager = (
     getCurrentTableData
   );
 
+  // 字段删除时，关闭相关的 popover
+  const handleDeleteField = useCallback(
+    (id: string) => {
+      if (configPopoverVisible === id) {
+        setConfigPopoverVisible(null);
+      }
+      if (constraintsPopoverVisible === id) {
+        setConstraintsPopoverVisible(null);
+      }
+    },
+    [configPopoverVisible, constraintsPopoverVisible, setConfigPopoverVisible, setConstraintsPopoverVisible]
+  );
+
+  const deleteFieldWithCleanup = useCallback(
+    (id: string) => {
+      fieldOperations.deleteField(id, handleDeleteField);
+    },
+    [fieldOperations, handleDeleteField]
+  );
+
   // 使用验证管理hook
   const fieldValidation = useFieldValidation();
 
@@ -237,7 +257,7 @@ export const useFieldManager = (
 
     // 操作
     addField: fieldOperations.addField,
-    deleteField: fieldOperations.deleteField,
+    deleteField: deleteFieldWithCleanup,
     updateField: fieldOperations.updateField,
     moveField: fieldOperations.moveField,
     getFieldById: fieldOperations.getFieldById,
