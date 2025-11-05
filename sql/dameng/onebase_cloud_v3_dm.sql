@@ -2612,7 +2612,7 @@ COMMENT ON COLUMN "system_login_log"."tenant_id" IS '租户编号';
 
 -- Table Definition
 CREATE TABLE "system_uid_worker_node" (
-    "id" INTEGER NOT NULL,
+    "id" INTEGER NOT NULL IDENTITY(1, 1),
     "worker_host" varchar(64),
     "worker_port" varchar(64),
     "node_type" SMALLINT,

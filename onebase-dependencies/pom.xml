@@ -565,6 +565,11 @@
                 <version>${anyline.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.anyline</groupId>
+                <artifactId>anyline-data-jdbc-dm</artifactId>
+                <version>${anyline.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>jakarta.persistence</groupId>
                 <artifactId>jakarta.persistence-api</artifactId>
                 <version>${jakarta.persistence-api.version}</version>
