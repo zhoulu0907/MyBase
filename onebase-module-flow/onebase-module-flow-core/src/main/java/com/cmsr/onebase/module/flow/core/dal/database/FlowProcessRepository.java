@@ -38,7 +38,7 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         if (StringUtils.isNotEmpty(reqVO.getTriggerType())) {
             configs.eq("trigger_type", reqVO.getTriggerType());
         }
-        configs.order(BaseDO.UPDATE_TIME, Order.TYPE.DESC);
+        configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
