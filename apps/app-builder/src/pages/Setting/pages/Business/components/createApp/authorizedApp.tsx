@@ -14,7 +14,7 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading,
     const columns = [
         {
             title: '应用名称',
-            dataIndex: 'appName',
+            dataIndex: 'applicationName',
             width: 180,
             render: (text: string) => (
                 <Space size={12} align="center">{text}</Space>
@@ -22,7 +22,7 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading,
         },
         {
             title: '应用ID',
-            dataIndex: 'appId',
+            dataIndex: 'applicationUid',
             width: 180,
         },
         {

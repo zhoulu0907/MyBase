@@ -115,8 +115,8 @@ const BusinessPage: React.FC = () => {
         try {
             const res = await getCorpListApi(params);
             if (res && Array.isArray(res.list)) {
-                const newData = res.list.map((item:any) => {
-                    return {...item, id:  112372064144556032}
+                const newData = res.list.map((item:cropItem) => {
+                    return {...item, id:  101}
                 })
                 setTableData(newData);
                 setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));
@@ -158,7 +158,7 @@ const BusinessPage: React.FC = () => {
                     <div className={styles.subTitle}>如确定删除，请输入企业名称：{name}</div>
                     <Input 
                         placeholder="请输入企业名称" 
-                        ref={inputRef}
+                        ref={inputRef as any}
                     />
                 </div>
             </div>
@@ -177,7 +177,7 @@ const BusinessPage: React.FC = () => {
                 const params = {id: record.id, status: record.status};
                 try {
                     await disabledCorpApi(params);
-                    await updateCorpApi({...record, status: 0})
+                    // await updateCorpApi({...record, status: 0})
                     Message.success("禁用成功");
                 }catch(error) {
                     Message.error("禁用失败");
@@ -195,7 +195,7 @@ const BusinessPage: React.FC = () => {
             },
             content:renderInput(record.corpName),
             onOk: async () => {
-                const value = inputRef?.current?.dom?.value;
+                const value = (inputRef as any)?.current?.dom?.value;
                 if(!value) {
                     Message.error("请输入内容");
                     return false;

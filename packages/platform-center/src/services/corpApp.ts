@@ -8,10 +8,10 @@ export const createCorpAppApi = (data: CorpAppParams) => systemService.post('/co
 export const updateCorpAppApi = (data: CorpAppParams) => systemService.post('/corp-app-relation/update',data);
 
 //删除应用授权企业
-export const removeCorpAppApi = (id: number) => systemService.post('/corp-app-relation/update',id);
+export const removeCorpAppApi = (id: number) => systemService.post(`/corp-app-relation/update/?id=${id}`);
 
 //获得企业授权应用列表-分页
-export const getCorpAuthorizedAppListApi = (data: corpAppListParams) => systemService.post('/corp-app-relation/corp-applications-page',data);
+export const getCorpAuthorizedAppListApi = (data: corpAppListParams) => systemService.get('/corp-app-relation/corp-applications-page',data);
 
 //获得企业关联应用分页
-export const getCorpAppRelatedListApi = (data: corpAppListParams) => systemService.post('/corp-app-relation/page',data);
+export const getCorpAppRelatedListApi = (data: corpAppListParams) => systemService.get('/corp-app-relation/page',data);

@@ -1,12 +1,14 @@
 export interface AppItem {
-  key:number,
+  key:number;
+  id: number;
   applicationName: string;
+  applicationId?: string;
+  applicationUid?: string;
   applicationCode: string;
-  applicationId: number;
   authorizationTime: string;
   versionNumber:string;
   expiresTime: string;
-  status: number;
+  statusDesc: string;
 }
 
 export interface AuthorizedAppRef {

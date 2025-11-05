@@ -7,14 +7,13 @@ import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useOutletContext, useParams } from 'react-router-dom';
 import EditAuthorizedTime from '../modal/editAuthorizedTime';
 import { CreateAppModal } from '../modal/createAppModal';
-import type { AppItem, AuthorizedAppRef, cropItem, OutletContextType } from '../../types/appItem';
+import type { AppItem, cropItem, OutletContextType } from '../../types/appItem';
 import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi, type corpListParams } from "@onebase/platform-center";
 import { convertIndustryType } from '../../utils';
 
 const EnterpriseInfoPage: React.FC = () => {
   const {activeTab} = useParams();
   const { currentId } = useOutletContext<OutletContextType>();
-  const authorizedAppRef = useRef<AuthorizedAppRef>(null);
   const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
