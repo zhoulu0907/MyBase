@@ -58,6 +58,13 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         this.deleteByConfig(configStore);
     }
 
+    public void deleteRoleUser(Long roleId, Long userId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("role_id", roleId);
+        configStore.eq("user_id", userId);
+        this.deleteByConfig(configStore);
+    }
+
     public void deleteByRoleId(Long roleId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
@@ -70,5 +77,6 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         configStore.eq("user_id", userId);
         this.deleteByConfig(configStore);
     }
+
 
 }
