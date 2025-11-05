@@ -135,4 +135,12 @@ public interface DeptService {
      * @return 部门和用户信息
      */
     DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO);
+    
+    /**
+     * 根据用户ID获取所有直属上级部门，包括一级部门
+     *
+     * @param userId 用户ID
+     * @return 所有直属上级部门列表
+     */
+    List<DeptDO> getParentDeptsListByUserId(Long userId);
 }

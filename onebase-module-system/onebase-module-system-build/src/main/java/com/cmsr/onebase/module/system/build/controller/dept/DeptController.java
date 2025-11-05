@@ -92,4 +92,12 @@ public class DeptController {
         return success(result);
     }
 
+    @GetMapping("/get-depts-by-user-id")
+    @Operation(summary = "根据用户ID获取其所属部门及其父部门列表")
+    @PreAuthorize("@ss.hasPermission('system:dept:query')")
+    public CommonResult<List<DeptSimpleRespVO>> getParentDeptsListByUserId(@RequestParam("userId") Long userId) {
+        List<DeptDO> deptDOList = deptService.getParentDeptsListByUserId(userId);
+        return success(BeanUtils.toBean(deptDOList, DeptSimpleRespVO.class));
+    }
+
 }
