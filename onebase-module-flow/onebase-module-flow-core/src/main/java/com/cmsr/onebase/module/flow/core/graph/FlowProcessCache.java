@@ -78,7 +78,6 @@ public class FlowProcessCache {
     }
 
 
-
     public boolean isProcessExist(Long processId) {
         return flowNodeDataCache.containsKey(processId);
     }
@@ -116,14 +115,6 @@ public class FlowProcessCache {
                 .filter(entry -> entry.getValue().equals(applicationId))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
-    }
-
-    public Set<Long> deleteByApplicationId(Long applicationId) {
-        Set<Long> processIds = findProcessByApplicationId(applicationId);
-        for (Long processId : processIds) {
-            deleteByProcessId(processId);
-        }
-        return processIds;
     }
 
     public void deleteByProcessId(Long processId) {

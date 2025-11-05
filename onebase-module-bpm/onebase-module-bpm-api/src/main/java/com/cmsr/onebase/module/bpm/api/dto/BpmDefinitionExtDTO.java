@@ -24,4 +24,9 @@ public class BpmDefinitionExtDTO {
      * 流程定义JSON，完整存储前端定义的JSON数据
      */
     private String bpmDefJson;
+
+    /**
+     * 全局配置
+     */
+    private BpmGlobalConfigDTO globalConfig;
 }

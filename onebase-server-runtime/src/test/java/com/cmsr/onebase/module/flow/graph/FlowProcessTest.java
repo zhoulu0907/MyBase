@@ -55,7 +55,10 @@ public class FlowProcessTest {
 
     @Test
     public void testSimple() throws IOException {
-        testToFlowChain(84076905441918976L);
+         testSimple2();
+        testSimple2();
+        testSimple2();
+        testSimple2();
     }
 
 

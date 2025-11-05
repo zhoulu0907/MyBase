@@ -4,14 +4,16 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
-import com.cmsr.onebase.module.etl.core.vo.datasource.ETLDatasourcePageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 @Slf4j
@@ -49,7 +51,7 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
         update(datasourceDO);
     }
 
-    public PageResult<ETLDatasourceDO> getETLDatasourcePage(ETLDatasourcePageReqVO pageReqVO) {
+    public PageResult<ETLDatasourceDO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("application_id", pageReqVO.getApplicationId());
         if (StringUtils.isNotBlank(pageReqVO.getDatasourceCode())) {
@@ -67,7 +69,16 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
         if (StringUtils.isNotBlank(pageReqVO.getCollectStatus())) {
             cs.eq("collect_status", pageReqVO.getCollectStatus());
         }
+        cs.order("create_time", Order.TYPE.DESC);
+        cs.order("update_time", Order.TYPE.DESC);
 
         return findPageWithConditions(cs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+    }
+
+    public List<ETLDatasourceDO> findAllByApplicationId(Long applicationId) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("application_id", applicationId);
+
+        return findAllByConfig(cs);
     }
 }

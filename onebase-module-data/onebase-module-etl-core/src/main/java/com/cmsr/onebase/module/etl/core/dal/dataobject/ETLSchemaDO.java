@@ -2,14 +2,10 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.sub.MetaSchema;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaSchema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.anyline.metadata.Schema;
 import org.apache.commons.lang3.StringUtils;
 

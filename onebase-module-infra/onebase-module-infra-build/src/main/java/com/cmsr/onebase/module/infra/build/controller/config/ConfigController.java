@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.infra.build.controller.config;
 
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -76,7 +77,7 @@ public class ConfigController {
         if (config == null) {
             return success(null);
         }
-        if (!config.getVisible()) {
+        if (config.getVisible().equals(NumberConstant.ZERO)) {
             throw exception(ErrorCodeConstants.CONFIG_GET_VALUE_ERROR_IF_VISIBLE);
         }
         return success(config.getValue());

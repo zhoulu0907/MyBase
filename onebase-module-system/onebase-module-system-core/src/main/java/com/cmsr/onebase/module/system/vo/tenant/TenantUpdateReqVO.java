@@ -50,6 +50,17 @@ public class TenantUpdateReqVO {
     // @NotNull(message = "账号数量不能为空")
     private Integer accountCount;
 
+    @Schema(description = "访问地址")
+    private String accessUrl;
+
+    @Schema(description = "saas功能是否开启默认0，开启1")
+    private Integer saasEnabled;
+
+    @Schema(description = "用户logo")
+    private String logoUrl;
+
+    @Schema(description = "管理员id")
+    private String adminUserId;
     // ========== 仅【创建】时，需要传递的字段 ==========
 
     // @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
@@ -67,7 +78,6 @@ public class TenantUpdateReqVO {
 //        return id != null // 修改时，不需要传递
 //                || (ObjectUtil.isAllNotEmpty(username, password)); // 新增时，必须都传递 username、password
 //    }
-
 
 
 }

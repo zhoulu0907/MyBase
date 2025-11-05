@@ -194,7 +194,6 @@ public class DolphinSchedulerClient {
             execType = "COMPLEMENT_DATA";
         }
 
-
         Result<List<Long>> executeResult = execute(dsClientStub.manuallyStartWorkflow(projectCode, workflowCode, environmentCode, tenantCode,
                 complementTime,
                 "CONTINUE", "NONE",

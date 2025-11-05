@@ -6,12 +6,14 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * 项目的启动类
+ * sj
  */
 @EnableAsync
 @SpringBootApplication(scanBasePackages = {"com.cmsr.onebase", "org.anyline"})
 public class OneBaseServerApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run(OneBaseServerApplication.class, args);
     }
 

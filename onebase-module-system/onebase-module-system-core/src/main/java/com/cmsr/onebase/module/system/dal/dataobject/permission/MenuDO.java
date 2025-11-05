@@ -116,7 +116,7 @@ public class MenuDO extends BaseDO {
      * 当设置为 true 时，该菜单不会展示在侧边栏，但是路由还是存在。例如说，一些独立的编辑页面 /edit/1024 等等
      */
     @Column(name = VISIBLE)
-    private Boolean visible;
+    private Integer visible;
     /**
      * 是否缓存
      *
@@ -124,13 +124,13 @@ public class MenuDO extends BaseDO {
      * 注意：如果开启缓存，则必须填写 {@link #componentName} 属性，否则无法缓存
      */
     @Column(name = KEEP_ALIVE)
-    private Boolean keepAlive;
+    private Integer keepAlive;
     /**
      * 是否总是显示
      *
      * 如果为 false 时，当该菜单只有一个子菜单时，不展示自己，直接展示子菜单
      */
     @Column(name = ALWAYS_SHOW)
-    private Boolean alwaysShow;
+    private Integer alwaysShow;
 
 }

@@ -32,6 +32,7 @@
         <opengauss.jdbc.version>5.1.0</opengauss.jdbc.version>
         <taos.version>3.3.3</taos.version>
         <postgresql.version>42.7.4</postgresql.version>
+        <oracle.jdbc.version>23.26.0.0.0</oracle.jdbc.version>
         <!--<anyline.version>8.7.2-jdk17-SNAPSHOT</anyline.version>-->
         <anyline.version>8.7.2-jdk17-20250818</anyline.version>
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
@@ -236,6 +237,12 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.oracle.database.jdbc</groupId>
+                <artifactId>ojdbc8</artifactId>
+                <version>${oracle.jdbc.version}</version>
             </dependency>
 
             <!-- RPC 远程调用相关 -->
@@ -544,7 +551,17 @@
             </dependency>
             <dependency>
                 <groupId>org.anyline</groupId>
+                <artifactId>anyline-data-jdbc-oracle</artifactId>
+                <version>${anyline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.anyline</groupId>
                 <artifactId>anyline-data-jdbc-h2</artifactId>
+                <version>${anyline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.anyline</groupId>
+                <artifactId>anyline-data-jdbc-kingbase</artifactId>
                 <version>${anyline.version}</version>
             </dependency>
             <dependency>
