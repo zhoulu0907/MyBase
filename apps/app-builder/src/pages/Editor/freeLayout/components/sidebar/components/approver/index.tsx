@@ -9,6 +9,7 @@ import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
+import HeigerConfig from './heigherConfig/index'
 import { ApproveDrawerTab } from './constant';
 import { useLocation } from 'react-router-dom';
 import type {
@@ -85,7 +86,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           />
         );
       case ApproveDrawerTab.ADVANCED_SETTINGS:
-        return <div>高级设置</div>;
+        return <HeigerConfig />;
       default:
         return <div>审批人</div>;
     }
