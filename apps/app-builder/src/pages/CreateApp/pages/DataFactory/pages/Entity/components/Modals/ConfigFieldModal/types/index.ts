@@ -45,7 +45,7 @@ export interface ConfigFieldModalProps {
 // 字段操作接口
 export interface FieldOperations {
   addField: () => void;
-  deleteField: (id: string) => void;
+  deleteField: (id: string, onDelete?: (id: string) => void) => void;
   updateField: (id: string, updates: Partial<FieldFormValues>) => void;
   moveField: (oldIndex: number, newIndex: number) => void;
   getFieldById: (id: string) => FieldFormValues | undefined;
