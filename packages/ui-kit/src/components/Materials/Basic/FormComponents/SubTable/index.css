@@ -13,16 +13,21 @@
   width: 100%;
   box-sizing: border-box;
   display: flex;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-top: 18px;
 }
 
 .componentItem {
-  flex: 1;
+  overflow: visible;
+  flex: 1 0 auto;
   cursor: move;
   box-sizing: border-box;
   border: 1px solid transparent;
   border-radius: 8px;
   transition: border-color 0.2s ease;
   position: relative;
+  min-width: 100px;
 }
 
 /* 操作 */
