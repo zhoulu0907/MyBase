@@ -1,11 +1,12 @@
+import type { IFlowValue } from '@flowgram.ai/form-materials';
 import {
-  FixedLayoutPluginContext,
   FlowNodeEntity,
-  type FlowNodeJSON as FlowNodeJSONDefault,
-  type FlowNodeMeta as FlowNodeMetaDefault,
-  FlowNodeRegistry as FlowNodeRegistryDefault
-} from '@flowgram.ai/fixed-layout-editor';
-import { type IFlowValue } from '@flowgram.ai/form-materials';
+  type WorkflowNodeJSON as FlowNodeJSONDefault,
+  type WorkflowNodeRegistry as FlowNodeRegistryDefault,
+  FreeLayoutPluginContext,
+  type WorkflowEdgeJSON,
+  type WorkflowNodeMeta
+} from '@flowgram.ai/free-layout-editor';
 
 import { type JsonSchema } from './json-schema';
 
@@ -42,31 +43,28 @@ export interface FlowNodeJSON extends FlowNodeJSONDefault {
  * You can customize your own node meta
  * 你可以自定义节点的meta
  */
-export interface FlowNodeMeta extends FlowNodeMetaDefault {
-  sidebarDisable?: boolean;
-  style?: React.CSSProperties;
+export interface FlowNodeMeta extends WorkflowNodeMeta {
+  sidebarDisabled?: boolean;
+  nodePanelHidden?: boolean;
+  wrapperStyle?: React.CSSProperties;
 }
+
 /**
  * You can customize your own node registry
  * 你可以自定义节点的注册器
  */
 export interface FlowNodeRegistry extends FlowNodeRegistryDefault {
-  meta?: FlowNodeMeta;
-  info: {
-    icon?: string;
-    description?: string;
+  meta: FlowNodeMeta;
+  info?: {
+    icon: string;
+    description: string;
   };
-  canAdd?: (ctx: FixedLayoutPluginContext, from: FlowNodeEntity) => boolean;
-  canDelete?: (ctx: FixedLayoutPluginContext, from: FlowNodeEntity) => boolean;
-  onAdd?: (ctx: FixedLayoutPluginContext, from: FlowNodeEntity) => FlowNodeJSON;
+  canAdd?: (ctx: FreeLayoutPluginContext) => boolean;
+  canDelete?: (ctx: FreeLayoutPluginContext, from: FlowNodeEntity) => boolean;
+  onAdd?: (ctx: FreeLayoutPluginContext) => FlowNodeJSON;
 }
 
-export type FlowDocumentJSON = {
+export interface FlowDocumentJSON {
   nodes: FlowNodeJSON[];
-};
-
-export interface Field {
-  id: string;
-  fieldName?: string;
-  fieldType?: string;
+  edges: WorkflowEdgeJSON[];
 }

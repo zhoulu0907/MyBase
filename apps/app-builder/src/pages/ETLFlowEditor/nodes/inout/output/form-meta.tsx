@@ -4,13 +4,13 @@ import { type FlowNodeJSON } from '../../../typings';
 import styles from './index.module.less';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
-  const [title, setTitle] = useState('输入节点');
+  const [title, setTitle] = useState('输出节点');
 
   useEffect(() => {
     setTitle(form.getValueIn('title'));
   }, [form]);
 
-  return <div className={styles.inputNode}>{title}</div>;
+  return <div className={styles.outputNode}>{title}</div>;
 };
 
 export const formMeta: FormMeta<FlowNodeJSON['data']> = {

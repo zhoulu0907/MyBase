@@ -1,8 +1,3 @@
-/**
- * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
- * SPDX-License-Identifier: MIT
- */
-
 import { useMemo } from 'react';
 
 import { FreeLayoutProps } from '@flowgram.ai/free-layout-editor';
@@ -19,6 +14,13 @@ export const useEditorProps = (nodeRegistries: FlowNodeRegistry[]) =>
        * Whether to enable the background
        */
       background: true,
+      playground: {
+        /**
+         * Prevent Mac browser gestures from turning pages
+         * 阻止 mac 浏览器手势翻页
+         */
+        preventGlobalGesture: true
+      },
       /**
        * Whether it is read-only or not, the node cannot be dragged in read-only mode
        */
@@ -65,6 +67,15 @@ export const useEditorProps = (nodeRegistries: FlowNodeRegistry[]) =>
             defaultExpanded: true
           }
         };
+      },
+      lineColor: {
+        hidden: 'var(--g-workflow-line-color-hidden,transparent)',
+        default: 'var(--g-workflow-line-color-default,#4d53e8)',
+        drawing: 'var(--g-workflow-line-color-drawing, #5DD6E3)',
+        hovered: 'var(--g-workflow-line-color-hover,#37d0ff)',
+        selected: 'var(--g-workflow-line-color-selected,#37d0ff)',
+        error: 'var(--g-workflow-line-color-error,red)',
+        flowing: 'var(--g-workflow-line-color-flowing,#4d53e8)'
       },
       materials: {
         /**
@@ -127,19 +138,20 @@ export const useEditorProps = (nodeRegistries: FlowNodeRegistry[]) =>
             canvasWidth: 182,
             canvasHeight: 102,
             canvasPadding: 50,
-            canvasBackground: 'rgba(245, 245, 245, 1)',
+            canvasBackground: 'rgba(242, 243, 245, 1)',
             canvasBorderRadius: 10,
-            viewportBackground: 'rgba(235, 235, 235, 1)',
+            viewportBackground: 'rgba(255, 255, 255, 1)',
             viewportBorderRadius: 4,
-            viewportBorderColor: 'rgba(201, 201, 201, 1)',
+            viewportBorderColor: 'rgba(6, 7, 9, 0.10)',
             viewportBorderWidth: 1,
-            viewportBorderDashLength: 2,
-            nodeColor: 'rgba(255, 255, 255, 1)',
+            viewportBorderDashLength: undefined,
+            nodeColor: 'rgba(0, 0, 0, 0.10)',
             nodeBorderRadius: 2,
             nodeBorderWidth: 0.145,
             nodeBorderColor: 'rgba(6, 7, 9, 0.10)',
-            overlayColor: 'rgba(255, 255, 255, 0)'
-          }
+            overlayColor: 'rgba(255, 255, 255, 0.55)'
+          },
+          inactiveDebounceTime: 1
         }),
         /**
          * Snap plugin
