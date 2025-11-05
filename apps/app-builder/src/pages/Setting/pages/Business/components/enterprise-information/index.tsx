@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Image, Space, Message } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import EditableFormItem from '../formItem';
@@ -8,24 +8,36 @@ import { useOutletContext, useParams } from 'react-router-dom';
 import EditAuthorizedTime from '../modal/editAuthorizedTime';
 import { CreateAppModal } from '../modal/createAppModal';
 import type { AppItem, AuthorizedAppRef, cropItem, OutletContextType } from '../../types/appItem';
-import { getDetailsApi, updateCorpApi } from "@onebase/platform-center";
+import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi, type corpListParams } from "@onebase/platform-center";
+import { convertIndustryType } from '../../utils';
 
 const EnterpriseInfoPage: React.FC = () => {
   const {activeTab} = useParams();
-  const { corpId } = useOutletContext<OutletContextType>();
+  const { currentId } = useOutletContext<OutletContextType>();
   const authorizedAppRef = useRef<AuthorizedAppRef>(null);
   const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
   const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
-  const [tableData, setTableData] = useState([]);
-  const [corpDetails, setCorpDetails] = useState<cropItem | null>(null);
+  const [tableData, setTableData] = useState<AppItem[]>([]);
   const [formData, setFormData] = useState<cropItem | null>(null);
+  const [originalInfo, setOriginalInfo] = useState<cropItem | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [pageInation, setPagination] = useState({
+        showTotal: true,
+        total: 0,
+        pageSize: 10,
+        current: 1,
+        sizeCanChange: true,
+        pageSizeChangeResetCurrent: true
+    });
 
   const fetchCorpDetail = async() => {
     try {
-      const res = await getDetailsApi({corpId});
-      setCorpDetails(res && res || null);
+      const res = await getDetailsApi({currentId});
+      setFormData(res && res || null);
+      setOriginalInfo(res && res || null);
     }catch(error) {
       Message.error("获取详情失败");
     }
@@ -35,26 +47,63 @@ const EnterpriseInfoPage: React.FC = () => {
     fetchCorpDetail();
   },[])
 
+  const fetchCorpAuthorizedList = async(pageNo = 1, pageSize = 10) => {
+    setLoading(true);
+    const params: corpListParams = {
+        pageNo,
+        pageSize
+    };
+    try {
+      const res = await getCorpAuthorizedAppListApi(params);
+      if (res && Array.isArray(res.list)) {
+          setTableData(res.list);
+          setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));
+      } else {
+          console.warn('Invalid response format:', res);
+      }
+    }catch(error) {
+      Message.error("获取企业授权应用列表失败");
+    }finally {
+      setLoading(false);
+    }
+  }
 
-  // 处理表单数据变更
-  const handleChange = (field: string, value: number | string) => {
-    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  useEffect(() => {
+    fetchCorpAuthorizedList()
+  },[])
+
+  //授权应用分页切换
+  const handlePageChange = (current: number, pageSize: number) => {
+    fetchCorpAuthorizedList(current, pageSize);
   };
 
-  // 切换编辑状态
-  const toggleEdit = () => {
-    if (isEdited) {
-      // 这里可以添加保存逻辑
+  const handleChange = (field: string, value: number | string | boolean) => {
+    let newValue = value;
+    if(field === "status") {
+      newValue = newValue === true ? 1 : 0;
+    }else if(field === "industryType") {
+      newValue = convertIndustryType(value as string);
     }
+    setFormData((prev: any) => ({ ...prev, [field]: newValue }));
+  };
+
+  const toggleEdit = () => {
     setIsEdited(!isEdited);
   };
 
+  const handleCancel = () => {
+    setFormData(originalInfo);
+    setIsEdited(false);
+  }
+
   const handleSubmitInfo = async() => {
     try {
-      await updateCorpApi(formData);
-      Message.success("保存成功");
+      await updateCorpApi({...formData, id: currentId});
+      Message.success("企业基本信息保存成功");
     }catch(error) {
-      Message.error("保存失败");
+      Message.error("企业基本信息保存失败");
+    }finally {
+      setIsEdited(false);
     }
   }
 
@@ -63,21 +112,16 @@ const EnterpriseInfoPage: React.FC = () => {
       setAddAppModalVisible(false);
   }
 
-
-  const handleEdit = () => {
+  const handleEdit = (id: number) => {
     setVisible(true);
+  }
+
+  const handleSearchChange = (searchValue: string) => {
+    setSearchValue(searchValue);
   }
 
   // 提交新应用（弹窗确认后调用）
   const handleAddSubmit = (newAppData: any) => {
-      const newData: AppItem = {
-          key: tableData.length + 1,
-          appId: "113",
-          effectTime: newAppData.appTime.effectTime,
-          expireTime: newAppData.appTime.expireTime,
-          appName: newAppData.appName[0],
-          version: "V2.3"
-      };
       authorizedAppRef.current?.addNewApp(newData);
       setAddAppModalVisible(false);
   };
@@ -85,6 +129,14 @@ const EnterpriseInfoPage: React.FC = () => {
   const handleUpdateTime = () => {
 
   }
+
+  const displayData = useMemo(()=>{
+      if (!searchValue.trim()) return tableData
+      const lowerSearch = searchValue.toLowerCase();
+      return tableData.filter(item => 
+          item.applicationName?.toLowerCase().includes(lowerSearch)
+      )
+  },[tableData, searchValue])
 
   const data = [
     {
@@ -184,7 +236,7 @@ const EnterpriseInfoPage: React.FC = () => {
             {isEdited ? <Space>
               <Button 
                 icon={<IconEdit />}
-                onClick={toggleEdit}
+                onClick={handleCancel}
               >
                取消
               </Button>
@@ -203,7 +255,15 @@ const EnterpriseInfoPage: React.FC = () => {
               </Button>}
           </Tabs.TabPane>
           <Tabs.TabPane key="authorized" title="授权应用">
-            <AuthorizedApp ref={authorizedAppRef} className ={styles.tabPanel} onEdit={handleEdit} setAddAppModalVisible={setAddAppModalVisible}/>
+            <AuthorizedApp 
+                pageination={pageInation} 
+                loading={loading} 
+                tableData={displayData} 
+                className ={styles.tabPanel} 
+                onEdit={handleEdit} 
+                onSearch={handleSearchChange}
+                onChange={handlePageChange}
+                setAddAppModalVisible={setAddAppModalVisible}/>
           </Tabs.TabPane>
         </Tabs>
       </Card>

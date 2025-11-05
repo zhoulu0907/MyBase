@@ -6,6 +6,7 @@ interface ICommonTableProps {
     loading: boolean;
     pageination: any;
     scroll?: {x: number}
+    onChange: (pageNo: number, pageSize: number) =>void;
 }
 export const CommonTable:React.FC<ICommonTableProps> = ({
     data,
@@ -13,17 +14,9 @@ export const CommonTable:React.FC<ICommonTableProps> = ({
     pageination,
     scroll,
     loading,
+    onChange,
     ...rest
 }) => {
-    const defaultPageination = {
-        sizeCanChange: true,
-        showTotal: true,
-        total: 100,
-        pageSize: 10,
-        current: 1,
-        pageSizeChangeResetCurrent: true
-    }
-
     return (
         <Table
             rowKey="id"
@@ -31,7 +24,7 @@ export const CommonTable:React.FC<ICommonTableProps> = ({
             loading={loading}
             columns={columns}
             data={data}
-            pagination={pageination ? pageination : defaultPageination}
+            pagination={{...pageination, onChange: onChange}}
             scroll={scroll}
             {...rest}
         />

@@ -1,10 +1,12 @@
 export interface AppItem {
   key:number,
-  appName: string;
-  appId: string;
-  version: string;
-  effectTime: string;
-  expireTime: string;
+  applicationName: string;
+  applicationCode: string;
+  applicationId: number;
+  authorizationTime: string;
+  versionNumber:string;
+  expiresTime: string;
+  status: number;
 }
 
 export interface AuthorizedAppRef {
@@ -12,9 +14,14 @@ export interface AuthorizedAppRef {
 };
 
 export interface IAuthorizedAppProps {
+    loading: boolean;
+    tableData: AppItem[];
+    pageination: any;
     className?: string;
+    onEdit: (id: number) =>void;
+    onSearch: (value: string) => void;
+    onChange: (pageNo: number, pageSize: number) => void;
     setAddAppModalVisible: (visible:boolean) => void;
-    onEdit: (record?: AppItem)=> void;
 }
 
 export interface statusProps {
@@ -43,5 +50,5 @@ export interface cropItem {
 }
 
 export interface OutletContextType {
-  corpId: number;
+  currentId: number;
 }

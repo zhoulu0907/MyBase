@@ -13,3 +13,16 @@ export const formatIndustryType = (value: number) =>{
     }
     return newValue;
 }
+
+export const convertIndustryType = (value: string) =>{
+    let newValue: number = 1;
+    switch(value) {
+        case "大交通": 
+            newValue = 1 ;
+            break;
+        default:
+            newValue = 1;
+            break;
+    }
+    return newValue;
+}

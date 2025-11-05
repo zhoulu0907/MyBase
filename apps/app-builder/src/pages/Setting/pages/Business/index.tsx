@@ -4,7 +4,7 @@ import styles from "./index.module.less";
 import StatusTag from "@/components/StatusTag";
 import { Outlet, useMatch, useNavigate } from "react-router-dom";
 import { TopHeader } from "./components/topHeader";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getCorpListApi, disabledCorpApi, deleteCorpApi, updateCorpApi, type corpListParams } from "@onebase/platform-center";
 import { type corpApplicationListProps, type cropItem} from "./types/appItem";
 import { formatTimeYMDHMS } from '@onebase/common';
@@ -76,13 +76,13 @@ const BusinessPage: React.FC = () => {
         }
     ];
     const navigate = useNavigate();
+    const inputRef = useRef(null);
     const isCreatePage = useMatch('onebase/setting/business/create-business');
     const [loading, setLoading] = useState<boolean>(false);
     const [editable, setEditable] = useState<boolean>(false);
-    const [inputValue, setInputValue] = useState<string>('');
     const [searchValue, setSearchValue] = useState<string>("");
     const [tableData, setTableData] = useState<cropItem[]>([]);
-    const [corpId, setCorpId] = useState<number>();
+    const [currentId, setCurrentId] = useState<number>();
     const [pagination, setPagination] = useState({
         showTotal: true,
         total: 0,
@@ -115,7 +115,10 @@ const BusinessPage: React.FC = () => {
         try {
             const res = await getCorpListApi(params);
             if (res && Array.isArray(res.list)) {
-                setTableData(res.list);
+                const newData = res.list.map((item:any) => {
+                    return {...item, id:  112372064144556032}
+                })
+                setTableData(newData);
                 setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));
             } else {
                 console.warn('Invalid response format:', res);
@@ -137,7 +140,7 @@ const BusinessPage: React.FC = () => {
 
     const handleEdit = (record:cropItem, activeTab: string) => {
         setEditable(true);
-        setCorpId(record.id);
+        setCurrentId(record.id);
         const encodedName = encodeURIComponent(record.corpName);
         navigate(`${encodedName}/${activeTab === "basic" ? "基本信息" : "授权应用"}`);
     }
@@ -145,6 +148,21 @@ const BusinessPage: React.FC = () => {
     //创建企业
     const handleCreateBusiness = () => {
         navigate("create-business");
+    }
+
+    const renderInput = (name: string) => {
+        return (
+             <div className={styles.deleteModal}>
+                <div className={styles.title}>删除企业，该企业下的数据将被永久删除，请谨慎操作。</div>
+                <div>
+                    <div className={styles.subTitle}>如确定删除，请输入企业名称：{name}</div>
+                    <Input 
+                        placeholder="请输入企业名称" 
+                        ref={inputRef}
+                    />
+                </div>
+            </div>
+        )
     }
 
     // 禁用
@@ -156,7 +174,7 @@ const BusinessPage: React.FC = () => {
                 status: 'danger',
             },
             onOk: async () => {
-                const params = {id: corpId, status: record.status};
+                const params = {id: record.id, status: record.status};
                 try {
                     await disabledCorpApi(params);
                     await updateCorpApi({...record, status: 0})
@@ -175,24 +193,19 @@ const BusinessPage: React.FC = () => {
             okButtonProps: {
                 status: 'danger',
             },
-            content: <div className={styles.deleteModal}>
-                <div className={styles.title}>删除企业，该企业下的数据将被永久删除，请谨慎操作。</div>
-                <div>
-                    <div className={styles.subTitle}>如确定删除，请输入企业名称：玩贝斯软件公司</div>
-                    <Input 
-                        placeholder="请输入企业名称" 
-                        value={inputValue} 
-                        onChange={(e:any) => setInputValue(e.target.value)} 
-                    />
-                </div>
-            </div>,
+            content:renderInput(record.corpName),
             onOk: async () => {
-                if (inputValue !== record.corpName) {
+                const value = inputRef?.current?.dom?.value;
+                if(!value) {
+                    Message.error("请输入内容");
+                    return false;
+                }
+                if (value !== record.corpName) {
                     Message.error('输入的企业名称不一致，请重新输入');
                     return false; 
                 }
                 try {
-                    await deleteCorpApi(record.corpId);
+                    await deleteCorpApi(record.id);
                     await getCorpListApi({pageNo: pagination.current, pageSize: pagination.pageSize})
                     Message.success('删除成功');
                 } catch (error) {
@@ -225,7 +238,7 @@ const BusinessPage: React.FC = () => {
 
     const renderContent = () => {
         if (editable) {
-            return <Outlet context={corpId}/>
+            return <Outlet context={{currentId}}/>
         }
         if (isCreatePage) {
             return <Outlet />

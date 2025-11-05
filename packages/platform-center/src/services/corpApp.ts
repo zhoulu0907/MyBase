@@ -15,4 +15,3 @@ export const getCorpAuthorizedAppListApi = (data: corpAppListParams) => systemSe
 
 //获得企业关联应用分页
 export const getCorpAppRelatedListApi = (data: corpAppListParams) => systemService.post('/corp-app-relation/page',data);
-

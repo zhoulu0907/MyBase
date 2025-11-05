@@ -1,51 +1,11 @@
-import { Button, Message, Space, Tag } from "@arco-design/web-react";
-import { useTableData } from "../../hooks/useTable";
+import { Button, Space, Tag } from "@arco-design/web-react";
 import { CommonTable } from "../table/commonTable";
 import { TopHeader } from "../topHeader";
 import styles from "./authorizedApp.module.less"
-import { forwardRef, useImperativeHandle } from "react";
-import type { IAuthorizedAppProps, AuthorizedAppRef, AppItem } from "../../types/appItem";
+import type { IAuthorizedAppProps } from "../../types/appItem";
 
 
-export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
-  ({ setAddAppModalVisible, onEdit, className}, ref) => {
-    // 模拟表格数据（5条示例数据）
-    const initialAppData:AppItem[]= Array(5).fill().map((_, index) => ({
-        key: index + 1,
-        appName: "CustomerRM_1c",
-        appId: 'CustomerRM_1c',
-        version: 'v1.2.3',
-        effectTime: '2025-03-29 12:46:21',
-        expireTime: '2025-03-29 12:46:21',
-    }));
-    const {
-        displayData,
-        currentPage,
-        setSearchValue,
-        setCurrentPage,
-        getEditItem,
-        removeItem,
-        addItem
-    } = useTableData<AppItem>(initialAppData);
-
-    useImperativeHandle(ref, () => ({
-      addNewApp: (newData) => {
-        addItem(newData);
-      }
-    }));
-
-    // 处理删除
-    const handleRemove = (key: string | number) => {
-        removeItem(key);
-        Message.success('移除成功');
-    };
-
-    //处理编辑
-    const handleEditAuthorizedApp = (key: string | number) => {
-        const item = getEditItem(key);
-        onEdit(item);
-    };
-
+export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading, tableData,pageination, setAddAppModalVisible, onChange, onSearch }) => {
     //点击创建应用打开modal
     const handleAddApplication = () => {
         setAddAppModalVisible(true);
@@ -100,27 +60,20 @@ export const AuthorizedApp = forwardRef<AuthorizedAppRef, IAuthorizedAppProps>(
     ];
 
     return (
-        <div className={className ? className : styles.authorizedApp}>
+        <div className={className ? className: styles.authorizedApp}>
             <TopHeader
                 title="添加应用"
                 onAdd={handleAddApplication}
                 isBusiness={false}
-                setSearchInputValue={setSearchValue}
+                setSearchInputValue={onSearch} 
             />
             <CommonTable
-                loading={false}
-                data={displayData}
+                loading={loading}
+                data={tableData}
                 columns={columns}
-                pageination={{
-                    sizeCanChange: true,
-                    showTotal: true,
-                    total: displayData.length,
-                    pageSize: 5,
-                    current: currentPage,
-                    pageSizeChangeResetCurrent: true,
-                    onChange: setCurrentPage,
-                }}
+                pageination={pageination}
+                onChange={onChange}
             />
         </div>
     )
-})
+}
