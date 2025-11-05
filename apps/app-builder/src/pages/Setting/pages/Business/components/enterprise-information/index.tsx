@@ -35,7 +35,7 @@ const EnterpriseInfoPage: React.FC = () => {
 
   const fetchCorpDetail = async() => {
     try {
-      const res = await getDetailsApi({currentId});
+      const res = await getDetailsApi(currentId);
       setFormData(res && res || null);
       setOriginalInfo(res && res || null);
     }catch(error) {
@@ -122,7 +122,7 @@ const EnterpriseInfoPage: React.FC = () => {
 
   // 提交新应用（弹窗确认后调用）
   const handleAddSubmit = (newAppData: any) => {
-      authorizedAppRef.current?.addNewApp(newData);
+      // authorizedAppRef.current?.addNewApp(newData);
       setAddAppModalVisible(false);
   };
 
