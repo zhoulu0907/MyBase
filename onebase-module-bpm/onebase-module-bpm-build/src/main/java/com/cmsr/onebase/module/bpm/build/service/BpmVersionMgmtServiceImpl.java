@@ -5,8 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.api.enums.VersionStatusEnum;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefinitionVO;
+import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
@@ -15,8 +14,6 @@ import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -122,18 +119,40 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
      */
     @Override
     public PageResult<BpmDefVersionMgtVO> getVersionMgmtPage(BpmVersionMgmtPageReqVo reqVo) {
+        // 设置默认值？todo：抛出异常
+        if (!Objects.equals(reqVo.getSortType(), "update_time") && !Objects.equals(reqVo.getSortType(), "create_time")) {
+            reqVo.setSortType("update_time");
+        }
+
         ConfigStore configStore = new DefaultConfigStore();
         configStore.and(Compare.EQUAL, FlowDefinition.FORM_PATH, String.valueOf(reqVo.getBusinessId()));
-        if (reqVo.getVersionStatus() != null && !reqVo.getVersionStatus().isEmpty()
-                && !StringUtils.equalsIgnoreCase("all", reqVo.getVersionStatus())){
-            configStore.and(Compare.EQUAL, "is_publish", convertVersionStatusToPublishStatus(reqVo.getVersionStatus()));
+
+        if (StringUtils.isNotBlank(reqVo.getVersionStatus()))  {
+            VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getVersionStatus());
+
+            if (versionStatusEnum != null && versionStatusEnum.toPublishStatus() != null) {
+                configStore.and(Compare.EQUAL, "is_publish", versionStatusEnum.toPublishStatus().getKey());
+            } else {
+                throw exception(ErrorCodeConstants.UNKNOWN_VERSION_STATUS);
+            }
         }
-        if (reqVo.getVersionAlias() != null && !reqVo.getVersionAlias().isEmpty()) {
+
+        String versionAlias = reqVo.getVersionAlias();
+
+        if (StringUtils.isNotBlank(reqVo.getVersionAlias())) {
+            String versionKeyWord = versionAlias;
+
+            // 去除首字母的V用于版本搜索
+            if (Character.toLowerCase(versionAlias.charAt(0)) == 'v') {
+                versionKeyWord = versionAlias.substring(1);
+            }
+
             ConfigStore orCondition = new DefaultConfigStore();
             orCondition.or(Compare.LIKE, "ext::json->>'versionAlias'", "%" + reqVo.getVersionAlias() + "%");
-            orCondition.or(Compare.EQUAL, "version", reqVo.getVersionAlias());
+            orCondition.or(Compare.LIKE, "version", "%" + versionKeyWord + "%");
             configStore.and(orCondition);
         }
+
         // 排序：设计中>已发布>历史
         String caseOrder = "CASE WHEN is_publish = " + PublishStatus.UNPUBLISHED.getKey() + " THEN 1 " +
                 "WHEN is_publish = " + PublishStatus.PUBLISHED.getKey() + " THEN 2 " +
@@ -141,24 +160,11 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                 "ELSE 4 END";
         configStore.order(caseOrder);
         configStore.order(reqVo.getSortType(), Order.TYPE.DESC);
+
         PageResult<FlowDefinition> definitions = flowDefinitionRepository.findPageWithConditions(configStore, reqVo.getPageNo(), reqVo.getPageSize());
         return buildVersionMgmtPageResult(definitions);
     }
-    /**
-     * 将 VersionStatusEnum 的 code 转换为 PublishStatus 的 key
-     * @param versionStatusCode VersionStatusEnum 的 code
-     * @return PublishStatus 的 key
-     */
-    private Integer convertVersionStatusToPublishStatus(String versionStatusCode) {
-        if (versionStatusCode.equals(VersionStatusEnum.PUBLISHED.getCode())) {
-            return PublishStatus.PUBLISHED.getKey();
-        } else if (versionStatusCode.equals(VersionStatusEnum.DESIGNING.getCode())) {
-            return PublishStatus.UNPUBLISHED.getKey();
-        } else if (versionStatusCode.equals(VersionStatusEnum.PREVIOUS.getCode())) {
-            return PublishStatus.EXPIRED.getKey();
-        }
-       return null;
-    }
+
     /**
      * 更新流程版本备注
      *
@@ -197,9 +203,8 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                 vo.setVersion("V" + definition.getVersion());
                 BpmDefinitionExtDTO extDTO = JsonUtils.parseObject(definition.getExt(), BpmDefinitionExtDTO.class);
                 vo.setVersionAlias(extDTO.getVersionAlias());
-                vo.setVersionStatus(definition.getIsPublish() == PublishStatus.UNPUBLISHED.getKey() ? "设计中" :
-                                definition.getIsPublish() == PublishStatus.PUBLISHED.getKey() ? "已发布" :
-                                definition.getIsPublish() == PublishStatus.EXPIRED.getKey() ? "历史" : "未知状态");
+                VersionStatusEnum versionStatusEnum = VersionStatusEnum.toVersionStatusEnum(definition.getIsPublish());
+                vo.setVersionStatus(versionStatusEnum.getName());
                 vo.setCreateTime(definition.getCreateTime());
                 vo.setUpdateTime(definition.getUpdateTime());
                 // 创建人

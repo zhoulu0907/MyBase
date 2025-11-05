@@ -18,4 +18,8 @@ public class AppAuthTimeReqVO {
     @Schema(description = "授权时间")
     @NotNull(message = "授权时间")
     private LocalDateTime authorizationTime ;
+
+    @Schema(description = "过期时间")
+    @NotNull(message = "过期时间")
+    private LocalDateTime expiresTime ;
 }

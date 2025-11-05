@@ -42,4 +42,7 @@ public class TenantPageReqVO extends PageParam {
     @Schema(description = "管理员id")
     private String adminUserId;
 
+    @Schema(description = "时间排序 asc/desc")
+    private  String sortType;
+
 }
