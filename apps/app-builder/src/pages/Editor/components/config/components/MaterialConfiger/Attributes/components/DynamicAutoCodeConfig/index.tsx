@@ -10,7 +10,7 @@ import {
   DIGIT_DEFAULT
 } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/const';
 import { findFieldPath } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/transform';
-import { Button, Cascader, Dropdown, Form, Input, Menu, Select } from '@arco-design/web-react';
+import { Button, Cascader, Dropdown, Form, Input, Menu, Select, Tooltip } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPen, IconPlus } from '@arco-design/web-react/icon';
 import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
 import { useAppEntityStore } from '@onebase/ui-kit';
@@ -306,29 +306,31 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
           }}
         >
           {rules.map((rule: any, index: number) => (
-            <div key={index} className={styles.autoCodeItem}>
-              {!configs[autoCodeDisabledKey] && (
-                <IconDragDotVertical
-                  // 支持拖拽的图标，别误删了：）
-                  className="autocode-item-handle"
-                  style={{
-                    cursor: 'move',
-                    color: '#555'
-                  }}
-                />
-              )}
-              {renderRuleConfig(rule, index)}
-              {!configs[autoCodeDisabledKey] && (
-                <Button
-                  type="text"
-                  status="danger"
-                  icon={<IconDelete />}
-                  onClick={() => removeRule(index)}
-                  disabled={rules.length <= 1 || rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE}
-                  className={styles.ruleActionBtn}
-                />
-              )}
-            </div>
+            <Tooltip key={index} content="如需修改请前往数据建模" disabled={!configs[autoCodeDisabledKey]}>
+              <div className={styles.autoCodeItem}>
+                {!configs[autoCodeDisabledKey] && (
+                  <IconDragDotVertical
+                    // 支持拖拽的图标，别误删了：）
+                    className="autocode-item-handle"
+                    style={{
+                      cursor: 'move',
+                      color: '#555'
+                    }}
+                  />
+                )}
+                {renderRuleConfig(rule, index)}
+                {!configs[autoCodeDisabledKey] && (
+                  <Button
+                    type="text"
+                    status="danger"
+                    icon={<IconDelete />}
+                    onClick={() => removeRule(index)}
+                    disabled={rules.length <= 1 || rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE}
+                    className={styles.ruleActionBtn}
+                  />
+                )}
+              </div>
+            </Tooltip>
           ))}
         </ReactSortable>
         {!configs[autoCodeDisabledKey] && (
