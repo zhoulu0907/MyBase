@@ -54,7 +54,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   // 查找选中菜单项的函数
   const findSelectedKeys = React.useCallback((items: MenuItemType[], path: string): string[] => {
     for (const item of items) {
-      if (item.path === path) {
+      if (path === item.path || path.startsWith(item.path + '/')) {
         return [item.key];
       }
       if (item.children) {

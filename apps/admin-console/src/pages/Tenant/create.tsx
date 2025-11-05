@@ -9,13 +9,12 @@ import {
   Message,
   Space,
   Checkbox,
+  Image,
 } from '@arco-design/web-react';
 import { IconUpload } from '@arco-design/web-react/icon';
-import { addPlatformTenantApi, getCreateTenantCountApi, getOtherTenantCountApi, getPlatformInfoApi, getPlatformTenantAdminListApi, getTenantUserCountApi, PlatformTenantStatus, type CreateTenantParams } from '@onebase/platform-center';
+import { addPlatformTenantApi, getCreateTenantCountApi, getOtherTenantCountApi, getPlatformInfoApi, getPlatformTenantAdminListApi, getTenantUserCountApi, PlatformTenantStatus, uploadFile, type CreateTenantParams } from '@onebase/platform-center';
 import { generateTimestampString } from '@/utils/date';
 import styles from './index.module.less';
-
-const Option = Select.Option;
 
 const CreateSpace = () => {
   const [form] = Form.useForm();
@@ -26,12 +25,13 @@ const CreateSpace = () => {
   const [otherTenantCount, setOtherTenantCount] = useState<number>(0); // 其他租户分配数
   const [tenantUserCount, setTenantUserCount] = useState<number>(0); // 租户下用户数
 
+  const [logoUrl, setLogoUrl] = useState<string>(); // logo
+
   // 获取Tenant参数
   useEffect(() => {
     form.resetFields();
     form.setFieldsValue({
-      status: PlatformTenantStatus.enabled,
-      admin: undefined
+      status: PlatformTenantStatus.enabled
     });
     getPlatformAdminList();
     getAllocatable();
@@ -92,38 +92,29 @@ const CreateSpace = () => {
     }
   };
 
-  // 获取用户数量
-  // const getTenantUserCount = async (id: string) => {
-  //   try {
-  //     const resp = await getTenantUserCountApi(id);
-  //     if (resp) {
-  //       setTenantUserCount(resp);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching tenantUserCount:', error);
-  //   }
-  // };
-
   /**
     * 创建新租户
     */
   const createTenant = async (values: any) => {
     try {
-      // 根据 id 查找管理员
-      const selectedAdmin = adminList.find((admin) => admin.id === values.admin);
-      const adminUsername = selectedAdmin ? selectedAdmin.username : '';
-      const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
-      const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
+      const formattedAdmin = values.adminUserId.map((id: string) => {
+        const user = adminList.find(u => u.id === id);
+        return {
+          adminNickName: user?.nickname || '',
+          adminUserName: user?.username || '',
+          adminMobile: user?.mobile || '',
+        };
+      });
 
       const newTenantData: CreateTenantParams = {
-        name: values.tenantName,
+        name: values.name,
         tenantCode: generateTenantCode(),
-        adminUserName: adminUsername,
-        adminNickName: adminNickname,
-        adminMobile: adminMobile,
-        status: values.status,
-        accountCount: values.allocatedCount,
-        website: values.website
+        status: values.status ? 1 : 0,
+        accountCount: values.accountCount,
+        accessUrl: values.accessUrl,
+        saasEnabled: values.saasEnabled ? 1 : 0,
+        adminUserId: formattedAdmin,
+        logoUrl,
       };
       await addPlatformTenantApi(newTenantData);
       nav('tenant');
@@ -172,17 +163,29 @@ const CreateSpace = () => {
     window.history.back();
   };
 
+  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const progressAdapter = onProgress
+      ? (progressEvent: ProgressEvent) => {
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
+        }
+      }
+      : undefined;
+
+    const res = await uploadFile(formData, progressAdapter);
+    return res;
+  };
+
   return (
     <div className={styles.createPage}>
       <Form
         form={form}
         layout="horizontal"
         autoComplete="off"
-        initialValues={{
-          userLimit: 5000,
-          status: true,
-          saas: false,
-        }}
       >
         <Form.Item
           label="空间名称"
@@ -192,20 +195,45 @@ const CreateSpace = () => {
           <Input placeholder="输入空间名称" />
         </Form.Item>
 
-        <Form.Item label="空间 Logo" field="logo">
-          <Upload
-            listType="picture-card"
-            action="/"
-            showUploadList={false}
-          >
-            <Button type='outline' icon={<IconUpload />}>上传图片</Button>
-          </Upload>
-          <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
+        <Form.Item label="空间 Logo" field="logoUrl">
+          <Space direction="vertical">
+            {logoUrl && <Image width={160} height={80} src={logoUrl} />}
+            <Upload
+              limit={1}
+              imagePreview
+              accept="image/*"
+              listType="picture-card"
+              showUploadList={false}
+              customRequest={async (option) => {
+                const { onProgress, onError, onSuccess, file } = option;
+                try {
+                  const uploadImgUrl = await handleUpload(file, onProgress);
+                  if (uploadImgUrl !== '') {
+                    setLogoUrl(uploadImgUrl);
+                    onSuccess(uploadImgUrl);
+                  } else {
+                    onError({
+                      status: 'error',
+                      msg: '上传失败'
+                    });
+                  }
+                } catch (error) {
+                  onError({
+                    status: 'error',
+                    msg: '上传失败'
+                  });
+                }
+              }}
+            >
+              <Button type='outline' icon={<IconUpload />}>上传图片</Button>
+            </Upload>
+            <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
+          </Space>
         </Form.Item>
 
         <Form.Item
           label="访问地址"
-          field="url"
+          field="accessUrl"
           rules={[{ required: true, message: '请输入访问地址' }]}
         >
           <Input prefix="http://" placeholder="www.onebase.com/" />
@@ -213,7 +241,7 @@ const CreateSpace = () => {
 
         <Form.Item
           label="用户上限"
-          field="userLimit"
+          field="accountCount"
           rules={[{ required: true, message: '请输入用户上限' }]}
         >
           <Input type="number" />
@@ -221,7 +249,7 @@ const CreateSpace = () => {
 
         <Form.Item
           label="管理员"
-          field="admin"
+          field="adminUserId"
           rules={[{ required: true, message: '请选择管理员' }]}
           extra="当前用户将作为空间所有者"
         >
@@ -230,10 +258,11 @@ const CreateSpace = () => {
             mode="multiple"
             allowClear
             style={{ width: '100%' }}
+            options={adminList.map(u => ({
+              label: u.nickname || u.username,
+              value: u.id
+            }))}
           >
-            <Option value="王少青">王少青</Option>
-            <Option value="张三">张三</Option>
-            <Option value="李四">李四</Option>
           </Select>
         </Form.Item>
 
@@ -248,7 +277,7 @@ const CreateSpace = () => {
 
         <Form.Item
           label="SaaS 功能"
-          field="saas"
+          field="saasEnabled"
           triggerPropName="checked"
           rules={[{ required: true }]}
         >

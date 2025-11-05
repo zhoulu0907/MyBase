@@ -15,7 +15,8 @@ export const getPlatformTenantListApi = (params: {
   pageNo: number,
   pageSize?: number,
   keywords?: string,
-  status?: number | null
+  status?: number | null,
+  // createTime?: number | null todo
 }) => {
   const { pageNo, pageSize = 10, keywords, status } = params;
 
@@ -29,6 +30,10 @@ export const getPlatformTenantListApi = (params: {
     url += `&status=${status}`;
   }
 
+  // if (createTime !== null) {
+  //   url += `&createTime=${createTime}`;
+  // }
+
   return systemService.get(url);
 };
 
@@ -37,6 +42,9 @@ export const addPlatformTenantApi = (data: CreateTenantParams) => systemService.
 
 // 修改平台租户
 export const updatePlatformTenantApi = (data: any) => systemService.post('/tenant/update', data);
+
+// 删除平台租户
+export const deletePlatformTenantApi = (id: UpdateTenantParams) => systemService.post('/tenant/delete', id);
 
 // 获取租户管理员列表
 export const getPlatformTenantAdminListApi = () => systemService.get('/platform/admin/list');

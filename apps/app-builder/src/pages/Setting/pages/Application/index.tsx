@@ -425,7 +425,7 @@ const AppManagement: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className={styles.updateTime}>更新时间：${dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
+                          <div className={styles.updateTime}>更新时间：{dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
                         </div>
                       </div>
 

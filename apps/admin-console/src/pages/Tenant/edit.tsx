@@ -10,8 +10,6 @@ import {
   Space,
   Checkbox,
   Tabs,
-  Tag,
-  Avatar,
   Tooltip,
 } from '@arco-design/web-react';
 import { IconCopy, IconUpload } from '@arco-design/web-react/icon';
@@ -19,12 +17,10 @@ import {
   getPlatformTenantAdminListApi,
   updatePlatformTenantApi,
   type UpdateTenantParams,
-  getPlatformTenantAdminInfoApi
+  getPlatformTenantAdminInfoApi,
 } from '@onebase/platform-center';
 import { copyToClipboard, getDomainPrefix, simplifyUrl } from '@/utils/date';
 import styles from './index.module.less';
-
-const Option = Select.Option;
 
 const EditTenant = () => {
   const [form] = Form.useForm();
@@ -42,8 +38,6 @@ const EditTenant = () => {
   const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${tenantInfo?.id}/${tenantInfo?.website}/`;
   const displayUrl = simplifyUrl(fullUrl);
 
-  console.log(fullUrl === displayUrl)
-
   useEffect(() => {
     if (id) {
       getTenantInfo(id);
@@ -54,17 +48,15 @@ const EditTenant = () => {
   useEffect(() => {
     if (tenantInfo) {
       const initialValues = {
-        name: tenantInfo?.name,
-        id: tenantInfo?.id,
-        logo: '',
-        url: fullUrl,
-        userLimit: 5000,
-        admin: [tenantInfo?.adminNickName],
-        status: tenantInfo?.status === 1,
-        saas: false
+        id: tenantInfo.id,
+        name: tenantInfo.name,
+        logoUrl: tenantInfo.logoUrl,
+        accountCount: tenantInfo.accountCount,
+        adminUserId: tenantInfo.adminUserId,
+        status: tenantInfo.status === 1,
+        saasEnabled: tenantInfo.saasEnabled === 1
       };
       form.setFieldsValue(initialValues);
-
     }
   }, [tenantInfo]);
 
@@ -92,29 +84,18 @@ const EditTenant = () => {
       const values = await form.validate();
       console.log('提交表单:', values);
 
-      // 检查管理员是否发生变化
-      const newAdminId = values.admin; // 这里是 id
-      const originalAdminId = tenantInfo?.adminUserName || ''; // 原始 contactName 是 username
-
-      // 根据 id 查找管理员
-      const selectedAdmin = adminList.find((admin) => admin.id === newAdminId);
-      const adminUsername = selectedAdmin ? selectedAdmin.username : '';
-      const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
-      const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
-
       // 构建更新参数
       if (tenantInfo?.id) {
         const updateParams: UpdateTenantParams = {
           id: tenantInfo.id,
-          name: values.tenantName,
+          name: values.name,
           tenantCode: values.tenantCode,
-          // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
-          adminNickName: newAdminId !== originalAdminId ? adminNickname : '',
-          adminUserName: newAdminId !== originalAdminId ? adminUsername : '',
-          adminMobile: newAdminId !== originalAdminId ? adminMobile : '',
-          status: values.status,
-          accountCount: values.allocatedCount,
-          website: values.website
+          status: values.status ? 1 : 0,
+          accountCount: values.accountCount,
+          accessUrl: values.accessUrl,
+          saasEnabled: values.saasEnabled ? 1 : 0,
+          logoUrl: values.logoUrl,
+          adminUserId: values.adminUserId[0]
         };
         // 调用 updatePlatformTenantApi
         await updatePlatformTenantApi(updateParams);
@@ -140,16 +121,6 @@ const EditTenant = () => {
             form={form}
             layout="horizontal"
             autoComplete="off"
-            initialValues={{
-              name: tenantInfo?.name,
-              id: tenantInfo?.id,
-              logo: '',
-              url: tenantInfo?.website,
-              userLimit: 5000,
-              admin: [tenantInfo?.adminNickName],
-              status: tenantInfo?.status === 1,
-              saas: false
-            }}
           >
             <Form.Item
               label="空间名称"
@@ -159,7 +130,7 @@ const EditTenant = () => {
               {isEdit ? <Input placeholder="输入空间名称" /> : <span>{tenantInfo?.name}</span>}
             </Form.Item>
 
-            <Form.Item label="空间 Logo" field="logo">
+            <Form.Item label="空间 Logo" field="logoUrl">
               {isEdit ? <>
                 <Upload
                   listType="picture-card"
@@ -181,7 +152,7 @@ const EditTenant = () => {
 
             <Form.Item
               label="访问地址"
-              field="url"
+              field="accessUrl"
               rules={[{ required: isEdit, message: '请输入访问地址' }]}
             >
               {isEdit ? <Input prefix="http://" placeholder="www.onebase.com/" /> :
@@ -193,15 +164,15 @@ const EditTenant = () => {
 
             <Form.Item
               label="用户上限"
-              field="userLimit"
+              field="accountCount"
               rules={[{ required: isEdit, message: '请输入用户上限' }]}
             >
-              {isEdit ? <Input type="number" /> : <span>{tenantInfo?.userLimit || 5000}</span>}
+              {isEdit ? <Input type="number" /> : <span>{tenantInfo?.accountCount}</span>}
             </Form.Item>
 
             <Form.Item
               label="管理员"
-              field="admin"
+              field="adminUserId"
               rules={[{ required: isEdit, message: '请选择管理员' }]}
               extra={isEdit && "当前用户将作为空间所有者"}
             >
@@ -210,15 +181,20 @@ const EditTenant = () => {
                 mode="multiple"
                 allowClear
                 style={{ width: '100%' }}
+                options={adminList.map(u => ({
+                  label: u.nickname || u.username,
+                  value: u.id
+                }))}
               >
-                <Option key="1" value="王少青">王少青</Option>
-                <Option key="2" value="张三">张三</Option>
-                <Option key="3" value="李四">李四</Option>
               </Select> :
                 <div className={styles.tagWrapper}>
-                  {Array(3).fill('').map((tag, index) => <Tag className={styles.adminTag} key={index} size='large' style={{ borderRadius: 16 }}>
-                    <Avatar size={24} style={{ marginRight: 4 }}>A</Avatar>王少青
-                  </Tag>)}
+                  {/* {adminList
+                    .filter(admin => (tenantInfo?.adminUserId || []).includes(admin.id))
+                    .map((tag, index) => (
+                      <Tag className={styles.adminTag} key={index} size='large' style={{ borderRadius: 16 }}>
+                        <Avatar size={24} style={{ marginRight: 4 }}>{tag.nickname.slice(0, 1)}</Avatar>{tag.nickname}
+                      </Tag>
+                    ))} */}
                 </div>}
             </Form.Item>
 
@@ -233,11 +209,11 @@ const EditTenant = () => {
 
             <Form.Item
               label="SaaS 功能"
-              field="saas"
+              field="saasEnabled"
               triggerPropName="checked"
               rules={[{ required: isEdit }]}
             >
-              {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.saas ? '已启用' : '未启用'}</span>}
+              {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.saasEnabled ? '已启用' : '未启用'}</span>}
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 5 }}>

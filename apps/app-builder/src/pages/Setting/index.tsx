@@ -49,13 +49,12 @@ const SettingPage: React.FC = () => {
                 <Route path="system-dict" element={<SystemDictPage />} />
                 <Route path="spaceInfo" element={<SpaceInfo />} />
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
-                <Route path="enterprise" element={<TenantPage />} />
                 <Route path="tenant" element={<TenantPage />} />
-                <Route path="business" element = {<BusinessPage />}>
-                  <Route path="create-business" element = {<CreateBusinessPage />} />
+                <Route path="business" element={<BusinessPage />}>
+                  <Route path="create-business" element={<CreateBusinessPage />} />
                   <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
                 </Route>
-                <Route path="authorized-application" element = {<AuthorizedApplication />}></Route>
+                <Route path="authorized-application" element={<AuthorizedApplication />}></Route>
                 <Route path="tenant/edit" element={<TenantEditPage />} />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>

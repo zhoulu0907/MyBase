@@ -58,9 +58,21 @@ export interface PlatformTenantInfo {
    */
   packageId?: number,
   /**
-   * 网站
+   * 访问地址
    */
-  website?: string,
+  accessUrl: string;
+  /**
+   * 用户logo
+   */
+  logoUrl?: string;
+  /**
+   * saas功能是否开启默认0，开启1
+   */
+  saasEnabled?: PlatformTenantStatus;
+  /**
+   * 管理员id
+   */
+  adminUserId?: string[];
 }
 
 export interface CreateTenantParams {
@@ -73,21 +85,9 @@ export interface CreateTenantParams {
    */
   tenantCode: string;
   /**
-   * 管理员名称
-   */
-  adminUserName: string;
-  /**
-   * 管理员昵称
-   */
-  adminNickName: string;
-  /**
-   * 管理员电话
-   */
-  adminMobile: string;
-  /**
    * 租户状态
    */
-  status: 0 | 1;
+  status: PlatformTenantStatus;
   /**
    * 分配数量
    */
@@ -95,7 +95,34 @@ export interface CreateTenantParams {
   /**
    * 访问地址
    */
-  website: string;
+  accessUrl: string;
+  /**
+   * 用户logo
+   */
+  logoUrl?: string;
+  /**
+   * saas功能是否开启默认0，开启1
+   */
+  saasEnabled?: PlatformTenantStatus;
+  /**
+   * 管理员id
+   */
+  adminUserId?: AdminUsers[];
+}
+
+interface AdminUsers {
+  /**
+   * 管理员名称
+   */
+  adminUserName?: string;
+  /**
+   * 管理员昵称
+   */
+  adminNickName?: string;
+  /**
+   * 管理员电话
+   */
+  adminMobile?: string;
 }
 
 export interface UpdateTenantParams extends CreateTenantParams {
