@@ -5,7 +5,6 @@ import TabFirstSelectBgSVG from '@/assets/images/tab_first_select_bg.svg';
 import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
 import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
 import VisitIconSVG from '@/assets/images/visit.svg';
-import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
@@ -13,6 +12,7 @@ import { UserPermissionManager } from '@/utils/permission';
 import { Button, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { AppStatus, getApplication, menuSignal, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager } from '@onebase/common';
+import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
@@ -117,7 +117,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           >
             <img src={AppIconSVG} alt="application icon" />
           </div>
-
           <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo?.iconColor }}>
             <DynamicIcon
               IconComponent={appIconMap[curAppInfo?.iconName as keyof typeof appIconMap]}
@@ -126,8 +125,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               fill="#F2F3F5"
             />
           </div>
-          <div className={styles.appName}>{curAppInfo?.appName}</div>
-
+          <div className={styles.appName}>
+            {curAppInfo?.appName}
+            xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+          </div>
           {curAppInfo?.appStatus === AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
           {curAppInfo?.appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}
           {curAppInfo?.appStatus == AppStatus.EDITING_AFTER_PUBLISH && (
@@ -137,6 +138,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
         <Tabs
           className="createAppTabs"
+          style={{
+            position: 'absolute',
+            left: '45%'
+          }}
           type="line"
           activeTab={activeTab}
           onChange={(key) => {
