@@ -5,13 +5,16 @@ server:
 spring:
   datasource:
     driver-class-name: com.kingbase8.Driver
-    url: jdbc:kingbase8://10.0.104.30:54321/onebase_cloud_v3
+    url: jdbc:kingbase8://10.0.104.30:54321/onebase_cloud_v3?currentSchema=public&useUnicode=true&characterEncoding=utf-8
     username: SYSTEM
     password: 3er4#ER$
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       minimum-idle: 1
       maximum-pool-size: 20
+      connection-test-query: SELECT 1
+      connection-timeout: 30000
+      validation-timeout: 5000
   redis:
     redisson:
       config: |

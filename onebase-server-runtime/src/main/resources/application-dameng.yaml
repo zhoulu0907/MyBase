@@ -5,13 +5,16 @@ server:
 spring:
   datasource:
     driver-class-name: dm.jdbc.driver.DmDriver
-    url: jdbc:dm://10.0.104.50:5237/ONEBASE_CLOUD_V3
+    url: jdbc:dm://10.0.104.50:5237?schema=ONEBASE_CLOUD_V3&zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8
     username: ONEBASE_CLOUD_V3
     password: Onebase2025
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       minimum-idle: 1
       maximum-pool-size: 20
+      connection-test-query: SELECT 1
+      connection-timeout: 30000
+      validation-timeout: 5000
   redis:
     redisson:
       config: |
