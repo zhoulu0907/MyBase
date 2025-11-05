@@ -20,6 +20,6 @@ public class FlowVersionProviderTest {
 
     @Test
     public void testUpdateApplicationVersion() {
-        flowVersionProvider.onApplicationUpdate(46699591748616192L);
+        flowVersionProvider.onApplicationUpdate(120906250090807296L);
     }
 }
