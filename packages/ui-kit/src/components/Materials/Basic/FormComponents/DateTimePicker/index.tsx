@@ -65,6 +65,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         ) : (
           <DatePicker
             showTime
+            format="YYYY-MM-DD HH:mm:ss"
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
