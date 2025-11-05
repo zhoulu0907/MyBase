@@ -124,11 +124,19 @@ export const useFieldManager = (
 
   // 处理取消
   const handleCancel = useCallback(() => {
-    setVisible?.(false);
-    form.resetFields();
-    setConfigPopoverVisible(null);
-    setConstraintsPopoverVisible(null);
-    fieldValidation.clearErrors();
+    Modal.confirm({
+      title: '确认取消',
+      content: '确定要取消字段配置吗？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => {
+        setVisible?.(false);
+        form.resetFields();
+        setConfigPopoverVisible(null);
+        setConstraintsPopoverVisible(null);
+        fieldValidation.clearErrors();
+      }
+    });
   }, [form, setVisible]);
 
   // 渲染字段配置 popover 内容
@@ -144,41 +152,49 @@ export const useFieldManager = (
       return;
     }
 
-    // 获取最新数据，再进行过滤
-    const mergedFields = getCurrentTableData();
-    const nonSystemFields = mergedFields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
+    setSubmitting(true);
 
-    const fieldDataList = nonSystemFields.map((field: FieldFormValues) => {
-      const fieldData = {
+    try {
+      // 获取最新数据，再进行过滤
+      const mergedFields = getCurrentTableData();
+      const nonSystemFields = mergedFields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
+
+      const fieldDataList = nonSystemFields.map((field: FieldFormValues) => {
+        const fieldData = {
+          appId: curAppId,
+          entityId: entity.entityId,
+          ...field,
+          isSystemField: FIELD_TYPE.CUSTOM,
+          isDeleted: field.isDeleted || false
+        };
+
+        return field.id && field.id.startsWith('field-') ? { ...fieldData, id: '' } : { ...fieldData, id: field.id };
+      });
+
+      const params = {
         appId: curAppId,
         entityId: entity.entityId,
-        ...field,
-        isSystemField: FIELD_TYPE.CUSTOM,
-        isDeleted: field.isDeleted || false
+        items: fieldDataList
       };
 
-      return field.id && field.id.startsWith('field-') ? { ...fieldData, id: '' } : { ...fieldData, id: field.id };
-    });
+      const result = await batchSaveFields(params);
 
-    const params = {
-      appId: curAppId,
-      entityId: entity.entityId,
-      items: fieldDataList
-    };
+      // 使用接口返回的 createdIds 标记新增字段
+      if (result?.createdIds && Array.isArray(result.createdIds)) {
+        result.createdIds.forEach((fieldId: string) => {
+          newFieldSignal.addNewField(entity.entityId as string, fieldId);
+        });
+      }
 
-    const result = await batchSaveFields(params);
-
-    // 使用接口返回的 createdIds 标记新增字段
-    if (result?.createdIds && Array.isArray(result.createdIds)) {
-      result.createdIds.forEach((fieldId: string) => {
-        newFieldSignal.addNewField(entity.entityId as string, fieldId);
-      });
+      Message.success('保存成功');
+      setVisible?.(false);
+      fieldValidation.clearErrors();
+      onSuccess?.();
+    } catch (error) {
+      console.error('executeSave error', error);
+    } finally {
+      setSubmitting(false);
     }
-
-    Message.success('保存成功');
-    setVisible?.(false);
-    fieldValidation.clearErrors();
-    onSuccess?.();
   }, [entity?.entityId, getCurrentTableData, curAppId, setVisible]);
 
   // 处理表单提交
@@ -196,22 +212,7 @@ export const useFieldManager = (
 
       await form.validate();
 
-      Modal.confirm({
-        title: '确认保存',
-        content: '确定要保存字段配置吗？',
-        okText: '确认',
-        cancelText: '取消',
-        onOk: async () => {
-          setSubmitting(true);
-          try {
-            await executeSave();
-          } catch (error) {
-            console.error('executeSave error', error);
-          } finally {
-            setSubmitting(false);
-          }
-        }
-      });
+      await executeSave();
     } catch (error) {
       // 手动渲染错误
       const errs = (error && (error as Record<string, unknown>).errors) || [];
