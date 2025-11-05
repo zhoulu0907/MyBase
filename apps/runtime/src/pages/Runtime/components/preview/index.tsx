@@ -1,7 +1,6 @@
 import ExecuteFlows from '@/utils/flow';
 import { Button, Drawer, Form, Message, Modal } from '@arco-design/web-react';
 import {
-  PageType,
   CATEGORY_TYPE,
   dataMethodData,
   dataMethodInsert,
@@ -9,6 +8,7 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
   type AppEntityField,
@@ -17,6 +17,7 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
+import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
@@ -28,10 +29,8 @@ import {
   STATUS_VALUES,
   useEditorSignalMap,
   useListEditorSignal,
-  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
-import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import FlowPredict from './flowPredict';
@@ -383,7 +382,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                   key={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
+                    width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                    margin: '4px'
                   }}
                 >
                   <PreviewRender
@@ -410,10 +410,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
-                      width: getComponentWidth(
+                      width: `calc(${getComponentWidth(
                         useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
                         cp.type
-                      )
+                      )} - 8px)`,
+                      margin: '4px'
                     }}
                   >
                     <PreviewRender
@@ -472,10 +473,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                       key={cp.id}
                       className={styles.componentItem}
                       style={{
-                        width: getComponentWidth(
+                        width: `calc(${getComponentWidth(
                           useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
                           cp.type
-                        )
+                        )} - 8px)`,
+                        margin: '4px'
                       }}
                     >
                       <PreviewRender

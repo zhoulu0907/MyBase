@@ -228,7 +228,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                   key={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
+                    width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                    margin: '4px'
                   }}
                 >
                   <PreviewRender
@@ -255,10 +256,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
-                      width: getComponentWidth(
+                      width: `calc(${getComponentWidth(
                         useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
                         cp.type
-                      )
+                      )} - 8px)`,
+                      margin: '4px'
                     }}
                   >
                     <PreviewRender
