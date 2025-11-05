@@ -270,7 +270,7 @@ const XTable = memo(
     };
 
     const handlePage = async () => {
-      if (!runtime) {
+      if (!runtime || !metaData) {
         return;
       }
 
