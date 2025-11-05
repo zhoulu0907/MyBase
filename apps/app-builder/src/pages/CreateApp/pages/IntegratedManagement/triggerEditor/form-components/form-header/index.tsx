@@ -31,7 +31,6 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
-      e.preventDefault();
       console.log('delete node: ', node.id);
 
       // 删除相关应用的节点配置
