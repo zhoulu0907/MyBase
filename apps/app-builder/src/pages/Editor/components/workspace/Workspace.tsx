@@ -222,7 +222,7 @@ export default function EditorWorkspace() {
   };
 
   return (
-    <div className={styles.formEditorWorkspace}>
+    <div className={styles.editorWorkspace}>
       <div className={styles.workspaceHeader}>
         <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
         <div className={styles.workspaceHeaderRight}>
