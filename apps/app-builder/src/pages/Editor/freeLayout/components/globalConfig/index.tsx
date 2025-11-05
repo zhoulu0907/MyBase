@@ -1,12 +1,13 @@
+import { useContext, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button, SideSheet } from '@douyinfe/semi-ui';
 import { Checkbox, Switch, Radio, Select, Button as ArcoButton, Message } from '@arco-design/web-react';
-import styles from './index.module.less';
 import { IconClose } from '@douyinfe/semi-icons';
-import { GlobalConfigContext, type GlobalConfigData } from '../../context/globalConfigContext';
-import { useContext, useEffect, useState } from 'react';
-import { getUserPage, type PageParam } from '@onebase/platform-center';
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
-import { useLocation } from 'react-router-dom';
+import { getUserPage, type PageParam } from '@onebase/platform-center';
+import { GlobalConfigContext, type GlobalConfigData } from '../../context/globalConfigContext';
+import { HandlerMode, Permission, Timing, Rule, AutoApproveType } from './constants';
+import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
@@ -63,7 +64,7 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
   // 更新到全局配置
   const onSubmit = () => {
     if (
-      useConfigData.emptyApproverCfg?.handlerMode === 'transfer_member' &&
+      useConfigData.emptyApproverCfg?.handlerMode === HandlerMode.TRANSFER_MEMBER &&
       !useConfigData.emptyApproverCfg?.transferMemberId
     ) {
       Message.error('请选择转交成员');
@@ -140,28 +141,34 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                     .map(([key]) => key)}
                   onChange={(value) => {
                     const newAutoApproveCfg = {
-                      initAutoApprove: value.includes('initAutoApprove'),
-                      dupUserAutoApprove: value.includes('dupUserAutoApprove'),
-                      prevNodeDupUserAutoApprove: value.includes('prevNodeDupUserAutoApprove')
+                      [AutoApproveType.INIT_AUTO_APPROVE]: value.includes(AutoApproveType.INIT_AUTO_APPROVE),
+                      [AutoApproveType.DUP_USER_AUTO_APPROVE]: value.includes(AutoApproveType.DUP_USER_AUTO_APPROVE),
+                      [AutoApproveType.PREV_NODE_DUP_USER_AUTO_APPROVE]: value.includes(
+                        AutoApproveType.PREV_NODE_DUP_USER_AUTO_APPROVE
+                      )
                     };
                     dataChange(newAutoApproveCfg, 'autoApproveCfg');
                   }}
                 >
-                  {['initAutoApprove', 'dupUserAutoApprove', 'prevNodeDupUserAutoApprove'].map((item) => {
+                  {[
+                    AutoApproveType.INIT_AUTO_APPROVE,
+                    AutoApproveType.DUP_USER_AUTO_APPROVE,
+                    AutoApproveType.PREV_NODE_DUP_USER_AUTO_APPROVE
+                  ].map((item) => {
                     return (
                       <Checkbox key={item} value={item}>
-                        {item === 'initAutoApprove' && (
+                        {item === AutoApproveType.INIT_AUTO_APPROVE && (
                           <span className={styles.checkText}>
                             发起人自动审批
                             <span className={styles.checkTextTips}>（当前节点人员为发起人时，自动审批）</span>
                           </span>
                         )}
-                        {item === 'dupUserAutoApprove' && (
+                        {item === AutoApproveType.DUP_USER_AUTO_APPROVE && (
                           <span className={styles.checkText}>
                             上级自动审批<span className={styles.checkTextTips}>（当前节点人员为上级时，自动审批）</span>
                           </span>
                         )}
-                        {item === 'prevNodeDupUserAutoApprove' && (
+                        {item === AutoApproveType.PREV_NODE_DUP_USER_AUTO_APPROVE && (
                           <span className={styles.checkText}>
                             指定人员自动审批
                             <span className={styles.checkTextTips}>（当前节点人员为指定人员时，自动审批）</span>
@@ -190,12 +197,12 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                     )
                   }
                 >
-                  <Radio value="pause">流程暂停（即不允许为空）</Radio>
-                  <Radio value="skip">自动跳过节点</Radio>
-                  <Radio value="transfer_admin">转交给应用管理员</Radio>
-                  <Radio value="transfer_member">转交给指定成员</Radio>
+                  <Radio value={HandlerMode.PAUSE}>流程暂停（即不允许为空）</Radio>
+                  <Radio value={HandlerMode.SKIP}>自动跳过节点</Radio>
+                  <Radio value={HandlerMode.TRANSFER_ADMIN}>转交给应用管理员</Radio>
+                  <Radio value={HandlerMode.TRANSFER_MEMBER}>转交给指定成员</Radio>
                 </RadioGroup>
-                {useConfigData.emptyApproverCfg?.handlerMode === 'transfer_member' && (
+                {useConfigData.emptyApproverCfg?.handlerMode === HandlerMode.TRANSFER_MEMBER && (
                   <Select
                     className={styles.transferMember}
                     placeholder="选择人员"
@@ -238,8 +245,8 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                     )
                   }
                 >
-                  <Radio value="none">不允许撤回</Radio>
-                  <Radio value="initiation_node">仅允许发起节点撤回</Radio>
+                  <Radio value={Permission.NONE}>不允许撤回</Radio>
+                  <Radio value={Permission.INITIATION_NODE}>仅允许发起节点撤回</Radio>
                   {/* <Radio value="any">允许所有节点撤回</Radio> */}
                 </RadioGroup>
 
@@ -257,8 +264,8 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                     )
                   }
                 >
-                  <Radio value="unprocessed">未操作</Radio>
-                  <Radio value="unread">未读</Radio>
+                  <Radio value={Timing.UNPROCESSED}>未操作</Radio>
+                  <Radio value={Timing.UNREAD}>未读</Radio>
                 </RadioGroup>
               </div>
             </div>
@@ -280,8 +287,8 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                     )
                   }
                 >
-                  <Radio value="seq">按流程顺序重新审批</Radio>
-                  <Radio value="direct">直达当前节点</Radio>
+                  <Radio value={Rule.SEQ}>按流程顺序重新审批</Radio>
+                  <Radio value={Rule.DIRECT}>直达当前节点</Radio>
                 </RadioGroup>
               </div>
             </div>
@@ -302,9 +309,9 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                     )
                   }
                 >
-                  <Radio value="initiation_node">仅可在发起节点终止</Radio>
-                  <Radio value="any">可在任意环节终止</Radio>
-                  <Radio value="none">发起人无终止权限</Radio>
+                  <Radio value={Permission.INITIATION_NODE}>仅可在发起节点终止</Radio>
+                  <Radio value={Permission.ANY}>可在任意环节终止</Radio>
+                  <Radio value={Permission.NONE}>发起人无终止权限</Radio>
                 </RadioGroup>
               </div>
             </div>

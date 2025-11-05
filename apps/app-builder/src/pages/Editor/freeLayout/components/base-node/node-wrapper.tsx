@@ -4,19 +4,17 @@
  */
 
 import React, { useState, useContext, useRef, useCallback } from 'react';
-
 import { WorkflowPortRender } from '@flowgram.ai/free-layout-editor';
 import { useClientContext, CommandService } from '@flowgram.ai/free-layout-editor';
-
 import { type FlowNodeMeta } from '../../typings';
 import { useNodeRenderContext, usePortClick } from '../../hooks';
 import { SidebarContext } from '../../context';
 import { scrollToView } from './utils';
 import { NodeWrapperStyle } from './styles';
-import './node-wrapper.less';
 import iconCopy from '../../assets/copy.svg';
 import iconDelete from '../../assets/delete.svg';
 import { WorkflowNodeType } from '../../nodes/constants';
+import './node-wrapper.less';
 
 export interface NodeWrapperProps {
   isScrollToView?: boolean;
@@ -41,7 +39,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const childRef = useRef<HTMLDivElement>(null);
   const portsRender = ports.map((p) => (
     <WorkflowPortRender
-      className={'nodePort' + ((selected && 'selectedPort') || '')}
+      className={'nodePort' + (selected ? 'selectedPort' : '')}
       key={p.id}
       entity={p}
       onClick={!readonly ? onPortClick : undefined}
