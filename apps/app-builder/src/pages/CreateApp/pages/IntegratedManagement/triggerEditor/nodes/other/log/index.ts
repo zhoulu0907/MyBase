@@ -1,6 +1,6 @@
 import iconOther from '@/assets/flow/nodes/log.svg';
-import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
+import { type FlowNodeRegistry } from '../../../typings';
 import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 

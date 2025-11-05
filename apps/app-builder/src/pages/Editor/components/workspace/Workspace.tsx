@@ -1,4 +1,4 @@
-import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -560,9 +560,10 @@ export default function EditorWorkspace() {
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
+                    width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                     borderColor: curComponentID === cp.id ? '#009E9E' : '',
-                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
+                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                    margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();

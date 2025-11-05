@@ -1,3 +1,4 @@
+import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
 import { Layout } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { Fragment, useEffect } from 'react';
@@ -6,9 +7,8 @@ import { getComponentWidth } from 'src/components/Materials/schema';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
-import { type XColumnLayoutConfig } from './schema';
-import { STATUS_VALUES, STATUS_OPTIONS } from '@/components/Materials/constants';
 import './index.css';
+import { type XColumnLayoutConfig } from './schema';
 
 const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
   const { colCount, id, pageType } = props;
@@ -57,7 +57,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
             {colComponents[index] &&
               colComponents[index].map((cp: GridItem) => (
                 <Fragment key={cp.id}>
-                  {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                  {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                     <div
                       key={cp.id}
                       data-cp-type={cp.type}
@@ -65,7 +65,8 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
                       data-cp-id={cp.id}
                       className="componentItem"
                       style={{
-                        width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
+                        width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
+                        margin: '4px'
                       }}
                       onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                         e.stopPropagation();
@@ -84,7 +85,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
                         runtime={true}
                       />
                     </div>
-                  }
+                  )}
                 </Fragment>
               ))}
           </ReactSortable>
