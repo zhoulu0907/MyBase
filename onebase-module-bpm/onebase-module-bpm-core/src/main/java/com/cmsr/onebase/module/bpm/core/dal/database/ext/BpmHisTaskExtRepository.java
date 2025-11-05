@@ -51,10 +51,12 @@ public class BpmHisTaskExtRepository {
                     t3.submit_Time,
                     t3.form_Summary,
                     t3.form_Name,
-                    t.*
+                    t.*,
+                    t4.form_path as business_id
                 FROM bpm_flow_his_task t
                 LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id
                 left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
+                left join bpm_flow_definition t4 on t4.id = t.definition_id
                 WHERE
                 t.approver = '%d'
                 and t1.deleted = 0
@@ -71,25 +73,28 @@ public class BpmHisTaskExtRepository {
         navi.setPageRows(reqVO.getPageSize());
         condition.setPageNavi(navi);
         condition.and(Compare.EQUAL, "t3.app_id", reqVO.getAppId());
-
         // 动态添加其他查询条件
-        if (reqVO.getProcessTitle() != null && !reqVO.getProcessTitle().isEmpty()) {
-            condition.and(Compare.LIKE, "t3.business_title", reqVO.getProcessTitle());
+        if (reqVO.getKeyword() != null && !reqVO.getKeyword().isEmpty()) {
+            ConfigStore orCondition = new DefaultConfigStore();
+            orCondition.or(Compare.LIKE, "t3.business_title", reqVO.getKeyword());
+            orCondition.or(Compare.LIKE, "t3.initiator_name", reqVO.getKeyword());
+            orCondition.or(Compare.LIKE, "t3.form_summary", reqVO.getKeyword());
+            condition.and(orCondition);
         }
-        if (reqVO.getInitiator() != null && !reqVO.getInitiator().isEmpty()) {
-            condition.and(Compare.LIKE, "t3.initiator_name", reqVO.getInitiator());
+        if (reqVO.getSubmitTimeStart() != null ) {
+            condition.and(Compare.GREAT_EQUAL, "t3.submit_time", reqVO.getSubmitTimeStart());
         }
-        if (reqVO.getFormSummary() != null && !reqVO.getFormSummary().isEmpty()) {
-            condition.and(Compare.LIKE, "t3.form_summary", reqVO.getFormSummary());
+        if (reqVO.getSubmitTimeEnd() != null ) {
+            condition.and(Compare.LESS_EQUAL, "t3.submit_time", reqVO.getSubmitTimeEnd());
         }
-        if (reqVO.getHandleTimeStart() != null ) {
-            condition.and(Compare.GREAT_EQUAL, "t.update_time", reqVO.getHandleTimeStart());
+        if (reqVO.getBusinessId() != null && !reqVO.getBusinessId().isEmpty()) {
+            condition.and(Compare.EQUAL, "t4.form_path", reqVO.getBusinessId());
         }
-        if (reqVO.getHandleTimeEnd() != null ) {
-            condition.and(Compare.LESS_EQUAL, "t.update_time", reqVO.getHandleTimeEnd());
+        if (reqVO.getFlowStatus() != null && !reqVO.getFlowStatus().isEmpty() && !"ALL".equals(reqVO.getFlowStatus()) ) {
+            condition.and(Compare.EQUAL, "t.flow_status", reqVO.getFlowStatus());
         }
-        if (reqVO.getSkipType() != null && !reqVO.getSkipType().isEmpty()) {
-            condition.and(Compare.EQUAL, "t.skip_type", reqVO.getSkipType());
+        if (reqVO.getNodeCode() != null && !reqVO.getNodeCode().isEmpty()) {
+            condition.and(Compare.EQUAL, "t.node_code", reqVO.getNodeCode());
         }
         // 设置排序
         if("asc".equals(reqVO.getSortType())){

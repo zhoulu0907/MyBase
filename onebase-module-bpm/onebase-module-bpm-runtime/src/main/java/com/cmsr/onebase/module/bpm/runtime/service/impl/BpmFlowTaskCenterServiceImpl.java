@@ -114,6 +114,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setSubmitTime(flowTaskExt.getSubmitTime());
         todoTaskVO.setFormSummary(flowTaskExt.getFormSummary());
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
+        todoTaskVO.setBusinessId(flowTaskExt.getBusinessId());
         return todoTaskVO;
     }
 
@@ -136,6 +137,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             doneTaskVO.setFormSummary(flowHisTaskExt.getFormSummary());
             doneTaskVO.setHandleTime(flowHisTaskExt.getUpdateTime());
             doneTaskVO.setTaskStatus(flowHisTaskExt.getFlowStatus());
+            doneTaskVO.setBusinessId(flowHisTaskExt.getBusinessId());
             doneTaskList.add(doneTaskVO);
         }
         return new PageResult<>(doneTaskList, pageResult.getTotal());
@@ -160,6 +162,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             bpmMyCreatedVO.setCreateTime(flowInstance.getCreateTime());
             bpmMyCreatedVO.setUpdateTime(flowInstance.getUpdateTime());
             bpmMyCreatedVO.setInstanceId(flowInstance.getId());
+            bpmMyCreatedVO.setBusinessId(flowInstance.getBusinessId());
 
             //设置当前节点处理人
             List<Task> flowTaskList = taskService.getByInsId(flowInstance.getId());
