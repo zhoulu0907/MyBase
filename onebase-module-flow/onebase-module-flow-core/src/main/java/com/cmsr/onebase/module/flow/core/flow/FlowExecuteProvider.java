@@ -34,10 +34,13 @@ public class FlowExecuteProvider {
         ExecutorResult executorResult;
         try {
             Map<String, Object> inputParams;
-            if (jobMessage.getJobType().equals("fld")) {
+            if (ExecutorRequest.JOB_TYPE_FIELD.equals(jobMessage.getJobType())) {
                 inputParams = createDateFieldInputParams(jobMessage);
-            } else {
+            } else if (ExecutorRequest.JOB_TYPE_TIME.equals(jobMessage.getJobType())) {
                 inputParams = createTimeInputParams(jobMessage);
+            } else {
+                ExecutorResult result = ExecutorResult.error(jobMessage.getProcessId(), "未知的流程类型:" + jobMessage.getJobType());
+                return result;
             }
             log.info("处理流程消息: {}", jobMessage);
             executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), jobMessage.getProcessId(), inputParams);
