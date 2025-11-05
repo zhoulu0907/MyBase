@@ -2,7 +2,10 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmInstanceExtRepository;
@@ -17,6 +20,7 @@ import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ListNodesRespVO;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowHisTaskRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowInstanceRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
@@ -25,8 +29,14 @@ import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.dromara.warm.flow.core.FlowEngine;
+import org.dromara.warm.flow.core.dto.DefJson;
+import org.dromara.warm.flow.core.dto.NodeJson;
+import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
+import org.dromara.warm.flow.core.enums.NodeType;
+import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
 import org.dromara.warm.flow.core.utils.StreamUtils;
@@ -38,6 +48,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 @Service
 @Slf4j
@@ -70,6 +82,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private InsService insService;
 
     @Resource
     private BpmFlowInsBizExtRepository insBizExtRepository;
@@ -185,5 +200,36 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         }
         return new PageResult<>(list, pageResult.getTotal());
+    }
+
+    @Override
+    public List<ListNodesRespVO.NodeVO> listNodes(Long instanceId) {
+        List<ListNodesRespVO.NodeVO> nodeVOs = new ArrayList<>();
+
+        Instance instance = insService.getById(instanceId);
+
+        if (instance == null) {
+            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+        }
+
+        String defJsonStr = instance.getDefJson();
+
+        DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+        for (NodeJson nodeJson : defJson.getNodeList()) {
+            // 只取中间节点
+            if (NodeType.isBetween(nodeJson.getNodeType())) {
+                ListNodesRespVO.NodeVO nodeVO = new ListNodesRespVO.NodeVO();
+                nodeVO.setNodeCode(nodeJson.getNodeCode());
+                nodeVO.setNodeName(nodeJson.getNodeName());
+
+                // 取实际的类型
+                BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
+                nodeVO.setNodeType(nodeExtDTO.getNodeType());
+
+                nodeVOs.add(nodeVO);
+            }
+        }
+
+        return nodeVOs;
     }
 }

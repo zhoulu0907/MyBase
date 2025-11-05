@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.formula.service.engine;
 
 import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
-import com.cmsr.onebase.module.formula.service.user.FormulaUserService;
+import com.cmsr.onebase.module.formula.service.extendsion.FormulaExtendsService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
@@ -15,11 +15,14 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.cmsr.onebase.module.formula.enums.FormulaConstants.*;
+import static com.cmsr.onebase.module.formula.enums.FormulaConstants.DANGEROUS_PATTERNS;
+import static com.cmsr.onebase.module.formula.enums.FormulaConstants.SUPPORTED_FUNCTIONS;
 
 /**
  * 公式引擎服务实现类
@@ -39,7 +42,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     private final Pattern dangerousPatternRegex;
 
     @Resource
-    private FormulaUserService formulaUserService;
+    private FormulaExtendsService formulaExtendsService;
 
     public FormulaEngineServiceImpl(FormulaEngineProperties properties) {
         this.properties = properties;
@@ -115,7 +118,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                     }
 
 
-                    formulaUserService.enrichParametersWithUserInfo(formula, parameters);
+                    formulaExtendsService.buildParametersWithSystemInfo(formula, parameters);
 
                     // 检查公式中是否包含$字符，如果包含则进行参数替换
                     if (formula.contains("$")) {
@@ -314,9 +317,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
         if (result.isDate()) {
-            java.time.format.DateTimeFormatter inputFormatter =
-                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            return java.time.LocalDateTime.parse(result.toString(), inputFormatter);
+            return LocalDateTime.parse(result.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
         }
         // 对于JavaScript对象，检查是否包含value属性，如果包含则返回value的值
         if (result.hasMembers()) {

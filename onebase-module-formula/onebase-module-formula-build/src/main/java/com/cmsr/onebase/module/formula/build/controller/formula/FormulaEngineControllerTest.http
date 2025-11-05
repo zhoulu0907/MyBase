@@ -168,7 +168,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "ENCODEURL('https://example.com/?a=1&b=2')" }
+{ "formula": "ENCODEURL('数智化底座')" }
 
 ### CHAR
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -233,7 +233,7 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 { "formula": "GETSUPERVISOR(id,name)",
-  "parameters": {"id": 107}
+  "parameters": {}
 }
 
 ### ISINROLE

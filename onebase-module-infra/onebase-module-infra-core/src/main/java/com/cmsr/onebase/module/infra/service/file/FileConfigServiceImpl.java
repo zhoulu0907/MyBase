@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.infra.service.file;
 
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.IdUtil;
@@ -80,7 +81,7 @@ public class FileConfigServiceImpl implements FileConfigService {
         FileConfigDO fileConfig = FileConfigConvert.INSTANCE.convert(createReqVO)
                 .setConfig(createReqVO.getConfig())
                 // .setConfig(parseClientConfig(createReqVO.getStorage(), createReqVO.getConfig()))
-                .setMaster(false); // 默认非 master
+                .setMaster(NumberConstant.ZERO); // 默认非 master
         fileConfigDataRepository.insert(fileConfig);
         return fileConfig.getId();
     }
