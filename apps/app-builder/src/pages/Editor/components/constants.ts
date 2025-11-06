@@ -26,7 +26,7 @@ export interface Updater {
 
 // 枚举
 export enum VersionStatus {
-  PUBLISHED = 'published',
-  DESIGNING = 'designing',
+  PUBLISHED = '已发布',
+  DESIGNING = '设计中',
   MANAGE= 'manage',
 }
