@@ -40,11 +40,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
     if (mainEntity) {
       initTreeData();
     }
-  }, [mainEntity, configs.id]);
-
-  useEffect(() => {
     getIsInSubTable();
-  }, []);
+  }, [mainEntity, configs.id]);
 
   // 判断是否是在子表单中
   const getIsInSubTable = () => {
@@ -199,7 +196,11 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         style={{
           width: '100%'
         }}
-        options={isInSubTable ? entityTree.filter((ele) => ele.value !== mainEntity.entityId) : entityTree}
+        options={
+          isInSubTable
+            ? entityTree.filter((ele) => ele.value !== mainEntity.entityId)
+            : entityTree.filter((ele) => ele.value === mainEntity.entityId)
+        }
         onChange={(value) => {
           handleDataFieldChange(value);
           handleAutoCode(value);

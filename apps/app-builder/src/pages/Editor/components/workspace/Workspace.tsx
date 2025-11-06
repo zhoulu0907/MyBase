@@ -304,7 +304,7 @@ export default function EditorWorkspace() {
                     // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
                     if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
                       if (field.options?.length) {
-                        schema.config.defaultOptions = field.options.map((e) => ({
+                        schema.config.defaultOptions = field.options.map((e:any) => ({
                           chosen: field.defaultValue && e.optionValue === field.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
@@ -392,7 +392,7 @@ export default function EditorWorkspace() {
                       subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
                     ) {
                       if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e) => ({
+                        subSchema.config.defaultOptions = ele.options.map((e:any) => ({
                           chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
