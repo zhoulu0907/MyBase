@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmVersionMgmtPageReqVo;
+import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
@@ -221,14 +222,14 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
      * @param user 用户信息
      * @return OperationUser 对象，如果用户为空则返回 null
      */
-    private BpmDefVersionMgtVO.OperationUser createOperationUser(AdminUserRespDTO user) {
+    private UserBasicInfoVO createOperationUser(AdminUserRespDTO user) {
         if (user == null) {
             return null;
         }
-        BpmDefVersionMgtVO.OperationUser operationUser = new BpmDefVersionMgtVO.OperationUser();
-        operationUser.setOperationUserId(user.getId());
-        operationUser.setOperationName(user.getNickname());
-        operationUser.setOperationUserAvatar(user.getAvatar());
+        UserBasicInfoVO operationUser = new UserBasicInfoVO();
+        operationUser.setUserId(user.getId());
+        operationUser.setName(user.getNickname());
+        operationUser.setAvatar(user.getAvatar());
         return operationUser;
     }
 

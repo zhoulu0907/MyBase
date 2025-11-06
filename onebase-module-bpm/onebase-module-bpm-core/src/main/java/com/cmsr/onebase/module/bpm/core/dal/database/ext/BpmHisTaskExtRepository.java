@@ -46,6 +46,7 @@ public class BpmHisTaskExtRepository {
                     t3.business_title,
                     t3.initiator_id,
                     t3.initiator_name,
+                    t3.initiator_avatar,
                     t3.initiator_dept_id,
                     t3.initiator_dept_name,
                     t3.submit_Time,
