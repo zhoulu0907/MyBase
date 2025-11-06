@@ -1,4 +1,4 @@
-import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -222,7 +222,7 @@ export default function EditorWorkspace() {
   };
 
   return (
-    <div className={styles.formEditorWorkspace}>
+    <div className={styles.editorWorkspace}>
       <div className={styles.workspaceHeader}>
         <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
         <div className={styles.workspaceHeaderRight}>
@@ -278,8 +278,11 @@ export default function EditorWorkspace() {
                       field.fieldName !== 'parent_id' &&
                       field.isSystemField !== 1
                   );
-                  fieldList.forEach((field: AppEntityField) => {
+                  for (let field of fieldList) {
                     let cpType = COMPONENT_MAP[field.fieldType];
+                    if (!cpType) {
+                      continue;
+                    }
                     let cpID = `${cpType}-${uuidv4()}`;
 
                     const schema = getComponentSchema(cpType as any);
@@ -291,14 +294,17 @@ export default function EditorWorkspace() {
                     // 字段描述 description
                     schema.config.tooltip = field.description;
                     // 是否必填：1-是，0-不是 isRequired
-                    schema.config.verify.required = field.isRequired;
                     // 是否唯一：1-是，0-不是 isUnique
-                    schema.config.verify.noRepeat = field.isUnique;
+                    schema.config.verify = {
+                      ...schema.config.verify,
+                      required: field.isRequired,
+                      noRepeat: field.isUnique
+                    };
 
                     // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
                     if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
                       if (field.options?.length) {
-                        schema.config.defaultOptions = field.options.map((e) => ({
+                        schema.config.defaultOptions = field.options.map((e:any) => ({
                           chosen: field.defaultValue && e.optionValue === field.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
@@ -328,7 +334,7 @@ export default function EditorWorkspace() {
                     setShowDeleteButton(false);
 
                     entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
-                  });
+                  }
                 } else if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
                   // 子表业务实体
                   const cpName = item.entityName || '子表单';
@@ -359,8 +365,12 @@ export default function EditorWorkspace() {
                       field.isSystemField !== 1
                   );
                   // 子表单的每个表单项配置
-                  const subFieldComponents = subFieldList.map((ele: AppEntityField) => {
+                  let subFieldComponents: any = [];
+                  for (let ele of subFieldList) {
                     const subType = COMPONENT_MAP[ele.fieldType];
+                    if (!subType) {
+                      continue;
+                    }
                     const subSchema = getComponentSchema(subType as any);
                     const subId = `${subType}-${uuidv4()}`;
 
@@ -370,10 +380,11 @@ export default function EditorWorkspace() {
                     subSchema.config.defaultValue = ele.defaultValue;
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
-                    // 是否必填：1-是，0-不是 isRequired
-                    subSchema.config.verify.required = ele.isRequired;
-                    // 是否唯一：1-是，0-不是 isUnique
-                    subSchema.config.verify.noRepeat = ele.isUnique;
+                    subSchema.config.verify = {
+                      ...subSchema.config.verify,
+                      required: ele.isRequired,
+                      noRepeat: ele.isUnique
+                    };
 
                     // 字段选项列表（单/多选字段专用） options
                     if (
@@ -381,7 +392,7 @@ export default function EditorWorkspace() {
                       subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
                     ) {
                       if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e) => ({
+                        subSchema.config.defaultOptions = ele.options.map((e:any) => ({
                           chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
@@ -410,8 +421,8 @@ export default function EditorWorkspace() {
                       ...subSchema
                     };
                     setPageComponentSchemas(subId, subProps);
-                    return { id: subId, type: subType, displayName: ele.displayName };
-                  });
+                    subFieldComponents.push({ id: subId, type: subType, displayName: ele.displayName });
+                  }
                   setSubTableComponents(cpID, subFieldComponents);
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
                 } else if (item.entityID && item.entityID !== mainEntity.entityId) {
@@ -482,7 +493,7 @@ export default function EditorWorkspace() {
                 // 主表 字段组件
                 if (entityID && fieldID) {
                   // 获取当前字段数据源配置
-                  const currentField = mainEntity.fields.find((ele: AppEntityField) => ele.fieldId === fieldID);
+                  const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldId === fieldID);
                   if (currentField) {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
@@ -491,9 +502,12 @@ export default function EditorWorkspace() {
                     // 字段描述 description
                     schema.config.tooltip = currentField.description;
                     // 是否必填：1-是，0-不是 isRequired
-                    schema.config.verify.required = currentField.isRequired;
                     // 是否唯一：1-是，0-不是 isUnique
-                    schema.config.verify.noRepeat = currentField.isUnique;
+                    schema.config.verify = {
+                      ...schema.config.verify,
+                      required: currentField.isRequired,
+                      noRepeat: currentField.isUnique
+                    };
 
                     // 字段选项列表（单/多选字段专用） options
                     if (
@@ -560,9 +574,10 @@ export default function EditorWorkspace() {
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
+                    width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                     borderColor: curComponentID === cp.id ? '#009E9E' : '',
-                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
+                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                    margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();

@@ -33,7 +33,10 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}

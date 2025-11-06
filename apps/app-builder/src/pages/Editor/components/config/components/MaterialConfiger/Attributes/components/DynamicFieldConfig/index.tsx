@@ -3,19 +3,34 @@ import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebas
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 import { useSignals } from '@preact/signals-react/runtime';
-import { usePageEditorSignal, useFormEditorSignal, useAppEntityStore } from '@onebase/ui-kit';
+import {
+  COMPONENT_FIELD_MAP,
+  FORM_COMPONENT_TYPES,
+  usePageEditorSignal,
+  useFormEditorSignal,
+  useAppEntityStore
+} from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 
 export interface DynamicFieldConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
+  handleConfigsChange: (config: any) => void;
   item: any;
   configs: any;
 }
 
-const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChange, item, configs }) => {
+const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
+  handlePropsChange,
+  handleConfigsChange,
+  item,
+  configs
+}) => {
   useSignals();
-  const { curComponentSchema, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
+  const autoCodeKey = 'autoCodeConfig';
+  const autoCodeDisabledKey = 'autoCodeDisabled';
+  const selectKey = 'defaultOptions';
+  const { curComponentSchema, components, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
   const { subTableComponents } = useFormEditorSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
   const [entityTree, setEntityTree] = useState<any[]>([]);
@@ -23,14 +38,10 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
 
   useEffect(() => {
     if (mainEntity) {
-      //   console.log(mainEntity);
       initTreeData();
     }
-  }, [mainEntity]);
-
-  useEffect(() => {
     getIsInSubTable();
-  }, []);
+  }, [mainEntity, configs.id]);
 
   // 判断是否是在子表单中
   const getIsInSubTable = () => {
@@ -48,8 +59,13 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
   };
 
   const initTreeData = async () => {
+    // 根据不同组件类型匹配不同的可选择字段
+    const fieldType = components.find((ele) => ele.id === configs.id)?.type;
+    const cpTypes = COMPONENT_FIELD_MAP[fieldType];
+    // debugger fieldType
     const mainEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
+      .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
       .map((field: AppEntityField) => ({
         value: field.fieldId,
         label: field.displayName
@@ -60,6 +76,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
       label: entity.entityName,
       children: entity.fields
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
+        .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
         .map((field: AppEntityField) => ({
           value: field.fieldId,
           label: field.displayName
@@ -81,7 +98,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
     for (let key of keys) {
       const ele = subTableComponents.value[key];
       // 包含当前节点的子表单
-      const isSubComponent = ele.find((item: any) => item.id === curComponentSchema.config.id);
+      const isSubComponent = ele?.find((item: any) => item.id === curComponentSchema.config.id);
       if (isSubComponent) {
         ele.forEach((item: any) => {
           // 不是本身 并且和当前子表不一致
@@ -99,6 +116,75 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
     }
   };
 
+  const handleAutoCode = (value: (string | string[])[]) => {
+    const type = components.find((ele) => ele.id === configs.id)?.type;
+    const isMainEntity = value?.includes(mainEntity.entityId);
+    const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldId));
+    const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
+    const currentSubField = isSubEntity?.fields.find((ele: AppEntityField) => value.includes(ele.fieldId));
+
+    if (isMainEntity && currentMainField) {
+      // 主表
+      const newConfigs = {
+        ...configs,
+        defaultValue: currentMainField.defaultValue,
+        tooltip: currentMainField.description,
+        verify: {
+          ...configs.verify,
+          required: currentMainField.isRequired,
+          noRepeat: currentMainField.isUnique
+        },
+        constraints: currentMainField.constraints,
+        [item.key]: value,
+        // 自动编号
+        [autoCodeKey]: type === FORM_COMPONENT_TYPES.AUTO_CODE ? { ...currentMainField.autoNumberConfig } : undefined,
+        [autoCodeDisabledKey]:
+          type === FORM_COMPONENT_TYPES.AUTO_CODE ? (currentMainField?.autoNumberConfig?.id ? true : false) : undefined,
+        //  字段选项列表（单/多选）
+        [selectKey]:
+          type === FORM_COMPONENT_TYPES.SELECT_ONE || type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
+            ? currentMainField.options?.map((e) => ({
+                chosen: currentMainField.defaultValue && e.optionValue === currentMainField.defaultValue,
+                label: e.optionLabel,
+                value: e.optionValue
+              }))
+            : undefined
+      };
+      handleConfigsChange(newConfigs);
+    } else if (isSubEntity && currentSubField) {
+      // 子表
+      const newConfigs = {
+        ...configs,
+        defaultValue: currentSubField.defaultValue,
+        tooltip: currentSubField.description,
+        verify: {
+          ...configs.verify,
+          required: currentSubField.isRequired,
+          noRepeat: currentSubField.isUnique
+        },
+        constraints: currentSubField.constraints,
+        [item.key]: value,
+        // 自动编号
+        [autoCodeKey]: type === FORM_COMPONENT_TYPES.AUTO_CODE ? { ...currentSubField.autoNumberConfig } : undefined,
+        [autoCodeDisabledKey]:
+          type === FORM_COMPONENT_TYPES.AUTO_CODE ? (currentSubField?.autoNumberConfig?.id ? true : false) : undefined,
+        //  字段选项列表（单/多选）
+        [selectKey]:
+          type === FORM_COMPONENT_TYPES.SELECT_ONE || type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
+            ? currentSubField.options?.map((e) => ({
+                chosen: currentSubField.defaultValue && e.optionValue === currentSubField.defaultValue,
+                label: e.optionLabel,
+                value: e.optionValue
+              }))
+            : undefined
+      };
+      handleConfigsChange(newConfigs);
+    } else {
+      // 未找到字段对应配置
+      handlePropsChange(item.key, value);
+    }
+  };
+
   return (
     <FormItem layout="vertical" labelAlign="left" label="数据字段配置" className={styles.formItem}>
       <Cascader
@@ -110,10 +196,14 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
         style={{
           width: '100%'
         }}
-        options={isInSubTable ? entityTree.filter((ele) => ele.value !== mainEntity.entityId) : entityTree}
+        options={
+          isInSubTable
+            ? entityTree.filter((ele) => ele.value !== mainEntity.entityId)
+            : entityTree.filter((ele) => ele.value === mainEntity.entityId)
+        }
         onChange={(value) => {
           handleDataFieldChange(value);
-          handlePropsChange(item.key, value);
+          handleAutoCode(value);
         }}
       />
     </FormItem>

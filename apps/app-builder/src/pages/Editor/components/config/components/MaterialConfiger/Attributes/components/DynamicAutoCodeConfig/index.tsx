@@ -10,7 +10,7 @@ import {
   DIGIT_DEFAULT
 } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/const';
 import { findFieldPath } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/transform';
-import { Button, Cascader, Dropdown, Form, Input, Menu, Select } from '@arco-design/web-react';
+import { Button, Cascader, Dropdown, Form, Input, Menu, Select, Tooltip } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPen, IconPlus } from '@arco-design/web-react/icon';
 import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
 import { useAppEntityStore } from '@onebase/ui-kit';
@@ -20,6 +20,7 @@ import styles from '../../index.module.less';
 
 export interface DynamicAutoCodeConfigProps {
   handlePropsChange: (key: string, value: any) => void;
+  handleConfigsChange: (config: any) => void;
   item: any;
   configs: any;
   id: string;
@@ -34,7 +35,13 @@ const dataOptions = [
   { label: '自定义', value: '自定义' }
 ];
 
-const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePropsChange, item, configs, id }) => {
+const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
+  handlePropsChange,
+  handleConfigsChange,
+  item,
+  configs,
+  id
+}) => {
   const autoCodeKey = 'autoCodeConfig';
   const autoCodeDisabledKey = 'autoCodeDisabled';
   const { mainEntity, subEntities } = useAppEntityStore();
@@ -52,7 +59,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
     const resetText = config.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
     return `${numberingMethodText},${digitsText},${resetText}`;
   };
-  const [displayText, setDisplayText] = useState(getDisplayText(configs[autoCodeKey]?.config));
+  const [displayText, setDisplayText] = useState(getDisplayText(configs[autoCodeKey]));
 
   useEffect(() => {
     const keys = Object.keys(configs[autoCodeKey] || {});
@@ -82,6 +89,39 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
       initTreeData();
     }
   }, [mainEntity]);
+
+  useEffect(() => {
+    getConfigRulesOptions();
+  }, []);
+
+  const getConfigRulesOptions = () => {
+    const value = configs.dataField;
+    const isMainEntity = value?.includes(mainEntity.entityId);
+    const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
+    const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
+    const currentSubField = isSubEntity?.fields.find((ele: any) => value.includes(ele.fieldId));
+    if (isMainEntity && currentMainField) {
+      // 主表
+      if (currentMainField.autoNumberConfig?.id) {
+        const newAutoNumberConfig = { ...currentMainField.autoNumberConfig };
+        const newConfig = {
+          [autoCodeKey]: newAutoNumberConfig,
+          [autoCodeDisabledKey]: true
+        };
+        handleConfigsChange(newConfig);
+      }
+    } else if (isSubEntity && currentSubField) {
+      // 子表
+      if (currentSubField.autoNumberConfig?.id) {
+        const newAutoNumberConfig = { ...currentSubField.autoNumberConfig };
+        const newConfig = {
+          [autoCodeKey]: newAutoNumberConfig,
+          [autoCodeDisabledKey]: true
+        };
+        handleConfigsChange(newConfig);
+      }
+    }
+  };
 
   const initTreeData = async () => {
     const mainEntityTree = mainEntity.fields
@@ -266,29 +306,31 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
           }}
         >
           {rules.map((rule: any, index: number) => (
-            <div key={index} className={styles.autoCodeItem}>
-              {!configs[autoCodeDisabledKey] && (
-                <IconDragDotVertical
-                  // 支持拖拽的图标，别误删了：）
-                  className="autocode-item-handle"
-                  style={{
-                    cursor: 'move',
-                    color: '#555'
-                  }}
-                />
-              )}
-              {renderRuleConfig(rule, index)}
-              {!configs[autoCodeDisabledKey] && (
-                <Button
-                  type="text"
-                  status="danger"
-                  icon={<IconDelete />}
-                  onClick={() => removeRule(index)}
-                  disabled={rules.length <= 1 || rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE}
-                  className={styles.ruleActionBtn}
-                />
-              )}
-            </div>
+            <Tooltip key={index} content="如需修改请前往数据建模" disabled={!configs[autoCodeDisabledKey]}>
+              <div className={styles.autoCodeItem}>
+                {!configs[autoCodeDisabledKey] && (
+                  <IconDragDotVertical
+                    // 支持拖拽的图标，别误删了：）
+                    className="autocode-item-handle"
+                    style={{
+                      cursor: 'move',
+                      color: '#555'
+                    }}
+                  />
+                )}
+                {renderRuleConfig(rule, index)}
+                {!configs[autoCodeDisabledKey] && (
+                  <Button
+                    type="text"
+                    status="danger"
+                    icon={<IconDelete />}
+                    onClick={() => removeRule(index)}
+                    disabled={rules.length <= 1 || rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE}
+                    className={styles.ruleActionBtn}
+                  />
+                )}
+              </div>
+            </Tooltip>
           ))}
         </ReactSortable>
         {!configs[autoCodeDisabledKey] && (
@@ -324,8 +366,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({ handlePro
         onVisibleChange={setEditRuleVisible}
         onConfirm={handleAutoCodeConfigConfirm}
         initialConfig={
-          rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)
-            ?.config as unknown as AutoNumberRuleResponce
+          rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE) as unknown as AutoNumberRuleResponce
         }
       />
     </>

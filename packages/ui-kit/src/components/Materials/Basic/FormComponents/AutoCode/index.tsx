@@ -36,7 +36,10 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         layout={layout}
         rules={[{ required: verify?.required }]}
         tooltip={tooltip}

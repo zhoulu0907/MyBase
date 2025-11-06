@@ -4,7 +4,6 @@ import { Button, Checkbox, Form, Input, Select, Space } from '@arco-design/web-r
 import { IconSelectAll, IconSettings, IconEdit } from '@arco-design/web-react/icon';
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
-import { systemFieldsLength } from '../utils/transform';
 import { ModalPopover } from '@/components/ModalPopover';
 import type { FieldFormValues, ColumnConfig } from '../types';
 import { CHECK_CONST } from '../utils/const';
@@ -287,13 +286,14 @@ const TableColumns = ({
           )}
           <Form.Item
             className={styles.fieldFormItem}
-            shouldUpdate={(prev, next) =>
-              prev?.fields?.[index + systemFieldsLength]?.fieldType !==
-              next?.fields?.[index + systemFieldsLength]?.fieldType
-            }
+            shouldUpdate={(prev, next) => {
+              const fieldIndex = getFieldIndex(record.id || '');
+              return prev?.fields?.[fieldIndex]?.fieldType !== next?.fields?.[fieldIndex]?.fieldType;
+            }}
           >
             {(values) => {
-              const fieldType = values?.fields?.[index + systemFieldsLength]?.fieldType;
+              const fieldIndex = getFieldIndex(record.id || '');
+              const fieldType = values?.fields?.[fieldIndex]?.fieldType;
               return renderConfigButton(
                 fieldType,
                 record,

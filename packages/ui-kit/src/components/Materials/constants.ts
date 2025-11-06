@@ -207,6 +207,13 @@ export const DATE_VALUES = {
   [DATE_OPTIONS.FULL]: 'full'
 } as const;
 
+export const DATE_FORMAT = {
+  [DATE_VALUES[DATE_OPTIONS.YEAR]]: 'YYYY',
+  [DATE_VALUES[DATE_OPTIONS.MONTH]]: 'YYYY-MM',
+  [DATE_VALUES[DATE_OPTIONS.DATE]]: 'YYYY-MM-DD',
+  [DATE_VALUES[DATE_OPTIONS.FULL]]: 'YYYY-MM-DD HH:mm:ss',
+} as const;
+
 // 表单的布局
 export const LAYOUT_OPTIONS = {
   HORIZONTAL: '水平',

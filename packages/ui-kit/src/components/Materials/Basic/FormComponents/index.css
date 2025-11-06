@@ -4,12 +4,27 @@
   box-sizing: border-box;
 
   .arco-form-label-item {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
 
     label {
-      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      width: 100%;
+
+      .labelText {
+        display: inline-block;
+        width: 100%;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+
+      .tooltipLabelText {
+        display: inline-block;
+        max-width: calc(100% - 18px);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
     }
   }
 }

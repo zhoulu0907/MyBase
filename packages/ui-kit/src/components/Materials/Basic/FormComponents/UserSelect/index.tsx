@@ -127,7 +127,10 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={fieldName}
         layout={layout}
         tooltip={tooltip}
@@ -205,7 +208,11 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
                     {currentSelectUser?.[0]}
                   </Avatar>
                   <span className='displayName'> {currentSelectUser} </span>
-                  <IconClose className='closeBtn'
+                  <IconClose className='closeBtn' onMouseDown={(e) => {
+                      // 阻止 mousedown 导致 input 聚焦/下拉打开
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
                     onClick={(e) => { handleRemove(e) }} />
                 </span>);
             }} />)}

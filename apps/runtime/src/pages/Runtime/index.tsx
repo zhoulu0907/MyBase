@@ -271,20 +271,18 @@ const Runtime: React.FC = () => {
             />
           </Sider>
           <Content className={styles.content}>
-            {curMenu.value?.id && (
-              <div className={styles.contentHeader}>
-                <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
-                <div className={styles.userInfo}>
-                  {nickname || '未登录'}
+            <div className={styles.contentHeader}>
+              <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
+              <div className={styles.userInfo}>
+                {nickname || '未登录'}
 
-                  <Dropdown droplist={userMenu} position="bottom">
-                    <div className={styles.userDropdown}>
-                      <img src={AvatarSVG} alt="avatar" />
-                    </div>
-                  </Dropdown>
-                </div>
+                <Dropdown droplist={userMenu} position="bottom">
+                  <div className={styles.userDropdown}>
+                    <img src={AvatarSVG} alt="avatar" />
+                  </div>
+                </Dropdown>
               </div>
-            )}
+            </div>
             {curMenu?.value?.id && curMenu?.value?.id?.indexOf('TASK-') >= 0 ? (
               <TaskCenterPage curMenuId={curMenu.value.id} />
             ) : (

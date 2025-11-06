@@ -3,6 +3,7 @@ import { Button, Input, Pagination, Spin, Tabs } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { ETL_FLOW_STATUS, ETL_SCHEDULE_STRATEGY, IS_SYNC_DONE, type ETLFlowMgmt } from '@onebase/app';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ETLFlowCard from './components/card';
 import CreateModal from './components/createModal';
 import styles from './index.module.less';
@@ -12,6 +13,8 @@ const TabPane = Tabs.TabPane;
 const EtlDataFactoryPage: React.FC = () => {
   const [searchETLFlowProcessName, setSearchETLFlowProcessName] = useState('');
   const [searchETLFlowType, setSearchETLFlowType] = useState<ETL_SCHEDULE_STRATEGY>(ETL_SCHEDULE_STRATEGY.ALL);
+
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
 
@@ -59,6 +62,10 @@ const EtlDataFactoryPage: React.FC = () => {
     setCreateModalVisible(false);
   };
 
+  const handleToEditor = () => {
+    navigate(`/onebase/etl_editor?flowId=xx&appId=${curAppId}`);
+  };
+
   return (
     <div className={styles.etlDataFactoryPage}>
       <div className={styles.header}>数据工厂</div>
@@ -100,7 +107,7 @@ const EtlDataFactoryPage: React.FC = () => {
                     key={`elt-flow-${index}`}
                     handleEdit={() => {}}
                     handleDelete={() => {}}
-                    toFlowEditor={() => {}}
+                    toFlowEditor={handleToEditor}
                     data={item}
                   />
                 ))}
