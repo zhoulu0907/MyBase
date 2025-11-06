@@ -48,5 +48,6 @@ tenant-id: {{adminTenantId}}
   "platformType": "私有化部署",
   "expireTime": 1764547308000,
   "tenantLimit": "3000",
-  "userLimit": "1000"
+  "userLimit": "1000",
+  "isTrial": false
 }

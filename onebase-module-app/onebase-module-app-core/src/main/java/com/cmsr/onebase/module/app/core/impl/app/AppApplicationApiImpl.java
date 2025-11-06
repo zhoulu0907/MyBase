@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.core.impl.app;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
@@ -31,8 +32,8 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
-    public List<ApplicationDTO> finAppApplicationByAppName(String appName) {
-        List<ApplicationDO> applicationList = appApplicationRepository.finAppApplicationByAppName(appName);
+    public List<ApplicationDTO> findAppApplicationByAppName(String appName) {
+        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -43,6 +44,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
+    @TenantIgnore
     public Map<Integer, Integer> findAppApplicationAll() {
         List<ApplicationDO> allApplications = appApplicationRepository.finAppApplicationAll();
         return allApplications.stream()

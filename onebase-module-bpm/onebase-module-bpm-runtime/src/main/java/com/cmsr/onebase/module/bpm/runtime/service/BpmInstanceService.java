@@ -46,4 +46,12 @@ public interface BpmInstanceService {
      * @param instanceId 流程实例ID
      */
     BpmFlowTaskDetailVO getFormDetail(Long instanceId);
+
+    /**
+     * 流程预测
+     *
+     * @param reqVO 流程预测请求VO
+     * @return 流程图
+     */
+    List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO);
 }

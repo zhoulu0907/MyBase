@@ -22,15 +22,15 @@ public class ETLWorkflowRepository extends DataRepository<ETLWorkflowDO> {
 
     public PageResult<ETLWorkflowDO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
         ConfigStore cs = new DefaultConfigStore();
-        if (StringUtils.isNotBlank(pageReqVO.getName())) {
-            cs.like("workflow_name", pageReqVO.getName());
+        if (StringUtils.isNotBlank(pageReqVO.getFlowName())) {
+            cs.like("workflow_name", pageReqVO.getFlowName());
         }
         String scheduleStrategy = pageReqVO.getScheduleStrategy();
         if (StringUtils.isNotBlank(scheduleStrategy) && !StringUtils.equals(ScheduleType.ALL.getValue(), scheduleStrategy)) {
             cs.eq("schedule_strategy", scheduleStrategy);
         }
-        if (pageReqVO.getEnabled() != null) {
-            cs.eq("is_enabled", pageReqVO.getEnabled() ? 1 : 0);
+        if (pageReqVO.getEnableStatus() != null) {
+            cs.eq("is_enabled", pageReqVO.getEnableStatus());
         }
         cs.order("create_time", Order.TYPE.DESC);
         cs.order("update_time", Order.TYPE.DESC);

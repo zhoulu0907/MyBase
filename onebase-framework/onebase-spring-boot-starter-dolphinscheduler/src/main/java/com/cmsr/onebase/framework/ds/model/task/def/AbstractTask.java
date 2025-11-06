@@ -34,5 +34,11 @@ public abstract class AbstractTask {
         return JsonUtils.toJsonString(this);
     }
 
+    public void withResource(String resourceName) {
+        TaskResource taskResource = new TaskResource();
+        taskResource.setResourceName(resourceName);
+        this.resourceList.add(taskResource);
+    }
+
     public abstract String grantTaskType();
 }

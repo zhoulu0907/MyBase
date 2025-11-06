@@ -34,8 +34,9 @@ public interface ETLErrorCodeConstants {
     ErrorCode WORKFLOW_NOT_EXIST                    = new ErrorCode(110700, "ETL流程不存在");
     ErrorCode WORKFLOW_NAME_DUPLICATE               = new ErrorCode(110701, "ETL流程名称重复");
     ErrorCode WORKFLOW_ENABLED                      = new ErrorCode(110704, "ETL流程已启用，请下线后再试");
+    ErrorCode WORKFLOW_DISABLED                     = new ErrorCode(110705, "ETL流程已停用");
 
     // 调度类异常
     ErrorCode ILLEGAL_SCHEDULE_TYPE                 = new ErrorCode(110901, "非法的调度类型");
-    ErrorCode WORKFLOW_IS_OFFLINE                   = new ErrorCode(110902, "ETL流程已下线");
+    ErrorCode WORKFLOW_ALREADY_OFFLINE              = new ErrorCode(110902, "ETL流程已下线");
 }

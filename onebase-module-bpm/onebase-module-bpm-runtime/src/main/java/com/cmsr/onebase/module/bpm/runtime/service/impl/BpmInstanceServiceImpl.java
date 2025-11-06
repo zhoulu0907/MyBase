@@ -2,11 +2,11 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.StartNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
@@ -24,7 +25,7 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDT
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
+import com.cmsr.onebase.module.system.api.permission.PermissionApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
@@ -98,7 +99,14 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     private AdminUserApi adminUserApi;
 
     @Resource
+    private NodeService nodeService;
+
+    @Resource
     private MetadataDataMethodCoreService metadataDataMethodCoreService;
+
+    @Resource
+    private PermissionApi permissionApi;
+
 
     @Resource
     private com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager execTaskStrategyManager;
@@ -369,8 +377,17 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
-        String initiatorName = SecurityFrameworkUtils.getLoginUserNickname();
-        Long deptId = SecurityFrameworkUtils.getLoginUserDeptId();
+
+        // todo: getUser接口暂时拿不到部门信息，先暂时使用getUserList
+        // CommonResult<AdminUserRespDTO> result = adminUserApi.getUser(loginUserId);
+        CommonResult<List<AdminUserRespDTO>> result = adminUserApi.getUserList(List.of(loginUserId));
+        if (!result.isSuccess() || CollectionUtils.isEmpty(result.getData())) {
+            throw exception(ErrorCodeConstants.USER_API_CALL_FAILED);
+        }
+
+        AdminUserRespDTO userRespDTO = result.getData().get(0);
+        String initiatorName = userRespDTO.getNickname();
+
         String businessTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
 
         // 任选3个字段，todo 从全局配置里选择，关联实体查询
@@ -384,19 +401,15 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             formSummary = reqVO.getFormName();
         }
 
-        CommonResult<DeptRespDTO> deptRespDTO = deptApi.getDept(deptId);
-        if (!deptRespDTO.isSuccess()) {
-            throw exception(ErrorCodeConstants.DEPT_API_CALL_FAILED);
-        }
-
         // 保存扩展信息
         flowInsExtDO.setBusinessId(entityDataId);
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
         flowInsExtDO.setBusinessTitle(businessTitle);
         flowInsExtDO.setInitiatorId(loginUserId);
+        flowInsExtDO.setInitiatorAvatar(userRespDTO.getAvatar());
         flowInsExtDO.setInitiatorName(initiatorName);
-        flowInsExtDO.setInitiatorDeptId(deptId);
-        flowInsExtDO.setInitiatorDeptName(deptRespDTO.getData().getName());
+        flowInsExtDO.setInitiatorDeptId(userRespDTO.getDeptId());
+        flowInsExtDO.setInitiatorDeptName(userRespDTO.getDeptName());
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary(formSummary);
         flowInsExtDO.setInstanceId(instance.getId());
@@ -452,7 +465,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             }
         }
 
-        List<User> users = userService.getByAssociateds(List.of(task.getId()));
+        List<User> users = userService.getByAssociateds(List.of(task.getId()),
+                BpmUserTypeEnum.APPROVAL.getCode(),
+                BpmUserTypeEnum.TRANSFER.getCode(),
+                BpmUserTypeEnum.DEPUTE.getCode());
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         boolean hasPermission = false;
 
@@ -561,7 +577,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             }
 
             // 查找有权限的用户
-            List<User> users = userService.getByAssociateds(List.of(task.getId()));
+            List<User> users = userService.getByAssociateds(List.of(task.getId()),
+                    BpmUserTypeEnum.APPROVAL.getCode(),
+                    BpmUserTypeEnum.TRANSFER.getCode(),
+                    BpmUserTypeEnum.DEPUTE.getCode());
 
             if (CollectionUtils.isNotEmpty(users)) {
                 if (record.getOperators() == null) {
@@ -626,19 +645,23 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             List<AdminUserRespDTO> users = result.getData();
 
 
-            Map<Long, String> userMap = new HashMap<>();
+            Map<Long, AdminUserRespDTO> userMap = new HashMap<>();
 
             for (AdminUserRespDTO user : users) {
-                userMap.put(user.getId(), user.getNickname());
+                userMap.put(user.getId(), user);
             }
 
             for (BpmOperatorRecordRespVO.OperatorRecord operatorRecord : operatorRecords) {
                 if (CollectionUtils.isNotEmpty(operatorRecord.getOperators())) {
                     for (BpmOperatorRecordRespVO.OperatorInfo operatorInfo : operatorRecord.getOperators()) {
-                        String nickName = userMap.get(Long.parseLong(operatorInfo.getOperator()));
+                        AdminUserRespDTO user = userMap.get(Long.parseLong(operatorInfo.getOperator()));
 
-                        if (nickName != null) {
-                            operatorInfo.setOperator(nickName);
+                        if (user != null) {
+                            operatorInfo.setOperator(user.getNickname());
+                            operatorInfo.setAvatar(user.getAvatar());
+                        } else {
+                            // todo: 用户不存在
+                            operatorInfo.setOperator("-");
                         }
                     }
                 }
@@ -682,7 +705,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
               taskMap.put(task.getId(), task);
             }
 
-            List<User> users = userService.getByAssociateds(taskIds);
+            List<User> users = userService.getByAssociateds(taskIds,
+                    BpmUserTypeEnum.APPROVAL.getCode(),
+                    BpmUserTypeEnum.TRANSFER.getCode(),
+                    BpmUserTypeEnum.DEPUTE.getCode());
 
             if (CollectionUtils.isNotEmpty(users)) {
                 for (User user : users) {
@@ -777,5 +803,129 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         vo.setInstanceId(instanceId);
 
         return vo;
+    }
+
+    @Override
+    public List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO) {
+        Long businessId = reqVO.getBusinessId();
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        List<BpmPredictRespVO.NodeInfo> nodes = new ArrayList<>();
+
+        Definition definition = defExtService.getByFormPathAndStatus(String.valueOf(businessId), PublishStatus.PUBLISHED.getKey());
+        if (definition == null) {
+            log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
+            throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
+        }
+
+        Node startNode = nodeService.getStartNode(definition.getId());
+
+        if (startNode == null) {
+            log.error("流程定义缺少开始节点");
+            throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS.getCode(), "获取开始节点失败");
+        }
+
+        Node currentNode = startNode;
+        Set<Long> allUserIds = new HashSet<>();
+
+        while (true) {
+            // todo：理论上只会有一条路径，需要结合实体信息预测下一步走向，主要是涉及到条件分支的
+            Node nextNode = nodeService.getNextNode(definition.getId(), currentNode.getNodeCode(), null, SkipType.PASS.getKey());
+
+            if (nextNode == null) {
+                // 找不到下一个节点，结束，todo 是否应该抛出异常
+                log.warn("没找到下一个节点");
+                break;
+            }
+
+            if (NodeType.isEnd(nextNode.getNodeType())) {
+                break;
+            }
+
+            currentNode = nextNode;
+
+            // 设置预测节点信息
+            BpmPredictRespVO.NodeInfo nodeInfo = new BpmPredictRespVO.NodeInfo();
+            nodeInfo.setHandlers(new ArrayList<>());
+            nodeInfo.setNodeCode(nextNode.getNodeCode());
+            nodeInfo.setNodeName(nextNode.getNodeName());
+
+            // 设置节点信息
+            BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(nextNode.getExt(), BaseNodeExtDTO.class);
+
+            // 获取业务节点类型
+            String bizNodeType = nodeExtDTO.getNodeType();
+
+            if (Objects.equals(bizNodeType, BpmNodeTypeEnum.INITIATION.getCode())) {
+                // 发起节点的处理人是当前登录用户
+                BpmPredictRespVO.HandlerInfo handlerInfo = new BpmPredictRespVO.HandlerInfo();
+                handlerInfo.setHandlerId(loginUserId);
+                nodeInfo.getHandlers().add(handlerInfo);
+                allUserIds.add(loginUserId);
+            } else if (Objects.equals(bizNodeType, BpmNodeTypeEnum.APPROVER.getCode())) {
+                // 解析权限标志
+                NodePermFlagDTO permFlagDTO = JsonUtils.parseObject(currentNode.getPermissionFlag(), NodePermFlagDTO.class);
+
+                // 用户ID去重
+                Set<Long> approverUserIds = new HashSet<>();
+
+                if (CollectionUtils.isNotEmpty(permFlagDTO.getUserIds())) {
+                    // 处理用户列表
+                    approverUserIds.addAll(permFlagDTO.getUserIds());
+                } else if (CollectionUtils.isNotEmpty(permFlagDTO.getRoleIds())) {
+                    // 处理角色列表
+                    CommonResult<Set<Long>> result = permissionApi.getUserRoleIdListByRoleIds(permFlagDTO.getRoleIds());
+
+                    if (result.isSuccess()) {
+                        approverUserIds.addAll(result.getData());
+                    }
+                } else {
+                    // todo: 支持更多类型的权限
+                }
+
+                if (!approverUserIds.isEmpty()) {
+                    allUserIds.addAll(approverUserIds);
+
+                    for (Long userId : approverUserIds) {
+                        BpmPredictRespVO.HandlerInfo handlerInfo = new BpmPredictRespVO.HandlerInfo();
+                        handlerInfo.setHandlerId(userId);
+                        nodeInfo.getHandlers().add(handlerInfo);
+                    }
+                }
+            } else {
+                // todo: 支持更多类型的节点
+                log.warn("未知节点类型，bizNodeType: {}", bizNodeType);
+                continue;
+            }
+
+            nodes.add(nodeInfo);
+        }
+
+        // 获取用户的名称和头像
+        CommonResult<List<AdminUserRespDTO>> userResult = adminUserApi.getUserList(allUserIds);
+
+        if (userResult.isSuccess()) {
+            // 构建用户ID到用户信息的映射
+            Map<Long, AdminUserRespDTO> userMap = userResult.getData().stream()
+                    .collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
+
+            for (BpmPredictRespVO.NodeInfo node : nodes) {
+                for (BpmPredictRespVO.HandlerInfo handler : node.getHandlers()) {
+                    AdminUserRespDTO user = userMap.get(handler.getHandlerId());
+                    if (user != null) {
+                        handler.setHandlerName(user.getNickname());
+                        handler.setUserAvatar(user.getAvatar());
+                    } else {
+                        // todo：处理用户不存在的情况，名称先设置成 "-"
+                        handler.setHandlerName("-");
+                        log.warn("用户不存在，userId: {}", handler.getHandlerId());
+                    }
+                }
+            }
+        } else {
+            log.warn("获取用户信息失败，userIds: {}", allUserIds);
+            throw exception(ErrorCodeConstants.USER_API_CALL_FAILED);
+        }
+
+        return nodes;
     }
 }

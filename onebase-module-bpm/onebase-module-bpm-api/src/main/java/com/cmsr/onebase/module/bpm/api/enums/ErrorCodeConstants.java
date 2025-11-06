@@ -82,7 +82,12 @@ public interface ErrorCodeConstants {
 
     ErrorCode NO_BUTTON_PERMISSION = new ErrorCode(1_009_002_017, "没有按钮权限");
 
+    ErrorCode UNKNOWN_VERSION_STATUS = new ErrorCode(1_009_002_018, "未知的流程版本状态");
+
     // ============= 系统相关错误 =============
 
     ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");
+
+    ErrorCode USER_API_CALL_FAILED = new ErrorCode(1_009_003_002, "用户接口调用失败");
+
 }

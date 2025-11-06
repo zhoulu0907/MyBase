@@ -23,9 +23,9 @@ public class CorpSaveReqVO extends PageParam {
     @Schema(description = "企业名称", example = "")
     private String corpName;
 
-    @NotBlank(message = "企业ID不能为空")
-    @Schema(description = "企业ID", example = "")
-    private String corpId;
+    @NotBlank(message = "企业编码不能为空")
+    @Schema(description = "企业编码", example = "")
+    private String corpCode;
 
     @NotNull(message = "行业类型不能为空")
     @Schema(description = "行业类型", example = "")

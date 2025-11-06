@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -86,7 +87,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map<String, Object> processedData = convertFieldIdToFieldName(data, fields);
 
         // 获取当前时间
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dateTime = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String now = dateTime.format(dateTimeFormatter);
 
         // 仅确定一个实际主键字段名，避免系统字段被误配置为主键导致被赋予雪花ID
         String realPrimaryKey = getPrimaryKeyFieldName(fields);

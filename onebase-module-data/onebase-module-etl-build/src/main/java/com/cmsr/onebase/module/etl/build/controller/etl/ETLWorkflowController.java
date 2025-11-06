@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.ETLWorkflowService;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
+import com.cmsr.onebase.module.etl.core.vo.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -52,18 +53,6 @@ public class ETLWorkflowController {
         return CommonResult.success(Boolean.TRUE);
     }
 
-    @GetMapping("/logs")
-    public CommonResult<PageResult<Object>> queryWorkflowExecutionLogs() {
-        // TODO:
-        return CommonResult.success(null);
-    }
-
-    @PostMapping("/{workflowId}/start")
-    public CommonResult<Boolean> startWorkflowManually(@PathVariable("workflowId") Long workflowId) {
-        workflowService.startWorkflowManually(workflowId);
-        return CommonResult.success(Boolean.TRUE);
-    }
-
     @PostMapping("/{workflowId}/enable")
     public CommonResult<Boolean> enableWorkflow(@PathVariable("workflowId") Long workflowId) {
         workflowService.enableWorkflow(workflowId);
@@ -76,12 +65,30 @@ public class ETLWorkflowController {
         return CommonResult.success(Boolean.TRUE);
     }
 
-    @PostMapping("/{workflowId}/schedule")
-    public CommonResult<Boolean> configScheduleStrategy(@PathVariable("workflowId") Long workflowId,
-                                                        @Validated @RequestBody ScheduleConfigVO scheduleConfigVO) {
-        // TODO:
-        scheduleConfigVO.setWorkflowId(workflowId);
+    @GetMapping("/schedule")
+    public CommonResult<?> getWorkflowSchedule(@RequestParam("workflowId") Long workflowId) {
+        ScheduleRespVO scheduleRespVO = workflowService.getWorkflowSchedule(workflowId);
+        return CommonResult.success(scheduleRespVO);
+    }
+
+    @PostMapping("/schedule")
+    public CommonResult<Boolean> configScheduleStrategy(@Validated @RequestBody ScheduleConfigVO scheduleConfigVO) {
         workflowService.configScheduleStrategy(scheduleConfigVO);
         return CommonResult.success(Boolean.TRUE);
+    }
+
+    @PostMapping("/{workflowId}/start")
+    public CommonResult<Boolean> startWorkflowManually(@PathVariable("workflowId") Long workflowId) {
+        workflowService.startWorkflowManually(workflowId);
+        return CommonResult.success(Boolean.TRUE);
+    }
+
+    @GetMapping("/logs")
+    public CommonResult<PageResult<ExecutionLogVO>> queryWorkflowExecutionLogs(@RequestParam("workflowId") Long workflowId,
+                                                                       @RequestParam("pageNo") Integer pageNo,
+                                                                       @RequestParam("pageSize") Integer pageSize) {
+        // TODO:
+        PageResult<ExecutionLogVO> workflowExecutionLogs = workflowService.getWorkflowExecutionLogs(workflowId);
+        return CommonResult.success(workflowExecutionLogs);
     }
 }

@@ -25,6 +25,13 @@ if (response.status === 200) {
 }
 %}
 
+### 请求 应用查询 接口 =>
+GET {{baseUrl}}/app/application/page?pageNo=1&pageSize=12&name=&ownerTag=0&orderByTime=create&_t=1762391366964'
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
 
 ### 请求 应用保存 接口 =>
 POST {{baseUrl}}/app/application/update

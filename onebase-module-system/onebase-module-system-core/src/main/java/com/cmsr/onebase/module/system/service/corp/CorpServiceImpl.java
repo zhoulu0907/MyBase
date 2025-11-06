@@ -1,11 +1,16 @@
 package com.cmsr.onebase.module.system.service.corp;
 
+import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.core.dto.app.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
+import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
@@ -14,6 +19,7 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -24,8 +30,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -54,6 +61,9 @@ public class CorpServiceImpl implements CorpService {
     @Resource
     private CorpAppRelationService corpAppRelationService;
 
+    @Resource
+    private AppApplicationApi appApplicationApi;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -75,7 +85,7 @@ public class CorpServiceImpl implements CorpService {
         //用于校验企业名称是否已存在
         validCorpNameDuplicate(reqVO.getCorpName());
         //用于校验企业ID是否已存在
-        validCorpIdDuplicate(reqVO.getCorpId());
+        validCorpIdDuplicate(reqVO.getCorpCode());
         //用于校验企业用户数量是否超过限制（如大于500）
         validCorpUserCountDuplicate(reqVO.getUserLimit());
 
@@ -101,13 +111,13 @@ public class CorpServiceImpl implements CorpService {
         }
     }
 
-    private void validCorpIdDuplicate(String corpId) {
-        if (StringUtils.isBlank(corpId)) {
+    private void validCorpIdDuplicate(String corpCode) {
+        if (StringUtils.isBlank(corpCode)) {
             return;
         }
-        CorpDO corpDO = corpDataRepository.findCorpByCorpId(corpId);
+        CorpDO corpDO = corpDataRepository.findCorpByCorpCode(corpCode);
         if (corpDO != null) {
-            throw exception(CORP_ID_EXISTS, corpId);
+            throw exception(CORP_ID_EXISTS, corpCode);
         }
     }
 
@@ -127,7 +137,7 @@ public class CorpServiceImpl implements CorpService {
     public void updateCorpAdminIdById(Long corpId, Long adminId) {
         //  企业修改管理员Id
         DataRow row = new DataRow();
-        row.put("admin_id", adminId);
+        row.put(CorpDO.ADMIN_ID, adminId);
         corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, corpId));
 
     }
@@ -151,16 +161,63 @@ public class CorpServiceImpl implements CorpService {
     public PageResult<CorpRespVO> getCorpPage(CorpPageReqVO pageReqVO) {
         // 调用数据仓库进行分页查询
         PageResult<CorpDO> pageResult = corpDataRepository.selectPage(pageReqVO);
-        // 将 DO 对象转换为 VO 对象
+        // 获取应用数据,根据应用id封装map
+        List<ApplicationDTO> applicationDTOS = appApplicationApi.findAppApplicationByAppName(null);
+        CorpAppRelationPageReqVO corpAppRelationPageReqVO = BeanUtils.toBean(pageReqVO, CorpAppRelationPageReqVO.class);
+
+        Map<Long, ApplicationDTO> applicationMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(applicationDTOS)) {
+            applicationMap = applicationDTOS.stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toMap(ApplicationDTO::getId, Function.identity()));
+        }
+        // 获取关联关系，根据企业id 分组获取 关联的应用
+        List<CorpAppRelationDO> corpAppRelationDOList = corpAppRelationService.getCorpAppRelationList(corpAppRelationPageReqVO);
+
+        // 封装成Map，key是企业id，value是分组后的list
+       Map<Long, List<CorpAppRelationDO>> corpAppRelationMap = new HashMap<>();
+        if (com.alibaba.nacos.common.utils.CollectionUtils.isNotEmpty(corpAppRelationDOList)) {
+            corpAppRelationMap = corpAppRelationDOList.stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.groupingBy(CorpAppRelationDO::getCorpId));
+        }
+
+
+        // 赋值corpApplicationList 授权应用数据获取
+        Map<Long, List<CorpAppRelationDO>> finalCorpAppRelationMap = corpAppRelationMap;
+        Map<Long, ApplicationDTO> finalApplicationMap = applicationMap;
         return new PageResult<CorpRespVO>(
                 pageResult.getList().stream()
-                        .map(corpDO -> BeanUtils.toBean(corpDO, CorpRespVO.class))
+                        .map(corpDO -> {
+                            CorpRespVO corpRespVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
+                            // 如果企业id在corpAppRelationMap中存在，设置corpApplicationList
+                            if (finalCorpAppRelationMap != null && finalCorpAppRelationMap.containsKey(corpDO.getId())) {
+                                List<CorpAppRelationDO> corplist= finalCorpAppRelationMap.get(corpDO.getId());
+                                List<CorpAppVo> corpApplicationList=new ArrayList();
+                                if (corplist != null && !corplist.isEmpty()) {
+                                    for (CorpAppRelationDO corpAppRelationDO : corplist) {
+                                        Long  applicationId=corpAppRelationDO.getApplicationId();
+                                        if(finalApplicationMap.get(applicationId)!=null){
+                                            ApplicationDTO dto= finalApplicationMap.get(applicationId);
+                                            CorpAppVo vo=new CorpAppVo();
+                                            vo.setAppCount(corplist.size());
+                                            vo.setAppName(dto.getAppName());
+                                            vo.setIconName(dto.getIconName());
+                                            corpApplicationList.add(vo);
+                                        }
+                                    }
+                                }
+                                corpRespVO.setCorpApplicationList(corpApplicationList);
+                            }
+                            return corpRespVO;
+                        })
                         .collect(java.util.stream.Collectors.toList()),
                 pageResult.getTotal()
         );
     }
 
     @Override
+    @TenantIgnore
     public List<CorpDO> findCorpAll() {
         return corpDataRepository.findAll();
     }
@@ -206,7 +263,7 @@ public class CorpServiceImpl implements CorpService {
     public void updateStatus(Long id, Long status) {
         //  企业禁用/开启
         DataRow row = new DataRow();
-        row.put("status", status);
+        row.put(CorpDO.STATUS, status);
         corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, id));
     }
 

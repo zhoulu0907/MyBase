@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.build.vo.design;
 
+import com.cmsr.onebase.module.bpm.api.dto.BpmGlobalConfigDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -22,6 +23,12 @@ public class BpmDesignVO extends BpmDefinitionVO {
     @Schema(description = "流程定义JSON")
     @NotBlank(message = "流程定义JSON不能为空")
     private String bpmDefJson;
+
+    /**
+     * 全局配置
+     */
+    @Schema(description = "全局配置")
+    private BpmGlobalConfigDTO globalConfig = new BpmGlobalConfigDTO();
 
     /**
      * 流程定义JSONVO

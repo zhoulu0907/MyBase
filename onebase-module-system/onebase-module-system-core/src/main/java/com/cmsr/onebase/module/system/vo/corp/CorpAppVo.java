@@ -8,7 +8,7 @@ public class CorpAppVo {
     private String appName;
 
     @Schema(description = "应用数量")
-    private String appCount;
+    private int appCount;
 
     @Schema(description = "应用图标")
     private String iconName;
