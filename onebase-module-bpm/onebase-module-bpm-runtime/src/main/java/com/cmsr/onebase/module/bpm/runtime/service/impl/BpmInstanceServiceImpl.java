@@ -378,12 +378,14 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
-        CommonResult<AdminUserRespDTO> result = adminUserApi.getUser(loginUserId);
-        if (!result.isSuccess()) {
+        // todo: getUser接口暂时拿不到部门信息，先暂时使用getUserList
+        // CommonResult<AdminUserRespDTO> result = adminUserApi.getUser(loginUserId);
+        CommonResult<List<AdminUserRespDTO>> result = adminUserApi.getUserList(List.of(loginUserId));
+        if (!result.isSuccess() || CollectionUtils.isEmpty(result.getData())) {
             throw exception(ErrorCodeConstants.USER_API_CALL_FAILED);
         }
 
-        AdminUserRespDTO userRespDTO = result.getData();
+        AdminUserRespDTO userRespDTO = result.getData().get(0);
         String initiatorName = userRespDTO.getNickname();
 
         String businessTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
