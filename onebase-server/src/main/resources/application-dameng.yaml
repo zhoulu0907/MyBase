@@ -6,7 +6,9 @@ spring:
   # 数据源配置项
   datasource:
     driver-class-name: dm.jdbc.driver.DmDriver
-    url: jdbc:dm://10.0.104.50:5237/ONEBASE_CLOUD_V3?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&caseSensitive=false
+    # 注意：达梦数据库的大小写敏感性在数据库初始化时设置，JDBC URL参数无法改变
+    # 如需修改，请联系DBA使用 dminit 命令重新初始化数据库，设置 CASE_SENSITIVE=0
+    url: jdbc:dm://10.0.104.50:5237/ONEBASE_CLOUD_V3?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&schema=ONEBASE_CLOUD_V3
     username: ONEBASE_CLOUD_V3
     password: Onebase2025
     type: com.zaxxer.hikari.HikariDataSource
