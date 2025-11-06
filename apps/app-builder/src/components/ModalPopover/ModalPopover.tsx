@@ -231,14 +231,74 @@ const ModalPopover: React.FC<ModalPopoverProps> = ({
     setFinalPlacement(finalPlacement);
   }, [placement, getTriggerElement, calculateAutoPlacement, width]);
 
+  // 查找所有可滚动的父元素
+  const findScrollableParents = useCallback((element: HTMLElement | null): HTMLElement[] => {
+    const scrollableParents: HTMLElement[] = [];
+    let current: HTMLElement | null = element;
+
+    while (current && current !== document.body) {
+      const style = window.getComputedStyle(current);
+      const overflowY = style.overflowY || style.overflow;
+      const overflowX = style.overflowX || style.overflow;
+
+      // 检查是否可滚动
+      if (
+        (overflowY === 'auto' || overflowY === 'scroll' || overflowX === 'auto' || overflowX === 'scroll') &&
+        (current.scrollHeight > current.clientHeight || current.scrollWidth > current.clientWidth)
+      ) {
+        scrollableParents.push(current);
+      }
+
+      current = current.parentElement;
+    }
+
+    // 添加 window 作为滚动容器
+    return scrollableParents;
+  }, []);
+
   // 更新位置
   useEffect(() => {
     if (isVisible) {
       // 延迟计算位置，确保DOM已更新
       const timer = setTimeout(calculatePosition, 0);
-      return () => clearTimeout(timer);
+
+      // 获取触发元素和所有可滚动的父元素
+      const triggerElement = getTriggerElement();
+      const scrollableParents = triggerElement ? findScrollableParents(triggerElement) : [];
+
+      // 使用 requestAnimationFrame 优化滚动性能
+      let rafId: number | null = null;
+      const handleScroll = () => {
+        if (rafId === null) {
+          rafId = requestAnimationFrame(() => {
+            calculatePosition();
+            rafId = null;
+          });
+        }
+      };
+
+      // 为所有滚动容器添加滚动监听
+      scrollableParents.forEach((parent) => {
+        parent.addEventListener('scroll', handleScroll, { passive: true });
+      });
+
+      // 监听窗口滚动和调整大小
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('resize', handleScroll, { passive: true });
+
+      return () => {
+        clearTimeout(timer);
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
+        scrollableParents.forEach((parent) => {
+          parent.removeEventListener('scroll', handleScroll);
+        });
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleScroll);
+      };
     }
-  }, [isVisible, calculatePosition]);
+  }, [isVisible, calculatePosition, getTriggerElement, findScrollableParents]);
 
   // 处理触发事件
   const handleTriggerEvent = useCallback(
