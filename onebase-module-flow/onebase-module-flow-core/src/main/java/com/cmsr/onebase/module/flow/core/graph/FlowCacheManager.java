@@ -50,7 +50,7 @@ public class FlowCacheManager implements ApplicationRunner, Runnable, MessageLis
 
     // 缓存已经处理过的版本，避免不停的加载和更新
     private Cache<Long, Long> versionCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(FlowUtils.VERSION_TIMEOUT_HOUR, TimeUnit.HOURS).build();
+            .expireAfterWrite(FlowUtils.VERSION_TIMEOUT_MINUTES * 2, TimeUnit.MINUTES).build();
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
