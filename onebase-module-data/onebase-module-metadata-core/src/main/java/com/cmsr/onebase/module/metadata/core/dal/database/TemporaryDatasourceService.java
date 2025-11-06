@@ -139,8 +139,8 @@ public class TemporaryDatasourceService {
             dsConfig.put("max-lifetime", 1800000);        // 连接最大生命周期30分钟
             dsConfig.put("leak-detection-threshold", 60000); // 连接泄露检测阈值1分钟
             
-            // 连接有效性检查配置
-            dsConfig.put("connection-test-query", "SELECT 1");
+            // 连接有效性检查配置 - 根据数据库类型使用不同的测试查询
+            dsConfig.put("connection-test-query", getConnectionTestQuery(datasourceType));
             dsConfig.put("validation-timeout", 5000);     // 验证超时5秒
             
             // 移除可能导致问题的配置
@@ -162,7 +162,7 @@ public class TemporaryDatasourceService {
                     }
                     // 执行简单查询验证连接
                     try (Statement stmt = testConn.createStatement();
-                         ResultSet rs = stmt.executeQuery("SELECT 1")) {
+                         ResultSet rs = stmt.executeQuery(getConnectionTestQuery(datasourceType))) {
                         if (!rs.next()) {
                             throw new RuntimeException("数据库连接测试查询失败");
                         }
@@ -488,6 +488,41 @@ public class TemporaryDatasourceService {
     public String getDriverByType(String datasourceType) {
         DatabaseType dbType = DatabaseType.valueOf(datasourceType);
         return dbType.driver();
+    }
+
+    /**
+     * 根据数据源类型获取连接测试查询语句
+     * <p>
+     * 不同数据库使用不同的测试查询语句：
+     * - PostgreSQL/KingBase: SELECT 1
+     * - DM(达梦): SELECT 1 FROM DUAL
+     * - Oracle: SELECT 1 FROM DUAL
+     * - MySQL: SELECT 1
+     *
+     * @param datasourceType 数据源类型字符串，如"PostgreSQL"、"DM"、"KingBase"
+     * @return 连接测试查询SQL
+     */
+    private String getConnectionTestQuery(String datasourceType) {
+        try {
+            DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+            
+            switch (dbType) {
+                case DM:
+                case ORACLE:
+                    // 达梦和Oracle使用FROM DUAL
+                    return "SELECT 1 FROM DUAL";
+                case PostgreSQL:
+                case KingBase:
+                case MySQL:
+                default:
+                    // PostgreSQL、金仓、MySQL等使用简单的SELECT 1
+                    return "SELECT 1";
+            }
+        } catch (IllegalArgumentException e) {
+            // 如果数据库类型无法识别，使用最通用的查询
+            log.warn("无法识别的数据库类型[{}]，使用默认测试查询SELECT 1", datasourceType);
+            return "SELECT 1";
+        }
     }
 
 }
