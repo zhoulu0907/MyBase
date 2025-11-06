@@ -278,8 +278,11 @@ export default function EditorWorkspace() {
                       field.fieldName !== 'parent_id' &&
                       field.isSystemField !== 1
                   );
-                  fieldList.forEach((field: AppEntityField) => {
+                  for (let field of fieldList) {
                     let cpType = COMPONENT_MAP[field.fieldType];
+                    if (!cpType) {
+                      continue;
+                    }
                     let cpID = `${cpType}-${uuidv4()}`;
 
                     const schema = getComponentSchema(cpType as any);
@@ -296,12 +299,12 @@ export default function EditorWorkspace() {
                       ...schema.config.verify,
                       required: field.isRequired,
                       noRepeat: field.isUnique
-                    }
+                    };
 
                     // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
                     if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
                       if (field.options?.length) {
-                        schema.config.defaultOptions = field.options.map((e) => ({
+                        schema.config.defaultOptions = field.options.map((e:any) => ({
                           chosen: field.defaultValue && e.optionValue === field.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
@@ -331,7 +334,7 @@ export default function EditorWorkspace() {
                     setShowDeleteButton(false);
 
                     entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
-                  });
+                  }
                 } else if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
                   // 子表业务实体
                   const cpName = item.entityName || '子表单';
@@ -362,8 +365,12 @@ export default function EditorWorkspace() {
                       field.isSystemField !== 1
                   );
                   // 子表单的每个表单项配置
-                  const subFieldComponents = subFieldList.map((ele: AppEntityField) => {
+                  let subFieldComponents: any = [];
+                  for (let ele of subFieldList) {
                     const subType = COMPONENT_MAP[ele.fieldType];
+                    if (!subType) {
+                      continue;
+                    }
                     const subSchema = getComponentSchema(subType as any);
                     const subId = `${subType}-${uuidv4()}`;
 
@@ -377,7 +384,7 @@ export default function EditorWorkspace() {
                       ...subSchema.config.verify,
                       required: ele.isRequired,
                       noRepeat: ele.isUnique
-                    }
+                    };
 
                     // 字段选项列表（单/多选字段专用） options
                     if (
@@ -385,7 +392,7 @@ export default function EditorWorkspace() {
                       subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
                     ) {
                       if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e) => ({
+                        subSchema.config.defaultOptions = ele.options.map((e:any) => ({
                           chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
@@ -414,8 +421,8 @@ export default function EditorWorkspace() {
                       ...subSchema
                     };
                     setPageComponentSchemas(subId, subProps);
-                    return { id: subId, type: subType, displayName: ele.displayName };
-                  });
+                    subFieldComponents.push({ id: subId, type: subType, displayName: ele.displayName });
+                  }
                   setSubTableComponents(cpID, subFieldComponents);
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
                 } else if (item.entityID && item.entityID !== mainEntity.entityId) {
@@ -500,7 +507,7 @@ export default function EditorWorkspace() {
                       ...schema.config.verify,
                       required: currentField.isRequired,
                       noRepeat: currentField.isUnique
-                    }
+                    };
 
                     // 字段选项列表（单/多选字段专用） options
                     if (

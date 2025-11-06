@@ -19,4 +19,4 @@ export {
 } from './schema';
 export { allTemplate, COMPONENT_TYPE_DISPLAY_NAME_MAP } from './template';
 export type { EditConfig } from './types';
-export { COMPONENT_MAP } from './componentsMap';
+export { COMPONENT_MAP, COMPONENT_FIELD_MAP } from './componentsMap';
