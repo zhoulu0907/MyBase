@@ -41,20 +41,12 @@ export const COMPONENT_MAP: Record<string, string> = {
 
 // 组件类型与数据字段配置可选择字段类型的映射表  fieldType TEXT
 export const COMPONENT_FIELD_MAP: Record<string, string[]> = {
-  // 单行文本 XInputText =>  常规文本、长文本内容、系统类型ID
-  [FORM_COMPONENT_TYPES.INPUT_TEXT]: [
-    ENTITY_FIELD_TYPE.TEXT.VALUE,
-    ENTITY_FIELD_TYPE.LONG_TEXT.VALUE,
-    ENTITY_FIELD_TYPE.ID.VALUE
-  ],
-  // 多行文本  XInputTextArea => 常规文本、长文本内容、系统类型ID
-  [FORM_COMPONENT_TYPES.INPUT_TEXTAREA]: [
-    ENTITY_FIELD_TYPE.TEXT.VALUE,
-    ENTITY_FIELD_TYPE.LONG_TEXT.VALUE,
-    ENTITY_FIELD_TYPE.ID.VALUE
-  ],
-  // TODO 富文本  XRichText => 常规文本
-  [FORM_COMPONENT_TYPES.RICH_TEXT]: [],
+  // 单行文本 XInputText =>  常规文本、长文本内容
+  [FORM_COMPONENT_TYPES.INPUT_TEXT]: [ENTITY_FIELD_TYPE.TEXT.VALUE,ENTITY_FIELD_TYPE.LONG_TEXT.VALUE],
+  // 多行文本  XInputTextArea => 常规文本、长文本内容
+  [FORM_COMPONENT_TYPES.INPUT_TEXTAREA]: [ENTITY_FIELD_TYPE.TEXT.VALUE,ENTITY_FIELD_TYPE.LONG_TEXT.VALUE],
+  // 富文本  XRichText => 常规文本
+  [FORM_COMPONENT_TYPES.RICH_TEXT]: [ENTITY_FIELD_TYPE.TEXT.VALUE,ENTITY_FIELD_TYPE.LONG_TEXT.VALUE],
   // 邮箱 XInputEmail => 邮箱
   [FORM_COMPONENT_TYPES.INPUT_EMAIL]: [ENTITY_FIELD_TYPE.EMAIL.VALUE],
   // 电话 XInputPhone => 电话
@@ -63,7 +55,7 @@ export const COMPONENT_FIELD_MAP: Record<string, string[]> = {
   [FORM_COMPONENT_TYPES.INPUT_NUMBER]: [ENTITY_FIELD_TYPE.NUMBER.VALUE],
   // 日期 XDatePicker => 日期
   [FORM_COMPONENT_TYPES.DATE_PICKER]: [ENTITY_FIELD_TYPE.DATE.VALUE],
-  // TODO 日期区间 XDatePicker => 日期区间
+  // 日期区间 XDatePicker => 无
   [FORM_COMPONENT_TYPES.DATE_RANGE_PICKER]: [],
   // 日期时间 XTimePicker => 日期时间
   [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: [ENTITY_FIELD_TYPE.DATETIME.VALUE],
@@ -91,7 +83,7 @@ export const COMPONENT_FIELD_MAP: Record<string, string[]> = {
   [FORM_COMPONENT_TYPES.AUTO_CODE]: [ENTITY_FIELD_TYPE.AUTO_CODE.VALUE],
   // 关联表单 XRelatedForm => 关联表单
   [FORM_COMPONENT_TYPES.RELATED_FORM]: [ENTITY_FIELD_TYPE.RELATION.VALUE],
-  // TODO 轮播图 XCarouselForm => 轮播图
+  // 轮播图 XCarouselForm => 无
   [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: [],
   // 子表单 XSubTable => 无
   [FORM_COMPONENT_TYPES.SUB_TABLE]: [],
