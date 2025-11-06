@@ -12,9 +12,9 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
 import { useBasicEditorStore } from '@/store';
-import { useAppStore } from '@/store/store_app';
-import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
-import { IconArrowLeft } from '@arco-design/web-react/icon';
+import { useAppStore, useFlowEditorStor } from '@/store/index';
+import { Breadcrumb, Button, Form, Message, Tabs, Select } from '@arco-design/web-react';
+import { IconArrowLeft, IconSettings } from '@arco-design/web-react/icon';
 
 import {
   PageType,
@@ -50,7 +50,9 @@ import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
-
+import type { VersionType } from '../constants';
+import { useInitDefaultVersion } from './useInitDefaultVersion';
+const Option = Select.Option;
 const BreadcrumbItem = Breadcrumb.Item;
 
 const baseTabData = [
@@ -92,6 +94,8 @@ const baseTabData = [
 ];
 
 export default function EditorHeader() {
+  const [versionList, setVersionList] = useState<VersionType[]>([]);
+  const useVersionList = useInitDefaultVersion();
   const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
@@ -99,7 +103,6 @@ export default function EditorHeader() {
   const { clearCurComponentID } = usePageEditorSignal();
   const { curViewId } = usePageViewEditorSignal;
   const { flowId } = useFlowPageEditorSignal;
-
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
   const {
@@ -125,6 +128,7 @@ export default function EditorHeader() {
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
 
   const { curAppId, setCurAppId } = useAppStore();
+  const { currentFlowId, setCurrnetFlowId } = useFlowEditorStor();
   const { setCurDataSourceId } = useResourceStore();
 
   const navigate = useNavigate();
@@ -349,6 +353,10 @@ export default function EditorHeader() {
     }
   }, [curPage?.value?.pageSetType]);
 
+  useEffect(() => {
+    setVersionList(useVersionList);
+  }, [useVersionList]);
+
   return (
     <div className={styles.editorHeader}>
       {/* 左侧 */}
@@ -420,6 +428,45 @@ export default function EditorHeader() {
       </div>
 
       <div className={styles.right}>
+        <Select
+          placeholder="选择流程版本"
+          style={{ width: 154 }}
+          triggerProps={{
+            autoAlignPopupWidth: false,
+            autoAlignPopupMinWidth: true,
+            position: 'bl'
+          }}
+          value={currentFlowId}
+          arrowIcon={null}
+          className={styles.versionSelect}
+          onChange={(value) => setCurrnetFlowId(value)}
+        >
+          {versionList.map((item) => (
+            <Option key={item.id} value={item.id}>
+              <div className={styles.versionOption}>
+                <span className={styles.versionName}>
+                  {item.versionAlias || '未命名'}
+                  {item.version}
+                </span>
+                <span
+                  className={`${styles.versionStatus} ${
+                    item.versionStatus === '设计中'
+                      ? styles.designing
+                      : item.versionStatus === '已发布'
+                        ? styles.published
+                        : styles.history
+                  }`}
+                >
+                  {item.versionStatus}
+                </span>
+              </div>
+            </Option>
+          ))}
+          <Option key="manage" value="manage" className={styles.manageOption}>
+            <IconSettings /> 流程版本管理
+          </Option>
+        </Select>
+
         {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>未保存</div>}
         {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已保存</div>}
         {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (

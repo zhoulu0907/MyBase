@@ -10,7 +10,6 @@ const EditorPage: React.FC = () => {
   return (
     <div className={styles.editorPage}>
       <EditorHeader />
-
       <div className={styles.editorContent}>
         <Routes>
           <Route path={EDITOR_TYPES.FORM_EDITOR} element={<FormEditor />} />

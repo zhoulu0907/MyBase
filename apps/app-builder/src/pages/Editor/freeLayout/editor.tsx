@@ -9,6 +9,7 @@ import {
   type FreeLayoutPluginContext
 } from '@flowgram.ai/free-layout-editor';
 import { useFlowPageEditorSignal } from '@onebase/ui-kit';
+import { useFlowEditorStor } from '@/store/index';
 import '@flowgram.ai/free-layout-editor/index.css';
 import './styles/index.css';
 import { nodeRegistries } from './nodes';
@@ -17,7 +18,7 @@ import { useEditorProps } from './hooks';
 import { DemoTools } from './components/tools';
 import { SidebarProvider, SidebarRenderer } from './components/sidebar';
 import LeftNavBar from './components/left-nav-bar/index';
-import { getByBusinessId, save } from '../../../../../../packages/app/src/services/index';
+import { getDataById, save } from '../../../../../../packages/app/src/services/index';
 import { useLocation } from 'react-router-dom';
 import type { WorkflowJSON, FlowData } from './editorType';
 import { getAppIdByPageSetId } from '@onebase/app';
@@ -32,13 +33,16 @@ export const Editor = () => {
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
   const [flowData, setFlowData] = useState<FlowData>({});
+  const { currentFlowId } = useFlowEditorStor();
 
-  const getFlowData = async () => {
+  const getFlowData = async (currentFlowId: string) => {
     try {
-      const res = await getByBusinessId({ businessId: pageSetId });
+      const res = await getDataById({ id: currentFlowId });
       if (res.globalConfig) {
         setConfigData(res.globalConfig);
       }
+      console.log(ref?.current);
+      
       let useJsonData = {};
       if (!res.bpmDefJson) {
         useJsonData = initialData;
@@ -49,6 +53,7 @@ export const Editor = () => {
       if (res.businessId) {
         setFlowData(res);
       }
+      ref?.current?.document.clear();
       setIsLoading(true);
       ref?.current?.document.fromJSON(useJsonData);
       setTimeout(() => {
@@ -59,8 +64,8 @@ export const Editor = () => {
     }
   };
   useEffect(() => {
-    getFlowData();
-  }, []);
+    currentFlowId && getFlowData(currentFlowId);
+  }, [currentFlowId]);
 
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
     obj?.edges.forEach((item) => {
