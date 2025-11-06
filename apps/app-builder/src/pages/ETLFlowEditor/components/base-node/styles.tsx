@@ -14,7 +14,7 @@ export const NodeWrapperStyle = styled.div`
   border: 2px solid #e5e6eb;
 
   &.selected {
-    border: 2px solid #b78fff;
+    border: 2px solid #009e9e;
   }
 
   &.error {
