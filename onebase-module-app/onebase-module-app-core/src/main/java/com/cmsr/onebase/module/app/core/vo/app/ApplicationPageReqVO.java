@@ -31,7 +31,4 @@ public class ApplicationPageReqVO extends PageParam {
     @Schema(description = "发布模式")
     private String publishModel;
 
-    @Schema(description = "空间ID")
-    private Long tenantId;
-
 }
