@@ -7,14 +7,14 @@ import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
-import com.cmsr.onebase.module.app.core.dto.auth.UserMemberDTO;
+import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
@@ -91,7 +91,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     public PageResult<AuthRoleMembersPageRespVO> pageRoleMembers(AuthRoleMembersPageReqVO reqVO) {
         appCommonService.validateRoleExist(reqVO.getRoleId());
-        PageResult<UserMemberDTO> result = appSqlQueryRepository.findUserMemberDTOByRoleId(reqVO.getRoleId(), reqVO.getMemberName(), reqVO);
+        PageResult<RoleMemberDTO> result = appSqlQueryRepository.findRoleMembers(reqVO.getRoleId(), reqVO.getMemberName(), reqVO.getMemberType(), reqVO);
         List<AuthRoleMembersPageRespVO> voResult = result.getList().stream().map(v -> {
             AuthRoleMembersPageRespVO vo = new AuthRoleMembersPageRespVO();
             vo.setId(v.getId());
@@ -99,7 +99,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             vo.setName(v.getMemberName());
             vo.setType(v.getMemberType());
             vo.setDeptName(v.getDeptName());
-            if (UserMemberDTO.MEMBER_TYPE_USER.equals(v.getMemberType())) {
+            if (RoleMemberDTO.MEMBER_TYPE_USER.equals(v.getMemberType())) {
                 vo.setTypeName("成员");
             } else if (v.getIsIncludeChild() != null && v.getIsIncludeChild() == 0) {
                 vo.setTypeName("本部门");
@@ -199,14 +199,14 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     public void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO) {
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         for (AuthRoleDeleteMemberReqVO.DeleteMember member : reqVO.getMembers()) {
-            if (UserMemberDTO.MEMBER_TYPE_USER.equalsIgnoreCase(member.getMemberType())) {
+            if (RoleMemberDTO.MEMBER_TYPE_USER.equalsIgnoreCase(member.getMemberType())) {
                 AuthRoleUserDO authRoleUserDO = appAuthRoleUserRepository.findById(member.getId());
                 if (authRoleUserDO != null) {
                     appAuthRoleUserRepository.deleteById(member.getId());
                     appCacheProvider.usersChanged(authRoleDO.getApplicationId(), List.of(authRoleUserDO.getUserId()));
                 }
             }
-            if (UserMemberDTO.MEMBER_TYPE_DEPT.equalsIgnoreCase(member.getMemberType())) {
+            if (RoleMemberDTO.MEMBER_TYPE_DEPT.equalsIgnoreCase(member.getMemberType())) {
                 AuthRoleDeptDO authRoleDeptDO = appAuthRoleDeptRepository.findById(member.getId());
                 if (authRoleDeptDO != null) {
                     appAuthRoleDeptRepository.deleteById(member.getId());

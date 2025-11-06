@@ -1,0 +1,55 @@
+package com.cmsr.onebase.module.infra.dal.dataobject.security;
+
+import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * 安全配置分类表
+ *
+ * @author chengyuansen
+ * @date 2025-11-04
+ */
+@Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "infra_security_config_category")
+@TenantIgnore
+public class SecurityConfigCategoryDO extends BaseDO {
+
+    public static final String CATEGORY_CODE = "category_code";
+    public static final String CATEGORY_NAME = "category_name";
+    public static final String DESCRIPTION = "description";
+    public static final String SORT_ORDER = "sort_order";
+
+    /**
+     * 分类编码
+     */
+    @Column(name = CATEGORY_CODE)
+    private String categoryCode;
+
+    /**
+     * 分类名称
+     */
+    @Column(name = CATEGORY_NAME)
+    private String categoryName;
+
+    /**
+     * 分类描述
+     */
+    @Column(name = DESCRIPTION)
+    private String description;
+
+    /**
+     * 排序号
+     */
+    @Column(name = SORT_ORDER)
+    private Integer sortOrder;
+
+}
