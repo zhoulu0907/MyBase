@@ -10,6 +10,7 @@ import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,6 +35,14 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     @Override
     public List<ApplicationDTO> findAppApplicationByAppName(String appName) {
         List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
+        return applicationList.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ApplicationDTO>  findAppApplicationByAppIds(Collection<Long> appIds) {
+        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppIds(appIds);
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
