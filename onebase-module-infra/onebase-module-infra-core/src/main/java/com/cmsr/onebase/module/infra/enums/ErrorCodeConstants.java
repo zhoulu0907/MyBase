@@ -27,7 +27,12 @@ public interface ErrorCodeConstants {
     ErrorCode FILE_IS_EMPTY = new ErrorCode(1_001_003_002, "文件为空");
 
     // ========== 安全相关 1-001-004-000 ==========
-    ErrorCode SECURITY_CONFIG_NOT_EXIST = new ErrorCode(1_001_004_000, "配置项{}不存在");
+    ErrorCode SECURITY_CONFIG_NOT_EXIST = new ErrorCode(1_001_004_000, "配置项[{}]不存在");
+    ErrorCode SECURITY_CONFIG_ITEM_REQUIRED = new ErrorCode(1_001_004_001, "配置项[{}]不能为空");
+    ErrorCode SECURITY_CONFIG_DATA_TYPE_NOT_SUPPORT = new ErrorCode(1_001_004_002, "配置项[{}]的数据类型[{}]不支持");
+    ErrorCode SECURITY_CONFIG_DATA_TYPE_WRONG = new ErrorCode(1_001_004_003, "配置项[{}]的数据类型不正确，应为[{}]");
+    ErrorCode SECURITY_CONFIG_MIN_VALUE = new ErrorCode(1_001_004_004, "配置项[{}]的值必须大于等于{}");
+    ErrorCode SECURITY_CONFIG_MAX_VALUE = new ErrorCode(1_001_004_005, "配置项[{}]的值必须小于等于{}");
 
     // ========== 文件配置 1-001-006-000 ==========
     ErrorCode FILE_CONFIG_NOT_EXISTS = new ErrorCode(1_001_006_000, "文件配置不存在");
