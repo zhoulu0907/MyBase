@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.apache.commons.lang3.BooleanUtils;
 
 @Schema(description = "ETL - 数据源创建 Request VO")
 @Data
@@ -40,8 +41,19 @@ public class ETLDatasourceCreateReqVO {
     @Schema(description = "只读", defaultValue = "true")
     private Boolean readonly;
 
+    @Schema(description = "是否创建时进行采集", defaultValue = "true")
+    private Integer withCollect;
+
     public JsonNode getConfig() {
         return JsonUtils.parseTree(this.config);
+    }
+
+    public Integer getReadonly() {
+        return BooleanUtils.toInteger(readonly);
+    }
+
+    public Boolean getWithCollect() {
+        return BooleanUtils.toBoolean(this.withCollect);
     }
 
     public void setConfig(JsonNode config) {
