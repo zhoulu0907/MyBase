@@ -96,7 +96,7 @@ public class TenantController {
     @GetMapping("/get")
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    @PermitAll
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
         if(null == id ){
             id= TenantContextHolder.getTenantId();
@@ -130,7 +130,7 @@ public class TenantController {
 
     @GetMapping("/page")
     @Operation(summary = "获得租户分页")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    @PermitAll
     public CommonResult<PageResult<TenantRespVO>> getTenantPage(@Valid TenantPageReqVO pageVO) {
         PageResult<TenantRespVO> pageResult = tenantService.getTenantPage(pageVO);
         return success(BeanUtils.toBean(pageResult, TenantRespVO.class));
