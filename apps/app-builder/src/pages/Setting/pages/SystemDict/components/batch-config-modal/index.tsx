@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button, Form, Message, Modal, Switch, Input, ColorPicker, Spin } from '@arco-design/web-react';
 import { IconDelete, IconTranslate, IconPlusCircle } from '@arco-design/web-react/icon';
 import { arrayMove } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/transform';
-import { getDictDataListByType, type DictData } from '@onebase/platform-center';
+import { getDictDataListByType, StatusEnum, type DictData } from '@onebase/platform-center';
 import { useCodeGenerator } from '../../hooks/useCodeGenerator';
 import CodeGenerationConfirmModal from '../code-generation-confirm-modal';
 import SortableTable from './SortableTable';
@@ -40,19 +40,51 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
 
-  // 同步表单数据
-  const syncFormData = (values: DictData[]) => {
-    const formData = values.map((item) => ({
-      label: item.label,
-      value: item.value,
-      colorType: item.colorType,
-      status: item.status,
-      sort: item.sort
-    }));
-    form.setFieldsValue({ dictValues: formData });
-  };
+  // 获取可见的数据
+  const getVisibleItems = useCallback((items = mergeFormDataWithState()): DictValueItem[] => {
+    return items.filter((item) => !item.isDelete);
+  }, []);
 
-  const loadAllDictDataList = async () => {
+  // 获取删除的数据
+  const getDeletedItems = useCallback((items = mergeFormDataWithState()): DictValueItem[] => {
+    return items.filter((item) => item.isDelete);
+  }, []);
+
+  const activeDictValues = useMemo(() => {
+    return getVisibleItems(dictValues);
+  }, [dictValues, getVisibleItems]);
+
+  // 合并表单数据和状态数据
+  const mergeFormDataWithState = useCallback(
+    (formDictValues?: DictData[]): DictValueItem[] => {
+      const formValues = formDictValues || form.getFieldsValue().dictValues || [];
+      const formDataMap = new Map(formValues.map((item: DictData) => [item.id, item]));
+
+      return dictValues.map((stateItem) => {
+        const formItem = formDataMap.get(stateItem.id);
+        if (formItem) {
+          return {
+            ...stateItem,
+            ...formItem,
+            id: stateItem.id,
+            isDelete: stateItem.isDelete
+          };
+        }
+        return stateItem;
+      });
+    },
+    [form, dictValues]
+  );
+
+  const updateDictValuesAndForm = useCallback(
+    (newValues: DictValueItem[]) => {
+      setDictValues(newValues);
+      form.setFieldsValue({ dictValues: getVisibleItems(newValues) });
+    },
+    [form]
+  );
+
+  const loadAllDictDataList = useCallback(async () => {
     try {
       setTableLoading(true);
       const res = await getDictDataListByType(dictType);
@@ -62,7 +94,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       }
       setColorMode(colorEnabled);
       setDictValues(res);
-      syncFormData(res);
+      form.setFieldsValue({ dictValues: res });
     } catch (error) {
       console.error('加载字典数据失败:', error);
     } finally {
@@ -70,18 +102,14 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
         setTableLoading(false);
       }, 500);
     }
-  };
-
-  // 获取未删除的数据
-  const getVisibleDictValues = () => {
-    return dictValues.filter((item) => !item.isDelete);
-  };
+  }, [dictType, form]);
 
   // 使用编码生成hook
   const { isGenerating, generateCodes, canGenerate } = useCodeGenerator({
     onSuccess: (generatedItems) => {
-      setDictValues(generatedItems);
-      form.setFieldsValue({ dictValues: generatedItems });
+      const deletedItems = getDeletedItems();
+      const newValues = [...generatedItems, ...deletedItems];
+      updateDictValuesAndForm(newValues);
       Message.success('编码生成成功');
     },
     onError: (error) => {
@@ -97,78 +125,54 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       form.resetFields();
       setDictValues([]);
     }
-  }, [visible, form]);
+  }, [visible]);
 
   // 新增字典值
   const addDictValue = () => {
-    const visibleValues = getVisibleDictValues();
-    const newValue: DictData = {
-      id: `temp-${Date.now()}-${visibleValues.length}`,
+    const mergedDictValues = mergeFormDataWithState();
+    const newValue: DictValueItem = {
+      id: `temp-${Date.now()}-${dictValues.length}`,
       label: '',
       value: '',
-      colorType: colorMode ? getColorByIndex(visibleValues.length) : '',
-      status: 1,
-      sort: visibleValues.length + 1
+      colorType: colorMode ? getColorByIndex(dictValues.length) : '',
+      status: StatusEnum.ENABLE,
+      sort: dictValues.length + 1,
+      isDelete: false
     };
-    const newValues = [...dictValues, newValue];
-    setDictValues(newValues);
-    syncFormData(newValues);
+    const newValues = [...mergedDictValues, newValue];
+    updateDictValuesAndForm(newValues);
   };
 
   // 删除字典值
   const deleteDictValue = (id: string) => {
-    let newValues: DictData[];
-
-    if (id.startsWith('temp-')) {
-      // 临时数据直接删除
-      newValues = dictValues.filter((item) => item.id !== id);
-    } else {
-      // 已保存数据标记为删除
-      newValues = dictValues.map((item) => (item.id === id ? { ...item, isDelete: true } : item));
-    }
-
-    setDictValues(newValues);
-    syncFormData(newValues);
-  };
-
-  // 更新字典值
-  const updateDictValue = (id: string, field: keyof DictData, value: string | number) => {
-    const newValues = dictValues.map((item) => (item.id === id ? { ...item, [field]: value } : item));
-    setDictValues(newValues);
-
-    // 只更新对应的表单字段，不覆盖整个表单数据
-    const targetIndex = newValues.findIndex((item) => item.id === id);
-    if (targetIndex !== -1) {
-      form.setFieldValue(`dictValues.${targetIndex}.${field}`, value);
-    }
+    const mergedDictValues = mergeFormDataWithState();
+    const newValues = id.startsWith('temp-')
+      ? mergedDictValues.filter((item) => item.id !== id)
+      : mergedDictValues.map((item) => (item.id === id ? { ...item, isDelete: true } : item));
+    updateDictValuesAndForm(newValues);
   };
 
   // 处理彩色模式切换
   const handleColorModeChange = (checked: boolean) => {
     setColorMode(checked);
+    const mergedDictValues = mergeFormDataWithState();
+    const visibleItems = getVisibleItems();
+    const visibleItemIdMap = new Map(visibleItems.map((item, index) => [item.id, index]));
 
-    if (checked) {
-      // 开启彩色模式时，为所有字典值重新分配颜色
-      const newValues = dictValues.map((item, index) => ({
+    const newValues = mergedDictValues.map((item) => {
+      if (item.isDelete) return item;
+      return {
         ...item,
-        colorType: getColorByIndex(index)
-      }));
-      setDictValues(newValues);
-      syncFormData(newValues);
-    } else {
-      // 关闭彩色模式时，将所有颜色重置为默认颜色
-      const newValues = dictValues.map((item) => ({
-        ...item,
-        colorType: ''
-      }));
-      setDictValues(newValues);
-      syncFormData(newValues);
-    }
+        colorType: checked && visibleItemIdMap.has(item.id) ? getColorByIndex(visibleItemIdMap.get(item.id)!) : ''
+      };
+    });
+
+    updateDictValuesAndForm(newValues);
   };
 
   // 一键生成编码 - 显示确认对话框
   const handleGenerateCodes = () => {
-    const visibleValues = getVisibleDictValues();
+    const visibleValues = getVisibleItems(dictValues);
     if (!canGenerate(visibleValues)) {
       Message.warning('没有需要生成编码的项');
       return;
@@ -178,21 +182,24 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
 
   // 处理拖拽排序
   const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    const visibleValues = getVisibleDictValues();
-    const newVisibleValues = arrayMove([...visibleValues], oldIndex, newIndex);
-    const sortableValues = newVisibleValues.map((item, index) => ({
+    const mergedDictValues = mergeFormDataWithState();
+    const visibleValues = getVisibleItems(mergedDictValues);
+    const newVisibleValues = arrayMove([...visibleValues], oldIndex, newIndex) as DictValueItem[];
+    const sortableValues = newVisibleValues.map((item: DictValueItem, index: number) => ({
       ...item,
       sort: index + 1
     }));
 
-    setDictValues(sortableValues as DictValueItem[]);
-    syncFormData(sortableValues as DictData[]);
+    const deletedItems = getDeletedItems(mergedDictValues);
+    const newValues = [...sortableValues, ...deletedItems];
+    updateDictValuesAndForm(newValues);
   };
 
   // 确认生成编码
   const handleConfirmGenerate = async () => {
     try {
-      const visibleValues = getVisibleDictValues();
+      const mergedDictValues = mergeFormDataWithState();
+      const visibleValues = getVisibleItems(mergedDictValues);
       await generateCodes(visibleValues);
       setShowConfirmModal(false);
     } catch {
@@ -217,19 +224,22 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
         width: 32,
         render: (_: unknown, record: DictData, index: number) => (
           <Form.Item field={`dictValues.${index}.colorType`} style={{ margin: 0 }}>
-            <ColorPicker
-              value={record.colorType}
-              onChange={(color) => {
-                const colorValue = typeof color === 'string' ? color : String(color);
-                updateDictValue(record.id, 'colorType', colorValue);
-              }}
-              size="small"
-              className={styles.colorPicker}
-            />
+            <ColorPicker value={record.colorType} size="small" className={styles.colorPicker} />
           </Form.Item>
         )
       });
     }
+
+    columns.push({
+      title: '',
+      dataIndex: 'id',
+      width: 1,
+      render: (_: unknown, record: DictData, index: number) => (
+        <Form.Item field={`dictValues.${index}.id`} noStyle>
+          <Input value={record.id} style={{ display: 'none' }} readOnly />
+        </Form.Item>
+      )
+    });
 
     columns.push({
       title: (
@@ -245,11 +255,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
           rules={[{ required: true, message: '请输入字典值' }]}
           style={{ margin: 0 }}
         >
-          <Input
-            placeholder="请输入字典值"
-            value={record.label}
-            onChange={(value) => updateDictValue(record.id, 'label', value)}
-          />
+          <Input placeholder="请输入字典值" value={record.label} />
         </Form.Item>
       )
     });
@@ -268,11 +274,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
           rules={[{ required: true, message: '请输入字典值编码' }]}
           style={{ margin: 0 }}
         >
-          <Input
-            placeholder="请输入字典值编码"
-            value={record.value}
-            onChange={(value) => updateDictValue(record.id, 'value', value)}
-          />
+          <Input placeholder="请输入字典值编码" value={record.value} />
         </Form.Item>
       )
     });
@@ -282,12 +284,14 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       dataIndex: 'status',
       width: 100,
       render: (_: unknown, record: DictData, index: number) => (
-        <Form.Item field={`dictValues.${index}.status`} style={{ margin: 0 }} triggerPropName="checked">
-          <Switch
-            checked={record.status === 1}
-            onChange={(checked) => updateDictValue(record.id, 'status', checked ? 1 : 0)}
-            size="small"
-          />
+        <Form.Item
+          field={`dictValues.${index}.status`}
+          style={{ margin: 0 }}
+          triggerPropName="checked"
+          normalize={(v) => (v ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
+          formatter={(v) => v === StatusEnum.ENABLE || v === true}
+        >
+          <Switch size="small" />
         </Form.Item>
       )
     });
@@ -314,29 +318,8 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
   const handleOk = async () => {
     try {
       const formValues = await form.validate();
-      const formDictValues = formValues.dictValues || [];
-
-      // 将表单数据与 dictValues 状态中的元数据合并
-      const allDictValues = dictValues;
-      const mergedValues = allDictValues.map((stateItem, index) => {
-        const formItem = formDictValues[index];
-        if (!formItem) return stateItem;
-
-        return {
-          ...stateItem,
-          label: formItem.label || stateItem.label,
-          value: formItem.value || stateItem.value,
-          colorType: formItem.colorType || stateItem.colorType,
-          status: formItem.status !== undefined ? formItem.status : stateItem.status
-        };
-      });
-
-      // 过滤掉空的字典值
-      const validValues = mergedValues.filter((item: DictData) => item.label.trim() && item.value.trim());
-
-      console.log('validValues', validValues);
-
-      onOk(validValues);
+      const mergedValues = mergeFormDataWithState(formValues.dictValues);
+      onOk(mergedValues);
     } catch (error) {
       console.error('表单验证失败:', error);
     }
@@ -366,11 +349,9 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
             {/* 字典值列表 */}
             <div className={styles.dictValuesSection} id="dict-config-container">
               <Spin loading={tableLoading} tip="正在加载字典值...">
-                <Form form={form}>
+                <Form form={form} initialValues={{ dictValues: activeDictValues }}>
                   <Form.List field="dictValues">
-                    {() => (
-                      <SortableTable data={getVisibleDictValues()} columns={createColumns()} onSort={handleSort} />
-                    )}
+                    {() => <SortableTable data={activeDictValues} columns={createColumns()} onSort={handleSort} />}
                   </Form.List>
                 </Form>
               </Spin>
@@ -386,7 +367,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
                 type="text"
                 onClick={handleGenerateCodes}
                 className={styles.generateButton}
-                disabled={isGenerating || !canGenerate(dictValues)}
+                disabled={isGenerating}
               >
                 <IconTranslate />
                 一键生成编码
