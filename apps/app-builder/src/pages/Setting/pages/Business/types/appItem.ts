@@ -38,7 +38,7 @@ export interface corpApplicationListProps {
 export interface cropItem {
   id: string;
   address: string;
-  corpId: string;
+  corpCode: string;
   corpName: string;
   createTime:number;
   industryType: number;

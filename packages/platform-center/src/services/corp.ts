@@ -11,9 +11,6 @@ export const updateCorpApi = (data: updateCorpParams) => systemService.post('/co
 //禁用/启用企业
 export const disabledCorpApi = (data: corpStatusParams) => systemService.post(`/corp/update-status?id=${data.id}&status=${data.status}`);
 
-// 搜索企业
-export const searchCorpApi = (id: number | string) => systemService.post(`/platform/admin/delete?id=${id}`)
-
 // 删除企业
 export const deleteCorpApi = (id: number) => systemService.post(`/corp/delete?id=${id}`)   
 

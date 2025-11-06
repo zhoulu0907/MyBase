@@ -5,10 +5,10 @@ import StatusTag from "@/components/StatusTag";
 import { Outlet, useMatch, useNavigate } from "react-router-dom";
 import { TopHeader } from "./components/topHeader";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getCorpListApi, disabledCorpApi, deleteCorpApi, updateCorpApi, type corpListParams } from "@onebase/platform-center";
+import { getCorpListApi, disabledCorpApi, deleteCorpApi, type corpListParams } from "@onebase/platform-center";
 import { type corpApplicationListProps, type cropItem} from "./types/appItem";
 import { formatTimeYMDHMS } from '@onebase/common';
-import { formatIndustryType } from "./utils";
+import { convertName, formatIndustryType } from "./utils";
 const AvatarGroup = Avatar.Group;
 
 const BusinessPage: React.FC = () => {
@@ -26,7 +26,7 @@ const BusinessPage: React.FC = () => {
         },
         {
             title: '企业ID',
-            dataIndex: 'corpId',
+            dataIndex: 'corpCode',
         },
         {
             title: '行业类型',
@@ -37,7 +37,7 @@ const BusinessPage: React.FC = () => {
         },
         {
             title: '授权应用',
-            dataIndex: 'application',
+            dataIndex: 'corpApplicationList',
             render: (apps: corpApplicationListProps[]) => (
               <div>{renderAuthorizedAppGroup(apps)}</div>
             )
@@ -77,12 +77,12 @@ const BusinessPage: React.FC = () => {
     ];
     const navigate = useNavigate();
     const inputRef = useRef(null);
-    const isCreatePage = useMatch('onebase/setting/business/create-business');
+    const isCreatePage = useMatch('onebase/setting/enterprise/create-enterprise');
     const [loading, setLoading] = useState<boolean>(false);
     const [editable, setEditable] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>("");
     const [tableData, setTableData] = useState<cropItem[]>([]);
-    const [currentId, setCurrentId] = useState<number>();
+    const [currentId, setCurrentId] = useState<string>("");
     const [pagination, setPagination] = useState({
         showTotal: true,
         total: 0,
@@ -101,6 +101,7 @@ const BusinessPage: React.FC = () => {
                             {item.iconName}
                         </Avatar>
                     })}
+                   {applicationList?.[0]?.appCount && <Avatar>{applicationList?.[0]?.appCount}</Avatar>} 
                 </AvatarGroup>
             </div>
         </>
@@ -144,7 +145,7 @@ const BusinessPage: React.FC = () => {
 
     //创建企业
     const handleCreateBusiness = () => {
-        navigate("create-business");
+        navigate("create-enterprise");
     }
 
     const renderInput = (name: string) => {
@@ -162,25 +163,36 @@ const BusinessPage: React.FC = () => {
         )
     }
 
-    // 禁用
-    const handleDisabled = (record: cropItem) => {
-        Modal.confirm({
-            title: `禁用企业(${record.corpName})? `,
-            content: '禁用后企业用户无法登录，再次启用时企业可恢复正常使用',
-            okButtonProps: {
-                status: 'danger',
-            },
-            onOk: async () => {
-                const params = {id: record.id, status: 0};
-                try {
-                    await disabledCorpApi(params);
-                    // await updateCorpApi({...record, status: 0})
-                    Message.success("禁用成功");
-                }catch(error) {
-                    Message.error("禁用失败");
-                }
+    const handleDisabled = async(record: cropItem) => {
+        const params = {id: record.id, status: 0};
+        if(record.status === 0) {
+            try {
+                await disabledCorpApi(params);
+                await fetchTableDataList(pagination.current,pagination.pageSize);
+                Message.success(`启用成功`);
+            }catch(error) {
+                Message.error(`启用失败`);
             }
-        });
+        }else {
+           return  (
+            Modal.confirm({
+                title: `禁用企业(${record.corpName})? `,
+                content: '禁用后企业用户无法登录，再次启用时企业可恢复正常使用',
+                okButtonProps: {
+                    status: 'danger',
+                },
+                onOk: async () => {
+                    try {
+                        await disabledCorpApi(params);
+                        await fetchTableDataList(pagination.current,pagination.pageSize);
+                        Message.success(`禁用成功`);
+                    }catch(error) {
+                        Message.error(`禁用失败`);
+                    }
+                }
+            })
+           )
+        }
     };
 
     // 删除
@@ -203,7 +215,7 @@ const BusinessPage: React.FC = () => {
                 }
                 try {
                     await deleteCorpApi(record.id);
-                    await getCorpListApi({pageNo: pagination.current, pageSize: pagination.pageSize})
+                    await fetchTableDataList(pagination.current,pagination.pageSize);
                     Message.success('删除成功');
                 } catch (error) {
                     Message.error('删除失败，请重试');
@@ -221,14 +233,14 @@ const BusinessPage: React.FC = () => {
         const lowerSearch = searchValue.toLowerCase();
         return tableData.filter(item => 
             item.corpName?.toLowerCase().includes(lowerSearch) || 
-            item.corpId?.toLowerCase().includes(lowerSearch)
+            item.corpCode?.toLowerCase().includes(lowerSearch)
         )
     },[tableData, searchValue])
 
     // 操作列下拉菜单
-    const actionMenu = (record: any) => (
+    const actionMenu = (record: cropItem) => (
         <Menu>
-            <Menu.Item key="disable" onClick={() => handleDisabled(record)}>禁用</Menu.Item>
+            <Menu.Item key="disable" onClick={() => handleDisabled(record)}>{convertName(record.status)}</Menu.Item>
             <Menu.Item key="delete" onClick={() => handleDelete(record)}>删除</Menu.Item>
         </Menu>
     );
