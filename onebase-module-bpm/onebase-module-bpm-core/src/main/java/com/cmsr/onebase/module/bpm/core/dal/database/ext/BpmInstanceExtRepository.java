@@ -54,6 +54,7 @@ public class BpmInstanceExtRepository {
                       t3.form_Name,
                       t.*
                 from bpm_flow_instance t
+                left join bpm_flow_task t1 on t.id = t1.instance_id
                 inner join bpm_flow_instance_biz_ext t3 on t.id = t3.instance_id
                 """;
     }
@@ -67,24 +68,28 @@ public class BpmInstanceExtRepository {
         condition.setPageNavi(navi);
         condition.and(Compare.EQUAL, "t3.app_id", reqVO.getAppId());
         condition.and(Compare.EQUAL, "t.creator", userId);
-
-        if (reqVO.getProcessTitle() != null && !reqVO.getProcessTitle().isEmpty()) {
-            condition.and(Compare.LIKE, "t3.business_title", reqVO.getProcessTitle());
+        // 动态添加其他查询条件
+        if (reqVO.getKeyword() != null && !reqVO.getKeyword().isEmpty()) {
+            ConfigStore orCondition = new DefaultConfigStore();
+            orCondition.or(Compare.LIKE, "t3.business_title", reqVO.getKeyword());
+            orCondition.or(Compare.LIKE, "t3.initiator_name", reqVO.getKeyword());
+            orCondition.or(Compare.LIKE, "t3.form_summary", reqVO.getKeyword());
+            condition.and(orCondition);
         }
-        if (reqVO.getInitiator() != null && !reqVO.getInitiator().isEmpty()) {
-            condition.and(Compare.LIKE, "t3.initiator_name", reqVO.getInitiator());
+        if (reqVO.getBusinessId() != null && !reqVO.getBusinessId().isEmpty()) {
+            condition.and(Compare.EQUAL, "t.business_id", reqVO.getBusinessId());
         }
-        if (reqVO.getFormSummary() != null && !reqVO.getFormSummary().isEmpty()) {
-            condition.and(Compare.LIKE, "t3.form_summary", reqVO.getFormSummary());
-        }
-        if (reqVO.getSubmitTimeStart() != null ) {
-            condition.and(Compare.GREAT_EQUAL, "t3.submit_time", reqVO.getSubmitTimeStart());
-        }
-        if (reqVO.getSubmitTimeStart() != null ) {
-            condition.and(Compare.LESS_EQUAL, "t3.submit_time", reqVO.getSubmitTimeEnd());
+        if (reqVO.getNodeCode() != null && !reqVO.getNodeCode().isEmpty()) {
+            condition.and(Compare.EQUAL, "t1.node_code", reqVO.getNodeCode());
         }
         if (reqVO.getFlowStatus() != null && !reqVO.getFlowStatus().isEmpty()){
             condition.and(Compare.EQUAL, "t.flow_status", reqVO.getFlowStatus());
+        }
+        if (reqVO.getCreateTimeStart() != null ) {
+            condition.and(Compare.GREAT_EQUAL, "t.create_time", reqVO.getCreateTimeStart());
+        }
+        if (reqVO.getCreateTimeEnd() != null ) {
+            condition.and(Compare.LESS_EQUAL, "t.create_time", reqVO.getCreateTimeEnd());
         }
         // 设置排序
         if("asc".equals(reqVO.getSortType())){
