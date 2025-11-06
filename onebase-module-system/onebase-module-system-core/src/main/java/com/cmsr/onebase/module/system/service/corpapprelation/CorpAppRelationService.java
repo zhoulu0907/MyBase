@@ -1,9 +1,12 @@
 package com.cmsr.onebase.module.system.service.corpapprelation;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.validation.Valid;
+
+import java.util.List;
 
 
 /**
@@ -50,4 +53,6 @@ public interface CorpAppRelationService {
     PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO);
 
     void deleteCorpAppRelationByCorpId(Long corpID);
+
+    List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO);
 }

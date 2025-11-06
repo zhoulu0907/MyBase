@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
@@ -43,10 +44,7 @@ import org.dromara.warm.flow.core.utils.StreamUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -125,10 +123,16 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setTaskId(flowTaskExt.getId());
         todoTaskVO.setNodeCode(flowTaskExt.getNodeCode());
         todoTaskVO.setProcessTitle(flowTaskExt.getBusinessTitle());
-        todoTaskVO.setInitiator(flowTaskExt.getInitiatorName());
         todoTaskVO.setSubmitTime(flowTaskExt.getSubmitTime());
         todoTaskVO.setFormSummary(flowTaskExt.getFormSummary());
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
+        todoTaskVO.setBusinessId(flowTaskExt.getBusinessId());
+
+        todoTaskVO.setInitiator(new UserBasicInfoVO());
+        todoTaskVO.getInitiator().setUserId(flowTaskExt.getInitiatorId());
+        todoTaskVO.getInitiator().setName(flowTaskExt.getInitiatorName());
+        todoTaskVO.getInitiator().setAvatar(flowTaskExt.getInitiatorAvatar());
+
         return todoTaskVO;
     }
 
@@ -141,18 +145,26 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Override
     public PageResult<BpmFlowDoneTaskVO> getDonePage(BpmDoneTaskPageReqVO pageReqVO) {
         PageResult<BpmDoneTaskDTO> pageResult = hisTaskExtRepository.getDoneTaskPage(pageReqVO, WebFrameworkUtils.getLoginUserId());  //todo WebFrameworkUtils.getLoginUserId()需改为运行态
+
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
         for (BpmDoneTaskDTO flowHisTaskExt : pageResult.getList()) {
             BpmFlowDoneTaskVO doneTaskVO = new BpmFlowDoneTaskVO();
             doneTaskVO.setTaskId(flowHisTaskExt.getId());
             doneTaskVO.setInstanceId(flowHisTaskExt.getInstanceId());
             doneTaskVO.setProcessTitle(flowHisTaskExt.getBusinessTitle());
-            doneTaskVO.setInitiator(flowHisTaskExt.getInitiatorName());
             doneTaskVO.setFormSummary(flowHisTaskExt.getFormSummary());
             doneTaskVO.setHandleTime(flowHisTaskExt.getUpdateTime());
             doneTaskVO.setTaskStatus(flowHisTaskExt.getFlowStatus());
+            doneTaskVO.setBusinessId(flowHisTaskExt.getBusinessId());
+
+            doneTaskVO.setInitiator(new UserBasicInfoVO());
+            doneTaskVO.getInitiator().setUserId(flowHisTaskExt.getInitiatorId());
+            doneTaskVO.getInitiator().setName(flowHisTaskExt.getInitiatorName());
+            doneTaskVO.getInitiator().setAvatar(flowHisTaskExt.getInitiatorAvatar());
+
             doneTaskList.add(doneTaskVO);
         }
+
         return new PageResult<>(doneTaskList, pageResult.getTotal());
     }
 
@@ -175,6 +187,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             bpmMyCreatedVO.setCreateTime(flowInstance.getCreateTime());
             bpmMyCreatedVO.setUpdateTime(flowInstance.getUpdateTime());
             bpmMyCreatedVO.setInstanceId(flowInstance.getId());
+            bpmMyCreatedVO.setBusinessId(flowInstance.getBusinessId());
 
             //设置当前节点处理人
             List<Task> flowTaskList = taskService.getByInsId(flowInstance.getId());
@@ -192,6 +205,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                     Map<String, Object> map = new HashMap<>();
                     map.put("userId", dto.getId());
                     map.put("userName", dto.getNickname());
+                    map.put("avatar", dto.getAvatar());
                     currentNodeHandler.add( map);
                 });
                 bpmMyCreatedVO.setCurrentNodeHandler(currentNodeHandler);

@@ -128,9 +128,9 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
         LocalDate resultTime = triggerTime;
         // 根据偏移模式和单位计算偏移时间
         if ("before".equals(offsetMode)) {
-            resultTime.plusDays(offsetValue);
+            resultTime = resultTime.plusDays(offsetValue);
         } else if ("after".equals(offsetMode)) {
-            resultTime.minusDays(offsetValue);
+            resultTime = resultTime.minusDays(offsetValue);
         } else {
             resultTime = triggerTime;
         }

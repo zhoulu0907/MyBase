@@ -113,4 +113,10 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
         return deleteByConfig(new DefaultConfigStore()
                 .eq(UserRoleDO.ROLE_ID, roleId).in(UserRoleDO.USER_ID, userIds));
     }
+
+    public List<UserRoleDO> getUserRoleByRoleId(Long roleId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(UserRoleDO.ROLE_ID, roleId);
+        return findAllByConfig(configStore);
+    }
 }
