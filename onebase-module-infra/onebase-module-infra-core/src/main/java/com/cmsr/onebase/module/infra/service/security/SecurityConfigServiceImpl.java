@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.infra.service.security;
 
+import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConvert;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigCategoryDataRepository;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigDataRepository;
@@ -20,6 +21,11 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
 
 /**
  * 安全配置服务实现类
@@ -101,6 +107,9 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
         log.info("开始批量更新租户安全配置，tenantId: {}, 配置项数量: {}", tenantId, updateReqVOList.size());
 
+        // 校验配置项
+        validateConfigUpdates(tenantId, updateReqVOList);
+
         for (SecurityConfigUpdateReqVO updateReqVO : updateReqVOList) {
             updateSingleConfig(tenantId, updateReqVO);
         }
@@ -168,6 +177,145 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         }
 
         return configItems;
+    }
+
+    /**
+     * 校验配置更新请求
+     *
+     * @param tenantId         租户ID
+     * @param updateReqVOList  更新请求列表
+     */
+    private void validateConfigUpdates(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList) {
+        // 获取租户所有安全配置模板
+        List<SecurityConfigItemRespVO> templates = getSecurityConfigsByTenant(tenantId);
+        
+        // 转换为Map便于快速查找
+        Map<String, SecurityConfigItemRespVO> templateMap = templates.stream()
+                .collect(Collectors.toMap(SecurityConfigItemRespVO::getConfigKey, item -> item));
+
+        // 校验每个配置项
+        for (SecurityConfigUpdateReqVO updateReqVO : updateReqVOList) {
+            String configKey = updateReqVO.getConfigKey();
+            String configValue = updateReqVO.getConfigValue();
+
+            // 1. Key匹配性校验
+            SecurityConfigItemRespVO template = templateMap.get(configKey);
+            if (template == null) {
+                throw new ServiceException(BAD_REQUEST.getCode(), 
+                    String.format("配置项 [%s] 不在安全配置范围内", configKey));
+            }
+
+            // 2. 必填校验
+            if ("true".equalsIgnoreCase(template.getRequired())) {
+                if (configValue == null || configValue.trim().isEmpty()) {
+                    throw new ServiceException(BAD_REQUEST.getCode(), 
+                        String.format("配置项 [%s] 为必填项，不能为空", template.getConfigName()));
+                }
+            }
+
+            // 如果值为空且非必填，跳过后续校验
+            if (configValue == null || configValue.trim().isEmpty()) {
+                continue;
+            }
+
+            String dataType = template.getDataType().toUpperCase(Locale.ROOT);
+
+            // 3. 数据类型校验
+            validateDataType(template.getConfigName(), configValue, dataType);
+
+            // 4. 数值边界校验（仅INTEGER类型）
+            if ("INTEGER".equals(dataType)) {
+                validateIntegerRange(template.getConfigName(), configValue, 
+                    template.getMinvalue(), template.getMaxvalue());
+            }
+        }
+    }
+
+    /**
+     * 校验数据类型
+     *
+     * @param configName  配置项名称
+     * @param configValue 配置值
+     * @param dataType    数据类型
+     */
+    private void validateDataType(String configName, String configValue, String dataType) {
+        try {
+            switch (dataType) {
+                case "STRING":
+                    // 字符串类型，任意值都可以
+                    break;
+                    
+                case "INTEGER":
+                    // 整数类型
+                    Long.parseLong(configValue.trim());
+                    break;
+                    
+                case "BOOLEAN":
+                    // 布尔类型
+                    String lowerValue = configValue.trim().toLowerCase();
+                    if (!"true".equals(lowerValue) && !"false".equals(lowerValue)) {
+                        throw new IllegalArgumentException();
+                    }
+                    break;
+                    
+                case "JSON[STRING]":
+                    // 逗号分隔的字符串，不需要特殊校验
+                    break;
+                    
+                case "JSON[INTEGER]":
+                    // 逗号分隔的整数
+                    String[] intValues = configValue.split(",");
+                    for (String value : intValues) {
+                        Long.parseLong(value.trim());
+                    }
+                    break;
+                    
+                case "JSON[BOOLEAN]":
+                    // 逗号分隔的布尔值
+                    String[] boolValues = configValue.split(",");
+                    for (String value : boolValues) {
+                        String lowerVal = value.trim().toLowerCase();
+                        if (!"true".equals(lowerVal) && !"false".equals(lowerVal)) {
+                            throw new IllegalArgumentException();
+                        }
+                    }
+                    break;
+                    
+                default:
+                    throw new ServiceException(BAD_REQUEST.getCode(), 
+                        String.format("配置项 [%s] 的数据类型 [%s] 不支持", configName, dataType));
+            }
+        } catch (IllegalArgumentException e) {
+            throw new ServiceException(BAD_REQUEST.getCode(), 
+                String.format("配置项 [%s] 的数据类型不正确，应为 [%s]", configName, dataType));
+        }
+    }
+
+    /**
+     * 校验整数范围
+     *
+     * @param configName  配置项名称
+     * @param configValue 配置值
+     * @param minValue    最小值
+     * @param maxValue    最大值
+     */
+    private void validateIntegerRange(String configName, String configValue, Long minValue, Long maxValue) {
+        try {
+            long value = Long.parseLong(configValue.trim());
+            
+            if (minValue != null && value < minValue) {
+                throw new ServiceException(BAD_REQUEST.getCode(), 
+                    String.format("配置项 [%s] 的值必须大于等于 %d", configName, minValue));
+            }
+            
+            if (maxValue != null && value > maxValue) {
+                throw new ServiceException(BAD_REQUEST.getCode(), 
+                    String.format("配置项 [%s] 的值必须小于等于 %d", configName, maxValue));
+            }
+        } catch (NumberFormatException e) {
+            throw new ServiceException(BAD_REQUEST.getCode(), 
+                String.format("配置项 [%s] 的数据类型不正确，应为 INTEGER", configName));
+        }
     }
 
 }

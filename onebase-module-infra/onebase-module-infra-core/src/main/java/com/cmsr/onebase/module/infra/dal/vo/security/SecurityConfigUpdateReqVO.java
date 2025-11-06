@@ -19,7 +19,6 @@ public class SecurityConfigUpdateReqVO {
     private String configKey;
 
     @Schema(description = "配置值", requiredMode = Schema.RequiredMode.REQUIRED, example = "8")
-    @NotBlank(message = "配置值不能为空")
     private String configValue;
 
 }
