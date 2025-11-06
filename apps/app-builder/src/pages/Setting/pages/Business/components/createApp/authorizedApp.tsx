@@ -1,16 +1,91 @@
-import { Button, Space, Tag } from "@arco-design/web-react";
+import { Button, Message, Space, Tag } from "@arco-design/web-react";
 import { CommonTable } from "../table/commonTable";
 import { TopHeader } from "../topHeader";
 import styles from "./authorizedApp.module.less"
-import type { IAuthorizedAppProps } from "../../types/appItem";
+import type { AppItem, authorizedTimeGroup, IAuthorizedAppProps, OutletContextType } from "../../types/appItem";
 import {formatTimeYMDHMS} from "@onebase/common";
+import { removeCorpAppApi, updateCorpAppApi, createCorpAppApi, type updateAppParams } from "@onebase/platform-center";
+import EditAuthorizedTime from "../modal/editAuthorizedTime";
+import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { CreateAppModal } from "../modal/createAppModal";
 
 
-export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading, tableData,pageination, setAddAppModalVisible, onChange, onSearch }) => {
+export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
+    className, loading, tableData, pageination, onChange, onSearch
+ }) => {
+    const { currentId:corpId } = useOutletContext<OutletContextType>();
+    const [visible, setVisible] = useState<boolean>(false);
+    const [authorizedAppItem, setAuthorizedAppItem] = useState<AppItem | null>(null);
+    const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
+
     //点击创建应用打开modal
     const handleAddApplication = () => {
         setAddAppModalVisible(true);
     }
+
+    //点击modal的取消按钮
+    const handleCloseModal = () => {
+        setAddAppModalVisible(false);
+    }
+
+    //编辑时间
+    const handleSubmitTime = async(values: authorizedTimeGroup) => {
+        try {
+            const params: updateAppParams = {
+                id: authorizedAppItem?.id,
+                corpId: corpId,
+                applicationId: authorizedAppItem?.applicationId,
+                authorizationTime: values.appTime?.authorizationTime || "",
+                expiresTime: values.appTime?.expiresTime || ""
+
+            }
+            const res = await updateCorpAppApi(params);
+            if(res) {
+                Message.success("更新授权时间成功");
+            }else {
+                Message.success("更新授权时间异常");
+            }
+        }catch(error) {
+            Message.error("更新授权时间失败")
+        }finally {
+            setVisible(false);
+        }
+    }
+    
+    //弹出编辑时间的modal
+    const handleEditAuthorizedTime = (record: AppItem) => {
+        setVisible(true);
+        setAuthorizedAppItem(record);
+    }
+
+    const handleRemove  = async(id: string) => {
+        try {
+            const res = await removeCorpAppApi(id);
+            if(res) {
+                Message.success("授权应用删除成功");
+            }else {
+                Message.success("未删除成功");
+            }
+        }catch(error) {
+            Message.error("接口返回异常, 授权应用删除失败");
+        }
+    }
+
+    // 提交新应用（弹窗确认后调用）
+    const handleAddSubmit = async(newAppData: any) => {
+        try {
+            const res = await createCorpAppApi(newAppData);
+            console.log("创建授权应用：", res);
+            Message.error("创建授权应用成功");
+        }catch(error) {
+            Message.error("创建授权应用失败");
+        }finally {
+            setAddAppModalVisible(false);
+        }
+    };
+
+    
 
     const columns = [
         {
@@ -23,7 +98,7 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading,
         },
         {
             title: '应用ID',
-            dataIndex: 'applicationId',
+            dataIndex: 'applicationCode',
             width: 180,
         },
         {
@@ -55,10 +130,10 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading,
             width: 140,
             render: (_: any, record: any) => (
                 <Space size="mini">
-                    <Button type="text" onClick={() => handleEditAuthorizedApp(record)}>
+                    <Button type="text" onClick={() => handleEditAuthorizedTime(record)}>
                         编辑
                     </Button>
-                    <Button type="text" onClick={() => handleRemove(record.key)}>
+                    <Button type="text" onClick={() => handleRemove(record.id)}>
                         移除
                     </Button>
                 </Space>
@@ -67,6 +142,7 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading,
     ];
 
     return (
+        <>
         <div className={className ? className: styles.authorizedApp}>
             <TopHeader
                 title="添加应用"
@@ -82,5 +158,10 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({className, loading,
                 onChange={onChange}
             />
         </div>
+        {/* 编辑授权应用 */}
+        <EditAuthorizedTime visible={visible} setVisible={setVisible} onUpdateData={handleSubmitTime} />
+        {/* 创建授权应用modal */}
+        <CreateAppModal visible={addAppModalVisible} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
+        </>
     )
 }

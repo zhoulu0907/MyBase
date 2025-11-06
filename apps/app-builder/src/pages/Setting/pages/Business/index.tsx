@@ -115,10 +115,7 @@ const BusinessPage: React.FC = () => {
         try {
             const res = await getCorpListApi(params);
             if (res && Array.isArray(res.list)) {
-                const newData = res.list.map((item:cropItem, index: number) => {
-                    return {...item, id: index+1}
-                })
-                setTableData(newData);
+                setTableData(res.list);
                 setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));
             } else {
                 console.warn('Invalid response format:', res);

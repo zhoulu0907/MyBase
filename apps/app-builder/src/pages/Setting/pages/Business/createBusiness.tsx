@@ -21,7 +21,6 @@ const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
     const [adminInfoForm] = Form.useForm();
     const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
     const [editTimeVisible, setEditTimeVisible] = useState<boolean>(false);
-    const {displayData} = useTableData();
 
     //点击创建应用的第三步中table的编辑button
     const handleEdit = (record?: AppItem) => {

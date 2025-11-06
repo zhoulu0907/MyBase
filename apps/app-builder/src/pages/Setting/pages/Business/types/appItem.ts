@@ -1,6 +1,5 @@
 export interface AppItem {
-  key:number;
-  id: number;
+  id: string;
   applicationName: string;
   applicationId?: string;
   applicationUid?: string;
@@ -20,10 +19,8 @@ export interface IAuthorizedAppProps {
     tableData: AppItem[];
     pageination: any;
     className?: string;
-    onEdit: (id: number) =>void;
     onSearch: (value: string) => void;
     onChange: (pageNo: number, pageSize: number) => void;
-    setAddAppModalVisible: (visible:boolean) => void;
 }
 
 export interface statusProps {
@@ -39,7 +36,7 @@ export interface corpApplicationListProps {
 }
 
 export interface cropItem {
-  id: number;
+  id: string;
   address: string;
   corpId: string;
   corpName: string;
@@ -52,5 +49,25 @@ export interface cropItem {
 }
 
 export interface OutletContextType {
-  currentId: number;
+  currentId: string;
+}
+
+export interface authorizedTime {
+  authorizationTime: string;
+  expiresTime: string;
+}
+export interface authorizedTimeGroup {
+  appTime: authorizedTime
+}
+
+export interface ICreateAppModal {
+    visible: boolean;
+    onCloseAppModal: () =>void;
+    onSaveAppData: (data: any)=>void;
+}
+
+export interface authorizedAppList {
+  corpName: string;
+  corpId: string;
+  id: string;
 }

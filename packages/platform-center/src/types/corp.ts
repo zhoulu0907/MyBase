@@ -1,6 +1,6 @@
 // 企业
 export interface disabledCorpParams {
-  id: number;
+  id: string;
   status: number; 
 }
 
@@ -15,7 +15,7 @@ export interface pageParams {
 }
 
 export interface updateCorpParams {
-    id: number;
+    id: string;
     corpId: string;
     corpName: string;
     industryType: number;
@@ -24,7 +24,7 @@ export interface updateCorpParams {
 }
 
 export interface corpStatusParams {
-    id: number;
+    id: string;
     status: number;
 }
 

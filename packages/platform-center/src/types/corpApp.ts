@@ -1,10 +1,19 @@
 export interface CorpAppParams {
-    corpId: number;
-    applicationIdList: number[];
+    corpId: string;
+    applicationIdList: string[];
     authorizationTime: string;
+    expiresTime: string;
 }
 
 export interface corpAppListParams {
     pageNo: number;
     pageSize: number;
+}
+
+export interface updateAppParams {
+    id: string;
+    applicationId: string;
+    corpId: string;
+    authorizationTime: string;
+    expiresTime: string;
 }

@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Image, Space, Message } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import EditableFormItem from '../formItem';
 import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useOutletContext, useParams } from 'react-router-dom';
-import EditAuthorizedTime from '../modal/editAuthorizedTime';
 import { CreateAppModal } from '../modal/createAppModal';
 import type { AppItem, cropItem, OutletContextType } from '../../types/appItem';
 import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi, type corpListParams } from "@onebase/platform-center";
@@ -14,10 +13,8 @@ import { convertIndustryType } from '../../utils';
 const EnterpriseInfoPage: React.FC = () => {
   const {activeTab} = useParams();
   const { currentId } = useOutletContext<OutletContextType>();
-  const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
-  const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
   const [tableData, setTableData] = useState<AppItem[]>([]);
   const [formData, setFormData] = useState<cropItem | null>(null);
   const [originalInfo, setOriginalInfo] = useState<cropItem | null>(null);
@@ -106,27 +103,8 @@ const EnterpriseInfoPage: React.FC = () => {
     }
   }
 
-  //点击modal的取消按钮
-  const handleCloseModal = () => {
-      setAddAppModalVisible(false);
-  }
-
-  const handleEdit = (id: number) => {
-    setVisible(true);
-  }
-
   const handleSearchChange = (searchValue: string) => {
     setSearchValue(searchValue);
-  }
-
-  // 提交新应用（弹窗确认后调用）
-  const handleAddSubmit = (newAppData: any) => {
-      // authorizedAppRef.current?.addNewApp(newData);
-      setAddAppModalVisible(false);
-  };
-
-  const handleUpdateTime = () => {
-
   }
 
   const displayData = useMemo(()=>{
@@ -259,17 +237,12 @@ const EnterpriseInfoPage: React.FC = () => {
                 loading={loading} 
                 tableData={displayData} 
                 className ={styles.tabPanel} 
-                onEdit={handleEdit} 
                 onSearch={handleSearchChange}
                 onChange={handlePageChange}
-                setAddAppModalVisible={setAddAppModalVisible}
               />
           </Tabs.TabPane>
         </Tabs>
       </Card>
-      <EditAuthorizedTime visible={visible} setVisible={setVisible} onUpdateData={handleUpdateTime} />
-       {/* 创建应用modal */}
-      <CreateAppModal visible={addAppModalVisible} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
     </div>
   );
 };
