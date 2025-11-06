@@ -44,6 +44,6 @@ public class ApplicationCreateRespVO {
     private List<Long> tagIds;
 
     @Schema(description = "发布模式")
-    private Integer publishModel;
+    private String publishModel;
 
 }

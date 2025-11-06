@@ -195,13 +195,24 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                         }
                         applyOperatorCondition(configs, fieldName, operator, value);
                     } else {
-                        // 退化：直接LIKE
+                        // 退化：直接LIKE（日期类型除外）
                         if (names.contains(rawKey)) {
                             String fieldType = fields.stream().filter(field ->
                                     rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
                             if("DATE".equals(fieldType)){
-                                String toChar = "to_char(" + rawKey + ",'YYYY-MM-DD')";
-                                configs.and(Compare.LIKE, toChar, rawVal);
+                                // 日期类型不使用LIKE，而是尝试解析为日期范围查询
+                                // 这样Anyline可以根据不同数据库自动生成正确的SQL
+                                try {
+                                    java.time.LocalDate date = java.time.LocalDate.parse(String.valueOf(rawVal));
+                                    java.time.LocalDateTime startOfDay = date.atStartOfDay();
+                                    java.time.LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+                                    configs.and(Compare.GREAT_EQUAL, rawKey, startOfDay);
+                                    configs.and(Compare.LESS, rawKey, endOfDay);
+                                } catch (Exception e) {
+                                    // 如果无法解析为日期，直接使用原字段进行LIKE（让Anyline处理类型转换）
+                                    log.debug("日期字段[{}]的值[{}]无法解析为日期，使用LIKE查询", rawKey, rawVal);
+                                    configs.and(Compare.LIKE, rawKey, rawVal);
+                                }
                             }else{
                                 configs.and(Compare.LIKE, rawKey, rawVal);
                             }
@@ -248,8 +259,19 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                             String fieldType = fields.stream().filter(field ->
                                     rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
                             if("DATE".equals(fieldType)){
-                                String toChar = "to_char(" + rawKey + ",'YYYY-MM-DD')";
-                                countConfigs.and(Compare.LIKE, toChar, rawVal);
+                                // 日期类型不使用LIKE，而是尝试解析为日期范围查询
+                                // 这样Anyline可以根据不同数据库自动生成正确的SQL
+                                try {
+                                    java.time.LocalDate date = java.time.LocalDate.parse(String.valueOf(rawVal));
+                                    java.time.LocalDateTime startOfDay = date.atStartOfDay();
+                                    java.time.LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+                                    countConfigs.and(Compare.GREAT_EQUAL, rawKey, startOfDay);
+                                    countConfigs.and(Compare.LESS, rawKey, endOfDay);
+                                } catch (Exception e) {
+                                    // 如果无法解析为日期，直接使用原字段进行LIKE（让Anyline处理类型转换）
+                                    log.debug("日期字段[{}]的值[{}]无法解析为日期，使用LIKE查询", rawKey, rawVal);
+                                    countConfigs.and(Compare.LIKE, rawKey, rawVal);
+                                }
                             }else {
                                 countConfigs.and(Compare.LIKE, rawKey, rawVal);
                             }

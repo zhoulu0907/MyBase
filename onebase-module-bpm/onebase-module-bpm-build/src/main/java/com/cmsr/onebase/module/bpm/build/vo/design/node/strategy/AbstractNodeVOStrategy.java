@@ -84,6 +84,7 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
         btnCfg.setDisplayName(BpmActionButtonEnum.SAVE.getName());
         btnCfg.setButtonType(BpmActionButtonEnum.SAVE.getCode());
         btnCfg.setDefaultApprovalComment("");
+        btnCfg.setApprovalCommentRequired(false);
 
         buttonConfigs.add(btnCfg);
 
@@ -94,6 +95,7 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
         btnCfg.setDisplayName(BpmActionButtonEnum.SUBMIT.getName());
         btnCfg.setButtonType(BpmActionButtonEnum.SUBMIT.getCode());
         btnCfg.setDefaultApprovalComment("");
+        btnCfg.setApprovalCommentRequired(false);
 
         buttonConfigs.add(btnCfg);
 

@@ -56,6 +56,6 @@ public class ApplicationDTO  {
     /**
      * 发布模式
      */
-    private Integer publishModel;
+    private String publishModel;
 
 }

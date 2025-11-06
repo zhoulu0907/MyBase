@@ -7,7 +7,7 @@ import lombok.Data;
  * @Date：2025/11/4 14:15
  */
 @Data
-public class UserMemberDTO {
+public class RoleMemberDTO {
 
     public static final String MEMBER_TYPE_USER = "user";
 

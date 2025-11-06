@@ -109,12 +109,17 @@ public class DataSourceFactory {
         }
     }
 
+    /**
+     * 构建JDBC连接字符串
+     * 使用Anyline的DatabaseType提供的URL模板，替换占位符
+     *
+     * @param dbType 数据库类型
+     * @param connectionProperties 连接属性
+     * @return JDBC连接字符串
+     */
     private String buildJdbcConnectionString(DatabaseType dbType, Properties connectionProperties) {
+        // 直接使用Anyline提供的URL模板
         String jdbcTemplate = dbType.url();
-        // 魔法处理，Anyline的PostgreSQL类数据源URL定义有错误
-        if (StringUtils.equals("org.postgresql.Driver", dbType.driver())) {
-            jdbcTemplate = "jdbc:postgresql://{host}:{port:5432}/{database}";
-        }
 
         StringBuffer sb = new StringBuffer();
         Matcher matcher = PARAM_PATTERN.matcher(jdbcTemplate);
