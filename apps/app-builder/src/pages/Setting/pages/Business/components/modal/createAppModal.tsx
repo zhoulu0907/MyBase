@@ -1,17 +1,30 @@
-import { DatePicker, Form, Modal, Select } from "@arco-design/web-react";
+import { DatePicker, Form, Message, Modal, Select } from "@arco-design/web-react";
+import { getCorpAppSimpleListApi } from "@onebase/platform-center";
+import type { authorizedAppList, ICreateAppModal } from "../../types/appItem";
+import { useEffect, useState } from "react";
 
-interface ICreateAppModal {
-    visible: boolean;
-    onCloseAppModal: () =>void;
-    onSaveAppData: (data: any)=>void;
-}
 export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppModal, onSaveAppData}) => {
     const [createNewAppForm] = Form.useForm();
+    const [dropdownList, setDropdownList] = useState<authorizedAppList[]>([]);
+
+    const getApplicationIdResult = async() => {
+        try{
+           const res: authorizedAppList[]= await getCorpAppSimpleListApi();
+           setDropdownList(res ? res : [])
+        }catch(error) {
+            Message.error("获取列表失败")
+        }
+    }
+
+    useEffect(() => {
+        getApplicationIdResult();
+    },[])
 
     const handleSaveModal = async() => {
         const values = await createNewAppForm.validate();
         onSaveAppData(values);
     }
+
     return (
         <Modal
             title={
@@ -26,7 +39,7 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
             <Form form={createNewAppForm}>
                 <Form.Item
                     label="选择应用"
-                    field="appName"
+                    field="applicationIdList"
                     rules={[{ required: true, message: '请选择应用' }]}
                 >
                     <Select
@@ -34,9 +47,9 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                         placeholder="选择应用"
                         allowClear
                     >
-                        {["CM1","CM2"].map((option) => (
-                        <Select.Option key={option} value={option}>
-                            {option}
+                        {dropdownList.map((option) => (
+                        <Select.Option key={option.id} value={option.corpId}>
+                            {option.corpName}
                         </Select.Option>
                         ))}
                     </Select>
@@ -47,12 +60,12 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                     rules={[{ required: true, message: '请选择授权时间' }]}
                     normalize={(value) => {
                     return {
-                        effectTime: value && value[0],
-                        expireTime: value && value[1]
+                        authorizationTime: value && value[0],
+                        expiresTime: value && value[1]
                         };
                     }}
                     formatter={(value) => {
-                    return value && value.effectTime ? [value.effectTime, value.expireTime] : [];
+                    return value && value.authorizationTime ? [value.authorizationTime, value.expiresTime] : [];
                     }}
                 >
                     <DatePicker.RangePicker showTime />

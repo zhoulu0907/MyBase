@@ -1,30 +1,28 @@
 import { Checkbox, Form, Input, Select } from "@arco-design/web-react"
 import { industryOptions, noLabelLayout } from "../../constants"
+import { type CorpBasicInfo } from "@onebase/platform-center";
 
-interface IBasicInfoProps {
-    basicInfoForm: any
-}
 
-export const BasicInformation:React.FC<IBasicInfoProps> = ({basicInfoForm}) => {
+export const BasicInformation:React.FC<CorpBasicInfo> = ({basicInfoForm}) => {
     return (
         <Form form={basicInfoForm}>
             <Form.Item
                 label="企业名称"
-                field="appName"
+                field="corpName"
                 rules={[{ required: true, message: '请输入企业名称' }]}
             >
                 <Input placeholder="输入企业名称" maxLength={50} />
             </Form.Item>
             <Form.Item
                 label="企业ID"
-                field="appId"
+                field="corpId"
                 rules={[{ required: true, message: '请输入企业ID' }]}
             >
                 <Input placeholder="输入企业ID" />
             </Form.Item>
             <Form.Item
                 label="行业类型"
-                field="industry"
+                field="industryType"
                 rules={[{ required: true, message: '请选择行业类型' }]}
             >
                 <Select
@@ -35,7 +33,7 @@ export const BasicInformation:React.FC<IBasicInfoProps> = ({basicInfoForm}) => {
             <Form.Item label="联系地址" field="address" rules={[{ required: true }]}>
                 <Select placeholder="请选择" />
             </Form.Item>
-            <Form.Item label="" field="detailAddress" {...noLabelLayout}>
+            <Form.Item label="" field="address" {...noLabelLayout}>
                 <Input.TextArea placeholder="请输入详细地址" autoSize={{ minRows: 2, maxRows: 6 }} />
             </Form.Item>
             <Form.Item label="用户上限" field="userLimit" rules={[{ required: true }]}>

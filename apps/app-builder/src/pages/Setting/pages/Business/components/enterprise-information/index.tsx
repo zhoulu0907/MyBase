@@ -1,86 +1,119 @@
-import React, { useRef, useState } from 'react';
-import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Image, Space } from '@arco-design/web-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Image, Space, Message } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import EditableFormItem from '../formItem';
 import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
-import { useParams } from 'react-router-dom';
-import EditAuthorizedTime from '../modal/editAuthorizedTime';
+import { useOutletContext, useParams } from 'react-router-dom';
 import { CreateAppModal } from '../modal/createAppModal';
-import type { AppItem, AuthorizedAppRef } from '../../types/appItem';
-import { useTableData } from '../../hooks/useTable';
-
-// 企业信息数据模型
-interface EnterpriseInfo {
-  logo: string;
-  name: string;
-  id: string;
-  industry: string;
-  address: string;
-  userLimit: number;
-  status: string;
-}
+import type { AppItem, cropItem, OutletContextType } from '../../types/appItem';
+import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi, type corpListParams } from "@onebase/platform-center";
+import { convertIndustryType } from '../../utils';
 
 const EnterpriseInfoPage: React.FC = () => {
-  // 企业信息数据
-  const enterpriseData: EnterpriseInfo = {
-    logo: 'https://picsum.photos/120/80', // 替换为实际Logo
-    name: '玩贝斯软件公司',
-    id: 'com_onebase',
-    industry: '工业',
-    address: '上海市浦东新区云桥路600号',
-    userLimit: 10000,
-    status: '已启用'
-  };
-
   const {activeTab} = useParams();
-  const authorizedAppRef = useRef<AuthorizedAppRef>(null);
-  const [visible, setVisible] = useState<boolean>(false);
+  const { currentId } = useOutletContext<OutletContextType>();
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
-  const [formData, setFormData] = React.useState<EnterpriseInfo>(enterpriseData);
-  const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
-  const {displayData} = useTableData();
-  // 处理表单数据变更
-  const handleChange = (field: keyof EnterpriseInfo, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const [tableData, setTableData] = useState<AppItem[]>([]);
+  const [formData, setFormData] = useState<cropItem | null>(null);
+  const [originalInfo, setOriginalInfo] = useState<cropItem | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [pageInation, setPagination] = useState({
+        showTotal: true,
+        total: 0,
+        pageSize: 10,
+        current: 1,
+        sizeCanChange: true,
+        pageSizeChangeResetCurrent: true
+    });
+
+  const fetchCorpDetail = async() => {
+    try {
+      const res = await getDetailsApi(currentId);
+      setFormData(res && res || null);
+      setOriginalInfo(res && res || null);
+    }catch(error) {
+      Message.error("获取详情失败");
+    }
+  }
+
+  useEffect(()=>{
+    fetchCorpDetail();
+  },[])
+
+  const fetchCorpAuthorizedList = async(pageNo = 1, pageSize = 10) => {
+    setLoading(true);
+    const params: corpListParams = {
+        pageNo,
+        pageSize
+    };
+    try {
+      const res = await getCorpAuthorizedAppListApi(params);
+      if (res && Array.isArray(res.list)) {
+          setTableData(res.list);
+          setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));
+      } else {
+          console.warn('Invalid response format:', res);
+      }
+    }catch(error) {
+      Message.error("获取企业授权应用列表失败");
+    }finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchCorpAuthorizedList()
+  },[])
+
+  //授权应用分页切换
+  const handlePageChange = (current: number, pageSize: number) => {
+    fetchCorpAuthorizedList(current, pageSize);
   };
 
-  // 切换编辑状态
-  const toggleEdit = () => {
-    if (isEdited) {
-      // 这里可以添加保存逻辑
+  const handleChange = (field: string, value: number | string | boolean) => {
+    let newValue = value;
+    if(field === "status") {
+      newValue = newValue === true ? 1 : 0;
+    }else if(field === "industryType") {
+      newValue = convertIndustryType(value as string);
     }
+    setFormData((prev: any) => ({ ...prev, [field]: newValue }));
+  };
+
+  const toggleEdit = () => {
     setIsEdited(!isEdited);
   };
 
-  //点击modal的取消按钮
-  const handleCloseModal = () => {
-      setAddAppModalVisible(false);
+  const handleCancel = () => {
+    setFormData(originalInfo);
+    setIsEdited(false);
   }
 
-
-  const handleEdit = (record?: any) => {
-    setVisible(true);
+  const handleSubmitInfo = async() => {
+    try {
+      await updateCorpApi({...formData, id: currentId});
+      Message.success("企业基本信息保存成功");
+    }catch(error) {
+      Message.error("企业基本信息保存失败");
+    }finally {
+      setIsEdited(false);
+    }
   }
 
-  // 提交新应用（弹窗确认后调用）
-  const handleAddSubmit = (newAppData: any) => {
-      const newData: AppItem = {
-          key: displayData.length + 1,
-          appId: "113",
-          effectTime: newAppData.appTime.effectTime,
-          expireTime: newAppData.appTime.expireTime,
-          appName: newAppData.appName[0],
-          version: "V2.3"
-      };
-      authorizedAppRef.current?.addNewApp(newData);
-      setAddAppModalVisible(false);
-  };
-
-  const handleUpdateTime = () => {
-
+  const handleSearchChange = (searchValue: string) => {
+    setSearchValue(searchValue);
   }
+
+  const displayData = useMemo(()=>{
+      if (!searchValue.trim()) return tableData
+      const lowerSearch = searchValue.toLowerCase();
+      return tableData.filter(item => 
+          item.applicationName?.toLowerCase().includes(lowerSearch)
+      )
+  },[tableData, searchValue])
 
   const data = [
     {
@@ -92,7 +125,7 @@ const EnterpriseInfoPage: React.FC = () => {
             src='http://localhost:4399/src/assets/images/ob_logo.svg'
             alt='lamp'
           />}
-          onChange={handleChange.bind(null, "name")}
+          onChange={handleChange.bind(null, "logo")}
           isEdit={isEdited}
           component={Upload}
           componentProps={{ listType:'picture-list', action: '/' }}
@@ -101,8 +134,8 @@ const EnterpriseInfoPage: React.FC = () => {
     {
       label:"企业名称", 
       value: <EditableFormItem
-          value = "44"
-          onChange={handleChange.bind(null, "name")}
+          value = {formData?.corpName}
+          onChange={handleChange.bind(null, "corpName")}
           isEdit={isEdited}
           component={Input}
           componentProps={{ placeholder: '请输入企业名称' }}
@@ -111,8 +144,8 @@ const EnterpriseInfoPage: React.FC = () => {
     {
       label:"企业ID", 
       value: <EditableFormItem
-          value = "33"
-          onChange={handleChange.bind(null, "name")}
+          value = {formData?.corpId}
+          onChange={handleChange.bind(null, "corpId")}
           isEdit={isEdited}
           component={Input}
           componentProps={{ placeholder: '请输入企业ID' }}
@@ -121,8 +154,8 @@ const EnterpriseInfoPage: React.FC = () => {
      {
       label:"行业类型", 
       value: <EditableFormItem
-          value = "22"
-          onChange={handleChange.bind(null, "industry")}
+          value = {formData?.industryType}
+          onChange={handleChange.bind(null, "industryType")}
           isEdit={isEdited}
           component={Select}
           componentProps={{
@@ -138,8 +171,8 @@ const EnterpriseInfoPage: React.FC = () => {
      {
       label:"企业地址", 
       value: <EditableFormItem
-          value = "11"
-          onChange={handleChange.bind(null, "name")}
+          value = {formData?.address}
+          onChange={handleChange.bind(null, "address")}
           isEdit={isEdited}
           component={Input.TextArea}
           componentProps={{ placeholder: '请输入企业地址' }}
@@ -148,8 +181,8 @@ const EnterpriseInfoPage: React.FC = () => {
     {
       label:"用户上限", 
       value: <EditableFormItem
-          value = "55"
-          onChange={handleChange.bind(null, "name")}
+          value = {formData?.userLimit}
+          onChange={handleChange.bind(null, "userLimit")}
           isEdit={isEdited}
           component={Input}
           componentProps={{ placeholder: '请输入用户上限' }}
@@ -158,7 +191,7 @@ const EnterpriseInfoPage: React.FC = () => {
     {
       label:"状态", 
       value: <EditableFormItem
-          value = "已启用"
+          value = {formData?.status}
           onChange={handleChange.bind(null, "status")}
           isEdit={isEdited}
           component={Checkbox}
@@ -180,14 +213,14 @@ const EnterpriseInfoPage: React.FC = () => {
             {isEdited ? <Space>
               <Button 
                 icon={<IconEdit />}
-                onClick={toggleEdit}
+                onClick={handleCancel}
               >
                取消
               </Button>
               <Button 
                 type="primary" 
                 icon={<IconEdit />}
-                onClick={toggleEdit}
+                onClick={handleSubmitInfo}
               >
                保存修改
               </Button>
@@ -199,13 +232,17 @@ const EnterpriseInfoPage: React.FC = () => {
               </Button>}
           </Tabs.TabPane>
           <Tabs.TabPane key="authorized" title="授权应用">
-            <AuthorizedApp ref={authorizedAppRef} className ={styles.tabPanel} onEdit={handleEdit} setAddAppModalVisible={setAddAppModalVisible}/>
+            <AuthorizedApp 
+                pageination={pageInation} 
+                loading={loading} 
+                tableData={displayData} 
+                className ={styles.tabPanel} 
+                onSearch={handleSearchChange}
+                onChange={handlePageChange}
+              />
           </Tabs.TabPane>
         </Tabs>
       </Card>
-      <EditAuthorizedTime visible={visible} setVisible={setVisible} onUpdateData={handleUpdateTime} />
-       {/* 创建应用modal */}
-      <CreateAppModal visible={addAppModalVisible} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
     </div>
   );
 };

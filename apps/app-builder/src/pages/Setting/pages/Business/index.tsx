@@ -1,40 +1,17 @@
-import { Button, Dropdown, Input, Menu, Space, Tag, Modal, Message } from "@arco-design/web-react";
+import { Button, Dropdown, Input, Menu, Space, Tag, Modal, Message, Table,Avatar } from "@arco-design/web-react";
 import { IconMore } from "@arco-design/web-react/icon";
 import styles from "./index.module.less";
 import StatusTag from "@/components/StatusTag";
 import { Outlet, useMatch, useNavigate } from "react-router-dom";
-import { CommonTable } from "./components/table/commonTable";
 import { TopHeader } from "./components/topHeader";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getCorpListApi, disabledCorpApi, deleteCorpApi, updateCorpApi, type corpListParams } from "@onebase/platform-center";
+import { type corpApplicationListProps, type cropItem} from "./types/appItem";
+import { formatTimeYMDHMS } from '@onebase/common';
+import { formatIndustryType } from "./utils";
+const AvatarGroup = Avatar.Group;
 
-interface businessTableItem {
-    key: number,
-    logo: string,
-    name: string,
-    id: string,
-    industry: string,
-    apps: string,
-    admin: string,
-    status: number,
-    createTime: string
-}
-interface IBusinessPageProps {
-
-}
-
-const BusinessPage: React.FC<IBusinessPageProps> = () => {
-    const navigate = useNavigate();
-    const [editable, setEditable] = useState<boolean>(false);
-    const [tableData, setTableData] = useState<businessTableItem[]>([]);
-    const [searchInputValue, setSearchInputValue] = useState<string>("");
-    const isCreatePage = useMatch('onebase/setting/business/create-business');
-
-    const handleEdit = (name: string, activeTab: string) => {
-        setEditable(true);
-        const encodedName = encodeURIComponent(name);
-        navigate(`${encodedName}/${activeTab === "basic" ? "基本信息" : "授权应用"}`);
-    }
-
+const BusinessPage: React.FC = () => {
     const businessManageColumns = [
         {
             title: '企业LOGO',
@@ -45,45 +22,48 @@ const BusinessPage: React.FC<IBusinessPageProps> = () => {
         },
         {
             title: '企业名称',
-            dataIndex: 'name',
+            dataIndex: 'corpName',
         },
         {
             title: '企业ID',
-            dataIndex: 'id',
+            dataIndex: 'corpId',
         },
         {
             title: '行业类型',
-            dataIndex: 'industry',
-            render: (industry: string) => (
-                <Tag color="cyan" size="small">{industry}</Tag>
+            dataIndex: 'industryType',
+            render: (industry: number) => (
+                <Tag color="cyan" size="small">{formatIndustryType(industry)}</Tag>
             )
         },
         {
             title: '授权应用',
-            dataIndex: 'apps',
-            render: (apps: string) => (
-                <div>{apps}</div>
+            dataIndex: 'application',
+            render: (apps: corpApplicationListProps[]) => (
+              <div>{renderAuthorizedAppGroup(apps)}</div>
             )
         },
         {
             title: '管理员',
-            dataIndex: 'admin',
+            dataIndex: 'adminName',
         },
         {
             title: '状态',
             dataIndex: 'status',
-            render: (status: string) => <StatusTag status={status} />
+            render: (status: number) => <StatusTag status={status} />
         },
         {
             title: '创建时间',
             dataIndex: 'createTime',
+            render: (timeValue: string) => (
+                <div>{formatTimeYMDHMS(timeValue)}</div>
+            )
         },
         {
             title: '操作',
             render: (_: any, record: any) => (
                 <Space size={4}>
-                    <Button size="small" type="text" onClick={handleEdit.bind(null, record.name,"basic")}>编辑</Button>
-                    <Button size="small" type="text" onClick={handleEdit.bind(null, record.name ,"authorized")}>应用授权</Button>
+                    <Button size="small" type="text" onClick={handleEdit.bind(null, record, "basic")}>编辑</Button>
+                    <Button size="small" type="text" onClick={handleEdit.bind(null, record, "authorized")}>应用授权</Button>
                     <Dropdown
                         trigger="click"
                         droplist={actionMenu(record)}
@@ -95,77 +75,155 @@ const BusinessPage: React.FC<IBusinessPageProps> = () => {
             )
         }
     ];
-    // 模拟数据
-    const initialBusinessManagementData = [1, 2, 3, 4, 5].map((_, index) => ({
-        key: index,
-        logo: '',
-        name: '玩贝斯软件公司',
-        id: 'com_onebase',
-        industry: '大交通',
-        apps: "1111",
-        admin: '风月',
-        status: 1,
-        createTime: '2025-03-29 12:46:21'
-    }));
+    const navigate = useNavigate();
+    const inputRef = useRef(null);
+    const isCreatePage = useMatch('onebase/setting/business/create-business');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [editable, setEditable] = useState<boolean>(false);
+    const [searchValue, setSearchValue] = useState<string>("");
+    const [tableData, setTableData] = useState<cropItem[]>([]);
+    const [currentId, setCurrentId] = useState<number>();
+    const [pagination, setPagination] = useState({
+        showTotal: true,
+        total: 0,
+        pageSize: 10,
+        current: 1,
+        sizeCanChange: true,
+        pageSizeChangeResetCurrent: true
+    });
+
+    function renderAuthorizedAppGroup(applicationList: corpApplicationListProps[]) {
+        return <>
+            <div style={{display: 'flex', alignItems: 'flex-end'}}>
+                <AvatarGroup size={24}>
+                    {applicationList?.map(item => {
+                        return <Avatar>
+                            {item.iconName}
+                        </Avatar>
+                    })}
+                </AvatarGroup>
+            </div>
+        </>
+    }
+
+    const fetchTableDataList = async(pageNo = 1, pageSize = 10) => {
+        setLoading(true);
+        const params: corpListParams = {
+            pageNo,
+            pageSize
+        };
+        try {
+            const res = await getCorpListApi(params);
+            if (res && Array.isArray(res.list)) {
+                setTableData(res.list);
+                setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));
+            } else {
+                console.warn('Invalid response format:', res);
+            }
+        } catch (error: any) {
+            Message.error(error.message);
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
-        setTableData(initialBusinessManagementData)
+        fetchTableDataList();
     }, [])
 
-    const displayBusinessData = useMemo(() => {
-        if (!searchInputValue.trim()) {
-        return tableData;
-        }
-        // 有搜索值时，过滤原始数据
-        const lowerKey = searchInputValue.toLowerCase();
-        return tableData.filter(item => 
-        item.name.toLowerCase().includes(lowerKey)
-        );
-    }, [tableData, searchInputValue]); 
+    const handlePageChange = (current: number, pageSize: number) => {
+        fetchTableDataList(current, pageSize);
+    };
+
+    const handleEdit = (record:cropItem, activeTab: string) => {
+        setEditable(true);
+        setCurrentId(record.id);
+        const encodedName = encodeURIComponent(record.corpName);
+        navigate(`${encodedName}/${activeTab === "basic" ? "基本信息" : "授权应用"}`);
+    }
 
     //创建企业
     const handleCreateBusiness = () => {
         navigate("create-business");
     }
 
-    // 禁用用户，需确认
-    const handleDisabled = (record: any) => {
+    const renderInput = (name: string) => {
+        return (
+             <div className={styles.deleteModal}>
+                <div className={styles.title}>删除企业，该企业下的数据将被永久删除，请谨慎操作。</div>
+                <div>
+                    <div className={styles.subTitle}>如确定删除，请输入企业名称：{name}</div>
+                    <Input 
+                        placeholder="请输入企业名称" 
+                        ref={inputRef as any}
+                    />
+                </div>
+            </div>
+        )
+    }
+
+    // 禁用
+    const handleDisabled = (record: cropItem) => {
         Modal.confirm({
-            title: `禁用企业(${record.name})? `,
+            title: `禁用企业(${record.corpName})? `,
             content: '禁用后企业用户无法登录，再次启用时企业可恢复正常使用',
             okButtonProps: {
                 status: 'danger',
             },
             onOk: async () => {
-                // await updateUserStatus(record.id, newStatus);
-                Message.success("禁用成功");
-                // getUserList();
+                const params = {id: record.id, status: 0};
+                try {
+                    await disabledCorpApi(params);
+                    // await updateCorpApi({...record, status: 0})
+                    Message.success("禁用成功");
+                }catch(error) {
+                    Message.error("禁用失败");
+                }
             }
         });
     };
 
     // 删除
-    const handleDelete = (record: any) => {
+    const handleDelete = (record: cropItem) => {
         Modal.confirm({
-            title: `确认要删除企业(${record.name})吗？`,
+            title: `确认要删除企业(${record.corpName})吗？`,
             okButtonProps: {
                 status: 'danger',
             },
-            content: <div className={styles.deleteModal}>
-                <div className={styles.title}>删除企业，该企业下的数据将被永久删除，请谨慎操作。</div>
-                <div>
-                    <div className={styles.subTitle}>如确定删除，请输入企业名称：玩贝斯软件公司</div>
-                    <Input placeholder="请输入企业名称" />
-                </div>
-            </div>,
+            content:renderInput(record.corpName),
             onOk: async () => {
-                // await deleteUser(record.id);
-                Message.success('删除成功');
-                // onRefreshDept();
-                // getUserList();
+                const value = (inputRef as any)?.current?.dom?.value;
+                if(!value) {
+                    Message.error("请输入内容");
+                    return false;
+                }
+                if (value !== record.corpName) {
+                    Message.error('输入的企业名称不一致，请重新输入');
+                    return false; 
+                }
+                try {
+                    await deleteCorpApi(record.id);
+                    await getCorpListApi({pageNo: pagination.current, pageSize: pagination.pageSize})
+                    Message.success('删除成功');
+                } catch (error) {
+                    Message.error('删除失败，请重试');
+                }
             }
         });
     };
+
+    const handleSearchChange = (searchValue: string) => {
+        setSearchValue(searchValue);
+    }
+
+    const displayData = useMemo(()=>{
+        if (!searchValue.trim()) return tableData
+        const lowerSearch = searchValue.toLowerCase();
+        return tableData.filter(item => 
+            item.corpName?.toLowerCase().includes(lowerSearch) || 
+            item.corpId?.toLowerCase().includes(lowerSearch)
+        )
+    },[tableData, searchValue])
 
     // 操作列下拉菜单
     const actionMenu = (record: any) => (
@@ -176,29 +234,28 @@ const BusinessPage: React.FC<IBusinessPageProps> = () => {
     );
 
     const renderContent = () => {
-        if(editable) {
-            return <Outlet />
+        if (editable) {
+            return <Outlet context={{currentId}}/>
         }
-        if(isCreatePage) {
+        if (isCreatePage) {
             return <Outlet />
         }
         return (
             <div className={styles.businessManagement}>
-                {/* 头部渲染 */}
-                <TopHeader title="创建企业" onAdd={handleCreateBusiness} setSearchInputValue={setSearchInputValue}/>
-                <CommonTable 
-                    data={displayBusinessData}
+                <TopHeader title="创建企业" onAdd={handleCreateBusiness} setSearchInputValue={handleSearchChange} />
+                <Table
+                    loading={loading}
                     columns={businessManageColumns}
-                    pageination={{
-                        sizeCanChange: true,
+                    data={displayData}
+                    pagination={{
+                        ...pagination,
                         showTotal: true,
-                        total: displayBusinessData.length,
-                        pageSize: 10,
-                        current: 1,
-                        pageSizeChangeResetCurrent: true
+                        onChange: handlePageChange
                     }}
+                    rowKey="id"
+                    border={false}
                 />
-            </div> 
+            </div>
         )
     }
 

@@ -50,7 +50,7 @@ const SettingPage: React.FC = () => {
                 <Route path="spaceInfo" element={<SpaceInfo />} />
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="tenant" element={<TenantPage />} />
-                <Route path="business" element={<BusinessPage />}>
+                <Route path="enterprise" element={<BusinessPage />}>
                   <Route path="create-business" element={<CreateBusinessPage />} />
                   <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
                 </Route>

@@ -30,12 +30,12 @@ export const EditAuthorizedTime:React.FC<IEditAuthorizedModal> = ({visible, setV
                     rules={[{ required: true, message: '请选择授权时间' }]}
                     normalize={(value) => {
                     return {
-                        effectTime: value && value[0],
-                        expireTime: value && value[1]
+                        authorizationTime: value && value[0],
+                        expiresTime: value && value[1]
                         };
                     }}
                     formatter={(value) => {
-                    return value && value.effectTime ? [value.effectTime, value.expireTime] : [];
+                    return value && value.authorizationTime ? [value.authorizationTime, value.expiresTime] : [];
                     }}
                 >
                     <DatePicker.RangePicker showTime />
