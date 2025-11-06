@@ -1,9 +1,15 @@
 import { Checkbox, Form, Input, Select } from "@arco-design/web-react"
-import { industryOptions, noLabelLayout } from "../../constants"
-import { type CorpBasicInfo } from "@onebase/platform-center";
+import { noLabelLayout } from "../../constants"
+import type { industryTypeOption } from "../../types/appItem";
+import { useEffect } from "react";
 
+interface IBasicInfoProps {
+    industryOptions: industryTypeOption[];
+}
 
-export const BasicInformation:React.FC<CorpBasicInfo> = ({basicInfoForm}) => {
+export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions }) => {
+    const [ basicInfoForm ] = Form.useForm();
+
     return (
         <Form 
             requiredSymbol={{ position: 'end' }}

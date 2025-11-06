@@ -1,29 +1,27 @@
 import { Form, Input } from "@arco-design/web-react"
 
-interface IAdminInfoProps {
-    adminInfoForm:any
-}
-
-export const AdminInformation:React.FC<IAdminInfoProps> = ({adminInfoForm}) => {
+export const AdminInformation:React.FC = () => {
+    const [adminInfoForm] = Form.useForm();
+    
     return (
         <Form form={adminInfoForm}>
             <Form.Item
                 label="姓名"
-                field="adminName"
+                field="username"
                 rules={[{ required: true, message: '请输入姓名' }]}
             >
                 <Input placeholder="输入姓名" />
             </Form.Item>
             <Form.Item
                 label="账号"
-                field=""
+                field="nickname"
                 rules={[{ required: true, message: '请输入账号' }]}
             >
                 <Input placeholder="输入账号" />
             </Form.Item>
             <Form.Item
                 label="手机号"
-                field="adminPhone"
+                field="mobile"
                 rules={[
                     { required: true, message: '请输入手机号' },
                 ]}
@@ -32,7 +30,7 @@ export const AdminInformation:React.FC<IAdminInfoProps> = ({adminInfoForm}) => {
             </Form.Item>
             <Form.Item
                 label="邮箱"
-                field="adminEmail"
+                field="email"
                 rules={[
                     { required: true, message: '请输入邮箱' },
                     { type: 'email', message: '请输入正确的邮箱格式' }

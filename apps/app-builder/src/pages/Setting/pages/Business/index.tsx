@@ -5,8 +5,8 @@ import StatusTag from "@/components/StatusTag";
 import { Outlet, useMatch, useNavigate } from "react-router-dom";
 import { TopHeader } from "./components/topHeader";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getCorpListApi, disabledCorpApi, deleteCorpApi, type corpListParams } from "@onebase/platform-center";
-import { type corpApplicationListProps, type cropItem} from "./types/appItem";
+import { getCorpListApi, disabledCorpApi, deleteCorpApi, getIndustryType, type corpListParams } from "@onebase/platform-center";
+import { type corpApplicationListProps, type cropItem, type industryTypeOption} from "./types/appItem";
 import { formatTimeYMDHMS } from '@onebase/common';
 import { convertName, formatIndustryType } from "./utils";
 const AvatarGroup = Avatar.Group;
@@ -83,6 +83,7 @@ const BusinessPage: React.FC = () => {
     const [searchValue, setSearchValue] = useState<string>("");
     const [tableData, setTableData] = useState<cropItem[]>([]);
     const [currentId, setCurrentId] = useState<string>("");
+    const [industryOptions, setIndustryOptions] = useState<industryTypeOption[]>([]);
     const [pagination, setPagination] = useState({
         showTotal: true,
         total: 0,
@@ -130,8 +131,18 @@ const BusinessPage: React.FC = () => {
         }
     }
 
+    const fetchIndustryType = async() => {
+        try {
+            const res = await getIndustryType("industry_type");
+            setIndustryOptions(res);
+        }catch(error) {
+            Message.error("获取行业类型列表失败");
+        }
+    }
+
     useEffect(() => {
         fetchTableDataList();
+        fetchIndustryType();
     }, [])
 
     const handlePageChange = (current: number, pageSize: number) => {
@@ -253,7 +264,7 @@ const BusinessPage: React.FC = () => {
             return <Outlet context={{currentId}}/>
         }
         if (isCreatePage) {
-            return <Outlet />
+            return <Outlet context={{industryOptions}}/>
         }
         return (
             <div className={styles.businessManagement}>

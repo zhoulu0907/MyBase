@@ -63,6 +63,7 @@ export interface cropItem {
 
 export interface OutletContextType {
   currentId: string;
+  industryOptions: industryTypeOption[]
 }
 
 export interface authorizedTime {
@@ -83,4 +84,14 @@ export interface authorizedAppList extends corpApplicationListProps {
   versionNumber: string;
   createTime: string;
   appId: string;
+}
+
+export interface industryTypeOption {
+  colorType: string;
+  dictType: string;
+  id: string;
+  label: string;
+  sort:number;
+  status: number; 
+  value: string;
 }
