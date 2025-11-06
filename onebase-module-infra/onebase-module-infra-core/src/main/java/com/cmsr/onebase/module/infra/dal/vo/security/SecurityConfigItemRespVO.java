@@ -43,10 +43,10 @@ public class SecurityConfigItemRespVO {
     private String options;
 
     @Schema(description = "最大值", example = "10000")
-    private Long maxvalue;
+    private Long maxValue;
 
     @Schema(description = "最小值", example = "1")
-    private Long minvalue;
+    private Long minValue;
 
     @Schema(description = "必填", example = "true")
     private String required;

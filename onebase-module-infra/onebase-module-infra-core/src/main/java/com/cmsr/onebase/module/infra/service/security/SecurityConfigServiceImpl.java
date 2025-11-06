@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigUpdateReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.SECURITY_CONFIG_NOT_EXIST;
 
 /**
  * 安全配置服务实现类
@@ -37,6 +40,13 @@ import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeC
 @Slf4j
 @Validated
 public class SecurityConfigServiceImpl implements SecurityConfigService {
+
+    public static final String                   DATATYPE_STRING  = "STRING";
+    public static final String                   DATATYPE_INTEGER = "INTEGER";
+    public static final String                   DATATYPE_BOOLEAN     = "BOOLEAN";
+    public static final String                   DATATYPE_JSON_STRING  = "JSON[STRING]";
+    public static final String                   DATATYPE_JSON_INTEGER = "JSON[INTEGER]";
+    public static final String                   DATATYPE_JSON_BOOLEAN = "JSON[BOOLEAN]";
 
     @Resource
     private SecurityConfigCategoryDataRepository categoryDataRepository;
@@ -75,20 +85,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         // 组装返回数据：defaultValue=模板默认值；configValue=租户有效值（租户配置或默认值）
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
-            SecurityConfigItemRespVO itemVO = new SecurityConfigItemRespVO();
-            itemVO.setConfigKey(template.getConfigKey());
-            itemVO.setConfigName(template.getConfigName());
-            itemVO.setDataType(template.getDataType());
-            itemVO.setConfigValue(template.getConfigValue());
-            itemVO.setDescription(template.getDescription());
-            itemVO.setSortOrder(template.getSortOrder());
-            itemVO.setId(template.getId());
-            itemVO.setCategoryId(template.getCategoryId());
-            itemVO.setOptions(template.getOptions());
-            itemVO.setMaxvalue(template.getMaxValue());
-            itemVO.setMinvalue(template.getMinValue());
-            itemVO.setRequired(template.getRequired());
-
+            SecurityConfigItemRespVO itemVO = SecurityConfigCategoryConvert.INSTANCE.convert(template);
             configItems.add(itemVO);
         }
 
@@ -101,7 +98,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     @CacheEvict(cacheNames = cacheNames, key = "#tenantId")
     public void batchUpdateConfig(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList) {
         // 接口4：批量更新租户安全配置
-        if (updateReqVOList == null || updateReqVOList.isEmpty()) {
+        if (CollectionUtils.isEmpty(updateReqVOList)) {
             return;
         }
 
@@ -159,20 +156,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         // 组装返回数据：defaultValue=模板默认值；configValue=租户有效值（租户配置或默认值）
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
-            SecurityConfigItemRespVO itemVO = new SecurityConfigItemRespVO();
-            itemVO.setConfigKey(template.getConfigKey());
-            itemVO.setConfigName(template.getConfigName());
-            itemVO.setDataType(template.getDataType());
-            itemVO.setConfigValue(template.getConfigValue());
-            itemVO.setDescription(template.getDescription());
-            itemVO.setSortOrder(template.getSortOrder());
-            itemVO.setId(template.getId());
-            itemVO.setCategoryId(template.getCategoryId());
-            itemVO.setOptions(template.getOptions());
-            itemVO.setMaxvalue(template.getMaxValue());
-            itemVO.setMinvalue(template.getMinValue());
-            itemVO.setRequired(template.getRequired());
-
+            SecurityConfigItemRespVO itemVO = SecurityConfigCategoryConvert.INSTANCE.convert(template);
             configItems.add(itemVO);
         }
 
@@ -188,7 +172,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     private void validateConfigUpdates(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList) {
         // 获取租户所有安全配置模板
         List<SecurityConfigItemRespVO> templates = getSecurityConfigsByTenant(tenantId);
-        
+
         // 转换为Map便于快速查找
         Map<String, SecurityConfigItemRespVO> templateMap = templates.stream()
                 .collect(Collectors.toMap(SecurityConfigItemRespVO::getConfigKey, item -> item));
@@ -201,14 +185,13 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             // 1. Key匹配性校验
             SecurityConfigItemRespVO template = templateMap.get(configKey);
             if (template == null) {
-                throw new ServiceException(BAD_REQUEST.getCode(), 
-                    String.format("配置项 [%s] 不在安全配置范围内", configKey));
+                throw exception(SECURITY_CONFIG_NOT_EXIST,configKey);
             }
 
             // 2. 必填校验
             if ("true".equalsIgnoreCase(template.getRequired())) {
                 if (configValue == null || configValue.trim().isEmpty()) {
-                    throw new ServiceException(BAD_REQUEST.getCode(), 
+                    throw new ServiceException(BAD_REQUEST.getCode(),
                         String.format("配置项 [%s] 为必填项，不能为空", template.getConfigName()));
                 }
             }
@@ -224,9 +207,8 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             validateDataType(template.getConfigName(), configValue, dataType);
 
             // 4. 数值边界校验（仅INTEGER类型）
-            if ("INTEGER".equals(dataType)) {
-                validateIntegerRange(template.getConfigName(), configValue, 
-                    template.getMinvalue(), template.getMaxvalue());
+            if (DATATYPE_INTEGER.equals(dataType)) {
+                validateIntegerRange(template.getConfigName(), configValue, template.getMinValue(), template.getMaxValue());
             }
         }
     }
@@ -241,36 +223,36 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     private void validateDataType(String configName, String configValue, String dataType) {
         try {
             switch (dataType) {
-                case "STRING":
+                case DATATYPE_STRING:
                     // 字符串类型，任意值都可以
                     break;
-                    
-                case "INTEGER":
+
+                case DATATYPE_INTEGER:
                     // 整数类型
                     Long.parseLong(configValue.trim());
                     break;
-                    
-                case "BOOLEAN":
+
+                case DATATYPE_BOOLEAN:
                     // 布尔类型
                     String lowerValue = configValue.trim().toLowerCase();
                     if (!"true".equals(lowerValue) && !"false".equals(lowerValue)) {
                         throw new IllegalArgumentException();
                     }
                     break;
-                    
-                case "JSON[STRING]":
+
+                case DATATYPE_JSON_STRING:
                     // 逗号分隔的字符串，不需要特殊校验
                     break;
-                    
-                case "JSON[INTEGER]":
+
+                case DATATYPE_JSON_INTEGER:
                     // 逗号分隔的整数
                     String[] intValues = configValue.split(",");
                     for (String value : intValues) {
                         Long.parseLong(value.trim());
                     }
                     break;
-                    
-                case "JSON[BOOLEAN]":
+
+                case DATATYPE_JSON_BOOLEAN:
                     // 逗号分隔的布尔值
                     String[] boolValues = configValue.split(",");
                     for (String value : boolValues) {
@@ -280,13 +262,13 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
                         }
                     }
                     break;
-                    
+
                 default:
-                    throw new ServiceException(BAD_REQUEST.getCode(), 
+                    throw new ServiceException(BAD_REQUEST.getCode(),
                         String.format("配置项 [%s] 的数据类型 [%s] 不支持", configName, dataType));
             }
         } catch (IllegalArgumentException e) {
-            throw new ServiceException(BAD_REQUEST.getCode(), 
+            throw new ServiceException(BAD_REQUEST.getCode(),
                 String.format("配置项 [%s] 的数据类型不正确，应为 [%s]", configName, dataType));
         }
     }
@@ -302,18 +284,18 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     private void validateIntegerRange(String configName, String configValue, Long minValue, Long maxValue) {
         try {
             long value = Long.parseLong(configValue.trim());
-            
+
             if (minValue != null && value < minValue) {
-                throw new ServiceException(BAD_REQUEST.getCode(), 
+                throw new ServiceException(BAD_REQUEST.getCode(),
                     String.format("配置项 [%s] 的值必须大于等于 %d", configName, minValue));
             }
-            
+
             if (maxValue != null && value > maxValue) {
-                throw new ServiceException(BAD_REQUEST.getCode(), 
+                throw new ServiceException(BAD_REQUEST.getCode(),
                     String.format("配置项 [%s] 的值必须小于等于 %d", configName, maxValue));
             }
         } catch (NumberFormatException e) {
-            throw new ServiceException(BAD_REQUEST.getCode(), 
+            throw new ServiceException(BAD_REQUEST.getCode(),
                 String.format("配置项 [%s] 的数据类型不正确，应为 INTEGER", configName));
         }
     }
