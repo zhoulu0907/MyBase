@@ -788,8 +788,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             vo.setSubmitTime(flowInsExtDO.getSubmitTime());
             vo.setInitiatorDeptId(flowInsExtDO.getInitiatorDeptId());
             vo.setInitiatorDeptName(flowInsExtDO.getInitiatorDeptName());
-            vo.setInitiatorId(flowInsExtDO.getInitiatorId());
-            vo.setInitiatorName(flowInsExtDO.getInitiatorName());
         }
 
         String entityDataId = instance.getBusinessId();
