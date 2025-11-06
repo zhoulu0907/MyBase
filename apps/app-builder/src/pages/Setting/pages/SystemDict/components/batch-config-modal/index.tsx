@@ -39,20 +39,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
   const [dictValues, setDictValues] = useState<DictValueItem[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
-
-  // 获取可见的数据
-  const getVisibleItems = useCallback((items = mergeFormDataWithState()): DictValueItem[] => {
-    return items.filter((item) => !item.isDelete);
-  }, []);
-
-  // 获取删除的数据
-  const getDeletedItems = useCallback((items = mergeFormDataWithState()): DictValueItem[] => {
-    return items.filter((item) => item.isDelete);
-  }, []);
-
-  const activeDictValues = useMemo(() => {
-    return getVisibleItems(dictValues);
-  }, [dictValues, getVisibleItems]);
+  const [externalErrors, setExternalErrors] = useState<Record<string, string>>({});
 
   // 合并表单数据和状态数据
   const mergeFormDataWithState = useCallback(
@@ -76,6 +63,28 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
     [form, dictValues]
   );
 
+  // 获取可见的数据
+  const getVisibleItems = useCallback(
+    (items?: DictValueItem[]): DictValueItem[] => {
+      const targetItems = items || mergeFormDataWithState();
+      return targetItems.filter((item) => !item.isDelete);
+    },
+    [mergeFormDataWithState]
+  );
+
+  // 获取删除的数据
+  const getDeletedItems = useCallback(
+    (items?: DictValueItem[]): DictValueItem[] => {
+      const targetItems = items || mergeFormDataWithState();
+      return targetItems.filter((item) => item.isDelete);
+    },
+    [mergeFormDataWithState]
+  );
+
+  const activeDictValues = useMemo(() => {
+    return getVisibleItems(dictValues);
+  }, [dictValues, getVisibleItems]);
+
   const updateDictValuesAndForm = useCallback(
     (newValues: DictValueItem[]) => {
       setDictValues(newValues);
@@ -83,6 +92,10 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
     },
     [form]
   );
+
+  const clearErrors = useCallback(() => {
+    setExternalErrors({});
+  }, []);
 
   const loadAllDictDataList = useCallback(async () => {
     try {
@@ -124,6 +137,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       // 关闭时重置
       form.resetFields();
       setDictValues([]);
+      clearErrors();
     }
   }, [visible]);
 
@@ -141,6 +155,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
     };
     const newValues = [...mergedDictValues, newValue];
     updateDictValuesAndForm(newValues);
+    clearErrors();
   };
 
   // 删除字典值
@@ -150,6 +165,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       ? mergedDictValues.filter((item) => item.id !== id)
       : mergedDictValues.map((item) => (item.id === id ? { ...item, isDelete: true } : item));
     updateDictValuesAndForm(newValues);
+    clearErrors();
   };
 
   // 处理彩色模式切换
@@ -172,7 +188,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
 
   // 一键生成编码 - 显示确认对话框
   const handleGenerateCodes = () => {
-    const visibleValues = getVisibleItems(dictValues);
+    const visibleValues = getVisibleItems();
     if (!canGenerate(visibleValues)) {
       Message.warning('没有需要生成编码的项');
       return;
@@ -249,15 +265,20 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       ),
       dataIndex: 'label',
       width: 200,
-      render: (_: unknown, record: DictData, index: number) => (
-        <Form.Item
-          field={`dictValues.${index}.label`}
-          rules={[{ required: true, message: '请输入字典值' }]}
-          style={{ margin: 0 }}
-        >
-          <Input placeholder="请输入字典值" value={record.label} />
-        </Form.Item>
-      )
+      render: (_: unknown, record: DictData, index: number) => {
+        const fieldName = `dictValues.${index}.label`;
+        return (
+          <Form.Item
+            field={fieldName}
+            rules={[{ required: true, message: '请输入字典值', validateTrigger: ['onChange', 'onBlur'] }]}
+            style={{ margin: 0 }}
+            validateStatus={externalErrors[fieldName] ? 'error' : undefined}
+            help={externalErrors[fieldName]}
+          >
+            <Input placeholder="请输入字典值" value={record.label} />
+          </Form.Item>
+        );
+      }
     });
 
     columns.push({
@@ -268,22 +289,28 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       ),
       dataIndex: 'value',
       width: 200,
-      render: (_: unknown, record: DictData, index: number) => (
-        <Form.Item
-          field={`dictValues.${index}.value`}
-          rules={[{ required: true, message: '请输入字典值编码' }]}
-          style={{ margin: 0 }}
-        >
-          <Input placeholder="请输入字典值编码" value={record.value} />
-        </Form.Item>
-      )
+      render: (_: unknown, record: DictData, index: number) => {
+        const fieldName = `dictValues.${index}.value`;
+        return (
+          <Form.Item
+            field={fieldName}
+            rules={[{ required: true, message: '请输入字典值编码' }]}
+            style={{ margin: 0 }}
+            validateTrigger={['onChange', 'onBlur']}
+            validateStatus={externalErrors[fieldName] ? 'error' : undefined}
+            help={externalErrors[fieldName]}
+          >
+            <Input placeholder="请输入字典值编码" value={record.value} />
+          </Form.Item>
+        );
+      }
     });
 
     columns.push({
       title: '启用状态',
       dataIndex: 'status',
       width: 100,
-      render: (_: unknown, record: DictData, index: number) => (
+      render: (_: unknown, _record: DictData, index: number) => (
         <Form.Item
           field={`dictValues.${index}.status`}
           style={{ margin: 0 }}
@@ -321,7 +348,16 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       const mergedValues = mergeFormDataWithState(formValues.dictValues);
       onOk(mergedValues);
     } catch (error) {
-      console.error('表单验证失败:', error);
+      // 手动渲染表单错误
+      const errs = (error && (error as Record<string, unknown>).errors) || {};
+
+      if (typeof errs === 'object') {
+        const map: Record<string, string> = {};
+        Object.keys(errs).forEach((key: string) => {
+          if (key) map[key] = (errs as Record<string, { message?: string }>)[key]?.message || '校验失败';
+        });
+        setExternalErrors(map);
+      }
     }
   };
 
