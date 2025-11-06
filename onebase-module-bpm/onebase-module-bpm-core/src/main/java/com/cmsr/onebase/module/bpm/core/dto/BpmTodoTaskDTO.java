@@ -39,8 +39,14 @@ public class BpmTodoTaskDTO extends FlowTask {
     /**
      * 发起人名称（冗余字段，方便查询显示）
      */
-    @Column(name = "initiator_name", length = 100)
+    @Column(name = "initiator_name", length = 500)
     private String initiatorName;
+
+    /**
+     * 发起人头像（冗余字段，方便查询显示）
+     */
+    @Column(name = "initiator_avatar", length = 100)
+    private String initiatorAvatar;
 
     /**
      * 发起部门ID
