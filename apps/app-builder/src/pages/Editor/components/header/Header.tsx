@@ -11,6 +11,7 @@ import { getEntityFields } from '@onebase/app';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
+import VersionModal from '@/pages/CreateApp/pages/PageManager/components/Modals/VersionModal';
 import { useBasicEditorStore } from '@/store';
 import { useAppStore, useFlowEditorStor } from '@/store/index';
 import { Breadcrumb, Button, Form, Message, Tabs, Select } from '@arco-design/web-react';
@@ -95,6 +96,7 @@ const baseTabData = [
 
 export default function EditorHeader() {
   const [versionList, setVersionList] = useState<VersionType[]>([]);
+  const [manageVisible, setManageVisible] = useState(false);
   const useVersionList = useInitDefaultVersion();
   const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
@@ -345,6 +347,13 @@ export default function EditorHeader() {
     setVisibleRenameForm(false);
   };
 
+  const changeCurrentFlow = (value: string) => {
+    if (value !== 'manage') {
+      setCurrnetFlowId(value);
+    } else {
+      setManageVisible(true);
+    }
+  };
   useEffect(() => {
     if (curPage?.value?.pageSetType === PageType.NORMAL) {
       setTabData(baseTabData.filter((tab) => tab.key !== EDITOR_TYPES.FLOW_EDITOR));
@@ -439,7 +448,7 @@ export default function EditorHeader() {
           value={currentFlowId}
           arrowIcon={null}
           className={styles.versionSelect}
-          onChange={(value) => setCurrnetFlowId(value)}
+          onChange={(value) => changeCurrentFlow(value)}
         >
           {versionList.map((item) => (
             <Option key={item.id} value={item.id}>
@@ -511,6 +520,8 @@ export default function EditorHeader() {
         setVisible={setVisibleRenameForm}
         form={renameForm}
       />
+
+      <VersionModal visible={manageVisible} setVisible={setManageVisible} />
     </div>
   );
 }

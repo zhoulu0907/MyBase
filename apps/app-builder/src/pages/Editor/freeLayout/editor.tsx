@@ -41,8 +41,6 @@ export const Editor = () => {
       if (res.globalConfig) {
         setConfigData(res.globalConfig);
       }
-      console.log(ref?.current);
-      
       let useJsonData = {};
       if (!res.bpmDefJson) {
         useJsonData = initialData;
