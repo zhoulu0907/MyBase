@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.SECURITY_CONFIG_NOT_EXIST;
+import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 
 /**
  * 安全配置服务实现类
@@ -191,8 +191,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             // 2. 必填校验
             if ("true".equalsIgnoreCase(template.getRequired())) {
                 if (configValue == null || configValue.trim().isEmpty()) {
-                    throw new ServiceException(BAD_REQUEST.getCode(),
-                        String.format("配置项 [%s] 为必填项，不能为空", template.getConfigName()));
+                    throw exception(SECURITY_CONFIG_ITEM_REQUIRED,template.getConfigName());
                 }
             }
 
@@ -264,12 +263,10 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
                     break;
 
                 default:
-                    throw new ServiceException(BAD_REQUEST.getCode(),
-                        String.format("配置项 [%s] 的数据类型 [%s] 不支持", configName, dataType));
+                    throw exception(SECURITY_CONFIG_DATA_TYPE_NOT_SUPPORT,configName, dataType);
             }
         } catch (IllegalArgumentException e) {
-            throw new ServiceException(BAD_REQUEST.getCode(),
-                String.format("配置项 [%s] 的数据类型不正确，应为 [%s]", configName, dataType));
+            throw exception(SECURITY_CONFIG_DATA_TYPE_WRONG,configName, dataType);
         }
     }
 
@@ -286,17 +283,14 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             long value = Long.parseLong(configValue.trim());
 
             if (minValue != null && value < minValue) {
-                throw new ServiceException(BAD_REQUEST.getCode(),
-                    String.format("配置项 [%s] 的值必须大于等于 %d", configName, minValue));
+                throw exception(SECURITY_CONFIG_MIN_VALUE,configName, minValue);
             }
 
             if (maxValue != null && value > maxValue) {
-                throw new ServiceException(BAD_REQUEST.getCode(),
-                    String.format("配置项 [%s] 的值必须小于等于 %d", configName, maxValue));
+                throw exception(SECURITY_CONFIG_MAX_VALUE,configName, maxValue);
             }
         } catch (NumberFormatException e) {
-            throw new ServiceException(BAD_REQUEST.getCode(),
-                String.format("配置项 [%s] 的数据类型不正确，应为 INTEGER", configName));
+            throw exception(SECURITY_CONFIG_DATA_TYPE_WRONG,configName, DATATYPE_INTEGER);
         }
     }
 
