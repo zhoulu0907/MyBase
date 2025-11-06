@@ -34,6 +34,7 @@ public class SecurityConfigTemplateDO extends BaseDO {
     public static final String OPTIONS = "options";
     public static final String MAXVALUE = "maxvalue";
     public static final String MINVALUE = "minvalue";
+    public static final String REQUIRED = "required";
 
     /**
      * 分类ID
@@ -79,6 +80,9 @@ public class SecurityConfigTemplateDO extends BaseDO {
 
     @Column(name = MINVALUE)
     private Long minValue;
+
+    @Column(name = REQUIRED)
+    private String required;
     /**
      * 描述
      */

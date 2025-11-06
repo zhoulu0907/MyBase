@@ -81,6 +81,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             itemVO.setOptions(template.getOptions());
             itemVO.setMaxvalue(template.getMaxValue());
             itemVO.setMinvalue(template.getMinValue());
+            itemVO.setRequired(template.getRequired());
 
             configItems.add(itemVO);
         }
@@ -161,6 +162,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             itemVO.setOptions(template.getOptions());
             itemVO.setMaxvalue(template.getMaxValue());
             itemVO.setMinvalue(template.getMinValue());
+            itemVO.setRequired(template.getRequired());
 
             configItems.add(itemVO);
         }

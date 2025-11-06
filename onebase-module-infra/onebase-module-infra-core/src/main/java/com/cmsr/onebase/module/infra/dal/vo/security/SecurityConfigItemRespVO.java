@@ -48,4 +48,7 @@ public class SecurityConfigItemRespVO {
     @Schema(description = "最小值", example = "1")
     private Long minvalue;
 
+    @Schema(description = "必填", example = "true")
+    private String required;
+
 }

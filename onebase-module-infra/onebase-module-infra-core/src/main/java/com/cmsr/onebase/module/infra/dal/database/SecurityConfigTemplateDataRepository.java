@@ -52,6 +52,7 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
                     t.options,
                     t.max_value,
                     t.min_value,
+                    t.required,
                     COALESCE(c.config_value, t.default_value) AS config_value_effective
                 FROM infra_security_config_template t
                 LEFT JOIN infra_security_config c
@@ -77,6 +78,7 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
             templateDO.setOptions(dataRow.getString("options"));
             templateDO.setMaxValue(dataRow.getLong("max_value"));
             templateDO.setMinValue(dataRow.getLong("min_value"));
+            templateDO.setRequired(dataRow.getString("required"));
             return templateDO;
         }).toList();
     }
@@ -105,6 +107,7 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
                     t.options,
                     t.max_value,
                     t.min_value,
+                    t.required,
                     COALESCE(c.config_value, t.default_value) AS config_value_effective
                 FROM infra_security_config_template t
                 LEFT JOIN infra_security_config c
@@ -129,6 +132,7 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
             templateDO.setOptions(dataRow.getString("options"));
             templateDO.setMaxValue(dataRow.getLong("max_value"));
             templateDO.setMinValue(dataRow.getLong("min_value"));
+            templateDO.setRequired(dataRow.getString("required"));
             return templateDO;
         }).toList();
     }
