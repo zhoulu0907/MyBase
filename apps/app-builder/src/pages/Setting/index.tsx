@@ -49,9 +49,8 @@ const SettingPage: React.FC = () => {
                 <Route path="system-dict" element={<SystemDictPage />} />
                 <Route path="spaceInfo" element={<SpaceInfo />} />
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
-                <Route path="enterprise" element={<TenantPage />} />
                 <Route path="tenant" element={<TenantPage />} />
-                <Route path="business" element = {<BusinessPage />}>
+                <Route path="enterprise" element = {<BusinessPage />}>
                   <Route path="create-business" element = {<CreateBusinessPage />} />
                   <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
                 </Route>

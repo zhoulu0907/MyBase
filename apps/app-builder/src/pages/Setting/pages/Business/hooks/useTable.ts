@@ -1,20 +1,20 @@
 import { useState, useMemo } from 'react';
 import type { AppItem } from '../types/appItem';
 
-interface UseTableDataReturn {
-  tableData: AppItem[];
-  displayData: AppItem[];
+interface UseTableDataReturn<T> {
+  tableData: T[];
+  displayData: T[];
   searchValue: string;
   currentPage: number;
   setSearchValue: (value: string) => void;
   setCurrentPage: (page: number) => void;
-  getEditItem: (key: string | number) => AppItem | undefined;
+  getEditItem: (key: string | number) => T | undefined;
   removeItem: (key: string | number) => void;
-  addItem: (newItem: AppItem) => void;
+  addItem: (newItem: T) => void;
 }
 
-export const useTableData = (initialData: AppItem[] = []): UseTableDataReturn => {
-  const [tableData, setTableData] = useState<AppItem[]>(initialData);
+export const useTableData = <T>(initialData : T[]): UseTableDataReturn<T> => {
+  const [tableData, setTableData] = useState<T[]>(initialData);
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
