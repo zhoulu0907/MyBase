@@ -1,3 +1,4 @@
+import InputIcon from '@/assets/images/etl/node_input.svg';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/free-layout-editor';
 import { useEffect, useState } from 'react';
 import { type FlowNodeJSON } from '../../../typings';
@@ -10,7 +11,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setTitle(form.getValueIn('title'));
   }, [form]);
 
-  return <div className={styles.inputNode}>{title}</div>;
+  return (
+    <div className={styles.inputNode}>
+      <img src={InputIcon} alt="input" />
+
+      {title}
+    </div>
+  );
 };
 
 export const formMeta: FormMeta<FlowNodeJSON['data']> = {
