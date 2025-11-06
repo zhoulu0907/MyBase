@@ -132,7 +132,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         datasourceDO.setDatasourceName(createReqVO.getDatasourceName());
         datasourceDO.setDeclaration(createReqVO.getDeclaration());
         datasourceDO.setDatasourceType(datasourceType);
-        datasourceDO.setConfig(createReqVO.getConfig().asText());
+        datasourceDO.setConfig(JsonUtils.toJsonString(createReqVO.getConfig()));
         datasourceDO.setReadonly(createReqVO.getReadonly());
         // initialize collect status to `none`, infer datasource will be empty.
         datasourceDO.setCollectStatus(CollectStatus.NONE);
@@ -178,7 +178,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     @Override
     public void deleteDatasource(Long datasourceId) {
         boolean entityExists = datasourceRepository.existsById(datasourceId);
-        if (entityExists) {
+        if (!entityExists) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         boolean existsTableReffered = workflowTableRepository.existsByDatasourceId(datasourceId);
