@@ -52,6 +52,6 @@ public class ApproverNodeVO extends BaseNodeVO {
          * 字段权限配置
          */
         @Valid
-        private FieldPermCfgDTO fieldPermConfig;
+        private FieldPermCfgDTO fieldPermConfig = new FieldPermCfgDTO();
     }
 }
