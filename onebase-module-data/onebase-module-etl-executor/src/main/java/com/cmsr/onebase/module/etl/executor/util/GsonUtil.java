@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
 import com.cmsr.onebase.module.etl.executor.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.node.InputNode;
+import com.cmsr.onebase.module.etl.executor.graph.node.JdbcInputNode;
 import com.cmsr.onebase.module.etl.executor.graph.node.JoinNode;
-import com.cmsr.onebase.module.etl.executor.graph.node.OutputNode;
+import com.cmsr.onebase.module.etl.executor.graph.node.JdbcOutputNode;
 import com.cmsr.onebase.module.etl.executor.graph.node.UnionNode;
 import com.google.gson.*;
 
@@ -27,9 +27,9 @@ public class GsonUtil {
             String type = jsonObject.get("type").getAsString();
             switch (type) {
                 case "input":
-                    return context.deserialize(jsonObject, InputNode.class);
+                    return context.deserialize(jsonObject, JdbcInputNode.class);
                 case "output":
-                    return context.deserialize(jsonObject, OutputNode.class);
+                    return context.deserialize(jsonObject, JdbcOutputNode.class);
                 case "join":
                     return context.deserialize(jsonObject, JoinNode.class);
                 case "union":
