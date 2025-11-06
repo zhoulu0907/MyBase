@@ -155,13 +155,16 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         className="createAppTabs"
         style={{
           position: 'absolute',
-          width: '98%',
+          width: '60%',
           padding: '0px',
           background: 'transparent',
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
+          marginLeft: '20%',
+          marginRight: '20%',
+          boxSizing: 'border-box'
         }}
         type="line"
         activeTab={activeTab}

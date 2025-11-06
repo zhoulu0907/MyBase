@@ -4,7 +4,6 @@ import styled from 'styled-components';
 export const NodeWrapperStyle = styled.div`
   align-items: flex-start;
   background-color: #fff;
-  border-radius: 4px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -12,9 +11,11 @@ export const NodeWrapperStyle = styled.div`
   width: 100%;
   height: auto;
   border: 2px solid #e5e6eb;
+  border-radius: 8px;
 
   &.selected {
-    border: 2px solid #b78fff;
+    border: 2px solid #009e9e;
+    border-radius: 8px;
   }
 
   &.error {
