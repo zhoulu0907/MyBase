@@ -1,6 +1,6 @@
 import { Message, Modal } from '@arco-design/web-react';
 import CryptoJS from 'crypto-js';
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState, TouchEvent } from 'react';
 import { Captcha, CaptchaCheck } from './types';
 
 interface SliderCaptchaProps {
@@ -142,17 +142,19 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
     };
 
     // 处理拖拽开始
-    const handleDragStart = (e: React.MouseEvent) => {
+    const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
       e.preventDefault();
       setDragging(true);
     };
 
     // 处理拖拽移动
-    const handleDragMove = (e: React.MouseEvent | MouseEvent) => {
+    const handleDragMove = (e: React.MouseEvent | MouseEvent | TouchEvent) => {
       if (!dragging || !trackRef.current) return;
 
       const trackRect = trackRef.current.getBoundingClientRect();
-      const offsetX = Math.max(0, Math.min(e.clientX - trackRect.left, trackRect.width));
+      // 兼容鼠标和触摸事件
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const offsetX = Math.max(0, Math.min(clientX - trackRect.left, trackRect.width));
       setDragOffset(offsetX);
     };
 
@@ -181,19 +183,33 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
       }
     };
 
-    // 监听鼠标移动和释放事件
+    // 监听鼠标和触摸事件
     useEffect(() => {
       const handleMouseMove = (e: MouseEvent) => handleDragMove(e);
       const handleMouseUp = () => handleDragEnd();
+      const handleTouchMove = (e: TouchEvent) => {
+        e.preventDefault(); // 防止页面滚动
+        handleDragMove(e);
+      };
+      const handleTouchEnd = () => handleDragEnd();
+      const handleTouchCancel = () => handleDragEnd(); // 处理触摸被意外中断的情况
 
       if (dragging) {
+        // 同时监听鼠标和触摸事件
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd);
+        document.addEventListener('touchcancel', handleTouchCancel);
       }
 
       return () => {
+        // 移除所有事件监听
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+        document.removeEventListener('touchcancel', handleTouchCancel);
       };
     }, [dragging, dragOffset]);
 
@@ -295,8 +311,11 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
                       borderRadius: '2px',
                       cursor: 'pointer',
                       border: '1px solid #ddd',
-                      boxShadow: '0 0 5px rgba(0, 0, 0, 0.1)'
+                      boxShadow: '0 0 5px rgba(0, 0, 0, 0.1)',
+                      touchAction: 'none' // 防止浏览器默认的触摸行为
                     }}
+                    onMouseDown={handleDragStart}
+                    onTouchStart={handleDragStart}
                   >
                     <div
                       ref={sliderRef}
@@ -320,6 +339,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
                         transform: 'scale(1.05)'
                       }}
                       onMouseDown={handleDragStart}
+                      onTouchStart={handleDragStart}
                     >
                       <div className="slider-button-inner" style={{ color: '#999' }}>
                         →

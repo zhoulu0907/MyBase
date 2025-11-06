@@ -3,6 +3,7 @@ import { IconUser, IconHome } from '@arco-design/mobile-react/esm/icon';
 import styles from './index.module.less';
 import { useState } from 'react';
 import Home from './components/home';
+import Me from './components/me';
 export default function RuntimeHome() {
     const [activeIndex, setActiveIndex] = useState(0);
     const tabs = [
@@ -19,7 +20,7 @@ export default function RuntimeHome() {
     return (
       <div className={ styles.runtimeHome }>
         {
-          activeIndex === 0 ? <Home /> : <div>我的内容</div> 
+          activeIndex === 0 ? <Home /> : <Me /> 
         }
         <TabBar
           fixed={true}

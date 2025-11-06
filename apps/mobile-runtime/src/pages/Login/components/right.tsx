@@ -286,13 +286,9 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <div className={styles.footerText}>
           登录即表示同意
-          <Button type="ghost" size="small">
-            《用户协议》
-          </Button>
+          <span>《用户协议》</span>
           和
-          <Button type="ghost" size="small">
-            《隐私政策》
-          </Button>
+          <span>《隐私政策》</span>
         </div>
       </div>
     </div>
