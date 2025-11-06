@@ -44,6 +44,9 @@ public class ETLDatasourceCreateReqVO {
     @Schema(description = "是否创建时进行采集")
     private Boolean withCollect = false;
 
+    @Schema(description = "是否创建时进行采集", defaultValue = "true")
+    private Integer withCollect;
+
     public JsonNode getConfig() {
         return JsonUtils.parseTree(this.config);
     }
