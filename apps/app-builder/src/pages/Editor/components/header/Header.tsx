@@ -53,6 +53,7 @@ import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
 import type { VersionType } from '../constants';
 import { useInitDefaultVersion } from './useInitDefaultVersion';
+import { VersionStatus } from '../constants';
 const Option = Select.Option;
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -97,7 +98,7 @@ const baseTabData = [
 export default function EditorHeader() {
   const [versionList, setVersionList] = useState<VersionType[]>([]);
   const [manageVisible, setManageVisible] = useState(false);
-  const useVersionList = useInitDefaultVersion();
+  const currentVersionList = useInitDefaultVersion();
   const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
@@ -363,8 +364,8 @@ export default function EditorHeader() {
   }, [curPage?.value?.pageSetType]);
 
   useEffect(() => {
-    setVersionList(useVersionList);
-  }, [useVersionList]);
+    setVersionList(currentVersionList);
+  }, [currentVersionList]);
 
   return (
     <div className={styles.editorHeader}>
@@ -459,9 +460,9 @@ export default function EditorHeader() {
                 </span>
                 <span
                   className={`${styles.versionStatus} ${
-                    item.versionStatus === '设计中'
+                    item.versionStatus === VersionStatus.DESIGNING
                       ? styles.designing
-                      : item.versionStatus === '已发布'
+                      : item.versionStatus === VersionStatus.PUBLISHED
                         ? styles.published
                         : styles.history
                   }`}
@@ -471,7 +472,7 @@ export default function EditorHeader() {
               </div>
             </Option>
           ))}
-          <Option key="manage" value="manage" className={styles.manageOption}>
+          <Option key="manage" value={VersionStatus.MANAGE} className={styles.manageOption}>
             <IconSettings /> 流程版本管理
           </Option>
         </Select>

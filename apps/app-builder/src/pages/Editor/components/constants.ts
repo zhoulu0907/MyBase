@@ -1,5 +1,3 @@
-
-
 export interface VersionType {
   createTime: number;
   creator: Creator;
@@ -24,4 +22,11 @@ export interface Updater {
   operationUserAvatar: string;
   operationUserId: string;
   [property: string]: any;
+}
+
+// 枚举
+export enum VersionStatus {
+  PUBLISHED = 'published',
+  DESIGNING = 'designing',
+  MANAGE= 'manage',
 }
