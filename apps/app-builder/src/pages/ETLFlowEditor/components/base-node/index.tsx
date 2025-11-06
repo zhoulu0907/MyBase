@@ -1,4 +1,5 @@
 import { FlowNodeEntity, useNodeRender } from '@flowgram.ai/free-layout-editor';
+import { etlEditorSignal } from '@onebase/common';
 import { NodeRenderContext } from '../../context';
 import styles from './index.module.less';
 import { NodeWrapper } from './node-wrapper';
@@ -21,7 +22,9 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
         <div
           className={`${styles.baseNodeStyle}`}
           onClick={() => {
-            console.log('onClick', node.id);
+            console.log('onClick: ', node.id);
+            console.log('nodeType: ', node.flowNodeType);
+            etlEditorSignal.setCurNode(node);
           }}
           style={{
             /**
