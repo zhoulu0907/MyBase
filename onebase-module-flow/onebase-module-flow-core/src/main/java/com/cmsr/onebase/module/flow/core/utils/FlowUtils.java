@@ -16,7 +16,7 @@ public class FlowUtils {
 
     public static final String REDIS_VERSION_CHANGE_TOPIC_KEY = "flow:version:change:topic";
 
-    public static final int VERSION_TIMEOUT_HOUR = 12;
+    public static final int VERSION_TIMEOUT_MINUTES = 30;
 
     public static final int MAX_QUERY_CALL_COUNT = 10;
 
