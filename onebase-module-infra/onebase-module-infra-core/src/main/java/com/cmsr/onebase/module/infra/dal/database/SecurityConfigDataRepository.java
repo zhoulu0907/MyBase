@@ -32,7 +32,6 @@ public class SecurityConfigDataRepository extends DataRepository<SecurityConfigD
      */
     public SecurityConfigDO findByTenantIdAndKey(Long tenantId, String configKey) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(SecurityConfigDO.TENANT_ID, tenantId);
         configStore.eq(SecurityConfigDO.CONFIG_KEY, configKey);
         return findOne(configStore);
     }
