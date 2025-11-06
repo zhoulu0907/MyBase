@@ -2609,7 +2609,7 @@ COMMENT ON COLUMN "public"."system_login_log"."tenant_id" IS '租户编号';
 
 -- Table Definition
 CREATE TABLE "public"."system_uid_worker_node" (
-    "id" int4 NOT NULL,
+    "id" int4 GENERATED ALWAYS AS IDENTITY NOT NULL,
     "worker_host" varchar(64),
     "worker_port" varchar(64),
     "node_type" int2,
