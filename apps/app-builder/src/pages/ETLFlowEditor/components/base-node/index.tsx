@@ -22,9 +22,13 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
         <div
           className={`${styles.baseNodeStyle}`}
           onClick={() => {
-            console.log('onClick: ', node.id);
-            console.log('nodeType: ', node.flowNodeType);
-            etlEditorSignal.setCurNode(node);
+            etlEditorSignal.setCurNode({
+              id: node.id,
+              title: form?.values?.title || '',
+              flowNodeType: node.flowNodeType
+            });
+
+            etlEditorSignal.resetCurDrawerTab();
           }}
           style={{
             /**

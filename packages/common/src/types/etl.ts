@@ -4,3 +4,8 @@ export enum ETLNodeType {
   JOIN_NODE = 'join',
   UNION_NODE = 'union'
 }
+
+export enum ETLDrawerTab {
+  DATA_PREVIEW = 'dataPreview',
+  NODE_REMARK = 'nodeRemark'
+}

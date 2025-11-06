@@ -1,10 +1,11 @@
-import { Button, Drawer } from '@arco-design/web-react';
+import { Button } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit } from '@arco-design/web-react/icon';
 import { EditorRenderer, FreeLayoutEditorProvider } from '@flowgram.ai/free-layout-editor';
 import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import NodeConfigPage from './components/drawer';
 import ETLFlowPanel from './components/panel';
 import { useEditorProps } from './hooks/use-editor-props';
 import styles from './index.module.less';
@@ -42,26 +43,20 @@ const ETLFlowEditorPage: React.FC = () => {
           <div className={styles.sidebar}>
             <ETLFlowPanel />
           </div>
-          <div className={styles.main} ref={refWrapper}>
+          <div
+            className={styles.main}
+            ref={refWrapper}
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+              if (
+                (e.target as HTMLElement).classList &&
+                (e.target as HTMLElement).classList.contains('gedit-flow-background-layer')
+              ) {
+                etlEditorSignal.clearCurNode();
+              }
+            }}
+          >
             <EditorRenderer />
-            <Drawer
-              height={600}
-              title={<span>Basic Information </span>}
-              getPopupContainer={() => refWrapper && refWrapper?.current!}
-              visible={etlEditorSignal.curNode.value.id}
-              footer={null}
-              placement={'bottom'}
-              style={{ zIndex: 100 }}
-              onOk={() => {
-                etlEditorSignal.clearCurNode();
-              }}
-              onCancel={() => {
-                etlEditorSignal.clearCurNode();
-              }}
-            >
-              <div>Here is an example text. </div>
-              <div>Here is an example text.</div>
-            </Drawer>
+            <NodeConfigPage refWrapper={refWrapper} />
           </div>
         </FreeLayoutEditorProvider>
       </div>
