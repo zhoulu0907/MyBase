@@ -61,6 +61,12 @@ public class BpmFlowInsBizExtDO extends TenantBaseDO {
     private String initiatorName;
 
     /**
+     * 发起人头像（冗余字段，方便查询显示）
+     */
+    @Column(name = "initiator_avatar", length = 500)
+    private String initiatorAvatar;
+
+    /**
      * 发起部门ID
      */
     @Column(name = "initiator_dept_id", length = 100)

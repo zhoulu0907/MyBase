@@ -68,7 +68,7 @@ public class BpmInstanceController {
     /**
      * 流程预览
      *
-     * @param businessId
+     * @param reqVO
      */
     @PostMapping("/flow-predict")
     @Operation(summary = "流程预测")

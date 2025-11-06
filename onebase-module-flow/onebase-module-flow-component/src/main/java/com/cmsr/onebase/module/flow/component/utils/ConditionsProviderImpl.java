@@ -187,7 +187,9 @@ public class ConditionsProviderImpl implements ConditionsProvider {
     }
 
     private void formatExpressionItemValue(ExpressionItem expressionItem) {
-        if (expressionItem.getOp() == OpEnum.RANGE && expressionItem.getJdbcType() == JdbcTypeEnum.DATE) {
+        if (expressionItem.getOp() == OpEnum.RANGE
+                && (expressionItem.getJdbcType() == JdbcTypeEnum.DATE || expressionItem.getJdbcType() == JdbcTypeEnum.TIMESTAMP)
+                && expressionItem.getValue() instanceof Map) {
             String begin = MapUtils.getString((Map) expressionItem.getValue(), "begin");
             String end = MapUtils.getString((Map) expressionItem.getValue(), "end");
             expressionItem.setValue(List.of(begin, end));

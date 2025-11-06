@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class OneBaseServerApplication {
 
     public static void main(String[] args) {
-
         SpringApplication.run(OneBaseServerApplication.class, args);
     }
 
