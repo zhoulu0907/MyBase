@@ -24,6 +24,7 @@ import DynamicDataSourceConfig from './components/DynamicDataSourceConfig';
 import DynamicFieldConfig from './components/DynamicFieldConfig';
 import DynamicFileConfig from './components/DynamicFileConfig';
 import DynamicImageConfig from './components/DynamicImageConfig';
+import DynamicImageHandleConfig from './components/DynamicImageHandleConfig';
 import DynamicOptionsConfig from './components/DynamicOptionsConfig';
 import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
@@ -236,7 +237,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 item.type !== CONFIG_TYPES.IMAGE &&
                 item.type !== CONFIG_TYPES.FILE &&
                 item.type !== CONFIG_TYPES.TABS &&
-                item.type !== CONFIG_TYPES.AUTO_CODE_RULES
+                item.type !== CONFIG_TYPES.AUTO_CODE_RULES &&
+                item.type !== CONFIG_TYPES.IMAGE_HANDLE
               ) {
                 return (
                   <FormItem
@@ -782,6 +784,17 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 );
               }
 
+              if (item.type === CONFIG_TYPES.IMAGE_HANDLE) {
+                return (
+                  <DynamicImageHandleConfig
+                    key={index}
+                    id={cpID}
+                    handlePropsChange={handlePropsChange}
+                    item={item}
+                    configs={configs}
+                  />
+                );
+              }
               if (item.type === CONFIG_TYPES.IMAGE) {
                 return (
                   <DynamicImageConfig

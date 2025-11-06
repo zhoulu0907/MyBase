@@ -426,3 +426,9 @@ export interface IAutoCodeConfigType {
   name: string;
   type: typeof CONFIG_TYPES.AUTO_CODE_RULES;
 }
+
+export interface IImageHandleConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.IMAGE_HANDLE;
+}

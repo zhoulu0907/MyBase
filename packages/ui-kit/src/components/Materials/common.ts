@@ -546,3 +546,9 @@ export const autoCodeConfig:any = {
   name:'编号规则配置',
   type: CONFIG_TYPES.AUTO_CODE_RULES
 }
+
+export const imageHandleConfig:any = {
+  key: 'imageHandle',
+  name:'图片处理',
+  type: CONFIG_TYPES.IMAGE_HANDLE
+}

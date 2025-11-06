@@ -85,6 +85,7 @@ export const CONFIG_TYPES = {
   // 静态文件
   IMAGE: 'Image',
   FILE: 'File',
+  IMAGE_HANDLE: 'ImageHandle',
   // 折叠面板展开状态
   COLLAPSED: 'Collapsed',
   // 自动编号规则
