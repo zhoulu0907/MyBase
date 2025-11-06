@@ -49,6 +49,11 @@ public class BpmOperatorRecordRespVO {
         private String operator;
 
         /**
+         * 处理人头像
+         */
+        private String avatar;
+
+        /**
          * 处理时间
          */
         private LocalDateTime operatorTime;

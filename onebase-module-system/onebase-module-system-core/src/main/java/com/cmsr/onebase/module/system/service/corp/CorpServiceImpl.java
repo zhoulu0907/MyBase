@@ -161,8 +161,8 @@ public class CorpServiceImpl implements CorpService {
     public PageResult<CorpRespVO> getCorpPage(CorpPageReqVO pageReqVO) {
         // 调用数据仓库进行分页查询
         PageResult<CorpDO> pageResult = corpDataRepository.selectPage(pageReqVO);
-        // 获取应用数据
-        List<ApplicationDTO> applicationDTOS = appApplicationApi.findAppApplicationByAppName(pageReqVO.getCorpName());
+        // 获取应用数据,根据应用id封装map
+        List<ApplicationDTO> applicationDTOS = appApplicationApi.findAppApplicationByAppName(null);
         CorpAppRelationPageReqVO corpAppRelationPageReqVO = BeanUtils.toBean(pageReqVO, CorpAppRelationPageReqVO.class);
 
         Map<Long, ApplicationDTO> applicationMap = new HashMap<>();
@@ -171,11 +171,11 @@ public class CorpServiceImpl implements CorpService {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toMap(ApplicationDTO::getId, Function.identity()));
         }
-
+        // 获取关联关系，根据企业id 分组获取 关联的应用
         List<CorpAppRelationDO> corpAppRelationDOList = corpAppRelationService.getCorpAppRelationList(corpAppRelationPageReqVO);
 
         // 封装成Map，key是企业id，value是分组后的list
-      Map<Long, List<CorpAppRelationDO>> corpAppRelationMap = new HashMap<>();
+       Map<Long, List<CorpAppRelationDO>> corpAppRelationMap = new HashMap<>();
         if (com.alibaba.nacos.common.utils.CollectionUtils.isNotEmpty(corpAppRelationDOList)) {
             corpAppRelationMap = corpAppRelationDOList.stream()
                     .filter(Objects::nonNull)
@@ -183,7 +183,7 @@ public class CorpServiceImpl implements CorpService {
         }
 
 
-// 将 DO 对象转换为 VO 对象
+        // 赋值corpApplicationList 授权应用数据获取
         Map<Long, List<CorpAppRelationDO>> finalCorpAppRelationMap = corpAppRelationMap;
         Map<Long, ApplicationDTO> finalApplicationMap = applicationMap;
         return new PageResult<CorpRespVO>(
@@ -200,7 +200,7 @@ public class CorpServiceImpl implements CorpService {
                                         if(finalApplicationMap.get(applicationId)!=null){
                                             ApplicationDTO dto= finalApplicationMap.get(applicationId);
                                             CorpAppVo vo=new CorpAppVo();
-                                            vo.setAppCount(corplist.size()+"");
+                                            vo.setAppCount(corplist.size());
                                             vo.setAppName(dto.getAppName());
                                             vo.setIconName(dto.getIconName());
                                             corpApplicationList.add(vo);
