@@ -15,7 +15,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
   useSignals();
 
   const { searchItems, labelColSpan, runtime } = props;
-  const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
+  const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
   const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
 
   const renderSearchItem = (item: any) => {
@@ -37,7 +37,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
           tooltip: ''
         };
         // 组件类型
-        const cpType = cpId.slice(0, cpId.indexOf('-'));
+        const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
         const detailMode = false;
         switch (cpType) {
           case FORM_COMPONENT_TYPES.INPUT_TEXT:

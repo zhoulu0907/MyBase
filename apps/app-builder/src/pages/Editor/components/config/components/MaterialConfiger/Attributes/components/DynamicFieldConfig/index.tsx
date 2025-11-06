@@ -120,7 +120,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   };
 
   const handleAutoCode = (value: (string | string[])[]) => {
-    const type = configs.id.slice(0, configs.id.indexOf('-'));
+    const type = components.find((ele) => ele.id === configs.id)?.type;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldId));
     const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
