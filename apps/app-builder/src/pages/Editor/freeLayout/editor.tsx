@@ -37,23 +37,24 @@ export const Editor = () => {
 
   const getFlowData = async (currentFlowId: string) => {
     try {
+      let currentJsonData = {};
       const res = await getDataById({ id: currentFlowId });
       if (res.globalConfig) {
         setConfigData(res.globalConfig);
       }
-      let useJsonData = {};
+
       if (!res.bpmDefJson) {
-        useJsonData = initialData;
+        currentJsonData = initialData;
       } else {
         const bpmDefJson = JSON.parse(res.bpmDefJson);
-        useJsonData = normalizeNodes(bpmDefJson);
+        currentJsonData = normalizeNodes(bpmDefJson);
       }
       if (res.businessId) {
         setFlowData(res);
       }
       ref?.current?.document.clear();
       setIsLoading(true);
-      ref?.current?.document.fromJSON(useJsonData);
+      ref?.current?.document.fromJSON(currentJsonData);
       setTimeout(() => {
         ref?.current?.document.fitView();
       }, 10);
@@ -61,8 +62,16 @@ export const Editor = () => {
       console.error('fail to get flow data:', e);
     }
   };
+  const initEditor = () => {
+    ref?.current?.document.clear();
+    ref?.current?.document.fromJSON(initialData);
+  };
   useEffect(() => {
-    currentFlowId && getFlowData(currentFlowId);
+    if (currentFlowId) {
+      getFlowData(currentFlowId);
+    } else {
+      initEditor();
+    }
   }, [currentFlowId]);
 
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
@@ -88,7 +97,7 @@ export const Editor = () => {
   const onSave = async () => {
     const appId = await getAppIdByPageSetId({ pageSetId });
     const data = ref?.current?.document.toJSON();
-    const useJsonData = normalizeNodes(data);
+    const currentJsonData = normalizeNodes(data);
     const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
     const params = {
       id: id || '',
@@ -99,7 +108,7 @@ export const Editor = () => {
       versionStatus: versionStatus || '',
       businessId: businessId || pageSetId,
       appId,
-      bpmDefJson: JSON.stringify(useJsonData),
+      bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
     save(params).then((res: any) => {
