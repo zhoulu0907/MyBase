@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.api.datasource.impl;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
+import com.cmsr.onebase.module.metadata.core.config.MetadataConfig;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 数据源管理 API 默认实现
@@ -25,24 +29,39 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
     @Resource
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
+    
+    @Resource
+    private MetadataConfig metadataConfig;
 
     @Override
     @Operation(summary = "创建默认数据源")
     public Long createDefaultDatasource(@Valid @RequestBody DatasourceCreateDefaultReqDTO reqDTO) {
         try {
-            // 构造默认数据源配置JSON
+            // 从配置类中读取默认数据源配置
+            Map<String, Object> config = new HashMap<>();
+            config.put("host", metadataConfig.getDefaultDatasourceHost());
+            config.put("port", metadataConfig.getDefaultDatasourcePort());
+            config.put("database", metadataConfig.getDefaultDatasourceDatabase());
+            config.put("username", metadataConfig.getDefaultDatasourceUsername());
+            config.put("password", metadataConfig.getDefaultDatasourcePassword());
+            
+            // 将配置转换为JSON字符串
+            String configJson = String.format(
+                "{\"host\":\"%s\",\"port\":%d,\"database\":\"%s\",\"username\":\"%s\",\"password\":\"%s\"}",
+                config.get("host"), config.get("port"), config.get("database"), 
+                config.get("username"), config.get("password")
+            );
 
-            String configJson = "{\"host\":\"10.0.104.38\",\"port\":5432,\"database\":\"onebase_business\",\"username\":\"postgres\",\"password\":\"onebase@2025\"}";
-
-            // 调用 core 模块的基础服务
+            // 调用 core 模块的基础服务，使用MetadataConfig中配置的数据源类型
             Long datasourceId = metadataDatasourceCoreService.createDefaultDatasource(
                     reqDTO.getAppId(),
                     reqDTO.getAppUid(),
-                    "postgresql",
+                    metadataConfig.getDefaultDatasourceType(),  // 使用配置的数据源类型
                     configJson
             );
 
-            log.info("创建默认数据源成功，数据源ID: {}，应用ID: {}", datasourceId, reqDTO.getAppId());
+            log.info("创建默认数据源成功，数据源ID: {}，应用ID: {}，类型: {}", 
+                    datasourceId, reqDTO.getAppId(), metadataConfig.getDefaultDatasourceType());
             return datasourceId;
         } catch (Exception e) {
             log.error("创建默认数据源失败", e);
