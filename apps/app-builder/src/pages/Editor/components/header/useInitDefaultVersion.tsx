@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useFlowEditorStor } from '@/store/index';
-import { getVersionMgmt } from '../../../../../../../packages/app/src/services/index';
+import { getVersionMgmt, getByBusinessId } from '@onebase/app';
 import type { VersionType } from '../constants';
-import { getByBusinessId } from '../../../../../../../packages/app/src/services/index';
 export function useInitDefaultVersion() {
   const [versionList, setVersionList] = useState<VersionType[]>([]);
   const { setBusinessId, setCurrnetFlowId } = useFlowEditorStor();

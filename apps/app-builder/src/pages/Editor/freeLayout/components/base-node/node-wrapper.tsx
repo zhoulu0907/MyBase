@@ -73,7 +73,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
         nodeRender.type !== WorkflowNodeType.START &&
         nodeRender.type !== WorkflowNodeType.END &&
         nodeRender.type !== WorkflowNodeType.INITIATION && (
-          <div className="showMore" ref={childRef} onMouseOut={onMouseOut}>
+          <div className="nodeShowMore" ref={childRef} onMouseOut={onMouseOut}>
             <div className="iconBox" onClick={copyNode}>
               <img src={iconCopy} />
             </div>

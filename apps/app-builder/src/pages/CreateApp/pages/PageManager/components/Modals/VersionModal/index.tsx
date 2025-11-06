@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Table, Select, Input } from '@arco-design/web-react';
 import { useFlowEditorStor } from '@/store/index';
-import { getVersionMgmt } from '../../../../../../../../../../packages/app/src/services/index';
+import { getVersionMgmt } from '@onebase/app';
 import { getVersionColumns } from './tableColumn';
 import { VersionStatus, SortType } from './indexType';
 import type { VersionData, VersionModalProps } from './indexType';

@@ -18,7 +18,7 @@ import { useEditorProps } from './hooks';
 import { DemoTools } from './components/tools';
 import { SidebarProvider, SidebarRenderer } from './components/sidebar';
 import LeftNavBar from './components/left-nav-bar/index';
-import { getDataById, save } from '../../../../../../packages/app/src/services/index';
+import { getDataById, save } from '@onebase/app';
 import { useLocation } from 'react-router-dom';
 import type { WorkflowJSON, FlowData } from './editorType';
 import { getAppIdByPageSetId } from '@onebase/app';

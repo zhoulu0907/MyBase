@@ -3,7 +3,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Message } from '@arco-design/web-react';
 import { ProcessStatus, updateFlowMgmtDefinition } from '@onebase/app';
-import { refreshFlowMgmt } from '@onebase/app/src/services';
+import { refreshFlowMgmt } from '@onebase/app';
 import React from 'react';
 import TriggerEditor from '../../triggerEditor';
 import styles from './index.module.less';
