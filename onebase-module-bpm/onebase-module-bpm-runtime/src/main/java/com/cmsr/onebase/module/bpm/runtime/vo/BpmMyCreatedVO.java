@@ -39,4 +39,7 @@ public class BpmMyCreatedVO {
 
     @Schema(description = "任务id")
     private Long taskId;
+
+    @Schema(description = "流程表单，实际对应pageSetId")
+    private String businessId;
 }

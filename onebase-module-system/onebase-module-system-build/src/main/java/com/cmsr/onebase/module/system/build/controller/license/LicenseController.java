@@ -103,7 +103,8 @@ public class LicenseController {
     @Operation(summary = "分页查询License")
     public CommonResult<PageResult<LicensePageRespVO>> getLicensePage(@Valid LicensePageReqVO reqVO) {
         PageResult<LicenseDO> pageResult = licenseService.getLicensePage(reqVO);
-        return CommonResult.success(BeanUtils.toBean(pageResult, LicensePageRespVO.class));
+        CommonResult<PageResult<LicensePageRespVO>> success = CommonResult.success(BeanUtils.toBean(pageResult, LicensePageRespVO.class));
+        return success;
     }
 
     /**

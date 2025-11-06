@@ -61,6 +61,6 @@ public class ApplicationDO extends TenantBaseDO {
     private String description;
 
     @Column(name = "publish_model", columnDefinition = "INT4 NOT NULL", comment = "发布模式/内部模式")
-    private Integer publishModel;
+    private String publishModel;
 
 }

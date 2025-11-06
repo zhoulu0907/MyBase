@@ -17,7 +17,7 @@ public class CorpUpdateReqVO {
 
     @NotBlank(message = "企业编号不能为空")
     @Schema(description = "企业编号")
-    private String corpId;
+    private String corpCode;
 
     @NotNull(message = "行业类型不能为空")
     @Schema(description = "行业类型", example = "1")
