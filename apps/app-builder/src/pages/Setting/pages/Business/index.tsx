@@ -94,16 +94,18 @@ const BusinessPage: React.FC = () => {
 
     function renderAuthorizedAppGroup(applicationList: corpApplicationListProps[]) {
         return <>
+           {applicationList?.length > 0 ? 
             <div style={{display: 'flex', alignItems: 'flex-end'}}>
-                <AvatarGroup size={24}>
-                    {applicationList?.map(item => {
-                        return <Avatar>
-                            {item.iconName}
-                        </Avatar>
-                    })}
-                   {applicationList?.[0]?.appCount && <Avatar>{applicationList?.[0]?.appCount}</Avatar>} 
-                </AvatarGroup>
-            </div>
+                    <AvatarGroup size={24}>
+                        {applicationList?.map(item => {
+                            return <Avatar style={{ backgroundColor: item.iconColor }}>
+                                {item.iconName}
+                            </Avatar>
+                        })}
+                    <Avatar>{applicationList.length}</Avatar>
+                    </AvatarGroup>
+            </div> : <></>
+            }
         </>
     }
 
@@ -164,8 +166,8 @@ const BusinessPage: React.FC = () => {
     }
 
     const handleDisabled = async(record: cropItem) => {
-        const params = {id: record.id, status: 0};
         if(record.status === 0) {
+            const params = {id: record.id, status: 1};
             try {
                 await disabledCorpApi(params);
                 await fetchTableDataList(pagination.current,pagination.pageSize);
@@ -182,6 +184,7 @@ const BusinessPage: React.FC = () => {
                     status: 'danger',
                 },
                 onOk: async () => {
+                    const params = {id: record.id, status: 0};
                     try {
                         await disabledCorpApi(params);
                         await fetchTableDataList(pagination.current,pagination.pageSize);

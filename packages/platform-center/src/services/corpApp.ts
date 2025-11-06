@@ -1,5 +1,6 @@
 import { CorpAppParams, corpAppListParams, updateAppParams } from "../types";
 import { systemService } from "./clients";
+import { appService } from "./clients/factory";
 
 //新增企业应用
 export const createCorpAppApi = (data: CorpAppParams) => systemService.post('/corp-app-relation/create', data);
@@ -17,4 +18,4 @@ export const getCorpAuthorizedAppListApi = (data: corpAppListParams) => systemSe
 export const getCorpAppRelatedListApi = (data: corpAppListParams) => systemService.get('/corp-app-relation/page',data);
 
 //获取应用列表
-export const getCorpAppSimpleListApi = () => systemService.get('/corp/simple-list');
+export const getCorpAppSimpleListApi = () => appService.get('/application/simple-list');

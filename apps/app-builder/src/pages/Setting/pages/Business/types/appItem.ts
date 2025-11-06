@@ -14,13 +14,25 @@ export interface AuthorizedAppRef {
   addNewApp: (newData: AppItem) => void;
 };
 
+export interface updatedParams {
+    id: string;
+    applicationId: string;
+    corpId: string;
+    authorizationTime: string;
+    expiresTime: string;
+}
+
 export interface IAuthorizedAppProps {
     loading: boolean;
     tableData: AppItem[];
     pageination: any;
     className?: string;
+    visible: boolean;
+    setVisible: (value: boolean) =>void;
     onSearch: (value: string) => void;
     onChange: (pageNo: number, pageSize: number) => void;
+    onUpdateTime:(values: updatedParams) => void;
+    onRemoveAuthorizedApp: (id: string) => void;
 }
 
 export interface statusProps {
@@ -31,8 +43,9 @@ export interface statusProps {
 
 export interface corpApplicationListProps {
   appName: string;
-  appCount: string;
+  appCode: string;
   iconName: string;
+  iconColor: string;
 }
 
 export interface cropItem {
@@ -66,8 +79,8 @@ export interface ICreateAppModal {
     onSaveAppData: (data: any)=>void;
 }
 
-export interface authorizedAppList {
-  corpName: string;
-  corpId: string;
-  id: string;
+export interface authorizedAppList extends corpApplicationListProps {
+  versionNumber: string;
+  createTime: string;
+  appId: string;
 }

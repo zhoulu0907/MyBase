@@ -1,7 +1,9 @@
-import { DatePicker, Form, Message, Modal, Select } from "@arco-design/web-react";
+import { useEffect, useState } from "react";
+import { Avatar, DatePicker, Form, Message, Modal, Select, Space, Typography } from "@arco-design/web-react";
 import { getCorpAppSimpleListApi } from "@onebase/platform-center";
 import type { authorizedAppList, ICreateAppModal } from "../../types/appItem";
-import { useEffect, useState } from "react";
+import styles from "./index.module.less";
+
 
 export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppModal, onSaveAppData}) => {
     const [createNewAppForm] = Form.useForm();
@@ -46,10 +48,22 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                         mode='multiple'
                         placeholder="选择应用"
                         allowClear
+                        showSearch
+                        renderFormat ={(option:any, value)=>{
+                            return value;
+                        }}
                     >
                         {dropdownList.map((option) => (
-                        <Select.Option key={option.id} value={option.corpId}>
-                            {option.corpName}
+                        <Select.Option key={option.appCode} value={option.appId}>
+                            <Space align="center" size={12}>
+                                <Avatar style={{ backgroundColor: option.iconColor }}>{option.iconName}</Avatar>
+                                <div className={styles.authorizedOption}>
+                                    <Typography.Text>{option.appName}</Typography.Text>
+                                    <Typography.Text type='secondary'>
+                                        {option.versionNumber} · {option.createTime}
+                                    </Typography.Text>
+                                </div>
+                            </Space>
                         </Select.Option>
                         ))}
                     </Select>

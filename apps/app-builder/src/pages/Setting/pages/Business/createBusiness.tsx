@@ -1,6 +1,6 @@
 import styles from "./createBusiness.module.less";
-import { useMemo, useRef, useState } from 'react';
-import { Steps, Button, Form, Space, Tag, Message } from '@arco-design/web-react';
+import { useRef, useState } from 'react';
+import { Steps, Button, Form, Space } from '@arco-design/web-react';
 import { useNavigate } from "react-router-dom";
 import { steps } from "./constants";
 import { CreateSuccess } from "./components/createApp/createSuccess";
@@ -10,10 +10,8 @@ import { AdminInformation } from "./components/createApp/adminInfomation";
 import { CreateAppModal } from "./components/modal/createAppModal";
 import type { AppItem, AuthorizedAppRef } from "./types/appItem";
 import EditAuthorizedTime from "./components/modal/editAuthorizedTime";
-import { useTableData } from "./hooks/useTable";
 
-
-const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
+const CreateBusinessPage: React.FC = () => {
     const authorizedAppRef = useRef<AuthorizedAppRef>(null);
     const [currentStep, setCurrentStep] = useState<number>(1);
     const navigate = useNavigate();
@@ -24,7 +22,7 @@ const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
 
     //点击创建应用的第三步中table的编辑button
     const handleEdit = (record?: AppItem) => {
-        navigate(`${record?.appName}`)
+        navigate(`${record?.applicationName}`)
     }
 
     const handleEditTime = () => {

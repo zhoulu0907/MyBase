@@ -5,14 +5,14 @@ import EditableFormItem from '../formItem';
 import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useOutletContext, useParams } from 'react-router-dom';
-import { CreateAppModal } from '../modal/createAppModal';
-import type { AppItem, cropItem, OutletContextType } from '../../types/appItem';
-import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi, type corpListParams } from "@onebase/platform-center";
+import type { AppItem, cropItem, OutletContextType, updatedParams } from '../../types/appItem';
+import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi, removeCorpAppApi, updateCorpAppApi, type corpListParams } from "@onebase/platform-center";
 import { convertIndustryType } from '../../utils';
 
 const EnterpriseInfoPage: React.FC = () => {
   const {activeTab} = useParams();
   const { currentId } = useOutletContext<OutletContextType>();
+  const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
   const [tableData, setTableData] = useState<AppItem[]>([]);
@@ -103,6 +103,36 @@ const EnterpriseInfoPage: React.FC = () => {
     }
   }
 
+  const handleUpdateTime = async(params: updatedParams) => {
+    try {
+     const res =  await updateCorpAppApi(params);
+     if(res) {
+        await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
+        Message.success("更新授权时间成功");
+     }else {
+       Message.success("接口返回数据异常");
+     }
+    }catch(error) {
+      Message.error("更新授权时间失败");
+    }finally {
+      setVisible(false);
+    }
+  }
+
+  const handleRemoveAuthorizedApp = async(id: string) => {
+    try {
+      const res = await removeCorpAppApi(id);
+      if(res) {
+          await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
+          Message.success("授权应用删除成功");
+      }else {
+          Message.success("未删除成功");
+      }
+    }catch(error) {
+      Message.error("接口返回异常, 授权应用删除失败");
+    }
+  }
+
   const handleSearchChange = (searchValue: string) => {
     setSearchValue(searchValue);
   }
@@ -125,7 +155,7 @@ const EnterpriseInfoPage: React.FC = () => {
             src='http://localhost:4399/src/assets/images/ob_logo.svg'
             alt='lamp'
           />}
-          onChange={handleChange.bind(null, "logo")}
+          onChange={handleChange.bind(null, "corpLogo")}
           isEdit={isEdited}
           component={Upload}
           componentProps={{ listType:'picture-list', action: '/' }}
@@ -144,8 +174,8 @@ const EnterpriseInfoPage: React.FC = () => {
     {
       label:"企业ID", 
       value: <EditableFormItem
-          value = {formData?.corpId}
-          onChange={handleChange.bind(null, "corpId")}
+          value = {formData?.corpCode}
+          onChange={handleChange.bind(null, "corpCode")}
           isEdit={isEdited}
           component={Input}
           componentProps={{ placeholder: '请输入企业ID' }}
@@ -233,12 +263,16 @@ const EnterpriseInfoPage: React.FC = () => {
           </Tabs.TabPane>
           <Tabs.TabPane key="authorized" title="授权应用">
             <AuthorizedApp 
+                visible={visible}
+                setVisible={setVisible}
                 pageination={pageInation} 
                 loading={loading} 
                 tableData={displayData} 
                 className ={styles.tabPanel} 
                 onSearch={handleSearchChange}
                 onChange={handlePageChange}
+                onUpdateTime={handleUpdateTime}
+                onRemoveAuthorizedApp={handleRemoveAuthorizedApp}
               />
           </Tabs.TabPane>
         </Tabs>
