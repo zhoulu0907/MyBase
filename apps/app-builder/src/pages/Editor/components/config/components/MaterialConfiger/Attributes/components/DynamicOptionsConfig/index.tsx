@@ -166,24 +166,26 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
                 ))}
               </ReactSortable>
 
-              <Button
-                type="outline"
-                onClick={() => {
-                  // 随机生成6位字母，这都能重复建议去买彩票：）
-                  const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
-                  const newValue = newLabel;
-                  const newList = [
-                    ...selectOptionsConfig,
-                    { label: item.displayName || newLabel, value: item.fieldName || newValue }
-                  ];
-                  console.log('newList: ', newList, _fields);
-                  add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
-                  setSelectOptionsConfig(newList);
-                  handlePropsChange(selectKey, newList);
-                }}
-              >
-                添加一项
-              </Button>
+              {!selectDisabled && (
+                <Button
+                  type="outline"
+                  onClick={() => {
+                    // 随机生成6位字母，这都能重复建议去买彩票：）
+                    const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
+                    const newValue = newLabel;
+                    const newList = [
+                      ...selectOptionsConfig,
+                      { label: item.displayName || newLabel, value: item.fieldName || newValue }
+                    ];
+                    console.log('newList: ', newList, _fields);
+                    add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
+                    setSelectOptionsConfig(newList);
+                    handlePropsChange(selectKey, newList);
+                  }}
+                >
+                  添加一项
+                </Button>
+              )}
             </div>
           )}
         </Form.List>
