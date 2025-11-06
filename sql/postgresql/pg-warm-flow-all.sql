@@ -12,7 +12,7 @@ CREATE TABLE bpm_flow_definition
     activity_status int2         NOT NULL DEFAULT 1,
     listener_type   varchar(100) NULL,
     listener_path   varchar(400) NULL,
-    ext             varchar(500) NULL,
+    ext             text          NULL,
     "lock_version" int8 NOT NULL DEFAULT 0,
     "creator" int8 NOT NULL DEFAULT 0,
     "create_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -159,7 +159,7 @@ CREATE TABLE bpm_flow_instance
     "create_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updater" int8 NOT NULL DEFAULT 0,
     "update_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ext             varchar(500) NULL,
+    ext             text          NULL,
     "deleted" int8 NOT NULL DEFAULT 0,
     "tenant_id" int8 NOT NULL DEFAULT 0,
     CONSTRAINT bpm_flow_instance_pkey PRIMARY KEY (id)
@@ -326,6 +326,7 @@ CREATE TABLE bpm_flow_instance_biz_ext
     app_id                  int8         NOT NULL,
     initiator_id            int8         NULL,
     initiator_name          varchar(100) NULL,
+    initiator_avatar        varchar(500) NULL,
     initiator_dept_id       int8         NULL,
     initiator_dept_name     varchar(100) NULL,
     submit_time             timestamp(6) NULL,
@@ -352,6 +353,7 @@ COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_title IS '业务标题';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.bpm_title IS '流程标题';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_id IS '发起人ID';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_name IS '发起人名称（冗余字段）';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_avatar IS '发起人头像（冗余字段）';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_dept_id IS '发起部门ID';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_dept_name IS '发起部门名称（冗余字段）';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.submit_time IS '发起时间（与create_time的区别：以提交表单动作为标准，而非保存表单）';

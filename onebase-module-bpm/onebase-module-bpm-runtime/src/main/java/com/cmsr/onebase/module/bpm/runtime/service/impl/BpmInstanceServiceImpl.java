@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
@@ -17,6 +16,7 @@ import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
@@ -25,7 +25,6 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDT
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.api.permission.PermissionApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
@@ -378,8 +377,15 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
-        String initiatorName = SecurityFrameworkUtils.getLoginUserNickname();
-        Long deptId = SecurityFrameworkUtils.getLoginUserDeptId();
+
+        CommonResult<AdminUserRespDTO> result = adminUserApi.getUser(loginUserId);
+        if (!result.isSuccess()) {
+            throw exception(ErrorCodeConstants.USER_API_CALL_FAILED);
+        }
+
+        AdminUserRespDTO userRespDTO = result.getData();
+        String initiatorName = userRespDTO.getNickname();
+
         String businessTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
 
         // 任选3个字段，todo 从全局配置里选择，关联实体查询
@@ -393,19 +399,15 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             formSummary = reqVO.getFormName();
         }
 
-        CommonResult<DeptRespDTO> deptRespDTO = deptApi.getDept(deptId);
-        if (!deptRespDTO.isSuccess()) {
-            throw exception(ErrorCodeConstants.DEPT_API_CALL_FAILED);
-        }
-
         // 保存扩展信息
         flowInsExtDO.setBusinessId(entityDataId);
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
         flowInsExtDO.setBusinessTitle(businessTitle);
         flowInsExtDO.setInitiatorId(loginUserId);
+        flowInsExtDO.setInitiatorAvatar(userRespDTO.getAvatar());
         flowInsExtDO.setInitiatorName(initiatorName);
-        flowInsExtDO.setInitiatorDeptId(deptId);
-        flowInsExtDO.setInitiatorDeptName(deptRespDTO.getData().getName());
+        flowInsExtDO.setInitiatorDeptId(userRespDTO.getDeptId());
+        flowInsExtDO.setInitiatorDeptName(userRespDTO.getDeptName());
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary(formSummary);
         flowInsExtDO.setInstanceId(instance.getId());
@@ -461,7 +463,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             }
         }
 
-        List<User> users = userService.getByAssociateds(List.of(task.getId()));
+        List<User> users = userService.getByAssociateds(List.of(task.getId()),
+                BpmUserTypeEnum.APPROVAL.getCode(),
+                BpmUserTypeEnum.TRANSFER.getCode(),
+                BpmUserTypeEnum.DEPUTE.getCode());
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         boolean hasPermission = false;
 
@@ -570,7 +575,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             }
 
             // 查找有权限的用户
-            List<User> users = userService.getByAssociateds(List.of(task.getId()));
+            List<User> users = userService.getByAssociateds(List.of(task.getId()),
+                    BpmUserTypeEnum.APPROVAL.getCode(),
+                    BpmUserTypeEnum.TRANSFER.getCode(),
+                    BpmUserTypeEnum.DEPUTE.getCode());
 
             if (CollectionUtils.isNotEmpty(users)) {
                 if (record.getOperators() == null) {
@@ -635,19 +643,23 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             List<AdminUserRespDTO> users = result.getData();
 
 
-            Map<Long, String> userMap = new HashMap<>();
+            Map<Long, AdminUserRespDTO> userMap = new HashMap<>();
 
             for (AdminUserRespDTO user : users) {
-                userMap.put(user.getId(), user.getNickname());
+                userMap.put(user.getId(), user);
             }
 
             for (BpmOperatorRecordRespVO.OperatorRecord operatorRecord : operatorRecords) {
                 if (CollectionUtils.isNotEmpty(operatorRecord.getOperators())) {
                     for (BpmOperatorRecordRespVO.OperatorInfo operatorInfo : operatorRecord.getOperators()) {
-                        String nickName = userMap.get(Long.parseLong(operatorInfo.getOperator()));
+                        AdminUserRespDTO user = userMap.get(Long.parseLong(operatorInfo.getOperator()));
 
-                        if (nickName != null) {
-                            operatorInfo.setOperator(nickName);
+                        if (user != null) {
+                            operatorInfo.setOperator(user.getNickname());
+                            operatorInfo.setAvatar(user.getAvatar());
+                        } else {
+                            // todo: 用户不存在
+                            operatorInfo.setOperator("-");
                         }
                     }
                 }
@@ -691,7 +703,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
               taskMap.put(task.getId(), task);
             }
 
-            List<User> users = userService.getByAssociateds(taskIds);
+            List<User> users = userService.getByAssociateds(taskIds,
+                    BpmUserTypeEnum.APPROVAL.getCode(),
+                    BpmUserTypeEnum.TRANSFER.getCode(),
+                    BpmUserTypeEnum.DEPUTE.getCode());
 
             if (CollectionUtils.isNotEmpty(users)) {
                 for (User user : users) {
