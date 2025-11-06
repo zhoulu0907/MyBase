@@ -92,7 +92,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
         });
     }
 
-    private boolean doCollection(Long applicationId, Long datasourceId, String databaseType) {
+    public boolean doCollection(Long applicationId, Long datasourceId, String databaseType) {
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
         String datasourceKey = "metadata-collector-" + datasourceId;
         try {
