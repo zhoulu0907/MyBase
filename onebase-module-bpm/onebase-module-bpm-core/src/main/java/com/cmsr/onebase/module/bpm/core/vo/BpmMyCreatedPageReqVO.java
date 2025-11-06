@@ -17,15 +17,14 @@ public class BpmMyCreatedPageReqVO extends BpmInsExtQueryPageVO {
             example = "ALL", defaultValue = "ALL")
     private String flowStatus;
 
-    @Schema(description = "发起时间 - 开始（包含）", example = "2025-08-01 00:00:00")
+    @Schema(description = "创建时间 - 开始（包含）", example = "2025-08-01 00:00:00")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime submitTimeStart;
+    private LocalDateTime createTimeStart;
 
-    @Schema(description = "发起时间 - 结束（包含）", example = "2025-08-18 23:59:59")
+    @Schema(description = "创建时间 - 结束（包含）", example = "2025-08-18 23:59:59")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime submitTimeEnd;
+    private LocalDateTime createTimeEnd;
 
-    @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
-            example = "desc", defaultValue = "desc")
-    private String sortType;
+    @Schema(description = "当前节点编码",example = "start_1")
+    private String nodeCode;
 }

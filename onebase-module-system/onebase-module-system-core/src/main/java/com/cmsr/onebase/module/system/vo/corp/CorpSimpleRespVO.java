@@ -8,8 +8,8 @@ public class CorpSimpleRespVO {
     @Schema(description = "企业名称")
     private String corpName;
 
-    @Schema(description = "企业id")
-    private String corpId;
+    @Schema(description = "企业编码")
+    private String corpCode;
 
     @Schema(description = "id")
     private  Long  id;

@@ -12,8 +12,8 @@ public class CorpReqVO {
     @Schema(description = "企业名称", example = "")
     private String corpName;
 
-    @Schema(description = "企业ID", example = "ALIBABA")
-    private String corpId;
+    @Schema(description = "企业编码", example = "ALIBABA")
+    private String corpCode;
 
     @Schema(description = "行业类型", example = "1")
     private Integer industryType;

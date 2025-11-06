@@ -145,8 +145,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         // 新增发布模式，新增空间id
         applicationDO.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
-        applicationDO.setTenantId(TenantContextHolder.getRequiredTenantId());
-
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());

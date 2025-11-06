@@ -18,6 +18,11 @@ import java.time.LocalDateTime;
 @Table(name = "system_corp_app_relation")
 @EqualsAndHashCode(callSuper = true)
 public class CorpAppRelationDO extends BaseDO {
+    public static final String APPLICATION_ID           = "application_id";
+    public static final String CORP_ID                  = "corp_id";
+    public static final String TENANT_ID                = "tenant_id";
+    public static final String STATUS                   = "status";
+    public static final String EXPIRES_TIME             = "expiresTime";
 
     /**
      * 应用id

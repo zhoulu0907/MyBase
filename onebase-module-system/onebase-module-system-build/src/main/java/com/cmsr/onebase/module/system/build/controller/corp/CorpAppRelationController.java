@@ -30,7 +30,7 @@ public class CorpAppRelationController {
     @PostMapping("/create")
     @PreAuthorize("@ss.hasPermission('system:corp-app-relation:create')")
     @Operation(summary = "新增企业应用关联")
-    public CommonResult<Boolean> createCorpApplication(@Valid @RequestBody CorpAppRelationInertReqVO corpAppRelationInertReqVO) {
+    public CommonResult<Boolean> createCorpAppRelation(@Valid @RequestBody CorpAppRelationInertReqVO corpAppRelationInertReqVO) {
         corpAppRelationService.createCorpAppRelation(corpAppRelationInertReqVO);
         return success(true);
     }
@@ -38,7 +38,7 @@ public class CorpAppRelationController {
     @PostMapping("/update")
     @PreAuthorize("@ss.hasPermission('system:corp-app-relation:update')")
     @Operation(summary = "更新企业应用关联")
-    public CommonResult<Boolean> updateCorpApplication(@Valid @RequestBody CorpAppRelationUpdateReqVO updateReqVO) {
+    public CommonResult<Boolean> updateCorpAppRelation(@Valid @RequestBody CorpAppRelationUpdateReqVO updateReqVO) {
         corpAppRelationService.updateCorpAppRelation(updateReqVO);
         return success(true);
     }
@@ -46,7 +46,7 @@ public class CorpAppRelationController {
     @PostMapping("/delete")
     @PreAuthorize("@ss.hasPermission('system:corp-app-relation:delete')")
     @Operation(summary = "删除应用授权企业")
-    public CommonResult<Boolean> deleteCorpApplication(@RequestParam("id") Long id) {
+    public CommonResult<Boolean> deleteCorpAppRelation(@RequestParam("id") Long id) {
         corpAppRelationService.deleteCorpAppRelation(id);
         return success(true);
     }
@@ -54,7 +54,7 @@ public class CorpAppRelationController {
     @GetMapping("/corp-applications-page")
     @Operation(summary = "获得企业授权应用列表-分页")
     @PreAuthorize("@ss.hasPermission('system:corp:query')")
-    public CommonResult<PageResult<CorpApplicationRespVO>> getCorpAppsRelationPage(@Valid CorpAppRelationPageReqVO pageReqVO) {
+    public CommonResult<PageResult<CorpApplicationRespVO>> getCorpAppRelationPage(@Valid CorpAppRelationPageReqVO pageReqVO) {
         PageResult<CorpApplicationRespVO> pageResult = corpAppRelationService.getCorpAppRelationPage(pageReqVO);
         return success(pageResult);
     }
