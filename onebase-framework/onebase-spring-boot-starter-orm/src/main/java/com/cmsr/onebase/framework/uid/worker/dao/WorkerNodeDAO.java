@@ -60,11 +60,18 @@ public class WorkerNodeDAO {
         // 获取自增ID（兼容不同数据库的键名：id, ID, GENERATED_KEY等）
         Number generatedId = null;
         
-        // 方式1：尝试从keyHolder直接获取
-        if (keyHolder.getKey() != null) {
-            generatedId = keyHolder.getKey();
-        } else {
-            // 方式2：从keyList中获取（兼容不同的键名）
+        // 方式1：尝试从keyHolder直接获取（适用于只返回主键的数据库，如达梦）
+        try {
+            if (keyHolder.getKey() != null) {
+                generatedId = keyHolder.getKey();
+            }
+        } catch (Exception e) {
+            // 如果失败（如PostgreSQL返回多个列），继续使用方式2
+            generatedId = null;
+        }
+        
+        // 方式2：从keyList中获取（兼容返回所有列的数据库，如PostgreSQL）
+        if (generatedId == null) {
             List<Map<String, Object>> keyList = keyHolder.getKeyList();
             if (keyList != null && !keyList.isEmpty()) {
                 Map<String, Object> map = keyList.get(0);
