@@ -1,6 +1,5 @@
-
-import { ENTITY_FIELD_TYPE } from "@/components/DataFactory";
-import { FORM_COMPONENT_TYPES } from "@/components/Materials/componentTypes";
+import { ENTITY_FIELD_TYPE } from '@/components/DataFactory';
+import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 
 // 组件类型与组件实现的映射表
 export const COMPONENT_MAP: Record<string, string> = {
@@ -20,26 +19,82 @@ export const COMPONENT_MAP: Record<string, string> = {
   [ENTITY_FIELD_TYPE.AUTO_CODE.VALUE]: FORM_COMPONENT_TYPES.AUTO_CODE,
   [ENTITY_FIELD_TYPE.USER.VALUE]: FORM_COMPONENT_TYPES.USER_SELECT,
   [ENTITY_FIELD_TYPE.DEPARTMENT.VALUE]: FORM_COMPONENT_TYPES.DEPT_SELECT,
-
-  //   TODO(Mickey): 补充对应组件
   [ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE]: FORM_COMPONENT_TYPES.DATA_SELECT,
-  [ENTITY_FIELD_TYPE.RELATION.VALUE]: FORM_COMPONENT_TYPES.RELATED_FORM,
-  //   TODO(Mickey): 补充对应组件
-  [ENTITY_FIELD_TYPE.STRUCTURE.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
-  //   TODO(Mickey): 补充对应组件
-  [ENTITY_FIELD_TYPE.ARRAY.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
   [ENTITY_FIELD_TYPE.FILE.VALUE]: FORM_COMPONENT_TYPES.FILE_UPLOAD,
   [ENTITY_FIELD_TYPE.IMAGE.VALUE]: FORM_COMPONENT_TYPES.IMG_UPLOAD,
-  //   TODO(Mickey): 补充对应组件
+
+  // TODO(Mickey) 地理位置
   [ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
+  // TODO(Mickey) 密码
   [ENTITY_FIELD_TYPE.PASSWORD.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
-  //   TODO(Mickey): 补充对应组件
+  // TODO(Mickey) 加密字段
   [ENTITY_FIELD_TYPE.ENCRYPTED.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
-  //   TODO(Mickey): 补充对应组件
+  // TODO(Mickey) 聚合统计
   [ENTITY_FIELD_TYPE.AGGREGATE.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
+  // TODO(Mickey) 唯一标识  
   [ENTITY_FIELD_TYPE.ID.VALUE]: FORM_COMPONENT_TYPES.INPUT_TEXT,
 
   [ENTITY_FIELD_TYPE.MULTI_USER.VALUE]: FORM_COMPONENT_TYPES.USER_SELECT,
   [ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE]: FORM_COMPONENT_TYPES.DEPT_SELECT,
   [ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE]: FORM_COMPONENT_TYPES.DATA_SELECT
+};
+
+// 组件类型与数据字段配置可选择字段类型的映射表  fieldType TEXT
+export const COMPONENT_FIELD_MAP: Record<string, string[]> = {
+  // 单行文本 XInputText =>  常规文本、长文本内容、系统类型ID
+  [FORM_COMPONENT_TYPES.INPUT_TEXT]: [
+    ENTITY_FIELD_TYPE.TEXT.VALUE,
+    ENTITY_FIELD_TYPE.LONG_TEXT.VALUE,
+    ENTITY_FIELD_TYPE.ID.VALUE
+  ],
+  // 多行文本  XInputTextArea => 常规文本、长文本内容、系统类型ID
+  [FORM_COMPONENT_TYPES.INPUT_TEXTAREA]: [
+    ENTITY_FIELD_TYPE.TEXT.VALUE,
+    ENTITY_FIELD_TYPE.LONG_TEXT.VALUE,
+    ENTITY_FIELD_TYPE.ID.VALUE
+  ],
+  // 富文本  XRichText => 常规文本
+  [FORM_COMPONENT_TYPES.RICH_TEXT]: [ENTITY_FIELD_TYPE.TEXT.VALUE],
+  // 邮箱 XInputEmail => 邮箱
+  [FORM_COMPONENT_TYPES.INPUT_EMAIL]: [],
+  // 电话 XInputPhone => 电话
+  [FORM_COMPONENT_TYPES.INPUT_PHONE]: [],
+  // 数字录入 XInputNumber => 数字
+  [FORM_COMPONENT_TYPES.INPUT_NUMBER]: [],
+  // 日期 XDatePicker => 日期
+  [FORM_COMPONENT_TYPES.DATE_PICKER]: [],
+  // 日期区间 XDatePicker => 日期区间
+  [FORM_COMPONENT_TYPES.DATE_RANGE_PICKER]: [],
+  // 日期时间 XTimePicker => 日期时间
+  [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: [],
+  // 时间 XTimePicker => 时间
+  [FORM_COMPONENT_TYPES.TIME_PICKER]: [],
+  // 开关 XSwitch => 开关
+  [FORM_COMPONENT_TYPES.SWITCH]: [],
+  // 单选框 XRadio => 单选框、下拉单选
+  [FORM_COMPONENT_TYPES.RADIO]: [],
+  // 复选框 XCheckbox => 复选框、下拉多选
+  [FORM_COMPONENT_TYPES.CHECKBOX]: [],
+  // 下拉单选 XSelectOne => 单选框、下拉单选
+  [FORM_COMPONENT_TYPES.SELECT_ONE]: [],
+  // 下拉多选 XSelectMutiple => 复选框、下拉多选
+  [FORM_COMPONENT_TYPES.SELECT_MUTIPLE]: [],
+  // 人员选择 XUserSelect => 人员
+  [FORM_COMPONENT_TYPES.USER_SELECT]: [],
+  // 部门选择 XDeptSelect => 部门
+  [FORM_COMPONENT_TYPES.DEPT_SELECT]: [],
+  // 文件上传 XFileUpload => 文件、图片
+  [FORM_COMPONENT_TYPES.FILE_UPLOAD]: [],
+  // 图片上传 XImgUpload => 图片
+  [FORM_COMPONENT_TYPES.IMG_UPLOAD]: [],
+  // 自动编号 XAutoCode => 自动编号
+  [FORM_COMPONENT_TYPES.AUTO_CODE]: [],
+  // 关联表单 XRelatedForm => 关联表单
+  [FORM_COMPONENT_TYPES.RELATED_FORM]: [],
+  // 轮播图 XCarouselForm => 轮播图
+  [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: [],
+  // 子表单 XSubTable => 无
+  [FORM_COMPONENT_TYPES.SUB_TABLE]: [],
+  // 选择数据 XDataSelect => 选择数据
+  [FORM_COMPONENT_TYPES.DATA_SELECT]: []
 };

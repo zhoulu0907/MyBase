@@ -57,6 +57,9 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   };
 
   const initTreeData = async () => {
+    const cpType = configs.id.slice(0,configs.id.indexOf('-'));
+    // 根据不同类型XInputText匹配不同的可选择字段  fieldType TEXT
+    console.log('mainEntity.fields',mainEntity.fields)
     const mainEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .map((field: AppEntityField) => ({
