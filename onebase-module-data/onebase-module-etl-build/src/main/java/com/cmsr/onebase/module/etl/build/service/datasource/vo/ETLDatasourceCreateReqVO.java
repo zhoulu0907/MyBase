@@ -18,8 +18,6 @@ public class ETLDatasourceCreateReqVO {
     private Long applicationId;
 
     @Schema(description = "数据源编号")
-    @NotBlank(message = "数据源编号不能为空")
-    @Size(min = 1, max = 40, message = "数据源编号最大长度为40")
     private String datasourceCode;
 
     @Schema(description = "数据源名称")

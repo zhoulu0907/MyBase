@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 public class DataPreview {
 
-    private List<Field> columns;
+    private List<Field> columns = new ArrayList<>();
 
-    private List<Collection<Object>> data = new ArrayList<>();
+    private List<List<Object>> data = new ArrayList<>();
 
 }
