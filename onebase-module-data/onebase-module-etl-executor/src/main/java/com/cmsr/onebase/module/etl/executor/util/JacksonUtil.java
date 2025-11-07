@@ -11,10 +11,4 @@ public class JacksonUtil {
         OBJECT_MAPPER.findAndRegisterModules();
     }
 
-    public static String toJson(Object o) {
-        try {
-            OBJECT_MAPPER.
-        }
-    }
-
 }
