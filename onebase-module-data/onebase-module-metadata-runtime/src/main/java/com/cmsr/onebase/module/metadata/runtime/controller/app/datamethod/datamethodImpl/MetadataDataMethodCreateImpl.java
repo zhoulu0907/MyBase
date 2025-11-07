@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubE
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
     @Resource
     private MetadataEntityFieldRepository entityFieldRepository;
+
+    @Resource
+    MetadataDataMethodSubEntityCrudImpl metadataDataMethodSubEntityCrudImpl;
 
     /**
      * 校验创建数据的完整性
@@ -392,25 +396,19 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                         entry.getKey().toString(),
                         Map.Entry::getValue));
 
-                Map rowToInsert = processDataAndSetDefaults(covertedRow,subEntityFields); //设置默认值
-                rowToInsert.put(subRelFieldName,parentValue); //关联字段值
+                // id：value 转 name：value
+                Map<String,Object> nameValueParis = convertFieldIdToFieldName(covertedRow,subEntityFields);
 
-                DataRow dataRow = new DataRow(rowToInsert);
-
-                // 检查DataRow中的数据
-                log.info("DataRow创建后的数据: {}", dataRow);
-                rowToInsert.forEach((key, value) -> {
-                    Object dataRowValue = dataRow.get(key);
-                    if (dataRowValue != null) {
-                        log.info("DataRow中字段 {} 的值类型: {}, 值: {}", key, dataRowValue.getClass().getName(), dataRowValue);
-                    } else {
-                        log.info("DataRow中字段 {} 的值为null", key);
-                    }
-                });
                 // 执行插入
-                AnylineService<?> temporaryService = context.getTemporaryService();
-                Object insertResult = temporaryService.insert(quoteTableName(subEntity.getTableName()), dataRow);
-                log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", subEntityId, subEntity.getTableName(), insertResult);
+                nameValueParis.put(subRelFieldName,parentValue);// 加入关联信息字段
+
+                ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
+                processedSubEntityVo.setTraceId(context.getTraceId());
+                processedSubEntityVo.setSubEntityId(subEntityId);
+                processedSubEntityVo.setSubData(nameValueParis);
+
+                Map<String, Object> resultData = metadataDataMethodSubEntityCrudImpl.doInsert(processedSubEntityVo);
+
             }
 
         }
