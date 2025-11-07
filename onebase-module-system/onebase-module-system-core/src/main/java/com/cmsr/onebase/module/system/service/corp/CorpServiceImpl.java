@@ -7,7 +7,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-import com.cmsr.onebase.module.app.core.dto.app.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
@@ -158,62 +158,86 @@ public class CorpServiceImpl implements CorpService {
     }
 
     @Override
-    public PageResult<CorpRespVO> getCorpPage(CorpPageReqVO pageReqVO) {
-        // 调用数据仓库进行分页查询
+    public PageResult<CorpRespVO> getCorpAppsPage(CorpPageReqVO pageReqVO) {
+        /**
+         * 根据企业分页条件，查询企业及其关联应用信息的分页列表
+         *
+         * @param pageReqVO 分页与筛选条件
+         * @return PageResult<CorpRespVO> 企业-应用信息分页结果
+         */
+        // Step 1：分页查询企业列表
         PageResult<CorpDO> pageResult = corpDataRepository.selectPage(pageReqVO);
-        // 获取应用数据,根据应用id封装map
-        List<ApplicationDTO> applicationDTOS = appApplicationApi.findAppApplicationByAppName(null);
-        CorpAppRelationPageReqVO corpAppRelationPageReqVO = BeanUtils.toBean(pageReqVO, CorpAppRelationPageReqVO.class);
-
-        Map<Long, ApplicationDTO> applicationMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(applicationDTOS)) {
-            applicationMap = applicationDTOS.stream()
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toMap(ApplicationDTO::getId, Function.identity()));
-        }
-        // 获取关联关系，根据企业id 分组获取 关联的应用
-        List<CorpAppRelationDO> corpAppRelationDOList = corpAppRelationService.getCorpAppRelationList(corpAppRelationPageReqVO);
-
-        // 封装成Map，key是企业id，value是分组后的list
-       Map<Long, List<CorpAppRelationDO>> corpAppRelationMap = new HashMap<>();
-        if (com.alibaba.nacos.common.utils.CollectionUtils.isNotEmpty(corpAppRelationDOList)) {
-            corpAppRelationMap = corpAppRelationDOList.stream()
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.groupingBy(CorpAppRelationDO::getCorpId));
+        List<CorpDO> corpList = pageResult.getList();
+        if (CollectionUtils.isEmpty(corpList)) {
+            return new PageResult<>(Collections.emptyList(), pageResult.getTotal());
         }
 
+        // 提取当前页企业ID集合
+        Set<Long> corpIds = corpList.stream()
+                .map(CorpDO::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-        // 赋值corpApplicationList 授权应用数据获取
-        Map<Long, List<CorpAppRelationDO>> finalCorpAppRelationMap = corpAppRelationMap;
-        Map<Long, ApplicationDTO> finalApplicationMap = applicationMap;
-        return new PageResult<CorpRespVO>(
-                pageResult.getList().stream()
-                        .map(corpDO -> {
-                            CorpRespVO corpRespVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
-                            // 如果企业id在corpAppRelationMap中存在，设置corpApplicationList
-                            if (finalCorpAppRelationMap != null && finalCorpAppRelationMap.containsKey(corpDO.getId())) {
-                                List<CorpAppRelationDO> corplist= finalCorpAppRelationMap.get(corpDO.getId());
-                                List<CorpAppVo> corpApplicationList=new ArrayList();
-                                if (corplist != null && !corplist.isEmpty()) {
-                                    for (CorpAppRelationDO corpAppRelationDO : corplist) {
-                                        Long  applicationId=corpAppRelationDO.getApplicationId();
-                                        if(finalApplicationMap.get(applicationId)!=null){
-                                            ApplicationDTO dto= finalApplicationMap.get(applicationId);
-                                            CorpAppVo vo=new CorpAppVo();
-                                            vo.setAppCount(corplist.size());
-                                            vo.setAppName(dto.getAppName());
-                                            vo.setIconName(dto.getIconName());
-                                            corpApplicationList.add(vo);
-                                        }
-                                    }
-                                }
-                                corpRespVO.setCorpApplicationList(corpApplicationList);
+        // Step 2：根据企业列表查询关联的应用ID列表（先拉取关联关系，再按当前页企业过滤）
+        CorpAppRelationPageReqVO relationReqVO = new CorpAppRelationPageReqVO();
+        relationReqVO.setCorpIds(corpIds);
+
+        List<CorpAppRelationDO> allRelations = corpAppRelationService.getCorpAppRelationList(relationReqVO);
+        List<CorpAppRelationDO> relations = (allRelations == null ? Collections.<CorpAppRelationDO>emptyList() : allRelations)
+                .stream()
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (relations.isEmpty()) {
+            // 无关联应用，直接返回企业基本信息
+            List<CorpRespVO> noAppResp = corpList.stream()
+                    .map(c -> BeanUtils.toBean(c, CorpRespVO.class))
+                    .collect(Collectors.toList());
+            return new PageResult<>(noAppResp, pageResult.getTotal());
+        }
+
+        // Step 3：根据应用ID列表，查询所有应用详情列表（全量拉取后按ID过滤）
+        Set<Long> appIds = relations.stream()
+                .map(CorpAppRelationDO::getApplicationId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<ApplicationDTO> allApps = appApplicationApi.findAppApplicationByAppIds(appIds);
+        Map<Long, ApplicationDTO> applicationMap = (allApps == null ? Collections.<ApplicationDTO>emptyList() : allApps)
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(a -> appIds.contains(a.getId()))
+                .collect(Collectors.toMap(ApplicationDTO::getId, Function.identity(), (a, b) -> a));
+
+        // 关联关系按企业分组，便于组装
+        Map<Long, List<CorpAppRelationDO>> relationGroupByCorp = relations.stream()
+                .collect(Collectors.groupingBy(CorpAppRelationDO::getCorpId));
+
+        // Step 4：组装返回值
+        List<CorpRespVO> respList = corpList.stream()
+                .map(corpDO -> {
+                    CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
+                    List<CorpAppRelationDO> corpRels = relationGroupByCorp.getOrDefault(corpDO.getId(), Collections.emptyList());
+                    if (!corpRels.isEmpty()) {
+                        List<CorpAppVo> corpApplicationList = new ArrayList<>();
+                        for (CorpAppRelationDO rel : corpRels) {
+                            ApplicationDTO dto = applicationMap.get(rel.getApplicationId());
+                            if (dto != null) {
+                                CorpAppVo vo = new CorpAppVo();
+                                vo.setAppId(dto.getId());
+                                vo.setAppName(dto.getAppName());
+                                vo.setIconName(dto.getIconName());
+                                vo.setIconColor(dto.getIconColor());
+                                corpApplicationList.add(vo);
                             }
-                            return corpRespVO;
-                        })
-                        .collect(java.util.stream.Collectors.toList()),
-                pageResult.getTotal()
-        );
+                        }
+                        respVO.setCorpApplicationList(corpApplicationList);
+                    }
+                    return respVO;
+                })
+                .collect(Collectors.toList());
+
+        return new PageResult<>(respList, pageResult.getTotal());
     }
 
     @Override

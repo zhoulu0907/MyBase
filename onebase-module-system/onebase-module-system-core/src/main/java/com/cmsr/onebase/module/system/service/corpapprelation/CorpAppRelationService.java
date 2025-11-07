@@ -50,7 +50,7 @@ public interface CorpAppRelationService {
      * @param pageReqVO 分页查询
      * @return 企业应用关联分页
      */
-    PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO);
+    PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppPageReqVO pageReqVO);
 
     void deleteCorpAppRelationByCorpId(Long corpID);
 

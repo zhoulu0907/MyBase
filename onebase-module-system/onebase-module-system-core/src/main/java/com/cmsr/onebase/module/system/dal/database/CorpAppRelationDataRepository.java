@@ -5,9 +5,8 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
-import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -27,7 +26,7 @@ public class CorpAppRelationDataRepository extends DataRepository<CorpAppRelatio
         super(CorpAppRelationDO.class);
     }
 
-    public PageResult<CorpAppRelationDO> selectPage(CorpAppRelationPageReqVO pageReqVO, List<Long> appIds) {
+    public PageResult<CorpAppRelationDO> selectPage(CorpAppPageReqVO pageReqVO, List<Long> appIds) {
         // 构建查询条件
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(CorpAppRelationDO.CORP_ID, pageReqVO.getCorpId());
@@ -67,8 +66,13 @@ public class CorpAppRelationDataRepository extends DataRepository<CorpAppRelatio
 
     public List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(CorpAppRelationDO.CORP_ID, corpAppRelationPageReqVO.getCorpId());
-       return  findAllByConfig(configStore);
+        if (CollectionUtils.isNotEmpty(corpAppRelationPageReqVO.getCorpIds())) {
+            configStore.in(CorpAppRelationDO.CORP_ID, corpAppRelationPageReqVO.getCorpIds());
+        }
+        if (CollectionUtils.isNotEmpty(corpAppRelationPageReqVO.getAppIds())) {
+            configStore.in(CorpAppRelationDO.APPLICATION_ID, corpAppRelationPageReqVO.getAppIds());
+        }
+        return findAllByConfig(configStore);
 
     }
 }
