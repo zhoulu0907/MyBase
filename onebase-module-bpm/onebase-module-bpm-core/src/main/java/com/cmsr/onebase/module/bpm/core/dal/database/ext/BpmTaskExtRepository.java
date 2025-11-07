@@ -56,7 +56,7 @@ public class BpmTaskExtRepository {
                     t.instance_id,
                     t.flow_status,
                     t.create_time,
-                    t2.business_id
+                    t.form_path as business_id,
                     from  bpm_flow_task t
                     left join bpm_flow_user t1 on t.id = t1.associated
                     left join bpm_flow_instance t2 on t.instance_id = t2.id
