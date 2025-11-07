@@ -49,15 +49,14 @@ public class BpmHisTaskExtRepository {
                     t3.initiator_avatar,
                     t3.initiator_dept_id,
                     t3.initiator_dept_name,
-                    t3.submit_Time,
-                    t3.form_Summary,
-                    t3.form_Name,
+                    t3.submit_time,
+                    t3.form_summary,
+                    t3.form_name,
                     t.*,
-                    t4.form_path as business_id
+                    t.form_path as business_id,
                 FROM bpm_flow_his_task t
                 LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id
                 left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
-                left join bpm_flow_definition t4 on t4.id = t.definition_id
                 WHERE
                 t.approver = '%d'
                 and t1.deleted = 0
@@ -89,7 +88,7 @@ public class BpmHisTaskExtRepository {
             condition.and(Compare.LESS_EQUAL, "t3.submit_time", reqVO.getSubmitTimeEnd());
         }
         if (reqVO.getBusinessId() != null && !reqVO.getBusinessId().isEmpty()) {
-            condition.and(Compare.EQUAL, "t4.form_path", reqVO.getBusinessId());
+            condition.and(Compare.EQUAL, "t.form_path", reqVO.getBusinessId());
         }
         if (reqVO.getFlowStatus() != null && !reqVO.getFlowStatus().isEmpty() && !"ALL".equals(reqVO.getFlowStatus()) ) {
             condition.and(Compare.EQUAL, "t.flow_status", reqVO.getFlowStatus());
