@@ -1,4 +1,5 @@
-import { Button, Form, InputNumber, Menu } from '@arco-design/web-react';
+import { Button, Form, Input, InputNumber, Menu, Select, Switch } from '@arco-design/web-react';
+import { getSecurityConfigCategories, getSecurityConfigItems } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -6,47 +7,15 @@ const MenuItem = Menu.Item;
 
 interface WorkspaceSecurityProps {}
 
-const mockCategories = [
-  {
-    id: '1',
-    categoryName: '密码强度',
-    items: [
-      {
-        id: '1-1',
-        configKey: 'minLength',
-        configName: '最小密码长度',
-        dataType: 'INTEGER',
-        configValue: 8,
-        description: '最小密码长度为',
-        sortOrder: 1
-      },
-      {
-        id: '1-2',
-        configKey: 'maxLength',
-        configName: '最大密码长度',
-        dataType: 'INTEGER',
-        configValue: 16,
-        description: '最大密码长度为',
-        sortOrder: 2
-      }
-    ]
-  },
-  {
-    id: '2',
-    categoryName: '类别2'
-  },
-  {
-    id: '3',
-    categoryName: '类别3'
-  }
-];
-
 const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
   const [form] = Form.useForm();
 
+  const [categories, setCategories] = useState<any[]>([]);
+  const [itemsData, setItemsData] = useState<any[]>([]);
+
   const [activeMenuItem, setActiveMenuItem] = useState<string>('');
-  const handleClickMenuItem = (key: string) => {
-    setActiveMenuItem(key);
+  const handleClickMenuItem = (id: string) => {
+    setActiveMenuItem(id);
   };
 
   //   TODO(mickey): 联调接口，获取配置项目和配置项
@@ -55,33 +24,47 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
   };
 
   useEffect(() => {
-    const res = mockCategories
-      .find((category) => category.id === activeMenuItem)
-      ?.items?.reduce(
-        (acc, item) => {
-          acc[item.configKey] = item.configValue;
-          return acc;
-        },
-        {} as Record<string, any>
-      );
-    console.log('res', res);
-    form.setFieldsValue(res);
+    handleGetSecurityConfigCategories();
+  }, []);
+
+  const handleGetSecurityConfigCategories = async () => {
+    const res = await getSecurityConfigCategories();
+
+    setCategories(res);
+  };
+
+  useEffect(() => {
+    if (activeMenuItem) {
+      handleGetSecurityConfigItems(activeMenuItem);
+    }
   }, [activeMenuItem]);
+
+  const handleGetSecurityConfigItems = async (id: string) => {
+    const res = await getSecurityConfigItems(id);
+
+    const tmpItemsData = (Array.isArray(res) ? res : []).reduce((acc: Record<string, any>, item: any) => {
+      if (item.configKey !== undefined) {
+        acc[item.configKey] = item.configValue;
+      }
+      return acc;
+    }, {});
+    form.setFieldsValue(tmpItemsData);
+
+    setItemsData(res);
+  };
 
   return (
     <div className={styles.workspaceSecurityPage}>
       <div className={styles.sider}>
         <Menu style={{ width: 200 }} mode="pop" onClickMenuItem={handleClickMenuItem}>
-          {mockCategories.map((category) => (
+          {categories.map((category) => (
             <MenuItem key={category.id}>{category.categoryName}</MenuItem>
           ))}
         </Menu>
       </div>
       <div className={styles.content}>
         <div className={styles.contentHeader}>
-          <div className={styles.contentTitle}>
-            {mockCategories.find((category) => category.id === activeMenuItem)?.categoryName}
-          </div>
+          <div className={styles.contentTitle}>配置项</div>
           <Button type="primary" onClick={handleSave}>
             更新配置
           </Button>
@@ -90,15 +73,86 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
           <div className={styles.contentBodyItem}>
             <Form form={form}>
               {activeMenuItem &&
-                mockCategories
-                  .find((category) => category.id === activeMenuItem)
-                  ?.items?.map((item) => (
-                    <div key={item.configKey} className={styles.contentBodyItemContent}>
-                      <Form.Item field={item.configKey} label={item.configName} extra={item.description}>
+                itemsData.map((item: any) => (
+                  <div key={item.configKey} className={styles.contentBodyItemContent}>
+                    {item.dataType === 'INTEGER' && (
+                      <Form.Item
+                        field={item.configKey}
+                        label={item.configName}
+                        extra={item.description}
+                        rules={[
+                          {
+                            required: item.required === 'true',
+                            message: `请输入${item.description}`,
+                            type: 'number',
+                            min: Number(item.min),
+                            max: Number(item.max)
+                          }
+                        ]}
+                      >
                         <InputNumber />
                       </Form.Item>
-                    </div>
-                  ))}
+                    )}
+                    {item.dataType === 'STRING' && item.options == null && (
+                      <Form.Item
+                        field={item.configKey}
+                        label={item.configName}
+                        extra={item.description}
+                        rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    )}
+                    {item.dataType === 'BOOLEAN' && (
+                      <Form.Item
+                        field={item.configKey}
+                        label={item.configName}
+                        extra={item.description}
+                        rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                      >
+                        <Switch />
+                      </Form.Item>
+                    )}
+                    {(item.dataType === 'JSON[STRING]' || item.dataType === 'STRING') && item.options != null && (
+                      <Form.Item
+                        field={item.configKey}
+                        label={item.configName}
+                        extra={item.description}
+                        rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                      >
+                        <Select
+                          mode="multiple"
+                          options={
+                            typeof item.options === 'string'
+                              ? item.options.split(',').map((opt: string) => ({
+                                  label: opt.trim(),
+                                  value: opt.trim()
+                                }))
+                              : []
+                          }
+                        />
+                      </Form.Item>
+                    )}
+
+                    {item.dataType === 'JSON[INTEGER]' && (
+                      <Form.Item
+                        field={item.configKey}
+                        label={item.configName}
+                        extra={item.description}
+                        rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                      >
+                        <Select
+                          allowClear
+                          mode="multiple"
+                          options={Array.from({ length: 50 }, (_, i) => ({
+                            label: (i + 1).toString(),
+                            value: i + 1
+                          }))}
+                        />
+                      </Form.Item>
+                    )}
+                  </div>
+                ))}
             </Form>
           </div>
         </div>
