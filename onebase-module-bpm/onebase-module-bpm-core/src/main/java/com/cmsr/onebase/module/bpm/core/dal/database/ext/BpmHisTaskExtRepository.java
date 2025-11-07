@@ -53,7 +53,7 @@ public class BpmHisTaskExtRepository {
                     t3.form_summary,
                     t3.form_name,
                     t.*,
-                    t.form_path as business_id,
+                    t.form_path as business_id
                 FROM bpm_flow_his_task t
                 LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id
                 left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
