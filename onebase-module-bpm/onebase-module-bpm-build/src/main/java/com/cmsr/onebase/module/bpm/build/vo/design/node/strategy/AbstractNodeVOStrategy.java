@@ -194,13 +194,4 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
             throw exception(ErrorCodeConstants.APPROVER_NODE_REQUIRED_ENABLED_BTN);
         }
     }
-
-    protected void validateFieldPermConfig(FieldPermCfgDTO fieldPermConfig) {
-        if (fieldPermConfig.getUseNodeConfig()) {
-           if (CollectionUtils.isEmpty(fieldPermConfig.getFieldConfigs())) {
-               log.error("缺少字段权限配置");
-               throw exception(ErrorCodeConstants.MISSING_NODE_FIELD_PERM_CFG);
-           }
-        }
-    }
 }

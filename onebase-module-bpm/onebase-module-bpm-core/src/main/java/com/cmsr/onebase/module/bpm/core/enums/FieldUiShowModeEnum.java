@@ -1,27 +1,27 @@
-package com.cmsr.onebase.module.bpm.api.enums;
+package com.cmsr.onebase.module.bpm.core.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 字段权限类型
+ * 字段权限类型（前端组件用）
  *
  * @author liyang
- * @date 2025-10-21
+ * @date 2025-11-06
  */
 @Getter
 @AllArgsConstructor
-public enum FieldPermTypeEnum {
+public enum FieldUiShowModeEnum {
 
     /**
      * 编辑
      */
-    WRITE("write", "编辑"),
+    WRITE("default", "编辑"),
 
     /**
      * 只读
      */
-    READ("read", "只读"),
+    READ("readonly", "只读"),
 
     /**
      * 隐藏
@@ -45,8 +45,8 @@ public enum FieldPermTypeEnum {
      * @param code 编码
      * @return 枚举
      */
-    public static FieldPermTypeEnum getByCode(String code) {
-        for (FieldPermTypeEnum type : values()) {
+    public static FieldUiShowModeEnum getByCode(String code) {
+        for (FieldUiShowModeEnum type : values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }

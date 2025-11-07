@@ -292,5 +292,7 @@ public interface AdminUserService {
      */
     UserRespVO getUserWithRoles(Long id);
 
-    List<String> getUserRoleByRoleId(Long id);
+    List<String> getUserRoleByRoleIdAndTenantId(Long id,Long tenantId);
+
+    Map<Long,Integer> getTenantExistUserCountByIds( List<Long> tenantIds);
 }

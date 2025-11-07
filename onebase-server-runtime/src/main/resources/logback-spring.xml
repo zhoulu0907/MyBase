@@ -62,8 +62,22 @@
         </encoder>
     </appender>-->
 
-    <!-- 本地环境 -->
-    <springProfile name="local">
+    <!-- 达梦数据库专用日志配置 -->
+    <springProfile name="dameng">
+        <logger name="dm.jdbc" level="INFO"/>
+        <logger name="org.anyline.data.jdbc.dm" level="DEBUG"/>
+        <logger name="com.cmsr.onebase.module.metadata.core.dal.database" level="DEBUG"/>
+    </springProfile>
+
+    <!-- 金仓数据库专用日志配置 -->
+    <springProfile name="kingbase">
+        <logger name="com.kingbase8" level="INFO"/>
+        <logger name="org.anyline.data.jdbc.kingbase" level="DEBUG"/>
+        <logger name="com.cmsr.onebase.module.metadata.core.dal.database" level="DEBUG"/>
+    </springProfile>
+
+    <!-- 本地环境和国产数据库环境 -->
+    <springProfile name="local,dameng,kingbase">
         <root level="INFO">
             <appender-ref ref="STDOUT"/>
             <!--<appender-ref ref="GRPC"/>--> <!-- 本地环境下，如果不想接入 SkyWalking 日志服务，可以注释掉本行 -->

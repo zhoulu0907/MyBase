@@ -39,6 +39,18 @@ public class CorpRespVO {
     @Schema(description = "用户上限", example = "100")
     private Integer userLimit;
 
+    @Schema(description = "用户个数", example = "100")
+    private Integer userCount;
+
+    @Schema(description = "应用个数", example = "100")
+    private Integer appCount;
+
+    @Schema(description = "联系人邮箱")
+    private String email;
+
+    @Schema(description = "联系人电话")
+    private String mobile;
+
     @Schema(description = "管理员")
     private String adminName;
 
