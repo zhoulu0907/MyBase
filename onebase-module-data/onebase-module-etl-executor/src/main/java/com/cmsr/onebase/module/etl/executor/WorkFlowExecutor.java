@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.etl.executor;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.WorFlowGraph;
+import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
@@ -18,7 +18,7 @@ public class WorkFlowExecutor {
 
     private InputArgs inputArgs;
 
-    private WorFlowGraph worFlowGraph;
+    private WorkflowGraph workflowGraph;
 
     private TableEnvironment tableEnv;
 
@@ -27,17 +27,18 @@ public class WorkFlowExecutor {
         try (BeanManager beanManager = new BeanManager(inputArgs)) {
             WorkflowProvider workflowProvider = beanManager.getWorkflowDao();
             if (inputArgs.getWorkflowId() != null) {
-                worFlowGraph = workflowProvider.getWorkflowGraph(inputArgs.getWorkflowId());
+                workflowGraph = workflowProvider.getWorkflowGraph(inputArgs.getWorkflowId());
             } else {
-                worFlowGraph = null; //TODO 定义新方法 workflowProvider.getWorkflowGraph(inputArgs.getPreviewWorkflow());
+                workflowGraph = workflowProvider.getWorkflowGraph(inputArgs.getPreviewWorkflow());
             }
         }
-        EnvironmentSettings settings = EnvironmentSettings.newInstance().inBatchMode().build();
+        EnvironmentSettings settings =
+                EnvironmentSettings.newInstance().inBatchMode().build();
         tableEnv = TableEnvironment.create(settings);
     }
 
     public void execute() {
-        for (Node node : worFlowGraph.getNodes()) {
+        for (Node node : workflowGraph.getNodes()) {
             if (node instanceof CreateTableAction action) {
                 action.createTable(tableEnv);
             }
@@ -48,7 +49,7 @@ public class WorkFlowExecutor {
     }
 
     public String preview() {
-        for (Node node : worFlowGraph.getNodes()) {
+        for (Node node : workflowGraph.getNodes()) {
             if (node instanceof CreateTableAction action) {
                 action.createTable(tableEnv);
             }
