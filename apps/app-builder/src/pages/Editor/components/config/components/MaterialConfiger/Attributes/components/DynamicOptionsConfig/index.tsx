@@ -30,8 +30,9 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
   }, [configs[selectKey]]);
 
   useEffect(() => {
+    setSelectDisabled(false);
     getDefaultOptions(true);
-  }, []);
+  }, [configs.id]);
 
   const getDefaultOptions = async (flag?: boolean) => {
     const value = configs.dataField;
