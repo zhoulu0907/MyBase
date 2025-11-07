@@ -131,13 +131,13 @@ public class NodeVOStrategyManager {
     }
 
     /**
-     * 构建节点扩展数据
+     * 填充节点扩展数据
      * 将BpmDefJsonVO.NodeVO的数据转换为NodeJson.ext格式
      *
      * @param nodeVO 节点配置VO
      * @return 扩展数据JSON字符串
      */
-    public void buildNodeExtData(NodeJson nodeJson, BaseNodeVO nodeVO) {
+    public void fillNodeExtData(NodeJson nodeJson, BaseNodeVO nodeVO, Long appId) {
         if (nodeVO == null) {
             log.error("节点VO为空");
             throw exception(ErrorCodeConstants.MISSING_NODE_VO_DATA);
@@ -154,7 +154,7 @@ public class NodeVOStrategyManager {
         // 使用策略构建扩展数据
         @SuppressWarnings("unchecked")
         NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO> rawStrategy = (NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO>) strategy;
-        BaseNodeExtDTO extData = rawStrategy.buildExtData(nodeVO);
+        BaseNodeExtDTO extData = rawStrategy.buildExtData(nodeVO, appId);
 
         String ext = JsonUtils.toJsonString(extData);
         nodeJson.setExt(ext);

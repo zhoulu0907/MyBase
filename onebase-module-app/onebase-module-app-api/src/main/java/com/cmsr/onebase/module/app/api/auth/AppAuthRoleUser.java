@@ -10,6 +10,8 @@ public interface AppAuthRoleUser {
 
     void deleteByUserId(Long userId);
 
-    List<Long> findUserIdsByAppIdAndRoleIds(Long appId, List<Long> roleIds);
+    List<Long> findUserIdsByRoleIds(List<Long> roleIds);
+
+    List<Long> findRoleIdsByAppId(Long appId);
 
 }

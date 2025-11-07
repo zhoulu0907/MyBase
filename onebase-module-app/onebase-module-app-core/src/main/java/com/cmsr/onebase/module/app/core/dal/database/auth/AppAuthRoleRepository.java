@@ -72,12 +72,4 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
             return authRoleDO;
         }).toList();
     }
-
-    public List<AuthRoleDO> findByAppIdAndRoleIds(Long appId, List<Long> roleIds) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", appId);
-        configs.in("id", roleIds);
-        return findAllByConfig(configs);
-    }
-
 }
