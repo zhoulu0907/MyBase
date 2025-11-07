@@ -43,8 +43,8 @@ public class DataSourceFactory {
         } else {
             jdbcConnection = (String) connectionProperties.get("jdbcUrl");
         }
-        connectionProperties.setProperty("jdbcUrl", jdbcConnection);
-        connectionProperties.setProperty("driver", dbType.driver());
+        connectionProperties.put("jdbcUrl", jdbcConnection);
+        connectionProperties.put("driver", dbType.driver());
         datasourceDO.setConfig(JsonUtils.toJsonString(connectionProperties));
 //        Driver declaredDriver = getDeclaredDriverInstance(dbType);
 

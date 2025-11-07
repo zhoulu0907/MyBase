@@ -37,7 +37,8 @@ public class QueryProvider {
 
     private final ResultSetHandler<JdbcInputConfig> datasourceHandler = resultSet -> {
         if (resultSet.next()) {
-            return resultSet.getObject("config", JdbcInputConfig.class);
+            String config = resultSet.getString("config");
+            return GsonUtil.GSON.fromJson(config, JdbcInputConfig.class);
         }
         return null;
     };
@@ -83,7 +84,9 @@ public class QueryProvider {
                 tableInfoQuery.getBindValues().toArray());
         Long datasourceId = (Long) tableInfo.get("datasource_id");
         String tableName = (String) tableInfo.get("table_name");
+        inputConfig.setTableName(tableName);
         JsonElement tableMeta = GsonUtil.GSON.toJsonTree(tableInfo.get("meta_info"));
+
 
         var datasourceInfoQuery = context.select(
                         DSL.field("config", String.class)
@@ -95,7 +98,10 @@ public class QueryProvider {
         JdbcInputConfig jdbcConnectionConfig = runner.query(datasourceInfoQuery.getSQL(ParamType.INDEXED),
                 datasourceHandler,
                 datasourceInfoQuery.getBindValues().toArray());
-
+        inputConfig.setDriver(jdbcConnectionConfig.getDriver());
+        inputConfig.setJdbcUrl(jdbcConnectionConfig.getJdbcUrl());
+        inputConfig.setUsername(jdbcConnectionConfig.getUsername());
+        inputConfig.setPassword(jdbcConnectionConfig.getPassword());
         System.out.println("dnn1iovu2h1");
     }
 }
