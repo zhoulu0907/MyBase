@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useAppEntityStore } from '@onebase/ui-kit';
+import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import styles from '../../index.module.less';
 
 const FormItem = Form.Item;
@@ -25,13 +26,15 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
 
   useEffect(() => {
     setSelectOptionsConfig(configs[selectKey] || []);
+    getDefaultOptions();
   }, [configs[selectKey]]);
 
   useEffect(() => {
-    getDefaultOptions();
-  }, []);
+    setSelectDisabled(false);
+    getDefaultOptions(true);
+  }, [configs.id]);
 
-  const getDefaultOptions = () => {
+  const getDefaultOptions = async (flag?: boolean) => {
     const value = configs.dataField;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
@@ -39,24 +42,48 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
     const currentSubField = isSubEntity?.fields.find((ele: any) => value.includes(ele.fieldId));
     if (isMainEntity && currentMainField) {
       // 主表
-      if (currentMainField.options?.length) {
+      if (currentMainField.dictTypeId) {
+        const res = await getDictDetail(currentMainField.dictTypeId);
+        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+        if (dictOptions.length) {
+          if (flag) {
+            handlePropsChange(selectKey, dictOptions);
+          }
+          setSelectDisabled(true);
+        }
+      } else if (currentMainField.options?.length) {
         const newOptions = currentMainField.options?.map((e) => ({
           chosen: currentMainField.defaultValue && e.optionValue === currentMainField.defaultValue,
           label: e.optionLabel,
           value: e.optionValue
         }));
-        handlePropsChange(selectKey, newOptions);
+        if (flag) {
+          handlePropsChange(selectKey, newOptions);
+        }
         setSelectDisabled(true);
       }
     } else if (isSubEntity && currentSubField) {
       // 子表
-      if (currentSubField.options?.length) {
+      if (currentSubField.dictTypeId) {
+        const res = await getDictDetail(currentSubField.dictTypeId);
+        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+        if (dictOptions.length) {
+          if (flag) {
+            handlePropsChange(selectKey, dictOptions);
+          }
+          setSelectDisabled(true);
+        }
+      } else if (currentSubField.options?.length) {
         const newOptions = currentSubField.options?.map((e) => ({
           chosen: currentSubField.defaultValue && e.optionValue === currentSubField.defaultValue,
           label: e.optionLabel,
           value: e.optionValue
         }));
-        handlePropsChange(selectKey, newOptions);
+        if (flag) {
+          handlePropsChange(selectKey, newOptions);
+        }
         setSelectDisabled(true);
       }
     }

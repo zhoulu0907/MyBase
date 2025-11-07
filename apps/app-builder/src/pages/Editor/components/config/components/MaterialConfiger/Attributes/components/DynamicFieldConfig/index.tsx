@@ -11,6 +11,7 @@ import {
   useAppEntityStore,
   getPopupContainer
 } from '@onebase/ui-kit';
+import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 
 const FormItem = Form.Item;
 
@@ -117,7 +118,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
     }
   };
 
-  const handleAutoCode = (value: (string | string[])[]) => {
+  const handleAutoCode = async (value: (string | string[])[]) => {
     const type = components.find((ele) => ele.id === configs.id)?.type;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldId));
@@ -144,11 +145,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         //  字段选项列表（单/多选）
         [selectKey]:
           type === FORM_COMPONENT_TYPES.SELECT_ONE || type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-            ? currentMainField.options?.map((e) => ({
-              chosen: currentMainField.defaultValue && e.optionValue === currentMainField.defaultValue,
-              label: e.optionLabel,
-              value: e.optionValue
-            }))
+            ? await getDefaultOptions(currentMainField)
             : undefined
       };
       handleConfigsChange(newConfigs);
@@ -172,11 +169,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         //  字段选项列表（单/多选）
         [selectKey]:
           type === FORM_COMPONENT_TYPES.SELECT_ONE || type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-            ? currentSubField.options?.map((e) => ({
-              chosen: currentSubField.defaultValue && e.optionValue === currentSubField.defaultValue,
-              label: e.optionLabel,
-              value: e.optionValue
-            }))
+            ? await getDefaultOptions(currentSubField)
             : undefined
       };
       handleConfigsChange(newConfigs);
@@ -184,6 +177,25 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       // 未找到字段对应配置
       handlePropsChange(item.key, value);
     }
+  };
+
+  const getDefaultOptions = async (field: any) => {
+    let newOptions: any = [];
+    if (field.dictTypeId) {
+      const res = await getDictDetail(field.dictTypeId);
+      const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+      const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+      if (dictOptions.length) {
+        newOptions = dictOptions;
+      }
+    } else if (field.options?.length) {
+      newOptions = field.options?.map((e: any) => ({
+        chosen: field.defaultValue && e.optionValue === field.defaultValue,
+        label: e.optionLabel,
+        value: e.optionValue
+      }));
+    }
+    return newOptions;
   };
 
   return (
