@@ -352,7 +352,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({
         confirmLoading={loading || isGenerating}
         style={{ width: 800 }}
       >
-        <Spin loading={isGenerating} tip="正在生成编码...">
+        <Spin loading={isGenerating} tip="正在生成编码..." style={{ width: '100%' }}>
           <div className={styles.configContainer}>
             {/* 彩色模式开关 */}
             <div className={styles.colorModeSection}>

@@ -1,21 +1,26 @@
 import { copyToClipboard, getDomainPrefix, simplifyUrl } from '@/utils/date';
 import {
+  Avatar,
   Button,
   Checkbox,
   Form,
+  Image,
   Input,
   Message,
   Select,
   Space,
   Tabs,
+  Tag,
   Tooltip,
   Upload
 } from '@arco-design/web-react';
 import { IconCopy, IconUpload } from '@arco-design/web-react/icon';
 import {
   getPlatformTenantAdminInfoApi,
-  getPlatformTenantAdminListApi,
+  getSimpleUserList,
   updatePlatformTenantApi,
+  uploadFile,
+  PlatformTenantPublishMode,
   type UpdateTenantParams
 } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
@@ -32,8 +37,9 @@ const EditTenant = () => {
   const id = searchParams.get('id');
 
   const [isEdit, setIsEdit] = useState(false);
-  const [tenantInfo, setTenantInfo] = useState<any>(); // todo
+  const [tenantInfo, setTenantInfo] = useState<any>();
   const [adminList, setAdminList] = useState<{ id: string; nickname: string; username: string; mobile: string }[]>([]);
+  const [logoUrl, setLogoUrl] = useState<string>();
 
   const domainPrefix = getDomainPrefix();
   const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${tenantInfo?.id}/${tenantInfo?.website}/`;
@@ -51,26 +57,26 @@ const EditTenant = () => {
       const initialValues = {
         id: tenantInfo.id,
         name: tenantInfo.name,
-        logoUrl: tenantInfo.logoUrl,
-        accountCount: tenantInfo.accountCount,
-        adminUserId: tenantInfo.adminUserId,
+        website: tenantInfo.website,
         status: tenantInfo.status === 1,
-        saasEnabled: tenantInfo.saasEnabled === 1
+        accountCount: tenantInfo.accountCount,
+        tenantAdminUserList: tenantInfo.tenantAdminUserList.map(ten => ten.id),
+        publishModel: tenantInfo.publishModel === PlatformTenantPublishMode.saas
       };
+      setLogoUrl(tenantInfo.logoUrl);
       form.setFieldsValue(initialValues);
     }
   }, [tenantInfo]);
 
   const getTenantInfo = async (id: string) => {
-    const res = await getPlatformTenantAdminInfoApi({ id });
+    const res = await getPlatformTenantAdminInfoApi(id);
     setTenantInfo(res);
-    console.log(res, 999);
   };
 
-  // 获取管理员列表
+  // 获取用户列表
   const getPlatformAdminList = async () => {
     try {
-      const adminListResp = await getPlatformTenantAdminListApi();
+      const adminListResp = await getSimpleUserList();
       setAdminList(adminListResp);
     } catch (error) {
       console.error('Error fetching adminList:', error);
@@ -87,16 +93,24 @@ const EditTenant = () => {
 
       // 构建更新参数
       if (tenantInfo?.id) {
+        const formattedAdmin = values.tenantAdminUserList.map((id: string) => {
+          const user = adminList.find(u => u.id === id);
+          return {
+            adminNickName: user?.nickname || '',
+            adminUserName: user?.username || '',
+            adminMobile: user?.mobile || '',
+          };
+        });
         const updateParams: UpdateTenantParams = {
           id: tenantInfo.id,
           name: values.name,
           tenantCode: values.tenantCode,
           status: values.status ? 1 : 0,
           accountCount: values.accountCount,
-          accessUrl: values.accessUrl,
-          saasEnabled: values.saasEnabled ? 1 : 0,
-          logoUrl: values.logoUrl,
-          adminUserId: values.adminUserId[0]
+          website: values.website,
+          publishModel: values.publishModel ? PlatformTenantPublishMode.saas : PlatformTenantPublishMode.inner,
+          tenantAdminUserUpdateReqVOSList: formattedAdmin,
+          logoUrl,
         };
         // 调用 updatePlatformTenantApi
         await updatePlatformTenantApi(updateParams);
@@ -114,14 +128,33 @@ const EditTenant = () => {
     }
   };
 
+  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const progressAdapter = onProgress
+      ? (progressEvent: ProgressEvent) => {
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
+        }
+      }
+      : undefined;
+
+    const res = await uploadFile(formData, progressAdapter);
+    return res;
+  };
+
   return (
     <div className={styles.editPage}>
-      <Tabs defaultActiveTab="1" destroyOnHide={false}>
+      <Tabs defaultActiveTab="1" destroyOnHide={false} style={{ width: '100%' }}>
         <Tabs.TabPane key="1" title="基本信息">
           <Form
             form={form}
             layout="horizontal"
             autoComplete="off"
+            labelCol={{ span: 2 }}
+            wrapperCol={{ span: 22 }}
           >
             <Form.Item
               label="空间名称"
@@ -134,14 +167,43 @@ const EditTenant = () => {
             <Form.Item label="空间 Logo" field="logoUrl">
               {isEdit ? <>
                 <Upload
+                  limit={1}
+                  imagePreview
+                  accept="image/*"
                   listType="picture-card"
-                  action="/"
-                  showUploadList={false}
+                  fileList={[
+                    {
+                      uid: '1',
+                      name: 'logo',
+                      url: logoUrl,
+                      status: 'done'
+                    }
+                  ]}
+                  customRequest={async (option) => {
+                    const { onProgress, onError, onSuccess, file } = option;
+                    try {
+                      const uploadImgUrl = await handleUpload(file, onProgress);
+                      if (uploadImgUrl !== '') {
+                        setLogoUrl(uploadImgUrl);
+                        onSuccess(uploadImgUrl);
+                      } else {
+                        onError({
+                          status: 'error',
+                          msg: '上传失败'
+                        });
+                      }
+                    } catch (error) {
+                      onError({
+                        status: 'error',
+                        msg: '上传失败'
+                      });
+                    }
+                  }}
                 >
                   <Button type='outline' icon={<IconUpload />}>上传图片</Button>
                 </Upload>
-                <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
-              </> : <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>}
+                {isEdit && <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>}
+              </> : <>{logoUrl ? <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} /> : <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>}</>}
             </Form.Item>
 
             <Form.Item label="空间ID" field="id">
@@ -150,10 +212,11 @@ const EditTenant = () => {
 
             <Form.Item
               label="访问地址"
-              field="accessUrl"
+              field="website"
               rules={[{ required: isEdit, message: '请输入访问地址' }]}
+              validateTrigger={['onBlur']}
             >
-              {isEdit ? <Input prefix="http://" placeholder="www.onebase.com/" /> :
+              {isEdit ? <Input addBefore={getDomainPrefix()} placeholder="www.onebase.com/" /> :
                 <div className={styles.urlWrapper}>
                   <Tooltip content={displayUrl}><span className={styles.url}>{displayUrl}</span></Tooltip>
                   <IconCopy className={styles.copyIcon} onClick={() => copyToClipboard(fullUrl)} />
@@ -170,7 +233,7 @@ const EditTenant = () => {
 
             <Form.Item
               label="管理员"
-              field="adminUserId"
+              field="tenantAdminUserList"
               rules={[{ required: isEdit, message: '请选择管理员' }]}
               extra={isEdit && "当前用户将作为空间所有者"}
             >
@@ -186,13 +249,13 @@ const EditTenant = () => {
               >
               </Select> :
                 <div className={styles.tagWrapper}>
-                  {/* {adminList
-                    .filter(admin => (tenantInfo?.adminUserId || []).includes(admin.id))
+                  {adminList
+                    .filter(admin => (tenantInfo?.tenantAdminUserList || []).includes(admin.id))
                     .map((tag, index) => (
                       <Tag className={styles.adminTag} key={index} size='large' style={{ borderRadius: 16 }}>
                         <Avatar size={24} style={{ marginRight: 4 }}>{tag.nickname.slice(0, 1)}</Avatar>{tag.nickname}
                       </Tag>
-                    ))} */}
+                    ))}
                 </div>}
             </Form.Item>
 
@@ -202,11 +265,11 @@ const EditTenant = () => {
 
             <Form.Item
               label="SaaS 功能"
-              field="saasEnabled"
+              field="publishModel"
               triggerPropName="checked"
               rules={[{ required: isEdit }]}
             >
-              {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.saasEnabled ? '已启用' : '未启用'}</span>}
+              {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.publishModel === PlatformTenantPublishMode.saas ? '已启用' : '未启用'}</span>}
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 5 }}>

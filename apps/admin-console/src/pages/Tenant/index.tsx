@@ -1,4 +1,4 @@
-import { copyToClipboard, formatTimestamp, generateTimestampString, getDomainPrefix, simplifyUrl } from '@/utils/date';
+import { copyToClipboard, formatTimestamp, getDomainPrefix, simplifyUrl } from '@/utils/date';
 import {
   Button,
   Dropdown,
@@ -14,23 +14,17 @@ import {
 } from '@arco-design/web-react';
 import { IconCaretDown, IconCheckCircleFill, IconCopy, IconDelete, IconEdit, IconPlus, IconRecord, IconSearch, IconStop } from '@arco-design/web-react/icon';
 import {
-  getCreateTenantCountApi,
-  getOtherTenantCountApi,
-  getPlatformInfoApi,
-  getPlatformTenantAdminListApi,
   getPlatformTenantListApi,
-  getTenantUserCountApi,
   PlatformTenantStatus,
   updatePlatformTenantApi,
   deletePlatformTenantApi,
   type PlatformTenantInfo,
-  type UpdateTenantParams
+  type UpdateTenantParams,
+  PlatformTenantSort
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
-
-const { useForm } = Form;
 
 interface Options {
   label: string;
@@ -40,11 +34,11 @@ interface Options {
 const timeOptions: Options[] = [
   {
     label: "按创建时间正序排序",
-    value: "create"
+    value: PlatformTenantSort.asc
   },
   {
     label: "按创建时间倒序排序",
-    value: "update"
+    value: PlatformTenantSort.desc
   },
 ];
 
@@ -64,34 +58,18 @@ const statusOptions: Options[] = [
 ];
 
 const TenantManagement: React.FC = () => {
+  const nav = useNavigate();
   const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]); // 空间数据
   const [statusFilter, setStatusFilter] = useState<number | null>(null); // 状态筛选
-  const [timeFilter, setTimeFilter] = useState<string>("create"); // 时间筛选
+  const [timeFilter, setTimeFilter] = useState<PlatformTenantSort>(PlatformTenantSort.desc); // 时间筛选
   const [keywordSearch, setKeywordSearch] = useState(''); // 关键字搜索
   const [searchInputValue, setSearchInputValue] = useState(''); // 输入框显示的值
   const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
-  const [isNewTenant, setIsNewTenant] = useState(false);
-
-  const [currentTenant, setCurrentTenant] = useState<PlatformTenantInfo | null>(null);
-  // const [originalAdmin, setOriginalAdmin] = useState<string>('');
-  // const [allocatableLicense, setAllocatableLicense] = useState<number>(10000); // 可分配许可证数量
-  const [tenantLimit, setTenantLimit] = useState<number>(10000); // 租户数量限制
-  const [otherTenantCount, setOtherTenantCount] = useState<number>(0); // 其他租户分配数
-  const [tenantUserCount, setTenantUserCount] = useState<number>(0); // 租户下用户数
-  const [adminList, setAdminList] = useState<{ id: string; nickname: string; username: string; mobile: string }[]>([]);
 
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [loading, setLoading] = useState(false);
-  const [modalLoading, setModalLoading] = useState(false);
-
-  // 弹窗
-  const [modalVisible, setModalVisible] = useState(false);
-  const [confirmDisableVisible, setConfirmDisableVisible] = useState(false);
-
-  const [form] = useForm();
-  const nav = useNavigate();
 
   // 获取租户列表
   const getPlatformTenantList = async () => {
@@ -102,7 +80,7 @@ const TenantManagement: React.FC = () => {
         pageSize: 10,
         status: statusFilter, // 添加状态筛选参数
         keywords: keywordSearch, // 添加关键词搜索参数
-        // createTime: timeFilter // 添加时间筛选参数 todo
+        sortType: timeFilter // 添加时间筛选参数 todo
       });
       setTenantList(resp.list);
       setTotal(resp.total);
@@ -113,10 +91,6 @@ const TenantManagement: React.FC = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    getPlatformTenantList();
-  }, []);
 
   useEffect(() => {
     setSearchInputValue(keywordSearch);
@@ -157,20 +131,36 @@ const TenantManagement: React.FC = () => {
     setSearchDebounceTimer(timer);
   };
 
-  // 生成租户编码
-  const generateTenantCode = () => {
-    const timestamp = generateTimestampString();
-    return `tenant_${timestamp}`;
-  };
-
-  // 启用
-  const confirmEnable = () => {
-
-  };
-
-  // 禁用
-  const confirmDisable = () => {
-
+  // 启用 / 禁用
+  const confirmEnable = (data: PlatformTenantInfo) => {
+    const statusText = data.status === 0 ? '启用' : '禁用';
+    const updateParams: UpdateTenantParams = {
+      id: data.id!,
+      name: data.name!,
+      tenantCode: data.tenantCode!,
+      accountCount: data.accountCount!,
+      website: data.website!,
+      publishModel: data.publishModel,
+      logoUrl: data.logoUrl,
+      status: data.status === 1 ? 0 : 1,
+      tenantAdminUserUpdateReqVOSList: data.tenantAdminUserList,
+    };
+    Modal.confirm({
+      title: `确认要${statusText}空间（${data?.name}）吗？`,
+      content: (<>
+        <div style={{ marginBottom: 20 }}>
+          <p>
+            {data.status === 0 ? '启用空间，该空间下的用户可正常进入空间并使用' : '禁用空间，该空间下的用户将无法登陆，再次启用时可恢复正常使用'}
+          </p>
+        </div>
+      </>),
+      okButtonProps: { status: data.status === 1 ? "danger" : "default" },
+      onOk: async () => {
+        await updatePlatformTenantApi(updateParams);
+        await getPlatformTenantList();
+        Message.success(`${statusText}空间成功`);
+      }
+    });
   };
 
   // 空间删除
@@ -198,7 +188,8 @@ const TenantManagement: React.FC = () => {
           Message.warning('租户名不正确');
           return Promise.reject();
         }
-        await deletePlatformTenantApi({ id: data.id });
+        await deletePlatformTenantApi(data.id!);
+        await getPlatformTenantList();
         Message.success('删除空间成功');
       }
     });
@@ -226,18 +217,14 @@ const TenantManagement: React.FC = () => {
 
   const DropList = ({ data }: { data: PlatformTenantInfo }) => {
     return (
-      <Menu onClickMenuItem={() => setCurrentTenant(data)}>
+      <Menu>
         <Menu.Item key='1' onClick={() => nav(`edit?id=${data.id}`)}>
           <IconEdit style={iconStyle} />
           编辑
         </Menu.Item>
         <Menu.Item key='2' onClick={confirmEnable}>
           <IconRecord style={iconStyle} />
-          启用
-        </Menu.Item>
-        <Menu.Item key='3' onClick={confirmDisable}>
-          <IconStop style={iconStyle} />
-          禁用
+          {data.status === 0 ? "启用" : "禁用"}
         </Menu.Item>
         <Menu.Item key='4' onClick={() => confirmDelete(data)}>
           <IconDelete style={iconStyle} />
@@ -255,7 +242,7 @@ const TenantManagement: React.FC = () => {
           新建空间
         </Button>
         <Space size="large">
-          <Select options={timeOptions} defaultValue={timeOptions[0].value} bordered={false} onChange={handleTimeChange} />
+          <Select options={timeOptions} defaultValue={timeFilter} bordered={false} onChange={handleTimeChange} />
           <Select options={statusOptions} defaultValue={statusOptions[0].value} bordered={false} onChange={handleStatusChange} />
 
           <Input.Search
@@ -311,20 +298,20 @@ const TenantManagement: React.FC = () => {
                 <div className={styles.center}>
                   <div className={styles.enterpriseNumber}>
                     <div className={styles.rowName}>企业数</div>
-                    <div className={styles.rowValue16}>137</div>
+                    <div className={styles.rowValue16}>{tenant.corpCount}</div>
                   </div>
 
                   <div className={styles.UserNumber}>
                     <div className={styles.rowName}>用户数</div>
                     <div className={styles.flexRow}>
-                      <div className={styles.rowValue16}>2200</div>
-                      <div className={styles.rowValue14}>/4000</div>
+                      <div className={styles.rowValue16}>{tenant.existUserCount || 0}</div>
+                      <div className={styles.rowValue14}>/{tenant.accountLimit || 0}</div>
                     </div>
                   </div>
 
                   <div className={styles.appNumber}>
                     <div className={styles.rowName}>应用数</div>
-                    <div className={styles.rowValue16}>220</div>
+                    <div className={styles.rowValue16}>{tenant.appCount || 0}</div>
                   </div>
 
                   <div className={styles.createTime}>
@@ -353,7 +340,6 @@ const TenantManagement: React.FC = () => {
             )
           })
         }
-
       </div>
 
       <Pagination

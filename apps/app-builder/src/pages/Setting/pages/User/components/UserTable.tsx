@@ -2,7 +2,7 @@ import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
 import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
 import type { PageParam, UserVO } from '@onebase/platform-center';
-import { deleteUser, getUserPage, resetUserPassword, StatusEnum, updateUserStatus } from '@onebase/platform-center';
+import { deleteUser, getUserPage, resetUserPassword, StatusEnum, updateUserStatus, UserType, PlatformTenantStatus, exportUser } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
@@ -12,7 +12,6 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasPermission, hasAllPermissions } from '@/utils/permission';
 import { TENANT_USER_PERMISSION as ACTIONS } from '@/constants/permission';
-import { UserType } from '@onebase/platform-center';
 import { AddMembers } from '@onebase/common';
 import { getDeptUser, type GetDeptUserReq, type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO, type RoleAddUserReq, roleAddUser } from '@onebase/app';
 
@@ -45,11 +44,11 @@ const statusOptions: SelectOptions[] = [
   },
   {
     label: '已启用',
-    value: 1,
+    value: PlatformTenantStatus.enabled
   },
   {
     label: '已禁用',
-    value: 0,
+    value: PlatformTenantStatus.disabled
   },
 ];
 
@@ -61,6 +60,7 @@ export default function UserTable({
 }: UserTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [status, setStatus] = useState<PlatformTenantStatus | ''>('');
   const [search, setSearch] = useState('');
   const [editingUser, setEditingUser] = useState<UserRecord | undefined>();
   const [data, setData] = useState<UserRecord[]>([]);
@@ -83,7 +83,8 @@ export default function UserTable({
     async (searchValue?: string) => {
       const params: PageParam = {
         pageNo: page,
-        pageSize
+        pageSize,
+        status
       };
       if (selectedDeptId) params.deptId = selectedDeptId;
       if (searchValue) params.nickname = searchValue;
@@ -91,7 +92,7 @@ export default function UserTable({
       setData(res.list || []);
       setTotal(res.total || 0);
     },
-    [page, pageSize, selectedDeptId]
+    [page, pageSize, selectedDeptId, status]
   );
 
   const debouncedSearch = useCallback(
@@ -103,7 +104,7 @@ export default function UserTable({
 
   useEffect(() => {
     getUserList();
-  }, [selectedDeptId, page, pageSize]);
+  }, [selectedDeptId, page, pageSize, status]);
 
   const handleEdit = (record: UserRecord) => {
     setEditingUser(record);
@@ -120,8 +121,17 @@ export default function UserTable({
     // todo import
   };
 
-  const handleExport = () => {
-    // todo export
+  const handleExport = async () => {
+    // try {
+    //   const params = {
+    //     pageNo: 1,
+    //     pageSize: 10
+    //   }
+    //   await exportUser('用户数据', params);
+    //   Message.success('用户导出成功');
+    // } catch (error) {
+
+    // }
   };
 
   // 搜索
@@ -421,7 +431,7 @@ export default function UserTable({
           </Button>
         </Space>
         <Space>
-          <Select defaultValue={statusOptions[0].value} bordered={false} options={statusOptions} onChange={(value) => console.log(value, 88)} />
+          <Select defaultValue={status} bordered={false} options={statusOptions} onChange={(val) => setStatus(val)} />
           <Input.Search
             className={s.inputSearch}
             style={{ width: 218, marginBottom: 0 }}

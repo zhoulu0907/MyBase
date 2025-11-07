@@ -12,10 +12,10 @@ export const updateCorpApi = (data: updateCorpParams) => systemService.post('/co
 export const disabledCorpApi = (data: corpStatusParams) => systemService.post(`/corp/update-status?id=${data.id}&status=${data.status}`);
 
 // 搜索企业
-export const searchCorpApi = (id: number | string) => systemService.post(`/platform/admin/delete?id=${id}`)
+export const searchCorpApi = (id: string) => systemService.post(`/platform/admin/delete?id=${id}`)
 
 // 删除企业
-export const deleteCorpApi = (id: number) => systemService.post(`/corp/delete?id=${id}`)   
+export const deleteCorpApi = (id: string) => systemService.post(`/corp/delete?id=${id}`)
 
 //获取企业列表-分页
 export const getCorpListApi = (data: corpListParams) => systemService.get('/corp/page', data);
@@ -24,4 +24,4 @@ export const getCorpListApi = (data: corpListParams) => systemService.get('/corp
 export const getCorpSimpleDetailsListApi = () => systemService.get('/corp/simple-list');
 
 //获得详情
-export const getDetailsApi = (id: number) => systemService.get(`/corp/get?id=${id}`);
+export const getDetailsApi = (id: string) => systemService.get(`/corp/get?id=${id}`);

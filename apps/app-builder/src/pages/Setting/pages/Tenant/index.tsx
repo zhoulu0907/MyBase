@@ -11,6 +11,17 @@ import StatusTag from '@/components/StatusTag';
 import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import styles from './index.module.less';
+import { getCommonPaginationList } from '@onebase/common';
+import {
+  createApplication,
+  deleteApplication,
+  listApplication,
+  type Application,
+  type CreateApplicationReq,
+  type DatasourceSaveReqDTO,
+  type DeleteApplicationReq,
+  type PageParam
+} from '@onebase/app';
 
 const TabPane = Tabs.TabPane;
 const { Title, Text } = Typography;
@@ -44,20 +55,12 @@ const tableData = [{
   createTime: '1762154032380'
 }];
 
-const appData = [
-  {
-    name: '智慧工厂应用',
-    desc: '覆盖报案、查勘、定损、核赔到支付的全流程数字化管理通过智能识别与流程自动化，提高理赔效率与准确性，优化客户体验',
-  },
-  {
-    name: '智慧工厂应用',
-    desc: '覆盖报案、查勘、定损、核赔到支付的全流程数字化管理通过智能识别与流程自动化，提高理赔效率与准确性，优化客户体验',
-  },
-  {
-    name: '智慧工厂应用',
-    desc: '覆盖报案、查勘、定损、核赔到支付的全流程数字化管理通过智能识别与流程自动化，提高理赔效率与准确性，优化客户体验',
-  }
-];
+const CREATED_TYPE = {
+  ENTERPRISE: 'enterprise',
+  APPLICATION: 'application',
+}
+
+type ownerCreateType = 'enterprise' | 'application' | string;
 
 const TenantPage: React.FC = () => {
   const nav = useNavigate();
@@ -67,7 +70,10 @@ const TenantPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
+
+  const [curTab, setCurTab] = useState<ownerCreateType>(CREATED_TYPE.ENTERPRISE);
   const [data, setData] = useState<any[]>(tableData);
+  const [appData, setAppData] = useState<any[]>([]);
   const [editingUser, setEditingUser] = useState<any | undefined>();
 
   // const fetchTenantInfo = async () => {
@@ -80,9 +86,31 @@ const TenantPage: React.FC = () => {
   //   }
   // };
 
+  const getOwnerApplication = async () => {
+    const req: PageParam = {
+      pageNo: 1,
+      pageSize: 100,
+      ownerTag: 1,
+    };
+    const res = await listApplication(req);
+    if (res) {
+      setAppData(res.list);
+    }
+  };
+
+
+
   useEffect(() => {
     // fetchTenantInfo();
   }, []);
+
+  useEffect(() => {
+    if (curTab === CREATED_TYPE.ENTERPRISE) {
+      // todo
+    } else if (curTab === CREATED_TYPE.APPLICATION) {
+      getOwnerApplication();
+    }
+  }, [curTab]);
 
   // 显示加载状态
   // if (loading) {
@@ -285,8 +313,8 @@ const TenantPage: React.FC = () => {
         style={{ display: 'flex', flex: 1, overflow: 'hidden' }}
         spinStyle={{ display: 'flex', flex: 1, overflow: 'hidden' }}
       >
-        <Tabs className={styles.createTabs}>
-          <TabPane key='tab1' title='我创建的企业'>
+        <Tabs className={styles.createTabs} activeTab={curTab} onChange={setCurTab} style={{ width: '100%' }}>
+          <TabPane key={CREATED_TYPE.ENTERPRISE} title='我创建的企业'>
             <Table
               rowKey="id"
               hover
@@ -319,47 +347,46 @@ const TenantPage: React.FC = () => {
             </div>
 
           </TabPane>
-          <TabPane key='tab2' title='我创建的应用'>
-            <div style={{ overflow: 'auto' }}>
-              <Space direction="vertical" size={16} style={{ width: '100%', height: '100%', overflow: 'auto' }}>
-                {appData.map((item, index) => (
-                  <Card
-                    key={index}
-                    bordered={false}
-                    style={{
-                      borderRadius: 16,
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                    }}
-                  >
-                    <Row align="center" gutter={8}>
-                      {/* 左侧图标 */}
-                      <Col flex="64px" style={{ textAlign: 'center' }}>
-                        <div className={styles.myAppIcon} style={{ backgroundColor: item?.iconColor || '#ccc' }}>
-                          <DynamicIcon
-                            IconComponent={appIconMap[item?.iconName as keyof typeof appIconMap || 'city-one']}
-                            theme="outline"
-                            size="32"
-                            fill="#F2F3F5"
-                          />
-                        </div>
-                      </Col>
+          <TabPane key={CREATED_TYPE.APPLICATION} title='我创建的应用'>
+            <Space direction="vertical" size={16}>
+              {appData.map((item, index) => (
+                <Card
+                  key={index}
+                  bordered={false}
+                  style={{
+                    width: '100%',
+                    borderRadius: 16,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  <Row align="center" gutter={8}>
+                    {/* 左侧图标 */}
+                    <Col flex="64px" style={{ textAlign: 'center' }}>
+                      <div className={styles.myAppIcon} style={{ backgroundColor: item?.iconColor || '#ccc' }}>
+                        <DynamicIcon
+                          IconComponent={appIconMap[item?.iconName as keyof typeof appIconMap || 'city-one']}
+                          theme="outline"
+                          size="32"
+                          fill="#F2F3F5"
+                        />
+                      </div>
+                    </Col>
 
-                      {/* 右侧信息 */}
-                      <Col flex="auto">
-                        <Space direction="vertical" size={4}>
-                          <Title heading={6} style={{ margin: 0 }}>
-                            {item.name}
-                          </Title>
-                          <Text type="secondary" style={{ lineHeight: 1.6 }}>
-                            {item.desc}
-                          </Text>
-                        </Space>
-                      </Col>
-                    </Row>
-                  </Card>
-                ))}
-              </Space>
-            </div>
+                    {/* 右侧信息 */}
+                    <Col flex="1">
+                      <Space direction="vertical" size={4}>
+                        <Title heading={6} style={{ margin: 0 }}>
+                          {item.appName}
+                        </Title>
+                        <Text type="secondary" style={{ lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {item.description}
+                        </Text>
+                      </Space>
+                    </Col>
+                  </Row>
+                </Card>
+              ))}
+            </Space>
 
           </TabPane>
         </Tabs>

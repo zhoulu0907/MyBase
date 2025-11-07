@@ -9,6 +9,16 @@ export enum PlatformTenantStatus {
   enabled,
 }
 
+export enum PlatformTenantSort {
+  asc = 'asc',
+  desc = 'desc'
+}
+
+export enum PlatformTenantPublishMode {
+  saas = 'saas',
+  inner = 'inner'
+}
+
 // 管理员根用户ID
 export const ADMIN_ROOT_ID = '1';
 
@@ -16,63 +26,83 @@ export const ADMIN_ROOT_ID = '1';
  * 平台租户信息
  */
 export interface PlatformTenantInfo {
-  id: string,
   /**
-   * 租户名称
+   * 租户编号
    */
-  name: string,
+  id?: string;
   /**
-   * 管理员名称
-   */
-  adminUserName: string,
+   * 访问地址
+  */
+  accessUrl?: string;
   /**
-   * 管理员昵称
+   * 账号数量
    */
-  adminNickName?: string,
+  accountCount?: number;
   /**
-   * 租户编码
+   * 应用数量
    */
-  tenantCode: string,
+  appCount?: number;
   /**
-   * 管理员手机号
+   * 企业数
    */
-  adminMobile: string,
+  corpCount?: number;
   /**
    * 创建时间
    */
-  createTime: string,
+  createTime?: string;
   /**
-   * 分配人员数量
+   * 已存在用户数量
    */
-  accountCount: number,
-  /**
-   * 租户状态
-   */
-  status: PlatformTenantStatus,
+  existUserCount?: number;
   /**
    * 过期时间
    */
-  expireTime?: string,
-  /**
-   * 套餐ID
-   */
-  packageId?: number,
-  /**
-   * 访问地址
-   */
-  accessUrl: string;
+  expireTime?: string;
   /**
    * 用户logo
    */
   logoUrl?: string;
   /**
-   * saas功能是否开启默认0，开启1
+   * 租户名
    */
-  saasEnabled?: PlatformTenantStatus;
+  name?: string;
   /**
-   * 管理员id
+   * 租户套餐编号
    */
-  adminUserId?: string[];
+  packageId?: number;
+  /**
+   * saas功能是否开启
+   */
+  publishModel?: PlatformTenantPublishMode;
+  /**
+   * 租户状态
+   */
+  status?: PlatformTenantStatus;
+  /**
+   * 管理员集合
+   */
+  tenantAdminUserList?: TenantAdminUserResVO[];
+  /**
+   * 租户编码
+   */
+  tenantCode?: string;
+  /**
+   * key
+   */
+  tenantKey?: string;
+  /**
+   * secret
+   */
+  tenantSecret?: string;
+  /**
+   * 域名
+   */
+  website?: string;
+  /**
+   * 域名H5
+   */
+  websiteH5?: string;
+  [property: string]: any;
 }
 
 export interface CreateTenantParams {
@@ -89,40 +119,53 @@ export interface CreateTenantParams {
    */
   status: PlatformTenantStatus;
   /**
+   * 域名
+   */
+  website: string;
+  /**
    * 分配数量
    */
   accountCount: number;
   /**
    * 访问地址
    */
-  accessUrl: string;
+  accessUrl?: string;
   /**
    * 用户logo
    */
   logoUrl?: string;
   /**
-   * saas功能是否开启默认0，开启1
+   * saas功能是否开启
    */
-  saasEnabled?: PlatformTenantStatus;
+  publishModel?: PlatformTenantPublishMode;
   /**
-   * 管理员id
+   * 管理员
    */
-  adminUserId?: AdminUsers[];
+  tenantAdminUserReqVOList?: TenantAdminUserResVO[];
+  tenantAdminUserUpdateReqVOSList?: TenantAdminUserResVO[];
 }
 
-interface AdminUsers {
+/**
+ * TenantAdminUserResVO
+ */
+export interface TenantAdminUserResVO {
   /**
-   * 管理员名称
+   * 管理员手机
    */
-  adminUserName?: string;
+  adminMobile?: string;
   /**
    * 管理员昵称
    */
   adminNickName?: string;
   /**
-   * 管理员电话
+   * 管理员id
    */
-  adminMobile?: string;
+  adminUserId?: number;
+  /**
+   * 管理员账号
+   */
+  adminUserName?: string;
+  [property: string]: any;
 }
 
 export interface UpdateTenantParams extends CreateTenantParams {
