@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.build.controller.platform;
+package com.cmsr.onebase.module.system.platform.controller.platform;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;

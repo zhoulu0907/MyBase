@@ -19,11 +19,11 @@ public abstract class AuthorizeRequestsCustomizer
     private WebProperties webProperties;
 
     protected String buildAdminApi(String url) {
-        return webProperties.getAdminApi().getPrefix() + url;
+        return webProperties.getBuildApi().getPrefix() + url;
     }
 
     protected String buildAppApi(String url) {
-        return webProperties.getAppApi().getPrefix() + url;
+        return webProperties.getRuntimeApi().getPrefix() + url;
     }
 
     @Override

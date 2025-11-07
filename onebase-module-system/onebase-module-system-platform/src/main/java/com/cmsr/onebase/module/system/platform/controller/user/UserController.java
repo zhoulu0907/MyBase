@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.build.controller.user;
+package com.cmsr.onebase.module.system.platform.controller.user;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;

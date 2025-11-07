@@ -1,8 +1,7 @@
-package com.cmsr.onebase.module.system.build.controller.license;
+package com.cmsr.onebase.module.system.platform.controller.license;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.build.controller.auth;
+package com.cmsr.onebase.module.system.platform.controller.auth;
 
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
@@ -27,6 +27,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +44,7 @@ import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUti
 @RequestMapping("/system/auth")
 @Validated
 @Slf4j
+@Component("platformAuthController")
 public class AuthController {
 
     @Resource

@@ -61,7 +61,7 @@ public class SmsSendServiceImpl implements SmsSendService {
             }
         }
         // 执行发送
-        return sendSingleSms(mobile, userId, UserTypeEnum.ADMIN.getValue(), templateCode, templateParams);
+        return sendSingleSms(mobile, userId, UserTypeEnum.BUILD.getValue(), templateCode, templateParams);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class SmsSendServiceImpl implements SmsSendService {
             mobile = memberService.getMemberUserMobile(userId);
         }
         // 执行发送
-        return sendSingleSms(mobile, userId, UserTypeEnum.MEMBER.getValue(), templateCode, templateParams);
+        return sendSingleSms(mobile, userId, UserTypeEnum.RUNTIME.getValue(), templateCode, templateParams);
     }
 
     @Override

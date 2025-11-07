@@ -17,14 +17,19 @@ import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 @Data
 public class WebProperties {
 
-    @NotNull(message = "APP API 不能为空")
-    private Api appApi = new Api("/runtime", new String[]{"**.controller.app.**", "**.runtime.controller.**"});
+    @NotNull(message = "Runtime API 不能为空")
+    private Api runtimeApi = new Api("/runtime", new String[]{"**.controller.app.**", "**.runtime.controller.**"});
 
-    @NotNull(message = "Admin API 不能为空")
-    private Api adminApi = new Api("/admin-api", new String[]{
+    @NotNull(message = "Build API 不能为空")
+    private Api buildApi = new Api("/admin-api", new String[]{
         "**.controller.admin.**",
         "**.build.controller.**",
         "**.module.**.controller.admin.**"
+    });
+
+    @NotNull(message = "Platform API 不能为空")
+    private Api platformApi = new Api("/platform", new String[]{
+            "**.platform.controller.**",
     });
 
     // @NotNull(message = "Admin UI 不能为空")

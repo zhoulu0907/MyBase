@@ -27,6 +27,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +44,7 @@ import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUti
 @RequestMapping("/system/auth")
 @Validated
 @Slf4j
+@Component("buildAuthController")
 public class AuthController {
 
     @Resource

@@ -24,63 +24,22 @@
             <artifactId>onebase-project-base</artifactId>
             <version>${revision}</version>
         </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-bpm-build</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-formula-build</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-system-build</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-core</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-build</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-runtime</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-build</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-app-build</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-flow-build</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <!-- 工作流。默认注释，保证编译速度 -->
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-module-bpm-server</artifactId>-->
-<!--            <version>${revision}</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-etl-build</artifactId>
+            <artifactId>onebase-module-system-platform</artifactId>
             <version>${revision}</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.cmsr.onebase</groupId>-->
+<!--            <artifactId>onebase-module-infra-core</artifactId>-->
+<!--            <version>${revision}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.cmsr.onebase</groupId>-->
+<!--            <artifactId>onebase-module-infra-build</artifactId>-->
+<!--            <version>${revision}</version>-->
+<!--        </dependency>-->
         <!-- spring boot 配置所需依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -124,16 +83,6 @@
             <scope>test</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-module-flow-component</artifactId>-->
-<!--            <version>${revision}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-module-flow-core</artifactId>-->
-<!--            <version>${revision}</version>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>

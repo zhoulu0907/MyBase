@@ -99,17 +99,22 @@ public class WebFrameworkUtils {
         String uri = request.getRequestURI();
         
         // 对于runtime metadata相关接口，不进行用户类型检查，允许任何类型用户访问
+        // todo: 确认为什么返回null
         if (StrUtil.startWith(uri, "/runtime/metadata/")) {
             return null;
         }
         
         // 检查 Admin API
-        if (StrUtil.startWith(uri, properties.getAdminApi().getPrefix())) {
-            return UserTypeEnum.ADMIN.getValue();
+        if (StrUtil.startWith(uri, properties.getBuildApi().getPrefix())) {
+            return UserTypeEnum.BUILD.getValue();
         }
         // 检查 App API
-        if (StrUtil.startWith(uri, properties.getAppApi().getPrefix())) {
-            return UserTypeEnum.MEMBER.getValue();
+        if (StrUtil.startWith(uri, properties.getRuntimeApi().getPrefix())) {
+            return UserTypeEnum.RUNTIME.getValue();
+        }
+        // 检查 App API
+        if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
+            return UserTypeEnum.PLATFORM.getValue();
         }
         return null;
     }

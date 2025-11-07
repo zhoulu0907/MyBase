@@ -152,7 +152,7 @@ public class OneBaseWebSecurityConfigurerAdapter {
     }
 
     private String buildAppApi(String url) {
-        return webProperties.getAppApi().getPrefix() + url;
+        return webProperties.getRuntimeApi().getPrefix() + url;
     }
 
     private Multimap<HttpMethod, String> getPermitAllUrlsFromAnnotations() {
