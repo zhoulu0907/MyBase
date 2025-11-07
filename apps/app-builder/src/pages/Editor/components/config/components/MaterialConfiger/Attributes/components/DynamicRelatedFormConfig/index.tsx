@@ -1,4 +1,4 @@
-import { useAppEntityStore } from '@onebase/ui-kit';
+import { getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
 import { Form, Select, Space } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
@@ -96,6 +96,7 @@ const DynamicRelatedFormConfig: React.FC<DynamicRelatedFormConfigProps> = ({ han
             options={entityOptions}
             onChange={handleEntityChange}
             allowClear
+            getPopupContainer={getPopupContainer}
           />
           <Select
             value={selectedField}
@@ -105,6 +106,7 @@ const DynamicRelatedFormConfig: React.FC<DynamicRelatedFormConfigProps> = ({ han
             onChange={handleFieldChange}
             disabled={!selectedEntity}
             allowClear
+            getPopupContainer={getPopupContainer}
           />
         </Space>
       </FormItem>

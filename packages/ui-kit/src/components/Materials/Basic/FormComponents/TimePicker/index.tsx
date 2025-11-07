@@ -3,6 +3,7 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputTimePickerConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
@@ -32,6 +33,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
           <div>{defaultValue || '--'}</div>
         ) : (
           <TimePicker
+            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

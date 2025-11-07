@@ -3,9 +3,10 @@ import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { DATE_OPTIONS, DATE_VALUES, DATE_FORMAT,STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { DATE_OPTIONS, DATE_VALUES, DATE_FORMAT, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputDateRangePickerConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -34,14 +35,6 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
-
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
 
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];

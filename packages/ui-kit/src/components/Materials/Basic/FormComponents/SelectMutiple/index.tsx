@@ -5,6 +5,7 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
 import '../index.css';
 import type { XInputSelectMutipleConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -32,14 +33,6 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
-
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
 
   return (
     <div className="formWrapper">

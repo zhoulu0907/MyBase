@@ -8,7 +8,8 @@ import {
   FORM_COMPONENT_TYPES,
   usePageEditorSignal,
   useFormEditorSignal,
-  useAppEntityStore
+  useAppEntityStore,
+  getPopupContainer
 } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
@@ -144,10 +145,10 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         [selectKey]:
           type === FORM_COMPONENT_TYPES.SELECT_ONE || type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
             ? currentMainField.options?.map((e) => ({
-                chosen: currentMainField.defaultValue && e.optionValue === currentMainField.defaultValue,
-                label: e.optionLabel,
-                value: e.optionValue
-              }))
+              chosen: currentMainField.defaultValue && e.optionValue === currentMainField.defaultValue,
+              label: e.optionLabel,
+              value: e.optionValue
+            }))
             : undefined
       };
       handleConfigsChange(newConfigs);
@@ -172,10 +173,10 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         [selectKey]:
           type === FORM_COMPONENT_TYPES.SELECT_ONE || type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
             ? currentSubField.options?.map((e) => ({
-                chosen: currentSubField.defaultValue && e.optionValue === currentSubField.defaultValue,
-                label: e.optionLabel,
-                value: e.optionValue
-              }))
+              chosen: currentSubField.defaultValue && e.optionValue === currentSubField.defaultValue,
+              label: e.optionLabel,
+              value: e.optionValue
+            }))
             : undefined
       };
       handleConfigsChange(newConfigs);
@@ -193,6 +194,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         showEmptyChildren
         animation={false}
         unmountOnExit={false}
+        getPopupContainer={getPopupContainer}
         style={{
           width: '100%'
         }}
