@@ -46,7 +46,7 @@ public class DeptSaveReqVO {
     @Size(max = 512, message = "邮箱长度不能超过 512 个字符")
     private String remark;
 
-    @Schema(description = "部门主管ID", example = "2048")
-    private Long deptLeaderUserId;
+    @Schema(description = "部门主管", example = "")
+    private Long deptDirectorId;
 
 }

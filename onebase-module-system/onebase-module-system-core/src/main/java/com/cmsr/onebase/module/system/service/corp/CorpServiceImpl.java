@@ -70,6 +70,7 @@ public class CorpServiceImpl implements CorpService {
     @Resource
     private AdminUserService userService;
 
+    @Resource
     private   DictDataCommonApi dictDataApi;
 
 
@@ -223,10 +224,10 @@ public class CorpServiceImpl implements CorpService {
         Map<Long, List<CorpAppRelationDO>> relationGroupByCorp = relations.stream()
                 .collect(Collectors.groupingBy(CorpAppRelationDO::getCorpId));
 
-/*        CommonResult<List<DictDataRespDTO>> dictlist= dictDataApi.getDictDataList(CorpConstant.INDUSTRY_TYPE);
+         CommonResult<List<DictDataRespDTO>> dictlist= dictDataApi.getDictDataList(CorpConstant.INDUSTRY_TYPE);
         Map<Long, String> dictmap = dictlist.getData().stream()
                 .collect(Collectors.toMap(DictDataRespDTO::getId
-                        , DictDataRespDTO::getLabel));*/
+                        , DictDataRespDTO::getLabel));
 
         // Step 4：组装返回值
         List<CorpRespVO> respList = corpList.stream()
@@ -247,8 +248,7 @@ public class CorpServiceImpl implements CorpService {
                             }
                         }
                         respVO.setCorpApplicationList(corpApplicationList);
-                       // respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
-                        respVO.setIndustryTypeName("ddddddd");
+                        respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                     }
                     return respVO;
                 })
