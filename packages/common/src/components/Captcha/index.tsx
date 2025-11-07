@@ -1,6 +1,6 @@
 import { Message, Modal } from '@arco-design/web-react';
 import CryptoJS from 'crypto-js';
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState, TouchEvent } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Captcha, CaptchaCheck } from './types';
 
 interface SliderCaptchaProps {
@@ -148,7 +148,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
     };
 
     // 处理拖拽移动
-    const handleDragMove = (e: React.MouseEvent | MouseEvent | TouchEvent) => {
+    const handleDragMove = (e: React.MouseEvent | MouseEvent | globalThis.TouchEvent) => {
       if (!dragging || !trackRef.current) return;
 
       const trackRect = trackRef.current.getBoundingClientRect();
@@ -187,7 +187,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
     useEffect(() => {
       const handleMouseMove = (e: MouseEvent) => handleDragMove(e);
       const handleMouseUp = () => handleDragEnd();
-      const handleTouchMove = (e: TouchEvent) => {
+      const handleTouchMove = (e: globalThis.TouchEvent) => {
         e.preventDefault(); // 防止页面滚动
         handleDragMove(e);
       };

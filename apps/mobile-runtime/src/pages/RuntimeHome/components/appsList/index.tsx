@@ -19,7 +19,8 @@ import styles from './index.module.less';
 
 interface TreeNode {
   key: string;
-  value: string;
+  id: string;
+  icon: string;
   title: string;
   isVisible: number;
   children?: TreeNode[];
@@ -28,29 +29,38 @@ interface TreeNode {
 const levelStyle = (level: number) => ({ padding: `0 ${level > 5 ? '0' : '0.12rem'}` })
 
 const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
-
-  const getGroupItem = (itemData:TreeNode, level:number = 0) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const getGroupItem = (itemData: TreeNode, level: number = 0) => {
     if (!itemData.children || itemData.children.length === 0) {
-      return <div className={styles.treeItem} style={levelStyle(level)}>
-                   <IconUser className={styles.treeItemIcon}/>
-                   <Ellipsis text={itemData.title} />
-                 </div>
+      return <div key={itemData.key + 1} className={styles.treeItem} style={levelStyle(level)} onClick={() => handlerItemClick(itemData.id)}>
+        <IconUser className={styles.treeItemIcon} />
+        <Ellipsis text={itemData.title} />
+      </div>
     }
     return <Collapse
-             className={styles.treeItemGroup}
-             style={levelStyle(level)}
-             header={
-               <div className={styles.treeItemGroupHeader}>
-                 <IconUser className={styles.treeItemIcon}/>
-                 <Ellipsis text={level + '--' + itemData.title} />
-               </div>
-             }
-             value={itemData.key}
-             content={
-               itemData.children.map((child) => getGroupItem(child, level + 1))
-             }
-          />
+      className={styles.treeItemGroup}
+      style={levelStyle(level)}
+      key={itemData.key}
+      header={
+        <div className={styles.treeItemGroupHeader}>
+          <IconUser className={styles.treeItemIcon} />
+          <Ellipsis text={level + '--' + itemData.title} />
+        </div>
+      }
+      value={itemData.key}
+      content={
+        itemData.children.map((child) => getGroupItem(child, level + 1))
+      }
+    />
   }
+  const handlerItemClick = (curMenuId: string) => {
+    const sp = new URLSearchParams(location.search);
+    sp.set('curMenu', String(curMenuId));
+    // sp.delete('curTab');
+    const to = `${location.pathname.replace('/runtime-home', '/runtime')}?${sp.toString()}`;
+    navigate(to);
+  };
 
   return (
     <div className={styles.appsList}>

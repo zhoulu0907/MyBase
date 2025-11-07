@@ -18,6 +18,20 @@ import {
   type UpdateMethodParams
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
+// import {
+//   EDITOR_TYPES,
+//   FORM_COMPONENT_TYPES,
+//   getComponentWidth,
+//   PreviewRender,
+//   startLoadPageSet,
+//   STATUS_OPTIONS,
+//   STATUS_VALUES,
+//   useEditorSignalMap,
+//   useListEditorSignal,
+//   useFormEditorSignal,
+//   type GridItem
+// } from '@onebase/ui-kit';
+
 import {
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
@@ -30,7 +44,7 @@ import {
   useListEditorSignal,
   useFormEditorSignal,
   type GridItem
-} from '@onebase/ui-kit';
+} from '@onebase/ui-kit-mobile';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';

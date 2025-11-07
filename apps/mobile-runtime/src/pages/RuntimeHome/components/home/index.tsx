@@ -26,7 +26,8 @@ import AppsList from '../appsList';
 
 interface TreeNode {
   key: string;
-  value: string;
+  id: string;
+  icon: string;
   title: string;
   isVisible: number;
   children?: TreeNode[];
@@ -35,18 +36,11 @@ interface TreeNode {
 const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
   useSignals();
 
-  const navigate = useNavigate();
-  const location = useLocation();
   const { appId } = useParams<{ appId?: string }>();
-  const [search] = useSearchParams();
-  const curMenuId = search.get('curMenu');
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
 
   const initTreeItemWidth = 155;
-  const cutTreeItemWidth = 25;
-  const { curMenu, setCurMenu } = menuSignal;
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   useEffect(() => {
     if (appId) {
@@ -78,51 +72,17 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
     // 处理数据
     const resPageList = res && res.length > 0 ? dealPage(res) : [];
     const pageList = resPageList; //getMenuArr().concat(resPageList);
-    const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
+    const treeData = convertMenuToTreeData(pageList);
     setTreeData(treeData);
-
-    // 如果菜单列表不为空，默认选中第一个菜单
-    if (pageList && pageList.length > 0) {
-      // 初始化页面没有curMenuId就处理第一个菜单为分组的情况 分组里没有页面的情况
-      const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
-      if (curMenuObj) {
-        setExpandedKeys(curMenuObj.parentIds);
-        setCurMenu(curMenuObj.node);
-      }
-    }
   };
 
-  //返回当前 menu 对象和链路上所有父节点 code
-  const findMenuWithParents = (
-    nodes: ApplicationMenu[],
-    accIds: string[],
-    targetId?: string
-  ): { node: ApplicationMenu; parentIds: string[] } | null => {
-    for (const n of nodes) {
-      if (targetId ? n.id === targetId : n.menuType === MenuType.PAGE) {
-        return { node: n, parentIds: accIds };
-      }
-
-      if (n.children && n.children.length) {
-        const res = findMenuWithParents(n.children, accIds.concat(n.menuCode), targetId);
-        if (res) return res;
-      }
-    }
-    return null;
-  };
-
-  // 更新当前路由的 curMenu（不刷新页面）
-  const handleCurMenuUrl = (curMenuId: string) => {
-    const sp = new URLSearchParams(location.search);
-    sp.set('curMenu', String(curMenuId));
-    const to = `${location.pathname}?${sp.toString()}`;
-    navigate(to, { replace: true });
-  };
-
-  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number): any[] => {
+  const convertMenuToTreeData = (menus: ApplicationMenu[]): any[] => {
     return menus.map((menu) => ({
       key: menu.menuCode,
+      id: menu.id,
+      icon: menu.menuIcon,
       title: menu.menuName,
+      isVisible: menu.isVisible,
       // title1: (
       //   <RuntimeMenuItem
       //     menuID={menu.id}
@@ -137,7 +97,7 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
       //     }}
       //   />
       // ),
-      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth) : []
+      children: menu.children ? convertMenuToTreeData(menu.children) : []
     }));
   };
 

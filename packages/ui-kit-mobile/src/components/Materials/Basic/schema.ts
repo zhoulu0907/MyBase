@@ -17,6 +17,9 @@ import XCarousel from './FormComponents/Carousel/schema';
 import FileUpload from './FormComponents/FileUpload/schema';
 import XAutoCode from './FormComponents/AutoCode/schema';
 import XDeptSelect from './FormComponents/DeptSelect/schema';
+import XShowMonitor from './ListComponents/ShowMonitor/schema';
+import XLoadMore from './ListComponents/LoadMore/schema';
+
 const baseSchema = {
   XInputText,
   XInputTextArea,
@@ -36,7 +39,10 @@ const baseSchema = {
   XCarousel,
   FileUpload,
   XAutoCode,
-  XDeptSelect
+  XDeptSelect,
+
+  XShowMonitor,
+  XLoadMore,
 };
 
 export default baseSchema;

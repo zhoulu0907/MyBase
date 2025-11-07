@@ -2,6 +2,7 @@ import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import Runtime from './pages/Runtime';
+import RuntimeLast from './pages/RuntimeLast';
 import RuntimeHome from './pages/RuntimeHome';
 import '@icon-park/react/styles/index.css';
 // import Runtime from './pages/Runtime';
@@ -14,6 +15,7 @@ function AppContent() {
       <Route path="/:appId/:tenantId/login" element={<Login />} />
 
       <Route path="/onebase/runtime-home/:appId/" element={<RuntimeHome />} />
+      <Route path="/onebase/runtime-last/:appId/" element={<RuntimeLast />} />
       <Route path="/onebase/runtime/:appId/" element={<Runtime />} />
 
       {/* 默认重定向到登录页 */}

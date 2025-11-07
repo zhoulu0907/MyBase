@@ -1,0 +1,156 @@
+.loadmore-list-wrapper {
+    .list-search-header {
+        padding: 0.2rem 0.16rem 0.12rem;
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        width: calc(100% - 0.32rem) !important;
+        @media screen and (min-width: 900px) {
+            max-width: calc(750px - 0.32rem) !important;
+        }
+        .filter-icon {
+            width: 0.24rem;
+            height: 0.24rem;
+            margin-left: 0.12rem;
+        }
+        .arco-search-bar-container {
+            padding: 0;
+            flex: 1;
+        }
+        .arco-search-bar-wrap {
+            font-size: 0.14rem;
+            height: 0.36rem;
+            padding: 0 0 0 0.12rem;
+            line-height: 0.36rem;
+        }
+        .arco-search-bar-search-icon {
+            font-size: 0.18rem;
+        }
+    }
+    .list-create-btn {
+        width: 0.48rem;
+        height: 0.48rem;
+        align-items: center;
+        border-radius: 50%;
+        background: linear-gradient(326deg, #009E9E 10.69%, #24B28F 56.88%, #00B42A 103.07%);
+        /* box-shadow: 0 4px 8px 0 rgba(0, 94, 115, 0.20); */
+        position: fixed;
+        bottom: 1.2rem;
+        right: 0.12rem;
+        &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 4px;
+        height: 0.24rem;
+        background: #fff;
+        }
+        &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0.24rem;
+        height: 4px;
+        background: #fff;
+        }
+    }
+    .list-body-wrapper {
+        padding: 0.12rem;
+        background: #F7F8FA;
+        .list-body-item-wrapper {
+            padding: 0 0.12rem 0.12rem;
+            background: #fff;
+            border-radius: 4px;
+            margin-bottom: 0.12rem;
+            line-height: 0.3rem;
+            border-radius: 8px;
+            border: 1px solid #fff;
+        }
+        .list-body-item-element {
+            display: flex;
+            line-height: 0.3rem;
+            height: 0.3rem;
+            border-radius: 8px 8px 0 0;
+            &:first-child {
+                margin:0 -0.12rem 0.06rem;
+                padding: 0 0.12rem;
+                background: linear-gradient(90deg, #E8FFF5 0%, #FFF 80%);
+                line-height: 0.44rem;
+                height: 0.44rem;
+                .list-body-item-title {
+                    font-size: 0.16rem;
+                    font-weight: 600;
+                    color: #86909C;
+                    width: auto;
+                }
+                .list-body-item-content {
+                    font-size: 0.16rem;
+                    font-weight: 600;
+                    line-height: 0.44rem;
+                    color: #1D2129;
+                    flex: 1;
+                }
+            }
+        }
+        .list-body-item-title {
+            font-size: 0.14rem;
+            font-weight: 500;
+            color: #86909C;
+            width: 0.8rem;
+        }
+        .list-body-item-content {
+            font-size: 0.14rem;
+            font-weight: 400;
+            color: #1D2129;
+            flex: 1;
+        }
+    }
+    .arco-load-more {
+        font-size: 0.14rem;
+    }
+    .list-body-item-btns {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-end;
+        .arco-button.arco-button-size-mini {
+            width: 0.6rem;
+            height: auto;
+            text-align: center;
+            font-size: 0.14rem;
+            padding: 0;
+            margin-left: 0.12rem;
+        }
+        .arco-button.arco-button-size-mini .arco-button-text {
+            font-size: 0.14rem;
+            height: 0.28rem;
+            line-height: 0.28rem;
+        }
+        .arco-button.arco-button-type-primary {
+            background-color: #009E9E;
+        }
+    }
+}
+
+.arco-dialog-content {
+    max-width: 80%;
+    @media screen and (min-width: 900px) {
+        max-width: 600px;
+    }
+    .arco-dialog-header.ios {
+        font-size: 0.2rem;
+        padding-top: 0.2rem;
+    }
+    .arco-dialog-body.ios {
+        font-size: 0.16rem;
+    }
+    .arco-dialog-footer.ios .dialog-footer-button {
+        font-size: 0.16rem;
+        height: 0.48rem;
+    }
+}
