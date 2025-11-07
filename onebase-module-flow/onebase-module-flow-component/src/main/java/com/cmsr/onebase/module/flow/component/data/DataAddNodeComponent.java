@@ -76,6 +76,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         }
         reqDTO.setData(reqData);
         try {
+            executeContext.addLog("数据添加节点开始执行");
             List<List<EntityFieldDataRespDTO>> respDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.insertData(reqDTO));
             executeContext.addLog("数据添加节点结束执行, 响应结果数量: " + respDTOSS.size());
             // 处理响应结果

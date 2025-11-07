@@ -51,4 +51,7 @@ public class SecurityConfigItemRespVO {
     @Schema(description = "必填", example = "true")
     private String required;
 
+    @Schema(description = "界面组件类型", example = "CHECKBOX ")
+    private String widgetType;
+
 }

@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -94,6 +95,10 @@ public class InitiationExecTaskStrategy extends AbstractExecTaskStrategy<Initiat
             UpdateDataReqDTO updateDataReqDTO = new UpdateDataReqDTO();
             updateDataReqDTO.setEntityId(entityVO.getEntityId());
             updateDataReqDTO.setData(List.of(entityVO.getData()));
+
+            // 构建条件
+            ConditionDTO conditionDTO = buildIdCondition(entityVO.getEntityId(), entityVO.getId());
+            updateDataReqDTO.setConditionDTO(List.of(List.of(conditionDTO)));
 
             dataMethodApi.updateData(updateDataReqDTO);
         }

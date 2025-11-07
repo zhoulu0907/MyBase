@@ -87,6 +87,9 @@ public interface ErrorCodeConstants {
 
     ErrorCode BPM_BIZ_EXT_NOT_EXIST = new ErrorCode(1_009_002_019, "流程业务扩展信息不存在");
 
+    ErrorCode MISSING_NODE_VALID_ROLE_LIST = new ErrorCode(1_009_002_020, "缺少有效审批角色列表");
+
+
     // ============= 系统相关错误 =============
 
     ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");

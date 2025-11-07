@@ -34,7 +34,7 @@ public interface NodeVOStrategy<T extends BaseNodeVO, E extends BaseNodeExtDTO> 
      * @param nodeVO 节点配置VO
      * @return 扩展数据对象
      */
-    E buildExtData(T nodeVO);
+    E buildExtData(T nodeVO, Long appId);
 
     /**
      * 将扩展数据对象转换为权限标签字符串

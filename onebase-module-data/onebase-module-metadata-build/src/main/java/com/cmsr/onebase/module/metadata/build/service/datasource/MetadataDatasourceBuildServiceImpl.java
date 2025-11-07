@@ -634,7 +634,9 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
             AnylineService<?> temporaryService = ServiceProxy.temporary(dataSource);
 
             // 使用 query 方法执行查询语句，避免框架的租户、软删除等特性影响
-            temporaryService.query("SELECT 1");
+            // 根据数据库类型使用不同的测试查询
+            String testQuery = getTestQueryByType(datasourceType);
+            temporaryService.query(testQuery);
 
             return true;
         } catch (Exception e) {
@@ -655,6 +657,41 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     private String getDriverByType(String datasourceType) {
         DatabaseType dbType = DatabaseType.valueOf(datasourceType);
         return dbType.driver();
+    }
+
+    /**
+     * 根据数据库类型获取测试查询SQL
+     * <p>
+     * 不同数据库使用不同的测试查询语句：
+     * - PostgreSQL/KingBase/MySQL: SELECT 1
+     * - DM(达梦)/Oracle: SELECT 1 FROM DUAL
+     * <p>
+     * 复用TemporaryDatasourceService的逻辑，保持一致性
+     *
+     * @param datasourceType 数据源类型字符串，如"PostgreSQL"、"DM"、"KingBase"
+     * @return 测试查询SQL
+     */
+    private String getTestQueryByType(String datasourceType) {
+        try {
+            DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+            
+            switch (dbType) {
+                case DM:
+                case ORACLE:
+                    // 达梦和Oracle使用FROM DUAL
+                    return "SELECT 1 FROM DUAL";
+                case PostgreSQL:
+                case KingBase:
+                case MySQL:
+                default:
+                    // PostgreSQL、金仓、MySQL等使用简单的SELECT 1
+                    return "SELECT 1";
+            }
+        } catch (IllegalArgumentException e) {
+            // 如果数据库类型无法识别，使用最通用的查询
+            log.warn("无法识别的数据库类型[{}]，使用默认测试查询SELECT 1", datasourceType);
+            return "SELECT 1";
+        }
     }
 
 }

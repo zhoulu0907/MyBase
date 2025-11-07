@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
@@ -26,8 +27,6 @@ import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
-import com.cmsr.onebase.module.system.api.dept.DeptApi;
-import com.cmsr.onebase.module.system.api.permission.PermissionApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
@@ -95,20 +94,16 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     private BpmFlowInsBizExtRepository flowInsExtRepository;
 
     @Resource
-    private DeptApi deptApi;
+    private AdminUserApi adminUserApi;
 
     @Resource
-    private AdminUserApi adminUserApi;
+    private AppAuthRoleUser appAuthRoleUser;
 
     @Resource
     private NodeService nodeService;
 
     @Resource
     private MetadataDataMethodCoreService metadataDataMethodCoreService;
-
-    @Resource
-    private PermissionApi permissionApi;
-
 
     @Resource
     private com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager execTaskStrategyManager;
@@ -455,6 +450,17 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         if (instance == null) {
             throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+        }
+
+        if (instance.getBusinessId() == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+        }
+
+        Long entityDataId = Long.parseLong(instance.getBusinessId());
+
+        // 忽略前端传的entityDataId，使用流程实例绑定的实体数据ID
+        if (reqVO.getEntity() != null) {
+            reqVO.getEntity().setId(entityDataId);
         }
 
         String taskNodeCode = task.getNodeCode();
@@ -843,10 +849,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                     approverUserIds.addAll(permFlagDTO.getUserIds());
                 } else if (CollectionUtils.isNotEmpty(permFlagDTO.getRoleIds())) {
                     // 处理角色列表
-                    CommonResult<Set<Long>> result = permissionApi.getUserRoleIdListByRoleIds(permFlagDTO.getRoleIds());
+                    List<Long> userIds = appAuthRoleUser.findUserIdsByRoleIds(permFlagDTO.getRoleIds());
 
-                    if (result.isSuccess()) {
-                        approverUserIds.addAll(result.getData());
+                    if (CollectionUtils.isNotEmpty(userIds)) {
+                        approverUserIds.addAll(userIds);
                     }
                 } else {
                     // todo: 支持更多类型的权限

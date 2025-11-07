@@ -31,10 +31,13 @@ public class AppAuthRoleUserImpl implements AppAuthRoleUser {
     }
 
     @Override
-    public List<Long> findUserIdsByAppIdAndRoleIds(Long appId, List<Long> roleIds) {
-        List<AuthRoleDO> authRoleDOS = appAuthRoleRepository.findByAppIdAndRoleIds(appId, roleIds);
-        roleIds = authRoleDOS.stream().map(AuthRoleDO::getId).toList();
+    public List<Long> findUserIdsByRoleIds(List<Long> roleIds) {
         return appAuthRoleUserRepository.findByByRoleIds(roleIds).stream().map(AuthRoleUserDO::getUserId).toList();
+    }
+
+    @Override
+    public List<Long> findRoleIdsByAppId(Long appId) {
+        return appAuthRoleRepository.findByApplicationId(appId).stream().map(AuthRoleDO::getId).toList();
     }
 
 }

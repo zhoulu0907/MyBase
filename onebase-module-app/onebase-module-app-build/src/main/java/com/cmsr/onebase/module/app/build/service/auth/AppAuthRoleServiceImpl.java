@@ -67,26 +67,26 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         return BeanUtils.toBean(authRoleList, AuthRoleListRespVO.class);
     }
 
-    @Override
-    public PageResult<AuthRoleUsersPageRespVO> pageRoleUsers(AuthRoleUsersPageReqVO reqVO) {
-        appCommonService.validateRoleExist(reqVO.getRoleId());
-        PageResult<AuthRoleUserDO> pageResult = appAuthRoleUserRepository.findByRoleId(reqVO.getRoleId(), reqVO);
-        Set<Long> userIds = pageResult.getList().stream().map(v -> v.getUserId()).collect(Collectors.toSet());
-        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(userIds);
-        List<AuthRoleUsersPageRespVO> respVOS = userIds.stream().map(userId -> {
-            AdminUserRespDTO user = userHelper.getUser(userId);
-            if (user == null) {
-                AuthRoleUsersPageRespVO vo = new AuthRoleUsersPageRespVO();
-                vo.setId(userId);
-                vo.setNickname("[" + userId + "]");
-                vo.setMobile("-");
-                return vo;
-            } else {
-                return BeanUtils.toBean(user, AuthRoleUsersPageRespVO.class);
-            }
-        }).toList();
-        return new PageResult(respVOS, pageResult.getTotal());
-    }
+//    @Override
+//    public PageResult<AuthRoleUsersPageRespVO> pageRoleUsers(AuthRoleUsersPageReqVO reqVO) {
+//        appCommonService.validateRoleExist(reqVO.getRoleId());
+//        PageResult<AuthRoleUserDO> pageResult = appAuthRoleUserRepository.findByRoleId(reqVO.getRoleId(), reqVO);
+//        Set<Long> userIds = pageResult.getList().stream().map(v -> v.getUserId()).collect(Collectors.toSet());
+//        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(userIds);
+//        List<AuthRoleUsersPageRespVO> respVOS = userIds.stream().map(userId -> {
+//            AdminUserRespDTO user = userHelper.getUser(userId);
+//            if (user == null) {
+//                AuthRoleUsersPageRespVO vo = new AuthRoleUsersPageRespVO();
+//                vo.setId(userId);
+//                vo.setNickname("[" + userId + "]");
+//                vo.setMobile("-");
+//                return vo;
+//            } else {
+//                return BeanUtils.toBean(user, AuthRoleUsersPageRespVO.class);
+//            }
+//        }).toList();
+//        return new PageResult(respVOS, pageResult.getTotal());
+//    }
 
     @Override
     public PageResult<AuthRoleMembersPageRespVO> pageRoleMembers(AuthRoleMembersPageReqVO reqVO) {
@@ -173,13 +173,13 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         appCacheProvider.usersChanged(authRoleDO.getApplicationId(), reqVO.getUserIds());
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO) {
-        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-        appAuthRoleUserRepository.deleteRoleUser(reqVO.getRoleId(), reqVO.getUserIds());
-        appCacheProvider.usersChanged(authRoleDO.getApplicationId(), reqVO.getUserIds());
-    }
+//    @Override
+//    @Transactional(rollbackFor = Exception.class)
+//    public void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO) {
+//        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+//        appAuthRoleUserRepository.deleteRoleUser(reqVO.getRoleId(), reqVO.getUserIds());
+//        appCacheProvider.usersChanged(authRoleDO.getApplicationId(), reqVO.getUserIds());
+//    }
 
     @Override
     public void addRoleDept(AuthRoleAddDeptReqVO reqVO) {
@@ -188,12 +188,12 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
     }
 
-    @Override
-    public void deleteRoleDept(AuthRoleDeleteDeptReqVO reqVO) {
-        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-        appAuthRoleDeptRepository.deleteRoleDept(reqVO.getRoleId(), reqVO.getDeptIds());
-        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds(), 1);
-    }
+//    @Override
+//    public void deleteRoleDept(AuthRoleDeleteDeptReqVO reqVO) {
+//        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+//        appAuthRoleDeptRepository.deleteRoleDept(reqVO.getRoleId(), reqVO.getDeptIds());
+//        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds(), 1);
+//    }
 
     @Override
     public void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO) {

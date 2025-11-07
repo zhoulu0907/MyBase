@@ -455,12 +455,12 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 String createTableDDL = generateCreateTableDDL(tableName, systemFields);
                 log.info("生成的DDL语句: \n{}", createTableDDL);
 
-                // 验证服务连接的数据库
+                // 记录连接的数据库信息（从datasource配置中获取）
                 try {
-                    String currentDatabase = service.query("SELECT current_database()").toString();
-                    log.info("当前连接的数据库: {}", currentDatabase);
+                    String databaseName = getDatabaseNameFromConfig(datasource);
+                    log.info("当前连接的数据库: {} (类型: {})", databaseName, datasource.getDatasourceType());
                 } catch (Exception e) {
-                    log.warn("无法获取当前数据库信息: {}", e.getMessage());
+                    log.debug("无法从配置获取数据库名称: {}", e.getMessage());
                 }
 
                 // 执行建表语句
@@ -1127,6 +1127,42 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         } catch (Exception e) {
             log.error("重新创建物理表失败，实体ID: {}, 错误: {}", entityId, e.getMessage(), e);
             throw new RuntimeException("重新创建物理表失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 从datasource配置中获取数据库名称
+     * <p>
+     * 仅用于日志记录，不影响核心功能。
+     *
+     * @param datasource 数据源配置对象
+     * @return 数据库名称，获取失败返回"unknown"
+     */
+    private String getDatabaseNameFromConfig(MetadataDatasourceDO datasource) {
+        try {
+            if (datasource == null || datasource.getConfig() == null) {
+                return "unknown";
+            }
+            
+            String config = datasource.getConfig();
+            
+            // 尝试从JSON配置中解析database字段
+            // 配置格式示例: {"host":"localhost","port":5432,"database":"mydb",...}
+            if (config.contains("\"database\"")) {
+                int startIdx = config.indexOf("\"database\"");
+                int colonIdx = config.indexOf(":", startIdx);
+                int quoteStartIdx = config.indexOf("\"", colonIdx);
+                int quoteEndIdx = config.indexOf("\"", quoteStartIdx + 1);
+                
+                if (quoteStartIdx > 0 && quoteEndIdx > quoteStartIdx) {
+                    return config.substring(quoteStartIdx + 1, quoteEndIdx);
+                }
+            }
+            
+            return "unknown";
+        } catch (Exception e) {
+            log.debug("从配置获取数据库名称失败: {}", e.getMessage());
+            return "unknown";
         }
     }
 

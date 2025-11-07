@@ -19,4 +19,8 @@ public class InputArgs {
 
     private Long workflowId;
 
+    private String previewWorkflow;
+
+    private String previewNodeId;
+
 }
