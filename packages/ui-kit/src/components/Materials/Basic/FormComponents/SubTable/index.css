@@ -79,6 +79,9 @@
   line-height: 32px;
   height: 32px;
   margin: 4px 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .subTableContent {
