@@ -25,7 +25,8 @@ import { useFlowEditorStor } from '@/store/index';
 const sourceNodeIDMap = new Map();
 
 export const Editor = () => {
-  const { currentFlowId, setEditorRef, flowData, setFlowData, configData, setConfigData } = useFlowEditorStor();
+  const { currentFlowId, setEditorRef, flowData, setFlowData, initFlowData, configData, setConfigData } =
+    useFlowEditorStor();
   const { setFlowId } = useFlowPageEditorSignal;
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +68,7 @@ export const Editor = () => {
     if (currentFlowId) {
       getFlowData(currentFlowId);
     } else {
+      initFlowData();
       initEditor();
     }
   }, [currentFlowId]);

@@ -63,8 +63,33 @@ export interface FlowEditorState {
   setFlowData: (flowData: FlowData) => void;
   configData: GlobalConfigData;
   setConfigData: (node: any) => void;
+  initFlowData: () => void;
 }
-
+const data: GlobalConfigData = {
+  useNodeConfig: false,
+  autoApproveCfg: {
+    initAutoApprove: false,
+    dupUserAutoApprove: false,
+    prevNodeDupUserAutoApprove: false
+  },
+  emptyApproverCfg: {
+    handlerMode: 'pause',
+    transferMemberId: ''
+  },
+  withdrawRuleCfg: {
+    permission: 'none',
+    timing: 'unprocessed'
+  },
+  returnRuleCfg: {
+    rule: 'seq'
+  },
+  initiatorTerminateCfg: {
+    permission: 'initiation_node'
+  },
+  formSummaryCfg: {
+    fieldConfigs: []
+  }
+};
 export const useFlowEditorStor = create<FlowEditorState>((set) => ({
   businessId: '',
   setBusinessId: (businessId: string) => set(() => ({ businessId })),
@@ -74,30 +99,7 @@ export const useFlowEditorStor = create<FlowEditorState>((set) => ({
   setEditorRef: (editorRef: FreeLayoutPluginContext | null) => set(() => ({ editorRef })),
   flowData: {},
   setFlowData: (flowData: FlowData) => set(() => ({ flowData })),
-  configData: {
-    useNodeConfig: false,
-    autoApproveCfg: {
-      initAutoApprove: false,
-      dupUserAutoApprove: false,
-      prevNodeDupUserAutoApprove: false
-    },
-    emptyApproverCfg: {
-      handlerMode: 'pause',
-      transferMemberId: ''
-    },
-    withdrawRuleCfg: {
-      permission: 'none',
-      timing: 'unprocessed'
-    },
-    returnRuleCfg: {
-      rule: 'seq'
-    },
-    initiatorTerminateCfg: {
-      permission: 'initiation_node'
-    },
-    formSummaryCfg: {
-      fieldConfigs: []
-    }
-  },
-  setConfigData: (configData: GlobalConfigData) => set(() => ({ configData }))
+  configData: data,
+  setConfigData: (configData: GlobalConfigData) => set(() => ({ configData })),
+  initFlowData: () => set(() => ({ flowData: {} }))
 }));
