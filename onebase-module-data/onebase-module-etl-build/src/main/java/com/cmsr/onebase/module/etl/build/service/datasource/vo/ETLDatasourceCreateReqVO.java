@@ -38,14 +38,11 @@ public class ETLDatasourceCreateReqVO {
     @NotBlank(message = "数据源配置信息不能为空")
     private String config;
 
-    @Schema(description = "只读")
+    @Schema(description = "只读", defaultValue = "true")
     private Boolean readonly = true;
 
-    @Schema(description = "是否创建时进行采集")
+    @Schema(description = "是否创建时进行采集", defaultValue = "false")
     private Boolean withCollect = false;
-
-    @Schema(description = "是否创建时进行采集", defaultValue = "true")
-    private Integer withCollect;
 
     public JsonNode getConfig() {
         return JsonUtils.parseTree(this.config);

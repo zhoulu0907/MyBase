@@ -36,23 +36,21 @@ public class AppSqlQueryRepository {
         if (StringUtils.equals(memberType, RoleMemberDTO.MEMBER_TYPE_USER)) {
             sql = """
                     select
-                    	aaru.id,
-                    	aaru.role_id as member_id,
-                    	aaru.update_time,
-                    	-1 as is_include_child,
-                    	d.name as dept_name,
-                    	u.nickname as member_name,
-                    	'user' as member_type
+                        aaru.id,
+                        aaru.role_id AS member_id,
+                        aaru.update_time,
+                        -1 AS is_include_child,
+                        d.name AS dept_name,
+                        u.nickname AS member_name,
+                        'user' AS member_type
                     from
-                    	app_auth_role_user aaru,
-                    	system_users u,
-                    	system_dept d
+                        app_auth_role_user aaru
+                    left join system_users u on aaru.user_id = u.id and u.deleted = 0
+                    left join system_dept d on u.dept_id = d.id
                     where
-                    	aaru.user_id = u.id
-                    	and u.dept_id = d.id
-                    	and aaru.role_id = #{roleId}
-                    	${and u.nickname like '%'|| :memberName ||'%'}
-                    	and aaru.deleted = 0 and u.deleted = 0
+                        aaru.role_id = #{roleId}
+                        ${and u.nickname like '%'|| :memberName ||'%'}
+                        and aaru.deleted = 0
                     """;
         } else if (StringUtils.equals(memberType, RoleMemberDTO.MEMBER_TYPE_DEPT)) {
             sql = """
@@ -65,52 +63,50 @@ public class AppSqlQueryRepository {
                         d.name as member_name,
                         'dept' as member_type
                     from
-                        app_auth_role_dept aard,
-                        system_dept d
+                        app_auth_role_dept aard
+                    left join system_dept d on aard.dept_id = d.id
                     where
-                        aard.dept_id = d.id
-                        and aard.role_id = #{roleId}
-                        ${and d.name like '%'|| :memberName ||'%'}
-                        and aard.deleted = 0 and d.deleted = 0
+                        aard.role_id = #{roleid}
+                        ${and d.name like '%'|| :membername ||'%'}
+                        and aard.deleted = 0
+                        and (d.id is null or d.deleted = 0)
                     """;
         } else {
             sql = """
                     select * from (
                     select
-                    	aaru.id,
-                    	aaru.role_id as member_id,
-                    	aaru.update_time,
-                    	-1 as is_include_child,
-                    	d.name as dept_name,
-                    	u.nickname as member_name,
-                    	'user' as member_type
+                        aaru.id,
+                        aaru.role_id AS member_id,
+                        aaru.update_time,
+                        -1 AS is_include_child,
+                        d.name AS dept_name,
+                        u.nickname AS member_name,
+                        'user' AS member_type
                     from
-                    	app_auth_role_user aaru,
-                    	system_users u,
-                    	system_dept d
+                        app_auth_role_user aaru
+                    left join system_users u on aaru.user_id = u.id and u.deleted = 0
+                    left join system_dept d on u.dept_id = d.id
                     where
-                    	aaru.user_id = u.id
-                    	and u.dept_id = d.id
-                    	and aaru.role_id = #{roleId}
-                    	${and u.nickname like '%'|| :memberName ||'%'}
-                    	and aaru.deleted = 0 and u.deleted = 0
+                        aaru.role_id = #{roleId}
+                        ${and u.nickname like '%'|| :memberName ||'%'}
+                        and aaru.deleted = 0
                     union all
                     select
-                    	aard.id,
-                    	aard.dept_id as member_id,
-                    	aard.update_time,
-                    	aard.is_include_child,
-                    	d.name as dept_name,
-                    	d.name as member_name,
-                    	'dept' as member_type
+                        aard.id,
+                        aard.dept_id as member_id,
+                        aard.update_time,
+                        aard.is_include_child,
+                        d.name as dept_name,
+                        d.name as member_name,
+                        'dept' as member_type
                     from
-                    	app_auth_role_dept aard,
-                    	system_dept d
+                        app_auth_role_dept aard
+                    left join system_dept d on aard.dept_id = d.id
                     where
-                    	aard.dept_id = d.id
-                    	and aard.role_id = #{roleId}
-                    	${and d.name like '%'|| :memberName ||'%'}
-                    	and aard.deleted = 0 and d.deleted = 0
+                        aard.role_id = #{roleid}
+                        ${and d.name like '%'|| :membername ||'%'}
+                        and aard.deleted = 0
+                        and (d.id is null or d.deleted = 0)
                     ) as combined_result
                     """;
         }
@@ -130,48 +126,48 @@ public class AppSqlQueryRepository {
 
     public List<Long> findDeptHierarchyByUserId(Long userId) {
         List<Long> result = new ArrayList<>();
-        Long currentDeptId = null;
-        {
-            ConfigStore configs = new DefaultConfigStore();
-            configs.param("userId", userId);
-            String sql = """
-                    select
-                    	dept_id
-                    from
-                    	system_users
-                    where
-                    	deleted = 0 and id = #{userId}
-                    """;
-            DataSet dataSet = anylineService.querys(sql, configs);
-            for (DataRow dataRow : dataSet) {
-                Long deptId = dataRow.getLong("dept_id");
-                if (deptId != null) {
-                    result.add(deptId);
-                    currentDeptId = deptId;
-                }
-            }
-        }
-        while (currentDeptId != null) {
-            ConfigStore configs = new DefaultConfigStore();
-            configs.param("deptId", currentDeptId);
-            String sql = """
-                    select
-                    	id,
-                    	parent_id
-                    from
-                    	system_dept
-                    where
-                    	deleted = 0 and id = #{deptId}
-                    """;
-            DataSet dataSet = anylineService.querys(sql, configs);
-            for (DataRow dataRow : dataSet) {
-                Long deptId = dataRow.getLong("id");
-                if (deptId != null) {
-                    result.add(deptId);
-                }
-                currentDeptId = dataRow.getLong("parent_id");
-            }
-        }
+//        Long currentDeptId = null;
+//        {
+//            ConfigStore configs = new DefaultConfigStore();
+//            configs.param("userId", userId);
+//            String sql = """
+//                    select
+//                    	dept_id
+//                    from
+//                    	system_users
+//                    where
+//                    	deleted = 0 and id = #{userId}
+//                    """;
+//            DataSet dataSet = anylineService.querys(sql, configs);
+//            for (DataRow dataRow : dataSet) {
+//                Long deptId = dataRow.getLong("dept_id");
+//                if (deptId != null) {
+//                    result.add(deptId);
+//                    currentDeptId = deptId;
+//                }
+//            }
+//        }
+//        while (currentDeptId != null) {
+//            ConfigStore configs = new DefaultConfigStore();
+//            configs.param("deptId", currentDeptId);
+//            String sql = """
+//                    select
+//                    	id,
+//                    	parent_id
+//                    from
+//                    	system_dept
+//                    where
+//                    	deleted = 0 and id = #{deptId}
+//                    """;
+//            DataSet dataSet = anylineService.querys(sql, configs);
+//            for (DataRow dataRow : dataSet) {
+//                Long deptId = dataRow.getLong("id");
+//                if (deptId != null) {
+//                    result.add(deptId);
+//                }
+//                currentDeptId = dataRow.getLong("parent_id");
+//            }
+//        }
 
         return result;
     }
