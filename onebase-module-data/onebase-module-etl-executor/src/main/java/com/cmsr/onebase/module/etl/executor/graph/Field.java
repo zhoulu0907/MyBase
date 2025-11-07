@@ -10,4 +10,9 @@ public class Field {
     private String fieldName;
 
     private String fieldType;
+
+    private int size;
+
+    private int scale;
+
 }

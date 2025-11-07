@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.etl.executor;
 
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
+import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
 import com.cmsr.onebase.module.etl.executor.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
@@ -41,6 +42,9 @@ public class WorkFlowExecutor {
         for (Node node : workflowGraph.getNodes()) {
             if (node instanceof CreateTableAction action) {
                 action.createTable(tableEnv);
+            }
+            if (node instanceof SqlQueryAction action) {
+                action.sqlQuery(tableEnv);
             }
             if (node instanceof ExecuteSqlAction action) {
                 action.executeSql(tableEnv);

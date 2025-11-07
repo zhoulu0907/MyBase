@@ -23,9 +23,4 @@ public class JdbcInputConfig {
     private String username;
     private String password;
 
-    /**
-     * 可选参数
-     */
-    private String schema;
-    private String catalog;
 }
