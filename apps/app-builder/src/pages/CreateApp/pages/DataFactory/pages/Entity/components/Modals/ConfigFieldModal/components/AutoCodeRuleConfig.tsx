@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Input, Select, Dropdown, Menu, Cascader, Space } from '@arco-design/web-react';
+import { Button, Input, Select, Dropdown, Menu, Cascader, Space, Message } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
@@ -89,26 +89,36 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   const [rules, setRules] = useState<AutoCodeRule[]>(getInitialRules());
   const [autoCodeModalVisible, setAutoCodeModalVisible] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string>('');
-
-  const autoCodeConfig =
-    rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.config || rules[0].config;
-
-  const getDisplayText = (config: AutoCodeRule['config']) => {
-    const numberingMethodText = config.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
-    const digitsText = config.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '' : `${config.digitWidth}位数`;
-    const resetText = config.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
+  const getDisplayText = (config?: AutoCodeRule['config']) => {
+    const sequenceConfig = config || rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.config;
+    if (!sequenceConfig) {
+      return '';
+    }
+    const numberingMethodText =
+      sequenceConfig.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
+    const digitsText =
+      sequenceConfig.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '' : `${sequenceConfig.digitWidth}位数`;
+    const resetText = sequenceConfig.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
     return `${numberingMethodText},${digitsText}${resetText}`;
   };
 
-  const [displayText, setDisplayText] = useState(getDisplayText(autoCodeConfig));
+  const [displayText, setDisplayText] = useState(getDisplayText());
 
   const addRule = (type: AutoCodeRule['itemType']) => {
-    const newRule: AutoCodeRule = {
-      id: 'rule-' + Date.now().toString(),
-      itemType: type,
-      config: type === AUTO_CODE_RULE_TYPE.DATE ? { dateFormat: DATE_FORMAT_DEFAULT } : {}
-    };
-    setRules([...rules, newRule]);
+    let config: AutoCodeRule['config'] = {};
+    switch (type) {
+      case AUTO_CODE_RULE_TYPE.SEQUENCE:
+        config = { ...AUTO_CODE_NUMBER_DEFAULT_CONFIG };
+        setDisplayText(getDisplayText(config));
+        break;
+      case AUTO_CODE_RULE_TYPE.DATE:
+        config = { dateFormat: DATE_FORMAT_DEFAULT };
+        break;
+      default:
+        config = {};
+        break;
+    }
+    setRules([...rules, { id: 'rule-' + Date.now().toString(), itemType: type, config }]);
   };
 
   const editRule = (id: string) => {
@@ -128,10 +138,6 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   };
 
   const removeRule = (id: string) => {
-    // 至少保留一条规则
-    if (rules.length === 1) {
-      return;
-    }
     setRules(rules.filter((rule) => rule.id !== id));
   };
 
@@ -148,6 +154,11 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   };
 
   const handleConfirm = () => {
+    // 至少保留一条规则
+    if (rules.length < 1) {
+      Message.error('至少保留一条规则');
+      return;
+    }
     // 将数组格式转换为 AutoNumberRule 对象格式
     const autoNumberRule = convertAutoCodeCompoToAutoNumberRule(rules);
     onConfirm(autoNumberRule);
@@ -182,7 +193,6 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
-              disabled={rules.length === 1}
               className={styles.ruleActionBtn}
             />
           </div>
@@ -210,7 +220,6 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
-              disabled={rules.length === 1}
               className={styles.ruleActionBtn}
             />
           </div>
@@ -238,7 +247,6 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
-              disabled={rules.length === 1}
               className={styles.ruleActionBtn}
             />
           </div>
@@ -269,7 +277,6 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
-              disabled={rules.length === 1}
               className={styles.ruleActionBtn}
             />
           </div>
@@ -302,9 +309,16 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
             droplist={
               <Menu>
                 <Menu.Item
+                  key={AUTO_CODE_RULE_TYPE.SEQUENCE}
+                  onClick={() => addRule(AUTO_CODE_RULE_TYPE.SEQUENCE)}
+                  disabled={rules.filter((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.length >= 1}
+                >
+                  自动编号
+                </Menu.Item>
+                <Menu.Item
                   key={AUTO_CODE_RULE_TYPE.DATE}
                   onClick={() => addRule(AUTO_CODE_RULE_TYPE.DATE)}
-                  disabled={rules.filter((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.DATE)?.length > 1}
+                  disabled={rules.filter((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.DATE)?.length >= 1}
                 >
                   创建时间
                 </Menu.Item>
