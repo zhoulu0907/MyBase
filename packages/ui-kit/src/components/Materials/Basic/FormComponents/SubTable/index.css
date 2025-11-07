@@ -20,14 +20,14 @@
 
 .componentItem {
   overflow: visible;
-  flex: 1 0 auto;
+  flex: 1;
+  width: 0;
   cursor: move;
   box-sizing: border-box;
   border: 1px solid transparent;
   border-radius: 8px;
   transition: border-color 0.2s ease;
   position: relative;
-  min-width: 50px;
 }
 
 /* 操作 */
