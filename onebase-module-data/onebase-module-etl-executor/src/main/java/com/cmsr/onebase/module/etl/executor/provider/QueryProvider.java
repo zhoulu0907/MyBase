@@ -1,19 +1,16 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
+import com.cmsr.onebase.module.etl.executor.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.util.GsonUtil;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
-import org.apache.commons.dbutils.handlers.MapHandler;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class QueryProvider {
 
@@ -26,23 +23,20 @@ public class QueryProvider {
     }
 
     public Object findWorkflowConfig(Long workflowId) {
-        ResultSetHandler<WorkflowGraph> handler = new ResultSetHandler<>() {
-            @Override
-            public WorkflowGraph handle(ResultSet resultSet) throws SQLException {
-                resultSet.next();
-                String resultJson = resultSet.getString(1);
-
-                return GsonUtil.GSON.fromJson(resultJson, WorkflowGraph.class);
+        ResultSetHandler<String> handler = resultSet -> {
+            if (resultSet.next()) {
+                return resultSet.getString("config");
             }
+            return null;
         };
-        String workflowQuery = context.select(DSL.field("config"))
+        String workflowQuery = context.select(DSL.field("config", String.class))
                 .from("etl_workflow")
                 .where(DSL.field("id").eq(workflowId))
                 .getSQL(ParamType.INLINED);
 
         try {
             var query = runner.query(workflowQuery, handler);
-
+            Node node = GsonUtil.GSON.fromJson(query, Node.class);
             System.out.println(query);
         } catch (Exception e) {
             e.printStackTrace();
