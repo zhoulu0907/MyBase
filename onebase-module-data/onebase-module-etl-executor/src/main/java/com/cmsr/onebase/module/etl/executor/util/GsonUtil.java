@@ -25,7 +25,7 @@ public class GsonUtil {
             switch (type) {
                 case "jdbc_input":
                     return context.deserialize(jsonObject, JdbcInputNode.class);
-                case "output":
+                case "jdbc_output":
                     return context.deserialize(jsonObject, JdbcOutputNode.class);
                 case "join":
                     return context.deserialize(jsonObject, JoinNode.class);
