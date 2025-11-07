@@ -36,7 +36,7 @@ public class QueryProviderTest {
 
 
     @Test
-    public void testQuery() {
+    public void testQuery() throws Exception {
         queryProvider.findWorkflowConfig(119776141113950208L);
     }
 }
