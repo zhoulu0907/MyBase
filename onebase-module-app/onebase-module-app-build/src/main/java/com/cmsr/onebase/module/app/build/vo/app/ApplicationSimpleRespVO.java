@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.vo.app;
 
+import cn.hutool.core.annotation.Alias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class ApplicationSimpleRespVO {
 
+    @Alias("id")
     @Schema(description = "应用Id")
     private String appId;
 

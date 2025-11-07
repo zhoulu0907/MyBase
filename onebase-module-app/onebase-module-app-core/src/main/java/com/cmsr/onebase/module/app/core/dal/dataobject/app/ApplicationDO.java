@@ -25,6 +25,7 @@ public class ApplicationDO extends TenantBaseDO {
     public static final String APP_STATUS = "app_status";
     public static final String DESCRIPTION = "description";
     public static final String PUBLISH_MODEL = "publish_model";
+    public static final String ID = "id";
 
 
     @Column(name = "app_uid", columnDefinition = "VARCHAR(16)", length = 256, comment = "应用uid(自动生成短码)")

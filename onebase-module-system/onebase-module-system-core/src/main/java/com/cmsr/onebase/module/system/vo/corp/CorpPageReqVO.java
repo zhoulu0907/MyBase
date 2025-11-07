@@ -21,7 +21,7 @@ public class CorpPageReqVO extends PageParam {
     private String corpName;
 
     @Schema(description = "行业类型")
-    private Integer industryType;
+    private Long industryType;
 
     @Schema(description = "状态")
     private Integer status;
