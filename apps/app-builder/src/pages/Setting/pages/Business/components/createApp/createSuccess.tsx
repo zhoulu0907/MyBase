@@ -15,7 +15,7 @@ export const CreateSuccess:React.FC<ICreateSuccessProps> = ({ basicInfoForm=[], 
 
     //点击创建企业button
     const handleCreate = () => {
-        setCurrentStep(3);
+        setCurrentStep(1);
         setAddAppModalVisible(true);
     }
 

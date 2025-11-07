@@ -7,7 +7,6 @@ import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useOutletContext, useParams } from 'react-router-dom';
 import type { AppItem, cropItem, OutletContextType, updatedParams } from '../../types/appItem';
 import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi,createCorpAppApi, removeCorpAppApi, updateCorpAppApi,type CorpAppParams, type corpListParams } from "@onebase/platform-center";
-import { convertIndustryType } from '../../utils';
 
 const EnterpriseInfoPage: React.FC = () => {
   const {activeTab} = useParams();
@@ -78,8 +77,11 @@ const EnterpriseInfoPage: React.FC = () => {
     let newValue = value;
     if(field === "status") {
       newValue = newValue === true ? 1 : 0;
-    }else if(field === "industryType") {
-      newValue = convertIndustryType(value as string);
+    } else if(field === "industryType") {
+      const index = industryOptions.findIndex(item => item.value === value);
+      if(index >=0) {
+        newValue = industryOptions[index].id;
+      }
     }
     setFormData((prev: any) => ({ ...prev, [field]: newValue }));
   };
@@ -206,8 +208,14 @@ const EnterpriseInfoPage: React.FC = () => {
           component={Select}
           componentProps={{
             placeholder: '请选择行业',
-            options: industryOptions
-          }}
+            options: industryOptions,
+            renderFormat: (value:any) =>{
+              if(!value) return "";
+              return value.map((id:any) => {
+                  const item = industryOptions.find(option => option.id === value);
+                  return item?.label;
+                }).join(',')} 
+              }}
       />
     },
      {

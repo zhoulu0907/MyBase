@@ -65,6 +65,7 @@ export interface cropItem {
   corpName: string;
   createTime:number;
   industryType: number;
+  industryTypeName: string;
   status: number;
   userLimit:number;
   adminName: string;

@@ -46,7 +46,7 @@ export interface CorpBasicInfo {
     corpId?: string;
     corpLogo?: string;
     corpName?: string;
-    industryType?: number;
+    industryType?: string;
     status?: number;
     userLimit?: number;
 }

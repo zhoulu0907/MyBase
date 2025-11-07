@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getCorpListApi, disabledCorpApi, deleteCorpApi, getIndustryType, type corpListParams } from "@onebase/platform-center";
 import { type corpApplicationListProps, type cropItem, type industryTypeOption} from "./types/appItem";
 import { formatTimeYMDHMS } from '@onebase/common';
-import { convertName, formatIndustryType } from "./utils";
+import { convertName } from "./utils";
 const AvatarGroup = Avatar.Group;
 
 const BusinessPage: React.FC = () => {
@@ -30,9 +30,9 @@ const BusinessPage: React.FC = () => {
         },
         {
             title: '行业类型',
-            dataIndex: 'industryType',
-            render: (industry: number) => (
-                <Tag color="cyan" size="small">{formatIndustryType(industry)}</Tag>
+            dataIndex: 'industryTypeName',
+            render: (industry: string) => (
+                <Tag color="cyan" size="small">{industry}</Tag>
             )
         },
         {
