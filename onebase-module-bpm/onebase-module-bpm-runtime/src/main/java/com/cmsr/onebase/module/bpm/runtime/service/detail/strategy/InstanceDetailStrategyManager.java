@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
+import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl.DefaultInstanceDetailStrategy;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTaskDetailVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,9 @@ public class InstanceDetailStrategyManager {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private DefaultInstanceDetailStrategy defaultStrategy;
 
     /**
      * 检查用户是否有权限操作流程实例的待办任务
@@ -114,12 +118,15 @@ public class InstanceDetailStrategyManager {
                                       Instance instance,
                                       Long loginUserId) {
         InstanceDetailStrategy<?> strategy = getStrategy(nodeExtDTO.getNodeType());
-        if (strategy == null) {
-            throw exception(ErrorCodeConstants.UNSUPPORT_NODE_TYPE);
-        }
+        Task currTask = null;
 
-        // 检查权限并获取待办任务
-        Task currTask = checkAndGetTodoTask(instance.getId(), loginUserId);
+        // 默认策略，无按钮，所有字段权限为只读
+        if (strategy == null) {
+            strategy = defaultStrategy;
+        } else {
+            // 检查权限并获取待办任务
+            currTask = checkAndGetTodoTask(instance.getId(), loginUserId);
+        }
 
         InstanceDetailStrategy<BaseNodeExtDTO> typedStrategy = (InstanceDetailStrategy<BaseNodeExtDTO>) strategy;
         typedStrategy.fillDetail(vo, nodeExtDTO, currTask, instance, loginUserId);
