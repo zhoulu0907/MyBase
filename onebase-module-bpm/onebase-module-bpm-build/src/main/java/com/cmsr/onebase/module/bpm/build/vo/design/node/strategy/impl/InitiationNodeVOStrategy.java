@@ -42,7 +42,7 @@ public class InitiationNodeVOStrategy extends AbstractNodeVOStrategy<InitiationN
     }
 
     @Override
-    public InitiationNodeExtDTO buildExtData(InitiationNodeVO nodeVO) {
+    public InitiationNodeExtDTO buildExtData(InitiationNodeVO nodeVO, Long appId) {
         InitiationNodeExtDTO extDTO = new InitiationNodeExtDTO();
         // 设置节点类型
         extDTO.setNodeType(getSupportedNodeType());

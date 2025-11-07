@@ -28,7 +28,7 @@ public class EndNodeVOStrategy extends AbstractNodeVOStrategy<EndNodeVO, EndNode
     }
 
     @Override
-    public EndNodeExtDTO buildExtData(EndNodeVO nodeVO) {
+    public EndNodeExtDTO buildExtData(EndNodeVO nodeVO, Long appId) {
         EndNodeExtDTO extDTO = new EndNodeExtDTO();
         // 设置节点类型
         extDTO.setNodeType(nodeVO.getType());

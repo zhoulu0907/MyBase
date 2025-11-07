@@ -230,6 +230,8 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         }
 
         String bpmDefJson = flowDesignVO.getBpmDefJson();
+        Long appId = flowDesignVO.getAppId();
+
         if (StringUtils.isBlank(bpmDefJson)) {
             return null;
         }
@@ -263,7 +265,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             nodeJson.setFormCustom("Y");
 
             // 设置ext：使用策略管理器构建扩展信息
-            strategyManager.buildNodeExtData(nodeJson, nodeVO);
+            strategyManager.fillNodeExtData(nodeJson, nodeVO, appId);
 
             // 添加到映射
             nodeJsonMap.put(nodeJson.getNodeCode(), nodeJson);

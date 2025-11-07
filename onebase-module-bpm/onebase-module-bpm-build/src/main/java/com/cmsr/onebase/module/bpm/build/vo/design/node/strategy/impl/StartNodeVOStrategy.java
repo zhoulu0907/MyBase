@@ -28,7 +28,7 @@ public class StartNodeVOStrategy extends AbstractNodeVOStrategy<StartNodeVO, Sta
     }
 
     @Override
-    public StartNodeExtDTO buildExtData(StartNodeVO nodeVO) {
+    public StartNodeExtDTO buildExtData(StartNodeVO nodeVO, Long appId) {
         StartNodeExtDTO extDTO = new StartNodeExtDTO();
         // 设置节点类型
         extDTO.setNodeType(getSupportedNodeType());
