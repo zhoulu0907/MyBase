@@ -6,6 +6,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constant
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import '../index.css';
 import { type XRelatedFormConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -53,10 +54,6 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
         { label: '牛逼', value: 233333 }
       ]);
     }
-  };
-
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (node?.closest('.arco-form-item') as HTMLElement) || (node?.parentNode as HTMLElement) || document.body;
   };
 
   return (

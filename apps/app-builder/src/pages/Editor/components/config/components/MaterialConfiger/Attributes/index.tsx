@@ -14,7 +14,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
+import { CONFIG_TYPES, usePageEditorSignal, getPopupContainer } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import DynamicAutoCodeConfig from './components/DynamicAutoCodeConfig';
@@ -281,14 +281,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     {(item.type === CONFIG_TYPES.TEXT_INPUT ||
                       item.type === CONFIG_TYPES.PLACEHOLDER_INPUT ||
                       item.type === CONFIG_TYPES.UPLOAD_COMPRESS) && (
-                      <Input
-                        placeholder={`请输入${item.name}`}
-                        value={configs[item.key]}
-                        onChange={(value) => {
-                          handlePropsChange(item.key, value);
-                        }}
-                      />
-                    )}
+                        <Input
+                          placeholder={`请输入${item.name}`}
+                          value={configs[item.key]}
+                          onChange={(value) => {
+                            handlePropsChange(item.key, value);
+                          }}
+                        />
+                      )}
                     {item.type === CONFIG_TYPES.LABEL_INPUT && (
                       <Input
                         placeholder={`请输入${item.name}`}
@@ -307,7 +307,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                             handlePropsChange(item.key, value);
                           }
                         }}
-                        // suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
+                      // suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
                       />
                     )}
 
@@ -359,6 +359,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       <>
                         <Select
                           defaultValue={configs[item.key]}
+                          getPopupContainer={getPopupContainer}
                           onChange={(value) => handlePropsChange(item.key, value)}
                         >
                           {item.range.map((item: any) => (
@@ -379,7 +380,11 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     )}
 
                     {item.type === CONFIG_TYPES.TABS_POSITION && (
-                      <Select defaultValue={configs[item.key]} onChange={(value) => handlePropsChange(item.key, value)}>
+                      <Select
+                        defaultValue={configs[item.key]}
+                        getPopupContainer={getPopupContainer}
+                        onChange={(value) => handlePropsChange(item.key, value)}
+                      >
                         {item.range.map((item: any) => (
                           <Option key={item.key} value={item.value}>
                             {item.label}
@@ -393,33 +398,33 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       item.type === CONFIG_TYPES.FORM_LAYOUT ||
                       item.type === CONFIG_TYPES.COLLAPSED ||
                       item.type === CONFIG_TYPES.TEXT_ALIGN) && (
-                      <Radio.Group
-                        type="button"
-                        size="default"
-                        value={configs[item.key]}
-                        onChange={(value) => {
-                          handlePropsChange(item.key, value);
-                        }}
-                        style={{
-                          width: '100%',
-                          display: 'flex'
-                        }}
-                      >
-                        {item.range.map((item: any) => (
-                          <Radio
-                            key={item.key}
-                            value={item.value}
-                            style={{
-                              flex: 1,
-                              textAlign: 'center',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
-                          </Radio>
-                        ))}
-                      </Radio.Group>
-                    )}
+                        <Radio.Group
+                          type="button"
+                          size="default"
+                          value={configs[item.key]}
+                          onChange={(value) => {
+                            handlePropsChange(item.key, value);
+                          }}
+                          style={{
+                            width: '100%',
+                            display: 'flex'
+                          }}
+                        >
+                          {item.range.map((item: any) => (
+                            <Radio
+                              key={item.key}
+                              value={item.value}
+                              style={{
+                                flex: 1,
+                                textAlign: 'center',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
+                            </Radio>
+                          ))}
+                        </Radio.Group>
+                      )}
                     {item.type === CONFIG_TYPES.COLUMN_COUNT_RADIO && (
                       <Radio.Group
                         type="button"
@@ -481,6 +486,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       <Select
                         addBefore="掩码方式"
                         defaultValue={configs[item.key]['type']}
+                        getPopupContainer={getPopupContainer}
                         onChange={(value) => handlePropsChange(item.key, { ...configs[item.key], type: value })}
                       >
                         {securityOptions.map((option, index) => (
