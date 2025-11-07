@@ -7,7 +7,7 @@ import { LISTTYPE, TaskStatusMap } from '@onebase/app';
 // import { getDonePageList } from '../../../../../../../../packages/app/src/services/app_runtime';
 import dayjs from 'dayjs';
 
-const IDone: FC = ({ appId }) => {
+const IDone: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -16,10 +16,10 @@ const IDone: FC = ({ appId }) => {
     {
       title: '发起人',
       dataIndex: 'initiator',
-      render: (val, record) => (
+      render: (obj, record) => (
         <span className="flex-bw-center">
-          <img src="/src/assets/images/avatar.svg" />
-          {val}
+          <div className='photo-img'>{obj?.avatar && <img src={obj?.avatar} />}</div>
+          {obj?.name}
         </span>
       )
     },
@@ -86,7 +86,14 @@ const IDone: FC = ({ appId }) => {
       //   submitTimeEnd: ''
     };
     const res = await getDonePageList(req);
-    setData(res?.list);
+    if (Array.isArray(res?.list)) {
+      setData(res.list.map((item: object, i: number) => {
+        return {
+          ...(item || {}),
+          key: i
+        }
+      }));
+    }
   };
 
   const onBack = () => {

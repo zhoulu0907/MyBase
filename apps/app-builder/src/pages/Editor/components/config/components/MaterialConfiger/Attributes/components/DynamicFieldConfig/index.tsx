@@ -3,7 +3,13 @@ import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebas
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 import { useSignals } from '@preact/signals-react/runtime';
-import { FORM_COMPONENT_TYPES, usePageEditorSignal, useFormEditorSignal, useAppEntityStore } from '@onebase/ui-kit';
+import {
+  COMPONENT_FIELD_MAP,
+  FORM_COMPONENT_TYPES,
+  usePageEditorSignal,
+  useFormEditorSignal,
+  useAppEntityStore
+} from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 
@@ -24,7 +30,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   const autoCodeKey = 'autoCodeConfig';
   const autoCodeDisabledKey = 'autoCodeDisabled';
   const selectKey = 'defaultOptions';
-  const { curComponentSchema, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
+  const { curComponentSchema, components, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
   const { subTableComponents } = useFormEditorSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
   const [entityTree, setEntityTree] = useState<any[]>([]);
@@ -32,14 +38,10 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 
   useEffect(() => {
     if (mainEntity) {
-      //   console.log(mainEntity);
       initTreeData();
     }
-  }, [mainEntity]);
-
-  useEffect(() => {
     getIsInSubTable();
-  }, []);
+  }, [mainEntity, configs.id]);
 
   // 判断是否是在子表单中
   const getIsInSubTable = () => {
@@ -57,8 +59,13 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   };
 
   const initTreeData = async () => {
+    // 根据不同组件类型匹配不同的可选择字段
+    const fieldType = components.find((ele) => ele.id === configs.id)?.type;
+    const cpTypes = COMPONENT_FIELD_MAP[fieldType];
+    // debugger fieldType
     const mainEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
+      .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
       .map((field: AppEntityField) => ({
         value: field.fieldId,
         label: field.displayName
@@ -69,6 +76,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       label: entity.entityName,
       children: entity.fields
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
+        .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
         .map((field: AppEntityField) => ({
           value: field.fieldId,
           label: field.displayName
@@ -109,7 +117,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   };
 
   const handleAutoCode = (value: (string | string[])[]) => {
-    const type = configs.id.slice(0, configs.id.indexOf('-'));
+    const type = components.find((ele) => ele.id === configs.id)?.type;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldId));
     const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
@@ -188,7 +196,11 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         style={{
           width: '100%'
         }}
-        options={isInSubTable ? entityTree.filter((ele) => ele.value !== mainEntity.entityId) : entityTree}
+        options={
+          isInSubTable
+            ? entityTree.filter((ele) => ele.value !== mainEntity.entityId)
+            : entityTree.filter((ele) => ele.value === mainEntity.entityId)
+        }
         onChange={(value) => {
           handleDataFieldChange(value);
           handleAutoCode(value);
