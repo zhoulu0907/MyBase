@@ -36,7 +36,7 @@ public class QueryProvider {
 
         try {
             var query = runner.query(workflowQuery, handler);
-            Node node = GsonUtil.GSON.fromJson(query, Node.class);
+            WorkflowGraph workflowGraph = GsonUtil.GSON.fromJson(query, WorkflowGraph.class);
             System.out.println(query);
         } catch (Exception e) {
             e.printStackTrace();

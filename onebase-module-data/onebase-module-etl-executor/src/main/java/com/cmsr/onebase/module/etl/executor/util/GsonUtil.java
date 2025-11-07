@@ -1,10 +1,7 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
 import com.cmsr.onebase.module.etl.executor.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.node.JdbcInputNode;
-import com.cmsr.onebase.module.etl.executor.graph.node.JoinNode;
-import com.cmsr.onebase.module.etl.executor.graph.node.JdbcOutputNode;
-import com.cmsr.onebase.module.etl.executor.graph.node.UnionNode;
+import com.cmsr.onebase.module.etl.executor.graph.node.*;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
@@ -26,7 +23,7 @@ public class GsonUtil {
             JsonObject jsonObject = json.getAsJsonObject();
             String type = jsonObject.get("type").getAsString();
             switch (type) {
-                case "input":
+                case "jdbc_input":
                     return context.deserialize(jsonObject, JdbcInputNode.class);
                 case "output":
                     return context.deserialize(jsonObject, JdbcOutputNode.class);
@@ -35,7 +32,7 @@ public class GsonUtil {
                 case "union":
                     return context.deserialize(jsonObject, UnionNode.class);
                 default:
-                    return context.deserialize(jsonObject, Node.class);
+                    return context.deserialize(jsonObject, DefaultNode.class);
             }
         }
     }
