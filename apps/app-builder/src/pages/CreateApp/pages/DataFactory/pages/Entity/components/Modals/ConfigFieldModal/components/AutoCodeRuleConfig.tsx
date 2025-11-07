@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Input, Select, Dropdown, Menu, Cascader } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import AutoCodeNumberSettingsModal from './AutoCodeNumberSettingsModal';
-import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from '../types';
+import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce, EntityFieldsWithChildren } from '../types';
 import {
   convertAutoCodeCompoToAutoNumberRule,
   convertAutoNumberRuleToAutoCodeComp,
@@ -23,7 +24,7 @@ interface AutoCodeRuleConfigProps {
   onConfirm: (config: AutoNumberRule) => void;
   initialConfig?: AutoNumberRule;
   onCancel?: () => void;
-  fields: { label: string; value: string }[];
+  fields: EntityFieldsWithChildren[];
 }
 
 const DATE_FORMAT_OPTIONS = [
@@ -34,6 +35,31 @@ const DATE_FORMAT_OPTIONS = [
   { label: '年月日时分秒', value: '年月日时分秒' },
   { label: '自定义', value: '自定义' }
 ];
+
+// 仅支持部分类型字段作为编号组成部分
+const getFieldOptions = (entitys: EntityFieldsWithChildren[]) => {
+  const filterTypes = [
+    ENTITY_FIELD_TYPE.TEXT.VALUE,
+    ENTITY_FIELD_TYPE.NUMBER.VALUE,
+    ENTITY_FIELD_TYPE.DATE.VALUE,
+    ENTITY_FIELD_TYPE.EMAIL.VALUE,
+    ENTITY_FIELD_TYPE.SELECT.VALUE,
+    ENTITY_FIELD_TYPE.PHONE.VALUE,
+    ENTITY_FIELD_TYPE.ADDRESS.VALUE
+  ];
+  return entitys?.map((entity) => {
+    return {
+      label: entity.label,
+      value: entity.value,
+      children: entity.children
+        ?.filter((field) => filterTypes.includes(field.fieldType))
+        ?.map((field) => ({
+          label: field.label,
+          value: field.value
+        }))
+    };
+  });
+};
 
 export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   onVisibleChange,
@@ -211,7 +237,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
             <Cascader
               placeholder="请选择字段"
               className={styles.ruleInput}
-              options={fields}
+              options={getFieldOptions(fields)}
               value={findFieldPath(rule.config.fieldName as string, fields)}
               onChange={(value) => {
                 updateRule(rule.id!, {
@@ -305,4 +331,3 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
     </>
   );
 };
-
