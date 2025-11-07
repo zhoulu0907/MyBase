@@ -48,6 +48,10 @@ public class ETLDatasourceDO extends TenantBaseDO {
         return BooleanUtils.toBoolean(readonly);
     }
 
+    public void setReadonly(Integer readonly) {
+        this.readonly = readonly;
+    }
+
     public void setReadonly(Boolean readonly) {
         if (readonly == null) {
             return;

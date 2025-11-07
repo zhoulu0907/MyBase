@@ -1,0 +1,116 @@
+server:
+  port: 48080
+
+--- #################### 数据库相关配置 ####################
+spring:
+  datasource:
+    driver-class-name: dm.jdbc.driver.DmDriver
+    # 注意：达梦数据库的大小写敏感性在数据库初始化时设置，JDBC URL参数无法改变
+    # 如需修改，请联系DBA使用 dminit 命令重新初始化数据库，设置 CASE_SENSITIVE=0
+    url: jdbc:dm://10.0.104.50:5237/ONEBASE_CLOUD_V3?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&schema=ONEBASE_CLOUD_V3
+    username: ONEBASE_CLOUD_V3
+    password: Onebase2025
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 20
+      # 达梦数据库的连接测试查询需使用 SELECT 1 FROM DUAL
+      connection-test-query: SELECT 1 FROM DUAL
+      connection-timeout: 30000
+      validation-timeout: 5000
+      idle-timeout: 300000 # 空闲连接超时时间（5分钟）
+      max-lifetime: 1800000 # 连接最大生命周期（30分钟）
+      leak-detection-threshold: 60000 # 连接泄露检测阈值（1分钟）
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          address: "redis://10.0.104.38:6379"
+          subscriptionConnectionMinimumIdleSize: 1
+          subscriptionConnectionPoolSize: 5
+          connectionMinimumIdleSize: 2
+          connectionPoolSize: 5
+          database: 0
+
+--- #################### 服务保障相关配置 ####################
+
+# Lock4j 配置项
+lock4j:
+  acquire-timeout: 3000 # 获取分布式锁超时时间，默认为 3000 毫秒
+  expire: 30000 # 分布式锁的超时时间，默认为 30 毫秒
+
+# 日志文件配置
+logging:
+  file:
+    name: ${user.home}/logs/${spring.application.name}.log # 日志文件名，全路径
+  level:
+    # 达梦数据库专用日志配置
+    dm.jdbc: INFO
+    org.anyline.data.jdbc.dm: DEBUG
+
+debug: false
+
+--- #################### OneBase相关配置 ####################
+
+# OneBase配置项，设置当前项目所有自定义的配置
+onebase:
+  captcha:
+    enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
+  security:
+    mock-enable: false
+  access-log: # 访问日志的配置项
+    enable: false
+  web:
+    return-exception-stack-trace: true # 本地开发：接口错误时返回堆栈，便于调试
+  metadata:
+    default-datasource:
+      type: DM # 达梦数据库类型
+      host: 10.0.104.50
+      port: 5237 # 达梦默认端口
+      database: ONEBASE_BUSINESS
+      username: ONEBASE_BUSINESS
+      password: Onebase2025
+      description: 达梦默认数据源
+  scheduler:
+    address: http://10.0.104.33:12345/dolphinscheduler
+    token: 85806d2d33502cef3036fb30b320e5f5
+    env: 154612656767296
+    flow-project: 154702155517248
+    flow-url: http://bing.com
+    flow-token: 0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c
+    etl-project: 155572154738048
+    tenant: root
+
+justauth:
+  enabled: true
+  cache:
+    type: REDIS
+    prefix: 'social_auth_state:' # 缓存前缀，目前只对 Redis 缓存生效，默认 JUSTAUTH::STATE::
+    timeout: 24h # 超时时长，目前只对 Redis 缓存生效，默认 3 分钟
+
+wx:
+  mp: # 参见 https://github.com/Wechat-Group/WxJava/blob/develop/spring-boot-starters/wx-java-mp-spring-boot-starter/README.md 文档
+    app-id: wx5b23ba7a5589ecbb # 测试号（自己的）
+    secret: 2a7b3b20c537e52e74afd395eb85f61f
+    # 存储配置，解决 AccessToken 的跨节点的共享
+    config-storage:
+      type: RedisTemplate # 采用 RedisTemplate 操作 Redis，会自动从 Spring 中获取
+      key-prefix: wx # Redis Key 的前缀
+      http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
+  miniapp: # 参见 https://github.com/Wechat-Group/WxJava/blob/develop/spring-boot-starters/wx-java-miniapp-spring-boot-starter/README.md 文档
+    appid: wxc4598c446f8a9cb3 # 测试号（Kongdy 提供的）
+    secret: 4a1a04e07f6a4a0751b39c3064a92c8b
+    config-storage:
+      type: RedisTemplate # 采用 RedisTemplate 操作 Redis，会自动从 Spring 中获取
+      key-prefix: wa # Redis Key 的前缀
+    http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
+
+liteflow:
+  enable: true
+  print-banner: true
+rocketmq:
+  endpoints: 10.0.104.38:8081
+
+metadata:
+  runtime:
+    enable-auth-check: true
