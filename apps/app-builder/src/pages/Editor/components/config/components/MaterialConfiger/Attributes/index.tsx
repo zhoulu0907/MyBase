@@ -30,6 +30,8 @@ import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import DynamicTabsConfig from './components/DynamicTabsConfig';
+import DynamicDateFormatConfig from './components/DynamicDateFormatConfig';
+import DynamicTimeFormatConfig from './components/DynamicTimeFormatConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -238,7 +240,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 item.type !== CONFIG_TYPES.FILE &&
                 item.type !== CONFIG_TYPES.TABS &&
                 item.type !== CONFIG_TYPES.AUTO_CODE_RULES &&
-                item.type !== CONFIG_TYPES.IMAGE_HANDLE
+                item.type !== CONFIG_TYPES.IMAGE_HANDLE &&
+                item.type !== CONFIG_TYPES.DATE_FORMAT &&
+                item.type !== CONFIG_TYPES.TIME_FORMAT 
               ) {
                 return (
                   <FormItem
@@ -835,6 +839,32 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               if (item.type == CONFIG_TYPES.AUTO_CODE_RULES) {
                 return (
                   <DynamicAutoCodeConfig
+                    key={index}
+                    id={cpID}
+                    handlePropsChange={handlePropsChange}
+                    handleConfigsChange={handleConfigsChange}
+                    item={item}
+                    configs={configs}
+                  />
+                );
+              }
+              // 日期格式
+              if (item.type == CONFIG_TYPES.DATE_FORMAT) {
+                return (
+                  <DynamicDateFormatConfig
+                    key={index}
+                    id={cpID}
+                    handlePropsChange={handlePropsChange}
+                    handleConfigsChange={handleConfigsChange}
+                    item={item}
+                    configs={configs}
+                  />
+                );
+              }
+              // 时间格式
+              if (item.type == CONFIG_TYPES.TIME_FORMAT) {
+                return (
+                  <DynamicTimeFormatConfig
                     key={index}
                     id={cpID}
                     handlePropsChange={handlePropsChange}

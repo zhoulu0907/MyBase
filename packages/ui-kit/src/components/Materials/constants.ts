@@ -85,11 +85,16 @@ export const CONFIG_TYPES = {
   // 静态文件
   IMAGE: 'Image',
   FILE: 'File',
+  // 图片处理
   IMAGE_HANDLE: 'ImageHandle',
   // 折叠面板展开状态
   COLLAPSED: 'Collapsed',
   // 自动编号规则
   AUTO_CODE_RULES: 'autoCodeRules',
+  // 日期格式
+  DATE_FORMAT: 'DateFormat',
+  // 时间格式
+  TIME_FORMAT: 'TimeFormat',
 
   TABLE_OPERATION: 'TableOperation',
   TABLE_BUTTON: 'advancedButtonPermission'
@@ -201,6 +206,13 @@ export const DATE_OPTIONS = {
   FULL: '年月日时'
 } as const;
 
+// 时间选择格式
+export const TIME_OPTIONS = {
+  HOUR:'时',
+  MINUTE:'分',
+  SECOND:'秒'
+} as const;
+
 export const DATE_VALUES = {
   [DATE_OPTIONS.YEAR]: 'year',
   [DATE_OPTIONS.MONTH]: 'month',
@@ -208,11 +220,23 @@ export const DATE_VALUES = {
   [DATE_OPTIONS.FULL]: 'full'
 } as const;
 
+export const TIME_VALUES = {
+  [TIME_OPTIONS.HOUR]: 'hour',
+  [TIME_OPTIONS.MINUTE]: 'minute',
+  [TIME_OPTIONS.SECOND]: 'second',
+} as const;
+
 export const DATE_FORMAT = {
   [DATE_VALUES[DATE_OPTIONS.YEAR]]: 'YYYY',
   [DATE_VALUES[DATE_OPTIONS.MONTH]]: 'YYYY-MM',
   [DATE_VALUES[DATE_OPTIONS.DATE]]: 'YYYY-MM-DD',
   [DATE_VALUES[DATE_OPTIONS.FULL]]: 'YYYY-MM-DD HH:mm:ss',
+} as const;
+
+export const TIME_FORMAT = {
+  [TIME_VALUES[TIME_OPTIONS.HOUR]]: 'HH',
+  [TIME_VALUES[TIME_OPTIONS.MINUTE]]: 'HH:mm',
+  [TIME_VALUES[TIME_OPTIONS.SECOND]]: 'HH:mm:ss',
 } as const;
 
 // 表单的布局

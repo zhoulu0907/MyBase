@@ -1,0 +1,46 @@
+import { Form, Select } from '@arco-design/web-react';
+import { DATE_OPTIONS, DATE_VALUES } from '@onebase/ui-kit';
+import { useEffect, useState } from 'react';
+import styles from '../../index.module.less';
+
+export interface DynamicDateFormatConfigProps {
+  handlePropsChange: (key: string, value: any) => void;
+  handleConfigsChange: (config: any) => void;
+  item: any;
+  configs: any;
+  id: string;
+}
+
+const DynamicDateFormatConfig: React.FC<DynamicDateFormatConfigProps> = ({
+  handlePropsChange,
+  handleConfigsChange,
+  item,
+  configs,
+  id
+}) => {
+  const options = [
+    { label: '年', value: DATE_VALUES[DATE_OPTIONS.YEAR] },
+    { label: '年-月', value: DATE_VALUES[DATE_OPTIONS.MONTH] },
+    { label: '年-月-日', value: DATE_VALUES[DATE_OPTIONS.DATE] }
+    // { label: '年-月-日 时:分:秒', value: DATE_VALUES[DATE_OPTIONS.FULL] },
+  ];
+
+  const dateFormatKey = 'dateType';
+
+  const [dateFormat, setDateFormat] = useState<string>('');
+
+  useEffect(() => {
+    setDateFormat(configs[dateFormatKey]);
+  }, [configs[dateFormatKey]]);
+
+  return (
+    <Form.Item layout="vertical" label={'日期格式'} className={styles.formItem}>
+      <Select
+        value={dateFormat}
+        onChange={(value) => handlePropsChange(dateFormatKey, value)}
+        options={options}
+      ></Select>
+    </Form.Item>
+  );
+};
+export default DynamicDateFormatConfig;

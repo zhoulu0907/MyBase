@@ -1,11 +1,11 @@
 import { Form, TimePicker } from '@arco-design/web-react';
 import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, TIME_FORMAT } from '../../../constants';
 import '../index.css';
 import type { XInputTimePickerConfig } from './schema';
 
 const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
+  const { label, tooltip, status, defaultValue,dateType, verify, layout, labelColSpan = 0, runtime = true } = props;
 
   return (
     <div className="formWrapper">
@@ -32,6 +32,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
           <div>{defaultValue || '--'}</div>
         ) : (
           <TimePicker
+            format={TIME_FORMAT[dateType]}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

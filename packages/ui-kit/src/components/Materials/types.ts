@@ -432,3 +432,17 @@ export interface IImageHandleConfigType {
   name: string;
   type: typeof CONFIG_TYPES.IMAGE_HANDLE;
 }
+
+// 日期格式
+export interface IDateFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_FORMAT;
+}
+
+// 时间格式
+export interface ITimrFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_FORMAT;
+}
