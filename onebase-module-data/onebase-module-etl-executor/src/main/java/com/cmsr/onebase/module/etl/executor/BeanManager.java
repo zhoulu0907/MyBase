@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.executor;
 
+import com.cmsr.onebase.module.etl.executor.provider.QueryProvider;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
 import com.cmsr.onebase.module.etl.executor.util.DataSourceUtil;
 import com.zaxxer.hikari.HikariDataSource;
@@ -18,10 +19,14 @@ public class BeanManager implements Closeable {
 
     private HikariDataSource dataSource;
 
+    private QueryProvider queryProvider;
+
     public BeanManager(InputArgs inputArgs) {
         this.inputArgs = inputArgs;
         this.dataSource = DataSourceUtil.createDataSource(inputArgs);
+        this.queryProvider = new QueryProvider(dataSource);
         this.workflowProvider = new WorkflowProvider(dataSource);
+        this.workflowProvider.setQueryProvider(queryProvider);
     }
 
     public WorkflowProvider getWorkflowDao() {

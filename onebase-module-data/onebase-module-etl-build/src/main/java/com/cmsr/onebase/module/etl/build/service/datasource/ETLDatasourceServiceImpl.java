@@ -259,7 +259,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
                     ColumnDefine columnDefine = new ColumnDefine();
                     columnDefine.setId(metaColumn.getId());
                     columnDefine.setName(metaColumn.getDisplayName());
-                    columnDefine.setType(metaColumn.getCompatibleType());
+                    columnDefine.setType(metaColumn.getFlinkType());
                     return columnDefine;
                 }).toList();
     }

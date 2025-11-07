@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class WorFlowGraph {
+public class WorkflowGraph {
 
     private List<Node> nodes;
 
