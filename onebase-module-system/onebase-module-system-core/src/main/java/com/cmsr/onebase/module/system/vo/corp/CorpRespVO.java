@@ -48,7 +48,7 @@ public class CorpRespVO {
     @Schema(description = "联系人邮箱")
     private String email;
 
-    @Schema(description = "联系人邮箱")
+    @Schema(description = "联系人电话")
     private String mobile;
 
     @Schema(description = "管理员")
