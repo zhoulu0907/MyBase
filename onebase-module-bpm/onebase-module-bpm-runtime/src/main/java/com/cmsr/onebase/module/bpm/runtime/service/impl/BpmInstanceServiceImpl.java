@@ -452,6 +452,17 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
         }
 
+        if (instance.getBusinessId() == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+        }
+
+        Long entityDataId = Long.parseLong(instance.getBusinessId());
+
+        // 忽略前端传的entityDataId，使用流程实例绑定的实体数据ID
+        if (reqVO.getEntity() != null) {
+            reqVO.getEntity().setId(entityDataId);
+        }
+
         String taskNodeCode = task.getNodeCode();
         BaseNodeExtDTO extDTO = getNodeExtDTOByNodeCode(taskNodeCode, instance.getDefJson());
 
