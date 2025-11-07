@@ -21,7 +21,7 @@ public class JdbcInputNode extends Node implements CreateTableAction {
     public void createTable(TableEnvironment tableEnv) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
         for (Field field : config.getFields()) {
-            DataType dataType = FlinkTypeUtil.getFlinkTableType(field.getFieldType(), field.getSize(), field.getScale());
+            DataType dataType = FlinkTypeUtil.getFlinkTableType(field.getFieldType(), field.getLength(), field.getPrecision(), field.getScale());
             schemaBuilder.column(field.getFieldName(), dataType);
         }
         TableDescriptor tableDescriptor = TableDescriptor.forConnector("jdbc")

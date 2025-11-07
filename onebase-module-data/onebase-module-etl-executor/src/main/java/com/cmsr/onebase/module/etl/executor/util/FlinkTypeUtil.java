@@ -6,6 +6,7 @@ import org.apache.flink.table.types.DataType;
 /**
  * Flink数据类型工具类
  * 用于将字符串类型转换为Flink的DataType
+ *
  * @Author：huangjie
  * @Date：2025/11/7 13:50
  */
@@ -13,32 +14,30 @@ public class FlinkTypeUtil {
 
     /**
      * 根据类型字符串获取对应的Flink DataType
-     * @param type 类型字符串
-     * @param size 大小/精度参数
-     * @param scale 小数位数参数
+     *
      * @return Flink DataType对象
      */
-    public static DataType getFlinkTableType(String type, int size, int scale) {
+    public static DataType getFlinkTableType(String type, Integer length, Integer precision, Integer scale) {
         if (type == null) {
             throw new IllegalArgumentException("Type cannot be null");
         }
         switch (type.toUpperCase()) {
             case "CHAR":
-                return DataTypes.CHAR(size);
+                return DataTypes.CHAR(length);
             case "VARCHAR":
-                return DataTypes.VARCHAR(size);
+                return DataTypes.VARCHAR(length);
             case "STRING":
                 return DataTypes.STRING();
             case "BOOLEAN":
                 return DataTypes.BOOLEAN();
             case "BINARY":
-                return DataTypes.BINARY(size);
+                return DataTypes.BINARY(length);
             case "VARBINARY":
-                return DataTypes.VARBINARY(size);
+                return DataTypes.VARBINARY(length);
             case "BYTES":
                 return DataTypes.BYTES();
             case "DECIMAL":
-                return DataTypes.DECIMAL(size, scale);
+                return DataTypes.DECIMAL(precision, scale);
             case "TINYINT":
                 return DataTypes.TINYINT();
             case "SMALLINT":
