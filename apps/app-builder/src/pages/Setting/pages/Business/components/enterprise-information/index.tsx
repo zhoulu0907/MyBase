@@ -6,12 +6,13 @@ import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useOutletContext, useParams } from 'react-router-dom';
 import type { AppItem, cropItem, OutletContextType, updatedParams } from '../../types/appItem';
-import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi, removeCorpAppApi, updateCorpAppApi, type corpListParams } from "@onebase/platform-center";
+import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi,createCorpAppApi, removeCorpAppApi, updateCorpAppApi,type CorpAppParams, type corpListParams } from "@onebase/platform-center";
 import { convertIndustryType } from '../../utils';
 
 const EnterpriseInfoPage: React.FC = () => {
   const {activeTab} = useParams();
   const { currentId, industryOptions} = useOutletContext<OutletContextType>();
+  const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
   const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
@@ -137,6 +138,22 @@ const EnterpriseInfoPage: React.FC = () => {
     setSearchValue(searchValue);
   }
 
+  const handleSubmitApp = async(data:CorpAppParams) => {
+    try {
+        const res = await createCorpAppApi(data);
+        if(res) {
+          await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize)
+          Message.error("创建授权应用成功");
+        }else {
+          Message.error("接口返回异常");
+        }
+    }catch(error) {
+        Message.error("创建授权应用失败");
+    }finally {
+        setAddAppModalVisible(false);
+    }
+  }
+
   const displayData = useMemo(()=>{
       if (!searchValue.trim()) return tableData
       const lowerSearch = searchValue.toLowerCase();
@@ -260,6 +277,7 @@ const EnterpriseInfoPage: React.FC = () => {
             <AuthorizedApp 
                 visible={visible}
                 setVisible={setVisible}
+                addAppModalVisible={addAppModalVisible}
                 pageination={pageInation} 
                 loading={loading} 
                 tableData={displayData} 
@@ -268,6 +286,8 @@ const EnterpriseInfoPage: React.FC = () => {
                 onChange={handlePageChange}
                 onUpdateTime={handleUpdateTime}
                 onRemoveAuthorizedApp={handleRemoveAuthorizedApp}
+                onSubmit={handleSubmitApp}
+                setAddAppModalVisible={setAddAppModalVisible}
               />
           </Tabs.TabPane>
         </Tabs>

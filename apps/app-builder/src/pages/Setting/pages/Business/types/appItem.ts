@@ -22,9 +22,17 @@ export interface updatedParams {
     expiresTime: string;
 }
 
+export interface CorpAppParams {
+    corpId: string;
+    applicationIdList: string[];
+    authorizationTime: string;
+    expiresTime: string;
+}
+
 export interface IAuthorizedAppProps {
     loading: boolean;
     tableData: AppItem[];
+    addAppModalVisible: boolean;
     pageination: any;
     className?: string;
     visible: boolean;
@@ -33,6 +41,8 @@ export interface IAuthorizedAppProps {
     onChange: (pageNo: number, pageSize: number) => void;
     onUpdateTime:(values: updatedParams) => void;
     onRemoveAuthorizedApp: (id: string) => void;
+    onSubmit: (data: CorpAppParams) => void;
+    setAddAppModalVisible:(value: boolean) => void;
 }
 
 export interface statusProps {

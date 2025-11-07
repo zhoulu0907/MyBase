@@ -8,7 +8,7 @@ import { BasicInformation } from "./components/createApp/basicInformation";
 import { AuthorizedApp } from "./components/createApp/authorizedApp";
 import { AdminInformation } from "./components/createApp/adminInfomation";
 import type { AppItem, OutletContextType } from "./types/appItem";
-import {removeCorpAppApi, updateCorpAppApi, createCorpApi, getCorpAuthorizedAppListApi, type createCorpParams, type updatedParams, type corpListParams} from "@onebase/platform-center";
+import {removeCorpAppApi, updateCorpAppApi, createCorpApi, getCorpAuthorizedAppListApi, type CorpAppParams, type createCorpParams, type updatedParams, type corpListParams} from "@onebase/platform-center";
 import { IconLoading } from "@arco-design/web-react/icon";
 
 const CreateBusinessPage: React.FC = () => {
@@ -57,7 +57,7 @@ const CreateBusinessPage: React.FC = () => {
         if(currentStep === 3) {
             fetchCorpAuthorizedList()
         }
-    },[])
+    },[currentStep])
 
     //授权应用分页切换
     const handlePageChange = (current: number, pageSize: number) => {
@@ -150,6 +150,19 @@ const CreateBusinessPage: React.FC = () => {
         }
     };
 
+    const handleSubmitApp = (data: CorpAppParams) => {
+        const newData = {
+            authorizationTime:data.authorizationTime,
+            expiresTime: data.expiresTime,
+            versionNumber:"",
+            applicationCode:"",
+            applicationName:data.applicationIdList?.join(",")
+
+        }
+        setTableData((prev: any) => [...prev, newData]);
+        setAddAppModalVisible(false);
+    }
+
 
     const renderContent = (currentStep: number) => {
         return (
@@ -168,6 +181,7 @@ const CreateBusinessPage: React.FC = () => {
                         <AuthorizedApp 
                             visible={visible}
                             setVisible={setVisible}
+                            addAppModalVisible={addAppModalVisible}
                             pageination={pageInation} 
                             loading={loading} 
                             tableData={displayData} 
@@ -176,6 +190,8 @@ const CreateBusinessPage: React.FC = () => {
                             onChange={handlePageChange}
                             onUpdateTime={handleUpdateTime}
                             onRemoveAuthorizedApp={handleRemoveAuthorizedApp}
+                            setAddAppModalVisible={setAddAppModalVisible}
+                            onSubmit={handleSubmitApp}
                         />
                     )}
                     {/* 第四步：确认信息 */}

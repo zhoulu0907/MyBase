@@ -1,10 +1,10 @@
-import { Button, Message, Space, Tag } from "@arco-design/web-react";
+import { Button, Space, Tag } from "@arco-design/web-react";
 import { CommonTable } from "../table/commonTable";
 import { TopHeader } from "../topHeader";
 import styles from "./authorizedApp.module.less"
 import type { AppItem, authorizedTimeGroup, IAuthorizedAppProps, OutletContextType } from "../../types/appItem";
 import {formatTimeYMDHMS} from "@onebase/common";
-import { createCorpAppApi, type updateAppParams } from "@onebase/platform-center";
+import { type CorpAppParams, type updateAppParams } from "@onebase/platform-center";
 import EditAuthorizedTime from "../modal/editAuthorizedTime";
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
@@ -12,12 +12,11 @@ import { CreateAppModal } from "../modal/createAppModal";
 
 
 export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
-    className, loading, tableData, pageination, visible, 
-    onChange, onSearch,onUpdateTime, setVisible, onRemoveAuthorizedApp
+    className, loading, tableData, pageination, visible,addAppModalVisible, setAddAppModalVisible,
+    onChange, onSearch,onUpdateTime, setVisible, onRemoveAuthorizedApp, onSubmit
  }) => {
     const { currentId } = useOutletContext<OutletContextType>();
     const [authorizedAppItem, setAuthorizedAppItem] = useState<AppItem | null>(null);
-    const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
 
     //点击创建应用打开modal
     const handleAddApplication = () => {
@@ -54,21 +53,13 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
 
     // 提交新应用（弹窗确认后调用）
     const handleAddSubmit = async(newAppData: any) => {
-        const newData = {
+        const newData :CorpAppParams = {
             corpId: currentId,
             applicationIdList: newAppData.applicationIdList,
             authorizationTime: newAppData.appTime?.authorizationTime,
             expiresTime: newAppData.appTime?.expiresTime
         }
-        try {
-            const res = await createCorpAppApi(newData);
-            console.log("创建授权应用：", res);
-            Message.error("创建授权应用成功");
-        }catch(error) {
-            Message.error("创建授权应用失败");
-        }finally {
-            setAddAppModalVisible(false);
-        }
+        onSubmit(newData);
     };  
 
     const columns = [
