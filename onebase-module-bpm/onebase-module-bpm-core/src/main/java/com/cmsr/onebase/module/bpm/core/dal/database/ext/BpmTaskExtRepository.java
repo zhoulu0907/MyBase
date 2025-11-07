@@ -63,7 +63,7 @@ public class BpmTaskExtRepository {
                     left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
                     left join bpm_flow_definition t4 on t4.id = t.definition_id
                     where t.node_type = 1 and t.flow_status !='draft'
-                    and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0 and t3.deleted = 0
+                    and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0 and t3.deleted = 0 and  t4.deleted = 0
                 """;
     }
 

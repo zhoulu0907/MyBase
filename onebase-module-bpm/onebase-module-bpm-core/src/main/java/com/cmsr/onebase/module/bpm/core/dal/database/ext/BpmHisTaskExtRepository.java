@@ -63,6 +63,7 @@ public class BpmHisTaskExtRepository {
                 and t1.deleted = 0
                 and t.deleted = 0
                 and t3.deleted = 0
+                and t4.deleted = 0
                 and t.node_type in ('1','3','4')
                 """, userId);
     }
