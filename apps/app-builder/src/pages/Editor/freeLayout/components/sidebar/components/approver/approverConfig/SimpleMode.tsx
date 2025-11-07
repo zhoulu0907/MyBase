@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Radio, Form, Select } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
@@ -26,6 +26,8 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     role: [{ required: true, message: '请选择角色' }]
   };
   const [formRes, setFormRes] = useState<any>({});
+
+  const prevUserIdsRef = useRef<any>();
 
   function initUserData() {
     const params: PageParam = {
@@ -94,21 +96,44 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
       selOptions = roleOptions;
       itemKey = 'roleId';
     }
-    setApprovalConfigData('approverConfig', {
-      approverType: simpleCkType,
-      [dataKey]: selOptions.filter((item: any) => {
+    const obj:any = {
+      approverType: simpleCkType
+    }
+    if (selOptions?.length > 0) {
+      obj[dataKey] = selOptions.filter((item: any) => {
         if (Array.isArray(formRes[simpleCkType])) {
           return formRes[simpleCkType].indexOf(item[itemKey]) > -1;
         }
         return false;
       })
-    });
+    }
+    setApprovalConfigData('approverConfig', obj);
   }, [simpleCkType, formRes]);
+
+  useEffect(() => {
+    let curUserList:any = approverConfig?.users;
+    let prevUIdsList:any = prevUserIdsRef?.current;
+    console.log('prevUserList, curUserList ====', prevUIdsList, curUserList)
+    let isChange = false;
+    if (prevUIdsList?.length === curUserList?.length) {
+      for(let u = 0; u < curUserList?.length; u++) {
+        if (curUserList[u]?.userId && prevUIdsList.indexOf(curUserList[u]?.userId) < 0) {
+          isChange = true;
+          break;
+        }
+      }
+    } else {
+      isChange = true;
+    }
+    if (isChange) {
+      setInitData()
+    }
+  }, [approverConfig?.users])
 
   useEffect(() => {
     initUserData();
     initRoleData();
-    setInitData();
+    // setInitData();
   }, []);
 
   const setInitData = () => {
@@ -116,8 +141,10 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     if (approverType) {
       setSimpleCkType(approverType);
       if (approverType === 'user') {
+        const userArr = users.map((item: any) => item.userId);
+        prevUserIdsRef.current = userArr
         form.setFieldsValue({
-          user: users.map((item: any) => item.userId)
+          user: userArr
         });
       } else if (approverType === 'role') {
         form.setFieldsValue({
