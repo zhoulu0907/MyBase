@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Input, Select, Dropdown, Menu, Cascader } from '@arco-design/web-react';
+import { Button, Input, Select, Dropdown, Menu, Cascader, Space } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
@@ -68,6 +68,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   initialConfig,
   fields
 }) => {
+  const [fixedTextStatus, setFixedTextStatus] = useState<'error' | undefined>(undefined);
   // 默认规则
   const getInitialRules = (): AutoCodeRule[] => {
     if (initialConfig) {
@@ -135,6 +136,14 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   };
 
   const updateRule = (id: string, updates: Partial<AutoCodeRule>) => {
+    // 固定字符校验
+    if (updates.config?.fixedText) {
+      if (!/^[_\-+=/()<>[\]{}.~、#%&*]+$/.test(updates.config?.fixedText as string)) {
+        setFixedTextStatus('error');
+      } else {
+        setFixedTextStatus(undefined);
+      }
+    }
     setRules(rules.map((rule) => (rule.id === id ? { ...rule, ...updates } : rule)));
   };
 
@@ -212,12 +221,18 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
           <div className={styles.ruleContent}>
             <IconDragDotVertical className={styles.dragHandle} />
             <span className={styles.ruleLabel}>固定字符:</span>
-            <Input
-              value={(rule.config.fixedText as string) || ''}
-              placeholder="请输入内容"
-              onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fixedText: value } })}
-              className={styles.ruleInput}
-            />
+            <Space direction="vertical">
+              <Input
+                value={(rule.config.fixedText as string) || ''}
+                placeholder="请输入内容"
+                onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fixedText: value } })}
+                className={styles.ruleInput}
+                status={fixedTextStatus}
+              />
+              {fixedTextStatus === 'error' && (
+                <span className={styles.ruleInputError}>{`仅支持：_-=+()<>[]{}.~、#%&*`}</span>
+              )}
+            </Space>
             <Button
               type="text"
               status="danger"
