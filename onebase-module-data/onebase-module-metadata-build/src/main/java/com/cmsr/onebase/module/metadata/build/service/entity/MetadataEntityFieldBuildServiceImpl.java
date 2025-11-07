@@ -44,6 +44,9 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DataRow;
 
+import org.anyline.metadata.Column;
+import org.anyline.metadata.Table;
+import org.anyline.metadata.type.DatabaseType;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -1337,19 +1340,29 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 检查表是否存在
+     * <p>
+     * 使用Anyline元数据API，自动适配不同数据库（PostgreSQL、达梦、金仓等）
+     * 避免手动拼接SQL和硬编码LIMIT语法
      */
     private boolean checkTableExists(AnylineService<?> service, String tableName) {
         try {
             log.info("检查表是否存在 - 表名: {}", tableName);
 
-            // 简单尝试查询表，给表名加双引号处理PostgreSQL大小写问题
-            String testSql = "SELECT 1 FROM \"" + tableName + "\" LIMIT 1";
-            service.querys(testSql);
+            // 使用Anyline元数据API，跨数据库兼容
+            // Anyline会自动处理不同数据库的元数据查询和标识符大小写问题
+            Table<?> table = service.metadata().table(tableName);
+            boolean exists = (table != null);
 
-            log.info("表 {} 存在，当前连接的数据库: {}", tableName, getCurrentDatabase(service));
-            return true;
+            if (exists) {
+                log.info("表 {} 存在", tableName);
+            } else {
+                log.debug("表 {} 不存在", tableName);
+            }
+
+            return exists;
         } catch (Exception e) {
-            log.warn("表 {} 不存在或查询失败: {}", tableName, e.getMessage());
+            // 捕获异常视为表不存在
+            log.debug("检查表 {} 时发生异常: {}", tableName, e.getMessage());
             return false;
         }
     }
@@ -1372,6 +1385,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 检查列是否存在于表中
+     * <p>
+     * 使用Anyline元数据API，自动适配不同数据库（PostgreSQL、达梦、金仓等）
+     * 避免硬编码ILIKE、information_schema和LIMIT语法
      *
      * @param service AnylineService实例
      * @param tableName 表名
@@ -1382,25 +1398,24 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         try {
             log.info("检查列是否存在 - 表名: {}, 列名: {}", tableName, columnName);
 
-            // 使用参数化查询 + ILIKE（PostgreSQL 不区分大小写匹配），一次查询既判断存在也可拿到详情
-            String sql = "SELECT table_name, column_name, data_type FROM information_schema.columns "
-                + "WHERE table_schema = ? "
-                + "AND table_name ILIKE ? "
-                + "AND column_name ILIKE ? "
-                + "LIMIT 1";
+            // 使用Anyline元数据API，完全跨数据库兼容
+            // Anyline会自动处理不同数据库的元数据查询、标识符大小写问题
+            Table<?> table = service.metadata().table(tableName);
+            if (table == null) {
+                log.info("表 {} 不存在，因此列 {} 也不存在", tableName, columnName);
+                return false;
+            }
 
-            DataSet resultSet = service.querys(sql, "public", tableName, columnName);
-            boolean exists = resultSet != null && resultSet.size() > 0;
+            Column column = table.getColumn(columnName);
+            boolean exists = (column != null);
 
             log.info("列 {} 在表 {} 中{}存在", columnName, tableName, exists ? "" : "不");
 
-            if (exists) {
+            if (exists && column != null) {
                 try {
-                    if (resultSet != null && resultSet.size() > 0) {
-                        DataRow row = resultSet.getRow(0);
-                        log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}",
-                                row.get("table_name"), row.get("column_name"), row.get("data_type"));
-                    }
+                    // 记录列的详细信息（用于调试）
+                    log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}",
+                            table.getName(), column.getName(), column.getTypeName());
                 } catch (Exception detailException) {
                     log.debug("获取列详细信息失败: {}", detailException.getMessage());
                 }
@@ -1409,19 +1424,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             return exists;
         } catch (Exception e) {
             log.error("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage(), e);
-            // 发生异常时，使用更保守的策略：尝试直接查询表结构来确认
-            try {
-                log.info("使用备用方法检查列是否存在: {}.{}", tableName, columnName);
-                String backupSql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND column_name = ? AND table_schema = 'public'";
-                DataSet backupResult = service.querys(backupSql, tableName, columnName);
-                boolean backupExists = backupResult != null && backupResult.size() > 0;
-                log.info("备用检查结果：列 {} 在表 {} 中{}存在", columnName, tableName, backupExists ? "" : "不");
-                return backupExists;
-            } catch (Exception backupException) {
-                log.error("备用列存在性检查也失败: {}", backupException.getMessage(), backupException);
-                // 最后的保险措施：假设列不存在，但在执行DDL时使用IF NOT EXISTS
-                return false;
-            }
+            // 发生异常时返回false，让调用方处理
+            // 避免使用备用的硬编码SQL，保持跨数据库兼容性
+            return false;
         }
     }
 
@@ -1457,8 +1462,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     return null;
                 }
 
-                // 生成并执行修改列 DDL
-                String alterColumnDDL = generateAlterColumnDDL(tableName, field);
+                // 生成并执行修改列 DDL（传入数据库类型以生成兼容的SQL）
+                String alterColumnDDL = generateAlterColumnDDL(datasource.getDatasourceType(), tableName, field);
                 service.execute(alterColumnDDL);
 
                 log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
@@ -1506,6 +1511,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 从表中删除列
+     * <p>
+     * 先检查列是否存在，存在才执行删除，以兼容达梦等数据库
      */
     private void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName) {
         try {
@@ -1513,6 +1520,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             TenantUtils.executeIgnore(() -> {
                 // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
+                // 检查列是否存在
+                boolean exists = checkColumnExists(service, tableName, fieldName);
+                if (!exists) {
+                    log.info("列 {} 不存在于表 {}，跳过删除操作", fieldName, tableName);
+                    return null;
+                }
 
                 // 生成删除列 DDL
                 String dropColumnDDL = generateDropColumnDDL(tableName, fieldName);
@@ -1531,11 +1545,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 生成添加字段的DDL语句
+     * <p>
+     * 注意：调用此方法前必须先使用checkColumnExists()检查列是否存在
+     * 不使用IF NOT EXISTS语法以兼容达梦等数据库
      */
     private String generateAddColumnDDL(String tableName, MetadataEntityFieldDO field) {
         StringBuilder ddl = new StringBuilder();
-        // 使用 IF NOT EXISTS 语法防止重复添加列的错误
-        ddl.append("ALTER TABLE \"").append(tableName).append("\" ADD COLUMN IF NOT EXISTS \"")
+        // 不使用IF NOT EXISTS，因为已在addColumnToTable()中提前检查
+        ddl.append("ALTER TABLE \"").append(tableName).append("\" ADD COLUMN \"")
            .append(field.getFieldName()).append("\" ");
 
         // 字段类型映射
@@ -1564,47 +1581,110 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     }
 
     /**
-     * 生成修改字段的DDL语句
+     * 生成修改字段的DDL语句（跨数据库兼容）
+     * <p>
+     * 根据不同数据库类型生成对应的ALTER COLUMN语法：
+     * - PostgreSQL/KingBase: ALTER COLUMN ... TYPE / SET/DROP NOT NULL
+     * - 达梦(DM): MODIFY "column" TYPE NOT NULL/NULL
+     *
+     * @param datasourceType 数据库类型
+     * @param tableName 表名
+     * @param field 字段信息
+     * @return DDL语句
      */
-    private String generateAlterColumnDDL(String tableName, MetadataEntityFieldDO field) {
+    private String generateAlterColumnDDL(String datasourceType, String tableName, MetadataEntityFieldDO field) {
         StringBuilder ddl = new StringBuilder();
-
-        // 修改字段类型
         String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
-        ddl.append("ALTER TABLE \"").append(tableName).append("\" ALTER COLUMN \"")
-           .append(field.getFieldName()).append("\" TYPE ").append(columnType).append(";\n");
-
-        // 修改是否允许为空 - 使用新的枚举值：1-是，0-否
-        if (field.getIsRequired() != null) {
-            if (BooleanStatusEnum.isYes(field.getIsRequired())) {
-                ddl.append("ALTER TABLE \"").append(tableName).append("\" ALTER COLUMN \"")
-                   .append(field.getFieldName()).append("\" SET NOT NULL;\n");
-            } else {
-                ddl.append("ALTER TABLE \"").append(tableName).append("\" ALTER COLUMN \"")
-                   .append(field.getFieldName()).append("\" DROP NOT NULL;\n");
+        String fieldName = field.getFieldName();
+        
+        try {
+            DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+            
+            switch (dbType) {
+                case PostgreSQL:
+                case KingBase:
+                    // PostgreSQL/金仓：需要分开修改类型和约束
+                    // 1. 修改字段类型
+                    ddl.append("ALTER TABLE \"").append(tableName)
+                       .append("\" ALTER COLUMN \"").append(fieldName)
+                       .append("\" TYPE ").append(columnType).append(";\n");
+                    
+                    // 2. 修改是否允许为空
+                    if (field.getIsRequired() != null) {
+                        ddl.append("ALTER TABLE \"").append(tableName)
+                           .append("\" ALTER COLUMN \"").append(fieldName).append("\"");
+                        if (BooleanStatusEnum.isYes(field.getIsRequired())) {
+                            ddl.append(" SET NOT NULL;\n");
+                        } else {
+                            ddl.append(" DROP NOT NULL;\n");
+                        }
+                    }
+                    
+                    // 3. 修改默认值
+                    if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
+                        ddl.append("ALTER TABLE \"").append(tableName)
+                           .append("\" ALTER COLUMN \"").append(fieldName)
+                           .append("\" SET DEFAULT ").append(field.getDefaultValue()).append(";\n");
+                    }
+                    break;
+                    
+                case DM:
+                    // 达梦：使用MODIFY，类型和约束一起修改
+                    ddl.append("ALTER TABLE \"").append(tableName)
+                       .append("\" MODIFY \"").append(fieldName)
+                       .append("\" ").append(columnType);
+                    
+                    // 添加约束
+                    if (field.getIsRequired() != null) {
+                        if (BooleanStatusEnum.isYes(field.getIsRequired())) {
+                            ddl.append(" NOT NULL");
+                        } else {
+                            ddl.append(" NULL");
+                        }
+                    }
+                    
+                    // 添加默认值
+                    if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
+                        ddl.append(" DEFAULT ").append(field.getDefaultValue());
+                    }
+                    
+                    ddl.append(";\n");
+                    break;
+                    
+                default:
+                    // 不支持的数据库类型，使用PostgreSQL语法作为默认
+                    log.warn("不支持的数据库类型: {}，使用PostgreSQL语法", datasourceType);
+                    ddl.append("ALTER TABLE \"").append(tableName)
+                       .append("\" ALTER COLUMN \"").append(fieldName)
+                       .append("\" TYPE ").append(columnType).append(";\n");
             }
+            
+            // 更新字段注释（所有支持的数据库都使用COMMENT ON语法）
+            if (field.getDescription() != null && !field.getDescription().trim().isEmpty()) {
+                ddl.append("COMMENT ON COLUMN \"").append(tableName).append("\".\"")
+                   .append(fieldName).append("\" IS '").append(field.getDescription()).append("';");
+            }
+            
+        } catch (IllegalArgumentException e) {
+            // 数据库类型无效，使用PostgreSQL语法作为默认
+            log.warn("无效的数据库类型: {}，使用PostgreSQL语法", datasourceType, e);
+            ddl.append("ALTER TABLE \"").append(tableName)
+               .append("\" ALTER COLUMN \"").append(fieldName)
+               .append("\" TYPE ").append(columnType).append(";");
         }
-
-        // 修改默认值
-        if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
-            ddl.append("ALTER TABLE \"").append(tableName).append("\" ALTER COLUMN \"")
-               .append(field.getFieldName()).append("\" SET DEFAULT ").append(field.getDefaultValue()).append(";\n");
-        }
-
-        // 更新字段注释
-        if (field.getDescription() != null && !field.getDescription().trim().isEmpty()) {
-            ddl.append("COMMENT ON COLUMN \"").append(tableName).append("\".\"")
-               .append(field.getFieldName()).append("\" IS '").append(field.getDescription()).append("';");
-        }
-
+        
         return ddl.toString();
     }
 
     /**
      * 生成删除字段的DDL语句
+     * <p>
+     * 注意：调用此方法前必须先使用checkColumnExists()检查列是否存在
+     * 不使用IF EXISTS语法以兼容达梦等数据库
      */
     private String generateDropColumnDDL(String tableName, String fieldName) {
-        return "ALTER TABLE \"" + tableName + "\" DROP COLUMN IF EXISTS \"" + fieldName + "\";";
+        // 不使用IF EXISTS，因为已在dropColumnFromTable()中提前检查
+        return "ALTER TABLE \"" + tableName + "\" DROP COLUMN \"" + fieldName + "\";";
     }
 
     /**
