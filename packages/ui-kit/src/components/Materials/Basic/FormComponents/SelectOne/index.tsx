@@ -5,6 +5,7 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputSelectOneConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -32,14 +33,6 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
-
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
 
   return (
     <div className="formWrapper">

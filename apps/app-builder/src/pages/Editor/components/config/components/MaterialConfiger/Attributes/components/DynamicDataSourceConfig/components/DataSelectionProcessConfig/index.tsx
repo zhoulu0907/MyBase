@@ -2,7 +2,7 @@ import { Button, Drawer, Form, Grid, Input, Radio, Select, Tree } from '@arco-de
 import React, { useEffect, useState } from 'react';
 
 import { IconCaretDown } from '@arco-design/web-react/icon';
-import { ListComp } from '@onebase/ui-kit';
+import { getPopupContainer, ListComp } from '@onebase/ui-kit';
 
 import type { DynamicSelectDataSourceConfigProps } from '../..';
 import styles from '../../index.module.less';
@@ -221,7 +221,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                   value={selected}
                   onChange={(e) => handleSelectedChange(e)}
                   placeholder="设置显示字段"
-                  getPopupContainer={(node) => node.parentNode as HTMLElement}
+                  getPopupContainer={getPopupContainer}
                   renderFormat={() => (selected.length > 0 ? `显示 ${selected.length} 个字段` : '设置显示字段')}
                   dropdownRender={() => (
                     <div className={styles.dropdownRender}>
@@ -255,7 +255,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                       value={sortFieldValue}
                       onChange={(e) => handlSortFieldValueChange(e)}
                       placeholder="请选择"
-                      getPopupContainer={(node) => node.parentNode as HTMLElement}
+                      getPopupContainer={getPopupContainer}
                       allowClear
                     >
                       {displayFieldOptions.map((option: any) => (
@@ -271,7 +271,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                         defaultValue={sortValue}
                         onChange={(e) => handleSortValueChange(e)}
                         placeholder="请选择"
-                        getPopupContainer={(node) => node.parentNode as HTMLElement}
+                        getPopupContainer={getPopupContainer}
                       >
                         {sortOptions.map((option) => (
                           <Option key={option.value} value={option.value}>

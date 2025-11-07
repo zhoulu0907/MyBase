@@ -4,6 +4,7 @@ import { IconDragDotVertical, IconEdit } from '@arco-design/web-react/icon';
 
 import styles from '../../index.module.less';
 import { ReactSortable } from 'react-sortablejs';
+import { getPopupContainer } from '@onebase/ui-kit';
 
 interface DropdownRenderProps {
   selected: Array<any>;
@@ -123,6 +124,7 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
                     trigger="click"
                     position="tr"
                     popupVisible={editIdx === index}
+                    getPopupContainer={getPopupContainer}
                     onVisibleChange={(visible) => {
                       if (visible) {
                         setEditIdx(index);
