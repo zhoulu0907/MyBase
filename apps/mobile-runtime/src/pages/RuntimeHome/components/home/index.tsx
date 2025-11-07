@@ -14,7 +14,15 @@ import { IconUser, IconHome } from '@arco-design/mobile-react/esm/icon';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from '../menuItem';
+import ellipse from '../../../../assets/images/home/ellipse.svg';
+import curb from '../../../../assets/images/home/curb.png';
+import topcates1 from '../../../../assets/images/home/topcates-1.svg';
+import topcates2 from '../../../../assets/images/home/topcates-2.svg';
+import topcates3 from '../../../../assets/images/home/topcates-3.svg';
+import topcates4 from '../../../../assets/images/home/topcates-4.svg';
+
 import styles from './index.module.less';
+import AppsList from '../appsList';
 
 interface TreeNode {
   key: string;
@@ -24,7 +32,7 @@ interface TreeNode {
   children?: TreeNode[];
 }
 
-const Home: React.FC = () => {
+const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
   useSignals();
 
   const navigate = useNavigate();
@@ -32,7 +40,6 @@ const Home: React.FC = () => {
   const { appId } = useParams<{ appId?: string }>();
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu');
-  const { t } = useI18n();
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
 
@@ -135,101 +142,83 @@ const Home: React.FC = () => {
   };
 
   const topCates = [
-      {
-        id: TASKMENU_TYPE.TASKINEEDTODO,
-        isVisible: 1,
-        menuCode: 'ineedtodo',
-        menuIcon: 'ineedtodo-icon',
-        menuName: '待我处理',
-        menuSort: 1,
-        menuType: 1,
-        parentId: '0'
-      },
-      {
-        id: TASKMENU_TYPE.TASKIHAVEDONE,
-        isVisible: 1,
-        menuCode: 'ihavedone',
-        menuIcon: 'ihavedone-icon',
-        menuName: '我已处理',
-        menuSort: 2,
-        menuType: 1,
-        parentId: '0'
-      },
-      {
-        id: TASKMENU_TYPE.TASKICREATED,
-        isVisible: 1,
-        menuCode: 'icreated',
-        menuIcon: 'icreated-icon',
-        menuName: '我创建的',
-        menuSort: 3,
-        menuType: 1,
-        parentId: '0'
-      },
-      {
-        id: TASKMENU_TYPE.TASKICOPIED,
-        isVisible: 1,
-        menuCode: 'icopied',
-        menuIcon: 'icopied-icon',
-        menuName: '抄送我的',
-        menuSort: 4,
-        menuType: 1,
-        parentId: '0'
-      },
-      // {
-      //   id: TASKMENU_TYPE.TASKTASKPROXY,
-      //   isVisible: 1,
-      //   menuCode: 'taskproxy',
-      //   menuIcon: 'taskproxy-icon',
-      //   menuName: '流程代理',
-      //   menuSort: 5,
-      //   menuType: 1,
-      //   parentId: '0'
-      // }
-    ];
-  const getGroupItem = (itemData:TreeNode, level:number = 0) => {
-    if (!itemData.children || itemData.children.length === 0) {
-      return <div style={{ display: 'flex', alignItems: 'center' }}>
-                   <IconUser className='header-icon-notice'/>
-                   {itemData.title}
-                 </div>
+    {
+      id: TASKMENU_TYPE.TASKINEEDTODO,
+      isVisible: 1,
+      menuCode: 'ineedtodo',
+      menuIcon: 'ineedtodo-icon',
+      menuName: '待我处理',
+      menuSort: 1,
+      menuType: 1,
+      parentId: '0'
+    },
+    {
+      id: TASKMENU_TYPE.TASKIHAVEDONE,
+      isVisible: 1,
+      menuCode: 'ihavedone',
+      menuIcon: 'ihavedone-icon',
+      menuName: '我已处理',
+      menuSort: 2,
+      menuType: 1,
+      parentId: '0'
+    },
+    {
+      id: TASKMENU_TYPE.TASKICREATED,
+      isVisible: 1,
+      menuCode: 'icreated',
+      menuIcon: 'icreated-icon',
+      menuName: '我创建的',
+      menuSort: 3,
+      menuType: 1,
+      parentId: '0'
+    },
+    {
+      id: TASKMENU_TYPE.TASKICOPIED,
+      isVisible: 1,
+      menuCode: 'icopied',
+      menuIcon: 'icopied-icon',
+      menuName: '抄送我的',
+      menuSort: 4,
+      menuType: 1,
+      parentId: '0'
+    },
+  ];
+
+  // 早上好，中午好，下午好，晚上好，根据当前时间判断
+  const getGreekString = () => {
+    const currentHour = new Date().getHours();
+    let greekString = '';
+    if (currentHour < 12) {
+      greekString = '早上好！';
+    } else if (currentHour < 13) {
+      greekString = '中午好！';
+    } else if (currentHour < 18) {
+      greekString = '下午好！';
+    } else {
+      greekString = '晚上好！';
     }
-    return <Collapse
-             className={styles[`treeItem-${level}`]}
-             header={
-               <div style={{ display: 'flex', alignItems: 'center' }}>
-                 <IconUser className='header-icon-notice'/>
-                 {itemData.title}
-               </div>
-             }
-             value={itemData.key}
-             content={
-               itemData.children.map((child) => getGroupItem(child, level + 1))
-             }
-          />
+    return nickname + '，' + greekString;
   }
 
   return (
     <div className={styles.home}>
       <div className={styles.topOut}>
-        <p style={{fontSize: '0.3rem', color: '#fff'}}>金小可，晚上好！</p>
+        <img className={styles.ellipse} src={ellipse} alt="" />
+        <img className={styles.curb} src={curb} alt="" />
+        <p className={styles.greekString}>{getGreekString()}</p>
         <Grid
           className={styles.grid}
           columns={4}
           data={
-            topCates.map((item) => ({
+            topCates.map((item, index) => ({
               key: item.menuCode,
-              img: <div className={styles[item.menuIcon]}></div>,
-              title: <span style={{fontSize: '0.2rem'}}>{item.menuName}</span>,
-              itemStyle: {padding: 0}
+              img: <img className={styles.topcatesImg} src={[topcates1, topcates2, topcates3, topcates4][index]} alt="" />,
+              title: <span className={styles.topcatesTitle}>{item.menuName}</span>,
+              itemStyle: { padding: 0 }
             }))}
         ></Grid>
       </div>
-      <div className={styles.label}>
-        应用菜单
-      </div>
-      {
-        treeData.map((item) => getGroupItem(item))
-      }
+      <AppsList treeData={treeData} />
     </div>
   );
 };

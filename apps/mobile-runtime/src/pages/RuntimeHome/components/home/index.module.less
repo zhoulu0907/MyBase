@@ -1,40 +1,50 @@
 .home {
+  padding-bottom: 0.72rem;
     .topOut {
-      background-color: green;
-      height: 3rem;
-      padding: 0.4rem 0.4rem 0;
+      background: linear-gradient(0deg, #F7F8FA 0.12%, #C3FFFF 74.09%);
+      height: 1.72rem;
+      padding: 0.8rem 0.12rem 0.12rem;
+    }
+    .greekString {
+      font-size: 0.16rem;
+      font-weight: 700;
+      color: #00394D;
+      padding-left: 0.12rem;
+    }
+    .ellipse {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 2rem;
+    }
+    .curb {
+      height: 0.96rem;
+      position: absolute;
+      top: 0.5rem;
+      right: 0.4rem;
     }
     .grid {
-      height: 3rem;
+      height: 0.92rem;
       background-color: #fff;
-      border-radius: 6px;
-    }
-    .label {
-      font-size: 0.26rem;
-      font-weight: bold;
-      color: #000;
-      padding-left: 0.48rem;
-      margin-top: 2rem;
-      position: relative;
-      &::after {
-        content: '';
-        display: block;
-        width: 0.1rem;
-        height: 0.3rem;
-        background-color: cyan;
-        border-radius: 2px;
-        position: absolute;
-        top: 50%;
-        left: 0.24rem;
-        transform: translateY(-50%);
+      border-radius: 0.06rem;
+      margin-top: 0.4rem;
+      :global(.arco-grid-rows-item-text) {
+        margin-top: 0;
+      }
+      :global(.arco-grid-rows-item-title) {
+        font-size: 0.14rem;
+        line-height: 0.2rem;
       }
     }
-}
-.ineedtodo-icon {
-  background: url(@/assets/images/task_center/willdo-on.svg) no-repeat center;
-  background-size: 100% 100%;
-}
-.ihavedone-icon {
-  background: url(@/assets/images/task_center/idone-on.svg) no-repeat center;
-  background-size: 100% 100%;
-}
+
+    .topcatesImg {
+      height: 0.4rem;
+      width: 0.4rem;
+    }
+    .topcatesTitle {
+      color: #272E3B;
+      font-size: 0.14rem;
+      text-align: center;
+      
+    }
+  }

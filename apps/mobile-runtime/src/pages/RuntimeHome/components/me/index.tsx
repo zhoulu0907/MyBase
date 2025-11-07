@@ -11,10 +11,12 @@ import lock from '../../../../assets/images/lock.svg';
 import account from '../../../../assets/images/account.svg';
 import styles from './index.module.less';
 
-const Me: React.FC = () => {
+interface MeProps {
+  nickname: string;
+  username: string;
+}
 
-  const [nickname, setNickname] = useState('-');
-  const [username, setUsername] = useState('-');
+const Me: React.FC<MeProps> = ({ nickname, username }) => {
 
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -39,19 +41,6 @@ const Me: React.FC = () => {
       ),
     });
   }
-
-  useEffect(() => {
-    getUserInfo();
-  }, []);
-
-  const getUserInfo = async () => {
-    const res = await getPermissionInfo();
-    UserPermissionManager.setUserPermissionInfo(res);
-    // userPermissionSignal.setPermissionInfo(res);
-    console.warn('res', res);
-    setNickname(res.user.nickname);
-    setUsername(res.user.username);
-  };
 
   return (
     <div className={styles.me}>

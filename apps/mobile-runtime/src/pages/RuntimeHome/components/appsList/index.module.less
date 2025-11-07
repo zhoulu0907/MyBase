@@ -1,0 +1,71 @@
+.appsList {
+  padding: 0.12rem 0.16rem;
+  background-color: #fff;
+  margin: 0 0.12rem;
+  border-radius: 0.06rem;
+    .label {
+      font-size: 0.16rem;
+      line-height: 0.24rem;
+      font-weight: bold;
+      color: #272E3B;
+      margin-bottom: 0.12rem;
+    }
+    .treeItem {
+      font-size: 0.16rem;
+      line-height: 0.56rem;
+      color: #1D2129;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;// #F2F3F5;
+      height: 0.56rem;
+      :global {
+        .arco-ellipsis {
+          font-size: 0.16rem;
+        }
+      }
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+    .treeItemIcon {
+        height: 0.24rem;
+        width: 0.24rem;
+        margin-right: 0.08rem;
+    }
+    .treeItemGroupHeader {
+      display: flex;
+      align-items: center;
+    }
+    .treeItemGroup {
+      // border-bottom: 1px solid #e0e0e0;// #F2F3F5;
+      :global {
+        .arco-collapse-header {
+          height: 0.56rem;
+          line-height: 0.56rem;
+          margin-left: 0;
+          padding: 0;
+          color: #1D2129;
+          font-size: 0.16rem;
+          border-bottom: 1px solid #e0e0e0;// #F2F3F5;
+          .arco-ellipsis {
+            font-size: 0.16rem;
+          }
+        }
+        .arco-collapse-icon svg, .arco-collapse-icon i {
+          height: 0.12rem;
+          width: 0.12rem;
+        }
+        .arco-collapse-content-container {
+          padding: 0;
+        }
+      }
+    }
+}
+.ineedtodo-icon {
+  background: url(@/assets/images/task_center/willdo-on.svg) no-repeat center;
+  background-size: 100% 100%;
+}
+.ihavedone-icon {
+  background: url(@/assets/images/task_center/idone-on.svg) no-repeat center;
+  background-size: 100% 100%;
+}

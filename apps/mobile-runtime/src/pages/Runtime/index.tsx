@@ -137,6 +137,7 @@ const Runtime: React.FC = () => {
   // 更新当前路由的 curMenu（不刷新页面）
   const handleCurMenuUrl = (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
+    console.warn('b=11--', location)
     sp.set('curMenu', String(curMenuId));
     const to = `${location.pathname}?${sp.toString()}`;
     navigate(to, { replace: true });
