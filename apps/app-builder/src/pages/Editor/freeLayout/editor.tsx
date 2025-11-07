@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
  * SPDX-License-Identifier: MIT
  */
-import { useRef, useEffect, useState, useContext } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import {
   EditorRenderer,
   FreeLayoutEditorProvider,
@@ -17,40 +17,42 @@ import { useEditorProps } from './hooks';
 import { DemoTools } from './components/tools';
 import { SidebarProvider, SidebarRenderer } from './components/sidebar';
 import LeftNavBar from './components/left-nav-bar/index';
-import { getByBusinessId, save } from '../../../../../../packages/app/src/services/index';
+import { getDataById, save } from '@onebase/app';
 import { useLocation } from 'react-router-dom';
-import type { WorkflowJSON, FlowData } from './editorType';
+import type { WorkflowJSON } from './editorType';
 import { getAppIdByPageSetId } from '@onebase/app';
-import { GlobalConfigContext } from './context/globalConfigContext';
+import { useFlowEditorStor } from '@/store/index';
 const sourceNodeIDMap = new Map();
+
 export const Editor = () => {
-  const { configData, setConfigData } = useContext(GlobalConfigContext);
+  const { currentFlowId, setEditorRef, flowData, setFlowData, initFlowData, configData, setConfigData } =
+    useFlowEditorStor();
   const { setFlowId } = useFlowPageEditorSignal;
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
-  const [flowData, setFlowData] = useState<FlowData>({});
-
-  const getFlowData = async () => {
+  const getFlowData = async (currentFlowId: string) => {
     try {
-      const res = await getByBusinessId({ businessId: pageSetId });
+      let currentJsonData = {};
+      const res = await getDataById({ id: currentFlowId });
       if (res.globalConfig) {
         setConfigData(res.globalConfig);
       }
-      let useJsonData = {};
+
       if (!res.bpmDefJson) {
-        useJsonData = initialData;
+        currentJsonData = initialData;
       } else {
         const bpmDefJson = JSON.parse(res.bpmDefJson);
-        useJsonData = normalizeNodes(bpmDefJson);
+        currentJsonData = normalizeNodes(bpmDefJson);
       }
       if (res.businessId) {
         setFlowData(res);
       }
+      ref?.current?.document.clear();
       setIsLoading(true);
-      ref?.current?.document.fromJSON(useJsonData);
+      ref?.current?.document.fromJSON(currentJsonData);
       setTimeout(() => {
         ref?.current?.document.fitView();
       }, 10);
@@ -58,9 +60,18 @@ export const Editor = () => {
       console.error('fail to get flow data:', e);
     }
   };
+  const initEditor = () => {
+    ref?.current?.document.clear();
+    ref?.current?.document.fromJSON(initialData);
+  };
   useEffect(() => {
-    getFlowData();
-  }, []);
+    if (currentFlowId) {
+      getFlowData(currentFlowId);
+    } else {
+      initFlowData();
+      initEditor();
+    }
+  }, [currentFlowId]);
 
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
     obj?.edges.forEach((item) => {
@@ -85,7 +96,7 @@ export const Editor = () => {
   const onSave = async () => {
     const appId = await getAppIdByPageSetId({ pageSetId });
     const data = ref?.current?.document.toJSON();
-    const useJsonData = normalizeNodes(data);
+    const currentJsonData = normalizeNodes(data);
     const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
     const params = {
       id: id || '',
@@ -96,13 +107,17 @@ export const Editor = () => {
       versionStatus: versionStatus || '',
       businessId: businessId || pageSetId,
       appId,
-      bpmDefJson: JSON.stringify(useJsonData),
+      bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
     save(params).then((res: any) => {
       setFlowId(res);
     });
   };
+
+  useEffect(() => {
+    setEditorRef(ref.current);
+  }, [ref.current]);
   return (
     <div className="doc-free-feature-overview">
       {

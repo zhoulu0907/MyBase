@@ -1,18 +1,19 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button, SideSheet } from '@douyinfe/semi-ui';
 import { Checkbox, Switch, Radio, Select, Button as ArcoButton, Message } from '@arco-design/web-react';
 import { IconClose } from '@douyinfe/semi-icons';
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 import { getUserPage, type PageParam } from '@onebase/platform-center';
-import { GlobalConfigContext, type GlobalConfigData } from '../../context/globalConfigContext';
+import { useFlowEditorStor } from '@/store/index';
+import { type GlobalConfigData } from '../../context/globalConfigContext';
 import { HandlerMode, Permission, Timing, Rule, AutoApproveType } from './constants';
 import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
 export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
-  const { configData, setConfigData } = useContext(GlobalConfigContext);
+  const { configData, setConfigData } = useFlowEditorStor();
   const [userOptions, setUserOptions] = useState<any[]>([]);
   const [formSummaryOptions, setFormSummaryOptions] = useState<any[]>([]);
   const [useConfigData, setUseConfigData] = useState<GlobalConfigData>(configData);
