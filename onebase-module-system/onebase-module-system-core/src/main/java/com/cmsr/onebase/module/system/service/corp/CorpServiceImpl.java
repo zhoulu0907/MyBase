@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.system.service.corp;
 
 import com.alibaba.nacos.common.utils.CollectionUtils;
+import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
+import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
@@ -67,6 +70,8 @@ public class CorpServiceImpl implements CorpService {
     @Resource
     private AdminUserService userService;
 
+    private   DictDataCommonApi dictDataApi;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -76,11 +81,16 @@ public class CorpServiceImpl implements CorpService {
         // 保存系统管理员
         CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO());
         // 保存关联关系
-        AppAuthTimeReqVO appAuthTimeReqVO = corpCombineReqVO.getAppAuthTimeReqVO();
-        createCorpAppRelation(appAuthTimeReqVO, corpId);
+        List<AppAuthTimeReqVO> appAuthTimeReqVO = corpCombineReqVO.getAppAuthTimeReqVO();
+
+        createListCorpAppRelation(appAuthTimeReqVO, corpId);
         // 更新企业管理员Id
         updateCorpAdminIdById(corpId, vo.getId());
         return vo;
+    }
+
+    private void createListCorpAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId) {
+        corpAppRelationService.createListCorpAppRelation(appAuthTimeReqVOs,corpId);
     }
 
 
@@ -145,11 +155,7 @@ public class CorpServiceImpl implements CorpService {
 
     }
 
-    public void createCorpAppRelation(AppAuthTimeReqVO createReqVO, Long corpId) {
-        CorpAppRelationInertReqVO createCorpAppRelation = BeanUtils.toBean(createReqVO, CorpAppRelationInertReqVO.class);
-        createCorpAppRelation.setCorpId(corpId);
-        corpAppRelationService.createCorpAppRelation(createCorpAppRelation);
-    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -162,6 +168,7 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     public PageResult<CorpRespVO> getCorpAppsPage(CorpPageReqVO pageReqVO) {
+
         /**
          * 根据企业分页条件，查询企业及其关联应用信息的分页列表
          *
@@ -216,6 +223,11 @@ public class CorpServiceImpl implements CorpService {
         Map<Long, List<CorpAppRelationDO>> relationGroupByCorp = relations.stream()
                 .collect(Collectors.groupingBy(CorpAppRelationDO::getCorpId));
 
+/*        CommonResult<List<DictDataRespDTO>> dictlist= dictDataApi.getDictDataList(CorpConstant.INDUSTRY_TYPE);
+        Map<Long, String> dictmap = dictlist.getData().stream()
+                .collect(Collectors.toMap(DictDataRespDTO::getId
+                        , DictDataRespDTO::getLabel));*/
+
         // Step 4：组装返回值
         List<CorpRespVO> respList = corpList.stream()
                 .map(corpDO -> {
@@ -235,6 +247,8 @@ public class CorpServiceImpl implements CorpService {
                             }
                         }
                         respVO.setCorpApplicationList(corpApplicationList);
+                       // respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
+                        respVO.setIndustryTypeName("ddddddd");
                     }
                     return respVO;
                 })

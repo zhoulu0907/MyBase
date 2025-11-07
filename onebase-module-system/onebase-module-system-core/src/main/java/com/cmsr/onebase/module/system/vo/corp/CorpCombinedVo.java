@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CorpCombinedVo {
     @Schema(description = "企业基础数据")
@@ -16,7 +18,6 @@ public class CorpCombinedVo {
     public CorpAdminReqVO corpAdminReqVO;
 
     @Schema(description = "授权应用")
-    @NotNull(message = "授权应用不能为空")
-    public AppAuthTimeReqVO appAuthTimeReqVO;
+    public List<AppAuthTimeReqVO> appAuthTimeReqVO;
 
 }
