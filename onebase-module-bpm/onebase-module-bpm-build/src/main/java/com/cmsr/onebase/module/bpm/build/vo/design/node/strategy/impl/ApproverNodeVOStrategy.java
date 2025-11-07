@@ -56,7 +56,7 @@ public class ApproverNodeVOStrategy extends AbstractNodeVOStrategy<ApproverNodeV
     }
 
     @Override
-    public ApproverNodeExtDTO buildExtData(ApproverNodeVO nodeVO) {
+    public ApproverNodeExtDTO buildExtData(ApproverNodeVO nodeVO, Long appId) {
         ApproverNodeExtDTO extDTO = new ApproverNodeExtDTO();
 
         // 设置节点类型
@@ -66,7 +66,8 @@ public class ApproverNodeVOStrategy extends AbstractNodeVOStrategy<ApproverNodeV
         ApproverNodeVO.ApproverNodeDataVO dataVO = nodeVO.getData();
 
         // 校验审批人配置
-        validateApproverConfig(dataVO.getApproverConfig());
+        validateApproverConfig(dataVO.getApproverConfig(), appId);
+
         // 校验按钮配置
         validateButtonConfigs(dataVO.getButtonConfigs());
 
