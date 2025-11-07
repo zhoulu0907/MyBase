@@ -69,8 +69,6 @@ public class ApproverNodeVOStrategy extends AbstractNodeVOStrategy<ApproverNodeV
         validateApproverConfig(dataVO.getApproverConfig());
         // 校验按钮配置
         validateButtonConfigs(dataVO.getButtonConfigs());
-        // 校验字段权限配置
-        validateFieldPermConfig(dataVO.getFieldPermConfig());
 
         // 去除提交按钮
         dataVO.getButtonConfigs().removeIf(buttonConfig -> BpmActionButtonEnum.SUBMIT.getCode().equals(buttonConfig.getButtonType()));

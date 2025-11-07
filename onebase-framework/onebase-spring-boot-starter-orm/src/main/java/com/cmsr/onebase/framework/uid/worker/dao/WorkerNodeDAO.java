@@ -45,8 +45,8 @@ public class WorkerNodeDAO {
      * @param workerNodeEntity
      */
     public void addWorkerNode(WorkerNodeEntity workerNodeEntity) {
-        // 定义SQL插入语句
-        String sql = "insert into system_uid_worker_node (worker_host, worker_port, node_type) values (?, ?, ?)";
+        // 定义SQL插入语句（加双引号以支持达梦等大小写敏感数据库）
+        String sql = "insert into \"system_uid_worker_node\" (\"worker_host\", \"worker_port\", \"node_type\") values (?, ?, ?)";
         // 使用KeyHolder获取自动生成的ID
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -56,16 +56,44 @@ public class WorkerNodeDAO {
             ps.setInt(3, workerNodeEntity.getNodeType());
             return ps;
         }, keyHolder);
-        List<Map<String, Object>> keyList = keyHolder.getKeyList();
-        if (keyList == null || keyList.isEmpty()) {
+        
+        // 获取自增ID（兼容不同数据库的键名：id, ID, GENERATED_KEY等）
+        Number generatedId = null;
+        
+        // 方式1：尝试从keyHolder直接获取（适用于只返回主键的数据库，如达梦）
+        try {
+            if (keyHolder.getKey() != null) {
+                generatedId = keyHolder.getKey();
+            }
+        } catch (Exception e) {
+            // 如果失败（如PostgreSQL返回多个列），继续使用方式2
+            generatedId = null;
+        }
+        
+        // 方式2：从keyList中获取（兼容返回所有列的数据库，如PostgreSQL）
+        if (generatedId == null) {
+            List<Map<String, Object>> keyList = keyHolder.getKeyList();
+            if (keyList != null && !keyList.isEmpty()) {
+                Map<String, Object> map = keyList.get(0);
+                // 尝试不同的键名（小写id、大写ID、GENERATED_KEY等）
+                generatedId = (Number) map.get("id");
+                if (generatedId == null) {
+                    generatedId = (Number) map.get("ID");
+                }
+                if (generatedId == null) {
+                    generatedId = (Number) map.get("GENERATED_KEY");
+                }
+                if (generatedId == null && !map.isEmpty()) {
+                    // 如果以上都没找到，取第一个值（通常就是ID）
+                    generatedId = (Number) map.values().iterator().next();
+                }
+            }
+        }
+        
+        if (generatedId == null) {
             throw new RuntimeException("Failed to get generated key for worker node");
         }
-        Map<String, Object> map = keyList.get(0);
-        Number id = (Number) map.get("id");
-        if (id == null) {
-            throw new RuntimeException("Failed to get generated key for worker node");
-        }
-        workerNodeEntity.setId(id.longValue());
+        workerNodeEntity.setId(generatedId.longValue());
     }
 
 }

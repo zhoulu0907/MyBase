@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.etl.build.service.datasource;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -119,15 +120,42 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public Long createDatasource(ETLDatasourceCreateReqVO createReqVO) {
+    public CommonResult<Long> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
         validDatasourceCodeDuplicate(createReqVO.getDatasourceCode(), null);
         validDatasourceTypeSupported(createReqVO.getDatasourceType());
 
-        ETLDatasourceDO datasourceDO = BeanUtils.toBean(createReqVO, ETLDatasourceDO.class);
+        Long applicationId = createReqVO.getApplicationId();
+        String datasourceType = createReqVO.getDatasourceType();
+        ETLDatasourceDO datasourceDO = new ETLDatasourceDO();
+        datasourceDO.setApplicationId(applicationId);
+        datasourceDO.setDatasourceCode(createReqVO.getDatasourceCode());
+        datasourceDO.setDatasourceName(createReqVO.getDatasourceName());
+        datasourceDO.setDeclaration(createReqVO.getDeclaration());
+        datasourceDO.setDatasourceType(datasourceType);
+        datasourceDO.setConfig(JsonUtils.toJsonString(createReqVO.getConfig()));
+        datasourceDO.setReadonly(createReqVO.getReadonly());
         // initialize collect status to `none`, infer datasource will be empty.
         datasourceDO.setCollectStatus(CollectStatus.NONE);
         datasourceDO = datasourceRepository.insert(datasourceDO);
-        return datasourceDO.getId();
+        Long datasourceId = datasourceDO.getId();
+        Boolean withCollect = createReqVO.getWithCollect();
+        if (withCollect) {
+            try {
+                boolean collectResult = metadataCollectorService.doCollection(applicationId, datasourceId, datasourceType);
+                if (!collectResult) {
+                    CommonResult.error(
+                            ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
+                            ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getMsg(),
+                            datasourceId);
+                }
+            } catch (Exception e) {
+                CommonResult.error(
+                        ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
+                        ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getMsg() + ": " + e.getMessage(),
+                        datasourceId);
+            }
+        }
+        return CommonResult.success(datasourceId);
     }
 
     @Override
@@ -150,7 +178,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     @Override
     public void deleteDatasource(Long datasourceId) {
         boolean entityExists = datasourceRepository.existsById(datasourceId);
-        if (entityExists) {
+        if (!entityExists) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         boolean existsTableReffered = workflowTableRepository.existsByDatasourceId(datasourceId);
