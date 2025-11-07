@@ -1,28 +1,28 @@
 import styles from "./createBusiness.module.less";
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Steps, Button, Form, Space, Message } from '@arco-design/web-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Steps, Button, Space, Message } from '@arco-design/web-react';
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { steps } from "./constants";
 import { CreateSuccess } from "./components/createApp/createSuccess";
 import { BasicInformation } from "./components/createApp/basicInformation";
 import { AuthorizedApp } from "./components/createApp/authorizedApp";
 import { AdminInformation } from "./components/createApp/adminInfomation";
-import { CreateAppModal } from "./components/modal/createAppModal";
-import type { AppItem, AuthorizedAppRef, OutletContextType } from "./types/appItem";
-import EditAuthorizedTime from "./components/modal/editAuthorizedTime";
-import {removeCorpAppApi, updateCorpAppApi,getCorpAuthorizedAppListApi, type updatedParams, type corpListParams} from "@onebase/platform-center";
+import type { AppItem, OutletContextType } from "./types/appItem";
+import {removeCorpAppApi, updateCorpAppApi, createCorpApi, getCorpAuthorizedAppListApi, type createCorpParams, type updatedParams, type corpListParams} from "@onebase/platform-center";
+import { IconLoading } from "@arco-design/web-react/icon";
 
 const CreateBusinessPage: React.FC = () => {
-    const authorizedAppRef = useRef<AuthorizedAppRef>(null);
-    const { industryOptions } = useOutletContext<OutletContextType>(); 
+    const [basicValues, setBasicData] = useState<Record<string, any>>({});
+    const [adminValues, setAdminData] = useState<Record<string, any>>({});
+    const { industryOptions, currentId } = useOutletContext<OutletContextType>(); 
     const [currentStep, setCurrentStep] = useState<number>(1);
     const navigate = useNavigate();
     const [loading, setLoading] = useState<boolean>(false);
     const [tableData, setTableData] = useState<AppItem[]>([]);
     const [visible, setVisible] = useState<boolean>(false);
     const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
-    const [editTimeVisible, setEditTimeVisible] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>("");
+    const [createLoading, setCreateLoading] = useState<boolean>(false);
     const [pageInation, setPagination] = useState({
         showTotal: true,
         total: 0,
@@ -106,17 +106,6 @@ const CreateBusinessPage: React.FC = () => {
         )
     },[tableData, searchValue])
 
-    // steps切换
-    const handleNext = async () => {
-        if(currentStep === 3) {
-            const basicValues = await basicInfoForm.validate();
-            const adminValues = await adminInfoForm.validate();
-            console.log(basicValues, adminValues, "11");
-        }else {
-            setCurrentStep(currentStep + 1);
-        }
-    };
-
     //点击创建应用的上一步button
     const handlePrev = () => {
         if (currentStep > 1) {
@@ -126,23 +115,41 @@ const CreateBusinessPage: React.FC = () => {
         }
     };
    
-    //点击modal的取消按钮
-    const handleCloseModal = () => {
-        setAddAppModalVisible(false);
-    }
-    // 提交新应用（弹窗确认后调用）
-    const handleAddSubmit = (newAppData: any) => {
-        const newData: AppItem = {
-            key: displayData.length + 1,
-            appId: "113",
-            effectTime: newAppData.appTime.effectTime,
-            expireTime: newAppData.appTime.expireTime,
-            appName: newAppData.appName[0],
-            version: "V2.3"
-        };
-        authorizedAppRef.current?.addNewApp(newData);
-        setAddAppModalVisible(false);
+    const handleBasicDataChange = (values: Record<string, any>) => {
+        setBasicData(values); 
     };
+
+    const handleAdminDataChange = (values: Record<string, any>) => {
+        setAdminData(values); 
+    };
+
+    const handleNext = async () => {
+        if(currentStep === 3) {
+            setCreateLoading(true);
+            const params:createCorpParams = {
+                appAuthTimeReqVO: tableData,
+                corpAdminReqVO: adminValues,
+                corpReqVO: basicValues
+            }
+            try {
+                const res = await createCorpApi(params);
+                if(res) {
+                    console.log(res,"res 创建企业");
+                    Message.success("创建企业成功");
+                }else {
+                    Message.success("接口返回数据异常");
+                }
+                setCreateLoading(false);
+            }catch(error) {
+                Message.error("创建企业失败");
+            }finally {
+                setCreateLoading(false);
+            }
+        }else {
+            setCurrentStep(currentStep + 1);
+        }
+    };
+
 
     const renderContent = (currentStep: number) => {
         return (
@@ -150,11 +157,11 @@ const CreateBusinessPage: React.FC = () => {
                 <div>
                     {/* 第一步：基本信息 */}
                     {currentStep === 1 && (
-                        <BasicInformation industryOptions={industryOptions}/>
+                        <BasicInformation industryOptions={industryOptions} basicValues={basicValues} onDataChange={handleBasicDataChange}/>
                     )}
                     {/* 第二步：管理员信息 */}
                     {currentStep === 2 && (
-                        <AdminInformation />
+                        <AdminInformation adminValues={adminValues} onDataChange={handleAdminDataChange}/>
                     )}
                     {/* 第三步： 授权应用 */}
                     {currentStep === 3 && (
@@ -174,7 +181,7 @@ const CreateBusinessPage: React.FC = () => {
                     {/* 第四步：确认信息 */}
                     {currentStep === 4 && (
                         <CreateSuccess 
-                         basicInfoForm={basicInfoForm} 
+                         basicInfoForm={[]}
                          setCurrentStep={setCurrentStep} 
                          setAddAppModalVisible={setAddAppModalVisible}
                         />
@@ -215,14 +222,10 @@ const CreateBusinessPage: React.FC = () => {
                                 onClick={handleNext}
                                 disabled={currentStep === steps.length}
                             >
-                                下一步
+                                {currentStep === 3 && createLoading ? <IconLoading /> : "下一步"}
                             </Button>
                         </Space>
                     </div>}
-                {/* 编辑授权应用 */}
-                <EditAuthorizedTime visible={editTimeVisible} setVisible={setEditTimeVisible} onUpdateData={handleUpdateTime} />
-                {/* 创建应用modal */}
-                <CreateAppModal visible={addAppModalVisible} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
             </div>
         </div>
     );

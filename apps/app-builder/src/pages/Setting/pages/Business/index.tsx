@@ -261,10 +261,10 @@ const BusinessPage: React.FC = () => {
 
     const renderContent = () => {
         if (editable) {
-            return <Outlet context={{currentId}}/>
+            return <Outlet context={{industryOptions, currentId}}/>
         }
         if (isCreatePage) {
-            return <Outlet context={{industryOptions}}/>
+            return <Outlet context={{industryOptions, currentId }}/>
         }
         return (
             <div className={styles.businessManagement}>

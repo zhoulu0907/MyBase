@@ -13,7 +13,7 @@ import { CreateAppModal } from "../modal/createAppModal";
 
 export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
     className, loading, tableData, pageination, visible, 
-    onChange, onSearch,onUpdateTime, setVisible,onRemoveAuthorizedApp
+    onChange, onSearch,onUpdateTime, setVisible, onRemoveAuthorizedApp
  }) => {
     const { currentId } = useOutletContext<OutletContextType>();
     const [authorizedAppItem, setAuthorizedAppItem] = useState<AppItem | null>(null);

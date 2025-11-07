@@ -16,13 +16,6 @@ export const addressOptions = [
     { label: '广东省', value: 'guangdong' },
 ];
 
-export const noLabelLayout = {
-    wrapperCol: {
-        span: 19,
-        offset: 5,
-    },
-};
-
 export const statusMapping:statusProps[] = [
     {label:"全部", value: "all", status: 3},
     {label:"已启用", value: "started", status:0},

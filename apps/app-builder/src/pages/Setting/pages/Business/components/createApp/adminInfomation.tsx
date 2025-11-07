@@ -1,10 +1,29 @@
 import { Form, Input } from "@arco-design/web-react"
+import { type CorpAdminInfo} from "@onebase/platform-center";
 
-export const AdminInformation:React.FC = () => {
+interface IAdminInfoProps {
+    adminValues: CorpAdminInfo;
+    onDataChange: (values: Record<string, any>) => void;
+}
+
+export const AdminInformation:React.FC<IAdminInfoProps> = ({adminValues, onDataChange}) => {
     const [adminInfoForm] = Form.useForm();
-    
+
+    const handleValuesChange = (changedValues: Record<string, any>, allValues: Record<string, any>) => {
+        onDataChange(allValues);
+    };
+
     return (
-        <Form form={adminInfoForm}>
+        <Form 
+            form={adminInfoForm} 
+            onValuesChange={handleValuesChange} 
+            initialValues={{
+                username: adminValues?.username, 
+                nickname:adminValues?.nickname,
+                mobile: adminValues?.mobile,
+                email: adminValues?.email
+            }}
+        >
             <Form.Item
                 label="姓名"
                 field="username"

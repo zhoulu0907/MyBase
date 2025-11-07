@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Image, Space, Message } from '@arco-design/web-react';
+import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Space, Message, Typography } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import EditableFormItem from '../formItem';
 import styles from "./index.module.less";
@@ -11,7 +11,7 @@ import { convertIndustryType } from '../../utils';
 
 const EnterpriseInfoPage: React.FC = () => {
   const {activeTab} = useParams();
-  const { currentId } = useOutletContext<OutletContextType>();
+  const { currentId, industryOptions} = useOutletContext<OutletContextType>();
   const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
@@ -150,15 +150,14 @@ const EnterpriseInfoPage: React.FC = () => {
       label:"企业Logo", 
       value: <EditableFormItem
           value = {
-          <Image
-            width={200}
-            src='http://localhost:4399/src/assets/images/ob_logo.svg'
-            alt='lamp'
-          />}
+            <Button type='dashed' style={{width:"160px", height:"80px", backgroundColor:"#F2F3F5"}}>中国移动</Button>
+          }
+          label="logo"
           onChange={handleChange.bind(null, "corpLogo")}
           isEdit={isEdited}
           component={Upload}
-          componentProps={{ listType:'picture-list', action: '/' }}
+          componentProps={{listType: 'picture-list',multiple: false, headers: {authorization: 'authorization-text'}}}
+          logoContent={<Space style={{display:"flex", alignItems:"flex-end"}}><Button type='primary'>重新上传</Button><Typography.Text type='secondary'>建议比例2:1</Typography.Text></Space>}
       />
     },
     {
@@ -190,11 +189,7 @@ const EnterpriseInfoPage: React.FC = () => {
           component={Select}
           componentProps={{
             placeholder: '请选择行业',
-            options: [
-              { label: 'IT', value: 'IT' },
-              { label: '金融', value: 'finance' },
-              { label: '教育', value: 'education' }
-            ]
+            options: industryOptions
           }}
       />
     },
@@ -225,7 +220,7 @@ const EnterpriseInfoPage: React.FC = () => {
           onChange={handleChange.bind(null, "status")}
           isEdit={isEdited}
           component={Checkbox}
-          componentProps={{ placeholder: '请选择是否启用' }}
+          componentProps={{ placeholder: '请选择是否启用', checked: formData?.status === 0 ? false : true }}
       />
     }
   ]
@@ -238,7 +233,7 @@ const EnterpriseInfoPage: React.FC = () => {
         <Tabs activeTab={currentTab} onChange={setCurrentTab}>
           <Tabs.TabPane key="basic" title="基本信息">
             {/* 企业Logo展示 */}
-            <Descriptions data={data} column={1} border={false} className={styles.infoPreview}/>
+            <Descriptions size='large' data={data} column={1} border={false} className={styles.infoPreview}/>
             {/* 编辑按钮 */}
             {isEdited ? <Space>
               <Button 

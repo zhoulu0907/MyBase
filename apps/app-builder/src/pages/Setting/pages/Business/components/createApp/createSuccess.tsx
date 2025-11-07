@@ -2,12 +2,12 @@ import { Button, Descriptions, Result, Space } from "@arco-design/web-react"
 import styles from "./authorizedApp.module.less";
 
 interface ICreateSuccessProps {
-    basicInfoForm: any,
+    basicInfoForm: any;
     setCurrentStep: (value: number) => void;
     setAddAppModalVisible: (visible: boolean) =>void;
 }
 
-export const CreateSuccess:React.FC<ICreateSuccessProps> = ({basicInfoForm, setCurrentStep, setAddAppModalVisible}) => {
+export const CreateSuccess:React.FC<ICreateSuccessProps> = ({ basicInfoForm=[], setCurrentStep, setAddAppModalVisible}) => {
     const desData = [
         { label: "管理员账号", value: basicInfoForm.getFieldValue("") },
         { label: "初始密码", value: basicInfoForm.getFieldValue("") }

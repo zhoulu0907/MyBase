@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Avatar, DatePicker, Form, Message, Modal, Select, Space, Typography } from "@arco-design/web-react";
-import { getCorpAppSimpleListApi } from "@onebase/platform-center";
+import { getCorpAppSimpleListApi, } from "@onebase/platform-center";
+import { formatTimeYMDHMS } from "@onebase/common";
 import type { authorizedAppList, ICreateAppModal } from "../../types/appItem";
 import styles from "./index.module.less";
 
@@ -53,14 +54,14 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                             return value;
                         }}
                     >
-                        {dropdownList.map((option) => (
-                        <Select.Option key={option.appId} value={option.appId}>
+                        {dropdownList.map((option, index: number) => (
+                        <Select.Option key={option.appId} value={option.appId || index.toString()}>
                             <Space align="center" size={12}>
                                 <Avatar style={{ backgroundColor: option.iconColor }}>{option.iconName}</Avatar>
                                 <div className={styles.authorizedOption}>
                                     <Typography.Text>{option.appName}</Typography.Text>
                                     <Typography.Text type='secondary'>
-                                        {option.versionNumber} · {option.createTime}
+                                        {option.versionNumber} · {formatTimeYMDHMS(option.createTime)}
                                     </Typography.Text>
                                 </div>
                             </Space>

@@ -1,22 +1,33 @@
 import { Checkbox, Form, Input, Select } from "@arco-design/web-react"
-import { noLabelLayout } from "../../constants"
 import type { industryTypeOption } from "../../types/appItem";
-import { useEffect } from "react";
+import {type CorpBasicInfo} from "@onebase/platform-center";
 
 interface IBasicInfoProps {
+    basicValues: CorpBasicInfo,
     industryOptions: industryTypeOption[];
+    onDataChange: (values: Record<string, any>) => void;
 }
 
-export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions }) => {
+export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions, basicValues, onDataChange }) => {
     const [ basicInfoForm ] = Form.useForm();
+
+    const handleValuesChange = (changedValues: Record<string, any>, allValues: Record<string, any>) => {
+        onDataChange(allValues);
+    };
+
 
     return (
         <Form 
-            requiredSymbol={{ position: 'end' }}
+            onValuesChange={handleValuesChange} 
             form={basicInfoForm}  
             initialValues={{
                 userLimit:"10000",
-                status:true
+                status:true,
+                corpName: basicValues?.corpName,
+                corpId: basicValues?.corpId,
+                industryType: basicValues?.industryType,
+                address: basicValues?.address
+
             }}
         >
             <Form.Item
@@ -43,10 +54,7 @@ export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions }) 
                     placeholder="行业类型"
                 />
             </Form.Item>
-            <Form.Item label="联系地址" field="address" rules={[{ required: true }]}>
-                <Select placeholder="请选择" />
-            </Form.Item>
-            <Form.Item label="" field="address" {...noLabelLayout}>
+            <Form.Item label="联系地址" field="address">
                 <Input.TextArea placeholder="请输入详细地址" autoSize={{ minRows: 2, maxRows: 6 }} />
             </Form.Item>
             <Form.Item label="用户上限" field="userLimit" rules={[{ required: true }]}>
