@@ -95,6 +95,8 @@ export const CONFIG_TYPES = {
   DATE_FORMAT: 'DateFormat',
   // 时间格式
   TIME_FORMAT: 'TimeFormat',
+  // 填充文本 switch
+  SWITCH_FILL_TEXT: 'SwitchFillText',
 
   TABLE_OPERATION: 'TableOperation',
   TABLE_BUTTON: 'advancedButtonPermission'
