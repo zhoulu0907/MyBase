@@ -566,3 +566,9 @@ export const timeFormatConfig:any = {
   name:'日期格式',
   type: CONFIG_TYPES.TIME_FORMAT
 }
+
+export const switchFillTextConfig:any = {
+  key: 'fillText',
+  name:'填充文本',
+  type: CONFIG_TYPES.SWITCH_FILL_TEXT
+}

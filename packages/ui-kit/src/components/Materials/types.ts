@@ -446,3 +446,11 @@ export interface ITimrFormatConfigType {
   name: string;
   type: typeof CONFIG_TYPES.TIME_FORMAT;
 }
+
+
+// 填充文本 switch
+export interface ISwitchFillTextConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SWITCH_FILL_TEXT;
+}
