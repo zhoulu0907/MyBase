@@ -7,8 +7,8 @@ import { LISTTYPE, FlowStatusMap, BPMConfigButtonType } from '@onebase/app';
 import DetailTable from './DetailTable';
 import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
-import { getFormDetail, getOperatorRecord } from '@onebase/app/src/services/app_runtime';
-
+import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
+import PreviewContainer from './DetailForm';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
@@ -27,6 +27,8 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   const [stepData, setStepData] = useState();
   const [detailData, setDetailData] = useState<any>();
   let confirmRef = useRef<any>(null);
+  const formRef = useRef<any>(null);
+
   const [popupVisibleMap, setPopupVisibleMap] = useState({});
   const setPopupVisibleByIndex = (index, visible) => {
     setPopupVisibleMap((prev) => ({
@@ -56,9 +58,28 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
       </>
     );
   }
-  function handleConfirmOK(value: any) {
-    confirmRef.current.childMethod(value);
-  }
+
+  const fetchExec = async (value: any) => {
+    const buttonType = value?.buttonType;
+    const entityData = await formRef.current.getFormData();
+    try {
+      const req = {
+        buttonType,
+        taskId: rowData?.taskId,
+        instanceId: rowData?.instanceId,
+        entity: entityData
+      };
+      await fetchExecTask(req);
+      onBack && onBack();
+    } catch (error) {}
+  };
+
+  const handleConfirmOK = async (value: any) => {
+    const entityData = await formRef.current.getFormData();
+
+    confirmRef.current.childMethod({ value, entityData });
+  };
+
   function handlePreview() {
     console.log('handle Preview ...');
   }
@@ -71,36 +92,47 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
         </Button>
         {detailData?.buttonConfigs &&
           detailData?.buttonConfigs?.map((item, index) => {
-            return (
-              <Popconfirm
-                title=""
-                key={index}
-                style={{ maxWidth: '420px', width: '420px' }}
-                className="dt-ok-confirm"
-                content={
-                  <DetailOKConfirm
-                    ref={confirmRef}
-                    onSetPopupVisible={(visible) => setPopupVisibleByIndex(index, visible)}
-                    onBack={onBack}
-                    taskId={taskId}
-                    instanceId={rowData?.instanceId}
-                    itemData={item}
-                  />
-                }
-                onOk={() => {
-                  handleConfirmOK(item);
-                }}
-                popupVisible={!!popupVisibleMap[index]}
-                onCancel={() => setPopupVisibleByIndex(index, false)}
-              >
+            if (!item?.approvalCommentRequired) {
+              return (
                 <Button
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
-                  onClick={() => setPopupVisibleByIndex(index, true)}
+                  onClick={() => fetchExec(item)}
                 >
                   {item?.buttonName}
                 </Button>
-              </Popconfirm>
-            );
+              );
+            } else {
+              return (
+                <Popconfirm
+                  title=""
+                  key={index}
+                  style={{ maxWidth: '420px', width: '420px' }}
+                  className="dt-ok-confirm"
+                  content={
+                    <DetailOKConfirm
+                      ref={confirmRef}
+                      onSetPopupVisible={(visible) => setPopupVisibleByIndex(index, visible)}
+                      onBack={onBack}
+                      taskId={taskId}
+                      instanceId={rowData?.instanceId}
+                      itemData={item}
+                    />
+                  }
+                  onOk={() => {
+                    handleConfirmOK(item);
+                  }}
+                  popupVisible={!!popupVisibleMap[index]}
+                  onCancel={() => setPopupVisibleByIndex(index, false)}
+                >
+                  <Button
+                    type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
+                    onClick={() => setPopupVisibleByIndex(index, true)}
+                  >
+                    {item?.buttonName}
+                  </Button>
+                </Popconfirm>
+              );
+            }
           })}
       </>
     );
@@ -167,14 +199,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           </Row>
           <div className="draw-content">
             <div className="draw-left">
-              <Row className="" style={{ marginBottom: 16 }}>
-                <Col span={12}>
-                  <p className="gray-color">申请原因</p>
-                  <div className="photo-box">需要采购一批办公用品</div>
-                </Col>
-              </Row>
-              <p className="gray-color photo-box">申请明细</p>
-              <DetailTable />
+              <PreviewContainer ref={formRef} pageSetId={rowData?.businessId} detailData={detailData} />
             </div>
             {isShowRight ? (
               <div className="draw-right">
