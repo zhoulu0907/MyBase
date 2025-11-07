@@ -284,6 +284,9 @@ public class TenantServiceImpl implements TenantService {
                         userLimit,
                         remainingCount);
             }
+            if(updateReqVO.getAccountCount()==null){
+                updateReqVO.setAccountCount(tenant.getAccountCount());
+            }
             TenantUtils.execute(tenant.getId(), () -> {
                 // 查询当前租户下已分配的用户数量，下限
                 Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
@@ -482,6 +485,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
+         Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量
         Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
@@ -490,6 +494,11 @@ public class TenantServiceImpl implements TenantService {
         Long appCountResult = appApplicationApi.countApplicationByTenantId(id);
         // Long 转 Integer
         tenantRespVO.setAppCount(appCountResult != null ? appCountResult.intValue() : 0);
+        Integer corpCount = corpCountMap.get(tenantDO.getId());
+        if (corpCount == null) {
+            corpCount = CorpConstant.ZERO; // 默认值处理
+        }
+        tenantRespVO.setCorpCount(corpCount);
         // 获取当前空间的管理员角色id
      //  RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
         RoleDO roleDO = roleService.getRoleIdsByCodeAndTenantId(RoleCodeEnum.TENANT_ADMIN.getCode(),id);

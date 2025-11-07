@@ -64,6 +64,9 @@ public class CorpServiceImpl implements CorpService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
+    @Resource
+    private AdminUserService userService;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -253,9 +256,31 @@ public class CorpServiceImpl implements CorpService {
             return null;
         }
         CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
+        AdminUserDO userDO=  userService.getUser(corpDO.getAdminId());
+        if(userDO!=null){
+            respVO.setAdminName(userDO.getNickname());
+            respVO.setEmail(userDO.getEmail());
+            respVO.setMobile(userDO.getMobile());
+        }
+        respVO.setAppCount(getCorpAppCount(id));
+        // TODO  获取企业用户数 待后续完善
+        respVO.setUserCount(respVO.getAppCount());
         return respVO;
     }
-
+    /**
+     * 获取企业关联的应用数量
+     *
+     * @param corpId 企业ID
+     * @return 应用数量
+     */
+    public Integer getCorpAppCount(Long corpId) {
+        CorpAppRelationPageReqVO relationReqVO = new CorpAppRelationPageReqVO();
+        Set<Long> corpIds = new HashSet<>();
+        corpIds.add(corpId);
+        relationReqVO.setCorpIds(corpIds);
+        List<CorpAppRelationDO> relations = corpAppRelationService.getCorpAppRelationList(relationReqVO);
+        return relations != null ? relations.size() : 0;
+    }
     private String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }
