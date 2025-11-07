@@ -77,11 +77,6 @@ const EnterpriseInfoPage: React.FC = () => {
     let newValue = value;
     if(field === "status") {
       newValue = newValue === true ? 1 : 0;
-    } else if(field === "industryType") {
-      const index = industryOptions.findIndex(item => item.value === value);
-      if(index >=0) {
-        newValue = industryOptions[index].id;
-      }
     }
     setFormData((prev: any) => ({ ...prev, [field]: newValue }));
   };
@@ -209,13 +204,11 @@ const EnterpriseInfoPage: React.FC = () => {
           componentProps={{
             placeholder: '请选择行业',
             options: industryOptions,
-            renderFormat: (value:any) =>{
-              if(!value) return "";
-              return value.map((id:any) => {
-                  const item = industryOptions.find(option => option.id === value);
-                  return item?.label;
-                }).join(',')} 
-              }}
+            renderFormat: (value:any) => {
+              const selectedOption = industryOptions.find(item => item.id === value);
+              return selectedOption ? selectedOption.label : value;
+            }
+          }}
       />
     },
      {

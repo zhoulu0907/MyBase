@@ -95,6 +95,7 @@ export interface authorizedAppList extends corpApplicationListProps {
   versionNumber: string;
   createTime: string;
   appId: string;
+  id: string;
 }
 
 export interface industryTypeOption {

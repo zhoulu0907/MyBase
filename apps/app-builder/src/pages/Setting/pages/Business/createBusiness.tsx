@@ -126,9 +126,8 @@ const CreateBusinessPage: React.FC = () => {
     const handleNext = async () => {
         if(currentStep === 3) {
             setCreateLoading(true);
-            const appIdList = tableData.map(item => item.id).filter(Boolean);
             const params:createCorpParams = {
-                appAuthTimeReqVO: appIdList,
+                appAuthTimeReqVO: tableData,
                 corpAdminReqVO: adminValues,
                 corpReqVO: basicValues
             }

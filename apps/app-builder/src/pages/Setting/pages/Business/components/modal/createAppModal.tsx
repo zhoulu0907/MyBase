@@ -50,12 +50,13 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                         placeholder="选择应用"
                         allowClear
                         showSearch
-                        renderFormat ={(option:any, value)=>{
-                            return value;
+                        renderFormat ={(option:any, value: any)=>{
+                            const selectedOption = dropdownList.find(item => item.id === value);
+                            return selectedOption ? selectedOption.appName : value;
                         }}
                     >
-                        {dropdownList.map((option, index: number) => (
-                        <Select.Option key={option.appId} value={option.appId || index.toString()}>
+                        {dropdownList.map((option) => (
+                        <Select.Option key={option.appId} value={option.id}>
                             <Space align="center" size={12}>
                                 <Avatar style={{ backgroundColor: option.iconColor }}>{option.iconName}</Avatar>
                                 <div className={styles.authorizedOption}>
