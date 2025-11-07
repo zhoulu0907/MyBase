@@ -50,8 +50,8 @@ public class BpmInstanceExtRepository {
                       t3.initiator_dept_id,
                       t3.initiator_dept_name,
                       t3.submit_Time,
-                      t3.form_Summary,
-                      t3.form_Name,
+                      t3.form_summary,
+                      t3.form_name,
                       t.*
                 from bpm_flow_instance t
                 left join bpm_flow_task t1 on t.id = t1.instance_id

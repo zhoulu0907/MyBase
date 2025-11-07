@@ -60,6 +60,9 @@ public class ETLDatasourceDO extends TenantBaseDO {
     }
 
     public CollectStatus getCollectStatus() {
+        if (collectStatus == null) {
+            return null;
+        }
         return CollectStatus.parse(collectStatus);
     }
 

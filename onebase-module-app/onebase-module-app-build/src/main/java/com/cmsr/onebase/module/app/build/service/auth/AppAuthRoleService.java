@@ -14,7 +14,7 @@ public interface AppAuthRoleService {
 
     List<AuthRoleListRespVO> getRoleList(Long applicationId);
 
-    PageResult<AuthRoleUsersPageRespVO> pageRoleUsers(AuthRoleUsersPageReqVO reqVO);
+//    PageResult<AuthRoleUsersPageRespVO> pageRoleUsers(AuthRoleUsersPageReqVO reqVO);
 
     PageResult<AuthRoleMembersPageRespVO> pageRoleMembers(AuthRoleMembersPageReqVO reqVO);
 
@@ -26,11 +26,11 @@ public interface AppAuthRoleService {
 
     void addRoleUser(AuthRoleAddUserReqVO reqVO);
 
-    void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO);
+//    void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO);
 
     void addRoleDept(AuthRoleAddDeptReqVO reqVO);
 
-    void deleteRoleDept(AuthRoleDeleteDeptReqVO reqVO);
+//    void deleteRoleDept(AuthRoleDeleteDeptReqVO reqVO);
 
     void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO);
 

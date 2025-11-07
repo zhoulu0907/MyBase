@@ -70,7 +70,7 @@ public class FlowProcessTest {
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setFieldData(Map.of(
                 "46999569445519360", "6年级3班",
-                "50026937276661762", LocalDate.now(),
+                "50026937276661762", LocalDate.now().minusYears(10),
                 "50028191407505411", 30
         ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
