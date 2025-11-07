@@ -83,6 +83,25 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private volatile long lastCacheTime = 0;
     private static final long CACHE_EXPIRE_TIME = 5 * 60 * 1000; // 缓存5分钟
 
+    /**
+     * 安全地将字符串转换为Long类型
+     * 处理空字符串和null的情况，返回null而不是抛出异常
+     *
+     * @param str 要转换的字符串
+     * @return Long值，如果字符串为空或null则返回null
+     */
+    private Long safeParseLong(String str) {
+        if (str == null || str.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(str);
+        } catch (NumberFormatException e) {
+            log.warn("无法将字符串转换为Long: {}", str);
+            return null;
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
 
@@ -94,8 +113,9 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         }
 
         // 校验编码唯一性（只有当code不为空时才校验）
-        if (CharSequenceUtil.isNotEmpty(createReqVO.getCode())) {
-            validateBusinessEntityCodeUniqueWithLock(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        Long appId = safeParseLong(createReqVO.getAppId());
+        if (CharSequenceUtil.isNotEmpty(createReqVO.getCode()) && appId != null) {
+            validateBusinessEntityCodeUniqueWithLock(null, createReqVO.getCode(), appId);
         }
 
         // 校验实体类型
@@ -103,7 +123,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         // 插入业务实体
         MetadataBusinessEntityDO businessEntity = BeanUtils.toBean(createReqVO, MetadataBusinessEntityDO.class);
-        businessEntity.setAppId(Long.valueOf(createReqVO.getAppId()));
+        businessEntity.setAppId(appId);
+        businessEntity.setDatasourceId(safeParseLong(createReqVO.getDatasourceId()));
 
         // 处理code字段：如果为空或空字符串，则生成UUID
         if (CharSequenceUtil.isEmpty(createReqVO.getCode())) {
@@ -112,9 +133,12 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         // 根据实体类型处理表名，并加上 appUid 前缀（如有）
         handleTableNameByEntityType(businessEntity, createReqVO);
-        String appUid = metadataAppAndDatasourceCoreService.getAppUidByAppIdAndDatasourceId(
-                Long.valueOf(createReqVO.getAppId()), Long.valueOf(createReqVO.getDatasourceId())
-        );
+        String appUid = null;
+        if (appId != null && businessEntity.getDatasourceId() != null) {
+            appUid = metadataAppAndDatasourceCoreService.getAppUidByAppIdAndDatasourceId(
+                    appId, businessEntity.getDatasourceId()
+            );
+        }
         if (appUid != null && !appUid.isBlank()) {
             String rawName = businessEntity.getTableName();
             // 避免重复前缀：如果已经以 appUid_ 开头则不再重复
@@ -137,8 +161,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         metadataBusinessEntityRepository.insert(businessEntity);
 
         // 如果需要创建物理表，保存系统字段信息到 metadata_entity_field 表
-        if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType()) && systemFields != null) {
-            saveEntityFields(businessEntity.getId(), systemFields, Long.valueOf(createReqVO.getAppId()));
+        if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType()) && systemFields != null && appId != null) {
+            saveEntityFields(businessEntity.getId(), systemFields, appId);
         }
 
         if (!BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
@@ -236,9 +260,13 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                                                  List<MetadataSystemFieldsDO> systemFields) {
         try {
             // 1. 通过数据源 id 获取对应的数据源信息
-            MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(Long.valueOf(createReqVO.getDatasourceId()));
+            Long datasourceId = safeParseLong(createReqVO.getDatasourceId());
+            if (datasourceId == null) {
+                throw new RuntimeException("数据源ID为空，无法创建物理表");
+            }
+            MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(datasourceId);
             if (datasource == null) {
-                throw new RuntimeException("未找到数据源ID为 " + createReqVO.getDatasourceId() + " 的数据源配置");
+                throw new RuntimeException("未找到数据源ID为 " + datasourceId + " 的数据源配置");
             }
 
             // 2. 生成 DDL 并在数据源内建物理表
@@ -583,19 +611,29 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateBusinessEntity(@Valid BusinessEntitySaveReqVO updateReqVO) {
+        // 安全转换 ID 和 appId
+        Long id = safeParseLong(updateReqVO.getId());
+        Long appId = safeParseLong(updateReqVO.getAppId());
+        Long datasourceId = safeParseLong(updateReqVO.getDatasourceId());
+        
         // 校验存在
-        validateBusinessEntityExists(Long.valueOf(updateReqVO.getId()));
-        // 校验编码唯一性（只有当code不为空时才校验）
-        if (CharSequenceUtil.isNotEmpty(updateReqVO.getCode())) {
-            validateBusinessEntityCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
+        if (id != null) {
+            validateBusinessEntityExists(id);
         }
+        
+        // 校验编码唯一性（只有当code不为空时才校验）
+        if (CharSequenceUtil.isNotEmpty(updateReqVO.getCode()) && id != null && appId != null) {
+            validateBusinessEntityCodeUnique(id, updateReqVO.getCode(), appId);
+        }
+        
         // 校验实体类型
         validateEntityType(updateReqVO.getEntityType());
 
         // 更新业务实体
         MetadataBusinessEntityDO updateObj = BeanUtils.toBean(updateReqVO, MetadataBusinessEntityDO.class);
-        updateObj.setId(Long.valueOf(updateReqVO.getId()));
-        updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
+        updateObj.setId(id);
+        updateObj.setAppId(appId);
+        updateObj.setDatasourceId(datasourceId);
 
         // 处理code字段：如果为空或空字符串，则生成UUID
         if (CharSequenceUtil.isEmpty(updateReqVO.getCode())) {
