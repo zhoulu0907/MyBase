@@ -4,6 +4,12 @@ import dayjs from 'dayjs';
 import type { TableColumnProps } from '@arco-design/web-react';
 import type { VersionData } from './indexType';
 
+enum VersionStatus {
+  DESIGNING = '设计中',
+  PUBLISHED = '已发布',
+  HISTORY = '历史版本'
+}
+
 export const getVersionColumns = (
   handleView: (record: VersionData) => void,
   handleEditRemark: (record: VersionData) => void,
@@ -25,7 +31,8 @@ export const getVersionColumns = (
     title: '状态',
     dataIndex: 'versionStatus',
     render: (text: string) => {
-      const classNameSelf = text === '已发布' ? 'published' : text === '设计中' ? 'designing' : 'history';
+      const classNameSelf =
+        text === VersionStatus.PUBLISHED ? 'published' : text === VersionStatus.DESIGNING ? 'designing' : 'history';
       return <span className={`${styles.versionStatus} ${styles[classNameSelf]}`}>{text}</span>;
     }
   },
@@ -85,11 +92,14 @@ export const getVersionColumns = (
         <span className={`${styles.operationBtn} ${styles.green}`} onClick={() => handleEditRemark(record)}>
           修改备注
         </span>
-        <Divider type="vertical" />
-        {record.versionStatus !== 'published' && (
-          <span className={`${styles.operationBtn} ${styles.yellow}`} onClick={() => handleDelete(record)}>
-            删除
-          </span>
+
+        {record.versionStatus !== VersionStatus.PUBLISHED && (
+          <>
+            <Divider type="vertical" />
+            <span className={`${styles.operationBtn} ${styles.yellow}`} onClick={() => handleDelete(record)}>
+              删除
+            </span>
+          </>
         )}
       </div>
     )

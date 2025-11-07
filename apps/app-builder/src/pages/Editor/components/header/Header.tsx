@@ -14,7 +14,7 @@ import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/R
 import VersionModal from '@/pages/CreateApp/pages/PageManager/components/Modals/VersionModal';
 import { useBasicEditorStore } from '@/store';
 import { useFlowEditorStor } from '@/store/index';
-import { useAppStore } from '@/store/index';
+import { useAppStore } from '@/store/store_app';
 import { Breadcrumb, Button, Form, Message, Tabs, Select } from '@arco-design/web-react';
 import { IconArrowLeft, IconSettings } from '@arco-design/web-react/icon';
 import type { WorkflowJSON } from './headerType';
@@ -52,9 +52,9 @@ import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
-import type { VersionType } from '../constants';
 import { useInitDefaultVersion } from './useInitDefaultVersion';
 import { VersionStatus } from '../constants';
+
 const Option = Select.Option;
 const BreadcrumbItem = Breadcrumb.Item;
 const sourceNodeIDMap = new Map();
@@ -97,7 +97,6 @@ const baseTabData = [
 ];
 
 export default function EditorHeader() {
-  const [manageVisible, setManageVisible] = useState(false);
   const currentVersionList = useInitDefaultVersion();
   const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
@@ -144,8 +143,8 @@ export default function EditorHeader() {
   const [tabData, setTabData] = useState(baseTabData);
   // 重命名弹窗
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
-
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
+  const [manageVisible, setManageVisible] = useState(false);
 
   const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
   const pageInfo = JSON.parse(sessionData);
@@ -396,7 +395,7 @@ export default function EditorHeader() {
   };
 
   const changeCurrentFlow = (value: string) => {
-    if (value !== 'manage') {
+    if (value !== VersionStatus.MANAGE) {
       setCurrnetFlowId(value);
     } else {
       setManageVisible(true);
