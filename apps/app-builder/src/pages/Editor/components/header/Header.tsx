@@ -97,7 +97,6 @@ const baseTabData = [
 ];
 
 export default function EditorHeader() {
-  // const [versionList, setVersionList] = useState<VersionType[]>([]);
   const [manageVisible, setManageVisible] = useState(false);
   const currentVersionList = useInitDefaultVersion();
   const { curPage } = pagesRuntimeSignal;
@@ -349,9 +348,6 @@ export default function EditorHeader() {
       Message.success('发布成功');
     } catch (error) {}
   };
-
-  const handleCreateFlow = async () => {};
-
   const clearAllData = () => {
     clearFromLayoutSubComponents();
     clearListLayoutSubComponents();
