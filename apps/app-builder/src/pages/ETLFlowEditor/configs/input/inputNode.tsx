@@ -1,7 +1,8 @@
 import { Button, Input } from '@arco-design/web-react';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import React from 'react';
+import React, { useState } from 'react';
+import DatasourceModal from '../../nodes/inout/input/components/datasourceModal';
 import styles from './index.module.less';
 
 const { TextArea } = Input;
@@ -11,6 +12,8 @@ export const InputNodeConfig: React.FC = () => {
 
   const { curDrawerTab } = etlEditorSignal;
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   return (
     <div className={styles.config}>
       {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && (
@@ -19,7 +22,9 @@ export const InputNodeConfig: React.FC = () => {
             <div className={styles.dataSourceHeader}>
               <div className={styles.dataSourceHeaderLeft}>输入源</div>
               <div className={styles.dataSourceHeaderRight}>
-                <Button type="text">更改输入源</Button>
+                <Button type="text" onClick={() => setIsModalVisible(true)}>
+                  更改输入源
+                </Button>
               </div>
             </div>
             <div className={styles.dataSourceContent}>
@@ -33,6 +38,12 @@ export const InputNodeConfig: React.FC = () => {
       {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && (
         <TextArea placeholder="请输入节点备注" autoSize={{ minRows: 3, maxRows: 6 }} allowClear />
       )}
+
+      <DatasourceModal
+        isModalVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onOk={() => setIsModalVisible(false)}
+      />
     </div>
   );
 };
