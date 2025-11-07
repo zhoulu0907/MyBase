@@ -28,7 +28,7 @@ public class CorpRespVO {
     private String corpCode;
 
     @Schema(description = "行业类型", example = "1")
-    private Integer industryType;
+    private Long industryType;
 
     @Schema(description = "状态", example = "1")
     private Integer status;

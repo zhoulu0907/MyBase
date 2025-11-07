@@ -21,7 +21,7 @@ public class CorpUpdateReqVO {
 
     @NotNull(message = "行业类型不能为空")
     @Schema(description = "行业类型", example = "1")
-    private Integer industryType;
+    private Long industryType;
 
     @NotNull(message = "状态不能为空")
     @Schema(description = "状态", example = "1")

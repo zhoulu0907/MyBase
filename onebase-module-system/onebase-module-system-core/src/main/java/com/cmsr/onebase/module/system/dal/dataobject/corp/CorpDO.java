@@ -31,7 +31,7 @@ public class CorpDO extends BaseDO {
     private String corpCode;
 
     @Column(name = "industry_type")
-    private Integer industryType;
+    private Long industryType;
 
     @Column(name = "status")
     private Integer status;
@@ -40,7 +40,7 @@ public class CorpDO extends BaseDO {
     private String address;
 
     @Column(name = "admin_id")
-    private String adminId;
+    private Long adminId;
 
     @Column(name = "user_limit")
     private Integer userLimit;
