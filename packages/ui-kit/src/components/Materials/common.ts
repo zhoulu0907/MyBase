@@ -4,6 +4,7 @@ import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
+  TIME_VALUES,
   FILL_OPTIONS,
   FILL_VALUES,
   LAYOUT_OPTIONS,
@@ -155,6 +156,7 @@ export const alignConfig: IAlignConfigType<TAlignSelectKeyType> = {
 };
 
 export type TDateTypeSelectKeyType = (typeof DATE_VALUES)[keyof typeof DATE_VALUES];
+export type TTimeTypeSelectKeyType = (typeof TIME_VALUES)[keyof typeof TIME_VALUES];
 export const dateTypeConfig: IDateTypeConfigType<TDateTypeSelectKeyType> = {
   key: 'dateType',
   name: '日期格式',
@@ -545,4 +547,22 @@ export const autoCodeConfig:any = {
   key: 'rules',
   name:'编号规则配置',
   type: CONFIG_TYPES.AUTO_CODE_RULES
+}
+
+export const imageHandleConfig:any = {
+  key: 'imageHandle',
+  name:'图片处理',
+  type: CONFIG_TYPES.IMAGE_HANDLE
+}
+
+export const dateFormatConfig:any = {
+  key: 'dateFormat',
+  name:'日期格式',
+  type: CONFIG_TYPES.DATE_FORMAT
+}
+
+export const timeFormatConfig:any = {
+  key: 'timeFormat',
+  name:'日期格式',
+  type: CONFIG_TYPES.TIME_FORMAT
 }

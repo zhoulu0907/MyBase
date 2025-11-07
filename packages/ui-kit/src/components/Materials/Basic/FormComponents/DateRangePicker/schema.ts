@@ -7,6 +7,7 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  dateFormatConfig,
   type ICommonBaseType,
   type TDateTypeSelectKeyType,
   type TLayoutSelectKeyType,
@@ -43,7 +44,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  IDateFormatConfigType
 } from '../../../types';
 
 export interface XInputDateRangePickerSchema {
@@ -67,6 +69,7 @@ export type TXInputDateRangePickerEditData = Array<
   | IDateConfigType
   | IVerifyConfigType
   | IDataFieldConfigType
+  | IDateFormatConfigType
 >;
 
 export interface XInputDateRangePickerConfig extends ICommonBaseType {
@@ -167,11 +170,12 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    dateFormatConfig,
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'verify',
       name: '校验',

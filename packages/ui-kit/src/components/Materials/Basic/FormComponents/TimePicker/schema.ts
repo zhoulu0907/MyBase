@@ -5,7 +5,9 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  timeFormatConfig,
   type ICommonBaseType,
+  type TTimeTypeSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
@@ -17,7 +19,9 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  TIME_VALUES,
+  TIME_OPTIONS
 } from '../../../constants';
 import type {
   IBooleanConfigType,
@@ -36,7 +40,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  ITimrFormatConfigType
 } from '../../../types';
 
 export interface XInputTimePickerSchema {
@@ -57,6 +62,7 @@ export type TXInputTimePickerEditData = Array<
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IVerifyConfigType
+  | ITimrFormatConfigType
 >;
 
 export interface XInputTimePickerConfig extends ICommonBaseType {
@@ -108,6 +114,7 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
    * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
+  dateType: TTimeTypeSelectKeyType;
 
   /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
@@ -135,11 +142,12 @@ const XTimePicker: XInputTimePickerSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    timeFormatConfig,
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'verify',
       name: '校验',
@@ -158,6 +166,7 @@ const XTimePicker: XInputTimePickerSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
+    dateType: TIME_VALUES[TIME_OPTIONS.SECOND],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 200,
     saveWithHidden: false,
