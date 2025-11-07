@@ -140,7 +140,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                 for (MetaColumn metaColumn : columns) {
                     String originType = metaColumn.getOriginType();
                     String compatibleType = flinkMappingRepository.findFlinkTypeByDatasourceTypeAndOriginType(databaseType, originType);
-                    metaColumn.setCompatibleType(compatibleType);
+                    metaColumn.setFlinkType(compatibleType);
                 }
                 metaInfo.setColumns(columns);
                 newTableDO.setMetaInfo(metaInfo);

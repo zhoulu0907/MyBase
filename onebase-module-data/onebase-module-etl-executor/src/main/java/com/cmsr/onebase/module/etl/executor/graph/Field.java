@@ -11,4 +11,10 @@ public class Field {
 
     private String fieldType;
 
+    private Integer length;
+
+    private Integer precision;
+
+    private Integer scale;
+
 }
