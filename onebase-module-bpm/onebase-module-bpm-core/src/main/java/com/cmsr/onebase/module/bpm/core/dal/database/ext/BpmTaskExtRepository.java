@@ -83,7 +83,7 @@ public class BpmTaskExtRepository {
             condition.and(orCondition);
         }
         if (reqVO.getBusinessId() != null && !reqVO.getBusinessId().isEmpty()) {
-            condition.and(Compare.EQUAL, "t2.business_id", reqVO.getBusinessId());
+            condition.and(Compare.EQUAL, "t.form_path", reqVO.getBusinessId());
         }
         if (reqVO.getNodeCode() != null && !reqVO.getNodeCode().isEmpty()) {
             condition.and(Compare.EQUAL, "t.node_code", reqVO.getNodeCode());

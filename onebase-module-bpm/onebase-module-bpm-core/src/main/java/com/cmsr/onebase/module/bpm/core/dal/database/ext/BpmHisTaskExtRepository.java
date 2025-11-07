@@ -88,7 +88,7 @@ public class BpmHisTaskExtRepository {
             condition.and(Compare.LESS_EQUAL, "t3.submit_time", reqVO.getSubmitTimeEnd());
         }
         if (reqVO.getBusinessId() != null && !reqVO.getBusinessId().isEmpty()) {
-            condition.and(Compare.EQUAL, "t1.business_id", reqVO.getBusinessId());
+            condition.and(Compare.EQUAL, "t.form_path", reqVO.getBusinessId());
         }
         if (reqVO.getFlowStatus() != null && !reqVO.getFlowStatus().isEmpty() && !"ALL".equals(reqVO.getFlowStatus()) ) {
             condition.and(Compare.EQUAL, "t.flow_status", reqVO.getFlowStatus());
