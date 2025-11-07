@@ -183,11 +183,11 @@ const XStaticText: XStaticTextSchema = {
       name: '文本最大长度',
       type: CONFIG_TYPES.NUMBER_INPUT
     },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'color',
       name: '文本颜色',

@@ -184,11 +184,11 @@ const XImgUpload: XInputImgUploadSchema = {
       name: '图片压缩率',
       type: CONFIG_TYPES.UPLOAD_COMPRESS
     },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'verify',
       name: '校验',

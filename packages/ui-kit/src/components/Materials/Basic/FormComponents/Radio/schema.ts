@@ -151,11 +151,11 @@ const XRadio: XInputRadioSchema = {
     labelColSpanConfig,
     layoutConfig,
     directionConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     radioDataConfig,
     {
       key: 'verify',

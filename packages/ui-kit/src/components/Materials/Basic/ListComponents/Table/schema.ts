@@ -305,11 +305,11 @@ const XTable: XTableSchema = {
       name: '固定操作项',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     widthConfig,
     statusConfig,
     {

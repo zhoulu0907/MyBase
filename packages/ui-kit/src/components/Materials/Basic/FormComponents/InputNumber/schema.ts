@@ -215,11 +215,11 @@ const XInputNumber: XInputNumberSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'color',
       name: '文本颜色',
