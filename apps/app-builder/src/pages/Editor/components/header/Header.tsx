@@ -13,10 +13,11 @@ import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
 import VersionModal from '@/pages/CreateApp/pages/PageManager/components/Modals/VersionModal';
 import { useBasicEditorStore } from '@/store';
-import { useAppStore, useFlowEditorStor } from '@/store/index';
+import { useFlowEditorStor } from '@/store/index';
+import { useAppStore } from '@/store/index';
 import { Breadcrumb, Button, Form, Message, Tabs, Select } from '@arco-design/web-react';
 import { IconArrowLeft, IconSettings } from '@arco-design/web-react/icon';
-
+import type { WorkflowJSON } from './headerType';
 import {
   PageType,
   AppStatus,
@@ -28,11 +29,11 @@ import {
   getPageSetMetaData,
   updateApplicationMenu,
   fetchPublish,
+  save,
   type ChildEntity,
   type GetApplicationReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
-
 import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
@@ -56,7 +57,7 @@ import { useInitDefaultVersion } from './useInitDefaultVersion';
 import { VersionStatus } from '../constants';
 const Option = Select.Option;
 const BreadcrumbItem = Breadcrumb.Item;
-
+const sourceNodeIDMap = new Map();
 const baseTabData = [
   {
     key: EDITOR_TYPES.FORM_EDITOR,
@@ -96,16 +97,15 @@ const baseTabData = [
 ];
 
 export default function EditorHeader() {
-  const [versionList, setVersionList] = useState<VersionType[]>([]);
+  // const [versionList, setVersionList] = useState<VersionType[]>([]);
   const [manageVisible, setManageVisible] = useState(false);
   const currentVersionList = useInitDefaultVersion();
   const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
-
   const { clearCurComponentID } = usePageEditorSignal();
   const { curViewId } = usePageViewEditorSignal;
-  const { flowId } = useFlowPageEditorSignal;
+  const { flowId, setFlowId } = useFlowPageEditorSignal;
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
   const {
@@ -131,7 +131,7 @@ export default function EditorHeader() {
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
 
   const { curAppId, setCurAppId } = useAppStore();
-  const { currentFlowId, setCurrnetFlowId } = useFlowEditorStor();
+
   const { setCurDataSourceId } = useResourceStore();
 
   const navigate = useNavigate();
@@ -150,6 +150,51 @@ export default function EditorHeader() {
 
   const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
   const pageInfo = JSON.parse(sessionData);
+  const { currentFlowId, setCurrnetFlowId, editorRef, flowData, configData } = useFlowEditorStor();
+  const onFlowSave = async (isCreate?: boolean) => {
+    const appId = await getAppIdByPageSetId({ pageSetId });
+    const data = editorRef?.document.toJSON();
+    const currentJsonData = normalizeNodes(data);
+    const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
+    const params = {
+      id: isCreate ? '' : id || '',
+      flowCode: flowCode || '',
+      flowName: flowName || '',
+      version: version || '',
+      versionAlias: versionAlias || '',
+      versionStatus: versionStatus || '',
+      businessId: businessId || pageSetId,
+      appId,
+      bpmDefJson: JSON.stringify(currentJsonData),
+      globalConfig: configData
+    };
+    save(params).then((res: any) => {
+      setFlowId(res);
+      Message.success(isCreate ? '创建成功' : '保存成功');
+      if (isCreate) {
+        setCurrnetFlowId(res);
+      }
+    });
+  };
+
+  const normalizeNodes = (obj: WorkflowJSON | undefined) => {
+    obj?.edges.forEach((item) => {
+      if (item?.type) {
+        sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
+      } else {
+        item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
+      }
+    });
+    const newNodes = obj?.nodes.map((node) => {
+      if ('name' in node) {
+        return { ...node, data: { ...(node.data || {}), name: node.name } };
+      } else if (node.data && 'name' in node.data) {
+        return { ...node, name: node.data.name };
+      }
+      return node;
+    });
+    return { ...obj, nodes: newNodes };
+  };
 
   useEffect(() => {
     // 根据当前 URL 动态设置 activeTab
@@ -276,6 +321,10 @@ export default function EditorHeader() {
   };
 
   const handleSavePageSet = async () => {
+    if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
+      onFlowSave();
+      return;
+    }
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
     console.log('curViewId: ', curViewId.value);
 
@@ -300,6 +349,8 @@ export default function EditorHeader() {
       Message.success('发布成功');
     } catch (error) {}
   };
+
+  const handleCreateFlow = async () => {};
 
   const clearAllData = () => {
     clearFromLayoutSubComponents();
@@ -362,10 +413,6 @@ export default function EditorHeader() {
       setTabData(baseTabData);
     }
   }, [curPage?.value?.pageSetType]);
-
-  useEffect(() => {
-    setVersionList(currentVersionList);
-  }, [currentVersionList]);
 
   return (
     <div className={styles.editorHeader}>
@@ -438,44 +485,46 @@ export default function EditorHeader() {
       </div>
 
       <div className={styles.right}>
-        <Select
-          placeholder="选择流程版本"
-          style={{ width: 154 }}
-          triggerProps={{
-            autoAlignPopupWidth: false,
-            autoAlignPopupMinWidth: true,
-            position: 'bl'
-          }}
-          value={currentFlowId}
-          arrowIcon={null}
-          className={styles.versionSelect}
-          onChange={(value) => changeCurrentFlow(value)}
-        >
-          {versionList.map((item) => (
-            <Option key={item.id} value={item.id}>
-              <div className={styles.versionOption}>
-                <span className={styles.versionName}>
-                  {item.versionAlias || '未命名'}
-                  {item.version}
-                </span>
-                <span
-                  className={`${styles.versionStatus} ${
-                    item.versionStatus === VersionStatus.DESIGNING
-                      ? styles.designing
-                      : item.versionStatus === VersionStatus.PUBLISHED
-                        ? styles.published
-                        : styles.history
-                  }`}
-                >
-                  {item.versionStatus}
-                </span>
-              </div>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Select
+            placeholder="选择流程版本"
+            style={{ width: 154 }}
+            triggerProps={{
+              autoAlignPopupWidth: false,
+              autoAlignPopupMinWidth: true,
+              position: 'bl'
+            }}
+            value={currentFlowId}
+            arrowIcon={null}
+            className={styles.versionSelect}
+            onChange={(value) => changeCurrentFlow(value)}
+          >
+            {currentVersionList.map((item) => (
+              <Option key={item.id} value={item.id}>
+                <div className={styles.versionOption}>
+                  <span className={styles.versionName}>
+                    {item.versionAlias || '未命名'}
+                    {item.version}
+                  </span>
+                  <span
+                    className={`${styles.versionStatus} ${
+                      item.versionStatus === VersionStatus.DESIGNING
+                        ? styles.designing
+                        : item.versionStatus === VersionStatus.PUBLISHED
+                          ? styles.published
+                          : styles.history
+                    }`}
+                  >
+                    {item.versionStatus}
+                  </span>
+                </div>
+              </Option>
+            ))}
+            <Option key="manage" value={VersionStatus.MANAGE} className={styles.manageOption}>
+              <IconSettings /> 流程版本管理
             </Option>
-          ))}
-          <Option key="manage" value={VersionStatus.MANAGE} className={styles.manageOption}>
-            <IconSettings /> 流程版本管理
-          </Option>
-        </Select>
+          </Select>
+        )}
 
         {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>未保存</div>}
         {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已保存</div>}
@@ -505,7 +554,16 @@ export default function EditorHeader() {
             发布
           </Button>
         )}
-
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button
+            type="primary"
+            onClick={() => {
+              onFlowSave(true);
+            }}
+          >
+            创建流程
+          </Button>
+        )}
         <PartPreview
           pageType={activeTab}
           visible={partPreviewVisible}

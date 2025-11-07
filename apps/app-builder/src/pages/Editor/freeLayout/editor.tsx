@@ -2,14 +2,13 @@
  * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
  * SPDX-License-Identifier: MIT
  */
-import { useRef, useEffect, useState, useContext } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import {
   EditorRenderer,
   FreeLayoutEditorProvider,
   type FreeLayoutPluginContext
 } from '@flowgram.ai/free-layout-editor';
 import { useFlowPageEditorSignal } from '@onebase/ui-kit';
-import { useFlowEditorStor } from '@/store/index';
 import '@flowgram.ai/free-layout-editor/index.css';
 import './styles/index.css';
 import { nodeRegistries } from './nodes';
@@ -20,21 +19,19 @@ import { SidebarProvider, SidebarRenderer } from './components/sidebar';
 import LeftNavBar from './components/left-nav-bar/index';
 import { getDataById, save } from '@onebase/app';
 import { useLocation } from 'react-router-dom';
-import type { WorkflowJSON, FlowData } from './editorType';
+import type { WorkflowJSON } from './editorType';
 import { getAppIdByPageSetId } from '@onebase/app';
-import { GlobalConfigContext } from './context/globalConfigContext';
+import { useFlowEditorStor } from '@/store/index';
 const sourceNodeIDMap = new Map();
+
 export const Editor = () => {
-  const { configData, setConfigData } = useContext(GlobalConfigContext);
+  const { currentFlowId, setEditorRef, flowData, setFlowData, configData, setConfigData } = useFlowEditorStor();
   const { setFlowId } = useFlowPageEditorSignal;
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
-  const [flowData, setFlowData] = useState<FlowData>({});
-  const { currentFlowId } = useFlowEditorStor();
-
   const getFlowData = async (currentFlowId: string) => {
     try {
       let currentJsonData = {};
@@ -115,6 +112,10 @@ export const Editor = () => {
       setFlowId(res);
     });
   };
+
+  useEffect(() => {
+    setEditorRef(ref.current);
+  }, [ref.current]);
   return (
     <div className="doc-free-feature-overview">
       {

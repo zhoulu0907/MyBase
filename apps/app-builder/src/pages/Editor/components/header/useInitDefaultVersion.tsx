@@ -6,7 +6,7 @@ import type { VersionType } from '../constants';
 
 export function useInitDefaultVersion() {
   const [versionList, setVersionList] = useState<VersionType[]>([]);
-  const { setBusinessId, setCurrnetFlowId } = useFlowEditorStor();
+  const { setBusinessId, setCurrnetFlowId, currentFlowId } = useFlowEditorStor();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
@@ -24,9 +24,12 @@ export function useInitDefaultVersion() {
     setCurrnetFlowId(id);
   };
   useEffect(() => {
-    getVersionMgmtData();
     getCurrentVersion();
     setBusinessId(pageSetId);
   }, []);
+
+  useEffect(() => {
+    getVersionMgmtData();
+  }, [currentFlowId]);
   return versionList;
 }
