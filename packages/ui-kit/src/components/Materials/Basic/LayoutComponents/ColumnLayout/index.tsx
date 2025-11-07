@@ -19,8 +19,7 @@ import './index.css';
 import { type XColumnLayoutConfig } from './schema';
 import { useAppEntityStore } from 'src/signals/store_entity'
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
-
-
+import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 
 const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { colCount, id, runtime = true } = props;
@@ -190,7 +189,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
             list={colComponents[index]}
             setList={(newList) => {
               const entityList: GridItem[] = [];
-              newList.forEach((item) => {
+              newList.forEach(async(item) => {
                if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
                   // 子表业务实体
                   const cpName = item.entityName || '子表单';
@@ -247,7 +246,14 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                       subType === FORM_COMPONENT_TYPES.SELECT_ONE ||
                       subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
                     ) {
-                      if (ele.options?.length) {
+                      if (ele.dictTypeId) {
+                        const res = await getDictDetail(ele.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          schema.config.defaultOptions = dictOptions;
+                        }
+                      } else if (ele.options?.length) {
                         subSchema.config.defaultOptions = ele.options.map((e:any) => ({
                           chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
                           label: e.optionLabel,
