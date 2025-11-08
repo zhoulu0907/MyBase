@@ -30,7 +30,7 @@ public class WorkFlowExecutor {
 
     private TableEnvironment tableEnv;
 
-    public WorkFlowExecutor(InputArgs inputArgs) {
+    public WorkFlowExecutor(InputArgs inputArgs) throws Exception {
         this.inputArgs = inputArgs;
         try (BeanManager beanManager = new BeanManager(inputArgs)) {
             WorkflowProvider workflowProvider = beanManager.getWorkflowDao();
