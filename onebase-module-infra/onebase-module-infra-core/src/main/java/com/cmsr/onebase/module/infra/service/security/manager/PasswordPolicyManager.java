@@ -123,7 +123,7 @@ public class PasswordPolicyManager {
         for (String value : values) {
             String trimmed = value.trim();
             if (!trimmed.isEmpty()) {
-                result.add(trimmed.toLowerCase(Locale.ROOT));
+                result.add(trimmed);
             }
         }
 
