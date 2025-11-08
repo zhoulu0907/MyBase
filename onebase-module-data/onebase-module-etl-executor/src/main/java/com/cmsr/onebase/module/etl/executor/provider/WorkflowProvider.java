@@ -5,13 +5,18 @@ import com.cmsr.onebase.module.etl.executor.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcConfig;
 import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcInputConfig;
+import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcOutputConfig;
+import com.cmsr.onebase.module.etl.executor.graph.conf.OutputField;
 import com.cmsr.onebase.module.etl.executor.graph.node.JdbcInputNode;
+import com.cmsr.onebase.module.etl.executor.graph.node.JdbcOutputNode;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlColumn;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTableColumn;
 import com.cmsr.onebase.module.etl.executor.util.GsonUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import lombok.Setter;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -38,7 +43,8 @@ public class WorkflowProvider {
      * @return
      */
     public WorkflowGraph getWorkflowGraph(Long workflowId) throws Exception {
-        WorkflowGraph workflowGraph = queryProvider.findWorkflowConfig(workflowId);
+        String workflowGraphJson = queryProvider.findWorkflowConfig(workflowId);
+        WorkflowGraph workflowGraph = GsonUtil.GSON.fromJson(workflowGraphJson, WorkflowGraph.class);
         complementGraphInfomation(workflowGraph);
         return workflowGraph;
     }
@@ -53,37 +59,62 @@ public class WorkflowProvider {
         for (Node node : workflowGraph.getNodes()) {
             if (node instanceof JdbcInputNode jdbcInputNode) {
                 complementJdbcInputInformation(jdbcInputNode);
+            } else if (node instanceof JdbcOutputNode jdbcOutputNode) {
+                complementJdbcOutputInformation(jdbcOutputNode);
             }
         }
     }
 
-    private void complementJdbcInputInformation(JdbcInputNode node) throws Exception {
-        JdbcInputConfig inputConfig = node.getConfig();
-        Long tableId = inputConfig.getTableId();
-        Map<String, Object> tableInfo = queryProvider.findTableById(tableId);
-        Long datasourceId = (Long) tableInfo.get("datasource_id");
-        String tableName = (String) tableInfo.get("table_name");
+    private void complementJdbcOutputInformation(JdbcOutputNode node) throws Exception {
+        JdbcOutputConfig outputConfig = node.getConfig();
+        Long datasourceId = outputConfig.getDatasourceId();
+        String jdbcConfigJson = queryProvider.findConnectPropertiesById(datasourceId);
+        JdbcConfig jdbcConfig = GsonUtil.GSON.fromJson(jdbcConfigJson, JdbcConfig.class);
+        Long tableId = outputConfig.getTableId();
+        List<String> tableQuery = queryProvider.findTableById(datasourceId, tableId);
+        String tableName = tableQuery.get(0);
+        jdbcConfig.setTableName(tableName);
+        outputConfig.setJdbcConfig(jdbcConfig);
 
-        JsonObject tableMeta = GsonUtil.GSON.fromJson((String) tableInfo.get("meta_info"), JsonObject.class);
-        Map<String, Field> columnMap = inputConfig.getFields().stream()
-                .collect(Collectors.toMap(Field::getFieldId, field -> field));
-        complementTableColumns(tableMeta, columnMap);
-
-        JdbcConfig connectionProperties = queryProvider.findConnectPropertiesById(datasourceId);
-        connectionProperties.setTableName(tableName);
-        inputConfig.setJdbcConfig(connectionProperties);
+        EtlTableColumn etlTableColumn = GsonUtil.GSON.fromJson(tableQuery.get(1), EtlTableColumn.class);
+        Map<String, EtlColumn> columnMap = etlTableColumn.getColumns()
+                .stream().collect(Collectors.toMap(EtlColumn::getId, col -> col));
+        List<Field> targetFieldList = new ArrayList<>();
+        for (OutputField field : outputConfig.getFields()) {
+            Field targetField = new Field();
+            String fieldId = field.getTargetFieldId();
+            targetField.setFieldId(fieldId);
+            if (!columnMap.containsKey(fieldId)) {
+                throw new IllegalArgumentException(fieldId + " not exists");
+            }
+            EtlColumn columnRelated = columnMap.get(fieldId);
+            targetField.complementColumn(columnRelated);
+            targetFieldList.add(targetField);
+        }
+        outputConfig.setTargetFields(targetFieldList);
     }
 
-    private void complementTableColumns(JsonObject tableMetaInfo, Map<String, Field> columnMap) {
-        JsonArray columns = tableMetaInfo.getAsJsonArray("columns");
-        columns.forEach(column -> {
-            JsonObject columnJson = column.getAsJsonObject();
-            String columnId = columnJson.get("id").getAsString();
-            if (!columnMap.containsKey(columnId)) {
-                return;
+    private void complementJdbcInputInformation(JdbcInputNode node) throws Exception {
+        JdbcInputConfig inputConfig = node.getConfig();
+        Long datasourceId = inputConfig.getDatasourceId();
+        String jdbcConfigJson = queryProvider.findConnectPropertiesById(datasourceId);
+        JdbcConfig jdbcConfig = GsonUtil.GSON.fromJson(jdbcConfigJson, JdbcConfig.class);
+        Long tableId = inputConfig.getTableId();
+        List<String> tableQuery = queryProvider.findTableById(datasourceId, tableId);
+        String tableName = tableQuery.get(0);
+        jdbcConfig.setTableName(tableName);
+        inputConfig.setJdbcConfig(jdbcConfig);
+
+        EtlTableColumn etlTableColumn = GsonUtil.GSON.fromJson(tableQuery.get(1), EtlTableColumn.class);
+        Map<String, EtlColumn> columnMap = etlTableColumn.getColumns()
+                .stream().collect(Collectors.toMap(EtlColumn::getId, col -> col));
+        for (Field field : inputConfig.getFields()) {
+            String fieldId = field.getFieldId();
+            if (!columnMap.containsKey(fieldId)) {
+                throw new IllegalArgumentException(fieldId + " not exists");
             }
-            Field field = columnMap.get(columnId);
-            field.applyJson(columnJson);
-        });
+            EtlColumn columnRelated = columnMap.get(fieldId);
+            field.complementColumn(columnRelated);
+        }
     }
 }
