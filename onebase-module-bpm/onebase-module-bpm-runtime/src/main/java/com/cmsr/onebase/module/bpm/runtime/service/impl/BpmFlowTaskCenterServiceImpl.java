@@ -294,7 +294,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setFlowStatus(flowTaskExt.getFlowStatus());
         todoTaskVO.setTaskId(flowTaskExt.getId());
         todoTaskVO.setNodeCode(flowTaskExt.getNodeCode());
-        todoTaskVO.setProcessTitle(flowTaskExt.getBusinessTitle());
+        todoTaskVO.setProcessTitle(flowTaskExt.getBpmTitle());
         todoTaskVO.setSubmitTime(flowTaskExt.getSubmitTime());
         todoTaskVO.setFormSummary(flowTaskExt.getFormSummary());
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
@@ -373,7 +373,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         for (BpmInstanceDTO flowInstance : pageResult.getList()) {
             BpmMyCreatedVO bpmMyCreatedVO = new BpmMyCreatedVO();
             bpmMyCreatedVO.setId(flowInstance.getId());
-            bpmMyCreatedVO.setProcessTitle(flowInstance.getBusinessTitle());
+            bpmMyCreatedVO.setProcessTitle(flowInstance.getBpmTitle());
             bpmMyCreatedVO.setFlowStatus(flowInstance.getFlowStatus());
             bpmMyCreatedVO.setFormSummary(flowInstance.getFormSummary());
             bpmMyCreatedVO.setSubmitTime(flowInstance.getSubmitTime());
