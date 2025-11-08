@@ -15,6 +15,7 @@ import XSwitch from './FormComponents/Switch/schema';
 import XImgUpload from './FormComponents/ImgUpload/schema';
 import XCarousel from './FormComponents/Carousel/schema';
 import FileUpload from './FormComponents/FileUpload/schema';
+import XAutoCode from './FormComponents/AutoCode/schema';
 const baseSchema = {
   XInputText,
   XInputTextArea,
@@ -32,7 +33,8 @@ const baseSchema = {
   XSwitch,
   XImgUpload,
   XCarousel,
-  FileUpload
+  FileUpload,
+  XAutoCode
 };
 
 export default baseSchema;

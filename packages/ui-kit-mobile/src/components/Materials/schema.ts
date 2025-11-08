@@ -23,7 +23,8 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.SELECT_MUTIPLE]: BasicSchema.XSelectMutiple,
   [ALL_COMPONENT_TYPES.IMG_UPLOAD]: BasicSchema.XImgUpload,
   [ALL_COMPONENT_TYPES.CAROUSEL]: BasicSchema.XCarousel,
-  [ALL_COMPONENT_TYPES.FILE_UPLOAD]: BasicSchema.FileUpload
+  [ALL_COMPONENT_TYPES.FILE_UPLOAD]: BasicSchema.FileUpload,
+  [ALL_COMPONENT_TYPES.AUTO_CODE]: BasicSchema.XAutoCode
 };
 
 /**

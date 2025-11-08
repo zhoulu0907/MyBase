@@ -66,6 +66,9 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XCarouselForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.FILE_UPLOAD:
         return <FormComp.FileUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.AUTO_CODE:
+        return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      
       default:
         return <div>未知组件类型: {cpType}</div>;
     }
