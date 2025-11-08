@@ -34,19 +34,75 @@ import java.util.Map;
 public class WorkerNodeDAO {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
+    private volatile String databaseType;
 
     public WorkerNodeDAO(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * 获取数据库类型（懒加载）
+     *
+     * @return 数据库类型（小写）
+     */
+    private String getDatabaseType() {
+        if (databaseType == null) {
+            synchronized (this) {
+                if (databaseType == null) {
+                    try {
+                        String driverClassName = dataSource.getConnection().getMetaData().getDriverName().toLowerCase();
+                        if (driverClassName.contains("dm") || driverClassName.contains("dameng")) {
+                            databaseType = "dameng";
+                        } else if (driverClassName.contains("mysql")) {
+                            databaseType = "mysql";
+                        } else if (driverClassName.contains("postgresql")) {
+                            databaseType = "postgresql";
+                        } else if (driverClassName.contains("oracle")) {
+                            databaseType = "oracle";
+                        } else if (driverClassName.contains("kingbase") || driverClassName.contains("人大金仓")) {
+                            databaseType = "kingbase";
+                        } else {
+                            databaseType = "unknown";
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to get database type", e);
+                    }
+                }
+            }
+        }
+        return databaseType;
     }
 
     /**
      * Add {@link WorkerNodeEntity}
      *
-     * @param workerNodeEntity
+     * @param workerNodeEntity 工作节点实体
      */
     public void addWorkerNode(WorkerNodeEntity workerNodeEntity) {
-        // 定义SQL插入语句（加双引号以支持达梦等大小写敏感数据库）
-        String sql = "insert into \"system_uid_worker_node\" (\"worker_host\", \"worker_port\", \"node_type\") values (?, ?, ?)";
+        String sql;
+        String dbType = getDatabaseType();
+        
+        // 根据数据库类型选择不同的插入SQL
+        if ("dameng".equals(dbType)) {
+            // 达梦数据库：显式使用序列生成ID
+            sql = "INSERT INTO \"system_uid_worker_node\" (\"id\", \"worker_host\", \"worker_port\", \"node_type\") " +
+                  "VALUES (SEQ_SYSTEM_UID_WORKER_NODE.NEXTVAL, ?, ?, ?)";
+        } else if ("kingbase".equals(dbType)) {
+            // 人大金仓：显式使用序列生成ID
+            sql = "INSERT INTO \"system_uid_worker_node\" (\"id\", \"worker_host\", \"worker_port\", \"node_type\") " +
+                  "VALUES (nextval('seq_system_uid_worker_node'), ?, ?, ?)";
+        } else if ("oracle".equals(dbType)) {
+            // Oracle：显式使用序列生成ID
+            sql = "INSERT INTO \"system_uid_worker_node\" (\"id\", \"worker_host\", \"worker_port\", \"node_type\") " +
+                  "VALUES (seq_system_uid_worker_node.NEXTVAL, ?, ?, ?)";
+        } else {
+            // MySQL、PostgreSQL等：依赖自增主键或SERIAL
+            sql = "INSERT INTO \"system_uid_worker_node\" (\"worker_host\", \"worker_port\", \"node_type\") " +
+                  "VALUES (?, ?, ?)";
+        }
+        
         // 使用KeyHolder获取自动生成的ID
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -91,7 +147,7 @@ public class WorkerNodeDAO {
         }
         
         if (generatedId == null) {
-            throw new RuntimeException("Failed to get generated key for worker node");
+            throw new RuntimeException("Failed to get generated key for worker node, database type: " + databaseType);
         }
         workerNodeEntity.setId(generatedId.longValue());
     }
