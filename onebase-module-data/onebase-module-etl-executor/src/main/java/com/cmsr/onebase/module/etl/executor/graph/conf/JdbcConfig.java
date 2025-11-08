@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.etl.executor.graph.conf;
 import lombok.Data;
 
 @Data
-public class JdbcConnectionProperties {
+public class JdbcConfig {
     /**
      * 来自数据库补充
      */

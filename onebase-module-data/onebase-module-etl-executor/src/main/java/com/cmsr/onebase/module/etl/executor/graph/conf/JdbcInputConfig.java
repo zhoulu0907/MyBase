@@ -14,5 +14,5 @@ public class JdbcInputConfig {
     private Long tableId;
     private List<Field> fields;
 
-    private JdbcConnectionProperties connectionProperties;
+    private JdbcConfig jdbcConfig;
 }
