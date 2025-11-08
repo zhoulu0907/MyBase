@@ -213,8 +213,8 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public List<MetaBriefVO> listDatasources(Long applicationId) {
-        List<ETLDatasourceDO> datasourceDOList = datasourceRepository.findAllByApplicationId(applicationId);
+    public List<MetaBriefVO> listDatasources(Long applicationId, Integer writable) {
+        List<ETLDatasourceDO> datasourceDOList = datasourceRepository.findAllByApplicationIdWithWritable(applicationId, writable);
 
         return datasourceDOList.stream()
                 .map(datasourceDO -> {

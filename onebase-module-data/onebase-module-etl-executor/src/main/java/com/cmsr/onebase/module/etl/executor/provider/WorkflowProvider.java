@@ -77,9 +77,9 @@ public class WorkflowProvider {
         inputConfig.getConnectionProperties().setPassword(connectionProperties.getPassword());
     }
 
-    private List<Field> complementTableColumns(JsonObject element, List<String> filteredColumns) {
+    private List<Field> complementTableColumns(JsonObject tableMetaInfo, List<String> filteredColumns) {
         List<Field> fields = new ArrayList<>();
-        JsonArray columns = element.getAsJsonArray("columns");
+        JsonArray columns = tableMetaInfo.getAsJsonArray("columns");
         columns.forEach(column -> {
             Field field = new Field();
             JsonObject columnJson = column.getAsJsonObject();
