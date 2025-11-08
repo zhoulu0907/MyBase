@@ -8,7 +8,9 @@ import java.util.List;
 @Data
 public class JdbcOutputConfig {
 
-    private Long targetTableId;
+    private Long datasourceId;
+
+    private Long tableId;
 
 
     private List<OutputField> fields;
