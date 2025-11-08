@@ -12,6 +12,7 @@ public class JdbcInputConfig {
      * 来自界面定义
      */
     private Long tableId;
+
     private List<Field> fields;
 
     private JdbcConfig jdbcConfig;

@@ -1,15 +1,22 @@
 package com.cmsr.onebase.module.etl.executor.graph.conf;
 
-import com.cmsr.onebase.module.etl.executor.graph.Field;
-import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 @Data
-public class OutputField extends Field {
-
-    @SerializedName("targetFieldId")
-    private String fieldId;
+public class OutputField {
 
     private String sourceFieldId;
+
+    /**
+     * 源字段名称
+     */
+    private String sourceFieldName;
+
+    private String targetFieldId;
+
+    /**
+     * 源字段名称
+     */
+    private String targetFieldName;
 
 }

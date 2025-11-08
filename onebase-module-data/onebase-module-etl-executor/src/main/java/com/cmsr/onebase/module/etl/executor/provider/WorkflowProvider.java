@@ -40,12 +40,13 @@ public class WorkflowProvider {
     public WorkflowGraph getWorkflowGraph(Long workflowId) throws Exception {
         WorkflowGraph workflowGraph = queryProvider.findWorkflowConfig(workflowId);
         complementGraphInfomation(workflowGraph);
-        return null;
+        return workflowGraph;
     }
 
-    public WorkflowGraph getWorkflowGraph(String previewWorkflow) {
-
-        return null;
+    public WorkflowGraph getWorkflowGraph(String previewWorkflow) throws Exception {
+        WorkflowGraph workflowGraph = GsonUtil.GSON.fromJson(previewWorkflow, WorkflowGraph.class);
+        complementGraphInfomation(workflowGraph);
+        return workflowGraph;
     }
 
     private void complementGraphInfomation(WorkflowGraph workflowGraph) throws Exception {

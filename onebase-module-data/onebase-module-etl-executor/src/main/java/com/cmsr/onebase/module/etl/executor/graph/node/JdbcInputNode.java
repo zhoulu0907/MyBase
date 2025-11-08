@@ -26,11 +26,11 @@ public class JdbcInputNode extends Node implements CreateTableAction {
         }
         TableDescriptor tableDescriptor = TableDescriptor.forConnector("jdbc")
                 .schema(schemaBuilder.build())
-                .option(JdbcConnectorOptions.DRIVER, config.getConnectionProperties().getDriver())
-                .option(JdbcConnectorOptions.URL, config.getConnectionProperties().getJdbcUrl())
-                .option(JdbcConnectorOptions.USERNAME, config.getConnectionProperties().getUsername())
-                .option(JdbcConnectorOptions.PASSWORD, config.getConnectionProperties().getPassword())
-                .option(JdbcConnectorOptions.TABLE_NAME, config.getConnectionProperties().getTableName())
+                .option(JdbcConnectorOptions.DRIVER, config.getJdbcConfig().getDriver())
+                .option(JdbcConnectorOptions.URL, config.getJdbcConfig().getJdbcUrl())
+                .option(JdbcConnectorOptions.USERNAME, config.getJdbcConfig().getUsername())
+                .option(JdbcConnectorOptions.PASSWORD, config.getJdbcConfig().getPassword())
+                .option(JdbcConnectorOptions.TABLE_NAME, config.getJdbcConfig().getTableName())
                 .build();
         tableEnv.createTable(getId(), tableDescriptor);
     }
