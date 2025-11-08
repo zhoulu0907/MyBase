@@ -37,6 +37,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
     <div className="formWrapper">
       <Input
         readOnly={true}
+        label={label.display && label.text}
         defaultValue={defaultValue}
         placeholder={placeholder}
         style={{
