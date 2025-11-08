@@ -81,15 +81,35 @@ public class WorkerNodeDAO {
      * @param workerNodeEntity 工作节点实体
      */
     public void addWorkerNode(WorkerNodeEntity workerNodeEntity) {
-        String sql;
         String dbType = getDatabaseType();
         
-        // 根据数据库类型选择不同的插入SQL
+        // 达梦数据库：需要手动生成ID（表中id列不是自增的）
         if ("dameng".equals(dbType)) {
-            // 达梦数据库：显式使用序列生成ID
-            sql = "INSERT INTO \"system_uid_worker_node\" (\"id\", \"worker_host\", \"worker_port\", \"node_type\") " +
-                  "VALUES (SEQ_SYSTEM_UID_WORKER_NODE.NEXTVAL, ?, ?, ?)";
-        } else if ("kingbase".equals(dbType)) {
+            // 先查询当前最大ID
+            Long maxId = jdbcTemplate.queryForObject(
+                "SELECT COALESCE(MAX(\"id\"), 0) FROM \"system_uid_worker_node\"", 
+                Long.class
+            );
+            Long newId = (maxId != null ? maxId : 0L) + 1;
+            
+            // 插入时显式指定ID和所有必需字段
+            String sql = "INSERT INTO \"system_uid_worker_node\" " +
+                        "(\"id\", \"worker_host\", \"worker_port\", \"node_type\", \"launch_date\", \"creator\", " +
+                        "\"create_time\", \"updater\", \"update_time\", \"deleted\") " +
+                        "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0)";
+            
+            jdbcTemplate.update(sql, newId, 
+                workerNodeEntity.getWorkerHost(), 
+                workerNodeEntity.getWorkerPort(), 
+                workerNodeEntity.getNodeType());
+            
+            workerNodeEntity.setId(newId);
+            return;
+        }
+        
+        // 其他数据库的处理逻辑
+        String sql;
+        if ("kingbase".equals(dbType)) {
             // 人大金仓：显式使用序列生成ID
             sql = "INSERT INTO \"system_uid_worker_node\" (\"id\", \"worker_host\", \"worker_port\", \"node_type\") " +
                   "VALUES (nextval('seq_system_uid_worker_node'), ?, ?, ?)";
@@ -98,7 +118,7 @@ public class WorkerNodeDAO {
             sql = "INSERT INTO \"system_uid_worker_node\" (\"id\", \"worker_host\", \"worker_port\", \"node_type\") " +
                   "VALUES (seq_system_uid_worker_node.NEXTVAL, ?, ?, ?)";
         } else {
-            // MySQL、PostgreSQL等：依赖自增主键或SERIAL
+            // MySQL、PostgreSQL等：依赖自增主键
             sql = "INSERT INTO \"system_uid_worker_node\" (\"worker_host\", \"worker_port\", \"node_type\") " +
                   "VALUES (?, ?, ?)";
         }
@@ -116,22 +136,22 @@ public class WorkerNodeDAO {
         // 获取自增ID（兼容不同数据库的键名：id, ID, GENERATED_KEY等）
         Number generatedId = null;
         
-        // 方式1：尝试从keyHolder直接获取（适用于只返回主键的数据库，如达梦）
+        // 方式1：尝试从keyHolder直接获取
         try {
             if (keyHolder.getKey() != null) {
                 generatedId = keyHolder.getKey();
             }
         } catch (Exception e) {
-            // 如果失败（如PostgreSQL返回多个列），继续使用方式2
+            // 如果失败，继续使用方式2
             generatedId = null;
         }
         
-        // 方式2：从keyList中获取（兼容返回所有列的数据库，如PostgreSQL）
+        // 方式2：从keyList中获取
         if (generatedId == null) {
             List<Map<String, Object>> keyList = keyHolder.getKeyList();
             if (keyList != null && !keyList.isEmpty()) {
                 Map<String, Object> map = keyList.get(0);
-                // 尝试不同的键名（小写id、大写ID、GENERATED_KEY等）
+                // 尝试不同的键名
                 generatedId = (Number) map.get("id");
                 if (generatedId == null) {
                     generatedId = (Number) map.get("ID");
@@ -140,7 +160,6 @@ public class WorkerNodeDAO {
                     generatedId = (Number) map.get("GENERATED_KEY");
                 }
                 if (generatedId == null && !map.isEmpty()) {
-                    // 如果以上都没找到，取第一个值（通常就是ID）
                     generatedId = (Number) map.values().iterator().next();
                 }
             }
