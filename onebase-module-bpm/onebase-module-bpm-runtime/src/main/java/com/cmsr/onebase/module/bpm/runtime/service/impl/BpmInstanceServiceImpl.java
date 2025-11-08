@@ -395,7 +395,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         AdminUserRespDTO userRespDTO = result.getData().get(0);
         String initiatorName = userRespDTO.getNickname();
 
-        String businessTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
+        String bpmTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
 
         // 任选3个字段，todo 从全局配置里选择，关联实体查询
         String formSummary = reqVO.getEntity().getData().entrySet().stream()
@@ -409,9 +409,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         // 保存扩展信息
-        flowInsExtDO.setBusinessId(entityDataId);
+        flowInsExtDO.setBusinessDataId(entityDataId);
+        flowInsExtDO.setBindingViewId(instance.getFormPath());
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
-        flowInsExtDO.setBusinessTitle(businessTitle);
+        flowInsExtDO.setBpmTitle(bpmTitle);
         flowInsExtDO.setInitiatorId(loginUserId);
         flowInsExtDO.setInitiatorAvatar(userRespDTO.getAvatar());
         flowInsExtDO.setInitiatorName(initiatorName);

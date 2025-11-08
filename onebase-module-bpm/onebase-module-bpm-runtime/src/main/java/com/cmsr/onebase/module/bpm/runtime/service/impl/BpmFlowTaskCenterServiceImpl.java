@@ -126,7 +126,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setSubmitTime(flowTaskExt.getSubmitTime());
         todoTaskVO.setFormSummary(flowTaskExt.getFormSummary());
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
-        todoTaskVO.setBusinessId(flowTaskExt.getBusinessId());
+        todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
 
         todoTaskVO.setInitiator(new UserBasicInfoVO());
         todoTaskVO.getInitiator().setUserId(flowTaskExt.getInitiatorId());
@@ -151,11 +151,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             BpmFlowDoneTaskVO doneTaskVO = new BpmFlowDoneTaskVO();
             doneTaskVO.setTaskId(flowHisTaskExt.getId());
             doneTaskVO.setInstanceId(flowHisTaskExt.getInstanceId());
-            doneTaskVO.setProcessTitle(flowHisTaskExt.getBusinessTitle());
+            doneTaskVO.setProcessTitle(flowHisTaskExt.getBpmTitle());
             doneTaskVO.setFormSummary(flowHisTaskExt.getFormSummary());
             doneTaskVO.setHandleTime(flowHisTaskExt.getUpdateTime());
             doneTaskVO.setTaskStatus(flowHisTaskExt.getFlowStatus());
-            doneTaskVO.setBusinessId(flowHisTaskExt.getBusinessId());
+            doneTaskVO.setBusinessId(flowHisTaskExt.getBindingViewId());
 
             doneTaskVO.setInitiator(new UserBasicInfoVO());
             doneTaskVO.getInitiator().setUserId(flowHisTaskExt.getInitiatorId());
@@ -187,7 +187,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             bpmMyCreatedVO.setCreateTime(flowInstance.getCreateTime());
             bpmMyCreatedVO.setUpdateTime(flowInstance.getUpdateTime());
             bpmMyCreatedVO.setInstanceId(flowInstance.getId());
-            bpmMyCreatedVO.setBusinessId(flowInstance.getBusinessId());
+            bpmMyCreatedVO.setBusinessId(flowInstance.getBindingViewId());
 
             //设置当前节点处理人
             List<Task> flowTaskList = taskService.getByInsId(flowInstance.getId());

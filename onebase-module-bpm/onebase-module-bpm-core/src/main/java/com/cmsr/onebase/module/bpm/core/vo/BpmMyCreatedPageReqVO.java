@@ -13,8 +13,7 @@ import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class BpmMyCreatedPageReqVO extends BpmInsExtQueryPageVO {
-    @Schema(description = "流程状态：ALL-全部, DRAFT-草稿, APPROVING-审批中, APPROVED-已通过, REJECTED-已拒绝, REVOKED-已撤回, TERMINATED-已终止",
-            example = "ALL", defaultValue = "ALL")
+    @Schema(description = "流程状态，不传则全部 draft草稿 in_approval 审批中 approved 已通过 rejected 已拒绝 withdrawn 已撤回 terminated 已终止")
     private String flowStatus;
 
     @Schema(description = "创建时间 - 开始（包含）", example = "2025-08-01 00:00:00")

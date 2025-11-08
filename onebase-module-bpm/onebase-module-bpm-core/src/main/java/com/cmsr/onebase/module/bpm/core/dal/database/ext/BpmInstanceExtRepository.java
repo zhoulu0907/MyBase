@@ -12,6 +12,7 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -44,7 +45,7 @@ public class BpmInstanceExtRepository {
         return """
                 select
                       distinct
-                      t3.business_title,
+                      t3.bpm_title,
                       t3.initiator_id,
                       t3.initiator_name,
                       t3.initiator_dept_id,
@@ -52,9 +53,18 @@ public class BpmInstanceExtRepository {
                       t3.submit_Time,
                       t3.form_summary,
                       t3.form_name,
-                      t.*
+                      t3.binding_view_id,
+                      t.id,
+                      t.definition_id,
+                      t.node_type,
+                      t.node_code,
+                      t.node_name,
+                      t.flow_status,
+                      t.creator,
+                      t.create_time,
+                      t.updater,
+                      t.update_time
                 from bpm_flow_instance t
-                left join bpm_flow_task t1 on t.id = t1.instance_id
                 inner join bpm_flow_instance_biz_ext t3 on t.id = t3.instance_id
                 """;
     }
@@ -68,35 +78,43 @@ public class BpmInstanceExtRepository {
         condition.setPageNavi(navi);
         condition.and(Compare.EQUAL, "t3.app_id", reqVO.getAppId());
         condition.and(Compare.EQUAL, "t.creator", userId);
+
         // 动态添加其他查询条件
-        if (reqVO.getKeyword() != null && !reqVO.getKeyword().isEmpty()) {
+        if (StringUtils.isNotBlank(reqVO.getKeyword())) {
             ConfigStore orCondition = new DefaultConfigStore();
-            orCondition.or(Compare.LIKE, "t3.business_title", reqVO.getKeyword());
+            orCondition.or(Compare.LIKE, "t3.bpm_title", reqVO.getKeyword());
             orCondition.or(Compare.LIKE, "t3.initiator_name", reqVO.getKeyword());
             orCondition.or(Compare.LIKE, "t3.form_summary", reqVO.getKeyword());
             condition.and(orCondition);
         }
-        if (reqVO.getBusinessId() != null && !reqVO.getBusinessId().isEmpty()) {
-            condition.and(Compare.EQUAL, "t.business_id", reqVO.getBusinessId());
+
+        if (StringUtils.isNotBlank(reqVO.getBusinessId())) {
+            condition.and(Compare.EQUAL, "t.binding_view_id", reqVO.getBusinessId());
         }
-        if (reqVO.getNodeCode() != null && !reqVO.getNodeCode().isEmpty()) {
-            condition.and(Compare.EQUAL, "t1.node_code", reqVO.getNodeCode());
+
+        if (StringUtils.isNotBlank(reqVO.getNodeCode())) {
+            condition.and(Compare.EQUAL, "t.node_code", reqVO.getNodeCode());
         }
-        if (reqVO.getFlowStatus() != null && !reqVO.getFlowStatus().isEmpty()){
+
+        if (StringUtils.isNotBlank(reqVO.getFlowStatus())) {
             condition.and(Compare.EQUAL, "t.flow_status", reqVO.getFlowStatus());
         }
+
         if (reqVO.getCreateTimeStart() != null ) {
             condition.and(Compare.GREAT_EQUAL, "t.create_time", reqVO.getCreateTimeStart());
         }
+
         if (reqVO.getCreateTimeEnd() != null ) {
             condition.and(Compare.LESS_EQUAL, "t.create_time", reqVO.getCreateTimeEnd());
         }
+
         // 设置排序
         if("asc".equals(reqVO.getSortType())){
             condition.order("t.create_time asc");
         } else{
             condition.order("t.create_time desc");
         }
+
         return condition;
     }
 
