@@ -6,6 +6,8 @@ import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcConfig;
 import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcInputConfig;
 import com.cmsr.onebase.module.etl.executor.graph.node.JdbcInputNode;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTableColumn;
 import com.cmsr.onebase.module.etl.executor.util.GsonUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -60,23 +62,20 @@ public class WorkflowProvider {
     private void complementJdbcInputInformation(JdbcInputNode node) throws Exception {
         JdbcInputConfig inputConfig = node.getConfig();
         Long tableId = inputConfig.getTableId();
-        Map<String, Object> tableInfo = queryProvider.findTableById(tableId);
-        Long datasourceId = (Long) tableInfo.get("datasource_id");
-        String tableName = (String) tableInfo.get("table_name");
+        EtlTable etlTable = queryProvider.findTableById(tableId);
 
-        JsonObject tableMeta = GsonUtil.GSON.fromJson((String) tableInfo.get("meta_info"), JsonObject.class);
+        EtlTableColumn etlTableColumn = GsonUtil.GSON.fromJson(etlTable.getMetaInfo(), EtlTableColumn.class);
         Map<String, Field> columnMap = inputConfig.getFields().stream()
                 .collect(Collectors.toMap(Field::getFieldId, field -> field));
-        complementTableColumns(tableMeta, columnMap);
+        complementTableColumns(etlTableColumn, columnMap);
 
-        JdbcConfig connectionProperties = queryProvider.findConnectPropertiesById(datasourceId);
-        connectionProperties.setTableName(tableName);
+        JdbcConfig connectionProperties = queryProvider.findConnectPropertiesById(etlTable.getDatasourceId());
+        connectionProperties.setTableName(etlTable.getTableName());
         inputConfig.setJdbcConfig(connectionProperties);
     }
 
-    private void complementTableColumns(JsonObject tableMetaInfo, Map<String, Field> columnMap) {
-        JsonArray columns = tableMetaInfo.getAsJsonArray("columns");
-        columns.forEach(column -> {
+    private void complementTableColumns(EtlTableColumn etlTableColumn, Map<String, Field> columnMap) {
+        etlTableColumn.getColumns().forEach(column -> {
             JsonObject columnJson = column.getAsJsonObject();
             String columnId = columnJson.get("id").getAsString();
             if (!columnMap.containsKey(columnId)) {
