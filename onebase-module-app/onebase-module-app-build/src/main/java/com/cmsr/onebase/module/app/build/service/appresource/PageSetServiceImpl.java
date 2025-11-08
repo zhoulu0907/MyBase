@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.cmsr.onebase.module.app.build.service.appresource.workbench.WorkBenchPageSetService;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.workbench.WorkBenchPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.workbench.WorkbenchComponentDO;
+import com.cmsr.onebase.module.app.core.enums.appresource.PageTypeSetEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +21,6 @@ import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetReqVO;
 import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
 import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppComponentRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageMetaRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRefRouterRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetLabelRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.ComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
@@ -48,6 +46,9 @@ import jakarta.annotation.Resource;
 public class PageSetServiceImpl implements PageSetService {
 
     @Resource
+    private WorkBenchPageSetService workBenchPageSetService;
+
+    @Resource
     private AppPageSetRepository pageSetDataRepository;
 
     @Resource
@@ -55,6 +56,7 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Resource
     private AppPageRepository pageDataRepository;
+
 
     @Resource
     private AppComponentRepository componentDataRepository;
@@ -71,8 +73,6 @@ public class PageSetServiceImpl implements PageSetService {
     @Resource
     private AppMenuRepository appMenuRepository;
 
-    @Resource
-    private AppApplicationRepository appApplicationRepository;
 
     @Override
     public Long getPageSetId(Long menuId) {
@@ -97,10 +97,22 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String createPageSet(CreatePageSetDTO createPageSetDTO) {
+
         PageSetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, PageSetDO.class);
         pageSetDO.setPageSetCode(UUID.randomUUID().toString());
         pageSetDO.setPageSetType(createPageSetDTO.getPageSetType());
         pageSetDO = pageSetDataRepository.insert(pageSetDO);
+
+        /**
+         * 借用表单贵宝地，拆出来工作台的逻辑：
+         */
+        if (PageTypeSetEnum.isWorkBenchType(createPageSetDTO.getPageSetType())) {
+            /**
+             * 创建工作台页面
+             */
+            workBenchPageSetService.initWorkbenchPage(pageSetDO);
+            return pageSetDO.getPageSetCode();
+        }
 
         // 创建空的表单设计页面和列表设计页面
         String formPageCode = UUID.randomUUID().toString();
@@ -242,6 +254,20 @@ public class PageSetServiceImpl implements PageSetService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean savePageSet(SavePageSetReqVO savePageSetReqVO) {
 
+        PageSetDO pageSetDO = pageSetDataRepository.findById(savePageSetReqVO.getId());
+
+        if (pageSetDO == null) {
+            throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
+        }
+
+        if(PageTypeSetEnum.isWorkBenchType(pageSetDO.getPageSetType())) {
+            /**
+             * 保存工作台页面配置
+             */
+            workBenchPageSetService.saveWorkbenchPage(savePageSetReqVO, pageSetDO);
+            return true;
+        }
+
         savePageSetReqVO.getPages().forEach(page -> {
             if (Boolean.TRUE.equals(page.getCreated())) {
                 // 插入新的视图
@@ -304,6 +330,8 @@ public class PageSetServiceImpl implements PageSetService {
         return true;
     }
 
+
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO) {
@@ -315,6 +343,13 @@ public class PageSetServiceImpl implements PageSetService {
 
         // 读取页面集中的页面
         List<PageSetPageDO> pageSetPageDOs = pageSetPageDataRepository.findByPageSetId(pageSetDO.getId());
+
+        if (PageTypeSetEnum.isWorkBenchType(pageSetDO.getPageSetType())) {
+            /**
+             * 加载工作台页面配置
+             */
+            return workBenchPageSetService.loadWorkbenchPageSet(pageSetDO, pageSetPageDOs);
+        }
 
         List<PageDO> pageDOs = pageSetPageDOs.stream()
                 .map(pageSetPageDO -> {
