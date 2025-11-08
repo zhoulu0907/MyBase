@@ -39,8 +39,7 @@ public class WorkflowProvider {
         return workflowGraph;
     }
 
-    public WorkflowGraph getWorkflowGraph(String previewWorkflow) throws Exception {
-        WorkflowGraph workflowGraph = JacksonUtil.fromJson(previewWorkflow, WorkflowGraph.class);
+    public WorkflowGraph getWorkflowGraph(WorkflowGraph workflowGraph) throws Exception {
         complementGraphInformation(workflowGraph);
         return workflowGraph;
     }

@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.etl.executor.graph.Field;
 import com.cmsr.onebase.module.etl.executor.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
+import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
@@ -40,7 +41,9 @@ public class WorkFlowExecutor {
             if (inputArgs.getWorkflowId() != null) {
                 workflowGraph = workflowProvider.getWorkflowGraph(inputArgs.getWorkflowId());
             } else {
-                workflowGraph = workflowProvider.getWorkflowGraph(inputArgs.getPreviewWorkflow());
+                WorkflowGraph graph = JacksonUtil.readValue(inputArgs.getPreviewWorkflow(), WorkflowGraph.class);
+                WorkflowGraph subgraph = graph.subgraph(inputArgs.getPreviewNodeId());
+                workflowGraph = workflowProvider.getWorkflowGraph(subgraph);
             }
         }
         EnvironmentSettings settings =

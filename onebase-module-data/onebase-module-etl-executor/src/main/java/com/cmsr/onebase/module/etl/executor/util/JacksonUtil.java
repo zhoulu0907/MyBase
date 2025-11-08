@@ -20,4 +20,8 @@ public class JacksonUtil {
         return OBJECT_MAPPER.readValue(inputJson, valueType);
     }
 
+    public static <T> T readValue(String content, Class<T> valueType) throws JsonProcessingException {
+        return OBJECT_MAPPER.readValue(content, valueType);
+    }
+
 }

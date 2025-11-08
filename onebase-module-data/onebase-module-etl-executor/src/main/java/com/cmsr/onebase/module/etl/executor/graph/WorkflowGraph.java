@@ -28,4 +28,9 @@ public class WorkflowGraph {
         }
         throw new IllegalArgumentException("Node not found: " + nodeId);
     }
+
+    public WorkflowGraph subgraph(String endNodeId) {
+        //TODO
+        return this;
+    }
 }

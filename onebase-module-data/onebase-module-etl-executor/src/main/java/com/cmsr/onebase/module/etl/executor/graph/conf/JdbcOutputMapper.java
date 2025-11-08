@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.etl.executor.graph.conf;
 import lombok.Data;
 
 @Data
-public class OutputField {
+public class JdbcOutputMapper {
 
     private String sourceFieldId;
 
