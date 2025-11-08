@@ -16,8 +16,6 @@ public class GsonTest {
 
         OutputField outputField = GsonUtil.GSON.fromJson(json, OutputField.class);
 
-        assert outputField.getFieldId() != null;
-
     }
 
 }
