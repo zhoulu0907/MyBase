@@ -25,7 +25,7 @@ public class BeanManager implements Closeable {
         this.inputArgs = inputArgs;
         this.dataSource = DataSourceUtil.createDataSource(inputArgs);
         this.queryProvider = new QueryProvider(dataSource);
-        this.workflowProvider = new WorkflowProvider(dataSource);
+        this.workflowProvider = new WorkflowProvider();
         this.workflowProvider.setQueryProvider(queryProvider);
     }
 

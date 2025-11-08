@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class EtlColumn {
+
     private String id;
 
     private String name;

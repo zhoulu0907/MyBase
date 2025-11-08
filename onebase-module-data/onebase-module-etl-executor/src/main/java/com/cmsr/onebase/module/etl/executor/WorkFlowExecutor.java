@@ -1,8 +1,11 @@
 package com.cmsr.onebase.module.etl.executor;
 
+import com.cmsr.onebase.module.etl.executor.action.AbstractAction;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
+import com.cmsr.onebase.module.etl.executor.action.node.JdbcInputAction;
+import com.cmsr.onebase.module.etl.executor.action.node.JdbcOutputAction;
 import com.cmsr.onebase.module.etl.executor.graph.Field;
 import com.cmsr.onebase.module.etl.executor.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
@@ -47,26 +50,43 @@ public class WorkFlowExecutor {
 
     public void execute() {
         for (Node node : workflowGraph.getNodes()) {
-            if (node instanceof CreateTableAction action) {
-                action.createTable(tableEnv);
-            }
-            if (node instanceof SqlQueryAction action) {
-                action.sqlQuery(tableEnv);
-            }
-            if (node instanceof ExecuteSqlAction action) {
-                action.executeSql(tableEnv);
-            }
+            doAction(node);
+        }
+    }
+
+    private void doAction(Node node) {
+        if ("jdbc_input".equalsIgnoreCase(node.getType())) {
+            JdbcInputAction action = new JdbcInputAction();
+            action.setTableEnv(tableEnv);
+            action.setGraph(workflowGraph);
+            action.setNode(node);
+            doAction(action);
+        }
+        if ("jdbc_output".equalsIgnoreCase(node.getType())) {
+            JdbcOutputAction action = new JdbcOutputAction();
+            action.setTableEnv(tableEnv);
+            action.setGraph(workflowGraph);
+            action.setNode(node);
+            doAction(action);
+        }
+    }
+
+
+    private void doAction(AbstractAction actionObject) {
+        if (actionObject instanceof CreateTableAction action) {
+            action.createTable();
+        }
+        if (actionObject instanceof SqlQueryAction action) {
+            action.sqlQuery();
+        }
+        if (actionObject instanceof ExecuteSqlAction action) {
+            action.executeSql();
         }
     }
 
     public DataPreview preview() {
         for (Node node : workflowGraph.getNodes()) {
-            if (node instanceof CreateTableAction action) {
-                action.createTable(tableEnv);
-            }
-            if (node instanceof ExecuteSqlAction action) {
-                action.executeSql(tableEnv);
-            }
+            doAction(node);
             if (node.getId().equals(inputArgs.getPreviewNodeId())) {
                 Table table = tableEnv.from(node.getId());
                 TableResult tableResult = table.execute();

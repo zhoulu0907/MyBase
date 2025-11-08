@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.etl.executor.action;
 
-import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 
 /**
@@ -12,6 +11,6 @@ import org.apache.flink.table.api.TableResult;
  */
 public interface ExecuteSqlAction {
 
-    TableResult executeSql(TableEnvironment tableEnv);
+    TableResult executeSql();
 
 }

@@ -1,12 +1,13 @@
 package com.cmsr.onebase.module.etl.executor.graph.conf;
 
 import com.cmsr.onebase.module.etl.executor.graph.Field;
+import com.cmsr.onebase.module.etl.executor.graph.NodeConfig;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class JdbcOutputConfig {
+public class JdbcOutputConfig extends NodeConfig {
 
     private Long datasourceId;
 

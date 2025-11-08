@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.etl.executor.action;
 
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableEnvironment;
 
 /**
  * 执行查询语句，如
@@ -12,6 +11,6 @@ import org.apache.flink.table.api.TableEnvironment;
  */
 public interface SqlQueryAction {
 
-    Table sqlQuery(TableEnvironment tableEnv);
+    Table sqlQuery();
 
 }

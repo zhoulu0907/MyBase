@@ -1,12 +1,13 @@
 package com.cmsr.onebase.module.etl.executor.graph.conf;
 
 import com.cmsr.onebase.module.etl.executor.graph.Field;
+import com.cmsr.onebase.module.etl.executor.graph.NodeConfig;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class JdbcInputConfig {
+public class JdbcInputConfig extends NodeConfig {
 
     /**
      * 来自界面定义
