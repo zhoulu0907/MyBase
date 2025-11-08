@@ -74,4 +74,10 @@ public class BpmInstanceDTO extends FlowInstance {
      */
     @Column(name = "form_name", length = 100)
     private String formName;
+
+    /**
+     * 绑定的视图ID，如pageSetId
+     */
+    @Column(name = "binding_view_id", length = 100)
+    private String bindingViewId;
 }

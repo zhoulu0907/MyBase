@@ -320,9 +320,10 @@ CREATE TABLE bpm_flow_instance_biz_ext
 (
     id                      int8         NOT NULL,
     instance_id             int8         NOT NULL,
-    business_id             varchar(100) NOT NULL,
-    business_code           varchar(100) NULL,
-    business_title          varchar(500) NOT NULL,
+    business_data_id             varchar(100) NOT NULL,
+    business_data_code           varchar(100) NULL,
+    binding_view_id              varchar(100) NOT NULL,
+    bpm_title                    varchar(500) NOT NULL,
     app_id                  int8         NOT NULL,
     initiator_id            int8         NULL,
     initiator_name          varchar(100) NULL,
@@ -347,9 +348,9 @@ COMMENT ON TABLE bpm_flow_instance_biz_ext IS '流程实例扩展信息表';
 
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.id IS '主键ID';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.instance_id IS '流程实例ID';
-COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_id IS '业务ID';
-COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_code IS '业务编码';
-COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_title IS '业务标题';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_data_id IS '业务ID';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.business_data_code IS '业务编码';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.binding_view_id IS '绑定视图ID（与流程实例表的form_path字段保持一致）';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.bpm_title IS '流程标题';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_id IS '发起人ID';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.initiator_name IS '发起人名称（冗余字段）';
@@ -371,7 +372,7 @@ COMMENT ON COLUMN bpm_flow_instance_biz_ext.tenant_id IS '租户ID';
 
 -- 创建索引
 CREATE INDEX idx_bpm_flow_instance_biz_ext_instance_id ON bpm_flow_instance_biz_ext(instance_id);
-CREATE INDEX idx_bpm_flow_instance_biz_ext_business_id ON bpm_flow_instance_biz_ext(business_id);
+CREATE INDEX idx_bpm_flow_instance_biz_ext_business_id ON bpm_flow_instance_biz_ext(business_data_id);
 CREATE INDEX idx_bpm_flow_instance_biz_ext_tenant_id ON bpm_flow_instance_biz_ext(tenant_id);
 CREATE INDEX idx_bpm_flow_instance_biz_ext_deleted ON bpm_flow_instance_biz_ext(deleted);
 
