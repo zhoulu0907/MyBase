@@ -40,5 +40,4 @@ public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO {
 
     @Schema(description = "流程表单，实际对应pageSetId")
     private String businessId;
-
 }
