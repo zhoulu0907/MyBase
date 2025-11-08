@@ -2,21 +2,12 @@ package com.cmsr.onebase.module.bpm.core.dal.database.ext;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
-import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
 import jakarta.annotation.Resource;
 import lombok.Getter;
 import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
-import org.anyline.entity.DefaultPageNavi;
-import org.anyline.entity.PageNavi;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * WarmFlow
@@ -30,12 +21,10 @@ public class BpmTaskExtRepository {
     @Resource
     private FlowTaskRepository flowTaskRepository;
 
-    public PageResult<BpmTodoTaskDTO> getTodoTaskPage(BpmTodoTaskPageReqVO reqVO, String permission) {
+    public PageResult<BpmTodoTaskDTO> getTodoTaskPage(ConfigStore condition) {
         // 构建基础SQL
         String baseSql = buildBaseSql();
 
-        // 构建动态条件
-        ConfigStore condition = buildDynamicCondition(reqVO, permission);
         // 执行查询
         DataSet dataSet = flowTaskRepository.querys(baseSql, condition);
         return new PageResult<>(
@@ -45,8 +34,10 @@ public class BpmTaskExtRepository {
     }
     private String buildBaseSql() {
         return """
+               select * from (
                   select
                     distinct
+                    t3.app_id,
                     t3.bpm_title,
                     t3.initiator_id,
                     t3.initiator_name,
@@ -61,77 +52,16 @@ public class BpmTaskExtRepository {
                     t.instance_id,
                     t.flow_status,
                     t.create_time,
-                    from  bpm_flow_task t
+                    t1.processed_by,
+                    t2.node_code
+                    from bpm_flow_task t
                     left join bpm_flow_user t1 on t.id = t1.associated
                     left join bpm_flow_instance t2 on t.instance_id = t2.id
                     left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
                     where t.node_type = 1 and t.flow_status !='draft'
                     and t1.type in ('1','2','3')
                     and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0 and t3.deleted = 0
-                """;
-    }
-
-    private ConfigStore buildDynamicCondition(BpmTodoTaskPageReqVO reqVO, String permission) {
-        DefaultConfigStore condition = new DefaultConfigStore();
-        // 设置分页参数
-        PageNavi navi = new DefaultPageNavi();
-        navi.setCurPage(reqVO.getPageNo());
-        navi.setPageRows(reqVO.getPageSize());
-        condition.setPageNavi(navi);
-        condition.and(Compare.EQUAL, "t3.app_id", reqVO.getAppId());
-
-        // 动态添加其他查询条件
-        if (StringUtils.isNotBlank(reqVO.getKeyword())) {
-            ConfigStore orCondition = new DefaultConfigStore();
-            orCondition.or(Compare.LIKE, "t3.bpm_title", reqVO.getKeyword());
-            orCondition.or(Compare.LIKE, "t3.initiator_name", reqVO.getKeyword());
-            orCondition.or(Compare.LIKE, "t3.form_summary", reqVO.getKeyword());
-            condition.and(orCondition);
-        }
-
-        if (StringUtils.isNotBlank(reqVO.getBusinessId())) {
-            condition.and(Compare.EQUAL, "t3.binding_view_id", reqVO.getBusinessId());
-        }
-
-        if (reqVO.getSubmitTimeStart() != null) {
-            condition.and(Compare.GREAT_EQUAL, "t3.submit_time", reqVO.getSubmitTimeStart());
-        }
-
-        if (reqVO.getSubmitTimeEnd() != null) {
-            condition.and(Compare.LESS_EQUAL, "t3.submit_time", reqVO.getSubmitTimeEnd());
-        }
-
-        if (permission != null) {
-            condition.and(Compare.EQUAL, "t1.processed_by", permission);
-        }
-
-        // 流程状态条件（支持多个值）
-        List<String> flowStatusList = reqVO.getFlowStatusList();
-        if (CollectionUtils.isNotEmpty(flowStatusList)) {
-            if (flowStatusList.size() == 1) {
-                condition.and(Compare.EQUAL, "t2.flow_status", flowStatusList.get(0));
-            } else {
-                condition.and(Compare.IN, "t2.flow_status", flowStatusList);
-            }
-        }
-
-        // 节点编码条件（支持多个值）
-        List<String> nodeCodeList = reqVO.getNodeCodeList();
-        if (CollectionUtils.isNotEmpty(nodeCodeList)) {
-            if (nodeCodeList.size() == 1) {
-                condition.and(Compare.EQUAL, "t2.node_code", nodeCodeList.get(0));
-            } else {
-                condition.and(Compare.IN, "t2.node_code", nodeCodeList);
-            }
-        }
-
-        // 设置排序
-        if("asc".equals(reqVO.getSortType())){
-            condition.order("t.create_time asc");
-        } else{
-            condition.order("t.create_time desc");
-        }
-
-        return condition;
+               ) tf
+               """;
     }
 }

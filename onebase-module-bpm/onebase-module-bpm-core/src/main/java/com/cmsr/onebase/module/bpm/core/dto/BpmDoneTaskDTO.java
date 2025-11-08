@@ -81,4 +81,7 @@ public class BpmDoneTaskDTO extends FlowHisTask {
      */
     @Column(name = "binding_view_id", length = 100)
     private String bindingViewId;
+
+    @Column(name = "task_flow_status", length = 100)
+    private String taskFlowStatus;
 }
