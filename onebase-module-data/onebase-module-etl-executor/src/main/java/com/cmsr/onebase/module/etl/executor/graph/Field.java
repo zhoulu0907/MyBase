@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.executor.graph;
 
-import com.google.gson.JsonObject;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlColumn;
 import lombok.Data;
 
 @Data
@@ -18,20 +18,20 @@ public class Field {
 
     private Integer scale;
 
-    public void applyJson(JsonObject columnJson) {
-        this.setFieldName(columnJson.get("name").getAsString());
-        this.setFieldType(columnJson.get("flinkType").getAsString());
-        int ignoreLength = columnJson.get("ignoreLength").getAsInt();
+    public void complementColumn(EtlColumn columnDef) {
+        this.setFieldName(columnDef.getName());
+        this.setFieldType(columnDef.getFlinkType());
+        int ignoreLength = columnDef.getIgnoreLength();
         if (ignoreLength == 0) {
-            this.setLength(columnJson.get("length").getAsInt());
+            this.setLength(columnDef.getLength());
         }
-        int ignorePrecision = columnJson.get("ignorePrecision").getAsInt();
+        int ignorePrecision = columnDef.getIgnorePrecision();
         if (ignorePrecision == 0) {
-            this.setPrecision(columnJson.get("precision").getAsInt());
+            this.setPrecision(columnDef.getPrecision());
         }
-        int ignoreScale = columnJson.get("ignoreScale").getAsInt();
+        int ignoreScale = columnDef.getIgnoreScale();
         if (ignoreScale == 0) {
-            this.setScale(columnJson.get("scale").getAsInt());
+            this.setScale(columnDef.getScale());
         }
     }
 }

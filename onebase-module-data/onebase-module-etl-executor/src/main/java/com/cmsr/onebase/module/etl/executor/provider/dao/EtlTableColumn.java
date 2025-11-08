@@ -11,29 +11,6 @@ import java.util.List;
 @Data
 public class EtlTableColumn {
 
-    private List<Column> columns;
-
-    @Data
-    public static class Column {
-
-        private String id;
-
-        private String name;
-
-        private String flinkType;
-
-        private Integer ignoreLength;
-
-        private Integer length;
-
-        private Integer ignorePrecision;
-
-        private Integer precision;
-
-        private Integer ignoreScale;
-
-        private Integer scale;
-
-    }
+    private List<EtlColumn> columns;
 
 }

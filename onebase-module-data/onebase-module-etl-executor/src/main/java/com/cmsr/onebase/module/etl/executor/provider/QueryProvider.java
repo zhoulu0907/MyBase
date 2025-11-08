@@ -1,19 +1,14 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
-import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcConfig;
-import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
-import com.cmsr.onebase.module.etl.executor.util.GsonUtil;
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QueryProvider {
 
@@ -25,19 +20,18 @@ public class QueryProvider {
         this.runner = new QueryRunner(dataSource);
     }
 
-    public WorkflowGraph findWorkflowConfig(Long workflowId) throws Exception {
+    public String findWorkflowConfig(Long workflowId) throws Exception {
         var workflowQuery = context.select(DSL.field("config", String.class))
                 .from(DSL.table("etl_workflow"))
-                .where(DSL.field("id").eq(workflowId));
-        WorkflowGraph workflowGraph = runner.query(workflowQuery.getSQL(ParamType.INDEXED), new ResultSetHandler<WorkflowGraph>() {
-            @Override
-            public WorkflowGraph handle(ResultSet resultSet) throws SQLException {
-                if (resultSet.next()) {
-                    String config = resultSet.getString("config");
-                    return GsonUtil.GSON.fromJson(config, WorkflowGraph.class);
-                }
-                return null;
+                .where(DSL.and(
+                        DSL.field("id").eq(workflowId),
+                        DSL.field("deleted").eq(0)
+                ));
+        String workflowGraph = runner.query(workflowQuery.getSQL(ParamType.INDEXED), resultSet -> {
+            if (resultSet.next()) {
+                return resultSet.getString(1);
             }
+            return null;
         }, workflowQuery.getBindValues().toArray());
         if (workflowGraph == null) {
             throw new IllegalArgumentException(workflowId + " not exists");
@@ -45,51 +39,57 @@ public class QueryProvider {
         return workflowGraph;
     }
 
-    public EtlTable findTableById(Long tableId) throws Exception {
+    public List<String> findTableById(Long datasourceId, Long tableId) throws Exception {
         var tableInfoQuery = context.select(
-                        DSL.field("datasource_id", Long.class),
                         DSL.field("table_name", String.class),
                         DSL.field("meta_info", String.class)
                 )
                 .from(DSL.table("etl_table"))
                 .where(
-                        DSL.field("id", Long.class).eq(tableId).and(DSL.field("deleted", Long.class).eq(0L))
+                        DSL.and(
+                                DSL.field("id", Long.class).eq(tableId),
+                                DSL.field("datasource_id", Long.class).eq(datasourceId),
+                                DSL.field("deleted", Long.class).eq(0L)
+                        )
                 );
-        return runner.query(tableInfoQuery.getSQL(ParamType.INDEXED),
-                new ResultSetHandler<EtlTable>() {
-                    @Override
-                    public EtlTable handle(java.sql.ResultSet rs) throws java.sql.SQLException {
-                        if (rs.next()) {
-                            EtlTable etlTable = new EtlTable();
-                            etlTable.setDatasourceId(rs.getLong("datasource_id"));
-                            etlTable.setTableName(rs.getString("table_name"));
-                            etlTable.setMetaInfo(rs.getString("meta_info"));
-                            return etlTable;
-                        }
-                        return null;
+
+        List<String> result = runner.query(tableInfoQuery.getSQL(ParamType.INDEXED), resultSet -> {
+                    List<String> resultList = new ArrayList<>();
+                    if (resultSet.next()) {
+                        resultList.add(resultSet.getString("table_name"));
+                        resultList.add(resultSet.getString("meta_info"));
+                        return resultList;
                     }
+                    return null;
                 },
                 tableInfoQuery.getBindValues().toArray());
+        if (result == null) {
+            throw new IllegalArgumentException(tableId + " not exists");
+        }
+        return result;
     }
 
-    public JdbcConfig findConnectPropertiesById(Long datasourceId) throws Exception {
+    public String findConnectPropertiesById(Long datasourceId) throws Exception {
         var datasourceInfoQuery = context.select(
                         DSL.field("config", String.class)
                 )
                 .from(DSL.table("etl_datasource"))
                 .where(
-                        DSL.field("id").eq(datasourceId).and(DSL.field("deleted", Long.class).eq(0L))
+                        DSL.and(
+                                DSL.field("id").eq(datasourceId),
+                                DSL.field("deleted", Long.class).eq(0L)
+                        )
                 );
-        return runner.query(datasourceInfoQuery.getSQL(ParamType.INDEXED),
-                new ResultSetHandler<JdbcConfig>() {
-                    @Override
-                    public JdbcConfig handle(java.sql.ResultSet rs) throws java.sql.SQLException {
-                        if (rs.next()) {
-                            return GsonUtil.GSON.fromJson(rs.getString("config"), JdbcConfig.class);
-                        }
-                        return null;
+        String result = runner.query(datasourceInfoQuery.getSQL(ParamType.INDEXED), resultSet -> {
+                    if (resultSet.next()) {
+                        return resultSet.getString(1);
                     }
+                    return null;
                 },
                 datasourceInfoQuery.getBindValues().toArray());
+        if (result == null) {
+            throw new IllegalArgumentException(datasourceId + " not exists");
+        }
+        return result;
     }
 }

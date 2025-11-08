@@ -117,7 +117,8 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         scheduleJobDO.setWorkflowId(workflowId);
         scheduleJobDO.setJobStatus(ScheduleJobStatus.INITIALIZED.getValue());
         scheduleJobRepository.insert(scheduleJobDO);
-
+        // 解析workflow相关的表信息
+        updateWorkflowTableRelations(workflowDO);
         return workflowId;
     }
 
@@ -131,8 +132,15 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         oldWorkflow.setWorkflowName(updateVO.getFlowName());
         oldWorkflow.setDeclaration(updateVO.getDeclaration());
         oldWorkflow.setConfig(updateVO.getConfig());
-
+        updateWorkflowTableRelations(oldWorkflow);
         workflowRepository.update(oldWorkflow);
+    }
+
+    private void updateWorkflowTableRelations(ETLWorkflowDO workflowDO) {
+        Long workflowId = workflowDO.getId();
+        Set<Long> sourceTableIds = workflowTableRepository.findSourceTableIdsByWorkflowId(workflowId);
+        ETLWorkflowTableDO targetTableId = workflowTableRepository.findTargetTableIdByWorkflowId(workflowId);
+
     }
 
     @Override

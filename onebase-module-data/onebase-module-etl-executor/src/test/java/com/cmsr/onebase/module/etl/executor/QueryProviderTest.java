@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.executor;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.provider.QueryProvider;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
+import com.cmsr.onebase.module.etl.executor.util.GsonUtil;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.AfterEach;
@@ -41,6 +42,8 @@ public class QueryProviderTest {
     public void testQuery() throws Exception {
         WorkflowProvider workflowProvider = new WorkflowProvider(null);
         workflowProvider.setQueryProvider(queryProvider);
-        WorkflowGraph workflowGraph = workflowProvider.getWorkflowGraph(126965658692452352L);
+        WorkflowGraph workflowGraph = workflowProvider.getWorkflowGraph(127119744939163648L);
+
+        System.out.println(GsonUtil.GSON.toJson(workflowGraph));
     }
 }
