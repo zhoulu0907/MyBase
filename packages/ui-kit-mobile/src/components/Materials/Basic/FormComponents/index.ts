@@ -13,6 +13,9 @@ import XSelectMutiple from './SelectMutiple';
 import XCheckbox from './Checkbox';
 import XRadio from './Radio';
 import XSwitch from './Switch';
+import XImgUpload from './ImgUpload';
+import XCarouselForm from './Carousel';
+import FileUpload from './FileUpload';
 
 // ========== Schema导入区域 ==========
 import XInputTextSchema from './InputText/schema';
@@ -29,6 +32,9 @@ import XSelectMutipleSchema from './SelectMutiple/schema';
 import XCheckboxSchema from './Checkbox/schema';
 import XRadioSchema from './Radio/schema';
 import XSwitchSchema from './Switch/schema';
+import XImgUploadSchema from './ImgUpload/schema';
+import XCarouselSchema from './Carousel/schema';
+import FileUploadSchema from './FileUpload/schema';
 
 // ========== 导出对象 ==========
 export const FormComp = {
@@ -45,7 +51,10 @@ export const FormComp = {
   XSelectMutiple,
   XCheckbox,
   XRadio,
-  XSwitch
+  XSwitch,
+  XImgUpload,
+  XCarouselForm,
+  FileUpload
 } as const;
 
 export const FormSchema = {
@@ -62,5 +71,8 @@ export const FormSchema = {
   XSelectMutipleSchema,
   XCheckboxSchema,
   XRadioSchema,
-  XSwitchSchema
+  XSwitchSchema,
+  XImgUploadSchema,
+  XCarouselSchema,
+  FileUploadSchema
 } as const;

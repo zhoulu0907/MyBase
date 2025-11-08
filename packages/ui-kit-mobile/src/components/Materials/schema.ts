@@ -20,7 +20,10 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.RADIO]: BasicSchema.XRadio,
   [ALL_COMPONENT_TYPES.SWITCH]: BasicSchema.XSwitch,
   [ALL_COMPONENT_TYPES.SELECT_ONE]: BasicSchema.XSelectOne,
-  [ALL_COMPONENT_TYPES.SELECT_MUTIPLE]: BasicSchema.XSelectMutiple
+  [ALL_COMPONENT_TYPES.SELECT_MUTIPLE]: BasicSchema.XSelectMutiple,
+  [ALL_COMPONENT_TYPES.IMG_UPLOAD]: BasicSchema.XImgUpload,
+  [ALL_COMPONENT_TYPES.CAROUSEL]: BasicSchema.XCarousel,
+  [ALL_COMPONENT_TYPES.FILE_UPLOAD]: BasicSchema.FileUpload
 };
 
 /**

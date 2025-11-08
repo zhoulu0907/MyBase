@@ -12,6 +12,9 @@ import XSelectMutiple from './FormComponents/SelectMutiple/schema';
 import XCheckbox from './FormComponents/Checkbox/schema';
 import XRadio from './FormComponents/Radio/schema';
 import XSwitch from './FormComponents/Switch/schema';
+import XImgUpload from './FormComponents/ImgUpload/schema';
+import XCarousel from './FormComponents/Carousel/schema';
+import FileUpload from './FormComponents/FileUpload/schema';
 const baseSchema = {
   XInputText,
   XInputTextArea,
@@ -26,7 +29,10 @@ const baseSchema = {
   XSelectMutiple,
   XCheckbox,
   XRadio,
-  XSwitch
+  XSwitch,
+  XImgUpload,
+  XCarousel,
+  FileUpload
 };
 
 export default baseSchema;
