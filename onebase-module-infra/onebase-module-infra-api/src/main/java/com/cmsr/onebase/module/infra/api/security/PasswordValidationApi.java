@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.api;
+package com.cmsr.onebase.module.infra.api.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.tags.Tag;

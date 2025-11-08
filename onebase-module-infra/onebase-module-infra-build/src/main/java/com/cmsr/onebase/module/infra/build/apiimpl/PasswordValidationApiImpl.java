@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.infra.build.apiimpl;
 
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.infra.api.PasswordValidationApi;
+import com.cmsr.onebase.module.infra.api.security.PasswordValidationApi;
 import com.cmsr.onebase.module.infra.service.security.PasswordValidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
