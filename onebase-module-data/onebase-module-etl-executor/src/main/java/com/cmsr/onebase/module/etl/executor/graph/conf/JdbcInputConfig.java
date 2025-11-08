@@ -11,6 +11,8 @@ public class JdbcInputConfig {
     /**
      * 来自界面定义
      */
+    private Long datasourceId;
+
     private Long tableId;
 
     private List<Field> fields;
