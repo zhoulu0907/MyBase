@@ -30,7 +30,7 @@ public interface ETLDatasourceService {
 
     DataPreviewVO previewTable(TablePreviewVO tablePreviewVO);
 
-    List<MetaBriefVO> listDatasources(Long applicationId);
+    List<MetaBriefVO> listDatasources(Long applicationId, Integer writable);
 
     List<MetaBriefVO> listDatasourceTables(Long datasourceId, Integer writable);
 
