@@ -47,7 +47,7 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
       <div
         className={styles.cardHeader}
         onClick={() => {
-          toFlowEditor(data.applicationId, data.id);
+          toFlowEditor(data.id);
         }}
       >
         <div className={styles.cardHeaderContentLeft}>
@@ -87,7 +87,7 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
           <div className={styles.cardBodyRowDataSource}>
             <span>输入源:</span>
             <img src={etlTable} alt="" />
-            <span>{data.sourceTables.join(',')}</span>
+            <span>{data.sourceTables?.join(',')}</span>
           </div>
           <div className={styles.cardBodyRowDataSource}>
             <span>输出源: </span>

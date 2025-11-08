@@ -1,8 +1,9 @@
+import TableIcon from '@/assets/images/etl/table.svg';
 import { Button, Input } from '@arco-design/web-react';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
-import DatasourceModal from '../../nodes/inout/input/components/datasourceModal';
+import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
 
 const { TextArea } = Input;
@@ -10,7 +11,7 @@ const { TextArea } = Input;
 export const InputNodeConfig: React.FC = () => {
   useSignals();
 
-  const { curDrawerTab } = etlEditorSignal;
+  const { curDrawerTab, nodeData, curNode } = etlEditorSignal;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -28,8 +29,17 @@ export const InputNodeConfig: React.FC = () => {
               </div>
             </div>
             <div className={styles.dataSourceContent}>
-              <div className={styles.dataSourceName}>数据源名称</div>
+              <div className={styles.dataSourceName}>{nodeData.value[curNode.value.id]?.config?.datasourceId}</div>
               <div className={styles.selectedFields}>已选字段</div>
+
+              <div className={styles.dataSourceContentItems}>
+                {nodeData.value[curNode.value.id]?.config?.fields.map((field: any) => (
+                  <div key={field.fieldId} className={styles.dataSourceContentItem}>
+                    <img src={TableIcon} alt="column" />
+                    {field.fieldName}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <div className={styles.dataPreviewContent}></div>

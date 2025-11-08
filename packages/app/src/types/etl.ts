@@ -45,13 +45,14 @@ export interface ETLDatasourceConfig {
 }
 
 export interface CreateDataSourceReq {
-  datasourceCode: string;
+  datasourceCode?: string;
   datasourceName: string;
   datasourceType: string;
   config: ETLDatasourceConfig;
   applicationId: string;
-  declaration: string;
-  readonly: boolean;
+  declaration?: string;
+  readonly: number;
+  withCollect?: number;
 }
 
 export interface UpdateDataSourceReq extends CreateDataSourceReq {
@@ -63,7 +64,7 @@ export interface PageDatasourceReq {
   datasourceCode: string;
   datasourceName: string;
   datasourceType: string;
-  readonly: boolean;
+  readonly: number;
   collectStatus: string;
   pageNo: number;
   pageSize: number;
@@ -76,9 +77,29 @@ export interface PreviewDatasourceReq {
 
 export interface ListTablesReq {
   id: string;
-  writable: string;
+  writable?: number;
 }
 
+export interface ETLTable {
+  id: string;
+  name: string;
+}
+
+export interface ELTColumn {
+  id: string;
+  name: string;
+  type: string;
+}
+
+export interface ETLDatasourceOption {
+  id: string;
+  name: string;
+}
+
+export interface ListAppETLDatasourceParams {
+  applicationId: string;
+  writable: number;
+}
 export interface ListTableColumnsReq {
   tableId: string;
 }

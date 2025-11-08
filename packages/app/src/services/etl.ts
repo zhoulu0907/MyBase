@@ -2,6 +2,7 @@ import {
   CreateDataSourceReq,
   CreateETLFlowReq,
   DeleteETLFlowReq,
+  ListAppETLDatasourceParams,
   ListTableColumnsReq,
   ListTablesReq,
   PageDatasourceReq,
@@ -27,8 +28,7 @@ export const pageETLDatasource = (params: PageDatasourceReq) => etlService.get(`
 
 export const previewETLDatasource = (params: PreviewDatasourceReq) => etlService.post(`/datasource/preview`, params);
 
-export const listAppETLDatasource = (applicationId: string) =>
-  etlService.get(`/datasource/list?applicationId=${applicationId}`);
+export const listAppETLDatasource = (params: ListAppETLDatasourceParams) => etlService.get(`/datasource/list`, params);
 
 export const listETLTables = (params: ListTablesReq) => etlService.get(`/datasource/tables`, params);
 
@@ -41,6 +41,8 @@ export const craeteETLFlow = (params: CreateETLFlowReq) => etlService.post(`/wor
 export const updateETLFlow = (params: UpdateETLFlowReq) => etlService.post(`/workflow/update`, params);
 
 export const deleteETLFlow = (params: DeleteETLFlowReq) => etlService.post(`/workflow/delete`, params);
+
+export const getETLFlow = (worlflowId: string) => etlService.get(`/workflow/${worlflowId}`);
 
 // export const getETLFlowLogs = (id: string) => etlService.get(`/workflow/logs?id=${id}`);
 

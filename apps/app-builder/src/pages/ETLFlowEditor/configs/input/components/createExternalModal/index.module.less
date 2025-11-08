@@ -18,6 +18,9 @@
     justify-content: flex-start;
     gap: 32px;
     margin-top: 16px;
+    padding-bottom: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     .datasourceItem {
       width: 20%;
@@ -57,5 +60,21 @@
         color: #272e3b;
       }
     }
+  }
+}
+
+.createExternalModalFooter {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  .createExternalModalFooterButtons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
   }
 }

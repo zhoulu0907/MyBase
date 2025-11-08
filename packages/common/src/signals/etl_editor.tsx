@@ -41,6 +41,11 @@ export const createETLEditorSignal = () => {
     curDrawerTab.value = ETLDrawerTab.DATA_PREVIEW;
   };
 
+  const graphData = signal<any>({});
+  const setGraphData = (data: any) => {
+    graphData.value = data;
+  };
+
   return {
     curNode,
     setCurNode,
@@ -54,7 +59,10 @@ export const createETLEditorSignal = () => {
 
     curDrawerTab,
     setCurDrawerTab,
-    resetCurDrawerTab
+    resetCurDrawerTab,
+
+    graphData,
+    setGraphData
   };
 };
 
