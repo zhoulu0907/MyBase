@@ -19,16 +19,10 @@ public class BpmTodoTaskDTO extends FlowTask {
     private Long appId;
 
     /**
-     * 业务编码
-     */
-    @Column(name = "business_code", length = 100)
-    private String businessCode;
-
-    /**
      * 业务标题
      */
-    @Column(name = "business_title", length = 500)
-    private String businessTitle;
+    @Column(name = "bpm_title", length = 500)
+    private String bpmTitle;
 
     /**
      * 发起人ID
