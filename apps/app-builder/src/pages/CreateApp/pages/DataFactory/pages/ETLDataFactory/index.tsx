@@ -1,8 +1,9 @@
 import { useAppStore } from '@/store';
 import { Button, Input, Pagination, Spin, Tabs } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { ETL_FLOW_STATUS, ETL_SCHEDULE_STRATEGY, IS_SYNC_DONE, type ETLFlowMgmt } from '@onebase/app';
-import React, { useState } from 'react';
+import { ETL_SCHEDULE_STRATEGY, pageETLFlow, type ETLFlowMgmt } from '@onebase/app';
+import { debounce } from 'lodash-es';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ETLFlowCard from './components/card';
 import CreateModal from './components/createModal';
@@ -22,33 +23,49 @@ const EtlDataFactoryPage: React.FC = () => {
   const [pageNo, setPageNo] = useState(1);
   const [total, setTotal] = useState(0);
   const [eltFlowList, setEltFlowList] = useState<ETLFlowMgmt[]>([
-    {
-      id: '1',
-      applicationId: '1',
-      flowName: '测试流程',
-      enableStatus: ETL_FLOW_STATUS.ENABLED,
-      scheduleStrategy: ETL_SCHEDULE_STRATEGY.FIXED,
-      lastSuccessTime: '2021-01-01',
-      sourceTables: ['生产管理系统', '年度计划表'],
-      targetTable: '生产计划表',
-      isSyncDone: IS_SYNC_DONE.NO
-    }
+    // {
+    //   id: '1',
+    //   applicationId: '1',
+    //   flowName: '测试流程',
+    //   enableStatus: ETL_FLOW_STATUS.ENABLED,
+    //   scheduleStrategy: ETL_SCHEDULE_STRATEGY.FIXED,
+    //   lastSuccessTime: '2021-01-01',
+    //   sourceTables: ['生产管理系统', '年度计划表'],
+    //   targetTable: '生产计划表',
+    //   isSyncDone: IS_SYNC_DONE.NO
+    // }
   ]);
 
   const { curAppId } = useAppStore();
 
   const [createModalVisible, setCreateModalVisible] = useState(false);
 
-  //   const debouncedSearch = useCallback(
-  //     debounce((processName: string, enableStatus: ProcessStatus | undefined, triggerType: TriggerType | undefined) => {
-  //       getFlowMgmtList(processName, enableStatus, triggerType);
-  //     }, 500),
-  //     []
-  //   );
+  const debouncedSearch = useCallback(
+    debounce(() => {
+      handleGetETLFlowList();
+    }, 500),
+    []
+  );
 
-  //   useEffect(() => {
-  //     return () => debouncedSearch.cancel();
-  //   }, [debouncedSearch]);
+  useEffect(() => {
+    handleGetETLFlowList();
+  }, [pageNo, pageSize]);
+
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
+
+  const handleGetETLFlowList = async () => {
+    setLoading(true);
+    const res = await pageETLFlow({
+      pageNo,
+      pageSize
+    });
+    console.log('handleGetETLFlowList res: ', res);
+    setEltFlowList(res.list);
+    setTotal(res.total);
+    setLoading(false);
+  };
 
   const handleOpenCreateModal = () => {
     setCreateModalVisible(true);
@@ -62,8 +79,8 @@ const EtlDataFactoryPage: React.FC = () => {
     setCreateModalVisible(false);
   };
 
-  const handleToEditor = () => {
-    navigate(`/onebase/etl_editor?flowId=xx&appId=${curAppId}`);
+  const handleToEditor = (flowId: string) => {
+    navigate(`/onebase/etl_editor?flowId=${flowId}&appId=${curAppId}`);
   };
 
   return (
