@@ -6,14 +6,20 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class JdbcInputConfig {
+public class JdbcOutputConfig {
+
+    private Long targetTableId;
+
+
+    private List<OutputField> fields;
 
     /**
-     * 来自界面定义
+     * 从数据库补充
      */
-    private Long tableId;
+    private List<Field> targetFields;
 
-    private List<Field> fields;
-
+    /**
+     * 从数据库补充
+     */
     private JdbcConfig jdbcConfig;
 }

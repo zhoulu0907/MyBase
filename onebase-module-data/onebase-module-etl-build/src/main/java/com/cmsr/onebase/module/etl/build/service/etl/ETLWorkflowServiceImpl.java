@@ -100,7 +100,6 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public Long createWorkflow(WorkflowCreateVO createVO) {
-        validateWorkflowNameUnique(createVO.getFlowName(), null);
         ETLWorkflowDO workflowDO = new ETLWorkflowDO();
         Long applicationId = createVO.getApplicationId();
         workflowDO.setApplicationId(applicationId);
@@ -125,7 +124,6 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void updateWorkflow(WorkflowUpdateVO updateVO) {
         Long workflowId = updateVO.getId();
-        validateWorkflowNameUnique(updateVO.getFlowName(), workflowId);
         ETLWorkflowDO oldWorkflow = getOperableWorkflow(workflowId);
         if (!Objects.equals(oldWorkflow.getApplicationId(), updateVO.getApplicationId())) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATA_CONFLICT);
@@ -257,13 +255,6 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         scheduleRespVO.setConfig(workflowDO.getConfig());
 
         return scheduleRespVO;
-    }
-
-    private void validateWorkflowNameUnique(String flowName, Long filterId) {
-        ETLWorkflowDO workflowDO = workflowRepository.findOneByNameFilterById(flowName, filterId);
-        if (workflowDO != null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NAME_DUPLICATE);
-        }
     }
 
     /**

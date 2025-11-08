@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcConnectionProperties;
+import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcConfig;
 import com.cmsr.onebase.module.etl.executor.util.GsonUtil;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -32,10 +32,10 @@ public class QueryProvider {
         return null;
     };
 
-    private final ResultSetHandler<JdbcConnectionProperties> datasourceHandler = resultSet -> {
+    private final ResultSetHandler<JdbcConfig> datasourceHandler = resultSet -> {
         if (resultSet.next()) {
             String config = resultSet.getString("config");
-            return GsonUtil.GSON.fromJson(config, JdbcConnectionProperties.class);
+            return GsonUtil.GSON.fromJson(config, JdbcConfig.class);
         }
         return null;
     };
@@ -69,7 +69,7 @@ public class QueryProvider {
                 tableInfoQuery.getBindValues().toArray());
     }
 
-    public JdbcConnectionProperties findConnectPropertiesById(Long datasourceId) throws Exception {
+    public JdbcConfig findConnectPropertiesById(Long datasourceId) throws Exception {
         var datasourceInfoQuery = context.select(
                         DSL.field("config", String.class)
                 )
