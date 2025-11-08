@@ -36,7 +36,7 @@ public class DataSourceFactory {
         DatabaseType dbType = parseDatabaseType(databaseType);
         // 2. 创建DataSource
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
-        String connectMode = (String) connectionProperties.get("connectMode");
+        String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
         String jdbcConnection;
         if (StringUtils.equalsIgnoreCase("default", connectMode)) {
             jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);

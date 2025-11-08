@@ -14,13 +14,5 @@ public class JdbcInputConfig {
     private Long tableId;
     private List<Field> fields;
 
-    /**
-     * 来自数据库补充
-     */
-    private String driver;
-    private String jdbcUrl;
-    private String tableName;
-    private String username;
-    private String password;
-
+    private JdbcConnectionProperties connectionProperties;
 }
