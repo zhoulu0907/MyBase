@@ -1,11 +1,8 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
-import com.cmsr.onebase.module.etl.executor.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcInputConfig;
-import com.cmsr.onebase.module.etl.executor.graph.node.JdbcInputNode;
+import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcConnectionProperties;
 import com.cmsr.onebase.module.etl.executor.util.GsonUtil;
-import com.google.gson.JsonElement;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapHandler;
@@ -35,10 +32,10 @@ public class QueryProvider {
         return null;
     };
 
-    private final ResultSetHandler<JdbcInputConfig> datasourceHandler = resultSet -> {
+    private final ResultSetHandler<JdbcConnectionProperties> datasourceHandler = resultSet -> {
         if (resultSet.next()) {
             String config = resultSet.getString("config");
-            return GsonUtil.GSON.fromJson(config, JdbcInputConfig.class);
+            return GsonUtil.GSON.fromJson(config, JdbcConnectionProperties.class);
         }
         return null;
     };
@@ -54,22 +51,10 @@ public class QueryProvider {
         if (workflowGraph == null) {
             throw new IllegalArgumentException(workflowId + " not exists");
         }
-        // TODO: complete graph with input/output..
-        complementGraphInfomation(workflowGraph);
         return workflowGraph;
     }
 
-    private void complementGraphInfomation(WorkflowGraph workflowGraph) throws Exception {
-        for (Node node : workflowGraph.getNodes()) {
-            if (node instanceof JdbcInputNode jdbcInputNode) {
-                complementJdbcInputInformation(jdbcInputNode);
-            }
-        }
-    }
-
-    private void complementJdbcInputInformation(JdbcInputNode node) throws Exception {
-        JdbcInputConfig inputConfig = node.getConfig();
-        Long tableId = inputConfig.getTableId();
+    public Map<String, Object> findTableById(Long tableId) throws Exception {
         var tableInfoQuery = context.select(
                         DSL.field("datasource_id", Long.class),
                         DSL.field("table_name", String.class),
@@ -79,15 +64,12 @@ public class QueryProvider {
                 .where(
                         DSL.field("id", Long.class).eq(tableId)
                 );
-        Map<String, Object> tableInfo = runner.query(tableInfoQuery.getSQL(ParamType.INDEXED),
+        return runner.query(tableInfoQuery.getSQL(ParamType.INDEXED),
                 tableHandler,
                 tableInfoQuery.getBindValues().toArray());
-        Long datasourceId = (Long) tableInfo.get("datasource_id");
-        String tableName = (String) tableInfo.get("table_name");
-        inputConfig.setTableName(tableName);
-        JsonElement tableMeta = GsonUtil.GSON.toJsonTree(tableInfo.get("meta_info"));
+    }
 
-
+    public JdbcConnectionProperties findConnectPropertiesById(Long datasourceId) throws Exception {
         var datasourceInfoQuery = context.select(
                         DSL.field("config", String.class)
                 )
@@ -95,13 +77,8 @@ public class QueryProvider {
                 .where(
                         DSL.field("id").eq(datasourceId)
                 );
-        JdbcInputConfig jdbcConnectionConfig = runner.query(datasourceInfoQuery.getSQL(ParamType.INDEXED),
+        return runner.query(datasourceInfoQuery.getSQL(ParamType.INDEXED),
                 datasourceHandler,
                 datasourceInfoQuery.getBindValues().toArray());
-        inputConfig.setDriver(jdbcConnectionConfig.getDriver());
-        inputConfig.setJdbcUrl(jdbcConnectionConfig.getJdbcUrl());
-        inputConfig.setUsername(jdbcConnectionConfig.getUsername());
-        inputConfig.setPassword(jdbcConnectionConfig.getPassword());
-        System.out.println("dnn1iovu2h1");
     }
 }
