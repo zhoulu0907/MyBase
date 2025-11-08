@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * 流程实例查询条件VO
  *
@@ -31,5 +33,22 @@ public class BpmInsExtQueryPageVO extends PageParam  {
     @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
             example = "desc", defaultValue = "desc")
     private String sortType;
+
+    @Schema(description = "当前节点编码，支持多个值，格式：a,b,c", example = "start_1")
+    private String nodeCode;
+
+    @Schema(description = "流程状态，不传则全部。支持多个值，格式：a,b,c。draft草稿 in_approval 审批中 approved 已通过 rejected 已拒绝 withdrawn 已撤回 terminated 已终止")
+    private String flowStatus;
+
+    //========================== 以下参数内部使用，前端不用传 ==============
+    /**
+     * 当前节点编码列表
+     */
+    private List<String> nodeCodeList;
+
+    /**
+     * 流程状态列表
+     */
+    private List<String> flowStatusList;
 
 }

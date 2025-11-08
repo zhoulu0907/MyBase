@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.api.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
@@ -30,6 +31,7 @@ import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
@@ -89,6 +91,37 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private AdminUserApi adminUserApi;
+
+    private List<String> splitToList(String str) {
+        if (StringUtils.isBlank(str)) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(str.split(","))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> splitToFlowStatusList(String str) {
+        List<String> flowStatusList = splitToList(str);
+
+        if (CollectionUtils.isEmpty(flowStatusList)) {
+            return flowStatusList;
+        }
+
+        return flowStatusList.stream()
+                .filter(s -> {
+                    if (BpmBusinessStatusEnum.getByCode(s) == null) {
+                        log.warn("忽略不支持的流程状态：{}", s);
+                        return false;
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
     /**
      * 获取流程待办分页
      *
@@ -98,6 +131,12 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Override
     public PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmTodoTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        // 处理节点编码参数
+        pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
+
+        // 处理流程状态参数
+        pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
+
         PageResult<BpmTodoTaskDTO> pageResult = taskExtRepository.getTodoTaskPage(pageReqVO, String.valueOf(loginUserId));
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
@@ -144,6 +183,12 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      */
     @Override
     public PageResult<BpmFlowDoneTaskVO> getDonePage(BpmDoneTaskPageReqVO pageReqVO) {
+        // 处理节点编码参数
+        pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
+
+        // 处理流程状态参数
+        pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
+
         PageResult<BpmDoneTaskDTO> pageResult = hisTaskExtRepository.getDoneTaskPage(pageReqVO, WebFrameworkUtils.getLoginUserId());  //todo WebFrameworkUtils.getLoginUserId()需改为运行态
 
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
@@ -175,7 +220,14 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      * @return
      */
     public PageResult<BpmMyCreatedVO> getMyCreatedPage(BpmMyCreatedPageReqVO pageReqVO) {
+        // 处理节点编码参数
+        pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
+
+        // 处理流程状态参数
+        pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
+
         PageResult<BpmInstanceDTO> pageResult = insExtRepository.getMyCreatePage(pageReqVO, WebFrameworkUtils.getLoginUserId());
+
         List<BpmMyCreatedVO> list = new ArrayList<>();
         for (BpmInstanceDTO flowInstance : pageResult.getList()) {
             BpmMyCreatedVO bpmMyCreatedVO = new BpmMyCreatedVO();

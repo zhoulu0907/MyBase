@@ -12,8 +12,11 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  *  对FlowHisTaskRepository的扩展
@@ -99,13 +102,24 @@ public class BpmHisTaskExtRepository {
             condition.and(Compare.EQUAL, "t3.binding_view_id", reqVO.getBusinessId());
         }
 
-        // 流程状态
-        if (StringUtils.isNotBlank(reqVO.getFlowStatus())) {
-            condition.and(Compare.EQUAL, "t1.flow_status", reqVO.getFlowStatus());
+        // 流程状态条件（支持多个值）
+        List<String> flowStatusList = reqVO.getFlowStatusList();
+        if (CollectionUtils.isNotEmpty(flowStatusList)) {
+            if (flowStatusList.size() == 1) {
+                condition.and(Compare.EQUAL, "t1.flow_status", flowStatusList.get(0));
+            } else {
+                condition.and(Compare.IN, "t1.flow_status", flowStatusList);
+            }
         }
 
-        if (StringUtils.isNotBlank(reqVO.getNodeCode())) {
-            condition.and(Compare.EQUAL, "t1.node_code", reqVO.getNodeCode());
+        // 节点编码条件（支持多个值）
+        List<String> nodeCodeList = reqVO.getNodeCodeList();
+        if (CollectionUtils.isNotEmpty(nodeCodeList)) {
+            if (nodeCodeList.size() == 1) {
+                condition.and(Compare.EQUAL, "t1.node_code", nodeCodeList.get(0));
+            } else {
+                condition.and(Compare.IN, "t1.node_code", nodeCodeList);
+            }
         }
 
         // 设置排序

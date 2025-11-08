@@ -410,7 +410,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 保存扩展信息
         flowInsExtDO.setBusinessDataId(entityDataId);
-        flowInsExtDO.setBindingViewId(instance.getFormPath());
+        flowInsExtDO.setBindingViewId(def.getFormPath());
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
         flowInsExtDO.setBpmTitle(bpmTitle);
         flowInsExtDO.setInitiatorId(loginUserId);
