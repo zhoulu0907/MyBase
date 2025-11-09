@@ -69,6 +69,7 @@ public class DataSourceFactory {
         }
     }
 
+    //TODO update(datasourceDO) 的方法只有在创建数据库连接的时候需要更新和保存，在预览数据的时候不应该更新了！！！！一个构造方法隐含了更新，太TMD扯了
     public DataSource constructDataSource(Long datasourceId, boolean oneshot) {
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {

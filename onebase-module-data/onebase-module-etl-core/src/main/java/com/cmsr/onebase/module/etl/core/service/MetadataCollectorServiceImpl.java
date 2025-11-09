@@ -91,6 +91,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
         });
     }
 
+    //TODO 数据采集和数据保存的逻辑交织在一起，太乱了
     public boolean doCollection(Long applicationId, Long datasourceId, String databaseType) {
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
         String datasourceKey = "metadata-collector-" + datasourceId;
