@@ -4,7 +4,7 @@
   <groupId>com.cmsr.onebase</groupId>
   <artifactId>onebase-module-flow-sched</artifactId>
   <name>onebase-module-flow-sched</name>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>${revision}</version>
   <description>flow 模块 发送消息，给DolphinScheduler调用触发定时任务执行</description>
   <url>https://cmsr.com/onebase-module-flow/onebase-module-flow-sched</url>
   <repositories>
