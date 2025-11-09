@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-security-runtime</artifactId>
+            <artifactId>onebase-security-runtime</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
