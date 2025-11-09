@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.permission;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
@@ -280,6 +281,12 @@ public class RoleServiceImpl implements RoleService {
             RoleDO role = roleService.getRoleFromCache(id);
             return role != null && RoleCodeEnum.TENANT_ADMIN.getCode().equals(role.getCode());
         });
+    }
+
+    @Override
+    @TenantIgnore
+    public RoleDO getRoleIdsByCodeAndTenantId(String code, Long id) {
+        return roleDataRepository.getRoleIdsByCodeAndTenantId(code, id);
     }
 
 }

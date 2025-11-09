@@ -35,6 +35,7 @@ public class SecurityConfigTemplateDO extends BaseDO {
     public static final String MAXVALUE = "maxvalue";
     public static final String MINVALUE = "minvalue";
     public static final String REQUIRED = "required";
+    public static final String WIDGET_TYPE = "widget_type";
 
     /**
      * 分类ID
@@ -83,6 +84,12 @@ public class SecurityConfigTemplateDO extends BaseDO {
 
     @Column(name = REQUIRED)
     private String required;
+
+    /**
+     * 界面组件类型
+     */
+    @Column(name = WIDGET_TYPE)
+    private String widgetType;
     /**
      * 描述
      */

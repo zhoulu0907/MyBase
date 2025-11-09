@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -121,14 +122,14 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public CommonResult<Long> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
-        validDatasourceCodeDuplicate(createReqVO.getDatasourceCode(), null);
         validDatasourceTypeSupported(createReqVO.getDatasourceType());
 
         Long applicationId = createReqVO.getApplicationId();
         String datasourceType = createReqVO.getDatasourceType();
         ETLDatasourceDO datasourceDO = new ETLDatasourceDO();
         datasourceDO.setApplicationId(applicationId);
-        datasourceDO.setDatasourceCode(createReqVO.getDatasourceCode());
+        UUID uuid = UUID.randomUUID();
+        datasourceDO.setDatasourceCode(uuid.toString());
         datasourceDO.setDatasourceName(createReqVO.getDatasourceName());
         datasourceDO.setDeclaration(createReqVO.getDeclaration());
         datasourceDO.setDatasourceType(datasourceType);
@@ -212,8 +213,8 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public List<MetaBriefVO> listDatasources(Long applicationId) {
-        List<ETLDatasourceDO> datasourceDOList = datasourceRepository.findAllByApplicationId(applicationId);
+    public List<MetaBriefVO> listDatasources(Long applicationId, Integer writable) {
+        List<ETLDatasourceDO> datasourceDOList = datasourceRepository.findAllByApplicationIdWithWritable(applicationId, writable);
 
         return datasourceDOList.stream()
                 .map(datasourceDO -> {
@@ -259,7 +260,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
                     ColumnDefine columnDefine = new ColumnDefine();
                     columnDefine.setId(metaColumn.getId());
                     columnDefine.setName(metaColumn.getDisplayName());
-                    columnDefine.setType(metaColumn.getCompatibleType());
+                    columnDefine.setType(metaColumn.getFlinkType());
                     return columnDefine;
                 }).toList();
     }

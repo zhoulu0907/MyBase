@@ -23,6 +23,11 @@ public class EntityVO {
     private Long entityId;
 
     /**
+     * 数据ID
+     */
+    private Long id;
+
+    /**
      * 数据内容
      */
     @NotEmpty(message = "实体数据内容不能为空")

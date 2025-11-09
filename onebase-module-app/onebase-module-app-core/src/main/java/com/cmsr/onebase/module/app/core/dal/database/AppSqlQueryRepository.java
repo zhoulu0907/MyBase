@@ -126,48 +126,48 @@ public class AppSqlQueryRepository {
 
     public List<Long> findDeptHierarchyByUserId(Long userId) {
         List<Long> result = new ArrayList<>();
-        Long currentDeptId = null;
-        {
-            ConfigStore configs = new DefaultConfigStore();
-            configs.param("userId", userId);
-            String sql = """
-                    select
-                    	dept_id
-                    from
-                    	system_users
-                    where
-                    	deleted = 0 and id = #{userId}
-                    """;
-            DataSet dataSet = anylineService.querys(sql, configs);
-            for (DataRow dataRow : dataSet) {
-                Long deptId = dataRow.getLong("dept_id");
-                if (deptId != null) {
-                    result.add(deptId);
-                    currentDeptId = deptId;
-                }
-            }
-        }
-        while (currentDeptId != null) {
-            ConfigStore configs = new DefaultConfigStore();
-            configs.param("deptId", currentDeptId);
-            String sql = """
-                    select
-                    	id,
-                    	parent_id
-                    from
-                    	system_dept
-                    where
-                    	deleted = 0 and id = #{deptId}
-                    """;
-            DataSet dataSet = anylineService.querys(sql, configs);
-            for (DataRow dataRow : dataSet) {
-                Long deptId = dataRow.getLong("id");
-                if (deptId != null) {
-                    result.add(deptId);
-                }
-                currentDeptId = dataRow.getLong("parent_id");
-            }
-        }
+//        Long currentDeptId = null;
+//        {
+//            ConfigStore configs = new DefaultConfigStore();
+//            configs.param("userId", userId);
+//            String sql = """
+//                    select
+//                    	dept_id
+//                    from
+//                    	system_users
+//                    where
+//                    	deleted = 0 and id = #{userId}
+//                    """;
+//            DataSet dataSet = anylineService.querys(sql, configs);
+//            for (DataRow dataRow : dataSet) {
+//                Long deptId = dataRow.getLong("dept_id");
+//                if (deptId != null) {
+//                    result.add(deptId);
+//                    currentDeptId = deptId;
+//                }
+//            }
+//        }
+//        while (currentDeptId != null) {
+//            ConfigStore configs = new DefaultConfigStore();
+//            configs.param("deptId", currentDeptId);
+//            String sql = """
+//                    select
+//                    	id,
+//                    	parent_id
+//                    from
+//                    	system_dept
+//                    where
+//                    	deleted = 0 and id = #{deptId}
+//                    """;
+//            DataSet dataSet = anylineService.querys(sql, configs);
+//            for (DataRow dataRow : dataSet) {
+//                Long deptId = dataRow.getLong("id");
+//                if (deptId != null) {
+//                    result.add(deptId);
+//                }
+//                currentDeptId = dataRow.getLong("parent_id");
+//            }
+//        }
 
         return result;
     }

@@ -7,10 +7,9 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-import com.cmsr.onebase.module.app.core.dto.app.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
-import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.annotation.Resource;
@@ -114,8 +113,8 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
 
     @Override
-    public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
-        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getApplicationName());
+    public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppPageReqVO pageReqVO) {
+        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);

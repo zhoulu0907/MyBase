@@ -236,4 +236,14 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
+
+
+    public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> userIds) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.in(AdminUserDO.ID, userIds)
+                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
+                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
 }
