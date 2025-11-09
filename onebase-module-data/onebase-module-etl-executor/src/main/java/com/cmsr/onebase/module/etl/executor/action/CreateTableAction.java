@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.etl.executor.action;
 
+import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
+import org.apache.flink.table.api.TableEnvironment;
+
 /**
  * 创建表
  * <p>
@@ -11,6 +14,6 @@ package com.cmsr.onebase.module.etl.executor.action;
  */
 public interface CreateTableAction {
 
-    void createTable();
+    void createTable(TableEnvironment tableEnv, WorkflowGraph graph);
 
 }

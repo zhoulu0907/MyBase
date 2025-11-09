@@ -1,14 +1,17 @@
-package com.cmsr.onebase.module.etl.executor.action.node;
+package com.cmsr.onebase.module.etl.executor.graph.node;
 
-import com.cmsr.onebase.module.etl.executor.action.AbstractAction;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.graph.Field;
+import com.cmsr.onebase.module.etl.executor.graph.Node;
+import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcOutputConfig;
 import com.cmsr.onebase.module.etl.executor.util.JooqUtil;
+import lombok.ToString;
 import org.apache.flink.connector.jdbc.core.table.JdbcConnectorOptions;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.TableDescriptor;
+import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.types.DataType;
 import org.jooq.InsertOnDuplicateStep;
@@ -23,13 +26,13 @@ import static org.jooq.impl.DSL.table;
 
 /**
  * @Author：huangjie
- * @Date：2025/11/8 19:29
+ * @Date：2025/11/9 7:44
  */
-public class JdbcOutputAction extends AbstractAction implements CreateTableAction, ExecuteSqlAction {
+@ToString(callSuper = true)
+public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTableAction, ExecuteSqlAction {
 
     @Override
-    public void createTable() {
-        JdbcOutputConfig config = (JdbcOutputConfig) node.getConfig();
+    public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
         for (Field field : config.getTargetFields()) {
             DataType dataType = field.toFlinkTableType();
@@ -43,19 +46,18 @@ public class JdbcOutputAction extends AbstractAction implements CreateTableActio
                 .option(JdbcConnectorOptions.PASSWORD, config.getJdbcConfig().getPassword())
                 .option(JdbcConnectorOptions.TABLE_NAME, config.getJdbcConfig().getTableName())
                 .build();
-        tableEnv.createTable(node.getId(), tableDescriptor);
+        tableEnv.createTable(getId(), tableDescriptor);
     }
 
     @Override
-    public TableResult executeSql() {
-        JdbcOutputConfig config = (JdbcOutputConfig) node.getConfig();
+    public TableResult executeSql(TableEnvironment tableEnv, WorkflowGraph graph) {
         org.jooq.Field[] intoFields = targetFieldNames(config);
         String intoTableName = config.getJdbcConfig().getTableName();
         org.jooq.Field[] fromFields = config.getFields().stream().map(f -> {
             String sourceFieldName = f.getSourceFieldName();
             return DSL.field(sourceFieldName);
         }).toList().toArray(new org.jooq.Field[0]);
-        String fromTableName = graph.getSourceNode(node).getId();
+        String fromTableName = graph.getSourceNode(this).getId();
         InsertOnDuplicateStep<Record> select = JooqUtil.DSL_CONTEXT
                 .insertInto(table(intoTableName)).columns(intoFields)
                 .select(select(fromFields).from(table(fromTableName)));
@@ -80,5 +82,4 @@ public class JdbcOutputAction extends AbstractAction implements CreateTableActio
         }
         throw new IllegalArgumentException("fieldId not found: " + fieldId);
     }
-
 }

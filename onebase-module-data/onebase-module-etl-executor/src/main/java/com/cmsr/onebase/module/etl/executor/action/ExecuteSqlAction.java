@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.etl.executor.action;
 
+import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
+import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 
 /**
@@ -11,6 +13,6 @@ import org.apache.flink.table.api.TableResult;
  */
 public interface ExecuteSqlAction {
 
-    TableResult executeSql();
+    TableResult executeSql(TableEnvironment tableEnv, WorkflowGraph graph);
 
 }
