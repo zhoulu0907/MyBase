@@ -9,7 +9,7 @@ public class EtlColumn {
 
     private String name;
 
-    private String flinkType;
+    private String originType;
 
     private Integer ignoreLength;
 

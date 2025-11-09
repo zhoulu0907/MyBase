@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.etl.executor.graph.Field;
 import com.cmsr.onebase.module.etl.executor.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcInputConfig;
+import com.cmsr.onebase.module.etl.executor.util.FlinkUtil;
 import lombok.ToString;
 import org.apache.flink.connector.jdbc.core.table.JdbcConnectorOptions;
 import org.apache.flink.table.api.Schema;
@@ -17,13 +18,13 @@ import org.apache.flink.table.types.DataType;
  * @Date：2025/11/9 7:39
  */
 @ToString(callSuper = true)
-public class JdbcInputNode extends Node<JdbcInputConfig>  implements CreateTableAction {
+public class JdbcInputNode extends Node<JdbcInputConfig> implements CreateTableAction {
 
     @Override
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
         for (Field field : config.getFields()) {
-            DataType dataType = field.toFlinkTableType();
+            DataType dataType = FlinkUtil.toFlinkTableType(field);
             schemaBuilder.column(field.getFieldName(), dataType);
         }
         TableDescriptor tableDescriptor = TableDescriptor.forConnector("jdbc")

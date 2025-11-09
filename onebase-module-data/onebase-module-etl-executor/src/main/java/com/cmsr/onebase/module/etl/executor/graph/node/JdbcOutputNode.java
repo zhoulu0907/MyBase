@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.etl.executor.graph.Field;
 import com.cmsr.onebase.module.etl.executor.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcOutputConfig;
+import com.cmsr.onebase.module.etl.executor.util.FlinkUtil;
 import com.cmsr.onebase.module.etl.executor.util.JooqUtil;
 import lombok.ToString;
 import org.apache.flink.connector.jdbc.core.table.JdbcConnectorOptions;
@@ -35,7 +36,7 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
         for (Field field : config.getTargetFields()) {
-            DataType dataType = field.toFlinkTableType();
+            DataType dataType = FlinkUtil.toFlinkTableType(field);
             schemaBuilder.column(field.getFieldName(), dataType);
         }
         TableDescriptor tableDescriptor = TableDescriptor.forConnector("jdbc")

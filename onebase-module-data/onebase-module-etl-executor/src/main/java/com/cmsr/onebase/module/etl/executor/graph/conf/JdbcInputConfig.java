@@ -16,9 +16,18 @@ public class JdbcInputConfig extends NodeConfig {
      */
     private Long datasourceId;
 
+    /**
+     * 来自界面定义
+     */
     private Long tableId;
 
+    /**
+     * 来自界面定义，需要补充类型和精度
+     */
     private List<Field> fields;
 
+    /**
+     * 数据库补充的信息
+     */
     private JdbcConfig jdbcConfig;
 }

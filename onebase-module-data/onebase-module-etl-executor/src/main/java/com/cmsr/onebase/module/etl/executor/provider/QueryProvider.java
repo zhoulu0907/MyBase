@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import org.apache.commons.dbutils.QueryRunner;
 import org.jooq.DSLContext;
@@ -8,6 +10,8 @@ import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QueryProvider {
 
@@ -59,8 +63,9 @@ public class QueryProvider {
                 query.getBindValues().toArray());
     }
 
-    public String findConnectPropertiesById(Long datasourceId) throws Exception {
+    public EtlDataSource findConnectPropertiesById(Long datasourceId) throws Exception {
         var query = context.select(
+                        DSL.field("datasource_type", String.class),
                         DSL.field("config", String.class)
                 )
                 .from(DSL.table("etl_datasource"))
@@ -72,10 +77,39 @@ public class QueryProvider {
                 );
         return runner.query(query.getSQL(ParamType.INDEXED), resultSet -> {
                     if (resultSet.next()) {
-                        return resultSet.getString(1);
+                        EtlDataSource etlDataSource = new EtlDataSource();
+                        etlDataSource.setDatasourceType(resultSet.getString("datasource_type"));
+                        etlDataSource.setConfig(resultSet.getString("config"));
+                        return etlDataSource;
                     }
                     return null;
                 },
                 query.getBindValues().toArray());
     }
+
+    public List<EtlFlinkMapping> findFlinkMapping(String datasourceType) throws Exception {
+        var query = context.select(
+                        DSL.field("origin_type", String.class),
+                        DSL.field("flink_type", String.class)
+                )
+                .from(DSL.table("etl_flink_mapping"))
+                .where(
+                        DSL.and(
+                                DSL.field("datasource_type", String.class).eq(datasourceType),
+                                DSL.field("deleted", Long.class).eq(0L)
+                        )
+                );
+        return runner.query(query.getSQL(ParamType.INDEXED), resultSet -> {
+                    List<EtlFlinkMapping> etlFlinkMappings = new ArrayList<>();
+                    if (resultSet.next()) {
+                        EtlFlinkMapping etlFlinkMapping = new EtlFlinkMapping();
+                        etlFlinkMapping.setOriginType(resultSet.getString("origin_type"));
+                        etlFlinkMapping.setFlinkType(resultSet.getString("flink_type"));
+                        etlFlinkMappings.add(etlFlinkMapping);
+                    }
+                    return etlFlinkMappings;
+                },
+                query.getBindValues().toArray());
+    }
+
 }
