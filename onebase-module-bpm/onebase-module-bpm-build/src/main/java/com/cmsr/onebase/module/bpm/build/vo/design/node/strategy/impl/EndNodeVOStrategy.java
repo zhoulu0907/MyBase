@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.impl;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.EndNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.EndNodeExtDTO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.EndNodeVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.AbstractNodeVOStrategy;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;

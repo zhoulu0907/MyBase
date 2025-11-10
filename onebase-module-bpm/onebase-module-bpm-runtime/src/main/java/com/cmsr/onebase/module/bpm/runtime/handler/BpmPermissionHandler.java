@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.warm.flow.core.dto.FlowParams;

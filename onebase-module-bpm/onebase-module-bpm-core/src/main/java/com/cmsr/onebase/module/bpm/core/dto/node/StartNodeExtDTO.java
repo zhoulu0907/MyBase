@@ -1,7 +1,7 @@
-package com.cmsr.onebase.module.bpm.api.dto.node;
+package com.cmsr.onebase.module.bpm.core.dto.node;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import lombok.Data;
 
 import java.util.List;

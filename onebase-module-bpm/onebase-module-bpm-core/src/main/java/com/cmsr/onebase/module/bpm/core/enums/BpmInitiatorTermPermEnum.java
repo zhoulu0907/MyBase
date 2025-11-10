@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.api.enums;
+package com.cmsr.onebase.module.bpm.core.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
