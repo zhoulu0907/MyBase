@@ -27,7 +27,7 @@ const ICreated: FC = ({ appId }: any) => {
     {
       title: '流程状态',
       dataIndex: 'flowStatus',
-      render: (val: FLOWSTATUS_TYPE, record) => {
+      render: (val: FLOWSTATUS_TYPE) => {
         if (val === FLOWSTATUS_TYPE.APPROVED) {
           return (
             <Tag color="green" size="medium">
@@ -58,7 +58,7 @@ const ICreated: FC = ({ appId }: any) => {
     {
       title: '当前节点处理人',
       dataIndex: 'currentNodeHandler',
-       render: (userArr, record) => {
+       render: (userArr:any) => {
         return (
             <div className="flex-bw-center">
               {userArr?.length > 0 ? (
@@ -92,7 +92,7 @@ const ICreated: FC = ({ appId }: any) => {
       title: '操作',
       dataIndex: 'op',
       align: 'center',
-      render: (_, record) => (
+      render: (_:any, record:any) => (
         <Button
           type="text"
           status="success"
@@ -164,7 +164,7 @@ const ICreated: FC = ({ appId }: any) => {
             {radioList.map((item) => {
               return (
                 <Radio key={item.value} value={item.value}>
-                  {({ checked }) => {
+                  {({ checked }: { checked: boolean }) => {
                     return (
                       <Button key={item.value} type="text" className={`${checked ? 'rdo-checked' : ''}`}>
                         {item.label}
