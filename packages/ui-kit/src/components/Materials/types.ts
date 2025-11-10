@@ -421,7 +421,7 @@ export interface IDateFormatConfigType {
 }
 
 // 时间格式
-export interface ITimrFormatConfigType {
+export interface ITimeFormatConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TIME_FORMAT;

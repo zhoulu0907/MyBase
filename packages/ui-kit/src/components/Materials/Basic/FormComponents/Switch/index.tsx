@@ -2,7 +2,7 @@ import { Form, Switch } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputSwitchConfig } from './schema';
 
@@ -12,9 +12,8 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     dataField,
     tooltip,
     status,
-    defaultValue,
+    defaultValueConfig,
     layout,
-    labelColSpan = 0,
     fillText,
     runtime = true,
     detailMode
@@ -41,9 +40,6 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         triggerPropName="checked"
         wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -51,18 +47,18 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValueConfig.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
             {fieldValue
-              ? (fillText.display && fillText.checkedText) || '开启'
-              : (fillText.display && fillText.uncheckedText) || '关闭'}
+              ? (fillText?.display && fillText.checkedText) || '开启'
+              : (fillText?.display && fillText.uncheckedText) || '关闭'}
           </div>
         ) : (
           <Switch
-            checkedText={fillText.display && fillText.checkedText}
-            uncheckedText={fillText.display && fillText.uncheckedText}
-            defaultChecked={defaultValue}
+            checkedText={fillText?.display && fillText.checkedText}
+            uncheckedText={fillText?.display && fillText.uncheckedText}
             style={{
               pointerEvents: runtime ? 'unset' : 'none'
             }}

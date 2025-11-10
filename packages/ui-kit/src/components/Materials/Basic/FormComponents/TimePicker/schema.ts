@@ -41,7 +41,7 @@ import type {
   TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType,
-  ITimrFormatConfigType
+  ITimeFormatConfigType
 } from '../../../types';
 
 export interface XInputTimePickerSchema {
@@ -62,7 +62,7 @@ export type TXInputTimePickerEditData = Array<
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IVerifyConfigType
-  | ITimrFormatConfigType
+  | ITimeFormatConfigType
 >;
 
 export interface XInputTimePickerConfig extends ICommonBaseType {
