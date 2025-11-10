@@ -1,13 +1,17 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
-import com.cmsr.onebase.module.etl.executor.graph.Field;
-import com.cmsr.onebase.module.etl.executor.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.NodeConfig;
-import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcConfig;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcInputConfig;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcOutputConfig;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcOutputMapper;
+import com.cmsr.onebase.module.etl.common.entity.EtlColumn;
+import com.cmsr.onebase.module.etl.common.entity.EtlDataSource;
+import com.cmsr.onebase.module.etl.common.entity.EtlTable;
+import com.cmsr.onebase.module.etl.common.entity.EtlTableColumn;
+import com.cmsr.onebase.module.etl.common.graph.conf.Field;
+import com.cmsr.onebase.module.etl.common.graph.Node;
+import com.cmsr.onebase.module.etl.common.graph.NodeConfig;
+import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
+import com.cmsr.onebase.module.etl.common.graph.conf.JdbcConfig;
+import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
+import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
+import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputMapper;
 import com.cmsr.onebase.module.etl.executor.provider.dao.*;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import lombok.Setter;

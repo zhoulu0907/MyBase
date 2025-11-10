@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.executor.provider.dao;
+package com.cmsr.onebase.module.etl.common.entity;
 
 import lombok.Data;
 

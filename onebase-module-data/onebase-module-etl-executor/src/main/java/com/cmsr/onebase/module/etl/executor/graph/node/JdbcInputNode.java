@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.etl.executor.graph.node;
 
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
-import com.cmsr.onebase.module.etl.executor.graph.Field;
-import com.cmsr.onebase.module.etl.executor.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcInputConfig;
+import com.cmsr.onebase.module.etl.common.graph.conf.Field;
+import com.cmsr.onebase.module.etl.common.graph.Node;
+import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
+import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
 import com.cmsr.onebase.module.etl.executor.util.FlinkUtil;
 import lombok.ToString;
 import org.apache.flink.connector.jdbc.core.table.JdbcConnectorOptions;

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.executor;
 
-import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
+import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.provider.QueryProvider;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;

@@ -1,10 +1,7 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
-import com.cmsr.onebase.module.etl.executor.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.NodeConfig;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcInputConfig;
+import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.executor.graph.node.JdbcInputNode;
-import com.cmsr.onebase.module.etl.executor.graph.conf.JdbcOutputConfig;
 import com.cmsr.onebase.module.etl.executor.graph.node.JdbcOutputNode;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;

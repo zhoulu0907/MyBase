@@ -1,7 +1,6 @@
-package com.cmsr.onebase.module.etl.executor.graph.conf;
+package com.cmsr.onebase.module.etl.common.graph.conf;
 
-import com.cmsr.onebase.module.etl.executor.graph.Field;
-import com.cmsr.onebase.module.etl.executor.graph.NodeConfig;
+import com.cmsr.onebase.module.etl.common.graph.NodeConfig;
 import lombok.Data;
 import lombok.ToString;
 

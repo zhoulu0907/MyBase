@@ -1,10 +1,9 @@
 package com.cmsr.onebase.module.etl.executor;
 
-import com.cmsr.onebase.module.etl.executor.graph.Field;
+import com.cmsr.onebase.module.etl.common.graph.conf.Field;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Data

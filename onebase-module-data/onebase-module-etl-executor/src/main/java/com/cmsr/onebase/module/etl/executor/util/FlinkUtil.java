@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
-import com.cmsr.onebase.module.etl.executor.graph.Field;
+import com.cmsr.onebase.module.etl.common.graph.conf.Field;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.types.DataType;
 

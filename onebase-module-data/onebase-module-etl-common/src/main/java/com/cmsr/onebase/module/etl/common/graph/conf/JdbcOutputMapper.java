@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.executor.graph.conf;
+package com.cmsr.onebase.module.etl.common.graph.conf;
 
 import lombok.Data;
 
