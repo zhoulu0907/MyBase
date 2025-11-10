@@ -21,8 +21,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-etl-common</artifactId>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -114,11 +115,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.13.2</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>

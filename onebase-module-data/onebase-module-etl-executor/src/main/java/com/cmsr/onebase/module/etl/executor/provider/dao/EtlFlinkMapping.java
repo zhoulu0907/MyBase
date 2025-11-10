@@ -4,13 +4,12 @@ import lombok.Data;
 
 /**
  * @Author：huangjie
- * @Date：2025/11/8 12:58
+ * @Date：2025/11/9 9:00
  */
 @Data
-public class EtlTable {
+public class EtlFlinkMapping {
 
-    private String tableName;
+    private String originType;
 
-    private String metaInfo;
-
+    private String flinkType;
 }

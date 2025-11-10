@@ -1,14 +1,15 @@
-package com.cmsr.onebase.module.etl.executor.provider.dao;
+package com.cmsr.onebase.module.etl.common.entity;
 
 import lombok.Data;
 
 @Data
 public class EtlColumn {
+
     private String id;
 
     private String name;
 
-    private String flinkType;
+    private String originType;
 
     private Integer ignoreLength;
 

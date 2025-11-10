@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.executor.graph;
+package com.cmsr.onebase.module.etl.common.graph;
 
 import lombok.Data;
 
@@ -11,6 +11,6 @@ import java.util.List;
 @Data
 public class NodeOutput {
 
-    private List<Field> fields;
+    private List<NodeOutputField> fields;
 
 }
