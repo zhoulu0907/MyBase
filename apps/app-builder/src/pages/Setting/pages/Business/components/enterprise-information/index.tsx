@@ -136,11 +136,13 @@ const EnterpriseInfoPage: React.FC = () => {
   }
 
   const handleSubmitApp = async(data:CorpAppParams) => {
+    const IdList = data.applicationIdList?.map((item: any) => item.id).filter(Boolean);
+    data.applicationIdList = IdList;
     try {
         const res = await createCorpAppApi(data);
         if(res) {
           await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize)
-          Message.error("创建授权应用成功");
+          Message.success("创建授权应用成功");
         }else {
           Message.error("接口返回异常");
         }

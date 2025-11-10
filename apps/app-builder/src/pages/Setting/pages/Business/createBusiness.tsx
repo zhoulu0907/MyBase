@@ -56,7 +56,7 @@ const CreateBusinessPage: React.FC = () => {
 
     useEffect(() => {
         if(currentStep === 3) {
-            fetchCorpAuthorizedList()
+            // fetchCorpAuthorizedList()
         }
     },[currentStep])
 
@@ -66,17 +66,19 @@ const CreateBusinessPage: React.FC = () => {
     };
    
     const handleRemoveAuthorizedApp = async(id: string) => {
-    try {
-        const res = await removeCorpAppApi(id);
-        if(res) {
-            await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
-            Message.success("授权应用删除成功");
-        }else {
-            Message.success("未删除成功");
-        }
-        }catch(error) {
-            Message.error("接口返回异常, 授权应用删除失败");
-        }
+        const newData = tableData.filter(item => item.id !== id);
+        setTableData(newData);
+        // try {
+        // const res = await removeCorpAppApi(id);
+        // if(res) {
+        //     await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
+        //     Message.success("授权应用删除成功");
+        // }else {
+        //     Message.success("未删除成功");
+        // }
+        // }catch(error) {
+        //     Message.error("接口返回异常, 授权应用删除失败");
+        // }
     }
 
     const handleSearchChange = (searchValue: string) => {
@@ -84,19 +86,31 @@ const CreateBusinessPage: React.FC = () => {
     }
 
     const handleUpdateTime = async(params: updatedParams) => {
-    try {
-     const res =  await updateCorpAppApi(params);
-     if(res) {
-        await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
-        Message.success("更新授权时间成功");
-     }else {
-       Message.success("接口返回数据异常");
-     }
-    }catch(error) {
-      Message.error("更新授权时间失败");
-    }finally {
-      setVisible(false);
-    }
+        const newData = tableData.map(item => {
+            if(item.id === params.id) {
+                return {
+                    ...item,
+                    expiresTime: params.expiresTime,
+                    authorizationTime: params.authorizationTime
+                };
+            }
+            return item;
+        });
+        setTableData(newData);
+        setVisible(false);
+        // try {
+        // const res =  await updateCorpAppApi(params);
+        // if(res) {
+        //     await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
+        //     Message.success("更新授权时间成功");
+        // }else {
+        // Message.success("接口返回数据异常");
+        // }
+        // }catch(error) {
+        // Message.error("更新授权时间失败");
+        // }finally {
+        // setVisible(false);
+        // }
     }
 
     const displayData = useMemo(()=>{
@@ -158,15 +172,14 @@ const CreateBusinessPage: React.FC = () => {
     };
 
     const handleSubmitApp = (data: CorpAppParams) => {
-        const newData = {
-            authorizationTime:data.authorizationTime,
-            expiresTime: data.expiresTime,
-            versionNumber:"",
-            applicationCode:"",
-            applicationName:data.applicationIdList?.join(",")
-
-        }
-        setTableData((prev: any) => [...prev, newData]);
+        const newData = data.applicationIdList?.map((item:any) => {
+            return {
+                ...item,
+                authorizationTime:data.authorizationTime,
+                expiresTime: data.expiresTime,
+            }
+        }).filter(Boolean);
+        setTableData((prev: any) => [...prev, ...newData]);
         setAddAppModalVisible(false);
     }
 

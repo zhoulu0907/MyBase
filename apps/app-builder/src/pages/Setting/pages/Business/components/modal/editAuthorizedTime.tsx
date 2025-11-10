@@ -1,11 +1,13 @@
 import { DatePicker, Form, Modal } from "@arco-design/web-react";
+import type { AppItem } from "../../types/appItem";
 
 interface IEditAuthorizedModal {
     visible: boolean;
+    initialFormData: AppItem | null;
     setVisible: (visible: boolean) =>void;
     onUpdateData: (data: any)=>void;
 }
-export const EditAuthorizedTime:React.FC<IEditAuthorizedModal> = ({visible, setVisible, onUpdateData}) => {
+export const EditAuthorizedTime:React.FC<IEditAuthorizedModal> = ({initialFormData, visible, setVisible, onUpdateData}) => {
     const [editForm] = Form.useForm();
 
     const handleUpdateData = async() => {
@@ -23,7 +25,12 @@ export const EditAuthorizedTime:React.FC<IEditAuthorizedModal> = ({visible, setV
             onCancel={()=>setVisible(false)}
             onOk={handleUpdateData}
             >
-            <Form form={editForm}>
+            <Form form={editForm} initialValues={{
+                appTime: {
+                    authorizationTime: initialFormData?.authorizationTime,
+                    expiresTime: initialFormData?.expiresTime
+                }
+            }}>
                 <Form.Item
                     label="授权时间"
                     field="appTime"

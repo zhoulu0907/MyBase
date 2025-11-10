@@ -23,10 +23,25 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
         getApplicationIdResult();
     },[])
 
+    const handleCancel = () => {
+        onCloseAppModal();
+        createNewAppForm.resetFields();
+    }
+
     const handleSaveModal = async() => {
         const values = await createNewAppForm.validate();
-        console.log("11", values);
-        onSaveAppData(values);
+        const formattedList = values.applicationIdList.map((value: string) => {
+            const match = dropdownList.find(item => item.id === value);
+            return {
+                value,
+                applicationName: match?.appName || "",
+                versionNumber: match?.versionNumber || "",
+                applicationCode: match?.appCode  || "",
+                id: match?.id || ""
+            };
+        });
+        onSaveAppData({ ...values, applicationIdList: formattedList });
+        createNewAppForm.resetFields();
     }
 
     return (
@@ -37,7 +52,7 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                 </div>
             } 
             visible={visible}
-            onCancel={onCloseAppModal}
+            onCancel={handleCancel}
             onOk={handleSaveModal}
             >
             <Form form={createNewAppForm}>
