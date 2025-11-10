@@ -47,7 +47,7 @@ public interface ErrorCodeConstants {
     ErrorCode WEAK_PASSWORD_KEYBOARD_SLOPE_SEQ = new ErrorCode(1_001_005_009, "密码包含键盘斜向连续字符");
     ErrorCode WEAK_PASSWORD_LOGIC_SEQUENTIAL = new ErrorCode(1_001_005_010, "密码包含逻辑连续字符");
     ErrorCode WEAK_PASSWORD_SAME_CHAR_SEQUENTIAL = new ErrorCode(1_001_005_011, "密码包含连续相同字符");
-    ErrorCode WEAK_PASSWORD_TENANT_EMPTY = new ErrorCode(1_001_005_012, "租户ID不能为空");
+    ErrorCode WEAK_PASSWORD_TENANT_EMPTY = new ErrorCode(1_001_005_012, "无法获取租户ID信息");
 
     // ========== 文件配置 1-001-006-000 ==========
     ErrorCode FILE_CONFIG_NOT_EXISTS = new ErrorCode(1_001_006_000, "文件配置不存在");

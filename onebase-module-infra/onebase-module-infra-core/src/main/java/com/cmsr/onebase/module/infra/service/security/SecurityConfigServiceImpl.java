@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.infra.service.security;
 
-import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConvert;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigCategoryDataRepository;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigDataRepository;
@@ -26,7 +25,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 
@@ -73,7 +71,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     }
 
     @Override
-//    @Cacheable(cacheNames = cacheNames, key = "#tenantId")
+    @Cacheable(cacheNames = cacheNames, key = "#tenantId")
     public List<SecurityConfigItemRespVO> getSecurityConfigsByTenant(Long tenantId) {
         // 获取租户所有安全配置项，用于安全逻辑判断（使用Redis分布式缓存，TTL=30分钟）
         log.info("从数据库加载租户安全配置，tenantId: {}", tenantId);
@@ -95,7 +93,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-//    @CacheEvict(cacheNames = cacheNames, key = "#tenantId")
+    @CacheEvict(cacheNames = cacheNames, key = "#tenantId")
     public void batchUpdateConfig(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList) {
         // 接口4：批量更新租户安全配置
         if (CollectionUtils.isEmpty(updateReqVOList)) {

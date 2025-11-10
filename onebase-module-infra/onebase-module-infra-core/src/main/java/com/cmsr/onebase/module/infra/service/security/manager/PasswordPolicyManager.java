@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.infra.service.security.manager;
 
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
+import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import com.cmsr.onebase.module.infra.service.security.validator.config.PasswordPolicyConfig;
 import jakarta.annotation.Resource;
@@ -9,10 +11,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.WEAK_PASSWORD_TENANT_EMPTY;
 
 /**
  * 密码策略管理器
@@ -27,16 +31,21 @@ import java.util.stream.Collectors;
 @Component
 public class PasswordPolicyManager {
 
+    private static final String TRUE = "true";
+
     @Resource
     private SecurityConfigService securityConfigService;
 
     /**
      * 获取租户的密码策略配置
      *
-     * @param tenantId 租户ID
      * @return 密码策略配置对象
      */
-    public PasswordPolicyConfig getPolicyConfig(Long tenantId) {
+    public PasswordPolicyConfig getPolicyConfig() {
+        Long tenantId = TenantContextHolder.getTenantId();
+        if (tenantId == null) {
+            throw exception(WEAK_PASSWORD_TENANT_EMPTY);
+        }
         // 从缓存中获取租户所有安全配置项
         List<SecurityConfigItemRespVO> configItems = securityConfigService.getSecurityConfigsByTenant(tenantId);
 
@@ -59,11 +68,12 @@ public class PasswordPolicyManager {
                 .build();
 
         // 设置密码校验总开关
-        String enableWeakPassword = getConfigValue(configMap, "enableWeakPassword");
-        config.setEnableWeakPassword("true".equalsIgnoreCase(enableWeakPassword));
+        String enableWeakPassword = getConfigValue(configMap, SecurityConfigKey.enableWeakPassword.getConfigKey());
+
+        config.setEnableWeakPassword(TRUE.equalsIgnoreCase(enableWeakPassword));
 
         // 设置最小长度
-        String minLength = getConfigValue(configMap, "minLength");
+        String minLength = getConfigValue(configMap, SecurityConfigKey.minLength.getConfigKey());
         if (minLength != null) {
             try {
                 config.setMinLength(Integer.parseInt(minLength.trim()));
@@ -76,12 +86,12 @@ public class PasswordPolicyManager {
         }
 
         // 解析extraCharacter配置项
-        String extraCharacter = getConfigValue(configMap, "extraCharacter");
+        String extraCharacter = getConfigValue(configMap, SecurityConfigKey.extraCharacter.getConfigKey());
         Set<String> extraSet = parseExtraCharacters(extraCharacter);
 
         // 根据extraCharacter中的值设置大写和特殊符号检查
-        config.setCheckUpperCase(extraSet.contains("uppperCase"));
-        config.setCheckContainSpecialChar(extraSet.contains("specialChar"));
+        config.setCheckUpperCase(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.uppperCase.getKey()));
+        config.setCheckContainSpecialChar(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.specialChar.getKey()));
 
         log.debug("租户密码策略配置转换完成，tenantId: {}, enableWeakPassword: {}, minLength: {}, checkUpperCase: {}, checkContainSpecialChar: {}",
                 null, config.getEnableWeakPassword(), config.getMinLength(), config.getCheckUpperCase(), config.getCheckContainSpecialChar());

@@ -31,6 +31,6 @@ public interface PasswordValidationApi {
      * @return 校验结果，成功返回success，失败返回error及错误信息
      */
     @PostMapping("/validate")
-    CommonResult<Boolean> validatePassword(@RequestParam("tenantId") Long tenantId,@RequestParam("password") String password);
+    CommonResult<Boolean> validatePassword(@RequestParam("password") String password);
 
 }
