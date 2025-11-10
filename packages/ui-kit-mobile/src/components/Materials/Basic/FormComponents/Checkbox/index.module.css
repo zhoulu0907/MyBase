@@ -1,0 +1,6 @@
+
+.checkboxCell {
+  :global(.arco-cell-inner) {
+    height: auto;
+  }
+}

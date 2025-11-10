@@ -3,8 +3,8 @@ import { Cell, Radio } from '@arco-design/mobile-react';
 import { memo } from 'react';
 // import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 // import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
 import type { XInputRadioConfig } from './schema';
+import styles from './index.module.css';
 
 const RadioGroup = Radio.Group;
 
@@ -26,6 +26,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     <div className="formWrapper">
       <Cell
         label={label.display && label.text}
+        className={styles.radioCell}
       >
         <RadioGroup
           options={defaultValue}

@@ -1,0 +1,5 @@
+.radioCell {
+  :global(.arco-cell-inner) {
+    height: auto;
+  }
+}

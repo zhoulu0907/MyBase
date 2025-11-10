@@ -3,9 +3,8 @@ import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
 import type { XInputCheckboxConfig } from './schema';
-
+import styles from './index.module.css';
 const CheckboxGroup = Checkbox.Group;
 
 const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -34,6 +33,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
     <div className="formWrapper">
       <Cell
         label={label.display && label.text}
+        className={styles.checkboxCell}
       >
         <CheckboxGroup
           defaultValue={defaultValue?.filter((op) => op.chosen).map((op) => op.value)}
