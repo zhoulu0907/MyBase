@@ -26,6 +26,11 @@
         <!-- 依赖模块 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-system-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-infra-api</artifactId>
             <version>${revision}</version>
         </dependency>

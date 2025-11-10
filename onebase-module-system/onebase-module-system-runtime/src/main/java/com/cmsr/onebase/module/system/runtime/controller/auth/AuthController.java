@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.platform.controller.auth;
+package com.cmsr.onebase.module.system.runtime.controller.auth;
 
 
 import cn.hutool.core.util.StrUtil;
@@ -7,7 +7,10 @@ import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.service.auth.AdminAuthService;
-import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +30,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RequestMapping("/system/auth")
 @Validated
 @Slf4j
-@Component("platformAuthController")
+@Component("runtimeAuthController")
 public class AuthController {
 
     @Resource
