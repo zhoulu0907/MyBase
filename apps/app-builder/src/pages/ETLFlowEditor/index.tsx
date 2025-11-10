@@ -61,6 +61,7 @@ const ETLFlowEditorPage: React.FC = () => {
         nodes: res.config.nodes.map((node: any) => {
           return {
             data: {
+              id: node.id,
               title: node.title,
               type: node.type
             },
@@ -79,6 +80,8 @@ const ETLFlowEditorPage: React.FC = () => {
       const nodesRes = res.config.nodes.reduce((acc: any, node: any) => {
         acc[node.id] = {
           config: node.config,
+          title: node.title,
+          description: node.description,
           output: node.output
         };
         return acc;
@@ -103,7 +106,8 @@ const ETLFlowEditorPage: React.FC = () => {
     const nodes = graphData.value.nodes?.map((node: any) => {
       return {
         id: node.id,
-        title: node.data.title,
+        title: nodeData.value[node.id].title || '',
+        description: nodeData.value[node.id].description || '',
         type: node.type,
         config: nodeData.value[node.id].config || {},
         output: nodeData.value[node.id].output || {},
@@ -133,10 +137,12 @@ const ETLFlowEditorPage: React.FC = () => {
       const res = await updateETLFlow({ id: flowId, ...req });
 
       console.log('res: ', res);
+      Message.success('更新成功');
     } else {
       const res = await craeteETLFlow(req);
 
       console.log('res: ', res);
+      Message.success('创建成功');
     }
   };
 

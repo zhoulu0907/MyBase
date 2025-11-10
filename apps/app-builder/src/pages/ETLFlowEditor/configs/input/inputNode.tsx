@@ -4,6 +4,7 @@ import { listETLTables, previewETLDatasource, type ETLTable } from '@onebase/app
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import DataPreview from '../../components/dataPreview';
 import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
 
@@ -17,6 +18,13 @@ export const InputNodeConfig: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [remark, setRemark] = useState<string>(nodeData.value[curNode.value.id]?.description || '');
   const [tables, setTables] = useState<ETLTable[]>([]);
+  const [previewData, setPreviewData] = useState<{
+    columns: any[];
+    data: any[];
+  }>({
+    columns: [],
+    data: []
+  });
 
   const handleChangeRemark = (value: string) => {
     if (!curNode.value.id) {
@@ -31,7 +39,7 @@ export const InputNodeConfig: React.FC = () => {
       handleListETLTables(nodeData.value[curNode.value.id]?.config?.datasourceId);
     }
 
-    // handlePreviewData();
+    handlePreviewData();
   }, [nodeData.value[curNode.value.id]?.config?.tableId]);
 
   const handleListETLTables = async (datasourceId: string) => {
@@ -40,8 +48,12 @@ export const InputNodeConfig: React.FC = () => {
   };
 
   const handlePreviewData = async () => {
-    const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
-    const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
+    // const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
+    // const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
+
+    const datasourceId = '115160185129926656';
+    const tableId = '125809900172541968';
+
     if (!datasourceId || !tableId) {
       return;
     }
@@ -49,7 +61,21 @@ export const InputNodeConfig: React.FC = () => {
       datasourceId: datasourceId,
       tableId: tableId
     });
-    console.log('res: ', res);
+    const previewData = {
+      columns: res.columns.map((column: any) => ({
+        title: column.name,
+        dataIndex: column.id,
+        key: column.id
+      })),
+      data: res.data.map((row: any[]) => {
+        const obj: any = {};
+        res.columns.forEach((col: any, idx: number) => {
+          obj[col.id] = row[idx];
+        });
+        return obj;
+      })
+    };
+    setPreviewData(previewData);
   };
 
   return (
@@ -86,7 +112,9 @@ export const InputNodeConfig: React.FC = () => {
               </div>
             )}
           </div>
-          <div className={styles.dataPreviewContent}></div>
+          <div className={styles.dataPreviewContent}>
+            {<DataPreview data={previewData.data} columns={previewData.columns} />}
+          </div>
         </div>
       )}
       {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && (

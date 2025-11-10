@@ -15,11 +15,11 @@ interface DrawerHeaderProps {}
 const DrawerHeader: React.FC<DrawerHeaderProps> = ({}) => {
   useSignals();
 
-  const { curNode, curDrawerTab, setCurDrawerTab } = etlEditorSignal;
+  const { curNode, nodeData, curDrawerTab, setCurDrawerTab } = etlEditorSignal;
 
   return (
     <div className={styles.drawerHeader}>
-      <NodeTitle title={etlEditorSignal.curNode.value?.title} />
+      <NodeTitle title={nodeData.value[curNode.value.id]?.title || ''} />
 
       <Tabs
         type="line"

@@ -10,7 +10,7 @@ const Col = Grid.Col;
 
 export interface FieldMapping {
   targetFieldName: string;
-  sourceFqn: string;
+  sourceFieldFqn: string;
   sourceFieldName: string;
   sourceFieldType: string;
 }
@@ -58,7 +58,7 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
       console.log('sourceNodeData: ', sourceNodeData);
       setOutputColumns(
         sourceNodeData?.output?.fields?.map((field: any) => ({
-          id: field.fqn,
+          id: field.fieldFqn,
           name: field.fieldName,
           type: field.fieldType
         })) ?? []
@@ -77,7 +77,7 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
     setFieldMappings([
       {
         targetFieldName: '',
-        sourceFqn: '',
+        sourceFieldFqn: '',
         sourceFieldName: '',
         sourceFieldType: ''
       }
@@ -89,7 +89,7 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
       ...prev,
       {
         targetFieldName: '',
-        sourceFqn: '',
+        sourceFieldFqn: '',
         sourceFieldName: '',
         sourceFieldType: ''
       }
@@ -102,7 +102,7 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
         return [
           {
             targetFieldName: '',
-            sourceFqn: '',
+            sourceFieldFqn: '',
             sourceFieldName: '',
             sourceFieldType: ''
           }
@@ -113,15 +113,15 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
     });
   };
 
-  const handleChangeOutputColumn = (sourceFqn: string, index: number) => {
-    const selectedColumn = outputColumns.find((column) => column.id === sourceFqn);
+  const handleChangeOutputColumn = (sourceFieldFqn: string, index: number) => {
+    const selectedColumn = outputColumns.find((column) => column.id === sourceFieldFqn);
 
     setFieldMappings((prev) =>
       prev.map((field, idx) =>
         idx === index
           ? {
               ...field,
-              sourceFqn,
+              sourceFieldFqn,
               sourceFieldName: selectedColumn?.name ?? '',
               sourceFieldType: selectedColumn?.type ?? ''
             }
@@ -144,7 +144,7 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
   };
 
   const handleOk = () => {
-    const validFields = fieldMappings.filter((field) => field.sourceFqn && field.targetFieldName);
+    const validFields = fieldMappings.filter((field) => field.sourceFieldFqn && field.targetFieldName);
 
     onOk?.(validFields);
   };
@@ -157,12 +157,12 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
     const selectedIds = new Set(
       fieldMappings
         .filter((_, idx) => idx !== currentIndex)
-        .map((mapping) => mapping.sourceFqn)
+        .map((mapping) => mapping.sourceFieldFqn)
         .filter((id) => !!id)
     );
 
     return outputColumns
-      .filter((column) => fieldMappings[currentIndex]?.sourceFqn === column.id || !selectedIds.has(column.id))
+      .filter((column) => fieldMappings[currentIndex]?.sourceFieldFqn === column.id || !selectedIds.has(column.id))
       .map((column) => ({
         label: column.name,
         value: column.id
@@ -198,7 +198,7 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
               <Col span={10}>
                 <Select
                   placeholder="请选择字段"
-                  value={field.sourceFqn}
+                  value={field.sourceFieldFqn}
                   options={getAvailableOutputOptions(index)}
                   onChange={(value) => handleChangeOutputColumn(value as string, index)}
                 />

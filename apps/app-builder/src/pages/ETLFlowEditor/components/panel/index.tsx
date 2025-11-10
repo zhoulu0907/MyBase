@@ -64,6 +64,7 @@ const ETLFlowPanel: React.FC = () => {
                   startDragSerivce.startDragCard(node.type.toLowerCase(), e, {
                     id: nodeId,
                     data: {
+                      id: nodeId,
                       title: `${node.name}节点`,
                       type: node.type
                     }
