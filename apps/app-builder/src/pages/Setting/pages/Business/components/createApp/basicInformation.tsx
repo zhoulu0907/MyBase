@@ -11,6 +11,8 @@ interface IBasicInfoProps {
 export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions, basicValues, onDataChange }) => {
     const [ basicInfoForm ] = Form.useForm();
 
+    const convertIndustryOption =  industryOptions.map((option: industryTypeOption) => ({ label: option.label, value: option.id }) as industryTypeOption);
+
     const handleValuesChange = (changedValues: Record<string, any>, allValues: Record<string, any>) => {
         onDataChange(allValues);
     };
@@ -50,7 +52,7 @@ export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions, ba
                 rules={[{ required: true, message: '请选择行业类型' }]}
             >
                 <Select
-                    options={industryOptions}
+                    options={convertIndustryOption}
                     placeholder="行业类型"
                 />
             </Form.Item>

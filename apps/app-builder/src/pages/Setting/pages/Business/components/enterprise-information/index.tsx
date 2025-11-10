@@ -47,7 +47,8 @@ const EnterpriseInfoPage: React.FC = () => {
     setLoading(true);
     const params: corpListParams = {
         pageNo,
-        pageSize
+        pageSize,
+        corpId
     };
     try {
       const res = await getCorpAuthorizedAppListApi(params);
