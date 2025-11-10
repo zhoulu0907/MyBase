@@ -70,6 +70,7 @@ public class DeptServiceImpl implements DeptService {
 
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
+        dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         deptDataRepository.insert(dept);
 
         return dept.getId();
