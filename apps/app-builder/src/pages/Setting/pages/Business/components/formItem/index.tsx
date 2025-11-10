@@ -1,5 +1,6 @@
 import React from 'react';
 import { Space } from '@arco-design/web-react';
+import { formatIndustryType } from '../../utils';
 
 interface FormItemProps {
   label?: string;
@@ -28,6 +29,10 @@ const EditableFormItem: React.FC<FormItemProps> = ({
 
     if (Array.isArray(value)) {
       return value.join(', ');
+    }
+
+    if(label=== "industryType") {
+      return formatIndustryType(componentProps?.options, value);
     }
 
     return value;

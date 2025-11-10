@@ -25,6 +25,7 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
 
     const handleSaveModal = async() => {
         const values = await createNewAppForm.validate();
+        console.log("11", values);
         onSaveAppData(values);
     }
 

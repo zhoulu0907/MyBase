@@ -7,7 +7,7 @@ import { CreateSuccess } from "./components/createApp/createSuccess";
 import { BasicInformation } from "./components/createApp/basicInformation";
 import { AuthorizedApp } from "./components/createApp/authorizedApp";
 import { AdminInformation } from "./components/createApp/adminInfomation";
-import type { AppItem, OutletContextType } from "./types/appItem";
+import type { AppItem, OutletContextType, successData } from "./types/appItem";
 import {removeCorpAppApi, updateCorpAppApi, createCorpApi, getCorpAuthorizedAppListApi, type CorpAppParams, type createCorpParams, type updatedParams, type corpListParams} from "@onebase/platform-center";
 import { IconLoading } from "@arco-design/web-react/icon";
 
@@ -31,6 +31,7 @@ const CreateBusinessPage: React.FC = () => {
         sizeCanChange: true,
         pageSizeChangeResetCurrent: true
     });
+    const [successData, setSuccessData] = useState<successData | null>(null);
 
     const fetchCorpAuthorizedList = async(pageNo = 1, pageSize = 10) => {
         setLoading(true);
@@ -116,7 +117,12 @@ const CreateBusinessPage: React.FC = () => {
     };
    
     const handleBasicDataChange = (values: Record<string, any>) => {
-        setBasicData(values); 
+        const newStatus = values?.status === true ? 1 : 0;
+        let newValues = {
+            ...values,
+            status: newStatus
+        }
+        setBasicData(newValues); 
     };
 
     const handleAdminDataChange = (values: Record<string, any>) => {
@@ -134,7 +140,8 @@ const CreateBusinessPage: React.FC = () => {
             try {
                 const res = await createCorpApi(params);
                 if(res) {
-                    console.log(res,"res 创建企业");
+                    setSuccessData(res);
+                    setCurrentStep(4);
                     Message.success("创建企业成功");
                 }else {
                     Message.success("接口返回数据异常");
@@ -197,7 +204,7 @@ const CreateBusinessPage: React.FC = () => {
                     {/* 第四步：确认信息 */}
                     {currentStep === 4 && (
                         <CreateSuccess 
-                         basicInfoForm={[]}
+                         successData={successData}
                          setCurrentStep={setCurrentStep} 
                          setAddAppModalVisible={setAddAppModalVisible}
                         />

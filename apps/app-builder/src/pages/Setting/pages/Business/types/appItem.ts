@@ -64,7 +64,7 @@ export interface cropItem {
   corpCode: string;
   corpName: string;
   createTime:number;
-  industryType: number;
+  industryType: string;
   industryTypeName: string;
   status: number;
   userLimit:number;
@@ -106,4 +106,10 @@ export interface industryTypeOption {
   sort:number;
   status: number; 
   value: string;
+}
+
+export interface successData {
+  id: string;
+  password: string;
+  username: string;
 }

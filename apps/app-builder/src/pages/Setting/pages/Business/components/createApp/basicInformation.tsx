@@ -21,10 +21,10 @@ export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions, ba
             onValuesChange={handleValuesChange} 
             form={basicInfoForm}  
             initialValues={{
-                userLimit:"10000",
-                status:true,
+                userLimit: basicValues?.userLimit ? basicValues?.userLimit : "10000",
+                status: basicValues?.status === 0 ? false: true,
                 corpName: basicValues?.corpName,
-                corpId: basicValues?.corpId,
+                corpCode: basicValues?.corpCode,
                 industryType: basicValues?.industryType,
                 address: basicValues?.address
 
@@ -39,7 +39,7 @@ export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions, ba
             </Form.Item>
             <Form.Item
                 label="企业ID"
-                field="corpId"
+                field="corpCode"
                 rules={[{ required: true, message: '请输入企业ID' }]}
             >
                 <Input placeholder="输入企业ID" />

@@ -5,7 +5,7 @@ import EditableFormItem from '../formItem';
 import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useOutletContext, useParams } from 'react-router-dom';
-import type { AppItem, cropItem, OutletContextType, updatedParams } from '../../types/appItem';
+import type { AppItem, cropItem, industryTypeOption, OutletContextType, updatedParams } from '../../types/appItem';
 import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi,createCorpAppApi, removeCorpAppApi, updateCorpAppApi,type CorpAppParams, type corpListParams } from "@onebase/platform-center";
 
 const EnterpriseInfoPage: React.FC = () => {
@@ -201,13 +201,10 @@ const EnterpriseInfoPage: React.FC = () => {
           onChange={handleChange.bind(null, "industryType")}
           isEdit={isEdited}
           component={Select}
+          label="industryType"
           componentProps={{
             placeholder: '请选择行业',
-            options: industryOptions,
-            renderFormat: (value:any) => {
-              const selectedOption = industryOptions.find(item => item.id === value);
-              return selectedOption ? selectedOption.label : value;
-            }
+            options: industryOptions.map((option: industryTypeOption) => ({ label: option.label, value: option.id }) as industryTypeOption),
           }}
       />
     },

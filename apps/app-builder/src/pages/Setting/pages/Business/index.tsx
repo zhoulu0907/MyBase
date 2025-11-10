@@ -1,8 +1,8 @@
-import { Button, Dropdown, Input, Menu, Space, Tag, Modal, Message, Table,Avatar } from "@arco-design/web-react";
+import { Button, Dropdown, Input, Menu, Space, Tag, Modal, Message, Table,Avatar, Image } from "@arco-design/web-react";
 import { IconMore } from "@arco-design/web-react/icon";
 import styles from "./index.module.less";
 import StatusTag from "@/components/StatusTag";
-import { Outlet, useMatch, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useMatch, useNavigate } from "react-router-dom";
 import { TopHeader } from "./components/topHeader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getCorpListApi, disabledCorpApi, deleteCorpApi, getIndustryType, type corpListParams } from "@onebase/platform-center";
@@ -15,9 +15,9 @@ const BusinessPage: React.FC = () => {
     const businessManageColumns = [
         {
             title: '企业LOGO',
-            dataIndex: 'logo',
-            render: () => (
-                <span>logo</span>
+            dataIndex: 'corpLogo',
+            render: (data: string) => (
+                <Image src={data}/>
             )
         },
         {
@@ -76,6 +76,7 @@ const BusinessPage: React.FC = () => {
         }
     ];
     const navigate = useNavigate();
+    const location = useLocation();
     const inputRef = useRef(null);
     const isCreatePage = useMatch('onebase/setting/enterprise/create-enterprise');
     const [loading, setLoading] = useState<boolean>(false);
@@ -141,9 +142,12 @@ const BusinessPage: React.FC = () => {
     }
 
     useEffect(() => {
-        fetchTableDataList();
-        fetchIndustryType();
-    }, [])
+        if(location.pathname === "/onebase/setting/enterprise") {
+            console.log(111111)
+            fetchTableDataList();
+            fetchIndustryType();
+        }
+    }, [location.pathname])
 
     const handlePageChange = (current: number, pageSize: number) => {
         fetchTableDataList(current, pageSize);
