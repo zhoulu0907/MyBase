@@ -1,9 +1,13 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpPageReqVO;
+import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -50,6 +54,12 @@ public class CorpDataRepository extends DataRepository<CorpDO> {
         }
         if (pageReqVO.getEndCreateTime() != null) {
             configStore.le(CorpDO.CREATE_TIME, pageReqVO.getEndCreateTime());
+        }
+        if(pageReqVO.getOwnerTag()!=null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue())){
+            LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+            if(loginUser!=null){
+                configStore.and(Compare.EQUAL, CorpDO.CREATOR, loginUser.getId());
+            }
         }
         // 按创建时间倒序排列
         configStore.order(CorpDO.CREATE_TIME, Order.TYPE.DESC);

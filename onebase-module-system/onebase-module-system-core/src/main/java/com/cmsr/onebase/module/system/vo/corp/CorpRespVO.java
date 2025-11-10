@@ -59,4 +59,7 @@ public class CorpRespVO {
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
+
+    @Schema(description = "行业类型名称", example = "1")
+    private String industryTypeName;
 }
