@@ -53,6 +53,10 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware.kryo</groupId>
+            <artifactId>kryo5</artifactId>
+        </dependency>
         <!-- 测试依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
