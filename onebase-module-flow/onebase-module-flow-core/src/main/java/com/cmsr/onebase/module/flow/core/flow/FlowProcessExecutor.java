@@ -74,11 +74,12 @@ public class FlowProcessExecutor {
             variableContext.setInputParams(inputParams);
             //初始化执行上下文
             Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
+            executeContext.setNodeDataMap(nodeData);
+
             executeContext.addLog("检查流程触发次数");
             int callCount = validateTraceIdCallCount(traceId, processId);
             executeContext.addLog("流程触发阈值正常[" + callCount + "]");
             executeContext.setTraceId(traceId);
-            executeContext.setNodeDataMap(nodeData);
             //执行上下文添加执行UUID
             executeContext.setExecutionUuid(UUID.randomUUID().toString());
             //设置日志执行UUID
@@ -125,6 +126,9 @@ public class FlowProcessExecutor {
             if (variableContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
+            Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
+            executeContext.setNodeDataMap(nodeData);
+
             variableContext.setInputFields(inputFields);
             variableContext.setOutputParams(Collections.emptyMap());
             //初始化执行上下文
