@@ -4,19 +4,16 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
-import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
-import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.StartNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
@@ -49,6 +46,7 @@ import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.*;
+import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -793,6 +791,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 }
 
                 if (!approverUserIds.isEmpty()) {
+                    // 限制最多100个用户
+                    approverUserIds = new HashSet<>(approverUserIds.stream().limit( BpmConstants.MAX_NODE_APPROVER_USERS).toList());
                     allUserIds.addAll(approverUserIds);
 
                     for (Long userId : approverUserIds) {
