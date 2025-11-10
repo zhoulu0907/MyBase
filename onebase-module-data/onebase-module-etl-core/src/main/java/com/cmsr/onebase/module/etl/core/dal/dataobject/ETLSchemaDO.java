@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaSchema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -28,6 +26,7 @@ public class ETLSchemaDO extends TenantBaseDO {
     @Column(name = "display_name")
     private String displayName;
 
+    // currently no usage, ;.
     @Column(name = "meta_info")
     private String metaInfo;
 
@@ -36,14 +35,6 @@ public class ETLSchemaDO extends TenantBaseDO {
 
     @Column(name = "declaration")
     private String declaration;
-
-    public MetaSchema getMetaInfo() {
-        return JsonUtils.parseObject(metaInfo, MetaSchema.class);
-    }
-
-    public void setMetaInfo(MetaSchema metaInfo) {
-        this.metaInfo = JsonUtils.toJsonString(metaInfo);
-    }
 
     public static ETLSchemaDO convert(Long applicationId, Long datasourceId, Long catalogId, Schema schema) {
         ETLSchemaDO schemaDO = new ETLSchemaDO();
@@ -56,8 +47,6 @@ public class ETLSchemaDO extends TenantBaseDO {
         String comment = schema.getComment();
         schemaDO.setRemarks(comment);
         schemaDO.setDeclaration(comment);
-        MetaSchema metaInfo = MetaSchema.convert(schema);
-        schemaDO.setMetaInfo(metaInfo);
 
         return schemaDO;
     }

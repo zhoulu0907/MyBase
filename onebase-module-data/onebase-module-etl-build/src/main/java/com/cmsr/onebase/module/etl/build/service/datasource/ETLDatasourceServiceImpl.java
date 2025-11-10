@@ -5,19 +5,20 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
+import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.common.meta.ColumnMeta;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaColumn;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import com.cmsr.onebase.module.etl.core.service.DataInspectService;
 import com.cmsr.onebase.module.etl.core.service.MetadataCollectorService;
-import com.cmsr.onebase.module.etl.core.vo.datasource.*;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import jakarta.annotation.PostConstruct;
@@ -80,10 +81,10 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public List<DatabaseTypeVO> getSupportedDatabaseTypes() {
-        List<DatabaseTypeVO> supportedDbVOs = Lists.newArrayList();
+    public List<SupportedDatasourceVO> getSupportedDatabaseTypes() {
+        List<SupportedDatasourceVO> supportedDbVOs = Lists.newArrayList();
         for (String dbName : supportedDbs.keySet()) {
-            DatabaseTypeVO typeVO = new DatabaseTypeVO();
+            SupportedDatasourceVO typeVO = new SupportedDatasourceVO();
             typeVO.setDatasourceType(dbName);
             typeVO.setDisplayName(supportedDbs.get(dbName));
             supportedDbVOs.add(typeVO);
@@ -92,10 +93,10 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public Boolean pingDatasource(ETLDatasourcePingVO pingVO) {
+    public Boolean pingDatasource(TestConnectionVO pingVO) {
         validDatasourceTypeSupported(pingVO.getDatasourceType());
         ETLDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, ETLDatasourceDO.class);
-        return metadataCollectorService.testConnection(datasourceDO);
+        return dataInspectService.testConnection(datasourceDO);
     }
 
     @Override
@@ -140,6 +141,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         datasourceDO = datasourceRepository.insert(datasourceDO);
         Long datasourceId = datasourceDO.getId();
         Boolean withCollect = createReqVO.getWithCollect();
+        // TODO
         if (withCollect) {
             try {
                 boolean collectResult = metadataCollectorService.doCollection(applicationId, datasourceId, datasourceType);
@@ -161,6 +163,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
+        // TODO
         validDatasourceCodeDuplicate(updateReqVO.getDatasourceCode(), updateReqVO.getId());
         validDatasourceTypeSupported(updateReqVO.getDatasourceType());
 
@@ -254,13 +257,12 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
 
-        List<MetaColumn> columns = tableDO.getMetaInfo().getColumns();
+        List<ColumnMeta> columns = tableDO.getMetaInfo().getColumns();
         return columns.stream()
-                .map(metaColumn -> {
+                .map(columnMeta -> {
                     ColumnDefine columnDefine = new ColumnDefine();
-                    columnDefine.setId(metaColumn.getId());
-                    columnDefine.setName(metaColumn.getDisplayName());
-                    columnDefine.setType(metaColumn.getFlinkType());
+                    columnDefine.setFieldName(columnMeta.getDisplayName());
+                    columnDefine.setFieldType(columnMeta.getType());
                     return columnDefine;
                 }).toList();
     }

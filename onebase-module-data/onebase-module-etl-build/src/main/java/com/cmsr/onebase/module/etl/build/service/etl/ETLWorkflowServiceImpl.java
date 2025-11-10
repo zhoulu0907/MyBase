@@ -15,7 +15,7 @@ import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
-import com.cmsr.onebase.module.etl.core.vo.ExecutionLogVO;
+import com.cmsr.onebase.module.etl.core.vo.etl.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -137,6 +137,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     private void updateWorkflowTableRelations(ETLWorkflowDO workflowDO) {
+        // TODO: rewrite this, consider .;
         Long applicationId = workflowDO.getApplicationId();
         Long workflowId = workflowDO.getId();
         workflowTableRepository.deleteByWorkflowId(workflowId);

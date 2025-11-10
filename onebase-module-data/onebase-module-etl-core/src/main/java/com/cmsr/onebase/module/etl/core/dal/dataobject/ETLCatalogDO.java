@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaCatalog;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -25,6 +24,7 @@ public class ETLCatalogDO extends TenantBaseDO {
     @Column(name = "display_name")
     private String displayName;
 
+    // currently no usage, ;.
     @Column(name = "meta_info")
     private String metaInfo;
 
@@ -33,14 +33,6 @@ public class ETLCatalogDO extends TenantBaseDO {
 
     @Column(name = "declaration")
     private String declaration;
-
-    public MetaCatalog getMetaInfo() {
-        return JsonUtils.parseObject(metaInfo, MetaCatalog.class);
-    }
-
-    public void setMetaInfo(MetaCatalog metaInfo) {
-        this.metaInfo = JsonUtils.toJsonString(metaInfo);
-    }
 
     public static ETLCatalogDO convert(Long applicationId, Long datasourceId, Catalog catalog) {
         ETLCatalogDO catalogDO = new ETLCatalogDO();
@@ -52,8 +44,6 @@ public class ETLCatalogDO extends TenantBaseDO {
         String comment = catalog.getComment();
         catalogDO.setRemarks(comment);
         catalogDO.setDeclaration(comment);
-        MetaCatalog metaInfo = MetaCatalog.convert(catalog);
-        catalogDO.setMetaInfo(metaInfo);
 
         return catalogDO;
     }

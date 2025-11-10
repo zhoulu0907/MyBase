@@ -6,8 +6,6 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaColumn;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaTable;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.google.common.collect.Lists;
@@ -55,19 +53,6 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Override
-    public boolean testConnection(ETLDatasourceDO datasourceDO) {
-        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
-        try {
-            boolean validity = ServiceProxy.temporary(datasource).validity();
-            boolean hit = ServiceProxy.temporary(datasource).hit();
-            return validity || hit;
-        } catch (Exception ex) {
-            log.error("测试数据源连接异常，数据源信息: {}", datasourceDO, ex);
-            return false;
-        }
-    }
-
-    @Override
     public void submitCollectJob(ETLDatasourceDO datasourceDO) {
         Long datasourceId = datasourceDO.getId();
         Long applicationId = datasourceDO.getApplicationId();
@@ -77,22 +62,23 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
         log.info("提交元数据采集任务，数据源ID：{}", datasourceId);
         threadPoolTaskExecutor.submit(() -> {
             datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.RUNNING);
-            boolean isJobSuccess = doCollection(applicationId, datasourceId, databaseType);
+            MetadataCollectResult collectResult = doCollection(applicationId, datasourceId, databaseType);
             LocalDateTime endTime = LocalDateTime.now();
             Duration duration = Duration.between(planTime, endTime);
             long timeCost = duration.toMillis();
-            if (isJobSuccess) {
-                datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.SUCCESS);
-                log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
-            } else {
-                datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.FAILED);
-                log.info("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
-            }
+            // TODO:
+//            if (isJobSuccess) {
+//                datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.SUCCESS);
+//                log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+//            } else {
+//                datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.FAILED);
+//                log.info("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+//            }
         });
     }
 
     //TODO 数据采集和数据保存的逻辑交织在一起，太乱了
-    public boolean doCollection(Long applicationId, Long datasourceId, String databaseType) {
+    public MetadataCollectResult doCollection(Long applicationId, Long datasourceId, String databaseType) {
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
         String datasourceKey = "metadata-collector-" + datasourceId;
         try {

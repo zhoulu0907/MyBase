@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class ETLDatasourcePingVO {
+public class TestConnectionVO {
 
     @Schema(description = "数据源类型信息", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "数据源类型不能为空")

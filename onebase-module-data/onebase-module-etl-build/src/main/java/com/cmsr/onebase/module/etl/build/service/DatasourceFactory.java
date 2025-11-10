@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.service;
+package com.cmsr.onebase.module.etl.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-public class DataSourceFactory {
+public class DatasourceFactory {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
 
     @Resource
@@ -43,10 +43,6 @@ public class DataSourceFactory {
         } else {
             jdbcConnection = (String) connectionProperties.get("jdbcUrl");
         }
-        connectionProperties.put("jdbcUrl", jdbcConnection);
-        connectionProperties.put("driver", dbType.driver());
-        datasourceDO.setConfig(JsonUtils.toJsonString(connectionProperties));
-//        Driver declaredDriver = getDeclaredDriverInstance(dbType);
 
         String username = (String) connectionProperties.get("username");
         String password = (String) connectionProperties.get("password");
@@ -69,15 +65,12 @@ public class DataSourceFactory {
         }
     }
 
-    //TODO update(datasourceDO) 的方法只有在创建数据库连接的时候需要更新和保存，在预览数据的时候不应该更新了！！！！一个构造方法隐含了更新，太TMD扯了
     public DataSource constructDataSource(Long datasourceId, boolean oneshot) {
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        DataSource dataSource = constructDataSource(datasourceDO, oneshot);
-        datasourceRepository.update(datasourceDO);
-        return dataSource;
+        return constructDataSource(datasourceDO, oneshot);
     }
 
     private DatabaseType parseDatabaseType(String databaseType) {

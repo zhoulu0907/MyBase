@@ -5,12 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class MetaTable {
-
-    /**
-     * 数据库类型标识（MySQL, PostgreSQL, Oracle等）
-     */
-    private String databaseType;
+public class TableMeta {
 
     /**
      * 目录（某些数据库支持）
@@ -26,22 +21,10 @@ public class MetaTable {
      * 表名
      */
     private String name;
-
-    /**
-     * 表注释
-     */
-    private String comment;
-
-    /**
-     * 表类型（TABLE, VIEW等）
-     */
-    private String type;
-
-    /**
  
     /**
      * 列信息列表
      */
-    private List<MetaColumn> columns;
+    private List<ColumnMeta> columns;
 
 }
