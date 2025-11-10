@@ -85,7 +85,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
             placeholder={placeholder}
             maxLength={verify.lengthLimit ? verify.maxLength : undefined}
             allowClear
-            autoSize={{ minRows }}
+            rows={minRows}
             showWordLimit
             style={{
               width: '100%',

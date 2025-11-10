@@ -445,6 +445,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             <InputNumber
               placeholder={`请输入${item.name}`}
               value={configs[item.key]}
+              min={item.min}
+              max={item.max}
               onChange={(value) => {
                 if (value >= 0) {
                   handlePropsChange(item.key, value);

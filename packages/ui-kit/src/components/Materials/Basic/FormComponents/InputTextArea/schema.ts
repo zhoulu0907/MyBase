@@ -215,7 +215,9 @@ const XInputTextArea: XInputTextAreaSchema = {
     {
       key: 'minRows',
       name: '文本展示行数',
-      type: CONFIG_TYPES.NUMBER_INPUT
+      type: CONFIG_TYPES.NUMBER_INPUT,
+      min: 1,
+      max: 10
     },
     // 显示状态
     statusConfig,
