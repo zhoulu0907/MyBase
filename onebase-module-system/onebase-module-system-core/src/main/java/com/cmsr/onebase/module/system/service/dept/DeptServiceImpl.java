@@ -423,7 +423,7 @@ public class DeptServiceImpl implements DeptService {
     }
 
     @Override
-    public List<DeptDO> getParentDeptsListById(Long id, Integer idType) {
+    public List<DeptDO> getParentDeptsListById(Long id, String idType) {
         if(idType.equals(IdTypeEnum.USER.getCode())) {
             AdminUserDO adminUserDO = adminUserService.getUser(id);
             if (adminUserDO != null && adminUserDO.getDeptId() != null) {

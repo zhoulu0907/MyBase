@@ -143,5 +143,5 @@ public interface DeptService {
      * @param idType ID 类型，参见 IdTypeEnum 枚举
      * @return 所有直属上级部门列表
      */
-    List<DeptDO> getParentDeptsListById(Long id,Integer idType);
+    List<DeptDO> getParentDeptsListById(Long id, String idType);
 }

@@ -96,7 +96,7 @@ public class DeptController {
     @Operation(summary = "根据ID和类型获取其所属部门及其父部门列表")
     @PreAuthorize("@ss.hasPermission('system:dept:query')")
     public CommonResult<List<DeptSimpleRespVO>> getParentDeptsListById(@RequestParam("id") Long id,
-                                                                       @RequestParam("idType") Integer idType) {
+                                                                       @RequestParam("idType") String idType) {
         List<DeptDO> deptDOList = deptService.getParentDeptsListById(id,idType);
         return success(BeanUtils.toBean(deptDOList, DeptSimpleRespVO.class));
     }
