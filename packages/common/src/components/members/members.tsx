@@ -17,7 +17,7 @@ interface IProps {
   onExpand: (value: string) => void;
   onSearch: (value: string) => void;
   onCancel: () => void;
-  onConfirm: (value: any[]) => void;
+  onConfirm: (value: any[], isIncludeChild?: boolean) => void;
   onUpdateSelectedMembers?: (members: any[]) => void;
 }
 
@@ -39,6 +39,7 @@ const AddMembers = (props: IProps) => {
   } = props;
 
   const [resetFlag, setResetFlag] = useState(false);
+  const [isIncludeChild, setIsIncludeChild] = useState(false);
 
   const isSelectDepartment = title === 'specifiedDepartment';
   const isSelectPerson = title === 'specifiedPerson';
@@ -73,13 +74,13 @@ const AddMembers = (props: IProps) => {
       footer={
         <div style={{display: 'flex'}}>
           <div style={{ flex: 1,textAlign: 'left' }}>
-            {(isFromPermission && isSelectDepartment) && <Checkbox>包含勾选部门及下级部门</Checkbox>}
+            {(isFromPermission && isSelectDepartment) && <Checkbox checked={isIncludeChild} onChange={(value)=>setIsIncludeChild(value)}>包含勾选部门及下级部门</Checkbox>}
           </div>
           <div>
             <Button type="default" onClick={handleCancel} style={{ marginRight: 12 }}>
               取消
             </Button>
-            <Button type="primary" disabled={selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers)}>
+            <Button type="primary" disabled={selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers, isIncludeChild)}>
               确定
             </Button>
           </div>
