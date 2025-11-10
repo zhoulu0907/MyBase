@@ -5,7 +5,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.vo.dept.*;
+import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -16,6 +18,8 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -50,6 +54,7 @@ public class DeptServiceImpl implements DeptService {
     @Lazy
     @Resource
     private PermissionService permissionService;
+
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
@@ -428,6 +433,8 @@ public class DeptServiceImpl implements DeptService {
         return List.of();
     }
 
+
+
     private List<DeptDO> getParentDeptsList(Long deptId) {
         List<DeptDO> parentDepts = new ArrayList<>();
         if (deptId == null) {
@@ -445,6 +452,20 @@ public class DeptServiceImpl implements DeptService {
             }
         }
         return parentDepts;
+    }
+
+    @Override
+    public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
+
+        if(reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)){
+            DataRow row = new DataRow();
+            row.put(DeptDO.LEADER_USER_ID, reqVO.getUserId());
+            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+        }else{
+            DataRow row = new DataRow();
+            row.put(DeptDO.DEPT_DIRECTOR_ID, reqVO.getUserId());
+            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+        }
     }
 
 }

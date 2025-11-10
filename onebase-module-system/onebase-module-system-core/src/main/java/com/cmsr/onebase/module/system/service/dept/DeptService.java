@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.dept;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.vo.dept.*;
+import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
 
 import java.util.*;
 
@@ -143,4 +144,7 @@ public interface DeptService {
      * @return 所有直属上级部门列表
      */
     List<DeptDO> getParentDeptsListByUserId(Long userId);
+
+    void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO);
+
 }
