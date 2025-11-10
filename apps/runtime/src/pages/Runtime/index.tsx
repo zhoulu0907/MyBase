@@ -21,6 +21,7 @@ import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import styles from './index.module.less';
+import './components/TaskCenter/style/taskSide.less'
 
 const Sider = Layout.Sider;
 const Content = Layout.Content;
@@ -99,8 +100,8 @@ const Runtime: React.FC = () => {
     const res = await listApplicationMenu(req);
 
     // 处理数据
-    const resPageList = res && res.length > 0 ? dealPage(res) : [];
-    const pageList = getMenuArr().concat(resPageList);
+    const resPageList:any[] = res && res.length > 0 ? dealPage(res) : [];
+    const pageList:any[] = getMenuArr().concat(resPageList);
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
     setTreeData(treeData);
 

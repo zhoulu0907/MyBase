@@ -8,7 +8,7 @@
         list-style: none; margin: 0; padding: 0;
     }
     .ineedtodo-icon, .ihavedone-icon, .icreated-icon, .icopied-icon, .taskproxy-icon {
-        width: 18px; height: 18px; display: inline-block; margin-left: -1px;
+        width: 18px; height: 18px; display: inline-block; margin-left: -1px; transform: scale(1.15);
     }
     .arco-tree-node-title {
         left: -8px;
@@ -38,6 +38,7 @@
     }
     .arco-tree-node-title-text {
         margin-right: 20px;
+        margin-left: 10px;
         display: block;
         & > div {
             justify-content: space-between; align-items: center;
@@ -50,11 +51,11 @@
         }
     }
     .arco-tree-node-drag-icon {
-        top: 14px; color: #333;
+        top: 14px; color: #333; right: 18px;
     }
     .arco-tree-node-selected {
         .arco-tree-node-drag-icon {
-            color: rgb(var(--primary-6));
+            color: rgb(var(--primary-6)); right: 18px;
         }
         .ineedtodo-icon {
             background: url(@/assets/images/task_center/willdo-on.svg) no-repeat center;
