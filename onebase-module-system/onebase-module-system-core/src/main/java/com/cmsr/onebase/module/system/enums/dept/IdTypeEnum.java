@@ -9,11 +9,11 @@ public enum IdTypeEnum {
     /**
      * 用户
      */
-    USER("userId", "用户标识"),
+    USER("user", "用户标识"),
     /**
      * 部门
      */
-    DEPT("deptId", "部门标识");
+    DEPT("dept", "部门标识");
 
     /**
      * 类型代码
