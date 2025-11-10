@@ -159,11 +159,11 @@
                 <version>${revision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-security</artifactId>
-                <version>${revision}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.cmsr.onebase</groupId>-->
+<!--                <artifactId>onebase-spring-boot-starter-security</artifactId>-->
+<!--                <version>${revision}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.springdoc</groupId>
@@ -344,6 +344,11 @@
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-security-platform</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-build</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

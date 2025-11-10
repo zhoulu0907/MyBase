@@ -94,6 +94,8 @@ onebase:
   info:
     version: 1.0.0
     base-package: com.cmsr.onebase
+  platform-tenant:
+    enable-create-app: true # 允许平台租户创建应用，方便登录接口测试；
   swagger:
     title: OneBase快速开发平台
     description: 提供管理后台、用户 App 的所有功能
