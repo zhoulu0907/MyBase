@@ -136,7 +136,8 @@ public interface DeptService {
      * @return 部门和用户信息
      */
     DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO);
-    
+
+    void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO);
     /**
      * 根据用户ID获取所有直属上级部门，包括一级部门
      *
@@ -144,9 +145,5 @@ public interface DeptService {
      * @param idType ID 类型，参见 IdTypeEnum 枚举
      * @return 所有直属上级部门列表
      */
-    List<DeptDO> getParentDeptsListByUserId(Long userId);
-
-    void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO);
-
     List<DeptDO> getParentDeptsListById(Long id, String idType);
 }
