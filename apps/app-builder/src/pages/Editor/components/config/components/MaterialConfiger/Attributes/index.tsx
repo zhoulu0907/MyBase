@@ -207,14 +207,11 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     switch (item.type) {
       case CONFIG_TYPES.RELATED_FORM_DATA:
         // 关联表单
-        return (
-          <DynamicRelatedFormConfig key={index} handlePropsChange={handlePropsChange} item={item} configs={configs} />
-        );
+        return <DynamicRelatedFormConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.FIELD_DATA:
         // 数据绑定
         return (
           <DynamicFieldConfig
-            key={index}
             handlePropsChange={handlePropsChange}
             handleConfigsChange={handleConfigsChange}
             item={item}
@@ -225,7 +222,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         // 数据
         return (
           <DynamicTableConfig
-            key={index}
             id={cpID}
             handleMultiPropsChange={handleMultiPropsChange}
             handlePropsChange={handlePropsChange}
@@ -237,7 +233,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         // 自定义选项 radio
         return (
           <DynamicRadioConfig
-            key={index}
             id={cpID}
             // handleMultiPropsChange={handleMultiPropsChange}
             handlePropsChange={handlePropsChange}
@@ -249,7 +244,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         // 自定义选项 checkbox
         return (
           <DynamicCheckboxConfig
-            key={index}
             id={cpID}
             // handleMultiPropsChange={handleMultiPropsChange}
             handlePropsChange={handlePropsChange}
@@ -259,31 +253,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         );
       case CONFIG_TYPES.SELECT_OPTIONS_INPUT:
         // 自定义选项 select
-        return (
-          <DynamicOptionsConfig
-            key={index}
-            id={cpID}
-            handlePropsChange={handlePropsChange}
-            item={item}
-            configs={configs}
-          />
-        );
+        return <DynamicOptionsConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.CAROUSEL:
         // 轮播
-        return (
-          <DynamicCarouselConfig
-            key={index}
-            id={cpID}
-            handlePropsChange={handlePropsChange}
-            item={item}
-            configs={configs}
-          />
-        );
+        return <DynamicCarouselConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.SWITCH_INPUT:
         // 开关
         return (
           <FormItem
-            key={index}
             label={
               <div style={{ textAlign: 'left' }}>
                 <span>{item.name}</span>
@@ -307,7 +284,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         // 选择数据配置
         return (
           <DynamicDataSourceConfig
-            key={index}
             id={cpID}
             handlePropsChange={handlePropsChange}
             handleMultiPropsChange={handleMultiPropsChange}
@@ -318,41 +294,18 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       case CONFIG_TYPES.IMAGE_HANDLE:
         // 图片处理
         return (
-          <DynamicImageHandleConfig
-            key={index}
-            id={cpID}
-            handlePropsChange={handlePropsChange}
-            item={item}
-            configs={configs}
-          />
+          <DynamicImageHandleConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />
         );
       case CONFIG_TYPES.IMAGE:
         // 图片
-        return (
-          <DynamicImageConfig
-            key={index}
-            id={cpID}
-            handlePropsChange={handlePropsChange}
-            item={item}
-            configs={configs}
-          />
-        );
+        return <DynamicImageConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.FILE:
         // 文件
-        return (
-          <DynamicFileConfig
-            key={index}
-            id={cpID}
-            handlePropsChange={handlePropsChange}
-            item={item}
-            configs={configs}
-          />
-        );
+        return <DynamicFileConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.TABS:
         // 页签数据配置
         return (
           <DynamicTabsConfig
-            key={index}
             id={cpID}
             handlePropsChange={handlePropsChange}
             handleMultiPropsChange={handleMultiPropsChange}
@@ -364,7 +317,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         // 自动编号规则配置
         return (
           <DynamicAutoCodeConfig
-            key={index}
             id={cpID}
             handlePropsChange={handlePropsChange}
             handleConfigsChange={handleConfigsChange}
@@ -376,7 +328,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         // 日期格式
         return (
           <DynamicDateFormatConfig
-            key={index}
             id={cpID}
             handlePropsChange={handlePropsChange}
             handleConfigsChange={handleConfigsChange}
@@ -388,7 +339,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         // 时间格式
         return (
           <DynamicTimeFormatConfig
-            key={index}
             id={cpID}
             handlePropsChange={handlePropsChange}
             handleConfigsChange={handleConfigsChange}
@@ -399,24 +349,12 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       case CONFIG_TYPES.SWITCH_FILL_TEXT:
         // 填充文本 switch
         return (
-          <DynamicSwitchFillTextConfig
-            key={index}
-            id={cpID}
-            handlePropsChange={handlePropsChange}
-            item={item}
-            configs={configs}
-          />
+          <DynamicSwitchFillTextConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />
         );
       case CONFIG_TYPES.DEFAULT_VALUE:
         // 默认值
         return (
-          <DynamicDefaultValueConfig
-            key={index}
-            id={cpID}
-            handlePropsChange={handlePropsChange}
-            item={item}
-            configs={configs}
-          />
+          <DynamicDefaultValueConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />
         );
       case CONFIG_TYPES.LABEL_INPUT:
         // 显示标题
@@ -439,7 +377,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 )}
               </>
             }
-            key={index}
           >
             <Input
               placeholder={`请输入${item.name}`}
@@ -469,7 +406,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 </Checkbox>
               </>
             }
-            key={index}
           >
             <Select
               addBefore="掩码方式"
@@ -907,9 +843,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
 
           {editData
             .filter((item: any) => !item.advanced)
-            .map((item: any, index: number) => {
-              return renderEditItem(item, index);
-            })}
+            .map((item: any, index: number) => (
+              <div key={index}>{renderEditItem(item, index)}</div>
+            ))}
         </Form>
       )}
     </div>
