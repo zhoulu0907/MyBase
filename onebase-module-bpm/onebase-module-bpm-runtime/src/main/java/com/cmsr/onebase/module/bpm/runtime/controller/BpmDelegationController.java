@@ -1,7 +1,14 @@
 package com.cmsr.onebase.module.bpm.runtime.controller;
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.bpm.runtime.service.BpmDelegationService;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationPageReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationPageResVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @Slf4j
 public class BpmDelegationController {
+    @Resource
+    private BpmDelegationService bpmDelegationService;
 
     @PostMapping("/create")
     @Operation(summary = "创建流程代理")
@@ -43,7 +52,10 @@ public class BpmDelegationController {
 
     @GetMapping("/page")
     @Operation(summary = "流程代理列表查询")
-    public void page() {
-        // todo: 补充业务逻辑
+    public CommonResult<PageResult<BpmDelegationPageResVO>> page(@Valid BpmDelegationPageReqVO reqVo) {
+        log.info("流程代理列表查询: {}", reqVo);
+        PageResult<BpmDelegationPageResVO> pageResult = bpmDelegationService.getDelegationPage(reqVo); // 修正为合理方法名
+        return CommonResult.success(pageResult);
     }
+
 }
