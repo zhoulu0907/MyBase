@@ -11,11 +11,14 @@ import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
+import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 import com.cmsr.onebase.module.etl.core.vo.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,10 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class ETLWorkflowServiceImpl implements ETLWorkflowService {
@@ -100,7 +100,6 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public Long createWorkflow(WorkflowCreateVO createVO) {
-        validateWorkflowNameUnique(createVO.getFlowName(), null);
         ETLWorkflowDO workflowDO = new ETLWorkflowDO();
         Long applicationId = createVO.getApplicationId();
         workflowDO.setApplicationId(applicationId);
@@ -118,14 +117,14 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         scheduleJobDO.setWorkflowId(workflowId);
         scheduleJobDO.setJobStatus(ScheduleJobStatus.INITIALIZED.getValue());
         scheduleJobRepository.insert(scheduleJobDO);
-
+        // 解析workflow相关的表信息
+        updateWorkflowTableRelations(workflowDO);
         return workflowId;
     }
 
     @Override
     public void updateWorkflow(WorkflowUpdateVO updateVO) {
         Long workflowId = updateVO.getId();
-        validateWorkflowNameUnique(updateVO.getFlowName(), workflowId);
         ETLWorkflowDO oldWorkflow = getOperableWorkflow(workflowId);
         if (!Objects.equals(oldWorkflow.getApplicationId(), updateVO.getApplicationId())) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATA_CONFLICT);
@@ -133,8 +132,53 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         oldWorkflow.setWorkflowName(updateVO.getFlowName());
         oldWorkflow.setDeclaration(updateVO.getDeclaration());
         oldWorkflow.setConfig(updateVO.getConfig());
-
+        updateWorkflowTableRelations(oldWorkflow);
         workflowRepository.update(oldWorkflow);
+    }
+
+    private void updateWorkflowTableRelations(ETLWorkflowDO workflowDO) {
+        Long applicationId = workflowDO.getApplicationId();
+        Long workflowId = workflowDO.getId();
+        workflowTableRepository.deleteByWorkflowId(workflowId);
+        List<ETLWorkflowTableDO> workflowTableDOList = new ArrayList<>();
+        // TODO: replace JsonNode with Object, needs refactor.
+        Map<Long, Set<Long>> dataList = new HashMap<>();
+        JsonNode workflowGraph = JsonUtils.parseTree(workflowDO.getConfig());
+        ArrayNode nodeList = (ArrayNode) workflowGraph.get("nodes");
+        for (JsonNode nodeDef : nodeList) {
+            String nodeType = nodeDef.get("type").asText();
+            if (StringUtils.equals(nodeType, "jdbc_input")) {
+                Long datasourceId = nodeDef.get("config").get("datasourceId").asLong();
+                Long tableId = nodeDef.get("config").get("tableId").asLong();
+                if (dataList.containsKey(datasourceId)) {
+                    dataList.get(datasourceId).add(tableId);
+                } else {
+                    Set<Long> tableSet = new HashSet<>();
+                    tableSet.add(tableId);
+                    dataList.put(datasourceId, tableSet);
+                }
+            } else if (StringUtils.equals(nodeType, "jdbc_output")) {
+                ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
+                workflowTableRel.setWorkflowId(workflowId);
+                workflowTableRel.setApplicationId(applicationId);
+                workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
+                workflowTableRel.setDatasourceId(nodeDef.get("config").get("datasourceId").asLong());
+                workflowTableRel.setTableId(nodeDef.get("config").get("tableId").asLong());
+                workflowTableDOList.add(workflowTableRel);
+            }
+        }
+        for (Long datasourceId : dataList.keySet()) {
+            for (Long tableId : dataList.get(datasourceId)) {
+                ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
+                workflowTableRel.setWorkflowId(workflowId);
+                workflowTableRel.setApplicationId(applicationId);
+                workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_SOURCE);
+                workflowTableRel.setDatasourceId(datasourceId);
+                workflowTableRel.setTableId(tableId);
+                workflowTableDOList.add(workflowTableRel);
+            }
+        }
+        workflowTableRepository.insertBatch(workflowTableDOList);
     }
 
     @Override
@@ -257,13 +301,6 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         scheduleRespVO.setConfig(workflowDO.getConfig());
 
         return scheduleRespVO;
-    }
-
-    private void validateWorkflowNameUnique(String flowName, Long filterId) {
-        ETLWorkflowDO workflowDO = workflowRepository.findOneByNameFilterById(flowName, filterId);
-        if (workflowDO != null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NAME_DUPLICATE);
-        }
     }
 
     /**
