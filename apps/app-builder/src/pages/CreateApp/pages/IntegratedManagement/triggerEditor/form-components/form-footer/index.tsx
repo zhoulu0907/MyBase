@@ -259,7 +259,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           updateDataUpdateOutputs(curNode.id, dataUpdateFields);
           break;
         case NodeType.MODAL:
-          const modalFields: ConditionField[] = formInfo.fields
+          const modalFields: ConditionField[] = (formInfo.fields || [])
             .filter((item: any) => item && item.fieldName && item.fieldType)
             .map((item: any) => {
               return {

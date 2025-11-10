@@ -27,7 +27,7 @@
   border-radius: 8px;
   transition: border-color 0.2s ease;
   position: relative;
-  min-width: 100px;
+  min-width: 50px;
 }
 
 /* 操作 */
@@ -79,6 +79,9 @@
   line-height: 32px;
   height: 32px;
   margin: 4px 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .subTableContent {

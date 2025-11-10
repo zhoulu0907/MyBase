@@ -149,3 +149,10 @@ export interface AutoCodeRule {
 export interface AutoCodeRules {
   rules: AutoCodeRule[];
 }
+
+// 实体及子表字段
+export interface EntityFieldsWithChildren {
+  label: string;
+  value: string;
+  children: { label: string; value: string; fieldType: string }[];
+}

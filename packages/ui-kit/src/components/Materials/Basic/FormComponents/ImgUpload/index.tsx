@@ -1,4 +1,4 @@
-import { Form, Message, Upload, Progress, Modal, Grid, Card } from '@arco-design/web-react';
+import { Form, Message, Upload, Progress, Modal, Grid, Card, Watermark } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
@@ -18,6 +18,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     tooltip,
     listType,
     uploadType,
+    imageHandle,
     verify,
     layout,
     labelColSpan = 0,
@@ -64,13 +65,18 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   }, [fieldValue]);
 
   // 自定义文件列表展示
-  const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
+  const renderUploadList = (filesList: UploadItem[], fileProps: UploadListProps) => {
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]) {
       return (
         <div className="uplaodList-text">
           {filesList.map((file) => (
             <div key={file.uid} className="uplaodList-text-item">
-              <img className="uplaodList-text-item-img" src={file.url} alt="" />
+              <Watermark
+                gap={[20, 20]}
+                content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
+              >
+                <img className="uplaodList-text-item-img" src={file.url} alt="" />
+              </Watermark>
               <div className="uplaodList-text-item-name">{file.name}</div>
               {file.percent && file.percent !== 100 ? (
                 <div className="uplaodList-text-item-process">
@@ -78,8 +84,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <IconClose
                     className="uplaodList-text-item-process-close"
                     onClick={() => {
-                      if (props.onRemove) {
-                        props.onRemove(file);
+                      if (fileProps.onRemove) {
+                        fileProps.onRemove(file);
                       }
                     }}
                   />
@@ -90,7 +96,16 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     onClick={() => {
                       Modal.info({
                         title: '预览',
-                        content: <img src={file.url} width="100%" alt="" />
+                        content: (
+                          <Watermark
+                            gap={[20, 20]}
+                            content={
+                              imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''
+                            }
+                          >
+                            <img src={file.url} width="100%" alt="" />
+                          </Watermark>
+                        )
                       });
                     }}
                   />
@@ -103,8 +118,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   />
                   <IconDelete
                     onClick={() => {
-                      if (props.onRemove) {
-                        props.onRemove(file);
+                      if (fileProps.onRemove) {
+                        fileProps.onRemove(file);
                       }
                     }}
                   />
@@ -122,7 +137,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             {filesList.map((file) => (
               <Grid.Col span={12} key={file.uid}>
                 <div className="uplaodList-list-item">
-                  <img className="uplaodList-list-item-img" src={file.url} alt="" />
+                  <Watermark
+                    gap={[20, 20]}
+                    content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
+                  >
+                    <img className="uplaodList-list-item-img" src={file.url} alt="" />
+                  </Watermark>
                   <div className="uplaodList-list-item-content">
                     <div className="uplaodList-list-item-name">{file.name}</div>
                     <div className="uplaodList-list-item-size">
@@ -132,8 +152,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <IconClose
                     className="uplaodList-list-item-close"
                     onClick={() => {
-                      if (props.onRemove) {
-                        props.onRemove(file);
+                      if (fileProps.onRemove) {
+                        fileProps.onRemove(file);
                       }
                     }}
                   />
@@ -156,7 +176,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
               className="uplaodList-card-item"
               cover={
                 <div className="uplaodList-card-item-img">
-                  <img src={file.url} alt="" />
+                  <Watermark
+                    gap={[20, 20]}
+                    content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
+                  >
+                    <img src={file.url} alt="" />
+                  </Watermark>
                 </div>
               }
             >
@@ -170,8 +195,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     <IconDelete
                       style={{ cursor: 'pointer' }}
                       onClick={() => {
-                        if (props.onRemove) {
-                          props.onRemove(file);
+                        if (fileProps.onRemove) {
+                          fileProps.onRemove(file);
                         }
                       }}
                     />
@@ -218,7 +243,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 : verify?.maxCount
           }
           accept="image/*"
-          listType={listType}
+          listType={'text'}
           beforeUpload={async (file) => {
             const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
             const fileSize = file.size / 1024;

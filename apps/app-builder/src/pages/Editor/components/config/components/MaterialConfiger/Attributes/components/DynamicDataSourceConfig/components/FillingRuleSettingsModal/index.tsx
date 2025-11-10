@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import styles from '../../index.module.less';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP, getComponentSchema, usePageEditorSignal, COMPONENT_MAP } from '@onebase/ui-kit';
+import { COMPONENT_TYPE_DISPLAY_NAME_MAP, getComponentSchema, usePageEditorSignal, COMPONENT_MAP, getPopupContainer } from '@onebase/ui-kit';
 
 interface FillingRuleSettingsModalProps {
   visible: boolean;
@@ -272,7 +272,7 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
                 <div>
                   <Select
                     placeholder="请选择"
-                    getPopupContainer={(node) => node.parentNode as HTMLElement}
+                    getPopupContainer={getPopupContainer}
                     defaultValue={fillOption}
                     onChange={(value) => {
                       setFillOption(value);
@@ -292,7 +292,11 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
         ) : (
           <div className={styles.nextStepContainer}>
             <span className={styles.titleSpan}>选择数据后，将按以下规则将所选字段的值填充到当前表单字段。</span>
-            <Dropdown droplist={droplist} trigger="click">
+            <Dropdown
+              droplist={droplist}
+              trigger="click"
+              getPopupContainer={getPopupContainer}
+            >
               <Button type="text">
                 <IconPlus />
                 选择字段
@@ -308,6 +312,7 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
                   className={styles.fieldSelect}
                   placeholder="请选择字段"
                   value={item.selectComponentID}
+                  getPopupContainer={getPopupContainer}
                   onChange={(v) => handleComChange(index, v)}
                   options={item.targetComponents.map((opt: any) => ({
                     label: opt.displayName,

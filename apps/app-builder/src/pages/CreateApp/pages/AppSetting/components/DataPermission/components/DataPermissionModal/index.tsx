@@ -296,7 +296,10 @@ const DataPermissionModal = (props: IProps) => {
       const allDataIdx = tags.indexOf(ALLDATA);
       if (allDataIdx >= 0) tags.splice(allDataIdx, 1);
       tags.push(CUSTOMCONDITION);
-      form.setFieldValue('scopeTags', tags);
+      form.setFieldsValue({
+        scopeTags: tags,
+        scopeFieldId: dataPermissionPerson[0].PersonId
+      });
       setScopeTags(tags);
     } else {
       const tags = form.getFieldValue('scopeTags');
@@ -376,12 +379,18 @@ const DataPermissionModal = (props: IProps) => {
         onCancel={handleCancel}
         unmountOnExit={true}
       >
-        <Form form={form} initialValues={initialFormValues} layout="vertical" className={styles.dataPermissionForm}>
+        <Form
+          key={String(modalVisible)}
+          form={form}
+          initialValues={initialFormValues}
+          layout="vertical"
+          className={styles.dataPermissionForm}
+        >
           <FormItem field="groupName" label="权限组名称" rules={[{ required: true, message: '请输入权限组名称' }]}>
-            <Input placeholder="请输入权限组名称" />
+            <Input placeholder="请输入权限组名称" maxLength={40} />
           </FormItem>
           <FormItem field="description" label="说明">
-            <Input placeholder="请输入权限组说明" />
+            <Input placeholder="请输入权限组说明" maxLength={200} />
           </FormItem>
           <FormItem label="权限范围" field="scopeTags" rules={[{ required: true, message: '至少设置一个权限范围' }]}>
             <div className={styles.dataPermissionScope}>
@@ -424,7 +433,7 @@ const DataPermissionModal = (props: IProps) => {
                         }}
                       >
                         {dataPermissionScope.map((option) => (
-                          <Option key={option.value} value={option.value}>
+                          <Option key={option.value} value={option.value} title={option.label}>
                             {option.label}
                           </Option>
                         ))}

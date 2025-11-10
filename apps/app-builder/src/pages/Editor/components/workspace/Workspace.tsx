@@ -1,4 +1,5 @@
 import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -268,7 +269,7 @@ export default function EditorWorkspace() {
             list={components}
             setList={(newList) => {
               const entityList: GridItem[] = [];
-              newList.forEach((item) => {
+              newList.forEach(async (item) => {
                 if (item.type == ENTITY_TYPE_VALUE.MAIN || item.entityType === ENTITY_TYPE.MAIN) {
                   // 主表业务实体
                   const fieldList = item.fields.filter(
@@ -303,8 +304,16 @@ export default function EditorWorkspace() {
 
                     // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
                     if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-                      if (field.options?.length) {
-                        schema.config.defaultOptions = field.options.map((e:any) => ({
+                      // 判断是否引用字典数据
+                      if (field.dictTypeId) {
+                        const res = await getDictDetail(field.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          schema.config.defaultOptions = dictOptions;
+                        }
+                      } else if (field.options?.length) {
+                        schema.config.defaultOptions = field.options.map((e: any) => ({
                           chosen: field.defaultValue && e.optionValue === field.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
@@ -391,8 +400,15 @@ export default function EditorWorkspace() {
                       subType === FORM_COMPONENT_TYPES.SELECT_ONE ||
                       subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
                     ) {
-                      if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e:any) => ({
+                      if (ele.dictTypeId) {
+                        const res = await getDictDetail(ele.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          subSchema.config.defaultOptions = dictOptions;
+                        }
+                      } else if (ele.options?.length) {
+                        subSchema.config.defaultOptions = ele.options.map((e: any) => ({
                           chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
@@ -514,7 +530,14 @@ export default function EditorWorkspace() {
                       itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
                       itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
                     ) {
-                      if (currentField.options?.length) {
+                      if (currentField.dictTypeId) {
+                        const res = await getDictDetail(currentField.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          schema.config.defaultOptions = dictOptions;
+                        }
+                      } else if (currentField.options?.length) {
                         schema.config.defaultOptions = currentField.options.map((e) => ({
                           chosen: currentField.defaultValue && e.optionValue === currentField.defaultValue,
                           label: e.optionLabel,

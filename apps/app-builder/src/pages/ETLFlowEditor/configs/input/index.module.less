@@ -1,0 +1,111 @@
+.config {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  padding: 0px;
+  color: #272e3b;
+  font-size: 14px;
+  font-weight: 400;
+
+  .dataPreview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    .dataSource {
+      width: 240px;
+      height: 100%;
+      background-color: #ffffff;
+      box-sizing: border-box;
+      padding: 0px;
+
+      .dataSourceHeader {
+        width: 100%;
+        height: 40px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+
+        .dataSourceHeaderLeft {
+          font-size: 14px;
+          font-weight: 400;
+          color: #4e5969;
+        }
+
+        .dataSourceHeaderRight {
+        }
+      }
+
+      .dataSourceContent {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 8px;
+
+        .dataSourceName {
+          width: 90%;
+          height: 40px;
+          background-color: #f7f8fa;
+          border-radius: 6px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 22px;
+        }
+
+        .selectedFields {
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+          box-sizing: border-box;
+          font-size: 14px;
+          font-weight: 400;
+          color: #4e5969;
+        }
+
+        .dataSourceContentItems {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: flex-start;
+          gap: 16px;
+          box-sizing: border-box;
+
+          .dataSourceContentItem {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 400;
+            color: #4e5969;
+          }
+        }
+      }
+    }
+
+    .dataPreviewContent {
+      flex: 1;
+      height: 100%;
+      background-color: #e5e6eb;
+    }
+  }
+}

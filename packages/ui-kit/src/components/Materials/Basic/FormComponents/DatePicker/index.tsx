@@ -3,8 +3,9 @@ import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
 import type { XInputDatePickerConfig } from './schema';
+import { getPopupContainer } from '@/utils';
+import '../index.css';
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -41,13 +42,6 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     const styles = {
       width: '100%',
       pointerEvents: (runtime ? 'auto' : 'none') as React.CSSProperties['pointerEvents']
-    };
-    const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-      return (
-        (node?.closest('.arco-form-item') as HTMLElement) ||
-        node?.parentNode as HTMLElement ||
-        document.body
-      );
     };
     switch (currentDateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:

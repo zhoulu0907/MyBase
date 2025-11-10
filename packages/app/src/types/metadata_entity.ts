@@ -64,6 +64,7 @@ export interface ChildEntity {
   relationshipType: string;
   sourceFieldName: string;
   targetFieldName: string;
+  dictTypeId?: string;
 }
 
 export interface AppEntityField extends MetadataEntityField {
@@ -73,6 +74,7 @@ export interface AppEntityField extends MetadataEntityField {
   fieldType: string; // 字段类型，如 BIGINT、VARCHAR、INT、DECIMAL、TIMESTAMP、TEXT、NUMBER 等
   isSystemField: number; // 是否是系统字段
   displayName: string; // 显示名称
+  dictTypeId?: string;
 }
 
 export interface EntityWithChildren {

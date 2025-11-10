@@ -8,6 +8,7 @@ import {
   uploadTypeConfig,
   statusConfig,
   widthConfig,
+  imageHandleConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -41,6 +42,7 @@ import type {
   IUploadSizeConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  IImageHandleConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
@@ -70,7 +72,14 @@ export type TXInputImgUploadEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
   | IVerifyConfigType
+  | IImageHandleConfigType
 >;
+
+interface IMAGE_HANDLE {
+  autoCompress: boolean, // 自动压缩图片
+  addWatermark: boolean, //添加水印
+  watermarkText?: string // 水印文案
+}
 
 export interface XInputImgUploadConfig extends ICommonBaseType {
   /**
@@ -136,6 +145,9 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
    */
   uploadCompress?: TNumberDefaultType;
 
+  // 图片处理 
+  imageHandle?: IMAGE_HANDLE
+
   /**
    * 文件/图片展示样式：文本、平铺、列表
    * 可选值: 'text' | 'picture-card' | 'picture-list'
@@ -166,16 +178,17 @@ const XImgUpload: XInputImgUploadSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
+    imageHandleConfig,
     {
       key: 'uploadCompress',
       name: '图片压缩率',
       type: CONFIG_TYPES.UPLOAD_COMPRESS
     },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'verify',
       name: '校验',
@@ -203,6 +216,11 @@ const XImgUpload: XInputImgUploadSchema = {
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     labelColSpan: 200,
+    imageHandle:{
+      autoCompress: false, // 自动压缩图片
+      addWatermark: false, //添加水印
+      watermarkText: '' // 水印文案
+    },
     verify: {
       required: false,
       maxCount: -1,

@@ -1,5 +1,5 @@
 import { FlowNodeEntity, useNodeRender } from '@flowgram.ai/free-layout-editor';
-import { etlEditorSignal } from '@onebase/common';
+import { ETLDrawerTab, etlEditorSignal, ETLNodeType } from '@onebase/common';
 import { NodeRenderContext } from '../../context';
 import styles from './index.module.less';
 import { NodeWrapper } from './node-wrapper';
@@ -21,10 +21,18 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
       <NodeWrapper>
         <div
           className={`${styles.baseNodeStyle}`}
-          onClick={() => {
-            console.log('onClick: ', node.id);
-            console.log('nodeType: ', node.flowNodeType);
-            etlEditorSignal.setCurNode(node);
+          onDoubleClick={() => {
+            etlEditorSignal.setCurNode({
+              id: node.id,
+              title: form?.values?.title || '',
+              flowNodeType: node.flowNodeType
+            });
+
+            if (node.flowNodeType === ETLNodeType.OUTPUT_NODE) {
+              etlEditorSignal.setCurDrawerTab(ETLDrawerTab.DATA_CONFIG);
+            } else {
+              etlEditorSignal.resetCurDrawerTab();
+            }
           }}
           style={{
             /**

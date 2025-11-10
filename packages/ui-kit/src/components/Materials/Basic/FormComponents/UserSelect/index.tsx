@@ -12,6 +12,7 @@ import AdvanceSelectModal from './AdvanceSelectModal';
 
 import '../index.css';
 import './index.css';
+import { getPopupContainer } from '@/utils';
 
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -116,14 +117,6 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     setAdvanceVisible(false);
   };
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   return (
     <div className="formWrapper">
       <Form.Item
@@ -209,10 +202,10 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
                   </Avatar>
                   <span className='displayName'> {currentSelectUser} </span>
                   <IconClose className='closeBtn' onMouseDown={(e) => {
-                      // 阻止 mousedown 导致 input 聚焦/下拉打开
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
+                    // 阻止 mousedown 导致 input 聚焦/下拉打开
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                     onClick={(e) => { handleRemove(e) }} />
                 </span>);
             }} />)}

@@ -2,8 +2,8 @@ import NodeInputIcon from '@/assets/images/etl/node_input.svg';
 import NodeJoinIcon from '@/assets/images/etl/node_join.svg';
 import NodeOutputIcon from '@/assets/images/etl/node_output.svg';
 import NodeUnionIcon from '@/assets/images/etl/node_union.svg';
-import { WorkflowDragService, useService } from '@flowgram.ai/free-layout-editor';
-import { ETLNodeType } from '@onebase/common';
+import { useService, WorkflowDragService } from '@flowgram.ai/free-layout-editor';
+import { etlEditorSignal, ETLNodeType } from '@onebase/common';
 import React from 'react';
 import styles from './index.module.less';
 import { generateNodeId } from './utils';
@@ -46,6 +46,7 @@ const NodeList = [
 ];
 const ETLFlowPanel: React.FC = () => {
   const startDragSerivce = useService<WorkflowDragService>(WorkflowDragService);
+  const { setCurNode, setNodeData } = etlEditorSignal;
 
   return (
     <div className={styles.panel}>
@@ -66,6 +67,12 @@ const ETLFlowPanel: React.FC = () => {
                       title: `${node.name}节点`,
                       type: node.type
                     }
+                  });
+
+                  setNodeData(nodeId, {
+                    id: nodeId,
+                    title: `${node.name}节点`,
+                    type: node.type
                   });
                 }}
               >

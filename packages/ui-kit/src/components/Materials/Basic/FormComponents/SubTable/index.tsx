@@ -19,7 +19,7 @@ import PreviewRender from 'src/components/render/PreviewRender';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
 import { useAppEntityStore } from 'src/signals/store_entity'
-
+import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -84,7 +84,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   };
 
   // 拖拽添加
-  const onSubAdd = (e: any) => {
+  const onSubAdd = async(e: any) => {
     const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
     const itemType = e.item.getAttribute('data-cp-type');
     const fieldId = e.item.getAttribute('data-field-id');
@@ -155,7 +155,14 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
         itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
       ) {
-        if (currentField.options?.length) {
+        if (currentField.dictTypeId) {
+          const res = await getDictDetail(currentField.dictTypeId);
+          const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+          const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+          if (dictOptions.length) {
+            schema.config.defaultOptions = dictOptions;
+          }
+        } else if (currentField.options?.length) {
           schema.config.defaultOptions = currentField.options.map((e) => ({
             chosen: currentField.defaultValue && e.optionValue === currentField.defaultValue,
             label: e.optionLabel,

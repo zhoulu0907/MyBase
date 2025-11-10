@@ -4,6 +4,7 @@ import { FreeLayoutProps } from '@flowgram.ai/free-layout-editor';
 import { createFreeSnapPlugin } from '@flowgram.ai/free-snap-plugin';
 import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
 
+import { etlEditorSignal } from '@onebase/common';
 import { BaseNode } from '../components/base-node';
 import type { FlowNodeRegistry } from '../typings';
 
@@ -29,10 +30,10 @@ export const useEditorProps = (nodeRegistries: FlowNodeRegistry[]) =>
        * Initial data
        * 初始化数据
        */
-      initialData: {
-        nodes: [],
-        edges: []
-      },
+      //   initialData: {
+      //     nodes: [],
+      //     edges: []
+      //   },
       /**
        * Node registries
        * 节点注册
@@ -95,7 +96,8 @@ export const useEditorProps = (nodeRegistries: FlowNodeRegistry[]) =>
        * Content change
        */
       onContentChange(ctx, event) {
-        console.log('Auto Save: ', event, ctx.document.toJSON());
+        // console.log('Auto Save: ', event, ctx.document.toJSON());
+        etlEditorSignal.setGraphData(ctx.document.toJSON());
       },
       // /**
       //  * Node engine enable, you can configure formMeta in the FlowNodeRegistry

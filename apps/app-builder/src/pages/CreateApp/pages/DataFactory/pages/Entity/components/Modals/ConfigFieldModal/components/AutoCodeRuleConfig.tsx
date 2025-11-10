@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Button, Input, Select, Dropdown, Menu, Cascader } from '@arco-design/web-react';
+import React, { useState, useCallback } from 'react';
+import { Button, Input, Select, Dropdown, Menu, Cascader, Space, Message } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import AutoCodeNumberSettingsModal from './AutoCodeNumberSettingsModal';
-import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce } from '../types';
+import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce, EntityFieldsWithChildren } from '../types';
 import {
   convertAutoCodeCompoToAutoNumberRule,
   convertAutoNumberRuleToAutoCodeComp,
@@ -14,7 +15,9 @@ import {
   AUTO_CODE_RESET_CYCLE,
   AUTO_CODE_RULE_TYPE,
   DATE_FORMAT_DEFAULT,
-  AUTO_CODE_NUMBER_DEFAULT_CONFIG
+  AUTO_CODE_NUMBER_DEFAULT_CONFIG,
+  DATE_FORMAT_OPTIONS,
+  DATE_FORMAT_VALUES
 } from '../utils/const';
 import styles from '../index.module.less';
 
@@ -23,17 +26,33 @@ interface AutoCodeRuleConfigProps {
   onConfirm: (config: AutoNumberRule) => void;
   initialConfig?: AutoNumberRule;
   onCancel?: () => void;
-  fields: { label: string; value: string }[];
+  fields: EntityFieldsWithChildren[];
 }
 
-const DATE_FORMAT_OPTIONS = [
-  { label: '年月日', value: '年月日' },
-  { label: '年月', value: '年月' },
-  { label: '年', value: '年' },
-  { label: '年月日时分', value: '年月日时分' },
-  { label: '年月日时分秒', value: '年月日时分秒' },
-  { label: '自定义', value: '自定义' }
-];
+// 仅支持部分类型字段作为编号组成部分
+const getFieldOptions = (entitys: EntityFieldsWithChildren[]) => {
+  const filterTypes = [
+    ENTITY_FIELD_TYPE.TEXT.VALUE,
+    ENTITY_FIELD_TYPE.NUMBER.VALUE,
+    ENTITY_FIELD_TYPE.DATE.VALUE,
+    ENTITY_FIELD_TYPE.EMAIL.VALUE,
+    ENTITY_FIELD_TYPE.SELECT.VALUE,
+    ENTITY_FIELD_TYPE.PHONE.VALUE,
+    ENTITY_FIELD_TYPE.ADDRESS.VALUE
+  ];
+  return entitys?.map((entity) => {
+    return {
+      label: entity.label,
+      value: entity.value,
+      children: entity.children
+        ?.filter((field) => filterTypes.includes(field.fieldType))
+        ?.map((field) => ({
+          label: field.label,
+          value: field.value
+        }))
+    };
+  });
+};
 
 export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   onVisibleChange,
@@ -42,12 +61,15 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   initialConfig,
   fields
 }) => {
+  // 使用对象存储每个规则的校验状态，key 为 rule.id
+  const [fixedTextStatusMap, setFixedTextStatusMap] = useState<Record<string, 'error' | undefined>>({});
+  const [customDateFormatStatusMap, setCustomDateFormatStatusMap] = useState<Record<string, 'error' | undefined>>({});
+
   // 默认规则
-  const getInitialRules = (): AutoCodeRule[] => {
+  const getInitialRules = useCallback((): AutoCodeRule[] => {
     if (initialConfig) {
       return convertAutoNumberRuleToAutoCodeComp(initialConfig, fields);
     }
-
     return [
       {
         id: 'rule-1',
@@ -57,31 +79,41 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
         }
       }
     ];
-  };
+  }, [initialConfig, fields]);
 
   const [rules, setRules] = useState<AutoCodeRule[]>(getInitialRules());
   const [autoCodeModalVisible, setAutoCodeModalVisible] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string>('');
-
-  const autoCodeConfig =
-    rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.config || rules[0].config;
-
-  const getDisplayText = (config: AutoCodeRule['config']) => {
-    const numberingMethodText = config.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
-    const digitsText = config.digitWidth ? `${config.digitWidth}位数` : '';
-    const resetText = config.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
-    return `${numberingMethodText},${digitsText},${resetText}`;
+  const getDisplayText = (config?: AutoCodeRule['config']) => {
+    const sequenceConfig = config || rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.config;
+    if (!sequenceConfig) {
+      return '';
+    }
+    const numberingMethodText =
+      sequenceConfig.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
+    const digitsText =
+      sequenceConfig.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '' : `${sequenceConfig.digitWidth}位数`;
+    const resetText = sequenceConfig.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
+    return `${numberingMethodText},${digitsText}${resetText}`;
   };
 
-  const [displayText, setDisplayText] = useState(getDisplayText(autoCodeConfig));
+  const [displayText, setDisplayText] = useState(getDisplayText());
 
   const addRule = (type: AutoCodeRule['itemType']) => {
-    const newRule: AutoCodeRule = {
-      id: 'rule-' + Date.now().toString(),
-      itemType: type,
-      config: type === AUTO_CODE_RULE_TYPE.DATE ? { dateFormat: DATE_FORMAT_DEFAULT } : {}
-    };
-    setRules([...rules, newRule]);
+    let config: AutoCodeRule['config'] = {};
+    switch (type) {
+      case AUTO_CODE_RULE_TYPE.SEQUENCE:
+        config = { ...AUTO_CODE_NUMBER_DEFAULT_CONFIG };
+        setDisplayText(getDisplayText(config));
+        break;
+      case AUTO_CODE_RULE_TYPE.DATE:
+        config = { dateFormat: DATE_FORMAT_DEFAULT };
+        break;
+      default:
+        config = {};
+        break;
+    }
+    setRules([...rules, { id: 'rule-' + Date.now().toString(), itemType: type, config }]);
   };
 
   const editRule = (id: string) => {
@@ -101,11 +133,18 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   };
 
   const removeRule = (id: string) => {
-    // 至少保留一条规则
-    if (rules.length === 1) {
-      return;
-    }
     setRules(rules.filter((rule) => rule.id !== id));
+    // 清理对应的校验状态
+    setFixedTextStatusMap((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    setCustomDateFormatStatusMap((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const updateRule = (id: string, updates: Partial<AutoCodeRule>) => {
@@ -113,6 +152,20 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   };
 
   const handleConfirm = () => {
+    // 至少保留一条规则
+    if (rules.length < 1) {
+      Message.error('至少保留一条规则');
+      return;
+    }
+
+    // 检查所有规则的校验状态
+    const hasFixedTextError = Object.values(fixedTextStatusMap).some((status) => status === 'error');
+    const hasCustomDateFormatError = Object.values(customDateFormatStatusMap).some((status) => status === 'error');
+
+    if (hasFixedTextError || hasCustomDateFormatError) {
+      Message.error('请检查输入内容');
+      return;
+    }
     // 将数组格式转换为 AutoNumberRule 对象格式
     const autoNumberRule = convertAutoCodeCompoToAutoNumberRule(rules);
     onConfirm(autoNumberRule);
@@ -142,14 +195,6 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               className={styles.ruleInput}
               suffix={<IconEdit onClick={() => editRule(rule.id || '')} className={styles.editBtn} />}
             />
-            <Button
-              type="text"
-              status="danger"
-              icon={<IconDelete />}
-              onClick={() => removeRule(rule.id!)}
-              disabled={rules.length === 1}
-              className={styles.ruleActionBtn}
-            />
           </div>
         );
       }
@@ -159,23 +204,48 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
           <div className={styles.ruleContent}>
             <IconDragDotVertical className={styles.dragHandle} />
             <span className={styles.ruleLabel}>创建时间:</span>
-            <Select
-              value={(rule.config.dateFormat as string) || DATE_FORMAT_DEFAULT}
-              onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, dateFormat: value } })}
-              className={styles.ruleInput}
-            >
-              {DATE_FORMAT_OPTIONS.map((option) => (
-                <Select.Option key={option.value} value={option.value}>
-                  {option.label}
-                </Select.Option>
-              ))}
-            </Select>
+            <Space direction="vertical">
+              <Select
+                value={(rule.config.dateFormat as string) || DATE_FORMAT_DEFAULT}
+                onChange={(value) => {
+                  // 清除该规则的校验状态
+                  setCustomDateFormatStatusMap((prev) => ({ ...prev, [rule.id!]: undefined }));
+                  updateRule(rule.id!, { config: { ...rule.config, dateFormat: value, fixedText: '' } });
+                }}
+                className={styles.ruleInput}
+              >
+                {DATE_FORMAT_OPTIONS.map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Select.Option>
+                ))}
+              </Select>
+              {rule.config.dateFormat === DATE_FORMAT_VALUES.CUSTOM && (
+                <Input
+                  value={(rule.config.fixedText as string) || ''}
+                  placeholder="例如：yyyyMMddHHmmss"
+                  onChange={(value) => {
+                    const ruleId = rule.id!;
+                    if (!/^[dhmstyHM]+$/.test(value as string)) {
+                      setCustomDateFormatStatusMap((prev) => ({ ...prev, [ruleId]: 'error' }));
+                    } else {
+                      setCustomDateFormatStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
+                    }
+                    updateRule(ruleId, { config: { ...rule.config, fixedText: value } });
+                  }}
+                  className={styles.ruleInput}
+                  status={customDateFormatStatusMap[rule.id!]}
+                />
+              )}
+              {customDateFormatStatusMap[rule.id!] === 'error' && (
+                <span className={styles.ruleInputError}>{`例如：yyyyMMddHHmmss`}</span>
+              )}
+            </Space>
             <Button
               type="text"
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
-              disabled={rules.length === 1}
               className={styles.ruleActionBtn}
             />
           </div>
@@ -186,18 +256,31 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
           <div className={styles.ruleContent}>
             <IconDragDotVertical className={styles.dragHandle} />
             <span className={styles.ruleLabel}>固定字符:</span>
-            <Input
-              value={(rule.config.fixedText as string) || ''}
-              placeholder="请输入内容"
-              onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fixedText: value } })}
-              className={styles.ruleInput}
-            />
+            <Space direction="vertical">
+              <Input
+                value={(rule.config.fixedText as string) || ''}
+                placeholder="请输入内容"
+                onChange={(value) => {
+                  const ruleId = rule.id!;
+                  if (!/^[_\-+=/()<>[\]{}.~、#%&*]+$/.test(value as string)) {
+                    setFixedTextStatusMap((prev) => ({ ...prev, [ruleId]: 'error' }));
+                  } else {
+                    setFixedTextStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
+                  }
+                  updateRule(ruleId, { config: { ...rule.config, fixedText: value } });
+                }}
+                className={styles.ruleInput}
+                status={fixedTextStatusMap[rule.id!]}
+              />
+              {fixedTextStatusMap[rule.id!] === 'error' && (
+                <span className={styles.ruleInputError}>{`仅支持：_-=+()<>[]{}.~、#%&*`}</span>
+              )}
+            </Space>
             <Button
               type="text"
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
-              disabled={rules.length === 1}
               className={styles.ruleActionBtn}
             />
           </div>
@@ -211,7 +294,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
             <Cascader
               placeholder="请选择字段"
               className={styles.ruleInput}
-              options={fields}
+              options={getFieldOptions(fields)}
               value={findFieldPath(rule.config.fieldName as string, fields)}
               onChange={(value) => {
                 updateRule(rule.id!, {
@@ -228,7 +311,6 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
-              disabled={rules.length === 1}
               className={styles.ruleActionBtn}
             />
           </div>
@@ -263,7 +345,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
                 <Menu.Item
                   key={AUTO_CODE_RULE_TYPE.DATE}
                   onClick={() => addRule(AUTO_CODE_RULE_TYPE.DATE)}
-                  disabled={rules.filter((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.DATE)?.length > 1}
+                  disabled={rules.filter((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.DATE)?.length >= 1}
                 >
                   创建时间
                 </Menu.Item>
@@ -305,4 +387,3 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
     </>
   );
 };
-

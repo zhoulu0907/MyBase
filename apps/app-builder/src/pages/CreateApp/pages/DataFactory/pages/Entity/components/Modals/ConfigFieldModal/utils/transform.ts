@@ -38,7 +38,8 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
         (rule.config?.dateFormat as string) ||
         (rule.config?.fixedText as string) ||
         (rule.config?.fieldName as string) ||
-        ''
+        '',
+      textValue: rule.config?.fixedText as string
     }));
 
   // 如果有 SEQUENCE 规则，使用其配置；否则使用默认配置
@@ -129,7 +130,7 @@ export const convertAutoNumberRuleToAutoCodeComp = (
 
     switch (rule.itemType) {
       case AUTO_CODE_RULE_TYPE.DATE:
-        autoCodeRule.config = { dateFormat: rule.format || DATE_FORMAT_DEFAULT };
+        autoCodeRule.config = { dateFormat: rule.format || DATE_FORMAT_DEFAULT, fixedText: rule.textValue || '' };
         break;
       case AUTO_CODE_RULE_TYPE.TEXT:
         autoCodeRule.config = { fixedText: rule.format || '' };

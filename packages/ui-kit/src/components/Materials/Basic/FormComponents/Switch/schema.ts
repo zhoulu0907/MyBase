@@ -6,6 +6,7 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  switchFillTextConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -39,7 +40,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  ITimrFormatConfigType
 } from '../../../types';
 
 export interface XInputSwitchSchema {
@@ -62,6 +64,7 @@ export type TXInputSwitchEditData = Array<
   | IDataFieldConfigType
   | ISecurityConfigType
   | IVerifyConfigType
+  | ITimrFormatConfigType
 >;
 
 export interface XInputSwitchConfig extends ICommonBaseType {
@@ -126,6 +129,11 @@ export interface XInputSwitchConfig extends ICommonBaseType {
     display: TBooleanDefaultType;
     type?: TTextDefaultType;
   };
+  fillText:{
+    display: boolean;
+    checkedText: string;
+    uncheckedText: string;
+  }
 }
 
 const XSwitch: XInputSwitchSchema = {
@@ -149,11 +157,12 @@ const XSwitch: XInputSwitchSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    switchFillTextConfig,
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     statusConfig,
     {
       key: 'security',
@@ -179,6 +188,11 @@ const XSwitch: XInputSwitchSchema = {
     security: {
       display: false,
       type: ''
+    },
+    fillText:{
+      display: true,
+      checkedText: '',
+      uncheckedText: ''
     }
   }
 };

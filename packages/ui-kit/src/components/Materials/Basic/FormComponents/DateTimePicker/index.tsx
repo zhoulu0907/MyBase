@@ -5,6 +5,7 @@ import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputDateTimePickerConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -30,14 +31,6 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
-
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
 
   return (
     <div className="formWrapper">

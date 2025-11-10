@@ -6,6 +6,13 @@ import { fetchExecTask } from '@onebase/app/src/services/app_runtime';
 
 import '../style/detailOkConfirm.less';
 
+interface ChildMethodParams {
+  value: {
+    buttonType: string;
+    [key: string]: any;
+  };
+  entityData: any;
+}
 const FormItem = Form.Item;
 
 const maxImgSizeMB = 20;
@@ -17,12 +24,12 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
   const [imgUpList, setImgUpList] = useState<any>();
 
   useImperativeHandle(ref, () => ({
-    childMethod: (value: any) => {
-      fetchExec(value);
+    childMethod: ({ value, entityData }: ChildMethodParams) => {
+      fetchExec({ value, entityData });
     }
   }));
 
-  const fetchExec = async (value: any) => {
+  const fetchExec = async ({ value, entityData }: ChildMethodParams) => {
     const buttonType = value?.buttonType;
     try {
       await form.validate();
@@ -31,15 +38,16 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
         buttonType,
         taskId,
         instanceId,
-        comment: nameValue
+        comment: nameValue,
+        entity: entityData
       };
       await fetchExecTask(req);
-        onSetPopupVisible(false);
-        onBack();
-      } catch (error) {
-        console.log('表单验证失败:', error);
-      }
-    };
+      onSetPopupVisible(false);
+      onBack();
+    } catch (error) {
+      console.log('表单验证失败:', error);
+    }
+  };
     const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
         const formData = new FormData();
         formData.append('file', file);

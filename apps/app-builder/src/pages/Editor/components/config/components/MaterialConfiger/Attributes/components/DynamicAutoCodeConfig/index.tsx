@@ -13,7 +13,7 @@ import { findFieldPath } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/
 import { Button, Cascader, Dropdown, Form, Input, Menu, Select, Tooltip } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPen, IconPlus } from '@arco-design/web-react/icon';
 import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
-import { useAppEntityStore } from '@onebase/ui-kit';
+import { getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
@@ -223,6 +223,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               onChange={(value) => updateRule(index, value)}
               className={styles.ruleInput}
               options={dataOptions}
+              getPopupContainer={getPopupContainer}
             ></Select>
           </>
         );
@@ -273,7 +274,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
       <Form.Item layout="vertical" label={'编号规则配置'} className={styles.formItem}>
         <ReactSortable
           list={rules}
-          setList={() => {}}
+          setList={() => { }}
           sort={!configs[autoCodeDisabledKey]}
           handle=".autocode-item-handle"
           forceFallback={true}

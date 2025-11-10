@@ -3,6 +3,7 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputDeptSelectConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 // TODO(Mickey): 放到schema的config中
 // 示例树形结构：部门
@@ -35,14 +36,6 @@ const treeData = [
 
 const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, tooltip, status, verify, layout, labelColSpan = 0, runtime = true } = props;
-
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
 
   return (
     <div className="formWrapper">
