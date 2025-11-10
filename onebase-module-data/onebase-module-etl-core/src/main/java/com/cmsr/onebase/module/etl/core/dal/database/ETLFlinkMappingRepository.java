@@ -7,6 +7,10 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Repository
 public class ETLFlinkMappingRepository extends DataRepository<ETLFlinkMappingDO> {
@@ -14,17 +18,16 @@ public class ETLFlinkMappingRepository extends DataRepository<ETLFlinkMappingDO>
         super(ETLFlinkMappingDO.class);
     }
 
-    // TODO: cachable method
-    public String findFlinkTypeByDatasourceTypeAndOriginType(String databaseType, String originType) {
+    public Map<String, String> findAllMappingsByDatasourceType(String datasourceType) {
         ConfigStore cs = new DefaultConfigStore();
-        cs.eq("database_type", databaseType);
-        cs.eq("origin_type", originType);
+        cs.eq("database_type", datasourceType);
 
-        ETLFlinkMappingDO mapping = findOne(cs);
-        if (mapping == null) { // by default, using string to capture this type
-            log.error("Unable to find compatible field mapping in Flink, database type: {}, origin field type: {}", databaseType, originType);
-            return "string";
-        }
-        return mapping.getFlinkType();
+        List<ETLFlinkMappingDO> flinkMappingDOs = findAllByConfig(cs);
+        return flinkMappingDOs.stream().collect(
+                Collectors.toMap(
+                        ETLFlinkMappingDO::getOriginType,
+                        ETLFlinkMappingDO::getFlinkType
+                )
+        );
     }
 }
