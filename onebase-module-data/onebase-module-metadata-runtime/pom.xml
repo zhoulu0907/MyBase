@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-security</artifactId>
+            <artifactId>onebase-security-build</artifactId>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-api</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
         <!-- 临时加onebase-module-flow-component 后续看如何解耦-->
@@ -65,8 +65,8 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-security-runtime</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>onebase-security-runtime</artifactId>
+            <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
         <!--        <dependency>-->

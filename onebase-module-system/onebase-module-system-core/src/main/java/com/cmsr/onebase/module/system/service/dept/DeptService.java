@@ -140,11 +140,13 @@ public interface DeptService {
     /**
      * 根据用户ID获取所有直属上级部门，包括一级部门
      *
-     * @param userId 用户ID
+     * @param id 用户/部门ID，根据 idType 决定
+     * @param idType ID 类型，参见 IdTypeEnum 枚举
      * @return 所有直属上级部门列表
      */
     List<DeptDO> getParentDeptsListByUserId(Long userId);
 
     void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO);
 
+    List<DeptDO> getParentDeptsListById(Long id, String idType);
 }

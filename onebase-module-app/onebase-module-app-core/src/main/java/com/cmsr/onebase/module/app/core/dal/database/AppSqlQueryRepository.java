@@ -40,7 +40,7 @@ public class AppSqlQueryRepository {
             sql = """
                     select
                         aaru.id,
-                        aaru.role_id AS member_id,
+                        aaru.user_id AS member_id,
                         aaru.update_time,
                         -1 AS is_include_child,
                         d.name AS dept_name,
@@ -79,7 +79,7 @@ public class AppSqlQueryRepository {
                     select * from (
                     select
                         aaru.id,
-                        aaru.role_id AS member_id,
+                        aaru.user_id AS member_id,
                         aaru.update_time,
                         -1 AS is_include_child,
                         d.name AS dept_name,

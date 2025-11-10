@@ -68,8 +68,8 @@ GET {{baseUrl}}/system/dept/get?id=100
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-### 请求 /get-dept-by-user-id 接口 => 成功
-GET {{baseUrl}}/system/dept/get-depts-by-user-id?userId=542576821770784768
+### 请求 /get-depts-by-id 接口 => 成功
+GET {{baseUrl}}/system/dept/get-depts-by-id?id=122721767135772672&idType=dept
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

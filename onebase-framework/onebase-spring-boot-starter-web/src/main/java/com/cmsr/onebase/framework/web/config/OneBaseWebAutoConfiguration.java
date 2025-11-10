@@ -36,8 +36,9 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(@NonNull PathMatchConfigurer configurer) {
-        configurePathMatch(configurer, webProperties.getAdminApi());
-        configurePathMatch(configurer, webProperties.getAppApi());
+        configurePathMatch(configurer, webProperties.getPlatformApi());
+        configurePathMatch(configurer, webProperties.getBuildApi());
+        configurePathMatch(configurer, webProperties.getRuntimeApi());
     }
 
     /**

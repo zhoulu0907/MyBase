@@ -42,7 +42,7 @@ public class ExecuteContext implements Serializable {
     /**
      * 节点配置数据
      */
-    private Map<String, NodeData> nodeDataMap = new HashMap<>();
+    private volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
 
     //节点执行的结果
     private Map<String, Object> nodeProcessHisResults = new ConcurrentHashMap<>();
@@ -64,12 +64,14 @@ public class ExecuteContext implements Serializable {
     @Getter
     private volatile String executionEndNodeTag;
 
-    private volatile Stopwatch stopwatch = Stopwatch.createStarted();
+    private volatile Stopwatch stopwatch;
 
-    private volatile List<String> logs = new CopyOnWriteArrayList<>();
+    private volatile List<String> logs;
 
     public ExecuteContext() {
-        logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), "流程执行开始"));
+        this.stopwatch = Stopwatch.createStarted();
+        this.logs = new CopyOnWriteArrayList<>();
+        this.logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), "流程执行开始"));
     }
 
     public void setNodeDataMap(Map<String, NodeData> nodeData) {

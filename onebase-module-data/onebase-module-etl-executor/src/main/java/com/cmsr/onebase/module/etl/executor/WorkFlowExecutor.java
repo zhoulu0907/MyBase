@@ -3,10 +3,11 @@ package com.cmsr.onebase.module.etl.executor;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
-import com.cmsr.onebase.module.etl.executor.graph.Field;
-import com.cmsr.onebase.module.etl.executor.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.WorkflowGraph;
+import com.cmsr.onebase.module.etl.common.graph.conf.Field;
+import com.cmsr.onebase.module.etl.common.graph.Node;
+import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
+import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
@@ -37,7 +38,9 @@ public class WorkFlowExecutor {
             if (inputArgs.getWorkflowId() != null) {
                 workflowGraph = workflowProvider.getWorkflowGraph(inputArgs.getWorkflowId());
             } else {
-                workflowGraph = workflowProvider.getWorkflowGraph(inputArgs.getPreviewWorkflow());
+                WorkflowGraph graph = JacksonUtil.readValue(inputArgs.getPreviewWorkflow(), WorkflowGraph.class);
+                WorkflowGraph subgraph = graph.subgraph(inputArgs.getPreviewNodeId());
+                workflowGraph = workflowProvider.getWorkflowGraph(subgraph);
             }
         }
         EnvironmentSettings settings =
@@ -47,26 +50,26 @@ public class WorkFlowExecutor {
 
     public void execute() {
         for (Node node : workflowGraph.getNodes()) {
-            if (node instanceof CreateTableAction action) {
-                action.createTable(tableEnv);
-            }
-            if (node instanceof SqlQueryAction action) {
-                action.sqlQuery(tableEnv);
-            }
-            if (node instanceof ExecuteSqlAction action) {
-                action.executeSql(tableEnv);
-            }
+            doAction(node);
         }
     }
 
+    private void doAction(Node node) {
+        if (node instanceof CreateTableAction action) {
+            action.createTable(tableEnv, workflowGraph);
+        }
+        if (node instanceof SqlQueryAction action) {
+            action.sqlQuery(tableEnv, workflowGraph);
+        }
+        if (node instanceof ExecuteSqlAction action) {
+            action.executeSql(tableEnv, workflowGraph);
+        }
+    }
+
+
     public DataPreview preview() {
         for (Node node : workflowGraph.getNodes()) {
-            if (node instanceof CreateTableAction action) {
-                action.createTable(tableEnv);
-            }
-            if (node instanceof ExecuteSqlAction action) {
-                action.executeSql(tableEnv);
-            }
+            doAction(node);
             if (node.getId().equals(inputArgs.getPreviewNodeId())) {
                 Table table = tableEnv.from(node.getId());
                 TableResult tableResult = table.execute();
