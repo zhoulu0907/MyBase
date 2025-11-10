@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
 
 /**

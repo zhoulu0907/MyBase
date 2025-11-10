@@ -1,6 +1,6 @@
-package com.cmsr.onebase.module.bpm.api.dto;
+package com.cmsr.onebase.module.bpm.core.dto;
 
-import com.cmsr.onebase.module.bpm.api.enums.*;
+import com.cmsr.onebase.module.bpm.core.enums.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
