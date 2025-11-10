@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -176,4 +179,45 @@ public class AppSqlQueryRepository {
         return new ArrayList<>();
     }
 
+    public Map<Long, List<Map<String, String>>> findUserPhotoList(List<Long> appIds) {
+        if (appIds == null || appIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        ConfigStore configs = new DefaultConfigStore();
+        configs.param("appIds", appIds);
+        configs.param("roleType", 1);
+
+        String sql = """
+                SELECT DISTINCT 
+                    su.id,
+                    su.avatar,
+                    su.nickName,
+                    r.application_id  
+                FROM app_auth_role r 
+                LEFT JOIN app_auth_role_user ru ON r.id = ru.role_id
+                LEFT JOIN system_users su ON su.id = ru.user_id
+                WHERE r.application_id IN (:appIds) 
+                  AND r.role_type = :roleType
+                  AND su.id IS NOT NULL
+                """;
+
+        DataSet dataSet = anylineService.querys(sql, configs);
+
+        // 处理结果集，按application_id分组
+        return dataSet.stream()
+                .collect(Collectors.groupingBy(
+                        row -> row.getLong("application_id"),
+                        Collectors.mapping(
+                                row -> {
+                                    Map<String, String> userMap = new HashMap<>();
+                                    userMap.put("id", String.valueOf(row.get("id")));
+                                    userMap.put("avatar", (String) row.get("avatar"));
+                                    userMap.put("nickName", (String) row.get("nickName"));
+                                    return userMap;
+                                },
+                                Collectors.toList()
+                        )
+                ));
+    }
 }

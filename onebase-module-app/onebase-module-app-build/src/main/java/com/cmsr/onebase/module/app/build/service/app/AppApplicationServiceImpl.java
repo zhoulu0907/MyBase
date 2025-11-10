@@ -1,11 +1,9 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
-import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
@@ -15,6 +13,7 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
@@ -35,11 +34,15 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -87,11 +90,20 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Resource
     private AppAuthRoleRepository appAuthRoleRepository;
 
+    @Autowired
+    private AppSqlQueryRepository appSqlQueryRepository;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO);
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
+
+        // 1. 获取应用ID列表
+        List<Long> appIds = pageResult.getList().stream()
+                .map(ApplicationDO::getId)
+                .collect(Collectors.toList());
+         Map<Long,List<Map<String,String>>> userListMap=appSqlQueryRepository.findUserPhotoList(appIds);
+
         List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
                     ApplicationRespVO bean = BeanUtils.toBean(v, ApplicationRespVO.class);
@@ -99,6 +111,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     bean.setTags(queryAppTags(v.getId()));
                     bean.setCreateUser(userHelper.getUserNickname(v.getCreator()));
                     bean.setUpdateUser(userHelper.getUserNickname(v.getUpdater()));
+                    // 用户头像数据待开发
+                    bean.setUserPhotoList(userListMap.get(v.getId()));
                     return bean;
                 })
                 .toList();
