@@ -126,6 +126,9 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
+    lengthLimit?: boolean;
+    minLength?: number;
+    maxLength?: number;
   };
 
   /**
@@ -159,16 +162,6 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
    * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
-
-  /**
-   * 多行文本字数下限
-   */
-  minLength?: TNumberDefaultType;
-
-  /**
-   * 多行文本字数上限
-   */
-  maxLength?: TNumberDefaultType;
 
   /**
    * 多行文本最小高度
@@ -220,16 +213,6 @@ const XInputTextArea: XInputTextAreaSchema = {
       type: CONFIG_TYPES.VERIFY
     },
     {
-      key: 'minLength',
-      name: '多行文本字数下限',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
-      key: 'maxLength',
-      name: '多行文本字数上限',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
       key: 'minRows',
       name: '文本展示行数',
       type: CONFIG_TYPES.NUMBER_INPUT
@@ -267,8 +250,6 @@ const XInputTextArea: XInputTextAreaSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    minLength: 0,
-    maxLength: 2000,
     minRows: 3,
     maxRows: 5,
     security: {
@@ -276,7 +257,10 @@ const XInputTextArea: XInputTextAreaSchema = {
       type: ''
     },
     verify: {
-      required: false
+      required: false,
+      lengthLimit: false,
+      minLength: 0,
+      maxLength: 2000
     }
   }
 };

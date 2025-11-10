@@ -34,6 +34,7 @@ import DynamicDateFormatConfig from './components/DynamicDateFormatConfig';
 import DynamicTimeFormatConfig from './components/DynamicTimeFormatConfig';
 import DynamicSwitchFillTextConfig from './components/DynamicSwitchFillTextConfig';
 import DynamicDefaultValueConfig from './components/DynamicDefaultValueConfig';
+import DynamicVerifyConfig from './components/DynamicVerifyConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -642,96 +643,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
           </FormItem>
         );
       case CONFIG_TYPES.VERIFY:
-        return (
-          <FormItem className={styles.formItem} label={item.name}>
-            <Row>
-              <Col flex="auto" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                <Checkbox
-                  checked={configs[item.key]['required']}
-                  onChange={(value) => {
-                    handlePropsChange(item.key, { ...configs[item.key], required: value });
-                  }}
-                >
-                  必填
-                </Checkbox>
-                {typeof configs[item.key]['noRepeat'] === 'boolean' && (
-                  <Checkbox
-                    checked={configs[item.key]['noRepeat']}
-                    onChange={(value) => {
-                      handlePropsChange(item.key, { ...configs[item.key], noRepeat: value });
-                    }}
-                  >
-                    不允许重复
-                  </Checkbox>
-                )}
-                {typeof configs[item.key]['min'] === 'number' && (
-                  <InputNumber
-                    value={configs[item.key]['min']}
-                    prefix="最小值"
-                    onChange={(value) => {
-                      if (value > configs[item.key]['max']) return;
-                      handlePropsChange(item.key, { ...configs[item.key], min: value });
-                    }}
-                  />
-                )}
-                {typeof configs[item.key]['max'] === 'number' && (
-                  <InputNumber
-                    value={configs[item.key]['max']}
-                    prefix="最大值"
-                    onChange={(value) => {
-                      if (value < configs[item.key]['min']) return;
-                      handlePropsChange(item.key, { ...configs[item.key], max: value });
-                    }}
-                  />
-                )}
-                {typeof configs[item.key]['maxChecked'] === 'number' && (
-                  <InputNumber
-                    value={configs[item.key]['maxChecked']}
-                    min={0}
-                    prefix="可选数量限制"
-                    onChange={(value) => {
-                      if (!value) return;
-                      handlePropsChange(item.key, { ...configs[item.key], maxChecked: value });
-                    }}
-                  />
-                )}
-                {typeof configs[item.key]['maxCount'] === 'number' && (
-                  <InputNumber
-                    value={configs[item.key]['maxCount']}
-                    min={-1}
-                    prefix="上传数量限制"
-                    onChange={(value) => {
-                      if (typeof value !== 'number') return;
-                      handlePropsChange(item.key, { ...configs[item.key], maxCount: value });
-                    }}
-                  />
-                )}
-                {typeof configs[item.key]['maxSize'] === 'number' && (
-                  <InputNumber
-                    value={configs[item.key]['maxSize']}
-                    min={0}
-                    prefix="大小限制"
-                    suffix={configs['verify']['maxSize'] ? 'MB' : ''}
-                    onChange={(value) => {
-                      if (!value) return;
-                      handlePropsChange(item.key, { ...configs[item.key], maxSize: value });
-                    }}
-                  />
-                )}
-                {typeof configs[item.key]['fileFormat'] === 'string' && (
-                  <Input
-                    placeholder={`请输入支持文件格式，用英文逗号分隔`}
-                    value={configs[item.key]['fileFormat']}
-                    onChange={(value) => {
-                      if (!value) return;
-                      handlePropsChange(item.key, { ...configs[item.key], fileFormat: value });
-                    }}
-                  />
-                )}
-              </Col>
-            </Row>
-          </FormItem>
-        );
+        // 校验
+        return <DynamicVerifyConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.NUMBER_FORMAT:
         return (
           <FormItem className={styles.formItem} label={item.name}>

@@ -22,8 +22,6 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     color,
     bgColor,
     labelColSpan = 0,
-    minLength = 0,
-    maxLength = 0,
     minRows,
     maxRows,
     runtime = true,
@@ -61,11 +59,13 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
           { required: verify?.required },
           {
             validator: (value, callback) => {
-              if (minLength !== 0 && value && value.length < minLength) {
-                callback(`字数不能小于${minLength}`);
-              }
-              if (maxLength !== 0 && value && value.length > maxLength) {
-                callback(`字数不能大于${maxLength}`);
+              if(verify.lengthLimit){
+                if (verify.minLength && value && value.length < verify.minLength) {
+                  callback(`字数不能小于${verify.minLength}`);
+                }
+                if (verify.maxLength && value && value.length > verify.maxLength) {
+                  callback(`字数不能大于${verify.maxLength}`);
+                }
               }
             }
           }
@@ -83,12 +83,9 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
           <TextArea
             key={`${minRows}-${maxRows}`}
             placeholder={placeholder}
-            maxLength={maxLength}
+            maxLength={verify.lengthLimit ? verify.maxLength : undefined}
             allowClear
-            autoSize={{
-              minRows,
-              maxRows
-            }}
+            autoSize={{ minRows }}
             showWordLimit
             style={{
               width: '100%',
