@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
 import com.cmsr.onebase.module.etl.common.entity.EtlColumn;
-import com.cmsr.onebase.module.etl.common.entity.EtlDataSource;
-import com.cmsr.onebase.module.etl.common.entity.EtlTable;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import com.cmsr.onebase.module.etl.common.entity.EtlTableColumn;
 import com.cmsr.onebase.module.etl.common.graph.conf.Field;
 import com.cmsr.onebase.module.etl.common.graph.Node;

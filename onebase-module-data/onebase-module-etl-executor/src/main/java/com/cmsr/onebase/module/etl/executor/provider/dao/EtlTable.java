@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.etl.executor.provider.dao;
 
-import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 /**
@@ -10,10 +9,8 @@ import lombok.Data;
 @Data
 public class EtlTable {
 
-    @SerializedName("table_name")
     private String tableName;
 
-    @SerializedName("meta_info")
-    private EtlTableColumn metaInfo;
+    private String metaInfo;
 
 }

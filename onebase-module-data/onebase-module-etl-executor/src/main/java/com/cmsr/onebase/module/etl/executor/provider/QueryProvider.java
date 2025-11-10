@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
-import com.cmsr.onebase.module.etl.common.entity.EtlDataSource;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
-import com.cmsr.onebase.module.etl.common.entity.EtlTable;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import org.apache.commons.dbutils.QueryRunner;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
