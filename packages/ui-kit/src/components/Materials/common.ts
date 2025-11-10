@@ -110,7 +110,7 @@ export const widthConfig: IWidthConfigType<TWidthSelectKeyType> = {
 export type TStatusSelectKeyType = (typeof STATUS_VALUES)[keyof typeof STATUS_VALUES];
 export const statusConfig: IStatusConfigType<TStatusSelectKeyType> = {
   key: 'status',
-  name: '组件状态',
+  name: '显示状态',
   type: CONFIG_TYPES.STATUS_RADIO,
   range: [
     {

@@ -393,6 +393,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         return (
           <FormItem
             className={styles.formItem}
+            required
             label={
               <>
                 {item.name}
@@ -720,6 +721,21 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             </>
           </FormItem>
         );
+      case CONFIG_TYPES.PHONE_TYPE:
+        // 电话类型
+        return (
+          <FormItem className={styles.formItem} label={item.name}>
+            <Radio.Group
+              size="large"
+              value={configs[item.key]}
+              onChange={(value) => {
+                handlePropsChange(item.key, value);
+              }}
+              className={styles.pagePositionRadioGroup}
+              options={item.range || []}
+            ></Radio.Group>
+          </FormItem>
+        );
       default:
         return (
           <FormItem className={styles.formItem} label={item.name}>
@@ -740,12 +756,13 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     <div className={styles.attributes}>
       {cpID && (
         <Form autoComplete="off" layout="vertical">
-          <FormItem
-            label="组件ID"
-            labelCol={{
-              span: 5
-            }}
-          >
+          {editData
+            .filter((item: any) => !item.advanced)
+            .map((item: any, index: number) => (
+              <div key={index}>{renderEditItem(item, index)}</div>
+            ))}
+
+          <FormItem label="组件ID" labelCol={{ span: 5 }}>
             <Input
               value={cpID}
               suffix={
@@ -755,12 +772,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               }
             />
           </FormItem>
-
-          {editData
-            .filter((item: any) => !item.advanced)
-            .map((item: any, index: number) => (
-              <div key={index}>{renderEditItem(item, index)}</div>
-            ))}
         </Form>
       )}
     </div>

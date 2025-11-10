@@ -95,6 +95,8 @@ export const CONFIG_TYPES = {
   TIME_FORMAT: 'TimeFormat',
   // 填充文本 switch
   SWITCH_FILL_TEXT: 'SwitchFillText',
+  // 手机类型
+  PHONE_TYPE: 'phoneType',
 
   TABLE_OPERATION: 'TableOperation',
   TABLE_BUTTON: 'advancedButtonPermission'
@@ -208,9 +210,9 @@ export const DATE_OPTIONS = {
 
 // 时间选择格式
 export const TIME_OPTIONS = {
-  HOUR:'时',
-  MINUTE:'分',
-  SECOND:'秒'
+  HOUR: '时',
+  MINUTE: '分',
+  SECOND: '秒'
 } as const;
 
 export const DATE_VALUES = {
@@ -343,4 +345,9 @@ export const DEFAULT_VALUE_TYPES_LABELS = {
   custom: '自定义',
   formula: '公式计算',
   linkage: '数据联动'
+} as const;
+
+export const PHONE_TYPE = {
+  MOBILE: 'mobile', // 手机
+  LANDLINE: 'landline', // 座机
 } as const;
