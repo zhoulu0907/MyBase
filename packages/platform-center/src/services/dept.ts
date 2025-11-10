@@ -1,5 +1,5 @@
 import { type PageParam } from '../types/common';
-import { type DeptForm, type DeptVO } from '../types/dept';
+import { GetDeptsByIdReq, type DeptForm, type DeptVO } from '../types/dept';
 import { systemService } from './clients';
 
 // 查询部门（精简)列表
@@ -40,4 +40,9 @@ export const deleteDept = async (id: number) => {
 // 批量删除部门
 export const deleteDeptList = async (ids: number[]) => {
   return await systemService.post('/dept/delete-list', { ids });
+};
+
+// 根据用户ID获取其所属部门及其父部门列表
+export const getDeptsById = async (params: GetDeptsByIdReq) => {
+  return await systemService.get(`/dept/get-depts-by-id?id=${params.id}&idType=${params.idType}`);
 };

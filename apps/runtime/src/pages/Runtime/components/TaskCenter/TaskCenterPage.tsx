@@ -8,7 +8,7 @@ import TaskProxy from './page/TaskProxy';
 import { TASKMENU_TYPE } from '@onebase/app';
 const TaskCenterPage: FC<any> = ({ curMenuId }) => {
   const location = useLocation();
-  const pathParts = location.pathname.split('/').filter((part) => part !== '');
+  const pathParts = location.pathname.split('/').filter((part: any) => part !== '');
   const runtimeIndex = pathParts.indexOf('runtime');
   const appId = runtimeIndex !== -1 && pathParts[runtimeIndex + 1] ? pathParts[runtimeIndex + 1] : null;
 

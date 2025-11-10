@@ -101,7 +101,7 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
                   return false;
                 }
               }}
-              customRequest={async (option) => {
+              customRequest={async (option: any) => {
                 const { onProgress, onError, onSuccess, file } = option;
                 try {
                   const uploadImgUrl = await handleUpload(file, onProgress);
@@ -149,7 +149,7 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
                   return false;
                 }
               }}
-              customRequest={async (option) => {
+              customRequest={async (option: any) => {
                 const { onProgress, onError, onSuccess, file } = option;
                 try {
                   const uploadImgUrl = await handleUpload(file, onProgress);
