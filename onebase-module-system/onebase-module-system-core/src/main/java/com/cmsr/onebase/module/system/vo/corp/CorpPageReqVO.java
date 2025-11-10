@@ -31,4 +31,7 @@ public class CorpPageReqVO extends PageParam {
 
     @Schema(description = "结束时间")
     private LocalDateTime endCreateTime;
+
+    @Schema(description = "是否查询当前用户创建的应用还是全部的应用")
+    private Integer ownerTag;
 }

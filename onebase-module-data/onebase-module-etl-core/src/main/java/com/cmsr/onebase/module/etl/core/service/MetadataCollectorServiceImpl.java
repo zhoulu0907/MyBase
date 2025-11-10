@@ -76,7 +76,6 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
         isAbleToSubmitJob(datasourceDO, planTime);
         log.info("提交元数据采集任务，数据源ID：{}", datasourceId);
         threadPoolTaskExecutor.submit(() -> {
-
             datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.RUNNING);
             boolean isJobSuccess = doCollection(applicationId, datasourceId, databaseType);
             LocalDateTime endTime = LocalDateTime.now();
@@ -92,6 +91,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
         });
     }
 
+    //TODO 数据采集和数据保存的逻辑交织在一起，太乱了
     public boolean doCollection(Long applicationId, Long datasourceId, String databaseType) {
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
         String datasourceKey = "metadata-collector-" + datasourceId;

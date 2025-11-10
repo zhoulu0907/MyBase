@@ -48,5 +48,8 @@ public class CorpDO extends BaseDO {
     @Column(name = "tenant_id")
     private Long tenantId;
 
+    @Column(name = "corp_logo")
+    private String corpLogo;
+
 
 }

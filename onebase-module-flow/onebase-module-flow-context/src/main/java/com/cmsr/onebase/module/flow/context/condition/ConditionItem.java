@@ -8,7 +8,7 @@ import lombok.Data;
  * @Date：2025/9/16 21:08
  */
 @Data
-public class ConditionItem {
+public class ConditionItem implements java.io.Serializable {
 
     @JsonAlias(value = {"field", "fieldId"})
     private String fieldId;

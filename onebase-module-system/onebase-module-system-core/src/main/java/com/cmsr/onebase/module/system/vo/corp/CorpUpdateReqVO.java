@@ -34,4 +34,7 @@ public class CorpUpdateReqVO {
     @NotNull(message = "用户数量上限不能为空")
     @Schema(description = "用户数量上限")
     private Integer userLimit;
+
+    @Schema(description = "企业logo", example = "")
+    private String corpLogo;
 }

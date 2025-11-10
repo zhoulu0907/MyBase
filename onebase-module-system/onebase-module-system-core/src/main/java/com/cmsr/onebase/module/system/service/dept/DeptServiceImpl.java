@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.vo.dept.*;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
@@ -40,6 +41,8 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Slf4j
 public class DeptServiceImpl implements DeptService {
 
+    public static final int LOOP_COUNT_LIMIT = 30;
+    public static final int LOOP_INIT = 0;
     @Resource
     private DeptDataRepository deptDataRepository;
 
@@ -278,6 +281,14 @@ public class DeptServiceImpl implements DeptService {
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
 
+        List<Long> directorUserIds = deptList.stream()
+                .map(DeptDO::getDeptDirectorId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // 2. 批量获取部门主管用户信息
+        Map<Long, AdminUserDO> directorUserMap = adminUserService.getUserMap(directorUserIds);
+
         // 4. 设置每个部门的人数和领导姓名
         respList.forEach(dept -> {
             // 设置人数（包含下级部门）
@@ -289,6 +300,12 @@ public class DeptServiceImpl implements DeptService {
                 AdminUserDO leader = leaderUserMap.get(dept.getLeaderUserId());
                 if (leader != null) {
                     dept.setLeaderUserName(leader.getNickname());
+                }
+            }
+            if (dept.getDeptDirectorId() != null) {
+                AdminUserDO deptDirector = directorUserMap.get(dept.getDeptDirectorId());
+                if (deptDirector != null) {
+                    dept.setDeptDirectorName(deptDirector.getNickname());
                 }
             }
         });
@@ -314,6 +331,10 @@ public class DeptServiceImpl implements DeptService {
         Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIdsIncludeChildren(deptIds);
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
+        List<Long> directorUserIds = dept.getDeptDirectorId() != null ?
+                Collections.singletonList(dept.getLeaderUserId()) : Collections.emptyList();
+        // . 批量获取部门主管用户信息
+        Map<Long, AdminUserDO> directorUserMap = adminUserService.getUserMap(directorUserIds);
 
         // 设置部门人数（包含下级部门）
         Integer userCount = deptUserCountMap.getOrDefault(id, 0);
@@ -324,6 +345,12 @@ public class DeptServiceImpl implements DeptService {
             AdminUserDO leader = leaderUserMap.get(dept.getLeaderUserId());
             if (leader != null) {
                 respVO.setLeaderUserName(leader.getNickname());
+            }
+        }
+        if (dept.getDeptDirectorId() != null) {
+            AdminUserDO deptDirector = directorUserMap.get(dept.getDeptDirectorId());
+            if (deptDirector != null) {
+                respVO.setDeptDirectorName(deptDirector.getNickname());
             }
         }
 
@@ -396,10 +423,14 @@ public class DeptServiceImpl implements DeptService {
     }
 
     @Override
-    public List<DeptDO> getParentDeptsListByUserId(Long userId) {
-        AdminUserDO adminUserDO = adminUserService.getUser(userId);
-        if (adminUserDO != null&& adminUserDO.getDeptId() != null) {
-            return getParentDeptsList(adminUserDO.getDeptId());
+    public List<DeptDO> getParentDeptsListById(Long id, String idType) {
+        if (IdTypeEnum.USER.getCode().equals(idType)) {
+            AdminUserDO adminUserDO = adminUserService.getUser(id);
+            if (adminUserDO != null && adminUserDO.getDeptId() != null) {
+                return getParentDeptsList(adminUserDO.getDeptId());
+            }
+        } else if (IdTypeEnum.DEPT.getCode().equals(idType)) {
+            return getParentDeptsList(id);
         }
         return List.of();
     }
@@ -411,12 +442,18 @@ public class DeptServiceImpl implements DeptService {
         }
         DeptDO dept = deptDataRepository.findById(deptId);
         parentDepts.add(dept);
+
+        int loopCount = LOOP_INIT;
         while (dept != null && dept.getParentId() != null) {
             DeptDO parentDept = deptDataRepository.findById(dept.getParentId());
             if (parentDept != null) {
                 parentDepts.add(parentDept);
                 dept = parentDept;
             } else {
+                break;
+            }
+            if (++loopCount > LOOP_COUNT_LIMIT) {
+                log.error("获取父部门列表时，出现死循环，deptId = {}，loopCount = {}", deptId, loopCount);
                 break;
             }
         }

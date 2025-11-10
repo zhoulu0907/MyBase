@@ -4,15 +4,16 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
-import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.StartNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
-import com.cmsr.onebase.module.bpm.api.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.StartNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
@@ -22,10 +23,14 @@ import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategyManager;
+import com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
@@ -106,10 +111,13 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     private MetadataDataMethodCoreService metadataDataMethodCoreService;
 
     @Resource
-    private com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager execTaskStrategyManager;
+    private ExecTaskStrategyManager execTaskStrategyManager;
 
     @Resource
     private InstanceDetailStrategyManager instanceDetailStrategyManager;
+
+    @Resource
+    protected MetadataEntityFieldApi metadataEntityFieldApi;
 
     /**
      * 根据节点编码获取节点扩展DTO
@@ -279,6 +287,59 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         return respVO;
     }
 
+    private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO) {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        Long entityId = entityVO.getEntityId();
+
+        // 拿到所有的实体字段
+        EntityFieldQueryReqDTO queryReqDTO = new EntityFieldQueryReqDTO();
+        queryReqDTO.setEntityId(entityId);
+        List<EntityFieldRespDTO> fieldList = metadataEntityFieldApi.getEntityFieldList(queryReqDTO);
+
+        Map<Long, EntityFieldRespDTO> fieldMap = new HashMap<>();
+
+        for (EntityFieldRespDTO fieldDto : fieldList) {
+            fieldMap.put(fieldDto.getId(), fieldDto);
+        }
+
+        BpmGlobalConfigDTO.FormSummaryConfig formSummaryCfg = null;
+
+        if (defExtDTO.getGlobalConfig() != null) {
+            formSummaryCfg = defExtDTO.getGlobalConfig().getFormSummaryCfg();
+        }
+
+        Set<Long> formSummaryFieldIds = new HashSet<>();
+        if (formSummaryCfg != null && CollectionUtils.isNotEmpty(formSummaryCfg.getFieldConfigs())) {
+            for (BpmGlobalConfigDTO.FieldConfigDTO fieldConfig : formSummaryCfg.getFieldConfigs()) {
+                formSummaryFieldIds.add(fieldConfig.getFieldId());
+            }
+        } else {
+            formSummaryFieldIds = entityVO.getData().keySet();
+        }
+
+        for (Long id : formSummaryFieldIds) {
+            EntityFieldRespDTO fieldDto = fieldMap.get(id);
+            Object fieldValue = entityVO.getData().get(id);
+
+            if (fieldDto == null || fieldValue == null) {
+                continue;
+            }
+
+            // 超过3个字段，只取前3个
+            if (count >= 3) {
+                break;
+            }
+
+            sb.append(fieldDto.getDisplayName()).append(":").append(fieldValue).append(" ");
+
+            count++;
+        }
+
+        return sb.toString();
+    }
+
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public BpmSubmitRespVO submit(BpmSubmitReqVO reqVO) {
@@ -395,23 +456,20 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         AdminUserRespDTO userRespDTO = result.getData().get(0);
         String initiatorName = userRespDTO.getNickname();
 
-        String businessTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
+        String bpmTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
 
-        // 任选3个字段，todo 从全局配置里选择，关联实体查询
-        String formSummary = reqVO.getEntity().getData().entrySet().stream()
-                .limit(3)
-                .map(Map.Entry::getValue)
-                .map(Object::toString)
-                .collect(Collectors.joining(" "));
+        // 构建表单摘要
+        String formSummary = buildFormSummary(entityVO, extDto);
 
         if (StringUtils.isBlank(formSummary)) {
             formSummary = reqVO.getFormName();
         }
 
         // 保存扩展信息
-        flowInsExtDO.setBusinessId(entityDataId);
+        flowInsExtDO.setBusinessDataId(entityDataId);
+        flowInsExtDO.setBindingViewId(def.getFormPath());
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
-        flowInsExtDO.setBusinessTitle(businessTitle);
+        flowInsExtDO.setBpmTitle(bpmTitle);
         flowInsExtDO.setInitiatorId(loginUserId);
         flowInsExtDO.setInitiatorAvatar(userRespDTO.getAvatar());
         flowInsExtDO.setInitiatorName(initiatorName);
