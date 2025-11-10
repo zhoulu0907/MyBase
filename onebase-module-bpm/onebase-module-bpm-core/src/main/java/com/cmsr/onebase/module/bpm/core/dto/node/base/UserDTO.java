@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.api.dto.node.base;
+package com.cmsr.onebase.module.bpm.core.dto.node.base;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

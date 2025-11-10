@@ -1,31 +1,28 @@
-package com.cmsr.onebase.module.bpm.api.enums;
+package com.cmsr.onebase.module.bpm.core.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 流程撤回权限枚举
+ * 流程撤回时机枚举
  *
  * @author liyang
  * @date 2025-11-04
  */
 @Getter
 @AllArgsConstructor
-public enum BpmWithdrawPermEnum {
+public enum BpmWithdrawTimingEnum {
     /**
-     * 不允许撤回
+     * 未操作
+     * 下一人工节点处理人未进行流程处理操作
      */
-    NONE("none", "不允许撤回"),
+    UNPROCESSED("unprocessed", "未操作"),
 
     /**
-     * 仅允许发起节点撤回
+     * 未读
+     * 下一人工节点处理人未查看详情
      */
-    INITIATION_NODE("initiation_node", "仅允许发起节点撤回"),
-
-    /**
-     * 允许所有节点撤回
-     */
-    ALL("all", "允许所有节点撤回");
+    UNREAD("unread", "未读");
 
     /**
      * 类型编码
@@ -43,8 +40,8 @@ public enum BpmWithdrawPermEnum {
      * @param code 编码
      * @return 枚举
      */
-    public static BpmWithdrawPermEnum getByCode(String code) {
-        for (BpmWithdrawPermEnum type : values()) {
+    public static BpmWithdrawTimingEnum getByCode(String code) {
+        for (BpmWithdrawTimingEnum type : values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }
@@ -52,3 +49,4 @@ public enum BpmWithdrawPermEnum {
         return null;
     }
 }
+

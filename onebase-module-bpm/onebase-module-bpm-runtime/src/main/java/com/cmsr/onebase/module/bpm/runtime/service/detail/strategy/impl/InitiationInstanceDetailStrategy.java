@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTaskDetailVO;
 import org.springframework.stereotype.Component;

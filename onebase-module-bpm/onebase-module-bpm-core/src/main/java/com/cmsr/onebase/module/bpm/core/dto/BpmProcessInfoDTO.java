@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.api.dto;
+package com.cmsr.onebase.module.bpm.core.dto;
 
 import lombok.Data;
 
