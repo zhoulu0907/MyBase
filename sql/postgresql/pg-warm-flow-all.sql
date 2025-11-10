@@ -378,3 +378,45 @@ CREATE INDEX idx_bpm_flow_instance_biz_ext_deleted ON bpm_flow_instance_biz_ext(
 
 -- 唯一索引：一个流程实例只对应一条扩展信息（未删除的记录）
 CREATE UNIQUE INDEX uk_bpm_flow_instance_biz_ext_instance_id ON bpm_flow_instance_biz_ext(instance_id) WHERE deleted = 0;
+
+CREATE TABLE bpm_flow_delegation
+(
+    id                      int8         NOT NULL,
+    app_id                  int8         NOT NULL,
+    principal_id            int8         NOT NULL,
+    delegate_id             int8         NOT NULL,
+    start_time              timestamp(6) NOT NULL,
+    end_time                timestamp(6) NOT NULL,
+    revoker_id                 int8,
+    revoked_time            timestamp(6),
+
+    lock_version            int8         NOT NULL DEFAULT 0,
+    creator                 int8         NOT NULL DEFAULT 0,
+    create_time             timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updater                 int8         NOT NULL DEFAULT 0,
+    update_time             timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted                 int8         NOT NULL DEFAULT 0,
+    tenant_id               int8         NOT NULL DEFAULT 0,
+    CONSTRAINT bpm_flow_delegation_pkey PRIMARY KEY (id)
+);
+
+-- 表注释
+COMMENT ON TABLE bpm_flow_delegation IS '流程代理表';
+
+-- 字段注释
+COMMENT ON COLUMN bpm_flow_delegation.id IS '主键ID';
+COMMENT ON COLUMN bpm_flow_delegation.app_id IS '应用ID';
+COMMENT ON COLUMN bpm_flow_delegation.principal_id IS '被代理人用户ID（即委托人），代理关系的发起方';
+COMMENT ON COLUMN bpm_flow_delegation.delegate_id IS '代理人用户ID，接受委托代为处理流程任务';
+COMMENT ON COLUMN bpm_flow_delegation.start_time IS '代理生效开始时间';
+COMMENT ON COLUMN bpm_flow_delegation.end_time IS '代理结束时间，必须晚于开始时间';
+COMMENT ON COLUMN bpm_flow_delegation.revoker_id IS '撤销人ID';
+COMMENT ON COLUMN bpm_flow_delegation.revoked_time IS '撤销时间';
+
+COMMENT ON COLUMN bpm_flow_delegation.lock_version IS '乐观锁';
+COMMENT ON COLUMN bpm_flow_delegation.creator IS '创建人';
+COMMENT ON COLUMN bpm_flow_delegation.create_time IS '创建时间';
+COMMENT ON COLUMN bpm_flow_delegation.updater IS '更新人';
+COMMENT ON COLUMN bpm_flow_delegation.update_time IS '更新时间';
+COMMENT ON COLUMN bpm_flow_delegation.deleted IS '删除标志';
+COMMENT ON COLUMN bpm_flow_delegation.tenant_id IS '租户ID';
