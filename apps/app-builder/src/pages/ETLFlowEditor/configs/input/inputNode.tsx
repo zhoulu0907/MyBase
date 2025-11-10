@@ -1,8 +1,9 @@
 import TableIcon from '@/assets/images/etl/table.svg';
 import { Button, Input } from '@arco-design/web-react';
+import { listETLTables, previewETLDatasource, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
 
@@ -14,6 +15,42 @@ export const InputNodeConfig: React.FC = () => {
   const { curDrawerTab, nodeData, curNode } = etlEditorSignal;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [remark, setRemark] = useState<string>(nodeData.value[curNode.value.id]?.description || '');
+  const [tables, setTables] = useState<ETLTable[]>([]);
+
+  const handleChangeRemark = (value: string) => {
+    if (!curNode.value.id) {
+      return;
+    }
+    nodeData.value[curNode.value.id].description = value;
+    setRemark(value);
+  };
+
+  useEffect(() => {
+    if (nodeData.value[curNode.value.id]?.config?.datasourceId && nodeData.value[curNode.value.id]?.config?.tableId) {
+      handleListETLTables(nodeData.value[curNode.value.id]?.config?.datasourceId);
+    }
+
+    // handlePreviewData();
+  }, [nodeData.value[curNode.value.id]?.config?.tableId]);
+
+  const handleListETLTables = async (datasourceId: string) => {
+    const res = await listETLTables({ id: datasourceId });
+    setTables(res);
+  };
+
+  const handlePreviewData = async () => {
+    const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
+    const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
+    if (!datasourceId || !tableId) {
+      return;
+    }
+    const res = await previewETLDatasource({
+      datasourceId: datasourceId,
+      tableId: tableId
+    });
+    console.log('res: ', res);
+  };
 
   return (
     <div className={styles.config}>
@@ -28,25 +65,38 @@ export const InputNodeConfig: React.FC = () => {
                 </Button>
               </div>
             </div>
-            <div className={styles.dataSourceContent}>
-              <div className={styles.dataSourceName}>{nodeData.value[curNode.value.id]?.config?.datasourceId}</div>
-              <div className={styles.selectedFields}>已选字段</div>
+            {nodeData.value[curNode.value.id]?.config?.tableId && (
+              <div className={styles.dataSourceContent}>
+                <div className={styles.dataSourceName}>
+                  {
+                    tables.find((table: ETLTable) => table.id === nodeData.value[curNode.value.id]?.config?.tableId)
+                      ?.name
+                  }
+                </div>
+                <div className={styles.selectedFields}>已选字段</div>
 
-              <div className={styles.dataSourceContentItems}>
-                {nodeData.value[curNode.value.id]?.config?.fields.map((field: any) => (
-                  <div key={field.fieldId} className={styles.dataSourceContentItem}>
-                    <img src={TableIcon} alt="column" />
-                    {field.fieldName}
-                  </div>
-                ))}
+                <div className={styles.dataSourceContentItems}>
+                  {nodeData.value[curNode.value.id]?.config?.fields.map((field: any) => (
+                    <div key={field.fieldName} className={styles.dataSourceContentItem}>
+                      <img src={TableIcon} alt="column" />
+                      {field.fieldName}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div className={styles.dataPreviewContent}></div>
         </div>
       )}
       {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && (
-        <TextArea placeholder="请输入节点备注" autoSize={{ minRows: 3, maxRows: 6 }} allowClear />
+        <TextArea
+          onChange={handleChangeRemark}
+          value={remark}
+          placeholder="请输入节点备注"
+          autoSize={{ minRows: 3, maxRows: 6 }}
+          allowClear
+        />
       )}
 
       <DatasourceModal

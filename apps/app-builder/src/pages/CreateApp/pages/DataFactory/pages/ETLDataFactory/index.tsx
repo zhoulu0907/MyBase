@@ -22,19 +22,7 @@ const EtlDataFactoryPage: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(8);
   const [pageNo, setPageNo] = useState(1);
   const [total, setTotal] = useState(0);
-  const [eltFlowList, setEltFlowList] = useState<ETLFlowMgmt[]>([
-    // {
-    //   id: '1',
-    //   applicationId: '1',
-    //   flowName: '测试流程',
-    //   enableStatus: ETL_FLOW_STATUS.ENABLED,
-    //   scheduleStrategy: ETL_SCHEDULE_STRATEGY.FIXED,
-    //   lastSuccessTime: '2021-01-01',
-    //   sourceTables: ['生产管理系统', '年度计划表'],
-    //   targetTable: '生产计划表',
-    //   isSyncDone: IS_SYNC_DONE.NO
-    // }
-  ]);
+  const [eltFlowList, setEltFlowList] = useState<ETLFlowMgmt[]>([]);
 
   const { curAppId } = useAppStore();
 
@@ -67,8 +55,9 @@ const EtlDataFactoryPage: React.FC = () => {
     setLoading(false);
   };
 
-  const handleOpenCreateModal = () => {
-    setCreateModalVisible(true);
+  const handleCreateFlow = () => {
+    // setCreateModalVisible(true);
+    handleToEditor();
   };
 
   const handleCreateETLFlow = () => {
@@ -79,8 +68,12 @@ const EtlDataFactoryPage: React.FC = () => {
     setCreateModalVisible(false);
   };
 
-  const handleToEditor = (flowId: string) => {
-    navigate(`/onebase/etl_editor?flowId=${flowId}&appId=${curAppId}`);
+  const handleToEditor = (flowId?: string) => {
+    if (flowId) {
+      navigate(`/onebase/etl_editor?flowId=${flowId}&appId=${curAppId}`);
+      return;
+    }
+    navigate(`/onebase/etl_editor?appId=${curAppId}`);
   };
 
   return (
@@ -90,7 +83,7 @@ const EtlDataFactoryPage: React.FC = () => {
         <div className={styles.content}>
           <div className={styles.contentHeader}>
             <div className={styles.contentHeaderLeft}>
-              <Button type="primary" icon={<IconPlus />} onClick={handleOpenCreateModal}>
+              <Button type="primary" icon={<IconPlus />} onClick={handleCreateFlow}>
                 新建流程
               </Button>
             </div>

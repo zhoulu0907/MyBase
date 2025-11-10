@@ -21,7 +21,10 @@ const ETLFlowEditorPage: React.FC = () => {
   const [flowName, setFlowName] = useState<string>('数据流名称');
   const [isEditFlowName, setIsEditFlowName] = useState<boolean>(false);
 
-  const [initData, setInitData] = useState<WorkflowJSON>();
+  const [initData, setInitData] = useState<WorkflowJSON>({
+    nodes: [],
+    edges: []
+  });
   const editorProps = useEditorProps(FlowNodeRegistries);
 
   const { graphData, nodeData, setGraphData, setAllNodeData } = etlEditorSignal;
@@ -34,7 +37,6 @@ const ETLFlowEditorPage: React.FC = () => {
 
   useEffect(() => {
     const flowId = getHashQueryParam('flowId');
-    console.log(flowId);
     if (flowId) {
       handleLoadETLFlow(flowId);
     }
@@ -170,7 +172,7 @@ const ETLFlowEditorPage: React.FC = () => {
       </div>
       <div className={styles.etlFlowEditorContent}>
         {initData && (
-          <FreeLayoutEditorProvider initialData={initData} {...editorProps}>
+          <FreeLayoutEditorProvider key={initData?.nodes?.length ?? 0} initialData={initData} {...editorProps}>
             <div className={styles.sidebar}>
               <ETLFlowPanel />
             </div>
