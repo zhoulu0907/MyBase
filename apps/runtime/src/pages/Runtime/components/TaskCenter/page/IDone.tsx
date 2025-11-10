@@ -16,9 +16,9 @@ const IDone: FC = ({ appId }: any) => {
     {
       title: '发起人',
       dataIndex: 'initiator',
-      render: (obj, record) => (
+      render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className='photo-img'>{obj?.avatar && <img src={obj?.avatar} />}</div>
+          <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
           {obj?.name}
         </span>
       )
@@ -26,7 +26,7 @@ const IDone: FC = ({ appId }: any) => {
     {
       title: '处理操作',
       dataIndex: 'taskStatus',
-      render: (val, record) => {
+      render: (val: TaskStatusMap) => {
         if (val === TaskStatusMap.SUBMITTED || val === TaskStatusMap.AGREED || val === TaskStatusMap.PASS) {
           return <span style={{ color: '#00B42A' }}>{val}</span>;
         } else if (
@@ -52,7 +52,7 @@ const IDone: FC = ({ appId }: any) => {
       title: '操作',
       dataIndex: 'op',
       align: 'center',
-      render: (_, record) => (
+      render: (_:any, record:any) => (
         <Button
           type="text"
           status="success"
