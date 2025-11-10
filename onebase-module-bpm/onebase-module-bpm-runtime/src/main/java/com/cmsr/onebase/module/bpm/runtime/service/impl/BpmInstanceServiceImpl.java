@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
@@ -227,6 +228,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 实体ID todo：校验，应该和businessID有关联关系
         Long entityId = reqVO.getEntity().getEntityId();
+
+        // 和更新数据公用了字段，需要手动校验
+        if (MapUtils.isEmpty(reqVO.getEntity().getData())) {
+            throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_NOT_EXISTS.getCode(), "实体数据内容不能为空");
+        }
 
         // 业务状态
         BpmBusinessStatusEnum businessStatus = BpmBusinessStatusEnum.IN_APPROVAL;
