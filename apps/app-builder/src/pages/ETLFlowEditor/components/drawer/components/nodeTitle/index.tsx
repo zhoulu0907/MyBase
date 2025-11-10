@@ -18,26 +18,30 @@ const NodeTitle: React.FC<NodeTitleProps> = ({ title }) => {
   }, [title]);
 
   const handleEdit = () => {
-    console.log('edit');
     if (isEditing) {
       setIsEditing(false);
-      setNodeData(curNode.value.id, {
-        ...nodeData.value[curNode.value.id],
-        title: titleValue
-      });
     } else {
       setIsEditing(true);
     }
   };
 
+  const handleBlur = () => {
+    setIsEditing(false);
+    console.log('titleValue: ', titleValue);
+    console.log('curNode.value.id: ', curNode.value.id);
+
+    setNodeData(curNode.value.id, {
+      ...nodeData.value[curNode.value.id],
+      title: titleValue
+    });
+  };
   const handleChange = (value: string) => {
-    console.log('change', value);
     setTitleValue(value);
   };
 
   return (
     <div className={styles.nodeTitle}>
-      {isEditing ? <Input value={titleValue} onChange={handleChange} /> : <span>{titleValue}</span>}
+      {isEditing ? <Input value={titleValue} onChange={handleChange} onBlur={handleBlur} /> : <span>{titleValue}</span>}
       <IconEdit onClick={handleEdit} />
     </div>
   );
