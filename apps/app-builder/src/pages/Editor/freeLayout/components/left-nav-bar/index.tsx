@@ -60,9 +60,9 @@ const LeftNavBar: React.FC = () => {
   const CustomTooltipContent = () => {
     return (
       <div className={styles.tipContent}>
-        <div>条件分支:按分支的优先级排序,仅执行满足条件的第一个分支</div>
-        <div>并行分支:分支间无优先级,满足条件的分支都会执行</div>
-        <div>汇聚节点:等待所有应到达的上游分支完成,合并路径后继续流程</div>
+        <div>条件分支：按分支的优先级排序，仅执行满足条件的第一个分支</div>
+        <div>并行分支：分支间无优先级，满足条件的分支都会执行</div>
+        <div>汇聚节点：等待所有应到达的上游分支完成，合并路径后继续流程</div>
       </div>
     );
   };
