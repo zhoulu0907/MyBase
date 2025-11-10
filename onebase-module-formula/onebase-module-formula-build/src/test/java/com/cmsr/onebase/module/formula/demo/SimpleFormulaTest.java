@@ -66,7 +66,6 @@ public class SimpleFormulaTest {
             Object result5 = formulaEngineService.executeFormulaWithParams(formula5, params5);
             System.out.println("公式: " + formula5 + " = " + result5);
 
-
             System.out.println("\n=== 测试完成，FormulaJS集成成功！ ===");
 
         } catch (Exception e) {

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTaskDetailVO;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Task;

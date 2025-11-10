@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.*;
-import com.cmsr.onebase.module.bpm.api.enums.ApprovalModeEnum;
-import com.cmsr.onebase.module.bpm.api.enums.ApproverTypeEnum;
-import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.enums.ApprovalModeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.ApproverTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;

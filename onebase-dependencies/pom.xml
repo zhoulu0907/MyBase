@@ -159,11 +159,11 @@
                 <version>${revision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-security</artifactId>
-                <version>${revision}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.cmsr.onebase</groupId>-->
+<!--                <artifactId>onebase-spring-boot-starter-security</artifactId>-->
+<!--                <version>${revision}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.springdoc</groupId>
@@ -325,10 +325,35 @@
             </dependency>
             <!-- 工作流相关结束 -->
 
-            <!-- 工具类相关 -->
+            <!-- 项目子模块 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-project-base</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-platform</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-build</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-runtime</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -338,6 +363,7 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- 工具类相关 -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
