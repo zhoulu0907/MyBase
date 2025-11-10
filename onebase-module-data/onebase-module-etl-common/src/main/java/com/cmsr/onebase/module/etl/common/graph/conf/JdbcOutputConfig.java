@@ -1,19 +1,21 @@
-package com.cmsr.onebase.module.etl.executor.graph.conf;
+package com.cmsr.onebase.module.etl.common.graph.conf;
 
-import com.cmsr.onebase.module.etl.executor.graph.Field;
+import com.cmsr.onebase.module.etl.common.graph.NodeConfig;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
 @Data
-public class JdbcOutputConfig {
+@ToString(callSuper = true)
+public class JdbcOutputConfig extends NodeConfig {
 
     private Long datasourceId;
 
     private Long tableId;
 
 
-    private List<OutputField> fields;
+    private List<JdbcOutputMapper> fields;
 
     /**
      * 从数据库补充

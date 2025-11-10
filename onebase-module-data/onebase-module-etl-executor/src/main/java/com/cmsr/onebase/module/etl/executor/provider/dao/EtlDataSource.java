@@ -2,15 +2,14 @@ package com.cmsr.onebase.module.etl.executor.provider.dao;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * @Author：huangjie
- * @Date：2025/11/8 13:12
+ * @Date：2025/11/9 8:49
  */
 @Data
-public class EtlTableColumn {
+public class EtlDataSource {
 
-    private List<EtlColumn> columns;
+    private String datasourceType;
 
+    private String config;
 }
