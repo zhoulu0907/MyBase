@@ -8,7 +8,7 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>onebase-spring-boot-starter-security-runtime</artifactId>
+    <artifactId>onebase-security-runtime</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -18,6 +18,10 @@
     <url>https://cmsr.com</url>
 
     <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>com.cmsr.onebase</groupId>-->
+<!--            <artifactId>onebase-security-common</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-app-api</artifactId>
