@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 import com.cmsr.onebase.framework.common.validation.ValidTableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -30,8 +29,7 @@ public class BusinessEntitySaveReqVO {
     @Size(max = 512, message = "实体描述长度不能超过512个字符")
     private String description;
 
-    @Schema(description = "数据源ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "数据源ID不能为空")
+    @Schema(description = "数据源ID", example = "1")
     private String datasourceId;
 
     @Schema(description = "对应数据表名", requiredMode = Schema.RequiredMode.REQUIRED, example = "sys_user")
@@ -42,8 +40,7 @@ public class BusinessEntitySaveReqVO {
     @Schema(description = "运行模式", example = "0")
     private Integer runMode;
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "应用ID不能为空")
+    @Schema(description = "应用ID", example = "1")
     private String appId;
 
     @Schema(description = "版本锁标识", example = "0")

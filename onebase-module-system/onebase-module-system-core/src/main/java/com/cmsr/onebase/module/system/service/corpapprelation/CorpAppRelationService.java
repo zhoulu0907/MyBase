@@ -17,11 +17,12 @@ public interface CorpAppRelationService {
     /**
      * 创建企业应用关联表
      *
-     * @param createReqVO 创建信息
+     * @param
      * @return 编号
      */
-    void createCorpAppRelation(@Valid CorpAppRelationInertReqVO createReqVO);
+    void createCorpAppRelation(CorpAppRelationInertReqVO vo);
 
+    void createListCorpAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId);
     /**
      * 更新企业应用关联
      * 通过id 可以更新关联关系，业可以更新授权时间
@@ -50,9 +51,11 @@ public interface CorpAppRelationService {
      * @param pageReqVO 分页查询
      * @return 企业应用关联分页
      */
-    PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO);
+    PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppPageReqVO pageReqVO);
 
     void deleteCorpAppRelationByCorpId(Long corpID);
 
     List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO);
+
+
 }

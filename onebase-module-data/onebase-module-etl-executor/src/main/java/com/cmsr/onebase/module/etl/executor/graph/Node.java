@@ -7,8 +7,6 @@ public class Node {
 
     private String id;
 
-    private String nodeName;
-
     private String type;
 
     private NodeOutput output;

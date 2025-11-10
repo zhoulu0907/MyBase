@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverConfigDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.FieldPermCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverConfigDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeDataVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
 import jakarta.validation.Valid;
@@ -52,6 +52,6 @@ public class ApproverNodeVO extends BaseNodeVO {
          * 字段权限配置
          */
         @Valid
-        private FieldPermCfgDTO fieldPermConfig;
+        private FieldPermCfgDTO fieldPermConfig = new FieldPermCfgDTO();
     }
 }

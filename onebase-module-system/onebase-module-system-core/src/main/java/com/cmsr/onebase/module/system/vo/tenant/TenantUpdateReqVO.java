@@ -44,9 +44,6 @@ public class TenantUpdateReqVO {
     @Schema(description = "访问地址")
     private String accessUrl;
 
-    @Schema(description = "saas功能是否开启默认0，开启1")
-    private Integer saasEnabled;
-
     @Schema(description = "用户logo")
     private String logoUrl;
 

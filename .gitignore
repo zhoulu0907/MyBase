@@ -38,6 +38,7 @@ target/*
 
 # dependencies
 **/node_modules
+dependency-reduced-pom.xml
 
 # roadhog-api-doc ignore
 /src/utils/request-temp.js

@@ -68,14 +68,14 @@ public class TenantRespVO {
     @Schema(description = "访问地址")
     private String accessUrl;
 
-    @Schema(description = "saas功能是否开启默认0，开启1")
-    private String saasEnabled;
-
     @Schema(description = "用户logo")
     private String logoUrl;
 
     @Schema(description = "企业数")
     private Integer corpCount;
+
+    @Schema(description = "发布模式")
+    private String publishModel;
 
     @Schema(description = "管理员集合")
     private List<TenantAdminUserResVO> tenantAdminUserList;

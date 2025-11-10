@@ -56,8 +56,7 @@ public class ETLDatasourceController {
     @PostMapping("/create")
     @Operation(summary = "创建数据源")
     public CommonResult<Long> createETLDatasource(@Validated @RequestBody ETLDatasourceCreateReqVO createReqVO) {
-        Long datasourceId = etlDatasourceService.createDatasource(createReqVO);
-        return CommonResult.success(datasourceId);
+        return etlDatasourceService.createDatasource(createReqVO);
     }
 
     @PostMapping("/update")
@@ -82,8 +81,9 @@ public class ETLDatasourceController {
     }
 
     @GetMapping("/list")
-    public CommonResult<List<MetaBriefVO>> listDatasources(@RequestParam("applicationId") Long applicationId) {
-        List<MetaBriefVO> briefVOList = etlDatasourceService.listDatasources(applicationId);
+    public CommonResult<List<MetaBriefVO>> listDatasources(@RequestParam("applicationId") Long applicationId,
+                                                           @RequestParam(value = "writable", required = false) Integer writable) {
+        List<MetaBriefVO> briefVOList = etlDatasourceService.listDatasources(applicationId, writable);
         return CommonResult.success(briefVOList);
     }
 

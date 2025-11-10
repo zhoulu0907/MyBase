@@ -14,5 +14,7 @@ import java.util.List;
 public interface AdminUserRoleApi {
     String PREFIX = ApiConstants.PREFIX + "/user";
 
-    List<String> getUserRoleByRoleId(@RequestParam("id") Long id);
+    List<String> getUserRoleByRoleIdAndTenantId(@RequestParam("id") Long id,Long tenantId);
+
+
 }

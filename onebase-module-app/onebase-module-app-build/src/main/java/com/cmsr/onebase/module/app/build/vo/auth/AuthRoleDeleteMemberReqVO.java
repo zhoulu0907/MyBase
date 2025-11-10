@@ -28,7 +28,7 @@ public class AuthRoleDeleteMemberReqVO {
     public static class DeleteMember {
 
         @Schema(description = "主键id")
-        private Long Id;
+        private Long id;
 
         @Schema(description = "角色类别")
         private String memberType;

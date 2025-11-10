@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.core.config;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.anyline.metadata.type.DatabaseType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Getter
+@Slf4j
 public class MetadataConfig {
 
     // ========== 默认数据源配置 ==========
@@ -97,4 +100,51 @@ public class MetadataConfig {
      */
     @Value("${onebase.metadata.data-method.method-timeout-ms:30000}")
     private Long dataMethodTimeoutMs;
+    
+    // ========== 数据源类型转换工具方法 ==========
+    
+    /**
+     * 获取默认数据源类型对应的DatabaseType枚举
+     * 如果配置的类型不是Anyline支持的枚举，返回null并记录警告
+     *
+     * @return DatabaseType枚举，如果不是有效枚举则返回null
+     */
+    public DatabaseType getDefaultDatasourceTypeEnum() {
+        try {
+            return DatabaseType.valueOf(defaultDatasourceType);
+        } catch (IllegalArgumentException e) {
+            log.warn("配置的默认数据源类型[{}]不是有效的DatabaseType枚举值，请检查配置", defaultDatasourceType);
+            return null;
+        }
+    }
+    
+    /**
+     * 验证数据源类型字符串是否是有效的DatabaseType枚举
+     *
+     * @param datasourceType 数据源类型字符串
+     * @return true-有效，false-无效
+     */
+    public static boolean isValidDatabaseType(String datasourceType) {
+        try {
+            DatabaseType.valueOf(datasourceType);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+    
+    /**
+     * 将数据源类型字符串转换为DatabaseType枚举，如果失败返回默认值PostgreSQL
+     *
+     * @param datasourceType 数据源类型字符串
+     * @return DatabaseType枚举
+     */
+    public static DatabaseType toDatabaseType(String datasourceType) {
+        try {
+            return DatabaseType.valueOf(datasourceType);
+        } catch (IllegalArgumentException e) {
+            log.warn("无法将字符串[{}]转换为DatabaseType枚举，使用默认值PostgreSQL", datasourceType);
+            return DatabaseType.PostgreSQL;
+        }
+    }
 }

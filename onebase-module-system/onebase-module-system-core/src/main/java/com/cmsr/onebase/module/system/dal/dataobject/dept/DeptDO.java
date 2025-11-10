@@ -26,6 +26,7 @@ public class DeptDO extends TenantBaseDO {
     public static final String EMAIL          = "email";
     public static final String STATUS         = "status";
     public static final String REMARK         = "remark";
+    public static final String DEPT_DIRECTOR_ID = "dept_director_id";
 
     /**
      * 部门名称
@@ -73,5 +74,11 @@ public class DeptDO extends TenantBaseDO {
      */
     @Column(name = REMARK)
     private String remark;
+
+    @Column(name = DEPT_DIRECTOR_ID)
+    private Long deptDirectorId;
+
+
+
 
 }

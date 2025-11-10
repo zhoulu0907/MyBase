@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.bpm.convert;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
@@ -230,6 +230,8 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         }
 
         String bpmDefJson = flowDesignVO.getBpmDefJson();
+        Long appId = flowDesignVO.getAppId();
+
         if (StringUtils.isBlank(bpmDefJson)) {
             return null;
         }
@@ -263,7 +265,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             nodeJson.setFormCustom("Y");
 
             // 设置ext：使用策略管理器构建扩展信息
-            strategyManager.buildNodeExtData(nodeJson, nodeVO);
+            strategyManager.fillNodeExtData(nodeJson, nodeVO, appId);
 
             // 添加到映射
             nodeJsonMap.put(nodeJson.getNodeCode(), nodeJson);

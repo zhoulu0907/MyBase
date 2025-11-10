@@ -26,7 +26,7 @@ public class DataPreviewVO {
             int metaColumnIdx = metaColumn.getPosition() - 1;
             columnDefine.setId(metaColumn.getId());
             columnDefine.setName(metaColumn.getDisplayName());
-            columnDefine.setType(metaColumn.getCompatibleType());
+            columnDefine.setType(metaColumn.getFlinkType());
             columnList.add(metaColumnIdx, columnDefine);
         }
         dataPreviewVO.setColumns(columnList);

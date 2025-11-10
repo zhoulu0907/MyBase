@@ -11,7 +11,7 @@ import java.util.Base64;
  */
 public class WorkFlowMain {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         if (args.length == 0) {
             throw new RuntimeException("参数长度非法");
         }

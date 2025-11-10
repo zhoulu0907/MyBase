@@ -68,6 +68,10 @@
             <artifactId>anyline-data-jdbc-kingbase</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-dm</artifactId>
+        </dependency>
+        <dependency>
             <groupId>cn.com.kingbase</groupId>
             <artifactId>kingbase8</artifactId>
         </dependency>

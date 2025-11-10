@@ -29,7 +29,7 @@ public class CorpSaveReqVO extends PageParam {
 
     @NotNull(message = "行业类型不能为空")
     @Schema(description = "行业类型", example = "")
-    private Integer industryType;
+    private Long industryType;
 
     @NotBlank(message = "企业地址")
     @Schema(description = "企业地址", example = "")

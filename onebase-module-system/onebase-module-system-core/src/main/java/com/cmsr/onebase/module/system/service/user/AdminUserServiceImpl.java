@@ -132,7 +132,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-        adminUserDataRepository.insert(user);
+        //下拉框选择的用户肯定是已经存在的，不需要重新保存
+        // adminUserDataRepository.insert(user);
+        user.setId(createReqVO.getId());
 
         // 2.2 插入关联岗位
         if (CollUtil.isNotEmpty(user.getPostIds())) {
@@ -441,6 +443,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    @TenantIgnore
     public List<AdminUserDO> getUserList(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
@@ -787,14 +790,25 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<String> getUserRoleByRoleId(Long id) {
-        List<UserRoleDO> UserRoleDOList=  userRoleDataRepository.getUserRoleByRoleId(id);
+    public List<String> getUserRoleByRoleIdAndTenantId(Long id,Long tenantId) {
+        List<UserRoleDO> UserRoleDOList=  userRoleDataRepository.getUserRoleByRoleIdAndTenantId(id,tenantId);
         List<String> userIdsList = UserRoleDOList.stream()
                 .map(userRole -> String.valueOf(userRole.getUserId()))
                 .collect(Collectors.toList());
         return userIdsList;
 
 
+    }
+    @TenantIgnore
+    @Override
+    public    Map<Long,Integer> getTenantExistUserCountByIds(List<Long> tenantIds) {
+        List<AdminUserDO>  userlist= adminUserDataRepository.getTenantExistUserCountByIds(tenantIds);
+        // 按租户ID分组并统计数量
+        return userlist.stream()
+                .collect(Collectors.groupingBy(
+                        AdminUserDO::getId,
+                        Collectors.summingInt(user -> 1)
+                ));
     }
 
     /**

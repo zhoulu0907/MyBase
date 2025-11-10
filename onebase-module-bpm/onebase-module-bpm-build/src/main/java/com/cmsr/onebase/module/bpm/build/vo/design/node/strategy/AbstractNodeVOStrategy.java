@@ -1,12 +1,14 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.*;
-import com.cmsr.onebase.module.bpm.api.enums.ApprovalModeEnum;
-import com.cmsr.onebase.module.bpm.api.enums.ApproverTypeEnum;
-import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.enums.ApprovalModeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.ApproverTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.*;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +25,8 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
  */
 @Slf4j
 public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends BaseNodeExtDTO> implements NodeVOStrategy<T, E> {
+    @Resource
+    protected AppAuthRoleUser appAuthRoleUser;
 
     /**
      * 解析 ext 数据并填充到节点配置VO中
@@ -62,7 +66,7 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
      * @return 扩展数据对象
      */
     @Override
-    public abstract E buildExtData(T nodeVO);
+    public abstract E buildExtData(T nodeVO, Long appId);
 
     @Override
     public NodePermFlagDTO buildPermissionFlag(E extDTO) {
@@ -102,7 +106,7 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
         return buttonConfigs;
     }
 
-    protected void validateApproverConfig(ApproverConfigDTO approverConfig) {
+    protected void validateApproverConfig(ApproverConfigDTO approverConfig, Long appId) {
         String approverType = approverConfig.getApproverType();
         ApproverTypeEnum approverTypeEnum = ApproverTypeEnum.getByCode(approverType);
 
@@ -126,6 +130,16 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
             if (CollectionUtils.isEmpty(roles)) {
                 log.error("缺少审批角色列表 {}", approverConfig);
                 throw exception(ErrorCodeConstants.MISSING_NODE_ROLE_LIST);
+            }
+
+            // 此处需要过滤非当前应用的角色，todo：或抛出异常
+            List<Long> roleIds = appAuthRoleUser.findRoleIdsByAppId(appId);
+
+            roles.removeIf(role -> !roleIds.contains(role.getRoleId()));
+
+            if (CollectionUtils.isEmpty(roles)) {
+                log.error("缺少有效的角色列表 {}", approverConfig);
+                throw exception(ErrorCodeConstants.MISSING_NODE_VALID_ROLE_LIST);
             }
 
             // 清空用户列表
@@ -192,15 +206,6 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
         if (enabledCount == 0) {
             log.error("审批按钮配置中必须开启至少一个按钮");
             throw exception(ErrorCodeConstants.APPROVER_NODE_REQUIRED_ENABLED_BTN);
-        }
-    }
-
-    protected void validateFieldPermConfig(FieldPermCfgDTO fieldPermConfig) {
-        if (fieldPermConfig.getUseNodeConfig()) {
-           if (CollectionUtils.isEmpty(fieldPermConfig.getFieldConfigs())) {
-               log.error("缺少字段权限配置");
-               throw exception(ErrorCodeConstants.MISSING_NODE_FIELD_PERM_CFG);
-           }
         }
     }
 }

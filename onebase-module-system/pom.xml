@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <modules>
+        <module>onebase-module-system-platform</module>
         <module>onebase-module-system-build</module>
         <module>onebase-module-system-runtime</module>
         <module>onebase-module-system-api</module>

@@ -21,11 +21,4 @@ public class BpmTodoTaskPageReqVO extends BpmInsExtQueryPageVO {
     @Schema(description = "发起时间 - 结束（包含）", example = "2025-08-18 23:59:59")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime submitTimeEnd;
-
-    @Schema(description = "当前节点编码",example = "start_1")
-    private String nodeCode;
-
-    @Schema(description = "流程状态，不传则全部 draft草稿 in_approval 审批中 approved 已通过 rejected 已拒绝 withdrawn 已撤回 terminated 已终止")
-    private String flowStatus;
-
 }

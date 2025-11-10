@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.context;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.google.common.base.Stopwatch;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author：huangjie
@@ -62,13 +64,12 @@ public class ExecuteContext implements Serializable {
     @Getter
     private volatile String executionEndNodeTag;
 
-    private volatile long lastLogTime;
+    private volatile Stopwatch stopwatch = Stopwatch.createStarted();
 
     private volatile List<String> logs = new CopyOnWriteArrayList<>();
 
     public ExecuteContext() {
-        lastLogTime = System.currentTimeMillis();
-        logs.add("[0] 流程执行开始");
+        logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), "流程执行开始"));
     }
 
     public void setNodeDataMap(Map<String, NodeData> nodeData) {
@@ -113,10 +114,7 @@ public class ExecuteContext implements Serializable {
     }
 
     public void addLog(String log) {
-        long currentTime = System.currentTimeMillis();
-        long elapsed = currentTime - lastLogTime;
-        String formattedLog = String.format("[%d] %s", elapsed, log);
-        this.logs.add(formattedLog);
+        logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), log));
     }
 
     public String getLogText() {

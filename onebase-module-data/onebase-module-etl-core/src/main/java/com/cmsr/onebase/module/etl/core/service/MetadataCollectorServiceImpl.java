@@ -76,7 +76,6 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
         isAbleToSubmitJob(datasourceDO, planTime);
         log.info("提交元数据采集任务，数据源ID：{}", datasourceId);
         threadPoolTaskExecutor.submit(() -> {
-
             datasourceRepository.changeCollectStatusById(datasourceId, CollectStatus.RUNNING);
             boolean isJobSuccess = doCollection(applicationId, datasourceId, databaseType);
             LocalDateTime endTime = LocalDateTime.now();
@@ -92,7 +91,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
         });
     }
 
-    private boolean doCollection(Long applicationId, Long datasourceId, String databaseType) {
+    public boolean doCollection(Long applicationId, Long datasourceId, String databaseType) {
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceId, false);
         String datasourceKey = "metadata-collector-" + datasourceId;
         try {
@@ -140,7 +139,7 @@ public class MetadataCollectorServiceImpl implements MetadataCollectorService {
                 for (MetaColumn metaColumn : columns) {
                     String originType = metaColumn.getOriginType();
                     String compatibleType = flinkMappingRepository.findFlinkTypeByDatasourceTypeAndOriginType(databaseType, originType);
-                    metaColumn.setCompatibleType(compatibleType);
+                    metaColumn.setFlinkType(compatibleType);
                 }
                 metaInfo.setColumns(columns);
                 newTableDO.setMetaInfo(metaInfo);

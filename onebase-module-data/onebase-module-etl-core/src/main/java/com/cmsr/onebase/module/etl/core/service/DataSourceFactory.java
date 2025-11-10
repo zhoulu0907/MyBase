@@ -36,13 +36,16 @@ public class DataSourceFactory {
         DatabaseType dbType = parseDatabaseType(databaseType);
         // 2. 创建DataSource
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
-        String connectMode = (String) connectionProperties.get("connectMode");
+        String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
         String jdbcConnection;
         if (StringUtils.equalsIgnoreCase("default", connectMode)) {
             jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);
         } else {
             jdbcConnection = (String) connectionProperties.get("jdbcUrl");
         }
+        connectionProperties.put("jdbcUrl", jdbcConnection);
+        connectionProperties.put("driver", dbType.driver());
+        datasourceDO.setConfig(JsonUtils.toJsonString(connectionProperties));
 //        Driver declaredDriver = getDeclaredDriverInstance(dbType);
 
         String username = (String) connectionProperties.get("username");
@@ -71,7 +74,9 @@ public class DataSourceFactory {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        return constructDataSource(datasourceDO, oneshot);
+        DataSource dataSource = constructDataSource(datasourceDO, oneshot);
+        datasourceRepository.update(datasourceDO);
+        return dataSource;
     }
 
     private DatabaseType parseDatabaseType(String databaseType) {
@@ -109,7 +114,16 @@ public class DataSourceFactory {
         }
     }
 
+    /**
+     * 构建JDBC连接字符串
+     * 使用Anyline的DatabaseType提供的URL模板，替换占位符
+     *
+     * @param dbType               数据库类型
+     * @param connectionProperties 连接属性
+     * @return JDBC连接字符串
+     */
     private String buildJdbcConnectionString(DatabaseType dbType, Properties connectionProperties) {
+        // 直接使用Anyline提供的URL模板
         String jdbcTemplate = dbType.url();
         // 魔法处理，Anyline的PostgreSQL类数据源URL定义有错误
         if (StringUtils.equals("org.postgresql.Driver", dbType.driver())) {

@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -83,7 +84,7 @@ public class AppApplicationController {
     @GetMapping(value = {"/simple-list"})
     @Operation(summary = "获取应用精简信息列表-不分页", description = "只包含被开启的应用，主要用于前端的下拉选项")
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList() {
-        List<ApplicationDO> list = appApplicationService.getSimpleAppList(CommonStatusEnum.ENABLE.getStatus());
+        List<ApplicationDO> list = appApplicationService.getSimpleAppList(ApplicationStatusEnum.PUBLISHED.getValue());
         return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
     }
 }

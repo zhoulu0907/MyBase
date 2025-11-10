@@ -20,5 +20,7 @@ public class AuthRoleMembersPageReqVO extends PageParam {
     @Schema(description = "成员名称")
     private String memberName;
 
+    @Schema(description = "成员类型")
+    private String memberType;
 
 }

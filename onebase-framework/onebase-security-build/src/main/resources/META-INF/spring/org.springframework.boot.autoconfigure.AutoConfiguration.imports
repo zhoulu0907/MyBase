@@ -1,0 +1,6 @@
+com.cmsr.onebase.framework.security.config.OneBaseSecurityRpcAutoConfiguration
+com.cmsr.onebase.framework.security.config.OneBaseSecurityAutoConfiguration
+com.cmsr.onebase.framework.security.config.OneBaseWebSecurityConfigurerAdapter
+com.cmsr.onebase.framework.operatelog.config.OneBaseOperateLogConfiguration
+com.cmsr.onebase.framework.operatelog.config.OneBaseOperateLogRpcAutoConfiguration
+com.cmsr.onebase.framework.license.config.OneBaseLicenseConfiguration

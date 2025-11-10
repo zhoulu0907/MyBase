@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.impl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.InitiationNodeVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.AbstractNodeVOStrategy;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
@@ -42,7 +42,7 @@ public class InitiationNodeVOStrategy extends AbstractNodeVOStrategy<InitiationN
     }
 
     @Override
-    public InitiationNodeExtDTO buildExtData(InitiationNodeVO nodeVO) {
+    public InitiationNodeExtDTO buildExtData(InitiationNodeVO nodeVO, Long appId) {
         InitiationNodeExtDTO extDTO = new InitiationNodeExtDTO();
         // 设置节点类型
         extDTO.setNodeType(getSupportedNodeType());

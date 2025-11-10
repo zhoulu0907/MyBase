@@ -7,4 +7,6 @@ public interface MetadataCollectorService {
     boolean testConnection(ETLDatasourceDO datasourceDO);
 
     void submitCollectJob(ETLDatasourceDO datasourceDO);
+
+    boolean doCollection(Long applicationId, Long datasourceId, String datasourceType);
 }

@@ -60,12 +60,19 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-infra-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-api</artifactId>
             <version>${revision}</version>
         </dependency>
 

@@ -11,6 +11,6 @@ import java.util.List;
 @Data
 public class NodeOutput {
 
-    private List<NodeOutputFieldDefine> fields;
+    private List<Field> fields;
 
 }
