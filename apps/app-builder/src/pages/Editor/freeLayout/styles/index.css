@@ -2,7 +2,9 @@
  * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
  * SPDX-License-Identifier: MIT
  */
-
+._variable-panel-button_1nfar_8{
+  display: none !important;
+}
 :root {
   /* Port colors */
   --g-workflow-port-color-primary: #65bf73;
