@@ -75,7 +75,7 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
               {activeMenuItem &&
                 itemsData.map((item: any) => (
                   <div key={item.configKey} className={styles.contentBodyItemContent}>
-                    {item.dataType === 'INTEGER' && (
+                    {item.widgetType === 'NUMBER' && (
                       <Form.Item
                         field={item.configKey}
                         label={item.configName}
@@ -93,7 +93,7 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                         <InputNumber />
                       </Form.Item>
                     )}
-                    {item.dataType === 'STRING' && item.options == null && (
+                    {item.widgetType === 'INPUT' && item.options == null && (
                       <Form.Item
                         field={item.configKey}
                         label={item.configName}
@@ -103,7 +103,18 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                         <Input />
                       </Form.Item>
                     )}
-                    {item.dataType === 'BOOLEAN' && (
+                    {item.widgetType === 'PASSWORD' && item.options == null && (
+                      <Form.Item
+                        field={item.configKey}
+                        label={item.configName}
+                        extra={item.description}
+                        rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                      >
+                        <Input.Password />
+                      </Form.Item>
+                    )}
+
+                    {item.widgetType === 'SWITCH' && (
                       <Form.Item
                         field={item.configKey}
                         label={item.configName}
@@ -113,7 +124,51 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                         <Switch />
                       </Form.Item>
                     )}
-                    {(item.dataType === 'JSON[STRING]' || item.dataType === 'STRING') && item.options != null && (
+                    {item.widgetType === 'SELECT' && item.options != null && (
+                      <Form.Item
+                        field={item.configKey}
+                        label={item.configName}
+                        extra={item.description}
+                        rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                      >
+                        <Select
+                          options={
+                            typeof item.options === 'string'
+                              ? Object.entries(JSON.parse(item.options)).map(([value, label]) => ({
+                                  label: String(label),
+                                  value
+                                }))
+                              : []
+                          }
+                        />
+                      </Form.Item>
+                    )}
+                    {item.widgetType === 'SELECT' && item.options == null && (
+                      <Form.Item
+                        field={item.configKey}
+                        label={item.configName}
+                        extra={item.description}
+                        rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                      >
+                        <Select
+                          options={Array.from(
+                            { length: Math.abs(Number(item.maxValue) - Number(item.minValue)) + 1 },
+                            (_, i) => ({
+                              label: (Number(item.maxValue) > Number(item.minValue)
+                                ? Number(item.minValue) + i
+                                : Number(item.minValue) - i
+                              ).toString(),
+                              value: (Number(item.maxValue) > Number(item.minValue)
+                                ? Number(item.minValue) + i
+                                : Number(item.minValue) - i
+                              ).toString()
+                            })
+                          )}
+                        />
+                      </Form.Item>
+                    )}
+
+                    {item.widgetType === 'MULTISELECT' && item.options != null && (
                       <Form.Item
                         field={item.configKey}
                         label={item.configName}
@@ -124,9 +179,9 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                           mode="multiple"
                           options={
                             typeof item.options === 'string'
-                              ? item.options.split(',').map((opt: string) => ({
-                                  label: opt.trim(),
-                                  value: opt.trim()
+                              ? Object.entries(JSON.parse(item.options)).map(([value, label]) => ({
+                                  label: String(label),
+                                  value
                                 }))
                               : []
                           }
@@ -134,7 +189,7 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                       </Form.Item>
                     )}
 
-                    {item.dataType === 'JSON[INTEGER]' && (
+                    {item.widgetType === 'MULTISELECT' && item.options == null && (
                       <Form.Item
                         field={item.configKey}
                         label={item.configName}
@@ -142,12 +197,23 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                         rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
                       >
                         <Select
-                          allowClear
                           mode="multiple"
-                          options={Array.from({ length: 50 }, (_, i) => ({
-                            label: (i + 1).toString(),
-                            value: i + 1
-                          }))}
+                          options={
+                            // 生成从 item.maxValue 到 item.minValue 的所有整数选项
+                            Array.from(
+                              { length: Math.abs(Number(item.maxValue) - Number(item.minValue)) + 1 },
+                              (_, i) => ({
+                                label: (Number(item.maxValue) > Number(item.minValue)
+                                  ? Number(item.minValue) + i
+                                  : Number(item.minValue) - i
+                                ).toString(),
+                                value: (Number(item.maxValue) > Number(item.minValue)
+                                  ? Number(item.minValue) + i
+                                  : Number(item.minValue) - i
+                                ).toString()
+                              })
+                            )
+                          }
                         />
                       </Form.Item>
                     )}
