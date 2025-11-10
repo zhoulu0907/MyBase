@@ -10,9 +10,8 @@ import java.time.LocalDateTime;
 @Data
 public class ApplicationSimpleRespVO {
 
-    @Alias("id")
     @Schema(description = "应用Id")
-    private String appId;
+    private String Id;
 
     @Schema(description = "应用名称")
     private String appName;

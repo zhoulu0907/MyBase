@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
@@ -44,28 +45,47 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
-
     @Override
-    public void createCorpAppRelation(@Valid CorpAppRelationInertReqVO createReqVO) {
+    public void createListCorpAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
         // 插入
-        createReqVO.getApplicationIdList().forEach(appliationId -> {
+        corpAppRelationInertReqVOList.forEach(corpAppRelationInertReqVO -> {
             // 先删除后插入
             ConfigStore configs = new DefaultConfigStore();
-            configs.eq("application_id", appliationId );
-            configs.eq("corp_id", createReqVO.getCorpId());
-            configs.eq("tenant_id", TenantContextHolder.getRequiredTenantId());
+            configs.eq(CorpAppRelationDO.APPLICATION_ID, corpAppRelationInertReqVO.getId() );
+            configs.eq(CorpAppRelationDO.CORP_ID, corpId);
             corpAppRelationDataRepository.deleteByConfig(configs);
 
             // 验证是否重复提交，先删除后插入
-            CorpAppRelationDO corpAppRelationDO = BeanUtils.toBean(createReqVO, CorpAppRelationDO.class);
-            corpAppRelationDO.setApplicationId(appliationId);
-            corpAppRelationDO.setAuthorizationTime(createReqVO.getAuthorizationTime());
-            corpAppRelationDO.setExpiresTime(createReqVO.getExpiresTime());
+            CorpAppRelationDO corpAppRelationDO = new CorpAppRelationDO();
+            corpAppRelationDO.setApplicationId(corpAppRelationInertReqVO.getId());
+            corpAppRelationDO.setAuthorizationTime(corpAppRelationInertReqVO.getAuthorizationTime());
+            corpAppRelationDO.setExpiresTime(corpAppRelationInertReqVO.getExpiresTime());
             corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
-            corpAppRelationDO.setCorpId(createReqVO.getCorpId());
-            corpAppRelationDO.setTenantId(TenantContextHolder.getTenantId());
+            corpAppRelationDO.setCorpId(corpId);
             corpAppRelationDataRepository.insert(corpAppRelationDO);
         });
+    }
+
+    @Override
+    public void createCorpAppRelation(CorpAppRelationInertReqVO vo) {
+        // 插入
+        vo.getApplicationIdList().forEach(appId -> {
+            // 先删除后插入
+            ConfigStore configs = new DefaultConfigStore();
+            configs.eq(CorpAppRelationDO.APPLICATION_ID,appId );
+            configs.eq(CorpAppRelationDO.CORP_ID, vo.getCorpId());
+            corpAppRelationDataRepository.deleteByConfig(configs);
+
+            // 验证是否重复提交，先删除后插入
+            CorpAppRelationDO corpAppRelationDO =  new CorpAppRelationDO();
+            corpAppRelationDO.setApplicationId(appId);
+            corpAppRelationDO.setAuthorizationTime(vo.getAuthorizationTime());
+            corpAppRelationDO.setExpiresTime(vo.getExpiresTime());
+            corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
+            corpAppRelationDO.setCorpId(vo.getCorpId());
+            corpAppRelationDataRepository.insert(corpAppRelationDO);
+        });
+
     }
 
     @Override

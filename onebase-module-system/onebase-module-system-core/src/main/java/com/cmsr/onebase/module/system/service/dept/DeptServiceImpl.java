@@ -278,6 +278,14 @@ public class DeptServiceImpl implements DeptService {
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
 
+        List<Long> directorUserIds = deptList.stream()
+                .map(DeptDO::getDeptDirectorId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+      // 2. 批量获取部门主管用户信息
+        Map<Long, AdminUserDO> directorUserMap = adminUserService.getUserMap(directorUserIds);
+
         // 4. 设置每个部门的人数和领导姓名
         respList.forEach(dept -> {
             // 设置人数（包含下级部门）
@@ -289,6 +297,12 @@ public class DeptServiceImpl implements DeptService {
                 AdminUserDO leader = leaderUserMap.get(dept.getLeaderUserId());
                 if (leader != null) {
                     dept.setLeaderUserName(leader.getNickname());
+                }
+            }
+            if (dept.getDeptDirectorId() != null) {
+                AdminUserDO deptDirector = directorUserMap.get(dept.getDeptDirectorId());
+                if (deptDirector != null) {
+                    dept.setDeptDirectorName(deptDirector.getNickname());
                 }
             }
         });
@@ -314,6 +328,10 @@ public class DeptServiceImpl implements DeptService {
         Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIdsIncludeChildren(deptIds);
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
+        List<Long> directorUserIds = dept.getDeptDirectorId() != null ?
+                Collections.singletonList(dept.getLeaderUserId()) : Collections.emptyList();
+        // . 批量获取部门主管用户信息
+        Map<Long, AdminUserDO> directorUserMap = adminUserService.getUserMap(directorUserIds);
 
         // 设置部门人数（包含下级部门）
         Integer userCount = deptUserCountMap.getOrDefault(id, 0);
@@ -324,6 +342,12 @@ public class DeptServiceImpl implements DeptService {
             AdminUserDO leader = leaderUserMap.get(dept.getLeaderUserId());
             if (leader != null) {
                 respVO.setLeaderUserName(leader.getNickname());
+            }
+        }
+        if (dept.getDeptDirectorId() != null) {
+            AdminUserDO deptDirector = directorUserMap.get(dept.getDeptDirectorId());
+            if (deptDirector != null) {
+                respVO.setDeptDirectorName(deptDirector.getNickname());
             }
         }
 
