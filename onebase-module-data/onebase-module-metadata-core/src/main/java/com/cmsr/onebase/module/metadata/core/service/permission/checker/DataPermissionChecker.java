@@ -22,6 +22,8 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.service.AnylineService;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -79,7 +81,7 @@ public class DataPermissionChecker implements PermissionChecker {
         DataPermission dataPermission = permissionContext.getDataPermission();
 
         if (dataPermission == null) {
-            log.warn("数据权限对象为空，跳过数据权限校验");
+            log.error("数据权限对象为空，跳过数据权限校验");
             return;
         }
 
@@ -246,7 +248,7 @@ public class DataPermissionChecker implements PermissionChecker {
         AnylineService<?> temporaryService = context.getTemporaryService();
 
         if (entity == null || fields == null || temporaryService == null) {
-            log.warn("缺少必要的上下文信息，无法查询数据行");
+            log.error("缺少必要的上下文信息，无法查询数据行");
             return null;
         }
 
@@ -300,7 +302,7 @@ public class DataPermissionChecker implements PermissionChecker {
             return "id";
         }
 
-        log.warn("未找到主键字段，使用默认id作为主键名称");
+        log.error("未找到主键字段，使用默认id作为主键名称");
         return "id";
     }
 
@@ -373,11 +375,11 @@ public class DataPermissionChecker implements PermissionChecker {
                     break;
 
                 case CUSTOM_CONDITION:
-                    // 自定义条件由filters处理，这里不处理
+                    // 自定义条件由checkScopeLevel处理
                     break;
 
                 default:
-                    log.warn("未知的权限标签：{}", tag);
+                    log.error("未知的权限标签：{}", tag);
             }
         }
 
@@ -463,7 +465,7 @@ public class DataPermissionChecker implements PermissionChecker {
 
         String fieldName = fieldIdToNameMap.get(scopeFieldId);
         if (fieldName == null) {
-            log.warn("未找到字段名：fieldId={}", scopeFieldId);
+            log.error("未找到字段名：fieldId={}", scopeFieldId);
             return false;
         }
 
@@ -488,41 +490,59 @@ public class DataPermissionChecker implements PermissionChecker {
                 return fieldValue != null && subordinateIds.contains(Convert.toLong(fieldValue));
 
             case MAIN_DEPARTMENT:
-                // 当前员工所在主部门：字段值 = 当前用户部门ID
-                return fieldValue != null && currentUser.getDeptId() != null
-                        && String.valueOf(fieldValue).equals(String.valueOf(currentUser.getDeptId()));
-
-            case MAIN_DEPARTMENT_AND_SUBS:
-                // 当前员工所在主部门及下级部门：需要获取主部门及下级部门列表
-                if (currentUser.getDeptId() == null) {
+                // 当前员工所在主部门：通过字段值（用户ID）查询该用户的部门，判断是否与当前用户部门一致
+                AdminUserRespDTO targetUser = getAdminUser(currentUser, fieldValue);
+                if (targetUser == null || targetUser.getDeptId() == null) {
                     return false;
                 }
-                List<DeptRespDTO> childDepts = deptApi.getChildDeptList(currentUser.getDeptId()).getCheckedData();
-                Set<Long> deptIds = new HashSet<>();
-                deptIds.add(currentUser.getDeptId());
-                if (childDepts != null && !childDepts.isEmpty()) {
-                    childDepts.forEach(dept -> deptIds.add(dept.getId()));
-                }
-                return fieldValue != null && deptIds.contains(Convert.toLong(fieldValue));
+                return targetUser.getDeptId().equals(currentUser.getDeptId());
 
+            case MAIN_DEPARTMENT_AND_SUBS:
+                // 当前员工所在主部门及下级部门：通过字段值（用户ID）查询该用户的部门，判断是否在当前用户的主部门及下级部门列表中
+                AdminUserRespDTO user = getAdminUser(currentUser, fieldValue);
+                if (user == null || user.getDeptId() == null) {
+                    return false;
+                }
+                // 获取当前用户的主部门及下级部门列表
+                List<DeptRespDTO> childDepts = deptApi.getChildDeptList(currentUser.getDeptId()).getCheckedData();
+                Set<Long> deptIds = childDepts.stream().map(DeptRespDTO::getId).collect(Collectors.toSet());
+                deptIds.add(currentUser.getDeptId());
+                // 判断目标用户的部门是否在当前用户的主部门及下级部门列表中
+                return deptIds.contains(user.getDeptId());
             case SPECIFIED_DEPARTMENT:
+                AdminUserRespDTO user2 = getAdminUser(currentUser, fieldValue);
+                if (user2 == null || user2.getDeptId() == null){
+                    return false;
+                }
                 // 指定部门：从scopeValue解析部门列表
                 if (scopeValue == null || scopeValue.isEmpty()) {
                     return false;
                 }
-                return checkSpecifiedScopeValue(scopeValue, fieldValue, "department");
+                return checkSpecifiedScopeValue(scopeValue, user2.getDeptId());
 
             case SPECIFIED_PERSON:
                 // 指定人员：从scopeValue解析人员列表
                 if (scopeValue == null || scopeValue.isEmpty()) {
                     return false;
                 }
-                return checkSpecifiedScopeValue(scopeValue, fieldValue, "person");
+                return checkSpecifiedScopeValue(scopeValue, fieldValue);
 
             default:
-                log.warn("未知的权限级别：{}", scopeLevel);
+                log.error("未知的权限级别：{}", scopeLevel);
                 return false;
         }
+    }
+
+    @Nullable
+    private AdminUserRespDTO getAdminUser(AdminUserRespDTO currentUser, Object fieldValue) {
+        // 如果任意一个为空就没有继续查询的必要
+        if (fieldValue == null || currentUser.getDeptId() == null) {
+            return null;
+        }
+        Long userId = Convert.toLong(fieldValue);
+
+        AdminUserRespDTO user = adminUserApi.getUser(userId).getCheckedData();
+        return user;
     }
 
     /**
@@ -530,10 +550,9 @@ public class DataPermissionChecker implements PermissionChecker {
      *
      * @param scopeValue JSON字符串，包含key列表
      * @param fieldValue 字段值
-     * @param type 类型：department或person
      * @return 是否匹配
      */
-    private boolean checkSpecifiedScopeValue(String scopeValue, Object fieldValue, String type) {
+    private boolean checkSpecifiedScopeValue(String scopeValue, Object fieldValue) {
         if (fieldValue == null) {
             return false;
         }
@@ -558,7 +577,7 @@ public class DataPermissionChecker implements PermissionChecker {
             String fieldValueStr = String.valueOf(fieldValue);
             return keySet.contains(fieldValueStr);
         } catch (Exception e) {
-            log.warn("解析scopeValue失败：{}", e.getMessage());
+            log.error("解析scopeValue失败：{}", e.getMessage());
             return false;
         }
     }
@@ -612,15 +631,46 @@ public class DataPermissionChecker implements PermissionChecker {
         Long fieldId = filter.getFieldId();
         String fieldName = fieldIdToNameMap.get(fieldId);
         if (fieldName == null) {
-            log.warn("未找到字段名：fieldId={}", fieldId);
+            log.error("未找到字段名：fieldId={}", fieldId);
             return false;
         }
 
         Object fieldValue = dataRow.get(fieldName);
         String operator = filter.getFieldOperator();
         String filterValue = filter.getFieldValue();
+        // OperatorTypeEnum枚举
+        String filterValueType = filter.getFieldValueType();
 
-        if (operator == null || filterValue == null) {
+        if (operator == null) {
+            return false;
+        }
+
+        String compareToValue = null;
+        if ("value".equals(filterValueType)) {
+            compareToValue = filterValue;
+        } else if ("variables".equals(filterValueType)) {
+            // 期望形如 entity-123945626659094528.123950299583512578
+            String variableExpr = filterValue != null ? filterValue.trim() : null;
+            if (variableExpr != null && variableExpr.contains(".")) {
+                String[] parts = variableExpr.split("\\.");
+                if (parts.length == 2) {
+                    String fieldIdPart = parts[1];
+                    try {
+                        Long refFieldId = Convert.toLong(fieldIdPart);
+                        String refFieldName = fieldIdToNameMap.get(refFieldId);
+                        Object refValue = refFieldName != null ? dataRow.get(refFieldName) : null;
+                        compareToValue = refValue != null ? String.valueOf(refValue) : null;
+                    } catch (Exception ex) {
+                        log.error("变量解析失败，期望 entity-<tableId>.<fieldId>，实际={}", variableExpr);
+                    }
+                } else {
+                    log.error("变量表达式格式不正确，期望 entity-<tableId>.<fieldId>，实际={}", variableExpr);
+                }
+            } else {
+                log.error("变量表达式未识别，期望以 entity- 开头且包含 '.' 分隔，实际={}", variableExpr);
+            }
+        } else if ("formula".equals(filterValueType)) {
+            log.error("暂不支持公式类型(fieldValueType=formula)的数据权限比较");
             return false;
         }
 
@@ -628,49 +678,20 @@ public class DataPermissionChecker implements PermissionChecker {
         switch (operator.toUpperCase()) {
             case "EQUALS":
             case "EQUAL":
-                return fieldValue != null && String.valueOf(fieldValue).equals(filterValue);
+                return fieldValue != null && String.valueOf(fieldValue).equals(compareToValue);
 
             case "NOT_EQUALS":
             case "NOT_EQUAL":
-                return fieldValue == null || !String.valueOf(fieldValue).equals(filterValue);
+                return fieldValue == null || !String.valueOf(fieldValue).equals(compareToValue);
 
-            case "GREATER_THAN":
-            case "GT":
-                return compareNumbers(fieldValue, filterValue) > 0;
+            case "IS_EMPTY":
+                return fieldValue == null || StringUtils.isEmpty(String.valueOf(fieldValue));
 
-            case "GREATER_EQUALS":
-            case "GTE":
-                return compareNumbers(fieldValue, filterValue) >= 0;
-
-            case "LESS_THAN":
-            case "LT":
-                return compareNumbers(fieldValue, filterValue) < 0;
-
-            case "LESS_EQUALS":
-            case "LTE":
-                return compareNumbers(fieldValue, filterValue) <= 0;
-
-            case "CONTAINS":
-            case "LIKE":
-                return fieldValue != null && String.valueOf(fieldValue).contains(filterValue);
-
-            case "NOT_CONTAINS":
-            case "NOT_LIKE":
-                return fieldValue == null || !String.valueOf(fieldValue).contains(filterValue);
-
-            case "IN":
-                // 假设filterValue是逗号分隔的值列表
-                String[] values = filterValue.split(",");
-                String fieldValueStr = fieldValue != null ? String.valueOf(fieldValue) : null;
-                return fieldValueStr != null && Arrays.asList(values).contains(fieldValueStr.trim());
-
-            case "NOT_IN":
-                String[] notInValues = filterValue.split(",");
-                String fieldValueStr2 = fieldValue != null ? String.valueOf(fieldValue) : null;
-                return fieldValueStr2 == null || !Arrays.asList(notInValues).contains(fieldValueStr2.trim());
+            case "IS_NOT_EMPTY":
+                return fieldValue != null && StringUtils.isNotEmpty(String.valueOf(fieldValue));
 
             default:
-                log.warn("未知的操作符：{}", operator);
+                log.error("未知的操作符：{}", operator);
                 return false;
         }
     }
@@ -692,7 +713,7 @@ public class DataPermissionChecker implements PermissionChecker {
             Double filterNum = Double.parseDouble(filterValue);
             return fieldNum.compareTo(filterNum);
         } catch (NumberFormatException e) {
-            log.warn("数值比较失败：fieldValue={}, filterValue={}", fieldValue, filterValue);
+            log.error("数值比较失败：fieldValue={}, filterValue={}", fieldValue, filterValue);
             return 0;
         }
     }
