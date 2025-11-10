@@ -23,7 +23,7 @@ import {
   PlatformTenantPublishMode,
   type UpdateTenantParams
 } from '@onebase/platform-center';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import WorkspaceSecurity from './components/security';
 import styles from './index.module.less';
@@ -44,6 +44,8 @@ const EditTenant = () => {
   const domainPrefix = getDomainPrefix();
   const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${tenantInfo?.id}/${tenantInfo?.website}/`;
   const displayUrl = simplifyUrl(fullUrl);
+
+  const uploadRef = useRef(null);
 
   useEffect(() => {
     if (id) {
@@ -99,6 +101,7 @@ const EditTenant = () => {
             adminNickName: user?.nickname || '',
             adminUserName: user?.username || '',
             adminMobile: user?.mobile || '',
+            adminUserId: user?.id
           };
         });
         const updateParams: UpdateTenantParams = {
@@ -121,10 +124,8 @@ const EditTenant = () => {
       }
 
       setIsEdit(false);
-      Message.success('保存成功');
     } catch (error) {
       console.error('更新租户信息失败:', error);
-      Message.error('更新租户信息失败');
     }
   };
 
@@ -144,6 +145,15 @@ const EditTenant = () => {
     const res = await uploadFile(formData, progressAdapter);
     return res;
   };
+
+  /* 获取当前管理员集合 */
+  const findMatchingItemsById = (arrA: any[], targetArr: any[]) => {
+    if (!Array.isArray(targetArr)) return;
+    const cutAdminList = targetArr.map(item => item.adminUserId);
+    const result = arrA.filter(item => cutAdminList.includes(item.id));
+
+    return result;
+  }
 
   return (
     <div className={styles.editPage}>
@@ -165,45 +175,56 @@ const EditTenant = () => {
             </Form.Item>
 
             <Form.Item label="空间 Logo" field="logoUrl">
-              {isEdit ? <>
-                <Upload
-                  limit={1}
-                  imagePreview
-                  accept="image/*"
-                  listType="picture-card"
-                  fileList={[
-                    {
-                      uid: '1',
-                      name: 'logo',
-                      url: logoUrl,
-                      status: 'done'
-                    }
-                  ]}
-                  customRequest={async (option) => {
-                    const { onProgress, onError, onSuccess, file } = option;
-                    try {
-                      const uploadImgUrl = await handleUpload(file, onProgress);
-                      if (uploadImgUrl !== '') {
-                        setLogoUrl(uploadImgUrl);
-                        onSuccess(uploadImgUrl);
-                      } else {
+              <Space direction="vertical">
+                {isEdit ? <>
+                  <Upload
+                    ref={uploadRef}
+                    limit={1}
+                    imagePreview
+                    accept="image/*"
+                    listType="picture-card"
+                    fileList={[
+                      {
+                        uid: '1',
+                        name: 'logo',
+                        url: logoUrl,
+                        status: 'done'
+                      }
+                    ]}
+                    customRequest={async (option) => {
+                      const { onProgress, onError, onSuccess, file } = option;
+                      try {
+                        const uploadImgUrl = await handleUpload(file, onProgress);
+                        if (uploadImgUrl !== '') {
+                          setLogoUrl(uploadImgUrl);
+                          onSuccess(uploadImgUrl);
+                        } else {
+                          onError({
+                            status: 'error',
+                            msg: '上传失败'
+                          });
+                        }
+                      } catch (error) {
                         onError({
                           status: 'error',
                           msg: '上传失败'
                         });
                       }
-                    } catch (error) {
-                      onError({
-                        status: 'error',
-                        msg: '上传失败'
-                      });
-                    }
-                  }}
-                >
-                  <Button type='outline' icon={<IconUpload />}>上传图片</Button>
-                </Upload>
-                {isEdit && <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>}
-              </> : <>{logoUrl ? <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} /> : <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>}</>}
+                    }}
+                    style={{
+                      display: 'none'
+                    }}
+                  />
+                  {isEdit && (
+                    <Space>
+                      <Button type='outline' icon={<IconUpload />} onClick={() => {
+                        uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                      }}>上传图片</Button>
+                      <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div></Space>
+                  )
+                  }
+                </> : <>{logoUrl ? <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} /> : <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>}</>}
+              </Space>
             </Form.Item>
 
             <Form.Item label="空间ID" field="id">
@@ -249,13 +270,11 @@ const EditTenant = () => {
               >
               </Select> :
                 <div className={styles.tagWrapper}>
-                  {adminList
-                    .filter(admin => (tenantInfo?.tenantAdminUserList || []).includes(admin.id))
-                    .map((tag, index) => (
-                      <Tag className={styles.adminTag} key={index} size='large' style={{ borderRadius: 16 }}>
-                        <Avatar size={24} style={{ marginRight: 4 }}>{tag.nickname.slice(0, 1)}</Avatar>{tag.nickname}
-                      </Tag>
-                    ))}
+                  {findMatchingItemsById(adminList, tenantInfo?.tenantAdminUserList)?.map((tag, index) => (
+                    <Tag className={styles.adminTag} key={index} size='large' style={{ borderRadius: 16 }}>
+                      <Avatar size={24} style={{ marginRight: 4 }}>{tag.nickname.slice(0, 1)}</Avatar>{tag.nickname}
+                    </Tag>
+                  ))}
                 </div>}
             </Form.Item>
 

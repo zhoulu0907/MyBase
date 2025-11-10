@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { Avatar, Typography, Grid, Space, Tag, Button, Tabs, Pagination, Table, Card } from '@arco-design/web-react';
-// import type { TenantInfo } from '@onebase/platform-center';
-// import { getTenantInfo } from '@onebase/platform-center';
+import { Avatar, Typography, Grid, Space, Tag, Button, Tabs, Pagination, Table, Card, Spin, Image } from '@arco-design/web-react';
+import { getCorpListApi, getLoginedUser, getDictDataByType } from '@onebase/platform-center';
+import type { CorpDetailResponse, DictData, RoleSimpleRespVO, PostSimpleRespVO } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
+import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import StatusTag from '@/components/StatusTag';
 import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import styles from './index.module.less';
-import { getCommonPaginationList } from '@onebase/common';
 import {
-  createApplication,
-  deleteApplication,
   listApplication,
   type Application,
-  type CreateApplicationReq,
-  type DatasourceSaveReqDTO,
-  type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
 
@@ -27,33 +21,6 @@ const TabPane = Tabs.TabPane;
 const { Title, Text } = Typography;
 const { Col, Row } = Grid;
 
-const tableData = [{
-  logo: '',
-  name: 'name',
-  id: '1',
-  type: '333',
-  admin: 'admin',
-  status: 1,
-  createTime: '1762154032380'
-},
-{
-  logo: '',
-  name: 'name',
-  id: '2',
-  type: '333',
-  admin: 'admin',
-  status: 1,
-  createTime: '1762154032380'
-},
-{
-  logo: '',
-  name: 'name',
-  id: '3',
-  type: '333',
-  admin: 'admin',
-  status: 1,
-  createTime: '1762154032380'
-}];
 
 const CREATED_TYPE = {
   ENTERPRISE: 'enterprise',
@@ -64,28 +31,57 @@ type ownerCreateType = 'enterprise' | 'application' | string;
 
 const TenantPage: React.FC = () => {
   const nav = useNavigate();
-  // const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
   const [loading, setLoading] = useState(true);
-
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
-
   const [curTab, setCurTab] = useState<ownerCreateType>(CREATED_TYPE.ENTERPRISE);
-  const [data, setData] = useState<any[]>(tableData);
-  const [appData, setAppData] = useState<any[]>([]);
-  const [editingUser, setEditingUser] = useState<any | undefined>();
 
-  // const fetchTenantInfo = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const res = await getTenantInfo();
-  //     setTenantInfo(res);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [appData, setAppData] = useState<Application[]>([]);
+  const [corpData, setCorpData] = useState<CorpDetailResponse[]>([]);
+  const [industryDict, setTndustryDict] = useState<DictData[] | null>(null);
 
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    if (curTab === CREATED_TYPE.ENTERPRISE) {
+      getOwnerCorp();
+    } else if (curTab === CREATED_TYPE.APPLICATION) {
+      getOwnerApplication();
+    }
+  }, [curTab, page, pageSize]);
+
+  const fetchUserInfo = async () => {
+    try {
+      setLoading(true);
+      const res = await getLoginedUser();
+      setUserInfo(res);
+      if (res?.id) {
+        await fetchIndustryDict(res.id)
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 我创建的企业
+  const getOwnerCorp = async () => {
+    const req: PageParam = {
+      pageNo: page,
+      pageSize: pageSize,
+      ownerTag: 1, // 我创建的
+    };
+    const res = await getCorpListApi(req);
+    if (res) {
+      setCorpData(res.list);
+      setTotal(res.total);
+    }
+  };
+
+  // 我创建的应用
   const getOwnerApplication = async () => {
     const req: PageParam = {
       pageNo: 1,
@@ -98,63 +94,50 @@ const TenantPage: React.FC = () => {
     }
   };
 
-
-
-  useEffect(() => {
-    // fetchTenantInfo();
-  }, []);
-
-  useEffect(() => {
-    if (curTab === CREATED_TYPE.ENTERPRISE) {
-      // todo
-    } else if (curTab === CREATED_TYPE.APPLICATION) {
-      getOwnerApplication();
+  const fetchIndustryDict = async (id: string) => {
+    try {
+      const res = await getDictDataByType(id);
+      setTndustryDict(res);
+    } catch (error) {
+      console.error('字典数据列表错误', error);
     }
-  }, [curTab]);
-
-  // 显示加载状态
-  // if (loading) {
-  //   return (
-  //     <div className={styles.tenantPage}>
-  //       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-  //         <Spin tip="加载中..." />
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // 数据加载完成后但没有租户信息
-  // if (!tenantInfo) {
-  //   return (
-  //     <div className={styles.tenantPage}>
-  //       <div style={{ textAlign: 'center', padding: '40px' }}>
-  //         <p>无法加载租户信息</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // 生成完整的工作台和移动端链接
-  // const fullWebsite = generateFullUrl(tenantInfo.website);
-  // const fullWebsiteH5 = generateFullUrl(tenantInfo.websiteH5);
-
-  const handleEdit = (record: any) => {
-    setEditingUser(record);
   };
 
-  const getColumns = (handleEdit: (record: any) => void) => {
+  // 显示加载状态
+  if (loading) {
+    return (
+      <div className={styles.tenantPage}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+          <Spin tip="加载中..." />
+        </div>
+      </div>
+    );
+  }
+
+  // 数据加载完成后但没有租户信息
+  if (!userInfo) {
+    return (
+      <div className={styles.tenantPage}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <p>无法加载个人中心信息</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getColumns = () => {
     return [
       {
         title: '企业LOGO',
-        dataIndex: 'logo',
+        dataIndex: 'corpLogo',
         width: 100,
-        render: (_: any) => (
-          <img />
+        render: (url: any) => (
+          <img src={url} style={{ width: 72, height: 36, borderRadius: 5, border: '1px solid #F2F3F5', backgroundColor: '#F7F8FA', objectFit: 'contain' }} />
         )
       },
       {
         title: '企业名称',
-        dataIndex: 'name',
+        dataIndex: 'corpName',
         width: 235,
         ellipsis: true
       },
@@ -166,14 +149,17 @@ const TenantPage: React.FC = () => {
       },
       {
         title: '行业类型',
-        dataIndex: 'type',
+        dataIndex: 'industryType',
         width: 100,
         placeholder: '-',
-        render: (val: string, a) => (
-          <Tag color="cyan">
-            {val}
-          </Tag>
-        )
+        render: (val: string) => {
+          const getIndustryTypeName = industryDict?.find(data => data.id === val)?.label || '-';
+          return (
+            <Tag color="cyan">
+              {getIndustryTypeName}
+            </Tag>
+          )
+        }
       },
       {
         title: '管理员',
@@ -198,13 +184,13 @@ const TenantPage: React.FC = () => {
   };
 
   const handleGoEditPage = () => {
-    nav(`/onebase/setting/tenant/edit?id=${123}`);
+    nav('/onebase/setting/tenant/edit');
   };
 
   return (
     <div className={styles.tenantPage}>
       <div className={styles.userInfo}>
-        <Row justify="space-between" align="center" style={{ marginBottom: 24 }}>
+        <Row justify="space-between" align="center">
           {/* 左侧头像与姓名 */}
           <Col flex="auto">
             <Space align="center">
@@ -212,19 +198,22 @@ const TenantPage: React.FC = () => {
                 className={styles.avatar}
                 size={80}
                 shape="circle"
-                style={{ border: '1px solid #f0f0f0' }}
-                image="https://cdn.example.com/avatar-wsq.jpg"
-              />
+                style={{ border: '1px solid #f0f0f0', overflow: 'hidden' }}
+              >
+                <Image width={80} height={80} src={userInfo.avatar} />
+              </Avatar>
               <div>
                 <div className={styles.userTop}>
                   <Title className={styles.username} heading={6}>
-                    王少青
+                    {userInfo.nickname}
                   </Title>
-                  <Tag className={styles.userTag} color="arcoblue" size="small">
-                    主管
-                  </Tag>
+                  {
+                    userInfo?.posts?.map((post: PostSimpleRespVO) => <Tag className={styles.userTag} color="cyan" size="small" key={post.id}>
+                      {post.name}
+                    </Tag>)
+                  }
                 </div>
-                <Text className={styles.userRole} type="secondary">角色：产品设计</Text>
+                <Text className={styles.userRole} type="secondary">角色：{userInfo?.roles?.map((role: RoleSimpleRespVO) => role.name).join('、')}</Text>
               </div>
             </Space>
           </Col>
@@ -236,7 +225,7 @@ const TenantPage: React.FC = () => {
         </Row>
 
         {/* 下方详细信息区 */}
-        <Row gutter={[0, 12]} align='center' style={{ paddingLeft: 100 }}>
+        <Row gutter={[0, 12]} align='center' style={{ paddingLeft: 105 }}>
           {/* 第一行 */}
           <Col span={8}>
             <Row gutter={8}>
@@ -244,7 +233,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">账号</Text>
               </Col>
               <Col flex="auto">
-                <Text>wangshaoqing</Text>
+                <Text>{userInfo.username}</Text>
               </Col>
             </Row>
           </Col>
@@ -255,7 +244,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">手机号</Text>
               </Col>
               <Col flex="auto">
-                <Text>137 0193 5734</Text>
+                <Text>{userInfo.mobile || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -278,7 +267,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">所属部门</Text>
               </Col>
               <Col flex="auto">
-                <Text>湖北交通行业空间 / 科创中心</Text>
+                <Text>{userInfo?.dept?.name || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -289,7 +278,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">邮箱</Text>
               </Col>
               <Col flex="auto">
-                <Text>wangshaoqing@cmsr.chinamobile.com</Text>
+                <Text>{userInfo.email || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -300,7 +289,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">OneID</Text>
               </Col>
               <Col flex="auto">
-                <Text>123566424512</Text>
+                <Text>{userInfo.id || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -318,8 +307,8 @@ const TenantPage: React.FC = () => {
             <Table
               rowKey="id"
               hover
-              columns={getColumns(handleEdit)}
-              data={data}
+              columns={getColumns()}
+              data={corpData}
               pagination={false}
               scroll={{ y: 510 }}
               border={false}

@@ -13,7 +13,7 @@ import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasPermission, hasAllPermissions } from '@/utils/permission';
 import { TENANT_USER_PERMISSION as ACTIONS } from '@/constants/permission';
 import { AddMembers } from '@onebase/common';
-import { getDeptUser, type GetDeptUserReq, type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO, type RoleAddUserReq, roleAddUser } from '@onebase/app';
+import { getDeptUser, getSimpleUserList, type GetDeptUserReq, type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO, type RoleAddUserReq, roleAddUser } from '@onebase/app';
 
 
 interface DataItem {
@@ -340,7 +340,6 @@ export default function UserTable({
   const handleSetDirector = async () => {
     await getDeptUsers({});
     setManagerTypeModalVisible('主管');
-    console.log(21324214, selectedDeptId)
   };
 
   // 设置管理员
@@ -359,12 +358,13 @@ export default function UserTable({
     setMemberLoading(true);
     try {
       if (!selectedDeptId) return;
-      const params: GetDeptUserReq = {
-        roleId: `${selectedDeptId}`,
-        deptId,
-        keywords
-      };
-      const res = await getDeptUser(params);
+      // const params: GetDeptUserReq = {
+      //   roleId: `${selectedDeptId}`,
+      //   deptId,
+      //   keywords
+      // };
+      // const res = await getDeptUser(params);
+      const res = await getSimpleUserList();
       console.log('获取部门用户信息 res:', res);
       setDeptData(res);
     } catch (error) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Form,
@@ -31,6 +31,8 @@ const CreateSpace = () => {
   const [adminList, setAdminList] = useState<any[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>(); // logo
 
+  const uploadRef = useRef(null);
+
   // 获取Tenant参数
   useEffect(() => {
     form.resetFields();
@@ -57,7 +59,6 @@ const CreateSpace = () => {
     }
   };
 
-
   /**
     * 创建新租户
     */
@@ -69,6 +70,7 @@ const CreateSpace = () => {
           adminNickName: user?.nickname || '',
           adminUserName: user?.username || '',
           adminMobile: user?.mobile || '',
+          adminUserId: user?.id
         };
       });
 
@@ -140,36 +142,44 @@ const CreateSpace = () => {
         </Form.Item>
 
         <Form.Item label="空间 Logo" field="logoUrl">
-          <Space direction="vertical">
-            <Space direction="horizontal">
-              <Upload
-                limit={1}
-                imagePreview
-                accept="image/*"
-                listType="picture-card"
-                customRequest={async (option) => {
-                  const { onProgress, onError, onSuccess, file } = option;
-                  try {
-                    const uploadImgUrl = await handleUpload(file, onProgress);
-                    if (uploadImgUrl !== '') {
-                      setLogoUrl(uploadImgUrl);
-                      onSuccess(uploadImgUrl);
-                    } else {
-                      onError({
-                        status: 'error',
-                        msg: '上传失败'
-                      });
-                    }
-                  } catch (error) {
+          <Space direction="vertical" style={{ margin: 0 }}>
+            <Upload
+              ref={uploadRef}
+              limit={1}
+              imagePreview
+              accept="image/*"
+              listType="picture-card"
+              customRequest={async (option) => {
+                const { onProgress, onError, onSuccess, file } = option;
+                try {
+                  const uploadImgUrl = await handleUpload(file, onProgress);
+                  if (uploadImgUrl !== '') {
+                    setLogoUrl(uploadImgUrl);
+                    onSuccess(uploadImgUrl);
+                  } else {
                     onError({
                       status: 'error',
                       msg: '上传失败'
                     });
                   }
-                }}
-              >
-                <Button type='outline' icon={<IconUpload />}>上传图片</Button>
-              </Upload>
+                } catch (error) {
+                  onError({
+                    status: 'error',
+                    msg: '上传失败'
+                  });
+                }
+              }}
+              style={{
+                display: 'none'
+              }}
+            />
+            <Space>
+              <Button
+                type='outline'
+                icon={<IconUpload />}
+                onClick={() => {
+                  uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                }}>上传图片</Button>
               <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
             </Space>
           </Space>

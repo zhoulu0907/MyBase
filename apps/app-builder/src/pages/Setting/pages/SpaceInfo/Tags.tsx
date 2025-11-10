@@ -1,5 +1,4 @@
 
-// import {} from 'react';
 import { Avatar, Popover, Tag, Grid } from '@arco-design/web-react';
 import styles from './index.module.less'
 
@@ -7,11 +6,12 @@ const { Row, Col } = Grid;
 
 interface IProps {
   data: {
+    adminUserId: string;
     adminNickName: string;
     adminUserName: string;
-    adminMobile: string;
-    adminEmail: string;
-    adminDept: string;
+    adminMobile?: string;
+    adminEmail?: string;
+    adminDept?: string;
   }[];
 }
 const Tags = ({ data }: IProps) => {
@@ -20,7 +20,7 @@ const Tags = ({ data }: IProps) => {
       {data.map((tag, index) => <Tag className={styles.adminTag} key={index} size='large' style={{ borderRadius: 16 }}>
         <Popover
           title={
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
               <Avatar size={40} style={{ marginRight: 4 }}>{tag.adminNickName?.slice(0, 1)}</Avatar>
               <div>{tag.adminNickName || '-'}</div>
             </div>
@@ -43,7 +43,7 @@ const Tags = ({ data }: IProps) => {
                   <span>{tag.adminEmail || '-'}</span>
                 </Col>
               </Row>
-              <Row gutter={24} style={{ marginBottom: 16 }}>
+              <Row gutter={24}>
                 <Col span={12}>
                   <span className={styles.infoKey}>所属部门</span>
                 </Col>

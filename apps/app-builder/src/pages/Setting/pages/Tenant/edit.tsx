@@ -1,82 +1,125 @@
-import { Avatar, Divider, Spin, Typography, Message, Tabs, Form, Select, Input, Space, Button, Upload } from '@arco-design/web-react';
-import { IconCopy, IconEye, IconEyeInvisible, IconUpload } from '@arco-design/web-react/icon';
-import type { TenantInfo } from '@onebase/platform-center';
-import { getTenantInfo, updateTenant } from '@onebase/platform-center';
-import React, { useEffect, useState } from 'react';
+import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image } from '@arco-design/web-react';
+import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+// import PlaceholderPanel from '@/components/PlaceholderPanel';
+// import { hasPermission } from '@/utils/permission';
+// import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import styles from './index.module.less';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
-import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 
 const TabPane = Tabs.TabPane;
-const { Option } = Select;
 const { Item: FormItem } = Form;
 
 const EditPage: React.FC = () => {
+  const nav = useNavigate();
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
-  const [avatarUrl, setAvatarUrl] = useState(
-    'https://cdn.example.com/avatar-default.jpg' // 默认头像
-  );
-  const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [secretVisible, setSecretVisible] = useState(false);
-  const [tenantName, setTenantName] = useState('');
 
-  const fetchTenantInfo = async () => {
+  const [avatarUrl, setAvatarUrl] = useState<string>();
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const uploadRef = useRef(null);
+
+  useEffect(() => {
+    fetchUserInfo();
+    form.resetFields();
+    passwordForm.resetFields();
+  }, []);
+
+  const fetchUserInfo = async () => {
     try {
       setLoading(true);
-      const res = await getTenantInfo();
-      setTenantInfo(res);
-      setTenantName(res.name);
+      const res = await getLoginedUser();
+      setUserInfo(res);
+      setAvatarUrl(res.avatar);
+      form.setFieldsValue({
+        nickname: res.nickname,
+        username: res.username,
+        mobile: res.mobile,
+        email: res.email,
+        dept: res.dept?.name,
+        id: res.id
+      })
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    // fetchTenantInfo();
-  }, []);
+  // 头像上传
+  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+    const formData = new FormData();
+    formData.append('file', file);
 
+    const progressAdapter = onProgress
+      ? (progressEvent: ProgressEvent) => {
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
+        }
+      }
+      : undefined;
 
-  const handleAvatarChange = (file) => {
-    // 模拟上传后更新头像
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setAvatarUrl(e.target.result);
-      Message.success('头像上传成功');
-    };
-    reader.readAsDataURL(file.originFile);
-    return false; // 阻止自动上传
+    const res = await uploadFile(formData, progressAdapter);
+    return res;
   };
 
-  const handleSubmit = (values) => {
-    console.log('提交数据：', values);
-    Message.success('保存成功');
+  // 表单提交
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validate();
+      const req = {
+        nickname: values.nickname,
+        mobile: values.mobile,
+        email: values.email,
+        avatar: avatarUrl
+      }
+      await updateLoginedUser(req);
+      form.resetFields();
+      nav('/onebase/setting/tenant');
+      Message.success('保存成功');
+    } catch (error) {
+      console.error('保存失败', error);
+    }
+  };
+
+  const handleSubmitPassword = async () => {
+    try {
+      const values = await passwordForm.validate();
+      const req = {
+        oldPassword: values.oldPassword,
+        newPassword: values.confirmNewPassword,
+      }
+      await updateLoginedUserPwd(req);
+      passwordForm.resetFields();
+      nav('/onebase/setting/tenant');
+      Message.success('保存成功');
+    } catch (error) {
+      console.error('保存密码失败', error);
+    }
   };
 
   // 显示加载状态
-  // if (loading) {
-  //   return (
-  //     <div className={styles.tenantPage}>
-  //       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-  //         <Spin tip="加载中..." />
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <div className={styles.tenantPage}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+          <Spin tip="加载中..." />
+        </div>
+      </div>
+    );
+  }
 
   // 数据加载完成后但没有租户信息
-  // if (!tenantInfo) {
-  //   return (
-  //     <div className={styles.tenantPage}>
-  //       <div style={{ textAlign: 'center', padding: '40px' }}>
-  //         <p>无法加载租户信息</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
+  if (!userInfo) {
+    return (
+      <div className={styles.tenantPage}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <p>无法加载个人中心信息</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.editPage}>
@@ -92,18 +135,12 @@ const EditPage: React.FC = () => {
               form={form}
               layout="horizontal"
               onSubmit={handleSubmit}
-              initialValues={{
-                name: '王少青',
-                account: 'wangshaoqing',
-                phone: '137 0193 5734',
-                email: 'wangshaoqing@cmsr.chinamobile.com',
-                department: '湖北交通行业空间 / 科创中心',
-                oneid: '123566424512',
-              }}
             >
               <FormItem label="头像" field="avatar">
                 <div>
-                  <img
+                  <Image
+                    width={120}
+                    height={120}
                     src={avatarUrl}
                     alt="头像"
                     style={{
@@ -117,34 +154,61 @@ const EditPage: React.FC = () => {
                   />
                   <div>
                     <Upload
-                      showUploadList={false}
-                      beforeUpload={handleAvatarChange}
+                      ref={uploadRef}
+                      limit={1}
                       accept="image/*"
+                      listType="picture-card"
+                      showUploadList={false}
+                      customRequest={async (option) => {
+                        const { onProgress, onError, onSuccess, file } = option;
+                        try {
+                          const uploadImgUrl = await handleUpload(file, onProgress);
+                          if (uploadImgUrl !== '') {
+                            setAvatarUrl(uploadImgUrl);
+                            onSuccess(uploadImgUrl);
+                          } else {
+                            onError({
+                              status: 'error',
+                              msg: '上传失败'
+                            });
+                          }
+                        } catch (error) {
+                          onError({
+                            status: 'error',
+                            msg: '上传失败'
+                          });
+                        }
+                      }}
+                      style={{
+                        display: 'none'
+                      }}
                     >
-                      <Button type="outline" icon={<IconUpload />}>
-                        修改头像
-                      </Button>
                     </Upload>
+                    <Button type="outline" onClick={() => {
+                      uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                    }}>
+                      修改头像
+                    </Button>
                   </div>
                 </div>
               </FormItem>
 
               <FormItem
                 label="姓名"
-                field="name"
+                field="nickname"
                 required
                 rules={[{ required: true, message: '请输入姓名' }]}
               >
                 <Input placeholder="请输入姓名" />
               </FormItem>
 
-              <FormItem label="账号" field="account" required>
+              <FormItem label="账号" field="username" required>
                 <Input disabled />
               </FormItem>
 
               <FormItem
                 label="手机号"
-                field="phone"
+                field="mobile"
                 required
                 rules={[
                   { required: true, message: '请输入手机号' },
@@ -166,16 +230,12 @@ const EditPage: React.FC = () => {
                 <Input placeholder="请输入邮箱" />
               </FormItem>
 
-              <FormItem label="所属部门" field="department" required>
+              <FormItem label="所属部门" field="dept" required disabled>
                 <Select placeholder="请选择所属部门">
-                  <Option value="湖北交通行业空间 / 科创中心">
-                    湖北交通行业空间 / 科创中心
-                  </Option>
-                  <Option value="技术运营部">技术运营部</Option>
                 </Select>
               </FormItem>
 
-              <FormItem label="OneID" field="oneid" required>
+              <FormItem label="OneID" field="id" required disabled>
                 <Input placeholder="请输入 OneID" />
               </FormItem>
 
@@ -187,6 +247,7 @@ const EditPage: React.FC = () => {
             </Form>
           </div>
         </TabPane>
+
         <TabPane key='tab2' title='修改密码'>
           <div style={{
             maxWidth: 600,
@@ -197,12 +258,7 @@ const EditPage: React.FC = () => {
             <Form
               form={passwordForm}
               layout="horizontal"
-              onSubmit={handleSubmit}
-              initialValues={{
-                oldPassword: '123',
-                newPassword: '678',
-                confirmNewPassword: '678'
-              }}
+              onSubmit={handleSubmitPassword}
             >
               <FormItem
                 label="旧密码"
@@ -226,7 +282,20 @@ const EditPage: React.FC = () => {
                 label="确认新密码"
                 field="confirmNewPassword"
                 required
-                rules={[{ required: true, message: '请再次输入新密码' }]}
+                dependencies={['newPassword']}
+                rules={[
+                  { required: true, message: '请再次输入密码' },
+                  {
+                    validator: (value, cb) => {
+                      if (!value) return cb();
+                      const newPassword = passwordForm.getFieldValue('newPassword');
+                      if (value !== newPassword) {
+                        return cb('两次输入的密码不一致');
+                      }
+                      return cb();
+                    },
+                  },
+                ]}
               >
                 <Input placeholder="请再次输入新密码" />
               </FormItem>

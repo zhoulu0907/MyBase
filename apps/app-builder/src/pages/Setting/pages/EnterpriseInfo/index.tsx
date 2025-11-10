@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Avatar, Spin, Typography, Message, Grid, Tooltip, Upload, Image, Form, Modal, Input } from '@arco-design/web-react';
-import type { PlatformTenantInfo } from '@onebase/platform-center';
-import { getDetailsApi, uploadFile } from '@onebase/platform-center';
+import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
+import { getDetailsApi, updateCorpApi, getDictDataByType, uploadFile } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
-import styles from './index.module.less';
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
+import styles from './index.module.less';
 // import { TokenManager } from '@onebase/common';
 
 const { Col, Row } = Grid;
@@ -15,9 +15,10 @@ const { Text } = Typography;
 const SpaceInfo: React.FC = () => {
   const [form] = Form.useForm();
 
-  const [tenantInfo, setTenantInfo] = useState<PlatformTenantInfo | null>(null);
+  const [enterpriseInfo, setEnterpriseInfo] = useState<CorpDetailResponse | null>(null);
+  const [industryDict, setTndustryDict] = useState<DictData[] | null>(null);
   const [loading, setLoading] = useState(true);
-  const [logoUrl, setLogoUrl] = useState<string>();
+  const [corpLogo, setCorpLogo] = useState<string>();
   const [renameVisible, setRenameVisible] = useState<boolean>(false);
 
   // 获取用户信息
@@ -26,27 +27,36 @@ const SpaceInfo: React.FC = () => {
 
   // console.log(tokenInfo, userPermissionInfo, 'userPermissionInfo')
 
-  const fetchTenantInfo = async (id: string) => {
+  useEffect(() => {
+    fetchEnterpriseInfo('114914409919610880');
+  }, []);
+
+  const fetchEnterpriseInfo = async (id: string) => {
     try {
       setLoading(true);
       const res = await getDetailsApi(id);
-      setTenantInfo(res);
-      // setLogoUrl(res.logoUrl);
-      setLogoUrl('http://wiki.virtueit.net/images/logo/default-space-logo.svg');
-      // setTenantName(res.name);
+      setEnterpriseInfo(res);
+      setCorpLogo(res.corpLogo);
+      if (res.id) {
+        await fetchIndustryDict(res.id);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchTenantInfo('114914409919610880');
-  }, []);
-
+  const fetchIndustryDict = async (id: string) => {
+    try {
+      const res = await getDictDataByType(id);
+      setTndustryDict(res);
+    } catch (error) {
+      console.error('字典数据列表错误', error);
+    }
+  };
 
   // 重命名
   const handleRenameSubmit = async () => {
-    if (!tenantInfo) return;
+    if (enterpriseInfo === null) return;
     const { newName } = await form.validate();
 
     if (!newName.trim()) {
@@ -55,19 +65,23 @@ const SpaceInfo: React.FC = () => {
     }
 
     try {
-      // await updatePlatformTenantApi({
-      //   id: tenantInfo.id,
-      //   name: newName,
-      //   tenantAdminUserUpdateReqVOSList: tenantInfo.tenantAdminUserList
-      // })
+      await updateCorpApi({
+        id: enterpriseInfo.id!,
+        corpName: newName,
+        corpCode: enterpriseInfo.corpCode,
+        industryType: +enterpriseInfo.industryType!,
+        status: enterpriseInfo.status,
+        address: enterpriseInfo.address!,
+        userLimit: enterpriseInfo.userLimit!
+      })
 
-      setTenantInfo({
-        ...tenantInfo,
-        name: newName
+      setEnterpriseInfo({
+        ...enterpriseInfo,
+        corpName: newName
       });
 
+      setRenameVisible(false);
       form.resetFields();
-
       Message.success('空间名称更新成功');
     } catch (error) {
       console.error('更新空间信息失败', error);
@@ -94,7 +108,7 @@ const SpaceInfo: React.FC = () => {
   // 显示加载状态
   if (loading) {
     return (
-      <div className={styles.tenantPage}>
+      <div className={styles.enterprisePage}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
           <Spin tip="加载中..." />
         </div>
@@ -103,20 +117,22 @@ const SpaceInfo: React.FC = () => {
   }
 
   // 数据加载完成后但没有租户信息
-  if (!tenantInfo) {
+  if (!enterpriseInfo) {
     return (
-      <div className={styles.tenantPage}>
+      <div className={styles.enterprisePage}>
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          <p>无法加载租户信息</p>
+          <p>无法加载公司信息</p>
         </div>
       </div>
     );
   }
 
+  const getIndustryTypeName = industryDict?.find(data => data.id === enterpriseInfo.industryType)?.label || '-';
+
   return (
     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)} isLoading={loading}>
-      <div className={styles.tenantPage}>
-        <div className={styles.tenantPageMain}>
+      <div className={styles.enterprisePage}>
+        <div className={styles.enterprisePageMain}>
 
           <div className={`${styles.infoCard} ${styles.infoCardPrimary}`}>
             <div className={styles.blockHeader}>基本信息</div>
@@ -125,7 +141,7 @@ const SpaceInfo: React.FC = () => {
               <div className={styles.infoCardPrimaryLeft}>
                 <div className={styles.avatarSection}>
                   <Tooltip content="修改Logo">
-                    {logoUrl ? (
+                    {corpLogo ? (
                       <Upload
                         limit={1}
                         accept="image/*"
@@ -135,7 +151,7 @@ const SpaceInfo: React.FC = () => {
                           try {
                             const uploadImgUrl = await handleUpload(file, onProgress);
                             if (uploadImgUrl !== '') {
-                              setLogoUrl(uploadImgUrl);
+                              setCorpLogo(uploadImgUrl);
                               onSuccess(uploadImgUrl);
                             } else {
                               onError({
@@ -153,7 +169,7 @@ const SpaceInfo: React.FC = () => {
                       >
                         <Image
                           className={styles.reUploadLogo}
-                          src={logoUrl}
+                          src={corpLogo}
                           width={160}
                           height={80}
                           preview={false}
@@ -163,16 +179,16 @@ const SpaceInfo: React.FC = () => {
                         />
                       </Upload>) :
                       <Avatar shape="square" style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}>
-                        <span className={styles.avatarText}>{tenantInfo.name?.slice(0, 6)}</span>
+                        <span className={styles.avatarText}>{enterpriseInfo.corpName?.slice(0, 6)}</span>
                       </Avatar>}
                   </Tooltip>
                 </div>
                 {/* 名称 & ID */}
                 <div className={styles.section}>
                   <div className={styles.enterpriseName}>
-                    {tenantInfo.name} {hasPermission(ACTIONS.UPDATE) && <IconEdit onClick={() => setRenameVisible(true)} style={{ cursor: 'pointer' }} />}
+                    {enterpriseInfo.corpName} {hasPermission(ACTIONS.UPDATE) && <IconEdit onClick={() => setRenameVisible(true)} style={{ cursor: 'pointer' }} />}
                   </div>
-                  <div className={styles.enterpriseId}>企业ID：<Text copyable>{tenantInfo.corpCode}</Text></div>
+                  <div className={styles.enterpriseId}>企业ID：<Text copyable>{enterpriseInfo.id}</Text></div>
                 </div>
               </div>
 
@@ -181,12 +197,12 @@ const SpaceInfo: React.FC = () => {
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>用户人数(个)</div>
                   <div className={styles.statValue}>
-                    {tenantInfo.accountCount}
+                    {enterpriseInfo.userCount || 0}
                   </div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>应用数量(个)</div>
-                  <div className={styles.statValue}>{tenantInfo.appCount}</div>
+                  <div className={styles.statValue}>{enterpriseInfo.appCount || 0}</div>
                 </div>
               </div>
             </div>
@@ -201,13 +217,13 @@ const SpaceInfo: React.FC = () => {
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>企业联系人</span>
-                    <span>王少青</span>
+                    <span>{enterpriseInfo.adminName || '-'}</span>
                   </div>
                 </Col>
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>联系人手机号</span>
-                    <span>137 0193 5734</span>
+                    <span>{enterpriseInfo.mobile || '-'}</span>
                   </div>
                 </Col>
               </Row>
@@ -216,13 +232,13 @@ const SpaceInfo: React.FC = () => {
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>联系人邮箱</span>
-                    <span>wangshaoqing@cmsr.chinamobile.com</span>
+                    <span>{enterpriseInfo.email || '-'}</span>
                   </div>
                 </Col>
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>用户上限</span>
-                    <span>{tenantInfo.userLimit}</span>
+                    <span>{enterpriseInfo.userLimit || 0}</span>
                   </div>
                 </Col>
               </Row>
@@ -231,13 +247,13 @@ const SpaceInfo: React.FC = () => {
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>行业类型</span>
-                    <span>工业</span>
+                    <span>{getIndustryTypeName}</span>
                   </div>
                 </Col>
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>企业地址</span>
-                    <span>{tenantInfo.address}</span>
+                    <span>{enterpriseInfo.address || '-'}</span>
                   </div>
                 </Col>
               </Row>

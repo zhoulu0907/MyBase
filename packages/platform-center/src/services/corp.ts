@@ -1,5 +1,5 @@
 //企业管理
-import { corpListParams, createCorpParams, corpStatusParams, updateCorpParams } from "../types"
+import { corpListParams, createCorpParams, corpStatusParams, updateCorpParams, CorpDetailResponse } from "../types"
 import { systemService } from "./clients"
 
 // 创建企业
@@ -24,4 +24,4 @@ export const getCorpListApi = (data: corpListParams) => systemService.get('/corp
 export const getCorpSimpleDetailsListApi = () => systemService.get('/corp/simple-list');
 
 //获得详情
-export const getDetailsApi = (id: string) => systemService.get(`/corp/get?id=${id}`);
+export const getDetailsApi = (id: string): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);

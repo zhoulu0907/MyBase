@@ -271,7 +271,7 @@ const TenantManagement: React.FC = () => {
               <div className={styles.tenantItem} key={tenant.id}>
                 <div className={styles.left}>
                   {tenant.logoUrl ? <img className={styles.tenantLogo} src="" alt="" /> :
-                    <div className={styles.tenantLogo}>{tenant.name.slice(0, 6)}</div>}
+                    <div className={styles.tenantLogo}>{tenant?.name?.slice(0, 6)}</div>}
                   <div className={styles.tenantBaseInfo}>
                     <div className={styles.tenantName}>
                       <div className={styles.tenantNameText}>{tenant.name}</div>
@@ -298,14 +298,14 @@ const TenantManagement: React.FC = () => {
                 <div className={styles.center}>
                   <div className={styles.enterpriseNumber}>
                     <div className={styles.rowName}>企业数</div>
-                    <div className={styles.rowValue16}>{tenant.corpCount}</div>
+                    <div className={styles.rowValue16}>{tenant.corpCount || 0}</div>
                   </div>
 
                   <div className={styles.UserNumber}>
                     <div className={styles.rowName}>用户数</div>
                     <div className={styles.flexRow}>
                       <div className={styles.rowValue16}>{tenant.existUserCount || 0}</div>
-                      <div className={styles.rowValue14}>/{tenant.accountLimit || 0}</div>
+                      <div className={styles.rowValue14}>/{tenant.accountCount || 0}</div>
                     </div>
                   </div>
 

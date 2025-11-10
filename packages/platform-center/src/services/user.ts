@@ -1,5 +1,5 @@
 import { type PageParam, PageResult } from '../types/common';
-import { type UserVO } from '../types/user';
+import type { UserVO, UserProfileRespVO, UserProfileUpdateReq, UserProfileUpdatePwdReq } from '../types/user';
 import { systemService } from './clients';
 
 // 查询用户管理列表
@@ -67,8 +67,22 @@ export const getSimpleUserList = (): Promise<UserVO[]> => {
   return systemService.get('/user/simple-list');
 };
 
-
 // 分页获取用户精简信息列表
 export const getSimpleUserPage = (params: PageParam): Promise<PageResult<UserVO>> => {
   return systemService.get('/user/simple-page', params);
+};
+
+// 获得登录用户信息
+export const getLoginedUser = (): Promise<UserProfileRespVO> => {
+  return systemService.get('/user/profile/get');
+};
+
+// 修改用户个人信息
+export const updateLoginedUser = (data: UserProfileUpdateReq) => {
+  return systemService.post('/user/profile/update', data);
+};
+
+// 修改用户个人密码
+export const updateLoginedUserPwd = (data: UserProfileUpdatePwdReq) => {
+  return systemService.post('/user/profile/update-password', data);
 };
