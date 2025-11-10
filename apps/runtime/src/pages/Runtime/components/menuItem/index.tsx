@@ -39,6 +39,8 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
           fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
           style={{ marginRight: 16 }}
         />
+        {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
+        {menuIcon.indexOf('-taskicon') > 0 && <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />}
         {label}
       </div>
     </div>

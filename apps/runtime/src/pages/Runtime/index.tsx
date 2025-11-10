@@ -21,6 +21,7 @@ import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import styles from './index.module.less';
+import './components/TaskCenter/style/taskSide.less'
 
 const Sider = Layout.Sider;
 const Content = Layout.Content;
@@ -99,8 +100,8 @@ const Runtime: React.FC = () => {
     const res = await listApplicationMenu(req);
 
     // 处理数据
-    const resPageList = res && res.length > 0 ? dealPage(res) : [];
-    const pageList = getMenuArr().concat(resPageList);
+    const resPageList:any[] = res && res.length > 0 ? dealPage(res) : [];
+    const pageList:any[] = getMenuArr().concat(resPageList);
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
     setTreeData(treeData);
 
@@ -169,7 +170,7 @@ const Runtime: React.FC = () => {
         id: TASKMENU_TYPE.TASKINEEDTODO,
         isVisible: 1,
         menuCode: 'ineedtodo',
-        menuIcon: 'ineedtodo-icon',
+        menuIcon: 'ineedtodo-taskicon',
         menuName: '待我处理',
         menuSort: 1,
         menuType: 1,
@@ -179,7 +180,7 @@ const Runtime: React.FC = () => {
         id: TASKMENU_TYPE.TASKIHAVEDONE,
         isVisible: 1,
         menuCode: 'ihavedone',
-        menuIcon: 'ihavedone-icon',
+        menuIcon: 'ihavedone-taskicon',
         menuName: '我已处理',
         menuSort: 2,
         menuType: 1,
@@ -189,7 +190,7 @@ const Runtime: React.FC = () => {
         id: TASKMENU_TYPE.TASKICREATED,
         isVisible: 1,
         menuCode: 'icreated',
-        menuIcon: 'icreated-icon',
+        menuIcon: 'icreated-taskicon',
         menuName: '我创建的',
         menuSort: 3,
         menuType: 1,
@@ -199,7 +200,7 @@ const Runtime: React.FC = () => {
         id: TASKMENU_TYPE.TASKICOPIED,
         isVisible: 1,
         menuCode: 'icopied',
-        menuIcon: 'icopied-icon',
+        menuIcon: 'icopied-taskicon',
         menuName: '抄送我的',
         menuSort: 4,
         menuType: 1,
@@ -209,7 +210,7 @@ const Runtime: React.FC = () => {
         id: TASKMENU_TYPE.TASKTASKPROXY,
         isVisible: 1,
         menuCode: 'taskproxy',
-        menuIcon: 'taskproxy-icon',
+        menuIcon: 'taskproxy-taskicon',
         menuName: '流程代理',
         menuSort: 5,
         menuType: 1,

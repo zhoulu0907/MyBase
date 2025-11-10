@@ -43,8 +43,8 @@ interface MenuItemProps {
   triggerDelete?: (menuID: string) => void;
   maxWidth: number;
   renameForm: FormInstance;
-  copyForm: FormInstance;
-  createForm: FormInstance;
+  copyForm?: FormInstance;
+  createForm?: FormInstance;
   style?: React.CSSProperties;
 }
 
@@ -219,6 +219,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
             style={{ marginRight: 16 }}
           />
+          {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
+          {menuIcon.indexOf('-taskicon') > 0 && <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />}
           <span className={styles.name} style={{ maxWidth: maxWidth + 'px' }}>
             {label}
           </span>
