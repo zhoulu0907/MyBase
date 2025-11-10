@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Skip;
@@ -114,7 +115,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
 
         // 实体数据更新
-        if (entityVO != null && fieldPermConfig != null && CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
+        if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData()) && fieldPermConfig != null && CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
             Map<Long, Boolean> fieldMap = new HashMap<>();
             Map<Long, Object> updateEntityData = new HashMap<>();
 
