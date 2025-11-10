@@ -25,6 +25,9 @@ public interface ETLErrorCodeConstants {
     ErrorCode METADATA_EMPTY                        = new ErrorCode(110502, "目标元数据信息不存在");
     ErrorCode METADATA_COLLECT_FAILED               = new ErrorCode(110503, "元数据采集失败");
     ErrorCode METADATA_COLLECT_RUNNING              = new ErrorCode(110504, "元数据采集运行中，请5分钟后再试");
+    ErrorCode NO_CATALOG_AVAILABLE                  = new ErrorCode(110505, "未采集到CATALOG");
+    ErrorCode NO_SCHEMA_AVAILABLE                   = new ErrorCode(110505, "未采集到SCHEMA");
+    ErrorCode NO_TABLE_AVAILABLE                    = new ErrorCode(110505, "未采集到表");
 
     // 元数据类型异常
     ErrorCode ILLEGAL_METADATA_TYPE                 = new ErrorCode(110601, "元数据类型异常");

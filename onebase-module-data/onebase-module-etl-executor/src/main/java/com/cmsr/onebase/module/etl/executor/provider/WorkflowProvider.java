@@ -81,17 +81,17 @@ public class WorkflowProvider {
     private void complementFields(List<Field> fields, List<EtlColumn> etlColumns, List<EtlFlinkMapping> flinkMappings) {
         // 预构建查找表，提高查找效率
         Map<String, EtlColumn> columnMap = etlColumns.stream()
-                .collect(Collectors.toMap(EtlColumn::getId, column -> column));
+                .collect(Collectors.toMap(EtlColumn::getName, column -> column));
         
         // 按类型名转小写构建映射，支持忽略大小写查找
         Map<String, EtlFlinkMapping> flinkMappingMap = flinkMappings.stream()
                 .collect(Collectors.toMap(mapping -> mapping.getOriginType().toLowerCase(), mapping -> mapping));
 
         for (Field field : fields) {
-            String fieldId = field.getFieldId();
-            EtlColumn etlColumn = columnMap.get(fieldId);
+            String fieldName = field.getFieldName();
+            EtlColumn etlColumn = columnMap.get(fieldName);
             if (etlColumn == null) {
-                throw new IllegalArgumentException(String.format("字段ID %s 不存在", fieldId));
+                throw new IllegalArgumentException(String.format("字段ID %s 不存在", fieldName));
             }
 
             String originType = etlColumn.getOriginType();
@@ -152,7 +152,6 @@ public class WorkflowProvider {
             }
 
             Field field = new Field();
-            field.setFieldId(targetFieldId);
             field.setFieldName(etlColumn.getName());
             field.setFieldType(etlFlinkMapping.getFlinkType());
             field.setLength(etlColumn.getLength());

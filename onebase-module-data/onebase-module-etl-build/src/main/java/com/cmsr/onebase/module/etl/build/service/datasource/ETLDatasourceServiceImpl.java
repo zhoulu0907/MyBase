@@ -5,17 +5,19 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollectService;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
 import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.meta.ColumnMeta;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import com.cmsr.onebase.module.etl.core.service.MetadataCollectorService;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
@@ -27,9 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,6 +42,9 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class ETLDatasourceServiceImpl implements ETLDatasourceService {
+
+    @Resource
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Resource
     private ETLDatasourceRepository datasourceRepository;
@@ -54,7 +62,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     private ETLWorkflowTableRepository workflowTableRepository;
 
     @Resource
-    private MetadataCollectorService metadataCollectorService;
+    private MetadataCollectService metadataCollectService;
 
     @Resource
     private DataInspectService dataInspectService;
@@ -144,7 +152,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         // TODO
         if (withCollect) {
             try {
-                boolean collectResult = metadataCollectorService.doCollection(applicationId, datasourceId, datasourceType);
+                boolean collectResult = runMetadataCollect(LocalDateTime.now(), datasourceDO);
                 if (!collectResult) {
                     CommonResult.error(
                             ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
@@ -206,8 +214,38 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        // 托管给MetadataCollectorService
-        metadataCollectorService.submitCollectJob(datasourceDO);
+        LocalDateTime plannedTime = LocalDateTime.now();
+        checkDatasourceCollectRunnable(datasourceDO, plannedTime);
+
+        threadPoolTaskExecutor.submit(() -> this.runMetadataCollect(plannedTime, datasourceDO));
+    }
+
+    private boolean runMetadataCollect(LocalDateTime plannedTime, ETLDatasourceDO datasourceDO) {
+        Long datasourceId = datasourceDO.getId();
+        log.info("提交元数据采集任务，数据源ID: {}", datasourceId);
+        try {
+            ETLCatalogDO catalogDO = metadataCollectService.collectCatalog(datasourceDO);
+            catalogDO = catalogRepository.upsert(catalogDO);
+            Long catalogId = catalogDO.getId();
+            ETLSchemaDO schemaDO = metadataCollectService.collectSchema(datasourceDO, catalogId);
+            schemaDO = schemaRepository.upsert(schemaDO);
+            Long schemaId = schemaDO.getId();
+            List<ETLTableDO> tableDOs = metadataCollectService.collectTables(datasourceDO, catalogId, schemaId);
+            tableRepository.upsertBatch(tableDOs);
+
+            LocalDateTime endTime = LocalDateTime.now();
+            Duration duration = Duration.between(plannedTime, endTime);
+            long timeCost = duration.toMillis();
+
+            log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+            return true;
+        } catch (Exception e) {
+            LocalDateTime endTime = LocalDateTime.now();
+            Duration duration = Duration.between(plannedTime, endTime);
+            long timeCost = duration.toMillis();
+            log.error("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+            return false;
+        }
     }
 
     @Override
@@ -277,6 +315,21 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     private void validDatasourceTypeSupported(String datasourceType) {
         if (!supportedDbs.containsKey(datasourceType)) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
+        }
+    }
+
+    private void checkDatasourceCollectRunnable(ETLDatasourceDO datasourceDO, LocalDateTime plannedTime) {
+        CollectStatus currentStatus = datasourceDO.getCollectStatus();
+        // case (none, required, success, failed) -> running
+        if (!CollectStatus.RUNNING.equals(currentStatus)) {
+            return;
+        }
+        // case running -> running
+        LocalDateTime perviousStartTime = datasourceDO.getCollectStartTime();
+        Duration timeBetween = Duration.between(perviousStartTime, plannedTime);
+        long minuteScale = timeBetween.toMinutes();
+        if (minuteScale < 5L) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_RUNNING);
         }
     }
 }

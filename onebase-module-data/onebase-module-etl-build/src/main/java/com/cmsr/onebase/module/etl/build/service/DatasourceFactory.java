@@ -13,7 +13,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
-@Service
+@Component
 public class DatasourceFactory {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
 
@@ -32,18 +32,16 @@ public class DatasourceFactory {
 
     public DataSource constructDataSource(ETLDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
-        String databaseType = datasourceDO.getDatasourceType();
-        DatabaseType dbType = parseDatabaseType(databaseType);
-        // 2. 创建DataSource
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
         String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
         String jdbcConnection;
         if (StringUtils.equalsIgnoreCase("default", connectMode)) {
-            jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);
+            jdbcConnection = buildJdbcConnectionString(datasourceDO);
         } else {
             jdbcConnection = (String) connectionProperties.get("jdbcUrl");
         }
 
+        // 2. 创建DataSource
         String username = (String) connectionProperties.get("username");
         String password = (String) connectionProperties.get("password");
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
@@ -73,7 +71,7 @@ public class DatasourceFactory {
         return constructDataSource(datasourceDO, oneshot);
     }
 
-    private DatabaseType parseDatabaseType(String databaseType) {
+    private static DatabaseType parseDatabaseType(String databaseType) {
         if (StringUtils.isBlank(databaseType)) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_ILLEGAL);
         }
@@ -108,15 +106,10 @@ public class DatasourceFactory {
         }
     }
 
-    /**
-     * 构建JDBC连接字符串
-     * 使用Anyline的DatabaseType提供的URL模板，替换占位符
-     *
-     * @param dbType               数据库类型
-     * @param connectionProperties 连接属性
-     * @return JDBC连接字符串
-     */
-    private String buildJdbcConnectionString(DatabaseType dbType, Properties connectionProperties) {
+    public static String buildJdbcConnectionString(ETLDatasourceDO datasourceDO) {
+        String databaseType = datasourceDO.getDatasourceType();
+        DatabaseType dbType = parseDatabaseType(databaseType);
+        Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
         // 直接使用Anyline提供的URL模板
         String jdbcTemplate = dbType.url();
         // 魔法处理，Anyline的PostgreSQL类数据源URL定义有错误

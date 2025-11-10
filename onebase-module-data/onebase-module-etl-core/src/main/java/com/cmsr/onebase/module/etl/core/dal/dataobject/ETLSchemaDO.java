@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 import org.anyline.metadata.Schema;
-import org.apache.commons.lang3.StringUtils;
 
 @Data
 @Table(name = "etl_schema")
@@ -36,7 +35,7 @@ public class ETLSchemaDO extends TenantBaseDO {
     @Column(name = "declaration")
     private String declaration;
 
-    public static ETLSchemaDO convert(Long applicationId, Long datasourceId, Long catalogId, Schema schema) {
+    public static ETLSchemaDO of(Long applicationId, Long datasourceId, Long catalogId, Schema schema) {
         ETLSchemaDO schemaDO = new ETLSchemaDO();
         schemaDO.setApplicationId(applicationId);
         schemaDO.setDatasourceId(datasourceId);
@@ -49,20 +48,5 @@ public class ETLSchemaDO extends TenantBaseDO {
         schemaDO.setDeclaration(comment);
 
         return schemaDO;
-    }
-
-    public static void applyChanges(ETLSchemaDO oldDO, ETLSchemaDO newDO) {
-        String oldCatalogName = oldDO.getSchemaName();
-        String oldDisplayName = oldDO.getDisplayName();
-        String oldRemarks = oldDO.getRemarks();
-        String oldDeclaration = oldDO.getDeclaration();
-        // 采集中，保留用户自定义的别名及备注
-        if (!StringUtils.equals(oldDisplayName, oldCatalogName)) {
-            newDO.setDisplayName(oldDisplayName);
-        }
-        if (StringUtils.isNotBlank(oldDeclaration) && !StringUtils.equals(oldDeclaration, oldRemarks)) {
-            newDO.setDeclaration(oldDeclaration);
-        }
-        newDO.setId(oldDO.getId());
     }
 }
