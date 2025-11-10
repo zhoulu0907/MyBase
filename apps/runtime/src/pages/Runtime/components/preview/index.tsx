@@ -71,6 +71,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [detailMode, setDetailMode] = useState(true);
   const [refresh, setRefresh] = useState(Date.now());
   const [isPredictVisible, setPredictVisible] = useState(false);
+  const [isAdd, setAdd] = useState(false);
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -128,8 +129,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [inputParams, setInputParams] = useState<any>({});
 
   // 提交表单
-  const submitForm = async () => {
-    setSubmitLoading(true);
+  const submitForm = async (isSave = false) => {
+    !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
     console.log('mainMetaDataFields: ', mainMetaDataFields.value);
@@ -218,7 +219,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         let res = null;
         if (curPage?.value?.pageSetType === PageType.BPM) {
           const reqFlow = {
-            isDraft: false,
+            isDraft: isSave,
             formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
             businessId: curPage?.value?.id,
             entity: {
@@ -247,6 +248,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         setPredictVisible(false);
         if (res) {
           Message.success('创建成功');
+          cancelSubmitForm()
         }
         setSubmitLoading(false);
       } catch (error) {
@@ -265,6 +267,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
+    setAdd(!id)
     form.resetFields();
 
     if (id && id !== '') {
@@ -367,6 +370,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
   };
 
+  const onSaveSubmit=()=>{
+    submitForm(true);
+  }
+
   const toEditMode = () => {
     setDetailMode(false);
   };
@@ -435,6 +442,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
+              {curPage?.value?.pageSetType === PageType.BPM && isAdd &&(
+                <Button type="primary" onClick={onSaveSubmit} loading={submitLoading}>
+                  保存
+                </Button>
+              )}
               <Button type="primary" onClick={onSubmit} loading={submitLoading}>
                 提交
               </Button>
