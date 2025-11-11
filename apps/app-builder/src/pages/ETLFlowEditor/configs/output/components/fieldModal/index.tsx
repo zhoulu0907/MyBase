@@ -58,9 +58,9 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
       console.log('sourceNodeData: ', sourceNodeData);
       setOutputColumns(
         sourceNodeData?.output?.fields?.map((field: any) => ({
-          id: field.fieldFqn,
-          name: field.fieldName,
-          type: field.fieldType
+          fieldFqn: field.fieldFqn,
+          fieldName: field.fieldName,
+          fieldType: field.fieldType
         })) ?? []
       );
     }
@@ -114,7 +114,7 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
   };
 
   const handleChangeOutputColumn = (sourceFieldFqn: string, index: number) => {
-    const selectedColumn = outputColumns.find((column) => column.id === sourceFieldFqn);
+    const selectedColumn = outputColumns.find((column) => column.fieldFqn === sourceFieldFqn);
 
     setFieldMappings((prev) =>
       prev.map((field, idx) =>
@@ -122,8 +122,8 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
           ? {
               ...field,
               sourceFieldFqn,
-              sourceFieldName: selectedColumn?.name ?? '',
-              sourceFieldType: selectedColumn?.type ?? ''
+              sourceFieldName: selectedColumn?.fieldName ?? '',
+              sourceFieldType: selectedColumn?.fieldType ?? ''
             }
           : field
       )
@@ -160,12 +160,13 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
         .map((mapping) => mapping.sourceFieldFqn)
         .filter((id) => !!id)
     );
-
     return outputColumns
-      .filter((column) => fieldMappings[currentIndex]?.sourceFieldFqn === column.id || !selectedIds.has(column.id))
+      .filter(
+        (column) => fieldMappings[currentIndex]?.sourceFieldFqn === column.fieldFqn || !selectedIds.has(column.fieldFqn)
+      )
       .map((column) => ({
-        label: column.name,
-        value: column.id
+        label: column.fieldName,
+        value: column.fieldFqn
       }));
   };
 
@@ -173,10 +174,10 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
     const targetType = fieldMappings[currentIndex]?.sourceFieldType;
 
     return targetColumns
-      .filter((column) => !targetType || column.type === targetType)
+      .filter((column) => !targetType || column.fieldType === targetType)
       .map((column) => ({
-        label: column.name,
-        value: column.id
+        label: column.fieldName,
+        value: column.fieldFqn
       }));
   };
 

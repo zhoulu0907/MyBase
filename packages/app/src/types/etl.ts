@@ -86,9 +86,9 @@ export interface ETLTable {
 }
 
 export interface ELTColumn {
-  id: string;
-  name: string;
-  type: string;
+  fieldFqn: string;
+  fieldName: string;
+  fieldType: string;
 }
 
 export interface ETLDatasourceOption {
