@@ -146,6 +146,9 @@ const BusinessPage: React.FC = () => {
 
     useEffect(() => {
         if(location.pathname === "/onebase/setting/enterprise") {
+            if(editable) {
+                setEditable(false);
+            }
             fetchTableDataList();
             fetchIndustryType();
         }

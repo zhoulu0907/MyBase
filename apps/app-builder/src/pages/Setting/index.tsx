@@ -20,6 +20,7 @@ import BusinessPage from './pages/Business';
 import CreateBusinessPage from './pages/Business/createBusiness';
 import EnterpriseInfoPage from './pages/Business/components/enterprise-information';
 import AuthorizedApplication from './pages/Business/components/authorizedApp';
+import RedirectEnterprise from './pages/Business/components/RedirectEnterprise';
 
 const Content = Layout.Content;
 
@@ -52,6 +53,7 @@ const SettingPage: React.FC = () => {
                 <Route path="tenant" element={<TenantPage />} />
                 <Route path="enterprise" element = {<BusinessPage />}>
                   <Route path="create-enterprise" element = {<CreateBusinessPage />} />
+                  <Route path=":enterpriseName" element={<RedirectEnterprise />} />
                   <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
                 </Route>
                 <Route path="authorized-application" element = {<AuthorizedApplication />}></Route>

@@ -72,7 +72,7 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                         }}
                     >
                         {dropdownList.map((option) => (
-                        <Select.Option key={option.appId} value={option.id}>
+                        <Select.Option key={option.id} value={option.id}>
                             <Space align="center" size={12}>
                                 <Avatar style={{ backgroundColor: option.iconColor }}>{option.iconName}</Avatar>
                                 <div className={styles.authorizedOption}>
