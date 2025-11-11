@@ -22,10 +22,8 @@ export const CONFIG_TYPES = {
   STATUS_RADIO: 'StatusRadio',
   // 组件宽度选择
   WIDTH_RADIO: 'WidthRadio',
-  // 组件默认值选择
-  DEFAULT_VALUE_SELECT: 'DefaultValueSelect',
-  // 组件默认值输入
-  DEFAULT_VALUE_INPUT: 'DefaultValueInput',
+  // 组件默认值
+  DEFAULT_VALUE: 'DefaultValue',
   // 组件必填选择
   REQUIRED_CHECKBOX: 'RequiredCheckBox',
   // 布局列数选择
@@ -338,3 +336,15 @@ export enum TableOperationButtonStyle {
   TEXT = 'text',
   ALL = 'all'
 }
+
+// 默认值
+export const DEFAULT_VALUE_TYPES = {
+  CUSTOM: 'custom',
+  FORMULA: 'formula',
+  LINKAGE: 'linkage'
+} as const;
+export const DEFAULT_VALUE_TYPES_LABELS = {
+  custom: '自定义',
+  formula: '公式计算',
+  linkage: '数据联动'
+} as const;

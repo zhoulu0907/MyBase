@@ -20,7 +20,10 @@ import '../style/tcPage.less';
    return '刚刚';
  };
 
-const WillDo: FC = ({ appId }: any) => {
+ interface WillDoProps {
+   appId: string;
+ }
+const WillDo: FC<WillDoProps> = ({ appId }) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -29,9 +32,9 @@ const WillDo: FC = ({ appId }: any) => {
     {
       title: '发起人',
       dataIndex: 'initiator',
-      render: (obj, record) => (
+      render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className='photo-img'>{obj?.avatar && <img src={obj?.avatar} />}</div>
+          <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
           {obj?.name}
         </span>
       )
@@ -39,7 +42,7 @@ const WillDo: FC = ({ appId }: any) => {
     {
       title: '流程状态',
       dataIndex: 'flowStatus',
-      render: (val: FLOWSTATUS_TYPE, record) => {
+      render: (val: FLOWSTATUS_TYPE) => {
         if (val === FLOWSTATUS_TYPE.APPROVED) {
           return (
             <Tag color="green" size="medium">
@@ -87,7 +90,7 @@ const WillDo: FC = ({ appId }: any) => {
       title: '操作',
       dataIndex: 'op',
       align: 'center',
-      render: (_, record) => (
+      render: (_: any, record: any) => (
         <Button
           type="text"
           status="success"
@@ -147,12 +150,14 @@ const WillDo: FC = ({ appId }: any) => {
     };
     const res = await getTodoPageList(req);
     if (Array.isArray(res?.list)) {
-      setData(res.list.map((item: object, i: number) => {
-        return {
-          ...(item || {}),
-          key: i
-        }
-      }));
+      setData(
+        res.list.map((item: object, i: number) => {
+          return {
+            ...(item || {}),
+            key: i
+          };
+        })
+      );
     }
   };
 

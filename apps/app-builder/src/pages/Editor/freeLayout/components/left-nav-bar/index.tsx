@@ -1,5 +1,6 @@
-import { Button } from '@arco-design/web-react';
+import { Button, Tooltip } from '@arco-design/web-react';
 import { WorkflowDragService, useService } from '@flowgram.ai/free-layout-editor';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 
 import React from 'react';
 import styles from './index.module.less';
@@ -38,7 +39,8 @@ const LeftNavBar: React.FC = () => {
         { img: conditional_branch, title: '条件分支' },
         { img: parallel_branch, title: '并行分支' },
         { img: sink_node, title: '汇聚节点' }
-      ]
+      ],
+      tips: true
     },
     {
       navTitle: '逻辑节点',
@@ -55,13 +57,30 @@ const LeftNavBar: React.FC = () => {
     }
   ];
   const startDragSerivce = useService<WorkflowDragService>(WorkflowDragService);
+  const CustomTooltipContent = () => {
+    return (
+      <div className={styles.tipContent}>
+        <div>条件分支：按分支的优先级排序，仅执行满足条件的第一个分支</div>
+        <div>并行分支：分支间无优先级，满足条件的分支都会执行</div>
+        <div>汇聚节点：等待所有应到达的上游分支完成，合并路径后继续流程</div>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.leftNav}>
       <div className={classNames(styles.process, styles.processNodeTitle)}>流程节点</div>
       <div className={styles.innerNodesBox}>
         {nodeList?.map((item, i) => (
           <div key={i}>
-            <div className={styles.navTitleColor}> {item.navTitle}</div>
+            <div className={styles.navTitleColor}>
+              {item.navTitle}
+              {item.tips && (
+                <Tooltip position="tl" trigger="hover" content={<CustomTooltipContent />}>
+                  <IconQuestionCircle style={{ fontSize: '15px', marginLeft: '4px', color: '#AAAEB3' }} />
+                </Tooltip>
+              )}
+            </div>
             {/* 左侧子节点 */}
             {item.navList.map((nodeItem, index) => (
               <Button

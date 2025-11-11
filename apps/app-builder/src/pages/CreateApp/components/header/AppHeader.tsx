@@ -9,7 +9,7 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';
-import { Button, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { Button, Layout, Menu, Tabs, Tooltip } from '@arco-design/web-react';
 import { AppStatus, getApplication, menuSignal, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
@@ -125,7 +125,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               fill="#F2F3F5"
             />
           </div>
-          <div className={styles.appName}>{curAppInfo?.appName}</div>
+          <Tooltip content={curAppInfo?.appName}>
+            <div className={styles.appName} >{curAppInfo?.appName}</div>
+          </Tooltip>
           {curAppInfo?.appStatus === AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
           {curAppInfo?.appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}
           {curAppInfo?.appStatus == AppStatus.EDITING_AFTER_PUBLISH && (

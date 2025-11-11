@@ -343,7 +343,7 @@ export const fillConfig: IStatusConfigType<TFillSelectKeyType> = {
 export const dataFieldConfig: IDataFieldConfigType[] = [
   {
     key: 'dataField',
-    name: '数据字段',
+    name: '数据绑定',
     type: CONFIG_TYPES.FIELD_DATA
   }
 ];
@@ -571,6 +571,13 @@ export const switchFillTextConfig:any = {
   key: 'fillText',
   name:'填充文本',
   type: CONFIG_TYPES.SWITCH_FILL_TEXT
+}
+
+// 默认值
+export const defaultValueConfig:any ={
+  key: 'defaultValueConfig',
+  name:'默认值',
+  type: CONFIG_TYPES.DEFAULT_VALUE
 }
 
 export const defaultValueModeConfig: any = {

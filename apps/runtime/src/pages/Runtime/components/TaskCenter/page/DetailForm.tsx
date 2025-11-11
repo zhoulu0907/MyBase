@@ -20,7 +20,7 @@ interface PreviewProps {
   detailData: any;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = forwardRef((props: any, ref: any) => {
+const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref) => {
   // 启用 signal 的响应式更新
   useSignals();
   // 直接访问 signal 的值，useSignals() 会确保组件在 signal 变化时重新渲染
@@ -30,7 +30,7 @@ const PreviewContainer: React.FC<PreviewProps> = forwardRef((props: any, ref: an
 
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
-  const [newCompents, setNewCompents] = useState();
+  const [newCompents, setNewCompents] = useState<any>();
 
   useImperativeHandle(ref, () => ({
     getFormData: () => {
@@ -52,13 +52,14 @@ const PreviewContainer: React.FC<PreviewProps> = forwardRef((props: any, ref: an
     const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
     const fieldPerm = detailData?.formData?.fieldPerm;
 
-    if (pageComponentSchemas && fieldPerm) {
-      const updatedData = {};
+    if (pageComponentSchemas) {
+      const updatedData: {
+        [key: string]: any;
+      } = {};
       Object.keys(pageComponentSchemas).forEach((key) => {
         const originalItem = pageComponentSchemas[key];
         const secondDataField = originalItem.config.dataField[1];
-        const newStatus = fieldPerm[secondDataField] || originalItem.config.status;
-
+        const newStatus = fieldPerm?.[secondDataField] || originalItem.config.status;
         updatedData[key] = {
           ...originalItem,
           config: {
@@ -135,7 +136,7 @@ const PreviewContainer: React.FC<PreviewProps> = forwardRef((props: any, ref: an
 
         //   过滤空行
         const subTableRows = [] as any;
-        for (const item of value) {
+        for (const item of value as any[]) {
           if (Object.values(item).every((v: any) => v === undefined)) {
             return;
           }
@@ -170,7 +171,7 @@ const PreviewContainer: React.FC<PreviewProps> = forwardRef((props: any, ref: an
     await updateComponentStatus();
 
     if (mainMetaData && mainMetaDataFields.value.length > 0) {
-      await handleGetData(mainMetaData);
+      await handleGetData();
     }
   };
 

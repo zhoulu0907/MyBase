@@ -21,15 +21,19 @@ interface DatasourceModalProps {
 }
 
 const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClose, onOk }) => {
+  const { curNode, setNodeData, nodeData } = etlEditorSignal;
+
   const [activeTab, setActiveTab] = useState('external');
-  const [curDatasourceId, setCurDatasourceId] = useState('126770168960581632');
+  const [curDatasourceId, setCurDatasourceId] = useState<string>(
+    nodeData.value[curNode.value.id]?.config?.datasourceId || ''
+  );
   const [curTables, setCurTables] = useState<ETLTable[]>([]);
-  const [selectedTableId, setSelectedTableId] = useState('');
+  const [selectedTableId, setSelectedTableId] = useState(nodeData.value[curNode.value.id]?.config?.tableId || '');
   const [curColumns, setCurColumns] = useState<ELTColumn[]>([]);
 
-  const [selectedColumns, setSelectColumns] = useState<ELTColumn[]>([]);
-
-  const { curNode, setNodeData, nodeData } = etlEditorSignal;
+  const [selectedColumns, setSelectColumns] = useState<ELTColumn[]>(
+    nodeData.value[curNode.value.id]?.config?.fields || []
+  );
 
   useEffect(() => {
     if (curDatasourceId) {
@@ -42,6 +46,10 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
       handlelistETLTableColumns(selectedTableId);
     }
   }, [selectedTableId]);
+
+  useEffect(() => {
+    console.log(selectedColumns);
+  }, [selectedColumns]);
 
   const [createExternalModalVisible, setCreateExternalModalVisible] = useState(false);
 
@@ -82,18 +90,17 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
       datasourceId: curDatasourceId,
       tableId: selectedTableId,
       fields: selectedColumns.map((column) => ({
-        fieldId: column.id,
-        fieldName: column.name,
-        fieldType: column.type
+        fieldName: column.fieldName,
+        fieldType: column.fieldType
       }))
     };
 
     payload.output = {
       verified: true,
       fields: selectedColumns.map((column) => ({
-        fieldId: column.id,
-        fieldName: column.name,
-        fieldType: column.type
+        fieldFqn: `${selectedTableId}.${column.fieldName}`,
+        fieldName: column.fieldName,
+        fieldType: column.fieldType
       }))
     };
 
@@ -107,12 +114,12 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
   const handleColumnSelect = (columnId: string) => {
     setSelectColumns((prevSelected: ELTColumn[]) => {
       // 判断该字段是否已经被选中
-      if (prevSelected.some((col) => col.id === columnId)) {
+      if (prevSelected.some((col) => col.fieldName === columnId)) {
         // 如果已经选中则移除
-        return prevSelected.filter((col) => col.id !== columnId);
+        return prevSelected.filter((col) => col.fieldName !== columnId);
       }
       // 否则将该字段加入已选中列表
-      const column = curColumns.find((col) => col.id === columnId);
+      const column = curColumns.find((col) => col.fieldName === columnId);
       return column ? [...prevSelected, column] : prevSelected;
     });
   };
@@ -218,14 +225,14 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
               </Checkbox>
             </div>
             {curColumns.map((column: ELTColumn) => (
-              <div key={column.id} className={styles.columnItem}>
+              <div key={column.fieldName} className={styles.columnItem}>
                 <Checkbox
-                  checked={selectedColumns.some((col: ELTColumn) => col.id === column.id)}
-                  onChange={() => handleColumnSelect(column.id)}
+                  checked={selectedColumns.some((col: ELTColumn) => col.fieldName === column.fieldName)}
+                  onChange={() => handleColumnSelect(column.fieldName)}
                   className={styles.columnItemName}
                   style={{ height: '32px' }}
                 >
-                  {column.name}
+                  {column.fieldName}
                 </Checkbox>
               </div>
             ))}
