@@ -61,7 +61,24 @@ export interface Application {
    * 版本号
    */
   versionNumber?: string;
+  /**
+   * 应用开发状态
+   */
+  developStatus?: string;
+  /**
+   * 发布模式
+   */
+  publishModel?: string;
+  userPhotoList?: developUser[];
+}
 
+/**
+ * 开发人员列表
+ */
+export interface developUser {
+  id: string;
+  avatar: string;
+  nickName: string;
 }
 
 /**
