@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public class AppWorkbenchPageRepository extends DataRepository<WorkBenchPageDO> {
-    public AppWorkbenchPageRepository(Class defaultClazz) {
-        super(defaultClazz);
+    public AppWorkbenchPageRepository() {
+        super(WorkBenchPageDO.class);
     }
 
 

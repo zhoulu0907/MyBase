@@ -13,11 +13,6 @@ import java.util.List;
 @Repository
 public class AppWorkbenchComponentRepository extends DataRepository<WorkbenchComponentDO> {
 
-    public AppWorkbenchComponentRepository(Class<WorkbenchComponentDO> defaultClazz) {
-        super(defaultClazz);
-    }
-
-
     public AppWorkbenchComponentRepository() {
         super(WorkbenchComponentDO.class);
     }
