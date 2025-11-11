@@ -36,13 +36,4 @@ public class ETLWorkflowRepository extends DataRepository<ETLWorkflowDO> {
         cs.order("update_time", Order.TYPE.DESC);
         return findPageWithConditions(cs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
-
-    public ETLWorkflowDO findOneByNameFilterById(String flowName, Long workflowId) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("workflow_name", flowName);
-        if (workflowId != null) {
-            cs.ne("id", workflowId);
-        }
-        return findOne(cs);
-    }
 }
