@@ -33,16 +33,10 @@ import {
   DATE_DYNAMIC_TYPE
 } from '../../../constants';
 import type {
-  IBooleanConfigType,
   IDataFieldConfigType,
-  IDateTypeConfigType,
   ILabelConfigType,
   ILayoutConfigType,
-  INumberConfigType,
-  ISelectConfigType,
   IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
@@ -205,7 +199,16 @@ const XDatePicker: XInputDatePickerSchema = {
     ...dataFieldConfig,
     // 默认值
     defaultValueConfig,
-    dateFormatConfig,
+    {
+      key: 'dateFormat',
+      name: '日期格式',
+      type: CONFIG_TYPES.DATE_FORMAT,
+      range: [
+        { label: '年', value: DATE_VALUES[DATE_OPTIONS.YEAR] },
+        { label: '年-月', value: DATE_VALUES[DATE_OPTIONS.MONTH] },
+        { label: '年-月-日', value: DATE_VALUES[DATE_OPTIONS.DATE] },
+      ]
+    },
     dateRangeConfig,
     {
       key: 'verify',
@@ -240,7 +243,7 @@ const XDatePicker: XInputDatePickerSchema = {
       customValue: ''
     },
     dateType: DATE_VALUES[DATE_OPTIONS.DATE],
-    dateRange:{
+    dateRange: {
       weekLimit: false,
       week: [],
       earliestLimit: false,
@@ -249,7 +252,7 @@ const XDatePicker: XInputDatePickerSchema = {
       earliestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
       earliestVariableValue: [],
       latestLimit: false,
-      latestType:  DATE_EXTREME_TYPE.DYNAMIC,
+      latestType: DATE_EXTREME_TYPE.DYNAMIC,
       latestStaticValue: '',
       latestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
       latestVariableValue: []

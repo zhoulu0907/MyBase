@@ -418,6 +418,10 @@ export interface IDateFormatConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DATE_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
 }
 
 // 日期可选范围
