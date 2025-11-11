@@ -12,12 +12,11 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager;
@@ -42,6 +41,7 @@ import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.dto.NodeJson;
+import org.dromara.warm.flow.core.dto.SkipJson;
 import org.dromara.warm.flow.core.entity.*;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
@@ -843,5 +843,81 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         return nodes;
+    }
+
+    @Override
+    public BpmPreviewRespVO flowPreview(BpmPreviewReqVO reqVO) {
+        // 获取流程实例
+        Instance instance = insService.getById(reqVO.getInstanceId());
+
+        if (instance == null) {
+            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+        }
+
+        String defJsonStr = instance.getDefJson();
+
+        // 解析流程定义JSON
+        DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+        BpmDefJsonVO bpmDefJsonVO = new BpmDefJsonVO();
+
+        for (NodeJson nodeJson : defJson.getNodeList()) {
+            String ext = nodeJson.getExt();
+            if (ext == null) {
+                continue;
+            }
+
+            BaseNodeExtDTO extDTO = JsonUtils.parseObject(ext, BaseNodeExtDTO.class);
+
+            // 节点扩展信息/配置 - 现在返回的是BaseNodeVO
+            CommonNodeVO nodeVO = new CommonNodeVO();
+
+            // 设置节点信息
+            nodeVO.setId(nodeJson.getNodeCode());
+            nodeVO.setName(nodeJson.getNodeName());
+            nodeVO.setType(extDTO.getNodeType());
+            nodeVO.setMeta(extDTO.getMeta());
+            nodeVO.setData(new CommonNodeVO.DataVO());
+
+            // 设置状态
+            BpmEleRunStatusEnum eleRunStatus = BpmEleRunStatusEnum.chartStatusToEleRunStatus(nodeJson.getStatus());
+            nodeVO.getData().setRunStatus(eleRunStatus.getCode());
+
+            if (bpmDefJsonVO.getNodes() == null) {
+                bpmDefJsonVO.setNodes(new ArrayList<>());
+            }
+
+            bpmDefJsonVO.getNodes().add(nodeVO);
+        }
+
+        for (NodeJson nodeJson : defJson.getNodeList()) {
+            for (SkipJson skipJson : nodeJson.getSkipList()) {
+                BaseEdgeVO edgeVO = new BaseEdgeVO();
+                edgeVO.setSourceNodeId(skipJson.getNowNodeCode());
+                edgeVO.setTargetNodeId(skipJson.getNextNodeCode());
+                edgeVO.setName(skipJson.getSkipName());
+                edgeVO.setType(skipJson.getSkipType());
+                edgeVO.setSkipCondition(skipJson.getSkipCondition());
+
+                // 设置状态
+                BpmEleRunStatusEnum eleRunStatus = BpmEleRunStatusEnum.chartStatusToEleRunStatus(skipJson.getStatus());
+                edgeVO.setRunStatus(eleRunStatus.getCode());
+
+                // 添加边视图到列表
+                if (bpmDefJsonVO.getEdges() == null) {
+                    bpmDefJsonVO.setEdges(new ArrayList<>());
+                }
+
+                bpmDefJsonVO.getEdges().add(edgeVO);
+            }
+        }
+
+        BpmPreviewRespVO respVO = new BpmPreviewRespVO();
+        respVO.setInstanceId(instance.getId());
+        respVO.setBusinessId(Long.valueOf(defJson.getFormPath()));
+        respVO.setFlowName(defJson.getFlowName());
+        respVO.setVersion("V" + defJson.getVersion());
+        respVO.setBpmDefJson(JsonUtils.toJsonString(bpmDefJsonVO));
+
+        return respVO;
     }
 }

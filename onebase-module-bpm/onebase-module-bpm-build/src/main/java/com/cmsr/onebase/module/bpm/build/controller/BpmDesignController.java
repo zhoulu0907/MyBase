@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.bpm.build.controller;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.bpm.build.service.BpmDesignService;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -53,7 +53,7 @@ public class BpmDesignController {
 
     @PostMapping("/publish")
     @Operation(summary = "发布流程")
-    public CommonResult<Boolean> publish(@Valid @RequestBody BpmPublishReqVo reqVo) {
+    public CommonResult<Boolean> publish(@Valid @RequestBody BpmPublishReqVO reqVo) {
         log.info("发布流程: {}", reqVo);
         bpmDesignService.publish(reqVo);
         return CommonResult.success(true);

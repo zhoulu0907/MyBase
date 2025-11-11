@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.bpm.build.factory;
 
-import com.cmsr.onebase.module.bpm.build.vo.design.node.ApproverNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.EndNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.InitiationNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.StartNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.ApproverNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.EndNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.InitiationNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.StartNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 

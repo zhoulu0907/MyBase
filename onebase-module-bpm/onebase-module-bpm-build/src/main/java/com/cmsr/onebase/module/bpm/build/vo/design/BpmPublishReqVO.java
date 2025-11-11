@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @date 2025-10-24
  */
 @Data
-public class BpmPublishReqVo implements Serializable {
+public class BpmPublishReqVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
