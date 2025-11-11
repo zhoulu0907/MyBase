@@ -1,46 +1,31 @@
 package com.cmsr.onebase.module.app.build.service.appresource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.service.AppCommonService;
+import com.cmsr.onebase.module.app.build.util.PageUtils;
+import com.cmsr.onebase.module.app.build.vo.appresource.*;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.*;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dto.appresource.*;
+import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+import com.cmsr.onebase.module.app.core.enums.appresource.PageTypeEnum;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.build.util.PageUtils;
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetReqVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
-import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppComponentRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageMetaRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRefRouterRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetLabelRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.ComponentDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageMetadataDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageRefRouterDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetLabelDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
-import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
-
-import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -73,6 +58,9 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Resource
     private AppApplicationRepository appApplicationRepository;
+
+    @Resource
+    private AppCommonService appCommonService;
 
     @Override
     public Long getPageSetId(Long menuId) {
@@ -362,5 +350,43 @@ public class PageSetServiceImpl implements PageSetService {
         PageSetRespDTO pageSetRespDTO = BeanUtils.toBean(pageSetDO, PageSetRespDTO.class);
 
         return pageSetRespDTO;
+    }
+
+    @Override
+    public ListPageSetRespVO listPageSet(ListPageSetReqVO listPageSetReqVO) {
+        ListPageSetRespVO respVO = new ListPageSetRespVO();
+        respVO.setPageSets(new ArrayList<>());
+
+        Integer pageSetType = listPageSetReqVO.getPageSetType();
+
+        if (pageSetType != null) {
+            PageTypeEnum.validate(pageSetType);
+        }
+
+        // 查询应用菜单ID
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(listPageSetReqVO.getApplicationId());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationDO.getId());
+
+        if (CollectionUtils.isEmpty(menuDOS)) {
+            return respVO;
+        }
+
+        List<Long> menuIds = menuDOS.stream()
+                .map(MenuDO::getId)
+                .collect(Collectors.toList());
+
+        List<PageSetDO> pageSetDOs;
+
+        if (pageSetType != null) {
+            pageSetDOs = pageSetDataRepository.findByMenuIdAndType(menuIds, pageSetType);
+        } else {
+            pageSetDOs = pageSetDataRepository.findByMenuId(menuIds);
+        }
+
+        respVO.setPageSets(pageSetDOs.stream()
+                .map(pageSetDO -> BeanUtils.toBean(pageSetDO, ListPageSetRespVO.PageSetVO.class))
+                .toList());
+
+        return respVO;
     }
 }
