@@ -96,6 +96,7 @@ public class PlatformInfoController {
 
     @PostMapping("/admin/update-password")
     @Operation(summary = "重置平台用户密码")
+    // todo 平台管理员，密码重置权限控制变更
     @PreAuthorize("@ss.hasPermission('system:platform-admin:update-password')")
     public CommonResult<Boolean> updatePlatformUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
         userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());

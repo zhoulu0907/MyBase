@@ -1,10 +1,9 @@
 package com.cmsr.onebase.framework.tenant.config;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
 import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
-import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.redis.config.OneBaseCacheProperties;
-import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnoreAspect;
 import com.cmsr.onebase.framework.tenant.core.redis.TenantRedisCacheManager;
@@ -107,9 +106,8 @@ public class OneBaseTenantAutoConfiguration {
     }
 
     @Bean
-    public TenantVisitContextInterceptor tenantVisitContextInterceptor(TenantProperties tenantProperties,
-                                                                       SecurityFrameworkService securityFrameworkService) {
-        return new TenantVisitContextInterceptor(tenantProperties, securityFrameworkService);
+    public TenantVisitContextInterceptor tenantVisitContextInterceptor(TenantProperties tenantProperties) {
+        return new TenantVisitContextInterceptor(tenantProperties);
     }
 
     @Bean

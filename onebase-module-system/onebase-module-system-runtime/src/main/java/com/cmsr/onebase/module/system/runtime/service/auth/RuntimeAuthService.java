@@ -1,17 +1,17 @@
-package com.cmsr.onebase.module.system.service.auth;
+package com.cmsr.onebase.module.system.runtime.service.auth;
 
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.auth.*;
-import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
 import jakarta.validation.Valid;
 
+
 /**
- * 管理后台的认证 Service 接口
- *
- * 提供用户的登录、登出的能力
- *
+ * Auth Service 实现类
+ * 1. 运行态登录：自有用户 登录
+ * 1. 运行态登录：三方用户 登录
+ * @author mty
  */
-public interface AdminAuthService {
+public interface RuntimeAuthService {
 
     /**
      * 验证账号 + 密码。如果通过，则返回用户
@@ -22,13 +22,6 @@ public interface AdminAuthService {
      */
     AdminUserDO authenticate(String username, String password);
 
-    /**
-     * Admin账号登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO adminLogin(@Valid UserLoginReqVO reqVO);
     /**
      * 账号登录
      *
@@ -44,29 +37,6 @@ public interface AdminAuthService {
      * @param logType 登出类型
      */
     void logout(String token, Integer logType);
-
-    /**
-     * 短信验证码发送
-     *
-     * @param reqVO 发送请求
-     */
-    void sendSmsCode(AuthSmsSendReqVO reqVO);
-
-    /**
-     * 短信登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO smsLogin(AuthSmsLoginReqVO reqVO);
-
-    /**
-     * 社交快捷登录，使用 code 授权码
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    // AuthLoginRespVO socialLogin(@Valid AuthSocialLoginReqVO reqVO);
 
     /**
      * 刷新访问令牌
@@ -90,12 +60,4 @@ public interface AdminAuthService {
      * @param reqVO 验证码信息
      */
     void resetPassword(AuthResetPasswordReqVO reqVO);
-
-    /**
-     * 账号登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO corpLogin(@Valid RuntimeAuthLoginReqVO reqVO);
 }

@@ -1,10 +1,10 @@
-package com.cmsr.onebase.framework.security.core.service;
+package com.cmsr.onebase.framework.security.build.service;
 
 /**
  * Security 框架 Service 接口，定义权限相关的校验操作
  *
  */
-public interface SecurityFrameworkService {
+public interface SystemPermissionService {
 
     /**
      * 判断是否有权限
