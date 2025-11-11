@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
@@ -32,7 +31,7 @@ import java.nio.charset.StandardCharsets;
  */
 @RequiredArgsConstructor
 @Slf4j
-public class TokenAuthenticationFilter extends OncePerRequestFilter {
+public class BuildAuthenticationFilter extends OncePerRequestFilter {
 
     private final SecurityProperties securityProperties;
 

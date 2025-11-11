@@ -23,6 +23,11 @@ public class WebFrameworkUtils {
     public static final String HEADER_TENANT_ID = "tenant-id";
     public static final String HEADER_VISIT_TENANT_ID = "visit-tenant-id";
 
+
+    public static final String HEADER_X_TENANT_ID = "X-Tenant-Id";
+    public static final String HEADER_X_CORP_ID = "X-Corp-Id";
+    public static final String HEADER_X_APP_ID = "X-App-Id";
+
     /**
      * 终端的 Header
      *

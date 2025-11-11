@@ -7,7 +7,7 @@ import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.service.auth.AdminAuthService;
-import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
+import com.cmsr.onebase.module.system.vo.auth.RuntimeAuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
@@ -47,7 +47,7 @@ public class PlatformAuthController {
     @PostMapping("/login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")
-    public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
+    public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid RuntimeAuthLoginReqVO reqVO) {
         return success(authService.login(reqVO));
     }
 

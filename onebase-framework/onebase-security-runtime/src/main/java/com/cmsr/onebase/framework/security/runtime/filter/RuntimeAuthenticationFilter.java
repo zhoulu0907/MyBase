@@ -10,6 +10,7 @@ import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.security.runtime.RTLoginUser;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
@@ -44,7 +45,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-        LoginUser loginUser = buildLoginUserByHeader(request);
+        RTLoginUser loginUser = buildLoginUserByHeader(request);
 
         // 情况二，基于 Token 获得用户
         // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
@@ -76,7 +77,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private LoginUser buildLoginUserByToken(String token, Integer userType) {
+    private RTLoginUser buildLoginUserByToken(String token, Integer userType) {
         try {
             // 校验访问令牌
             OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(token).getCheckedData();
@@ -84,19 +85,17 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
                 return null;
             }
 
-            // 这里，需要屏蔽用户类型（管理员vs普通用户）匹配逻辑
-            // 注意：只有 /admin-api/* 和 /app-api/* 有 userType，才需要比对用户类型，类似 WebSocket 的 /ws/* 连接地址，是不需要比对用户类型的
-            // if (userType != null
-            //         && ObjUtil.notEqual(accessToken.getUserType(), userType)) {
-            //     throw new AccessDeniedException("错误的用户类型");
-            // }
+            // 暂不校验类型，打印日志
             log.info("buildLoginUserByToken userType:{}", userType);
 
             // 构建登录用户
-            return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+            RTLoginUser loginUser = new RTLoginUser();
+            loginUser.setApplicationId(accessToken.getAppId())
+                    .setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
                     .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
                     .setExpiresTime(accessToken.getExpiresTime());
+            return loginUser;
         } catch (ServiceException serviceException) {
             // 校验 Token 不通过时，考虑到一些接口是无需登录的，所以直接返回 null 即可
             return null;
@@ -113,7 +112,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
      * @param userType 用户类型
      * @return 模拟的 LoginUser
      */
-    private LoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
+    private RTLoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
         if (!securityProperties.getMockEnable()) {
             return null;
         }
@@ -123,28 +122,19 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         }
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
-        return new LoginUser().setId(userId).setUserType(userType)
-                .setTenantId(WebFrameworkUtils.getTenantId(request));
+        RTLoginUser loginUser = new RTLoginUser();
+        loginUser.setId(userId).setUserType(userType).setTenantId(WebFrameworkUtils.getTenantId(request));
+        return loginUser;
     }
 
-    private LoginUser buildLoginUserByHeader(HttpServletRequest request) {
+    private RTLoginUser buildLoginUserByHeader(HttpServletRequest request) {
         String loginUserStr = request.getHeader(SecurityFrameworkUtils.LOGIN_USER_HEADER);
         if (StrUtil.isEmpty(loginUserStr)) {
             return null;
         }
         try {
             loginUserStr = URLDecoder.decode(loginUserStr, StandardCharsets.UTF_8); // 解码，解决中文乱码问题
-            LoginUser loginUser = JsonUtils.parseObject(loginUserStr, LoginUser.class);
-
-            // 这里，需要屏蔽用户类型（管理员vs普通用户）匹配逻辑
-            // 注意：只有 /admin-api/* 和 /app-api/* 有 userType，才需要比对用户类型，类似 WebSocket 的 /ws/* 连接地址，是不需要比对用户类型的
-            // Integer userType = WebFrameworkUtils.getLoginUserType(request);
-            // if (userType != null
-            //         && loginUser != null
-            //         && ObjUtil.notEqual(loginUser.getUserType(), userType)) {
-            //     throw new AccessDeniedException("错误的用户类型");
-            // }
-
+            RTLoginUser loginUser = JsonUtils.parseObject(loginUserStr, RTLoginUser.class);
             return loginUser;
         } catch (Exception ex) {
             log.error("[buildLoginUserByHeader][解析 LoginUser({}) 发生异常]", loginUserStr, ex);

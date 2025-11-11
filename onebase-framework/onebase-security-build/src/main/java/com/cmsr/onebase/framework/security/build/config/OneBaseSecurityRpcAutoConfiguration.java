@@ -1,10 +1,7 @@
-package com.cmsr.onebase.framework.security.config;
+package com.cmsr.onebase.framework.security.build.config;
 
-import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.security.core.rpc.LoginUserRequestInterceptor;
-import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 
 /**

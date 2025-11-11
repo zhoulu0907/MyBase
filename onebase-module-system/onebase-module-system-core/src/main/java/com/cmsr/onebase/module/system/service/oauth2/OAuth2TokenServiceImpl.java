@@ -50,10 +50,10 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     private OAuth2ClientService oauth2ClientService;
     @Resource
     @Lazy // 懒加载，避免循环依赖
-    private AdminUserService adminUserService;
+    private AdminUserService    adminUserService;
 
     @Resource
-    private OAuth2AccessTokenDataRepository oauth2AccessTokenDataRepository;
+    private OAuth2AccessTokenDataRepository  oauth2AccessTokenDataRepository;
     @Resource
     private OAuth2RefreshTokenDataRepository oauth2RefreshTokenDataRepository;
 
@@ -62,7 +62,25 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     public OAuth2AccessTokenDO createAccessToken(Long userId, Integer userType, String clientId, List<String> scopes) {
         OAuth2ClientDO clientDO = oauth2ClientService.validOAuthClientFromCache(clientId);
         // 创建刷新令牌
-        OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(userId, userType, clientDO, scopes);
+        OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(null, null, userId, userType, clientDO, scopes);
+        // 创建访问令牌
+        return createOAuth2AccessToken(refreshTokenDO, clientDO);
+    }
+
+    @Override
+    public OAuth2AccessTokenDO createAppAccessToken(Long appId, Long userId, Integer userType, String clientId, List<String> scopes) {
+        OAuth2ClientDO clientDO = oauth2ClientService.validOAuthClientFromCache(clientId);
+        // 创建刷新令牌
+        OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(null, appId, userId, userType, clientDO, scopes);
+        // 创建访问令牌
+        return createOAuth2AccessToken(refreshTokenDO, clientDO);
+    }
+
+    @Override
+    public OAuth2AccessTokenDO createCorpAccessToken(Long corpId, Long userId, Integer userType, String clientId, List<String> scopes) {
+        OAuth2ClientDO clientDO = oauth2ClientService.validOAuthClientFromCache(clientId);
+        // 创建刷新令牌
+        OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(corpId, null, userId, userType, clientDO, scopes);
         // 创建访问令牌
         return createOAuth2AccessToken(refreshTokenDO, clientDO);
     }
@@ -163,6 +181,8 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     private OAuth2AccessTokenDO createOAuth2AccessToken(OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO) {
         OAuth2AccessTokenDO accessTokenDO = new OAuth2AccessTokenDO().setAccessToken(generateAccessToken())
                 .setUserId(refreshTokenDO.getUserId()).setUserType(refreshTokenDO.getUserType())
+                .setCorpId(refreshTokenDO.getCorpId())
+                .setAppId(refreshTokenDO.getAppId())
                 .setUserInfo(buildUserInfo(refreshTokenDO.getUserId(), refreshTokenDO.getUserType()))
                 .setClientId(clientDO.getClientId()).setScopes(refreshTokenDO.getScopes())
                 .setRefreshToken(refreshTokenDO.getRefreshToken())
@@ -174,9 +194,11 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         return accessTokenDO;
     }
 
-    private OAuth2RefreshTokenDO createOAuth2RefreshToken(Long userId, Integer userType, OAuth2ClientDO clientDO, List<String> scopes) {
+    private OAuth2RefreshTokenDO createOAuth2RefreshToken(Long corpId, Long appId, Long userId, Integer userType, OAuth2ClientDO clientDO, List<String> scopes) {
         OAuth2RefreshTokenDO refreshToken = new OAuth2RefreshTokenDO().setRefreshToken(generateRefreshToken())
                 .setUserId(userId).setUserType(userType)
+                .setCorpId(corpId)
+                .setAppId(appId)
                 .setClientId(clientDO.getClientId()).setScopes(scopes)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getRefreshTokenValiditySeconds()));
 
@@ -188,14 +210,14 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         OAuth2AccessTokenDO accessTokenDO = BeanUtils.toBean(refreshTokenDO, OAuth2AccessTokenDO.class)
                 .setAccessToken(refreshTokenDO.getRefreshToken());
         TenantUtils.execute(refreshTokenDO.getTenantId(),
-                        () -> accessTokenDO.setUserInfo(buildUserInfo(refreshTokenDO.getUserId(), refreshTokenDO.getUserType())));
+                () -> accessTokenDO.setUserInfo(buildUserInfo(refreshTokenDO.getUserId(), refreshTokenDO.getUserType())));
         return accessTokenDO;
     }
 
     /**
      * 加载用户信息，方便 {@link com.cmsr.onebase.framework.security.core.LoginUser} 获取到昵称、部门等信息
      *
-     * @param userId 用户编号
+     * @param userId   用户编号
      * @param userType 用户类型
      * @return 用户信息
      */

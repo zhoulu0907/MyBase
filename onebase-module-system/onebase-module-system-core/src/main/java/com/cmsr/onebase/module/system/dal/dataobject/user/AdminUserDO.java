@@ -38,9 +38,10 @@ public class AdminUserDO extends TenantBaseDO {
     public static final String LOGIN_IP   = "login_ip";
     public static final String LOGIN_DATE = "login_date";
     public static final String USER_TYPE  = "user_type";
-    public static final String ADMIN_TYPE  = "Admin_type";
+    public static final String ADMIN_TYPE = "admin_type";
+    public static final String CORP_ID    = "corp_id";
 
-    public AdminUserDO setId(Long id){
+    public AdminUserDO setId(Long id) {
         super.setId(id);
         return this;
     }
@@ -53,7 +54,7 @@ public class AdminUserDO extends TenantBaseDO {
 
     /**
      * 加密后的密码
-     *
+     * <p>
      * 因为目前使用 {@link BCryptPasswordEncoder} 加密器，所以无需自己处理 salt 盐
      */
     @Column(name = PASSWORD)
@@ -98,7 +99,7 @@ public class AdminUserDO extends TenantBaseDO {
 
     /**
      * 用户性别
-     *
+     * <p>
      * 枚举类 {@link SexEnum}
      */
     @Column(name = SEX)
@@ -112,7 +113,7 @@ public class AdminUserDO extends TenantBaseDO {
 
     /**
      * 帐号状态
-     *
+     * <p>
      * 枚举 {@link CommonStatusEnum}
      */
     @Column(name = STATUS)
@@ -142,4 +143,9 @@ public class AdminUserDO extends TenantBaseDO {
     @Column(name = ADMIN_TYPE)
     private Integer adminType;
 
+    /**
+     * 归属企业ID
+     */
+    @Column(name = CORP_ID)
+    private Integer corpId;
 }

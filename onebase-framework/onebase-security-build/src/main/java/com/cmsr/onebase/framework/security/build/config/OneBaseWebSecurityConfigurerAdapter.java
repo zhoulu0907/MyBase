@@ -1,7 +1,9 @@
-package com.cmsr.onebase.framework.security.config;
+package com.cmsr.onebase.framework.security.build.config;
 
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.framework.security.core.filter.TokenAuthenticationFilter;
+import com.cmsr.onebase.framework.security.config.AuthorizeRequestsCustomizer;
+import com.cmsr.onebase.framework.security.config.SecurityProperties;
+import com.cmsr.onebase.framework.security.core.filter.BuildAuthenticationFilter;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -48,7 +50,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 public class OneBaseWebSecurityConfigurerAdapter {
 
     @Resource
-    private WebProperties webProperties;
+    private WebProperties      webProperties;
     @Resource
     private SecurityProperties securityProperties;
 
@@ -61,12 +63,12 @@ public class OneBaseWebSecurityConfigurerAdapter {
      * 权限不够处理器 Bean
      */
     @Resource
-    private AccessDeniedHandler accessDeniedHandler;
+    private AccessDeniedHandler       accessDeniedHandler;
     /**
      * Token 认证过滤器 Bean
      */
     @Resource
-    private TokenAuthenticationFilter authenticationTokenFilter;
+    private BuildAuthenticationFilter authenticationTokenFilter;
 
     /**
      * 自定义的权限映射 Bean 们

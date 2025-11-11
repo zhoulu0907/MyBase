@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.core.service;
+package com.cmsr.onebase.framework.security.build.service;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.common.core.KeyValue;
@@ -19,11 +19,11 @@ import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUti
 import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.skipPermissionCheck;
 
 /**
- * 默认的 {@link SecurityFrameworkService} 实现类
+ * 默认的 {@link SystemPermissionService} 实现类
  *
  */
 @AllArgsConstructor
-public class SecurityFrameworkServiceImpl implements SecurityFrameworkService {
+public class SystemPermissionServiceImpl implements SystemPermissionService {
 
     private final PermissionCommonApi permissionApi;
 

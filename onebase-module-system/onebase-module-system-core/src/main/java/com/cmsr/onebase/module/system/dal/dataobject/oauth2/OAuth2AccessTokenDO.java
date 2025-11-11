@@ -31,7 +31,8 @@ public class OAuth2AccessTokenDO extends TenantBaseDO {
     public static final String CLIENT_ID     = "client_id";
     public static final String SCOPES        = "scopes";
     public static final String EXPIRES_TIME  = "expires_time";
-
+    public static final String CORP_ID       = "app_id";
+    public static final String APP_ID        = "corp_id";
     /**
      * 访问令牌
      */
@@ -77,4 +78,15 @@ public class OAuth2AccessTokenDO extends TenantBaseDO {
     @Column(name = EXPIRES_TIME)
     private LocalDateTime expiresTime;
 
+    /**
+     * 企业ID
+     */
+    @Column(name = CORP_ID)
+    private Long corpId;
+
+    /**
+     * AppID
+     */
+    @Column(name = APP_ID)
+    private Long appId;
 }
