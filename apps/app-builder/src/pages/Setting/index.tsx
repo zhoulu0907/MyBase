@@ -20,7 +20,8 @@ import BusinessPage from './pages/Business';
 import CreateBusinessPage from './pages/Business/createBusiness';
 import EnterpriseInfoPage from './pages/Business/components/enterprise-information';
 import AuthorizedApplication from './pages/Business/components/authorizedApp';
-import RedirectEnterprise from './pages/Business/components/RedirectEnterprise';
+import RedirectEnterprise from './pages/Business/redirectEnterprise';
+
 
 const Content = Layout.Content;
 
