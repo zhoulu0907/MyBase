@@ -108,6 +108,7 @@ export interface PageETLFlowReq {
   flowName?: string;
   scheduleStrategy?: string;
   enableStatus?: number;
+  applicationId: string;
   pageNo: number;
   pageSize: number;
 }

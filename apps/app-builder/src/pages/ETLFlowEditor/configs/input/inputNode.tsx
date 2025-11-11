@@ -62,9 +62,9 @@ export const InputNodeConfig: React.FC = () => {
     console.log('res: ', res);
     const previewData = {
       columns: res.columns.map((column: any) => ({
-        title: column,
-        dataIndex: column,
-        key: column
+        title: column.displayName,
+        dataIndex: column.fieldFqn,
+        key: column.fieldFqn
       })),
       data: res.data.map((row: any[]) => {
         const obj: any = {};
@@ -74,6 +74,7 @@ export const InputNodeConfig: React.FC = () => {
         return obj;
       })
     };
+    console.log('previewData: ', previewData);
     setPreviewData(previewData);
   };
 
