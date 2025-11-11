@@ -1,8 +1,7 @@
 // 8. 创建 corp 模块的 DO 对象
 package com.cmsr.onebase.module.system.dal.dataobject.corp;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -15,7 +14,7 @@ import lombok.Data;
  */
 @Data
 @Table(name = "system_corp")
-public class CorpDO extends TenantDO {
+public class CorpDO extends TenantBaseDO {
     public static final String CORP_NAME           = "corp_name";
     public static final String CORP_CODE           = "corp_code";
     public static final String INDUSTRY_TYPE       = "industry_type";

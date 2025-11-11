@@ -229,6 +229,12 @@ public class CorpServiceImpl implements CorpService {
                 .collect(Collectors.toMap(DictDataRespDTO::getId
                         , DictDataRespDTO::getLabel));
 
+        Set<Long> adminUserIds = corpList.stream()
+                .map(CorpDO::getAdminId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, AdminUserDO> userDOMap= userService.getUserMap(adminUserIds);
+
         // Step 4：组装返回值
         List<CorpRespVO> respList = corpList.stream()
                 .map(corpDO -> {
@@ -248,8 +254,12 @@ public class CorpServiceImpl implements CorpService {
                             }
                         }
                         respVO.setCorpApplicationList(corpApplicationList);
-                        respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                     }
+                    AdminUserDO userDO=userDOMap.get(corpDO.getAdminId());
+                    if(userDO!=null){
+                        respVO.setAdminName(userDO.getNickname());
+                    }
+                    respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                     return respVO;
                 })
                 .collect(Collectors.toList());
