@@ -36,7 +36,7 @@ public class SecurityConfigController {
     private SecurityConfigService securityConfigService;
 
     @Resource
-    private SecurityConfigApi passwordValidationApi;
+    private SecurityConfigApi securityConfigApi;
 
     @GetMapping("/categories")
     @Operation(summary = "获取所有安全配置分类")
@@ -78,7 +78,7 @@ public class SecurityConfigController {
     @Operation(summary = "弱密码校验")
     @PreAuthorize("@ss.hasPermission('infra:security-config:query')")
     public CommonResult<Boolean> checkWeakPassword(@RequestParam("password") String password) {
-        passwordValidationApi.validatePassword(password);
+        securityConfigApi.validatePassword(password);
         return success(true);
     }
 
