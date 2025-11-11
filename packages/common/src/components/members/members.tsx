@@ -14,6 +14,7 @@ interface IProps {
   visible: boolean;
   selectedMembers: any[];
   isFromPermission?: boolean;
+  selectMemberCanEmpty?: boolean;
   onExpand: (value: string) => void;
   onSearch: (value: string) => void;
   onCancel: () => void;
@@ -31,6 +32,7 @@ const AddMembers = (props: IProps) => {
     loading,
     selectedMembers,
     isFromPermission = false,
+    selectMemberCanEmpty = false,
     onExpand,
     onSearch,
     onCancel,
@@ -80,7 +82,7 @@ const AddMembers = (props: IProps) => {
             <Button type="default" onClick={handleCancel} style={{ marginRight: 12 }}>
               取消
             </Button>
-            <Button type="primary" disabled={selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers, isIncludeChild)}>
+            <Button type="primary" disabled={!selectMemberCanEmpty && selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers, isIncludeChild)}>
               确定
             </Button>
           </div>

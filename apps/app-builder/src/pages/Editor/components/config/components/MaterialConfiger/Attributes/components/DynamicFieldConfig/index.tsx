@@ -199,7 +199,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   };
 
   return (
-    <FormItem layout="vertical" labelAlign="left" label="数据字段配置" className={styles.formItem}>
+    <FormItem layout="vertical" labelAlign="left" label="数据绑定" className={styles.formItem}>
       <Cascader
         value={configs[item.key]}
         placeholder="请选择数据字段"

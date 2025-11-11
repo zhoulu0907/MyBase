@@ -34,6 +34,8 @@ import DynamicDateFormatConfig from './components/DynamicDateFormatConfig';
 import DynamicTimeFormatConfig from './components/DynamicTimeFormatConfig';
 import DynamicSwitchFillTextConfig from './components/DynamicSwitchFillTextConfig';
 import styles from './index.module.less';
+import DynamicDeptDefaultValueConfig from './components/DynamicDeptDefaultValueConfig';
+import DynamicSelectScopeConfig from './components/DynamicSelectScopeConfig';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -244,7 +246,10 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 item.type !== CONFIG_TYPES.IMAGE_HANDLE &&
                 item.type !== CONFIG_TYPES.DATE_FORMAT &&
                 item.type !== CONFIG_TYPES.TIME_FORMAT &&
-                item.type !== CONFIG_TYPES.SWITCH_FILL_TEXT
+                item.type !== CONFIG_TYPES.SWITCH_FILL_TEXT &&
+                item.type !== CONFIG_TYPES.AUTO_CODE_RULES &&
+                item.type !== CONFIG_TYPES.DEPT_DEFAULT_VALUE &&
+                item.type !== CONFIG_TYPES.DEPT_SELECT_SCOPE
               ) {
                 return (
                   <FormItem
@@ -726,6 +731,30 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               if (item.type === CONFIG_TYPES.SELECT_OPTIONS_INPUT) {
                 return (
                   <DynamicOptionsConfig
+                    key={index}
+                    id={cpID}
+                    handlePropsChange={handlePropsChange}
+                    item={item}
+                    configs={configs}
+                  />
+                );
+              }
+
+              if (item.type === CONFIG_TYPES.DEPT_DEFAULT_VALUE) {
+                return (
+                  <DynamicDeptDefaultValueConfig
+                    key={index}
+                    id={cpID}
+                    handlePropsChange={handlePropsChange}
+                    item={item}
+                    configs={configs}
+                  />
+                );
+              }
+
+              if (item.type === CONFIG_TYPES.DEPT_SELECT_SCOPE) {
+                return (
+                  <DynamicSelectScopeConfig
                     key={index}
                     id={cpID}
                     handlePropsChange={handlePropsChange}

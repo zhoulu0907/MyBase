@@ -572,3 +572,15 @@ export const switchFillTextConfig:any = {
   name:'填充文本',
   type: CONFIG_TYPES.SWITCH_FILL_TEXT
 }
+
+export const defaultValueModeConfig: any = {
+  key: 'defaultValueMode',
+  name:'默认值',
+  type: CONFIG_TYPES.DEPT_DEFAULT_VALUE
+}
+
+export const selectScopeConfig: any = {
+  key: 'selectScope',
+  name:'可选范围',
+  type: CONFIG_TYPES.DEPT_SELECT_SCOPE
+}
