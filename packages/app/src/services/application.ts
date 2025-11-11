@@ -38,3 +38,8 @@ export const deleteApplication = (params: DeleteApplicationReq) => {
 export const generateId = () => {
   return appService.get('/application/id/generate');
 };
+
+// 获取应用精简信息列表-不分页
+export const getApplicationSimple = (ownerTag: number) => {
+  return appService.get(`/application/simple-list-by-name?ownerTag=${ownerTag}`);
+};

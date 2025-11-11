@@ -1,5 +1,5 @@
 import { type PageParam, PageResult } from '../types/common';
-import type { UserVO, UserProfileRespVO, UserProfileUpdateReq, UserProfileUpdatePwdReq, UpdateAdminOrDirectorReq } from '../types/user';
+import type { UserVO, UserProfileRespVO, UserProfileUpdateReq, UserProfileUpdatePwdReq } from '../types/user';
 import { systemService } from './clients';
 
 // 查询用户管理列表
@@ -88,11 +88,11 @@ export const updateLoginedUserPwd = (data: UserProfileUpdatePwdReq) => {
 };
 
 // 获得用户列表-支持搜索 用于设置管理员和主管
-export const getSimpleUser = (userNickName?: string) => {
+export const getSimpleUser = (userNickName: string) => {
   return systemService.get(`/user/simple-list-by-name?userNickName=${userNickName}`);
 };
 
 // 修改用户管理员/主管
 export const updateAdminOrDirector = (data: UpdateAdminOrDirectorReq) => {
-  return systemService.post('/user/update-admin-or-director', data);
+  return systemService.post('/dept/update-dept-admin-or-director', data);
 };

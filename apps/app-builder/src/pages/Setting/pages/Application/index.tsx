@@ -466,11 +466,11 @@ const AppManagement: React.FC = () => {
                           >
                             {
                               item?.userPhotoList?.map(user => (
-                                <img src={user.avatar} alt={user.nickName} />
+                                <img src={user.avatar} />
                               ))
                             }
                           </AvatarGroup>
-                          <div>{item?.userPhotoList?.[item?.userPhotoList.length - 1].nickName}等{item?.userPhotoList?.length}人开发</div>
+                          <div>{item?.createUser}等{item?.userPhotoList?.length}人开发</div>
                         </>
                       )}
                     </div>

@@ -346,20 +346,15 @@ export default function UserTable({
     return null;
   }
 
-  // 设置主管
-  const handleSetDirector = async () => {
-    await getDeptUsers({});
-    setManagerTypeModalVisible(UserRole.DIRECTOR);
-  };
-
-  // 设置管理员
-  const handleSetAdmin = async () => {
-    await getDeptUsers({});
-    setManagerTypeModalVisible(UserRole.ADMIN);
+  // 设置主管/管理员
+  const handleSetAdminOrDirector = async (updateType: UserRole) => {
+    if (!selectedDeptId) return Message.warning('请先选择部门');
+    await getSimpleUsers({});
+    setManagerTypeModalVisible(updateType);
   };
 
   // 获取部门用户信息
-  const getDeptUsers = async ({ keywords }: { keywords?: string }) => {
+  const getSimpleUsers = async ({ keywords = '' }: { keywords?: string }) => {
     setMemberLoading(true);
     try {
       if (!selectedDeptId) return;
@@ -389,9 +384,9 @@ export default function UserTable({
 
   const debouncedUpdate = useCallback(
     debounce((value) => {
-      getDeptUsers({ keywords: value });
+      getSimpleUsers({ keywords: value });
     }, 500),
-    []
+    [selectedDeptId]
   );
 
   useEffect(() => {
@@ -408,10 +403,10 @@ export default function UserTable({
       <div className={s.operationTop}>
         <div className={s.deptName}>{findNameById(deptTree, `${selectedDeptId}`)}</div>
         <Space>
-          <Button permission={ACTIONS.CREATE} onClick={handleSetDirector}>
+          <Button permission={ACTIONS.CREATE} onClick={() => handleSetAdminOrDirector(UserRole.DIRECTOR)}>
             设置主管
           </Button>
-          <Button permission={ACTIONS.CREATE} onClick={handleSetAdmin}>
+          <Button permission={ACTIONS.CREATE} onClick={() => handleSetAdminOrDirector(UserRole.ADMIN)}>
             设置管理员
           </Button>
         </Space>

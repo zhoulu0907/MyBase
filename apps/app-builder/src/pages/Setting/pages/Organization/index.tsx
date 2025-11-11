@@ -34,7 +34,7 @@ const OrganizationPage: React.FC = () => {
     },
     {
       title: '部门主管',
-      dataIndex: 'deptDirectorId',
+      dataIndex: 'deptDirectorName',
       placeholder: '-'
     },
     // {

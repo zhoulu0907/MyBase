@@ -7,6 +7,7 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import Tags from './Tags';
+import { TokenManager } from '@onebase/common';
 import styles from './index.module.less';
 
 const { Col, Row } = Grid;
@@ -19,10 +20,13 @@ const SpaceInfo: React.FC = () => {
   const [logoUrl, setLogoUrl] = useState<string>();
   const [renameVisible, setRenameVisible] = useState<boolean>(false);
 
-  const fetchSpaceInfo = async () => {
+  // 获取用户信息
+  const tokenInfo = TokenManager.getTokenInfo();
+
+  const fetchSpaceInfo = async (id: string) => {
     try {
       setLoading(true);
-      const res = await getPlatformTenantAdminInfoApi('124106567673610240');
+      const res = await getPlatformTenantAdminInfoApi(id);
       setSpaceInfo(res);
       setLogoUrl(res.logoUrl);
     } finally {
@@ -31,7 +35,7 @@ const SpaceInfo: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchSpaceInfo();
+    tokenInfo?.userId && fetchSpaceInfo(`${tokenInfo.userId}`);
     form.resetFields();
   }, []);
 

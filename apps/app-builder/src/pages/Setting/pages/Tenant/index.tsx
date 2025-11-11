@@ -12,7 +12,7 @@ import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import styles from './index.module.less';
 import {
-  listApplication,
+  getApplicationSimple,
   type Application,
   type PageParam
 } from '@onebase/app';
@@ -26,6 +26,10 @@ const CREATED_TYPE = {
   ENTERPRISE: 'enterprise',
   APPLICATION: 'application',
 }
+
+const leftPanelWidth = 240;
+const SectionPadding = 32 + 64;
+const tabPanelWidth = `calc(100vw - ${leftPanelWidth}px - ${SectionPadding}px`;
 
 type ownerCreateType = 'enterprise' | 'application' | string;
 
@@ -83,15 +87,9 @@ const TenantPage: React.FC = () => {
 
   // 我创建的应用
   const getOwnerApplication = async () => {
-    const req: PageParam = {
-      pageNo: 1,
-      pageSize: 100,
-      ownerTag: 1,
-    };
-    const res = await listApplication(req);
-    if (res) {
-      setAppData(res.list);
-    }
+    const ownerTag = 1;
+    const res = await getApplicationSimple(ownerTag);
+    setAppData(res.list);
   };
 
   const fetchIndustryDict = async (id: string) => {
@@ -163,7 +161,7 @@ const TenantPage: React.FC = () => {
       },
       {
         title: '管理员',
-        dataIndex: 'admin',
+        dataIndex: 'adminName',
         width: 90,
         placeholder: '-',
         ellipsis: true
@@ -255,7 +253,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">账号状态</Text>
               </Col>
               <Col flex="auto">
-                <Text>正常</Text>
+                <Text>{userInfo.statusDesc || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -302,7 +300,7 @@ const TenantPage: React.FC = () => {
         style={{ display: 'flex', flex: 1, overflow: 'hidden' }}
         spinStyle={{ display: 'flex', flex: 1, overflow: 'hidden' }}
       >
-        <Tabs className={styles.createTabs} activeTab={curTab} onChange={setCurTab} style={{ width: '100%' }}>
+        <Tabs className={styles.createTabs} activeTab={curTab} onChange={setCurTab} style={{ maxWidth: tabPanelWidth }}>
           <TabPane key={CREATED_TYPE.ENTERPRISE} title='我创建的企业'>
             <Table
               rowKey="id"

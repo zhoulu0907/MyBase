@@ -182,22 +182,3 @@ export interface UserProfileUpdatePwdReq {
   oldPassword: string;
   [property: string]: any;
 }
-
-/**
- * UserAdminOrDirectorUpdateReqVO
- */
-export interface UpdateAdminOrDirectorReq {
-  /**
-   * 部门Id
-   */
-  deptId: string;
-  /**
-   * 管理员类型
-   */
-  updateType: string;
-  /**
-   * 用户id
-   */
-  userId: string;
-  [property: string]: any;
-}
