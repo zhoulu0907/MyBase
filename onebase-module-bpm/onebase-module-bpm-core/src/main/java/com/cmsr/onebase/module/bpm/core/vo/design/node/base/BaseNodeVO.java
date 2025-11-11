@@ -1,9 +1,9 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node.base;
+package com.cmsr.onebase.module.bpm.core.vo.design.node.base;
 
-import com.cmsr.onebase.module.bpm.build.vo.design.node.ApproverNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.EndNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.InitiationNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.StartNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.ApproverNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.EndNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.InitiationNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.StartNodeVO;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -57,4 +57,3 @@ public class BaseNodeVO {
     @Schema(description = "元数据")
     private Object meta;
 }
-

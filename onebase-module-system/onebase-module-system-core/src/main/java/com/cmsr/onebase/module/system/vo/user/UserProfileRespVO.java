@@ -56,4 +56,7 @@ public class UserProfileRespVO {
      */
     private List<PostSimpleRespVO> posts;
 
+    @Schema(description = "状态描述" )
+    private String statusDesc;
+
 }

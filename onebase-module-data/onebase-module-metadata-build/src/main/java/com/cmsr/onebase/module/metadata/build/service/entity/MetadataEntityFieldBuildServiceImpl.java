@@ -1407,8 +1407,22 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 return false;
             }
 
+            // 先尝试精确匹配
             Column column = table.getColumn(columnName);
             boolean exists = (column != null);
+
+            // 如果精确匹配失败，尝试忽略大小写匹配（处理PostgreSQL等数据库的大小写问题）
+            if (!exists && table.getColumns() != null) {
+                log.debug("精确匹配列 {} 失败，尝试忽略大小写匹配", columnName);
+                for (Column col : table.getColumns().values()) {
+                    if (col.getName().equalsIgnoreCase(columnName)) {
+                        column = col;
+                        exists = true;
+                        log.info("通过忽略大小写找到列: {} (实际列名: {})", columnName, col.getName());
+                        break;
+                    }
+                }
+            }
 
             log.info("列 {} 在表 {} 中{}存在", columnName, tableName, exists ? "" : "不");
 

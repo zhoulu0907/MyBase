@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node;
+package com.cmsr.onebase.module.bpm.core.vo.design.node;
 
 import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeDataVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeDataVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import lombok.Data;
 
 /**

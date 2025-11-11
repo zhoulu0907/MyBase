@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
+package com.cmsr.onebase.module.bpm.build.vo.design.strategy;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.ApprovalModeEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

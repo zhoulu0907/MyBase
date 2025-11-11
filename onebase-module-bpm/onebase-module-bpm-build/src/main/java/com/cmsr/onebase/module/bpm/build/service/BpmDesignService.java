@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
 
 
 /**
@@ -42,5 +42,5 @@ public interface BpmDesignService {
      * @param reqVo
      * @return
      */
-    void publish(BpmPublishReqVo reqVo);
+    void publish(BpmPublishReqVO reqVo);
 }

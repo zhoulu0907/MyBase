@@ -1,7 +1,7 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node;
+package com.cmsr.onebase.module.bpm.runtime.vo;
 
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeDataVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeDataVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import lombok.Data;
 
 /**
@@ -11,7 +11,7 @@ import lombok.Data;
  * @date 2025-10-21
  */
 @Data
-public class StartNodeVO extends BaseNodeVO {
+public class CommonNodeVO extends BaseNodeVO {
     /**
      * 节点自定义配置
      */
