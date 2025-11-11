@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.service.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceRespVO;
@@ -15,8 +14,8 @@ import com.cmsr.onebase.module.metadata.build.service.datasource.vo.ColumnQueryV
 import com.cmsr.onebase.module.metadata.build.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.config.MetadataConfig;
-import com.cmsr.onebase.module.metadata.core.enums.DatasourceTypeEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepository;
+import org.anyline.metadata.type.DatabaseType;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
@@ -84,7 +83,14 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
-        return Arrays.stream(DatasourceTypeEnum.values())
+        // 定义支持的数据库类型：PostgreSQL、达梦、人大金仓
+        DatabaseType[] supportedTypes = {
+                DatabaseType.PostgreSQL,
+                DatabaseType.DM,
+                DatabaseType.KingBase
+        };
+        
+        return Arrays.stream(supportedTypes)
                 .map(this::convertToTypeRespVO)
                 .toList();
     }
@@ -196,22 +202,22 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     }
 
     /**
-     * 将数据源类型枚举转换为响应VO
+     * 将Anyline数据库类型枚举转换为响应VO
      *
-     * @param typeEnum 数据源类型枚举
+     * @param dbType Anyline数据库类型枚举
      * @return 数据源类型响应VO
      */
-    private DatasourceTypeRespVO convertToTypeRespVO(DatasourceTypeEnum typeEnum) {
-        return BeanUtils.toBean(typeEnum, DatasourceTypeRespVO.class, respVO -> {
-            respVO.setDatasourceType(typeEnum.getCode());
-            respVO.setDisplayName(typeEnum.getDisplayName());
-            respVO.setDescription(typeEnum.getDescription());
-            respVO.setDefaultPort(typeEnum.getDefaultPort());
-            respVO.setJdbcDriverClass(typeEnum.getJdbcDriverClass());
-            respVO.setUrlTemplate(typeEnum.getUrlTemplate());
-            // 所有数据源类型都支持读写和模式发现功能
-            respVO.setSupportFeatures(Arrays.asList("READ", "WRITE", "SCHEMA_DISCOVERY"));
-        });
+    private DatasourceTypeRespVO convertToTypeRespVO(DatabaseType dbType) {
+        DatasourceTypeRespVO respVO = new DatasourceTypeRespVO();
+        respVO.setDatasourceType(dbType.name());        // 使用枚举的name()作为类型编码
+        respVO.setDisplayName(dbType.title());           // 使用title()作为显示名称
+        respVO.setDescription("支持 " + dbType.title() + " 数据库");
+        respVO.setDefaultPort(null);                     // 不提供默认端口，要求用户必须输入
+        respVO.setJdbcDriverClass(dbType.driver());      // 使用Anyline的driver()方法
+        respVO.setUrlTemplate(dbType.url());             // 使用Anyline的url()方法
+        // 所有数据源类型都支持读写和模式发现功能
+        respVO.setSupportFeatures(Arrays.asList("READ", "WRITE", "SCHEMA_DISCOVERY"));
+        return respVO;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -628,7 +634,9 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
             AnylineService<?> temporaryService = ServiceProxy.temporary(dataSource);
 
             // 使用 query 方法执行查询语句，避免框架的租户、软删除等特性影响
-            temporaryService.query("SELECT 1");
+            // 根据数据库类型使用不同的测试查询
+            String testQuery = getTestQueryByType(datasourceType);
+            temporaryService.query(testQuery);
 
             return true;
         } catch (Exception e) {
@@ -640,27 +648,50 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
 
     /**
      * 根据数据源类型获取对应的驱动类名
+     * 直接使用Anyline的DatabaseType枚举，不支持的类型将抛出异常
      *
-     * @param datasourceType 数据源类型
+     * @param datasourceType 数据源类型字符串
      * @return 驱动类名
+     * @throws IllegalArgumentException 如果数据源类型不被支持
      */
     private String getDriverByType(String datasourceType) {
-        return switch (datasourceType.toUpperCase()) {
-            case "MYSQL" -> "com.mysql.cj.jdbc.Driver";
-            case "POSTGRESQL" -> "org.postgresql.Driver";
-            case "ORACLE" -> "oracle.jdbc.driver.OracleDriver";
-            case "SQLSERVER" -> "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-            case "KINGBASE" -> "com.kingbase8.Driver";
-            case "TDENGINE" -> "com.taosdata.jdbc.TSDBDriver";
-            case "CLICKHOUSE" -> "ru.yandex.clickhouse.ClickHouseDriver";
-            case "DM" -> "dm.jdbc.driver.DmDriver";
-            case "OPENGAUSS" -> "org.opengauss.Driver";
-            case "DB2" -> "com.ibm.db2.jcc.DB2Driver";
-            default -> {
-                log.warn("未知的数据源类型: {}", datasourceType);
-                yield ""; // 返回空字符串作为默认值
+        DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+        return dbType.driver();
+    }
+
+    /**
+     * 根据数据库类型获取测试查询SQL
+     * <p>
+     * 不同数据库使用不同的测试查询语句：
+     * - PostgreSQL/KingBase/MySQL: SELECT 1
+     * - DM(达梦)/Oracle: SELECT 1 FROM DUAL
+     * <p>
+     * 复用TemporaryDatasourceService的逻辑，保持一致性
+     *
+     * @param datasourceType 数据源类型字符串，如"PostgreSQL"、"DM"、"KingBase"
+     * @return 测试查询SQL
+     */
+    private String getTestQueryByType(String datasourceType) {
+        try {
+            DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+            
+            switch (dbType) {
+                case DM:
+                case ORACLE:
+                    // 达梦和Oracle使用FROM DUAL
+                    return "SELECT 1 FROM DUAL";
+                case PostgreSQL:
+                case KingBase:
+                case MySQL:
+                default:
+                    // PostgreSQL、金仓、MySQL等使用简单的SELECT 1
+                    return "SELECT 1";
             }
-        };
+        } catch (IllegalArgumentException e) {
+            // 如果数据库类型无法识别，使用最通用的查询
+            log.warn("无法识别的数据库类型[{}]，使用默认测试查询SELECT 1", datasourceType);
+            return "SELECT 1";
+        }
     }
 
 }

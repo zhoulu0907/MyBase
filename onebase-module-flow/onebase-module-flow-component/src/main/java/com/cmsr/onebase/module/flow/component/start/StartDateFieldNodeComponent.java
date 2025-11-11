@@ -101,7 +101,9 @@ public class StartDateFieldNodeComponent extends NodeComponent {
         if (nodeData.isBatchMode()) {
             reqDTO.setNum(nodeData.getBatchSize());
         }
+        executeContext.addLog("时间字段触发开始查询数据");
         List<List<EntityFieldDataRespDTO>> fieldDataRespDTOS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
+        executeContext.addLog("时间字段触发查询返回数据量: " + fieldDataRespDTOS.size());
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOS));
     }
 

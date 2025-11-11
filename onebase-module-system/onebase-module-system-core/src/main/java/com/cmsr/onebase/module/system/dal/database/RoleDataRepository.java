@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import org.anyline.data.param.ConfigStore;
@@ -10,6 +12,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
+import org.yaml.snakeyaml.events.Event;
 
 import java.util.Collection;
 import java.util.List;
@@ -125,5 +128,13 @@ public class RoleDataRepository extends DataRepository<RoleDO> {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in(RoleDO.CODE, codes);
         return findAllByConfig(configStore);
+    }
+
+    public RoleDO getRoleIdsByCodeAndTenantId(String code,Long tenandID) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.in(RoleDO.CODE, code);
+        configStore.eq(RoleDO.TENANT_ID, tenandID);
+        return findOne(configStore);
+
     }
 }

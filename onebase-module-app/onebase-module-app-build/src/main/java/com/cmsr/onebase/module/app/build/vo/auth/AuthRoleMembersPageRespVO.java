@@ -11,8 +11,11 @@ import lombok.Data;
 @Schema(description = "应用管理 - 角色下用户列表 Response VO")
 public class AuthRoleMembersPageRespVO {
 
-    @Schema(description = "用户ID")
+    @Schema(description = "主键ID")
     private Long id;
+
+    @Schema(description = "成员ID")
+    private Long memberId;
 
     @Schema(description = "成员名称")
     private String name;

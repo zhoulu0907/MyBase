@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * 流程实例查询条件VO
  *
@@ -17,19 +19,36 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class BpmInsExtQueryPageVO extends PageParam  {
 
-    @Schema(description = "流程标题，模糊匹配", example = "物品领用申请")
+    @Schema(description = "关键词：模糊匹配流程标题、发起人、表单摘要", example = "物品领用申请")
     @Size(max = 200, message = "流程标题长度不能超过200个字符")
-    private String processTitle;
-
-    @Schema(description = "发起人，模糊匹配", example = "王少青")
-    @Size(max = 100, message = "发起人长度不能超过100个字符")
-    private String initiator;
-
-    @Schema(description = "表单摘要，模糊匹配", example = "铅笔")
-    @Size(max = 500, message = "表单摘要长度不能超过500个字符")
-    private String formSummary;
+    private String keyword;
 
     @Schema(description = "应用ID", example = "1332334434343")
     @NotNull(message = "应用ID不能为空")
     private Long appId;
+
+    @Schema(description = "业务id，实际对应pageSetId", example = "32636263636323")
+    private String businessId;
+
+    @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
+            example = "desc", defaultValue = "desc")
+    private String sortType;
+
+    @Schema(description = "当前节点编码，支持多个值，格式：a,b,c", example = "start_1")
+    private String nodeCode;
+
+    @Schema(description = "流程状态，不传则全部。支持多个值，格式：a,b,c。draft草稿 in_approval 审批中 approved 已通过 rejected 已拒绝 withdrawn 已撤回 terminated 已终止")
+    private String flowStatus;
+
+    //========================== 以下参数内部使用，前端不用传 ==============
+    /**
+     * 当前节点编码列表
+     */
+    private List<String> nodeCodeList;
+
+    /**
+     * 流程状态列表
+     */
+    private List<String> flowStatusList;
+
 }

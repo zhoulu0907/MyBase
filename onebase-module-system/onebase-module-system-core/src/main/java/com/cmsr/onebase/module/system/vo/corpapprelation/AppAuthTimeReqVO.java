@@ -11,11 +11,13 @@ import java.util.List;
 @Data
 public class AppAuthTimeReqVO {
     @Schema(description = "应用id")
-    @NotNull(message = "应用id list不能为空")
-    private  List<Long> applicationIdList;
-
+    private  Long id;
 
     @Schema(description = "授权时间")
     @NotNull(message = "授权时间")
     private LocalDateTime authorizationTime ;
+
+    @Schema(description = "过期时间")
+    @NotNull(message = "过期时间")
+    private LocalDateTime expiresTime ;
 }

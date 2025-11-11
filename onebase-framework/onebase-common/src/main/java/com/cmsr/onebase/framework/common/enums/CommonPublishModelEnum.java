@@ -12,24 +12,24 @@ import java.util.Arrays;
  */
 @Getter
 @AllArgsConstructor
-public enum CommonPublishModelEnum implements ArrayValuable<Integer> {
+public enum CommonPublishModelEnum implements ArrayValuable<String> {
 
-    InnerModel(0, "内部模式"),
-    SaaSModel(1, "saas模式");
+    InnerModel("inner", "内部模式"),
+    SaaSModel("saas", "saas模式");
 
-    public static final Integer[] ARRAYS = Arrays.stream(values()).map(CommonPublishModelEnum::getValue).toArray(Integer[]::new);
+    public static final String[] ARRAYS = Arrays.stream(values()).map(CommonPublishModelEnum::getValue).toArray(String[]::new);
 
     /**
      * 值
      */
-    private final Integer value;
+    private final String value;
     /**
      * 名
      */
     private final String name;
 
     @Override
-    public Integer[] array() {
+    public String[] array() {
         return ARRAYS;
     }
 

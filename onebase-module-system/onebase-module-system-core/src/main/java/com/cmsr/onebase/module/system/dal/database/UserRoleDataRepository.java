@@ -113,4 +113,18 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
         return deleteByConfig(new DefaultConfigStore()
                 .eq(UserRoleDO.ROLE_ID, roleId).in(UserRoleDO.USER_ID, userIds));
     }
+
+    /**
+     *  configStore.eq(UserRoleDO.TENANT_ID,tenantId); 
+     *  通过id，查询租户信息，前面忽略掉了切面的租户
+     * @param roleId
+     * @param tenantId
+     * @return
+     */
+    public List<UserRoleDO> getUserRoleByRoleIdAndTenantId(Long roleId,Long tenantId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(UserRoleDO.ROLE_ID, roleId);
+        configStore.eq(UserRoleDO.TENANT_ID,tenantId);
+        return findAllByConfig(configStore);
+    }
 }

@@ -75,9 +75,12 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
         return findPageWithConditions(cs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
-    public List<ETLDatasourceDO> findAllByApplicationId(Long applicationId) {
+    public List<ETLDatasourceDO> findAllByApplicationIdWithWritable(Long applicationId, Integer writable) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("application_id", applicationId);
+        if (writable != null) {
+            cs.eq("readonly", 0);
+        }
 
         return findAllByConfig(cs);
     }

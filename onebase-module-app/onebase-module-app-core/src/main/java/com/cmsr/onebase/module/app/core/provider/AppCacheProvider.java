@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.provider;
 
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
@@ -31,6 +32,9 @@ public class AppCacheProvider {
 
     @Autowired
     private AppAuthRoleUserRepository appAuthRoleUserRepository;
+
+    @Autowired
+    private AppSqlQueryRepository appSqlQueryRepository;
 
     private List<Long> findAllMenuIds(Long applicationId) {
         return appMenuRepository.findByApplicationId(applicationId)
@@ -68,6 +72,24 @@ public class AppCacheProvider {
         }
     }
 
+    public void deptChanged(Long applicationId, Long deptId, Integer isIncludeChild) {
+        List<Long> menuIds = findAllMenuIds(applicationId);
+        List<Long> userIds = appSqlQueryRepository.findAllUserIdsByDeptIds(deptId, isIncludeChild);
+        for (Long userId : userIds) {
+            for (Long menuId : menuIds) {
+                allCacheKeys(userId, applicationId, menuId).forEach(key -> {
+                    log.info("deptsChanged 删除缓存：{}", key);
+                    redissonClient.getBucket(key).delete();
+                });
+            }
+        }
+    }
+
+    public void deptsChanged(Long applicationId, List<Long> deptIds, Integer isIncludeChild) {
+        deptIds.forEach(deptId -> deptChanged(applicationId, deptId, isIncludeChild));
+    }
+
+
     public List<String> allCacheKeys(Long userId, Long applicationId, Long menuId) {
         return List.of(
                 CacheUtils.keyForDataPermission(userId, applicationId, menuId),
@@ -75,9 +97,6 @@ public class AppCacheProvider {
                 CacheUtils.keyForOperationPermission(userId, applicationId, menuId),
                 CacheUtils.keyForPagePermission(userId, applicationId, menuId)
         );
-    }
-
-    public void deptsChanged(Long applicationId, List<Long> deptIds) {
     }
 
 

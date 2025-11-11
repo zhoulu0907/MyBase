@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.build.vo.app;
 
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
+import com.cmsr.onebase.framework.common.validation.InEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -44,6 +46,7 @@ public class ApplicationCreateRespVO {
     private List<Long> tagIds;
 
     @Schema(description = "发布模式")
-    private Integer publishModel;
+    @InEnum(value = CommonPublishModelEnum.class, message = "返回值类型必须是 {value}")
+    private String publishModel;
 
 }

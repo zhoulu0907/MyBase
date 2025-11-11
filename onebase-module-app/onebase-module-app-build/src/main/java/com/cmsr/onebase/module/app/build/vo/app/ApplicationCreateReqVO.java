@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.build.vo.app;
 
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
+import com.cmsr.onebase.framework.common.validation.InEnum;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -47,12 +49,8 @@ public class ApplicationCreateReqVO {
     @Schema(description = "数据源信息")
     private DatasourceSaveReqDTO datasourceSaveReq;
 
-    @Schema(description = "空间Id")
-    private Long tenantId;
-
     @Schema(description = "发布模式")
-    @NotBlank(message = "发布模式不能为空")
-    private Integer publishModel;
-
+    @InEnum(value = CommonPublishModelEnum.class, message = "返回值类型必须是 {value}")
+    private String publishModel;
 
 }

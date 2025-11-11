@@ -8,9 +8,9 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorRequest;
 import com.cmsr.onebase.module.flow.core.flow.FlowExecuteProvider;
+import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -55,7 +55,7 @@ public class FlowProcessTest {
 
     @Test
     public void testSimple() throws IOException {
-         testSimple2();
+        testSimple2();
         testSimple2();
         testSimple2();
         testSimple2();
@@ -70,7 +70,7 @@ public class FlowProcessTest {
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setFieldData(Map.of(
                 "46999569445519360", "6年级3班",
-                "50026937276661762", LocalDate.now(),
+                "50026937276661762", LocalDate.now().minusYears(10),
                 "50028191407505411", 30
         ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
@@ -87,6 +87,21 @@ public class FlowProcessTest {
         reqDTO.setFieldData(Map.of(
                 104845168301834240L, "yy",
                 "104951150916075520", "yy"
+        ));
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        System.out.println(respDTO);
+    }
+
+    @Test
+    public void testSimple23() throws IOException {
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(88576673965670400L);
+        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        reqDTO.setFieldData(Map.of(
+                "8857773477298176", "测试部门号",
+                "88577773477298181", "测试部门",
+                "88577773477298186", "Manager"
         ));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);

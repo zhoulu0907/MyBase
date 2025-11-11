@@ -29,6 +29,11 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-etl-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -66,6 +71,10 @@
         <dependency>
             <groupId>org.anyline</groupId>
             <artifactId>anyline-data-jdbc-kingbase</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-dm</artifactId>
         </dependency>
         <dependency>
             <groupId>cn.com.kingbase</groupId>

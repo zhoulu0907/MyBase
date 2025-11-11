@@ -29,14 +29,6 @@ public class BpmInstanceController {
     @Resource
     private BpmInstanceService bpmExecService;
 
-    @GetMapping("/list-act-buttons")
-    @Operation(summary = "获取流程实例的操作按钮")
-    public CommonResult<ListActButtonRespVO> listActButtons(@RequestParam(value = "taskId", required = false) String taskId, @RequestParam("businessId") String businessId) {
-        log.info("获取流程实例的操作按钮: {}, {}", taskId, businessId);
-        ListActButtonRespVO respVO = bpmExecService.getActButtons(taskId, businessId);
-        return CommonResult.success(respVO);
-    }
-
     @PostMapping("/submit")
     @Operation(summary = "流程发起")
     public CommonResult<BpmSubmitRespVO> exec(@RequestBody @Validated BpmSubmitReqVO reqVO) {
@@ -68,7 +60,7 @@ public class BpmInstanceController {
     /**
      * 流程预览
      *
-     * @param businessId
+     * @param reqVO
      */
     @PostMapping("/flow-predict")
     @Operation(summary = "流程预测")

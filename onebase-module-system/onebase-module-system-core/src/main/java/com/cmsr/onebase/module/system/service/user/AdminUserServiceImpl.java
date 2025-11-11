@@ -31,7 +31,6 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.corp.CorpAdminReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
@@ -133,7 +132,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-        adminUserDataRepository.insert(user);
+        //下拉框选择的用户肯定是已经存在的，不需要重新保存
+        // adminUserDataRepository.insert(user);
+        user.setId(createReqVO.getId());
 
         // 2.2 插入关联岗位
         if (CollUtil.isNotEmpty(user.getPostIds())) {
@@ -442,6 +443,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    @TenantIgnore
     public List<AdminUserDO> getUserList(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
@@ -658,8 +660,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByStatus(Integer status) {
-        return adminUserDataRepository.findAllByStatus(status);
+    public List<AdminUserDO> getUserListByStatus(Integer status,String userNickName) {
+        return adminUserDataRepository.findAllByStatus(status,userNickName);
     }
 
     @Override
@@ -785,6 +787,28 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 转换为响应对象
         return UserConvert.INSTANCE.convert(user, dept, roles);
+    }
+
+    @Override
+    public List<String> getUserRoleByRoleIdAndTenantId(Long id,Long tenantId) {
+        List<UserRoleDO> UserRoleDOList=  userRoleDataRepository.getUserRoleByRoleIdAndTenantId(id,tenantId);
+        List<String> userIdsList = UserRoleDOList.stream()
+                .map(userRole -> String.valueOf(userRole.getUserId()))
+                .collect(Collectors.toList());
+        return userIdsList;
+
+
+    }
+    @TenantIgnore
+    @Override
+    public    Map<Long,Integer> getTenantExistUserCountByIds(List<Long> tenantIds) {
+        List<AdminUserDO>  userlist= adminUserDataRepository.getTenantExistUserCountByIds(tenantIds);
+        // 按租户ID分组并统计数量
+        return userlist.stream()
+                .collect(Collectors.groupingBy(
+                        AdminUserDO::getId,
+                        Collectors.summingInt(user -> 1)
+                ));
     }
 
     /**

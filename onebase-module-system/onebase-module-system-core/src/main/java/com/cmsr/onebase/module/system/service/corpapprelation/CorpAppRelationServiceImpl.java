@@ -7,11 +7,10 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-
-import com.cmsr.onebase.module.app.core.dto.app.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
-import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.annotation.Resource;
@@ -22,7 +21,6 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,28 +45,47 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
-
     @Override
-    public void createCorpAppRelation(@Valid CorpAppRelationInertReqVO createReqVO) {
+    public void createListCorpAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
         // 插入
-        createReqVO.getApplicationIdList().forEach(appliationId -> {
+        corpAppRelationInertReqVOList.forEach(corpAppRelationInertReqVO -> {
             // 先删除后插入
             ConfigStore configs = new DefaultConfigStore();
-            configs.eq("application_id", appliationId );
-            configs.eq("corp_id", createReqVO.getCorpId());
-            configs.eq("tenant_id", TenantContextHolder.getRequiredTenantId());
+            configs.eq(CorpAppRelationDO.APPLICATION_ID, corpAppRelationInertReqVO.getId() );
+            configs.eq(CorpAppRelationDO.CORP_ID, corpId);
             corpAppRelationDataRepository.deleteByConfig(configs);
 
             // 验证是否重复提交，先删除后插入
-            CorpAppRelationDO corpAppRelationDO = BeanUtils.toBean(createReqVO, CorpAppRelationDO.class);
-            corpAppRelationDO.setApplicationId(appliationId);
-            corpAppRelationDO.setAuthorizationTime(createReqVO.getAuthorizationTime());
-            corpAppRelationDO.setExpiresTime(createReqVO.getAuthorizationTime().plusYears(CorpConstant.EXPIRESYEAR));
+            CorpAppRelationDO corpAppRelationDO = new CorpAppRelationDO();
+            corpAppRelationDO.setApplicationId(corpAppRelationInertReqVO.getId());
+            corpAppRelationDO.setAuthorizationTime(corpAppRelationInertReqVO.getAuthorizationTime());
+            corpAppRelationDO.setExpiresTime(corpAppRelationInertReqVO.getExpiresTime());
             corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
-            corpAppRelationDO.setCorpId(createReqVO.getCorpId());
-            corpAppRelationDO.setTenantId(TenantContextHolder.getTenantId());
+            corpAppRelationDO.setCorpId(corpId);
             corpAppRelationDataRepository.insert(corpAppRelationDO);
         });
+    }
+
+    @Override
+    public void createCorpAppRelation(CorpAppRelationInertReqVO vo) {
+        // 插入
+        vo.getApplicationIdList().forEach(appId -> {
+            // 先删除后插入
+            ConfigStore configs = new DefaultConfigStore();
+            configs.eq(CorpAppRelationDO.APPLICATION_ID,appId );
+            configs.eq(CorpAppRelationDO.CORP_ID, vo.getCorpId());
+            corpAppRelationDataRepository.deleteByConfig(configs);
+
+            // 验证是否重复提交，先删除后插入
+            CorpAppRelationDO corpAppRelationDO =  new CorpAppRelationDO();
+            corpAppRelationDO.setApplicationId(appId);
+            corpAppRelationDO.setAuthorizationTime(vo.getAuthorizationTime());
+            corpAppRelationDO.setExpiresTime(vo.getExpiresTime());
+            corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
+            corpAppRelationDO.setCorpId(vo.getCorpId());
+            corpAppRelationDataRepository.insert(corpAppRelationDO);
+        });
+
     }
 
     @Override
@@ -106,7 +123,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
     private Map<Long, ApplicationDTO> getApplicationDoMap(String appName) {
-        List<ApplicationDTO> pageDOList = appApplicationApi.finAppApplicationByAppName(appName);
+        List<ApplicationDTO> pageDOList = appApplicationApi.findAppApplicationByAppName(appName);
         return pageDOList.stream()
                 .collect(Collectors.toMap(
                         ApplicationDTO::getId,
@@ -116,8 +133,8 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
 
     @Override
-    public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppRelationPageReqVO pageReqVO) {
-        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getApplicationName());
+    public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppPageReqVO pageReqVO) {
+        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
@@ -166,7 +183,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             respVO.setApplicationCode(appDo.getAppCode());
             respVO.setApplicationUid(appDo.getAppUid());
             respVO.setApplicationId(appDo.getId());
-            respVO.setId(appDo.getId());
+            respVO.setId(corpDO.getId());
             respVO.setVersionNumber(appDo.getVersionNumber());
             // 获取app应用状态描述
             Integer status = corpDO.getStatus();
@@ -178,6 +195,12 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     @Override
     public void deleteCorpAppRelationByCorpId(Long corpID) {
         corpAppRelationDataRepository.deleteCorpAppRelationByCorpId(corpID);
+    }
+
+    @Override
+    public List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO) {
+        List<CorpAppRelationDO> corpApplicationRespVOList= corpAppRelationDataRepository.getCorpAppRelationList(corpAppRelationPageReqVO);
+        return corpApplicationRespVOList;
     }
 }
 

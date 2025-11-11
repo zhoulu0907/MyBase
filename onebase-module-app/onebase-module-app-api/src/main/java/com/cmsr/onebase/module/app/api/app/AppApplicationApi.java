@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.api.app;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,9 @@ public interface AppApplicationApi {
 
     Long countApplicationByTenantId(Long tenantId);
 
-    List finAppApplicationByAppName(String appName);
+    List findAppApplicationByAppName(String appName);
+
+    List findAppApplicationByAppIds(Collection<Long> appIds);
 
     Map<Integer,Integer> findAppApplicationAll();
 }

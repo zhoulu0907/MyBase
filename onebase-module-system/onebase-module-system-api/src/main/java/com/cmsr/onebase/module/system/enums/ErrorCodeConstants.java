@@ -185,7 +185,7 @@ public interface ErrorCodeConstants {
     // ========== 企业相关 1-002-029-000 ==========
     ErrorCode CORP_NO_EXISTS = new ErrorCode(1_002_025_006, "【{}】企业不存在");
     ErrorCode CORP_NAME_EXISTS = new ErrorCode(1_002_025_005, "名称为【{}】的企业已存在");
-    ErrorCode CORP_ID_EXISTS = new ErrorCode(1_002_025_005, "编码为【{}】的企业已存在");
+    ErrorCode CORP_ID_EXISTS = new ErrorCode(1_002_025_008, "编码为【{}】的企业已存在");
     ErrorCode CORP_USER_LIMIT_COUNT = new ErrorCode(1_002_025_007, "企业用户数【{}】，大于系统上限");
     // ========== 企业应用关联 1-002-030-000 ==========
     ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "企业应用关联表不存在");

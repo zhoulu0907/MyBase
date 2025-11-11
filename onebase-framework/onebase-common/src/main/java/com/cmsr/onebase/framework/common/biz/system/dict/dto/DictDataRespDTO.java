@@ -19,4 +19,8 @@ public class DictDataRespDTO {
     @Schema(description = "状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer status; // 参见 CommonStatusEnum 枚举
 
+    // 已确定相关引用处保存用id
+    @Schema(description = "字典id")
+    private Long id;
+
 }

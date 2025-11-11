@@ -15,6 +15,8 @@ import java.util.List;
  */
 @Data
 public class CorpRespVO {
+    @Schema(description = "企业Id", example = "")
+    private Long id;
 
     @Schema(description = "企业Logo", example = "")
     private String corpLogo;
@@ -22,11 +24,11 @@ public class CorpRespVO {
     @Schema(description = "企业名称", example = "")
     private String corpName;
 
-    @Schema(description = "企业ID", example = "ALIBABA")
-    private String corpId;
+    @Schema(description = "企业编码", example = "ALIBABA")
+    private String corpCode;
 
     @Schema(description = "行业类型", example = "1")
-    private Integer industryType;
+    private Long industryType;
 
     @Schema(description = "状态", example = "1")
     private Integer status;
@@ -37,6 +39,18 @@ public class CorpRespVO {
     @Schema(description = "用户上限", example = "100")
     private Integer userLimit;
 
+    @Schema(description = "用户个数", example = "100")
+    private Integer userCount;
+
+    @Schema(description = "应用个数", example = "100")
+    private Integer appCount;
+
+    @Schema(description = "联系人邮箱")
+    private String email;
+
+    @Schema(description = "联系人电话")
+    private String mobile;
+
     @Schema(description = "管理员")
     private String adminName;
 
@@ -45,4 +59,7 @@ public class CorpRespVO {
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
+
+    @Schema(description = "行业类型名称", example = "1")
+    private String industryTypeName;
 }

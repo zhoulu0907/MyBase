@@ -56,13 +56,15 @@ public class FlowVersionProvider {
                 updateDateFieldJob(flowProcessDO);
             }
         }
-        RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CACHE_KEY);
-        mapCache.put(applicationId, System.currentTimeMillis(), FlowUtils.VERSION_TIMEOUT_HOUR, TimeUnit.HOURS);
-        RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
         ChangeEvent changeEvent = new ChangeEvent();
         changeEvent.setEventType(ChangeEvent.UPDATE_EVENT);
         changeEvent.setApplicationId(applicationId);
         changeEvent.setVersion(System.currentTimeMillis());
+        //记录缓存
+        RMapCache<Long, ChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
+        mapCache.put(applicationId, changeEvent, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
+        //发送消息
+        RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
         topic.publish(changeEvent);
     }
 
@@ -83,8 +85,8 @@ public class FlowVersionProvider {
     }
 
     public void onApplicationDelete(Long applicationId) {
-        RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CACHE_KEY);
-        mapCache.put(applicationId, -1L, FlowUtils.VERSION_TIMEOUT_HOUR, TimeUnit.HOURS);
+        RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY);
+        mapCache.put(applicationId, -1L, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
         RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
         ChangeEvent changeEvent = new ChangeEvent();
         changeEvent.setEventType(ChangeEvent.DELETE_EVENT);

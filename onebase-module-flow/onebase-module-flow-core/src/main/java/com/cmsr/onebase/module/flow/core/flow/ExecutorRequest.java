@@ -9,6 +9,10 @@ import lombok.Data;
 @Data
 public class ExecutorRequest {
 
+    public static final String JOB_TYPE_TIME = "time";
+
+    public static final String JOB_TYPE_FIELD = "fld";
+
     private Long processId;
 
     private String jobType;

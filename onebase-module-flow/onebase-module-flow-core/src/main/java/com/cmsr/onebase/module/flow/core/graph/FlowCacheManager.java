@@ -34,10 +34,6 @@ public class FlowCacheManager implements ApplicationRunner, Runnable, MessageLis
 
     @Setter
     @Autowired
-    private FlowProcessCache flowProcessCache;
-
-    @Setter
-    @Autowired
     private FlowCacheHandler flowCacheHandler;
 
     @Setter
@@ -52,21 +48,21 @@ public class FlowCacheManager implements ApplicationRunner, Runnable, MessageLis
     @Autowired
     private TaskScheduler taskScheduler;
 
-    // 缓存已经处理过的版本，避免不同的加载和更新
+    // 缓存已经处理过的版本，避免不停的加载和更新
     private Cache<Long, Long> versionCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(FlowUtils.VERSION_TIMEOUT_HOUR, TimeUnit.HOURS).build();
+            .expireAfterWrite(FlowUtils.VERSION_TIMEOUT_MINUTES * 2, TimeUnit.MINUTES).build();
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CACHE_KEY);
+        RMapCache<Long, ChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
         mapCache.forEach((k, v) -> {
-            versionCache.put(k, v);
+            versionCache.put(k, v.getVersion());
         });
         flowCacheHandler.initAllProcess();
         flowJobHandler.initAllProcess();
         RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
         topic.addListener(ChangeEvent.class, this);
-        taskScheduler.scheduleAtFixedRate(this, Duration.of(60, ChronoUnit.SECONDS));
+        taskScheduler.scheduleWithFixedDelay(this, Duration.of(60, ChronoUnit.SECONDS));
     }
 
 
@@ -76,15 +72,10 @@ public class FlowCacheManager implements ApplicationRunner, Runnable, MessageLis
         Long applicationId = msg.getApplicationId();
         Long version = msg.getVersion();
         try {
-            synchronized (this) {
-                switch (msg.getEventType()) {
-                    case ChangeEvent.UPDATE_EVENT:
-                        onApplicationUpdate(applicationId, version);
-                        break;
-                    case ChangeEvent.DELETE_EVENT:
-                        onApplicationDelete(applicationId);
-                        break;
-                }
+            if (ChangeEvent.UPDATE_EVENT.equals(msg.getEventType())) {
+                onApplicationUpdate(applicationId, version);
+            } else if (ChangeEvent.DELETE_EVENT.equals(msg.getEventType())) {
+                onApplicationDelete(applicationId, version);
             }
         } catch (Exception e) {
             log.error("更新版本异常：{}", msg, e);
@@ -93,66 +84,43 @@ public class FlowCacheManager implements ApplicationRunner, Runnable, MessageLis
 
     @Override
     public void run() {
-        RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CACHE_KEY);
-        mapCache.forEach((applicationId, rVersion) -> {
+        RMapCache<Long, ChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
+        mapCache.forEach((applicationId, changeEvent) -> {
             try {
-                // 版本大于0，则更新
-                if (rVersion != null && rVersion >= 0) {
-                    checkApplicationForUpdate(applicationId, rVersion);
-                }
-                // 版本小于0的，则删除
-                if (rVersion != null && rVersion < 0) {
-                    checkApplicationForDelete(applicationId, rVersion);
+                if (ChangeEvent.UPDATE_EVENT.equals(changeEvent.getEventType())) {
+                    onApplicationUpdate(applicationId, changeEvent.getVersion());
+                } else if (ChangeEvent.DELETE_EVENT.equals(changeEvent.getEventType())) {
+                    onApplicationDelete(applicationId, changeEvent.getVersion());
                 }
             } catch (Exception e) {
                 log.error("更新版本异常：{}", e.getMessage(), e);
             }
         });
-        // 检查自己的缓存，可能有需要删除的，清理缓存，避免内存溢出
-        flowProcessCache.getAllApplicationId().forEach(applicationId -> {
-            try {
-                Long rVersion = mapCache.get(applicationId);
-                checkApplicationForDelete(applicationId, rVersion);
-            } catch (Exception e) {
-                log.error("删除应用异常：{}", e.getMessage(), e);
-            }
-        });
-    }
-
-
-    private void checkApplicationForUpdate(Long applicationId, Long rVersion) throws Exception {
-        synchronized (this) {
-            Long localVersion = versionCache.getIfPresent(applicationId);
-            // 版本不一致
-            if (localVersion == null || !localVersion.equals(rVersion)) {
-                onApplicationUpdate(applicationId, rVersion);
-            }
-        }
     }
 
     private void onApplicationUpdate(Long applicationId, Long rVersion) throws Exception {
         synchronized (this) {
-            log.info("更新应用自动化工作流：{}", applicationId);
-            flowCacheHandler.onApplicationChange(applicationId);
-            flowJobHandler.onApplicationChange(applicationId);
-            versionCache.put(applicationId, rVersion);
-        }
-    }
-
-    private void checkApplicationForDelete(Long applicationId, Long rVersion) throws Exception {
-        synchronized (this) {
-            if (rVersion != null && rVersion.equals(-1L)) {
-                onApplicationDelete(applicationId);
+            Long localVersion = versionCache.getIfPresent(applicationId);
+            if (localVersion == null || localVersion < rVersion) {
+                log.info("更新应用自动化工作流：{}", applicationId);
+                flowCacheHandler.onApplicationChange(applicationId);
+                flowJobHandler.onApplicationChange(applicationId);
+                //
+                versionCache.put(applicationId, rVersion);
             }
         }
     }
 
-    private void onApplicationDelete(Long applicationId) throws Exception {
+    private void onApplicationDelete(Long applicationId, Long rVersion) throws Exception {
         synchronized (this) {
-            log.info("删除应用自动化工作流：{}", applicationId);
-            flowCacheHandler.onApplicationDelete(applicationId);
-            flowJobHandler.onApplicationDelete(applicationId);
-            versionCache.invalidate(applicationId);
+            Long localVersion = versionCache.getIfPresent(applicationId);
+            if (localVersion == null || localVersion < rVersion) {
+                log.info("删除应用自动化工作流：{}", applicationId);
+                flowCacheHandler.onApplicationDelete(applicationId);
+                flowJobHandler.onApplicationDelete(applicationId);
+                //
+                versionCache.put(applicationId, rVersion);
+            }
         }
     }
 

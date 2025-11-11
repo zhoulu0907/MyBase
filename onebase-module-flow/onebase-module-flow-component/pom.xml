@@ -44,6 +44,10 @@
             <artifactId>liteflow-spring-boot-starter</artifactId>
             <version>2.13.2.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware.kryo</groupId>
+            <artifactId>kryo5</artifactId>
+        </dependency>
         <!-- 测试依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

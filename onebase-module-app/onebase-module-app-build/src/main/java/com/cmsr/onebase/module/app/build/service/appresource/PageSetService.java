@@ -1,11 +1,9 @@
 package com.cmsr.onebase.module.app.build.service.appresource;
 
+import com.cmsr.onebase.module.app.build.vo.appresource.*;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetReqVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
 
 public interface PageSetService {
 
@@ -26,4 +24,6 @@ public interface PageSetService {
     LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO);
 
     PageSetRespDTO getPageSet(Long pageSetId);
+
+    ListPageSetRespVO listPageSet(ListPageSetReqVO listPageSetReqVO);
 }

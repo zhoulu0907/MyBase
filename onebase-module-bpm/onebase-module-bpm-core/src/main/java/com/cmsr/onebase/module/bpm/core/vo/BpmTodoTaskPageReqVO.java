@@ -13,9 +13,6 @@ import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class BpmTodoTaskPageReqVO extends BpmInsExtQueryPageVO {
-    @Schema(description = "发起时间", example = "[2025-08-01 00:00:00,2025-08-18 23:59:59]")
-    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime[] submitTime;
 
     @Schema(description = "发起时间 - 开始（包含）", example = "2025-08-01 00:00:00")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
@@ -24,8 +21,4 @@ public class BpmTodoTaskPageReqVO extends BpmInsExtQueryPageVO {
     @Schema(description = "发起时间 - 结束（包含）", example = "2025-08-18 23:59:59")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime submitTimeEnd;
-
-    @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
-            example = "desc", defaultValue = "desc")
-    private String sortType;
 }

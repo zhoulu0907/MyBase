@@ -126,8 +126,8 @@ public class TenantDO extends BaseDO {
     /**
      * saas功能是否开启默认0，开启1
      */
-    @Column(name = "SAAS_ENABLED")
-    private Integer saasEnabled;
+    @Column(name = "PUBLISH_MODEL")
+    private String publishModel;
 
     /**
      * 用户logo

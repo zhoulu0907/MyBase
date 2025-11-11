@@ -241,7 +241,7 @@ public class AnyLineDBInfoListener implements DMListener {
             return SWITCH.CONTINUE;
         }
         if (!TenantContextHolder.isIgnore() && TenantContextHolder.getTenantId() != null) {
-            configs.param("tenant_id", TenantContextHolder.getTenantId());
+            configs.param(TenantBaseDO.TENANT_ID, TenantContextHolder.getTenantId());
         }
         // 检查是否有表名，如果没有表名则跳过添加条件
         if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {
@@ -266,7 +266,7 @@ public class AnyLineDBInfoListener implements DMListener {
             log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
         }
         if (!shouldIgnore) {
-            configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
+            configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         return SWITCH.CONTINUE;
     }
@@ -533,7 +533,7 @@ public class AnyLineDBInfoListener implements DMListener {
         boolean shouldIgnore = isTableTenantIgnored(table);
         log.info("[{}] injectTenantIdAndDeleteToConfigs --------------> isTableTenantIgnored: {}", table, shouldIgnore);
         if (!shouldIgnore) {
-            configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
+            configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);

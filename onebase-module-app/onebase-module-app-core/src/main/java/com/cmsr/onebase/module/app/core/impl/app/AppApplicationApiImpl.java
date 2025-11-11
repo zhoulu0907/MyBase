@@ -1,14 +1,16 @@
 package com.cmsr.onebase.module.app.core.impl.app;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dto.app.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,8 +33,16 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
-    public List<ApplicationDTO> finAppApplicationByAppName(String appName) {
-        List<ApplicationDO> applicationList = appApplicationRepository.finAppApplicationByAppName(appName);
+    public List<ApplicationDTO> findAppApplicationByAppName(String appName) {
+        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
+        return applicationList.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ApplicationDTO>  findAppApplicationByAppIds(Collection<Long> appIds) {
+        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppIds(appIds);
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -43,6 +53,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
+    @TenantIgnore
     public Map<Integer, Integer> findAppApplicationAll() {
         List<ApplicationDO> allApplications = appApplicationRepository.finAppApplicationAll();
         return allApplications.stream()

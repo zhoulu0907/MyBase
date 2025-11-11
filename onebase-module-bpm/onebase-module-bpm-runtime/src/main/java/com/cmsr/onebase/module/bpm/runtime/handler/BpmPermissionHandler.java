@@ -1,21 +1,18 @@
 package com.cmsr.onebase.module.bpm.runtime.handler;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.system.api.permission.PermissionApi;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.handler.PermissionHandler;
+import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 办理人权限处理器
@@ -26,7 +23,7 @@ import java.util.Set;
 @Slf4j
 public class BpmPermissionHandler implements PermissionHandler {
     @Resource
-    private PermissionApi permissionApi;
+    private AppAuthRoleUser appAuthRoleUser;
 
     /**
      * 办理人权限标识，比如用户，角色，部门等，用于校验是否有权限办理任务
@@ -57,7 +54,7 @@ public class BpmPermissionHandler implements PermissionHandler {
             return permissions;
         }
 
-        List<String> convertedPermissions = new ArrayList<>();
+        Set<String> convertedPermissions = new HashSet<>();
 
         // todo：是否要兼容原有warmflow格式
         // permissions使用了定义的格式
@@ -73,15 +70,11 @@ public class BpmPermissionHandler implements PermissionHandler {
                 }
 
                 if (CollectionUtil.isNotEmpty(nodePermFlagDTO.getRoleIds())) {
-                    // 处理角色
-                    CommonResult<Set<Long>> result = permissionApi.getUserRoleIdListByRoleIds(nodePermFlagDTO.getRoleIds());
+                    List<Long> usersFromRoleId = appAuthRoleUser.findUserIdsByRoleIds(nodePermFlagDTO.getRoleIds());
 
-                    if (result.isSuccess()) {
-                        Set<Long> usersFromRoleId = result.getData();
-                        if (CollectionUtil.isNotEmpty(usersFromRoleId)) {
-                            for (Long userId : usersFromRoleId) {
-                                convertedPermissions.add(String.valueOf(userId));
-                            }
+                    if (CollectionUtil.isNotEmpty(usersFromRoleId)) {
+                        for (Long userId : usersFromRoleId) {
+                            convertedPermissions.add(String.valueOf(userId));
                         }
                     }
                 }
@@ -90,7 +83,13 @@ public class BpmPermissionHandler implements PermissionHandler {
             }
         }
 
-        return convertedPermissions;
+        // 限制只返回最多100个用户ID
+        if (convertedPermissions.size() > BpmConstants.MAX_NODE_APPROVER_USERS) {
+            log.warn("审批人列表最多100个用户 当前为：{}", convertedPermissions.size());
+            return new ArrayList<>(convertedPermissions.stream().limit(BpmConstants.MAX_NODE_APPROVER_USERS).toList());
+        }
+
+        return new ArrayList<>(convertedPermissions);
     }
 }
 

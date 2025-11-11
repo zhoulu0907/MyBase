@@ -31,13 +31,13 @@ public interface CorpService {
     void deleteCorp(Long id);
 
     /**
-     * 获得企业分页
+     * 获得企业应用分页
      * 入参 企业名称搜索、状态筛选、创建时间区间、行业类型筛选
      *
      * @param pageReqVO 分页查询参数
-     * @return 企业分页结果
+     * @return 企业应用分页结果
      */
-    PageResult<CorpRespVO> getCorpPage(CorpPageReqVO pageReqVO);
+    PageResult<CorpRespVO> getCorpAppsPage(CorpPageReqVO pageReqVO);
 
     /**
      * 获得所有企业

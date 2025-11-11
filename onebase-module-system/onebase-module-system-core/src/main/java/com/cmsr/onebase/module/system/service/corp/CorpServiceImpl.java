@@ -1,11 +1,19 @@
 package com.cmsr.onebase.module.system.service.corp;
 
+import com.alibaba.nacos.common.utils.CollectionUtils;
+import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
+import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
+import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
@@ -14,6 +22,7 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -24,8 +33,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -54,6 +64,15 @@ public class CorpServiceImpl implements CorpService {
     @Resource
     private CorpAppRelationService corpAppRelationService;
 
+    @Resource
+    private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private AdminUserService userService;
+
+    @Resource
+    private   DictDataCommonApi dictDataApi;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -63,11 +82,16 @@ public class CorpServiceImpl implements CorpService {
         // 保存系统管理员
         CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO());
         // 保存关联关系
-        AppAuthTimeReqVO appAuthTimeReqVO = corpCombineReqVO.getAppAuthTimeReqVO();
-        createCorpAppRelation(appAuthTimeReqVO, corpId);
+        List<AppAuthTimeReqVO> appAuthTimeReqVO = corpCombineReqVO.getAppAuthTimeReqVO();
+
+        createListCorpAppRelation(appAuthTimeReqVO, corpId);
         // 更新企业管理员Id
         updateCorpAdminIdById(corpId, vo.getId());
         return vo;
+    }
+
+    private void createListCorpAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId) {
+        corpAppRelationService.createListCorpAppRelation(appAuthTimeReqVOs,corpId);
     }
 
 
@@ -75,7 +99,7 @@ public class CorpServiceImpl implements CorpService {
         //用于校验企业名称是否已存在
         validCorpNameDuplicate(reqVO.getCorpName());
         //用于校验企业ID是否已存在
-        validCorpIdDuplicate(reqVO.getCorpId());
+        validCorpIdDuplicate(reqVO.getCorpCode());
         //用于校验企业用户数量是否超过限制（如大于500）
         validCorpUserCountDuplicate(reqVO.getUserLimit());
 
@@ -101,13 +125,13 @@ public class CorpServiceImpl implements CorpService {
         }
     }
 
-    private void validCorpIdDuplicate(String corpId) {
-        if (StringUtils.isBlank(corpId)) {
+    private void validCorpIdDuplicate(String corpCode) {
+        if (StringUtils.isBlank(corpCode)) {
             return;
         }
-        CorpDO corpDO = corpDataRepository.findCorpByCorpId(corpId);
+        CorpDO corpDO = corpDataRepository.findCorpByCorpCode(corpCode);
         if (corpDO != null) {
-            throw exception(CORP_ID_EXISTS, corpId);
+            throw exception(CORP_ID_EXISTS, corpCode);
         }
     }
 
@@ -127,16 +151,12 @@ public class CorpServiceImpl implements CorpService {
     public void updateCorpAdminIdById(Long corpId, Long adminId) {
         //  企业修改管理员Id
         DataRow row = new DataRow();
-        row.put("admin_id", adminId);
+        row.put(CorpDO.ADMIN_ID, adminId);
         corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, corpId));
 
     }
 
-    public void createCorpAppRelation(AppAuthTimeReqVO createReqVO, Long corpId) {
-        CorpAppRelationInertReqVO createCorpAppRelation = BeanUtils.toBean(createReqVO, CorpAppRelationInertReqVO.class);
-        createCorpAppRelation.setCorpId(corpId);
-        corpAppRelationService.createCorpAppRelation(createCorpAppRelation);
-    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -148,19 +168,97 @@ public class CorpServiceImpl implements CorpService {
     }
 
     @Override
-    public PageResult<CorpRespVO> getCorpPage(CorpPageReqVO pageReqVO) {
-        // 调用数据仓库进行分页查询
+    public PageResult<CorpRespVO> getCorpAppsPage(CorpPageReqVO pageReqVO) {
+
+        /**
+         * 根据企业分页条件，查询企业及其关联应用信息的分页列表
+         *
+         * @param pageReqVO 分页与筛选条件
+         * @return PageResult<CorpRespVO> 企业-应用信息分页结果
+         */
+        // Step 1：分页查询企业列表
         PageResult<CorpDO> pageResult = corpDataRepository.selectPage(pageReqVO);
-        // 将 DO 对象转换为 VO 对象
-        return new PageResult<CorpRespVO>(
-                pageResult.getList().stream()
-                        .map(corpDO -> BeanUtils.toBean(corpDO, CorpRespVO.class))
-                        .collect(java.util.stream.Collectors.toList()),
-                pageResult.getTotal()
-        );
+        List<CorpDO> corpList = pageResult.getList();
+        if (CollectionUtils.isEmpty(corpList)) {
+            return new PageResult<>(Collections.emptyList(), pageResult.getTotal());
+        }
+
+        // 提取当前页企业ID集合
+        Set<Long> corpIds = corpList.stream()
+                .map(CorpDO::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // Step 2：根据企业列表查询关联的应用ID列表（先拉取关联关系，再按当前页企业过滤）
+        CorpAppRelationPageReqVO relationReqVO = new CorpAppRelationPageReqVO();
+        relationReqVO.setCorpIds(corpIds);
+
+        List<CorpAppRelationDO> allRelations = corpAppRelationService.getCorpAppRelationList(relationReqVO);
+        List<CorpAppRelationDO> relations = (allRelations == null ? Collections.<CorpAppRelationDO>emptyList() : allRelations)
+                .stream()
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (relations.isEmpty()) {
+            // 无关联应用，直接返回企业基本信息
+            List<CorpRespVO> noAppResp = corpList.stream()
+                    .map(c -> BeanUtils.toBean(c, CorpRespVO.class))
+                    .collect(Collectors.toList());
+            return new PageResult<>(noAppResp, pageResult.getTotal());
+        }
+
+        // Step 3：根据应用ID列表，查询所有应用详情列表（全量拉取后按ID过滤）
+        Set<Long> appIds = relations.stream()
+                .map(CorpAppRelationDO::getApplicationId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<ApplicationDTO> allApps = appApplicationApi.findAppApplicationByAppIds(appIds);
+        Map<Long, ApplicationDTO> applicationMap = (allApps == null ? Collections.<ApplicationDTO>emptyList() : allApps)
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(a -> appIds.contains(a.getId()))
+                .collect(Collectors.toMap(ApplicationDTO::getId, Function.identity(), (a, b) -> a));
+
+        // 关联关系按企业分组，便于组装
+        Map<Long, List<CorpAppRelationDO>> relationGroupByCorp = relations.stream()
+                .collect(Collectors.groupingBy(CorpAppRelationDO::getCorpId));
+
+         CommonResult<List<DictDataRespDTO>> dictlist= dictDataApi.getDictDataList(CorpConstant.INDUSTRY_TYPE);
+        Map<Long, String> dictmap = dictlist.getData().stream()
+                .collect(Collectors.toMap(DictDataRespDTO::getId
+                        , DictDataRespDTO::getLabel));
+
+        // Step 4：组装返回值
+        List<CorpRespVO> respList = corpList.stream()
+                .map(corpDO -> {
+                    CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
+                    List<CorpAppRelationDO> corpRels = relationGroupByCorp.getOrDefault(corpDO.getId(), Collections.emptyList());
+                    if (!corpRels.isEmpty()) {
+                        List<CorpAppVo> corpApplicationList = new ArrayList<>();
+                        for (CorpAppRelationDO rel : corpRels) {
+                            ApplicationDTO dto = applicationMap.get(rel.getApplicationId());
+                            if (dto != null) {
+                                CorpAppVo vo = new CorpAppVo();
+                                vo.setAppId(dto.getId());
+                                vo.setAppName(dto.getAppName());
+                                vo.setIconName(dto.getIconName());
+                                vo.setIconColor(dto.getIconColor());
+                                corpApplicationList.add(vo);
+                            }
+                        }
+                        respVO.setCorpApplicationList(corpApplicationList);
+                        respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
+                    }
+                    return respVO;
+                })
+                .collect(Collectors.toList());
+
+        return new PageResult<>(respList, pageResult.getTotal());
     }
 
     @Override
+    @TenantIgnore
     public List<CorpDO> findCorpAll() {
         return corpDataRepository.findAll();
     }
@@ -172,9 +270,31 @@ public class CorpServiceImpl implements CorpService {
             return null;
         }
         CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
+        AdminUserDO userDO=  userService.getUser(corpDO.getAdminId());
+        if(userDO!=null){
+            respVO.setAdminName(userDO.getNickname());
+            respVO.setEmail(userDO.getEmail());
+            respVO.setMobile(userDO.getMobile());
+        }
+        respVO.setAppCount(getCorpAppCount(id));
+        // TODO  获取企业用户数 待后续完善
+        respVO.setUserCount(respVO.getAppCount());
         return respVO;
     }
-
+    /**
+     * 获取企业关联的应用数量
+     *
+     * @param corpId 企业ID
+     * @return 应用数量
+     */
+    public Integer getCorpAppCount(Long corpId) {
+        CorpAppRelationPageReqVO relationReqVO = new CorpAppRelationPageReqVO();
+        Set<Long> corpIds = new HashSet<>();
+        corpIds.add(corpId);
+        relationReqVO.setCorpIds(corpIds);
+        List<CorpAppRelationDO> relations = corpAppRelationService.getCorpAppRelationList(relationReqVO);
+        return relations != null ? relations.size() : 0;
+    }
     private String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }
@@ -206,7 +326,7 @@ public class CorpServiceImpl implements CorpService {
     public void updateStatus(Long id, Long status) {
         //  企业禁用/开启
         DataRow row = new DataRow();
-        row.put("status", status);
+        row.put(CorpDO.STATUS, status);
         corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, id));
     }
 

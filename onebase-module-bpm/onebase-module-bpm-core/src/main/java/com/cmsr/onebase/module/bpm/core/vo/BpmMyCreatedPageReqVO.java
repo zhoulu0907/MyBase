@@ -13,19 +13,11 @@ import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class BpmMyCreatedPageReqVO extends BpmInsExtQueryPageVO {
-    @Schema(description = "流程状态：ALL-全部, DRAFT-草稿, APPROVING-审批中, APPROVED-已通过, REJECTED-已拒绝, REVOKED-已撤回, TERMINATED-已终止",
-            example = "ALL", defaultValue = "ALL")
-    private String flowStatus;
-
-    @Schema(description = "发起时间 - 开始（包含）", example = "2025-08-01 00:00:00")
+    @Schema(description = "创建时间 - 开始（包含）", example = "2025-08-01 00:00:00")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime submitTimeStart;
+    private LocalDateTime createTimeStart;
 
-    @Schema(description = "发起时间 - 结束（包含）", example = "2025-08-18 23:59:59")
+    @Schema(description = "创建时间 - 结束（包含）", example = "2025-08-18 23:59:59")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime submitTimeEnd;
-
-    @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
-            example = "desc", defaultValue = "desc")
-    private String sortType;
+    private LocalDateTime createTimeEnd;
 }

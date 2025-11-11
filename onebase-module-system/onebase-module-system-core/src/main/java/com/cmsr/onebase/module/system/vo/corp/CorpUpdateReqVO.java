@@ -17,11 +17,11 @@ public class CorpUpdateReqVO {
 
     @NotBlank(message = "企业编号不能为空")
     @Schema(description = "企业编号")
-    private String corpId;
+    private String corpCode;
 
     @NotNull(message = "行业类型不能为空")
     @Schema(description = "行业类型", example = "1")
-    private Integer industryType;
+    private Long industryType;
 
     @NotNull(message = "状态不能为空")
     @Schema(description = "状态", example = "1")
@@ -34,4 +34,7 @@ public class CorpUpdateReqVO {
     @NotNull(message = "用户数量上限不能为空")
     @Schema(description = "用户数量上限")
     private Integer userLimit;
+
+    @Schema(description = "企业logo", example = "")
+    private String corpLogo;
 }

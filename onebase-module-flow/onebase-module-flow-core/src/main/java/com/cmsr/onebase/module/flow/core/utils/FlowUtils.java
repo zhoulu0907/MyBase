@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.flow.core.utils;
 
+import org.redisson.codec.Kryo5Codec;
+
 import java.time.Duration;
 
 /**
@@ -8,11 +10,13 @@ import java.time.Duration;
  */
 public class FlowUtils {
 
-    public static final String REDIS_VERSION_CACHE_KEY = "flow:version:cache";
+    public static Kryo5Codec KRYO5_CODEC = new Kryo5Codec();
+
+    public static final String REDIS_VERSION_CHANGE_CACHE_KEY = "flow:version:change:cache";
 
     public static final String REDIS_VERSION_CHANGE_TOPIC_KEY = "flow:version:change:topic";
 
-    public static final int VERSION_TIMEOUT_HOUR = 12;
+    public static final int VERSION_TIMEOUT_MINUTES = 30;
 
     public static final int MAX_QUERY_CALL_COUNT = 10;
 

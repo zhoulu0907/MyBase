@@ -80,4 +80,28 @@ public class AppAuthRoleDeptRepository extends DataRepository<AuthRoleDeptDO> {
     }
 
 
+    public List<AuthRoleDeptDO> findByApplicationId(Long applicationId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.param("applicationId", applicationId);
+        String sql = """
+                select
+                	d.*
+                from
+                	app_auth_role_dept d,
+                	app_auth_role r
+                where
+                	d.deleted = 0
+                	and r.deleted = 0
+                	and d.role_id = r.id
+                	and r.application_id = #{applicationId}
+                """;
+        return this.querys(sql, configStore).stream().map(dataRow -> {
+            AuthRoleDeptDO authRoleDeptDO = new AuthRoleDeptDO();
+            authRoleDeptDO.setId(dataRow.getLong("id"));
+            authRoleDeptDO.setRoleId(dataRow.getLong("role_id"));
+            authRoleDeptDO.setDeptId(dataRow.getLong("dept_id"));
+            authRoleDeptDO.setIsIncludeChild(dataRow.getInt("is_include_child"));
+            return authRoleDeptDO;
+        }).toList();
+    }
 }

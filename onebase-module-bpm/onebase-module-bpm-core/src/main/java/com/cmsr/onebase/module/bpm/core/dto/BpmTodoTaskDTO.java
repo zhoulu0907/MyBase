@@ -19,16 +19,10 @@ public class BpmTodoTaskDTO extends FlowTask {
     private Long appId;
 
     /**
-     * 业务编码
-     */
-    @Column(name = "business_code", length = 100)
-    private String businessCode;
-
-    /**
      * 业务标题
      */
-    @Column(name = "business_title", length = 500)
-    private String businessTitle;
+    @Column(name = "bpm_title", length = 500)
+    private String bpmTitle;
 
     /**
      * 发起人ID
@@ -39,8 +33,14 @@ public class BpmTodoTaskDTO extends FlowTask {
     /**
      * 发起人名称（冗余字段，方便查询显示）
      */
-    @Column(name = "initiator_name", length = 100)
+    @Column(name = "initiator_name", length = 500)
     private String initiatorName;
+
+    /**
+     * 发起人头像（冗余字段，方便查询显示）
+     */
+    @Column(name = "initiator_avatar", length = 100)
+    private String initiatorAvatar;
 
     /**
      * 发起部门ID
@@ -75,4 +75,10 @@ public class BpmTodoTaskDTO extends FlowTask {
      */
     @Column(name = "form_name", length = 100)
     private String formName;
+
+    /**
+     * 绑定的视图ID，如pageSetId
+     */
+    @Column(name = "binding_view_id", length = 100)
+    private String bindingViewId;
 }

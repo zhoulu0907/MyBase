@@ -136,4 +136,6 @@ public interface RoleService {
      * @return 是否是租户管理员
      */
     boolean isTenantAdmin(Set<Long> ids);
+
+    RoleDO getRoleIdsByCodeAndTenantId(String code, Long id);
 }
