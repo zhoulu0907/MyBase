@@ -101,6 +101,8 @@ public class MetadataCollectServiceImpl implements MetadataCollectService {
     public List<ETLTableDO> collectTables(ETLDatasourceDO datasourceDO, Long catalogId, Long schemaId) {
         Long datasourceId = datasourceDO.getId();
         DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, false);
+
+
         String runnerKey = "metadata-collect-" + datasourceId;
         try {
             DataSourceHolder.reg(runnerKey, datasource);

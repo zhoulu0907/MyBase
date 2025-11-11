@@ -5,12 +5,15 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
+import com.cmsr.onebase.module.etl.build.service.MetadataCollector;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollectService;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
 import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
-import com.cmsr.onebase.module.etl.common.meta.ColumnMeta;
+import com.cmsr.onebase.module.etl.common.entity.CatalogData;
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
@@ -33,6 +36,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -66,6 +70,12 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Resource
     private DataInspectService dataInspectService;
+
+    @Resource
+    private DatasourceFactory datasourceFactory;
+
+    @Resource
+    private MetadataCollector metadataCollector;
 
     private Map<String, String> supportedDbs = Maps.newHashMap();
 
@@ -224,6 +234,10 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         Long datasourceId = datasourceDO.getId();
         log.info("提交元数据采集任务，数据源ID: {}", datasourceId);
         try {
+            DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, true);
+            CatalogData catalogData = metadataCollector.collectCatalog(datasourceId, datasource);
+
+
             ETLCatalogDO catalogDO = metadataCollectService.collectCatalog(datasourceDO);
             catalogDO = catalogRepository.upsert(catalogDO);
             Long catalogId = catalogDO.getId();
@@ -295,7 +309,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
 
-        List<ColumnMeta> columns = tableDO.getMetaInfo().getColumns();
+        List<ColumnData> columns = tableDO.getMetaInfo().getColumns();
         return columns.stream()
                 .map(columnMeta -> {
                     ColumnDefine columnDefine = new ColumnDefine();

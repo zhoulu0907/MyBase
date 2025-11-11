@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.cmsr.onebase.module.etl.common.meta.ColumnMeta;
-import com.cmsr.onebase.module.etl.common.meta.TableMeta;
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
+import com.cmsr.onebase.module.etl.common.entity.TableData;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -46,11 +46,11 @@ public class ETLTableDO extends TenantBaseDO {
     @Column(name = "declaration")
     private String declaration;
 
-    public TableMeta getMetaInfo() {
-        return JsonUtils.parseObject(this.metaInfo, TableMeta.class);
+    public TableData getMetaInfo() {
+        return JsonUtils.parseObject(this.metaInfo, TableData.class);
     }
 
-    public void setMetaInfo(TableMeta metaInfo) {
+    public void setMetaInfo(TableData metaInfo) {
         this.metaInfo = JsonUtils.toJsonString(metaInfo);
     }
 
@@ -66,47 +66,47 @@ public class ETLTableDO extends TenantBaseDO {
         tableDO.setTableName(tableName);
         tableDO.setDisplayName(tableName);
         tableDO.setTableType(table.keyword().toLowerCase());
-        TableMeta tableMeta = new TableMeta();
-        tableMeta.setCatalog(table.getCatalogName());
-        tableMeta.setSchema(table.getSchemaName());
-        tableMeta.setName(tableName);
-        List<ColumnMeta> columns = parseColumnMeta(tableColumns);
-        tableMeta.setColumns(columns);
+        TableData tableData = new TableData();
+        tableData.setCatalogName(table.getCatalogName());
+        tableData.setSchemaName(table.getSchemaName());
+        tableData.setName(tableName);
+        List<ColumnData> columns = parseColumnMeta(tableColumns);
+        tableData.setColumns(columns);
 
         return tableDO;
     }
 
-    private static List<ColumnMeta> parseColumnMeta(Collection<org.anyline.metadata.Column> tableColumns) {
-        List<ColumnMeta> columnList = new ArrayList<>(tableColumns.size());
+    private static List<ColumnData> parseColumnMeta(Collection<org.anyline.metadata.Column> tableColumns) {
+        List<ColumnData> columnList = new ArrayList<>(tableColumns.size());
         for (org.anyline.metadata.Column columnDef : tableColumns) {
-            ColumnMeta columnMeta = new ColumnMeta();
-            int position = columnMeta.getPosition();
+            ColumnData columnData = new ColumnData();
+            int position = columnData.getPosition();
             String columnName = columnDef.getName();
-            columnMeta.setName(columnName);
-            columnMeta.setDisplayName(columnName);
-            String comment = columnMeta.getComment();
-            columnMeta.setComment(comment);
-            columnMeta.setDeclaration(comment);
-            columnMeta.setType(columnDef.getOriginType().toLowerCase());
-            columnMeta.setPosition(position);
-            columnMeta.setNullable(columnDef.getNullable());
+            columnData.setName(columnName);
+            columnData.setDisplayName(columnName);
+            String comment = columnData.getComment();
+            columnData.setComment(comment);
+            columnData.setDeclaration(comment);
+            columnData.setType(columnDef.getOriginType().toLowerCase());
+            columnData.setPosition(position);
+            columnData.setNullable(columnDef.getNullable());
             if (columnDef.ignoreLength() != 1) {
-                columnMeta.setLength(columnDef.getLength());
+                columnData.setLength(columnDef.getLength());
             }
             if (columnDef.ignorePrecision() != 1) {
-                columnMeta.setPrecision(columnDef.getPrecision());
+                columnData.setPrecision(columnDef.getPrecision());
             }
             if (columnDef.ignoreScale() != 1) {
-                columnMeta.setScale(columnDef.getScale());
+                columnData.setScale(columnDef.getScale());
             }
-            columnMeta.setDefaultValue(columnDef.getDefaultValue().toString());
+            columnData.setDefaultValue(columnDef.getDefaultValue().toString());
             boolean isPrimaryKey = columnDef.getPrimaryKey();
-            columnMeta.setPrimaryKey(isPrimaryKey);
+            columnData.setPrimaryKey(isPrimaryKey);
             if (isPrimaryKey) {
-                columnMeta.setAutoIncrement(columnDef.getAutoIncrement());
+                columnData.setAutoIncrement(columnDef.getAutoIncrement());
             }
 
-            columnList.add(position - 1, columnMeta);
+            columnList.add(position - 1, columnData);
         }
         return columnList;
     }

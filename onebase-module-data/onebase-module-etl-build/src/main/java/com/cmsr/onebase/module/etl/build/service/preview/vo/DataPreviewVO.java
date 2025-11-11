@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.build.service.preview.vo;
 
-import com.cmsr.onebase.module.etl.common.meta.ColumnMeta;
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import lombok.Data;
 import org.anyline.entity.DataRow;
@@ -19,11 +19,11 @@ public class DataPreviewVO {
 
     public static DataPreviewVO of(ETLTableDO tableDO) {
         DataPreviewVO dataPreviewVO = new DataPreviewVO();
-        List<ColumnMeta> columnMetaList = tableDO.getMetaInfo().getColumns();
-        List<String> columnList = new ArrayList<>(columnMetaList.size());
-        for (ColumnMeta columnMeta : columnMetaList) {
-            String columnDefine = columnMeta.getDisplayName();
-            int metaColumnIdx = columnMeta.getPosition() - 1;
+        List<ColumnData> columnDataList = tableDO.getMetaInfo().getColumns();
+        List<String> columnList = new ArrayList<>(columnDataList.size());
+        for (ColumnData columnData : columnDataList) {
+            String columnDefine = columnData.getDisplayName();
+            int metaColumnIdx = columnData.getPosition() - 1;
             columnList.add(metaColumnIdx, columnDefine);
         }
         dataPreviewVO.setColumns(columnList);

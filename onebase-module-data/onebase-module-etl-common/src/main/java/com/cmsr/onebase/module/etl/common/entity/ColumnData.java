@@ -1,9 +1,9 @@
-package com.cmsr.onebase.module.etl.common.meta;
+package com.cmsr.onebase.module.etl.common.entity;
 
 import lombok.Data;
 
 @Data
-public class ColumnMeta {
+public class ColumnData {
 
     /**
      * 列名
