@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node.base;
+package com.cmsr.onebase.module.bpm.core.vo.design.node.base;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,6 +39,11 @@ public class BaseEdgeVO {
     @Schema(description = "条件")
     private String skipCondition;
 
+    /**
+     * 线状态，运行实例使用
+     */
+    @Schema(description = "线状态")
+    private String runStatus;
 }
 
 

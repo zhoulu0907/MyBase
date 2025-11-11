@@ -28,6 +28,10 @@ public class ApplicationSimpleRespVO {
     @Schema(description = "版本号")
     private String versionNumber;
 
+
+    @Schema(description = "应用描述")
+    private String description;
+
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime createTime;
 

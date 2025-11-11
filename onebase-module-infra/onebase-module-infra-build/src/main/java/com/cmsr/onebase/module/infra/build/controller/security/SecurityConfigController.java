@@ -2,11 +2,10 @@ package com.cmsr.onebase.module.infra.build.controller.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
-import com.cmsr.onebase.module.infra.api.security.PasswordValidationApi;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigBatchUpdateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigUpdateReqVO;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,7 +36,7 @@ public class SecurityConfigController {
     private SecurityConfigService securityConfigService;
 
     @Resource
-    private PasswordValidationApi passwordValidationApi;
+    private SecurityConfigApi securityConfigApi;
 
     @GetMapping("/categories")
     @Operation(summary = "获取所有安全配置分类")
@@ -79,7 +78,7 @@ public class SecurityConfigController {
     @Operation(summary = "弱密码校验")
     @PreAuthorize("@ss.hasPermission('infra:security-config:query')")
     public CommonResult<Boolean> checkWeakPassword(@RequestParam("password") String password) {
-        passwordValidationApi.validatePassword(password);
+        securityConfigApi.validatePassword(password);
         return success(true);
     }
 

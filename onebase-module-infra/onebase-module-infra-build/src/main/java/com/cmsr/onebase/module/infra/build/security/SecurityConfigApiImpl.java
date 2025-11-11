@@ -1,7 +1,7 @@
-package com.cmsr.onebase.module.infra.build.apiimpl;
+package com.cmsr.onebase.module.infra.build.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.infra.api.security.PasswordValidationApi;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.infra.service.security.manager.PasswordPolicyManager;
 import com.cmsr.onebase.module.infra.service.security.validator.PasswordValidator;
 import com.cmsr.onebase.module.infra.service.security.validator.config.PasswordPolicyConfig;
@@ -23,7 +23,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
      */
     @Slf4j
     @RestController
-    public class PasswordValidationApiImpl implements PasswordValidationApi {
+    public class SecurityConfigApiImpl implements SecurityConfigApi {
 
         @Resource
         private PasswordPolicyManager passwordPolicyManager;
