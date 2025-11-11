@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.impl;
+package com.cmsr.onebase.module.bpm.build.vo.design.strategy.impl;
 
 import com.cmsr.onebase.module.bpm.core.dto.node.StartNodeExtDTO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.StartNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.AbstractNodeVOStrategy;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.StartNodeVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.strategy.AbstractNodeVOStrategy;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

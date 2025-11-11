@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -79,6 +80,7 @@ public class ETLTableRepository extends DataRepository<ETLTableDO> {
         if (writable) {
             cs.eq("table_type", "table");
         }
+        cs.order("table_name", Order.TYPE.ASC);
 
         return findAllByConfig(cs);
     }

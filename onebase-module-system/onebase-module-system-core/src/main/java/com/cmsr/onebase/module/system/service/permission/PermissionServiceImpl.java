@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermi
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.dal.database.RoleMenuDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
@@ -409,12 +410,12 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @TenantIgnore
     public long deleteRoleUsers(Long roleId, Set<Long> userIds) {
         // 参数校验
         if (CollUtil.isEmpty(userIds)) {
             return 0;
         }
-
         // 删除指定角色下的指定用户关系
         return userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
     }

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.impl;
+package com.cmsr.onebase.module.bpm.build.vo.design.strategy.impl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
@@ -8,8 +8,8 @@ import com.cmsr.onebase.module.bpm.core.dto.node.base.RoleDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.UserDTO;
 import com.cmsr.onebase.module.bpm.core.enums.ApproverTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.ApproverNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.AbstractNodeVOStrategy;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.ApproverNodeVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.strategy.AbstractNodeVOStrategy;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

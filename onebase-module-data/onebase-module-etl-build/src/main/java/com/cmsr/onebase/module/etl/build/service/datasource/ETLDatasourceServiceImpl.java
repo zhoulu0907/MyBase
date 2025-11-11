@@ -148,7 +148,6 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     @Override
     public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
         ETLDatasourceDO oldDatasource = datasourceRepository.findById(updateReqVO.getId());
-        oldDatasource.setDatasourceCode(updateReqVO.getDatasourceCode());
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
         oldDatasource.setConfig(updateReqVO.getConfig());

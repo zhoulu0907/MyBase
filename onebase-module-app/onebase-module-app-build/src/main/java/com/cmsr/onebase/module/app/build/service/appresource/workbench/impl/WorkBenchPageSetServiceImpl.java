@@ -126,6 +126,16 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
         workBenchPageDO.setPageSetId(pageSetDO.getId());
         workBenchPageDO.setPageName(pageName);
         workBenchPageDO.setTitle(pageName);
+        workBenchPageDO.setPageType(PageEnum.WORKBENCH.getValue());
+        //补全必填字段
+        workBenchPageDO.setLayout("horizontal");
+        workBenchPageDO.setWidth("auto");
+        workBenchPageDO.setMargin("0");
+        workBenchPageDO.setBackgroundColor("#FFFFFF");
+        workBenchPageDO.setMainMetadata("{}");
+        workBenchPageDO.setRouterPath("workbench/" + UUID.randomUUID());
+        workBenchPageDO.setRouterName(pageName);
+        workBenchPageDO.setRouterMetaTitle(pageName);
 
         return workBenchPageDO;
     }

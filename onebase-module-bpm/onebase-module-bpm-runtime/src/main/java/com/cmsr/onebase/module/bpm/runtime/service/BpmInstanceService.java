@@ -46,4 +46,13 @@ public interface BpmInstanceService {
      * @return 流程图
      */
     List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO);
+
+
+    /**
+     * 流程预览
+     *
+     * @param reqVO 流程预览请求VO
+     * @return 流程图
+     */
+    BpmPreviewRespVO flowPreview(BpmPreviewReqVO reqVO);
 }

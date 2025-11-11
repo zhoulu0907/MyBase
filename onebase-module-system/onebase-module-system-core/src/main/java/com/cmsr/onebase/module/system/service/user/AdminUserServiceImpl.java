@@ -12,6 +12,7 @@ import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
@@ -23,6 +24,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
@@ -31,6 +33,7 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
@@ -54,6 +57,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.*;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
+import static java.util.Collections.singleton;
 
 /**
  * 后台用户 Service 实现类
@@ -83,6 +87,9 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Lazy
     @Resource
     private RoleService roleService;
+
+    @Resource
+    private SecurityConfigApi securityConfigApi;
 
     @Resource
     private AdminUserDataRepository adminUserDataRepository;
@@ -125,6 +132,8 @@ public class AdminUserServiceImpl implements AdminUserService {
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
         // 1.3 校验角色权限
         validateRoleIds(createReqVO.getRoleIds());
+        // 1.4 弱密码校验
+        securityConfigApi.validatePassword(createReqVO.getPassword());
 
         // 2.1 插入用户
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
@@ -167,7 +176,18 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         AdminUserDO adminUserDO= adminUserDataRepository.insert(userDO);
+        Long roleId=createCoreAdminRole();
+        permissionService.assignUserRoles(adminUserDO.getId(), singleton(roleId));
        return adminUserDO.getId();
+    }
+
+    private Long createCoreAdminRole() {
+        // 创建角色
+        RoleInsertReqVO reqVO = new RoleInsertReqVO();
+        reqVO.setName(RoleCodeEnum.CORP_ADMIN.getName()).setCode(RoleCodeEnum.CORP_ADMIN.getCode())
+                .setSort(0).setRemark("系统自动生成");
+        Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+        return roleId;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -182,6 +202,8 @@ public class AdminUserServiceImpl implements AdminUserService {
         //  校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
+        // 弱密码校验
+        securityConfigApi.validatePassword(createReqVO.getPassword());
         // 插入用户
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
@@ -219,6 +241,8 @@ public class AdminUserServiceImpl implements AdminUserService {
         });
         // 1.3 校验正确性
         validateUserForCreateOrUpdate(null, registerReqVO.getUsername(), null, null, null, null);
+        // 1.4 弱密码校验
+        securityConfigApi.validatePassword(registerReqVO.getPassword());
 
         // 2. 插入用户
         AdminUserDO user = BeanUtils.toBean(registerReqVO, AdminUserDO.class);
@@ -269,6 +293,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    @TenantIgnore
     public void updateAdminType(Long id, Integer adminType) {
         // 校验正确性
         validateUserExists(id);
@@ -321,6 +346,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void updateUserPassword(Long id, UserProfileUpdatePasswordReqVO reqVO) {
         // 校验旧密码密码
         validateOldPassword(id, reqVO.getOldPassword());
+        // 弱密码校验
+        securityConfigApi.validatePassword(reqVO.getNewPassword());
         // 执行更新
         AdminUserDO updateObj = new AdminUserDO().setId(id);
         updateObj.setPassword(encodePassword(reqVO.getNewPassword())); // 加密密码
@@ -334,13 +361,16 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
 
-        // 2. 更新密码
+        // 2. 弱密码校验
+        securityConfigApi.validatePassword(password);
+
+        // 3. 更新密码
         AdminUserDO updateObj = new AdminUserDO();
         updateObj.setId(id);
         updateObj.setPassword(encodePassword(password)); // 加密密码
         adminUserDataRepository.update(updateObj);
 
-        // 3. 记录操作日志上下文
+        // 4. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
         LogRecordContext.putVariable("newPassword", updateObj.getPassword());
     }
@@ -417,7 +447,13 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUser(Long id) {
-        return adminUserDataRepository.findById(id);
+        AdminUserDO adminUserDo= adminUserDataRepository.findById(id);
+        if(CommonStatusEnum.ENABLE.getStatus().equals(adminUserDo.getStatus())){
+            adminUserDo.setStatusDesc(CommonStatusEnum.ENABLE.getName());
+        }else{
+            adminUserDo.setStatusDesc(CommonStatusEnum.DISABLE.getName());
+        }
+        return adminUserDo;
     }
 
     @Override
@@ -617,8 +653,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (StrUtil.isEmpty(initPassword)) {
             throw exception(USER_IMPORT_INIT_PASSWORD);
         }
+        // 1.3 弱密码校验
+        securityConfigApi.validatePassword(initPassword);
 
-        // 2. 遍历，逐个创建 or 更新
+        // 2. 遍历,逐个创建 or 更新
         UserImportRespVO respVO = UserImportRespVO.builder().createUsernames(new ArrayList<>())
                 .updateUsernames(new ArrayList<>()).failureUsernames(new LinkedHashMap<>()).build();
         importUsers.forEach(importUser -> {
@@ -660,7 +698,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByStatus(Integer status,String userNickName) {
+    public List<AdminUserDO> getUserListByStatus(Integer status, String userNickName) {
         return adminUserDataRepository.findAllByStatus(status,userNickName);
     }
 

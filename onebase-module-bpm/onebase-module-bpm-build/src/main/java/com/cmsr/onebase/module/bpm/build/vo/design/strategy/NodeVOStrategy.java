@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
+package com.cmsr.onebase.module.bpm.build.vo.design.strategy;
 
 import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 
 /**
  * 节点配置创建策略接口

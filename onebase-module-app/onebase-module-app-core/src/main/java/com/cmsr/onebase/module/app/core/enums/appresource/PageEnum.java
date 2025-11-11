@@ -10,7 +10,8 @@ public enum PageEnum {
 
     FORM("form", "表单"),
 
-    LIST("list", "列表");
+    LIST("list", "列表"),
+    WORKBENCH("workbench", "工作台");
 
     private final String value;
 
