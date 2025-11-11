@@ -66,6 +66,9 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     private ETLWorkflowTableRepository workflowTableRepository;
 
     @Resource
+    private ETLFlinkMappingRepository flinkMappingRepository;
+
+    @Resource
     private MetadataCollectService metadataCollectService;
 
     @Resource
@@ -308,13 +311,18 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(tableDO.getId());
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+        }
+        Map<String, String> flinkTypeMappings = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceDO.getDatasourceType());
 
         List<ColumnData> columns = tableDO.getMetaInfo().getColumns();
         return columns.stream()
                 .map(columnMeta -> {
                     ColumnDefine columnDefine = new ColumnDefine();
                     columnDefine.setFieldName(columnMeta.getDisplayName());
-                    columnDefine.setFieldType(columnMeta.getType());
+                    columnDefine.setFieldType(flinkTypeMappings.get(columnMeta.getType()));
                     return columnDefine;
                 }).toList();
     }
