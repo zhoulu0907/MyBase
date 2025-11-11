@@ -246,9 +246,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     if (!conditionFields) return;
 
     conditionFields.forEach((field: ConditionField) => {
-      console.log('field: ', field.fieldType, field.label);
-      console.log('fieldType: ', fieldType);
-
       if (!fieldType || !field.fieldType) {
         children.push({
           key: `${nodeId}.${field.value}`,
