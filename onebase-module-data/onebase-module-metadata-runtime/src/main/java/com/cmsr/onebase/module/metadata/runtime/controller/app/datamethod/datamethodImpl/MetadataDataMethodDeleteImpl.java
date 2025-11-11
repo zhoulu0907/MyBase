@@ -371,6 +371,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         DefaultConfigStore configStore = new DefaultConfigStore();
         Object id = context.getId();
         configStore.and(primaryKeyField, id);
+        configStore.and("deleted",0);
 
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
@@ -380,8 +381,12 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         log.info("成功切换到数据源：{}", datasource.getCode());
         DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
 
+        // 将要删除的数据行保存下来，以便在后置删除触发方法中使用（物理删除之后数据库可能不存在该数据行）
+        context.setProcessedData(dataRow.map());
+
         Long entityId = context.getEntityId();
         Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
@@ -403,25 +408,11 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
     @Override
     protected void executePostWorkflow(ProcessContext context) {
         //查询删除数据
-        MetadataBusinessEntityDO entity = context.getEntity();
-        List<MetadataEntityFieldDO> fields = context.getFields();
-
-        String primaryKeyField = getPrimaryKeyFieldName(fields);
-
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        Object id = context.getId();
-        configStore.and(primaryKeyField, id);
-
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-        if (datasource == null) {
-            throw exception(DATASOURCE_NOT_EXISTS);
-        }
-        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-        log.info("成功切换到数据源：{}", datasource.getCode());
-        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+        Map deletedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+        Map<String, Object> data = convertNameToId(entityId,deletedData);
+
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
