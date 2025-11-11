@@ -53,7 +53,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
                 <InputNumber
                   size="mini"
                   value={configs[verifyKey]['minLength']}
-                  placeholder='字数下限'
+                  placeholder="字数下限"
                   min={0}
                   onChange={(value) => {
                     if (value > configs[verifyKey]['maxLength']) return;
@@ -67,7 +67,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
               <Grid.Col span={7}>
                 <InputNumber
                   size="mini"
-                  placeholder='字数上限'
+                  placeholder="字数上限"
                   min={0}
                   value={configs[verifyKey]['maxLength']}
                   onChange={(value) => {
@@ -79,26 +79,48 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
             </Grid.Row>
           )}
 
-          {typeof configs[verifyKey]['min'] === 'number' && (
-            <InputNumber
-              value={configs[verifyKey]['min']}
-              prefix="最小值"
-              onChange={(value) => {
-                if (value > configs[verifyKey]['max']) return;
-                handlePropsChange(verifyKey, { ...configs[verifyKey], min: value });
-              }}
-            />
+          {typeof configs[verifyKey]['numberLimit'] === 'boolean' && (
+            <Grid.Row align="center">
+              <Grid.Col span={8}>
+                <Checkbox
+                  checked={configs[verifyKey]['numberLimit']}
+                  onChange={(value) => {
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], numberLimit: value });
+                  }}
+                >
+                  数值范围
+                </Checkbox>
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <InputNumber
+                  size="mini"
+                  value={configs[verifyKey]['min']}
+                  placeholder="最小值"
+                  min={0}
+                  onChange={(value) => {
+                    if (value > configs[verifyKey]['max']) return;
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], min: value });
+                  }}
+                />
+              </Grid.Col>
+              <Grid.Col span={2} style={{ textAlign: 'center' }}>
+                -
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <InputNumber
+                  size="mini"
+                  placeholder="最大值"
+                  min={0}
+                  value={configs[verifyKey]['max']}
+                  onChange={(value) => {
+                    if (value < configs[verifyKey]['min']) return;
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], max: value });
+                  }}
+                />
+              </Grid.Col>
+            </Grid.Row>
           )}
-          {typeof configs[verifyKey]['max'] === 'number' && (
-            <InputNumber
-              value={configs[verifyKey]['max']}
-              prefix="最大值"
-              onChange={(value) => {
-                if (value < configs[verifyKey]['min']) return;
-                handlePropsChange(verifyKey, { ...configs[verifyKey], max: value });
-              }}
-            />
-          )}
+         
           {typeof configs[verifyKey]['maxChecked'] === 'number' && (
             <InputNumber
               value={configs[verifyKey]['maxChecked']}

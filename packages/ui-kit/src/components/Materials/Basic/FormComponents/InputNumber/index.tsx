@@ -2,7 +2,7 @@ import { Form, InputNumber } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputNumberConfig } from './schema';
 
@@ -13,12 +13,11 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     dataField,
     tooltip,
     status,
-    defaultValue,
+    defaultValueConfig,
     verify,
     align,
     step,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode,
     numberFormat
@@ -70,9 +69,6 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
           {
@@ -84,7 +80,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
+        initialValue={defaultValueConfig.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{detailValue(fieldValue) || '--'}</div>
@@ -92,8 +88,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
           <InputNumber
             placeholder={placeholder}
             step={step}
-            min={verify?.min}
-            max={verify?.max || 1000000000}
+            min={verify?.numberLimit ? verify?.min : undefined}
+            max={verify?.numberLimit ? verify?.max : undefined}
             precision={showPrecision ? precision : 0}
             formatter={(value) => {
               return useThousandsSeparator ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : value.toString();

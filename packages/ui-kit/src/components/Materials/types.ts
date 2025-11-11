@@ -420,11 +420,24 @@ export interface IDateFormatConfigType {
   type: typeof CONFIG_TYPES.DATE_FORMAT;
 }
 
+// 日期可选范围
+export interface IDateRangeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_RANGE;
+}
+
 // 时间格式
 export interface ITimeFormatConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TIME_FORMAT;
+}
+// 时间可选范围
+export interface ITimeRangeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_RANGE;
 }
 
 

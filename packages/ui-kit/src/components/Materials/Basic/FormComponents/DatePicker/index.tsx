@@ -14,11 +14,11 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     dataField,
     tooltip,
     status,
-    defaultValue,
+    defaultValueConfig,
     verify,
     dateType,
+    dateRange,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -70,9 +70,6 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

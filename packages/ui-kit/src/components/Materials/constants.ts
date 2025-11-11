@@ -91,8 +91,11 @@ export const CONFIG_TYPES = {
   AUTO_CODE_RULES: 'autoCodeRules',
   // 日期格式
   DATE_FORMAT: 'DateFormat',
+  // 日期可选范围
+  DATE_RANGE: 'DateRange',
   // 时间格式
   TIME_FORMAT: 'TimeFormat',
+  TIME_RANGE: 'TimeRange',
   // 填充文本 switch
   SWITCH_FILL_TEXT: 'SwitchFillText',
   // 手机类型
@@ -350,4 +353,33 @@ export const DEFAULT_VALUE_TYPES_LABELS = {
 export const PHONE_TYPE = {
   MOBILE: 'mobile', // 手机
   LANDLINE: 'landline', // 座机
+} as const;
+
+export const DATE_EXTREME_TYPE = {
+  STATIC: 'static',
+  DYNAMIC: 'dynamic',
+  VARIABLE: 'variable',
+} as const;
+
+// 当天/昨天/明天/7天前/7天后/30天前/30天后/自定义
+export const DATE_DYNAMIC_TYPE = {
+  TODAY: 'today',
+  YESTERDAY: 'yesterday',
+  TOMORROW: 'tomorrow',
+  BEFOREWEEK: 'beforeWeek',
+  AFTERWEEK: 'afterWeek',
+  BEFOREMONTH: 'beforeMonth',
+  AFTERMONTH: 'afterMonth',
+  CUSTOM: 'custom'
+} as const;
+
+export const DATE_DYNAMIC_VALUE = {
+  today: 0,
+  yesterday: -1,
+  tomorrow: 1,
+  beforeWeek: -7,
+  afterWeek: 7,
+  beforeMonth: -30,
+  afterMonth: 30,
+  custom: null
 } as const;

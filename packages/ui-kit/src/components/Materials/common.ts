@@ -543,39 +543,51 @@ export const tableOperationConfig: ITableOperationConfigType = {
   advanced: true,
 };
 
-export const autoCodeConfig:any = {
+export const autoCodeConfig: any = {
   key: 'rules',
-  name:'编号规则配置',
+  name: '编号规则配置',
   type: CONFIG_TYPES.AUTO_CODE_RULES
 }
 
-export const imageHandleConfig:any = {
+export const imageHandleConfig: any = {
   key: 'imageHandle',
-  name:'图片处理',
+  name: '图片处理',
   type: CONFIG_TYPES.IMAGE_HANDLE
 }
 
-export const dateFormatConfig:any = {
+export const dateFormatConfig: any = {
   key: 'dateFormat',
-  name:'日期格式',
+  name: '日期格式',
   type: CONFIG_TYPES.DATE_FORMAT
 }
 
-export const timeFormatConfig:any = {
+export const dateRangeConfig: any = {
+  key: 'dateRange',
+  name: '可选范围',
+  type: CONFIG_TYPES.DATE_RANGE
+}
+
+export const timeFormatConfig: any = {
   key: 'timeFormat',
-  name:'日期格式',
+  name: '日期格式',
   type: CONFIG_TYPES.TIME_FORMAT
 }
 
-export const switchFillTextConfig:any = {
+export const timeRangeConfig: any = {
+  key: 'timeRange',
+  name: '可选范围',
+  type: CONFIG_TYPES.TIME_RANGE
+}
+
+export const switchFillTextConfig: any = {
   key: 'fillText',
-  name:'填充文本',
+  name: '填充文本',
   type: CONFIG_TYPES.SWITCH_FILL_TEXT
 }
 
 // 默认值
-export const defaultValueConfig:any ={
+export const defaultValueConfig: any = {
   key: 'defaultValueConfig',
-  name:'默认值',
+  name: '默认值',
   type: CONFIG_TYPES.DEFAULT_VALUE
 }

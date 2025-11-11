@@ -35,6 +35,7 @@ import DynamicTimeFormatConfig from './components/DynamicTimeFormatConfig';
 import DynamicSwitchFillTextConfig from './components/DynamicSwitchFillTextConfig';
 import DynamicDefaultValueConfig from './components/DynamicDefaultValueConfig';
 import DynamicVerifyConfig from './components/DynamicVerifyConfig';
+import DynamicDateRangeConfig from './components/DynamicDateRangeConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -736,6 +737,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             ></Radio.Group>
           </FormItem>
         );
+      case CONFIG_TYPES.DATE_RANGE:
+        // 日期可选范围
+        return <DynamicDateRangeConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       default:
         return (
           <FormItem className={styles.formItem} label={item.name}>
