@@ -63,23 +63,6 @@ const AppPermission: FC = () => {
     setActiveTab(res[0].id);
   };
 
-  // 获取用户角色成员
-  const getMemberList = async (roleId: string) => {
-    try {
-      const params: GerRoleUserReq = {
-        roleId,
-        // applicationId: appId,
-        pageNo: 1,
-        pageSize: 10
-      };
-      const res = await getRoleUser(params);
-      setMemberList(res.list || []);
-      setMemberTotal(res.total);
-    } catch (error) {
-      console.error('获取用户角色成员失败:', error);
-    }
-  };
-
   const handleSelectmenu = (val: string) => {
     if (val === 'add') {
       setAddRole(true);
@@ -87,10 +70,6 @@ const AppPermission: FC = () => {
     }
     setActiveTab(val);
     setShowEmpty(false);
-    const isAdminRole = val === adminData?.id;
-    if (isAdminRole) {
-      getMemberList(val);
-    }
   };
 
   // 回车新建自定义角色

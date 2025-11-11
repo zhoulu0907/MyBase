@@ -8,7 +8,10 @@ import {
   type RoleDeleteUserReq,
   type DeleteRoleReq,
   type GerRoleUserReq,
-  type GetDeptUserReq
+  type GetDeptUserReq,
+  getRoleMembersReq,
+  RoleDeleteMemberReq,
+  RoleAddDeptReq
 } from '../types/role';
 import { appService } from './clients';
 
@@ -33,9 +36,19 @@ export const roleAddUser = (params: RoleAddUserReq) => {
   return appService.post('/auth-role/add-user', params);
 };
 
+// 角色添加部门
+export const roleAddDept = (params: RoleAddDeptReq) => {
+  return appService.post('/auth-role/add-dept', params);
+};
+
 // 角色删除成员
 export const roleDeleteUser = (params: RoleDeleteUserReq) => {
   return appService.post('/auth-role/delete-user', params);
+};
+
+// 角色删除成员
+export const roleDeleteMember = (params: RoleDeleteMemberReq) => {
+  return appService.post('/auth-role/delete-member', params);
 };
 
 // 删除角色
@@ -51,4 +64,9 @@ export const getRoleUser = (params: GerRoleUserReq) => {
 // 获取部门用户列表
 export const getDeptUser = (params: GetDeptUserReq) => {
   return appService.get('/auth-role/list-dept-users', params);
+};
+
+// 获取角色成员列表
+export const getRoleMembers = (params: getRoleMembersReq) => {
+  return appService.get('/auth-role/page-role-members', params);
 };

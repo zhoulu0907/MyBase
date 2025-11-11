@@ -14,14 +14,21 @@ const Col = Grid.Col;
 
 interface PageProps {
   detailPopVisible: boolean;
-  setPopVisible: Function;
-  onBack?: Function;
+  setPopVisible: (visible: boolean) => void;
+  onBack?: () => void;
   taskId?: string;
   rowData?: any;
   listType?: string;
 }
 
-const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, taskId, rowData, listType }) => {
+const DetailPage: React.FC<PageProps> = ({
+  detailPopVisible = false,
+  setPopVisible,
+  onBack,
+  taskId,
+  rowData,
+  listType
+}) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [stepData, setStepData] = useState();
@@ -29,9 +36,9 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
 
-  const [popupVisibleMap, setPopupVisibleMap] = useState({});
-  const setPopupVisibleByIndex = (index, visible) => {
-    setPopupVisibleMap((prev) => ({
+  const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
+  const setPopupVisibleByIndex = (index: number, visible: boolean) => {
+    setPopupVisibleMap((prev: any) => ({
       ...prev,
       [index]: visible
     }));
@@ -91,7 +98,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           流程预览
         </Button>
         {detailData?.buttonConfigs &&
-          detailData?.buttonConfigs?.map((item, index) => {
+          detailData?.buttonConfigs?.map((item: any, index: number) => {
             if (!item?.approvalCommentRequired) {
               return (
                 <Button
@@ -111,7 +118,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
                   content={
                     <DetailOKConfirm
                       ref={confirmRef}
-                      onSetPopupVisible={(visible) => setPopupVisibleByIndex(index, visible)}
+                      onSetPopupVisible={(visible: any) => setPopupVisibleByIndex(index, visible)}
                       onBack={onBack}
                       taskId={taskId}
                       instanceId={rowData?.instanceId}
@@ -145,6 +152,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   const fetchDetailData = async () => {
     const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: rowData?.taskId });
     setDetailData(res);
+    // 拿到详情信息
   };
 
   useEffect(() => {
