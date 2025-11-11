@@ -104,7 +104,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private AdminUserRoleApi adminUserRoleApi;
-
+    @Resource
+    private AdminUserService adminUserService;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -238,6 +239,7 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setMobile(adminUserReqVO.getAdminMobile());
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
+            reqVO.setId(adminUserReqVO.getAdminUserId());
             // 创建用户
             Long userId = userService.createUser(reqVO);
             // 分配角色
@@ -283,6 +285,9 @@ public class TenantServiceImpl implements TenantService {
                         userLimit,
                         remainingCount);
             }
+            if(updateReqVO.getAccountCount()==null){
+                updateReqVO.setAccountCount(tenant.getAccountCount());
+            }
             TenantUtils.execute(tenant.getId(), () -> {
                 // 查询当前租户下已分配的用户数量，下限
                 Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
@@ -321,7 +326,7 @@ public class TenantServiceImpl implements TenantService {
                 // 管理员变了，把旧管理员角色移除，并降级为自定义
                 Long  roleId = getAdminRoleAndDeleteOldUserRole(tenant);
                 // 判断管理员是否发生变更
-              List<String> adminUserRespDTOS=  adminUserRoleApi.getUserRoleByRoleId(roleId);
+              List<String> adminUserRespDTOS=  adminUserRoleApi.getUserRoleByRoleIdAndTenantId(roleId,tenant.getId());
                 List<Long> userIds = adminUserRespDTOS.stream()
                         .map(Long::valueOf)
                         .collect(Collectors.toList());
@@ -333,7 +338,7 @@ public class TenantServiceImpl implements TenantService {
                 Map<String, String> adminUsernameMap = updateReqVO.getTenantAdminUserUpdateReqVOSList().stream()
                         .collect(Collectors.toMap(TenantAdminUserUpdateReqVO::getAdminUserName, TenantAdminUserUpdateReqVO::getAdminUserName));
 
-// 获取需要删除的用户（在现有用户中但不在新管理员列表中的用户）
+                // 获取需要删除的用户（在现有用户中但不在新管理员列表中的用户）
                 Map<String, Long> usersToDelete = usernameIdMap.entrySet().stream()
                         .filter(entry -> !adminUsernameMap.containsKey(entry.getKey()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -481,19 +486,25 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
+         Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量
         Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
         tenantRespVO.setExistUserCount(count);
-
         Long appCountResult = appApplicationApi.countApplicationByTenantId(id);
         // Long 转 Integer
         tenantRespVO.setAppCount(appCountResult != null ? appCountResult.intValue() : 0);
+        Integer corpCount = corpCountMap.get(tenantDO.getId());
+        if (corpCount == null) {
+            corpCount = CorpConstant.ZERO; // 默认值处理
+        }
+        tenantRespVO.setCorpCount(corpCount);
         // 获取当前空间的管理员角色id
-        RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+     //  RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+        RoleDO roleDO = roleService.getRoleIdsByCodeAndTenantId(RoleCodeEnum.TENANT_ADMIN.getCode(),id);
         if(roleDO!=null) {
-            List<String> adminUserRespDTOS = adminUserRoleApi.getUserRoleByRoleId(roleDO.getId());
+            List<String> adminUserRespDTOS = adminUserRoleApi.getUserRoleByRoleIdAndTenantId(roleDO.getId(),id);
             List<Long> userIds = adminUserRespDTOS.stream()
                     .map(Long::valueOf)
                     .collect(Collectors.toList());
@@ -549,7 +560,9 @@ public class TenantServiceImpl implements TenantService {
         if (CollUtil.isEmpty(tenantDOPageResult.getList())) {
             return PageResult.empty();
         }
-
+        List<TenantDO> tenantDOList=tenantDOPageResult.getList();
+        List<Long> tenantIds = CollectionUtils.convertList(tenantDOList, TenantDO::getId);
+        Map<Long,Integer> existUserCountMap = adminUserService.getTenantExistUserCountByIds(tenantIds);
         Map<Long, Integer> coupCountMap = findCorpCount();
         Map<Integer, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称
@@ -558,6 +571,11 @@ public class TenantServiceImpl implements TenantService {
                 .map(tenantDO -> {
                     TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
                     tenantRespVO.setLogoUrl(tenantDO.getLogoUrl());
+                    Integer existUserCount = existUserCountMap.get(tenantDO.getId());
+                    if (existUserCount == null) {
+                        existUserCount = CorpConstant.ZERO; // 默认值处理
+                    }
+                    tenantRespVO.setExistUserCount(existUserCount);
 
                     Integer corpCount = coupCountMap.get(tenantDO.getId());
                     if (corpCount == null) {

@@ -8,4 +8,10 @@ public class CorpConstant {
     public static final int ZERO = 0;
     // 授权时间有效期范围 默认往后推加一年
     public static final int EXPIRESYEAR = 1;
+
+    public static final String  INDUSTRY_TYPE = "industry_type";
+
+    public static final String  LEADER_USER_ID = "admin";
+
+
 }

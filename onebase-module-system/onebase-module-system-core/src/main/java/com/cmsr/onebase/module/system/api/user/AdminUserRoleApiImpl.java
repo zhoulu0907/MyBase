@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.api.user;
 
 
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -16,7 +17,8 @@ public class AdminUserRoleApiImpl implements AdminUserRoleApi {
     @Resource
     private AdminUserService userService;
     @Override
-    public List<String> getUserRoleByRoleId(Long id) {
-      return   userService.getUserRoleByRoleId(id);
+    @TenantIgnore
+    public List<String> getUserRoleByRoleIdAndTenantId(Long id,Long tenantId) {
+      return   userService.getUserRoleByRoleIdAndTenantId(id,tenantId);
     }
 }

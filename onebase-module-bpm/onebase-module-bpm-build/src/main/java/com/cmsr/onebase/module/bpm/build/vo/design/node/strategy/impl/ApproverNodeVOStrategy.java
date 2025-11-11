@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.impl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverConfigDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.RoleDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.UserDTO;
-import com.cmsr.onebase.module.bpm.api.enums.ApproverTypeEnum;
-import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverConfigDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.RoleDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.UserDTO;
+import com.cmsr.onebase.module.bpm.core.enums.ApproverTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.ApproverNodeVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.AbstractNodeVOStrategy;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
@@ -56,7 +56,7 @@ public class ApproverNodeVOStrategy extends AbstractNodeVOStrategy<ApproverNodeV
     }
 
     @Override
-    public ApproverNodeExtDTO buildExtData(ApproverNodeVO nodeVO) {
+    public ApproverNodeExtDTO buildExtData(ApproverNodeVO nodeVO, Long appId) {
         ApproverNodeExtDTO extDTO = new ApproverNodeExtDTO();
 
         // 设置节点类型
@@ -66,11 +66,10 @@ public class ApproverNodeVOStrategy extends AbstractNodeVOStrategy<ApproverNodeV
         ApproverNodeVO.ApproverNodeDataVO dataVO = nodeVO.getData();
 
         // 校验审批人配置
-        validateApproverConfig(dataVO.getApproverConfig());
+        validateApproverConfig(dataVO.getApproverConfig(), appId);
+
         // 校验按钮配置
         validateButtonConfigs(dataVO.getButtonConfigs());
-        // 校验字段权限配置
-        validateFieldPermConfig(dataVO.getFieldPermConfig());
 
         // 去除提交按钮
         dataVO.getButtonConfigs().removeIf(buttonConfig -> BpmActionButtonEnum.SUBMIT.getCode().equals(buttonConfig.getButtonType()));

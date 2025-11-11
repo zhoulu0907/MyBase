@@ -1,16 +1,19 @@
 package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.FieldPermCfgDTO;
-import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
-import com.cmsr.onebase.module.bpm.api.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.api.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Skip;
@@ -112,7 +115,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
 
         // 实体数据更新
-        if (entityVO != null && fieldPermConfig != null) {
+        if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData()) && fieldPermConfig != null && CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
             Map<Long, Boolean> fieldMap = new HashMap<>();
             Map<Long, Object> updateEntityData = new HashMap<>();
 
@@ -137,6 +140,10 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 UpdateDataReqDTO updateDataReqDTO = new UpdateDataReqDTO();
                 updateDataReqDTO.setEntityId(entityVO.getEntityId());
                 updateDataReqDTO.setData(List.of(updateEntityData));
+
+                // 构建条件
+                ConditionDTO conditionDTO = buildIdCondition(entityVO.getEntityId(), entityVO.getId());
+                updateDataReqDTO.setConditionDTO(List.of(List.of(conditionDTO)));
 
                 dataMethodApi.updateData(updateDataReqDTO);
             }

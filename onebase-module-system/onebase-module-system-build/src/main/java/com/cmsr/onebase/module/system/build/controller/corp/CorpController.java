@@ -73,7 +73,7 @@ public class CorpController {
     @Operation(summary = "获得企业列表-分页")
     @PreAuthorize("@ss.hasPermission('system:corp:query')")
     public CommonResult<PageResult<CorpRespVO>> getCorpPage(@Valid CorpPageReqVO pageReqVO) {
-        PageResult<CorpRespVO> pageResult = corpService.getCorpPage(pageReqVO);
+        PageResult<CorpRespVO> pageResult = corpService.getCorpAppsPage(pageReqVO);
         return success(pageResult);
     }
 
@@ -92,4 +92,5 @@ public class CorpController {
         CorpRespVO corp = corpService.getCorp(id);
         return success(corp);
     }
+
 }

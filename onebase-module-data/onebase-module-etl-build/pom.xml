@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-security</artifactId>
+            <artifactId>onebase-security-build</artifactId>
         </dependency>
 
         <!-- Compile time -->

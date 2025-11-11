@@ -17,7 +17,7 @@ public class BpmFlowInstanceVO {
     @Schema(description = "对应flow_definition表的id")
     private Long definitionId;
 
-    @Schema(description = "业务id")
+    @Schema(description = "业务id，实际对应pageSetId")
     private String businessId;
 
     @Schema(description = "节点类型（0开始节点 1中间节点 2结束节点 3互斥网关 4并行网关）")

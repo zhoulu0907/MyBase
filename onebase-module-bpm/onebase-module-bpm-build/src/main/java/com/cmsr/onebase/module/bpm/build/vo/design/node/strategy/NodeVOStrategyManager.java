@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.enums.ApprovalModeEnum;
+import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.ApprovalModeEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
 import jakarta.annotation.PostConstruct;
@@ -131,13 +131,13 @@ public class NodeVOStrategyManager {
     }
 
     /**
-     * 构建节点扩展数据
+     * 填充节点扩展数据
      * 将BpmDefJsonVO.NodeVO的数据转换为NodeJson.ext格式
      *
      * @param nodeVO 节点配置VO
      * @return 扩展数据JSON字符串
      */
-    public void buildNodeExtData(NodeJson nodeJson, BaseNodeVO nodeVO) {
+    public void fillNodeExtData(NodeJson nodeJson, BaseNodeVO nodeVO, Long appId) {
         if (nodeVO == null) {
             log.error("节点VO为空");
             throw exception(ErrorCodeConstants.MISSING_NODE_VO_DATA);
@@ -154,7 +154,7 @@ public class NodeVOStrategyManager {
         // 使用策略构建扩展数据
         @SuppressWarnings("unchecked")
         NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO> rawStrategy = (NodeVOStrategy<BaseNodeVO, BaseNodeExtDTO>) strategy;
-        BaseNodeExtDTO extData = rawStrategy.buildExtData(nodeVO);
+        BaseNodeExtDTO extData = rawStrategy.buildExtData(nodeVO, appId);
 
         String ext = JsonUtils.toJsonString(extData);
         nodeJson.setExt(ext);

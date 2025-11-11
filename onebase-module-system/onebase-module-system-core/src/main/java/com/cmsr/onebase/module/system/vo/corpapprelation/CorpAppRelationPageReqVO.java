@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.Collection;
+
 @Schema(description = "企业应用关联表分页")
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -13,14 +15,8 @@ import lombok.ToString;
 public class CorpAppRelationPageReqVO extends PageParam {
 
     @Schema(description = "企业id" )
-    private Long corpId;
+    private Collection<Long> corpIds;
 
-    @Schema(description = "状态（启用，禁用，过期）" )
-    private Integer status;
-
-    @Schema(description = "应用名称" )
-    private String applicationName;
-
-
-
+    @Schema(description = "应用id" )
+    private Collection<Long> appIds;
 }

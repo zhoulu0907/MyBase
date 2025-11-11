@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.build.service.datasource;
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
@@ -19,7 +20,7 @@ public interface ETLDatasourceService {
 
     PageResult<DatasourceRespVO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO);
 
-    Long createDatasource(ETLDatasourceCreateReqVO createReqVO);
+    CommonResult<Long> createDatasource(ETLDatasourceCreateReqVO createReqVO);
 
     void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO);
 
@@ -29,7 +30,7 @@ public interface ETLDatasourceService {
 
     DataPreviewVO previewTable(TablePreviewVO tablePreviewVO);
 
-    List<MetaBriefVO> listDatasources(Long applicationId);
+    List<MetaBriefVO> listDatasources(Long applicationId, Integer writable);
 
     List<MetaBriefVO> listDatasourceTables(Long datasourceId, Integer writable);
 

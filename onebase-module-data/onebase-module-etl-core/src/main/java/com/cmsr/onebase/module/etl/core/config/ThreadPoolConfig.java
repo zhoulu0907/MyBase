@@ -37,6 +37,8 @@ public class ThreadPoolConfig {
         executor.setQueueCapacity(queueCapacity);
         executor.setKeepAliveSeconds(keepAliveSeconds);
         executor.setThreadNamePrefix(threadNamePrefix);
+        // 允许核心线程超时退出
+        executor.setAllowCoreThreadTimeOut(true);
         // 等待所有任务结束后再关闭线程池，最多等待10秒
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(10);

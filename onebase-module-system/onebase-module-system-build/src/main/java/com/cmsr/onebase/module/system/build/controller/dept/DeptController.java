@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.vo.dept.*;
+import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,6 +48,14 @@ public class DeptController {
     @PreAuthorize("@ss.hasPermission('system:dept:update')")
     public CommonResult<Boolean> updateDept(@Valid @RequestBody DeptSaveReqVO updateReqVO) {
         deptService.updateDept(updateReqVO);
+        return success(true);
+    }
+
+    @PostMapping("/update-dept-admin-or-director")
+    @Operation(summary = "修改部门用户管理员/主管")
+    @PreAuthorize("@ss.hasPermission('system:user:update')")
+    public CommonResult<Boolean> updateAdminOrDirector(@Valid @RequestBody UserAdminOrDirectorUpdateReqVO reqVO) {
+        deptService.updateAdminOrDirector(reqVO);
         return success(true);
     }
 
@@ -92,11 +101,12 @@ public class DeptController {
         return success(result);
     }
 
-    @GetMapping("/get-depts-by-user-id")
-    @Operation(summary = "根据用户ID获取其所属部门及其父部门列表")
+    @GetMapping("/get-depts-by-id")
+    @Operation(summary = "根据ID和类型获取其所属部门及其父部门列表")
     @PreAuthorize("@ss.hasPermission('system:dept:query')")
-    public CommonResult<List<DeptSimpleRespVO>> getParentDeptsListByUserId(@RequestParam("userId") Long userId) {
-        List<DeptDO> deptDOList = deptService.getParentDeptsListByUserId(userId);
+    public CommonResult<List<DeptSimpleRespVO>> getParentDeptsListById(@RequestParam("id") Long id,
+                                                                       @RequestParam("idType") String idType) {
+        List<DeptDO> deptDOList = deptService.getParentDeptsListById(id,idType);
         return success(BeanUtils.toBean(deptDOList, DeptSimpleRespVO.class));
     }
 

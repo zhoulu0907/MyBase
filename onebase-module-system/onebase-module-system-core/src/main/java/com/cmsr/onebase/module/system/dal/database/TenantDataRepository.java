@@ -161,9 +161,7 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
 
     public PageResult<TenantDO> findPage(TenantPageReqVO pageReqVO) {
         Integer status = pageReqVO.getStatus();
-
         DefaultConfigStore configStore = new DefaultConfigStore();
-
         // 按照关键词模糊查询
         if (pageReqVO.getKeyword() != null && !pageReqVO.getKeyword().trim().isEmpty()) {
             configStore.and(new DefaultConfigStore()

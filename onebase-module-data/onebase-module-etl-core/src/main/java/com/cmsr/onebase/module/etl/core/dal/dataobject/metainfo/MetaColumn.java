@@ -38,10 +38,9 @@ public class MetaColumn {
     private String originType;
 
     /**
-     * 与标准Anyline TypeMetadata中匹配的类型
-     * {@link org.anyline.metadata.type.TypeMetadata}
+`    * Flink类型
      */
-    private String compatibleType;
+    private String flinkType;
 
     /**
      * 列字段的排序
@@ -149,7 +148,7 @@ public class MetaColumn {
                     StringUtils.equals(this.comment, oColumn.comment) &&
                     StringUtils.equals(this.name, oColumn.name) &&
                     StringUtils.equals(this.originType, oColumn.originType) &&
-                    StringUtils.equals(this.compatibleType, oColumn.compatibleType) &&
+                    StringUtils.equals(this.flinkType, oColumn.flinkType) &&
                     this.position == oColumn.position &&
                     this.nullable == oColumn.nullable &&
                     this.primary == oColumn.primary &&

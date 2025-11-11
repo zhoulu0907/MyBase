@@ -105,6 +105,28 @@ public class DictDataController {
         return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
     }
 
+    /**
+     * 根据字典类型ID获得字典数据列表
+     *
+     * @param dictTypeId 字典类型ID
+     * @return 字典数据列表
+     */
+    @GetMapping("/simple-list-by-type-id")
+    @Operation(summary = "根据字典类型ID获得字典数据列表", description = "一般用于前段获取")
+    @Parameter(name = "dictTypeId", description = "字典类型ID", required = true, example = "1")
+    // 无需添加权限认证，因为前端全局都需要
+    public CommonResult<List<DictDataSimpleRespVO>> getSimpleDictDataListByTypeId(
+            @RequestParam("dictTypeId") Long dictTypeId) {
+        // 通过dictTypeId查询字典类型
+        DictTypeDO dictTypeDO = dictTypeService.getDictType(dictTypeId);
+        String dictType = null;
+        if (dictTypeDO != null) {
+            dictType = dictTypeDO.getType();
+        }
+        // 查询字典数据列表
+        List<DictDataDO> list = dictDataService.getDictDataList(CommonStatusEnum.ENABLE.getStatus(), dictType);
+        return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
+    }
     @GetMapping("/page")
     @Operation(summary = "/获得字典类型的分页列表")
     @PreAuthorize("@ss.hasPermission('system:dict:query')")

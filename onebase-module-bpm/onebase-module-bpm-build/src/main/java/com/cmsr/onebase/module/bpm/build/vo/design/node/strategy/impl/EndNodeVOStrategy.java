@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.impl;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.EndNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.EndNodeExtDTO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.EndNodeVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.AbstractNodeVOStrategy;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
@@ -28,7 +28,7 @@ public class EndNodeVOStrategy extends AbstractNodeVOStrategy<EndNodeVO, EndNode
     }
 
     @Override
-    public EndNodeExtDTO buildExtData(EndNodeVO nodeVO) {
+    public EndNodeExtDTO buildExtData(EndNodeVO nodeVO, Long appId) {
         EndNodeExtDTO extDTO = new EndNodeExtDTO();
         // 设置节点类型
         extDTO.setNodeType(nodeVO.getType());
