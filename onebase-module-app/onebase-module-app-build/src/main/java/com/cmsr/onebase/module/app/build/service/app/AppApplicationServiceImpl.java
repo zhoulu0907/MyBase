@@ -281,4 +281,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     public List<ApplicationDO> getSimpleAppList(Integer status) {
         return applicationRepository.getSimpleAppList(status);
     }
+
+    @Override
+    public List<ApplicationDO> getMySimpleAppListByName(String appName) {
+        return applicationRepository.findMyAppApplicationByAppName(appName);
+    }
 }

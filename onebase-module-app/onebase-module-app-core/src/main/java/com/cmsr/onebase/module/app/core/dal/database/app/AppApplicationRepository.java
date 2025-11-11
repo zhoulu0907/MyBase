@@ -115,4 +115,17 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
+
+    public List<ApplicationDO> findMyAppApplicationByAppName(String appName) {
+        ConfigStore configStore = new DefaultConfigStore();
+        if (StringUtils.isNotBlank(appName)) {
+            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
+        }
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        if(loginUser!=null){
+            configStore.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
+        }
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
 }

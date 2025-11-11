@@ -149,4 +149,9 @@ public class AdminUserDO extends TenantBaseDO {
     @Column(name = DEPT_ID)
     private Long corpId;
 
+    /**
+     * 企业状态
+     */
+    private String statusDesc;
+
 }
