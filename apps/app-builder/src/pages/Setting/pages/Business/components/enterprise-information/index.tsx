@@ -48,7 +48,7 @@ const EnterpriseInfoPage: React.FC = () => {
     const params: corpListParams = {
         pageNo,
         pageSize,
-        corpId
+        corpId:""
     };
     try {
       const res = await getCorpAuthorizedAppListApi(params);
@@ -103,8 +103,13 @@ const EnterpriseInfoPage: React.FC = () => {
   }
 
   const handleUpdateTime = async(params: updatedParams) => {
+    const newParams = {
+      ...params,
+      authorizationTime: new Date(params.authorizationTime).getTime(),
+      expiresTime: new Date(params.expiresTime).getTime()
+    }
     try {
-     const res =  await updateCorpAppApi(params);
+     const res =  await updateCorpAppApi(newParams);
      if(res) {
         await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
         Message.success("更新授权时间成功");
@@ -139,6 +144,8 @@ const EnterpriseInfoPage: React.FC = () => {
   const handleSubmitApp = async(data:CorpAppParams) => {
     const IdList = data.applicationIdList?.map((item: any) => item.id).filter(Boolean);
     data.applicationIdList = IdList;
+    data.authorizationTime = new Date(data.authorizationTime).getTime();
+    data.expiresTime = new Date(data.expiresTime).getTime();
     try {
         const res = await createCorpAppApi(data);
         if(res) {

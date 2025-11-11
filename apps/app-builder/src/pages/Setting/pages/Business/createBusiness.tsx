@@ -146,8 +146,15 @@ const CreateBusinessPage: React.FC = () => {
     const handleNext = async () => {
         if(currentStep === 3) {
             setCreateLoading(true);
+            const newTableData = tableData.map(item => {
+                return {
+                    ...item,
+                    authorizationTime: new Date(item.authorizationTime).getTime(),
+                    expiresTime: new Date(item.expiresTime).getTime()
+                }
+            })
             const params:createCorpParams = {
-                appAuthTimeReqVO: tableData,
+                appAuthTimeReqVO: newTableData,
                 corpAdminReqVO: adminValues,
                 corpReqVO: basicValues
             }
