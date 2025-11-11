@@ -28,7 +28,7 @@ public class PageSetDO extends TenantBaseDO {
     @Column(name = "pageset_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面集名称")
     private String pageSetName;
 
-    @Column(name = "pageset_type", columnDefinition = "INT NOT NULL",  nullable = false, comment = "页面集类型 1-普通表单 2-流程表单")
+    @Column(name = "pageset_type", columnDefinition = "INT NOT NULL",  nullable = false, comment = "页面集类型 1-普通表单 2-流程表单 3-工作台")
     private Integer pageSetType;
 
 

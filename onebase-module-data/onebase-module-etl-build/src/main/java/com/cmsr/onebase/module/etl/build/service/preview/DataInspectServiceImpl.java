@@ -2,9 +2,13 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ColumnDefine;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
+import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLFlinkMappingRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
@@ -18,16 +22,20 @@ import org.anyline.entity.DataSet;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
 public class DataInspectServiceImpl implements DataInspectService {
 
-    @Value("${onebase.etl.inspect-size:50}")
+    @Value("${onebase.etl.inspect-size:20}")
     private Integer inspectSize;
 
     @Resource
@@ -38,6 +46,9 @@ public class DataInspectServiceImpl implements DataInspectService {
 
     @Resource
     private ETLTableRepository tableRepository;
+
+    @Resource
+    private ETLFlinkMappingRepository flinkMappingRepository;
 
     @Override
     public boolean testConnection(ETLDatasourceDO datasourceDO) {
@@ -59,6 +70,7 @@ public class DataInspectServiceImpl implements DataInspectService {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
+        String datasourceType = datasourceDO.getDatasourceType();
         Long tableId = previewVO.getTableId();
         ETLTableDO tableDO = tableRepository.findById(tableId);
         if (tableDO == null) {
@@ -76,7 +88,37 @@ public class DataInspectServiceImpl implements DataInspectService {
                 case VIEW -> table = temporary.metadata().view(tableDO.getTableName());
                 default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_METADATA_TYPE);
             }
-            DataPreviewVO dataPreviewVO = DataPreviewVO.of(tableDO);
+            Map<String, String> fieldTypeMapping = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceType);
+            DataPreviewVO dataPreviewVO = new DataPreviewVO();
+            TableData tableData = tableDO.getMetaInfo();
+            List<ColumnData> columnDataList = tableData.getColumns();
+            List<ColumnDefine> columnList = new ArrayList<>(columnDataList.size());
+            for (ColumnData columnData : columnDataList) {
+                ColumnDefine columnDefine = new ColumnDefine();
+                String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getId(),
+                        tableData.getCatalogName(),
+                        tableData.getSchemaName(),
+                        tableData.getName(),
+                        columnData.getName());
+                columnDefine.setFieldFqn(fqn);
+
+                String tableName = columnData.getName();
+                String displayName = columnData.getDisplayName();
+                String comment = columnData.getComment();
+                String declaration = columnData.getDeclaration();
+                columnDefine.setFieldName(tableName);
+                columnDefine.setDisplayName(tableName);
+                if (StringUtils.isNotBlank(comment)) columnDefine.setDisplayName(comment);
+                if (StringUtils.isNotBlank(declaration) && !StringUtils.equals(declaration, comment))
+                    columnDefine.setDisplayName(declaration);
+                if (StringUtils.isNotBlank(displayName) && !StringUtils.equals(tableName, displayName))
+                    columnDefine.setDisplayName(displayName);
+                String flinkType = fieldTypeMapping.get(columnData.getType());
+                columnDefine.setFieldType(flinkType);
+                int metaColumnIdx = columnData.getPosition() - 1;
+                columnList.add(metaColumnIdx, columnDefine);
+            }
+            dataPreviewVO.setColumns(columnList);
             ConfigStore cs = new DefaultConfigStore();
             cs.limit(inspectSize);
             DataSet dataSet = temporary.querys(table, cs);
