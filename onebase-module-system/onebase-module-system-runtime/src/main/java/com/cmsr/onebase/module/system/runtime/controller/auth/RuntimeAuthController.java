@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.platform.controller.auth;
+package com.cmsr.onebase.module.system.runtime.controller.auth;
 
 
 import cn.hutool.core.util.StrUtil;
@@ -7,7 +7,10 @@ import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.service.auth.AdminAuthService;
-import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,19 +19,25 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
+/**
+ * 运行态登录认证相关服务
+ * 1. 应用登录-内部用户登录
+ * 2. 应用登录-第三方系统用户登录
+ *
+ * @author matianyu
+ * @date 2025-11
+ */
 @Tag(name = "管理后台 - 认证")
 @RestController
 @RequestMapping("/system/auth")
 @Validated
 @Slf4j
-@Component("platformAuthController")
-public class AuthController {
+public class RuntimeAuthController {
 
     @Resource
     private AdminAuthService authService;
