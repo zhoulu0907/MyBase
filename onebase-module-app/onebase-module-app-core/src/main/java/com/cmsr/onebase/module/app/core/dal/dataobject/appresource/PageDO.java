@@ -101,6 +101,8 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "router_meta_title", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由元数据-页面标题")
     private String routerMetaTitle;
 
+    @Column(name = "interaction_rules", columnDefinition = "TEXT NOT NULL", comment = "交互规则")
+    private String interactionRules;
     // TODO(mickey): 补充 Method字段
 
 }
