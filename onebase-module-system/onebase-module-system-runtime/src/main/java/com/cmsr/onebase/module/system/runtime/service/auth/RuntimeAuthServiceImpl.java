@@ -45,6 +45,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  * Auth Service 实现类
  * 1. 运行态登录：自有用户 登录
  * 1. 运行态登录：三方用户 登录
+ *
  * @author mty
  */
 @Service
@@ -53,34 +54,34 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
-    private AdminUserService userService;
+    private AdminUserService   userService;
     @Resource
-    private LoginLogService loginLogService;
+    private LoginLogService    loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService memberService;
+    private MemberService      memberService;
     @Resource
-    private Validator validator;
+    private Validator          validator;
     @Resource
-    private CaptchaService captchaService;
+    private CaptchaService     captchaService;
     @Resource
-    private SmsCodeApi smsCodeApi;
+    private SmsCodeApi         smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean captchaEnable;
+    private Boolean            captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */
     @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean       platformTenantEnableCreateApp;
+    private Boolean            platformTenantEnableCreateApp;
 
     @Resource
-    private TenantService tenantService;
+    private TenantService     tenantService;
     @Resource
     private PermissionService permissionService;
 
@@ -131,7 +132,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
 
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getAppId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     private void createLoginLog(Long userId, String username,
@@ -175,11 +176,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, Long appId, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long appId, Long userId, String username, LoginLogTypeEnum logType) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessToken(userId, getUserType().getValue(),
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAppAccessToken(appId, userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
@@ -242,7 +243,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         Long userId = userService.registerUser(registerReqVO);
 
         // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(userId, registerReqVO.getUsername(), registerReqVO.getAppId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(registerReqVO.getAppId(), userId, registerReqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @VisibleForTesting

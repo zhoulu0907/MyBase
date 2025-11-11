@@ -25,8 +25,8 @@ public class OAuth2RefreshTokenDO extends TenantBaseDO {
     public static final String CLIENT_ID     = "client_id";
     public static final String SCOPES        = "scopes";
     public static final String EXPIRES_TIME  = "expires_time";
-    public static final String CORP_ID       = "app_id";
-    public static final String APP_ID        = "corp_id";
+    public static final String CORP_ID       = "corp_id";
+    public static final String APP_ID        = "app_id";
 
     /**
      * 刷新令牌

@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.vo.auth;
 import com.cmsr.onebase.framework.common.validation.InEnum;
 import com.cmsr.onebase.module.system.enums.social.SocialTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +30,7 @@ public class RuntimeAuthLoginReqVO extends UserLoginReqVO {
 
 
     @Schema(description = "appId", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    @NotEmpty(message = "AppId不能为空")
+    @NotNull(message = "AppId不能为空")
     private Long appId;
 
 }
