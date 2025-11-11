@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author chengyuansen
  * @date 2025-11-07
  */
-@RequestMapping("/infra/api/password-validation")
+@RequestMapping("/infra/api/security-config")
 @Tag(name = "基础设施 - 密码校验")
 @FeignClient(name = "infra-service")
-public interface PasswordValidationApi {
+public interface SecurityConfigApi {
 
     /**
      * 校验密码强度

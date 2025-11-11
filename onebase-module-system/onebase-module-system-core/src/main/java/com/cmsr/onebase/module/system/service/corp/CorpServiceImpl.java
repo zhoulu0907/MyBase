@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.util.encrypt.PasswordRandomGenerator;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
@@ -318,7 +319,7 @@ public class CorpServiceImpl implements CorpService {
         // 插入用户
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
-        String password = getRandomPassWord();
+        String password = PasswordRandomGenerator.generateSecurePassword(15);
         user.setPassword(encodePassword(password)); // 加密密码
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
@@ -352,19 +353,4 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.getSimpleCorpList(staus);
     }
 
-
-    /**
-     * 随机生成一个密码
-     *
-     * @return randomStr
-     */
-    public String getRandomPassWord() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return sb.toString();
-    }
 }
