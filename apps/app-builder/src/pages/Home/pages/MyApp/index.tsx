@@ -13,7 +13,8 @@ import {
   Select,
   Space,
   Spin,
-  Tag
+  Tag,
+  Tooltip
 } from '@arco-design/web-react';
 import { IconEmpty, IconLeft, IconMoreVertical, IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import {
@@ -415,7 +416,9 @@ const MyAppPage: React.FC = () => {
                         </div>
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.infoHeader}>
-                            <div className={styles.myAppTitle}>{item.appName}</div>
+                            <Tooltip content={item.appName}>
+                              <div className={styles.myAppTitle}>{item.appName}</div>
+                            </Tooltip>
                             {/* TODO */}
                             {/* <Tag color={TagColor[item.appStatus]} className={styles.tag}>
                               SaaS模式
@@ -448,7 +451,9 @@ const MyAppPage: React.FC = () => {
                     </div>
 
                     <div className={styles.myAppCardBody}>
-                      <div className={styles.myAppDesc}>{item.description ?? '该应用暂无介绍。'}</div>
+                      <Tooltip content={item.description}>
+                        <div className={styles.myAppDesc}>{item.description ?? '该应用暂无介绍。'}</div>
+                      </Tooltip>
                       <div className={styles.myAppTags}>
                         {item.tags?.map((tag: { id: string; tagName: string }) => (
                           <Tag
