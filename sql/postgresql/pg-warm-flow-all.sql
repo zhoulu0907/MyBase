@@ -397,6 +397,8 @@ CREATE TABLE bpm_flow_delegation
     update_time             timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted                 int8         NOT NULL DEFAULT 0,
     tenant_id               int8         NOT NULL DEFAULT 0,
+    delegate_name           varchar(64)  NOT NULL,
+    principal_name          varchar(64)  NOT NULL,
     CONSTRAINT bpm_flow_delegation_pkey PRIMARY KEY (id)
 );
 
@@ -420,3 +422,5 @@ COMMENT ON COLUMN bpm_flow_delegation.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_delegation.update_time IS '更新时间';
 COMMENT ON COLUMN bpm_flow_delegation.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_delegation.tenant_id IS '租户ID';
+COMMENT ON COLUMN bpm_flow_delegation.delegate_name IS '代理人用户名称';
+COMMENT ON COLUMN bpm_flow_delegation.principal_name IS '被代理人用户名称（即委托人）';
