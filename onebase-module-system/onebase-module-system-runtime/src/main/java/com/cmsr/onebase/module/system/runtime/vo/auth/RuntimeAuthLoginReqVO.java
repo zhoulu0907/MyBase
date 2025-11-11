@@ -1,7 +1,8 @@
-package com.cmsr.onebase.module.system.vo.auth;
+package com.cmsr.onebase.module.system.runtime.vo.auth;
 
 import com.cmsr.onebase.framework.common.validation.InEnum;
 import com.cmsr.onebase.module.system.enums.social.SocialTypeEnum;
+import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

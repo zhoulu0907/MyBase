@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -27,6 +28,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -86,6 +90,7 @@ public class OneBaseWebSecurityConfigurerAdapter {
      * 通过覆写父类的该方法，添加 @Bean 注解，解决该问题
      */
     @Bean
+    @Primary
     public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
@@ -109,6 +114,11 @@ public class OneBaseWebSecurityConfigurerAdapter {
      */
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        RequestMatcher runtimeApiMatcher = new OrRequestMatcher(
+                new AntPathRequestMatcher(webProperties.getBuildApi().getPrefix() + "/**")
+        );
+        httpSecurity.securityMatcher(runtimeApiMatcher);
+
         // 登出
         httpSecurity
                 // 开启跨域

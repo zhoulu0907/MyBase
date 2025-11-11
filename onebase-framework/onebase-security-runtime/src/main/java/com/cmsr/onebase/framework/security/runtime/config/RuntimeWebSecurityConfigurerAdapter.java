@@ -1,12 +1,10 @@
 package com.cmsr.onebase.framework.security.runtime.config;
 
-import com.cmsr.onebase.framework.security.config.AuthorizeRequestsCustomizer;
-import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.runtime.filter.RuntimeAuthenticationFilter;
+import com.cmsr.onebase.framework.web.config.WebProperties;
 import jakarta.annotation.Resource;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -20,8 +18,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.util.List;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  * 自定义的 Spring Security 配置适配器实现
@@ -36,25 +35,27 @@ public class RuntimeWebSecurityConfigurerAdapter {
      * 认证失败处理类 Bean
      */
     @Resource
-    private AuthenticationEntryPoint authenticationEntryPoint;
+    private AuthenticationEntryPoint runtimeAuthenticationEntryPoint;
     /**
      * 权限不够处理器 Bean
      */
     @Resource
-    private AccessDeniedHandler         accessDeniedHandler;
+    private AccessDeniedHandler runtimeAccessDeniedHandler;
     /**
      * Token 认证过滤器 Bean
      */
     @Resource
-    private RuntimeAuthenticationFilter authenticationTokenFilter;
-
+    private RuntimeAuthenticationFilter runtimeAuthenticationTokenFilter;
+    
+    @Resource
+    private WebProperties webProperties;
 
     /**
      * 由于 Spring Security 创建 AuthenticationManager 对象时，没声明 @Bean 注解，导致无法被注入
      * 通过覆写父类的该方法，添加 @Bean 注解，解决该问题
      */
     @Bean
-    public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager runtimeAuthenticationManagerBean(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -76,7 +77,13 @@ public class RuntimeWebSecurityConfigurerAdapter {
      * authenticated       |   用户登录后可访问
      */
     @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    protected SecurityFilterChain runtimeFilterChain(HttpSecurity httpSecurity) throws Exception {
+        // 设置运行时API的安全匹配器
+        RequestMatcher runtimeApiMatcher = new OrRequestMatcher(
+            new AntPathRequestMatcher(webProperties.getRuntimeApi().getPrefix() + "/**")
+        );
+        httpSecurity.securityMatcher(runtimeApiMatcher);
+        
         // 登出
         httpSecurity
                 // 开启跨域
@@ -87,11 +94,11 @@ public class RuntimeWebSecurityConfigurerAdapter {
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 // 一堆自定义的 Spring Security 处理器
-                .exceptionHandling(c -> c.authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler));
+                .exceptionHandling(c -> c.authenticationEntryPoint(runtimeAuthenticationEntryPoint)
+                        .accessDeniedHandler(runtimeAccessDeniedHandler));
 
         // 添加 Token Filter
-        httpSecurity.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(runtimeAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
 
