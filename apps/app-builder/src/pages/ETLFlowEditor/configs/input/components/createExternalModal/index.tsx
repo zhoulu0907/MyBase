@@ -128,16 +128,10 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
   };
 
   const handleCancel = () => {
-    // if (currentStep == 2) {
-    //   setCurrentStep(1);
-    //   return;
-    // }
     onClose();
   };
 
   const handleGetSupportedDataSource = async () => {
-    // const res = await getETLSupportedDataSource();
-    // console.log('getSupportedDataSource', res);
     const res = [
       {
         datasourceType: 'PostgreSQL',
