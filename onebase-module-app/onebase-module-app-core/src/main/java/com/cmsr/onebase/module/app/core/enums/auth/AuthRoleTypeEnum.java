@@ -11,7 +11,7 @@ public enum AuthRoleTypeEnum {
     /**
      * 系统管理员角色
      */
-    SYSTEM_ADMIN(1, "ROLE_SYSTEM_ADMIN", "管理员"),
+    SYSTEM_ADMIN(1, "ROLE_SYSTEM_ADMIN", "应用开发者"),
 
     /**
      * 系统普通用户角色
