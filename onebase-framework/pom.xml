@@ -14,8 +14,11 @@
         <module>onebase-spring-boot-starter-orm</module>
         <module>onebase-spring-boot-starter-redis</module>
         <module>onebase-spring-boot-starter-web</module>
-        <module>onebase-spring-boot-starter-security</module>
-        <module>onebase-spring-boot-starter-security-runtime</module>
+        <module>onebase-security-common</module>
+        <module>onebase-security-platform</module>
+        <module>onebase-security-build</module>
+        <module>onebase-security-runtime</module>
+<!--        <module>onebase-spring-boot-starter-security</module>-->
         <module>onebase-spring-boot-starter-protection</module>
         <module>onebase-spring-boot-starter-rpc</module>
         <module>onebase-spring-boot-starter-excel</module>

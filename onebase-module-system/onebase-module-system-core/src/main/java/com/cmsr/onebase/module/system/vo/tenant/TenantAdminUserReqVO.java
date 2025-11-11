@@ -15,4 +15,7 @@ public class TenantAdminUserReqVO {
     @Schema(description = "管理员手机", example = "")
     private String adminMobile;
 
+
+    @Schema(description = "管理员id", example = "")
+    private Long adminUserId;
 }

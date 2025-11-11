@@ -1,32 +1,25 @@
 -- -------------------------------------------------------------
 -- 达梦数据库(DM) DDL - 由PostgreSQL转换
 -- 转换日期: 2025-11-04
--- 最后更新: 2025-11-06 (修复IDENTITY格式)
 -- 数据库: onebase_cloud_v3
 -- 
 -- 关键修改:
 -- 1. 整型数据类型: int8→BIGINT, int4→INTEGER, int2→SMALLINT (988处)
 -- 2. 去除所有PostgreSQL类型转换语法(::character varying, ::bigint等) (150处)
 -- 3. 移除schema前缀（达梦直接使用表名）
--- 4. 序列自增:使用IDENTITY(1,1)自增列,应用层无需修改,自动生成ID (9处)
---    - system_role_menu, system_user_post, system_user_role
---    - metadata_data_system_method, metadata_component_field_type
---    - metadata_validation_type, metadata_system_fields
---    - metadata_field_type_mapping, system_uid_worker_node
+-- 4. 序列自增:使用IDENTITY(1,1)自增列,应用层无需修改,自动生成ID (8处)
 -- 5. 简化CHECK约束: ARRAY/ANY语法 → IN语法，列名加双引号 (2处)
 -- 6. 移除所有索引的USING btree语法（达梦不支持该语法） (204处)
 -- 7. 索引定义中表名加双引号（保持与表定义一致，避免大小写不匹配） (204处)
 -- 8. 索引定义中列名加双引号（保持与列定义一致，避免大小写不匹配） (204处,共约1200个列)
 -- 9. bytea类型已转换为BLOB
 -- 10. bpchar类型已转换为CHAR
--- 11. 统一IDENTITY格式: IDENTITY(1,1)位置统一在NOT NULL之前 (2025-11-06)
 --
--- 累计修复：1,763处兼容性问题
+-- 累计修复：1,762处兼容性问题
 -- 
 -- 执行前准备:
--- 1. 使用SYSDBA或具有完整DBA权限的用户执行
--- 2. 建议先在测试环境验证
--- 3. 执行前确保数据库已创建: CREATE DATABASE onebase_cloud_v3 CHARSET 'UTF-8';
+-- CREATE DATABASE onebase_cloud_v3 CHARSET 'UTF-8';
+-- -- 以SYSDBA或有创建权限的用户连接到onebase_cloud_v3数据库后执行本脚本
 -- -------------------------------------------------------------
 
 -- -------------------------------------------------------------
@@ -2619,7 +2612,7 @@ COMMENT ON COLUMN "system_login_log"."tenant_id" IS '租户编号';
 
 -- Table Definition
 CREATE TABLE "system_uid_worker_node" (
-    "id" INTEGER IDENTITY(1,1) NOT NULL,
+    "id" INTEGER NOT NULL,
     "worker_host" varchar(64),
     "worker_port" varchar(64),
     "node_type" SMALLINT,

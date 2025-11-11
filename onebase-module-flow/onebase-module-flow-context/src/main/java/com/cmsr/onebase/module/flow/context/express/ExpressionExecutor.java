@@ -9,6 +9,7 @@ import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,7 +24,7 @@ import java.util.*;
  * @Author：huangjie
  * @Date：2025/9/16 21:11
  */
-public class ExpressionExecutor {
+public class ExpressionExecutor implements Serializable {
 
     public static final String VAR_PREFIX = "var_";
 

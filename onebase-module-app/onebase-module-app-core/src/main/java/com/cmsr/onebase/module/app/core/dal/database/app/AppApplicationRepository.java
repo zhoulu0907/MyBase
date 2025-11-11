@@ -1,8 +1,11 @@
 package com.cmsr.onebase.module.app.core.dal.database.app;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import org.anyline.data.param.ConfigStore;
@@ -33,7 +36,13 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
             configs.and(Compare.LIKE, "app_name", pageReqVO.getName());
         }
         if (pageReqVO.getStatus() != null) {
-            configs.and(Compare.EQUAL, "app_status", pageReqVO.getStatus());
+            configs.and(Compare.EQUAL, ApplicationDO.APP_STATUS, pageReqVO.getStatus());
+        }
+        if(pageReqVO.getOwnerTag()!=null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue())){
+            LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+            if(loginUser!=null){
+                configs.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
+            }
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
             configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);

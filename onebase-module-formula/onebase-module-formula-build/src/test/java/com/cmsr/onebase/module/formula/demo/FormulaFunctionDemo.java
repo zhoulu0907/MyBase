@@ -45,9 +45,12 @@ public class FormulaFunctionDemo {
 
         try {
             // 运行executeFormulaWithParams测试用例
-            demo.testSumLeftFormulas();
+            // demo.testSumLeftFormulas();
             // 新增：条件/日期/逻辑相关函数测试
-            demo.testConditionDateLogicFormulas();
+            // demo.testConditionDateLogicFormulas();
+
+            // 返回类型测试
+            demo.testReturnType();
 
             // demo.testMetaDataFormulas();
             log.info("\n=== executeFormulaWithParams测试完成 ===");
@@ -56,7 +59,21 @@ public class FormulaFunctionDemo {
             log.error("测试程序执行失败", e);
         }
     }
+    /**
+     * 演示executeFormulaWithParams的基本参数传递功能
+     */
+    public void testReturnType() {
+        System.out.println("\n测试时间函数:");
+        String formula6 = "NOW()";
+        Object result6 = formulaEngineService.executeFormula(formula6);
+        System.out.println("公式: " + formula6 + " = " + result6);
 
+        System.out.println("\n测试YEAR函数:");
+        String formula7 = "YEAR('2025-10-27')";
+        Object result7 = formulaEngineService.executeFormula(formula7);
+        System.out.println("公式: " + formula7 + " = " + result7);
+
+    }
     /**
      * 演示executeFormulaWithParams的基本参数传递功能
      */

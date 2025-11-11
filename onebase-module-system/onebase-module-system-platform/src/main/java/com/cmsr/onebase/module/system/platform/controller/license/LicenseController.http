@@ -1,0 +1,53 @@
+### 获得凭证详情 /system/license/get
+GET {{baseUrl}}/system/license/get?id=7038386249531392
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得凭证详情 /system/license/simple-list
+GET {{baseUrl}}/system/license/simple-list
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得凭证列表分页 /system/license/page
+GET {{baseUrl}}/system/license/page?pageNum=1&pageSize=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 导出凭证
+GET {{baseUrl}}/system/license/export?id=49906575113453568
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 导入凭证
+POST {{baseUrl}}/system/license/import
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="license.lic.sm4"
+Content-Type: application/octet-stream
+
+< ./license.lic-2.sm4
+--WebAppBoundary--
+
+### 创建凭证
+POST {{baseUrl}}/system/license/createLicenseFile
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "enterpriseName": "上海移动有限公司",
+  "enterpriseCode": "F200090910001",
+  "enterpriseAddress": "上海市浦东金桥开发区",
+  "platformType": "私有化部署",
+  "expireTime": 1764547308000,
+  "tenantLimit": "3000",
+  "userLimit": "1000",
+  "isTrial": false
+}

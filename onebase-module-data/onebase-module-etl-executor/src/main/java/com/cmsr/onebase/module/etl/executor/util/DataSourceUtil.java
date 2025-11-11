@@ -4,8 +4,6 @@ import com.cmsr.onebase.module.etl.executor.InputArgs;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import javax.sql.DataSource;
-
 /**
  * @Author：huangjie
  * @Date：2025/11/6 11:29
