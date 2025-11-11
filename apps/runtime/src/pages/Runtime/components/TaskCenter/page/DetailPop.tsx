@@ -99,7 +99,11 @@ const DetailPage: React.FC<PageProps> = ({
         </Button>
         {detailData?.buttonConfigs &&
           detailData?.buttonConfigs?.map((item: any, index: number) => {
-            if (!item?.approvalCommentRequired) {
+            if (
+              item?.buttonType === BPMConfigButtonType.SAVE ||
+              item?.buttonType === BPMConfigButtonType.SUBMIT ||
+              item?.buttonType === BPMConfigButtonType.WITHDRAW
+            ) {
               return (
                 <Button
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
@@ -123,6 +127,7 @@ const DetailPage: React.FC<PageProps> = ({
                       taskId={taskId}
                       instanceId={rowData?.instanceId}
                       itemData={item}
+                      isRequired={item?.approvalCommentRequired}
                     />
                   }
                   onOk={() => {
