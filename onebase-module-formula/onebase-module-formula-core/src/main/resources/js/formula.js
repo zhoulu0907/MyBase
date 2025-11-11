@@ -4493,34 +4493,7 @@ function _typeof(o) {
     }
   }
 
-  function REGEXEXTRACTALL(text, regex_pattern) {
-    if (arguments.length !== 2) {
-      return value;
-    }
-    
-    text = parseString(text);
-    if (text instanceof Error) {
-      return text;
-    }
-    
-    regex_pattern = parseString(regex_pattern);
-    if (regex_pattern instanceof Error) {
-      return regex_pattern;
-    }
-    
-    try {
-      var regex = new RegExp(regex_pattern, 'g');
-      var matches = text.match(regex);
-      
-      if (matches === null) {
-        return [];
-      }
-      
-      return matches;
-    } catch (e) {
-      return value;
-    }
-  }
+
 
   function REGEXEXTRACT(text, regex_pattern) {
     if (arguments.length !== 2) {
@@ -4597,6 +4570,35 @@ function _typeof(o) {
     try {
       var regex = new RegExp(regex_pattern, 'g');
       return text.replace(regex, replacement);
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function REGEXEXTRACTALL(text, regex_pattern) {
+    if (arguments.length !== 2) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern, 'g');
+      var matches = text.match(regex);
+      
+      if (matches === null) {
+        return "";
+      }
+      
+      return matches.join(", ");
     } catch (e) {
       return value;
     }
@@ -4744,28 +4746,20 @@ function _typeof(o) {
       return value;
     }
     
-    // 如果是字符串，尝试转换为日期对象
-    if (typeof date === 'string') {
-      date = new Date(date);
-    }
-    
-    // 如果是数字，假设它是已经是一个时间戳
-    if (typeof date === 'number') {
-      date = new Date(date);
-    }
-    
-    // 检查是否为有效的日期对象
-    if (!(date instanceof Date) || isNaN(date.getTime())) {
-      return value;
+    date = parseDate(date);
+    if (date instanceof Error) {
+      return date;
     }
     
     try {
-      // 返回时间戳（毫秒）
+      // 返回日期的时间戳（毫秒数）
       return date.getTime();
     } catch (e) {
       return value;
     }
   }
+
+
 
   function CLEAN(text) {
     if (anyIsError(text)) {
@@ -4890,48 +4884,49 @@ function _typeof(o) {
   function GETUSER(id,name) {
     console.log(id,name);
     var user = {
-      name: name,
-      id: id,
+        id: id,
+      name: name
     }
     return user;
   }
 
-  function GETDEPT(deptno,name) {
-    console.log(deptno,name);
+  function GETDEPT(id,name) {
+    console.log(id,name);
     var dept = {
-      name: name,
-      deptno: deptno,
+        id:id,
+      name: name
     }
     return dept;
   }
-  function GETUPDEPT(deptno,name) {
-    console.log(deptno,name);
+  function GETUPDEPT(id,name) {
+    console.log(id,name);
     var updept = {
-      name: name,
-      deptno: deptno,
+        id:id,
+      name: name
     }
     return updept;
   }
-  function GETROLE(arr) {
-    console.log(arr);
-    return arr;
+  function GETROLE(id) {
+    console.log(JSON.stringify(id));
+    return id;
   }
   function GETSUPERVISOR(id,name) {
     console.log(id,name);
     var user = {
-      name: name,
-      id: id,
+        id: id,
+      name: name
     }
     return user;
   }
 
-  function ISINROLE(isInRole) {
+  function ISINROLE(id,roldId,isInRole) {
     console.log(isInRole);
     return isInRole;
   }
 
-  function ISINDEPT(isInDept) {
-    console.log(isInDept);
+  function ISINDEPT(id,isInDept) {
+    console.log("isInDept --> isInDept: ",isInDept);
+    console.log("id --> id: ",id);
     return isInDept;
   }
 
@@ -5004,101 +4999,7 @@ function _typeof(o) {
     return old_text.substr(0, num_chars - 1) + new_text + old_text.substr(num_chars - 1 + length);
   }
 
-  function TEXTSPLIT(text, col_delimiter, row_delimiter, ignore_empty, match_mode, match_end) {
-    // 参数处理
-    if (arguments.length < 2) {
-      return na;
-    }
 
-    // 处理文本参数
-    text = parseString(text);
-    if (text instanceof Error) {
-      return text;
-    }
-
-    // 处理列分隔符
-    col_delimiter = parseString(col_delimiter);
-    if (col_delimiter instanceof Error) {
-      return col_delimiter;
-    }
-
-    // 处理行分隔符（可选）
-    if (row_delimiter !== undefined) {
-      row_delimiter = parseString(row_delimiter);
-      if (row_delimiter instanceof Error) {
-        return row_delimiter;
-      }
-    }
-
-    // 处理忽略空值参数（可选，默认为false）
-    if (ignore_empty === undefined) {
-      ignore_empty = false;
-    } else {
-      ignore_empty = parseBool(ignore_empty);
-    }
-
-    // 处理匹配模式参数（可选，默认为0）
-    if (match_mode === undefined) {
-      match_mode = 0;
-    } else {
-      match_mode = parseNumber(match_mode);
-      if (match_mode instanceof Error) {
-        return match_mode;
-      }
-    }
-
-    // 处理匹配结束参数（可选，默认为false）
-    if (match_end === undefined) {
-      match_end = false;
-    } else {
-      match_end = parseBool(match_end);
-    }
-
-    try {
-      var result = [];
-      
-      // 如果有行分隔符，则先按行分割
-      var rows;
-      if (row_delimiter !== undefined && row_delimiter !== "") {
-        rows = splitWithMode(text, row_delimiter, match_mode, match_end);
-      } else {
-        // 没有行分隔符，整段文本作为一行
-        rows = [text];
-      }
-
-      // 对每一行按列分隔符进行分割
-      for (var i = 0; i < rows.length; i++) {
-        var cols = splitWithMode(rows[i], col_delimiter, match_mode, match_end);
-        
-        // 根据ignore_empty参数决定是否过滤空值
-        if (ignore_empty) {
-          cols = cols.filter(function(cell) {
-            return cell !== "";
-          });
-        }
-        
-        result.push(cols);
-      }
-
-      // 如果ignore_empty为true且所有元素都被过滤掉，则返回空数组
-      if (ignore_empty) {
-        var hasContent = false;
-        for (var r = 0; r < result.length; r++) {
-          if (result[r].length > 0) {
-            hasContent = true;
-            break;
-          }
-        }
-        if (!hasContent) {
-          return [];
-        }
-      }
-
-      return result;
-    } catch (e) {
-      return value;
-    }
-  }
 
   // 辅助函数：根据不同的匹配模式进行分割
   function splitWithMode(text, delimiter, match_mode, match_end) {
@@ -5121,6 +5022,78 @@ function _typeof(o) {
     } else {
       // 默认使用精确匹配
       return text.split(delimiter);
+    }
+  }
+
+  function TEXTSPLIT(text, col_delimiter, row_delimiter, ignore_empty, match_mode, match_end) {
+    // 参数处理
+    if (arguments.length < 2) {
+      return value;
+    }
+
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+
+    // 设置默认值
+    ignore_empty = ignore_empty === undefined ? false : parseBool(ignore_empty);
+    match_mode = match_mode === undefined ? 0 : parseNumber(match_mode);
+    match_end = match_end === undefined ? false : parseBool(match_end);
+
+    if (ignore_empty instanceof Error) {
+      return ignore_empty;
+    }
+
+    if (match_mode instanceof Error) {
+      return match_mode;
+    }
+
+    if (match_end instanceof Error) {
+      return match_end;
+    }
+
+    try {
+      var result = [];
+
+      // 如果提供了行分隔符，先按行分割
+      if (row_delimiter !== undefined) {
+        var rows = splitWithMode(text, row_delimiter, match_mode, match_end);
+
+        // 对每一行再按列分隔符分割
+        for (var i = 0; i < rows.length; i++) {
+          var cols = splitWithMode(rows[i], col_delimiter, match_mode, match_end);
+
+          // 如果需要忽略空值，则过滤掉空字符串
+          if (ignore_empty) {
+            cols = cols.filter(function(item) {
+              return item !== "";
+            });
+          }
+
+          // 只有当列不为空或不需要忽略空值时才添加行
+          if (!ignore_empty || cols.length > 0) {
+            result.push(cols);
+          }
+        }
+      } else {
+        // 只按列分隔符分割
+        var cols = splitWithMode(text, col_delimiter, match_mode, match_end);
+
+        // 如果需要忽略空值，则过滤掉空字符串
+        if (ignore_empty) {
+          cols = cols.filter(function(item) {
+            return item !== "";
+          });
+        }
+
+        result = cols;
+      }
+
+      // 直接返回数组
+      return result;
+    } catch (e) {
+      return value;
     }
   }
 
@@ -11330,6 +11303,7 @@ function _typeof(o) {
   exports.TEXTSPLIT = TEXTSPLIT;
   exports.TIME = TIME;
   exports.TIMEVALUE = TIMEVALUE;
+  exports.TIMESTAMP = TIMESTAMP;
   exports.TINV = TINV;
   exports.TODAY = TODAY;
   exports.TRANSPOSE = TRANSPOSE;
@@ -11378,3 +11352,4 @@ function _typeof(o) {
   exports.NE = NE;
   exports.POW = POW;
 }));
+

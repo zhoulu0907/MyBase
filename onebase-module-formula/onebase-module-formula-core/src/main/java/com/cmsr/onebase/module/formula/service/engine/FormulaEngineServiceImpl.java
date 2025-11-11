@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.formula.service.engine;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
 import com.cmsr.onebase.module.formula.service.extendsion.FormulaExtendsService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
@@ -244,12 +246,12 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             return false;
         }
 
-        // 检查是否包含恶意字符
-        if (formula.contains("..") || formula.contains("//") ||
-                formula.contains("\\") || formula.contains("file:")) {
-            log.warn("公式包含可疑字符：{}", formula);
-            return false;
-        }
+        // 检查是否包含恶意字符 （部分字符串函数传入正则表达式，需放过这些字符校验）
+        // if (formula.contains("..") || formula.contains("//") ||
+        //         formula.contains("\\") || formula.contains("file:")) {
+        //     log.warn("公式包含可疑字符：{}", formula);
+        //     return false;
+        // }
 
         return true;
     }
@@ -319,6 +321,17 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         if (result.isDate()) {
             return LocalDateTime.parse(result.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
         }
+        
+        // 处理JavaScript数组
+        if (result.hasArrayElements()) {
+            List<Object> resultList = new ArrayList<>();
+            long arraySize = result.getArraySize();
+            for (long i = 0; i < arraySize; i++) {
+                Value element = result.getArrayElement(i);
+                resultList.add(convertResult(element)); // 递归转换数组元素
+            }
+            return resultList;
+        }
         // 对于JavaScript对象，检查是否包含value属性，如果包含则返回value的值
         if (result.hasMembers()) {
             // 如果没有value属性，按原逻辑处理
@@ -329,8 +342,8 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             }
             return resultMap;
         }
-        if (result.isString()) {
-            return result.asString();
+        if (result.isString()&&result.asString().startsWith("[{")) {
+            return JsonUtils.parseObject(result.toString(), new TypeReference<List<Map<String, Object>>>() {});
         }
         // 对于其他类型，转换为字符串
         return result.toString();
@@ -568,4 +581,5 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
         return result;
     }
+
 }
