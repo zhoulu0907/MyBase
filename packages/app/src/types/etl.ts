@@ -80,6 +80,11 @@ export interface ListTablesReq {
   writable?: number;
 }
 
+export interface ETLDatasource {
+  id: string;
+  name: string;
+}
+
 export interface ETLTable {
   id: string;
   name: string;
