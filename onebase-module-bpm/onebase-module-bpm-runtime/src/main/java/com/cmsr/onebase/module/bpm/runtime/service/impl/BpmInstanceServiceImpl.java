@@ -4,28 +4,30 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
-import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.StartNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
-import com.cmsr.onebase.module.bpm.api.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategyManager;
+import com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
@@ -34,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
@@ -44,6 +47,7 @@ import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.*;
+import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,10 +110,13 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     private MetadataDataMethodCoreService metadataDataMethodCoreService;
 
     @Resource
-    private com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager execTaskStrategyManager;
+    private ExecTaskStrategyManager execTaskStrategyManager;
 
     @Resource
     private InstanceDetailStrategyManager instanceDetailStrategyManager;
+
+    @Resource
+    protected MetadataEntityFieldApi metadataEntityFieldApi;
 
     /**
      * 根据节点编码获取节点扩展DTO
@@ -155,129 +162,58 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         return JsonUtils.parseObject(currNodeJson.getExt(), BaseNodeExtDTO.class);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public ListActButtonRespVO getActButtons(String taskId, String businessId) {
-        ListActButtonRespVO respVO = new ListActButtonRespVO();
-        NodeJson currNodeJson = null;
-        Instance instance = null;
+    private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO) {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        Long entityId = entityVO.getEntityId();
 
-        respVO.setButtons(new ArrayList<>());
+        // 拿到所有的实体字段
+        EntityFieldQueryReqDTO queryReqDTO = new EntityFieldQueryReqDTO();
+        queryReqDTO.setEntityId(entityId);
+        List<EntityFieldRespDTO> fieldList = metadataEntityFieldApi.getEntityFieldList(queryReqDTO);
 
-        // businessId 业务ID是dataSetId，通过该ID能查到对应的流程定义信息
-        // dataId是数据ID，通过该ID能查到对应的流程实例信息
-        log.info("获取流程实例的操作按钮: {}, {}", taskId, businessId);
+        Map<Long, EntityFieldRespDTO> fieldMap = new HashMap<>();
 
-        // 查询已经发布的业务流程
-        // 先判断taskId是否为空
-        if (StringUtils.isBlank(taskId)) {
-            // 为空则代表尚未发起流程，查询业务流程定义是否存在
-            Definition flowDefinition = defExtService.getByFormPathAndStatus(businessId, PublishStatus.PUBLISHED.getKey());
+        for (EntityFieldRespDTO fieldDto : fieldList) {
+            fieldMap.put(fieldDto.getId(), fieldDto);
+        }
 
-            // 不存在已经发布的流程定义
-            if (flowDefinition == null) {
-                throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
-            }
+        BpmGlobalConfigDTO.FormSummaryConfig formSummaryCfg = null;
 
-            // 获取开始节点对应的按钮
-            DefJson defJson = defService.queryDesign(flowDefinition.getId());
-            for (NodeJson nodeJson : defJson.getNodeList()) {
-                if (Objects.equals(nodeJson.getNodeType(), NodeType.START.getKey())) {
-                    currNodeJson = nodeJson;
-                    break;
-                }
+        if (defExtDTO.getGlobalConfig() != null) {
+            formSummaryCfg = defExtDTO.getGlobalConfig().getFormSummaryCfg();
+        }
+
+        Set<Long> formSummaryFieldIds = new HashSet<>();
+        if (formSummaryCfg != null && CollectionUtils.isNotEmpty(formSummaryCfg.getFieldConfigs())) {
+            for (BpmGlobalConfigDTO.FieldConfigDTO fieldConfig : formSummaryCfg.getFieldConfigs()) {
+                formSummaryFieldIds.add(fieldConfig.getFieldId());
             }
         } else {
-            Task task = taskService.getById(taskId);
-
-            if (task == null) {
-                log.error("获取流程实例的操作按钮: {} 不存在", taskId);
-                throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
-            }
-
-            // todo：判断task的权限
-            String nodeCode = task.getNodeCode();
-            Long instanceId = task.getInstanceId();
-            Integer nodeType = task.getNodeType();
-
-            // 流程节点类型不存在操作按钮
-            if (!NodeType.isBetween(nodeType)) {
-                throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS);
-            }
-
-            // 数据存在则说明已经发起过流程，查询流程实例表
-            instance = insService.getById(instanceId);
-
-            // instance为空说明流程未发起/已完成，不存在流程实例
-            if (instance == null) {
-                throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
-            }
-
-            // 找到流程定义
-            String defJsonStr = instance.getDefJson();
-            DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
-
-            // 找到对应节点的配置
-            for (NodeJson nodeJson : defJson.getNodeList()) {
-                if (nodeJson.getNodeCode().equals(nodeCode)) {
-                    currNodeJson = nodeJson;
-                    break;
-                }
-            }
+            formSummaryFieldIds = entityVO.getData().keySet();
         }
 
-        // 节点不存在
-        if (currNodeJson == null) {
-            throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS);
-        }
+        for (Long id : formSummaryFieldIds) {
+            EntityFieldRespDTO fieldDto = fieldMap.get(id);
+            Object fieldValue = entityVO.getData().get(id);
 
-        BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(currNodeJson.getExt(), BaseNodeExtDTO.class);
-        String userId = String.valueOf(WebFrameworkUtils.getLoginUserId());
-        List<BaseNodeBtnCfgDTO> buttonConfigs = new ArrayList<>();
-
-        if (nodeExtDTO instanceof ApproverNodeExtDTO approverNodeExtDTO) {
-            // todo：判断审批节点的权限
-
-            // 审批节点
-            if (approverNodeExtDTO.getButtonConfigs() != null) {
-                buttonConfigs.addAll(approverNodeExtDTO.getButtonConfigs());
-            }
-        } else if (nodeExtDTO instanceof StartNodeExtDTO startNodeExtDTO) {
-            // 开始节点
-            if (startNodeExtDTO.getButtonConfigs() != null) {
-                buttonConfigs.addAll(startNodeExtDTO.getButtonConfigs());
-            }
-        } else if (nodeExtDTO instanceof InitiationNodeExtDTO initiationNodeExtDTO) {
-            // 发起节点
-            // 判断是否是创建人
-            if (!Objects.equals(instance.getCreateBy(), userId)) {
-                throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY);
-            }
-
-            if (initiationNodeExtDTO.getButtonConfigs() != null) {
-                buttonConfigs.addAll(initiationNodeExtDTO.getButtonConfigs());
-            }
-        } else {
-            // 未知节点
-            throw exception(ErrorCodeConstants.UNSUPPORT_NODE_TYPE);
-        }
-
-        for (BaseNodeBtnCfgDTO buttonConfig : buttonConfigs) {
-            if (!buttonConfig.getEnabled()) {
+            if (fieldDto == null || fieldValue == null) {
                 continue;
             }
 
-            ListActButtonRespVO.ActionButton buttonVO = new ListActButtonRespVO.ActionButton();
-            buttonVO.setButtonName(buttonConfig.getButtonName());
-            buttonVO.setButtonType(buttonConfig.getButtonType());
-            buttonVO.setDisplayName(buttonConfig.getDisplayName());
-            respVO.getButtons().add(buttonVO);
+            // 超过3个字段，只取前3个
+            if (count >= 3) {
+                break;
+            }
+
+            sb.append(fieldDto.getDisplayName()).append(":").append(fieldValue).append(" ");
+
+            count++;
         }
 
-        respVO.setBusinessId(businessId);
-
-        return respVO;
+        return sb.toString();
     }
+
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -292,6 +228,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 实体ID todo：校验，应该和businessID有关联关系
         Long entityId = reqVO.getEntity().getEntityId();
+
+        // 和更新数据公用了字段，需要手动校验
+        if (MapUtils.isEmpty(reqVO.getEntity().getData())) {
+            throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_NOT_EXISTS.getCode(), "实体数据内容不能为空");
+        }
 
         // 业务状态
         BpmBusinessStatusEnum businessStatus = BpmBusinessStatusEnum.IN_APPROVAL;
@@ -397,12 +338,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         String bpmTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
 
-        // 任选3个字段，todo 从全局配置里选择，关联实体查询
-        String formSummary = reqVO.getEntity().getData().entrySet().stream()
-                .limit(3)
-                .map(Map.Entry::getValue)
-                .map(Object::toString)
-                .collect(Collectors.joining(" "));
+        // 构建表单摘要
+        String formSummary = buildFormSummary(entityVO, extDto);
 
         if (StringUtils.isBlank(formSummary)) {
             formSummary = reqVO.getFormName();
@@ -860,6 +797,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 }
 
                 if (!approverUserIds.isEmpty()) {
+                    // 限制最多100个用户
+                    approverUserIds = new HashSet<>(approverUserIds.stream().limit( BpmConstants.MAX_NODE_APPROVER_USERS).toList());
                     allUserIds.addAll(approverUserIds);
 
                     for (Long userId : approverUserIds) {

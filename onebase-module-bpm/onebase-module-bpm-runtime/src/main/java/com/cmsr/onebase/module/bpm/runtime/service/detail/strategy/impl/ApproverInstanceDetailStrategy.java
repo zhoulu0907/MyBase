@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.ApproverNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.ApproverNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.FieldPermCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldUiShowModeEnum;

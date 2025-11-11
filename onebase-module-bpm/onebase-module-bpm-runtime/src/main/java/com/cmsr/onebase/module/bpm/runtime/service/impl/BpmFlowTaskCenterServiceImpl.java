@@ -4,8 +4,6 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
@@ -14,6 +12,9 @@ import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmTaskExtRepository;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDoneTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
@@ -34,13 +35,14 @@ import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
-import org.dromara.warm.flow.core.entity.Instance;
+import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.enums.NodeType;
+import org.dromara.warm.flow.core.enums.PublishStatus;
+import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
@@ -94,6 +96,12 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private AdminUserApi adminUserApi;
+
+    @Resource
+    private BpmEngineDefExtService engineDefExtService;
+
+    @Resource
+    private DefService defService;
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -294,7 +302,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setFlowStatus(flowTaskExt.getFlowStatus());
         todoTaskVO.setTaskId(flowTaskExt.getId());
         todoTaskVO.setNodeCode(flowTaskExt.getNodeCode());
-        todoTaskVO.setProcessTitle(flowTaskExt.getBusinessTitle());
+        todoTaskVO.setProcessTitle(flowTaskExt.getBpmTitle());
         todoTaskVO.setSubmitTime(flowTaskExt.getSubmitTime());
         todoTaskVO.setFormSummary(flowTaskExt.getFormSummary());
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
@@ -373,7 +381,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         for (BpmInstanceDTO flowInstance : pageResult.getList()) {
             BpmMyCreatedVO bpmMyCreatedVO = new BpmMyCreatedVO();
             bpmMyCreatedVO.setId(flowInstance.getId());
-            bpmMyCreatedVO.setProcessTitle(flowInstance.getBusinessTitle());
+            bpmMyCreatedVO.setProcessTitle(flowInstance.getBpmTitle());
             bpmMyCreatedVO.setFlowStatus(flowInstance.getFlowStatus());
             bpmMyCreatedVO.setFormSummary(flowInstance.getFormSummary());
             bpmMyCreatedVO.setSubmitTime(flowInstance.getSubmitTime());
@@ -410,18 +418,21 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     }
 
     @Override
-    public List<ListNodesRespVO.NodeVO> listNodes(Long instanceId) {
+    public List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId) {
         List<ListNodesRespVO.NodeVO> nodeVOs = new ArrayList<>();
 
-        Instance instance = insService.getById(instanceId);
-
-        if (instance == null) {
-            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+        Definition def = engineDefExtService.getByFormPathAndStatus(String.valueOf(bindingViewId), PublishStatus.PUBLISHED.getKey());
+        if (def == null) {
+            // todo：无发布状态的定义，返回空列表，是否要返回历史状态的流程定义数据
+            return nodeVOs;
         }
 
-        String defJsonStr = instance.getDefJson();
+        DefJson defJson = defService.queryDesign(def.getId());
 
-        DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+        if (defJson == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
+        }
+
         for (NodeJson nodeJson : defJson.getNodeList()) {
             // 只取中间节点
             if (NodeType.isBetween(nodeJson.getNodeType())) {

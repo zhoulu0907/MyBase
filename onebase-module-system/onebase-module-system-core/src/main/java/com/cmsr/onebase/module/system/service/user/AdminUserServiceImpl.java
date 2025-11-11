@@ -132,7 +132,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-        adminUserDataRepository.insert(user);
+        //下拉框选择的用户肯定是已经存在的，不需要重新保存
+        // adminUserDataRepository.insert(user);
+        user.setId(createReqVO.getId());
 
         // 2.2 插入关联岗位
         if (CollUtil.isNotEmpty(user.getPostIds())) {
@@ -658,8 +660,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByStatus(Integer status) {
-        return adminUserDataRepository.findAllByStatus(status);
+    public List<AdminUserDO> getUserListByStatus(Integer status,String userNickName) {
+        return adminUserDataRepository.findAllByStatus(status,userNickName);
     }
 
     @Override

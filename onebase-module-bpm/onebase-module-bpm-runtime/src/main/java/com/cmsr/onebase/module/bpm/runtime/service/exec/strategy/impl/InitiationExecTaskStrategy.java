@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.InitiationNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
-import com.cmsr.onebase.module.bpm.api.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.enums.SkipType;
@@ -90,7 +91,7 @@ public class InitiationExecTaskStrategy extends AbstractExecTaskStrategy<Initiat
         }
 
         // 实体数据更新，发起节点默认有编辑权限
-        if (entityVO != null) {
+        if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData())) {
             // 更新数据
             UpdateDataReqDTO updateDataReqDTO = new UpdateDataReqDTO();
             updateDataReqDTO.setEntityId(entityVO.getEntityId());

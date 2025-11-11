@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl.DefaultInstanceDetailStrategy;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTaskDetailVO;

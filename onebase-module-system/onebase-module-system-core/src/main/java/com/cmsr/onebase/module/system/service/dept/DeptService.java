@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.dept;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.vo.dept.*;
+import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
 
 import java.util.*;
 
@@ -135,12 +136,14 @@ public interface DeptService {
      * @return 部门和用户信息
      */
     DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO);
-    
+
+    void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO);
     /**
      * 根据用户ID获取所有直属上级部门，包括一级部门
      *
-     * @param userId 用户ID
+     * @param id 用户/部门ID，根据 idType 决定
+     * @param idType ID 类型，参见 IdTypeEnum 枚举
      * @return 所有直属上级部门列表
      */
-    List<DeptDO> getParentDeptsListByUserId(Long userId);
+    List<DeptDO> getParentDeptsListById(Long id, String idType);
 }

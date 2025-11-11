@@ -1,19 +1,22 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
 
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
-import com.cmsr.onebase.module.bpm.api.dto.node.NodePermFlagDTO;
-import com.cmsr.onebase.module.bpm.api.dto.node.base.*;
-import com.cmsr.onebase.module.bpm.api.enums.ApprovalModeEnum;
-import com.cmsr.onebase.module.bpm.api.enums.ApproverTypeEnum;
-import com.cmsr.onebase.module.bpm.api.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.*;
+import com.cmsr.onebase.module.bpm.core.enums.ApprovalModeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.ApproverTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.warm.flow.core.service.impl.BpmConstants;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -123,6 +126,21 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
                 throw exception(ErrorCodeConstants.MISSING_NODE_USER_LIST);
             }
 
+            // 根据用户ID去重
+            Map<Long, UserDTO> userMap = com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap(users, UserDTO::getUserId);
+
+            // 转换为列表
+            users = new ArrayList<>(userMap.values());
+
+            // 审批人列表最多100个用户
+            if (users.size() > BpmConstants.MAX_NODE_APPROVER_USERS) {
+                log.warn("审批人列表最多100个用户 当前为：{}", users.size());
+
+                users = new ArrayList<>(users.subList(0, BpmConstants.MAX_NODE_APPROVER_USERS));
+            }
+
+            approverConfig.setUsers(users);
+
             // 清空角色列表
             approverConfig.setRoles(null);
         } else if (approverTypeEnum == ApproverTypeEnum.ROLE) {
@@ -141,6 +159,20 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
                 log.error("缺少有效的角色列表 {}", approverConfig);
                 throw exception(ErrorCodeConstants.MISSING_NODE_VALID_ROLE_LIST);
             }
+
+            // 根据用户ID去重
+            Map<Long, RoleDTO> roleMap = com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap(roles, RoleDTO::getRoleId);
+
+            // 转换为列表
+            roles = new ArrayList<>(roleMap.values());
+
+            // 审批人列表最多10个角色
+            if (roles.size() > BpmConstants.MAX_NODE_APPROVER_ROLES) {
+                log.warn("审批人列表最多10个角色 当前为：{}", roles.size());
+                roles = new ArrayList<>(roles.subList(0, BpmConstants.MAX_NODE_APPROVER_ROLES));
+            }
+
+            approverConfig.setRoles(roles);
 
             // 清空用户列表
             approverConfig.setUsers(null);
