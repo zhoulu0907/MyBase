@@ -126,8 +126,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             try {
                 boolean collectResult = runMetadataCollect(LocalDateTime.now(), datasourceDO);
                 if (!collectResult) {
-                    CommonResult.error(
-                            ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
+                    ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
                             ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getMsg(),
                             datasourceId);
                 }
@@ -199,16 +198,11 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, false);
             CatalogData catalogData = metadataCollector.collectCatalog(datasourceId, datasource);
             metadataManager.saveMetadata(applicationId, datasourceId, catalogData);
-            LocalDateTime endTime = LocalDateTime.now();
-            Duration duration = Duration.between(plannedTime, endTime);
-            long timeCost = duration.toMillis();
-
+            long timeCost = Duration.between(plannedTime, LocalDateTime.now()).toMillis();
             log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
             return true;
         } catch (Exception e) {
-            LocalDateTime endTime = LocalDateTime.now();
-            Duration duration = Duration.between(plannedTime, endTime);
-            long timeCost = duration.toMillis();
+            long timeCost = Duration.between(plannedTime, LocalDateTime.now()).toMillis();
             log.error("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
             return false;
         }

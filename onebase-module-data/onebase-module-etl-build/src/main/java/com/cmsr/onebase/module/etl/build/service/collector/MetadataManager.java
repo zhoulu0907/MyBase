@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,7 +34,7 @@ public class MetadataManager {
     @Resource
     private ETLTableRepository tableRepository;
 
-    public boolean saveMetadata(Long applicationId, Long datasourceId, CatalogData catalogData) {
+    public void saveMetadata(Long applicationId, Long datasourceId, CatalogData catalogData) {
         ETLCatalogDO catalogDO = extractCatalogDO(applicationId, datasourceId, catalogData);
         catalogDO = catalogRepository.upsert(catalogDO);
         Long catalogId = catalogDO.getId();
@@ -41,12 +42,18 @@ public class MetadataManager {
             ETLSchemaDO schemaDO = extractSchemaDO(applicationId, datasourceId, catalogId, schemaData);
             schemaDO = schemaRepository.upsert(schemaDO);
             Long schemaId = schemaDO.getId();
-            List<ETLTableDO> tableDOList = schemaData.getTables().stream()
-                    .map(tableData -> extractTableDO(applicationId, datasourceId, catalogId, schemaId, tableData)).toList();
-            tableRepository.upsertBatch(tableDOList);
+            for (TableData tableData : schemaData.getTables()) {
+                ETLTableDO etlTableDO = extractTableDO(applicationId, datasourceId, catalogId, schemaId, tableData);
+                tableRepository.upsert(etlTableDO);
+            }
+            List<ETLTableDO> tableDOS = tableRepository.findAllByCatalogIdAndSchemaIdAndDatasourceId(datasourceId, catalogId, schemaId);
+            for (ETLTableDO tableDO : tableDOS) {
+                Optional<TableData> optional = schemaData.getTables().stream().filter(tableData -> tableData.getName().equals(tableDO.getTableName())).findAny();
+                if (!optional.isPresent()) {
+                    tableRepository.delete(tableDO);
+                }
+            }
         }
-
-        return true;
     }
 
     private ETLCatalogDO extractCatalogDO(Long applicationId, Long datasourceId, CatalogData catalogData) {
