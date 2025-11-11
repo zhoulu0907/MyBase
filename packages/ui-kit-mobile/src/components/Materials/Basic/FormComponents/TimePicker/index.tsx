@@ -15,13 +15,14 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
       <Cell
         showArrow
         label={label.display && label.text}
-        onClick={() => {setPickerVisible(true);}}
+        // onClick={() => {setPickerVisible(true);}}
       >
         <DatePicker
           currentTs={pickerCurrentTs}
           mode={"time"}
           visible={pickerVisible}
           onHide={() => setPickerVisible(false)}
+          onOk={() => setPickerVisible(false)}
           contentStyle={{
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'

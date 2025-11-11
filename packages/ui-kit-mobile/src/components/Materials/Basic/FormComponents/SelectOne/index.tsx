@@ -53,12 +53,19 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
         cascade={false}
         data={defaultValue}
         visible={singleVisible}
+        maskClosable={true}
         getContainer={getPopupContainer}
         contentStyle={{
           width: '100%',
           pointerEvents: runtime ? 'unset' : 'none'
         }}
         onHide={() => setSingleVisible(false)}
+        onOk={(val, data) => {
+          setSingleVisible(false);
+        }}
+        onPickerChange={(value, index, data) => {
+            console.info('-----demo onPickerChange', value, index, data);
+        }}
       />
       {/* <Form.Item
         label={label.display && label.text}

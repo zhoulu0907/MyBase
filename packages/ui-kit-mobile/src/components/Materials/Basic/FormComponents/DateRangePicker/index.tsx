@@ -44,7 +44,6 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
     );
   };
 
-  // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
   const validStartTime = startTime && dayjs(startTime).valueOf();
   const validEndTime = endTime && dayjs(endTime).valueOf();
@@ -58,8 +57,11 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
       />
       <DatePicker
         mode={"date"}
+        visible={pickerVisible}
         currentTs={[validStartTime, validEndTime]}
         getContainer={getPopupContainer}
+        onHide={() => setPickerVisible(false)}
+        onOk={() => setPickerVisible(false)}
       />
 
 

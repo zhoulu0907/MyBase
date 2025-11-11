@@ -66,20 +66,27 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
         mode = 'date';
     }
 
+    const onPickerChange = (timestamp: number | [number, number]) => {
+      // setPickerCurrentTs(timestamp);
+    }
+
 
     return (
       <>
         <Cell
           showArrow
           label={label.display && label.text}
-          // onClick={() => {setPickerVisible(true);}}
+          // onClick={() => {setPickerVisible(true);}} // 预览或运行态
         />
         <DatePicker
           currentTs={pickerCurrentTs}
           mode={mode as any}
           getContainer={getPopupContainer}
           visible={pickerVisible}
-          onHide={() => setPickerVisible(false)} />
+          onHide={() => setPickerVisible(false)}
+          onOk={() => setPickerVisible(false)}
+          onChange={onPickerChange}
+        />
       </>
     )
   };

@@ -1,4 +1,4 @@
-import { Form, Uploader, Progress, Toast } from '@arco-design/mobile-react';
+import { Form, Uploader, CircleProgress, Toast, Loading } from '@arco-design/mobile-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/mobile-react/lib/Upload';
 import { IconDelete, IconClose, IconDownload, IconFile, IconAdd } from '@arco-design/mobile-react/esm/icon';
 import { uploadFile } from '@onebase/platform-center';
@@ -26,7 +26,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     detailMode
   } = props;
 
-  const [_fileUrl, setFileUrl] = useState<string>('');
+  const [filesList, setFilesList] = useState<{file: File, status: "loaded" | "loading" | "error", url: string}[]>([]);
 
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
@@ -65,7 +65,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
   // }, [fieldValue]);
 
   // 自定义文件列表展示
-  const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
+  const renderUploadList = (fileListMethods) => {
     const getFileIcon = (file: UploadItem) => {
       if (file?.name) {
         // todo  根据文件类型展示不同icon
@@ -76,37 +76,29 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     }
     return (
       <div className="uplaodList-text">
-        {filesList.map((file) => (
-          <div key={file.uid} className="uplaodList-text-item">
+        {filesList.map(({ file, status, url }, index) => (
+          <div key={index} className="uplaodList-text-item">
             {getFileIcon(file)}
             <div className="uplaodList-text-item-name">{file.name}</div>
-            {file.percent && file.percent !== 100 ? (
+            {status && status !== 'loaded' ? (
               <div className="uplaodList-text-item-process">
-                <Progress percentage={file.percent} showText={false}></Progress>
+                <Loading type="circle" radius={7} />
                 <IconClose
                   className="uplaodList-text-item-process-close"
-                  onClick={() => {
-                    if (props.onRemove) {
-                      props.onRemove(file);
-                    }
-                  }}
+                  onClick={() => fileListMethods.deleteFile(index)}
                 />
               </div>
             ) : (
               <div className="uplaodList-text-item-opera">
                 <IconDownload
                   onClick={() => {
-                    if (file.url && file.name) {
+                    if (url && file.name) {
                       // downloadFileByUrl(file.url, file.name);
                     }
                   }}
                 />
                 <IconDelete
-                  onClick={() => {
-                    if (props.onRemove) {
-                      props.onRemove(file);
-                    }
-                  }}
+                  onClick={() => fileListMethods.deleteFile(index)}
                 />
               </div>
             )}
@@ -120,136 +112,23 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     <div className="formWrapper">
       {/* TODO 预览态下显示情况，及上传接口调用需要修改 */}
       <Uploader
+        files={filesList}
         limit={
           (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) ? 1 : verify?.maxCount === -1 ? undefined : verify?.maxCount
         }
         accept={verify?.fileFormat}
-        listType={listType}
-        beforeUpload={async (file) => {
-          const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
-          const fileSize = file.size / 1024;
-          if (fileSize > fileSizeLimit) {
-            Toast.toast({
-              content: '文件大小超出限制',
-              duration: 2000
-            });
-            return false;
-          }
-        }}
-        customRequest={async (option) => {
-          const { onProgress, onError, onSuccess, file } = option;
-          try {
-            const uploadFileUrl = await handleUpload(file, onProgress);
-            if (uploadFileUrl !== '') {
-              setFileUrl(uploadFileUrl);
-              onSuccess(uploadFileUrl);
-            } else {
-              onError({
-                status: 'error',
-                msg: '上传失败'
-              });
-            }
-          } catch (error) {
-            onError({
-              status: 'error',
-              msg: '上传失败'
-            });
-          }
-        }}
+        // onChange={setFilesList} 
+        onMaxSizeExceed={(file) =>         
+          Toast.toast({
+            content: '文件大小超出限制',
+            duration: 2000
+        })}
         style={{
           width: '100%',
           pointerEvents: runtime ? 'unset' : 'none'
         }}
-        showUploadList={{
-          removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
-        }}
-        renderUploadList={renderUploadList}
-      >
-        {listType == 'picture-card' && (
-          <div className="arco-upload-trigger-picture">
-            <div className="arco-upload-trigger-picture-text">
-              <IconAdd />
-              <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动文件到框内上传</div>
-              <div style={{ marginTop: 5, fontWeight: 600, fontSize: '11px' }}>文件大小不超过{verify?.maxSize}MB</div>
-            </div>
-          </div>
-        )}
-      </Uploader>
-      {/* <Form.Item
-        label={label.display && label.text}
-        field={fieldId}
-        layout={layout}
-        tooltip={tooltip}
-        rules={[{ required: verify?.required }]}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-        style={{
-          margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
-        triggerPropName="fileList"
-      >
-        <Upload
-          limit={
-            (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
-              ? fieldValue?.length
-              : verify?.maxCount === -1
-                ? undefined
-                : verify?.maxCount
-          }
-          accept={verify?.fileFormat}
-          listType={listType}
-          beforeUpload={async (file) => {
-            const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
-            const fileSize = file.size / 1024;
-            if (fileSize > fileSizeLimit) {
-              Message.warning('文件大小超出限制');
-              return false;
-            }
-          }}
-          customRequest={async (option) => {
-            const { onProgress, onError, onSuccess, file } = option;
-            try {
-              const uploadFileUrl = await handleUpload(file, onProgress);
-              if (uploadFileUrl !== '') {
-                setFileUrl(uploadFileUrl);
-                onSuccess(uploadFileUrl);
-              } else {
-                onError({
-                  status: 'error',
-                  msg: '上传失败'
-                });
-              }
-            } catch (error) {
-              onError({
-                status: 'error',
-                msg: '上传失败'
-              });
-            }
-          }}
-          style={{
-            width: '100%',
-            pointerEvents: runtime ? 'unset' : 'none'
-          }}
-          showUploadList={{
-            removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
-          }}
-          renderUploadList={renderUploadList}
-        >
-          {listType == 'picture-card' && (
-            <div className="arco-upload-trigger-picture">
-              <div className="arco-upload-trigger-picture-text">
-                <IconPlus />
-                <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动文件到框内上传</div>
-                <div style={{ marginTop: 5, fontWeight: 600, fontSize: '11px' }}>文件大小不超过{verify?.maxSize}MB</div>
-              </div>
-            </div>
-          )}
-        </Upload>
-      </Form.Item> */}
+        renderFileList={renderUploadList}
+      />
     </div>
   );
 });

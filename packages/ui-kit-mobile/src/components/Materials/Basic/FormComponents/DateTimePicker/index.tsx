@@ -54,7 +54,10 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         typeArr={['year', 'month', 'date', 'hour', 'minute']}
         getContainer={getPopupContainer}
         visible={pickerVisible}
-        onHide={() => setPickerVisible(false)} />
+        onHide={() => setPickerVisible(false)}
+        onOk={() => setPickerVisible(false)}
+      />
+
       {/* <Form.Item
         label={label.display && label.text}
         field={

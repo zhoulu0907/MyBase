@@ -52,11 +52,19 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
         data={defaultValue}
         visible={multipleVisible}
         getContainer={getPopupContainer}
+        cascade={false}
+        maskClosable={true}
         contentStyle={{
           width: '100%',
           pointerEvents: runtime ? 'unset' : 'none'
         }}
         onHide={() => setMultipleVisible(false)}
+        onOk={(val, data) => {
+          setMultipleVisible(false);
+        }}
+        onPickerChange={(value, index, data) => {
+            console.info('-----demo onPickerChange', value, index, data);
+        }}
       />
           
       {/* <Form.Item

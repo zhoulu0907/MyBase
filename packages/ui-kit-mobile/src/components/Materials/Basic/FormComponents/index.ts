@@ -17,6 +17,7 @@ import XImgUpload from './ImgUpload';
 import XCarouselForm from './Carousel';
 import FileUpload from './FileUpload';
 import XAutoCode from './AutoCode';
+import XDeptSelect from './DeptSelect';
 
 // ========== Schema导入区域 ==========
 import XInputTextSchema from './InputText/schema';
@@ -37,7 +38,7 @@ import XImgUploadSchema from './ImgUpload/schema';
 import XCarouselSchema from './Carousel/schema';
 import FileUploadSchema from './FileUpload/schema';
 import XAutoCodeSchema from './AutoCode/schema';
-
+import XDeptSelectSchema from './DeptSelect/schema';
 // ========== 导出对象 ==========
 export const FormComp = {
   XInputText,
@@ -57,7 +58,8 @@ export const FormComp = {
   XImgUpload,
   XCarouselForm,
   FileUpload,
-  XAutoCode
+  XAutoCode,
+  XDeptSelect
 } as const;
 
 export const FormSchema = {
@@ -78,5 +80,6 @@ export const FormSchema = {
   XImgUploadSchema,
   XCarouselSchema,
   FileUploadSchema,
-  XAutoCodeSchema
+  XAutoCodeSchema,
+  XDeptSelectSchema
 } as const;
