@@ -589,6 +589,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 1.5 校验本次提交的字段名是否有重复
         validateFieldNameDuplicationInBatch(reqVO.getItems());
 
+        // 用于收集需要执行的物理表操作
+        List<PhysicalTableOperation> physicalTableOps = new java.util.ArrayList<>();
+
         // 2. 先删除
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             if (Boolean.TRUE.equals(item.getIsDeleted())) {
@@ -624,9 +627,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 先删库记录
                 metadataEntityFieldRepository.deleteById(Long.valueOf(item.getId()));
 
-                // 同步物理表
-                if (datasource != null && businessEntity.getTableName() != null) {
-                    dropColumnFromTable(datasource, businessEntity.getTableName(), existing.getFieldName());
+                // 收集物理表删除操作
+                if (datasource != null && businessEntity.getTableName() != null && existing != null) {
+                    PhysicalTableOperation op = new PhysicalTableOperation();
+                    op.setOperationType("DROP");
+                    op.setFieldName(existing.getFieldName());
+                    physicalTableOps.add(op);
                 }
                 resp.getDeletedIds().add(item.getId());
             }
@@ -669,38 +675,40 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
                 if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
                 if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
-                // fieldCode字段已注释，不再处理
-                // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
-                // 修复：正确处理isSystemField字段的更新
                 if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
-                // 处理dictTypeId字段
                 if (item.getDictTypeId() != null) {
                     upd.setDictTypeId(item.getDictTypeId());
                 }
 
                 metadataEntityFieldRepository.update(upd);
 
-                // 同步物理表（需要完整字段信息）
-                // 若本次更新修改了字段名，先尝试对物理列执行重命名，避免后续ALTER因新列不存在而失败
-                if (datasource != null && businessEntity.getTableName() != null && item.getFieldName() != null
-                        && !item.getFieldName().equals(origin.getFieldName())) {
-                    try {
-                        renameColumnInTable(datasource, businessEntity.getTableName(), origin.getFieldName(), item.getFieldName());
-                    } catch (Exception e) {
-                        log.warn("重命名物理列失败，将在后续逻辑中回退为新增列处理。old={}, new={}, err={}",
-                                origin.getFieldName(), item.getFieldName(), e.getMessage());
-                    }
-                }
-                DefaultConfigStore cs2 = new DefaultConfigStore();
-                cs2.and("id", origin.getId());
-                MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
+                // 收集物理表更新操作
                 if (datasource != null && businessEntity.getTableName() != null) {
-                    alterColumnInTable(datasource, businessEntity.getTableName(), full);
+                    // 若字段名变更，先收集重命名操作
+                    if (item.getFieldName() != null && !item.getFieldName().equals(origin.getFieldName())) {
+                        PhysicalTableOperation renameOp = new PhysicalTableOperation();
+                        renameOp.setOperationType("RENAME");
+                        renameOp.setOldFieldName(origin.getFieldName());
+                        renameOp.setFieldName(item.getFieldName());
+                        physicalTableOps.add(renameOp);
+                    }
+                    
+                    // 收集ALTER操作
+                    DefaultConfigStore cs2 = new DefaultConfigStore();
+                    cs2.and("id", origin.getId());
+                    MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
+                    PhysicalTableOperation alterOp = new PhysicalTableOperation();
+                    alterOp.setOperationType("ALTER");
+                    alterOp.setFieldInfo(full);
+                    physicalTableOps.add(alterOp);
                 }
                 resp.getUpdatedIds().add(item.getId());
 
-                // 同步选项、约束和自动编号（整体替换）
+                // 同步选项、约束和自动编号（使用智能更新逻辑）
                 Long fieldId = origin.getId();
+                DefaultConfigStore cs2 = new DefaultConfigStore();
+                cs2.and("id", origin.getId());
+                MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
                 processFieldRelatedData(fieldId, full, item.getOptions(), item.getConstraints(), item.getAutoNumber());
                 
                 // 特别处理：如果 isRequired 字段发生了变更，需要额外同步到 MetadataValidationRequiredDO
@@ -714,7 +722,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
                 
                 // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
-                // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
                 boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
                     (item.getConstraints().getLengthEnabled() != null || 
                      item.getConstraints().getMinLength() != null || 
@@ -724,7 +731,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     processLengthValidation(fieldId, full);
                 }
                 
-                // 校验：同一实体的同一字段的同一种校验类型只能有一条生效的规则
                 validateValidationRuleUniqueness(fieldId, origin.getEntityId());
             }
         }
@@ -733,7 +739,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             // 新增：当未提供ID或ID为空白时进入
             if (!Boolean.TRUE.equals(item.getIsDeleted()) && (item.getId() == null || item.getId().trim().isEmpty())) {
-                // 智能处理：如果没有传ID，但fieldCode或fieldName已存在，则自动转换为更新操作
+                // 智能处理：如果没有传ID，但fieldName已存在，则自动转换为更新操作
                 MetadataEntityFieldDO existingField = findExistingFieldByCodeOrName(reqVO.getEntityId(), item);
                 if (existingField != null) {
                     log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}",
@@ -741,10 +747,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                     // 转换为更新操作
                     item.setId(existingField.getId().toString());
-            String updateFieldName = item.getFieldName() != null ? item.getFieldName() : existingField.getFieldName();
-            validateEntityFieldNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateFieldName);
-            String updateDisplayName = item.getDisplayName() != null ? item.getDisplayName() : existingField.getDisplayName();
-            validateEntityFieldDisplayNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateDisplayName);
+                    String updateFieldName = item.getFieldName() != null ? item.getFieldName() : existingField.getFieldName();
+                    validateEntityFieldNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateFieldName);
+                    String updateDisplayName = item.getDisplayName() != null ? item.getDisplayName() : existingField.getDisplayName();
+                    validateEntityFieldDisplayNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateDisplayName);
 
                     Integer maxLength = extractMaxLength(item);
 
@@ -764,52 +770,49 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
                     if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
                     if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
-                    // fieldCode字段已注释，不再处理
-                    // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
-                    // 关键：正确处理isSystemField字段的更新
                     if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
-                    // 处理dictTypeId字段
                     if (item.getDictTypeId() != null) {
                         upd.setDictTypeId(item.getDictTypeId());
                     }
 
                     metadataEntityFieldRepository.update(upd);
 
-                    // 同步物理表（需要完整字段信息）
-                    // 如果修改了字段名，优先执行物理列重命名
-                    if (datasource != null && businessEntity.getTableName() != null && item.getFieldName() != null
-                            && !item.getFieldName().equals(existingField.getFieldName())) {
-                        try {
-                            renameColumnInTable(datasource, businessEntity.getTableName(), existingField.getFieldName(), item.getFieldName());
-                        } catch (Exception e) {
-                            log.warn("重命名物理列失败，将在后续逻辑中回退为新增列处理。old={}, new={}, err={}",
-                                    existingField.getFieldName(), item.getFieldName(), e.getMessage());
-                        }
-                    }
-                    DefaultConfigStore cs2 = new DefaultConfigStore();
-                    cs2.and("id", existingField.getId());
-                    MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
+                    // 收集物理表更新操作
                     if (datasource != null && businessEntity.getTableName() != null) {
-                        alterColumnInTable(datasource, businessEntity.getTableName(), full);
+                        // 若字段名变更，先收集重命名操作
+                        if (item.getFieldName() != null && !item.getFieldName().equals(existingField.getFieldName())) {
+                            PhysicalTableOperation renameOp = new PhysicalTableOperation();
+                            renameOp.setOperationType("RENAME");
+                            renameOp.setOldFieldName(existingField.getFieldName());
+                            renameOp.setFieldName(item.getFieldName());
+                            physicalTableOps.add(renameOp);
+                        }
+                        
+                        DefaultConfigStore cs2 = new DefaultConfigStore();
+                        cs2.and("id", existingField.getId());
+                        MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
+                        PhysicalTableOperation alterOp = new PhysicalTableOperation();
+                        alterOp.setOperationType("ALTER");
+                        alterOp.setFieldInfo(full);
+                        physicalTableOps.add(alterOp);
                     }
                     resp.getUpdatedIds().add(existingField.getId().toString());
                     
-                    // 同步选项、约束和自动编号（整体替换）
+                    // 同步选项、约束和自动编号（使用智能更新逻辑）
                     Long fieldId = existingField.getId();
+                    DefaultConfigStore cs2 = new DefaultConfigStore();
+                    cs2.and("id", existingField.getId());
+                    MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
                     processFieldRelatedData(fieldId, full, item.getOptions(), item.getConstraints(), item.getAutoNumber());
                     
-                    // 特别处理：如果 isRequired 字段发生了变更，需要额外同步到 MetadataValidationRequiredDO
                     if (item.getIsRequired() != null && !item.getIsRequired().equals(existingField.getIsRequired())) {
                         processRequiredValidation(fieldId, full);
                     }
                     
-                    // 特别处理：如果 isUnique 字段发生了变更，需要额外同步到 MetadataValidationUniqueDO
                     if (item.getIsUnique() != null && !item.getIsUnique().equals(existingField.getIsUnique())) {
                         processUniqueValidation(fieldId, full);
                     }
                     
-                    // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
-                    // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
                     boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
                         (item.getConstraints().getLengthEnabled() != null || 
                          item.getConstraints().getMinLength() != null || 
@@ -819,14 +822,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         processLengthValidation(fieldId, full);
                     }
                     
-                    // 校验：同一实体的同一字段的同一种校验类型只能有一条生效的规则
                     validateValidationRuleUniqueness(fieldId, existingField.getEntityId());
                     
                     continue; // 跳过新增逻辑
                 }
 
                 // 确实是新增字段的情况
-                // 名称唯一
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
                 validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), item.getDisplayName());
                 validateEntityAllowModifyStructure(Long.valueOf(reqVO.getEntityId()));
@@ -846,39 +847,35 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 toCreate.setIsRequired(item.getIsRequired());
                 toCreate.setIsUnique(item.getIsUnique());
                 toCreate.setSortOrder(item.getSortOrder());
-                // fieldCode字段已注释，自动生成
                 toCreate.setFieldCode(generateFieldCode(item.getFieldName()));
-                // 使用新的枚举值：1-是，0-否
-                toCreate.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : StatusEnumUtil.YES); // 默认1-是系统字段
-                toCreate.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
-                // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
+                toCreate.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : StatusEnumUtil.YES);
+                toCreate.setIsPrimaryKey(StatusEnumUtil.NO);
                 toCreate.setRunMode(0);
-                // 处理dictTypeId字段
                 toCreate.setDictTypeId(item.getDictTypeId());
 
                 metadataEntityFieldRepository.insert(toCreate);
 
+                // 收集物理表新增操作
                 if (datasource != null && businessEntity.getTableName() != null) {
-                    addColumnToTable(datasource, businessEntity.getTableName(), toCreate);
+                    PhysicalTableOperation addOp = new PhysicalTableOperation();
+                    addOp.setOperationType("ADD");
+                    addOp.setFieldInfo(toCreate);
+                    physicalTableOps.add(addOp);
                 }
                 resp.getCreatedIds().add(String.valueOf(toCreate.getId()));
 
-                // 同步选项、约束和自动编号（整体替换）
+                // 同步选项、约束和自动编号（使用智能更新逻辑）
                 Long fieldId = toCreate.getId();
                 processFieldRelatedData(fieldId, toCreate, item.getOptions(), item.getConstraints(), item.getAutoNumber());
                 
-                // 特别处理：对于新增字段，如果设置了 isRequired，需要同步到 MetadataValidationRequiredDO
                 if (item.getIsRequired() != null && item.getIsRequired() == 1) {
                     processRequiredValidation(fieldId, toCreate);
                 }
                 
-                // 特别处理：对于新增字段，如果设置了 isUnique，需要同步到 MetadataValidationUniqueDO
                 if (item.getIsUnique() != null && item.getIsUnique() == 1) {
                     processUniqueValidation(fieldId, toCreate);
                 }
                 
-                // 特别处理：对于新增字段，如果设置了 dataLength，需要同步到 MetadataValidationLengthDO
-                // 但如果用户已通过constraints提供了长度约束，则跳过此处理避免冲突
                 boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
                     (item.getConstraints().getLengthEnabled() != null || 
                      item.getConstraints().getMinLength() != null || 
@@ -888,9 +885,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     processLengthValidation(fieldId, toCreate);
                 }
                 
-                // 校验：同一实体的同一字段的同一种校验类型只能有一条生效的规则
                 validateValidationRuleUniqueness(fieldId, toCreate.getEntityId());
             }
+        }
+
+        // 5. 统一执行所有物理表操作
+        if (datasource != null && businessEntity.getTableName() != null && !physicalTableOps.isEmpty()) {
+            executePhysicalTableOperations(datasource, businessEntity.getTableName(), physicalTableOps);
         }
 
         return resp;
@@ -1677,6 +1678,75 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     }
 
     /**
+     * 物理表操作封装类
+     */
+    @lombok.Data
+    private static class PhysicalTableOperation {
+        /**
+         * 操作类型：ADD、ALTER、DROP、RENAME
+         */
+        private String operationType;
+        
+        /**
+         * 字段名（用于ADD、ALTER、DROP操作）
+         */
+        private String fieldName;
+        
+        /**
+         * 旧字段名（用于RENAME操作）
+         */
+        private String oldFieldName;
+        
+        /**
+         * 字段信息（用于ADD、ALTER操作）
+         */
+        private MetadataEntityFieldDO fieldInfo;
+    }
+    
+    /**
+     * 统一执行物理表操作
+     *
+     * @param datasource 数据源信息
+     * @param tableName 表名
+     * @param operations 待执行的操作列表
+     */
+    private void executePhysicalTableOperations(MetadataDatasourceDO datasource, String tableName, 
+                                                List<PhysicalTableOperation> operations) {
+        if (operations == null || operations.isEmpty()) {
+            return;
+        }
+        
+        log.info("开始批量执行物理表操作，表名: {}, 操作数量: {}", tableName, operations.size());
+        
+        for (PhysicalTableOperation op : operations) {
+            try {
+                switch (op.getOperationType()) {
+                    case "DROP":
+                        dropColumnFromTable(datasource, tableName, op.getFieldName());
+                        break;
+                    case "RENAME":
+                        renameColumnInTable(datasource, tableName, op.getOldFieldName(), op.getFieldName());
+                        break;
+                    case "ALTER":
+                        alterColumnInTable(datasource, tableName, op.getFieldInfo());
+                        break;
+                    case "ADD":
+                        addColumnToTable(datasource, tableName, op.getFieldInfo());
+                        break;
+                    default:
+                        log.warn("未知的物理表操作类型: {}", op.getOperationType());
+                }
+            } catch (Exception e) {
+                log.error("执行物理表操作失败，操作类型: {}, 字段名: {}, 错误: {}", 
+                         op.getOperationType(), op.getFieldName(), e.getMessage(), e);
+                throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
+            }
+        }
+        
+        log.info("批量执行物理表操作完成，表名: {}", tableName);
+    }
+
+    /**
      * 生成删除字段的DDL语句
      * <p>
      * 注意：调用此方法前必须先使用checkColumnExists()检查列是否存在
@@ -1816,21 +1886,61 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                                        List<FieldOptionRespVO> options,
                                        FieldConstraintRespVO constraints,
                                        AutoNumberConfigReqVO autoNumber) {
-        // 处理选项：仅当未关联字典类型时才处理自定义选项
+        // 处理选项：仅当未关联字典类型时才处理自定义选项（智能更新版本）
         // 如果 dictTypeId 不为 null，说明复用系统字典，忽略 options 参数
         if (entityField != null && entityField.getDictTypeId() == null && options != null) {
-            fieldOptionService.deleteByFieldId(fieldId);
+            // 获取现有选项
+            List<MetadataEntityFieldOptionDO> existingOptions = fieldOptionService.listByFieldId(fieldId);
+            Map<Long, MetadataEntityFieldOptionDO> existingOptionsMap = existingOptions.stream()
+                .collect(java.util.stream.Collectors.toMap(MetadataEntityFieldOptionDO::getId, o -> o, (a, b) -> a));
+            
+            // 用于标记已处理的选项ID
+            Set<Long> processedOptionIds = new java.util.HashSet<>();
+            
             for (var opt : options) {
-                MetadataEntityFieldOptionDO d =
-                    new MetadataEntityFieldOptionDO();
+                // 如果提供了ID，尝试更新现有选项
+                if (opt.getId() != null && !opt.getId().trim().isEmpty()) {
+                    try {
+                        Long optionId = Long.valueOf(opt.getId());
+                        MetadataEntityFieldOptionDO existing = existingOptionsMap.get(optionId);
+                        if (existing != null) {
+                            // 更新现有选项
+                            MetadataEntityFieldOptionDO updateObj = new MetadataEntityFieldOptionDO();
+                            updateObj.setId(optionId);
+                            updateObj.setFieldId(fieldId);
+                            updateObj.setOptionLabel(opt.getOptionLabel());
+                            updateObj.setOptionValue(opt.getOptionValue());
+                            updateObj.setOptionOrder(opt.getOptionOrder());
+                            updateObj.setIsEnabled(opt.getIsEnabled());
+                            updateObj.setDescription(opt.getDescription());
+                            updateObj.setAppId(entityField.getAppId());
+                            fieldOptionService.update(updateObj);
+                            processedOptionIds.add(optionId);
+                            continue;
+                        }
+                    } catch (NumberFormatException e) {
+                        log.warn("选项ID格式错误，将作为新增处理: {}", opt.getId());
+                    }
+                }
+                
+                // 新增选项
+                MetadataEntityFieldOptionDO d = new MetadataEntityFieldOptionDO();
                 d.setFieldId(fieldId);
                 d.setOptionLabel(opt.getOptionLabel());
                 d.setOptionValue(opt.getOptionValue());
                 d.setOptionOrder(opt.getOptionOrder());
                 d.setIsEnabled(opt.getIsEnabled());
                 d.setDescription(opt.getDescription());
-                d.setAppId(entityField != null ? entityField.getAppId() : null);
+                d.setAppId(entityField.getAppId());
                 fieldOptionService.create(d);
+            }
+            
+            // 删除未在请求中出现的旧选项
+            for (MetadataEntityFieldOptionDO existingOption : existingOptions) {
+                if (!processedOptionIds.contains(existingOption.getId())) {
+                    fieldOptionService.deleteById(existingOption.getId());
+                    log.info("删除未在请求中出现的字段选项: {}", existingOption.getId());
+                }
             }
         } else if (entityField != null && entityField.getDictTypeId() != null) {
             // 如果切换到使用字典类型，删除原有的自定义选项
@@ -1844,7 +1954,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             processFieldConstraints(fieldId, entityField, constraints);
         }
 
-        // 处理自动编号
+        // 处理自动编号（使用智能更新版本）
         if (autoNumber != null) {
             processAutoNumberConfig(fieldId, entityField, autoNumber);
         }
@@ -1959,16 +2069,24 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     }
 
     /**
-     * 处理自动编号配置
+     * 处理自动编号配置（智能更新版本）
+     *
+     * @param fieldId 字段ID
+     * @param entityField 字段实体
+     * @param autoNumber 自动编号配置
      */
     private void processAutoNumberConfig(Long fieldId, MetadataEntityFieldDO entityField, AutoNumberConfigReqVO autoNumber) {
-        // 先删除现有配置
-        autoNumberConfigBuildService.deleteByFieldId(fieldId);
-
+        // 获取现有配置
+        MetadataAutoNumberConfigDO existingConfig = autoNumberConfigBuildService.getByFieldId(fieldId);
+        
         // 使用新的枚举值：1-启用，0-禁用
         if (autoNumber.getIsEnabled() != null && CommonStatusEnum.isEnabled(autoNumber.getIsEnabled())) {
-            // 创建自动编号配置
+            // 构建配置对象
             MetadataAutoNumberConfigDO config = new MetadataAutoNumberConfigDO();
+            if (existingConfig != null) {
+                // 更新：保留原有ID
+                config.setId(existingConfig.getId());
+            }
             config.setFieldId(fieldId);
             config.setIsEnabled(autoNumber.getIsEnabled());
             config.setNumberMode(autoNumber.getNumberMode());
@@ -1982,9 +2100,65 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
             Long configId = autoNumberConfigBuildService.upsert(config);
 
-            // 处理规则项
-            if (autoNumber.getRuleItems() != null && !autoNumber.getRuleItems().isEmpty()) {
+            // 处理规则项（智能更新：根据ID进行精确匹配更新）
+            if (autoNumber.getRuleItems() != null) {
+                // 获取现有规则项，按 ID 建立映射
+                List<MetadataAutoNumberRuleItemDO> existingRules = autoNumberRuleBuildService.listByConfigId(configId);
+                Map<Long, MetadataAutoNumberRuleItemDO> existingRulesMap = existingRules.stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                        MetadataAutoNumberRuleItemDO::getId, 
+                        r -> r, 
+                        (a, b) -> a
+                    ));
+                
+                // 用于标记已处理的规则项ID
+                Set<Long> processedRuleIds = new java.util.HashSet<>();
+                
                 for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRuleItems()) {
+                    // 如果提供了ID，尝试更新现有规则项
+                    if (ruleReq.getId() != null) {
+                        MetadataAutoNumberRuleItemDO existing = existingRulesMap.get(ruleReq.getId());
+                        if (existing != null) {
+                            // 更新现有规则项
+                            MetadataAutoNumberRuleItemDO rule = new MetadataAutoNumberRuleItemDO();
+                            rule.setId(ruleReq.getId());
+                            rule.setConfigId(configId);
+                            rule.setItemType(ruleReq.getItemType());
+                            rule.setItemOrder(ruleReq.getItemOrder());
+                            rule.setFormat(ruleReq.getFormat());
+                            
+                            // 兼容性处理：TEXT类型的规则项支持从format字段获取文本值
+                            String textValue = ruleReq.getTextValue();
+                            if ("TEXT".equalsIgnoreCase(ruleReq.getItemType()) && textValue == null && ruleReq.getFormat() != null) {
+                                textValue = ruleReq.getFormat();
+                            }
+                            rule.setTextValue(textValue);
+                            
+                            // 兼容性处理：FIELD_REF类型的规则项支持从format字段获取引用字段ID
+                            Long refFieldId = ruleReq.getRefFieldId();
+                            if ("FIELD_REF".equalsIgnoreCase(ruleReq.getItemType()) && refFieldId == null && ruleReq.getFormat() != null) {
+                                try {
+                                    refFieldId = Long.parseLong(ruleReq.getFormat());
+                                    log.info("FIELD_REF规则项从format字段解析出引用字段ID: {}", refFieldId);
+                                } catch (NumberFormatException e) {
+                                    log.warn("FIELD_REF规则项的format字段无法解析为字段ID: {}", ruleReq.getFormat());
+                                }
+                            }
+                            rule.setRefFieldId(refFieldId);
+                            rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
+                            rule.setAppId(entityField != null ? entityField.getAppId() : null);
+                            
+                            autoNumberRuleBuildService.update(rule);
+                            processedRuleIds.add(ruleReq.getId());
+                            log.info("更新自动编号规则项，id={}, configId={}, itemOrder={}", 
+                                    ruleReq.getId(), configId, ruleReq.getItemOrder());
+                            continue;
+                        } else {
+                            log.warn("请求中的规则项ID不存在，将作为新增处理，id={}", ruleReq.getId());
+                        }
+                    }
+                    
+                    // 新增规则项（未提供ID或ID不存在的情况）
                     MetadataAutoNumberRuleItemDO rule = new MetadataAutoNumberRuleItemDO();
                     rule.setConfigId(configId);
                     rule.setItemType(ruleReq.getItemType());
@@ -2009,12 +2183,28 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         }
                     }
                     rule.setRefFieldId(refFieldId);
-                    // 使用新的枚举值：1-启用，0-禁用
                     rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
                     rule.setAppId(entityField != null ? entityField.getAppId() : null);
 
-                    autoNumberRuleBuildService.add(rule);
+                    Long newRuleId = autoNumberRuleBuildService.add(rule);
+                    log.info("新增自动编号规则项，id={}, configId={}, itemOrder={}", 
+                            newRuleId, configId, ruleReq.getItemOrder());
                 }
+                
+                // 删除未在请求中出现的旧规则项
+                for (MetadataAutoNumberRuleItemDO existingRule : existingRules) {
+                    if (!processedRuleIds.contains(existingRule.getId())) {
+                        autoNumberRuleBuildService.deleteById(existingRule.getId());
+                        log.info("删除未在请求中出现的自动编号规则项，id={}, itemOrder={}", 
+                                existingRule.getId(), existingRule.getItemOrder());
+                    }
+                }
+            }
+        } else {
+            // 禁用或删除配置
+            if (existingConfig != null) {
+                autoNumberConfigBuildService.deleteByFieldId(fieldId);
+                log.info("删除字段 {} 的自动编号配置", fieldId);
             }
         }
     }
