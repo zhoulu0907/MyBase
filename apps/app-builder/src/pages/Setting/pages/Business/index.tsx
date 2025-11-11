@@ -17,7 +17,10 @@ const BusinessPage: React.FC = () => {
             title: '企业LOGO',
             dataIndex: 'corpLogo',
             render: (data: string) => (
-                <Image src={data}/>
+               <>{data? 
+                <Image src={data} width={72} height={36}/>:
+                <div className={styles.corpLogo}>中国移动</div> }
+               </>
             )
         },
         {

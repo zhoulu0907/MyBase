@@ -29,3 +29,7 @@ export const statusOptions = [
     { label: '迭代中', value: 'fixing' },
     { label: '已发布', value: 'published' }
 ]
+
+// 允许的文件格式列表
+export const allowedFormats = ['image/jpeg', 'image/png', 'image/gif'];
+

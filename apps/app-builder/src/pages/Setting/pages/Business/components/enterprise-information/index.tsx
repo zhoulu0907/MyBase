@@ -1,17 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Space, Message, Typography } from '@arco-design/web-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Tabs, Button, Card, Input, Descriptions, Checkbox, Select, Upload, Space, Message, Typography, Avatar, Image } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import EditableFormItem from '../formItem';
 import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useOutletContext, useParams } from 'react-router-dom';
 import type { AppItem, cropItem, industryTypeOption, OutletContextType, updatedParams } from '../../types/appItem';
-import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi,createCorpAppApi, removeCorpAppApi, updateCorpAppApi,type CorpAppParams, type corpListParams } from "@onebase/platform-center";
+import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi,createCorpAppApi, removeCorpAppApi, updateCorpAppApi, uploadFile, type CorpAppParams, type corpListParams } from "@onebase/platform-center";
+import { allowedFormats } from '../../constants';
 
 const EnterpriseInfoPage: React.FC = () => {
   const {activeTab} = useParams();
   const { currentId, industryOptions} = useOutletContext<OutletContextType>();
   const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
+  const uploadRef = useRef(null);
+  const [isImageFailed, setIsImageFailed] = useState<boolean>(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab ==="授权应用" ? "authorized" : "basic");
   const [isEdited, setIsEdited] = React.useState(false);
@@ -34,6 +38,10 @@ const EnterpriseInfoPage: React.FC = () => {
       const res = await getDetailsApi(currentId);
       setFormData(res && res || null);
       setOriginalInfo(res && res || null);
+      if(res.corpLogo) {
+        setIsImageFailed(false);
+        setAvatarUrl(res.corpLogo);
+      }
     }catch(error) {
       Message.error("获取详情失败");
     }
@@ -78,6 +86,8 @@ const EnterpriseInfoPage: React.FC = () => {
     let newValue = value;
     if(field === "status") {
       newValue = newValue === true ? 1 : 0;
+    }else if(field === "corpLogo") {
+      newValue = (value as any)?.[0]?.response || "";
     }
     setFormData((prev: any) => ({ ...prev, [field]: newValue }));
   };
@@ -169,18 +179,72 @@ const EnterpriseInfoPage: React.FC = () => {
       )
   },[tableData, searchValue])
 
+  // 头像上传
+const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+  setIsImageFailed(false);
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const progressAdapter = onProgress
+    ? (progressEvent: ProgressEvent) => {
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
+        }
+      }
+    : undefined;
+
+  const res = await uploadFile(formData, progressAdapter);
+  return res;
+};
+
+  
+  const beforeUpload = async(file: any) => {
+    if (!allowedFormats.includes(file.type)) {
+      Message.warning(`不支持该格式，仅支持 JPG / JPEG / PNG / GIF`);
+      return false;
+    }
+  }
+
+ const customRequest= async (option:any) => {
+    const { onProgress, onError, onSuccess, file } = option;
+    try {
+      const uploadImgUrl = await handleUpload(file, onProgress);
+      if (uploadImgUrl !== '') {
+        setIsImageFailed(false);
+        setAvatarUrl(uploadImgUrl);
+        onSuccess(uploadImgUrl);
+      } else {
+        onError({
+          status: 'error',
+          msg: '上传失败'
+        });
+      }
+    } catch (error) {
+      onError({
+        status: 'error',
+        msg: '上传失败'
+      });
+    }
+  }
+
+  const handleImageError = () => {
+    setIsImageFailed(true);
+  }
+
   const data = [
     {
       label:"企业Logo", 
       value: <EditableFormItem
           value = {
-            <Button type='dashed' style={{width:"160px", height:"80px", backgroundColor:"#F2F3F5"}}>中国移动</Button>
+             isImageFailed ? <Button type='dashed' style={{width:"160px", height:"80px", backgroundColor:"#F2F3F5"}}>中国移动</Button> : 
+              <Image alt="头像" src={avatarUrl} onError={handleImageError} width={160} height={80} />
           }
           label="logo"
           onChange={handleChange.bind(null, "corpLogo")}
           isEdit={isEdited}
           component={Upload}
-          componentProps={{listType: 'picture-list',multiple: false, headers: {authorization: 'authorization-text'}}}
+          componentProps={{ref:uploadRef, accept:"image/*",listType: 'picture-card',limit: 1,showUploadList: false,beforeUpload: beforeUpload,customRequest:customRequest, headers: {authorization: 'authorization-text'}}}
           logoContent={<Space style={{display:"flex", alignItems:"flex-end"}}><Button type='primary'>重新上传</Button><Typography.Text type='secondary'>建议比例2:1</Typography.Text></Space>}
       />
     },
