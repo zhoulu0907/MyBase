@@ -52,14 +52,14 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
     const fieldPerm = detailData?.formData?.fieldPerm;
 
-    if (pageComponentSchemas && fieldPerm) {
+    if (pageComponentSchemas) {
       const updatedData: {
         [key: string]: any;
       } = {};
       Object.keys(pageComponentSchemas).forEach((key) => {
         const originalItem = pageComponentSchemas[key];
         const secondDataField = originalItem.config.dataField[1];
-        const newStatus = fieldPerm[secondDataField] || originalItem.config.status;
+        const newStatus = fieldPerm?.[secondDataField] || originalItem.config.status;
         updatedData[key] = {
           ...originalItem,
           config: {
