@@ -1,20 +1,19 @@
 import OutputIcon from '@/assets/images/etl/node_output.svg';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/free-layout-editor';
-import { useEffect, useState } from 'react';
+import { etlEditorSignal } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import { type FlowNodeJSON } from '../../../typings';
 import styles from './index.module.less';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
-  const [title, setTitle] = useState('输入节点');
+  useSignals();
 
-  useEffect(() => {
-    setTitle(form.getValueIn('title'));
-  }, [form]);
+  const { nodeData } = etlEditorSignal;
 
   return (
     <div className={styles.outputNode}>
       <img src={OutputIcon} alt="input" />
-      {title}
+      {nodeData.value[form.getValueIn('id')]?.title || '输入节点'}
     </div>
   );
 };

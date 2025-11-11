@@ -129,7 +129,7 @@ export interface DatasourceSaveReqDTO {
   /**
    * 数据源配置信息
    */
-  config: MapObject;
+  config: MapObject | string;
   /**
    * 数据源名称
    */

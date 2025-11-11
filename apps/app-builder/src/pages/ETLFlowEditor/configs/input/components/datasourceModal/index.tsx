@@ -82,7 +82,6 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
       datasourceId: curDatasourceId,
       tableId: selectedTableId,
       fields: selectedColumns.map((column) => ({
-        fieldId: column.id,
         fieldName: column.name,
         fieldType: column.type
       }))
@@ -91,7 +90,7 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
     payload.output = {
       verified: true,
       fields: selectedColumns.map((column) => ({
-        fieldId: column.id,
+        fieldFqn: `${selectedTableId}.${column.name}`,
         fieldName: column.name,
         fieldType: column.type
       }))

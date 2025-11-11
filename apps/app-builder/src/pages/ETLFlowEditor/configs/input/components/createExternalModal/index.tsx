@@ -1,5 +1,7 @@
 import kingbaseIcon from '@/assets/images/etl/kingbase.png';
 import mockIcon from '@/assets/images/etl/mock.png';
+import mysqlIcon from '@/assets/images/etl/mysql.png';
+import oracleIcon from '@/assets/images/etl/oracle.png';
 import postgresqlIcon from '@/assets/images/etl/postgresql.png';
 import { Button, Checkbox, Form, Grid, Input, Message, Modal, Radio, Select, Steps } from '@arco-design/web-react';
 import { createETLDataSource, getETLSupportedDataSource } from '@onebase/app';
@@ -67,12 +69,16 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
       return <img className={styles.datasourceIcon} src={postgresqlIcon} alt="PostgreSQL" />;
     }
 
-    // if (datasourceType === 'MySQL'){}
+    if (datasourceType === 'MySQL') {
+      return <img className={styles.datasourceIcon} src={mysqlIcon} alt="MySQL" />;
+    }
     if (datasourceType === 'KingBase') {
       return <img className={styles.datasourceIcon} src={kingbaseIcon} alt="KingBase" />;
     }
-    // if (datasourceType === 'ORACLE'){}
-    return <img className={styles.datasourceIcon} src={mockIcon} alt="KingBase" />;
+    if (datasourceType === 'ORACLE') {
+      return <img className={styles.datasourceIcon} src={oracleIcon} alt="ORACLE" />;
+    }
+    return <img className={styles.datasourceIcon} src={mockIcon} alt="未知数据源" />;
   };
 
   const handleOk = async () => {

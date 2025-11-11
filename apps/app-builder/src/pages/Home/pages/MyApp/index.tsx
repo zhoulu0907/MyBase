@@ -11,6 +11,7 @@ import {
   Modal,
   Pagination,
   Select,
+  Space,
   Spin,
   Tag
 } from '@arco-design/web-react';
@@ -26,8 +27,8 @@ import {
   type PageParam
 } from '@onebase/app';
 import { getCommonPaginationList } from '@onebase/common';
-import { debounce, sample } from 'lodash-es';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { debounce } from 'lodash-es';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
@@ -42,7 +43,6 @@ import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
 import {
   appOptions,
-  avatarBgColor,
   calculateMaxItems,
   createTimeOptions,
   defaultTheme,
@@ -82,6 +82,9 @@ const MyAppPage: React.FC = () => {
   const [applicationEmpty, setAapplicationEmpty] = useState<boolean>(false); // 未创建应用
   const [applicationFilterEmpty, setAapplicationFilterEmpty] = useState<boolean>(false); // 应用列表过滤后为空，此时applicationEmpty为true
 
+  const [currentStep, setCurrentStep] = useState<number>(1); // 创建数据源步骤
+  const [dbTypeSelect, setDbTypeSelect] = useState<string>(''); // 数据源类型
+
   const { setCurAppId } = useAppStore();
 
   const createDatasourceRef = useRef<DataSourceHandle>(null);
@@ -106,6 +109,12 @@ const MyAppPage: React.FC = () => {
   useEffect(() => {
     setDdtasource(undefined);
   }, []);
+
+  useEffect(() => {
+    setCreateType('app');
+    setCurrentStep(1);
+    setDbTypeSelect('');
+  }, [createVisible]);
 
   useEffect(() => {
     // 只有ownerTag和status会影响应用列表长度
@@ -156,20 +165,9 @@ const MyAppPage: React.FC = () => {
     debouncedUpdate(value);
   };
 
-  const randomColors: string[] = useMemo(() => {
-    return Array.from({ length: pageSize || 8 }, () => sample(avatarBgColor) || avatarBgColor[0]);
-  }, [pageSize]);
-
   /* 创建应用 */
   const handleCreateApp = async () => {
     try {
-      // 切换到创建数据源
-      if (createType === 'datasource') {
-        const res = await createDatasourceRef.current?.handleGetDatasource?.();
-        setDdtasource(res);
-        return;
-      }
-
       const values = await form.validate(); // 等待校验完成并返回数据
       setCreateLoading(true);
       const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = values;
@@ -555,14 +553,42 @@ const MyAppPage: React.FC = () => {
         simple
         unmountOnExit
         footer={
-          <div style={{ textAlign: 'right', visibility: createType === 'app' ? 'visible' : 'hidden' }}>
-            <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
-              取消
+          <Space style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Button type="default" onClick={() => setCurrentStep(1)} style={{ visibility: createType === 'datasource' && currentStep === 2 ? 'visible' : 'hidden' }}>
+              上一步
             </Button>
-            <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
-              创建
-            </Button>
-          </div>
+
+            <Space>
+              <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
+                取消
+              </Button>
+
+              {createType === 'datasource' && currentStep === 1 && (
+                <Button type="primary" onClick={() => setCurrentStep(2)} disabled={!dbTypeSelect}>
+                  下一步
+                </Button>
+              )}
+              {createType !== 'app' ? (
+                <>
+                  {currentStep === 2 && <Button type="primary" onClick={async () => {
+                    if (createType === 'datasource') {
+                      const res = await createDatasourceRef.current?.handleGetDatasource?.();
+                      setDdtasource(res);
+                    }
+                    setCreateType('app');
+                    setCurrentStep(1);
+                  }}>
+                    完成
+                  </Button>}
+                </>
+              )
+                : (
+                  <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
+                    创建
+                  </Button>
+                )}
+            </Space>
+          </Space>
         }
         confirmLoading={true}
         onCancel={() => setCreateVisible(false)}
@@ -583,6 +609,9 @@ const MyAppPage: React.FC = () => {
           />
           <CreateDataSource
             ref={createDatasourceRef}
+            currentStep={currentStep}
+            dbTypeSelect={dbTypeSelect}
+            setDbTypeSelect={setDbTypeSelect}
             style={{
               position: 'absolute',
               padding: '0 200px',

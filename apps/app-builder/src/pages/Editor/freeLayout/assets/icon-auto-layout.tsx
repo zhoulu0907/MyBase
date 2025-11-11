@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-export const IconAutoLayout = (
+export const IconAutoLayout = () => (
   <svg width="1em" height="1em" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
       fill="currentColor"

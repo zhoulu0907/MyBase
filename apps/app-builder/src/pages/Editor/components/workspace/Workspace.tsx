@@ -1,5 +1,5 @@
+import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
-import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -602,8 +602,9 @@ export default function EditorWorkspace() {
                   className={styles.componentItem}
                   style={{
                     width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
-                    borderColor: curComponentID === cp.id ? '#009E9E' : '',
+                    borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : '',
                     borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : '',
                     margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
