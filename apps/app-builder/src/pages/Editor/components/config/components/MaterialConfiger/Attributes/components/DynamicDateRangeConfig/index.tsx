@@ -1,4 +1,4 @@
-import { Form, Grid, Checkbox, Select, DatePicker } from '@arco-design/web-react';
+import { Form, Grid, Checkbox, Select, DatePicker, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 import { WEEK_OPTIONS, WEEK_OPTIONS_LABEL, DATE_EXTREME_TYPE, DATE_DYNAMIC_TYPE } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
@@ -140,6 +140,15 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                     format="YYYY-MM-DD"
                     value={configs[dateRangeKey]['earliestStaticValue']}
                     onChange={(value) => {
+                      // 校验最早可选日期不得晚于最晚可选日期
+                      if (configs[dateRangeKey].latestStaticValue) {
+                        const latestTime = new Date(configs[dateRangeKey].latestStaticValue).getTime();
+                        const earliestTime = new Date(value).getTime();
+                        if (earliestTime > latestTime) {
+                          Message.error('最早可选日期不得晚于最晚可选日期');
+                          return;
+                        }
+                      }
                       handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestStaticValue: value });
                     }}
                   ></DatePicker>
@@ -170,7 +179,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
             >
               最晚可选日期时间
             </Checkbox>
-             <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
+            <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
               <Grid.Col span={8}>
                 <Select
                   placeholder="请选择"
@@ -188,6 +197,15 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                     format="YYYY-MM-DD"
                     value={configs[dateRangeKey]['latestStaticValue']}
                     onChange={(value) => {
+                      // 校验最早可选日期不得晚于最晚可选日期 earliestLimit earliestLimit
+                      if (configs[dateRangeKey].earliestStaticValue) {
+                        const earliestTime = new Date(configs[dateRangeKey].earliestStaticValue).getTime();
+                        const latestTime = new Date(value).getTime();
+                        if (earliestTime > latestTime) {
+                          Message.error('最早可选日期不得晚于最晚可选日期');
+                          return;
+                        }
+                      }
                       handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestStaticValue: value });
                     }}
                   ></DatePicker>
