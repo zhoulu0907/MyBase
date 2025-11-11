@@ -48,7 +48,6 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-security-build</artifactId>
-            <version>${revision}</version>
         </dependency>
         <!-- DB 相关 -->
         <dependency>

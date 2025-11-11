@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.build.service.etl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
-import com.cmsr.onebase.module.etl.core.vo.ExecutionLogVO;
+import com.cmsr.onebase.module.etl.core.vo.etl.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 
 public interface ETLWorkflowService {

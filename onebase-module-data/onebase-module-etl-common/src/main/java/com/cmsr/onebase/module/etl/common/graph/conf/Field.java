@@ -8,11 +8,6 @@ public class Field {
     /**
      * 界面配置
      */
-    private String fieldId;
-
-    /**
-     * 界面配置
-     */
     private String fieldName;
 
     /**

@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.etl.ETLWorkflowService;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
-import com.cmsr.onebase.module.etl.core.vo.ExecutionLogVO;
+import com.cmsr.onebase.module.etl.core.vo.etl.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
