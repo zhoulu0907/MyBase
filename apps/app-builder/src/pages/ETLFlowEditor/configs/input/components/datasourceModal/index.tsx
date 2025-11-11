@@ -3,8 +3,15 @@ import TableIcon from '@/assets/images/etl/table.svg';
 import TableIconActive from '@/assets/images/etl/table_active.svg';
 import { Button, Checkbox, Input, Modal, Popover, Tabs } from '@arco-design/web-react';
 import { IconPlus, IconSwap } from '@arco-design/web-react/icon';
-import { listETLTableColumns, listETLTables, type ELTColumn, type ETLTable } from '@onebase/app';
-import { etlEditorSignal } from '@onebase/common';
+import {
+  listAppETLDatasource,
+  listETLTableColumns,
+  listETLTables,
+  type ELTColumn,
+  type ETLDatasource,
+  type ETLTable
+} from '@onebase/app';
+import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useMemo, useState } from 'react';
 import CreateExternalModal from '../createExternalModal';
 import styles from './index.module.less';
@@ -24,6 +31,7 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
   const { curNode, setNodeData, nodeData } = etlEditorSignal;
 
   const [activeTab, setActiveTab] = useState('external');
+  const [allDatasources, setAllDatasources] = useState<ETLDatasource[]>([]);
   const [curDatasourceId, setCurDatasourceId] = useState<string>(
     nodeData.value[curNode.value.id]?.config?.datasourceId || ''
   );
@@ -34,6 +42,10 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
   const [selectedColumns, setSelectColumns] = useState<ELTColumn[]>(
     nodeData.value[curNode.value.id]?.config?.fields || []
   );
+
+  useEffect(() => {
+    handleListETLDatasources();
+  }, []);
 
   useEffect(() => {
     if (curDatasourceId) {
@@ -65,6 +77,19 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
     const res = await listETLTableColumns({ tableId });
     console.log(res);
     setCurColumns(res);
+  };
+
+  const handleListETLDatasources = async () => {
+    const curAppId = getHashQueryParam('appId');
+    if (!curAppId) {
+      return;
+    }
+    const res = await listAppETLDatasource({
+      applicationId: curAppId,
+      writable: 0
+    });
+    console.log(res);
+    setAllDatasources(res);
   };
 
   const handleCreateExternalModalClose = () => {
@@ -189,9 +214,31 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
                   <div className={styles.externalDatasourceContentItem}>
                     <div className={styles.databaseItem}>
                       <img src={DatabaseIcon} alt="database" />
-                      <div>数据库</div>
+                      <div>
+                        {curDatasourceId
+                          ? allDatasources.find((datasource) => datasource.id === curDatasourceId)?.name
+                          : '数据库'}
+                      </div>
                     </div>
-                    <Popover title="Title" content={<span>HJNB</span>}>
+                    <Popover
+                      content={
+                        <div className={styles.datasourceContent}>
+                          <Input.Search placeholder="搜索数据源" style={{ marginBottom: '8px' }} />
+                          {allDatasources.map((datasource) => (
+                            <div key={datasource.id} className={styles.datasourceItem}>
+                              <div className={styles.datasourceItemName}>{datasource.name}</div>
+                              <div>
+                                {curDatasourceId == datasource.id ? (
+                                  <div className={styles.datasourceItemCurrent}>当前数据库</div>
+                                ) : (
+                                  <IconSwap onClick={() => setCurDatasourceId(datasource.id)} />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      }
+                    >
                       <Button type="text" icon={<IconSwap />}></Button>
                     </Popover>
                   </div>
