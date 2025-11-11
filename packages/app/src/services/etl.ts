@@ -14,8 +14,6 @@ import {
 } from '../types';
 import { etlService } from './clients';
 
-export const getETLSupportedDataSource = () => etlService.get(`/datasource/supported`);
-
 export const pingETLDataSource = (params: PingDatasourceReq) => etlService.post(`/datasource/ping`, params);
 
 export const createETLDataSource = (params: CreateDataSourceReq) => etlService.post(`/datasource/create`, params);

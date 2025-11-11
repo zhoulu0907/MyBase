@@ -94,7 +94,8 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
         detailViewMode: pageViews.value[_page.id]?.detailViewMode,
         editViewMode: pageViews.value[_page.id]?.editViewMode,
         isDefaultDetailViewMode: pageViews.value[_page.id]?.isDefaultDetailViewMode,
-        isDefaultEditViewMode: pageViews.value[_page.id]?.isDefaultEditViewMode
+        isDefaultEditViewMode: pageViews.value[_page.id]?.isDefaultEditViewMode,
+        interactionRules: pageViews.value[_page.id]?.interactionRules
       };
 
       loadPagesetResp.pages[index].components = components.map((component) => {
@@ -225,14 +226,14 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setLayoutSubComponents: setFromLayoutSubComponents,
     loadLayoutSubComponents: loadFormLayoutSubComponents,
     setSubTableComponents: setFromSubTableComponents,
-    loadSubTableComponents: loadFormSubTableComponents,
+    loadSubTableComponents: loadFormSubTableComponents
   } = useFormEditorSignal;
 
   const {
     setComponents: setListComponents,
     setPageComponentSchemas: setListPageComponentSchemas,
     setLayoutSubComponents: setListLayoutSubComponents,
-    setSubTableComponents: setListSubTableComponents,
+    setSubTableComponents: setListSubTableComponents
   } = useListEditorSignal;
 
   const loadPageSetReq: LoadPageSetReq = {
@@ -275,9 +276,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
         LAYOUT_COMPONENT_TYPES.TABS_LAYOUT
       ];
 
-      const subList:string[] = [
-        FORM_COMPONENT_TYPES.SUB_TABLE,
-      ];
+      const subList: string[] = [FORM_COMPONENT_TYPES.SUB_TABLE];
 
       // 载入布局组件的列数初始化
       if (layoutList.includes(component.componentType)) {
@@ -300,7 +299,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       if (component.parentCode !== '' && component.parentCode !== null) {
         if (component.parentCode.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
           const colComponents = newSubTableComponentsMap.get(component.parentCode);
-          if(colComponents){
+          if (colComponents) {
             colComponents[component.containerIndex] = {
               id: component.componentCode,
               chosen: false,
@@ -310,10 +309,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             };
           }
           if (page.pageType === CATEGORY_TYPE.FORM) {
-            setFromSubTableComponents(component.parentCode, colComponents as any[])
-           
+            setFromSubTableComponents(component.parentCode, colComponents as any[]);
           } else if (page.pageType === CATEGORY_TYPE.LIST) {
-            setListSubTableComponents(component.parentCode, colComponents as any[])
+            setListSubTableComponents(component.parentCode, colComponents as any[]);
           }
           // useEditorSignalMap.get(page.id)!.setSubTableComponents(component.parentCode, colComponents as any[]);
         } else {
