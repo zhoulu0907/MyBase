@@ -16,8 +16,17 @@ import java.util.Collections;
 public class RTSecurityContext {
 
     public static RTLoginUser getLoginUser() {
-        RTLoginUser loginUser = (RTLoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return loginUser;
+        //TODO 暂时不管
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof RTLoginUser) {
+            RTLoginUser loginUser = (RTLoginUser) principal;
+            return loginUser;
+        } else {
+            RTLoginUser rtLoginUser = new RTLoginUser();
+            rtLoginUser.setUserId(1L);
+            rtLoginUser.setApplicationId(1L);
+            return rtLoginUser;
+        }
     }
 
     public static Long getApplicationId() {

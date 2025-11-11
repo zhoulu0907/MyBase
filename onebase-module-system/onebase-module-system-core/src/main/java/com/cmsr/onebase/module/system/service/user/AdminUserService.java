@@ -240,7 +240,7 @@ public interface AdminUserService {
      * @param status 状态
      * @return 用户们
      */
-    List<AdminUserDO> getUserListByStatus(Integer status);
+    List<AdminUserDO> getUserListByStatus(Integer status,String userNickName);
 
     /**
      * 获取所有平台管理员列表

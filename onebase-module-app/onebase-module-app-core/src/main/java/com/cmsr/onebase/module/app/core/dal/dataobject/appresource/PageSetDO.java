@@ -14,6 +14,7 @@ public class PageSetDO extends TenantBaseDO {
 
     public static final String PAGE_SET_CODE = "pageset_code";
     public static final String MENU_ID = "menu_id";
+    public static final String PAGESET_TYPE = "pageset_type";
 
     @Column(name = "pageset_code", columnDefinition = "VARCHAR(255) NOT NULL", nullable = false, comment = "页面集编码")
     private String pageSetCode;
@@ -27,7 +28,7 @@ public class PageSetDO extends TenantBaseDO {
     @Column(name = "pageset_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面集名称")
     private String pageSetName;
 
-    @Column(name = "pageset_type", columnDefinition = "INT NOT NULL",  nullable = false, comment = "页面集类型 1-普通表单 2-流程表单")
+    @Column(name = "pageset_type", columnDefinition = "INT NOT NULL",  nullable = false, comment = "页面集类型 1-普通表单 2-流程表单 3-工作台")
     private Integer pageSetType;
 
 

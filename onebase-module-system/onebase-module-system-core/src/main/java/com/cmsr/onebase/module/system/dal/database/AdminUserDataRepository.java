@@ -117,8 +117,11 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @param status 状态
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllByStatus(Integer status) {
+    public List<AdminUserDO> findAllByStatus(Integer status,String userNickName) {
         DefaultConfigStore configStore = new DefaultConfigStore();
+        if(userNickName!=null){
+            configStore.like(AdminUserDO.NICKNAME, userNickName);
+        }
         configStore.eq(AdminUserDO.STATUS, status)
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
