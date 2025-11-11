@@ -56,7 +56,10 @@ public class FormulaConstants {
             "DGET", "DMAX", "DMIN", "DSUM", "DAVERAGE", "DCOUNT", "DCOUNTA",
 
             // 其他常用函数
-            "TRANSPOSE", "UNIQUE", "SORT", "FILTER", "SUMPRODUCT"
+            "TRANSPOSE", "UNIQUE", "SORT", "FILTER", "SUMPRODUCT",
+
+            // 正则表达式函数
+            "REGEXEXTRACTALL", "REGEXEXTRACT", "REGEXMATCH", "REGEXREPLACE"
     };
 
     /**
