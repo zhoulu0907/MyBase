@@ -561,12 +561,6 @@ export const dateRangeConfig: any = {
   type: CONFIG_TYPES.DATE_RANGE
 }
 
-export const timeFormatConfig: any = {
-  key: 'timeFormat',
-  name: '日期格式',
-  type: CONFIG_TYPES.TIME_FORMAT
-}
-
 export const timeRangeConfig: any = {
   key: 'timeRange',
   name: '可选范围',

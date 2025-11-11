@@ -436,6 +436,10 @@ export interface ITimeFormatConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TIME_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
 }
 // 时间可选范围
 export interface ITimeRangeConfigType {

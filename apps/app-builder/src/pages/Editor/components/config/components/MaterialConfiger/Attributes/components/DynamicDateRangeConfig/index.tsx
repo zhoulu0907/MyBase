@@ -141,7 +141,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                     value={configs[dateRangeKey]['earliestStaticValue']}
                     onChange={(value) => {
                       // 校验最早可选日期不得晚于最晚可选日期
-                      if (configs[dateRangeKey].latestStaticValue) {
+                      if (value && configs[dateRangeKey].latestStaticValue) {
                         const latestTime = new Date(configs[dateRangeKey].latestStaticValue).getTime();
                         const earliestTime = new Date(value).getTime();
                         if (earliestTime > latestTime) {
@@ -198,7 +198,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                     value={configs[dateRangeKey]['latestStaticValue']}
                     onChange={(value) => {
                       // 校验最早可选日期不得晚于最晚可选日期 earliestLimit earliestLimit
-                      if (configs[dateRangeKey].earliestStaticValue) {
+                      if (value && configs[dateRangeKey].earliestStaticValue) {
                         const earliestTime = new Date(configs[dateRangeKey].earliestStaticValue).getTime();
                         const latestTime = new Date(value).getTime();
                         if (earliestTime > latestTime) {

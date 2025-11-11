@@ -36,6 +36,7 @@ import DynamicSwitchFillTextConfig from './components/DynamicSwitchFillTextConfi
 import DynamicDefaultValueConfig from './components/DynamicDefaultValueConfig';
 import DynamicVerifyConfig from './components/DynamicVerifyConfig';
 import DynamicDateRangeConfig from './components/DynamicDateRangeConfig';
+import DynamicTimeRangeConfig from './components/DynamicTimeRangeConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -740,6 +741,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       case CONFIG_TYPES.DATE_RANGE:
         // 日期可选范围
         return <DynamicDateRangeConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
+      case CONFIG_TYPES.TIME_RANGE:
+        // 日期可选范围
+        return <DynamicTimeRangeConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       default:
         return (
           <FormItem className={styles.formItem} label={item.name}>
