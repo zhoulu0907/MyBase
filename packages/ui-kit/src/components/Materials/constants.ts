@@ -355,6 +355,7 @@ export const PHONE_TYPE = {
   LANDLINE: 'landline', // 座机
 } as const;
 
+// 静态值、动态值、变量
 export const DATE_EXTREME_TYPE = {
   STATIC: 'static',
   DYNAMIC: 'dynamic',
@@ -382,4 +383,38 @@ export const DATE_DYNAMIC_VALUE = {
   beforeMonth: -30,
   afterMonth: 30,
   custom: null
+} as const;
+
+export const WEEK_OPTIONS_LABEL = {
+  // Monday/Tuesday/Wednesday/Thursday/Friday/Saturday/Sunday
+  Monday: '星期一',
+  Tuesday: '星期二',
+  Wednesday: '星期三',
+  Thursday: '星期四',
+  Friday: '星期五',
+  Saturday: '星期六',
+  Sunday: '星期日',
+} as const;
+
+// 对应getDay返回数字
+export const WEEK_OPTIONS_NUMBER = {
+  // Monday/Tuesday/Wednesday/Thursday/Friday/Saturday/Sunday
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+  Sunday: 0
+} as const;
+
+export const WEEK_OPTIONS = {
+  // Monday/Tuesday/Wednesday/Thursday/Friday/Saturday/Sunday
+  MONDAY: 'Monday',
+  TUESDAY: 'Tuesday',
+  WEDNESDAY: 'Wednesday',
+  THURSDAY: 'Thursday',
+  FRIDAY: 'Friday',
+  SATURDAY: 'Saturday',
+  SUNDAY: 'Sunday'
 } as const;
