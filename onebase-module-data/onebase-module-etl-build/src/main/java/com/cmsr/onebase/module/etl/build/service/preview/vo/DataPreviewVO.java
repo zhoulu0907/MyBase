@@ -1,7 +1,7 @@
-package com.cmsr.onebase.module.etl.core.vo.datasource;
+package com.cmsr.onebase.module.etl.build.service.preview.vo;
 
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaColumn;
 import lombok.Data;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
@@ -13,20 +13,17 @@ import java.util.List;
 @Data
 public class DataPreviewVO {
 
-    private List<ColumnDefine> columns;
+    private List<String> columns;
 
     private List<Collection<Object>> data = new ArrayList<>();
 
     public static DataPreviewVO of(ETLTableDO tableDO) {
         DataPreviewVO dataPreviewVO = new DataPreviewVO();
-        List<MetaColumn> metaColumnList = tableDO.getMetaInfo().getColumns();
-        List<ColumnDefine> columnList = new ArrayList<>(metaColumnList.size());
-        for (MetaColumn metaColumn : metaColumnList) {
-            ColumnDefine columnDefine = new ColumnDefine();
-            int metaColumnIdx = metaColumn.getPosition() - 1;
-            columnDefine.setId(metaColumn.getId());
-            columnDefine.setName(metaColumn.getDisplayName());
-            columnDefine.setType(metaColumn.getFlinkType());
+        List<ColumnData> columnDataList = tableDO.getMetaInfo().getColumns();
+        List<String> columnList = new ArrayList<>(columnDataList.size());
+        for (ColumnData columnData : columnDataList) {
+            String columnDefine = columnData.getDisplayName();
+            int metaColumnIdx = columnData.getPosition() - 1;
             columnList.add(metaColumnIdx, columnDefine);
         }
         dataPreviewVO.setColumns(columnList);

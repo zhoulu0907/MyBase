@@ -1,13 +1,15 @@
-package com.cmsr.onebase.module.etl.core.service;
+package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import com.cmsr.onebase.module.etl.core.vo.datasource.DataPreviewVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.TablePreviewVO;
+import com.cmsr.onebase.module.etl.core.enums.MetadataType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -16,6 +18,7 @@ import org.anyline.entity.DataSet;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -23,14 +26,31 @@ import javax.sql.DataSource;
 @Slf4j
 @Service
 public class DataInspectServiceImpl implements DataInspectService {
+
+    @Value("${onebase.etl.inspect-size:50}")
+    private Integer inspectSize;
+
     @Resource
-    private DataSourceFactory dataSourceFactory;
+    private DatasourceFactory dataSourceFactory;
 
     @Resource
     private ETLDatasourceRepository datasourceRepository;
 
     @Resource
     private ETLTableRepository tableRepository;
+
+    @Override
+    public boolean testConnection(ETLDatasourceDO datasourceDO) {
+        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
+        try {
+            boolean validity = ServiceProxy.temporary(datasource).validity();
+            boolean hit = ServiceProxy.temporary(datasource).hit();
+            return validity || hit;
+        } catch (Exception ex) {
+            log.error("测试数据源连接异常，数据源信息: {}", datasourceDO, ex);
+            return false;
+        }
+    }
 
     @Override
     public DataPreviewVO previewData(TablePreviewVO previewVO) {
@@ -49,11 +69,16 @@ public class DataInspectServiceImpl implements DataInspectService {
 
         try {
             AnylineService<?> temporary = ServiceProxy.temporary(dataSource);
-            Table<?> table = temporary.metadata().table(tableDO.getTableName());
+            Table<?> table;
+            MetadataType metadataType = MetadataType.getType(tableDO.getTableType());
+            switch (metadataType) {
+                case TABLE -> table = temporary.metadata().table(tableDO.getTableName());
+                case VIEW -> table = temporary.metadata().view(tableDO.getTableName());
+                default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_METADATA_TYPE);
+            }
             DataPreviewVO dataPreviewVO = DataPreviewVO.of(tableDO);
             ConfigStore cs = new DefaultConfigStore();
-            // TODO: 魔法值，后续需要做成配置
-            cs.limit(50);
+            cs.limit(inspectSize);
             DataSet dataSet = temporary.querys(table, cs);
             return dataPreviewVO.appendData(dataSet);
         } catch (Exception e) {

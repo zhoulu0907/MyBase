@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.config;
+package com.cmsr.onebase.module.etl.build.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

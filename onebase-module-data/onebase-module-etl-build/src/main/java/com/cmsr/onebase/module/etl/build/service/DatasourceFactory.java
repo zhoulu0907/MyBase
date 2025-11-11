@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.service;
+package com.cmsr.onebase.module.etl.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
@@ -13,7 +13,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
@@ -23,8 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
-@Service
-public class DataSourceFactory {
+@Component
+public class DatasourceFactory {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
 
     @Resource
@@ -32,22 +32,16 @@ public class DataSourceFactory {
 
     public DataSource constructDataSource(ETLDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
-        String databaseType = datasourceDO.getDatasourceType();
-        DatabaseType dbType = parseDatabaseType(databaseType);
-        // 2. 创建DataSource
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
         String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
         String jdbcConnection;
         if (StringUtils.equalsIgnoreCase("default", connectMode)) {
-            jdbcConnection = buildJdbcConnectionString(dbType, connectionProperties);
+            jdbcConnection = buildJdbcConnectionString(datasourceDO);
         } else {
             jdbcConnection = (String) connectionProperties.get("jdbcUrl");
         }
-        connectionProperties.put("jdbcUrl", jdbcConnection);
-        connectionProperties.put("driver", dbType.driver());
-        datasourceDO.setConfig(JsonUtils.toJsonString(connectionProperties));
-//        Driver declaredDriver = getDeclaredDriverInstance(dbType);
 
+        // 2. 创建DataSource
         String username = (String) connectionProperties.get("username");
         String password = (String) connectionProperties.get("password");
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
@@ -69,18 +63,7 @@ public class DataSourceFactory {
         }
     }
 
-    //TODO update(datasourceDO) 的方法只有在创建数据库连接的时候需要更新和保存，在预览数据的时候不应该更新了！！！！一个构造方法隐含了更新，太TMD扯了
-    public DataSource constructDataSource(Long datasourceId, boolean oneshot) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
-        if (datasourceDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
-        }
-        DataSource dataSource = constructDataSource(datasourceDO, oneshot);
-        datasourceRepository.update(datasourceDO);
-        return dataSource;
-    }
-
-    private DatabaseType parseDatabaseType(String databaseType) {
+    private static DatabaseType parseDatabaseType(String databaseType) {
         if (StringUtils.isBlank(databaseType)) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_ILLEGAL);
         }
@@ -115,15 +98,10 @@ public class DataSourceFactory {
         }
     }
 
-    /**
-     * 构建JDBC连接字符串
-     * 使用Anyline的DatabaseType提供的URL模板，替换占位符
-     *
-     * @param dbType               数据库类型
-     * @param connectionProperties 连接属性
-     * @return JDBC连接字符串
-     */
-    private String buildJdbcConnectionString(DatabaseType dbType, Properties connectionProperties) {
+    public static String buildJdbcConnectionString(ETLDatasourceDO datasourceDO) {
+        String databaseType = datasourceDO.getDatasourceType();
+        DatabaseType dbType = parseDatabaseType(databaseType);
+        Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
         // 直接使用Anyline提供的URL模板
         String jdbcTemplate = dbType.url();
         // 魔法处理，Anyline的PostgreSQL类数据源URL定义有错误

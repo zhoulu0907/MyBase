@@ -3,11 +3,15 @@ package com.cmsr.onebase.module.etl.build.controller.datasource;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.datasource.ETLDatasourceService;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ColumnDefine;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.*;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.TestConnectionVO;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -26,16 +30,9 @@ public class ETLDatasourceController {
     private ETLDatasourceService etlDatasourceService;
 
     // GETs
-    @GetMapping("/supported")
-    @Operation(summary = "获取所有支持的数据源类型")
-    public CommonResult<List<DatabaseTypeVO>> getSupportedDatabaseTypes() {
-        List<DatabaseTypeVO> supportedDatabaseTypes = etlDatasourceService.getSupportedDatabaseTypes();
-        return CommonResult.success(supportedDatabaseTypes);
-    }
-
     @PostMapping("/ping")
     @Operation(summary = "测试数据源连接")
-    public CommonResult<Boolean> testConnection(@Validated @RequestBody ETLDatasourcePingVO requestVO) {
+    public CommonResult<Boolean> testConnection(@Validated @RequestBody TestConnectionVO requestVO) {
         Boolean connected = etlDatasourceService.pingDatasource(requestVO);
         return CommonResult.success(connected);
     }

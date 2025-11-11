@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Repository
@@ -16,8 +17,10 @@ public class ETLSchemaRepository extends DataRepository<ETLSchemaDO> {
     }
 
 
-    public ETLSchemaDO findOneByNameAndCatalogIdAndDatasourceId(Long datasourceId, Long catalogId, String name) {
+    // 优化方法名：更简洁但保持语义清晰
+    public ETLSchemaDO findOneByQualifiedName(Long applicationId, Long datasourceId, Long catalogId, String name) {
         ConfigStore cs = new DefaultConfigStore();
+        cs.eq("application_id", applicationId);
         cs.eq("datasource_id", datasourceId);
         cs.eq("catalog_id", catalogId);
         cs.eq("schema_name", name);
@@ -30,5 +33,23 @@ public class ETLSchemaRepository extends DataRepository<ETLSchemaDO> {
         cs.eq("datasource_id", datasourceId);
 
         deleteByConfig(cs);
+    }
+
+    @Override
+    @Transactional
+    public ETLSchemaDO upsert(ETLSchemaDO schemaDO) {
+        Long applicationId = schemaDO.getApplicationId();
+        Long datasourceId = schemaDO.getDatasourceId();
+        Long catalogId = schemaDO.getCatalogId();
+        String schemaName = schemaDO.getSchemaName();
+        // 调用优化后的方法名
+        ETLSchemaDO oldSchema = findOneByQualifiedName(applicationId, datasourceId, catalogId, schemaName);
+        if (oldSchema == null) {
+            schemaDO = insert(schemaDO);
+        } else {
+            schemaDO.setId(oldSchema.getId());
+            update(schemaDO);
+        }
+        return schemaDO;
     }
 }
