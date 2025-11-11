@@ -7,12 +7,14 @@ import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @Author：huangjie
  * @Date：2025/9/26 16:19
  */
 @Data
-public class ExpressionItem {
+public class ExpressionItem implements Serializable {
 
     public static ExpressionItem copy(ExpressionItem item) {
         ExpressionItem newItem = new ExpressionItem();

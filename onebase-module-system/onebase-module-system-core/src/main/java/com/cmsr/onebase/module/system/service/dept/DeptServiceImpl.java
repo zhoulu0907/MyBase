@@ -6,7 +6,9 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
+import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.vo.dept.*;
+import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -17,6 +19,8 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -54,6 +58,7 @@ public class DeptServiceImpl implements DeptService {
     @Resource
     private PermissionService permissionService;
 
+
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
             allEntries = true)
@@ -68,6 +73,7 @@ public class DeptServiceImpl implements DeptService {
 
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
+        dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         deptDataRepository.insert(dept);
 
         return dept.getId();
@@ -286,7 +292,7 @@ public class DeptServiceImpl implements DeptService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-      // 2. 批量获取部门主管用户信息
+        // 2. 批量获取部门主管用户信息
         Map<Long, AdminUserDO> directorUserMap = adminUserService.getUserMap(directorUserIds);
 
         // 4. 设置每个部门的人数和领导姓名
@@ -424,16 +430,18 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public List<DeptDO> getParentDeptsListById(Long id, String idType) {
-        if(idType.equals(IdTypeEnum.USER.getCode())) {
+        if (IdTypeEnum.USER.getCode().equals(idType)) {
             AdminUserDO adminUserDO = adminUserService.getUser(id);
             if (adminUserDO != null && adminUserDO.getDeptId() != null) {
                 return getParentDeptsList(adminUserDO.getDeptId());
             }
-        } else if(idType.equals(IdTypeEnum.DEPT.getCode())) {
+        } else if (IdTypeEnum.DEPT.getCode().equals(idType)) {
             return getParentDeptsList(id);
         }
         return List.of();
     }
+
+
 
     private List<DeptDO> getParentDeptsList(Long deptId) {
         List<DeptDO> parentDepts = new ArrayList<>();
@@ -453,11 +461,25 @@ public class DeptServiceImpl implements DeptService {
                 break;
             }
             if (++loopCount > LOOP_COUNT_LIMIT) {
-                log.error("获取父部门列表时，出现死循环，deptId = {}", deptId);
+                log.error("获取父部门列表时，出现死循环，deptId = {}，loopCount = {}", deptId, loopCount);
                 break;
             }
         }
         return parentDepts;
+    }
+
+    @Override
+    public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
+
+        if(reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)){
+            DataRow row = new DataRow();
+            row.put(DeptDO.LEADER_USER_ID, reqVO.getUserId());
+            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+        }else{
+            DataRow row = new DataRow();
+            row.put(DeptDO.DEPT_DIRECTOR_ID, reqVO.getUserId());
+            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+        }
     }
 
 }

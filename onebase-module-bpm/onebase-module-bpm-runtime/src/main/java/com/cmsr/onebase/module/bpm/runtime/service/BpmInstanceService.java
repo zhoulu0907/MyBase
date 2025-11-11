@@ -12,14 +12,6 @@ import java.util.List;
  */
 public interface BpmInstanceService {
     /**
-     * 获取流程实例的操作按钮
-     *
-     * @param taskId      任务ID
-     * @param businessId  业务ID
-     */
-     ListActButtonRespVO getActButtons(String taskId, String businessId);
-
-    /**
      * 发起流程实例
      *
      * @param reqVO 开启流程实例请求VO

@@ -34,6 +34,21 @@ public interface ErrorCodeConstants {
     ErrorCode SECURITY_CONFIG_MIN_VALUE = new ErrorCode(1_001_004_004, "配置项[{}]的值必须大于等于{}");
     ErrorCode SECURITY_CONFIG_MAX_VALUE = new ErrorCode(1_001_004_005, "配置项[{}]的值必须小于等于{}");
 
+    // ========== 密码校验相关 1-001-005-000 ==========
+    ErrorCode WEAK_PASSWORD_EMPTY = new ErrorCode(1_001_005_000, "密码不能为空");
+    ErrorCode WEAK_PASSWORD_TOO_SHORT = new ErrorCode(1_001_005_001, "密码长度不能少于{}位");
+    ErrorCode WEAK_PASSWORD_TOO_LONG = new ErrorCode(1_001_005_002, "密码长度不能超过{}位");
+    ErrorCode WEAK_PASSWORD_CONTAINS_NO_DIGIT = new ErrorCode(1_001_005_003, "密码必须包含数字");
+    ErrorCode WEAK_PASSWORD_CONTAINS_NO_LETTER = new ErrorCode(1_001_005_004, "密码必须包含字母");
+    ErrorCode WEAK_PASSWORD_CONTAINS_NO_LOWER_CASE = new ErrorCode(1_001_005_005, "密码必须包含小写字母");
+    ErrorCode WEAK_PASSWORD_CONTAINS_NO_UPPER_CASE = new ErrorCode(1_001_005_006, "密码必须包含大写字母");
+    ErrorCode WEAK_PASSWORD_CONTAINS_NO_SPECIAL_CHAR = new ErrorCode(1_001_005_007, "密码必须包含特殊符号");
+    ErrorCode WEAK_PASSWORD_KEYBOARD_HORIZONTAL_SEQ = new ErrorCode(1_001_005_008, "密码包含键盘横向连续字符");
+    ErrorCode WEAK_PASSWORD_KEYBOARD_SLOPE_SEQ = new ErrorCode(1_001_005_009, "密码包含键盘斜向连续字符");
+    ErrorCode WEAK_PASSWORD_LOGIC_SEQUENTIAL = new ErrorCode(1_001_005_010, "密码包含逻辑连续字符");
+    ErrorCode WEAK_PASSWORD_SAME_CHAR_SEQUENTIAL = new ErrorCode(1_001_005_011, "密码包含连续相同字符");
+    ErrorCode WEAK_PASSWORD_TENANT_EMPTY = new ErrorCode(1_001_005_012, "无法获取租户ID信息");
+
     // ========== 文件配置 1-001-006-000 ==========
     ErrorCode FILE_CONFIG_NOT_EXISTS = new ErrorCode(1_001_006_000, "文件配置不存在");
     ErrorCode FILE_CONFIG_DELETE_FAIL_MASTER = new ErrorCode(1_001_006_001, "该文件配置不允许删除，原因：它是主配置，删除会导致无法上传文件");

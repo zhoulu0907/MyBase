@@ -660,8 +660,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByStatus(Integer status) {
-        return adminUserDataRepository.findAllByStatus(status);
+    public List<AdminUserDO> getUserListByStatus(Integer status,String userNickName) {
+        return adminUserDataRepository.findAllByStatus(status,userNickName);
     }
 
     @Override

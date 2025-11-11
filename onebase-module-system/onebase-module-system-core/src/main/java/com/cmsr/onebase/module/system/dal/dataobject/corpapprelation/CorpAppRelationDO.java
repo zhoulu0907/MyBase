@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.corpapprelation;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "system_corp_app_relation")
 @EqualsAndHashCode(callSuper = true)
-public class CorpAppRelationDO extends BaseDO {
+public class CorpAppRelationDO extends TenantDO {
     public static final String APPLICATION_ID           = "application_id";
     public static final String CORP_ID                  = "corp_id";
     public static final String TENANT_ID                = "tenant_id";
