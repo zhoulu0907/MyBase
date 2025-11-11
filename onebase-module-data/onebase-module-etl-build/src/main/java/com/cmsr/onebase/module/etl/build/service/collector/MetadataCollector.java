@@ -50,6 +50,7 @@ public class MetadataCollector {
                 Collection<Column> tableColumn = temporary.metadata().columns(table).values();
                 List<ColumnData> columns = toColumnData(tableColumn);
                 tableData.setColumns(columns);
+                schemaData.getTables().add(tableData);
             }
             return catalogData;
         } finally {
@@ -61,11 +62,11 @@ public class MetadataCollector {
         List<ColumnData> columnList = new ArrayList<>(tableColumn.size());
         for (Column column : tableColumn) {
             ColumnData columnData = new ColumnData();
-            int position = columnData.getPosition();
+            int position = column.getPosition();
             String columnName = column.getName();
             columnData.setName(columnName);
             columnData.setDisplayName(columnName);
-            String comment = columnData.getComment();
+            String comment = column.getComment();
             columnData.setComment(comment);
             columnData.setDeclaration(comment);
             columnData.setType(column.getOriginType().toLowerCase());
@@ -80,7 +81,10 @@ public class MetadataCollector {
             if (column.ignoreScale() != 1) {
                 columnData.setScale(column.getScale());
             }
-            columnData.setDefaultValue(column.getDefaultValue().toString());
+            Object defaultValue = column.getDefaultValue();
+            if (defaultValue != null) {
+                columnData.setDefaultValue(defaultValue.toString());
+            }
             boolean isPrimaryKey = column.getPrimaryKey();
             columnData.setPrimaryKey(isPrimaryKey);
             if (isPrimaryKey) {
