@@ -22,6 +22,7 @@ public class ETLWorkflowRepository extends DataRepository<ETLWorkflowDO> {
 
     public PageResult<ETLWorkflowDO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
         ConfigStore cs = new DefaultConfigStore();
+        cs.eq("application_id", pageReqVO.getApplicationId());
         if (StringUtils.isNotBlank(pageReqVO.getFlowName())) {
             cs.like("workflow_name", pageReqVO.getFlowName());
         }
