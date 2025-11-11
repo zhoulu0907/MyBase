@@ -157,8 +157,8 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             if (CollectionUtils.isEmpty(nodes)) {
                 return;
             }
-            List<Node> startNodes = workflowGraph.getStartNodes();
-            List<Node> endNodes = workflowGraph.getEndNode();
+            List<Node> startNodes = workflowGraph.findStartNodes();
+            List<Node> endNodes = workflowGraph.findEndNodes();
             for (Node startNode : startNodes) {
                 try {
                     JdbcInputConfig inputConfig = (JdbcInputConfig) startNode.getConfig();

@@ -13,16 +13,16 @@ public class WorkflowGraph {
 
     private List<Edge> edges;
 
-    public Node getSourceNode(Node node) {
+    public Node findIncomingNode(Node node) {
         for (Edge edge : edges) {
             if (edge.getTargetNodeId().equals(node.getId())) {
-                return getNodeById(edge.getSourceNodeId());
+                return findNodeById(edge.getSourceNodeId());
             }
         }
         throw new IllegalArgumentException("Source node not found for target node: " + node.getId());
     }
 
-    private Node getNodeById(String nodeId) {
+    private Node findNodeById(String nodeId) {
         for (Node node : nodes) {
             if (node.getId().equals(nodeId)) {
                 return node;
@@ -36,7 +36,7 @@ public class WorkflowGraph {
         return this;
     }
 
-    public List<Node> getStartNodes() {
+    public List<Node> findStartNodes() {
         Set<String> sourceNodeIds = new HashSet<>();
         for (Edge edge : this.edges) {
             sourceNodeIds.add(edge.getSourceNodeId());
@@ -44,10 +44,10 @@ public class WorkflowGraph {
         for (Edge edge : this.edges) {
             sourceNodeIds.remove(edge.getTargetNodeId());
         }
-        return sourceNodeIds.stream().map(this::getNodeById).toList();
+        return sourceNodeIds.stream().map(this::findNodeById).toList();
     }
 
-    public List<Node> getEndNode() {
+    public List<Node> findEndNodes() {
         Set<String> targetNodeIds = new HashSet<>();
         for (Edge edge : this.edges) {
             targetNodeIds.add(edge.getTargetNodeId());
@@ -55,6 +55,6 @@ public class WorkflowGraph {
         for (Edge edge : this.edges) {
             targetNodeIds.remove(edge.getSourceNodeId());
         }
-        return targetNodeIds.stream().map(this::getNodeById).toList();
+        return targetNodeIds.stream().map(this::findNodeById).toList();
     }
 }
