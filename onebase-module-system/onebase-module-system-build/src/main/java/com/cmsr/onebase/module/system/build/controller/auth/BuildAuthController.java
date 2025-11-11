@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.system.build.controller.auth;
 
 
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
@@ -18,7 +18,6 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.auth.*;
-import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +26,6 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,13 +37,20 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
 
+/**
+ *  编辑态登录认证相关接口
+ *  1. 空间登录
+ *  2. 企业登录
+ *
+ *  @author matianyu
+ *  @date 2025-11
+ */
 @Tag(name = "管理后台 - 认证")
 @RestController
 @RequestMapping("/system/auth")
 @Validated
 @Slf4j
-@Component("buildAuthController")
-public class AuthController {
+public class BuildAuthController {
 
     @Resource
     private AdminAuthService authService;

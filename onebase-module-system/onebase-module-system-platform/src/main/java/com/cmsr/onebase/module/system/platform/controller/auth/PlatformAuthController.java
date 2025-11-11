@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.runtime.controller.auth;
+package com.cmsr.onebase.module.system.platform.controller.auth;
 
 
 import cn.hutool.core.util.StrUtil;
@@ -19,19 +19,24 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
+/**
+ * 平台登录认证相关服务
+ * 1. 平台用户登录，超级管理员
+ *
+ * @author matianyu
+ * @date 2025-11
+ */
 @Tag(name = "管理后台 - 认证")
 @RestController
 @RequestMapping("/system/auth")
 @Validated
 @Slf4j
-@Component("runtimeAuthController")
-public class AuthController {
+public class PlatformAuthController {
 
     @Resource
     private AdminAuthService authService;
