@@ -77,7 +77,7 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
 
     private String findFieldName(List<Field> fields, String fieldId) {
         for (Field field : fields) {
-            if (field.getFieldId().equals(fieldId)) {
+            if (field.getFieldName().equals(fieldId)) {
                 return field.getFieldName();
             }
         }

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.vo.datasource;
+package com.cmsr.onebase.module.etl.build.service.preview.vo;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
