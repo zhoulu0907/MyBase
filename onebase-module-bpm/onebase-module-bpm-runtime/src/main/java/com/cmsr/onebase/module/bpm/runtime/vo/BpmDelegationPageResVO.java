@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 @Data
 public class BpmDelegationPageResVO {
     /**
+     * 主键ID
+     */
+    private Long id;
+    /**
      * 代理人信息
      */
     private UserBasicInfoVO delegate;

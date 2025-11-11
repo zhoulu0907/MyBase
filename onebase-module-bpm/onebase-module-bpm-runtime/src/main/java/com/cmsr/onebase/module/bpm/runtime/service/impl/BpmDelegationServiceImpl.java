@@ -61,6 +61,7 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
             vo.setStartTime(item.getStartTime());
             vo.setEndTime(item.getEndTime());
             vo.setCreateTime(item.getCreateTime());
+            vo.setId(item.getId());
             // 代理状态
             vo.setDelegateStatus(calculateDelegateStatus(item.getStartTime(), item.getEndTime(),item.getRevokedTime()));
             return vo;
