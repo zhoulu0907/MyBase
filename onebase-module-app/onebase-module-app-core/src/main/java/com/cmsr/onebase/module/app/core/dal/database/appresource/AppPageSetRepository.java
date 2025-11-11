@@ -1,13 +1,12 @@
 package com.cmsr.onebase.module.app.core.dal.database.appresource;
 
-import java.util.List;
-
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import java.util.List;
 
 @Repository
 public class AppPageSetRepository extends DataRepository<PageSetDO> {
@@ -37,6 +36,17 @@ public class AppPageSetRepository extends DataRepository<PageSetDO> {
     public List<PageSetDO> findByMenuId(List<Long> menuIds) {
         ConfigStore configs = new DefaultConfigStore();
         configs.in(PageSetDO.MENU_ID, menuIds);
+        return findAllByConfig(configs);
+    }
+
+    public List<PageSetDO> findByMenuIdAndType(List<Long> menuIds, Integer pageSetType) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.in(PageSetDO.MENU_ID, menuIds);
+
+        if (pageSetType != null) {
+            configs.eq(PageSetDO.PAGESET_TYPE, pageSetType);
+        }
+
         return findAllByConfig(configs);
     }
 

@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class ColumnDefine {
 
+    private String fieldFqn;
+
     private String fieldName;
 
     // flink type

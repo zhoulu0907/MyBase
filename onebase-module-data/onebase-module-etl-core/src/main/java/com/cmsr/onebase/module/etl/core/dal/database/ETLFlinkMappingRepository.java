@@ -20,7 +20,7 @@ public class ETLFlinkMappingRepository extends DataRepository<ETLFlinkMappingDO>
 
     public Map<String, String> findAllMappingsByDatasourceType(String datasourceType) {
         ConfigStore cs = new DefaultConfigStore();
-        cs.eq("database_type", datasourceType);
+        cs.eq("datasource_type", datasourceType);
 
         List<ETLFlinkMappingDO> flinkMappingDOs = findAllByConfig(cs);
         return flinkMappingDOs.stream().collect(
