@@ -19,9 +19,14 @@ public class BpmDelegationPageResVO {
      */
     private UserBasicInfoVO principal;
     /**
-     * 代理时间
+     * 代理生效开始时间
      */
-    private String delegateTime;
+    private LocalDateTime startTime;
+
+    /**
+     * 代理结束时间
+     */
+    private LocalDateTime endTime;
     /**
      * 代理状态
      */

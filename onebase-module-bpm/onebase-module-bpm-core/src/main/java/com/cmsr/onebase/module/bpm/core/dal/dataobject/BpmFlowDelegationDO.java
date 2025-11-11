@@ -27,12 +27,22 @@ public class BpmFlowDelegationDO extends TenantBaseDO {
      */
     @Column(name = "principal_id")
     private Long principalId;
-
+    /*
+    *被代理人用户名称
+     */
+    @Column(name = "principal_name")
+    private String principalName;
     /**
      * 代理人用户ID
      */
     @Column(name = "delegate_id")
     private Long delegateId;
+
+    /**
+     * 代理人用户名称
+     */
+    @Column(name = "delegate_id")
+    private Long delegateName;
 
     /**
      * 代理开始时间

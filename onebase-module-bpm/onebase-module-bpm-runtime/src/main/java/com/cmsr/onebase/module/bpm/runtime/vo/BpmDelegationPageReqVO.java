@@ -17,9 +17,6 @@ public class BpmDelegationPageReqVO extends PageParam {
     @Schema(description = "人员名称", example = "张三")
     private String delegatePersonName ;
 
-    @Schema(description = "代理人员名称", example = "张三")
-    private String agentPersonName ;
-
     @Schema(description = "代理状态", example = "inactive")
     private String delegateStatus;
 }
