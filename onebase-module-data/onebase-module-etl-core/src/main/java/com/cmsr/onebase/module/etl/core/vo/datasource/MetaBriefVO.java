@@ -9,4 +9,6 @@ public class MetaBriefVO {
 
     private String name;
 
+    private String displayName;
+
 }
