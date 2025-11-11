@@ -1,4 +1,4 @@
-import TableIcon from '@/assets/images/etl/table.svg';
+import FieldIcon from '@/assets/images/etl/field.svg';
 import { Button, Input } from '@arco-design/web-react';
 import { listETLTables, previewETLDatasource, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
@@ -104,7 +104,7 @@ export const InputNodeConfig: React.FC = () => {
                 <div className={styles.dataSourceContentItems}>
                   {nodeData.value[curNode.value.id]?.config?.fields.map((field: any) => (
                     <div key={field.fieldName} className={styles.dataSourceContentItem}>
-                      <img src={TableIcon} alt="column" />
+                      <img src={FieldIcon} alt="column" />
                       {field.fieldName}
                     </div>
                   ))}
