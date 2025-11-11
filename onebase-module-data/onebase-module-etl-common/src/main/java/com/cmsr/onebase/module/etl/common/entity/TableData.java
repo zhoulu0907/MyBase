@@ -21,7 +21,17 @@ public class TableData {
      * 表名
      */
     private String name;
- 
+
+    /**
+     * 表类型，table/view
+     */
+    private String type;
+
+    /**
+     * 注释
+     */
+    private String comment;
+
     /**
      * 列信息列表
      */

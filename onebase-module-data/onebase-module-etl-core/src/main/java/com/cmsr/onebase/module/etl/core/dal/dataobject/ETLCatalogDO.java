@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
-import org.anyline.metadata.Catalog;
 
 @Data
 @Table(name = "etl_catalog")
@@ -31,18 +30,4 @@ public class ETLCatalogDO extends TenantBaseDO {
 
     @Column(name = "declaration")
     private String declaration;
-
-    public static ETLCatalogDO of(Long applicationId, Long datasourceId, Catalog catalog) {
-        ETLCatalogDO catalogDO = new ETLCatalogDO();
-        catalogDO.setApplicationId(applicationId);
-        catalogDO.setDatasourceId(datasourceId);
-        String name = catalog.getName();
-        catalogDO.setCatalogName(name);
-        catalogDO.setDisplayName(name);
-        String comment = catalog.getComment();
-        catalogDO.setRemarks(comment);
-        catalogDO.setDeclaration(comment);
-
-        return catalogDO;
-    }
 }

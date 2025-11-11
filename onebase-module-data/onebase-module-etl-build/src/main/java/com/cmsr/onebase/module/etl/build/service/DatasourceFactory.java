@@ -63,14 +63,6 @@ public class DatasourceFactory {
         }
     }
 
-    public DataSource constructDataSource(Long datasourceId, boolean oneshot) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
-        if (datasourceDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
-        }
-        return constructDataSource(datasourceDO, oneshot);
-    }
-
     private static DatabaseType parseDatabaseType(String databaseType) {
         if (StringUtils.isBlank(databaseType)) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_ILLEGAL);

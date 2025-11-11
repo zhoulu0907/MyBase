@@ -6,32 +6,27 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
-import com.cmsr.onebase.module.etl.build.service.MetadataCollector;
-import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollectService;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
+import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollector;
+import com.cmsr.onebase.module.etl.build.service.collector.MetadataManager;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ColumnDefine;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.TestConnectionVO;
 import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.metadata.type.DatabaseType;
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,53 +64,19 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     private ETLFlinkMappingRepository flinkMappingRepository;
 
     @Resource
-    private MetadataCollectService metadataCollectService;
+    private MetadataManager metadataManager;
 
     @Resource
-    private DataInspectService dataInspectService;
+    private MetadataCollector metadataCollector;
 
     @Resource
     private DatasourceFactory datasourceFactory;
 
     @Resource
-    private MetadataCollector metadataCollector;
-
-    private Map<String, String> supportedDbs = Maps.newHashMap();
-
-    @PostConstruct
-    public void init() throws ClassNotFoundException {
-        DatabaseType[] dbs = {
-                DatabaseType.PostgreSQL,
-                DatabaseType.KingBase,
-                DatabaseType.ORACLE,
-                DatabaseType.MySQL
-        };
-        for (DatabaseType db : dbs) {
-            // 跳过非常规类型
-            if (StringUtils.isBlank(db.driver())) {
-                continue;
-            }
-            String driverName = db.driver();
-            ClassUtils.getClass(driverName);
-            supportedDbs.put(db.name(), db.title());
-        }
-    }
-
-    @Override
-    public List<SupportedDatasourceVO> getSupportedDatabaseTypes() {
-        List<SupportedDatasourceVO> supportedDbVOs = Lists.newArrayList();
-        for (String dbName : supportedDbs.keySet()) {
-            SupportedDatasourceVO typeVO = new SupportedDatasourceVO();
-            typeVO.setDatasourceType(dbName);
-            typeVO.setDisplayName(supportedDbs.get(dbName));
-            supportedDbVOs.add(typeVO);
-        }
-        return supportedDbVOs;
-    }
+    private DataInspectService dataInspectService;
 
     @Override
     public Boolean pingDatasource(TestConnectionVO pingVO) {
-        validDatasourceTypeSupported(pingVO.getDatasourceType());
         ETLDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, ETLDatasourceDO.class);
         return dataInspectService.testConnection(datasourceDO);
     }
@@ -144,8 +105,6 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public CommonResult<Long> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
-        validDatasourceTypeSupported(createReqVO.getDatasourceType());
-
         Long applicationId = createReqVO.getApplicationId();
         String datasourceType = createReqVO.getDatasourceType();
         ETLDatasourceDO datasourceDO = new ETLDatasourceDO();
@@ -186,7 +145,6 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
         // TODO
         validDatasourceCodeDuplicate(updateReqVO.getDatasourceCode(), updateReqVO.getId());
-        validDatasourceTypeSupported(updateReqVO.getDatasourceType());
 
         ETLDatasourceDO oldDatasource = datasourceRepository.findById(updateReqVO.getId());
         oldDatasource.setDatasourceCode(updateReqVO.getDatasourceCode());
@@ -234,22 +192,13 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     private boolean runMetadataCollect(LocalDateTime plannedTime, ETLDatasourceDO datasourceDO) {
+        Long applicationId = datasourceDO.getApplicationId();
         Long datasourceId = datasourceDO.getId();
         log.info("提交元数据采集任务，数据源ID: {}", datasourceId);
         try {
-            DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, true);
+            DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, false);
             CatalogData catalogData = metadataCollector.collectCatalog(datasourceId, datasource);
-
-
-            ETLCatalogDO catalogDO = metadataCollectService.collectCatalog(datasourceDO);
-            catalogDO = catalogRepository.upsert(catalogDO);
-            Long catalogId = catalogDO.getId();
-            ETLSchemaDO schemaDO = metadataCollectService.collectSchema(datasourceDO, catalogId);
-            schemaDO = schemaRepository.upsert(schemaDO);
-            Long schemaId = schemaDO.getId();
-            List<ETLTableDO> tableDOs = metadataCollectService.collectTables(datasourceDO, catalogId, schemaId);
-            tableRepository.upsertBatch(tableDOs);
-
+            metadataManager.saveMetadata(applicationId, datasourceId, catalogData);
             LocalDateTime endTime = LocalDateTime.now();
             Duration duration = Duration.between(plannedTime, endTime);
             long timeCost = duration.toMillis();
@@ -331,12 +280,6 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         boolean exists = datasourceRepository.existsByDatasourceCodeFilterById(datasourceCode, filterId);
         if (exists) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
-        }
-    }
-
-    private void validDatasourceTypeSupported(String datasourceType) {
-        if (!supportedDbs.containsKey(datasourceType)) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
         }
     }
 

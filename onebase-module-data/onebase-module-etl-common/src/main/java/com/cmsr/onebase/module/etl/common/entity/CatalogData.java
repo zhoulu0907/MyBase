@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -14,5 +15,6 @@ public class CatalogData {
 
     private String name;
 
+    @JsonIgnore
     private List<SchemaData> schemas = new ArrayList<>();
 }

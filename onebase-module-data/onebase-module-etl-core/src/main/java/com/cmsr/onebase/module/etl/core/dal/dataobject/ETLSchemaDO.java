@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
-import org.anyline.metadata.Schema;
 
 @Data
 @Table(name = "etl_schema")
@@ -34,19 +33,4 @@ public class ETLSchemaDO extends TenantBaseDO {
 
     @Column(name = "declaration")
     private String declaration;
-
-    public static ETLSchemaDO of(Long applicationId, Long datasourceId, Long catalogId, Schema schema) {
-        ETLSchemaDO schemaDO = new ETLSchemaDO();
-        schemaDO.setApplicationId(applicationId);
-        schemaDO.setDatasourceId(datasourceId);
-        schemaDO.setCatalogId(catalogId);
-        String name = schema.getName();
-        schemaDO.setSchemaName(name);
-        schemaDO.setDisplayName(name);
-        String comment = schema.getComment();
-        schemaDO.setRemarks(comment);
-        schemaDO.setDeclaration(comment);
-
-        return schemaDO;
-    }
 }

@@ -39,14 +39,31 @@ public class ETLTableRepository extends DataRepository<ETLTableDO> {
         deleteByConfig(cs);
     }
 
+    public ETLTableDO findOneByNameAndApplicationAndDatasourceAndCatalogAndSchema(Long applicationId, Long datasourceId, Long catalogId, Long schemaId, String tableName) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("application_id", applicationId);
+        cs.eq("datasource_id", datasourceId);
+        cs.eq("catalog_id", catalogId);
+        cs.eq("schema_id", schemaId);
+        cs.eq("table_name", tableName);
+
+        return findOne(cs);
+    }
+
     @Override
     public ETLTableDO upsert(ETLTableDO tableDO) {
         if (tableDO == null) return null;
+        Long applicationId = tableDO.getApplicationId();
+        Long datasourceId = tableDO.getDatasourceId();
+        Long catalogId = tableDO.getCatalogId();
+        Long schemaId = tableDO.getSchemaId();
+        String tableName = tableDO.getTableName();
         try {
-            Long id = tableDO.getId();
-            if (id == null) {
+            ETLTableDO old = findOneByNameAndApplicationAndDatasourceAndCatalogAndSchema(applicationId, datasourceId, catalogId, schemaId, tableName);
+            if (old == null) {
                 tableDO = insert(tableDO);
             } else {
+                tableDO.setId(old.getId());
                 update(tableDO);
             }
         } catch (Exception e) {

@@ -17,14 +17,6 @@ public class ETLCatalogRepository extends DataRepository<ETLCatalogDO> {
         super(ETLCatalogDO.class);
     }
 
-    public ETLCatalogDO findOneByNameAndDatasourceId(Long datasourceId, String catalogName) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("datasource_id", datasourceId);
-        cs.eq("catalog_name", catalogName);
-
-        return findOne(cs);
-    }
-
     public void deleteAllByDatasourceId(Long datasourceId) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("datasource_id", datasourceId);
@@ -36,15 +28,28 @@ public class ETLCatalogRepository extends DataRepository<ETLCatalogDO> {
     public ETLCatalogDO upsert(ETLCatalogDO catalogDO) {
         if (catalogDO == null) return null;
         try {
-            Long id = catalogDO.getId();
-            if (id == null) {
+            Long applicationId = catalogDO.getApplicationId();
+            Long datasourceId = catalogDO.getDatasourceId();
+            String catalogName = catalogDO.getCatalogName();
+            ETLCatalogDO oldCatalog = findOneByCatalogNameAndApplicationAndDatasource(applicationId, datasourceId, catalogName);
+            if (oldCatalog == null) {
                 catalogDO = insert(catalogDO);
             } else {
+                catalogDO.setId(oldCatalog.getId());
                 update(catalogDO);
             }
         } catch (Exception e) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_FAILED);
         }
         return catalogDO;
+    }
+
+    public ETLCatalogDO findOneByCatalogNameAndApplicationAndDatasource(Long applicationId, Long datasourceId, String catalogName) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("application_id", applicationId);
+        cs.eq("datasource_id", datasourceId);
+        cs.eq("catalog_name", catalogName);
+
+        return findOne(cs);
     }
 }

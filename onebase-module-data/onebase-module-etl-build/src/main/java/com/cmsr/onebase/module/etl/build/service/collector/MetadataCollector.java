@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.build.service;
+package com.cmsr.onebase.module.etl.build.service.collector;
 
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
@@ -21,31 +21,32 @@ import java.util.*;
 @Service
 public class MetadataCollector {
 
-
     public CatalogData collectCatalog(Long datasourceId, DataSource datasource) throws Exception {
         String runnerKey = "metadata-collect-" + datasourceId;
         try {
             DataSourceHolder.reg(runnerKey, datasource);
+            AnylineService<?> temporary = ServiceProxy.service(runnerKey);
             CatalogData catalogData = new CatalogData();
-            AnylineService<?> temporary = ServiceProxy.temporary(datasource);
             // 1. collect catalog
             Catalog catalog = temporary.metadata().catalog();
             String catalogName = catalog.getName();
             catalogData.setName(catalogName);
-            //
+            // 2. collect schema
             Schema schema = temporary.metadata().schema();
             String schemaName = schema.getName();
             SchemaData schemaData = new SchemaData();
             schemaData.setCatalogName(catalogName);
             schemaData.setName(schemaName);
             catalogData.getSchemas().add(schemaData);
-            //
-            LinkedHashMap<String, Table> tables = temporary.metadata().tables();
+            // 3. collect tables
+            LinkedHashMap<String, Table<?>> tables = temporary.metadata().tables(Table.TYPE.VIEW.value());
             for (Table<?> table : tables.values()) {
                 TableData tableData = new TableData();
                 tableData.setCatalogName(catalogName);
                 tableData.setSchemaName(schemaName);
                 tableData.setName(table.getName());
+                tableData.setType(table.keyword().toLowerCase());
+                tableData.setComment(table.getComment());
                 Collection<Column> tableColumn = temporary.metadata().columns(table).values();
                 List<ColumnData> columns = toColumnData(tableColumn);
                 tableData.setColumns(columns);
@@ -53,14 +54,6 @@ public class MetadataCollector {
             return catalogData;
         } finally {
             unregisterDataSource(runnerKey);
-        }
-    }
-
-    private void unregisterDataSource(String datasourceKey) {
-        try {
-            DataSourceHolder.destroy(datasourceKey);
-        } catch (Exception ex) {
-            log.error("注销数据源失败，数据源标识：{}", datasourceKey, ex);
         }
     }
 
@@ -93,9 +86,17 @@ public class MetadataCollector {
             if (isPrimaryKey) {
                 columnData.setAutoIncrement(column.getAutoIncrement());
             }
+            columnList.add(columnData);
         }
-        Collections.sort(columnList, Comparator.comparingInt(ColumnData::getPosition));
+        columnList.sort(Comparator.comparingInt(ColumnData::getPosition));
         return columnList;
     }
 
+    private void unregisterDataSource(String datasourceKey) {
+        try {
+            DataSourceHolder.destroy(datasourceKey);
+        } catch (Exception ex) {
+            log.error("注销数据源失败，数据源标识：{}", datasourceKey, ex);
+        }
+    }
 }

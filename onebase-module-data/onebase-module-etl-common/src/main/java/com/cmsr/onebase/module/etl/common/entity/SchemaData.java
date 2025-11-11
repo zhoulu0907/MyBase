@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -16,5 +17,6 @@ public class SchemaData {
 
     private String name;
 
+    @JsonIgnore
     private List<TableData> tables = new ArrayList<>();
 }

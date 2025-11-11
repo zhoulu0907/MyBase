@@ -13,8 +13,6 @@ import java.util.List;
 
 public interface ETLDatasourceService {
 
-    List<SupportedDatasourceVO> getSupportedDatabaseTypes();
-
     Boolean pingDatasource(TestConnectionVO pingVO);
 
     DatasourceRespVO queryDatasourceDetail(Long datasourceId);
