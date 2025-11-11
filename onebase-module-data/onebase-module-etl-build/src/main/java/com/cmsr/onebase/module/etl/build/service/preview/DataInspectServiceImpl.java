@@ -27,7 +27,7 @@ import javax.sql.DataSource;
 @Service
 public class DataInspectServiceImpl implements DataInspectService {
 
-    @Value("${onebase.etl.inspect-size:50}")
+    @Value("${onebase.etl.inspect-size:20}")
     private Integer inspectSize;
 
     @Resource
