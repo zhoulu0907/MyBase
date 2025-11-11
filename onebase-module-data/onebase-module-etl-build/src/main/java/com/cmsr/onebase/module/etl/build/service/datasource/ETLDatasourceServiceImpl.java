@@ -28,6 +28,8 @@ import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.metadata.type.DatabaseType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 
 @Service
@@ -108,6 +111,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     public CommonResult<Long> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
         Long applicationId = createReqVO.getApplicationId();
         String datasourceType = createReqVO.getDatasourceType();
+
         ETLDatasourceDO datasourceDO = new ETLDatasourceDO();
         datasourceDO.setApplicationId(applicationId);
         UUID uuid = UUID.randomUUID();
@@ -115,14 +119,14 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         datasourceDO.setDatasourceName(createReqVO.getDatasourceName());
         datasourceDO.setDeclaration(createReqVO.getDeclaration());
         datasourceDO.setDatasourceType(datasourceType);
-        datasourceDO.setConfig(JsonUtils.toJsonString(createReqVO.getConfig()));
+        datasourceDO.setConfig(createReqVO.getConfig());
         datasourceDO.setReadonly(createReqVO.getReadonly());
         // initialize collect status to `none`, infer datasource will be empty.
         datasourceDO.setCollectStatus(CollectStatus.NONE);
+        complementJdbcDatasourceProperties(datasourceDO);
         datasourceDO = datasourceRepository.insert(datasourceDO);
         Long datasourceId = datasourceDO.getId();
         Boolean withCollect = createReqVO.getWithCollect();
-        // TODO
         if (withCollect) {
             try {
                 boolean collectResult = runMetadataCollect(LocalDateTime.now(), datasourceDO);
@@ -143,19 +147,26 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
-        // TODO
-        validDatasourceCodeDuplicate(updateReqVO.getDatasourceCode(), updateReqVO.getId());
-
         ETLDatasourceDO oldDatasource = datasourceRepository.findById(updateReqVO.getId());
         oldDatasource.setDatasourceCode(updateReqVO.getDatasourceCode());
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
-        oldDatasource.setConfig(JsonUtils.toJsonString(updateReqVO.getConfig()));
+        oldDatasource.setConfig(updateReqVO.getConfig());
         oldDatasource.setReadonly(updateReqVO.getReadonly());
         // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
-
+        complementJdbcDatasourceProperties(oldDatasource);
         datasourceRepository.update(oldDatasource);
+    }
+
+    private void complementJdbcDatasourceProperties(ETLDatasourceDO datasourceDO) {
+        String datasourceType = datasourceDO.getDatasourceType();
+        DatabaseType databaseType = DatasourceFactory.parseDatabaseType(datasourceType);
+        Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
+        connectionProperties.put("driver", databaseType.driver());
+        String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, connectionProperties);
+        connectionProperties.put("jdbcUrl", jdbcUrl);
+        datasourceDO.setConfig(connectionProperties);
     }
 
     @Override
@@ -244,7 +255,8 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
                 .map(tableDO -> {
                     MetaBriefVO briefVO = new MetaBriefVO();
                     briefVO.setId(String.valueOf(tableDO.getId()));
-                    briefVO.setName(tableDO.getDisplayName());
+                    briefVO.setName(tableDO.getTableName());
+                    briefVO.setDisplayName(tableDO.getDisplayName());
                     return briefVO;
                 }).toList();
     }
@@ -271,17 +283,20 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
                             tableData.getName(),
                             columnMeta.getName());
                     columnDefine.setFieldFqn(fqn);
-                    columnDefine.setFieldName(columnMeta.getDisplayName());
+                    String tableName = columnMeta.getName();
+                    String displayName = columnMeta.getDisplayName();
+                    String comment = columnMeta.getComment();
+                    String declaration = columnMeta.getDeclaration();
+                    columnDefine.setFieldName(tableName);
+                    columnDefine.setDisplayName(tableName);
+                    if (StringUtils.isNotBlank(comment)) columnDefine.setDisplayName(comment);
+                    if (StringUtils.isNotBlank(declaration) && !StringUtils.equals(declaration, comment))
+                        columnDefine.setDisplayName(declaration);
+                    if (StringUtils.isNotBlank(displayName) && !StringUtils.equals(tableName, displayName))
+                        columnDefine.setDisplayName(displayName);
                     columnDefine.setFieldType(flinkTypeMappings.get(columnMeta.getType()));
                     return columnDefine;
                 }).toList();
-    }
-
-    private void validDatasourceCodeDuplicate(String datasourceCode, Long filterId) {
-        boolean exists = datasourceRepository.existsByDatasourceCodeFilterById(datasourceCode, filterId);
-        if (exists) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
-        }
     }
 
     private void checkDatasourceCollectRunnable(ETLDatasourceDO datasourceDO, LocalDateTime plannedTime) {
