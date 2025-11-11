@@ -1,7 +1,7 @@
-package com.cmsr.onebase.module.bpm.build.vo.design;
+package com.cmsr.onebase.module.bpm.core.vo.design;
 
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseEdgeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

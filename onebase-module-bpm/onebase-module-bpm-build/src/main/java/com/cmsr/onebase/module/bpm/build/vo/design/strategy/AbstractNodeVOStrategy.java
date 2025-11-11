@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node.strategy;
+package com.cmsr.onebase.module.bpm.build.vo.design.strategy;
 
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.*;
 import com.cmsr.onebase.module.bpm.core.enums.ApprovalModeEnum;

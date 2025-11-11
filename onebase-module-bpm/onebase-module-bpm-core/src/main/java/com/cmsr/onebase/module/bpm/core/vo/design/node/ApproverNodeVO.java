@@ -1,10 +1,10 @@
-package com.cmsr.onebase.module.bpm.build.vo.design.node;
+package com.cmsr.onebase.module.bpm.core.vo.design.node;
 
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeDataVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeDataVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
