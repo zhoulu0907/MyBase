@@ -48,11 +48,8 @@ export const InputNodeConfig: React.FC = () => {
   };
 
   const handlePreviewData = async () => {
-    // const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
-    // const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
-
-    const datasourceId = '115160185129926656';
-    const tableId = '125809900172541968';
+    const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
+    const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
 
     if (!datasourceId || !tableId) {
       return;
@@ -61,16 +58,18 @@ export const InputNodeConfig: React.FC = () => {
       datasourceId: datasourceId,
       tableId: tableId
     });
+
+    console.log('res: ', res);
     const previewData = {
       columns: res.columns.map((column: any) => ({
-        title: column.name,
-        dataIndex: column.id,
-        key: column.id
+        title: column,
+        dataIndex: column,
+        key: column
       })),
       data: res.data.map((row: any[]) => {
         const obj: any = {};
         res.columns.forEach((col: any, idx: number) => {
-          obj[col.id] = row[idx];
+          obj[col] = row[idx];
         });
         return obj;
       })

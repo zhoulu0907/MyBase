@@ -4,7 +4,7 @@ import mysqlIcon from '@/assets/images/etl/mysql.png';
 import oracleIcon from '@/assets/images/etl/oracle.png';
 import postgresqlIcon from '@/assets/images/etl/postgresql.png';
 import { Button, Checkbox, Form, Grid, Input, Message, Modal, Radio, Select, Steps } from '@arco-design/web-react';
-import { createETLDataSource, getETLSupportedDataSource } from '@onebase/app';
+import { createETLDataSource } from '@onebase/app';
 import { pingETLDataSource } from '@onebase/app/src/services';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
@@ -29,7 +29,9 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
-  const [supportedDatasourceList, setSupportedDataSource] = useState([]);
+  const [supportedDatasourceList, setSupportedDataSource] = useState<{ datasourceType: string; displayName: string }[]>(
+    []
+  );
   const [selectedDataSourceType, setSelectedDataSourceType] = useState('');
 
   const [testConnectionSuccess, setTestConnectionSuccess] = useState(false);
@@ -134,8 +136,26 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
   };
 
   const handleGetSupportedDataSource = async () => {
-    const res = await getETLSupportedDataSource();
-    console.log('getSupportedDataSource', res);
+    // const res = await getETLSupportedDataSource();
+    // console.log('getSupportedDataSource', res);
+    const res = [
+      {
+        datasourceType: 'PostgreSQL',
+        displayName: 'PostgreSQL'
+      },
+      {
+        datasourceType: 'MySQL',
+        displayName: 'MySQL'
+      },
+      {
+        datasourceType: 'KingBase',
+        displayName: '人大金仓'
+      },
+      {
+        datasourceType: 'ORACLE',
+        displayName: 'Oracle'
+      }
+    ];
     setSupportedDataSource(res);
   };
 

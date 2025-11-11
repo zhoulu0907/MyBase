@@ -1,16 +1,16 @@
-import { Button, Divider, Form, Grid, Input, Modal, Select, Switch, Tag } from '@arco-design/web-react';
-import { IconDelete, IconLaunch, IconPlus } from '@arco-design/web-react/icon';
+import { Button, Divider, Dropdown, Form, Grid, Input, Menu, Modal, Select, Switch, Tag } from '@arco-design/web-react';
+import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, VALIDATION_TYPE } from '@onebase/app';
 import { useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { InteractionActionType } from './action';
 import styles from './index.module.less';
 import { getOperatorOptions } from './ruleMap';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
-
-const Option = Select.Option;
 
 const opCodeOptions = [
   {
@@ -23,10 +23,50 @@ const opCodeOptions = [
   }
 ];
 
+const formActionOptions = [
+  {
+    label: '显示',
+    value: InteractionActionType.Show
+  },
+  {
+    label: '隐藏',
+    value: InteractionActionType.Hide
+  },
+  {
+    label: '可编辑',
+    value: InteractionActionType.Editable
+  },
+  {
+    label: '只读',
+    value: InteractionActionType.Readonly
+  },
+  {
+    label: '必填',
+    value: InteractionActionType.Required
+  },
+  {
+    label: '只读所有字段',
+    value: InteractionActionType.ReadonlyAll
+  },
+  {
+    label: '设置字段值',
+    value: InteractionActionType.SetFieldValue
+  }
+];
+
 interface InteractionRuleModalProps {
   visible: boolean;
   onCancel: () => void;
   onOk: () => void;
+}
+
+interface Rule {
+  id: string;
+  name: string;
+  enabled: number;
+  description?: string;
+  interactionCondition: any[];
+  formAction: any[];
 }
 
 const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, onCancel, onOk }) => {
@@ -55,29 +95,45 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   const [form] = Form.useForm();
 
   const interactionCondition = Form.useWatch('interactionCondition', form);
+  const formAction = Form.useWatch('formAction', form);
 
-  const rules = [
+  const [rules, setRules] = useState<Rule[]>([
     {
       id: '1',
       name: '规则1',
-      enabled: 1
+      enabled: 1,
+      description: '规则1描述',
+      interactionCondition: [],
+      formAction: []
     },
     {
       id: '2',
       name: '规则2',
-      enabled: 0
+      enabled: 0,
+      description: '规则2描述',
+      interactionCondition: [],
+      formAction: []
     },
     {
       id: '3',
       name: '规则3',
-      enabled: 1
-    },
-    {
-      id: '4',
-      name: '规则4',
-      enabled: 0
+      enabled: 1,
+      description: '规则3描述',
+      interactionCondition: [],
+      formAction: []
     }
-  ];
+  ]);
+
+  const [curRule, setCurRule] = useState<string>('');
+
+  useEffect(() => {
+    if (curRule) {
+      const rule = rules.find((rule) => rule.id === curRule);
+      if (rule) {
+        form.setFieldsValue(rule);
+      }
+    }
+  }, [curRule]);
 
   const handleOk = () => {
     onOk();
@@ -85,6 +141,44 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
   const handleCancel = () => {
     onCancel();
+  };
+
+  const handleAddRule = () => {
+    setRules((prevRules) => [
+      ...prevRules,
+      {
+        id: uuidv4().replaceAll('-', ''),
+        name: '新规则',
+        enabled: 0,
+        description: '',
+        interactionCondition: [],
+        formAction: []
+      }
+    ]);
+  };
+
+  const handleDeleteRule = (ruleId: string) => {
+    setRules((prevRules) => prevRules.filter((rule) => rule.id !== ruleId));
+  };
+
+  const handleMoveRule = (ruleId: string, direction: 'up' | 'down') => {
+    setRules((prevRules) => {
+      const currentIndex = prevRules.findIndex((rule) => rule.id === ruleId);
+      if (currentIndex === -1) {
+        return prevRules;
+      }
+
+      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+      if (targetIndex < 0 || targetIndex >= prevRules.length) {
+        return prevRules;
+      }
+
+      const nextRules = [...prevRules];
+      const [currentRule] = nextRules.splice(currentIndex, 1);
+      nextRules.splice(targetIndex, 0, currentRule);
+      return nextRules;
+    });
   };
 
   return (
@@ -99,28 +193,90 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
         <div className={styles.left}>
           <div className={styles.leftHeader}>
             <Input.Search placeholder="搜索" />
-            <Button type="text" icon={<IconPlus />}>
+            <Button type="text" icon={<IconPlus />} onClick={handleAddRule}>
               新建
             </Button>
           </div>
           <div className={styles.leftContent}>
             {rules.map((rule) => (
-              <div key={rule.id} className={styles.ruleItem}>
+              <div
+                key={rule.id}
+                className={styles.ruleItem}
+                style={{ backgroundColor: curRule === rule.id ? '#f7f8fa' : 'transparent' }}
+                onClick={() => {
+                  setCurRule(rule.id);
+                }}
+              >
                 <div className={styles.ruleItemName}>{rule.name}</div>
                 <div className={styles.ruleItemEnabled}>
                   {rule.enabled ? <Tag color="green">启用</Tag> : <Tag color="gray">禁用</Tag>}
-                  <IconDelete
-                    onClick={() => {
-                      console.log('delete rule: ', rule.id);
-                    }}
-                  />
+
+                  <Dropdown
+                    droplist={
+                      <Menu>
+                        <Menu.Item key="copy">复制</Menu.Item>
+                        <Menu.Item
+                          key="move-up"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMoveRule(rule.id, 'up');
+                          }}
+                        >
+                          优先级上移
+                        </Menu.Item>
+                        <Menu.Item
+                          key="move-down"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMoveRule(rule.id, 'down');
+                          }}
+                        >
+                          优先级下移
+                        </Menu.Item>
+                        <Menu.Item
+                          key="delete"
+                          style={{ color: 'red' }}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleDeleteRule(rule.id);
+                          }}
+                        >
+                          删除
+                        </Menu.Item>
+                      </Menu>
+                    }
+                    position="bl"
+                  >
+                    <Button type="text">
+                      <IconMoreVertical />
+                    </Button>
+                  </Dropdown>
                 </div>
               </div>
             ))}
           </div>
         </div>
         <div className={styles.right}>
-          <Form layout="vertical" form={form}>
+          <Form
+            layout="vertical"
+            form={form}
+            onValuesChange={(changeValue: any, values: any) => {
+              //   console.log(values);
+              // 需求：找到id对应的rule并进行更新
+
+              // 从values中获取当前rule的id
+              const curRuleId = values.id;
+              if (curRuleId) {
+                // 查找并更新rules列表
+                setRules((prevRules: any[]) =>
+                  prevRules.map((rule) => (rule.id === curRuleId ? { ...rule, ...values } : rule))
+                );
+              }
+            }}
+          >
+            <Form.Item field="id" hidden={true}>
+              <Input />
+            </Form.Item>
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item label="规则名称" field="name">
@@ -191,17 +347,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                             item.config?.id === form.getFieldValue(item.field + '.cpId')
                                                         )?.config?.type
                                                       )}
-                                                    >
-                                                      {/* {form.getFieldValue(item.field)?.fieldId &&
-                                              entityFieldValidationTypes &&
-                                              entityFieldValidationTypes
-                                                .find((cc) => cc.fieldId == form.getFieldValue(item.field).fieldId)
-                                                ?.validationTypes.map((operator: ValidationTypeItem) => (
-                                                  <Option key={operator.code} value={operator.code}>
-                                                    {operator.name}
-                                                  </Option>
-                                                ))} */}
-                                                    </Select>
+                                                    />
                                                   </Form.Item>
                                                 </Grid.Col>
 
@@ -339,7 +485,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
               <div className={styles.ruleAction}>
                 <div>则执行动作</div>
                 <div style={{ width: '100%' }}>
-                  <Form.List field={'.actions'}>
+                  <Form.List field={'formAction'}>
                     {(actions, { add: addAction, remove: removeAction }) => {
                       return (
                         <div>
@@ -355,108 +501,130 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                             return (
                                               // 字段id
                                               <Grid.Row key={item.key} gutter={8} align="center">
-                                                <Grid.Col span={8}>
-                                                  <Form.Item field={item.field + '.fieldId'}>
+                                                <Grid.Col
+                                                  span={
+                                                    form.getFieldValue(item.field + '.action') ==
+                                                    InteractionActionType.ReadonlyAll
+                                                      ? 23
+                                                      : 4
+                                                  }
+                                                >
+                                                  <Form.Item field={item.field + '.action'}>
                                                     <Select
                                                       className={styles.itemSelect}
-                                                      options={[]}
+                                                      options={formActionOptions}
                                                       onChange={(_value) => {
-                                                        form.setFieldValue(item.field + '.op', undefined);
-                                                        form.setFieldValue(item.field + '.operatorType', undefined);
-                                                        form.setFieldValue(item.field + '.value', undefined);
+                                                        form.resetFields([item.field + '.cpId']);
                                                       }}
                                                     />
                                                   </Form.Item>
                                                 </Grid.Col>
 
-                                                {/* 操作符 */}
-                                                <Grid.Col span={4}>
-                                                  <Form.Item field={item.field + '.op'}>
-                                                    <Select
-                                                      className={styles.itemSelect}
-                                                      disabled={
-                                                        form.getFieldValue(item.field + '.fieldId') == undefined
-                                                      }
-                                                      onChange={(_value) => {
-                                                        form.setFieldValue(item.field + '.operatorType', undefined);
-                                                        form.setFieldValue(item.field + '.value', undefined);
-                                                      }}
-                                                    ></Select>
-                                                  </Form.Item>
-                                                </Grid.Col>
+                                                {![
+                                                  InteractionActionType.SetFieldValue,
+                                                  InteractionActionType.ReadonlyAll
+                                                ].includes(form.getFieldValue(item.field + '.action')) && (
+                                                  <>
+                                                    <Grid.Col span={19}>
+                                                      <Form.Item field={item.field + '.cpId'}>
+                                                        <Select
+                                                          className={styles.itemSelect}
+                                                          options={cpOptions}
+                                                          onChange={(_value) => {}}
+                                                        />
+                                                      </Form.Item>
+                                                    </Grid.Col>
+                                                  </>
+                                                )}
 
-                                                {/* 不为空和为空不需要选择操作类型 */}
-                                                {form.getFieldValue(item.field + '.op') != VALIDATION_TYPE.IS_EMPTY &&
-                                                  form.getFieldValue(item.field + '.op') !=
-                                                    VALIDATION_TYPE.IS_NOT_EMPTY && (
-                                                    <>
-                                                      <Grid.Col span={3}>
-                                                        <Form.Item field={item.field + '.operatorType'}>
-                                                          <Select
-                                                            className={styles.itemSelect}
-                                                            disabled={
-                                                              form.getFieldValue(item.field + '.op') == undefined
+                                                {[InteractionActionType.SetFieldValue].includes(
+                                                  form.getFieldValue(item.field + '.action')
+                                                ) && (
+                                                  <>
+                                                    <Grid.Col span={8}>
+                                                      <Form.Item field={item.field + '.cpId'}>
+                                                        <Select
+                                                          className={styles.itemSelect}
+                                                          options={cpOptions}
+                                                          onChange={(_value) => {}}
+                                                        />
+                                                      </Form.Item>
+                                                    </Grid.Col>
+
+                                                    <Grid.Col
+                                                      span={2}
+                                                      style={{ textAlign: 'center', marginBottom: '16px' }}
+                                                    >
+                                                      <div>的值设为</div>
+                                                    </Grid.Col>
+
+                                                    <Grid.Col span={3}>
+                                                      <Form.Item field={item.field + '.operatorType'}>
+                                                        <Select
+                                                          className={styles.itemSelect}
+                                                          disabled={
+                                                            form.getFieldValue(item.field + '.cpId') == undefined
+                                                          }
+                                                          options={opCodeOptions}
+                                                          onChange={() => {
+                                                            form.setFieldValue(item.field + '.value', undefined);
+                                                            // 如果是范围类型 需要用数组兜底
+                                                            if (
+                                                              form.getFieldValue(item.field + '.op') ==
+                                                              VALIDATION_TYPE.RANGE
+                                                            ) {
+                                                              form.setFieldValue(item.field + '.value', [
+                                                                undefined,
+                                                                undefined
+                                                              ]);
                                                             }
-                                                            options={opCodeOptions}
-                                                            onChange={() => {
-                                                              form.setFieldValue(item.field + '.value', undefined);
-                                                              // 如果是范围类型 需要用数组兜底
-                                                              if (
-                                                                form.getFieldValue(item.field + '.op') ==
-                                                                VALIDATION_TYPE.RANGE
-                                                              ) {
-                                                                form.setFieldValue(item.field + '.value', [
-                                                                  undefined,
-                                                                  undefined
-                                                                ]);
-                                                              }
-                                                            }}
-                                                          ></Select>
+                                                          }}
+                                                        ></Select>
+                                                      </Form.Item>
+                                                    </Grid.Col>
+
+                                                    <Grid.Col span={6}>
+                                                      {form.getFieldValue(item.field + '.operatorType') ==
+                                                        undefined && (
+                                                        <Form.Item field={item.field + '.value'}>
+                                                          <Input placeholder="请输入" disabled />
                                                         </Form.Item>
-                                                      </Grid.Col>
+                                                      )}
+                                                      {form.getFieldValue(item.field + '.operatorType') ==
+                                                        FieldType.VALUE && (
+                                                        <Form.Item field={item.field + '.value'}>
+                                                          <Input placeholder="请输入静态值" />
+                                                        </Form.Item>
+                                                      )}
 
-                                                      <Grid.Col span={8}>
-                                                        {form.getFieldValue(item.field + '.operatorType') ==
-                                                          undefined && (
-                                                          <Form.Item field={item.field + '.value'}>
-                                                            <Input placeholder="请输入" disabled />
-                                                          </Form.Item>
-                                                        )}
-                                                        {form.getFieldValue(item.field + '.operatorType') ==
-                                                          FieldType.VALUE && (
-                                                          <Form.Item field={item.field + '.value'}>
-                                                            <Input placeholder="请输入静态值" />
-                                                          </Form.Item>
-                                                        )}
+                                                      {form.getFieldValue(item.field + '.operatorType') ==
+                                                        FieldType.VARIABLES && (
+                                                        <Form.Item field={item.field + '.value'}>
+                                                          <Select />
+                                                        </Form.Item>
+                                                      )}
 
-                                                        {form.getFieldValue(item.field + '.operatorType') ==
-                                                          FieldType.VARIABLES && (
-                                                          <Form.Item field={item.field + '.value'}>
-                                                            <Select />
-                                                          </Form.Item>
-                                                        )}
-
-                                                        {form.getFieldValue(item.field + '.operatorType') ==
-                                                          FieldType.FORMULA && (
-                                                          <Form.Item field={item.field + '.value'}>
-                                                            <Button
-                                                              //   onClick={() => openFormulaEditor(item.field + '.value')}
-                                                              long
-                                                            >
-                                                              {form.getFieldValue(item.field + '.value')
-                                                                ? '已设置公式'
-                                                                : 'ƒx 编辑公式'}
-                                                              {form.getFieldValue(item.field + '.value') ? (
-                                                                <IconLaunch />
-                                                              ) : (
-                                                                ''
-                                                              )}
-                                                            </Button>
-                                                          </Form.Item>
-                                                        )}
-                                                      </Grid.Col>
-                                                    </>
-                                                  )}
+                                                      {form.getFieldValue(item.field + '.operatorType') ==
+                                                        FieldType.FORMULA && (
+                                                        <Form.Item field={item.field + '.value'}>
+                                                          <Button
+                                                            //   onClick={() => openFormulaEditor(item.field + '.value')}
+                                                            long
+                                                          >
+                                                            {form.getFieldValue(item.field + '.value')
+                                                              ? '已设置公式'
+                                                              : 'ƒx 编辑公式'}
+                                                            {form.getFieldValue(item.field + '.value') ? (
+                                                              <IconLaunch />
+                                                            ) : (
+                                                              ''
+                                                            )}
+                                                          </Button>
+                                                        </Form.Item>
+                                                      )}
+                                                    </Grid.Col>
+                                                  </>
+                                                )}
 
                                                 <Grid.Col span={1}>
                                                   <IconDelete
