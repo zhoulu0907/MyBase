@@ -1,7 +1,7 @@
 import DatabaseIcon from '@/assets/images/etl/database.svg';
 import TableIcon from '@/assets/images/etl/table.svg';
 import TableIconActive from '@/assets/images/etl/table_active.svg';
-import { Button, Checkbox, Input, Modal, Tabs } from '@arco-design/web-react';
+import { Button, Checkbox, Input, Modal, Popover, Tabs } from '@arco-design/web-react';
 import { IconPlus, IconSwap } from '@arco-design/web-react/icon';
 import { listETLTableColumns, listETLTables, type ELTColumn, type ETLTable } from '@onebase/app';
 import { etlEditorSignal } from '@onebase/common';
@@ -191,7 +191,9 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
                       <img src={DatabaseIcon} alt="database" />
                       <div>数据库</div>
                     </div>
-                    <Button type="text" icon={<IconSwap />}></Button>
+                    <Popover title="Title" content={<span>HJNB</span>}>
+                      <Button type="text" icon={<IconSwap />}></Button>
+                    </Popover>
                   </div>
                   <div className={styles.tableList}>
                     {curTables.map((table) => (
