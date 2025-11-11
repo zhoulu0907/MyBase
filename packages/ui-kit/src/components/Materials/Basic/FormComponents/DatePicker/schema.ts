@@ -7,7 +7,6 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
-  dateFormatConfig,
   dateRangeConfig,
   type ICommonBaseType,
   type TDateTypeSelectKeyType,

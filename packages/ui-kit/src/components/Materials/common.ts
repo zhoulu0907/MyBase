@@ -555,12 +555,6 @@ export const imageHandleConfig: any = {
   type: CONFIG_TYPES.IMAGE_HANDLE
 }
 
-export const dateFormatConfig: any = {
-  key: 'dateFormat',
-  name: '日期格式',
-  type: CONFIG_TYPES.DATE_FORMAT
-}
-
 export const dateRangeConfig: any = {
   key: 'dateRange',
   name: '可选范围',

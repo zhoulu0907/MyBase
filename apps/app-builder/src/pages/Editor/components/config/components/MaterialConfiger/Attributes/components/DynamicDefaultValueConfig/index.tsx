@@ -16,7 +16,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   configs,
   id
 }) => {
-  const defaultValueConfigKey = 'defaultValueConfig';
+  const defaultValueConfigKey = item.key || 'defaultValueConfig';
 
   const [defaultValueConfig, setDefaultValueConfig] = useState({
     type: '',
