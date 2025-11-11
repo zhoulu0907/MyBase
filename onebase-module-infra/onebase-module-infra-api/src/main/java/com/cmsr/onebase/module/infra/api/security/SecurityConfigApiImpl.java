@@ -1,7 +1,6 @@
-package com.cmsr.onebase.module.infra.build.security;
+package com.cmsr.onebase.module.infra.api.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.infra.service.security.manager.PasswordPolicyManager;
 import com.cmsr.onebase.module.infra.service.security.validator.PasswordValidator;
 import com.cmsr.onebase.module.infra.service.security.validator.config.PasswordPolicyConfig;

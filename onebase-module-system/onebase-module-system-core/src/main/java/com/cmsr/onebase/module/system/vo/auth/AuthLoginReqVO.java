@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.system.vo.auth;
 import com.cmsr.onebase.framework.common.validation.InEnum;
 import com.cmsr.onebase.module.system.enums.social.SocialTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,10 +26,5 @@ public class AuthLoginReqVO extends UserLoginReqVO {
 
     @Schema(description = "state", requiredMode = Schema.RequiredMode.REQUIRED, example = "9b2ffbc1-7425-4155-9894-9d5c08541d62")
     private String socialState;
-
-
-    @Schema(description = "appId", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    @NotNull(message = "AppId不能为空")
-    private Long appId;
 
 }
