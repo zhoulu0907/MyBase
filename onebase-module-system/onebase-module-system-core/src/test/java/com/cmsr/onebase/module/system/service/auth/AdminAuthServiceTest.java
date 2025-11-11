@@ -207,7 +207,7 @@ public class AdminAuthServiceTest {
     @Test
     public void testLogin_Success() {
         // 准备数据
-        RuntimeAuthLoginReqVO reqVO = new RuntimeAuthLoginReqVO();
+        AuthLoginReqVO reqVO = new AuthLoginReqVO();
         reqVO.setUsername("testuser");
         reqVO.setPassword("123456");
 
@@ -440,7 +440,7 @@ public class AdminAuthServiceTest {
         ((AdminAuthServiceImpl) adminAuthService).setCaptchaEnable(true);
 
         // 准备数据
-        RuntimeAuthLoginReqVO reqVO = new RuntimeAuthLoginReqVO();
+        AuthLoginReqVO reqVO = new AuthLoginReqVO();
         reqVO.setUsername("testuser");
         reqVO.setPassword("123456");
         reqVO.setCaptchaVerification("invalidCaptcha");

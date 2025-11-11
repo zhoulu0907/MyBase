@@ -61,11 +61,6 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-runtime</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-infra-build</artifactId>
             <version>${revision}</version>
         </dependency>

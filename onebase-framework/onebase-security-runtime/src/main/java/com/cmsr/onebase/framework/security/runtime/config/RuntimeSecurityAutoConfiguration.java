@@ -38,7 +38,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 认证失败处理类 Bean
      */
     @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
+    public AuthenticationEntryPoint runtimeAuthenticationEntryPoint() {
         return new AuthenticationEntryPointImpl();
     }
 
@@ -46,7 +46,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 权限不够处理器 Bean
      */
     @Bean
-    public AccessDeniedHandler accessDeniedHandler() {
+    public AccessDeniedHandler runtimeAccessDeniedHandler() {
         return new AccessDeniedHandlerImpl();
     }
 
@@ -57,7 +57,7 @@ public class RuntimeSecurityAutoConfiguration {
      * @see <a href="http://stackabuse.com/password-encoding-with-spring-security/">Password Encoding with Spring Security</a>
      */
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder runtimePasswordEncoder() {
         return new BCryptPasswordEncoder(securityProperties.getPasswordEncoderLength());
     }
 
@@ -65,7 +65,7 @@ public class RuntimeSecurityAutoConfiguration {
      * Token 认证过滤器 Bean`
      */
     @Bean
-    public RuntimeAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
+    public RuntimeAuthenticationFilter runtimeAuthenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
                                                                OAuth2TokenCommonApi oauth2TokenApi) {
         return new RuntimeAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi);
     }
@@ -75,7 +75,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 设置使用 {@link TransmittableThreadLocalSecurityContextHolderStrategy} 作为 Security 的上下文策略
      */
     @Bean
-    public MethodInvokingFactoryBean securityContextHolderMethodInvokingFactoryBean() {
+    public MethodInvokingFactoryBean runtimeSecurityContextHolderMethodInvokingFactoryBean() {
         MethodInvokingFactoryBean methodInvokingFactoryBean = new MethodInvokingFactoryBean();
         methodInvokingFactoryBean.setTargetClass(SecurityContextHolder.class);
         methodInvokingFactoryBean.setTargetMethod("setStrategyName");
