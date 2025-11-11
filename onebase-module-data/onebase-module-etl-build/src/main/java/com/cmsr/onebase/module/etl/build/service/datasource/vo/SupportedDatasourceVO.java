@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Schema(description = "管理后台 - 支持的数据源类型")
 @Data
-public class DatabaseTypeVO {
+public class SupportedDatasourceVO {
 
     @Schema(description = "数据源类型")
     private String datasourceType;

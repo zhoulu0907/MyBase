@@ -1,18 +1,17 @@
 package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
 
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.FlowParams;
@@ -115,25 +114,41 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
 
         // 实体数据更新
-        if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData()) && fieldPermConfig != null && CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
-            Map<Long, Boolean> fieldMap = new HashMap<>();
-            Map<Long, Object> updateEntityData = new HashMap<>();
+        if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData())) {
+            boolean useNodeConfig = false;
 
-            for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
-                Long fieldId = fieldConfig.getFieldId();
-
-                // 只保留可编辑的字段
-                if (Objects.equals(fieldConfig.getFieldPermType(), FieldPermTypeEnum.WRITE.getCode())) {
-                    fieldMap.put(fieldId, true);
-                }
+            if (fieldPermConfig != null && fieldPermConfig.getUseNodeConfig()) {
+                useNodeConfig = true;
             }
 
-            // 审批节点默认所有字段都为只读
-            entityVO.getData().forEach((key, value) -> {
-                if (fieldMap.containsKey(key)) {
-                    updateEntityData.put(key, value);
+            Map<Long, Object> updateEntityData;
+
+            // 使用节点配置，则根据字段配置来更新数据
+            if (useNodeConfig) {
+                Map<Long, Boolean> fieldMap = new HashMap<>();
+
+                // 重置，待过滤出可编辑的字段
+                updateEntityData = new HashMap<>();
+
+                for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
+                    Long fieldId = fieldConfig.getFieldId();
+
+                    // 只保留可编辑的字段
+                    if (Objects.equals(fieldConfig.getFieldPermType(), FieldPermTypeEnum.WRITE.getCode())) {
+                        fieldMap.put(fieldId, true);
+                    }
                 }
-            });
+
+                // 审批节点默认所有字段都为只读
+                entityVO.getData().forEach((key, value) -> {
+                    if (fieldMap.containsKey(key)) {
+                        updateEntityData.put(key, value);
+                    }
+                });
+            } else {
+                // todo：待完善，未开启字段权限配置，则以表单默认权限为准，此处不做校验
+                updateEntityData = entityVO.getData();
+            }
 
             // 更新数据
             if (!updateEntityData.isEmpty()) {

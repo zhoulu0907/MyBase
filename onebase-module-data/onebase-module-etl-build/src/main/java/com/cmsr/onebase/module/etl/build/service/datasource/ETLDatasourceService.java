@@ -2,19 +2,18 @@ package com.cmsr.onebase.module.etl.build.service.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.*;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
 
 import java.util.List;
 
 public interface ETLDatasourceService {
 
-    List<DatabaseTypeVO> getSupportedDatabaseTypes();
-
-    Boolean pingDatasource(ETLDatasourcePingVO pingVO);
+    Boolean pingDatasource(TestConnectionVO pingVO);
 
     DatasourceRespVO queryDatasourceDetail(Long datasourceId);
 

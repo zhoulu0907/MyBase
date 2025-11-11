@@ -1,25 +1,16 @@
 package com.cmsr.onebase.module.app.build.controller.appresource;
 
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
+import com.cmsr.onebase.module.app.build.vo.appresource.*;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.build.vo.appresource.DeletePageSetReqVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetReqVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
-import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "应用资源管理-页面集管理")
 @RestController
@@ -93,5 +84,14 @@ public class PageSetController {
         LoadPageSetRespVO loadPageSetRespVO = pageSetService.loadPageSet(loadPageSetReqVO);
 
         return CommonResult.success(loadPageSetRespVO);
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "查询页面集列表")
+    public CommonResult<ListPageSetRespVO> listPageSet(@Valid ListPageSetReqVO listPageSetReqVO) {
+
+        ListPageSetRespVO listPageSetRespVO = pageSetService.listPageSet(listPageSetReqVO);
+
+        return CommonResult.success(listPageSetRespVO);
     }
 }
