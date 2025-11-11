@@ -80,7 +80,7 @@ public class CorpServiceImpl implements CorpService {
         // 保存基础数据
         Long corpId = createCorp(corpCombineReqVO.getCorpReqVO());
         // 保存系统管理员
-        CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO());
+        CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO(),corpId);
         // 保存关联关系
         List<AppAuthTimeReqVO> appAuthTimeReqVO = corpCombineReqVO.getAppAuthTimeReqVO();
 
@@ -309,7 +309,7 @@ public class CorpServiceImpl implements CorpService {
         return passwordEncoder.encode(password);
     }
 
-    public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO) {
+    public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO,Long corpId) {
         // 2.2.1 判断如果不存在，在进行插入
         AdminUserDO existUser = adminUserService.getUserByUsername(reqVO.getUsername());
         if (existUser != null) {
@@ -323,6 +323,7 @@ public class CorpServiceImpl implements CorpService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
+        user.setCorpId(corpId);
         Long userId = adminUserService.createCorpAdminUser(user);
         CorpAdminUserRespVO vo = new CorpAdminUserRespVO();
             vo.setUsername(reqVO.getUsername());

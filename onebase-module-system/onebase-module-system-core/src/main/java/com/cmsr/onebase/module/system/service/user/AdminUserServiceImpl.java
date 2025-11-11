@@ -269,6 +269,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    @TenantIgnore
     public void updateAdminType(Long id, Integer adminType) {
         // 校验正确性
         validateUserExists(id);
@@ -660,7 +661,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByStatus(Integer status,String userNickName) {
+    public List<AdminUserDO> getUserListByStatus(Integer status, String userNickName) {
         return adminUserDataRepository.findAllByStatus(status,userNickName);
     }
 

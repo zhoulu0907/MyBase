@@ -39,6 +39,7 @@ public class AdminUserDO extends TenantBaseDO {
     public static final String LOGIN_DATE = "login_date";
     public static final String USER_TYPE  = "user_type";
     public static final String ADMIN_TYPE  = "Admin_type";
+    public static final  String CORP_ID     ="corp_id";
 
     public AdminUserDO setId(Long id){
         super.setId(id);
@@ -141,5 +142,11 @@ public class AdminUserDO extends TenantBaseDO {
      */
     @Column(name = ADMIN_TYPE)
     private Integer adminType;
+
+    /**
+     * 企业id
+     */
+    @Column(name = DEPT_ID)
+    private Long corpId;
 
 }
