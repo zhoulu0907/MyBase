@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.core.dto.app.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
@@ -63,6 +64,9 @@ public class CorpServiceImpl implements CorpService {
 
     @Resource
     private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private SecurityConfigApi securityConfigApi;
 
 
     @Override
@@ -246,6 +250,8 @@ public class CorpServiceImpl implements CorpService {
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         String password = getRandomPassWord();
+        // 弱密码校验
+        securityConfigApi.validatePassword(password);
         user.setPassword(encodePassword(password)); // 加密密码
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());

@@ -73,7 +73,7 @@ import static java.util.Collections.singleton;
 public class TenantServiceImpl implements TenantService {
 
     // 租户管理员设置默认密码
-    private static final String TENANT_ADMIN_PASSWORD = "admin123";
+    private static final String TENANT_ADMIN_PASSWORD = "AdminChina2025!";
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Resource // 由于 onebase.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
