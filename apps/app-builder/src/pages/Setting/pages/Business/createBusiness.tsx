@@ -163,6 +163,8 @@ const CreateBusinessPage: React.FC = () => {
                 if(res) {
                     setSuccessData(res);
                     setCurrentStep(4);
+                    setBasicData({});
+                    setAdminData({});
                     Message.success("创建企业成功");
                 }else {
                     Message.success("接口返回数据异常");
