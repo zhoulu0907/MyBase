@@ -89,6 +89,16 @@ public interface ErrorCodeConstants {
 
     ErrorCode MISSING_NODE_VALID_ROLE_LIST = new ErrorCode(1_009_002_020, "缺少有效审批角色列表");
 
+    ErrorCode DELEGATION_TIME_CONFLICT = new ErrorCode(1_009_002_021, "被代理人在该时间段内已存在代理设置，请确认现有代理关系后重新配置");
+
+    ErrorCode DELEGATION_START_TIME_AFTER_END_TIME = new ErrorCode(1_009_002_022, "代理生效时间必须小于代理失效时间");
+
+    ErrorCode DELEGATION_NOT_EXISTS = new ErrorCode(1_009_002_023, "流程代理不存在");
+
+    ErrorCode DELEGATION_REVOKE_NO_PERMISSION = new ErrorCode(1_009_002_024, "只有创建人或被代理人是自己才能操作");
+
+    ErrorCode DELEGATION_REVOKE_INVALID_STATUS = new ErrorCode(1_009_002_025, "只允许操作待生效或代理中的记录");
+
 
     // ============= 系统相关错误 =============
 

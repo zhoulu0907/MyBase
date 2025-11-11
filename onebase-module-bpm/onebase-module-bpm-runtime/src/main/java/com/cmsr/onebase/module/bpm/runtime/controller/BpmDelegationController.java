@@ -3,18 +3,17 @@ package com.cmsr.onebase.module.bpm.runtime.controller;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmDelegationService;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationInsertReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationPageResVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationUpdateReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -34,20 +33,27 @@ public class BpmDelegationController {
 
     @PostMapping("/create")
     @Operation(summary = "创建流程代理")
-    public void create() {
-        // todo: 补充业务逻辑，被代理人取当前登录用户
+    public CommonResult<Boolean> create(@RequestBody @Validated BpmDelegationInsertReqVO reqVO) {
+        log.info("创建流程代理: {}", reqVO);
+        bpmDelegationService.create(reqVO);
+        return CommonResult.success(true);
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新流程代理")
-    public void update() {
+    public CommonResult<Boolean>  update(@RequestBody @Validated BpmDelegationUpdateReqVO reqVO) {
         // todo: 补充业务逻辑 只有当前被代理人可以修改
+        log.info("更新流程代理: {}", reqVO);
+        bpmDelegationService.update(reqVO);
+        return CommonResult.success(true);
     }
 
     @PostMapping("/revoke")
     @Operation(summary = "撤销流程代理")
-    public void revoke() {
-        // todo: 补充业务逻辑
+    public CommonResult<Boolean>  revoke(@RequestBody @Validated Long delegationId) {
+        log.info("撤销流程代理: {}", delegationId);
+        bpmDelegationService.revoke(delegationId);
+        return CommonResult.success(true);
     }
 
     @GetMapping("/page")
