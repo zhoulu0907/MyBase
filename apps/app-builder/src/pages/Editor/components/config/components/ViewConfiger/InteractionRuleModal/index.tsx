@@ -1,8 +1,11 @@
 import { Button, Divider, Form, Grid, Input, Modal, Select, Switch, Tag } from '@arco-design/web-react';
 import { IconDelete, IconLaunch, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, VALIDATION_TYPE } from '@onebase/app';
-import React from 'react';
+import { useFormEditorSignal } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
+import { getOperatorOptions } from './ruleMap';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -27,7 +30,31 @@ interface InteractionRuleModalProps {
 }
 
 const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, onCancel, onOk }) => {
+  useSignals();
+  const { components, pageComponentSchemas } = useFormEditorSignal;
+
+  const [cpOptions, setCpOptions] = useState<{ label: string; value: string }[]>([]);
+
+  // 获取组件下拉列表
+  const getComponentOptions = () => {
+    const cpOptions = Object.values(pageComponentSchemas.value).map((item: any) => ({
+      label: item.config?.label?.text || '',
+      value: item.config?.id
+    }));
+
+    console.log('cpOptions: ', cpOptions);
+    setCpOptions(cpOptions);
+  };
+
+  useEffect(() => {
+    console.log('components: ', components.value);
+    console.log('pageComponentSchemas: ', pageComponentSchemas.value);
+    visible && getComponentOptions();
+  }, [visible, pageComponentSchemas]);
+
   const [form] = Form.useForm();
+
+  const interactionCondition = Form.useWatch('interactionCondition', form);
 
   const rules = [
     {
@@ -62,7 +89,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
   return (
     <Modal
-      style={{ width: 900, height: 600 }}
+      style={{ width: 1200, height: 600 }}
       title={<div style={{ textAlign: 'left' }}>交互规则管理</div>}
       visible={visible}
       onCancel={handleCancel}
@@ -117,7 +144,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
               <div className={styles.ruleCondition}>
                 <div>当满足以下条件时</div>
                 <div style={{ width: '100%' }}>
-                  <Form.List field={'.conditions'}>
+                  <Form.List field={'interactionCondition'}>
                     {(conditions, { add: addCondition, remove: removeCondition }) => {
                       return (
                         <div>
@@ -135,10 +162,10 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                               // 字段id
                                               <Grid.Row key={item.key} gutter={8} align="center">
                                                 <Grid.Col span={8}>
-                                                  <Form.Item field={item.field + '.fieldId'}>
+                                                  <Form.Item field={item.field + '.cpId'}>
                                                     <Select
                                                       className={styles.itemSelect}
-                                                      options={[]}
+                                                      options={cpOptions}
                                                       onChange={(_value) => {
                                                         form.setFieldValue(item.field + '.op', undefined);
                                                         form.setFieldValue(item.field + '.operatorType', undefined);
@@ -153,14 +180,28 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                   <Form.Item field={item.field + '.op'}>
                                                     <Select
                                                       className={styles.itemSelect}
-                                                      disabled={
-                                                        form.getFieldValue(item.field + '.fieldId') == undefined
-                                                      }
+                                                      disabled={form.getFieldValue(item.field + '.cpId') == undefined}
                                                       onChange={(_value) => {
                                                         form.setFieldValue(item.field + '.operatorType', undefined);
                                                         form.setFieldValue(item.field + '.value', undefined);
                                                       }}
-                                                    ></Select>
+                                                      options={getOperatorOptions(
+                                                        components.value.find(
+                                                          (item: any) =>
+                                                            item.config?.id === form.getFieldValue(item.field + '.cpId')
+                                                        )?.config?.type
+                                                      )}
+                                                    >
+                                                      {/* {form.getFieldValue(item.field)?.fieldId &&
+                                              entityFieldValidationTypes &&
+                                              entityFieldValidationTypes
+                                                .find((cc) => cc.fieldId == form.getFieldValue(item.field).fieldId)
+                                                ?.validationTypes.map((operator: ValidationTypeItem) => (
+                                                  <Option key={operator.code} value={operator.code}>
+                                                    {operator.name}
+                                                  </Option>
+                                                ))} */}
+                                                    </Select>
                                                   </Form.Item>
                                                 </Grid.Col>
 
