@@ -139,7 +139,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       // 数据长度 dataLength
       // 小数位数 decimalPlaces
       // 默认值 defaultValue
-      schema.config.defaultValue = currentField.defaultValue;
+      const defaultValueConfig = { ...schema.config.defaultValue, customValue: currentField.defaultValue };
+      schema.config.defaultValueConfig = defaultValueConfig;
       // 字段描述 description
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
@@ -164,7 +165,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           }
         } else if (currentField.options?.length) {
           schema.config.defaultOptions = currentField.options.map((e) => ({
-            chosen: currentField.defaultValue && e.optionValue === currentField.defaultValue,
             label: e.optionLabel,
             value: e.optionValue
           }));

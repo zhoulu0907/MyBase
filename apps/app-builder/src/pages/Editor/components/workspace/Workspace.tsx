@@ -295,7 +295,8 @@ export default function EditorWorkspace() {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    schema.config.defaultValue = field.defaultValue;
+                    const defaultValueConfig = { ...schema.config.defaultValue, customValue: field.defaultValue };
+                    schema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     schema.config.tooltip = field.description;
                     // 是否必填：1-是，0-不是 isRequired
@@ -318,7 +319,6 @@ export default function EditorWorkspace() {
                         }
                       } else if (field.options?.length) {
                         schema.config.defaultOptions = field.options.map((e: any) => ({
-                          chosen: field.defaultValue && e.optionValue === field.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
                         }));
@@ -390,7 +390,8 @@ export default function EditorWorkspace() {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    subSchema.config.defaultValue = ele.defaultValue;
+                    const defaultValueConfig = { ...subSchema.config.defaultValue, customValue: ele.defaultValue };
+                    subSchema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
                     subSchema.config.verify = {
@@ -413,7 +414,6 @@ export default function EditorWorkspace() {
                         }
                       } else if (ele.options?.length) {
                         subSchema.config.defaultOptions = ele.options.map((e: any) => ({
-                          chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
                         }));
@@ -518,7 +518,11 @@ export default function EditorWorkspace() {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    schema.config.defaultValue = currentField.defaultValue;
+                    const defaultValueConfig = {
+                      ...schema.config.defaultValue,
+                      customValue: currentField.defaultValue
+                    };
+                    schema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     schema.config.tooltip = currentField.description;
                     // 是否必填：1-是，0-不是 isRequired
@@ -543,7 +547,6 @@ export default function EditorWorkspace() {
                         }
                       } else if (currentField.options?.length) {
                         schema.config.defaultOptions = currentField.options.map((e) => ({
-                          chosen: currentField.defaultValue && e.optionValue === currentField.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
                         }));

@@ -190,7 +190,6 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       }
     } else if (field.options?.length) {
       newOptions = field.options?.map((e: any) => ({
-        chosen: field.defaultValue && e.optionValue === field.defaultValue,
         label: e.optionLabel,
         value: e.optionValue
       }));

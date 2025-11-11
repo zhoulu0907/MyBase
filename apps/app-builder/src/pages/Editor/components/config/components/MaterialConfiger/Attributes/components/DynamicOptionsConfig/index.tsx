@@ -54,7 +54,6 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
         }
       } else if (currentMainField.options?.length) {
         const newOptions = currentMainField.options?.map((e) => ({
-          chosen: currentMainField.defaultValue && e.optionValue === currentMainField.defaultValue,
           label: e.optionLabel,
           value: e.optionValue
         }));
@@ -77,7 +76,6 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsConfigProps> = ({ handleProps
         }
       } else if (currentSubField.options?.length) {
         const newOptions = currentSubField.options?.map((e) => ({
-          chosen: currentSubField.defaultValue && e.optionValue === currentSubField.defaultValue,
           label: e.optionLabel,
           value: e.optionValue
         }));

@@ -232,7 +232,8 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    subSchema.config.defaultValue = ele.defaultValue;
+                    const defaultValueConfig = { ...subSchema.config.defaultValue, customValue: ele.defaultValue };
+                    subSchema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
                     subSchema.config.verify = {
@@ -255,7 +256,6 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                         }
                       } else if (ele.options?.length) {
                         subSchema.config.defaultOptions = ele.options.map((e:any) => ({
-                          chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
                           label: e.optionLabel,
                           value: e.optionValue
                         }));
