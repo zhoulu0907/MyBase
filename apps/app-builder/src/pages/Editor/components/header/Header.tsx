@@ -50,6 +50,7 @@ import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
+import FlowView from '../flowView';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
 import { useInitDefaultVersion } from './useInitDefaultVersion';
@@ -145,6 +146,7 @@ export default function EditorHeader() {
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
 
   const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
   const pageInfo = JSON.parse(sessionData);
@@ -526,8 +528,14 @@ export default function EditorHeader() {
         {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
           <div className={styles.editorStatusEditAfterPublished}>未保存</div>
         )}
-
-        <Button onClick={toPreview} className={styles.previewButton}>
+        {/* 预览 */}
+        <Button
+          //  onClick={toPreview}
+          className={styles.previewButton}
+          onClick={() => {
+            setFlowViewVisible(true);
+          }}
+        >
           <img src={previewSVG} />
           {t('editor.preview')}
         </Button>
@@ -576,6 +584,7 @@ export default function EditorHeader() {
       />
 
       <VersionModal visible={manageVisible} setVisible={setManageVisible} />
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} />
     </div>
   );
 }

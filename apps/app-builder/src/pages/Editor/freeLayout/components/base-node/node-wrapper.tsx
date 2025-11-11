@@ -39,13 +39,14 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const childRef = useRef<HTMLDivElement>(null);
   const portsRender = ports.map((p) => (
     <WorkflowPortRender
-      className={'nodePort' + (selected ? 'selectedPort' : '')}
+      className={'nodePort' + (selected ? ' selectedPort' : '') + (readonly ? ' readonlyPort' : '')}
       key={p.id}
       entity={p}
       onClick={!readonly ? onPortClick : undefined}
     />
   ));
   const onMouseOver = useCallback(() => {
+    if (readonly) return;
     setIsHover(true);
   }, [node]);
   const onMouseOut = useCallback(
@@ -66,10 +67,10 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const copyNode = useCallback(() => {
     console.log('复制节点');
   }, [node]);
-
   return (
     <>
       {(isHover || selected) &&
+        !readonly &&
         nodeRender.type !== WorkflowNodeType.START &&
         nodeRender.type !== WorkflowNodeType.END &&
         nodeRender.type !== WorkflowNodeType.INITIATION && (
@@ -83,7 +84,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
           </div>
         )}
       <NodeWrapperStyle
-        className={selected ? 'selected' : ''}
+        className={`${selected && !readonly ? 'selected' : ''} ${readonly && nodeRender.data.status + 'Border'}`}
         ref={nodeRef}
         draggable
         onMouseOver={onMouseOver}
