@@ -106,11 +106,11 @@ public class WebFrameworkUtils {
         
         // 检查 Admin API
         if (StrUtil.startWith(uri, properties.getBuildApi().getPrefix())) {
-            return UserTypeEnum.BUILD.getValue();
+            return UserTypeEnum.THIRD.getValue();
         }
         // 检查 App API
         if (StrUtil.startWith(uri, properties.getRuntimeApi().getPrefix())) {
-            return UserTypeEnum.RUNTIME.getValue();
+            return UserTypeEnum.CORP.getValue();
         }
         // 检查 App API
         if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
