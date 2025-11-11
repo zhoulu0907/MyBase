@@ -36,6 +36,18 @@ Content-Type: application/json
   "status": 0
 }
 
+### 请求 /update 接口 => 成功
+POST {{baseUrl}}/system/dept/update-dept-admin-or-director
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+{
+  "userId": 1001,
+  "deptId": 9,
+  "updateType": "admin1"
+}
+
+
 ### 请求 /get-dept-users 接口 => 成功
 GET {{baseUrl}}/system/dept/get-dept-users?deptId=100&keywords=
 Authorization: Bearer {{token}}

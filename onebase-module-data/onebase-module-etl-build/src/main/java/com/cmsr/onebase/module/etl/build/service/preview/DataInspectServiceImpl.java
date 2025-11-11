@@ -1,0 +1,131 @@
+package com.cmsr.onebase.module.etl.build.service.preview;
+
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.ColumnDefine;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
+import com.cmsr.onebase.module.etl.common.entity.TableData;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLFlinkMappingRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
+import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
+import com.cmsr.onebase.module.etl.core.enums.MetadataType;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataSet;
+import org.anyline.metadata.Table;
+import org.anyline.proxy.ServiceProxy;
+import org.anyline.service.AnylineService;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@Service
+public class DataInspectServiceImpl implements DataInspectService {
+
+    @Value("${onebase.etl.inspect-size:20}")
+    private Integer inspectSize;
+
+    @Resource
+    private DatasourceFactory dataSourceFactory;
+
+    @Resource
+    private ETLDatasourceRepository datasourceRepository;
+
+    @Resource
+    private ETLTableRepository tableRepository;
+
+    @Resource
+    private ETLFlinkMappingRepository flinkMappingRepository;
+
+    @Override
+    public boolean testConnection(ETLDatasourceDO datasourceDO) {
+        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
+        try {
+            boolean validity = ServiceProxy.temporary(datasource).validity();
+            boolean hit = ServiceProxy.temporary(datasource).hit();
+            return validity || hit;
+        } catch (Exception ex) {
+            log.error("测试数据源连接异常，数据源信息: {}", datasourceDO, ex);
+            return false;
+        }
+    }
+
+    @Override
+    public DataPreviewVO previewData(TablePreviewVO previewVO) {
+        Long datasourceId = previewVO.getDatasourceId();
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
+        String datasourceType = datasourceDO.getDatasourceType();
+        Long tableId = previewVO.getTableId();
+        ETLTableDO tableDO = tableRepository.findById(tableId);
+        if (tableDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
+        }
+
+        DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
+
+        try {
+            AnylineService<?> temporary = ServiceProxy.temporary(dataSource);
+            Table<?> table;
+            MetadataType metadataType = MetadataType.getType(tableDO.getTableType());
+            switch (metadataType) {
+                case TABLE -> table = temporary.metadata().table(tableDO.getTableName());
+                case VIEW -> table = temporary.metadata().view(tableDO.getTableName());
+                default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_METADATA_TYPE);
+            }
+            Map<String, String> fieldTypeMapping = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceType);
+            DataPreviewVO dataPreviewVO = new DataPreviewVO();
+            TableData tableData = tableDO.getMetaInfo();
+            List<ColumnData> columnDataList = tableData.getColumns();
+            List<ColumnDefine> columnList = new ArrayList<>(columnDataList.size());
+            for (ColumnData columnData : columnDataList) {
+                ColumnDefine columnDefine = new ColumnDefine();
+                String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getId(),
+                        tableData.getCatalogName(),
+                        tableData.getSchemaName(),
+                        tableData.getName(),
+                        columnData.getName());
+                columnDefine.setFieldFqn(fqn);
+
+                String tableName = columnData.getName();
+                String displayName = columnData.getDisplayName();
+                String comment = columnData.getComment();
+                String declaration = columnData.getDeclaration();
+                columnDefine.setFieldName(tableName);
+                columnDefine.setDisplayName(tableName);
+                if (StringUtils.isNotBlank(comment)) columnDefine.setDisplayName(comment);
+                if (StringUtils.isNotBlank(declaration) && !StringUtils.equals(declaration, comment))
+                    columnDefine.setDisplayName(declaration);
+                if (StringUtils.isNotBlank(displayName) && !StringUtils.equals(tableName, displayName))
+                    columnDefine.setDisplayName(displayName);
+                String flinkType = fieldTypeMapping.get(columnData.getType());
+                columnDefine.setFieldType(flinkType);
+                int metaColumnIdx = columnData.getPosition() - 1;
+                columnList.add(metaColumnIdx, columnDefine);
+            }
+            dataPreviewVO.setColumns(columnList);
+            ConfigStore cs = new DefaultConfigStore();
+            cs.limit(inspectSize);
+            DataSet dataSet = temporary.querys(table, cs);
+            return dataPreviewVO.appendData(dataSet);
+        } catch (Exception e) {
+            log.error("数据源连接异常，数据源信息: {}", datasourceDO, e);
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+        }
+    }
+}

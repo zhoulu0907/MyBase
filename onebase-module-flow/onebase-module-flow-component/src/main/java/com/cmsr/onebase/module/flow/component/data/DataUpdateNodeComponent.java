@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataUpdateNodeData;
@@ -76,10 +77,10 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
 
     private List<Map<Long, Object>> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> vars) {
         List<Map<Long, Object>> reqData = new ArrayList<>();
-        conditionsProvider.formatConditionItemsForValue(conditionItems, vars);
+        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, vars);
         Map<Long, Object> data = new HashMap<>();
-        for (ConditionItem conditionItem : conditionItems) {
-            data.put(NumberUtils.toLong(conditionItem.getFieldId()), conditionItem.getValue());
+        for (ExpressionItem expressionItem : expressionItems) {
+            data.put(NumberUtils.toLong(expressionItem.getKey()), expressionItem.getValue());
         }
         reqData.add(data);
         return reqData;
