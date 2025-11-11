@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.module.app.api.app.dto.UserPhotoDTO;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
@@ -102,7 +103,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         List<Long> appIds = pageResult.getList().stream()
                 .map(ApplicationDO::getId)
                 .collect(Collectors.toList());
-         Map<Long,List<Map<String,String>>> userListMap=appSqlQueryRepository.findUserPhotoList(appIds);
+         Map<Long,List<UserPhotoDTO>> userListMap=appSqlQueryRepository.findUserPhotoList(appIds);
 
         List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
@@ -111,7 +112,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     bean.setTags(queryAppTags(v.getId()));
                     bean.setCreateUser(userHelper.getUserNickname(v.getCreator()));
                     bean.setUpdateUser(userHelper.getUserNickname(v.getUpdater()));
-                    // 用户头像数据待开发
                     bean.setUserPhotoList(userListMap.get(v.getId()));
                     return bean;
                 })
@@ -280,5 +280,10 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     public List<ApplicationDO> getSimpleAppList(Integer status) {
         return applicationRepository.getSimpleAppList(status);
+    }
+
+    @Override
+    public List<ApplicationDO> getMySimpleAppListByName(String appName) {
+        return applicationRepository.findMyAppApplicationByAppName(appName);
     }
 }
