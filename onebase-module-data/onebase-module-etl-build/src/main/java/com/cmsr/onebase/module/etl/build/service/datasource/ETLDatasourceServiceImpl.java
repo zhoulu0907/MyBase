@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
+import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
@@ -254,16 +255,22 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(tableDO.getId());
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(tableDO.getDatasourceId());
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
         }
         Map<String, String> flinkTypeMappings = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceDO.getDatasourceType());
-
-        List<ColumnData> columns = tableDO.getMetaInfo().getColumns();
+        TableData tableData = tableDO.getMetaInfo();
+        List<ColumnData> columns = tableData.getColumns();
         return columns.stream()
                 .map(columnMeta -> {
                     ColumnDefine columnDefine = new ColumnDefine();
+                    String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getId(),
+                            tableData.getCatalogName(),
+                            tableData.getSchemaName(),
+                            tableData.getName(),
+                            columnMeta.getName());
+                    columnDefine.setFieldFqn(fqn);
                     columnDefine.setFieldName(columnMeta.getDisplayName());
                     columnDefine.setFieldType(flinkTypeMappings.get(columnMeta.getType()));
                     return columnDefine;
