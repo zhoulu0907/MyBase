@@ -15,11 +15,12 @@ import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
-import com.cmsr.onebase.module.etl.core.vo.ExecutionLogVO;
+import com.cmsr.onebase.module.etl.core.vo.etl.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+@Slf4j
 @Service
 public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
@@ -137,48 +139,53 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     private void updateWorkflowTableRelations(ETLWorkflowDO workflowDO) {
-        Long applicationId = workflowDO.getApplicationId();
-        Long workflowId = workflowDO.getId();
-        workflowTableRepository.deleteByWorkflowId(workflowId);
-        List<ETLWorkflowTableDO> workflowTableDOList = new ArrayList<>();
-        // TODO: replace JsonNode with Object, needs refactor.
-        Map<Long, Set<Long>> dataList = new HashMap<>();
-        JsonNode workflowGraph = JsonUtils.parseTree(workflowDO.getConfig());
-        ArrayNode nodeList = (ArrayNode) workflowGraph.get("nodes");
-        for (JsonNode nodeDef : nodeList) {
-            String nodeType = nodeDef.get("type").asText();
-            if (StringUtils.equals(nodeType, "jdbc_input")) {
-                Long datasourceId = nodeDef.get("config").get("datasourceId").asLong();
-                Long tableId = nodeDef.get("config").get("tableId").asLong();
-                if (dataList.containsKey(datasourceId)) {
-                    dataList.get(datasourceId).add(tableId);
-                } else {
-                    Set<Long> tableSet = new HashSet<>();
-                    tableSet.add(tableId);
-                    dataList.put(datasourceId, tableSet);
+        try {
+            // TODO: rewrite this, consider .;
+            Long applicationId = workflowDO.getApplicationId();
+            Long workflowId = workflowDO.getId();
+            workflowTableRepository.deleteByWorkflowId(workflowId);
+            List<ETLWorkflowTableDO> workflowTableDOList = new ArrayList<>();
+            // TODO: replace JsonNode with Object, needs refactor.
+            Map<Long, Set<Long>> dataList = new HashMap<>();
+            JsonNode workflowGraph = JsonUtils.parseTree(workflowDO.getConfig());
+            ArrayNode nodeList = (ArrayNode) workflowGraph.get("nodes");
+            for (JsonNode nodeDef : nodeList) {
+                String nodeType = nodeDef.get("type").asText();
+                if (StringUtils.equals(nodeType, "jdbc_input")) {
+                    Long datasourceId = nodeDef.get("config").get("datasourceId").asLong();
+                    Long tableId = nodeDef.get("config").get("tableId").asLong();
+                    if (dataList.containsKey(datasourceId)) {
+                        dataList.get(datasourceId).add(tableId);
+                    } else {
+                        Set<Long> tableSet = new HashSet<>();
+                        tableSet.add(tableId);
+                        dataList.put(datasourceId, tableSet);
+                    }
+                } else if (StringUtils.equals(nodeType, "jdbc_output")) {
+                    ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
+                    workflowTableRel.setWorkflowId(workflowId);
+                    workflowTableRel.setApplicationId(applicationId);
+                    workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
+                    workflowTableRel.setDatasourceId(nodeDef.get("config").get("datasourceId").asLong());
+                    workflowTableRel.setTableId(nodeDef.get("config").get("tableId").asLong());
+                    workflowTableDOList.add(workflowTableRel);
                 }
-            } else if (StringUtils.equals(nodeType, "jdbc_output")) {
-                ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
-                workflowTableRel.setWorkflowId(workflowId);
-                workflowTableRel.setApplicationId(applicationId);
-                workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
-                workflowTableRel.setDatasourceId(nodeDef.get("config").get("datasourceId").asLong());
-                workflowTableRel.setTableId(nodeDef.get("config").get("tableId").asLong());
-                workflowTableDOList.add(workflowTableRel);
             }
-        }
-        for (Long datasourceId : dataList.keySet()) {
-            for (Long tableId : dataList.get(datasourceId)) {
-                ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
-                workflowTableRel.setWorkflowId(workflowId);
-                workflowTableRel.setApplicationId(applicationId);
-                workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_SOURCE);
-                workflowTableRel.setDatasourceId(datasourceId);
-                workflowTableRel.setTableId(tableId);
-                workflowTableDOList.add(workflowTableRel);
+            for (Long datasourceId : dataList.keySet()) {
+                for (Long tableId : dataList.get(datasourceId)) {
+                    ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
+                    workflowTableRel.setWorkflowId(workflowId);
+                    workflowTableRel.setApplicationId(applicationId);
+                    workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_SOURCE);
+                    workflowTableRel.setDatasourceId(datasourceId);
+                    workflowTableRel.setTableId(tableId);
+                    workflowTableDOList.add(workflowTableRel);
+                }
             }
+            workflowTableRepository.insertBatch(workflowTableDOList);
+        } catch (Exception ignored) {
+            log.warn("保存表关系结构异常, {}", workflowDO.getConfig());
         }
-        workflowTableRepository.insertBatch(workflowTableDOList);
     }
 
     @Override

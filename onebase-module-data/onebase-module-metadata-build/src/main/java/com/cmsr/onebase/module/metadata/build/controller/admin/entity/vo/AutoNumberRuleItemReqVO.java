@@ -16,6 +16,9 @@ import lombok.Data;
 @Schema(description = "自动编号规则项请求VO")
 public class AutoNumberRuleItemReqVO {
 
+    @Schema(description = "规则项ID（更新时必填）", example = "1")
+    private Long id;
+
     @Schema(description = "规则项类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "SEQUENCE")
     @NotBlank(message = "规则项类型不能为空")
     private String itemType;
