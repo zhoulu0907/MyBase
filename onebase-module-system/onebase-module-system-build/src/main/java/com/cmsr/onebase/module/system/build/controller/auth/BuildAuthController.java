@@ -76,14 +76,14 @@ public class BuildAuthController {
     @PostMapping("/login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")
-    public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
+    public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid RuntimeAuthLoginReqVO reqVO) {
         return success(authService.login(reqVO));
     }
 
     @PostMapping("/corp-login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")
-    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {
+    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid RuntimeAuthLoginReqVO reqVO) {
         return success(authService.corpLogin(reqVO));
     }
 

@@ -207,7 +207,7 @@ public class AdminAuthServiceTest {
     @Test
     public void testLogin_Success() {
         // 准备数据
-        AuthLoginReqVO reqVO = new AuthLoginReqVO();
+        RuntimeAuthLoginReqVO reqVO = new RuntimeAuthLoginReqVO();
         reqVO.setUsername("testuser");
         reqVO.setPassword("123456");
 
@@ -440,7 +440,7 @@ public class AdminAuthServiceTest {
         ((AdminAuthServiceImpl) adminAuthService).setCaptchaEnable(true);
 
         // 准备数据
-        AuthLoginReqVO reqVO = new AuthLoginReqVO();
+        RuntimeAuthLoginReqVO reqVO = new RuntimeAuthLoginReqVO();
         reqVO.setUsername("testuser");
         reqVO.setPassword("123456");
         reqVO.setCaptchaVerification("invalidCaptcha");
@@ -482,7 +482,7 @@ public class AdminAuthServiceTest {
         token.setAccessToken("accessToken123");
         token.setRefreshToken("refreshToken123");
         token.setUserId(testUser != null ? testUser.getId() : 1L);
-        token.setUserType(UserTypeEnum.BUILD.getValue());
+        token.setUserType(UserTypeEnum.THIRD.getValue());
         return token;
     }
 }

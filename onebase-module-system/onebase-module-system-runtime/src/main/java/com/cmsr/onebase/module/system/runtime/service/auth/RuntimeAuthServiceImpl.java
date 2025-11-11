@@ -1,11 +1,11 @@
-package com.cmsr.onebase.module.system.service.auth;
+package com.cmsr.onebase.module.system.runtime.service.auth;
 
+import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
@@ -17,7 +17,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
-import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
@@ -40,46 +39,49 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.servlet.ServletUtils.getClientIP;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
  * Auth Service 实现类
+ * 1. 运行态登录：自有用户 登录
+ * 1. 运行态登录：三方用户 登录
+ *
+ * @author mty
  */
 @Service
 @RefreshScope
 @Slf4j
-public class AdminAuthServiceImpl implements AdminAuthService {
+public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
-    private AdminUserService userService;
+    private AdminUserService   userService;
     @Resource
-    private LoginLogService loginLogService;
+    private LoginLogService    loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService memberService;
+    private MemberService      memberService;
     @Resource
-    private Validator validator;
+    private Validator          validator;
     @Resource
-    private CaptchaService captchaService;
+    private CaptchaService     captchaService;
     @Resource
-    private SmsCodeApi smsCodeApi;
+    private SmsCodeApi         smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean captchaEnable;
+    private Boolean            captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */
     @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean       platformTenantEnableCreateApp;
+    private Boolean            platformTenantEnableCreateApp;
 
     @Resource
-    private TenantService tenantService;
+    private TenantService     tenantService;
     @Resource
     private PermissionService permissionService;
 
@@ -106,24 +108,6 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
 
     @Override
-    public AuthLoginRespVO adminLogin(UserLoginReqVO reqVO) {
-        // 1. 校验验证码
-        validateCaptcha(reqVO);
-
-        // 2. 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-
-        // 3. 校验是否是平台管理员
-        boolean isAdmin = permissionService.isPlatformSuperAdmin(user.getId());
-        if (!isAdmin) {
-            throw exception(AUTH_LOGIN_USER_NOT_ADMIN_ERROR);
-        }
-
-        // 4. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
-    }
-
-    @Override
     public AuthLoginRespVO login(RuntimeAuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
@@ -148,55 +132,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
 
-        // 如果 socialType 非空，说明需要绑定社交用户
-        // if (reqVO.getSocialType() != null) {
-        //     socialUserService.bindSocialUser(new SocialUserBindReqDTO(user.getId(), getUserType().getValue(),
-        //             reqVO.getSocialType(), reqVO.getSocialCode(), reqVO.getSocialState()));
-        // }
-        // 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
-    }
-
-    @Override
-    public AuthLoginRespVO corpLogin(RuntimeAuthLoginReqVO reqVO) {
-        // 校验验证码
-        validateCaptcha(reqVO);
-        // 2. 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
-    }
-
-    @Override
-    public void sendSmsCode(AuthSmsSendReqVO reqVO) {
-        // 如果是重置密码场景，需要校验图形验证码是否正确
-        if (Objects.equals(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene(), reqVO.getScene())) {
-            ResponseModel response = doValidateCaptcha(reqVO);
-            if (!response.isSuccess()) {
-                throw exception(AUTH_REGISTER_CAPTCHA_CODE_ERROR, response.getRepMsg());
-            }
-        }
-
-        // 登录场景，验证是否存在
-        if (userService.getUserByMobile(reqVO.getMobile()) == null) {
-            throw exception(AUTH_MOBILE_NOT_EXISTS);
-        }
-        // 发送验证码
-        smsCodeApi.sendSmsCode(AuthConvert.INSTANCE.convert(reqVO).setCreateIp(getClientIP()));
-    }
-
-    @Override
-    public AuthLoginRespVO smsLogin(AuthSmsLoginReqVO reqVO) {
-        // 校验验证码
-        smsCodeApi.useSmsCode(AuthConvert.INSTANCE.convert(reqVO, SmsSceneEnum.ADMIN_MEMBER_LOGIN.getScene(), getClientIP())).checkError();
-
-        // 获得用户信息
-        AdminUserDO user = userService.getUserByMobile(reqVO.getMobile());
-        if (user == null) {
-            throw exception(USER_NOT_EXISTS);
-        }
-
-        // 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        return createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     private void createLoginLog(Long userId, String username,
@@ -240,11 +176,11 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long appId, Long userId, String username, LoginLogTypeEnum logType) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessToken(userId, getUserType().getValue(),
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAppAccessToken(appId, userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
@@ -307,7 +243,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         Long userId = userService.registerUser(registerReqVO);
 
         // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(userId, registerReqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(registerReqVO.getAppId(), userId, registerReqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @VisibleForTesting
@@ -322,19 +258,6 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void resetPassword(AuthResetPasswordReqVO reqVO) {
-        // 暂时屏蔽验证码功能后续恢复
-        // AdminUserDO userByMobile = userService.getUserByMobile(reqVO.getMobile());
-        // if (userByMobile == null) {
-        //     throw exception(USER_MOBILE_NOT_EXISTS);
-        // }
-        //
-        // smsCodeApi.useSmsCode(new SmsCodeUseReqDTO()
-        //         .setCode(reqVO.getCode())
-        //         .setMobile(reqVO.getMobile())
-        //         .setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene())
-        //         .setUsedIp(getClientIP())
-        // ).checkError();
-
         AdminUserDO user = userService.getUser(reqVO.getUserId());
         if (user == null) {
             throw exception(USER_MOBILE_NOT_EXISTS);

@@ -1,15 +1,14 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
-import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 import com.cmsr.onebase.module.system.dal.database.RoleMenuDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -26,6 +25,7 @@ import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
@@ -35,6 +35,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,6 +64,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Resource
     private TenantPackageService tenantPackageService;
     @Resource
+    @Lazy // 延迟，避免循环依赖报错
     private TenantService tenantService;
 
 
