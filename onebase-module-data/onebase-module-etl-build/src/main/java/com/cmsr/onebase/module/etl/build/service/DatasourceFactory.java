@@ -36,7 +36,7 @@ public class DatasourceFactory {
         String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
         String jdbcConnection;
         if (StringUtils.equalsIgnoreCase("default", connectMode)) {
-            jdbcConnection = buildJdbcConnectionString(datasourceDO);
+            jdbcConnection = buildJdbcConnectionString(datasourceDO.getDatasourceType(), connectionProperties);
         } else {
             jdbcConnection = (String) connectionProperties.get("jdbcUrl");
         }
@@ -63,7 +63,7 @@ public class DatasourceFactory {
         }
     }
 
-    private static DatabaseType parseDatabaseType(String databaseType) {
+    public static DatabaseType parseDatabaseType(String databaseType) {
         if (StringUtils.isBlank(databaseType)) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_ILLEGAL);
         }
@@ -98,10 +98,8 @@ public class DatasourceFactory {
         }
     }
 
-    public static String buildJdbcConnectionString(ETLDatasourceDO datasourceDO) {
-        String databaseType = datasourceDO.getDatasourceType();
+    public static String buildJdbcConnectionString(String databaseType, Properties connectionProperties) {
         DatabaseType dbType = parseDatabaseType(databaseType);
-        Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
         // 直接使用Anyline提供的URL模板
         String jdbcTemplate = dbType.url();
         // 魔法处理，Anyline的PostgreSQL类数据源URL定义有错误

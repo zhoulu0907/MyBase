@@ -7,6 +7,10 @@ import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.FlinkTask;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
+import com.cmsr.onebase.module.etl.common.graph.Node;
+import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
+import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
+import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
@@ -17,8 +21,6 @@ import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 import com.cmsr.onebase.module.etl.core.vo.etl.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,7 +29,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -140,46 +145,44 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     private void updateWorkflowTableRelations(ETLWorkflowDO workflowDO) {
         try {
-            // TODO: rewrite this, consider .;
             Long applicationId = workflowDO.getApplicationId();
             Long workflowId = workflowDO.getId();
             workflowTableRepository.deleteByWorkflowId(workflowId);
             List<ETLWorkflowTableDO> workflowTableDOList = new ArrayList<>();
-            // TODO: replace JsonNode with Object, needs refactor.
-            Map<Long, Set<Long>> dataList = new HashMap<>();
-            JsonNode workflowGraph = JsonUtils.parseTree(workflowDO.getConfig());
-            ArrayNode nodeList = (ArrayNode) workflowGraph.get("nodes");
-            for (JsonNode nodeDef : nodeList) {
-                String nodeType = nodeDef.get("type").asText();
-                if (StringUtils.equals(nodeType, "jdbc_input")) {
-                    Long datasourceId = nodeDef.get("config").get("datasourceId").asLong();
-                    Long tableId = nodeDef.get("config").get("tableId").asLong();
-                    if (dataList.containsKey(datasourceId)) {
-                        dataList.get(datasourceId).add(tableId);
-                    } else {
-                        Set<Long> tableSet = new HashSet<>();
-                        tableSet.add(tableId);
-                        dataList.put(datasourceId, tableSet);
-                    }
-                } else if (StringUtils.equals(nodeType, "jdbc_output")) {
-                    ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
-                    workflowTableRel.setWorkflowId(workflowId);
-                    workflowTableRel.setApplicationId(applicationId);
-                    workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
-                    workflowTableRel.setDatasourceId(nodeDef.get("config").get("datasourceId").asLong());
-                    workflowTableRel.setTableId(nodeDef.get("config").get("tableId").asLong());
-                    workflowTableDOList.add(workflowTableRel);
-                }
+            if (StringUtils.isBlank(workflowDO.getConfig())) {
+                return;
             }
-            for (Long datasourceId : dataList.keySet()) {
-                for (Long tableId : dataList.get(datasourceId)) {
+            WorkflowGraph workflowGraph = JsonUtils.parseObject(workflowDO.getConfig(), WorkflowGraph.class);
+            List<Node> nodes = workflowGraph.getNodes();
+            if (CollectionUtils.isEmpty(nodes)) {
+                return;
+            }
+            List<Node> startNodes = workflowGraph.getStartNodes();
+            List<Node> endNodes = workflowGraph.getEndNode();
+            for (Node startNode : startNodes) {
+                try {
+                    JdbcInputConfig inputConfig = (JdbcInputConfig) startNode.getConfig();
                     ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
                     workflowTableRel.setWorkflowId(workflowId);
                     workflowTableRel.setApplicationId(applicationId);
                     workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_SOURCE);
-                    workflowTableRel.setDatasourceId(datasourceId);
-                    workflowTableRel.setTableId(tableId);
+                    workflowTableRel.setDatasourceId(inputConfig.getDatasourceId());
+                    workflowTableRel.setTableId(inputConfig.getTableId());
                     workflowTableDOList.add(workflowTableRel);
+                } catch (Exception ignored) {
+                }
+            }
+            for (Node endNode : endNodes) {
+                try {
+                    JdbcOutputConfig outputConfig = (JdbcOutputConfig) endNode.getConfig();
+                    ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
+                    workflowTableRel.setWorkflowId(workflowId);
+                    workflowTableRel.setApplicationId(applicationId);
+                    workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
+                    workflowTableRel.setDatasourceId(outputConfig.getDatasourceId());
+                    workflowTableRel.setTableId(outputConfig.getTableId());
+                    workflowTableDOList.add(workflowTableRel);
+                } catch (Exception ignored) {
                 }
             }
             workflowTableRepository.insertBatch(workflowTableDOList);

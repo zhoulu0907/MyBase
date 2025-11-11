@@ -9,6 +9,8 @@ public class ColumnDefine {
 
     private String fieldName;
 
+    private String displayName;
+
     // flink type
     private String fieldType;
 
