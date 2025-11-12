@@ -363,17 +363,24 @@ public class BpmAgentServiceImpl implements BpmAgentService {
             ConfigStore statusCondition = new DefaultConfigStore();
             if (BpmAgentStatus.INACTIVE.getCode().equals(status)) {
                 // 待生效：当前时间 < 代理生效时间
+                // 同时需要确保未被撤销
                 statusCondition.and(Compare.GREAT, "start_time", now);
+                statusCondition.and(Compare.NULL, "revoked_time");
             } else if (BpmAgentStatus.ACTIVE.getCode().equals(status)) {
                 // 代理中：当前时间 >= 代理生效时间 且 当前时间 <= 代理失效时间
+                // 同时需要确保未被撤销
                 statusCondition.and(Compare.LESS_EQUAL, "start_time", now);
                 statusCondition.and(Compare.GREAT_EQUAL, "end_time", now);
+                statusCondition.and(Compare.NULL, "revoked_time");
             } else if (BpmAgentStatus.EXPIRED.getCode().equals(status)) {
                 // 已失效：当前时间 > 代理失效时间
+                // 同时需要确保未被撤销
                 statusCondition.and(Compare.LESS, "end_time", now);
+                statusCondition.and(Compare.NULL, "revoked_time");
             } else if (BpmAgentStatus.REVOKED.getCode().equals(status)) {
                 // 已撤销：撤销时间不为空
                 statusCondition.and(Compare.NOT_NULL, "revoked_time");
+
             }
             condition.and(statusCondition);
         }
