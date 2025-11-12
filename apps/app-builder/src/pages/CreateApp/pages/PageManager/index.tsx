@@ -36,6 +36,7 @@ import {
   type UpdateApplicationMenuOrderReq,
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
@@ -106,6 +107,7 @@ const PageManagerPage: FC = () => {
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
   const { curMenu, setCurMenu } = menuSignal;
+  const { curPage } = pagesRuntimeSignal;
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -367,7 +369,16 @@ const PageManagerPage: FC = () => {
           'EDITOR_PAGE_INFO',
           JSON.stringify({ id: curMenu.value?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
         );
-        navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+
+        // 根据页面类型跳转到对应的编辑器
+        let editorType: string = EDITOR_TYPES.FORM_EDITOR;
+        if (visibleCreateForm === 'workbench') {
+          editorType = EDITOR_TYPES.WORKBENCH_EDITOR;
+        } else {
+          editorType = EDITOR_TYPES.FORM_EDITOR;
+        }
+
+        navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
       }
     });
   };
@@ -443,9 +454,12 @@ const PageManagerPage: FC = () => {
       return;
     }
 
+    const editorType =
+      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+
     // 把编辑页菜单数据保存起来；
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
   };
 
   // 菜单搜索
