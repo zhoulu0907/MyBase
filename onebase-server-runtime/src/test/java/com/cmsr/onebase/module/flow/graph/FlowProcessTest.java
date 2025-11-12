@@ -8,8 +8,8 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.flow.ExecutorRequest;
-import com.cmsr.onebase.module.flow.core.flow.FlowExecuteProvider;
+import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
@@ -41,7 +41,7 @@ public class FlowProcessTest {
     private FlowProcessExecApiImpl flowProcessExecApi;
 
     @Autowired
-    private FlowExecuteProvider flowExecuteProvider;
+    private FlowRemoteCallExecutor flowRemoteCallExecutor;
 
     @Autowired
     private FlowProcessExecService flowProcessExecService;
@@ -109,10 +109,10 @@ public class FlowProcessTest {
 
     @Test
     public void testSimple3() throws IOException {
-        ExecutorRequest jobMessage = new ExecutorRequest();
+        RemoteCallRequest jobMessage = new RemoteCallRequest();
         jobMessage.setJobType("fld");
         jobMessage.setProcessId(89995954500108288L);
-        flowExecuteProvider.executeFlow(jobMessage);
+        flowRemoteCallExecutor.executeFlow(jobMessage);
     }
 
     @Test
