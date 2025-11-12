@@ -448,11 +448,6 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public AdminUserDO getUser(Long id) {
         AdminUserDO adminUserDo= adminUserDataRepository.findById(id);
-        if(CommonStatusEnum.ENABLE.getStatus().equals(adminUserDo.getStatus())){
-            adminUserDo.setStatusDesc(CommonStatusEnum.ENABLE.getName());
-        }else{
-            adminUserDo.setStatusDesc(CommonStatusEnum.DISABLE.getName());
-        }
         return adminUserDo;
     }
 

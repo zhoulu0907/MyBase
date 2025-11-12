@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -15,9 +16,10 @@ import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
-
 import java.util.Collection;
 import java.util.List;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * @Author：huangjie
@@ -122,9 +124,10 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
             configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
         }
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        if(loginUser!=null){
-            configStore.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
+        if(loginUser==null){
+            throw exception(AppErrorCodeConstants.NOT_LOGIN);
         }
+        configStore.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
