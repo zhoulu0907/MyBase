@@ -101,7 +101,7 @@ public class QueryProvider {
                 );
         return runner.query(query.getSQL(ParamType.INDEXED), resultSet -> {
                     List<EtlFlinkMapping> etlFlinkMappings = new ArrayList<>();
-                    if (resultSet.next()) {
+                    while (resultSet.next()) {
                         EtlFlinkMapping etlFlinkMapping = new EtlFlinkMapping();
                         etlFlinkMapping.setOriginType(resultSet.getString("origin_type"));
                         etlFlinkMapping.setFlinkType(resultSet.getString("flink_type"));
