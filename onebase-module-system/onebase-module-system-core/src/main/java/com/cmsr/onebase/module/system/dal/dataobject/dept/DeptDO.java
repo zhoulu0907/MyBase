@@ -87,7 +87,7 @@ public class DeptDO extends TenantBaseDO {
      * 部门类型： tenant-空间部门，corp-企业部门
      */
     @Column(name = DEPT_TYPE)
-    private String dept_type;
+    private String deptType;
 
     /**
      * 归属企业ID
