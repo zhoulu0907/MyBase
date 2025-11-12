@@ -100,9 +100,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const offsetFiledId = Form.useWatch('offsetFiledId', payloadForm);
 
-  const offsetFiledIdChange = ()=>{
+  const offsetFiledIdChange = () => {
     payloadForm.clearFields(['offsetUnit']);
-  }
+  };
 
   return (
     <>
@@ -190,7 +190,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row gutter={8} align="end">
               <Grid.Col span={4}>
-                <Form.Item label="批处理" field="batchMode" triggerPropName="checked" layout="vertical">
+                <Form.Item label="批处理" field="batchMode" triggerPropName="checked" layout="vertical" hidden={true}>
                   <Checkbox>开启</Checkbox>
                 </Form.Item>
               </Grid.Col>
