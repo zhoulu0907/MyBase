@@ -107,7 +107,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   useEffect(() => {
     if (pageSetId) {
-      loadPageSetInfo(pageSetId);
+      startLoadPageSet({ pageSetId: pageSetId });
       getMainMetaData(pageSetId);
     }
     // 优先切换到列表页
@@ -118,10 +118,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const req: GetPageSetIdReq = { menuId: menuId };
     const res = await getPageSetId(req);
     setPageSetId(res);
-  };
-
-  const loadPageSetInfo = async (pageSetId: string) => {
-    startLoadPageSet({ pageSetId: pageSetId });
   };
 
   // 信息收集弹窗
@@ -248,7 +244,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         setPredictVisible(false);
         if (res) {
           Message.success('创建成功');
-          cancelSubmitForm()
+          cancelSubmitForm();
         }
         setSubmitLoading(false);
       } catch (error) {
@@ -267,7 +263,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
-    setAdd(!id)
+    setAdd(!id);
     form.resetFields();
 
     if (id && id !== '') {
@@ -370,9 +366,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
   };
 
-  const onSaveSubmit=()=>{
+  const onSaveSubmit = () => {
     submitForm(true);
-  }
+  };
 
   const toEditMode = () => {
     setDetailMode(false);
@@ -442,7 +438,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
-              {curPage?.value?.pageSetType === PageType.BPM && isAdd &&(
+              {curPage?.value?.pageSetType === PageType.BPM && isAdd && (
                 <Button type="primary" onClick={onSaveSubmit} loading={submitLoading}>
                   保存
                 </Button>
@@ -509,7 +505,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
               {!detailMode && (
                 <div className={styles.footer}>
-                  <Button type="primary" onClick={submitForm}>
+                  <Button type="primary" onClick={() => submitForm()}>
                     更新
                   </Button>
                   <Button type="default" onClick={cancelSubmitForm}>
