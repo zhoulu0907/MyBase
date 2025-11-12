@@ -272,7 +272,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                                 upperFieldType.contains("IMAGE") ||         // 图片
                                 upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
-                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DEPARTMENT") ||    // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
                                 upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
                                 upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
                                 upperFieldType.contains("GEO") ||           // 地理位置（简写）
@@ -416,9 +416,11 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
     @Override
     protected void executePreWorkflow(ProcessContext context) {
+        // 获取插入数据
+        Map processedData = context.getProcessedData();
+
         Long entityId = context.getEntityId();
-        Map<String, Object> data = context.getData();
-        Map fieldData = convertNameToId(entityId,data);
+        Map fieldData = convertNameToId(entityId,processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
@@ -426,22 +428,24 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
-            log.info("BEFORE_CREATE 数据创建前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            log.info("BEFORE_CREATE 数据创建前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,processedData,respDTO.getMessage());
             return;
         }
         if(respDTO.isSuccess()){
-            log.info("BEFORE_CREATE 数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+            log.info("BEFORE_CREATE 数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId,processedData);
         }else{
-            log.info("BEFORE_CREATE 数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
+            log.info("BEFORE_CREATE 数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,processedData,respDTO.getMessage());
             throw  exception(PROCESS_ERROR_BEFORE_CREATE,respDTO.getMessage());
         }
     }
 
     @Override
     protected void executePostWorkflow(ProcessContext context) {
+        // 获取插入数据
+        Map processedData = context.getProcessedData();
+
         Long entityId = context.getEntityId();
-        Map<String, Object> data = context.getData();
-        Map fieldData = convertNameToId(entityId,data);
+        Map fieldData = convertNameToId(entityId,processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
@@ -449,13 +453,13 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
-            log.info("AFTER_CREATE 数据创建后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+            log.info("AFTER_CREATE 数据创建后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,processedData,respDTO.getMessage());
             return;
         }
         if(respDTO.isSuccess()){
-            log.info("AFTER_CREATE 数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
+            log.info("AFTER_CREATE 数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId,processedData);
         }else{
-            log.error("AFTER_CREATE 数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
+            log.error("AFTER_CREATE 数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,processedData,respDTO.getMessage());
             throw  exception(PROCESS_ERROR_AFTER_CREATE,respDTO.getMessage());
         }
     }
