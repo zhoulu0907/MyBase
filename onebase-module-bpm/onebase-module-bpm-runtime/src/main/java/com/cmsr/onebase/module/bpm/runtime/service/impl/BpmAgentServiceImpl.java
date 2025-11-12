@@ -5,14 +5,11 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowDelegationRepository;
-import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowDelegationDO;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
-import com.cmsr.onebase.module.bpm.runtime.service.BpmDelegationService;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationInsertReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationPageReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationPageResVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmDelegationUpdateReqVO;
+import com.cmsr.onebase.module.bpm.runtime.service.BpmAgentService;
+import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
@@ -20,54 +17,53 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
-import com.cmsr.onebase.module.bpm.core.enums.BpmDelegationStatus;
+import com.cmsr.onebase.module.bpm.core.enums.BpmAgentStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 @Service
-public class BpmDelegationServiceImpl implements BpmDelegationService {
+public class BpmAgentServiceImpl implements BpmAgentService {
     @Resource
-    private BpmFlowDelegationRepository bpmFlowDelegationRepository;
+    private BpmFlowAgentRepository bpmFlowAgentRepository;
 
     @Resource
     private AdminUserApi adminUserApi;
 
     @Override
-    public PageResult<BpmDelegationPageResVO> getDelegationPage(BpmDelegationPageReqVO pageReqVO) {
+    public PageResult<BpmAgentPageResVO> getAgentPage(BpmAgentPageReqVO pageReqVO) {
         // 获取当前登录用户ID
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
 
-        PageResult<BpmFlowDelegationDO> pageResult =bpmFlowDelegationRepository.findPageWithConditions(condition, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        PageResult<BpmFlowAgentDO> pageResult =bpmFlowAgentRepository.findPageWithConditions(condition, pageReqVO.getPageNo(), pageReqVO.getPageSize());
 
         // 结果不为空时 获取代理人，被代理人，创建人信息
-        List<BpmFlowDelegationDO> delegationList = pageResult.getList() != null ?
+        List<BpmFlowAgentDO> agentList = pageResult.getList() != null ?
                 pageResult.getList() : Collections.emptyList();
-        Map<Long, AdminUserRespDTO> delegateUserInfoMap = queryDelegateUser(delegationList);
+        Map<Long, AdminUserRespDTO> agentUserInfoMap = queryAgentUser(agentList);
 
-        List<BpmDelegationPageResVO> list = pageResult.getList().stream().map(item -> {
-            BpmDelegationPageResVO vo = new BpmDelegationPageResVO();
+        List<BpmAgentPageResVO> list = pageResult.getList().stream().map(item -> {
+            BpmAgentPageResVO vo = new BpmAgentPageResVO();
             // 代理人
-            vo.setDelegate(createDelegateUser(delegateUserInfoMap.get(item.getDelegateId())));
+            vo.setAgent(createAgentUser(agentUserInfoMap.get(item.getAgentId())));
             // 被代理人
-            vo.setPrincipal(createDelegateUser(delegateUserInfoMap.get(item.getPrincipalId())));
+            vo.setPrincipal(createAgentUser(agentUserInfoMap.get(item.getPrincipalId())));
             //创建人
-            vo.setCreator(createDelegateUser(delegateUserInfoMap.get(item.getCreator())));
+            vo.setCreator(createAgentUser(agentUserInfoMap.get(item.getCreator())));
             vo.setStartTime(item.getStartTime());
             vo.setEndTime(item.getEndTime());
             vo.setCreateTime(item.getCreateTime());
             vo.setId(item.getId());
             // 代理状态
-            vo.setDelegateStatus(calculateDelegateStatus(item.getStartTime(), item.getEndTime(),item.getRevokedTime()));
+            vo.setAgentStatus(calculateAgentStatus(item.getStartTime(), item.getEndTime(),item.getRevokedTime()));
             return vo;
         }).toList();
        return new PageResult<>(list, pageResult.getTotal());
@@ -77,89 +73,110 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void create(BpmDelegationInsertReqVO reqVO) {
+    public void create(BpmAgentInsertReqVO reqVO) {
         Long userId = WebFrameworkUtils.getLoginUserId();
         String nickname =SecurityFrameworkUtils.getLoginUserNickname();
         // 校验开始时间必须小于结束时间
         if (reqVO.getStartTime() != null && reqVO.getEndTime() != null &&
                 !reqVO.getStartTime().isBefore(reqVO.getEndTime())) {
-            throw exception(ErrorCodeConstants.DELEGATION_START_TIME_AFTER_END_TIME);
+            throw exception(ErrorCodeConstants.AGENT_START_TIME_AFTER_END_TIME);
         }
-        // 校验被代理人在指定时间段内是否已存在"待生效"或"代理中"的代理关系
-        validateExistingDelegation(userId, reqVO.getStartTime(), reqVO.getEndTime());
-        // 插入数据
-        BpmFlowDelegationDO bpmFlowDelegationDO = new BpmFlowDelegationDO();
-        bpmFlowDelegationDO.setPrincipalId(userId);
-        bpmFlowDelegationDO.setPrincipalName(nickname);
-        bpmFlowDelegationDO.setDelegateId(reqVO.getDelegateId());
-        bpmFlowDelegationDO.setDelegateName(reqVO.getDelegateName());
-        bpmFlowDelegationDO.setStartTime(reqVO.getStartTime());
-        bpmFlowDelegationDO.setEndTime(reqVO.getEndTime());
-        bpmFlowDelegationDO.setAppId(reqVO.getAppId());
-        bpmFlowDelegationRepository.insert(bpmFlowDelegationDO);
 
+        // 验证代理人是否存在
+        AdminUserRespDTO agentUser = validateAgentExists(reqVO.getAgentId());
+
+        // 校验被代理人在指定时间段内是否已存在"待生效"或"代理中"的代理关系
+        validateExistingAgent(userId, reqVO.getStartTime(), reqVO.getEndTime());
+
+        // 插入数据
+        BpmFlowAgentDO bpmFlowAgentDO = new BpmFlowAgentDO();
+        bpmFlowAgentDO.setPrincipalId(userId);
+        bpmFlowAgentDO.setPrincipalName(nickname);
+        bpmFlowAgentDO.setAgentId(reqVO.getAgentId());
+        bpmFlowAgentDO.setAgentName(agentUser.getNickname());
+        bpmFlowAgentDO.setStartTime(reqVO.getStartTime());
+        bpmFlowAgentDO.setEndTime(reqVO.getEndTime());
+        bpmFlowAgentDO.setAppId(reqVO.getAppId());
+        bpmFlowAgentRepository.insert(bpmFlowAgentDO);
+
+    }
+    /**
+     * 验证代理人是否存在
+     * @param agentId 代理人ID
+     * @return 代理人用户信息
+     */
+    private AdminUserRespDTO validateAgentExists(Long agentId) {
+
+        CommonResult<AdminUserRespDTO> agentUserResult = adminUserApi.getUser(agentId);
+        if (!agentUserResult.isSuccess() || agentUserResult.getData() == null) {
+            throw exception(ErrorCodeConstants.AGENT_USER_NOT_EXISTS);
+        }
+        return agentUserResult.getData();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void revoke(Long delegationId) {
+    public void revoke( BpmAgentRevokeReqVO reqVO) {
         // 获取当前登录用户信息
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
         // 查询要撤销的代理记录
-        BpmFlowDelegationDO delegation = bpmFlowDelegationRepository.findById(delegationId);
-        if (delegation == null) {
-            throw exception(ErrorCodeConstants.DELEGATION_NOT_EXISTS);
+        BpmFlowAgentDO agent = bpmFlowAgentRepository.findById(reqVO.getAgentId());
+        if (agent == null) {
+            throw exception(ErrorCodeConstants.AGENT_NOT_EXISTS);
         }
 
         // 校验权限：只有创建人或被代理人才能撤销
-        validateRevokePermission(delegation, loginUserId);
+        validateRevokePermission(agent, loginUserId);
 
         // 校验状态：只能撤销"待生效"或"代理中"的记录
-        validateRevokeStatus(delegation);
+        validateRevokeStatus(agent);
 
         // 执行撤销操作：设置撤销时间
-        delegation.setRevokedTime(LocalDateTime.now());
-        delegation.setRevokerId(loginUserId);
-        bpmFlowDelegationRepository.update(delegation);
+        agent.setRevokedTime(LocalDateTime.now());
+        agent.setRevokerId(loginUserId);
+        bpmFlowAgentRepository.update(agent);
     }
     /**
      * 更新代理
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update(BpmDelegationUpdateReqVO reqVO) {
+    public void update(BpmAgentUpdateReqVO reqVO) {
         // 获取当前登录用户信息
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
         // 查询要更新的代理记录
-        BpmFlowDelegationDO delegation = bpmFlowDelegationRepository.findById(reqVO.getId());
-        if (delegation == null) {
-            throw exception(ErrorCodeConstants.DELEGATION_NOT_EXISTS);
+        BpmFlowAgentDO agent = bpmFlowAgentRepository.findById(reqVO.getId());
+        if (agent == null) {
+            throw exception(ErrorCodeConstants.AGENT_NOT_EXISTS);
         }
 
         // 校验权限：只有创建人或被代理人才能编辑
-        validateRevokePermission(delegation, loginUserId);
+        validateRevokePermission(agent, loginUserId);
 
         // 校验状态：只能编辑"待生效"或"代理中"的记录
-        validateRevokeStatus(delegation);
+        validateRevokeStatus(agent);
 
         // 校验开始时间必须小于结束时间
         if (reqVO.getStartTime() != null && reqVO.getEndTime() != null &&
                 !reqVO.getStartTime().isBefore(reqVO.getEndTime())) {
-            throw exception(ErrorCodeConstants.DELEGATION_START_TIME_AFTER_END_TIME);
+            throw exception(ErrorCodeConstants.AGENT_START_TIME_AFTER_END_TIME);
         }
 
         // 校验被代理人在指定时间段内是否已存在"待生效"或"代理中"的代理关系（排除自己）
-        validateUpdateDelegation(delegation.getId(), delegation.getPrincipalId(), reqVO.getStartTime(), reqVO.getEndTime());
+        validateUpdateAgent(agent.getId(), agent.getPrincipalId(), reqVO.getStartTime(), reqVO.getEndTime());
+
+        // 验证代理人是否存在
+        AdminUserRespDTO agentUser = validateAgentExists(reqVO.getAgentId());
 
         // 执行更新操作
-        delegation.setDelegateId(reqVO.getDelegateId());
-        delegation.setDelegateName(reqVO.getDelegateName());
-        delegation.setStartTime(reqVO.getStartTime());
-        delegation.setEndTime(reqVO.getEndTime());
+        agent.setAgentId(reqVO.getAgentId());
+        agent.setAgentName(agentUser.getNickname());
+        agent.setStartTime(reqVO.getStartTime());
+        agent.setEndTime(reqVO.getEndTime());
 
-        bpmFlowDelegationRepository.update(delegation);
+        bpmFlowAgentRepository.update(agent);
     }
 
     /**
@@ -169,7 +186,7 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
      * @param startTime 开始时间
      * @param endTime 结束时间
      */
-    private void validateUpdateDelegation(Long id, Long principalId, LocalDateTime startTime, LocalDateTime endTime) {
+    private void validateUpdateAgent(Long id, Long principalId, LocalDateTime startTime, LocalDateTime endTime) {
         // 构建查询条件：查找指定被代理人的未撤销记录，排除当前记录
         DefaultConfigStore condition = new DefaultConfigStore();
         condition.and(Compare.EQUAL, "principal_id", principalId);
@@ -182,42 +199,42 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
         timeOverlapCondition.and(Compare.GREAT, "end_time", startTime); // 记录结束时间 > 新记录开始时间
         condition.and(timeOverlapCondition);
 
-        List<BpmFlowDelegationDO> existingDelegations = bpmFlowDelegationRepository.findAllByConfig(condition);
+        List<BpmFlowAgentDO> existingAgents = bpmFlowAgentRepository.findAllByConfig(condition);
 
         // 检查这些记录是否处于"待生效"或"代理中"状态
         LocalDateTime now = LocalDateTime.now();
-        boolean hasActiveOrPending = existingDelegations.stream().anyMatch(delegation ->
-                (delegation.getStartTime() != null && now.isBefore(delegation.getStartTime())) || // 待生效
-                        (delegation.getStartTime() != null && delegation.getEndTime() != null &&
-                                now.isAfter(delegation.getStartTime()) && now.isBefore(delegation.getEndTime())) // 代理中
+        boolean hasActiveOrPending = existingAgents.stream().anyMatch(agent ->
+                (agent.getStartTime() != null && now.isBefore(agent.getStartTime())) || // 待生效
+                        (agent.getStartTime() != null && agent.getEndTime() != null &&
+                                now.isAfter(agent.getStartTime()) && now.isBefore(agent.getEndTime())) // 代理中
         );
 
         if (hasActiveOrPending) {
-            throw exception(ErrorCodeConstants.DELEGATION_TIME_CONFLICT);
+            throw exception(ErrorCodeConstants.AGENT_TIME_CONFLICT);
         }
     }
 
 
     /**
      * 校验撤销权限：只有创建人或被代理人才能操作
-     * @param delegation 代理记录
+     * @param agent 代理记录
      * @param loginUserId 当前登录用户ID
      */
-    private void validateRevokePermission(BpmFlowDelegationDO delegation, Long loginUserId) {
-        if (!loginUserId.equals(delegation.getCreator()) && !loginUserId.equals(delegation.getPrincipalId())) {
-            throw exception(ErrorCodeConstants.DELEGATION_REVOKE_NO_PERMISSION);
+    private void validateRevokePermission(BpmFlowAgentDO agent, Long loginUserId) {
+        if (!loginUserId.equals(agent.getCreator()) && !loginUserId.equals(agent.getPrincipalId())) {
+            throw exception(ErrorCodeConstants.AGENT_REVOKE_NO_PERMISSION);
         }
     }
 
     /**
      * 校验撤销状态：只能撤销"待生效"或"代理中"的记录
-     * @param delegation 代理记录
+     * @param agent 代理记录
      */
-    private void validateRevokeStatus(BpmFlowDelegationDO delegation) {
-        String status = calculateDelegateStatus(delegation.getStartTime(), delegation.getEndTime(), delegation.getRevokedTime());
-        if (!BpmDelegationStatus.INACTIVE.getName().equals(status) &&
-                !BpmDelegationStatus.ACTIVE.getName().equals(status)) {
-            throw exception(ErrorCodeConstants.DELEGATION_REVOKE_INVALID_STATUS);
+    private void validateRevokeStatus(BpmFlowAgentDO agent) {
+        String status = calculateAgentStatus(agent.getStartTime(), agent.getEndTime(), agent.getRevokedTime());
+        if (!BpmAgentStatus.INACTIVE.getName().equals(status) &&
+                !BpmAgentStatus.ACTIVE.getName().equals(status)) {
+            throw exception(ErrorCodeConstants.AGENT_REVOKE_INVALID_STATUS);
         }
     }
 
@@ -228,7 +245,7 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
      * @param startTime 开始时间
      * @param endTime 结束时间
      */
-    private void validateExistingDelegation(Long principalId, LocalDateTime startTime, LocalDateTime endTime) {
+    private void validateExistingAgent(Long principalId, LocalDateTime startTime, LocalDateTime endTime) {
         // 构建查询条件：查找指定被代理人的未撤销记录
         DefaultConfigStore condition = new DefaultConfigStore();
         condition.and(Compare.EQUAL, "principal_id", principalId);
@@ -240,18 +257,18 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
         timeOverlapCondition.and(Compare.GREAT, "end_time", startTime); // 记录结束时间 > 新记录开始时间
         condition.and(timeOverlapCondition);
 
-        List<BpmFlowDelegationDO> existingDelegations = bpmFlowDelegationRepository.findAllByConfig(condition);
+        List<BpmFlowAgentDO> existingAgents = bpmFlowAgentRepository.findAllByConfig(condition);
 
         // 检查这些记录是否处于"待生效"或"代理中"状态
         LocalDateTime now = LocalDateTime.now();
-        boolean hasActiveOrPending = existingDelegations.stream().anyMatch(delegation ->
-                (delegation.getStartTime() != null && now.isBefore(delegation.getStartTime())) || // 待生效
-                        (delegation.getStartTime() != null && delegation.getEndTime() != null &&
-                                now.isAfter(delegation.getStartTime()) && now.isBefore(delegation.getEndTime())) // 代理中
+        boolean hasActiveOrPending = existingAgents.stream().anyMatch(agent ->
+                (agent.getStartTime() != null && now.isBefore(agent.getStartTime())) || // 待生效
+                        (agent.getStartTime() != null && agent.getEndTime() != null &&
+                                now.isAfter(agent.getStartTime()) && now.isBefore(agent.getEndTime())) // 代理中
         );
 
         if (hasActiveOrPending) {
-            throw exception(ErrorCodeConstants.DELEGATION_TIME_CONFLICT);
+            throw exception(ErrorCodeConstants.AGENT_TIME_CONFLICT);
         }
     }
 
@@ -262,10 +279,10 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
      * @param revokedTime 撤销时间
      * @return 委托状态字符串
      */
-    private String calculateDelegateStatus(LocalDateTime startTime, LocalDateTime endTime, LocalDateTime revokedTime) {
+    private String calculateAgentStatus(LocalDateTime startTime, LocalDateTime endTime, LocalDateTime revokedTime) {
         // 如果撤销时间不为空，直接返回已撤销
         if (revokedTime != null) {
-            return BpmDelegationStatus.REVOKED.getName();
+            return BpmAgentStatus.REVOKED.getName();
         }
 
         // 获取当前时间
@@ -273,18 +290,18 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
 
         // 判断待生效：当前时间 < 代理生效时间
         if (startTime != null && now.isBefore(startTime)) {
-            return BpmDelegationStatus.INACTIVE.getName();
+            return BpmAgentStatus.INACTIVE.getName();
         }
 
         // 判断代理中：当前时间 >= 代理生效时间 且 当前时间 <= 代理失效时间
         if (startTime != null && endTime != null &&
                 now.isAfter(startTime) && now.isBefore(endTime)) {
-            return BpmDelegationStatus.ACTIVE.getName();
+            return BpmAgentStatus.ACTIVE.getName();
         }
 
         // 判断已失效：当前时间 > 代理失效时间
         if (endTime != null && now.isAfter(endTime)) {
-            return BpmDelegationStatus.EXPIRED.getName();
+            return BpmAgentStatus.EXPIRED.getName();
         }
 
         return "未知状态";
@@ -292,7 +309,7 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
 
 
 
-    private UserBasicInfoVO createDelegateUser(AdminUserRespDTO user) {
+    private UserBasicInfoVO createAgentUser(AdminUserRespDTO user) {
         if (user == null) {
             return null;
         }
@@ -303,10 +320,10 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
         return operationUser;
     }
 
-    private Map<Long, AdminUserRespDTO> queryDelegateUser(List<BpmFlowDelegationDO>  list) {
+    private Map<Long, AdminUserRespDTO> queryAgentUser(List<BpmFlowAgentDO>  list) {
         // 获取创建人和代理人被代理人去重后一次性查出
         Set<Long> userIds = list.stream()
-                .flatMap(item -> Stream.of(item.getCreator(), item.getPrincipalId(), item.getDelegateId()))
+                .flatMap(item -> Stream.of(item.getCreator(), item.getPrincipalId(), item.getAgentId()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         CommonResult<List<AdminUserRespDTO>> userResult = adminUserApi.getUserList(userIds);
@@ -319,42 +336,42 @@ public class BpmDelegationServiceImpl implements BpmDelegationService {
         }
     }
 
-    private ConfigStore buildDynamicCondition(BpmDelegationPageReqVO reqVO, String userId) {
+    private ConfigStore buildDynamicCondition(BpmAgentPageReqVO reqVO, String userId) {
         DefaultConfigStore condition = new DefaultConfigStore();
         // 填充条件
         fillCondition(condition, reqVO,userId);
 
         return condition;
     }
-    private void fillCondition(ConfigStore condition, BpmDelegationPageReqVO queryVO,String userId) {
+    private void fillCondition(ConfigStore condition, BpmAgentPageReqVO queryVO, String userId) {
         condition.and(Compare.EQUAL, "app_id", queryVO.getAppId());
         ConfigStore userIdConfig = new DefaultConfigStore();
         userIdConfig.or(Compare.EQUAL, "principal_id", userId);
-        userIdConfig.or(Compare.EQUAL, "delegate_id", userId);
+        userIdConfig.or(Compare.EQUAL, "agent_id", userId);
         condition.and(userIdConfig);
         // 动态添加其他查询条件
-        if (StringUtils.isNotBlank(queryVO.getDelegatePersonName())) {
+        if (StringUtils.isNotBlank(queryVO.getPersonName())) {
             ConfigStore orCondition = new DefaultConfigStore();
-            orCondition.or(Compare.LIKE, "principal_name", queryVO.getDelegatePersonName());
-            orCondition.or(Compare.LIKE, "delegate_name", queryVO.getDelegatePersonName());
+            orCondition.or(Compare.LIKE, "principal_name", queryVO.getPersonName());
+            orCondition.or(Compare.LIKE, "agent_name", queryVO.getPersonName());
             condition.and(orCondition);
         }
-        if (StringUtils.isNotBlank(queryVO.getDelegateStatus())) {
-            String status = queryVO.getDelegateStatus();
+        if (StringUtils.isNotBlank(queryVO.getAgentStatus())) {
+            String status = queryVO.getAgentStatus();
             LocalDateTime now = LocalDateTime.now();
 
             ConfigStore statusCondition = new DefaultConfigStore();
-            if (BpmDelegationStatus.INACTIVE.getCode().equals(status)) {
+            if (BpmAgentStatus.INACTIVE.getCode().equals(status)) {
                 // 待生效：当前时间 < 代理生效时间
                 statusCondition.and(Compare.GREAT, "start_time", now);
-            } else if (BpmDelegationStatus.ACTIVE.getCode().equals(status)) {
+            } else if (BpmAgentStatus.ACTIVE.getCode().equals(status)) {
                 // 代理中：当前时间 >= 代理生效时间 且 当前时间 <= 代理失效时间
                 statusCondition.and(Compare.LESS_EQUAL, "start_time", now);
                 statusCondition.and(Compare.GREAT_EQUAL, "end_time", now);
-            } else if (BpmDelegationStatus.EXPIRED.getCode().equals(status)) {
+            } else if (BpmAgentStatus.EXPIRED.getCode().equals(status)) {
                 // 已失效：当前时间 > 代理失效时间
                 statusCondition.and(Compare.LESS, "end_time", now);
-            } else if (BpmDelegationStatus.REVOKED.getCode().equals(status)) {
+            } else if (BpmAgentStatus.REVOKED.getCode().equals(status)) {
                 // 已撤销：撤销时间不为空
                 statusCondition.and(Compare.NOT_NULL, "revoked_time");
             }

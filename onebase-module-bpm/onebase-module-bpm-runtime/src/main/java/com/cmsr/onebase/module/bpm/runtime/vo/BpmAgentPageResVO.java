@@ -2,14 +2,13 @@ package com.cmsr.onebase.module.bpm.runtime.vo;
 
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Schema(description = "流程代理列表VO")
 @Data
-public class BpmDelegationPageResVO {
+public class BpmAgentPageResVO {
     /**
      * 主键ID
      */
@@ -17,7 +16,7 @@ public class BpmDelegationPageResVO {
     /**
      * 代理人信息
      */
-    private UserBasicInfoVO delegate;
+    private UserBasicInfoVO agent;
     /**
      * 被代理人信息
      */
@@ -34,7 +33,7 @@ public class BpmDelegationPageResVO {
     /**
      * 代理状态
      */
-    private String delegateStatus;
+    private String agentStatus;
     /**
      * 创建人
      */
