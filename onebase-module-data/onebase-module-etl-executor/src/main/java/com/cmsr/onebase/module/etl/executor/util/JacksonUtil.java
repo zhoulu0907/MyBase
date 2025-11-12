@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
 import com.cmsr.onebase.module.etl.common.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.node.JdbcInputNode;
-import com.cmsr.onebase.module.etl.executor.graph.node.JdbcOutputNode;
+import com.cmsr.onebase.module.etl.executor.graph.JdbcOutputNode;
+import com.cmsr.onebase.module.etl.executor.graph.JdbcInputNode;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
@@ -21,6 +21,7 @@ public class JacksonUtil {
 
     static {
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        OBJECT_MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Node.class, new NodeDeserializer());
         //module.addDeserializer(NodeConfig.class, new NodeConfigDeserializer());
