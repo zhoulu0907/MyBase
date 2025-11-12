@@ -1402,6 +1402,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         try {
             log.info("检查列是否存在 - 表名: {}, 列名: {}", tableName, columnName);
 
+            // 关键修复：清除Anyline的元数据缓存
+            // Anyline会缓存表结构信息(默认缓存24小时)，导致刚添加的列查询不到
+            // 使用CacheProxy.clear()清除缓存，强制重新从数据库查询最新的表结构
+            try {
+                org.anyline.proxy.CacheProxy.clear();
+                log.debug("已清除Anyline元数据缓存");
+            } catch (Exception e) {
+                log.warn("清除Anyline元数据缓存失败: {}", e.getMessage());
+            }
+
             // 使用Anyline元数据API，完全跨数据库兼容
             // Anyline会自动处理不同数据库的元数据查询、标识符大小写问题
             Table<?> table = service.metadata().table(tableName);

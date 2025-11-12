@@ -463,8 +463,15 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                     log.debug("无法从配置获取数据库名称: {}", e.getMessage());
                 }
 
-                // 执行建表语句
-                service.execute(createTableDDL);
+                // 执行建表语句(分两步执行:先创建表,再添加注释)
+                String[] sqlStatements = createTableDDL.split(";\n");
+                for (String sql : sqlStatements) {
+                    String trimmedSql = sql.trim();
+                    if (!trimmedSql.isEmpty()) {
+                        log.debug("执行SQL: {}", trimmedSql);
+                        service.execute(trimmedSql);
+                    }
+                }
 
                 log.info("=== 物理表创建完成 ===");
                 log.info("成功创建物理表: {}", tableName);
