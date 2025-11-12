@@ -1,23 +1,26 @@
-import { Button, Dropdown, Input, Menu, Space, Tag, Modal, Message, Table,Avatar } from "@arco-design/web-react";
+import { Button, Dropdown, Input, Menu, Space, Tag, Modal, Message, Table,Avatar, Image } from "@arco-design/web-react";
 import { IconMore } from "@arco-design/web-react/icon";
 import styles from "./index.module.less";
 import StatusTag from "@/components/StatusTag";
-import { Outlet, useMatch, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useMatch, useNavigate } from "react-router-dom";
 import { TopHeader } from "./components/topHeader";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getCorpListApi, disabledCorpApi, deleteCorpApi, updateCorpApi, type corpListParams } from "@onebase/platform-center";
-import { type corpApplicationListProps, type cropItem} from "./types/appItem";
+import { getCorpListApi, disabledCorpApi, deleteCorpApi, getIndustryType, type corpListParams } from "@onebase/platform-center";
+import { type corpApplicationListProps, type cropItem, type industryTypeOption} from "./types/appItem";
 import { formatTimeYMDHMS } from '@onebase/common';
-import { formatIndustryType } from "./utils";
+import { convertName } from "./utils";
 const AvatarGroup = Avatar.Group;
 
 const BusinessPage: React.FC = () => {
     const businessManageColumns = [
         {
             title: '企业LOGO',
-            dataIndex: 'logo',
-            render: () => (
-                <span>logo</span>
+            dataIndex: 'corpLogo',
+            render: (data: string) => (
+               <>{data? 
+                <Image src={data} width={72} height={36}/>:
+                <div className={styles.corpLogo}>中国移动</div> }
+               </>
             )
         },
         {
@@ -26,18 +29,18 @@ const BusinessPage: React.FC = () => {
         },
         {
             title: '企业ID',
-            dataIndex: 'corpId',
+            dataIndex: 'corpCode',
         },
         {
             title: '行业类型',
-            dataIndex: 'industryType',
-            render: (industry: number) => (
-                <Tag color="cyan" size="small">{formatIndustryType(industry)}</Tag>
+            dataIndex: 'industryTypeName',
+            render: (industry: string) => (
+                <Tag color="cyan" size="small">{industry}</Tag>
             )
         },
         {
             title: '授权应用',
-            dataIndex: 'application',
+            dataIndex: 'corpApplicationList',
             render: (apps: corpApplicationListProps[]) => (
               <div>{renderAuthorizedAppGroup(apps)}</div>
             )
@@ -76,13 +79,15 @@ const BusinessPage: React.FC = () => {
         }
     ];
     const navigate = useNavigate();
+    const location = useLocation();
     const inputRef = useRef(null);
-    const isCreatePage = useMatch('onebase/setting/business/create-business');
+    const isCreatePage = useMatch('onebase/setting/enterprise/create-enterprise');
     const [loading, setLoading] = useState<boolean>(false);
     const [editable, setEditable] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>("");
     const [tableData, setTableData] = useState<cropItem[]>([]);
-    const [currentId, setCurrentId] = useState<number>();
+    const [currentId, setCurrentId] = useState<string>("");
+    const [industryOptions, setIndustryOptions] = useState<industryTypeOption[]>([]);
     const [pagination, setPagination] = useState({
         showTotal: true,
         total: 0,
@@ -94,15 +99,18 @@ const BusinessPage: React.FC = () => {
 
     function renderAuthorizedAppGroup(applicationList: corpApplicationListProps[]) {
         return <>
+           {applicationList?.length > 0 ? 
             <div style={{display: 'flex', alignItems: 'flex-end'}}>
-                <AvatarGroup size={24}>
-                    {applicationList?.map(item => {
-                        return <Avatar>
-                            {item.iconName}
-                        </Avatar>
-                    })}
-                </AvatarGroup>
-            </div>
+                    <AvatarGroup size={24}>
+                        {applicationList?.map(item => {
+                            return <Avatar style={{ backgroundColor: item.iconColor }}>
+                                {item.iconName}
+                            </Avatar>
+                        })}
+                    <Avatar>{applicationList.length}</Avatar>
+                    </AvatarGroup>
+            </div> : <></>
+            }
         </>
     }
 
@@ -127,9 +135,24 @@ const BusinessPage: React.FC = () => {
         }
     }
 
+    const fetchIndustryType = async() => {
+        try {
+            const res = await getIndustryType("industry_type");
+            setIndustryOptions(res);
+        }catch(error) {
+            Message.error("获取行业类型列表失败");
+        }
+    }
+
     useEffect(() => {
-        fetchTableDataList();
-    }, [])
+        if(location.pathname === "/onebase/setting/enterprise") {
+            if(editable) {
+                setEditable(false);
+            }
+            fetchTableDataList();
+            fetchIndustryType();
+        }
+    }, [location.pathname])
 
     const handlePageChange = (current: number, pageSize: number) => {
         fetchTableDataList(current, pageSize);
@@ -144,7 +167,7 @@ const BusinessPage: React.FC = () => {
 
     //创建企业
     const handleCreateBusiness = () => {
-        navigate("create-business");
+        navigate("create-enterprise");
     }
 
     const renderInput = (name: string) => {
@@ -162,25 +185,37 @@ const BusinessPage: React.FC = () => {
         )
     }
 
-    // 禁用
-    const handleDisabled = (record: cropItem) => {
-        Modal.confirm({
-            title: `禁用企业(${record.corpName})? `,
-            content: '禁用后企业用户无法登录，再次启用时企业可恢复正常使用',
-            okButtonProps: {
-                status: 'danger',
-            },
-            onOk: async () => {
-                const params = {id: record.id, status: 0};
-                try {
-                    await disabledCorpApi(params);
-                    // await updateCorpApi({...record, status: 0})
-                    Message.success("禁用成功");
-                }catch(error) {
-                    Message.error("禁用失败");
-                }
+    const handleDisabled = async(record: cropItem) => {
+        if(record.status === 0) {
+            const params = {id: record.id, status: 1};
+            try {
+                await disabledCorpApi(params);
+                await fetchTableDataList(pagination.current,pagination.pageSize);
+                Message.success(`启用成功`);
+            }catch(error) {
+                Message.error(`启用失败`);
             }
-        });
+        }else {
+           return  (
+            Modal.confirm({
+                title: `禁用企业(${record.corpName})? `,
+                content: '禁用后企业用户无法登录，再次启用时企业可恢复正常使用',
+                okButtonProps: {
+                    status: 'danger',
+                },
+                onOk: async () => {
+                    const params = {id: record.id, status: 0};
+                    try {
+                        await disabledCorpApi(params);
+                        await fetchTableDataList(pagination.current,pagination.pageSize);
+                        Message.success(`禁用成功`);
+                    }catch(error) {
+                        Message.error(`禁用失败`);
+                    }
+                }
+            })
+           )
+        }
     };
 
     // 删除
@@ -203,7 +238,7 @@ const BusinessPage: React.FC = () => {
                 }
                 try {
                     await deleteCorpApi(record.id);
-                    await getCorpListApi({pageNo: pagination.current, pageSize: pagination.pageSize})
+                    await fetchTableDataList(pagination.current,pagination.pageSize);
                     Message.success('删除成功');
                 } catch (error) {
                     Message.error('删除失败，请重试');
@@ -221,24 +256,24 @@ const BusinessPage: React.FC = () => {
         const lowerSearch = searchValue.toLowerCase();
         return tableData.filter(item => 
             item.corpName?.toLowerCase().includes(lowerSearch) || 
-            item.corpId?.toLowerCase().includes(lowerSearch)
+            item.corpCode?.toLowerCase().includes(lowerSearch)
         )
     },[tableData, searchValue])
 
     // 操作列下拉菜单
-    const actionMenu = (record: any) => (
+    const actionMenu = (record: cropItem) => (
         <Menu>
-            <Menu.Item key="disable" onClick={() => handleDisabled(record)}>禁用</Menu.Item>
+            <Menu.Item key="disable" onClick={() => handleDisabled(record)}>{convertName(record.status)}</Menu.Item>
             <Menu.Item key="delete" onClick={() => handleDelete(record)}>删除</Menu.Item>
         </Menu>
     );
 
     const renderContent = () => {
         if (editable) {
-            return <Outlet context={{currentId}}/>
+            return <Outlet context={{industryOptions, currentId}}/>
         }
         if (isCreatePage) {
-            return <Outlet />
+            return <Outlet context={{industryOptions, currentId }}/>
         }
         return (
             <div className={styles.businessManagement}>

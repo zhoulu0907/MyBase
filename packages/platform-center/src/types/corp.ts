@@ -29,8 +29,9 @@ export interface corpStatusParams {
 }
 
 export interface AppAuthTimeInfo {
-    applicationIdList: number[];
+    applicationIdList: string[];
     authorizationTime: string;
+    expiresTime: string;
 }
 
 export interface CorpAdminInfo {
@@ -45,7 +46,7 @@ export interface CorpBasicInfo {
     corpId?: string;
     corpLogo?: string;
     corpName?: string;
-    industryType?: number;
+    industryType?: string;
     status?: number;
     userLimit?: number;
 }

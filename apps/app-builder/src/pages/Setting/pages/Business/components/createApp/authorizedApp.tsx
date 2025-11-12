@@ -1,10 +1,10 @@
-import { Button, Message, Space, Tag } from "@arco-design/web-react";
+import { Button, Space, Tag } from "@arco-design/web-react";
 import { CommonTable } from "../table/commonTable";
 import { TopHeader } from "../topHeader";
 import styles from "./authorizedApp.module.less"
 import type { AppItem, authorizedTimeGroup, IAuthorizedAppProps, OutletContextType } from "../../types/appItem";
 import {formatTimeYMDHMS} from "@onebase/common";
-import { removeCorpAppApi, updateCorpAppApi, createCorpAppApi, type updateAppParams } from "@onebase/platform-center";
+import { type CorpAppParams, type updateAppParams } from "@onebase/platform-center";
 import EditAuthorizedTime from "../modal/editAuthorizedTime";
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
@@ -12,12 +12,11 @@ import { CreateAppModal } from "../modal/createAppModal";
 
 
 export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
-    className, loading, tableData, pageination, onChange, onSearch
+    className, loading, tableData, pageination, visible,addAppModalVisible, setAddAppModalVisible,
+    onChange, onSearch,onUpdateTime, setVisible, onRemoveAuthorizedApp, onSubmit
  }) => {
-    const { currentId:corpId } = useOutletContext<OutletContextType>();
-    const [visible, setVisible] = useState<boolean>(false);
+    const { currentId } = useOutletContext<OutletContextType>();
     const [authorizedAppItem, setAuthorizedAppItem] = useState<AppItem | null>(null);
-    const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
 
     //点击创建应用打开modal
     const handleAddApplication = () => {
@@ -30,27 +29,16 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
     }
 
     //编辑时间
-    const handleSubmitTime = async(values: authorizedTimeGroup) => {
-        try {
-            const params: updateAppParams = {
-                id: authorizedAppItem?.id,
-                corpId: corpId,
-                applicationId: authorizedAppItem?.applicationId,
-                authorizationTime: values.appTime?.authorizationTime || "",
-                expiresTime: values.appTime?.expiresTime || ""
+    const handleSubmitTime = (values: authorizedTimeGroup) => {
+        const params: updateAppParams = {
+            id: authorizedAppItem?.id,
+            corpId: currentId,
+            applicationId: authorizedAppItem?.applicationId,
+            authorizationTime: values.appTime?.authorizationTime || "",
+            expiresTime: values.appTime?.expiresTime || ""
 
-            }
-            const res = await updateCorpAppApi(params);
-            if(res) {
-                Message.success("更新授权时间成功");
-            }else {
-                Message.success("更新授权时间异常");
-            }
-        }catch(error) {
-            Message.error("更新授权时间失败")
-        }finally {
-            setVisible(false);
         }
+        onUpdateTime(params);
     }
     
     //弹出编辑时间的modal
@@ -60,32 +48,19 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
     }
 
     const handleRemove  = async(id: string) => {
-        try {
-            const res = await removeCorpAppApi(id);
-            if(res) {
-                Message.success("授权应用删除成功");
-            }else {
-                Message.success("未删除成功");
-            }
-        }catch(error) {
-            Message.error("接口返回异常, 授权应用删除失败");
-        }
+        onRemoveAuthorizedApp(id);
     }
 
     // 提交新应用（弹窗确认后调用）
     const handleAddSubmit = async(newAppData: any) => {
-        try {
-            const res = await createCorpAppApi(newAppData);
-            console.log("创建授权应用：", res);
-            Message.error("创建授权应用成功");
-        }catch(error) {
-            Message.error("创建授权应用失败");
-        }finally {
-            setAddAppModalVisible(false);
+        const newData :CorpAppParams = {
+            corpId: currentId,
+            applicationIdList: newAppData.applicationIdList,
+            authorizationTime: newAppData.appTime?.authorizationTime,
+            expiresTime: newAppData.appTime?.expiresTime
         }
-    };
-
-    
+        onSubmit(newData);
+    };  
 
     const columns = [
         {
@@ -159,7 +134,7 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
             />
         </div>
         {/* 编辑授权应用 */}
-        <EditAuthorizedTime visible={visible} setVisible={setVisible} onUpdateData={handleSubmitTime} />
+        <EditAuthorizedTime visible={visible} setVisible={setVisible} onUpdateData={handleSubmitTime} initialFormData={authorizedAppItem}/>
         {/* 创建授权应用modal */}
         <CreateAppModal visible={addAppModalVisible} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
         </>
