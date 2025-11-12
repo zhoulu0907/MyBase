@@ -329,6 +329,16 @@ const XTable = memo(
                 newItem[key] = newItem[key].userName || newItem[key];
               }
             }
+
+            // 部门选择单选 TODO
+            const deptSelectField = mainMetaData.parentFields.find(
+              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+            );
+            if (deptSelectField && newItem[key]) {
+              if (newItem[key]) {
+                newItem[key] = newItem[key].deptName || newItem[key];
+              }
+            }
           }
         });
 

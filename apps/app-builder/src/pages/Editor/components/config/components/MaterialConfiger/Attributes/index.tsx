@@ -807,6 +807,26 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             </>
           </FormItem>
         );
+      case CONFIG_TYPES.DEPT_DEFAULT_VALUE:
+        return (
+          <DynamicDeptDefaultValueConfig
+            key={index}
+            id={cpID}
+            handlePropsChange={handlePropsChange}
+            item={item}
+            configs={configs}
+          />
+        );
+      case CONFIG_TYPES.DEPT_SELECT_SCOPE:
+        return (
+          <DynamicSelectScopeConfig
+            key={index}
+            id={cpID}
+            handlePropsChange={handlePropsChange}
+            item={item}
+            configs={configs}
+          />
+        );
       default:
         return (
           <FormItem className={styles.formItem} label={item.name}>

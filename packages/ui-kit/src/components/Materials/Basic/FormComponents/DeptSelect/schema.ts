@@ -97,14 +97,14 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   defaultValueMode?: TTextDefaultType;
 
   /**
-   * 默认值
+   * 部门默认值
    */
-  defaultValue?: TTextDefaultType;
+  defaultDeptValue?: TTextDefaultType;
 
   /**
    * 多选模式
    */
-  multipleMode?: TBooleanDefaultType;
+  // multipleMode?: TBooleanDefaultType;
 
   /**
    * 可选范围switch
@@ -162,11 +162,11 @@ const XDeptSelect: XInputDeptSelectSchema = {
     },
     ...dataFieldConfig,
     defaultValueModeConfig,
-    {
-      key: 'multipleMode',
-      name: '多选模式',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'multipleMode',
+    //   name: '多选模式',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     selectScopeConfig,
     layoutConfig,
     labelColSpanConfig,
@@ -194,8 +194,8 @@ const XDeptSelect: XInputDeptSelectSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValueMode: 'custom',
-    defaultValue: '',
-    multipleMode: false,
+    defaultDeptValue: '',
+    // multipleMode: false,
     isSelectScope: false,
     selectScope: [],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
