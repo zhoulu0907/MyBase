@@ -5,9 +5,11 @@ import {
   GetDonePageList,
   GetOperatorRecord,
   SubMitInstanceReq,
-  GetMyCreatePageListReq
+  GetMyCreatePageListReq,
+  GetListNodesReq,
+  GetPageSetListReq
 } from '../types';
-import { runtimeListdataService } from './clients';
+import { runtimeListdataService, appService } from './clients';
 
 export const getTodoPageList = (params: GetRunTimePageSetIdReq) => {
   return runtimeListdataService.get('/task-center/todo/page', params);
@@ -32,4 +34,11 @@ export const fetchSubmitInstance = (params: SubMitInstanceReq) => {
 };
 export const fetchFlowPredict = (params: GetOperatorRecord) => {
   return runtimeListdataService.post('/instance/flow-predict', params);
+};
+
+export const getPageSetList = (params: GetPageSetListReq) => {
+  return appService.get('/resource/page_set/list', params);
+};
+export const getListNodes = (params: GetListNodesReq) => {
+  return runtimeListdataService.get('/task-center/list-nodes', params);
 };
