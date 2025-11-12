@@ -232,8 +232,8 @@ public class BpmAgentServiceImpl implements BpmAgentService {
      */
     private void validateRevokeStatus(BpmFlowAgentDO agent) {
         String status = calculateAgentStatus(agent.getStartTime(), agent.getEndTime(), agent.getRevokedTime());
-        if (!BpmAgentStatus.INACTIVE.getName().equals(status) &&
-                !BpmAgentStatus.ACTIVE.getName().equals(status)) {
+        if (!BpmAgentStatus.INACTIVE.getCode().equals(status) &&
+                !BpmAgentStatus.ACTIVE.getCode().equals(status)) {
             throw exception(ErrorCodeConstants.AGENT_REVOKE_INVALID_STATUS);
         }
     }
@@ -282,7 +282,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
     private String calculateAgentStatus(LocalDateTime startTime, LocalDateTime endTime, LocalDateTime revokedTime) {
         // 如果撤销时间不为空，直接返回已撤销
         if (revokedTime != null) {
-            return BpmAgentStatus.REVOKED.getName();
+            return BpmAgentStatus.REVOKED.getCode();
         }
 
         // 获取当前时间
@@ -290,21 +290,21 @@ public class BpmAgentServiceImpl implements BpmAgentService {
 
         // 判断待生效：当前时间 < 代理生效时间
         if (startTime != null && now.isBefore(startTime)) {
-            return BpmAgentStatus.INACTIVE.getName();
+            return BpmAgentStatus.INACTIVE.getCode();
         }
 
         // 判断代理中：当前时间 >= 代理生效时间 且 当前时间 <= 代理失效时间
         if (startTime != null && endTime != null &&
                 now.isAfter(startTime) && now.isBefore(endTime)) {
-            return BpmAgentStatus.ACTIVE.getName();
+            return BpmAgentStatus.ACTIVE.getCode();
         }
 
         // 判断已失效：当前时间 > 代理失效时间
         if (endTime != null && now.isAfter(endTime)) {
-            return BpmAgentStatus.EXPIRED.getName();
+            return BpmAgentStatus.EXPIRED.getCode();
         }
 
-        return "未知状态";
+        return "unknowStatus";
     }
 
 
