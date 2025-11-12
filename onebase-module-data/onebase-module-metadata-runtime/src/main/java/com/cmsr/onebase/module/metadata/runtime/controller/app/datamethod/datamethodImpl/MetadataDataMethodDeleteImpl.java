@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
@@ -14,19 +16,24 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.Metadat
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
+import org.anyline.entity.DataSet;
 import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.invalidParamException;
@@ -47,6 +54,9 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
     @Autowired
     private FlowProcessExecApiImpl flowProcessExecApi;
+
+    @Resource
+    MetadataDataMethodSubEntityCrudImpl metadataDataMethodSubEntityCrudImpl;
 
     @Override
     protected void validateData(ProcessContext context) {
@@ -123,6 +133,13 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                 // 软删除：更新deleted字段为删除时间戳
                 DataRow updateData = new DataRow();
                 updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+
+                // 修改时间
+                LocalDateTime dateTime = LocalDateTime.now();
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String now = dateTime.format(dateTimeFormatter);
+                updateData.put("updated_time", now);
+
                 deleteCount = temporaryService.update(quoteTableName(entity.getTableName()), updateData, configStore);
                 log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
             } else {
@@ -192,49 +209,39 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                     return;
                 }
 
-                // 获取临时数据源服务
-                MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-                if (datasource == null) {
-                    throw exception(DATASOURCE_NOT_EXISTS);
+                // 子表实体id
+                Long subEntityId = relationshipDO.getTargetEntityId();
+
+                // 构建查询子表关联条件
+                MetadataEntityFieldDO targetEntityFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+                String targetField = targetEntityFieldDO.getFieldName();
+                Map deletedData = context.getProcessedData();
+                Object value = deletedData.get(sourceFieldDO.getFieldName());
+
+                // 要删除的子表数据行
+                AnylineService<?> temporaryService = context.getTemporaryService();
+                DefaultConfigStore deleteConfig = new DefaultConfigStore();
+                deleteConfig.and(targetField, value);
+                deleteConfig.and("deleted",0);
+                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+                DataSet dateSet = temporaryService.querys(quoteTableName(targetEntity.getTableName()), deleteConfig);
+
+                // 待删除数据行的id集合
+                List toDeleteList = dateSet.stream().map(map -> map.get("id")).collect(Collectors.toList());
+
+                if(ObjectUtil.isEmpty(toDeleteList)){
+                    return;
                 }
 
-                AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-                log.info("成功切换到数据源：{}", datasource.getCode());
+                // 执行删除操作
+                for(Object id: toDeleteList){
+                    ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
+                    processedSubEntityVo.setTraceId(context.getTraceId());
+                    processedSubEntityVo.setSubEntityId(subEntityId);
+                    processedSubEntityVo.setId(id.toString());
 
-                // 检查表中是否有软删除字段
-                boolean hasDeletedField = fields.stream()
-                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
-                // 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-                TenantUtils.executeIgnore(() -> {
-                    //要删除数据的表名
-                    MetadataBusinessEntityDO targetEntityDO = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
-                    String tableName = targetEntityDO.getTableName();
-
-                    //要删除数据的字段名
-                    MetadataEntityFieldDO targetEntityFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
-                    String targetField = targetEntityFieldDO.getFieldName();
-
-                    //要删除数据的关联字段的值
-                    Map deletedData = context.getProcessedData();
-                    Object value = deletedData.get(sourceFieldDO.getFieldName());
-
-                    // 构建删除条件
-                    DefaultConfigStore configStore = new DefaultConfigStore();
-                    configStore.and(targetField, value);
-
-                    long deleteCount;
-                    if (hasDeletedField) {
-                        // 软删除：更新deleted字段为删除时间戳
-                        DataRow updateData = new DataRow();
-                        updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
-                        deleteCount = temporaryService.update(quoteTableName(tableName), updateData, configStore);
-                        log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-                    } else {
-                        // 物理删除：直接删除记录
-                        deleteCount = temporaryService.delete(quoteTableName(tableName), configStore);
-                        log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-                    }
-                });
+                    metadataDataMethodSubEntityCrudImpl.doDelete(processedSubEntityVo);
+                }
             }
         }
 
@@ -267,49 +274,39 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                     return;
                 }
 
-                // 获取临时数据源服务
-                MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-                if (datasource == null) {
-                    throw exception(DATASOURCE_NOT_EXISTS);
+                // 子表实体id
+                Long subEntityId = relationshipDO.getSourceEntityId();
+
+                // 构建查询子表关联条件
+                MetadataEntityFieldDO sourceEntityFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
+                String sourceField = sourceEntityFieldDO.getFieldName();
+                Map deletedData = context.getProcessedData();
+                Object value = deletedData.get(targetFieldDO.getFieldName());
+
+                // 要删除的子表数据行
+                AnylineService<?> temporaryService = context.getTemporaryService();
+                DefaultConfigStore deleteConfig = new DefaultConfigStore();
+                deleteConfig.and(sourceField, value);
+                deleteConfig.and("deleted",0);
+                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityId());
+                DataSet dateSet = temporaryService.querys(quoteTableName(sourceEntity.getTableName()), deleteConfig);
+
+                // 待删除数据行的id集合
+                List toDeleteList = dateSet.stream().map(map -> map.get("id")).collect(Collectors.toList());
+
+                if(ObjectUtil.isEmpty(toDeleteList)){
+                    return;
                 }
 
-                AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-                log.info("成功切换到数据源：{}", datasource.getCode());
+                // 执行删除操作
+                for(Object id: toDeleteList){
+                    ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
+                    processedSubEntityVo.setTraceId(context.getTraceId());
+                    processedSubEntityVo.setSubEntityId(subEntityId);
+                    processedSubEntityVo.setId(id.toString());
 
-                // 检查表中是否有软删除字段
-                boolean hasDeletedField = fields.stream()
-                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
-                // 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-                TenantUtils.executeIgnore(() -> {
-                    //要删除数据的表名
-                    MetadataBusinessEntityDO sourceEntityDO = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityId());
-                    String tableName = sourceEntityDO.getTableName();
-
-                    //要删除数据的字段名
-                    MetadataEntityFieldDO sourceEntityFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
-                    String sourceField = sourceEntityFieldDO.getFieldName();
-
-                    //要删除数据的关联字段的值
-                    Map deletedData = context.getProcessedData();
-                    Object value = deletedData.get(targetFieldDO.getFieldName());
-
-                    // 构建删除条件
-                    DefaultConfigStore configStore = new DefaultConfigStore();
-                    configStore.and(sourceField, value);
-
-                    long deleteCount;
-                    if (hasDeletedField) {
-                        // 软删除：更新deleted字段为删除时间戳
-                        DataRow updateData = new DataRow();
-                        updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
-                        deleteCount = temporaryService.update(quoteTableName(tableName), updateData, configStore);
-                        log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-                    } else {
-                        // 物理删除：直接删除记录
-                        deleteCount = temporaryService.delete(quoteTableName(tableName), configStore);
-                        log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-                    }
-                });
+                    metadataDataMethodSubEntityCrudImpl.doDelete(processedSubEntityVo);
+                }
             }
         }
     }
@@ -374,6 +371,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         DefaultConfigStore configStore = new DefaultConfigStore();
         Object id = context.getId();
         configStore.and(primaryKeyField, id);
+        configStore.and("deleted",0);
 
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
@@ -383,8 +381,12 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         log.info("成功切换到数据源：{}", datasource.getCode());
         DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
 
+        // 将要删除的数据行保存下来，以便在后置删除触发方法中使用（物理删除之后数据库可能不存在该数据行）
+        context.setProcessedData(dataRow.map());
+
         Long entityId = context.getEntityId();
         Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
@@ -406,25 +408,11 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
     @Override
     protected void executePostWorkflow(ProcessContext context) {
         //查询删除数据
-        MetadataBusinessEntityDO entity = context.getEntity();
-        List<MetadataEntityFieldDO> fields = context.getFields();
-
-        String primaryKeyField = getPrimaryKeyFieldName(fields);
-
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        Object id = context.getId();
-        configStore.and(primaryKeyField, id);
-
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-        if (datasource == null) {
-            throw exception(DATASOURCE_NOT_EXISTS);
-        }
-        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-        log.info("成功切换到数据源：{}", datasource.getCode());
-        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+        Map deletedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+        Map<String, Object> data = convertNameToId(entityId,deletedData);
+
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
