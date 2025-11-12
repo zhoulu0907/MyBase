@@ -152,5 +152,5 @@ public class AdminUserDO extends TenantBaseDO {
      * 归属企业ID
      */
     @Column(name = CORP_ID)
-    private Integer corpId;
+    private Long corpId;
 }

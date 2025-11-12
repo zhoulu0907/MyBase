@@ -35,7 +35,7 @@ public interface AdminAuthService {
      * @param reqVO 登录信息
      * @return 登录结果
      */
-    AuthLoginRespVO login(@Valid RuntimeAuthLoginReqVO reqVO);
+    AuthLoginRespVO login(@Valid AuthLoginReqVO reqVO);
 
     /**
      * 基于 token 退出登录
@@ -97,5 +97,5 @@ public interface AdminAuthService {
      * @param reqVO 登录信息
      * @return 登录结果
      */
-    AuthLoginRespVO corpLogin(@Valid RuntimeAuthLoginReqVO reqVO);
+    AuthLoginRespVO corpLogin(@Valid AuthLoginReqVO reqVO);
 }
