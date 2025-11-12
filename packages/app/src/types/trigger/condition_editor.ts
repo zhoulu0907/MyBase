@@ -9,7 +9,7 @@ export interface ConditionField {
 
 export enum VALIDATION_TYPE {
   // 等于
-  EQUALS = '"EQUALS"',
+  EQUALS = 'EQUALS',
   // 不等于
   NOT_EQUALS = 'NOT_EQUALS',
 

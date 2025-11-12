@@ -69,7 +69,7 @@ export const InputNodeConfig: React.FC = () => {
       data: res.data.map((row: any[]) => {
         const obj: any = {};
         res.columns.forEach((col: any, idx: number) => {
-          obj[col] = row[idx];
+          obj[col.fieldFqn] = row[idx];
         });
         return obj;
       })

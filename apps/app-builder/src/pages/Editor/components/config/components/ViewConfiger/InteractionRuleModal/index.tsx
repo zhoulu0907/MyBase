@@ -98,32 +98,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   const interactionCondition = Form.useWatch('interactionCondition', form);
   const formAction = Form.useWatch('formAction', form);
 
-  const [rules, setRules] = useState<Rule[]>([
-    {
-      id: '1',
-      name: '规则1',
-      enabled: 1,
-      description: '规则1描述',
-      interactionCondition: [],
-      formAction: []
-    },
-    {
-      id: '2',
-      name: '规则2',
-      enabled: 0,
-      description: '规则2描述',
-      interactionCondition: [],
-      formAction: []
-    },
-    {
-      id: '3',
-      name: '规则3',
-      enabled: 1,
-      description: '规则3描述',
-      interactionCondition: [],
-      formAction: []
-    }
-  ]);
+  const [rules, setRules] = useState<Rule[]>(pageViews.value[curViewId.value]?.interactionRules || []);
 
   const [curRule, setCurRule] = useState<string>(rules.length > 0 ? rules[0].id : '');
 
