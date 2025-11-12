@@ -95,7 +95,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
         editViewMode: pageViews.value[_page.id]?.editViewMode,
         isDefaultDetailViewMode: pageViews.value[_page.id]?.isDefaultDetailViewMode,
         isDefaultEditViewMode: pageViews.value[_page.id]?.isDefaultEditViewMode,
-        interactionRules: pageViews.value[_page.id]?.interactionRules
+        interactionRules: JSON.stringify(pageViews.value[_page.id]?.interactionRules)
       };
 
       loadPagesetResp.pages[index].components = components.map((component) => {
@@ -378,6 +378,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
     }
 
+    // 规则string转对象
+    res.pages.forEach((item: any, index: number) => {
+      res.pages[index].interactionRules = JSON.parse(item.interactionRules);
+    });
     console.log('载入视图: ', res.pages);
     setPageViews(res.pages);
     // 设置默认编辑视图
