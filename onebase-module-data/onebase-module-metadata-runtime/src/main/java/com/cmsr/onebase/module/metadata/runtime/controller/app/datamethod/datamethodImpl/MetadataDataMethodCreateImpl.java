@@ -272,7 +272,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                                 upperFieldType.contains("IMAGE") ||         // 图片
                                 upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
-                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DEPARTMENT") ||    // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
                                 upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
                                 upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
                                 upperFieldType.contains("GEO") ||           // 地理位置（简写）
