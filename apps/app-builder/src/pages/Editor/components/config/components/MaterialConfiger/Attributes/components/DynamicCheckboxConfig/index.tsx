@@ -224,10 +224,9 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                           checked={configs[checkboxKey].defaultOptions[idx].chosen || false}
                           onChange={(e) => {
                             let newList = [...configs[checkboxKey].defaultOptions];
-                            newList = newList.map((item) => ({ ...item, chosen: false }));
                             newList[idx] = {
                               ...newList[idx],
-                              chosen: true
+                              chosen: e
                             };
                             const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
                             handlePropsChange(checkboxKey, newConfig);
