@@ -1389,6 +1389,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * <p>
      * 使用Anyline元数据API，自动适配不同数据库（PostgreSQL、达梦、金仓等）
      * 避免硬编码ILIKE、information_schema和LIMIT语法
+     * <p>
+     * 注意：PostgreSQL会将不带引号的标识符自动转为小写，因此在检查列是否存在时需要
+     * 先尝试精确匹配，再尝试小写匹配，最后再进行忽略大小写的模糊匹配
      *
      * @param service AnylineService实例
      * @param tableName 表名
@@ -1411,15 +1414,25 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             Column column = table.getColumn(columnName);
             boolean exists = (column != null);
 
-            // 如果精确匹配失败，尝试忽略大小写匹配（处理PostgreSQL等数据库的大小写问题）
+            // 如果精确匹配失败，尝试小写匹配（PostgreSQL默认将不带引号的标识符转为小写）
             if (!exists && table.getColumns() != null) {
-                log.debug("精确匹配列 {} 失败，尝试忽略大小写匹配", columnName);
-                for (Column col : table.getColumns().values()) {
-                    if (col.getName().equalsIgnoreCase(columnName)) {
-                        column = col;
-                        exists = true;
-                        log.info("通过忽略大小写找到列: {} (实际列名: {})", columnName, col.getName());
-                        break;
+                log.debug("精确匹配列 {} 失败，尝试小写匹配", columnName);
+                String lowerColumnName = columnName.toLowerCase();
+                column = table.getColumn(lowerColumnName);
+                exists = (column != null);
+                
+                if (exists) {
+                    log.info("通过小写匹配找到列: {} (实际列名: {})", columnName, lowerColumnName);
+                } else {
+                    // 如果小写匹配也失败，最后尝试忽略大小写匹配（处理其他数据库的大小写问题）
+                    log.debug("小写匹配列 {} 失败，尝试忽略大小写匹配", columnName);
+                    for (Column col : table.getColumns().values()) {
+                        if (col.getName().equalsIgnoreCase(columnName)) {
+                            column = col;
+                            exists = true;
+                            log.info("通过忽略大小写找到列: {} (实际列名: {})", columnName, col.getName());
+                            break;
+                        }
                     }
                 }
             }
