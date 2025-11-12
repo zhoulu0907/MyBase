@@ -380,7 +380,11 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
     // 规则string转对象
     res.pages.forEach((item: any, index: number) => {
-      res.pages[index].interactionRules = JSON.parse(item.interactionRules);
+      if (item.interactionRules) {
+        res.pages[index].interactionRules = JSON.parse(item.interactionRules);
+      } else {
+        res.pages[index].interactionRules = [];
+      }
     });
     console.log('载入视图: ', res.pages);
     setPageViews(res.pages);
