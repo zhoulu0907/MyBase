@@ -1410,46 +1410,50 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 return false;
             }
 
+            // 获取所有列
+            LinkedHashMap<String, Column> columns = table.getColumns();
+            if (columns == null || columns.isEmpty()) {
+                log.warn("表 {} 的列信息为空，无法检查列 {} 是否存在", tableName, columnName);
+                return false;
+            }
+            
+            log.debug("表 {} 共有 {} 列", tableName, columns.size());
+
             // 先尝试精确匹配
             Column column = table.getColumn(columnName);
-            boolean exists = (column != null);
+            if (column != null) {
+                log.info("通过精确匹配找到列: {} (实际列名: {})", columnName, column.getName());
+                log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}", 
+                        table.getName(), column.getName(), column.getTypeName());
+                return true;
+            }
+            
+            log.debug("精确匹配列 {} 失败，尝试小写匹配", columnName);
 
             // 如果精确匹配失败，尝试小写匹配（PostgreSQL默认将不带引号的标识符转为小写）
-            if (!exists && table.getColumns() != null) {
-                log.debug("精确匹配列 {} 失败，尝试小写匹配", columnName);
-                String lowerColumnName = columnName.toLowerCase();
-                column = table.getColumn(lowerColumnName);
-                exists = (column != null);
-                
-                if (exists) {
-                    log.info("通过小写匹配找到列: {} (实际列名: {})", columnName, lowerColumnName);
-                } else {
-                    // 如果小写匹配也失败，最后尝试忽略大小写匹配（处理其他数据库的大小写问题）
-                    log.debug("小写匹配列 {} 失败，尝试忽略大小写匹配", columnName);
-                    for (Column col : table.getColumns().values()) {
-                        if (col.getName().equalsIgnoreCase(columnName)) {
-                            column = col;
-                            exists = true;
-                            log.info("通过忽略大小写找到列: {} (实际列名: {})", columnName, col.getName());
-                            break;
-                        }
-                    }
+            String lowerColumnName = columnName.toLowerCase();
+            column = table.getColumn(lowerColumnName);
+            if (column != null) {
+                log.info("通过小写匹配找到列: {} (实际列名: {})", columnName, column.getName());
+                log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}", 
+                        table.getName(), column.getName(), column.getTypeName());
+                return true;
+            }
+            
+            log.debug("小写匹配列 {} 失败，尝试忽略大小写遍历匹配", columnName);
+            
+            // 如果小写匹配也失败，最后尝试忽略大小写遍历匹配（处理其他数据库的大小写问题）
+            for (Column col : columns.values()) {
+                if (col.getName().equalsIgnoreCase(columnName)) {
+                    log.info("通过忽略大小写遍历找到列: {} (实际列名: {})", columnName, col.getName());
+                    log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}", 
+                            table.getName(), col.getName(), col.getTypeName());
+                    return true;
                 }
             }
 
-            log.info("列 {} 在表 {} 中{}存在", columnName, tableName, exists ? "" : "不");
-
-            if (exists && column != null) {
-                try {
-                    // 记录列的详细信息（用于调试）
-                    log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}",
-                            table.getName(), column.getName(), column.getTypeName());
-                } catch (Exception detailException) {
-                    log.debug("获取列详细信息失败: {}", detailException.getMessage());
-                }
-            }
-
-            return exists;
+            log.info("列 {} 在表 {} 中不存在", columnName, tableName);
+            return false;
         } catch (Exception e) {
             log.error("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage(), e);
             // 发生异常时返回false，让调用方处理
@@ -1469,6 +1473,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 修改表中的列
+     * 
+     * 注意:调用此方法时,field必定已经有ID,说明是已存在的字段,因此无需再检查列是否存在
      */
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
@@ -1476,20 +1482,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             TenantUtils.executeIgnore(() -> {
                 // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
-                // 先校验表与列是否存在
+                
+                // 先校验表是否存在
                 if (!checkTableExists(service, tableName)) {
                     throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
                 }
 
-                boolean exists = checkColumnExists(service, tableName, field.getFieldName());
-                if (!exists) {
-                    // 列不存在：容错处理，改为新增列，防止 ALTER 失败
-                    String addColumnDDL = generateAddColumnDDL(tableName, field);
-                    service.execute(addColumnDDL);
-                    log.info("列 {} 在表 {} 中不存在，已自动改为添加列", field.getFieldName(), tableName);
-                    return null;
-                }
-
+                // 简化逻辑:如果field有ID,说明是已存在的字段,直接执行ALTER操作
+                // 不再需要checkColumnExists检查,因为前端传递的参数中有字段ID就表示该字段已存在
+                log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, field.getFieldName(), field.getId());
+                
                 // 生成并执行修改列 DDL（传入数据库类型以生成兼容的SQL）
                 String alterColumnDDL = generateAlterColumnDDL(datasource.getDatasourceType(), tableName, field);
                 service.execute(alterColumnDDL);
