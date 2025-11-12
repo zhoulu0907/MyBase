@@ -231,9 +231,9 @@ export const OutputNodeConfig: React.FC = () => {
 
       <FieldModal
         targetColumns={targetColumns.map((option: ELTColumn) => ({
-          id: option.id,
-          name: option.name,
-          type: option.type
+          fieldFqn: option.fieldFqn,
+          fieldName: option.fieldName,
+          fieldType: option.fieldType
         }))}
         isModalVisible={isModalVisible}
         initialMappings={fieldMappings}

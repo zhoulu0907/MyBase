@@ -46,6 +46,7 @@ const EtlDataFactoryPage: React.FC = () => {
   const handleGetETLFlowList = async () => {
     setLoading(true);
     const res = await pageETLFlow({
+      applicationId: curAppId,
       pageNo,
       pageSize
     });
