@@ -295,7 +295,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     private UserTypeEnum getUserType() {
-        return UserTypeEnum.BUILD;
+        return UserTypeEnum.THIRD;
     }
 
     @Override

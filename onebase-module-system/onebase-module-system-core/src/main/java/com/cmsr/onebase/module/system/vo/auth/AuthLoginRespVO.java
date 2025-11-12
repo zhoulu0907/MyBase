@@ -32,4 +32,7 @@ public class AuthLoginRespVO {
 
     @Schema(description = "租户子域名", example = "onebase")
     private String tenantWebsite;
+
+    @Schema(description = "企业ID", example = "1")
+    private Long corpId;
 }

@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.api.auth;
 
+import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
+
 import java.util.List;
 
 /**
@@ -14,4 +16,5 @@ public interface AppAuthRoleUser {
 
     List<Long> findRoleIdsByAppId(Long appId);
 
+    List<AuthRoleDTO> findRolesByUserId(Long userId);
 }

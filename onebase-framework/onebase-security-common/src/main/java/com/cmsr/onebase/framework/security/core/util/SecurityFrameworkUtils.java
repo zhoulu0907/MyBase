@@ -73,12 +73,12 @@ public class SecurityFrameworkUtils {
      * @return 当前用户
      */
     @Nullable
-    public static LoginUser getLoginUser() {
+    public static <T extends LoginUser> T getLoginUser() {
         Authentication authentication = getAuthentication();
         if (authentication == null) {
             return null;
         }
-        return authentication.getPrincipal() instanceof LoginUser ? (LoginUser) authentication.getPrincipal() : null;
+        return authentication.getPrincipal() instanceof LoginUser ? (T) authentication.getPrincipal() : null;
     }
 
     /**

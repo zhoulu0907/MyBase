@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.util.encrypt.PasswordRandomGenerator;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
@@ -80,7 +81,7 @@ public class CorpServiceImpl implements CorpService {
         // 保存基础数据
         Long corpId = createCorp(corpCombineReqVO.getCorpReqVO());
         // 保存系统管理员
-        CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO());
+        CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO(),corpId);
         // 保存关联关系
         List<AppAuthTimeReqVO> appAuthTimeReqVO = corpCombineReqVO.getAppAuthTimeReqVO();
 
@@ -229,6 +230,12 @@ public class CorpServiceImpl implements CorpService {
                 .collect(Collectors.toMap(DictDataRespDTO::getId
                         , DictDataRespDTO::getLabel));
 
+        Set<Long> adminUserIds = corpList.stream()
+                .map(CorpDO::getAdminId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, AdminUserDO> userDOMap= userService.getUserMap(adminUserIds);
+
         // Step 4：组装返回值
         List<CorpRespVO> respList = corpList.stream()
                 .map(corpDO -> {
@@ -248,8 +255,12 @@ public class CorpServiceImpl implements CorpService {
                             }
                         }
                         respVO.setCorpApplicationList(corpApplicationList);
-                        respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                     }
+                    AdminUserDO userDO=userDOMap.get(corpDO.getAdminId());
+                    if(userDO!=null){
+                        respVO.setAdminName(userDO.getNickname());
+                    }
+                    respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                     return respVO;
                 })
                 .collect(Collectors.toList());
@@ -299,7 +310,7 @@ public class CorpServiceImpl implements CorpService {
         return passwordEncoder.encode(password);
     }
 
-    public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO) {
+    public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO,Long corpId) {
         // 2.2.1 判断如果不存在，在进行插入
         AdminUserDO existUser = adminUserService.getUserByUsername(reqVO.getUsername());
         if (existUser != null) {
@@ -308,11 +319,12 @@ public class CorpServiceImpl implements CorpService {
         // 插入用户
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
-        String password = getRandomPassWord();
+        String password = PasswordRandomGenerator.generateSecurePassword(15);
         user.setPassword(encodePassword(password)); // 加密密码
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
+        user.setCorpId(corpId);
         Long userId = adminUserService.createCorpAdminUser(user);
         CorpAdminUserRespVO vo = new CorpAdminUserRespVO();
             vo.setUsername(reqVO.getUsername());
@@ -341,19 +353,4 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.getSimpleCorpList(staus);
     }
 
-
-    /**
-     * 随机生成一个密码
-     *
-     * @return randomStr
-     */
-    public String getRandomPassWord() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return sb.toString();
-    }
 }

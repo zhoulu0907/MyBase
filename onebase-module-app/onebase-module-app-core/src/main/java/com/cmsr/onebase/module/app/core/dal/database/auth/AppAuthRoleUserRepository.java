@@ -84,5 +84,10 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         this.deleteByConfig(configStore);
     }
 
+    public List<AuthRoleUserDO> findByUserId(Long userId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("user_id", userId);
+        return findAllByConfig(configStore);
+    }
 
 }

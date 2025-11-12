@@ -18,10 +18,10 @@
     <url>https://cmsr.com</url>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-security-common</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-security-common</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-app-api</artifactId>
