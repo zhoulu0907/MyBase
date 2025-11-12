@@ -77,20 +77,23 @@ public class DeptDO extends TenantBaseDO {
     @Column(name = REMARK)
     private String remark;
 
+    /**
+     * 部门主管id
+     */
     @Column(name = DEPT_DIRECTOR_ID)
     private Long deptDirectorId;
 
     /**
      * 部门类型： tenant-空间部门，corp-企业部门
      */
-    @Column(name = REMARK)
-    private String 部门类型;
+    @Column(name = DEPT_TYPE)
+    private String dept_type;
 
     /**
      * 归属企业ID
      */
     @Column(name = CORP_ID)
-    private Integer corpId;
+    private Long corpId;
 
 
 }
