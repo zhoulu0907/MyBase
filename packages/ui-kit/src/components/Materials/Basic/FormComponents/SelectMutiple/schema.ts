@@ -2,10 +2,8 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  directionConfig,
   alignConfig,
   layoutConfig,
-  selectOptionsConfig,
   statusConfig,
   widthConfig,
   type ICommonBaseType,
@@ -95,12 +93,6 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
   }
 
   /**
-   * 单选框方向：水平（默认）、垂直
-   * 可选值: 'vertical' | 'horizontal'
-   */
-  direction?: TLayoutSelectKeyType;
-
-  /**
   * required：是否必填，未填写时提交报错
   */
   verify: {
@@ -149,7 +141,6 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     ...dataFieldConfig,
     // 选项
     mutipleSelectOptionsConfig,
-    directionConfig,
     // 选项分布方式
     {
       key: 'verify',
@@ -194,7 +185,6 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
         }
       ],
     },
-    direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {
       required: false,
       maxChecked: 3

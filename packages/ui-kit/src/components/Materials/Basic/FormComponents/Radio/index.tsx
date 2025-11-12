@@ -38,6 +38,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.chosen)?.value}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
           <div>{defaultOptionsConfig?.defaultOptions?.find((op) => op.chosen)?.label || '--'}</div>
@@ -63,10 +64,9 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
                           marginRight: '8px'
                         }}
                       ></span>
-                      <span>选项</span>
+                      <span>{ele.label}</span>
                     </>}
                 </> : <>{ele.label}</>}
-
               </Radio>
             ))}
           </RadioGroup>

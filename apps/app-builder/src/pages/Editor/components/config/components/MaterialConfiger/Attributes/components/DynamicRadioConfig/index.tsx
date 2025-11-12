@@ -78,7 +78,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
           setTypeDisabled(true);
         }
       } else if (currentMainField.options?.length) {
-        const newOptions = currentMainField.options?.map((e) => ({
+        const newOptions = currentMainField.options?.map((e:any) => ({
           label: e.optionLabel,
           value: e.optionValue
         }));
@@ -109,7 +109,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
           setTypeDisabled(true);
         }
       } else if (currentSubField.options?.length) {
-        const newOptions = currentSubField.options?.map((e) => ({
+        const newOptions = currentSubField.options?.map((e:any) => ({
           label: e.optionLabel,
           value: e.optionValue
         }));
