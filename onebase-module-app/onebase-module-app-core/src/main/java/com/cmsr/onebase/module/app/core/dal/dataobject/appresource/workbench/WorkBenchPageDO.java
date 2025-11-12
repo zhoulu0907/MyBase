@@ -21,15 +21,30 @@ public class WorkBenchPageDO extends TenantBaseDO {
 
     @Column(name = "page_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面名称")
     private String pageName;
+
+    @Column(name = "page_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "页面类型 workbench")
+    private String pageType;
+
+    @Column(name = "edit_view_mode", columnDefinition = "INT(2)", comment = "编辑模式" )
+    private Integer editViewMode;
+
+    @Column(name = "detail_view_mode", columnDefinition = "INT(2)", comment = "详情模式" )
+    private Integer detailViewMode;
+
+    @Column(name = "is_default_edit_view_mode", columnDefinition = "INT(2)", comment = "是否默认编辑视图")
+    private Integer isDefaultEditViewMode;
+
+    @Column(name = "is_default_detail_view_mode", columnDefinition = "INT(2)", comment = "是否默认详情视图")
+    private Integer isDefaultDetailViewMode;
+
+    @Column(name = "is_latest_updated", columnDefinition = "INT(2)", comment = "最新更新的视图")
+    private Integer isLatestUpdated;
+
     /**
      * 页面标题
      */
     @Column(name = "title", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面标题")
     private String title;
-
-
-    /********下面的字段从表单模块抄过来的，不确定有没有用，暂时放着 ***********/
-
 
     /**
      * 页面布局方式，vertical（垂直布局）、horizontal（水平布局）
@@ -55,6 +70,7 @@ public class WorkBenchPageDO extends TenantBaseDO {
     @Column(name = "background_color", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面背景色")
     private String backgroundColor;
 
+    // TODO(mickey): remove
     /**
      * 页面主元数据
      */
@@ -81,20 +97,4 @@ public class WorkBenchPageDO extends TenantBaseDO {
      */
     @Column(name = "router_meta_title", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由元数据-页面标题")
     private String routerMetaTitle;
-
-
-    @Column(name = "edit_view_mode", columnDefinition = "INT(2)", comment = "编辑模式" )
-    private Integer editViewMode;
-
-    @Column(name = "detail_view_mode", columnDefinition = "INT(2)", comment = "详情模式" )
-    private Integer detailViewMode;
-
-    @Column(name = "is_default_edit_view_mode", columnDefinition = "INT(2)", comment = "是否默认编辑视图")
-    private Integer isDefaultEditViewMode;
-
-    @Column(name = "is_default_detail_view_mode", columnDefinition = "INT(2)", comment = "是否默认详情视图")
-    private Integer isDefaultDetailViewMode;
-
-    @Column(name = "is_latest_updated", columnDefinition = "INT(2)", comment = "最新更新的视图")
-    private Integer isLatestUpdated;
 }

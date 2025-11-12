@@ -26,6 +26,11 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-security-build</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-bpm-build</artifactId>
             <version>${revision}</version>
         </dependency>

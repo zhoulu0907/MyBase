@@ -62,7 +62,7 @@ public class MailSendServiceImpl implements MailSendService {
             }
         }
         // 执行发送
-        return sendSingleMail(mail, userId, UserTypeEnum.BUILD.getValue(), templateCode, templateParams);
+        return sendSingleMail(mail, userId, UserTypeEnum.THIRD.getValue(), templateCode, templateParams);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class MailSendServiceImpl implements MailSendService {
             mail = memberService.getMemberUserEmail(userId);
         }
         // 执行发送
-        return sendSingleMail(mail, userId, UserTypeEnum.RUNTIME.getValue(), templateCode, templateParams);
+        return sendSingleMail(mail, userId, UserTypeEnum.CORP.getValue(), templateCode, templateParams);
     }
 
     @Override
