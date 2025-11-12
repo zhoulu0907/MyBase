@@ -7,7 +7,10 @@ import {
 } from '@flowgram.ai/free-layout-editor';
 import { nodeRegistries } from '../../freeLayout/nodes';
 import { useEditorProps } from '../../freeLayout/hooks';
+import { ZoomSelect } from '../../freeLayout/components/tools/zoom-select';
 import { initialData } from './initial-data';
+import { AutoLayout } from './auto-layout';
+import { IndexType } from './indexType';
 import styles from './index.module.less';
 
 interface PreviewModalProps {
@@ -18,14 +21,16 @@ interface PreviewModalProps {
 const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible }) => {
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   const editorPropsInit = useEditorProps(initialData, nodeRegistries);
-  const editorProps = Object.assign({}, editorPropsInit, { background: false, readonly: true });
+  const editorProps = Object.assign({}, editorPropsInit, { background: false, readonly: false });
   const [isModalReady, setIsModalReady] = useState(false);
 
   const afterOpen = async () => {
     setIsModalReady(true);
   };
   const getPassConnections = (edges: Array<any>) => {
-    return edges.filter((edge) => edge.status === 'pass').map((edge) => `${edge.sourceNodeID}_-${edge.targetNodeID}_`);
+    return edges
+      .filter((edge) => edge.runStatus === IndexType.PASS)
+      .map((edge) => `${edge.sourceNodeID}_-${edge.targetNodeID}_`);
   };
 
   useEffect(() => {
@@ -34,12 +39,11 @@ const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible }) => {
     const lines = ref?.current?.document.linesManager.getAllLines();
     lines?.forEach((line) => {
       if (passLines.includes(line.id)) {
-        line.lockedColor = '#4FAE7B';
+        line.lockedColor = IndexType.COMPLETED_COLOR;
       } else {
-        line.lockedColor = '#d9d9d9';
+        line.lockedColor = IndexType.PENDING;
       }
     });
-    console.log(lines, passLines);
   }, [isModalReady]);
   return (
     <Modal
@@ -69,6 +73,10 @@ const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible }) => {
         {isModalReady && (
           <FreeLayoutEditorProvider {...editorProps} ref={ref}>
             <EditorRenderer className={styles.demoEditor} />
+            <div className={styles.zoomSelectWrapper}>
+              <ZoomSelect />
+              <AutoLayout />
+            </div>
           </FreeLayoutEditorProvider>
         )}
       </div>

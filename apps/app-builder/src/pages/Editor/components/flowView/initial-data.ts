@@ -18,7 +18,7 @@ export const initialData: FlowDocumentJSON = {
       },
       data: {
         name: '开始',
-        status: 'completed'
+        runStatus: 'completed'
       }
     },
     {
@@ -32,7 +32,7 @@ export const initialData: FlowDocumentJSON = {
       },
       data: {
         name: '发起',
-        status: 'completed'
+        runStatus: 'completed'
       }
     },
     {
@@ -46,7 +46,7 @@ export const initialData: FlowDocumentJSON = {
       },
       data: {
         name: '结束',
-        status: 'pending'
+        runStatus: 'pending'
       }
     },
     {
@@ -59,7 +59,7 @@ export const initialData: FlowDocumentJSON = {
         }
       },
       data: {
-        status: 'processing',
+        runStatus: 'processing',
         approverConfig: {
           approverType: 'user',
           users: [
@@ -105,12 +105,12 @@ export const initialData: FlowDocumentJSON = {
     {
       sourceNodeID: 'start_0',
       targetNodeID: 'start_1',
-      status: 'pass'
+      runStatus: 'pass'
     },
     {
       sourceNodeID: 'start_1',
       targetNodeID: 'executor_zIEdi',
-      status: 'pass'
+      runStatus: 'pass'
     },
     {
       sourceNodeID: 'executor_zIEdi',

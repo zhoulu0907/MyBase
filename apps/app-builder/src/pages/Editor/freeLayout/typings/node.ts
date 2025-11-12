@@ -43,7 +43,7 @@ export interface FlowNodeJSON extends FlowNodeJSONDefault {
      */
     [key: string]: any;
     name?: string;
-    status?: string;
+    runStatus?: string;
   };
   name?: string;
 }
