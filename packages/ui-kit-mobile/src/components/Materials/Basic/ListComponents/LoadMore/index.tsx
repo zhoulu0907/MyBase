@@ -164,6 +164,7 @@ const XLoadMore = memo(
       if (!runtime) {
         return;
       }
+      console.log('showFromPageData: ', showFromPageData);
 
       showFromPageData?.(null, true);
     };
@@ -337,7 +338,7 @@ const XLoadMore = memo(
 
     return (
       <div className="loadmore-list-wrapper">
-        <Sticky topOffset={0} className="list-search-header">
+        <Sticky topOffset={0.46 * window.ROOT_FONT_SIZE} className="list-search-header">
           {searchItems?.length ? (
               <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
             ) : null}

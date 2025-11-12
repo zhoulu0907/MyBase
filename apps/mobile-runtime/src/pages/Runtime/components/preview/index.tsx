@@ -1,5 +1,7 @@
 import ExecuteFlows from '@/utils/flow';
-import { Button, Drawer, Form, Message } from '@arco-design/web-react';
+import { Button, PopupSwiper, Form, Toast, Sticky } from '@arco-design/mobile-react';
+import { useForm } from '@arco-design/mobile-react/esm/form';
+
 import {
   PageType,
   CATEGORY_TYPE,
@@ -58,7 +60,7 @@ interface PreviewProps {
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useSignals();
 
-  const [form] = Form.useForm();
+  const [form] = useForm();
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
@@ -73,7 +75,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     subEntities,
     setSubEntities
   } = pagesRuntimeSignal;
-
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
@@ -211,7 +212,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       );
       setFlows(updateFlows);
       if (res) {
-        Message.success('更新成功');
+        Toast.success('更新成功');
       }
       setEditTargetId('');
       setDrawerVisible(false);
@@ -250,10 +251,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         setFlows(createFlows);
 
         if (res) {
-          Message.success('创建成功');
+          Toast.success('创建成功');
         }
       } catch (error) {
-        Message.error('创建失败')
+        Toast.error('创建失败')
       }
     }
 
@@ -267,6 +268,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
+    console.warn('bb=11===', id)
     form.resetFields();
 
     if (id && id !== '') {
@@ -293,7 +295,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       id: id
     };
     const res = await dataMethodData(req);
-    console.log(res);
+    console.log('xxx=====', res);
 
     // 遍历 res.data，将数据回填到表单
     const formValues: Record<string, any> = {};
@@ -365,8 +367,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setDetailMode(false);
   };
 
+  const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
+  console.warn('xx-d==', useEditorSignalMap.get(editPageViewId.value)?.components.value)
   return (
     <div className={styles.previewPage}>
+      
+      <Sticky topOffset={0} className={styles.previewTitle}>
+        {curFormPage.slice(0, curFormPage.length - 3)}
+      </Sticky>
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
           listComponents.value.map((cp: GridItem) => (
@@ -393,20 +401,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           ))}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
-          <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
+          <Form layout="inline" form={form} className={styles.formWrapper}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
-              <Fragment key={cp.id}>
+              <Fragment key={cp.id} >
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                   STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div
                     key={cp.id}
                     className={styles.componentItem}
-                    style={{
-                      width: getComponentWidth(
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                        cp.type
-                      )
-                    }}
+                    style={{ width: '100%' }}
                   >
                     <PreviewRender
                       cpId={cp.id}
@@ -425,19 +428,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
-              <Button type="primary" onClick={submitForm}>
-                提交
-              </Button>
-              <Button type="default" onClick={cancelSubmitForm}>
+              <Button style={{ flex: 2 }} type="ghost" onClick={cancelSubmitForm}>
                 取消
+              </Button>
+              <Button style={{ flex: 5 }} type="primary" onClick={submitForm}>
+                提交
               </Button>
             </div>
           </Form>
         )}
 
         {/* 右侧详情抽屉 */}
-        <Drawer
-          width={'60vw'}
+        <PopupSwiper
           title={
             <div className={styles.drawerTitle}>
               <div>详情</div>
@@ -496,7 +498,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               )}
             </Form>
           </div>
-        </Drawer>
+        </PopupSwiper>
       </div>
 
       {/* 信息收集弹窗 */}

@@ -4,6 +4,8 @@ import { memo, useEffect, useState } from 'react';
 // import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 // import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
+import './index.css';
+
 import type { XInputTextAreaConfig } from './schema';
 
 const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -40,7 +42,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
   }, [dataField]);
 
   return (
-    <div className="formWrapper">
+    <div className="formWrapper inputTextAreaWrapper">
       <Textarea
         label={label.display && label.text}
         key={`${minRows}-${maxRows}`}
@@ -48,7 +50,8 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         placeholder={placeholder}
         maxLength={maxLength}
         clearable
-        autosize
+        textareaStyle={{ height: 0.25 * minRows + 'rem' }}
+        autosize={false}
         rows={minRows}
       />
       {/* <Form.Item

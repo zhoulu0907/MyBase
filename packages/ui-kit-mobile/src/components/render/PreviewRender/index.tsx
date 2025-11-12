@@ -10,6 +10,10 @@ import {
   // ShowComp,
   getComponentConfig
 } from 'src/components/Materials';
+import {
+  ALIGN_OPTIONS,
+  ALIGN_VALUES,
+} from '../../Materials/Basic/constants';
 
 /**
  * 组件渲染的通用属性
@@ -44,12 +48,22 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
+  console.warn('b11=======111====', {
+  cpId,
+  cpType,
+  pageComponentSchema,
+  runtime,
+  detailMode,
+  showFromPageData,
+  refresh
+})
+console.warn('b11=======222====', componentConfig)
   // 渲染对应的组件
   const renderComponent = () => {
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return (
-          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} align={ALIGN_VALUES[ALIGN_OPTIONS.RIGHT]} runtime={runtime} detailMode={detailMode} />
         );
       case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
         return (
@@ -57,6 +71,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             cpName={cpId}
             id={cpId}
             {...componentConfig}
+            minRows={2}
             runtime={runtime}
             detailMode={detailMode}
           />
@@ -254,7 +269,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <div>todo: LayoutComp</div>
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} showFromPageData={showFromPageData} />;
         // return (
         //   <ListComp.XTable
         //     cpName={cpId}

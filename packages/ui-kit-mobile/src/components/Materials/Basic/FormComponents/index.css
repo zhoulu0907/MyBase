@@ -1,6 +1,6 @@
 .formWrapper {
   width: 100%;
-  padding: 6px;
+  padding: 0 0.16rem;
   box-sizing: border-box;
 
   .arco-form-label-item {
