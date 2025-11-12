@@ -29,12 +29,14 @@ import {
   STATUS_VALUES,
   useEditorSignalMap,
   useListEditorSignal,
+  usePageViewEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import FlowPredict from './flowPredict';
 import styles from './index.module.less';
+import { initInteractionRule } from './interaction_rule';
 
 interface PreviewProps {
   menuId: string;
@@ -59,6 +61,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     subEntities,
     setSubEntities
   } = pagesRuntimeSignal;
+
+  const { pageViews, curViewId } = usePageViewEditorSignal;
 
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
@@ -374,6 +378,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setDetailMode(false);
   };
 
+  const handleFormValuesChange = (value: Partial<any>, values: Partial<any>) => {
+    initInteractionRule(
+      values,
+      pageViews.value[curViewId.value]?.interactionRules,
+      useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value
+    );
+  };
+
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
@@ -404,7 +416,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           ))}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
-          <Form layout="inline" form={form}>
+          <Form layout="inline" form={form} onValuesChange={handleFormValuesChange}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
