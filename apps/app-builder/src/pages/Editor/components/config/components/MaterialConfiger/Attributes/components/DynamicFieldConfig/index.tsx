@@ -63,9 +63,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 
   const initTreeData = async () => {
     // 根据不同组件类型匹配不同的可选择字段
-    const fieldType = components.find((ele) => ele.id === configs.id)?.type;
+    const fieldType = components.find((ele:any) => ele.id === configs.id)?.type;
     const cpTypes = COMPONENT_FIELD_MAP[fieldType];
-    // debugger fieldType
     const mainEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
@@ -120,10 +119,10 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   };
 
   const handleDefaultOptions = async (value: (string | string[])[]) => {
-    const type = components.find((ele) => ele.id === configs.id)?.type;
+    const type = components.find((ele:any) => ele.id === configs.id)?.type;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldId));
-    const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
+    const isSubEntity = subEntities.entities?.find((ele:any) => value?.includes(ele.entityId));
     const currentSubField = isSubEntity?.fields.find((ele: AppEntityField) => value.includes(ele.fieldId));
 
     if (isMainEntity && currentMainField) {
@@ -199,6 +198,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         newConfig.defaultOptions = dictOptions;
       }
     } else if (field.options?.length) {
+      newConfig.type = DEFAULT_OPTIONS_TYPE.CUSTOM;
       newConfig.defaultOptions = field.options?.map((e: any) => ({
         label: e.optionLabel,
         value: e.optionValue
