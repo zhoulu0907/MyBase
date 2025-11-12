@@ -282,7 +282,7 @@ public class OAuth2OpenController {
     }
 
     private Integer getUserType() {
-        return UserTypeEnum.BUILD.getValue();
+        return UserTypeEnum.THIRD.getValue();
     }
 
     private String[] obtainBasicAuthorization(HttpServletRequest request) {

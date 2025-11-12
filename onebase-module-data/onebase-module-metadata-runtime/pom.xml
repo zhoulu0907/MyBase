@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-security-build</artifactId>
+            <artifactId>onebase-security-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

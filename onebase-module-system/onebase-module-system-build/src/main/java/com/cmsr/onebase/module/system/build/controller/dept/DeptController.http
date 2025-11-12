@@ -69,7 +69,9 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 请求 /get-depts-by-id 接口 => 成功
-GET {{baseUrl}}/system/dept/get-depts-by-id?id=122721767135772672&idType=dept
+GET {{baseUrl}}/system/dept/get-depts-by-id?id=129783586736504832&idType=user
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
+### 请求 /get-depts-by-id 接口 => 成功
+http://localhost:48080/admin-api/lapp/auth-role/page-role-members?roleld=37775560235057154&pageNo=1&pageSize=10&t=1762757497126

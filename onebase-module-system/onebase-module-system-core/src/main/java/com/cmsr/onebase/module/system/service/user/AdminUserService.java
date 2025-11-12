@@ -31,7 +31,6 @@ public interface AdminUserService {
     Long createUser(@Valid UserInsertReqVO createReqVO);
 
 
-
     /**
      * 创建用户
      *
@@ -67,7 +66,7 @@ public interface AdminUserService {
      * 修改用户管理员类型
      *
      * @param adminType 修改管理员类型
-     * @param id    用户编号
+     * @param id        用户编号
      */
     void updateAdminType(Long id,  Integer adminType);
 
@@ -240,7 +239,7 @@ public interface AdminUserService {
      * @param status 状态
      * @return 用户们
      */
-    List<AdminUserDO> getUserListByStatus(Integer status,String userNickName);
+    List<AdminUserDO> getUserListByStatus(Integer status, String userNickName);
 
     /**
      * 获取所有平台管理员列表
@@ -292,7 +291,7 @@ public interface AdminUserService {
      */
     UserRespVO getUserWithRoles(Long id);
 
-    List<String> getUserRoleByRoleIdAndTenantId(Long id,Long tenantId);
+    List<String> getUserRoleByRoleIdAndTenantId(Long id, Long tenantId);
 
-    Map<Long,Integer> getTenantExistUserCountByIds( List<Long> tenantIds);
+    Map<Long, Integer> getTenantExistUserCountByIds(List<Long> tenantIds);
 }
