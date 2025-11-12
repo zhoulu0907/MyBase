@@ -6,3 +6,4 @@ import { createClient } from '@onebase/common';
  */
 export const systemService = createClient('/system');
 export const infraService = createClient('/infra');
+export const appService = createClient('/app');

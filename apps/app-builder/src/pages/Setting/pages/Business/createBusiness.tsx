@@ -1,47 +1,125 @@
 import styles from "./createBusiness.module.less";
-import { useMemo, useRef, useState } from 'react';
-import { Steps, Button, Form, Space, Tag, Message } from '@arco-design/web-react';
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from 'react';
+import { Steps, Button, Space, Message } from '@arco-design/web-react';
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { steps } from "./constants";
 import { CreateSuccess } from "./components/createApp/createSuccess";
 import { BasicInformation } from "./components/createApp/basicInformation";
 import { AuthorizedApp } from "./components/createApp/authorizedApp";
 import { AdminInformation } from "./components/createApp/adminInfomation";
-import { CreateAppModal } from "./components/modal/createAppModal";
-import type { AppItem, AuthorizedAppRef } from "./types/appItem";
-import EditAuthorizedTime from "./components/modal/editAuthorizedTime";
-import { useTableData } from "./hooks/useTable";
+import type { AppItem, OutletContextType, successData } from "./types/appItem";
+import {removeCorpAppApi, updateCorpAppApi, createCorpApi, getCorpAuthorizedAppListApi, type CorpAppParams, type createCorpParams, type updatedParams, type corpListParams} from "@onebase/platform-center";
+import { IconLoading } from "@arco-design/web-react/icon";
 
-
-const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
-    const authorizedAppRef = useRef<AuthorizedAppRef>(null);
+const CreateBusinessPage: React.FC = () => {
+    const [basicValues, setBasicData] = useState<Record<string, any>>({});
+    const [adminValues, setAdminData] = useState<Record<string, any>>({});
+    const { industryOptions, currentId } = useOutletContext<OutletContextType>(); 
     const [currentStep, setCurrentStep] = useState<number>(1);
     const navigate = useNavigate();
-    const [basicInfoForm] = Form.useForm();
-    const [adminInfoForm] = Form.useForm();
+    const [loading, setLoading] = useState<boolean>(false);
+    const [tableData, setTableData] = useState<AppItem[]>([]);
+    const [visible, setVisible] = useState<boolean>(false);
     const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
-    const [editTimeVisible, setEditTimeVisible] = useState<boolean>(false);
+    const [searchValue, setSearchValue] = useState<string>("");
+    const [createLoading, setCreateLoading] = useState<boolean>(false);
+    const [pageInation, setPagination] = useState({
+        showTotal: true,
+        total: 0,
+        pageSize: 10,
+        current: 1,
+        sizeCanChange: true,
+        pageSizeChangeResetCurrent: true
+    });
+    const [successData, setSuccessData] = useState<successData | null>(null);
 
-    //点击创建应用的第三步中table的编辑button
-    const handleEdit = (record?: AppItem) => {
-        navigate(`${record?.appName}`)
-    }
-
-    const handleEditTime = () => {
-        setEditTimeVisible(true);
-    }
-
-    const handleUpdateTime = () => {
-        
-    }
-
-    // steps切换
-    const handleNext = async () => {
-        if (currentStep < steps.length) {
-            setCurrentStep(currentStep + 1);
+    const fetchCorpAuthorizedList = async(pageNo = 1, pageSize = 10) => {
+        setLoading(true);
+        const params: corpListParams = {
+            pageNo,
+            pageSize
+        };
+        try {
+        const res = await getCorpAuthorizedAppListApi(params);
+        if (res && Array.isArray(res.list)) {
+            setTableData(res.list);
+            setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));
+        } else {
+            console.warn('Invalid response format:', res);
         }
-        const values = await basicInfoForm.validate();
+        }catch(error) {
+            Message.error("获取企业授权应用列表失败");
+        }finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        if(currentStep === 3) {
+            // fetchCorpAuthorizedList()
+        }
+    },[currentStep])
+
+    //授权应用分页切换
+    const handlePageChange = (current: number, pageSize: number) => {
+        fetchCorpAuthorizedList(current, pageSize);
     };
+   
+    const handleRemoveAuthorizedApp = async(id: string) => {
+        const newData = tableData.filter(item => item.id !== id);
+        setTableData(newData);
+        // try {
+        // const res = await removeCorpAppApi(id);
+        // if(res) {
+        //     await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
+        //     Message.success("授权应用删除成功");
+        // }else {
+        //     Message.success("未删除成功");
+        // }
+        // }catch(error) {
+        //     Message.error("接口返回异常, 授权应用删除失败");
+        // }
+    }
+
+    const handleSearchChange = (searchValue: string) => {
+        setSearchValue(searchValue);
+    }
+
+    const handleUpdateTime = async(params: updatedParams) => {
+        const newData = tableData.map(item => {
+            if(item.id === params.id) {
+                return {
+                    ...item,
+                    expiresTime: params.expiresTime,
+                    authorizationTime: params.authorizationTime
+                };
+            }
+            return item;
+        });
+        setTableData(newData);
+        setVisible(false);
+        // try {
+        // const res =  await updateCorpAppApi(params);
+        // if(res) {
+        //     await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
+        //     Message.success("更新授权时间成功");
+        // }else {
+        // Message.success("接口返回数据异常");
+        // }
+        // }catch(error) {
+        // Message.error("更新授权时间失败");
+        // }finally {
+        // setVisible(false);
+        // }
+    }
+
+    const displayData = useMemo(()=>{
+        if (!searchValue.trim()) return tableData
+        const lowerSearch = searchValue.toLowerCase();
+        return tableData.filter(item => 
+            item.applicationName?.toLowerCase().includes(lowerSearch)
+        )
+    },[tableData, searchValue])
 
     //点击创建应用的上一步button
     const handlePrev = () => {
@@ -52,23 +130,68 @@ const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
         }
     };
    
-    //点击modal的取消按钮
-    const handleCloseModal = () => {
+    const handleBasicDataChange = (values: Record<string, any>) => {
+        const newStatus = values?.status === true ? 1 : 0;
+        let newValues = {
+            ...values,
+            status: newStatus
+        }
+        setBasicData(newValues); 
+    };
+
+    const handleAdminDataChange = (values: Record<string, any>) => {
+        setAdminData(values); 
+    };
+
+    const handleNext = async () => {
+        if(currentStep === 3) {
+            setCreateLoading(true);
+            const newTableData = tableData.map(item => {
+                return {
+                    ...item,
+                    authorizationTime: new Date(item.authorizationTime).getTime(),
+                    expiresTime: new Date(item.expiresTime).getTime()
+                }
+            })
+            const params:createCorpParams = {
+                appAuthTimeReqVO: newTableData,
+                corpAdminReqVO: adminValues,
+                corpReqVO: basicValues
+            }
+            try {
+                const res = await createCorpApi(params);
+                if(res) {
+                    setSuccessData(res);
+                    setCurrentStep(4);
+                    setBasicData({});
+                    setAdminData({});
+                    Message.success("创建企业成功");
+                }else {
+                    Message.success("接口返回数据异常");
+                }
+                setCreateLoading(false);
+            }catch(error) {
+                Message.error("创建企业失败");
+            }finally {
+                setCreateLoading(false);
+            }
+        }else {
+            setCurrentStep(currentStep + 1);
+        }
+    };
+
+    const handleSubmitApp = (data: CorpAppParams) => {
+        const newData = data.applicationIdList?.map((item:any) => {
+            return {
+                ...item,
+                authorizationTime:data.authorizationTime,
+                expiresTime: data.expiresTime,
+            }
+        }).filter(Boolean);
+        setTableData((prev: any) => [...prev, ...newData]);
         setAddAppModalVisible(false);
     }
-    // 提交新应用（弹窗确认后调用）
-    const handleAddSubmit = (newAppData: any) => {
-        const newData: AppItem = {
-            key: displayData.length + 1,
-            appId: "113",
-            effectTime: newAppData.appTime.effectTime,
-            expireTime: newAppData.appTime.expireTime,
-            appName: newAppData.appName[0],
-            version: "V2.3"
-        };
-        authorizedAppRef.current?.addNewApp(newData);
-        setAddAppModalVisible(false);
-    };
+
 
     const renderContent = (currentStep: number) => {
         return (
@@ -76,20 +199,34 @@ const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
                 <div>
                     {/* 第一步：基本信息 */}
                     {currentStep === 1 && (
-                        <BasicInformation basicInfoForm={basicInfoForm} />
+                        <BasicInformation industryOptions={industryOptions} basicValues={basicValues} onDataChange={handleBasicDataChange}/>
                     )}
                     {/* 第二步：管理员信息 */}
                     {currentStep === 2 && (
-                        <AdminInformation adminInfoForm={adminInfoForm} />
+                        <AdminInformation adminValues={adminValues} onDataChange={handleAdminDataChange}/>
                     )}
                     {/* 第三步： 授权应用 */}
                     {currentStep === 3 && (
-                        <AuthorizedApp ref={authorizedAppRef} onEdit={handleEditTime} setAddAppModalVisible={setAddAppModalVisible}/>
+                        <AuthorizedApp 
+                            visible={visible}
+                            setVisible={setVisible}
+                            addAppModalVisible={addAppModalVisible}
+                            pageination={pageInation} 
+                            loading={loading} 
+                            tableData={displayData} 
+                            className ={styles.tabPanel} 
+                            onSearch={handleSearchChange}
+                            onChange={handlePageChange}
+                            onUpdateTime={handleUpdateTime}
+                            onRemoveAuthorizedApp={handleRemoveAuthorizedApp}
+                            setAddAppModalVisible={setAddAppModalVisible}
+                            onSubmit={handleSubmitApp}
+                        />
                     )}
                     {/* 第四步：确认信息 */}
                     {currentStep === 4 && (
                         <CreateSuccess 
-                         basicInfoForm={basicInfoForm} 
+                         successData={successData}
                          setCurrentStep={setCurrentStep} 
                          setAddAppModalVisible={setAddAppModalVisible}
                         />
@@ -130,14 +267,10 @@ const CreateBusinessPage: React.FC<ICreateBusinessPageProps> = () => {
                                 onClick={handleNext}
                                 disabled={currentStep === steps.length}
                             >
-                                下一步
+                                {currentStep === 3 && createLoading ? <IconLoading /> : "下一步"}
                             </Button>
                         </Space>
                     </div>}
-                {/* 编辑授权应用 */}
-                <EditAuthorizedTime visible={editTimeVisible} setVisible={setEditTimeVisible} onUpdateData={handleUpdateTime} />
-                {/* 创建应用modal */}
-                <CreateAppModal visible={addAppModalVisible} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
             </div>
         </div>
     );

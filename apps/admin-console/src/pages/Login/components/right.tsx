@@ -70,7 +70,8 @@ const Right: React.FC = () => {
             accessToken: loginResp.accessToken,
             refreshToken: loginResp.refreshToken,
             expiresTime: loginResp.expiresTime,
-            tenantId: loginResp.tenantWebsite
+            tenantId: loginResp.tenantWebsite,
+            corpId: loginResp.corpId,
           },
           rememberMe
         );

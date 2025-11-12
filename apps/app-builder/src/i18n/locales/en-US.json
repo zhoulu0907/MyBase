@@ -124,7 +124,8 @@
     "enterpriseInfo": "Enterprise Info",
     "enterprise": "Enterprise Management",
     "tenant": "Personal Center",
-    "edit": "Edit"
+    "edit": "Edit",
+    "createEnterprise":"Create Enterprise"
   },
   "myApp": {
     "createApp": "Create App"

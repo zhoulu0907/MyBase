@@ -1,7 +1,10 @@
-import { DatePicker, Form, Message, Modal, Select } from "@arco-design/web-react";
-import { getCorpAppSimpleListApi } from "@onebase/platform-center";
-import type { authorizedAppList, ICreateAppModal } from "../../types/appItem";
 import { useEffect, useState } from "react";
+import { Avatar, DatePicker, Form, Message, Modal, Select, Space, Typography } from "@arco-design/web-react";
+import { getCorpAppSimpleListApi, } from "@onebase/platform-center";
+import { formatTimeYMDHMS } from "@onebase/common";
+import type { authorizedAppList, ICreateAppModal } from "../../types/appItem";
+import styles from "./index.module.less";
+
 
 export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppModal, onSaveAppData}) => {
     const [createNewAppForm] = Form.useForm();
@@ -20,9 +23,25 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
         getApplicationIdResult();
     },[])
 
+    const handleCancel = () => {
+        onCloseAppModal();
+        createNewAppForm.resetFields();
+    }
+
     const handleSaveModal = async() => {
         const values = await createNewAppForm.validate();
-        onSaveAppData(values);
+        const formattedList = values.applicationIdList.map((value: string) => {
+            const match = dropdownList.find(item => item.id === value);
+            return {
+                value,
+                applicationName: match?.appName || "",
+                versionNumber: match?.versionNumber || "",
+                applicationCode: match?.appCode  || "",
+                id: match?.id || ""
+            };
+        });
+        onSaveAppData({ ...values, applicationIdList: formattedList });
+        createNewAppForm.resetFields();
     }
 
     return (
@@ -33,7 +52,7 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                 </div>
             } 
             visible={visible}
-            onCancel={onCloseAppModal}
+            onCancel={handleCancel}
             onOk={handleSaveModal}
             >
             <Form form={createNewAppForm}>
@@ -46,10 +65,23 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                         mode='multiple'
                         placeholder="选择应用"
                         allowClear
+                        showSearch
+                        renderFormat ={(option:any, value: any)=>{
+                            const selectedOption = dropdownList.find(item => item.id === value);
+                            return selectedOption ? selectedOption.appName : value;
+                        }}
                     >
                         {dropdownList.map((option) => (
-                        <Select.Option key={option.id} value={option.corpId}>
-                            {option.corpName}
+                        <Select.Option key={option.id} value={option.id}>
+                            <Space align="center" size={12}>
+                                <Avatar style={{ backgroundColor: option.iconColor }}>{option.iconName}</Avatar>
+                                <div className={styles.authorizedOption}>
+                                    <Typography.Text>{option.appName}</Typography.Text>
+                                    <Typography.Text type='secondary'>
+                                        {option.versionNumber} · {formatTimeYMDHMS(option.createTime)}
+                                    </Typography.Text>
+                                </div>
+                            </Space>
                         </Select.Option>
                         ))}
                     </Select>

@@ -1,22 +1,26 @@
 import React from 'react';
-import { Typography } from '@arco-design/web-react';
+import { Space } from '@arco-design/web-react';
+import { formatIndustryType } from '../../utils';
 
 interface FormItemProps {
   label?: string;
+  logoContent?: React.ReactNode;
   value: any;
   onChange: (value: any) => void;
   isEdit: boolean;
   component: React.ElementType;
   componentProps?: Record<string, any>;
- 
+
 }
 
 const EditableFormItem: React.FC<FormItemProps> = ({
-    value,
-    onChange,
-    isEdit,
-    component: Component,
-    componentProps = {},
+  logoContent,
+  label,
+  value,
+  onChange,
+  isEdit,
+  component: Component,
+  componentProps = {},
 }) => {
   const renderReadOnlyContent = () => {
     if (value === undefined || value === null || value === '') {
@@ -27,21 +31,37 @@ const EditableFormItem: React.FC<FormItemProps> = ({
       return value.join(', ');
     }
 
+    if(label=== "industryType") {
+      return formatIndustryType(componentProps?.options, value);
+    }
+
     return value;
   };
 
-  return (
-    <div style={{ flexGrow: 1 }}>
-        {/* 内容 */}
-        {isEdit ? (
+  const renderEditContent = () => {
+    if (label === "logo") {
+      return (
+        <Space direction='vertical'>
+          {value}
           <Component
             value={value}
             onChange={onChange}
             {...componentProps}
-          />
-        ) : (
-          renderReadOnlyContent()
-        )}
+          >{logoContent}</Component>
+        </Space>
+      )
+    } else {
+      return <Component
+        value={value}
+        onChange={onChange}
+        {...componentProps}
+      />
+    }
+  }
+
+  return (
+    <div style={{ flexGrow: 1 }}>
+      {isEdit ? renderEditContent() : renderReadOnlyContent()}
     </div>
   );
 };
