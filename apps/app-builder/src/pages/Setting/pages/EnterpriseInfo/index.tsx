@@ -3,11 +3,11 @@ import { Avatar, Spin, Typography, Message, Grid, Tooltip, Upload, Image, Form, 
 import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
 import { getDetailsApi, updateCorpApi, getDictDataByType, uploadFile } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
+import { hasPermission } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
-// import { TokenManager } from '@onebase/common';
+import { TokenManager } from '@onebase/common';
 
 const { Col, Row } = Grid;
 const { Text } = Typography;
@@ -22,16 +22,13 @@ const SpaceInfo: React.FC = () => {
   const [renameVisible, setRenameVisible] = useState<boolean>(false);
 
   // 获取用户信息
-  // const tokenInfo = TokenManager.getTokenInfo();
-  // const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
-
-  // console.log(tokenInfo, userPermissionInfo, 'userPermissionInfo')
+  const corpInfo = TokenManager.getCorpIdInfo();
 
   useEffect(() => {
-    fetchEnterpriseInfo('114914409919610880');
+    corpInfo?.corpId && fetchEnterpriseInfo(+corpInfo.corpId);
   }, []);
 
-  const fetchEnterpriseInfo = async (id: string) => {
+  const fetchEnterpriseInfo = async (id: number) => {
     try {
       setLoading(true);
       const res = await getDetailsApi(id);

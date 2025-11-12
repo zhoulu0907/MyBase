@@ -36,5 +36,4 @@ export interface UpdateAdminOrDirectorReq {
    * 用户id
    */
   userId: string;
-  [property: string]: any;
 }

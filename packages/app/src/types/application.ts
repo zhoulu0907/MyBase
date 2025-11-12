@@ -175,7 +175,6 @@ export interface DatasourceSaveReqDTO {
    * 运行模式
    */
   runMode?: number;
-  [property: string]: any;
 }
 
 /**

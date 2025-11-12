@@ -333,9 +333,7 @@ const TenantManagement: React.FC = () => {
                       <IconEdit fontSize={16} style={{ marginRight: 4 }} />编辑
                     </div>
                   </Dropdown.Button>
-
                 </div>
-
               </div>
             )
           })

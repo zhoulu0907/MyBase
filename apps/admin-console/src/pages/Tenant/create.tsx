@@ -20,7 +20,6 @@ import {
   PlatformTenantPublishMode,
   type CreateTenantParams
 } from '@onebase/platform-center';
-// import { getBackendURL } from '@onebase/common';
 import { generateTimestampString, getDomainPrefix } from '@/utils/date';
 import styles from './index.module.less';
 

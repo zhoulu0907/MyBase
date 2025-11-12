@@ -128,7 +128,6 @@ export interface CorpDetailResponse {
    * 用户上限
    */
   userLimit?: number;
-  [property: string]: any;
 }
 
 /**
@@ -153,5 +152,4 @@ export interface CorpAppVo {
    * 应用图标
    */
   iconName?: string;
-  [property: string]: any;
 }

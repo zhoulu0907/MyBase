@@ -2,9 +2,6 @@ import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image } from 
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import PlaceholderPanel from '@/components/PlaceholderPanel';
-// import { hasPermission } from '@/utils/permission';
-// import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;

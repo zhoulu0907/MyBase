@@ -91,8 +91,3 @@ export const updateLoginedUserPwd = (data: UserProfileUpdatePwdReq) => {
 export const getSimpleUser = (userNickName: string) => {
   return systemService.get(`/user/simple-list-by-name?userNickName=${userNickName}`);
 };
-
-// 修改用户管理员/主管
-export const updateAdminOrDirector = (data: UpdateAdminOrDirectorReq) => {
-  return systemService.post('/dept/update-dept-admin-or-director', data);
-};

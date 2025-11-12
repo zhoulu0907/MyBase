@@ -83,7 +83,6 @@ export interface UserProfileRespVO {
    * 用户账号
    */
   username?: string;
-  [property: string]: any;
 }
 
 /**
@@ -104,7 +103,6 @@ export interface DeptSimpleRespVO {
    * 父部门 ID
    */
   parentId?: number;
-  [property: string]: any;
 }
 
 /**
@@ -121,7 +119,6 @@ export interface PostSimpleRespVO {
    * 岗位名称
    */
   name?: string;
-  [property: string]: any;
 }
 
 /**
@@ -138,7 +135,6 @@ export interface RoleSimpleRespVO {
    * 角色名称
    */
   name?: string;
-  [property: string]: any;
 }
 
 /**
@@ -165,7 +161,6 @@ export interface UserProfileUpdateReq {
    * 用户性别，参见 SexEnum 枚举类
    */
   sex?: number;
-  [property: string]: any;
 }
 
 /**
@@ -180,5 +175,4 @@ export interface UserProfileUpdatePwdReq {
    * 旧密码
    */
   oldPassword: string;
-  [property: string]: any;
 }

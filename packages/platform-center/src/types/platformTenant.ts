@@ -102,7 +102,6 @@ export interface PlatformTenantInfo {
    * 域名H5
    */
   websiteH5?: string;
-  [property: string]: any;
 }
 
 export interface CreateTenantParams {
@@ -165,7 +164,6 @@ export interface TenantAdminUserResVO {
    * 管理员账号
    */
   adminUserName?: string;
-  [property: string]: any;
 }
 
 export interface UpdateTenantParams extends CreateTenantParams {
