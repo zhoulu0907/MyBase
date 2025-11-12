@@ -847,17 +847,44 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Override
     public BpmPreviewRespVO flowPreview(BpmPreviewReqVO reqVO) {
-        // 获取流程实例
-        Instance instance = insService.getById(reqVO.getInstanceId());
+        Long instanceId = reqVO.getInstanceId();
+        Long businessId = reqVO.getBusinessId();
 
-        if (instance == null) {
-            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+        BpmPreviewRespVO respVO = new BpmPreviewRespVO();
+
+        // 抛参数异常
+        if (instanceId == null && businessId == null) {
+            throw new IllegalArgumentException("业务ID和流程实例ID不能同时为空");
         }
 
-        String defJsonStr = instance.getDefJson();
+        DefJson defJson;
 
-        // 解析流程定义JSON
-        DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+        // 优先处理流程实例ID
+        if (instanceId != null) {
+            // 获取流程实例
+            Instance instance = insService.getById(reqVO.getInstanceId());
+
+            if (instance == null) {
+                throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
+            }
+
+            respVO.setInstanceId(instance.getId());
+
+            String defJsonStr = instance.getDefJson();
+
+            // 解析流程定义JSON
+            defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+        } else {
+            // 查询已发布的流程定义
+            Definition definition = defExtService.getByFormPathAndStatus(String.valueOf(businessId), PublishStatus.PUBLISHED.getKey());
+            if (definition == null) {
+                log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
+                throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
+            }
+
+            defJson = defService.queryDesign(definition.getId());
+        }
+
         BpmDefJsonVO bpmDefJsonVO = new BpmDefJsonVO();
 
         for (NodeJson nodeJson : defJson.getNodeList()) {
@@ -880,7 +907,12 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
             // 设置状态
             BpmEleRunStatusEnum eleRunStatus = BpmEleRunStatusEnum.chartStatusToEleRunStatus(nodeJson.getStatus());
-            nodeVO.getData().setRunStatus(eleRunStatus.getCode());
+
+            if (eleRunStatus == null) {
+                nodeVO.getData().setRunStatus(BpmEleRunStatusEnum.PENDING.getCode());
+            } else {
+                nodeVO.getData().setRunStatus(eleRunStatus.getCode());
+            }
 
             if (bpmDefJsonVO.getNodes() == null) {
                 bpmDefJsonVO.setNodes(new ArrayList<>());
@@ -900,7 +932,12 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
                 // 设置状态
                 BpmEleRunStatusEnum eleRunStatus = BpmEleRunStatusEnum.chartStatusToEleRunStatus(skipJson.getStatus());
-                edgeVO.setRunStatus(eleRunStatus.getCode());
+
+                if (eleRunStatus == null) {
+                    edgeVO.setRunStatus(BpmEleRunStatusEnum.PENDING.getCode());
+                } else {
+                    edgeVO.setRunStatus(eleRunStatus.getCode());
+                }
 
                 // 添加边视图到列表
                 if (bpmDefJsonVO.getEdges() == null) {
@@ -911,8 +948,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             }
         }
 
-        BpmPreviewRespVO respVO = new BpmPreviewRespVO();
-        respVO.setInstanceId(instance.getId());
         respVO.setBusinessId(Long.valueOf(defJson.getFormPath()));
         respVO.setFlowName(defJson.getFlowName());
         respVO.setVersion("V" + defJson.getVersion());
