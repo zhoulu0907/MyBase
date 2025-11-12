@@ -322,6 +322,12 @@ export interface ISelectOptionsConfigType {
   type: typeof CONFIG_TYPES.SELECT_OPTIONS_INPUT;
   placeholder?: string;
 }
+export interface IMutipleSelectOptionsConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT;
+  placeholder?: string;
+}
 
 // 数据选择 数据源
 export interface ISelectDataSourceConfigType {

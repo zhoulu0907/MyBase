@@ -1,4 +1,4 @@
-import { Button, Form, Input, Radio, Space, Tooltip, Select } from '@arco-design/web-react';
+import { Button, Form, Input, Space, Checkbox, Tooltip, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -9,14 +9,19 @@ import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import SelectDictModal from '@/components/SelectDictModal';
 import { useAppStore } from '@/store/store_app';
 
-export interface DynamicSelectConfigProps {
+export interface DynamicSelectMutipleConfigProps {
   handlePropsChange: (key: string, value: any) => void;
   item: any;
   configs: any;
   id: string;
 }
 
-const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsChange, item, configs, id }) => {
+const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
+  handlePropsChange,
+  item,
+  configs,
+  id
+}) => {
   const selectKey = item.key || 'defaultOptionsConfig';
   const { mainEntity, subEntities } = useAppEntityStore();
   useSignals();
@@ -205,14 +210,14 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                             color: '#555'
                           }}
                         />
-                        <Radio
+                        {/* SelectMutiple */}
+                        <Checkbox
                           checked={configs[selectKey].defaultOptions[idx].chosen || false}
                           onChange={(e) => {
                             let newList = [...configs[selectKey].defaultOptions];
-                            newList = newList.map((item) => ({ ...item, chosen: false }));
                             newList[idx] = {
                               ...newList[idx],
-                              chosen: true
+                              chosen: e
                             };
                             const newConfig = { ...configs[selectKey], defaultOptions: newList };
                             handlePropsChange(selectKey, newConfig);
@@ -290,4 +295,4 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
   );
 };
 
-export default DynamicSelectConfig;
+export default DynamicSelectMutipleConfig;

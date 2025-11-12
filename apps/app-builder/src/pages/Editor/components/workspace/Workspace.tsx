@@ -1,5 +1,5 @@
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
-import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -17,6 +17,7 @@ import {
   usePageEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
+  DEFAULT_OPTIONS_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -315,13 +316,29 @@ export default function EditorWorkspace() {
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          schema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            dictTypeId: field.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          schema.config.defaultOptionsConfig = {
+                            ...schema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (field.options?.length) {
-                        schema.config.defaultOptions = field.options.map((e: any) => ({
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: field.options.map((e: any) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        schema.config.defaultOptionsConfig = {
+                          ...schema.config.defaultOptionsConfig,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints
@@ -410,13 +427,29 @@ export default function EditorWorkspace() {
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          subSchema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            dictTypeId: ele.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          subSchema.config.defaultOptionsConfig = {
+                            ...subSchema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e: any) => ({
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: ele.options.map((e: any) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        subSchema.config.defaultOptionsConfig = {
+                          ...subSchema.config.defaultOptionsConfig,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints
@@ -543,13 +576,29 @@ export default function EditorWorkspace() {
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          schema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            dictTypeId: currentField.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          schema.config.defaultOptionsConfig = {
+                            ...schema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (currentField.options?.length) {
-                        schema.config.defaultOptions = currentField.options.map((e) => ({
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: currentField.options.map((e) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        schema.config.defaultOptionsConfig = {
+                          ...schema.config.defaultOptionsConfig,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints

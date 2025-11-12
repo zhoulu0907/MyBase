@@ -15,10 +15,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
     status,
     verify,
     layout,
-    labelColSpan = 0,
-    showSearch,
-    defaultValue,
-    defaultOptions,
+    defaultOptionsConfig,
     runtime = true,
     detailMode
   } = props;
@@ -46,9 +43,6 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -56,19 +50,17 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{defaultOptions.find((item: any) => item.value == fieldValue)?.label || '--'}</div>
+          <div>{defaultOptionsConfig?.defaultOptions?.find((op) => op.chosen)?.label || '--'}</div>
         ) : (
           <Select
             placeholder="请选择"
-            showSearch={showSearch}
             filterOption={(input, option) => {
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             allowClear
-            options={defaultOptions}
+            options={defaultOptionsConfig?.defaultOptions}
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

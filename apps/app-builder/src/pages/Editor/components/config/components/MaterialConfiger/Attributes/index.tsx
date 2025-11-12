@@ -26,6 +26,7 @@ import DynamicFileConfig from './components/DynamicFileConfig';
 import DynamicImageConfig from './components/DynamicImageConfig';
 import DynamicImageHandleConfig from './components/DynamicImageHandleConfig';
 import DynamicOptionsConfig from './components/DynamicOptionsConfig';
+import DynamicOptionsMutipleConfig from './components/DynamicOptionsMutipleConfig';
 import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
@@ -257,6 +258,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       case CONFIG_TYPES.SELECT_OPTIONS_INPUT:
         // 自定义选项 select
         return <DynamicOptionsConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
+      case CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT:
+        // 自定义选项 select 多选
+        return <DynamicOptionsMutipleConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.CAROUSEL:
         // 轮播
         return <DynamicCarouselConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;

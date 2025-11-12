@@ -9,7 +9,7 @@ import { getComponentSchema } from '../../../schema';
 import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
 import EditRender from 'src/components/render/EditRender';
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES,DEFAULT_OPTIONS_TYPE } from '../../../constants';
 import { v4 as uuidv4 } from 'uuid';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
@@ -84,7 +84,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   };
 
   // 拖拽添加
-  const onSubAdd = async(e: any) => {
+  const onSubAdd = async (e: any) => {
     const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
     const itemType = e.item.getAttribute('data-cp-type');
     const fieldId = e.item.getAttribute('data-field-id');
@@ -132,9 +132,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config = schemaConfig;
 
     // 当前实体
-    const currentEntity = subEntities.entities?.find((ele)=>ele.entityId===entityId);
+    const currentEntity = subEntities.entities?.find((ele) => ele.entityId === entityId);
     // 当前字段
-    const currentField = currentEntity?.fields?.find((ele)=>ele.fieldId===fieldId);
+    const currentField = currentEntity?.fields?.find((ele) => ele.fieldId === fieldId);
     if (currentField) {
       // 数据长度 dataLength
       // 小数位数 decimalPlaces
@@ -161,13 +161,29 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
           const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
           if (dictOptions.length) {
-            schema.config.defaultOptions = dictOptions;
+            const newDefaultOptionsConfig = {
+              type: DEFAULT_OPTIONS_TYPE.DICT,
+              dictTypeId: currentField.dictTypeId,
+              colorMode: true,
+              colorModeType: COLOR_MODE_TYPES.POINT,
+              defaultOptions: dictOptions
+            };
+            schema.config.defaultOptionsConfig = {
+              ...schema.config.defaultOptionsConfig,
+              ...newDefaultOptionsConfig
+            };
           }
         } else if (currentField.options?.length) {
-          schema.config.defaultOptions = currentField.options.map((e) => ({
-            label: e.optionLabel,
-            value: e.optionValue
-          }));
+          const newDefaultOptionsConfig = {
+            defaultOptions: currentField.options.map((e) => ({
+              label: e.optionLabel,
+              value: e.optionValue
+            }))
+          };
+          schema.config.defaultOptionsConfig = {
+            ...schema.config.defaultOptionsConfig,
+            ...newDefaultOptionsConfig
+          };
         }
       }
       // 字段约束配置（长度/正则） constraints
@@ -249,7 +265,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ),
         dataIndex: column.id,
         key: column.id,
-        bodyCellStyle:{
+        bodyCellStyle: {
           padding: '4px 0'
         },
         render: (_text: string, _record: any, index: number) => {

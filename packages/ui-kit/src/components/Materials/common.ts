@@ -38,6 +38,7 @@ import type {
   IRelatedFormDataConfigType,
   ISelectConfigType,
   ISelectOptionsConfigType,
+  IMutipleSelectOptionsConfigType,
   IStatusConfigType,
   ITableDataConfigType,
   ITextConfigType,
@@ -374,21 +375,27 @@ export const baseDefault = {
 };
 
 export const radioDataConfig: IRadioDataConfigType = {
-  key: 'radioData',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.RADIO_DATA
 };
 
 export const checkboxDataConfig: ICheckboxDataConfigType = {
-  key: 'checkboxData',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.CHECKBOX_DATA
 };
 
 export const selectOptionsConfig: ISelectOptionsConfigType = {
-  key: 'selectOptions',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.SELECT_OPTIONS_INPUT
+};
+
+export const mutipleSelectOptionsConfig: IMutipleSelectOptionsConfigType = {
+  key: 'defaultOptionsConfig',
+  name: '自定义选项',
+  type: CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT
 };
 
 export const carouselConfig: ICarouselConfigType = {

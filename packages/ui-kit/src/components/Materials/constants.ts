@@ -16,6 +16,7 @@ export const CONFIG_TYPES = {
   PLACEHOLDER_INPUT: 'PlaceholderInput',
   // 组件选项输入
   SELECT_OPTIONS_INPUT: 'OptionsInput',
+  MUTIPLE_SELECT_OPTIONS_INPUT: 'MutipleOptionsInput',
   // 组件提示输入
   TOOLTIP_INPUT: 'TooltipInput',
   // 组件状态选择
@@ -417,4 +418,15 @@ export const WEEK_OPTIONS = {
   FRIDAY: 'Friday',
   SATURDAY: 'Saturday',
   SUNDAY: 'Sunday'
+} as const;
+
+export const COLOR_MODE_TYPES = {
+  TAG:'tag',
+  POINT: 'point'
+}
+
+// 
+export const DEFAULT_OPTIONS_TYPE = {
+  CUSTOM: 'CUSTOM',
+  DICT: 'DICT'
 } as const;

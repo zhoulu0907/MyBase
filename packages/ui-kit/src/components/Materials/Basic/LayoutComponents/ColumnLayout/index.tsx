@@ -11,9 +11,9 @@ import EditRender from 'src/components/render/EditRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
-import { ENTITY_COMPONENT_TYPES,ALL_COMPONENT_TYPES,FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { ENTITY_COMPONENT_TYPES, ALL_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { COMPONENT_MAP } from '../../../componentsMap';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_VALUES,WIDTH_OPTIONS } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_VALUES, WIDTH_OPTIONS, COLOR_MODE_TYPES,DEFAULT_OPTIONS_TYPE } from '../../../constants';
 import { getComponentSchema } from '../../../schema';
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
@@ -189,8 +189,8 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
             list={colComponents[index]}
             setList={(newList) => {
               const entityList: GridItem[] = [];
-              newList.forEach(async(item) => {
-               if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
+              newList.forEach(async (item) => {
+                if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
                   // 子表业务实体
                   const cpName = item.entityName || '子表单';
                   const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
@@ -252,13 +252,29 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          schema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.CUSTOM,
+                            dictTypeId: ele.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          subSchema.config.defaultOptionsConfig = {
+                            ...subSchema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e:any) => ({
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: ele.options.map((e: any) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        subSchema.config.defaultOptionsConfig = {
+                          ...subSchema.config.defaultOptionsConfig,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints
@@ -302,7 +318,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
               const entityID = e.item.getAttribute('data-entity-id');
-               // 子表字段不允许
+              // 子表字段不允许
               if (
                 (entityID && entityID !== mainEntity.entityId) ||
                 itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
