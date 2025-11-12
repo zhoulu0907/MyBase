@@ -1,9 +1,7 @@
 package com.cmsr.onebase.framework.tenant.core.web;
 
-import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -14,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-
 @RequiredArgsConstructor
 @Slf4j
 public class TenantVisitContextInterceptor implements HandlerInterceptor {
@@ -24,7 +20,7 @@ public class TenantVisitContextInterceptor implements HandlerInterceptor {
 
     private final TenantProperties tenantProperties;
 
-    private final SecurityFrameworkService securityFrameworkService;
+    // private final SystemPermissionService systemPermissionService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -44,9 +40,9 @@ public class TenantVisitContextInterceptor implements HandlerInterceptor {
         }
 
         // 校验用户是否可切换租户
-        if (!securityFrameworkService.hasAnyPermissions(PERMISSION)) {
-            throw exception(GlobalErrorCodeConstants.FORBIDDEN.getCode(), "您无权切换租户");
-        }
+        // if (!systemPermissionService.hasAnyPermissions(PERMISSION)) {
+        //     throw exception(GlobalErrorCodeConstants.FORBIDDEN.getCode(), "您无权切换租户");
+        // }
 
         // 【重点】切换租户编号
         loginUser.setVisitTenantId(visitTenantId);

@@ -1,12 +1,13 @@
-package com.cmsr.onebase.framework.security.config;
+package com.cmsr.onebase.framework.security.build.config;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
+import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
-import com.cmsr.onebase.framework.security.core.filter.TokenAuthenticationFilter;
+import com.cmsr.onebase.framework.security.core.filter.BuildAuthenticationFilter;
 import com.cmsr.onebase.framework.security.core.handler.AccessDeniedHandlerImpl;
 import com.cmsr.onebase.framework.security.core.handler.AuthenticationEntryPointImpl;
-import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
-import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkServiceImpl;
+import com.cmsr.onebase.framework.security.build.service.SystemPermissionService;
+import com.cmsr.onebase.framework.security.build.service.SystemPermissionServiceImpl;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import jakarta.annotation.Resource;
@@ -67,14 +68,14 @@ public class OneBaseSecurityAutoConfiguration {
      * Token 认证过滤器 Bean`
      */
     @Bean
-    public TokenAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
+    public BuildAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
                                                                OAuth2TokenCommonApi oauth2TokenApi) {
-        return new TokenAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi);
+        return new BuildAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi);
     }
 
     @Bean("ss") // 使用 Spring Security 的缩写，方便使用
-    public SecurityFrameworkService securityFrameworkService(PermissionCommonApi permissionApi) {
-        return new SecurityFrameworkServiceImpl(permissionApi);
+    public SystemPermissionService securityFrameworkService(PermissionCommonApi permissionApi) {
+        return new SystemPermissionServiceImpl(permissionApi);
     }
 
     /**
