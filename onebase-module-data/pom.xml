@@ -19,8 +19,10 @@
         <module>onebase-module-metadata-build</module>
         <module>onebase-module-etl-api</module>
         <module>onebase-module-etl-build</module>
+        <module>onebase-module-etl-common</module>
         <module>onebase-module-etl-core</module>
         <module>onebase-module-etl-runtime</module>
+        <module>onebase-module-etl-executor</module>
     </modules>
 
     <properties>

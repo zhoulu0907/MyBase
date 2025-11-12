@@ -12,14 +12,6 @@ import java.util.List;
  */
 public interface BpmInstanceService {
     /**
-     * 获取流程实例的操作按钮
-     *
-     * @param taskId      任务ID
-     * @param businessId  业务ID
-     */
-     ListActButtonRespVO getActButtons(String taskId, String businessId);
-
-    /**
      * 发起流程实例
      *
      * @param reqVO 开启流程实例请求VO
@@ -46,4 +38,21 @@ public interface BpmInstanceService {
      * @param instanceId 流程实例ID
      */
     BpmFlowTaskDetailVO getFormDetail(Long instanceId);
+
+    /**
+     * 流程预测
+     *
+     * @param reqVO 流程预测请求VO
+     * @return 流程图
+     */
+    List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO);
+
+
+    /**
+     * 流程预览
+     *
+     * @param reqVO 流程预览请求VO
+     * @return 流程图
+     */
+    BpmPreviewRespVO flowPreview(BpmPreviewReqVO reqVO);
 }

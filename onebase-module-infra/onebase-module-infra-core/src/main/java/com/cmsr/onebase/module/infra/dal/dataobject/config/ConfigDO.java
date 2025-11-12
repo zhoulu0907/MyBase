@@ -66,7 +66,7 @@ public class ConfigDO extends BaseDO {
      * 不可见的参数，一般是敏感参数，前端不可获取
      */
     @Column(name = VISIBLE)
-    private Boolean visible;
+    private Integer visible;
     /**
      * 备注
      */

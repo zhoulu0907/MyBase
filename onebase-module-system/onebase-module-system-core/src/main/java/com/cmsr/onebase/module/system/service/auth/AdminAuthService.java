@@ -91,4 +91,11 @@ public interface AdminAuthService {
      */
     void resetPassword(AuthResetPasswordReqVO reqVO);
 
+    /**
+     * 账号登录
+     *
+     * @param reqVO 登录信息
+     * @return 登录结果
+     */
+    AuthLoginRespVO corpLogin(@Valid AuthLoginReqVO reqVO);
 }

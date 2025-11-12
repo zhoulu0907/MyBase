@@ -8,6 +8,9 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -81,50 +84,70 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
             }
         });
 
+        MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
+        methodCoreContext.setEntityId(reqVO.getEntityId());
+        methodCoreContext.setData(dataByName);
+        methodCoreContext.setMethodCode(reqVO.getMethodCode());
+        methodCoreContext.setTraceId(reqVO.getTraceId());
+        methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
+
+        if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+            List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+                MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+                metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+                metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+                return metadataDataMethodSubEntityContext;
+            }).collect(Collectors.toList());
+            methodCoreContext.setSubEntities(entityContexts);
+        }
+
+
         // 调用core模块的基础服务
         Map<String, Object> resultData = coreDataMethodService.createData(
-                reqVO.getEntityId(),
-                dataByName,
-                reqVO.getMethodCode()
+                methodCoreContext
         );
 
-        // 获取主表业务数据id，作为子表parent_id字段的值
-        Map<String,Object> map = (Map<String,Object>)resultData.get("data");
-        String parentId = (String)map.get("id");
-
-        // 处理子表插入数据
-        List<SubEntityVo> subEntities = reqVO.getSubEntities();
-        if(subEntities!=null){
-            for(SubEntityVo subEntityVo: subEntities){
-                //子实体Id
-                Long subEntityId = subEntityVo.getSubEntityId();
-                //该子实体对应多条数据待插入
-                List<Map<Long,Object>> list  = subEntityVo.getSubData();
-                for(Map<Long,Object> data: list){
-                    // 将 field_id -> value 转换为 field_name -> value
-                    Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
-
-                    subDataByName.put("parent_id",parentId);
-                    log.info("字段ID映射为名称后的数据: {}", subDataByName);
-
-                    // 打印每个字段值的类型
-                    subDataByName.forEach((key, value) -> {
-                        if (value != null) {
-                            log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
-                        } else {
-                            log.info("字段 {} 的值为null", key);
-                        }
-                    });
-
-                    // 调用core模块的基础服务
-                    Map<String, Object> subResultData = coreDataMethodService.createData(
-                            subEntityId,
-                            subDataByName,
-                            reqVO.getMethodCode()
-                    );
-                }
-            }
-        }
+//        // 获取主表业务数据id，作为子表parent_id字段的值
+//        Map<String,Object> map = (Map<String,Object>)resultData.get("data");
+//        String parentId = (String)map.get("id");
+//
+//        // 处理子表插入数据
+//        List<SubEntityVo> subEntities = reqVO.getSubEntities();
+//        if(subEntities!=null){
+//            for(SubEntityVo subEntityVo: subEntities){
+//                //子实体Id
+//                Long subEntityId = subEntityVo.getSubEntityId();
+//                //该子实体对应多条数据待插入
+//                List<Map<Long,Object>> list  = subEntityVo.getSubData();
+//                for(Map<Long,Object> data: list){
+//                    // 将 field_id -> value 转换为 field_name -> value
+//                    Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
+//
+//                    subDataByName.put("parent_id",parentId);
+//                    log.info("字段ID映射为名称后的数据: {}", subDataByName);
+//
+//                    // 打印每个字段值的类型
+//                    subDataByName.forEach((key, value) -> {
+//                        if (value != null) {
+//                            log.info("字段 {} 的值类型: {}, 值: {}", key, value.getClass().getName(), value);
+//                        } else {
+//                            log.info("字段 {} 的值为null", key);
+//                        }
+//                    });
+//
+//                    MetadataDataMethodRequestContext subMethodCoreContext = new MetadataDataMethodRequestContext();
+//                    subMethodCoreContext.setEntityId(subEntityId);
+//                    subMethodCoreContext.setData(subDataByName);
+//                    subMethodCoreContext.setMethodCode(reqVO.getMethodCode());
+//                    methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
+//
+//                    // 调用core模块的基础服务
+//                    Map<String, Object> subResultData = coreDataMethodService.createData(
+//                            subMethodCoreContext
+//                    );
+//                }
+//            }
+//        }
 
         // 转换为VO
         return convertToDynamicDataRespVO(resultData);
@@ -135,152 +158,188 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         // 将 field_id -> value 转换为 field_name -> value
         Map<String, Object> dataByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getData());
 
+        MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
+        methodCoreContext.setEntityId(reqVO.getEntityId());
+        methodCoreContext.setId(reqVO.getId());
+        methodCoreContext.setData(dataByName);
+        methodCoreContext.setMethodCode(reqVO.getMethodCode());
+        methodCoreContext.setMenuId(reqVO.getMenuId());
+        methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
+
+        if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+            List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+                MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+                metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+                metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+                return metadataDataMethodSubEntityContext;
+            }).collect(Collectors.toList());
+            methodCoreContext.setSubEntities(entityContexts);
+        }
+
         // 调用core模块的基础服务 更新主表信息
-        Map<String, Object> resultData = coreDataMethodService.updateData(
-                reqVO.getEntityId(),
-                reqVO.getId(),
-                dataByName,
-                reqVO.getMethodCode()
-        );
+        Map<String, Object> resultData = coreDataMethodService.updateData(methodCoreContext);
 
-        //查询关联关系 默认主表为source表
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, reqVO.getEntityId());
-        configStore.order("create_time", Order.TYPE.DESC);
-        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
-        List<String> subTableIds = new ArrayList<String>();
-        //获取子表数据
-        List<SubEntityVo> subEntities = reqVO.getSubEntities();
-        for(MetadataEntityRelationshipDO relationshipDO:relationships){
-            //根据关联字段查询子表存在的所有记录
-            MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
-
-            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
-            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
-            String tableName = targetEntity.getTableName();
-            String fieldName = targetFieldDO.getFieldName();
-            // 获取临时数据源服务
-            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
-            if (datasource == null) {
-                throw exception(DATASOURCE_NOT_EXISTS);
-            }
-            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-            log.info("成功切换到数据源：{}", datasource.getCode());
-
-            DefaultConfigStore config = new DefaultConfigStore();
-            if("parent_id".equals(fieldName)){
-                config.and(fieldName, reqVO.getId());
-            }else{
-                Object value = dataByName.get(sourceFieldDO.getFieldName());
-                config.and(fieldName, value);
-            }
-            DataSet dataSet = temporaryService.querys(tableName,config);
-
-            //子表存在的数据行id
-            for (int i = 0; i < dataSet.size(); i++) {
-                DataRow row = dataSet.getRow(i);
-                subTableIds.add((String) row.get("id"));
-            }
-            //如果子表数据为空，对子表数据全部删除
-            if(subEntities.isEmpty()) {
-                List<MetadataEntityFieldDO> fields = entityFieldRepository.getEntityFieldListByEntityId(targetEntity.getId());
-                boolean hasDeletedField = fields.stream()
-                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
-                DefaultConfigStore subConfig = new DefaultConfigStore();
-                subConfig.and("parent_id", reqVO.getId());
-                if (hasDeletedField) {
-                    // 软删除：更新deleted字段为删除时间戳
-                    DataRow updateData = new DataRow();
-                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
-                    temporaryService.update(tableName, updateData, subConfig);
-//                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-                } else {
-                     temporaryService.delete(tableName, subConfig);
-//                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-                }
-//                for (String id : subTableIds) {
-//                    coreDataMethodService.deleteData(
-//                            targetEntity.getId(),
-//                            id,
-//                            null
-//                    );
+//        //查询关联关系 默认主表为source表
+//        DefaultConfigStore configStore = new DefaultConfigStore();
+//        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, reqVO.getEntityId());
+//        configStore.order("create_time", Order.TYPE.DESC);
+//        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
+//        List<String> subTableIds = new ArrayList<String>();
+//        //获取子表数据
+//        List<SubEntityVo> subEntities = reqVO.getSubEntities();
+//        for(MetadataEntityRelationshipDO relationshipDO:relationships){
+//            //根据关联字段查询子表存在的所有记录
+//            MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
+//
+//            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+//            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+//            String tableName = targetEntity.getTableName();
+//            String fieldName = targetFieldDO.getFieldName();
+//            // 获取临时数据源服务
+//            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
+//            if (datasource == null) {
+//                throw exception(DATASOURCE_NOT_EXISTS);
+//            }
+//            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+//            log.info("成功切换到数据源：{}", datasource.getCode());
+//
+//            DefaultConfigStore config = new DefaultConfigStore();
+//            if("parent_id".equals(fieldName)){
+//                config.and(fieldName, reqVO.getId());
+//            }else{
+//                Object value = dataByName.get(sourceFieldDO.getFieldName());
+//                config.and(fieldName, value);
+//            }
+//            DataSet dataSet = temporaryService.querys(tableName,config);
+//
+//            //子表存在的数据行id
+//            for (int i = 0; i < dataSet.size(); i++) {
+//                DataRow row = dataSet.getRow(i);
+//                subTableIds.add((String) row.get("id"));
+//            }
+//            //如果子表数据为空，对子表数据全部删除
+//            if(subEntities.isEmpty()) {
+//                List<MetadataEntityFieldDO> fields = entityFieldRepository.getEntityFieldListByEntityId(targetEntity.getId());
+//                boolean hasDeletedField = fields.stream()
+//                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+//                DefaultConfigStore subConfig = new DefaultConfigStore();
+//                subConfig.and("parent_id", reqVO.getId());
+//                if (hasDeletedField) {
+//                    // 软删除：更新deleted字段为删除时间戳
+//                    DataRow updateData = new DataRow();
+//                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+//                    temporaryService.update(tableName, updateData, subConfig);
+////                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+//                } else {
+//                     temporaryService.delete(tableName, subConfig);
+////                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
 //                }
-            }
-        }
-
-        for(SubEntityVo subEntityVo: subEntities) {
-            //子实体Id
-            Long subEntityId = subEntityVo.getSubEntityId();
-
-            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(subEntityId);
-
-
-            List<String> processedIds = new ArrayList<String>();
-            //该子实体对应多条数据待插入
-            List<Map<Long, Object>> list = subEntityVo.getSubData();
-
-            // 获取临时数据源服务
-            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
-            if (datasource == null) {
-                throw exception(DATASOURCE_NOT_EXISTS);
-            }
-            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-
-            for (Map<Long, Object> data : list) {
-                Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
-                Object id = subDataByName.get("id");
-                if(id == null){
-                   //插入数据不包含id字段，说明数据表不存在则插入
-                    subDataByName.put("parent_id",reqVO.getId());
-                   coreDataMethodService.createData(
-                           subEntityId,
-                           subDataByName,
-                           reqVO.getMethodCode()
-                   );
-               }else{
-                   //插入数据包含id字段，说明数据表已经存在则修改
-                    subDataByName.remove("id");
-                    coreDataMethodService.updateData(
-                            subEntityId,
-                            id,
-                            subDataByName,
-                            reqVO.getMethodCode()
-                    );
-                    processedIds.add(id.toString());
-                }
-            }
-            //找出【在子表有的但没在更新信息表单】的记录行
-            List<String> toDelete = subTableIds.stream().filter(item ->
-                    !processedIds.contains(item)).collect(Collectors.toList());
-
-            //删除多余的【在子表有的但没在更新信息表单】数据行
-            for(String id: toDelete){
-//                coreDataMethodService.deleteData(
-//                        subEntityId,
-//                        id,
-//                        null
-//                );
-
-                List<MetadataEntityFieldDO> fields = entityFieldRepository.getEntityFieldListByEntityId(subEntityId);
-                boolean hasDeletedField = fields.stream()
-                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
-                DefaultConfigStore subConfig = new DefaultConfigStore();
-                subConfig.and("id", id);
-                if (hasDeletedField) {
-                    // 软删除：更新deleted字段为删除时间戳
-                    DataRow updateData = new DataRow();
-                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
-                    temporaryService.update(targetEntity.getTableName(), updateData, subConfig);
-//                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-                } else {
-                    temporaryService.delete(targetEntity.getTableName(), subConfig);
-//                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-                }
-
-
-
-            }
-        }
+////                for (String id : subTableIds) {
+////                    coreDataMethodService.deleteData(
+////                            targetEntity.getId(),
+////                            id,
+////                            null
+////                    );
+////                }
+//            }
+//        }
+//
+//        for(SubEntityVo subEntityVo: subEntities) {
+//            //子实体Id
+//            Long subEntityId = subEntityVo.getSubEntityId();
+//
+//            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(subEntityId);
+//
+//
+//            List<String> processedIds = new ArrayList<String>();
+//            //该子实体对应多条数据待插入
+//            List<Map<Long, Object>> list = subEntityVo.getSubData();
+//
+//            // 获取临时数据源服务
+//            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
+//            if (datasource == null) {
+//                throw exception(DATASOURCE_NOT_EXISTS);
+//            }
+//            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+//
+//            for (Map<Long, Object> data : list) {
+//                Map<String, Object> subDataByName = convertIdKeyMapToNameKeyMap(subEntityId, data);
+//                Object id = subDataByName.get("id");
+//                if(id == null){
+//                   //插入数据不包含id字段，说明数据表不存在则插入
+//                    subDataByName.put("parent_id",reqVO.getId());
+//
+//                    MetadataDataMethodRequestContext metadataDataMethodRequestContext
+//                            = new MetadataDataMethodRequestContext();
+//                    metadataDataMethodRequestContext.setEntityId(subEntityId);
+//                    metadataDataMethodRequestContext.setData(subDataByName);
+//                    metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
+//                    methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
+//
+//                   coreDataMethodService.createData(
+//                           metadataDataMethodRequestContext
+//                   );
+//               }else{
+//                   //插入数据包含id字段，说明数据表已经存在则修改
+//                    subDataByName.remove("id");
+//
+//                    MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+//
+//                    metadataDataMethodRequestContext.setEntityId(subEntityId);
+//                    metadataDataMethodRequestContext.setId(id);
+//                    metadataDataMethodRequestContext.setData(subDataByName);
+//                    metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
+//                    metadataDataMethodRequestContext.setMenuId(reqVO.getMenuId());
+//                    metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.UPDATE);
+//
+//                    if (CollectionUtils.isNotEmpty(reqVO.getSubEntities())) {
+//                        List<MetadataDataMethodSubEntityContext> entityContexts = reqVO.getSubEntities().stream().map(item -> {
+//                            MetadataDataMethodSubEntityContext metadataDataMethodSubEntityContext = new MetadataDataMethodSubEntityContext();
+//                            metadataDataMethodSubEntityContext.setEntityId(item.getSubEntityId());
+//                            metadataDataMethodSubEntityContext.setSubData(item.getSubData());
+//                            return metadataDataMethodSubEntityContext;
+//                        }).collect(Collectors.toList());
+//                        methodCoreContext.setSubEntities(entityContexts);
+//                    }
+//
+//                    coreDataMethodService.updateData(
+//                            metadataDataMethodRequestContext
+//                    );
+//                    processedIds.add(id.toString());
+//                }
+//            }
+//            //找出【在子表有的但没在更新信息表单】的记录行
+//            List<String> toDelete = subTableIds.stream().filter(item ->
+//                    !processedIds.contains(item)).collect(Collectors.toList());
+//
+//            //删除多余的【在子表有的但没在更新信息表单】数据行
+//            for(String id: toDelete){
+////                coreDataMethodService.deleteData(
+////                        subEntityId,
+////                        id,
+////                        null
+////                );
+//
+//                List<MetadataEntityFieldDO> fields = entityFieldRepository.getEntityFieldListByEntityId(subEntityId);
+//                boolean hasDeletedField = fields.stream()
+//                        .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+//                DefaultConfigStore subConfig = new DefaultConfigStore();
+//                subConfig.and("id", id);
+//                if (hasDeletedField) {
+//                    // 软删除：更新deleted字段为删除时间戳
+//                    DataRow updateData = new DataRow();
+//                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+//                    temporaryService.update(targetEntity.getTableName(), updateData, subConfig);
+////                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+//                } else {
+//                    temporaryService.delete(targetEntity.getTableName(), subConfig);
+////                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+//                }
+//
+//
+//
+//            }
+//        }
 
         // 转换为VO
         return convertToDynamicDataRespVO(resultData);
@@ -288,11 +347,17 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
 
     @Override
     public Boolean deleteData(DynamicDataDeleteReqVO reqVO) {
+        MetadataDataMethodRequestContext metadataDataMethodRequestContext = new MetadataDataMethodRequestContext();
+        metadataDataMethodRequestContext.setEntityId(reqVO.getEntityId());
+        metadataDataMethodRequestContext.setId(reqVO.getId());
+        metadataDataMethodRequestContext.setMethodCode(reqVO.getMethodCode());
+        metadataDataMethodRequestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.DELETE);
+        metadataDataMethodRequestContext.setMenuId(reqVO.getMenuId());
+
+
         // 调用core模块的基础服务
         return coreDataMethodService.deleteData(
-                reqVO.getEntityId(),
-                reqVO.getId(),
-                reqVO.getMethodCode()
+                metadataDataMethodRequestContext
         );
     }
 

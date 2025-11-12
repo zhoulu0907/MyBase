@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_PASSW
 @RestController
 @RequestMapping("/system/platform")
 @Tag(name = "平台信息管理")
+@Component("oldPlatformInfoController")
 public class PlatformInfoController {
 
     @Resource
@@ -94,6 +96,7 @@ public class PlatformInfoController {
 
     @PostMapping("/admin/update-password")
     @Operation(summary = "重置平台用户密码")
+    // todo 平台管理员，密码重置权限控制变更
     @PreAuthorize("@ss.hasPermission('system:platform-admin:update-password')")
     public CommonResult<Boolean> updatePlatformUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
         userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());

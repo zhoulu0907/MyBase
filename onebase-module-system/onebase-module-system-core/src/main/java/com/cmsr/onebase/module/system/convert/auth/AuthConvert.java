@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.convert.auth;
 
 import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
@@ -14,6 +15,8 @@ import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +44,9 @@ public interface AuthConvert {
                 .build();
     }
 
+    @Mapping(source = "visible", target = "visible", qualifiedByName = "integerToBoolean")
+    @Mapping(source = "keepAlive", target = "keepAlive", qualifiedByName = "integerToBoolean")
+    @Mapping(source = "alwaysShow", target = "alwaysShow", qualifiedByName = "integerToBoolean")
     AuthPermissionInfoRespVO.MenuVO convertTreeNode(MenuDO menu);
 
     /**
@@ -97,5 +103,10 @@ public interface AuthConvert {
         respVO.setTenantId(tennantDO.getId());
         respVO.setTenantWebsite(tennantDO.getWebsite());
         return respVO;
+    }
+    
+    @Named("integerToBoolean")
+    default Boolean integerToBoolean(Integer value) {
+        return value != null && value != NumberConstant.ZERO;
     }
 }

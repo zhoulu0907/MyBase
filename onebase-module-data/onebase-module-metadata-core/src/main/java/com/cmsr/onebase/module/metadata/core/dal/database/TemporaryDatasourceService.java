@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.jdbc.util.DataSourceUtil;
+import org.anyline.metadata.type.DatabaseType;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Component;
@@ -96,11 +97,17 @@ public class TemporaryDatasourceService {
                 Object portObj = datasourceConfig.get("port");
                 String database = (String) datasourceConfig.get("database");
                 if (host != null && !host.trim().isEmpty()) {
-                    int port = getDefaultPort(datasourceType);
+                    // 端口号必填，不提供默认值
+                    if (portObj == null) {
+                        throw new IllegalArgumentException("数据源配置缺少必填参数：port");
+                    }
+                    int port;
                     if (portObj instanceof Integer) {
                         port = (Integer) portObj;
                     } else if (portObj instanceof String) {
                         port = Integer.parseInt((String) portObj);
+                    } else {
+                        throw new IllegalArgumentException("端口号类型错误，应为Integer或String: " + portObj.getClass());
                     }
                     url = buildJdbcUrl(datasourceType, host, port, database);
                 }
@@ -132,8 +139,8 @@ public class TemporaryDatasourceService {
             dsConfig.put("max-lifetime", 1800000);        // 连接最大生命周期30分钟
             dsConfig.put("leak-detection-threshold", 60000); // 连接泄露检测阈值1分钟
             
-            // 连接有效性检查配置
-            dsConfig.put("connection-test-query", "SELECT 1");
+            // 连接有效性检查配置 - 根据数据库类型使用不同的测试查询
+            dsConfig.put("connection-test-query", getConnectionTestQuery(datasourceType));
             dsConfig.put("validation-timeout", 5000);     // 验证超时5秒
             
             // 移除可能导致问题的配置
@@ -155,7 +162,7 @@ public class TemporaryDatasourceService {
                     }
                     // 执行简单查询验证连接
                     try (Statement stmt = testConn.createStatement();
-                         ResultSet rs = stmt.executeQuery("SELECT 1")) {
+                         ResultSet rs = stmt.executeQuery(getConnectionTestQuery(datasourceType))) {
                         if (!rs.next()) {
                             throw new RuntimeException("数据库连接测试查询失败");
                         }
@@ -289,11 +296,17 @@ public class TemporaryDatasourceService {
             Object portObj = datasourceConfig.get("port");
             String database = (String) datasourceConfig.get("database");
             if (host != null) {
-                int port = getDefaultPort(datasourceType);
+                // 端口号必填，不提供默认值
+                if (portObj == null) {
+                    throw new IllegalArgumentException("数据源配置缺少必填参数：port");
+                }
+                int port;
                 if (portObj instanceof Integer) {
                     port = (Integer) portObj;
                 } else if (portObj instanceof String) {
                     port = Integer.parseInt((String) portObj);
+                } else {
+                    throw new IllegalArgumentException("端口号类型错误，应为Integer或String: " + portObj.getClass());
                 }
                 url = buildJdbcUrl(datasourceType, host, port, database);
             }
@@ -422,98 +435,93 @@ public class TemporaryDatasourceService {
 
     /**
      * 根据数据源类型构建 JDBC URL
+     * 使用Anyline的DatabaseType来构建标准的JDBC URL
+     * 
+     * @param datasourceType 数据源类型（必须是Anyline DatabaseType支持的类型）
+     * @param host 主机地址
+     * @param port 端口号（必填，不接受0或负数）
+     * @param database 数据库名
+     * @return JDBC URL
+     * @throws IllegalArgumentException 如果参数无效或数据库类型不支持
      */
     public String buildJdbcUrl(String datasourceType, String host, int port, String database) {
         if (host == null || host.trim().isEmpty()) {
-            throw new RuntimeException("主机地址不能为空");
+            throw new IllegalArgumentException("主机地址不能为空");
         }
+        if (port <= 0 || port > 65535) {
+            throw new IllegalArgumentException("端口号必须在1-65535之间，当前值: " + port);
+        }
+        
+        // 验证数据库类型是否被Anyline支持
+        DatabaseType dbType;
+        try {
+            dbType = DatabaseType.valueOf(datasourceType);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("不支持的数据源类型: " + datasourceType);
+        }
+        
+        // 使用Anyline的url()方法获取URL模板，然后替换占位符
+        // Anyline模板格式: jdbc:postgresql://{host}:{port:5432}/{database}
+        String urlTemplate = dbType.url();
         String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
-        switch (datasourceType.toUpperCase()) {
-            case "POSTGRESQL":
-                return String.format("jdbc:postgresql://%s:%d/%s", host, port, databasePart);
-            case "MYSQL":
-                return String.format(
-                        "jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai",
-                        host, port, databasePart);
-            case "ORACLE":
-                return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databasePart);
-            case "SQLSERVER":
-                return String.format("jdbc:sqlserver://%s:%d;DatabaseName=%s", host, port, databasePart);
-            case "KINGBASE":
-                return String.format("jdbc:kingbase8://%s:%d/%s", host, port, databasePart);
-            case "TDENGINE":
-                return String.format("jdbc:TAOS-RS://%s:%d/%s", host, port, databasePart);
-            case "CLICKHOUSE":
-                return String.format("jdbc:clickhouse://%s:%d/%s", host, port, databasePart);
-            case "DM":
-                return String.format("jdbc:dm://%s:%d/%s", host, port, databasePart);
-            case "OPENGAUSS":
-                return String.format("jdbc:opengauss://%s:%d/%s", host, port, databasePart);
-            case "DB2":
-                return String.format("jdbc:db2://%s:%d/%s", host, port, databasePart);
-            default:
-                log.warn("未知的数据源类型，使用通用格式: {}", datasourceType);
-                return String.format("jdbc:%s://%s:%d/%s", datasourceType.toLowerCase(), host, port, databasePart);
-        }
+        
+        // 替换Anyline模板中的占位符
+        String url = urlTemplate
+                .replace("{host}", host)
+                .replace("{database}", databasePart)
+                .replace("{database/schema}", databasePart); // DM数据库使用的占位符
+        
+        // 处理端口占位符 {port:默认值}，使用正则表达式替换
+        url = url.replaceAll("\\{port:\\d+\\}", String.valueOf(port));
+        
+        return url;
     }
 
     /**
      * 根据数据源类型获取驱动类名
+     * 直接使用Anyline的DatabaseType枚举，不支持的类型将抛出异常
+     *
+     * @param datasourceType 数据源类型字符串
+     * @return 驱动类名
+     * @throws IllegalArgumentException 如果数据源类型不被Anyline支持
      */
     public String getDriverByType(String datasourceType) {
-        switch (datasourceType.toUpperCase()) {
-            case "POSTGRESQL":
-                return "org.postgresql.Driver";
-            case "MYSQL":
-                return "com.mysql.cj.jdbc.Driver";
-            case "ORACLE":
-                return "oracle.jdbc.driver.OracleDriver";
-            case "SQLSERVER":
-                return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-            case "KINGBASE":
-                return "com.kingbase8.Driver";
-            case "TDENGINE":
-                return "com.taosdata.jdbc.TSDBDriver";
-            case "CLICKHOUSE":
-                return "ru.yandex.clickhouse.ClickHouseDriver";
-            case "DM":
-                return "dm.jdbc.driver.DmDriver";
-            case "OPENGAUSS":
-                return "org.opengauss.Driver";
-            case "DB2":
-                return "com.ibm.db2.jcc.DB2Driver";
-            default:
-                throw new RuntimeException("不支持的数据源类型: " + datasourceType);
-        }
+        DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+        return dbType.driver();
     }
 
     /**
-     * 根据数据源类型获取默认端口
+     * 根据数据源类型获取连接测试查询语句
+     * <p>
+     * 不同数据库使用不同的测试查询语句：
+     * - PostgreSQL/KingBase: SELECT 1
+     * - DM(达梦): SELECT 1 FROM DUAL
+     * - Oracle: SELECT 1 FROM DUAL
+     * - MySQL: SELECT 1
+     *
+     * @param datasourceType 数据源类型字符串，如"PostgreSQL"、"DM"、"KingBase"
+     * @return 连接测试查询SQL
      */
-    public int getDefaultPort(String datasourceType) {
-        switch (datasourceType.toUpperCase()) {
-            case "POSTGRESQL":
-                return 5432;
-            case "MYSQL":
-                return 3306;
-            case "ORACLE":
-                return 1521;
-            case "SQLSERVER":
-                return 1433;
-            case "KINGBASE":
-                return 54321;
-            case "TDENGINE":
-                return 6041;
-            case "CLICKHOUSE":
-                return 8123;
-            case "DM":
-                return 5236;
-            case "OPENGAUSS":
-                return 5432;
-            case "DB2":
-                return 50000;
-            default:
-                return 5432;
+    private String getConnectionTestQuery(String datasourceType) {
+        try {
+            DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+            
+            switch (dbType) {
+                case DM:
+                case ORACLE:
+                    // 达梦和Oracle使用FROM DUAL
+                    return "SELECT 1 FROM DUAL";
+                case PostgreSQL:
+                case KingBase:
+                case MySQL:
+                default:
+                    // PostgreSQL、金仓、MySQL等使用简单的SELECT 1
+                    return "SELECT 1";
+            }
+        } catch (IllegalArgumentException e) {
+            // 如果数据库类型无法识别，使用最通用的查询
+            log.warn("无法识别的数据库类型[{}]，使用默认测试查询SELECT 1", datasourceType);
+            return "SELECT 1";
         }
     }
 

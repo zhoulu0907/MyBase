@@ -37,11 +37,18 @@ public class AppAuthRoleController {
         return CommonResult.success(authRoleService.getRoleList(applicationId));
     }
 
-    @GetMapping("/page-role-users")
-    @Operation(summary = "获取角色用户列表")
-    public CommonResult<PageResult<AuthRoleUsersPageRespVO>> pageRoleUsers(@Validated AuthRoleUsersPageReqVO reqVO) {
-        return CommonResult.success(authRoleService.pageRoleUsers(reqVO));
+//    @GetMapping("/page-role-users")
+//    @Operation(summary = "获取角色用户列表")
+//    public CommonResult<PageResult<AuthRoleUsersPageRespVO>> pageRoleUsers(@Validated AuthRoleUsersPageReqVO reqVO) {
+//        return CommonResult.success(authRoleService.pageRoleUsers(reqVO));
+//    }
+
+    @GetMapping("/page-role-members")
+    @Operation(summary = "获取角色成员列表")
+    public CommonResult<PageResult<AuthRoleMembersPageRespVO>> pageRoleUsers(@Validated AuthRoleMembersPageReqVO reqVO) {
+        return CommonResult.success(authRoleService.pageRoleMembers(reqVO));
     }
+
 
     @GetMapping("/list-dept-users")
     @Operation(summary = "获取部门用户列表")
@@ -76,25 +83,59 @@ public class AppAuthRoleController {
      * @return
      */
     @PostMapping("/add-user")
-    @Operation(summary = "角色添加成员")
+    @Operation(summary = "角色添加用户")
     public CommonResult<Boolean> addRoleUser(@Valid @RequestBody AuthRoleAddUserReqVO reqVO) {
         authRoleService.addRoleUser(reqVO);
         return CommonResult.success(true);
     }
 
+//    /**
+//     * 角色删除成员
+//     *
+//     * @param reqVO
+//     * @return
+//     */
+//    @PostMapping("/delete-user")
+//    @Operation(summary = "角色删除用户")
+//    public CommonResult<Boolean> deleteRoleUser(@Valid @RequestBody AuthRoleDeleteUserReqVO reqVO) {
+//        authRoleService.deleteRoleUser(reqVO);
+//        return CommonResult.success(true);
+//    }
+
+
     /**
-     * 角色删除成员
+     * 角色添加成员
      *
      * @param reqVO
      * @return
      */
-    @PostMapping("/delete-user")
-    @Operation(summary = "角色删除成员")
-    public CommonResult<Boolean> deleteRoleUser(@Valid @RequestBody AuthRoleDeleteUserReqVO reqVO) {
-        authRoleService.deleteRoleUser(reqVO);
+    @PostMapping("/add-dept")
+    @Operation(summary = "角色添加部门")
+    public CommonResult<Boolean> addRoleDept(@Valid @RequestBody AuthRoleAddDeptReqVO reqVO) {
+        authRoleService.addRoleDept(reqVO);
         return CommonResult.success(true);
     }
 
+//    /**
+//     * 角色删除成员
+//     *
+//     * @param reqVO
+//     * @return
+//     */
+//    @PostMapping("/delete-dept")
+//    @Operation(summary = "角色删除部门")
+//    public CommonResult<Boolean> deleteRoleDept(@Valid @RequestBody AuthRoleDeleteDeptReqVO reqVO) {
+//        authRoleService.deleteRoleDept(reqVO);
+//        return CommonResult.success(true);
+//    }
+
+
+    @PostMapping("/delete-member")
+    @Operation(summary = "角色删除成员")
+    public CommonResult<Boolean> deleteRoleDept(@Valid @RequestBody AuthRoleDeleteMemberReqVO reqVO) {
+        authRoleService.deleteRoleMember(reqVO);
+        return CommonResult.success(true);
+    }
 
     /**
      * 删除角色

@@ -1,46 +1,53 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.security.runtime.RTLoginUser;
+import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
+import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
+import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
+import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
-// MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
+import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSystemMethodCoreService;
-//import com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl.MetadataDataMethodCreateImpl;
-//import com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl.MetadataDataMethodUpdateImpl;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.engine.MultiTableQueryEngine;
+import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
-import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
-import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.engine.MultiTableQueryEngine;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodCreateImpl;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodDeleteImpl;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodQueryImpl;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodUpdateImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.entity.DataRow;
-import org.anyline.entity.DataSet;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.data.param.ConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.PageNavi;
-import org.anyline.entity.DefaultPageNavi;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.*;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED;
 
 /**
  * 数据方法 Service 核心实现类 - 只处理基础数据操作，不依赖VO
@@ -86,184 +93,58 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     @Resource
     private UidGenerator uidGenerator;
 
+    @Value("${metadata.runtime.enable-auth-check:false}")
+    private boolean enableAuthCheck;
+
     @Resource
     private com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService autoNumberService;
     // ========== 动态数据操作方法实现 ==========
     // ========== 动态数据操作方法实现 ==========
 
     @Override
-    public Map<String, Object> createData(Long entityId, Map<String, Object> data, String methodCode) {
+    public Map<String, Object> createData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
-        Map<String, Object> result = metadataDataMethodCreate.executeProcess(OperationType.CREATE, entityId, data, methodCode);
+        // 获取当前登录用户的运行时权限
+        this.fetchRuntimePermission(metadataDataMethodRequestContext);
 
-
-//        // 1. 校验实体存在
-//        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-//
-//        // 2. 获取实体字段信息
-//        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-//
-//        // 3. 校验数据完整性
-//        validateDataIntegrity(data, fields);
-//
-//        // 4. 处理数据并设置默认值
-//        Map<String, Object> processedData = processDataAndSetDefaults(data, fields);
-//
-//        // 5. 获取临时数据源服务
-//        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-//        if (datasource == null) {
-//            throw exception(DATASOURCE_NOT_EXISTS);
-//        }
-//
-//        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-//        log.info("成功切换到数据源：{}", datasource.getCode());
-//
-//        // 6. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-//        return TenantUtils.executeIgnore(() -> {
-//
-//        // 7. 执行插入
-//        if (log.isDebugEnabled()) {
-//            log.debug("createData -> processedData before insert: {}", processedData);
-//        }
-//        DataRow dataRow = new DataRow(processedData);
-//        Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
-//        log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
-//
-//        // 8. 查询插入后的完整数据
-//        Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
-//        log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
-//
-//        // 确保主键值不为null
-//        if (primaryKeyValue == null) {
-//            log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", entityId, entity.getTableName());
-//            // 返回插入的数据
-//            return buildDataResponse(entity, processedData, fields);
-//        }
-//
-//        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
-//
-//        // 9. 构建响应（移除多表写入逻辑，直接返回结果）
-//        return buildDataResponse(entity, resultData, fields);
-//
-//        }); // TenantUtils.executeIgnore 闭合
-
-        return result;
+        // 使用统一流程处理新增操作
+        return metadataDataMethodCreate.executeProcess(metadataDataMethodRequestContext);
     }
 
+
+
     @Override
-    public Map<String, Object> updateData(Long entityId, Object id, Map<String, Object> data, String methodCode) {
+    public Map<String, Object> updateData(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
+
+        // 获取当前登录用户的运行时权限
+        this.fetchRuntimePermission(metadataDataMethodRequestContext);
+
         // 使用新的统一流程处理更新操作
-        return metadataDataMethodUpdate.executeProcess(OperationType.UPDATE, entityId, id, data, methodCode);
+
+        return metadataDataMethodUpdate.executeProcess(metadataDataMethodRequestContext);
     }
 
     @Override
-    public Boolean deleteData(Long entityId, Object id, String methodCode) {
+    public Boolean deleteData(MetadataDataMethodRequestContext methodCoreContext) {
 
-        metadataDataMethodDelete.executeProcess(OperationType.DELETE, entityId, id, null, methodCode);
+        // 获取当前登录用户的运行时权限
+        this.fetchRuntimePermission(methodCoreContext);
+
+        // 使用统一流程处理删除操作
+        metadataDataMethodDelete.executeProcess(methodCoreContext);
         return true;
-//        // 1. 校验实体存在
-//        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-//
-//        // 2. 获取实体字段信息
-//    List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-//
-//        // 3. 获取临时数据源服务
-//        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-//        if (datasource == null) {
-//            throw exception(DATASOURCE_NOT_EXISTS);
-//        }
-//
-//        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-//        log.info("成功切换到数据源：{}", datasource.getCode());
-//
-//        // 4. 检查表中是否有软删除字段
-//        boolean hasDeletedField = fields.stream()
-//                .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
-//
-//    // 5. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-//    return TenantUtils.executeIgnore(() -> {
-//
-//            // 6. 校验数据存在
-//            validateDataExistsWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
-//
-//            // 7. 获取主键字段名
-//            String primaryKeyField = getPrimaryKeyFieldName(fields);
-//
-//            // 8. 构建删除条件
-//            DefaultConfigStore configStore = new DefaultConfigStore();
-//            configStore.and(primaryKeyField, id);
-//
-//            long deleteCount;
-//            if (hasDeletedField) {
-//                // 软删除：更新deleted字段为删除时间戳
-//                DataRow updateData = new DataRow();
-//                updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
-//                deleteCount = temporaryService.update(quoteTableName(entity.getTableName()), updateData, configStore);
-//                log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-//            } else {
-//                // 物理删除：直接删除记录
-//                deleteCount = temporaryService.delete(quoteTableName(entity.getTableName()), configStore);
-//                log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-//            }
-//
-//            boolean ok = deleteCount > 0;
-        // 移除多表写入逻辑，直接返回删除结果
-//            return ok;
-//        }); // TenantUtils.executeIgnore 闭合
     }
 
     @Override
     public Map<String, Object> getData(Long entityId, Object id, String methodCode) {
 
-        Map<String, Object> result = metadataDataMethodQuery.executeProcess(OperationType.GET,entityId,id,null,null);
+        MetadataDataMethodRequestContext requestContext = new MetadataDataMethodRequestContext();
+        requestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.GET);
+        requestContext.setEntityId(entityId);
+        requestContext.setId(id);
+
+        Map<String, Object> result = metadataDataMethodQuery.doExecuteProcess(requestContext);
         return result;
-//        //查询子表数据
-//        Long sourceEntityId = reqVO.getEntityId();
-//        DefaultConfigStore configStore = new DefaultConfigStore();
-//        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
-//        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
-//        List<String> subTableIds = new ArrayList<String>();
-//        for(MetadataEntityRelationshipDO relationshipDO:relationships){
-//            MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
-//
-//            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
-//            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
-//            String tableName = targetEntity.getTableName();
-//            String fieldName = targetFieldDO.getFieldName();
-//            // 获取临时数据源服务
-//            MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(targetEntity.getDatasourceId());
-//            if (datasource == null) {
-//                throw exception(DATASOURCE_NOT_EXISTS);
-//            }
-//            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-//            log.info("成功切换到数据源：{}", datasource.getCode());
-//
-//            DefaultConfigStore config = new DefaultConfigStore();
-//            if("parent_id".equals(fieldName)){
-//                config.and(fieldName, reqVO.getId());
-//            }else{
-//                Object value = resultData.get(sourceFieldDO.getFieldName());
-//                config.and(fieldName, value);
-//            }
-//            DataSet dataSet = temporaryService.querys(tableName,config);
-//            System.out.println(dataSet);
-//        }
-        // 移除多表查询逻辑，直接使用单表查询
-//        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-//        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-//        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-//        if (datasource == null) {
-//            throw exception(DATASOURCE_NOT_EXISTS);
-//        }
-//        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-//        log.info("成功切换到数据源：{}", datasource.getCode());
-//        return TenantUtils.executeIgnore(() -> {
-//            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
-//            if (resultData == null || resultData.isEmpty()) {
-//                throw exception(BUSINESS_ENTITY_NOT_EXISTS);
-//            }
-//            return buildDataResponse(entity, resultData, fields);
-//        });
     }
 
     @Override
@@ -311,9 +192,27 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                         }
                         applyOperatorCondition(configs, fieldName, operator, value);
                     } else {
-                        // 退化：直接LIKE
+                        // 退化：直接LIKE（日期类型除外）
                         if (names.contains(rawKey)) {
-                            configs.and(Compare.LIKE, rawKey, rawVal);
+                            String fieldType = fields.stream().filter(field ->
+                                    rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
+                            if("DATE".equals(fieldType)){
+                                // 日期类型不使用LIKE，而是尝试解析为日期范围查询
+                                // 这样Anyline可以根据不同数据库自动生成正确的SQL
+                                try {
+                                    java.time.LocalDate date = java.time.LocalDate.parse(String.valueOf(rawVal));
+                                    java.time.LocalDateTime startOfDay = date.atStartOfDay();
+                                    java.time.LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+                                    configs.and(Compare.GREAT_EQUAL, rawKey, startOfDay);
+                                    configs.and(Compare.LESS, rawKey, endOfDay);
+                                } catch (Exception e) {
+                                    // 如果无法解析为日期，直接使用原字段进行LIKE（让Anyline处理类型转换）
+                                    log.debug("日期字段[{}]的值[{}]无法解析为日期，使用LIKE查询", rawKey, rawVal);
+                                    configs.and(Compare.LIKE, rawKey, rawVal);
+                                }
+                            }else{
+                                configs.and(Compare.LIKE, rawKey, rawVal);
+                            }
                         }
                     }
                 }
@@ -354,7 +253,25 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                         applyOperatorCondition(countConfigs, fieldName, operator, value);
                     } else {
                         if (existingFieldNames.contains(rawKey)) {
-                            countConfigs.and(Compare.LIKE, rawKey, rawVal);
+                            String fieldType = fields.stream().filter(field ->
+                                    rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
+                            if("DATE".equals(fieldType)){
+                                // 日期类型不使用LIKE，而是尝试解析为日期范围查询
+                                // 这样Anyline可以根据不同数据库自动生成正确的SQL
+                                try {
+                                    java.time.LocalDate date = java.time.LocalDate.parse(String.valueOf(rawVal));
+                                    java.time.LocalDateTime startOfDay = date.atStartOfDay();
+                                    java.time.LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+                                    countConfigs.and(Compare.GREAT_EQUAL, rawKey, startOfDay);
+                                    countConfigs.and(Compare.LESS, rawKey, endOfDay);
+                                } catch (Exception e) {
+                                    // 如果无法解析为日期，直接使用原字段进行LIKE（让Anyline处理类型转换）
+                                    log.debug("日期字段[{}]的值[{}]无法解析为日期，使用LIKE查询", rawKey, rawVal);
+                                    countConfigs.and(Compare.LIKE, rawKey, rawVal);
+                                }
+                            }else {
+                                countConfigs.and(Compare.LIKE, rawKey, rawVal);
+                            }
                         }
                     }
                 }
@@ -595,15 +512,44 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         }
     }
 
-    // 校验方法已移动到 AbstractMetadataDataMethodCoreService
+    private void fetchRuntimePermission(MetadataDataMethodRequestContext metadataDataMethodRequestContext) {
 
-    // 数据处理方法已移动到 AbstractMetadataDataMethodCoreService
+        metadataDataMethodRequestContext.setEnableAuthCheck(enableAuthCheck);
 
-    // 处理更新数据方法已移动到 AbstractMetadataDataMethodCoreService
+        if (!enableAuthCheck) {
+            return;
+        }
+        // 仅 runtime 客户端需要校验权限
+        if (metadataDataMethodRequestContext.getClientTypeEnum() != ClientTypeEnum.RUNTIME) {
+            return;
+        }
 
-    // 主键相关方法已移动到 AbstractMetadataDataMethodCoreService
+        Long menuId = metadataDataMethodRequestContext.getMenuId();
+        if (menuId == null) {
+            throw exception(METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED);
+        }
 
-    // 查询和校验方法已移动到 AbstractMetadataDataMethodCoreService
+        RTLoginUser loginUser = RTSecurityContext.getLoginUser();
 
-    // 自动编号和表名处理方法已移动到 AbstractMetadataDataMethodCoreService
+        DataPermission menuDataPermission = RTSecurityContext.getMenuDataPermission(menuId);
+        FieldPermission menuFieldPermission = RTSecurityContext.getMenuFieldPermission(menuId);
+        OperationPermission menuOperation = RTSecurityContext.getMenuOperation(menuId);
+
+        MetadataPermissionContext metadataPermissionContext = new MetadataPermissionContext();
+        metadataPermissionContext.setDataPermission(menuDataPermission);
+        metadataPermissionContext.setFieldPermission(menuFieldPermission);
+        metadataPermissionContext.setOperationPermission(menuOperation);
+        metadataDataMethodRequestContext.setPermissionContext(metadataPermissionContext);
+        LoginUserCtx loginUserCtx = convertLoginUserCtx(loginUser);
+        metadataDataMethodRequestContext.setLoginUserCtx(loginUserCtx);
+
+    }
+
+    private LoginUserCtx convertLoginUserCtx(RTLoginUser loginUser) {
+        LoginUserCtx loginUserCtx = new LoginUserCtx();
+        loginUserCtx.setUserId(loginUser.getId());
+        loginUserCtx.setApplicationId(loginUser.getApplicationId());
+        return loginUserCtx;
+    }
+
 }

@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,24 +30,16 @@ public class BpmInstanceController {
     @Resource
     private BpmInstanceService bpmExecService;
 
-    @GetMapping("/list-act-buttons")
-    @Operation(summary = "获取流程实例的操作按钮")
-    public CommonResult<ListActButtonRespVO> listActButtons(@RequestParam(value = "taskId", required = false) String taskId, @RequestParam("businessId") String businessId) {
-        log.info("获取流程实例的操作按钮: {}, {}", taskId, businessId);
-        ListActButtonRespVO respVO = bpmExecService.getActButtons(taskId, businessId);
-        return CommonResult.success(respVO);
-    }
-
     @PostMapping("/submit")
     @Operation(summary = "流程发起")
-    public CommonResult<BpmSubmitRespVO> exec(@RequestBody @Validated BpmSubmitReqVO reqVO) {
+    public CommonResult<BpmSubmitRespVO> exec(@RequestBody @Valid BpmSubmitReqVO reqVO) {
         log.info("执行流程实例的操作按钮: {}", reqVO);
         BpmSubmitRespVO respVO = bpmExecService.submit(reqVO);
         return CommonResult.success(respVO);
     }
 
     @PostMapping("/exec-task")
-    public CommonResult<Boolean> exec(@RequestBody @Validated ExecTaskReqVO reqVO) {
+    public CommonResult<Boolean> exec(@RequestBody @Valid ExecTaskReqVO reqVO) {
         log.info("执行流程实例的操作按钮: {}", reqVO);
         bpmExecService.execTask(reqVO);
         return CommonResult.success(true);
@@ -66,4 +59,27 @@ public class BpmInstanceController {
         return CommonResult.success(bpmExecService.getFormDetail(instanceId));
     }
 
+    /**
+     * 流程预测
+     *
+     * @param reqVO
+     */
+    @PostMapping("/flow-predict")
+    @Operation(summary = "流程预测")
+    public CommonResult<List<BpmPredictRespVO.NodeInfo>> flowPredict(@RequestBody @Valid BpmPredictReqVO reqVO) {
+        log.info("流程预测: {}", reqVO);
+        return CommonResult.success(bpmExecService.flowPredict(reqVO)) ;
+    }
+
+    /**
+     * 流程预览
+     *
+     * @param reqVO
+     */
+    @GetMapping("/flow-preview")
+    @Operation(summary = "流程预览")
+    public CommonResult<BpmPreviewRespVO> flowPreview(@Valid BpmPreviewReqVO reqVO) {
+        log.info("流程预览: {}", reqVO);
+        return CommonResult.success(bpmExecService.flowPreview(reqVO)) ;
+    }
 }

@@ -38,6 +38,7 @@ target/*
 
 # dependencies
 **/node_modules
+dependency-reduced-pom.xml
 
 # roadhog-api-doc ignore
 /src/utils/request-temp.js
@@ -114,3 +115,6 @@ sessionStore
 /sql/patch/update_parent_id_flags.sql
 /sql/patch/20250908_add_validation_type_to_rule_group.sql
 LOG_FILE_IS_UNDEFINED
+/sql/postgresql/patch/2025-11-01-metadata-auto-number-reset-on-initial-change.sql
+/docs/人大金仓数据库适配方案.md
+/docs/达梦数据库适配方案.md

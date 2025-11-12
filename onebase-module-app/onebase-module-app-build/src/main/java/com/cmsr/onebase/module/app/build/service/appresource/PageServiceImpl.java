@@ -88,7 +88,7 @@ public class PageServiceImpl implements PageService {
         formPageSetPageDO.setPageSetId(createPageViewDTO.getPageSetId());
         formPageSetPageDO.setPageType(formPageType);
         formPageSetPageDO.setPageId(formPageDO.getId());
-        formPageSetPageDO.setIsDefault(false);
+        formPageSetPageDO.setIsDefault(0);
         formPageSetPageDO.setDefaultSeq(1);
 
         pageSetPageDataRepository.insert(formPageSetPageDO);

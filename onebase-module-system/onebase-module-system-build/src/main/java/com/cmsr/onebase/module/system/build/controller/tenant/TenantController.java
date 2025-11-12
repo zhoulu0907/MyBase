@@ -20,6 +20,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 @Tag(name = "管理后台 - 租户")
 @RestController
 @RequestMapping("/system/tenant")
+@Component("oldTenantController")
 public class TenantController {
 
     @Resource
@@ -97,8 +99,11 @@ public class TenantController {
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")
-    public CommonResult<TenantRespVO> getTenant() {
-        return success(tenantService.getTenantWithAppCount(TenantContextHolder.getTenantId()));
+    public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
+        if(null == id ){
+            id= TenantContextHolder.getTenantId();
+        }
+        return success(tenantService.getTenantWithAppCount(id));
     }
 
     @GetMapping("/get-allocatable-count")

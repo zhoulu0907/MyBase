@@ -9,6 +9,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "管理后台 - 租户创建/修改 Request VO")
 @Data
@@ -20,16 +21,6 @@ public class TenantUpdateReqVO {
 
     @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String name;
-
-    @Schema(description = "租户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    // @NotNull(message = "租户昵称不能为空")
-    private String adminNickName;
-
-    @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    private String adminUserName;
-
-    @Schema(description = "联系手机", example = "15601691300")
-    private String adminMobile;
 
     @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer status;
@@ -50,6 +41,15 @@ public class TenantUpdateReqVO {
     // @NotNull(message = "账号数量不能为空")
     private Integer accountCount;
 
+    @Schema(description = "访问地址")
+    private String accessUrl;
+
+    @Schema(description = "用户logo")
+    private String logoUrl;
+
+    @Schema(description = "管理员集合")
+    @NotNull(message = "管理员不能为空")
+    private List<TenantAdminUserUpdateReqVO> tenantAdminUserUpdateReqVOSList;
     // ========== 仅【创建】时，需要传递的字段 ==========
 
     // @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
@@ -67,7 +67,6 @@ public class TenantUpdateReqVO {
 //        return id != null // 修改时，不需要传递
 //                || (ObjectUtil.isAllNotEmpty(username, password)); // 新增时，必须都传递 username、password
 //    }
-
 
 
 }

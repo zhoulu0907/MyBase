@@ -215,6 +215,31 @@ public class DataMethodAssembler {
             return null;
         }
         QueryCondition qc = new QueryCondition();
+
+        // 当用户输入的条件值为 空字符串/“null”/未设置任何值，将值修改未NULL，否则AnyLine忽略处理【AnyLine会将NULL对应的条件改为 IS NULL】
+        List<String> values = dto.getFieldValue();
+        if(values == null){
+            String newValue = "NULL";
+            List newList = new ArrayList<String>();
+            newList.add(newValue);
+            qc.setFieldId(dto.getFieldId());
+            qc.setOperator(dto.getOperator());
+            qc.setFieldValues(newList);
+            return qc;
+        }
+        if(values.size() == 1){
+            String value = values.get(0);
+            if (!StringUtils.hasText(value) || "null".equals(value)){
+                String newValue = "NULL";
+                List newList = new ArrayList<String>();
+                newList.add(newValue);
+                qc.setFieldId(dto.getFieldId());
+                qc.setOperator(dto.getOperator());
+                qc.setFieldValues(newList);
+                return qc;
+            }
+        }
+
         qc.setFieldId(dto.getFieldId());
         qc.setOperator(dto.getOperator());
         qc.setFieldValues(dto.getFieldValue());

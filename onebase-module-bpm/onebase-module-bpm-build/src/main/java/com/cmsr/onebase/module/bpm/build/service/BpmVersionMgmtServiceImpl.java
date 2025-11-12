@@ -1,10 +1,27 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
+import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
+import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
+import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmVersionMgmtPageReqVo;
+import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
+import com.cmsr.onebase.module.system.api.user.AdminUserApi;
+import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.anyline.entity.Order;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.enums.FlowStatus;
@@ -17,8 +34,9 @@ import org.dromara.warm.flow.core.utils.CollUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -46,6 +64,9 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
 
     @Resource
     private FlowDefinitionRepository flowDefinitionRepository;
+
+    @Resource
+    private AdminUserApi adminUserApi;
 
     /**
      * 可对指定的流程版本进行删除，但已发布版本及含有尚未完结的历史版本流程无法删除。
@@ -91,4 +112,125 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             throw exception(ErrorCodeConstants.DELETE_FLOW_FAILED);
         }
     }
+    /**
+     * 获取流程版本管理列表
+     *
+     * @param reqVo
+     * @return
+     */
+    @Override
+    public PageResult<BpmDefVersionMgtVO> getVersionMgmtPage(BpmVersionMgmtPageReqVo reqVo) {
+        // 设置默认值？todo：抛出异常
+        if (!Objects.equals(reqVo.getSortType(), "update_time") && !Objects.equals(reqVo.getSortType(), "create_time")) {
+            reqVo.setSortType("update_time");
+        }
+
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.and(Compare.EQUAL, FlowDefinition.FORM_PATH, String.valueOf(reqVo.getBusinessId()));
+
+        if (StringUtils.isNotBlank(reqVo.getVersionStatus()))  {
+            VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getVersionStatus());
+
+            if (versionStatusEnum != null && versionStatusEnum.toPublishStatus() != null) {
+                configStore.and(Compare.EQUAL, "is_publish", versionStatusEnum.toPublishStatus().getKey());
+            } else {
+                throw exception(ErrorCodeConstants.UNKNOWN_VERSION_STATUS);
+            }
+        }
+
+        String versionAlias = reqVo.getVersionAlias();
+
+        if (StringUtils.isNotBlank(reqVo.getVersionAlias())) {
+            String versionKeyWord = versionAlias;
+
+            // 去除首字母的V用于版本搜索
+            if (Character.toLowerCase(versionAlias.charAt(0)) == 'v') {
+                versionKeyWord = versionAlias.substring(1);
+            }
+
+            ConfigStore orCondition = new DefaultConfigStore();
+            orCondition.or(Compare.LIKE, "ext::json->>'versionAlias'", "%" + reqVo.getVersionAlias() + "%");
+            orCondition.or(Compare.LIKE, "version", "%" + versionKeyWord + "%");
+            configStore.and(orCondition);
+        }
+
+        // 排序：设计中>已发布>历史
+        String caseOrder = "CASE WHEN is_publish = " + PublishStatus.UNPUBLISHED.getKey() + " THEN 1 " +
+                "WHEN is_publish = " + PublishStatus.PUBLISHED.getKey() + " THEN 2 " +
+                "WHEN is_publish = " + PublishStatus.EXPIRED.getKey() + " THEN 3 " +
+                "ELSE 4 END";
+        configStore.order(caseOrder);
+        configStore.order(reqVo.getSortType(), Order.TYPE.DESC);
+
+        PageResult<FlowDefinition> definitions = flowDefinitionRepository.findPageWithConditions(configStore, reqVo.getPageNo(), reqVo.getPageSize());
+        return buildVersionMgmtPageResult(definitions);
+    }
+
+    /**
+     * 更新流程版本备注
+     *
+     * @param reqVo
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateVersionAliasById(BpmUpdateReqVo reqVo) {
+        Definition definition = defService.getById(String.valueOf(reqVo.getId()));
+        if (definition != null) {
+            BpmDefinitionExtDTO extDTO = JsonUtils.parseObject(definition.getExt(), BpmDefinitionExtDTO.class);
+            extDTO.setVersionAlias(reqVo.getVersionAlias());
+            definition.setExt(JsonUtils.toJsonString(extDTO));
+            defService.updateById(definition);
+        }
+    }
+
+    private PageResult<BpmDefVersionMgtVO> buildVersionMgmtPageResult(PageResult<FlowDefinition> pageResult) {
+        if (pageResult == null || CollUtil.isEmpty(pageResult.getList())) {
+            return PageResult.empty();
+        }
+        List<BpmDefVersionMgtVO> voList = new ArrayList<>();
+        // 获取创建人和修改人去重后一次性查出名称
+        Set<Long> userIds = pageResult.getList().stream()
+                .flatMap(definition -> Stream.of(definition.getCreator(), definition.getUpdater()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        CommonResult<List<AdminUserRespDTO>> userResult = adminUserApi.getUserList(userIds);
+        if (userResult.isSuccess()) {
+            // 用户信息
+            Map<Long, AdminUserRespDTO> userMap = userResult.getData().stream()
+                    .collect(Collectors.toMap(AdminUserRespDTO::getId, user -> user));
+            for (FlowDefinition definition : pageResult.getList()) {
+                BpmDefVersionMgtVO vo = new BpmDefVersionMgtVO();
+                vo.setId(definition.getId());
+                vo.setVersion("V" + definition.getVersion());
+                BpmDefinitionExtDTO extDTO = JsonUtils.parseObject(definition.getExt(), BpmDefinitionExtDTO.class);
+                vo.setVersionAlias(extDTO.getVersionAlias());
+                VersionStatusEnum versionStatusEnum = VersionStatusEnum.toVersionStatusEnum(definition.getIsPublish());
+                vo.setVersionStatus(versionStatusEnum.getName());
+                vo.setCreateTime(definition.getCreateTime());
+                vo.setUpdateTime(definition.getUpdateTime());
+                // 创建人
+                vo.setCreator(createOperationUser(userMap.get(definition.getCreator())));
+                // 修改人
+                vo.setUpdater(createOperationUser(userMap.get(definition.getUpdater())));
+                voList.add(vo);
+            }
+        }
+        return new PageResult<>(voList, pageResult.getTotal());
+    }
+    /**
+     * 创建操作人信息
+     * @param user 用户信息
+     * @return OperationUser 对象，如果用户为空则返回 null
+     */
+    private UserBasicInfoVO createOperationUser(AdminUserRespDTO user) {
+        if (user == null) {
+            return null;
+        }
+        UserBasicInfoVO operationUser = new UserBasicInfoVO();
+        operationUser.setUserId(user.getId());
+        operationUser.setName(user.getNickname());
+        operationUser.setAvatar(user.getAvatar());
+        return operationUser;
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.mail;
 
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import cn.hutool.core.util.StrUtil;
@@ -61,7 +62,7 @@ public class MailSendServiceImpl implements MailSendService {
             }
         }
         // 执行发送
-        return sendSingleMail(mail, userId, UserTypeEnum.ADMIN.getValue(), templateCode, templateParams);
+        return sendSingleMail(mail, userId, UserTypeEnum.THIRD.getValue(), templateCode, templateParams);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class MailSendServiceImpl implements MailSendService {
             mail = memberService.getMemberUserEmail(userId);
         }
         // 执行发送
-        return sendSingleMail(mail, userId, UserTypeEnum.MEMBER.getValue(), templateCode, templateParams);
+        return sendSingleMail(mail, userId, UserTypeEnum.CORP.getValue(), templateCode, templateParams);
     }
 
     @Override
@@ -124,7 +125,8 @@ public class MailSendServiceImpl implements MailSendService {
         return new MailAccount().setFrom(from).setAuth(true)
                 .setUser(account.getUsername()).setPass(account.getPassword())
                 .setHost(account.getHost()).setPort(account.getPort())
-                .setSslEnable(account.getSslEnable()).setStarttlsEnable(account.getStarttlsEnable());
+                .setSslEnable(account.getSslEnable()== NumberConstant.ONE?true:false)
+                .setStarttlsEnable(account.getStarttlsEnable()== NumberConstant.ONE?true:false);
     }
 
     @VisibleForTesting

@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.corp.CorpAdminReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -28,6 +29,15 @@ public interface AdminUserService {
      * @return 用户编号
      */
     Long createUser(@Valid UserInsertReqVO createReqVO);
+
+
+    /**
+     * 创建用户
+     *
+     * @param createReqVO 用户信息
+     * @return 用户编号
+     */
+    Long createCorpAdminUser(@Valid AdminUserDO createReqVO);
 
     /**
      * 创建平台用户
@@ -56,7 +66,7 @@ public interface AdminUserService {
      * 修改用户管理员类型
      *
      * @param adminType 修改管理员类型
-     * @param id    用户编号
+     * @param id        用户编号
      */
     void updateAdminType(Long id,  Integer adminType);
 
@@ -229,7 +239,7 @@ public interface AdminUserService {
      * @param status 状态
      * @return 用户们
      */
-    List<AdminUserDO> getUserListByStatus(Integer status);
+    List<AdminUserDO> getUserListByStatus(Integer status, String userNickName);
 
     /**
      * 获取所有平台管理员列表
@@ -281,4 +291,7 @@ public interface AdminUserService {
      */
     UserRespVO getUserWithRoles(Long id);
 
+    List<String> getUserRoleByRoleIdAndTenantId(Long id, Long tenantId);
+
+    Map<Long, Integer> getTenantExistUserCountByIds(List<Long> tenantIds);
 }

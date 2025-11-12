@@ -5,10 +5,12 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
 import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
 import com.cmsr.onebase.module.system.enums.DictTypeConstants;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "管理后台 - 租户 Response VO")
 @Data
@@ -26,22 +28,6 @@ public class TenantRespVO {
     @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("租户名")
     private String name;
-
-    @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    @ExcelProperty("租户名")
-    private Integer adminUserId;
-
-    @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    @ExcelProperty("用户昵称")
-    private String adminNickName;
-
-    @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    @ExcelProperty("联系人")
-    private String adminUserName;
-
-    @Schema(description = "联系手机", example = "15601691300")
-    @ExcelProperty("联系手机")
-    private String adminMobile;
 
     @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @ExcelProperty(value = "状态", converter = DictConvert.class)
@@ -78,5 +64,20 @@ public class TenantRespVO {
 
     @Schema(description = "已存在用户数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Integer existUserCount;
+
+    @Schema(description = "访问地址")
+    private String accessUrl;
+
+    @Schema(description = "用户logo")
+    private String logoUrl;
+
+    @Schema(description = "企业数")
+    private Integer corpCount;
+
+    @Schema(description = "发布模式")
+    private String publishModel;
+
+    @Schema(description = "管理员集合")
+    private List<TenantAdminUserResVO> tenantAdminUserList;
 
 }

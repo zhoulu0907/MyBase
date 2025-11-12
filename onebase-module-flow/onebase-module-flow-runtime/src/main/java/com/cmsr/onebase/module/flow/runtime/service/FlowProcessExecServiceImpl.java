@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
-import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Autowired
-    private GraphFlowCache graphFlowCache;
+    private FlowProcessCache flowProcessCache;
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
@@ -56,7 +56,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
-        List<StartFormNodeData> startFormNodeDataList = graphFlowCache.findStartFormNodeDataByPageId(pageId);
+        List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageId(pageId);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
                 .toList();
@@ -65,7 +65,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
-        StartFormNodeData startFormNodeData = graphFlowCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
+        StartFormNodeData startFormNodeData = flowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
         if (startFormNodeData == null) {
             FormTriggerRespVO vo = formNotTriggerRespVO();
             vo.setMessage("流程不存在");
@@ -104,7 +104,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             log.error("表单触发异常: {}", reqVO, e);
             FormTriggerRespVO vo = formNotTriggerRespVO();
             vo.setMessage("表单触发异常");
-            vo.setCause(ExceptionUtils.getRootCauseMessage(e));
+            vo.setCause(ExceptionUtils.getMessage(e));
             return vo;
         }
     }

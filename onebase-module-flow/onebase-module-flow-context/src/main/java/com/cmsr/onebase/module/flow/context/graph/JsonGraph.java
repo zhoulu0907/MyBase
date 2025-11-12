@@ -53,7 +53,7 @@ public class JsonGraph {
     private String nodeDefine(int deep, JsonGraphNode node) {
         if (StringUtils.equalsAny(node.getType(),
                 "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate",
-                "modal", "refresh","navigate",
+                "modal", "refresh", "navigate",
                 "startDateField", "startForm", "startEntity", "startTime", "startAPI", "startBPM",
                 "end", "log")) {
             return toDefine(node);
@@ -109,7 +109,14 @@ public class JsonGraph {
     }
 
     private String switchDefaultNodeDefine(int deep, JsonGraphNode defaultJsonGraphNode) {
-        String blocksNodeDefine = blocksNodeDefine(deep, defaultJsonGraphNode.getBlocks());
+        String blocksNodeDefine;
+        if (CollectionUtils.isNotEmpty(defaultJsonGraphNode.getBlocks())) {
+            blocksNodeDefine = blocksNodeDefine(deep, defaultJsonGraphNode.getBlocks());
+        } else {
+            StringBuilder define = new StringBuilder();
+            define.append(repeatIndent(deep)).append("noop");
+            blocksNodeDefine = define.toString();
+        }
         StringBuilder define = new StringBuilder();
         define.append(".DEFAULT(");
         define.append(NEW_LINE).append(blocksNodeDefine).append(".tag(\"").append(defaultJsonGraphNode.getId()).append("\")");

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.vo;
 
-import com.cmsr.onebase.module.bpm.api.dto.node.base.BaseNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -14,11 +15,19 @@ public class BpmFlowTaskDetailVO {
     @Schema(description = "当前状态")
     private String currentStatus;
 
+    @Deprecated
     @Schema(description = "发起人ID")
     private Long initiatorId;
 
+    @Deprecated
     @Schema(description = "发起人")
     private String initiatorName;
+
+    /**
+     * 发起人
+     */
+    @Schema(description = "发起人")
+    private UserBasicInfoVO initiator;
 
     @Schema(description = "发起部门ID")
     private Long initiatorDeptId;

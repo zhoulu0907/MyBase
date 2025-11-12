@@ -1,0 +1,51 @@
+
+### 请求 /login 接口 => 成功（无验证码)
+POST {{baseUrl}}/system/auth/login
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+
+### 创建企业 /admin-api/system/corp-app-relation/update
+POST {{baseUrl}}/system/corp/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+{
+    "corpReqVO":{
+     "corpLogo":"xx",
+     "corpName":"xx",
+      "corpId":"xx",
+      "industryType":"0",
+      "status":0,
+      "address":"xxxxxx",
+      "userCount":200
+    },
+    "corpUserReqVO":{
+        "username":"xx",
+        "nickname":"xx",
+        "email":"xx",
+        "mobile":"xx"
+    },
+    "corpAppRelationInertReqVO":{
+        "corpId":"1",
+        "applicationIdList":[1002,1001],
+        "authorizationTime":"xx"
+    }
+}
+
+
+
+### 请求 /delete 接口 => 成功
+get {{baseUrl}}/system/corp-app-relation/delete?id=117
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+### 请求 /delete 接口 => 成功
+get {{baseUrl}}/system/corp-app-relation/page?corp_id=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

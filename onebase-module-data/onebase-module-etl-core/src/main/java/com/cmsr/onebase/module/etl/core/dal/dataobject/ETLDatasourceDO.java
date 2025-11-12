@@ -2,11 +2,13 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.module.etl.common.entity.JdbcDatasourceConfig;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +24,9 @@ public class ETLDatasourceDO extends TenantBaseDO {
 
     @Column(name = "datasource_name")
     private String datasourceName;
+
+    @Column(name = "declaration")
+    private String declaration;
 
     @Column(name = "datasource_type")
     private String datasourceType;
@@ -41,8 +46,16 @@ public class ETLDatasourceDO extends TenantBaseDO {
     @Column(name = "readonly")
     private Integer readonly;
 
+    public void setConfig(Object config) {
+        this.config = JsonUtils.toJsonString(config);
+    }
+
     public Boolean getReadonly() {
         return BooleanUtils.toBoolean(readonly);
+    }
+
+    public void setReadonly(Integer readonly) {
+        this.readonly = readonly;
     }
 
     public void setReadonly(Boolean readonly) {
@@ -53,6 +66,9 @@ public class ETLDatasourceDO extends TenantBaseDO {
     }
 
     public CollectStatus getCollectStatus() {
+        if (collectStatus == null) {
+            return null;
+        }
         return CollectStatus.parse(collectStatus);
     }
 

@@ -482,7 +482,7 @@ public class AdminAuthServiceTest {
         token.setAccessToken("accessToken123");
         token.setRefreshToken("refreshToken123");
         token.setUserId(testUser != null ? testUser.getId() : 1L);
-        token.setUserType(UserTypeEnum.ADMIN.getValue());
+        token.setUserType(UserTypeEnum.THIRD.getValue());
         return token;
     }
 }

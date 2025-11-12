@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.vo;
 
+import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -17,7 +18,7 @@ public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO {
     private String processTitle;
 
     @Schema(description = "发起人")
-    private String initiator;
+    private UserBasicInfoVO initiator;
 
     @Schema(description = "当前节点状态")
     private String flowStatus;
@@ -36,4 +37,7 @@ public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO {
 
     @Schema(description = "流程实例id")
     private Long instanceId;
+
+    @Schema(description = "流程表单，实际对应pageSetId")
+    private String businessId;
 }

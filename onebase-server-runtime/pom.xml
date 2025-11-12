@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-security-runtime</artifactId>
+            <artifactId>onebase-security-runtime</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
@@ -95,6 +95,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- 数据库驱动 -->
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver18</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.kingbase</groupId>
+            <artifactId>kingbase8</artifactId>
         </dependency>
     </dependencies>
 

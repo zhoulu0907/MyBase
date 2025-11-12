@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
-import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
+import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
@@ -76,6 +76,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         }
         reqDTO.setData(reqData);
         try {
+            executeContext.addLog("数据添加节点开始执行");
             List<List<EntityFieldDataRespDTO>> respDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.insertData(reqDTO));
             executeContext.addLog("数据添加节点结束执行, 响应结果数量: " + respDTOSS.size());
             // 处理响应结果

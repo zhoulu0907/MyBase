@@ -54,7 +54,7 @@ public class LicenseDO extends BaseDO{
     private String status;
     /** 是否为试用License */
     @Column(name = IS_TRIAL)
-    private Boolean isTrial;
+    private Integer isTrial;
     /** License文件 */
     @Column(name = LICENSE_FILE)
     private String licenseFile;

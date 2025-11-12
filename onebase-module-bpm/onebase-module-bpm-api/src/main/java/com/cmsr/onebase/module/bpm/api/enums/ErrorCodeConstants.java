@@ -40,6 +40,9 @@ public interface ErrorCodeConstants {
 
     ErrorCode FLOW_ENTITY_DATA_ID_NOT_EXISTS = new ErrorCode(1_009_001_011, "流程实体数据ID不存在");
 
+    ErrorCode FAILED_TO_GET_NODE_TYPE = new ErrorCode(1_009_001_012, "获取节点类型失败");
+
+    ErrorCode FLOW_ENTITY_DATA_NOT_EXISTS = new ErrorCode(1_009_001_013, "流程实体数据不存在");
 
     // ============= 校验 =============
 
@@ -76,7 +79,21 @@ public interface ErrorCodeConstants {
 
     ErrorCode INVALID_ENTITY_ID = new ErrorCode(1_009_002_015, "无效的实体ID");
 
+    ErrorCode APPROVER_NODE_REQUIRED_ENABLED_BTN = new ErrorCode(1_009_002_016, "审批节点至少开启一个按钮");
+
+    ErrorCode NO_BUTTON_PERMISSION = new ErrorCode(1_009_002_017, "没有按钮权限");
+
+    ErrorCode UNKNOWN_VERSION_STATUS = new ErrorCode(1_009_002_018, "未知的流程版本状态");
+
+    ErrorCode BPM_BIZ_EXT_NOT_EXIST = new ErrorCode(1_009_002_019, "流程业务扩展信息不存在");
+
+    ErrorCode MISSING_NODE_VALID_ROLE_LIST = new ErrorCode(1_009_002_020, "缺少有效审批角色列表");
+
+
     // ============= 系统相关错误 =============
 
     ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");
+
+    ErrorCode USER_API_CALL_FAILED = new ErrorCode(1_009_003_002, "用户接口调用失败");
+
 }

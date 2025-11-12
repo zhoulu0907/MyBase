@@ -667,6 +667,44 @@ function _typeof(o) {
   function ISBLANK(value) {
     return value === null;
   }
+
+  function RANDOMBETWEEN(min, max, volatile) {
+    // 参数检查
+    if (arguments.length < 2 || arguments.length > 3) {
+      return value;
+    }
+    
+    min = parseNumber(min);
+    max = parseNumber(max);
+    
+    if (anyIsError(min, max)) {
+      return value;
+    }
+    
+    // 检查最小值是否大于最大值
+    if (min > max) {
+      return num;
+    }
+    
+    // 处理 volatile 参数，默认为 true
+    if (arguments.length < 3) {
+      volatile = true;
+    } else {
+      volatile = parseBool(volatile);
+      if (volatile instanceof Error) {
+        return volatile;
+      }
+    }
+    
+    try {
+      // 生成指定范围内的随机整数
+      var randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
+      return randomInt;
+    } catch (e) {
+      return value;
+    }
+  }
+
   function ISERR(value$1) {
     return [ value, ref, div0, num, name, nil ].indexOf(value$1) >= 0 || typeof value$1 === "number" && (isNaN(value$1) || !isFinite(value$1));
   }
@@ -4439,6 +4477,290 @@ function _typeof(o) {
     }
     return String.fromCharCode(number);
   }
+
+  function ENCODEURL(text) {
+    if (arguments.length !== 1) {
+      return value;
+    }
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    try {
+      return encodeURIComponent(text);
+    } catch (e) {
+      return value;
+    }
+  }
+
+
+
+  function REGEXEXTRACT(text, regex_pattern) {
+    if (arguments.length !== 2) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern);
+      var match = text.match(regex);
+      
+      if (match === null) {
+        return "";
+      }
+      
+      return match[0];
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function REGEXMATCH(text, regex_pattern) {
+    if (arguments.length !== 2) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern);
+      return regex.test(text);
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function REGEXREPLACE(text, regex_pattern, replacement) {
+    if (arguments.length !== 3) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    replacement = parseString(replacement);
+    if (replacement instanceof Error) {
+      return replacement;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern, 'g');
+      return text.replace(regex, replacement);
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function REGEXEXTRACTALL(text, regex_pattern) {
+    if (arguments.length !== 2) {
+      return value;
+    }
+    
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+    
+    regex_pattern = parseString(regex_pattern);
+    if (regex_pattern instanceof Error) {
+      return regex_pattern;
+    }
+    
+    try {
+      var regex = new RegExp(regex_pattern, 'g');
+      var matches = text.match(regex);
+      
+      if (matches === null) {
+        return "";
+      }
+      
+      return matches.join(", ");
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function RMBCAP(number) {
+    if (arguments.length !== 1) {
+      return value;
+    }
+    
+    number = parseNumber(number);
+    if (number instanceof Error) {
+      return number;
+    }
+    
+    // 检查是否为负数
+    var isNegative = number < 0;
+    number = Math.abs(number);
+    
+    // 分离整数和小数部分
+    var integerPart = Math.floor(number);
+    var decimalPart = Math.round((number - integerPart) * 100);
+    
+    // 数字对应的大写
+    var digits = ["零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
+    var units = ["", "拾", "佰", "仟"];
+    var bigUnits = ["", "万", "亿"];
+    
+    // 转换整数部分
+    function convertInteger(num) {
+      if (num === 0) return "零";
+      
+      var str = "";
+      var zero = false;
+      var unitIndex = 0;
+      var bigUnitIndex = 0;
+      
+      while (num > 0) {
+        var digit = num % 10;
+        
+        if (digit === 0) {
+          zero = true;
+        } else {
+          if (zero) {
+            str = digits[0] + str;
+            zero = false;
+          }
+          
+          if (unitIndex === 0 && bigUnitIndex > 0) {
+            str = bigUnits[bigUnitIndex] + str;
+          }
+          
+          str = digits[digit] + units[unitIndex] + str;
+        }
+        
+        unitIndex++;
+        if (unitIndex === 4) {
+          unitIndex = 0;
+          bigUnitIndex++;
+        }
+        
+        num = Math.floor(num / 10);
+      }
+      
+      // 处理万、亿单位
+      if (bigUnitIndex > 0 && str.indexOf(bigUnits[bigUnitIndex]) === -1) {
+        str = bigUnits[bigUnitIndex] + str;
+      }
+      
+      return str;
+    }
+    
+    // 转换小数部分
+    function convertDecimal(decimal) {
+      if (decimal === 0) return "整";
+      
+      var str = "";
+      var jiao = Math.floor(decimal / 10);
+      var fen = decimal % 10;
+      
+      if (jiao > 0) {
+        str += digits[jiao] + "角";
+      }
+      
+      if (fen > 0) {
+        str += digits[fen] + "分";
+      }
+      
+      return str;
+    }
+    
+    try {
+      var result = "人民币";
+      
+      if (isNegative) {
+        result += "负";
+      }
+      
+      result += convertInteger(integerPart);
+      
+      // 添加元
+      if (integerPart > 0) {
+        result += "元";
+      }
+      
+      result += convertDecimal(decimalPart);
+      
+      // 如果没有小数部分，添加"整"
+      if (decimalPart === 0 && integerPart > 0) {
+        result += "整";
+      }
+      
+      // 特殊情况：0
+      if (integerPart === 0 && decimalPart === 0) {
+        result = "人民币零元整";
+      }
+      
+      return result;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function UUID() {
+    if (arguments.length !== 0) {
+      return value;
+    }
+    
+    try {
+      // 生成 UUID 版本 4 (随机)
+      var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0;
+        var v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      
+      return uuid;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function TIMESTAMP(date) {
+    if (arguments.length !== 1) {
+      return value;
+    }
+    
+    date = parseDate(date);
+    if (date instanceof Error) {
+      return date;
+    }
+    
+    try {
+      // 返回日期的时间戳（毫秒数）
+      return date.getTime();
+    } catch (e) {
+      return value;
+    }
+  }
+
+
+
   function CLEAN(text) {
     if (anyIsError(text)) {
       return text;
@@ -4562,38 +4884,51 @@ function _typeof(o) {
   function GETUSER(id,name) {
     console.log(id,name);
     var user = {
-      name: name,
-      id: id,
+        id: id,
+      name: name
     }
     return user;
   }
 
-  function GETDEPT(deptno,name) {
-    console.log(deptno,name);
+  function GETDEPT(id,name) {
+    console.log(id,name);
     var dept = {
-      name: name,
-      deptno: deptno,
+        id:id,
+      name: name
     }
     return dept;
   }
-  function GETUPDEPT(deptno,name) {
-    console.log(deptno,name);
+  function GETUPDEPT(id,name) {
+    console.log(id,name);
     var updept = {
-      name: name,
-      deptno: deptno,
+        id:id,
+      name: name
     }
     return updept;
   }
-
+  function GETROLE(id) {
+    console.log(JSON.stringify(id));
+    return id;
+  }
   function GETSUPERVISOR(id,name) {
     console.log(id,name);
     var user = {
-      name: name,
-      id: id,
+        id: id,
+      name: name
     }
     return user;
   }
 
+  function ISINROLE(id,roldId,isInRole) {
+    console.log(isInRole);
+    return isInRole;
+  }
+
+  function ISINDEPT(id,isInDept) {
+    console.log("isInDept --> isInDept: ",isInDept);
+    console.log("id --> id: ",id);
+    return isInDept;
+  }
 
   function LEN(text) {
     if (arguments.length === 0) {
@@ -4663,6 +4998,110 @@ function _typeof(o) {
     }
     return old_text.substr(0, num_chars - 1) + new_text + old_text.substr(num_chars - 1 + length);
   }
+
+
+
+  // 辅助函数：根据不同的匹配模式进行分割
+  function splitWithMode(text, delimiter, match_mode, match_end) {
+    if (match_mode === 0) {
+      // 精确匹配
+      return text.split(delimiter);
+    } else if (match_mode === 1) {
+      // 通配符匹配 (* 和 ?)
+      var escapedDelimiter = escapeRegExp(delimiter).replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
+      var regex = new RegExp(escapedDelimiter, 'g');
+      return text.split(regex);
+    } else if (match_mode === 2) {
+      // 正则表达式
+      try {
+        var regex = new RegExp(delimiter, match_end ? '' : 'g');
+        return text.split(regex);
+      } catch (e) {
+        return [text]; // 正则表达式无效时返回原文本
+      }
+    } else {
+      // 默认使用精确匹配
+      return text.split(delimiter);
+    }
+  }
+
+  function TEXTSPLIT(text, col_delimiter, row_delimiter, ignore_empty, match_mode, match_end) {
+    // 参数处理
+    if (arguments.length < 2) {
+      return value;
+    }
+
+    text = parseString(text);
+    if (text instanceof Error) {
+      return text;
+    }
+
+    // 设置默认值
+    ignore_empty = ignore_empty === undefined ? false : parseBool(ignore_empty);
+    match_mode = match_mode === undefined ? 0 : parseNumber(match_mode);
+    match_end = match_end === undefined ? false : parseBool(match_end);
+
+    if (ignore_empty instanceof Error) {
+      return ignore_empty;
+    }
+
+    if (match_mode instanceof Error) {
+      return match_mode;
+    }
+
+    if (match_end instanceof Error) {
+      return match_end;
+    }
+
+    try {
+      var result = [];
+
+      // 如果提供了行分隔符，先按行分割
+      if (row_delimiter !== undefined) {
+        var rows = splitWithMode(text, row_delimiter, match_mode, match_end);
+
+        // 对每一行再按列分隔符分割
+        for (var i = 0; i < rows.length; i++) {
+          var cols = splitWithMode(rows[i], col_delimiter, match_mode, match_end);
+
+          // 如果需要忽略空值，则过滤掉空字符串
+          if (ignore_empty) {
+            cols = cols.filter(function(item) {
+              return item !== "";
+            });
+          }
+
+          // 只有当列不为空或不需要忽略空值时才添加行
+          if (!ignore_empty || cols.length > 0) {
+            result.push(cols);
+          }
+        }
+      } else {
+        // 只按列分隔符分割
+        var cols = splitWithMode(text, col_delimiter, match_mode, match_end);
+
+        // 如果需要忽略空值，则过滤掉空字符串
+        if (ignore_empty) {
+          cols = cols.filter(function(item) {
+            return item !== "";
+          });
+        }
+
+        result = cols;
+      }
+
+      // 直接返回数组
+      return result;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  // 辅助函数：转义正则表达式特殊字符
+  function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   function REPT(text, number_times) {
     var someError = anyError(text, number_times);
     if (someError) {
@@ -10531,6 +10970,14 @@ function _typeof(o) {
   exports.CEILINGMATH = CEILINGMATH;
   exports.CEILINGPRECISE = CEILINGPRECISE;
   exports.CHAR = CHAR;
+  exports.ENCODEURL = ENCODEURL;
+  exports.REGEXEXTRACTALL = REGEXEXTRACTALL;
+  exports.REGEXEXTRACT = REGEXEXTRACT;
+  exports.REGEXMATCH = REGEXMATCH;
+  exports.REGEXREPLACE = REGEXREPLACE;
+  exports.RMBCAP = RMBCAP;
+  exports.UUID = UUID;
+  exports.TIMESTAMP = TIMESTAMP;
   exports.CHIDIST = CHIDIST;
   exports.CHIDISTRT = CHIDISTRT;
   exports.CHIINV = CHIINV;
@@ -10700,12 +11147,16 @@ function _typeof(o) {
   exports.ISTEXT = ISTEXT;
   exports.KURT = KURT;
   exports.LARGE = LARGE;
+  exports.RANDOMBETWEEN = RANDOMBETWEEN;
   exports.LCM = LCM;
   exports.LEFT = LEFT;
   exports.GETUSER = GETUSER;
   exports.GETDEPT = GETDEPT;
   exports.GETUPDEPT = GETUPDEPT;
+  exports.GETROLE = GETROLE;
   exports.GETSUPERVISOR = GETSUPERVISOR;
+  exports.ISINROLE = ISINROLE;
+  exports.ISINDEPT = ISINDEPT;
   exports.LEN = LEN;
   exports.LINEST = LINEST;
   exports.LN = LN;
@@ -10849,8 +11300,10 @@ function _typeof(o) {
   exports.TDISTRT = TDISTRT;
   exports.TEXT = TEXT;
   exports.TEXTJOIN = TEXTJOIN;
+  exports.TEXTSPLIT = TEXTSPLIT;
   exports.TIME = TIME;
   exports.TIMEVALUE = TIMEVALUE;
+  exports.TIMESTAMP = TIMESTAMP;
   exports.TINV = TINV;
   exports.TODAY = TODAY;
   exports.TRANSPOSE = TRANSPOSE;
@@ -10899,3 +11352,4 @@ function _typeof(o) {
   exports.NE = NE;
   exports.POW = POW;
 }));
+

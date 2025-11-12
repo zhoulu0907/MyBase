@@ -32,6 +32,7 @@
         <opengauss.jdbc.version>5.1.0</opengauss.jdbc.version>
         <taos.version>3.3.3</taos.version>
         <postgresql.version>42.7.4</postgresql.version>
+        <oracle.jdbc.version>23.26.0.0.0</oracle.jdbc.version>
         <!--<anyline.version>8.7.2-jdk17-SNAPSHOT</anyline.version>-->
         <anyline.version>8.7.2-jdk17-20250818</anyline.version>
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
@@ -75,6 +76,7 @@
         <!-- 三方云服务相关 -->
         <commons-io.version>2.17.0</commons-io.version>
         <commons-compress.version>1.27.1</commons-compress.version>
+        <commons-text.version>1.10.0</commons-text.version>
         <awssdk.version>2.30.14</awssdk.version>
         <justauth.version>1.16.7</justauth.version>
         <justauth-starter.version>1.4.0</justauth-starter.version>
@@ -158,11 +160,11 @@
                 <version>${revision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-security</artifactId>
-                <version>${revision}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.cmsr.onebase</groupId>-->
+<!--                <artifactId>onebase-spring-boot-starter-security</artifactId>-->
+<!--                <version>${revision}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.springdoc</groupId>
@@ -236,6 +238,12 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.oracle.database.jdbc</groupId>
+                <artifactId>ojdbc8</artifactId>
+                <version>${oracle.jdbc.version}</version>
             </dependency>
 
             <!-- RPC 远程调用相关 -->
@@ -318,10 +326,35 @@
             </dependency>
             <!-- 工作流相关结束 -->
 
-            <!-- 工具类相关 -->
+            <!-- 项目子模块 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-project-base</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-platform</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-build</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-security-runtime</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -331,6 +364,7 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- 工具类相关 -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -436,6 +470,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-jexl3</artifactId>
                 <version>${jexl3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tika</groupId>
@@ -544,7 +583,22 @@
             </dependency>
             <dependency>
                 <groupId>org.anyline</groupId>
+                <artifactId>anyline-data-jdbc-oracle</artifactId>
+                <version>${anyline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.anyline</groupId>
                 <artifactId>anyline-data-jdbc-h2</artifactId>
+                <version>${anyline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.anyline</groupId>
+                <artifactId>anyline-data-jdbc-kingbase</artifactId>
+                <version>${anyline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.anyline</groupId>
+                <artifactId>anyline-data-jdbc-dm</artifactId>
                 <version>${anyline.version}</version>
             </dependency>
             <dependency>

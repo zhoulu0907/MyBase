@@ -3,7 +3,10 @@ package com.cmsr.onebase.module.system.api.tenant;
 import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +21,6 @@ public class TenantApiImpl implements TenantCommonApi {
 
     @Resource
     private TenantService tenantService;
-
     @Override
     @TenantIgnore // 防止递归。避免调用 /rpc-api/system/tenant/valid 接口时，又去触发 /rpc-api/system/tenant/valid 去校验
     public CommonResult<List<Long>> getTenantIdList() {

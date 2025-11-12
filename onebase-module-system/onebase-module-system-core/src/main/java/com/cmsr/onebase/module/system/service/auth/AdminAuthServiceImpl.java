@@ -158,6 +158,15 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     @Override
+    public AuthLoginRespVO corpLogin(AuthLoginReqVO reqVO) {
+        // 校验验证码
+        validateCaptcha(reqVO);
+        // 2. 使用账号密码，进行登录
+        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+    }
+
+    @Override
     public void sendSmsCode(AuthSmsSendReqVO reqVO) {
         // 如果是重置密码场景，需要校验图形验证码是否正确
         if (Objects.equals(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene(), reqVO.getScene())) {
@@ -286,7 +295,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     private UserTypeEnum getUserType() {
-        return UserTypeEnum.ADMIN;
+        return UserTypeEnum.THIRD;
     }
 
     @Override

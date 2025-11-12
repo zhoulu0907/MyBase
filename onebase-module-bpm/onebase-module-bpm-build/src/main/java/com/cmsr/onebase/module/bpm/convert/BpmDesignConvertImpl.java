@@ -1,13 +1,14 @@
 package com.cmsr.onebase.module.bpm.convert;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.bpm.api.dto.BpmDefinitionExtDTO;
-import com.cmsr.onebase.module.bpm.api.enums.VersionStatusEnum;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
+import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseEdgeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.base.BaseNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.node.strategy.NodeVOStrategyManager;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.strategy.NodeVOStrategyManager;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +76,13 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             if (extDto != null) {
                 flowDesignVO.setVersionAlias(extDto.getVersionAlias());
 
+                if (extDto.getGlobalConfig() != null) {
+                    flowDesignVO.setGlobalConfig(extDto.getGlobalConfig());
+                } else {
+                    // 返回默认值
+                    flowDesignVO.setGlobalConfig(new BpmGlobalConfigDTO());
+                }
+
                 // todo：应用ID校验
                 flowDesignVO.setAppId(extDto.getAppId());
             }
@@ -112,10 +120,10 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
         // 构建ext
         BpmDefinitionExtDTO extDto = new BpmDefinitionExtDTO();
-
         if (flowDesignVO.getVersionAlias() != null) {
             extDto.setVersionAlias(flowDesignVO.getVersionAlias());
             extDto.setAppId(flowDesignVO.getAppId());
+            extDto.setGlobalConfig(flowDesignVO.getGlobalConfig());
         }
 
         defJson.setExt(JsonUtils.toJsonString(extDto));
@@ -222,6 +230,8 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         }
 
         String bpmDefJson = flowDesignVO.getBpmDefJson();
+        Long appId = flowDesignVO.getAppId();
+
         if (StringUtils.isBlank(bpmDefJson)) {
             return null;
         }
@@ -255,7 +265,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             nodeJson.setFormCustom("Y");
 
             // 设置ext：使用策略管理器构建扩展信息
-            strategyManager.buildNodeExtData(nodeJson, nodeVO);
+            strategyManager.fillNodeExtData(nodeJson, nodeVO, appId);
 
             // 添加到映射
             nodeJsonMap.put(nodeJson.getNodeCode(), nodeJson);

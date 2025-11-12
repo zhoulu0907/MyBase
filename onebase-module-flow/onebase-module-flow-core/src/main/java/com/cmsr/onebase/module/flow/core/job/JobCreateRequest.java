@@ -11,6 +11,12 @@ import lombok.Data;
 @Data
 public class JobCreateRequest {
 
+    private Long applicationId;
+
+    private Long processId;
+
+    private String processName;
+
     private String startTime;
 
     private String endTime;

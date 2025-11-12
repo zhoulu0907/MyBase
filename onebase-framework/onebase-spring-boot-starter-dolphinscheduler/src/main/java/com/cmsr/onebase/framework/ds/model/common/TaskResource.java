@@ -4,5 +4,9 @@ import lombok.Data;
 
 @Data
 public class TaskResource {
+
     private Long id;
+
+    private String resourceName;
+
 }

@@ -44,6 +44,12 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         return findAllByConfig(configStore);
     }
 
+    public List<AuthRoleUserDO> findByByRoleIds(List<Long> roleIds) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.in("role_id", roleIds);
+        return findAllByConfig(configStore);
+    }
+
     public PageResult<AuthRoleUserDO> findByRoleId(Long roleId, PageParam pageParam) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
@@ -58,6 +64,13 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         this.deleteByConfig(configStore);
     }
 
+    public void deleteRoleUser(Long roleId, Long userId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("role_id", roleId);
+        configStore.eq("user_id", userId);
+        this.deleteByConfig(configStore);
+    }
+
     public void deleteByRoleId(Long roleId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
@@ -69,6 +82,12 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("user_id", userId);
         this.deleteByConfig(configStore);
+    }
+
+    public List<AuthRoleUserDO> findByUserId(Long userId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("user_id", userId);
+        return findAllByConfig(configStore);
     }
 
 }

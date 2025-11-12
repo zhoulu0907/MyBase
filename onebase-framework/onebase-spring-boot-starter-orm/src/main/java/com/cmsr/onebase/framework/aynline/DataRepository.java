@@ -579,7 +579,13 @@ public class DataRepository<T extends BaseDOInterface> {
     }
 
     public DataSet querys(String dest, ConfigStore configs, String... conditions) {
-       return anylineService.querys(dest, configs, conditions);
+        return anylineService.querys(dest, configs, conditions);
+    }
+
+    public DataSet querysPage(String dest, ConfigStore configs, int pageIndex, int pageSize, String... conditions) {
+        PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
+        configs.setPageNavi(page);
+        return anylineService.querys(dest, configs, conditions);
     }
 
 }

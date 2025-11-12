@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.flow.component.start;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.data.DataMethodApiHelper;
-import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
+import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
@@ -101,7 +101,9 @@ public class StartDateFieldNodeComponent extends NodeComponent {
         if (nodeData.isBatchMode()) {
             reqDTO.setNum(nodeData.getBatchSize());
         }
+        executeContext.addLog("时间字段触发开始查询数据");
         List<List<EntityFieldDataRespDTO>> fieldDataRespDTOS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
+        executeContext.addLog("时间字段触发查询返回数据量: " + fieldDataRespDTOS.size());
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOS));
     }
 

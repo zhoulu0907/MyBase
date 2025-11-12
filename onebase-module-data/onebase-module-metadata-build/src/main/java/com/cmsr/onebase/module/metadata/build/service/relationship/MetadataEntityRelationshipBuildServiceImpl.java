@@ -268,6 +268,10 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         result.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
         result.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
 
+        // 查询源字段和目标字段的展示名称
+        result.setSourceFieldDisplayName(getFieldDisplayNameById(relationshipDO.getSourceFieldId()));
+        result.setTargetFieldDisplayName(getFieldDisplayNameById(relationshipDO.getTargetFieldId()));
+
         // 验证关键字段
         if (result.getId() == null) {
             log.error("转换后的响应VO中id字段为空，原始DO的id: {}", relationshipDO.getId());
@@ -376,6 +380,31 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         }
     }
 
+    /**
+     * 根据字段ID获取字段展示名称
+     *
+     * @param fieldId 字段ID
+     * @return 字段展示名称
+     */
+    private String getFieldDisplayNameById(String fieldId) {
+        if (!StringUtils.hasText(fieldId)) {
+            return null;
+        }
+
+        try {
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and("id", Long.valueOf(fieldId));
+            MetadataEntityFieldDO field = entityFieldService.getEntityField(fieldId);
+            return field != null ? field.getDisplayName() : null;
+        } catch (NumberFormatException e) {
+            log.warn("无效的字段ID: {}", fieldId);
+            return null;
+        } catch (Exception e) {
+            log.warn("获取字段展示名称失败，字段ID: {}, 错误: {}", fieldId, e.getMessage());
+            return null;
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ParentChildRelationshipRespVO createParentChildRelationship(@Valid ParentChildRelationshipSaveReqVO createReqVO) {
@@ -439,15 +468,28 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
      * @return 子表实体ID
      */
     private Long createNewChildEntity(ParentChildRelationshipSaveReqVO createReqVO) {
+        // 获取主表实体信息
+        MetadataBusinessEntityDO parentEntity = businessEntityService.getBusinessEntity(Long.valueOf(createReqVO.getParentEntityId()));
+        if (parentEntity == null) {
+            throw new IllegalArgumentException("主表实体不存在，实体ID: " + createReqVO.getParentEntityId());
+        }
+        
+        log.info("创建子表实体，主表ID: {}, 主表数据源ID: {}", parentEntity.getId(), parentEntity.getDatasourceId());
+        
         BusinessEntitySaveReqVO entityReqVO = BeanUtils.toBean(createReqVO, BusinessEntitySaveReqVO.class, req -> {
             req.setDisplayName(createReqVO.getChildTableName());
             req.setCode(createReqVO.getChildTableCode());
             req.setDescription(createReqVO.getChildTableDescription());
             req.setEntityType(1); // 自建表
             req.setRunMode(0); // 默认运行模式
+            // 关键修复：使用主表的datasourceId，确保主子表在同一个数据源下
+            req.setDatasourceId(String.valueOf(parentEntity.getDatasourceId()));
         });
 
-        return businessEntityBuildService.createBusinessEntity(entityReqVO);
+        Long childEntityId = businessEntityBuildService.createBusinessEntity(entityReqVO);
+        log.info("子表实体创建成功，子表ID: {}, 数据源ID: {}", childEntityId, parentEntity.getDatasourceId());
+        
+        return childEntityId;
     }
 
     /**

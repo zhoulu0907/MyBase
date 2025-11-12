@@ -108,6 +108,14 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+
+
         <!-- 工具类相关 -->
     <!-- 去除与 UI/邮件/第三方登录相关的运行期依赖，统一由上层应用引入 -->
 

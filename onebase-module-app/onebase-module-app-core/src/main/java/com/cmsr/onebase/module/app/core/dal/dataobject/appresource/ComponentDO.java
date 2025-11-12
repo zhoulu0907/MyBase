@@ -28,12 +28,6 @@ public class ComponentDO extends TenantBaseDO {
     private Long pageId;
 
     /**
-     * 是否在子表中
-     */
-    @Column(name = "in_table", columnDefinition = "BOOLEAN NOT NULL", comment = "是否在子表中")
-    private Boolean inTable;
-
-    /**
      * 组件类型
      */
     @Column(name = "component_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "组件类型")

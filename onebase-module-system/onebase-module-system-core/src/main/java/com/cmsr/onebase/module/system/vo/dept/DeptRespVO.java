@@ -45,4 +45,10 @@ public class DeptRespVO {
     @Schema(description = "部门人数", example = "10")
     private Integer userCount;
 
+    @Schema(description = "部门主管ID", example = "")
+    private Long deptDirectorId;
+
+    @Schema(description = "部门主管", example = "")
+    private String deptDirectorName;
+
 }

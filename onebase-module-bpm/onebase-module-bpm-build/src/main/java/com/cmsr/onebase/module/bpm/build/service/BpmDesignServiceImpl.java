@@ -3,9 +3,9 @@ package com.cmsr.onebase.module.bpm.build.service;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefJsonVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVo;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
 import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
@@ -205,7 +205,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void publish(BpmPublishReqVo reqVo) {
+    public void publish(BpmPublishReqVO reqVo) {
         Long id = reqVo.getId();
 
         // 校验流程是否存在

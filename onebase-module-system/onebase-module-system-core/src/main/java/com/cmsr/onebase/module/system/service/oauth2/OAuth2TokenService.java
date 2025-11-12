@@ -29,6 +29,35 @@ public interface OAuth2TokenService {
     OAuth2AccessTokenDO createAccessToken(Long userId, Integer userType, String clientId, List<String> scopes);
 
     /**
+     * 创建访问令牌
+     * 注意：该流程中，会包含创建刷新令牌的创建
+     *
+     * 参考 DefaultTokenServices 的 createAccessToken 方法
+     *
+     * @param appId 应用编号
+     * @param userType 用户类型
+     * @param clientId 客户端编号
+     * @param scopes 授权范围
+     * @return 访问令牌的信息
+     */
+    OAuth2AccessTokenDO createAppAccessToken(Long appId, Long userId, Integer userType, String clientId, List<String> scopes);
+
+    /**
+     * 创建访问令牌
+     * 注意：该流程中，会包含创建刷新令牌的创建
+     *
+     * 参考 DefaultTokenServices 的 createAccessToken 方法
+     *
+     * @param corpId 企业编号
+     * @param userId 用户编号
+     * @param userType 用户类型
+     * @param clientId 客户端编号
+     * @param scopes 授权范围
+     * @return 访问令牌的信息
+     */
+    OAuth2AccessTokenDO createCorpAccessToken(Long corpId, Long userId, Integer userType, String clientId, List<String> scopes);
+
+    /**
      * 刷新访问令牌
      *
      * 参考 DefaultTokenServices 的 refreshAccessToken 方法

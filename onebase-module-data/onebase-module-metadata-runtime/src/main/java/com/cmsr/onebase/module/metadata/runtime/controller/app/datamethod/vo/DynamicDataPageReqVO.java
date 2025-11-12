@@ -16,6 +16,10 @@ import java.util.Map;
 @Schema(description = "动态数据分页查询请求VO")
 public class DynamicDataPageReqVO {
 
+    @Schema(description = "菜单ID", requiredMode = Schema.RequiredMode.REQUIRED)
+//    @NotNull(message = "菜单ID不能为空")
+    private Long menuId;
+
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "实体ID不能为空")
     private Long entityId;

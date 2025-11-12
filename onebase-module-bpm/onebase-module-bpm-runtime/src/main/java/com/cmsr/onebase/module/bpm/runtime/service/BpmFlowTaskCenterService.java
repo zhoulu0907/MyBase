@@ -1,14 +1,13 @@
 package com.cmsr.onebase.module.bpm.runtime.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowHisTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowDoneTaskPageReqVO;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmFlowTodoTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
-import com.cmsr.onebase.module.engine.orm.anyline.vo.BpmMyCreatedPageReqVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.ListNodesRespVO;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ public interface BpmFlowTaskCenterService {
      * @param pageReqVO
      * @return
      */
-    PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmFlowTodoTaskPageReqVO pageReqVO);
+    PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmTodoTaskPageReqVO pageReqVO);
 
     /**
      * 获取流程已办分页
@@ -27,7 +26,7 @@ public interface BpmFlowTaskCenterService {
      * @param pageReqVO
      * @return
      */
-    PageResult<BpmFlowDoneTaskVO> getDonePage(BpmFlowDoneTaskPageReqVO pageReqVO);
+    PageResult<BpmFlowDoneTaskVO> getDonePage(BpmDoneTaskPageReqVO pageReqVO);
 
     /**
      * 获取流我创建的流程
@@ -38,5 +37,11 @@ public interface BpmFlowTaskCenterService {
     PageResult<BpmMyCreatedVO> getMyCreatedPage(BpmMyCreatedPageReqVO pageReqVO);
 
 
-    List<FlowHisTask>  getHisTaskByInstanceId(Long instanceId,String appId);
+    /**
+     * 获取流程节点列表
+     *
+     * @param bindingViewId 绑定视图Id
+     * @return
+     */
+    List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId);
 }

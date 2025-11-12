@@ -51,8 +51,6 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("system_notify_template");
         TENANT_IGNORE_TABLES.add("system_oauth2_client");
         TENANT_IGNORE_TABLES.add("system_license");
-        TENANT_IGNORE_TABLES.add("infra_codegen_column");
-        TENANT_IGNORE_TABLES.add("infra_codegen_table");
         TENANT_IGNORE_TABLES.add("infra_config");
         TENANT_IGNORE_TABLES.add("infra_data_source_config");
         TENANT_IGNORE_TABLES.add("infra_file_config");
@@ -73,6 +71,7 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("flow_process_stat");
         TENANT_IGNORE_TABLES.add("flow_process_time");
         TENANT_IGNORE_TABLES.add("flow_execution_log");
+        TENANT_IGNORE_TABLES.add("etl_flink_mapping");
         // 可以根据需要添加更多表
     }
 
@@ -130,14 +129,20 @@ public class AnyLineDBInfoListener implements DMListener {
      */
     private void injectTenantIdToSingleEntity(Object obj) {
         boolean shouldIgnore = isTableTenantIgnored(obj);
-        log.info("injectTenantIdToOneEntity--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (ConfigTable.IS_DEBUG) {
+            log.info("injectTenantIdToOneEntity--------------> isTableTenantIgnored: {}", shouldIgnore);
+        }
         if (!shouldIgnore) {
             if (obj instanceof TenantBaseDO tenantBaseDO) {
                 tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
-                log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), tenantBaseDO.getTenantId());
+                if (ConfigTable.IS_DEBUG) {
+                    log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), tenantBaseDO.getTenantId());
+                }
             } else if (obj instanceof BaseEntity baseEntity) {
                 baseEntity.setTenantIdByListener(TenantContextHolder.getRequiredTenantId());
-                log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), baseEntity.getTenantId());
+                if (ConfigTable.IS_DEBUG) {
+                    log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), baseEntity.getTenantId());
+                }
             }
         }
     }
@@ -236,7 +241,7 @@ public class AnyLineDBInfoListener implements DMListener {
             return SWITCH.CONTINUE;
         }
         if (!TenantContextHolder.isIgnore() && TenantContextHolder.getTenantId() != null) {
-            configs.param("tenant_id", TenantContextHolder.getTenantId());
+            configs.param(TenantBaseDO.TENANT_ID, TenantContextHolder.getTenantId());
         }
         // 检查是否有表名，如果没有表名则跳过添加条件
         if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {
@@ -261,7 +266,7 @@ public class AnyLineDBInfoListener implements DMListener {
             log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
         }
         if (!shouldIgnore) {
-            configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
+            configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         return SWITCH.CONTINUE;
     }
@@ -528,7 +533,7 @@ public class AnyLineDBInfoListener implements DMListener {
         boolean shouldIgnore = isTableTenantIgnored(table);
         log.info("[{}] injectTenantIdAndDeleteToConfigs --------------> isTableTenantIgnored: {}", table, shouldIgnore);
         if (!shouldIgnore) {
-            configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
+            configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);

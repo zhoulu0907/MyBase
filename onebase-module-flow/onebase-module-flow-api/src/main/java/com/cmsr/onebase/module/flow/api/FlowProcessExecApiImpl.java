@@ -3,13 +3,13 @@ package com.cmsr.onebase.module.flow.api;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
-import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,17 +31,20 @@ import java.util.Map;
 public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Autowired
-    private GraphFlowCache graphFlowCache;
+    private FlowProcessCache flowProcessCache;
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
+
+    @Autowired
+    private ConditionsProvider conditionsProvider;
 
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
-        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.findStartEntityNodeDataByEntityId(reqDTO.getEntityId());
+        List<StartEntityNodeData> entityNodeDataList = flowProcessCache.findStartEntityNodeDataByEntityId(reqDTO.getEntityId());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setSuccess(true);
@@ -88,7 +91,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
                 return respDTO;
             }
             if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
-                OrExpression orExpression = ConditionsSupport.convertToOrExpresses(nodeData.getFilterCondition());
+                OrExpression orExpression = conditionsProvider.formatConditionsForExpression(nodeData.getFilterCondition(), inputData);
                 boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
                 if (!isMatch) {
                     respDTO.setSuccess(true);

@@ -34,6 +34,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -97,22 +98,22 @@ public class DolphinSchedulerClient {
     }
 
     public List<Long> queryWorkflowCodeListByName(Long projectCode, String flowName) {
+        List<WorkflowDefinitionResp> result = new ArrayList<>();
         Result<PageInfo<WorkflowDefinitionResp>> pageResp =
-                execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, 1));
+                execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, 1000));
         if (pageResp.getFailed()) {
             throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
         }
-        PageInfo<WorkflowDefinitionResp> pageData = pageResp.getData();
-        Integer total = pageData.getTotal();
-        if (total == 0) {
-            return Collections.emptyList();
+        int totalPage = pageResp.getData().getTotalPage();
+        result.addAll(pageResp.getData().getTotalList());
+        for (int i = 2; i <= totalPage; i++) {
+            pageResp = execute(dsClientStub.queryWorkflowPage(projectCode, flowName, i, 1000));
+            if (pageResp.getFailed()) {
+                throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+            }
+            result.addAll(pageResp.getData().getTotalList());
         }
-        pageResp = execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, total));
-        if (pageResp.getFailed()) {
-            throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
-        }
-        List<WorkflowDefinitionResp> workflowList = pageResp.getData().getTotalList();
-        return workflowList.stream().map(WorkflowDefinitionResp::getCode).toList();
+        return result.stream().map(WorkflowDefinitionResp::getCode).toList();
     }
 
     /**
@@ -192,7 +193,6 @@ public class DolphinSchedulerClient {
             complementTime.setComplementEndDate(endTime);
             execType = "COMPLEMENT_DATA";
         }
-
 
         Result<List<Long>> executeResult = execute(dsClientStub.manuallyStartWorkflow(projectCode, workflowCode, environmentCode, tenantCode,
                 complementTime,

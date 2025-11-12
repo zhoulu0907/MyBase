@@ -1,12 +1,16 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
+import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
@@ -59,6 +63,15 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
      * 功能权限校验
      */
     protected void validatePermission(ProcessContext context) {
+
+//        /**
+//         * 查询的功能权限校验
+//         */
+//        TenantContextHolder.setIgnore(true);
+//        RTSecurityContext.mockLoginUser(3386012505007460352L,46699591748616192L);
+//        FieldPermission fieldPermission = RTSecurityContext.getMenuFieldPermission(47012574606491648L);
+//        System.out.println(fieldPermission);
+
 
     }
 

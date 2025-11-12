@@ -48,8 +48,8 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
 
     public List<AuthRoleDO> findByUserIdAndApplicationId(Long userId, Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.param("user_id", userId);
-        configs.param("application_id", applicationId);
+        configs.param("userId", userId);
+        configs.param("applicationId", applicationId);
         String sql = """
                 select
                 	aar.id, aar.role_code, aar.role_type, aar.role_name
@@ -60,8 +60,8 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
                 	aaru.role_id = aar.id
                     and aaru.deleted = 0
                     and aar.deleted = 0
-                	and aaru.user_id = #{user_id}
-                	and aar.application_id = #{application_id}
+                	and aaru.user_id = #{userId}
+                	and aar.application_id = #{applicationId}
                 """;
         return this.querys(sql, configs).stream().map(row -> {
             AuthRoleDO authRoleDO = new AuthRoleDO();

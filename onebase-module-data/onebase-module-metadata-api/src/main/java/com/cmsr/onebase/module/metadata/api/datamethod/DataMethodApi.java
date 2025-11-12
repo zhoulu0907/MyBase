@@ -44,6 +44,7 @@ public interface DataMethodApi {
 
     /**
      * 插入实体字段数据
+     * 该方法给外部模块调用，是被编辑态调用的
      *
      * @param reqDTO 插入请求参数
      * @return 返回插入的数据对象

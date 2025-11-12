@@ -57,11 +57,11 @@ public class MailAccountDO extends BaseDO {
      * 是否开启 SSL
      */
     @Column(name = SSL_ENABLE)
-    private Boolean sslEnable;
+    private Integer sslEnable;
     /**
      * 是否开启 STARTTLS
      */
     @Column(name = STARTTLS_ENABLE)
-    private Boolean starttlsEnable;
+    private Integer starttlsEnable;
 
 }

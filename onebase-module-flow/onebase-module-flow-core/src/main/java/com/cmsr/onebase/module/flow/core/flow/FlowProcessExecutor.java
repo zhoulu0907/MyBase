@@ -8,8 +8,9 @@ import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
-import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
+import com.google.common.collect.Lists;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
 import lombok.Setter;
@@ -24,7 +25,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @Author：huangjie
@@ -40,7 +44,7 @@ public class FlowProcessExecutor {
     private FlowExecutor flowExecutor;
 
     @Autowired
-    private GraphFlowCache graphFlowCache;
+    private FlowProcessCache flowProcessCache;
 
     @Autowired
     private ContextProvider contextProvider;
@@ -55,8 +59,11 @@ public class FlowProcessExecutor {
      * 执行新流程（基于traceId和输入参数）
      */
     public ExecutorResult execute(String traceId, Long processId, Map<String, Object> inputParams) {
-        if (!graphFlowCache.isProcessExist(processId)) {
+        if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
+        }
+        if (StringUtils.isEmpty(traceId)) {
+            traceId = FlowUtils.generateTraceId();
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
         ExecuteContext executeContext = new ExecuteContext();
@@ -66,10 +73,13 @@ public class FlowProcessExecutor {
             VariableContext variableContext = new VariableContext();
             variableContext.setInputParams(inputParams);
             //初始化执行上下文
-            Map<String, NodeData> nodeData = graphFlowCache.findNodeData(processId);
-            traceId = validateAndGenerateTraceId(traceId, processId);
-            executeContext.setTraceId(traceId);
+            Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
             executeContext.setNodeDataMap(nodeData);
+
+            executeContext.addLog("检查流程触发次数");
+            int callCount = validateTraceIdCallCount(traceId, processId);
+            executeContext.addLog("流程触发阈值正常[" + callCount + "]");
+            executeContext.setTraceId(traceId);
             //执行上下文添加执行UUID
             executeContext.setExecutionUuid(UUID.randomUUID().toString());
             //设置日志执行UUID
@@ -103,25 +113,30 @@ public class FlowProcessExecutor {
      * 理论上可以根据trace id 恢复完整的执行情况
      */
     public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputFields) {
-        if (!graphFlowCache.isProcessExist(processId)) {
+        if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
         ExecuteContext executeContext = new ExecuteContext();
         try {
             //初始化变量上下文
+            executeContext.addLog("恢复变量上下文");
             VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
+            executeContext.addLog("恢复变量上下文结束");
             if (variableContext == null) {
-                executionLog.setErrorMessage("执行上下文不存在或已过期: " + executionUuid);
-                return ExecutorResult.error(processId, "执行上下文不存在或已过期: " + executionUuid);
+                throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
+            Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
+            executeContext.setNodeDataMap(nodeData);
+
             variableContext.setInputFields(inputFields);
             variableContext.setOutputParams(Collections.emptyMap());
             //初始化执行上下文
+            executeContext.addLog("恢复执行上下文");
             executeContext = contextProvider.restoreExecuteContext(executionUuid);
+            executeContext.addLog("恢复执行上下文结束");
             if (executeContext == null) {
-                executionLog.setErrorMessage("执行上下文不存在或已过期: " + executionUuid);
-                return ExecutorResult.error(processId, "执行上下文不存在或已过期: " + executionUuid);
+                throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
             //重置执行结果
             executeContext.resetNodeProcessResult();
@@ -157,11 +172,11 @@ public class FlowProcessExecutor {
      */
     private ExecutorResult executeFlow(Long processId, VariableContext variableContext, ExecuteContext executeContext) {
         String chainId = FlowUtils.toFlowChainId(processId);
+        executeContext.addLog("调用流程执行方法");
         LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
-
+        executeContext.addLog("调用流程执行方法返回");
         VariableContext updatedVariableContext = response.getContextBean(VariableContext.class);
         ExecuteContext updatedExecuteContext = response.getContextBean(ExecuteContext.class);
-
         return buildExecutorResult(response, updatedExecuteContext, updatedVariableContext);
     }
 
@@ -169,15 +184,12 @@ public class FlowProcessExecutor {
     /**
      * 验证并生成traceId
      */
-    private String validateAndGenerateTraceId(String traceId, Long processId) {
-        if (StringUtils.isEmpty(traceId)) {
-            return FlowUtils.generateTraceId();
-        }
+    private int validateTraceIdCallCount(String traceId, Long processId) {
         List<Long> callInvocation = queryCallInvocation(traceId, processId);
         if (callInvocation.size() > FlowUtils.MAX_QUERY_CALL_COUNT) {
             throw new IllegalStateException("触发流程执行次数超阈值[" + traceId + "][" + callInvocation + "]");
         }
-        return traceId;
+        return callInvocation.size();
     }
 
 
@@ -185,7 +197,7 @@ public class FlowProcessExecutor {
      * 创建新的执行日志
      */
     private FlowExecutionLogDO createNewExecutionLog(Long processId) {
-        Long applicationId = graphFlowCache.findApplicationByProcessId(processId);
+        Long applicationId = flowProcessCache.findApplicationByProcessId(processId);
         FlowExecutionLogDO log = new FlowExecutionLogDO();
         log.setApplicationId(applicationId);
         log.setProcessId(processId);
@@ -202,10 +214,10 @@ public class FlowProcessExecutor {
             throw new IllegalArgumentException("traceId is empty");
         }
         String key = FlowUtils.toRedisTraceKey(traceId);
-        RList<Long> list = redissonClient.getList(key);
+        RList<Long> list = redissonClient.getList(key, FlowUtils.KRYO5_CODEC);
         list.expire(FlowUtils.REDIS_TRACE_TIMEOUT);
         list.add(processId);
-        return new ArrayList<>(list);
+        return Lists.newArrayList(list);
     }
 
     /**

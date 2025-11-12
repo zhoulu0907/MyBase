@@ -18,11 +18,11 @@ public class JsonFileGraphTest {
         ClassPathResource resource = new ClassPathResource("graphjson/" + fileName);
         String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
-        JsonGraph jsonGraph = JsonGraphBuilder.build(json);
+        JsonGraph jsonGraph = FlowGraphBuilder.build(json);
         System.out.println(jsonGraph.toFlowChain());
 
-        GraphFlowCache graphFlowCache = new GraphFlowCache();
-        graphFlowCache.update(1L, 1L, jsonGraph);
+        FlowProcessCache flowProcessCache = new FlowProcessCache();
+        flowProcessCache.update(1L, 1L, jsonGraph);
     }
 
     @Test

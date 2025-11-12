@@ -23,6 +23,11 @@ public class WebFrameworkUtils {
     public static final String HEADER_TENANT_ID = "tenant-id";
     public static final String HEADER_VISIT_TENANT_ID = "visit-tenant-id";
 
+
+    public static final String HEADER_X_TENANT_ID = "X-Tenant-Id";
+    public static final String HEADER_X_CORP_ID = "X-Corp-Id";
+    public static final String HEADER_X_APP_ID = "X-App-Id";
+
     /**
      * 终端的 Header
      *
@@ -99,17 +104,22 @@ public class WebFrameworkUtils {
         String uri = request.getRequestURI();
         
         // 对于runtime metadata相关接口，不进行用户类型检查，允许任何类型用户访问
+        // todo: 确认为什么返回null
         if (StrUtil.startWith(uri, "/runtime/metadata/")) {
             return null;
         }
         
         // 检查 Admin API
-        if (StrUtil.startWith(uri, properties.getAdminApi().getPrefix())) {
-            return UserTypeEnum.ADMIN.getValue();
+        if (StrUtil.startWith(uri, properties.getBuildApi().getPrefix())) {
+            return UserTypeEnum.THIRD.getValue();
         }
         // 检查 App API
-        if (StrUtil.startWith(uri, properties.getAppApi().getPrefix())) {
-            return UserTypeEnum.MEMBER.getValue();
+        if (StrUtil.startWith(uri, properties.getRuntimeApi().getPrefix())) {
+            return UserTypeEnum.CORP.getValue();
+        }
+        // 检查 App API
+        if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
+            return UserTypeEnum.PLATFORM.getValue();
         }
         return null;
     }

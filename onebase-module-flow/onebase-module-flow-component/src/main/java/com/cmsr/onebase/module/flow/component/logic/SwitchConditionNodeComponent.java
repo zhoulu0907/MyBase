@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.component.logic;
 
-import com.cmsr.onebase.module.flow.component.utils.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;

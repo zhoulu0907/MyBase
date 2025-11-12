@@ -19,6 +19,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -146,8 +150,12 @@
             <groupId>com.anji-plus</groupId>
             <artifactId>captcha-spring-boot-starter</artifactId> <!-- 验证码，一般用于登录使用 -->
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+        </dependency>
 
-<!--        <dependency>-->
+        <!--        <dependency>-->
 <!--            <groupId>org.dromara.hutool</groupId>-->
 <!--            <artifactId>hutool-extra</artifactId> &lt;!&ndash; 邮件 &ndash;&gt;-->
 <!--        </dependency>-->

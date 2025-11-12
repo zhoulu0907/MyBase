@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,19 +13,19 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/3 10:07
  */
+@Slf4j
 @Setter
 @Component
 public class JobClient {
 
-    public static final String JOB_EXECUTOR_INFO_TIME = "flow_process_time_job";
-
-    public static final String JOB_EXECUTOR_INFO_DATE_FIELD = "flow_process_date_field_job";
+    public static DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Value("${onebase.scheduler.flow-project}")
     private Long flowProjectCode;
@@ -38,32 +39,39 @@ public class JobClient {
     @Autowired
     private DolphinSchedulerClient dolphinSchedulerClient;
 
-    public String startJob(Long processId, JobCreateRequest jobCreateRequest) {
-        String flowName = String.valueOf(processId);
-        Map<String, Object> body = new HashMap<>();
-        body.put("processId", processId);
-        body.put("token", flowToken);
-        HttpTask httpTask = HttpTask.ofUrl(flowUrl)
-                .method(HttpTask.HttpMethod.POST)
-                .body(JsonUtils.toJsonString(body));
-        Long jobId = dolphinSchedulerClient.createSingletonWorkflow(flowProjectCode, flowName, httpTask, null);
-        Schedule schedule = new Schedule();
-        schedule.setStartTime(LocalDateTime.parse(jobCreateRequest.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        schedule.setEndTime(LocalDateTime.parse(jobCreateRequest.getEndTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        schedule.setCrontab(jobCreateRequest.getCrontab());
-        dolphinSchedulerClient.onlineWorkflowWithSchedule(flowProjectCode, jobId, schedule);
-        return String.valueOf(jobId);
+    public String startJob(JobCreateRequest jobCreateRequest) {
+        try {
+            String flowName = jobCreateRequest.getApplicationId() + "-" + jobCreateRequest.getProcessId();
+            Map<String, Object> body = new HashMap<>();
+            body.put("processId", jobCreateRequest.getProcessId());
+            body.put("token", flowToken);
+            HttpTask httpTask = HttpTask.ofUrl(flowUrl)
+                    .method(HttpTask.HttpMethod.POST)
+                    .body(JsonUtils.toJsonString(body));
+            Long jobId = dolphinSchedulerClient.createSingletonWorkflow(flowProjectCode, flowName, httpTask, jobCreateRequest.getProcessName());
+            Schedule schedule = new Schedule();
+            schedule.setStartTime(LocalDateTime.parse(jobCreateRequest.getStartTime(), DATETIME_FORMATTER));
+            schedule.setEndTime(LocalDateTime.parse(jobCreateRequest.getEndTime(), DATETIME_FORMATTER));
+            schedule.setCrontab(jobCreateRequest.getCrontab());
+            dolphinSchedulerClient.onlineWorkflowWithSchedule(flowProjectCode, jobId, schedule);
+            return String.valueOf(jobId);
+        } catch (Exception e) {
+            log.error("启动工作流失败: {}", jobCreateRequest, e);
+            throw new RuntimeException("启动工作流失败: " + jobCreateRequest, e);
+        }
     }
 
 
-    public void deleteJob(Long processId, String jobId) {
-        String flowName = String.valueOf(processId);
-        Long dsJobId = dolphinSchedulerClient.queryWorkflowByName(flowProjectCode, flowName);
-        if (dsJobId != null) {
-            dolphinSchedulerClient.purgeWorkflow(flowProjectCode, dsJobId);
-        }
-        if (jobId != null && !jobId.equals("0") && dsJobId != null && !jobId.equals(dsJobId.toString())) {
-            dolphinSchedulerClient.purgeWorkflow(flowProjectCode, Long.parseLong(jobId));
+    public void deleteJob(Long applicationId) {
+        try {
+            String flowName = String.valueOf(applicationId);
+            List<Long> jobIds = dolphinSchedulerClient.queryWorkflowCodeListByName(flowProjectCode, flowName);
+            for (Long jobId : jobIds) {
+                dolphinSchedulerClient.purgeWorkflow(flowProjectCode, jobId);
+            }
+        } catch (Exception e) {
+            log.error("删除工作流失败: {}", applicationId, e);
+            throw new RuntimeException("删除工作流失败: " + applicationId, e);
         }
     }
 

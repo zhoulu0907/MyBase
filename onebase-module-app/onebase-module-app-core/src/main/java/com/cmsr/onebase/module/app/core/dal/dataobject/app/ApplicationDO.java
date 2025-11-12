@@ -13,6 +13,20 @@ import lombok.Data;
 @Data
 @Table(name = "app_application")
 public class ApplicationDO extends TenantBaseDO {
+    public static final String APP_UID = "app_uid";
+    public static final String APP_NAME = "app_name";
+    public static final String APP_CODE = "app_code";
+    public static final String APP_MODE = "app_mode";
+    public static final String THEME_COLOR = "theme_color";
+    public static final String ICON_NAME = "icon_name";
+    public static final String ICON_COLOR = "icon_color";
+    public static final String VERSION_NUMBER = "version_number";
+    public static final String VERSION_URL = "version_url";
+    public static final String APP_STATUS = "app_status";
+    public static final String DESCRIPTION = "description";
+    public static final String PUBLISH_MODEL = "publish_model";
+    public static final String ID = "id";
+
 
     @Column(name = "app_uid", columnDefinition = "VARCHAR(16)", length = 256, comment = "应用uid(自动生成短码)")
     private String appUid;
@@ -46,5 +60,8 @@ public class ApplicationDO extends TenantBaseDO {
 
     @Column(name = "description", columnDefinition = "VARCHAR(1024)", length = 1024, comment = "描述")
     private String description;
+
+    @Column(name = "publish_model", columnDefinition = "VARCHAR(256)", comment = "发布模式/内部模式")
+    private String publishModel;
 
 }

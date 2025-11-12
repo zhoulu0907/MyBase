@@ -81,13 +81,6 @@ public class PageDO extends TenantBaseDO {
     private String mainMetadata;
 
     /**
-     * 是否启用 BPM
-     * 例如: true 表示启用 BPM
-     */
-    @Column(name = "bpm_enabled", columnDefinition = "BOOLEAN NOT NULL", comment = "是否启用 BPM")
-    private Boolean bpmEnabled;
-
-    /**
      * 路由路径
      * 例如: /user/profile
      */
@@ -102,19 +95,14 @@ public class PageDO extends TenantBaseDO {
     private String routerName;
 
     /**
-     * 路由元数据-是否需要认证
-     * 例如: true 表示需要登录
-     */
-    @Column(name = "router_meta_auth_required", columnDefinition = "BOOLEAN NOT NULL", comment = "路由元数据-是否需要认证")
-    private Boolean routerMetaAuthRequired;
-
-    /**
      * 路由元数据-页面标题
      * 例如: 用户资料 - 个人中心
      */
     @Column(name = "router_meta_title", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由元数据-页面标题")
     private String routerMetaTitle;
 
+    @Column(name = "interaction_rules", columnDefinition = "TEXT NOT NULL", comment = "交互规则")
+    private String interactionRules;
     // TODO(mickey): 补充 Method字段
 
 }
