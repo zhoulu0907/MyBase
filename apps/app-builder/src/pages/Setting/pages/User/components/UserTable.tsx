@@ -1,8 +1,8 @@
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
 import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
-import type { PageParam, UserVO } from '@onebase/platform-center';
-import { deleteUser, getUserPage, resetUserPassword, StatusEnum, updateUserStatus } from '@onebase/platform-center';
+import type { PageParam, UpdateAdminOrDirectorReq, UserVO } from '@onebase/platform-center';
+import { deleteUser, getUserPage, resetUserPassword, StatusEnum, updateUserStatus, UserType, PlatformTenantStatus, getSimpleUser, updateAdminOrDirector, getSimpleUserList } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
@@ -12,9 +12,8 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasPermission, hasAllPermissions } from '@/utils/permission';
 import { TENANT_USER_PERMISSION as ACTIONS } from '@/constants/permission';
-import { UserType } from '@onebase/platform-center';
 import { AddMembers } from '@onebase/common';
-import { getDeptUser, type GetDeptUserReq, type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO, type RoleAddUserReq, roleAddUser } from '@onebase/app';
+import { type AuthRoleUsersPageRespVO } from '@onebase/app';
 
 
 interface DataItem {
@@ -45,13 +44,23 @@ const statusOptions: SelectOptions[] = [
   },
   {
     label: '已启用',
-    value: 1,
+    value: PlatformTenantStatus.enabled
   },
   {
     label: '已禁用',
-    value: 0,
+    value: PlatformTenantStatus.disabled
   },
 ];
+
+export enum UserRole {
+  ADMIN = 'admin',
+  DIRECTOR = 'director',
+}
+
+export const RoleLabelMap: Record<UserRole, string> = {
+  [UserRole.ADMIN]: '管理员',
+  [UserRole.DIRECTOR]: '主管',
+};
 
 export default function UserTable({
   selectedDeptId = undefined,
@@ -61,6 +70,7 @@ export default function UserTable({
 }: UserTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [status, setStatus] = useState<PlatformTenantStatus | ''>('');
   const [search, setSearch] = useState('');
   const [editingUser, setEditingUser] = useState<UserRecord | undefined>();
   const [data, setData] = useState<UserRecord[]>([]);
@@ -68,7 +78,7 @@ export default function UserTable({
   const [detailUser, setDetailUser] = useState<UserRecord | undefined>();
   const [resetPasswordUser, setResetPasswordUser] = useState<UserRecord | undefined>();
 
-  const [deptData, setDeptData] = useState<DeptAndUsersRespDTO>();
+  const [userData, setUsertData] = useState<{ userList: any[] }>();
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [selectedMembers, setSelectedMembers] = useState<AuthRoleUsersPageRespVO[]>([]);
 
@@ -76,14 +86,15 @@ export default function UserTable({
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [resetPasswordModalVisible, setResetPasswordModalVisible] = useState(false);
   const [importModalVisible, setImportModalVisible] = useState(false); // 导入
-  const [managerTypeModalVisible, setManagerTypeModalVisible] = useState<'主管' | '管理员' | null>(null); // 设置主管 or 管理员
+  const [managerTypeModalVisible, setManagerTypeModalVisible] = useState<UserRole | null>(null); // 设置主管 or 管理员
 
   // 查询用户列表
   const getUserList = useCallback(
     async (searchValue?: string) => {
       const params: PageParam = {
         pageNo: page,
-        pageSize
+        pageSize,
+        status
       };
       if (selectedDeptId) params.deptId = selectedDeptId;
       if (searchValue) params.nickname = searchValue;
@@ -91,7 +102,7 @@ export default function UserTable({
       setData(res.list || []);
       setTotal(res.total || 0);
     },
-    [page, pageSize, selectedDeptId]
+    [page, pageSize, selectedDeptId, status]
   );
 
   const debouncedSearch = useCallback(
@@ -103,7 +114,7 @@ export default function UserTable({
 
   useEffect(() => {
     getUserList();
-  }, [selectedDeptId, page, pageSize]);
+  }, [selectedDeptId, page, pageSize, status]);
 
   const handleEdit = (record: UserRecord) => {
     setEditingUser(record);
@@ -120,8 +131,17 @@ export default function UserTable({
     // todo import
   };
 
-  const handleExport = () => {
-    // todo export
+  const handleExport = async () => {
+    // try {
+    //   const params = {
+    //     pageNo: 1,
+    //     pageSize: 10
+    //   }
+    //   await exportUser('用户数据', params);
+    //   Message.success('用户导出成功');
+    // } catch (error) {
+
+    // }
   };
 
   // 搜索
@@ -326,37 +346,20 @@ export default function UserTable({
     return null;
   }
 
-  // 设置主管
-  const handleSetDirector = async () => {
-    await getDeptUsers({});
-    setManagerTypeModalVisible('主管');
-    console.log(21324214, selectedDeptId)
-  };
-
-  // 设置管理员
-  const handleSetAdmin = async () => {
-    await getDeptUsers({});
-    setManagerTypeModalVisible('管理员');
-  };
-
-  // 展开下级
-  const handleExpand = async (deptId: string) => {
-    await getDeptUsers({ deptId });
+  // 设置主管/管理员
+  const handleSetAdminOrDirector = async (updateType: UserRole) => {
+    if (!selectedDeptId) return Message.warning('请先选择部门');
+    await getSimpleUsers({});
+    setManagerTypeModalVisible(updateType);
   };
 
   // 获取部门用户信息
-  const getDeptUsers = async ({ deptId, keywords }: { deptId?: string; keywords?: string }) => {
+  const getSimpleUsers = async ({ keywords = '' }: { keywords?: string }) => {
     setMemberLoading(true);
     try {
       if (!selectedDeptId) return;
-      const params: GetDeptUserReq = {
-        roleId: `${selectedDeptId}`,
-        deptId,
-        keywords
-      };
-      const res = await getDeptUser(params);
-      console.log('获取部门用户信息 res:', res);
-      setDeptData(res);
+      const res = await getSimpleUser(keywords);
+      setUsertData({ userList: res });
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);
     } finally {
@@ -365,25 +368,25 @@ export default function UserTable({
   };
 
   // 添加成员
-  const handleAddUser = async (selectedMembers: AuthRoleUsersPageRespVO[]) => {
+  const handleAddUser = async (selectedMembers: any[]) => {
     console.log('添加成员 selectedMembers:', selectedMembers);
-    if (!selectedDeptId) return;
-    const userIds = selectedMembers.map((v) => v.key);
-    const params: RoleAddUserReq = {
-      roleId: `${selectedDeptId}`,
-      userIds
+    if (!selectedDeptId || !managerTypeModalVisible) return;
+    if (selectedMembers.length !== 1) return Message.warning(`只能设置一个${RoleLabelMap[managerTypeModalVisible]}`);
+    const params: UpdateAdminOrDirectorReq = {
+      deptId: `${selectedDeptId}`,
+      updateType: managerTypeModalVisible,
+      userId: selectedMembers[0].key
     };
-    console.log('添加成员 params:', params);
-    // await roleAddUser(params); // todo 设置管理员
+    await updateAdminOrDirector(params);
     setManagerTypeModalVisible(null);
     Message.success('添加成功');
   };
 
   const debouncedUpdate = useCallback(
     debounce((value) => {
-      getDeptUsers({ keywords: value });
+      getSimpleUsers({ keywords: value });
     }, 500),
-    []
+    [selectedDeptId]
   );
 
   useEffect(() => {
@@ -400,10 +403,10 @@ export default function UserTable({
       <div className={s.operationTop}>
         <div className={s.deptName}>{findNameById(deptTree, `${selectedDeptId}`)}</div>
         <Space>
-          <Button permission={ACTIONS.CREATE} onClick={handleSetDirector}>
+          <Button permission={ACTIONS.CREATE} onClick={() => handleSetAdminOrDirector(UserRole.DIRECTOR)}>
             设置主管
           </Button>
-          <Button permission={ACTIONS.CREATE} onClick={handleSetAdmin}>
+          <Button permission={ACTIONS.CREATE} onClick={() => handleSetAdminOrDirector(UserRole.ADMIN)}>
             设置管理员
           </Button>
         </Space>
@@ -421,7 +424,7 @@ export default function UserTable({
           </Button>
         </Space>
         <Space>
-          <Select defaultValue={statusOptions[0].value} bordered={false} options={statusOptions} onChange={(value) => console.log(value, 88)} />
+          <Select defaultValue={status} bordered={false} options={statusOptions} onChange={(val) => setStatus(val)} />
           <Input.Search
             className={s.inputSearch}
             style={{ width: 218, marginBottom: 0 }}
@@ -496,12 +499,11 @@ export default function UserTable({
         onOk={handleResetPasswordOk}
       />
       <AddMembers
-        title={managerTypeModalVisible ? `设置${managerTypeModalVisible}` : ''}
+        title={managerTypeModalVisible ? `设置${RoleLabelMap[managerTypeModalVisible]}` : ''}
         visible={!!managerTypeModalVisible}
-        data={deptData}
+        data={userData}
         loading={memberLoading}
         selectedMembers={selectedMembers || []}
-        onExpand={handleExpand}
         onSearch={debouncedUpdate}
         onConfirm={handleAddUser}
         onUpdateSelectedMembers={handleUpdateSelectedMembers}

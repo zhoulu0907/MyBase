@@ -80,11 +80,11 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'enterpriseInfo':
           title = t('sider.enterpriseInfo');
           break;
-        case 'enterprise':
-          title = t('sider.enterprise');
-          break;
         case 'tenant':
           title = t('sider.tenant');
+          break;
+        case 'enterprise':
+          title = t('sider.enterprise');
           break;
         case "create-enterprise":
           title = t('sider.createEnterprise');

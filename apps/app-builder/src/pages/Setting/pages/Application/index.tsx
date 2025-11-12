@@ -14,7 +14,8 @@ import {
   Select,
   Space,
   Spin,
-  Tag
+  Tag,
+  Tooltip
 } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconEmpty, IconEye, IconLaunch, IconLeft, IconMoreVertical, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -399,18 +400,20 @@ const AppManagement: React.FC = () => {
                         </div>
                         <div className={styles.appCardInfo}>
                           <div className={styles.infoHeader}>
-                            <div className={styles.appTitle}>{item.appName}</div>
+                            <Tooltip content={item.appName}>
+                              <div className={styles.appTitle}>{item.appName}</div>
+                            </Tooltip>
 
                             <div className={styles.tagWrapper}>
-                              <Tag
+                              {item?.developStatus && <Tag
                                 color={TagColor[item.appStatus]}
                                 style={{
                                   fontSize: 12,
                                   fontWeight: 400
                                 }}
                               >
-                                迭代中
-                              </Tag>
+                                {item.developStatus}
+                              </Tag>}
 
                               <Tag
                                 color={TagColor[item.appStatus]}
@@ -425,14 +428,16 @@ const AppManagement: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className={styles.updateTime}>更新时间：${dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
+                          <div className={styles.updateTime}>更新时间：{dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
                         </div>
                       </div>
 
                     </div>
 
                     <div className={styles.appCardBody}>
-                      <div className={styles.appDesc}>{item.description ?? '该应用暂无介绍。'}</div>
+                      <Tooltip content={item.description}>
+                        <div className={styles.appDesc}>{item.description ?? '该应用暂无介绍。'}</div>
+                      </Tooltip>
                       <div className={styles.appTags}>
                         {item.tags?.map((tag: { id: string; tagName: string }) => (
                           <Tag
@@ -452,28 +457,22 @@ const AppManagement: React.FC = () => {
                   <Divider style={{ margin: '12px 0 0' }} />
                   <div className={styles.appCardFooter}>
                     <div className={styles.footerLeft}>
-                      <AvatarGroup
-                        size={24}
-                        maxCount={4}
-                        zIndexAscend
-                      >
-                        <Avatar style={{ backgroundColor: '#7BC616' }}>
-                          A
-                        </Avatar>
-                        <Avatar style={{ backgroundColor: '#14C9C9' }}>
-                          B
-                        </Avatar>
-                        <Avatar style={{ backgroundColor: '#168CFF' }}>
-                          C
-                        </Avatar>
-                        <Avatar style={{ backgroundColor: '#FF7D00' }}>
-                          Arco
-                        </Avatar>
-                        <Avatar style={{ backgroundColor: '#FFC72E' }}>
-                          Design
-                        </Avatar>
-                      </AvatarGroup>
-                      <div>Cyan王玊等7人开发</div>
+                      {item?.userPhotoList && item?.userPhotoList.length > 0 && (
+                        <>
+                          <AvatarGroup
+                            size={24}
+                            maxCount={4}
+                            zIndexAscend
+                          >
+                            {
+                              item?.userPhotoList?.map(user => (
+                                <img src={user.avatar} />
+                              ))
+                            }
+                          </AvatarGroup>
+                          <div>{item?.createUser}等{item?.userPhotoList?.length}人开发</div>
+                        </>
+                      )}
                     </div>
 
                     <div className={styles.footerRight}>

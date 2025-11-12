@@ -100,3 +100,10 @@ export const getDictDataDetail = (id: number): Promise<DictData> => {
 export const batchConfigDictData = (data: DictData[]): Promise<void> => {
   return systemService.post('/dict-data/batch-operate', data);
 };
+
+/**
+ * 根据dict type获得字典数据列表
+ */
+export const getDictDataByType = (id: string): DictData[] => {
+  return systemService.get(`/dict-data/simple-list-by-type?id=${id}`);
+};

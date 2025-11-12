@@ -1,61 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, Spin, Typography, Message, Grid } from '@arco-design/web-react';
-import { IconCopy } from '@arco-design/web-react/icon';
-import type { TenantInfo } from '@onebase/platform-center';
-import { getTenantInfo, updateTenant } from '@onebase/platform-center';
+import { Avatar, Spin, Typography, Message, Grid, Upload, Image, Tooltip, Modal, Input, Form } from '@arco-design/web-react';
+import { IconCamera, IconCopy, IconEdit } from '@arco-design/web-react/icon';
+import type { PlatformTenantInfo } from '@onebase/platform-center';
+import { getPlatformTenantAdminInfoApi, updatePlatformTenantApi, PlatformTenantPublishMode, uploadFile } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import Tags from './Tags';
+import { TokenManager } from '@onebase/common';
 import styles from './index.module.less';
 
 const { Col, Row } = Grid;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const SpaceInfo: React.FC = () => {
-  const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
+  const [form] = Form.useForm();
+  const [spaceInfo, setSpaceInfo] = useState<PlatformTenantInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tenantName, setTenantName] = useState('');
+  const [logoUrl, setLogoUrl] = useState<string>();
+  const [renameVisible, setRenameVisible] = useState<boolean>(false);
 
-  const fetchTenantInfo = async () => {
+  // 获取用户信息
+  const tokenInfo = TokenManager.getTokenInfo();
+
+  const fetchSpaceInfo = async (id: string) => {
     try {
       setLoading(true);
-      const res = await getTenantInfo();
-      setTenantInfo(res);
-      setTenantName(res.name);
+      const res = await getPlatformTenantAdminInfoApi(id);
+      setSpaceInfo(res);
+      setLogoUrl(res.logoUrl);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTenantInfo();
+    tokenInfo?.userId && fetchSpaceInfo(`${tokenInfo.userId}`);
+    form.resetFields();
   }, []);
-
-  const handleNameChange = async (newName: string) => {
-    if (!tenantInfo) return;
-
-    if (!newName.trim()) {
-      Message.error('租户名称不能为空');
-      return;
-    }
-
-    try {
-      await updateTenant({
-        id: tenantInfo.id,
-        name: newName
-      });
-
-      setTenantInfo({
-        ...tenantInfo,
-        name: newName
-      });
-
-      Message.success('租户名称更新成功');
-    } catch (error) {
-      console.error('更新租户信息失败', error);
-    }
-  };
 
   const gotoLink = (link: string | null) => {
     if (!link) {
@@ -64,12 +46,60 @@ const SpaceInfo: React.FC = () => {
     window.open(link, '_blank');
   };
 
+  // 上传logo
+  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const progressAdapter = onProgress
+      ? (progressEvent: ProgressEvent) => {
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
+        }
+      }
+      : undefined;
+
+    const res = await uploadFile(formData, progressAdapter);
+    return res;
+  };
+
   // 生成完整访问地址的函数
   const generateFullUrl = (path: string | null | undefined) => {
     if (!path) return '';
     const origin = window.location.origin;
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     return `${origin}/#/tenant${normalizedPath}`;
+  };
+
+  // 重命名
+  const handleRenameSubmit = async () => {
+    if (!spaceInfo) return;
+    const { newName } = await form.validate();
+
+    if (!newName.trim()) {
+      Message.error('空间名称不能为空');
+      return;
+    }
+
+    try {
+      await updatePlatformTenantApi({
+        id: spaceInfo.id,
+        name: newName,
+        tenantAdminUserUpdateReqVOSList: spaceInfo.tenantAdminUserList
+      })
+
+      setSpaceInfo({
+        ...spaceInfo,
+        name: newName
+      });
+
+      form.resetFields();
+      setRenameVisible(false);
+      Message.success('空间名称更新成功');
+    } catch (error) {
+      console.error('更新空间信息失败', error);
+    }
   };
 
   // 显示加载状态
@@ -83,24 +113,24 @@ const SpaceInfo: React.FC = () => {
     );
   }
 
-  // 数据加载完成后但没有租户信息
-  if (!tenantInfo) {
+  // 数据加载完成后但没有空间信息
+  if (!spaceInfo) {
     return (
       <div className={styles.tenantPage}>
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          <p>无法加载租户信息</p>
+          <p>无法加载空间信息</p>
         </div>
       </div>
     );
   }
 
   // 生成完整的工作台和移动端链接
-  const fullWebsite = generateFullUrl(tenantInfo.website);
+  const fullWebsite = generateFullUrl(spaceInfo.website);
 
   return (
     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)} isLoading={loading}>
-      <div className={styles.tenantPage}>
-        <div className={styles.tenantPageMain}>
+      <div className={styles.spaceInfoPage}>
+        <div className={styles.spaceInfoPageMain}>
 
           <div className={`${styles.infoCard} ${styles.infoCardPrimary}`}>
             <div className={styles.blockHeader}>基本信息</div>
@@ -108,22 +138,55 @@ const SpaceInfo: React.FC = () => {
             <div className={styles.baseInfo}>
               <div className={styles.infoCardPrimaryLeft}>
                 <div className={styles.avatarSection}>
-                  <Avatar shape="square" style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}>
-                    <span className={styles.avatarText}>{tenantInfo.name?.slice(0, 6)}</span>
-                  </Avatar>
+                  <Tooltip content="修改Logo">
+                    {logoUrl ? (
+                      <Upload
+                        limit={1}
+                        accept="image/*"
+                        listType="picture-card"
+                        customRequest={async (option) => {
+                          const { onProgress, onError, onSuccess, file } = option;
+                          try {
+                            const uploadImgUrl = await handleUpload(file, onProgress);
+                            if (uploadImgUrl !== '') {
+                              setLogoUrl(uploadImgUrl);
+                              onSuccess(uploadImgUrl);
+                            } else {
+                              onError({
+                                status: 'error',
+                                msg: '上传失败'
+                              });
+                            }
+                          } catch (error) {
+                            onError({
+                              status: 'error',
+                              msg: '上传失败'
+                            });
+                          }
+                        }}
+                      >
+                        <Image
+                          className={styles.reUploadLogo}
+                          src={logoUrl}
+                          width={160}
+                          height={80}
+                          preview={false}
+                          actions={[
+                            <IconCamera />
+                          ]}
+                        />
+                      </Upload>) :
+                      <Avatar shape="square" style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}>
+                        <span className={styles.avatarText}>{spaceInfo.name?.slice(0, 6)}</span>
+                      </Avatar>}
+                  </Tooltip>
                 </div>
                 {/* 名称 & ID */}
                 <div className={styles.section}>
-                  <Title
-                    heading={5}
-                    style={{ margin: 0, fontSize: 16, color: '#272E3B' }}
-                    editable={
-                      hasPermission(ACTIONS.UPDATE) ? { onChange: setTenantName, onEnd: handleNameChange } : false
-                    }
-                  >
-                    {tenantName}
-                  </Title>
-                  <div className={styles.enterpriseId}>企业ID：<Text copyable>{tenantInfo.id}</Text></div>
+                  <div className={styles.enterpriseName}>
+                    {spaceInfo.name} {hasPermission(ACTIONS.UPDATE) && <IconEdit onClick={() => setRenameVisible(true)} style={{ cursor: 'pointer' }} />}
+                  </div>
+                  <div className={styles.enterpriseId}>企业ID：<Text copyable>{spaceInfo.id}</Text></div>
                 </div>
               </div>
 
@@ -132,12 +195,12 @@ const SpaceInfo: React.FC = () => {
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>企业数(个)</div>
                   <div className={styles.statValue}>
-                    {tenantInfo.accountCount}
+                    {spaceInfo.corpCount || 0}
                   </div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>应用数量(个)</div>
-                  <div className={styles.statValue}>{tenantInfo.appCount}</div>
+                  <div className={styles.statValue}>{spaceInfo.appCount || 0}</div>
                 </div>
               </div>
             </div>
@@ -176,7 +239,7 @@ const SpaceInfo: React.FC = () => {
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>用户数量</span>
-                    <span>2000/3000</span>
+                    <span>{spaceInfo.existUserCount ?? '-'}/{spaceInfo.accountCount || 0}</span>
                   </div>
                 </Col>
               </Row>
@@ -185,22 +248,29 @@ const SpaceInfo: React.FC = () => {
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>SaaS功能</span>
-                    <span>未启用</span>
+                    <span>{spaceInfo?.publishModel === PlatformTenantPublishMode.saas ? '已启用' : '未启用'}</span>
                   </div>
                 </Col>
                 <Col span={12}>
-                  <div style={{ display: 'flex' }}>
+                  <Row>
                     <span className={styles.infoKey}>空间管理员</span>
-                    <span>
-                      <Tags data={['王少青1', '王少青2', '王少青3']} />
-                    </span>
-                  </div>
+                    <Tags data={spaceInfo.tenantAdminUserList} />
+                  </Row>
                 </Col>
               </Row>
             </div>
           </div>
         </div>
       </div>
+
+      {/* 修改空间名称 */}
+      <Modal title="修改空间名称" visible={renameVisible} onOk={handleRenameSubmit} onCancel={() => setRenameVisible(false)}>
+        <Form form={form} layout="vertical">
+          <Form.Item label="新的空间名称" field="newName" rules={[{ required: true, message: "请输入新的空间名称" }]}>
+            <Input placeholder="请输入新的空间名称" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </PlaceholderPanel>
   );
 };

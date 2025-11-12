@@ -98,6 +98,7 @@ export const TENANT_INFO_PERMISSION = {
   QUERY: TENANT_INFO_QUERY,
   UPDATE: TENANT_INFO_UPDATE,
 }
+
 /** 应用管理-我的应用管理 */
 export const APP_MYAPP_QUERY = 'app:app:query';
 export const APP_MYAPP_CREATE = 'app:app:create';

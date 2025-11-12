@@ -19,3 +19,21 @@ export interface DeptTree extends DeptVO {
 }
 
 export type DeptForm = Partial<DeptVO>;
+
+/**
+ * UserAdminOrDirectorUpdateReqVO
+ */
+export interface UpdateAdminOrDirectorReq {
+  /**
+   * 部门Id
+   */
+  deptId: string;
+  /**
+   * 管理员类型
+   */
+  updateType: string;
+  /**
+   * 用户id
+   */
+  userId: string;
+}

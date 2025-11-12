@@ -1,132 +1,141 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { Avatar, Typography, Grid, Space, Tag, Button, Tabs, Pagination, Table, Card } from '@arco-design/web-react';
-// import type { TenantInfo } from '@onebase/platform-center';
-// import { getTenantInfo } from '@onebase/platform-center';
+import { Avatar, Typography, Grid, Space, Tag, Button, Tabs, Pagination, Table, Card, Spin, Image } from '@arco-design/web-react';
+import { getCorpListApi, getLoginedUser, getDictDataByType } from '@onebase/platform-center';
+import type { CorpDetailResponse, DictData, RoleSimpleRespVO, PostSimpleRespVO } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
+import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import StatusTag from '@/components/StatusTag';
 import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import styles from './index.module.less';
+import {
+  getApplicationSimple,
+  type Application,
+  type PageParam
+} from '@onebase/app';
 
 const TabPane = Tabs.TabPane;
 const { Title, Text } = Typography;
 const { Col, Row } = Grid;
 
-const tableData = [{
-  logo: '',
-  name: 'name',
-  id: '1',
-  type: '333',
-  admin: 'admin',
-  status: 1,
-  createTime: '1762154032380'
-},
-{
-  logo: '',
-  name: 'name',
-  id: '2',
-  type: '333',
-  admin: 'admin',
-  status: 1,
-  createTime: '1762154032380'
-},
-{
-  logo: '',
-  name: 'name',
-  id: '3',
-  type: '333',
-  admin: 'admin',
-  status: 1,
-  createTime: '1762154032380'
-}];
 
-const appData = [
-  {
-    name: '智慧工厂应用',
-    desc: '覆盖报案、查勘、定损、核赔到支付的全流程数字化管理通过智能识别与流程自动化，提高理赔效率与准确性，优化客户体验',
-  },
-  {
-    name: '智慧工厂应用',
-    desc: '覆盖报案、查勘、定损、核赔到支付的全流程数字化管理通过智能识别与流程自动化，提高理赔效率与准确性，优化客户体验',
-  },
-  {
-    name: '智慧工厂应用',
-    desc: '覆盖报案、查勘、定损、核赔到支付的全流程数字化管理通过智能识别与流程自动化，提高理赔效率与准确性，优化客户体验',
-  }
-];
+const CREATED_TYPE = {
+  ENTERPRISE: 'enterprise',
+  APPLICATION: 'application',
+}
+
+const leftPanelWidth = 240;
+const SectionPadding = 32 + 64;
+const tabPanelWidth = `calc(100vw - ${leftPanelWidth}px - ${SectionPadding}px`;
+
+type ownerCreateType = 'enterprise' | 'application' | string;
 
 const TenantPage: React.FC = () => {
   const nav = useNavigate();
-  // const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
   const [loading, setLoading] = useState(true);
-
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
-  const [data, setData] = useState<any[]>(tableData);
-  const [editingUser, setEditingUser] = useState<any | undefined>();
+  const [curTab, setCurTab] = useState<ownerCreateType>(CREATED_TYPE.ENTERPRISE);
 
-  // const fetchTenantInfo = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const res = await getTenantInfo();
-  //     setTenantInfo(res);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [appData, setAppData] = useState<Application[]>([]);
+  const [corpData, setCorpData] = useState<CorpDetailResponse[]>([]);
+  const [industryDict, setTndustryDict] = useState<DictData[] | null>(null);
 
   useEffect(() => {
-    // fetchTenantInfo();
+    fetchUserInfo();
   }, []);
 
-  // 显示加载状态
-  // if (loading) {
-  //   return (
-  //     <div className={styles.tenantPage}>
-  //       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-  //         <Spin tip="加载中..." />
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  useEffect(() => {
+    if (curTab === CREATED_TYPE.ENTERPRISE) {
+      getOwnerCorp();
+    } else if (curTab === CREATED_TYPE.APPLICATION) {
+      getOwnerApplication();
+    }
+  }, [curTab, page, pageSize]);
 
-  // 数据加载完成后但没有租户信息
-  // if (!tenantInfo) {
-  //   return (
-  //     <div className={styles.tenantPage}>
-  //       <div style={{ textAlign: 'center', padding: '40px' }}>
-  //         <p>无法加载租户信息</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // 生成完整的工作台和移动端链接
-  // const fullWebsite = generateFullUrl(tenantInfo.website);
-  // const fullWebsiteH5 = generateFullUrl(tenantInfo.websiteH5);
-
-  const handleEdit = (record: any) => {
-    setEditingUser(record);
+  const fetchUserInfo = async () => {
+    try {
+      setLoading(true);
+      const res = await getLoginedUser();
+      setUserInfo(res);
+      if (res?.id) {
+        await fetchIndustryDict(res.id)
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getColumns = (handleEdit: (record: any) => void) => {
+  // 我创建的企业
+  const getOwnerCorp = async () => {
+    const req: PageParam = {
+      pageNo: page,
+      pageSize: pageSize,
+      ownerTag: 1, // 我创建的
+    };
+    const res = await getCorpListApi(req);
+    if (res) {
+      setCorpData(res.list);
+      setTotal(res.total);
+    }
+  };
+
+  // 我创建的应用
+  const getOwnerApplication = async () => {
+    const ownerTag = 1;
+    const res = await getApplicationSimple(ownerTag);
+    setAppData(res.list);
+  };
+
+  const fetchIndustryDict = async (id: string) => {
+    try {
+      const res = await getDictDataByType(id);
+      setTndustryDict(res);
+    } catch (error) {
+      console.error('字典数据列表错误', error);
+    }
+  };
+
+  // 显示加载状态
+  if (loading) {
+    return (
+      <div className={styles.tenantPage}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+          <Spin tip="加载中..." />
+        </div>
+      </div>
+    );
+  }
+
+  // 数据加载完成后但没有租户信息
+  if (!userInfo) {
+    return (
+      <div className={styles.tenantPage}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <p>无法加载个人中心信息</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getColumns = () => {
     return [
       {
         title: '企业LOGO',
-        dataIndex: 'logo',
+        dataIndex: 'corpLogo',
         width: 100,
-        render: (_: any) => (
-          <img />
+        render: (url: any) => (
+          <img src={url} style={{ width: 72, height: 36, borderRadius: 5, border: '1px solid #F2F3F5', backgroundColor: '#F7F8FA', objectFit: 'contain' }} />
         )
       },
       {
         title: '企业名称',
-        dataIndex: 'name',
+        dataIndex: 'corpName',
         width: 235,
         ellipsis: true
       },
@@ -138,18 +147,21 @@ const TenantPage: React.FC = () => {
       },
       {
         title: '行业类型',
-        dataIndex: 'type',
+        dataIndex: 'industryType',
         width: 100,
         placeholder: '-',
-        render: (val: string, a) => (
-          <Tag color="cyan">
-            {val}
-          </Tag>
-        )
+        render: (val: string) => {
+          const getIndustryTypeName = industryDict?.find(data => data.id === val)?.label || '-';
+          return (
+            <Tag color="cyan">
+              {getIndustryTypeName}
+            </Tag>
+          )
+        }
       },
       {
         title: '管理员',
-        dataIndex: 'admin',
+        dataIndex: 'adminName',
         width: 90,
         placeholder: '-',
         ellipsis: true
@@ -170,13 +182,13 @@ const TenantPage: React.FC = () => {
   };
 
   const handleGoEditPage = () => {
-    nav(`/onebase/setting/tenant/edit?id=${123}`);
+    nav('/onebase/setting/tenant/edit');
   };
 
   return (
     <div className={styles.tenantPage}>
       <div className={styles.userInfo}>
-        <Row justify="space-between" align="center" style={{ marginBottom: 24 }}>
+        <Row justify="space-between" align="center">
           {/* 左侧头像与姓名 */}
           <Col flex="auto">
             <Space align="center">
@@ -184,19 +196,22 @@ const TenantPage: React.FC = () => {
                 className={styles.avatar}
                 size={80}
                 shape="circle"
-                style={{ border: '1px solid #f0f0f0' }}
-                image="https://cdn.example.com/avatar-wsq.jpg"
-              />
+                style={{ border: '1px solid #f0f0f0', overflow: 'hidden' }}
+              >
+                <Image width={80} height={80} src={userInfo.avatar} />
+              </Avatar>
               <div>
                 <div className={styles.userTop}>
                   <Title className={styles.username} heading={6}>
-                    王少青
+                    {userInfo.nickname}
                   </Title>
-                  <Tag className={styles.userTag} color="arcoblue" size="small">
-                    主管
-                  </Tag>
+                  {
+                    userInfo?.posts?.map((post: PostSimpleRespVO) => <Tag className={styles.userTag} color="cyan" size="small" key={post.id}>
+                      {post.name}
+                    </Tag>)
+                  }
                 </div>
-                <Text className={styles.userRole} type="secondary">角色：产品设计</Text>
+                <Text className={styles.userRole} type="secondary">角色：{userInfo?.roles?.map((role: RoleSimpleRespVO) => role.name).join('、')}</Text>
               </div>
             </Space>
           </Col>
@@ -208,7 +223,7 @@ const TenantPage: React.FC = () => {
         </Row>
 
         {/* 下方详细信息区 */}
-        <Row gutter={[0, 12]} align='center' style={{ paddingLeft: 100 }}>
+        <Row gutter={[0, 12]} align='center' style={{ paddingLeft: 105 }}>
           {/* 第一行 */}
           <Col span={8}>
             <Row gutter={8}>
@@ -216,7 +231,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">账号</Text>
               </Col>
               <Col flex="auto">
-                <Text>wangshaoqing</Text>
+                <Text>{userInfo.username}</Text>
               </Col>
             </Row>
           </Col>
@@ -227,7 +242,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">手机号</Text>
               </Col>
               <Col flex="auto">
-                <Text>137 0193 5734</Text>
+                <Text>{userInfo.mobile || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -238,7 +253,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">账号状态</Text>
               </Col>
               <Col flex="auto">
-                <Text>正常</Text>
+                <Text>{userInfo.statusDesc || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -250,7 +265,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">所属部门</Text>
               </Col>
               <Col flex="auto">
-                <Text>湖北交通行业空间 / 科创中心</Text>
+                <Text>{userInfo?.dept?.name || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -261,7 +276,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">邮箱</Text>
               </Col>
               <Col flex="auto">
-                <Text>wangshaoqing@cmsr.chinamobile.com</Text>
+                <Text>{userInfo.email || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -272,7 +287,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">OneID</Text>
               </Col>
               <Col flex="auto">
-                <Text>123566424512</Text>
+                <Text>{userInfo.id || '-'}</Text>
               </Col>
             </Row>
           </Col>
@@ -285,13 +300,13 @@ const TenantPage: React.FC = () => {
         style={{ display: 'flex', flex: 1, overflow: 'hidden' }}
         spinStyle={{ display: 'flex', flex: 1, overflow: 'hidden' }}
       >
-        <Tabs className={styles.createTabs}>
-          <TabPane key='tab1' title='我创建的企业'>
+        <Tabs className={styles.createTabs} activeTab={curTab} onChange={setCurTab} style={{ maxWidth: tabPanelWidth }}>
+          <TabPane key={CREATED_TYPE.ENTERPRISE} title='我创建的企业'>
             <Table
               rowKey="id"
               hover
-              columns={getColumns(handleEdit)}
-              data={data}
+              columns={getColumns()}
+              data={corpData}
               pagination={false}
               scroll={{ y: 510 }}
               border={false}
@@ -319,47 +334,46 @@ const TenantPage: React.FC = () => {
             </div>
 
           </TabPane>
-          <TabPane key='tab2' title='我创建的应用'>
-            <div style={{ overflow: 'auto' }}>
-              <Space direction="vertical" size={16} style={{ width: '100%', height: '100%', overflow: 'auto' }}>
-                {appData.map((item, index) => (
-                  <Card
-                    key={index}
-                    bordered={false}
-                    style={{
-                      borderRadius: 16,
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                    }}
-                  >
-                    <Row align="center" gutter={8}>
-                      {/* 左侧图标 */}
-                      <Col flex="64px" style={{ textAlign: 'center' }}>
-                        <div className={styles.myAppIcon} style={{ backgroundColor: item?.iconColor || '#ccc' }}>
-                          <DynamicIcon
-                            IconComponent={appIconMap[item?.iconName as keyof typeof appIconMap || 'city-one']}
-                            theme="outline"
-                            size="32"
-                            fill="#F2F3F5"
-                          />
-                        </div>
-                      </Col>
+          <TabPane key={CREATED_TYPE.APPLICATION} title='我创建的应用'>
+            <Space direction="vertical" size={16}>
+              {appData.map((item, index) => (
+                <Card
+                  key={index}
+                  bordered={false}
+                  style={{
+                    width: '100%',
+                    borderRadius: 16,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  <Row align="center" gutter={8}>
+                    {/* 左侧图标 */}
+                    <Col flex="64px" style={{ textAlign: 'center' }}>
+                      <div className={styles.myAppIcon} style={{ backgroundColor: item?.iconColor || '#ccc' }}>
+                        <DynamicIcon
+                          IconComponent={appIconMap[item?.iconName as keyof typeof appIconMap || 'city-one']}
+                          theme="outline"
+                          size="32"
+                          fill="#F2F3F5"
+                        />
+                      </div>
+                    </Col>
 
-                      {/* 右侧信息 */}
-                      <Col flex="auto">
-                        <Space direction="vertical" size={4}>
-                          <Title heading={6} style={{ margin: 0 }}>
-                            {item.name}
-                          </Title>
-                          <Text type="secondary" style={{ lineHeight: 1.6 }}>
-                            {item.desc}
-                          </Text>
-                        </Space>
-                      </Col>
-                    </Row>
-                  </Card>
-                ))}
-              </Space>
-            </div>
+                    {/* 右侧信息 */}
+                    <Col flex="1">
+                      <Space direction="vertical" size={4}>
+                        <Title heading={6} style={{ margin: 0 }}>
+                          {item.appName}
+                        </Title>
+                        <Text type="secondary" style={{ lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {item.description}
+                        </Text>
+                      </Space>
+                    </Col>
+                  </Row>
+                </Card>
+              ))}
+            </Space>
 
           </TabPane>
         </Tabs>

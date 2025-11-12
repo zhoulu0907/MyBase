@@ -34,14 +34,9 @@ const OrganizationPage: React.FC = () => {
     },
     {
       title: '部门主管',
-      dataIndex: 'departmentHead', // todo 新增字段
+      dataIndex: 'deptDirectorName',
       placeholder: '-'
     },
-    // {
-    //   title: '部门描述',
-    //   dataIndex: 'remark',
-    //   placeholder: '-'
-    // },
     {
       title: '用户数量',
       dataIndex: 'userCount',
@@ -80,15 +75,15 @@ const OrganizationPage: React.FC = () => {
     return columns.filter((column) => column.dataIndex !== 'operations');
   }, [columns]);
 
-  const handleAddSubDepart = (e: React.MouseEvent, record: DeptVO) => {
+  const handleAddSubDepart = (e: any, record: DeptVO) => {
     e.stopPropagation();
     setIsSubDept(true);
     setModalType('create');
-    setEditRecord({ parentId: record?.parentId });
+    setEditRecord({ parentId: record?.id });
     setModalVisible(true);
   };
 
-  const handleEdit = (e: React.MouseEvent, record: DeptVO) => {
+  const handleEdit = (e: any, record: DeptVO) => {
     e.stopPropagation();
     setModalType('edit');
     setIsSubDept(record?.children.length === 0);
@@ -96,7 +91,7 @@ const OrganizationPage: React.FC = () => {
     setModalVisible(true);
   };
 
-  const handleDelete = (e: React.MouseEvent, record: DeptVO) => {
+  const handleDelete = (e: any, record: DeptVO) => {
     e.stopPropagation();
     Modal.confirm({
       title: `确认要删除部门（${record.name}）吗？`,
@@ -184,12 +179,12 @@ const OrganizationPage: React.FC = () => {
         </div>
         <div className={styles.rightContent}>
           <Input
+            className={styles.inputSearch}
             placeholder="请输入部门名称"
             prefix={<IconSearch />}
             value={searchValue}
             onChange={handleSearch}
             onPressEnter={(e) => handleSearch(e.target.value)}
-            style={{ width: 300 }}
           />
         </div>
       </div>

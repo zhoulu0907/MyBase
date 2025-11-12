@@ -71,38 +71,31 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         permissionKey: TENANT_MENUS.DICT
       },
       {
-        key: '空间信息',
+        key: 'spaceInfo',
         title: '空间信息',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/spaceInfo',
         permissionKey: TENANT_MENUS.INFO // todo
       },
       {
-        key: '企业信息',
+        key: 'enterpriseInfo',
         title: '企业信息',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/enterpriseInfo',
         permissionKey: TENANT_MENUS.INFO
       },
       {
-        key: '企业管理',
-        title: '企业管理',
-        icon: <IconIdcard style={iconStyle} />,
-        path: '/onebase/setting/enterprise',
-        permissionKey: TENANT_MENUS.INFO
-      },
-      {
-        key: '个人中心',
+        key: 'tenant',
         title: '个人中心',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/tenant',
         permissionKey: TENANT_MENUS.INFO
       },
       {
-        key: 'business',
+        key: 'enterprise',
         title: '企业管理',
         icon: <IconIdcard style={iconStyle} />,
-        path: '/onebase/setting/business',
+        path: '/onebase/setting/enterprise',
         permissionKey: TENANT_MENUS.BUSINESS
       },
       {

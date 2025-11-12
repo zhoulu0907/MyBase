@@ -52,12 +52,12 @@ const SettingPage: React.FC = () => {
                 <Route path="spaceInfo" element={<SpaceInfo />} />
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="tenant" element={<TenantPage />} />
-                <Route path="enterprise" element = {<BusinessPage />}>
-                  <Route path="create-enterprise" element = {<CreateBusinessPage />} />
+                <Route path="enterprise" element={<BusinessPage />}>
+                  <Route path="create-enterprise" element={<CreateBusinessPage />} />
                   <Route path=":enterpriseName" element={<RedirectEnterprise />} />
                   <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
                 </Route>
-                <Route path="authorized-application" element = {<AuthorizedApplication />}></Route>
+                <Route path="authorized-application" element={<AuthorizedApplication />}></Route>
                 <Route path="tenant/edit" element={<TenantEditPage />} />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>

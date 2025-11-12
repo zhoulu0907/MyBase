@@ -1,5 +1,5 @@
 //企业管理
-import { corpListParams, createCorpParams, corpStatusParams, updateCorpParams } from "../types"
+import { corpListParams, createCorpParams, corpStatusParams, updateCorpParams, CorpDetailResponse } from "../types"
 import { systemService } from "./clients"
 
 // 创建企业
@@ -12,7 +12,7 @@ export const updateCorpApi = (data: updateCorpParams) => systemService.post('/co
 export const disabledCorpApi = (data: corpStatusParams) => systemService.post(`/corp/update-status?id=${data.id}&status=${data.status}`);
 
 // 删除企业
-export const deleteCorpApi = (id: number) => systemService.post(`/corp/delete?id=${id}`)   
+export const deleteCorpApi = (id: string) => systemService.post(`/corp/delete?id=${id}`)
 
 //获取企业列表-分页
 export const getCorpListApi = (data: corpListParams) => systemService.get('/corp/page', data);
@@ -21,7 +21,7 @@ export const getCorpListApi = (data: corpListParams) => systemService.get('/corp
 export const getCorpSimpleDetailsListApi = () => systemService.get('/corp/simple-list');
 
 //获得详情
-export const getDetailsApi = (id: number) => systemService.get(`/corp/get?id=${id}`);
+export const getDetailsApi = (id: number): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);
 
 //获取行业类型
 export const getIndustryType = (type: string) => systemService.get(`dict-data/simple-list-by-type?dictType=${type}`);
