@@ -44,6 +44,28 @@ public class DataRuntimeTest {
         System.out.println(dynamicDataRespVO);
     }
 
+    // 测试数据权限
+    @Test
+    public void updateData() {
+        System.out.println(1);
+        DynamicDataUpdateReqVO reqVO = new DynamicDataUpdateReqVO();
+        reqVO.setMenuId(123950969598410752L);
+        reqVO.setEntityId(123945626659094528L);
+        reqVO.setId(123954233773522944L);
+        Map<Long, Object> data = new HashMap<>(){
+            {
+                put(123950299583512576L, "订单一号");
+                put(123950299583512577L, "test001");
+                put(123950299583512578L, "102");
+            }
+        };
+        reqVO.setData(data);
+        TenantContextHolder.setIgnore(true);
+        RTSecurityContext.mockLoginUser(123957446409093120L, 123944716126027776L);
+        DynamicDataRespVO dynamicDataRespVO = runtimeDataService.updateData(reqVO);
+        System.out.println(dynamicDataRespVO);
+    }
+
 
     @Test
     public void authDeleteData() {

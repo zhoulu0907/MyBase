@@ -1,17 +1,15 @@
 package com.cmsr.onebase.module.etl.executor;
 
+import com.cmsr.onebase.module.etl.common.graph.Node;
+import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
+import com.cmsr.onebase.module.etl.common.graph.conf.Field;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
-import com.cmsr.onebase.module.etl.common.graph.conf.Field;
-import com.cmsr.onebase.module.etl.common.graph.Node;
-import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
-import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.TableResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.table.api.*;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
@@ -23,6 +21,7 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/11/6 9:44
  */
+@Slf4j
 public class WorkFlowExecutor {
 
     private InputArgs inputArgs;
@@ -45,29 +44,34 @@ public class WorkFlowExecutor {
         }
         EnvironmentSettings settings =
                 EnvironmentSettings.newInstance().inBatchMode().build();
-        tableEnv = TableEnvironment.create(settings);
+        this.tableEnv = TableEnvironment.create(settings);
     }
 
-    public void execute() {
+    public void execute() throws Exception {
         for (Node node : workflowGraph.getNodes()) {
             doAction(node);
         }
+        log.info("execute workflow end");
     }
 
-    private void doAction(Node node) {
+    private void doAction(Node node) throws Exception {
         if (node instanceof CreateTableAction action) {
             action.createTable(tableEnv, workflowGraph);
         }
         if (node instanceof SqlQueryAction action) {
-            action.sqlQuery(tableEnv, workflowGraph);
+            Table table = action.sqlQuery(tableEnv, workflowGraph);
+            log.info("sqlQuery table: {}", table.toString());
         }
         if (node instanceof ExecuteSqlAction action) {
-            action.executeSql(tableEnv, workflowGraph);
+            TableResult tableResult = action.executeSql(tableEnv, workflowGraph);
+            tableResult.await();
+            ResultKind resultKind = tableResult.getResultKind();
+            log.info("resultKind: {}", resultKind);
         }
     }
 
 
-    public DataPreview preview() {
+    public DataPreview preview() throws Exception {
         for (Node node : workflowGraph.getNodes()) {
             doAction(node);
             if (node.getId().equals(inputArgs.getPreviewNodeId())) {
@@ -78,6 +82,7 @@ public class WorkFlowExecutor {
         }
         throw new RuntimeException("未找到预览节点");
     }
+
 
     private DataPreview tableResultToDataPreview(TableResult tableResult) {
         DataPreview dataPreview = new DataPreview();
