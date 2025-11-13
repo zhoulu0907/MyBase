@@ -326,7 +326,7 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key].userName || newItem[key];
+                newItem[key] = newItem[key]?.userName || '';
               }
             }
 
@@ -336,7 +336,7 @@ const XTable = memo(
             );
             if (deptSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key].deptName || newItem[key];
+                newItem[key] = newItem[key]?.deptName || '';
               }
             }
           }

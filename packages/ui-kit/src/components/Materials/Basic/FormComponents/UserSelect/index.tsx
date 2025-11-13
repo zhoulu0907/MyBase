@@ -43,6 +43,8 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   useEffect(() => {
     if (runtime === true && fieldValue) {
       setCurrentSelectUser(fieldValue?.userName);
+    } else {
+      setCurrentSelectUser('');
     }
   }, [fieldValue]);
 

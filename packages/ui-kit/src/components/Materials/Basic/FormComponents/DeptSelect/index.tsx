@@ -24,6 +24,8 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   const loadingDeptRef = useRef<Record<string, boolean>>({});
   const [, forceUpdate] = useState(0);
 
+  const runtimeEditRef = useRef<boolean>(false);
+
   const fieldValue = Form.useWatch(fieldName, form);
 
   useEffect(() => {
@@ -33,6 +35,9 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   useEffect(() => {
     if (runtime === true && fieldValue) {
       setCurrentSelectDept(fieldValue?.deptName);
+      runtimeEditRef.current = true;
+    } else {
+      setCurrentSelectDept('');
     }
   }, [fieldValue]);
 
@@ -42,7 +47,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   }, [selectScope]);
 
   useEffect(() => {
-    if(runtime && defaultDeptValue && !fieldValue) {
+    if(runtime && defaultDeptValue && !fieldValue && !runtimeEditRef.current) {
       if (!deptFlatTree || deptFlatTree.length === 0) return; // 等待数据
       handleChange(defaultDeptValue);
     }
@@ -92,11 +97,11 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
 
   const handleChange = (value: string) => {
     const curSelectDeptObj = deptFlatTree.find(dept => dept.id === value);
-    const curSelectDept ={
-        deptID: curSelectDeptObj.id,
-        deptName: curSelectDeptObj.name
-      };
-    setCurrentSelectDept(curSelectDeptObj.name);
+    const curSelectDept = curSelectDeptObj ? {
+        deptID: curSelectDeptObj?.id,
+        deptName: curSelectDeptObj?.name
+      } : undefined;
+    setCurrentSelectDept(curSelectDeptObj?.name);
     form.setFieldValue(fieldName, curSelectDept);
   };
 
