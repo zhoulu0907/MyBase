@@ -193,6 +193,7 @@ const ICreated: FC = ({ appId }: any) => {
           setPopVisible={setPopVisible}
           rowData={rowData}
           listType={LISTTYPE.ICREATED}
+          onBack={onBack}
         />
       )}
     </section>

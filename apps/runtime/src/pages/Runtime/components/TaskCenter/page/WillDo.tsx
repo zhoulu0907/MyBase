@@ -106,7 +106,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<any>();
   const [data, setData] = useState<any>();
   const [rowData, setRowData] = useState();
-  const [taskId, setTaskId] = useState('');
   const [detailPopVisible, setPopVisible] = useState(false);
   const [approveVisible, setApproveVisible] = useState(false);
   const [pagination, setPagination] = useState<any>({
@@ -138,7 +137,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
   }
 
   function handleDetailPage(row: any) {
-    setTaskId(row?.taskId);
     setPopVisible(true);
     setRowData(row);
   }
@@ -244,7 +242,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
           detailPopVisible={detailPopVisible}
           setPopVisible={setPopVisible}
           onBack={onBack}
-          taskId={taskId}
           rowData={rowData}
           listType={LISTTYPE.WILLDO}
         />

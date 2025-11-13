@@ -76,7 +76,6 @@ const IDone: FC = ({ appId }: any) => {
   const [filters, setFilters] = useState<any>({});
   const defaultPageNo = 1;
   function handleDetailPage(row: any) {
-    console.log('click to detail page === row ===', row);
     setRowData(row);
     setPopVisible(true);
   }
