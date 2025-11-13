@@ -12,7 +12,7 @@ import { useClientContext, WorkflowNodeEntity, WorkflowDragService, useService }
 import { Collapse, Tabs, Layout, Input } from '@arco-design/web-react';
 import type { FlowNodeRegistry } from '../../typings';
 import { nodeRegistries } from '../../nodes';
-import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
+import IconCollapsedDown from '@workflow/images/collapse_down_icon.svg';
 import './node-list.less';
 import approver from '../../assets/bpmLogo/approver.png';
 import executor_big from '../../assets/bpmLogo/executor_big.png';
@@ -26,9 +26,15 @@ import task from '../../assets/bpmLogo/task.png';
 import wait from '../../assets/bpmLogo/wait.png';
 
 import message from '../../assets/bpmLogo/message.png';
-import {LLMNodeRegistry} from '../../nodes/llm/index';
-import {ModalNodeRegistry} from '../../nodes/modal/index';
-import { ApproverNodeRegistry, CcRecipientsNodeRegistry, ExecutorNodeRegistry } from '../../nodes/index';
+import { LLMNodeRegistry } from '../../nodes/llm/index';
+import { ModalNodeRegistry } from '../../nodes/modal/index';
+import {
+  ApproverNodeRegistry,
+  CcRecipientsNodeRegistry,
+  ExecutorNodeRegistry,
+  ParallelBranchNodeRegistry,
+  HTTPNodeRegistry
+} from '../../nodes/index';
 
 interface NodeListProps {
   onSelect: NodePanelRenderProps['onSelect'];
@@ -77,13 +83,13 @@ export const NodeList: FC<NodeListProps> = (props) => {
           </div>
         </Collapse.Item>
         <Collapse.Item className="collapseItem" header="分支节点" name="2">
-          <div className="nodeItem">
+          <div className="nodeItem" onClick={(e) => handleClick(e, HTTPNodeRegistry)}>
             <div className="nodeItemIcon">
               <img src={conditional_branch} alt="" />
             </div>
             条件分支
           </div>
-          <div className="nodeItem">
+          <div className="nodeItem" onClick={(e) => handleClick(e, ParallelBranchNodeRegistry)}>
             <div className="nodeItemIcon">
               <img src={parallel_branch} alt="" />
             </div>

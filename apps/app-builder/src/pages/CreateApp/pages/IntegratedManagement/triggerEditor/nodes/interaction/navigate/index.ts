@@ -1,4 +1,4 @@
-import iconInteraction from '@/assets/flow/nodes/navigate.svg';
+import iconInteraction from '@workflow/nodes/navigate.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
 import { generateNodeId } from '../../utils';

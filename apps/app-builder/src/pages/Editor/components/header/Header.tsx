@@ -17,6 +17,7 @@ import { useFlowEditorStor } from '@/store/index';
 import { useAppStore } from '@/store/store_app';
 import { Breadcrumb, Button, Form, Message, Tabs, Select } from '@arco-design/web-react';
 import { IconArrowLeft, IconSettings } from '@arco-design/web-react/icon';
+import { getFlowPreview } from '@onebase/app/src/services';
 import type { WorkflowJSON } from './headerType';
 import {
   PageType,
@@ -147,6 +148,7 @@ export default function EditorHeader() {
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
   const [flowViewVisible, setFlowViewVisible] = useState(false);
+  const [preViewData, setPreviewData] = useState<any>({});
 
   const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
   const pageInfo = JSON.parse(sessionData);
@@ -403,6 +405,19 @@ export default function EditorHeader() {
       setManageVisible(true);
     }
   };
+  const flowPreview = async () => {
+    const res = await getFlowPreview({ instanceId: '1437487585063735296', businessId: '113961425395449857' });
+    console.log(res);
+    try {
+      const parseData = normalizeNodes(JSON.parse(res.bpmDefJson));
+      setPreviewData(parseData);
+    } catch (error) {
+      console.log('预览数据错误');
+    } finally {
+      setFlowViewVisible(true);
+    }
+  };
+
   useEffect(() => {
     if (curPage?.value?.pageSetType === PageType.NORMAL) {
       setTabData(baseTabData.filter((tab) => tab.key !== EDITOR_TYPES.FLOW_EDITOR));
@@ -532,9 +547,7 @@ export default function EditorHeader() {
         <Button
           //  onClick={toPreview}
           className={styles.previewButton}
-          onClick={() => {
-            setFlowViewVisible(true);
-          }}
+          onClick={flowPreview}
         >
           <img src={previewSVG} />
           {t('editor.preview')}
@@ -584,7 +597,7 @@ export default function EditorHeader() {
       />
 
       <VersionModal visible={manageVisible} setVisible={setManageVisible} />
-      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} />
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} preViewData={preViewData} />
     </div>
   );
 }

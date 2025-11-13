@@ -1,4 +1,4 @@
-import iconControl from '@/assets/flow/nodes/end.svg';
+import iconControl from '@workflow/nodes/end.svg';
 import { FlowNodeBaseType } from '@flowgram.ai/fixed-layout-editor';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';

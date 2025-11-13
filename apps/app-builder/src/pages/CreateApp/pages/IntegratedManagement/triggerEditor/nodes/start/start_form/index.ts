@@ -1,4 +1,4 @@
-import iconStartForm from '@/assets/flow/nodes/startForm.svg';
+import iconStartForm from '@workflow/nodes/startForm.svg';
 import type { TriggerRange } from '../../../components/const';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';

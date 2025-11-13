@@ -9,6 +9,7 @@ import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
 import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
 import PreviewContainer from './DetailForm';
+import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
@@ -26,6 +27,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   let [isShowRight, setIsShowRight] = useState(true);
   const [stepData, setStepData] = useState();
   const [detailData, setDetailData] = useState<any>();
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
 
@@ -82,6 +84,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
 
   function handlePreview() {
     console.log('handle Preview ...');
+    setFlowViewVisible(true);
   }
   function renderDrawerFooter() {
     return (
@@ -95,6 +98,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
             if (!item?.approvalCommentRequired) {
               return (
                 <Button
+                  key={index}
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                   onClick={() => fetchExec(item)}
                 >
@@ -221,6 +225,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           </div>
         </div>
       </Drawer>
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} />
     </section>
   );
 };

@@ -26,6 +26,8 @@ import { ExecutorNodeRegistry } from './executor/index';
 import { ApproverNodeRegistry } from './approver/index';
 import { CcRecipientsNodeRegistry } from './CcRecipients/index';
 import { InitiateNodeRegistry } from './initiate/index';
+import { ParallelBranchNodeRegistry } from './parallel_branch/index';
+
 export { WorkflowNodeType } from './constants';
 
 export const nodeRegistries: FlowNodeRegistry[] = [
@@ -50,6 +52,14 @@ export const nodeRegistries: FlowNodeRegistry[] = [
   ExecutorNodeRegistry,
   ApproverNodeRegistry,
   CcRecipientsNodeRegistry,
-  InitiateNodeRegistry
+  InitiateNodeRegistry,
+  ParallelBranchNodeRegistry
 ];
-export { ExecutorNodeRegistry, ApproverNodeRegistry, CcRecipientsNodeRegistry, InitiateNodeRegistry };
+export {
+  ExecutorNodeRegistry,
+  ApproverNodeRegistry,
+  CcRecipientsNodeRegistry,
+  InitiateNodeRegistry,
+  ParallelBranchNodeRegistry,
+  HTTPNodeRegistry
+};

@@ -84,7 +84,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
           </div>
         )}
       <NodeWrapperStyle
-        className={`${selected && !readonly ? 'selected' : ''} ${readonly && nodeRender.data.status + 'Border'}`}
+        className={`${selected && !readonly ? 'selected' : ''} ${readonly && nodeRender.data.runStatus + 'Border'}`}
         ref={nodeRef}
         draggable
         onMouseOver={onMouseOver}
