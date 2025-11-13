@@ -185,6 +185,14 @@ const TenantPage: React.FC = () => {
     nav('/onebase/setting/tenant/edit');
   };
 
+  const getStatus = (status: number) => {
+    if(status === 0) {
+      return "禁用"
+    }else {
+      return "正常"
+    }
+  }
+
   return (
     <div className={styles.tenantPage}>
       <div className={styles.userInfo}>
@@ -253,7 +261,7 @@ const TenantPage: React.FC = () => {
                 <Text type="secondary">账号状态</Text>
               </Col>
               <Col flex="auto">
-                <Text>{userInfo.statusDesc || '-'}</Text>
+                <Text>{getStatus(userInfo.status)}</Text>
               </Col>
             </Row>
           </Col>

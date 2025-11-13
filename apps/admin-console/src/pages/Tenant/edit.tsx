@@ -101,13 +101,18 @@ const EditTenant = () => {
       // 构建更新参数
       if (tenantInfo?.id) {
         const formattedAdmin = values.tenantAdminUserList.map((id: string) => {
-          const user = adminList.find((u) => u.id === id);
-          return {
-            adminNickName: user?.nickname || '',
-            adminUserName: user?.username || '',
-            adminMobile: user?.mobile || '',
-            adminUserId: user?.id
-          };
+          const user = adminList.find(u => u.id === id);
+          if(user?.id) {
+            return {
+              adminNickName: user?.nickname || '',
+              adminUserName: user?.username || '',
+              adminMobile: user?.mobile || '',
+              adminUserId: user.id
+            };
+          }else {
+            const adminUser = tenantInfo?.tenantAdminUserList.find((t: any) => t.adminUserId === id);
+            return adminUser || {}
+          }
         });
         const updateParams: UpdateTenantParams = {
           id: tenantInfo.id,
@@ -122,6 +127,9 @@ const EditTenant = () => {
         };
         // 调用 updatePlatformTenantApi
         await updatePlatformTenantApi(updateParams);
+        if(id){
+          await getTenantInfo(id);
+        }
         Message.success('更新成功');
       } else {
         // 添加错误处理，以防万一id不存在
@@ -272,23 +280,23 @@ const EditTenant = () => {
             >
               {isEdit ? (
                 <Select
-                  placeholder="选择管理员"
-                  mode="multiple"
-                  allowClear
-                  style={{ width: '100%' }}
-                  options={adminList.map((u) => ({
-                    label: u.nickname || u.username,
-                    value: u.id
-                  }))}
-                ></Select>
+                placeholder="选择管理员"
+                mode="multiple"
+                allowClear
+                style={{ width: '100%' }}
+                options={[...(tenantInfo?.tenantAdminUserList || []), ...(adminList || [])].map(u => ({
+                  label: u.nickname || u.username || u.adminNickName || u.adminUserName,
+                  value: u.id || u.adminUserId
+                }))}
+              ></Select> 
               ) : (
                 <div className={styles.tagWrapper}>
                   {findMatchingItemsById(adminList, tenantInfo?.tenantAdminUserList)?.map((tag, index) => (
                     <Tag className={styles.adminTag} key={index} size="large" style={{ borderRadius: 16 }}>
                       <Avatar size={24} style={{ marginRight: 4 }}>
-                        {tag.nickname.slice(0, 1)}
+                        {tag.adminNickName.slice(0, 1)}
                       </Avatar>
-                      {tag.nickname}
+                      {tag.adminNickName}
                     </Tag>
                   ))}
                 </div>
