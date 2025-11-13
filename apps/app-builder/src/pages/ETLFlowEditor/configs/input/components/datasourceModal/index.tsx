@@ -44,8 +44,10 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
   );
 
   useEffect(() => {
-    handleListETLDatasources();
-  }, []);
+    if (isModalVisible) {
+      handleListETLDatasources();
+    }
+  }, [isModalVisible]);
 
   useEffect(() => {
     if (curDatasourceId) {

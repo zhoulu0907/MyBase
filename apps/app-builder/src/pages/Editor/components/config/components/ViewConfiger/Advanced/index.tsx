@@ -1,6 +1,7 @@
 import { Button, Form } from '@arco-design/web-react';
+import { usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import InteractionRuleModal from '../InteractionRuleModal';
 import styles from './index.module.less';
 
@@ -10,8 +11,15 @@ interface AdvancedProps {}
 
 const ViewAdvanced = ({}: AdvancedProps) => {
   useSignals();
+  const { pageViews, curViewId } = usePageViewEditorSignal;
 
   const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    setCount(
+      (pageViews.value[curViewId.value]?.interactionRules || []).filter((rule: any) => rule.enabled == 1).length
+    );
+  }, [pageViews.value, curViewId.value]);
 
   const [interactionRuleModalVisible, setInteractionRuleModalVisible] = useState(false);
 
@@ -22,6 +30,7 @@ const ViewAdvanced = ({}: AdvancedProps) => {
   const handleCancel = () => {
     setInteractionRuleModalVisible(false);
   };
+
   const handleOk = () => {
     setInteractionRuleModalVisible(false);
   };

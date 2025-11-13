@@ -25,7 +25,7 @@ export const LogNodeRegistry: FlowNodeRegistry = {
    */
   formMeta,
   canDelete(ctx, node) {
-    return node.parent !== ctx.document.root;
+    return true;
   },
   onAdd(ctx, from) {
     return {

@@ -98,32 +98,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   const interactionCondition = Form.useWatch('interactionCondition', form);
   const formAction = Form.useWatch('formAction', form);
 
-  const [rules, setRules] = useState<Rule[]>([
-    {
-      id: '1',
-      name: '规则1',
-      enabled: 1,
-      description: '规则1描述',
-      interactionCondition: [],
-      formAction: []
-    },
-    {
-      id: '2',
-      name: '规则2',
-      enabled: 0,
-      description: '规则2描述',
-      interactionCondition: [],
-      formAction: []
-    },
-    {
-      id: '3',
-      name: '规则3',
-      enabled: 1,
-      description: '规则3描述',
-      interactionCondition: [],
-      formAction: []
-    }
-  ]);
+  const [rules, setRules] = useState<Rule[]>(pageViews.value[curViewId.value]?.interactionRules || []);
 
   const [curRule, setCurRule] = useState<string>(rules.length > 0 ? rules[0].id : '');
 
@@ -513,161 +488,127 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                               return (
                                 <div key={item.key}>
                                   <div className={styles.items}>
-                                    <Form.List field={item.field + '.actions'}>
-                                      {(condition, { add: childAdd, remove: childRemove }) => {
-                                        return (
-                                          <div style={{ width: '100%' }}>
-                                            {condition.map((item: any, childIndex) => {
-                                              return (
-                                                // 字段id
-                                                <Grid.Row key={item.key} gutter={8} align="center">
-                                                  <Grid.Col
-                                                    span={
-                                                      form.getFieldValue(item.field + '.action') ==
-                                                      InteractionActionType.ReadonlyAll
-                                                        ? 23
-                                                        : 4
-                                                    }
-                                                  >
-                                                    <Form.Item field={item.field + '.action'}>
-                                                      <Select
-                                                        className={styles.itemSelect}
-                                                        options={formActionOptions}
-                                                        onChange={(_value) => {
-                                                          form.resetFields([item.field + '.cpId']);
-                                                        }}
-                                                      />
-                                                    </Form.Item>
-                                                  </Grid.Col>
+                                    <Grid.Row key={item.key} gutter={8} align="center">
+                                      <Grid.Col
+                                        span={
+                                          form.getFieldValue(item.field + '.action') ==
+                                          InteractionActionType.ReadonlyAll
+                                            ? 23
+                                            : 4
+                                        }
+                                      >
+                                        <Form.Item field={item.field + '.action'}>
+                                          <Select
+                                            className={styles.itemSelect}
+                                            options={formActionOptions}
+                                            onChange={(_value) => {
+                                              form.resetFields([item.field + '.cpId']);
+                                            }}
+                                          />
+                                        </Form.Item>
+                                      </Grid.Col>
 
-                                                  {![
-                                                    InteractionActionType.SetFieldValue,
-                                                    InteractionActionType.ReadonlyAll
-                                                  ].includes(form.getFieldValue(item.field + '.action')) && (
-                                                    <>
-                                                      <Grid.Col span={19}>
-                                                        <Form.Item field={item.field + '.cpId'}>
-                                                          <Select
-                                                            className={styles.itemSelect}
-                                                            options={cpOptions}
-                                                            onChange={(_value) => {}}
-                                                          />
-                                                        </Form.Item>
-                                                      </Grid.Col>
-                                                    </>
-                                                  )}
+                                      {![
+                                        InteractionActionType.SetFieldValue,
+                                        InteractionActionType.ReadonlyAll
+                                      ].includes(form.getFieldValue(item.field + '.action')) && (
+                                        <>
+                                          <Grid.Col span={19}>
+                                            <Form.Item field={item.field + '.cpId'}>
+                                              <Select
+                                                className={styles.itemSelect}
+                                                options={cpOptions}
+                                                onChange={(_value) => {}}
+                                              />
+                                            </Form.Item>
+                                          </Grid.Col>
+                                        </>
+                                      )}
 
-                                                  {[InteractionActionType.SetFieldValue].includes(
-                                                    form.getFieldValue(item.field + '.action')
-                                                  ) && (
-                                                    <>
-                                                      <Grid.Col span={8}>
-                                                        <Form.Item field={item.field + '.cpId'}>
-                                                          <Select
-                                                            className={styles.itemSelect}
-                                                            options={cpOptions}
-                                                            onChange={(_value) => {}}
-                                                          />
-                                                        </Form.Item>
-                                                      </Grid.Col>
+                                      {[InteractionActionType.SetFieldValue].includes(
+                                        form.getFieldValue(item.field + '.action')
+                                      ) && (
+                                        <>
+                                          <Grid.Col span={8}>
+                                            <Form.Item field={item.field + '.cpId'}>
+                                              <Select
+                                                className={styles.itemSelect}
+                                                options={cpOptions}
+                                                onChange={(_value) => {}}
+                                              />
+                                            </Form.Item>
+                                          </Grid.Col>
 
-                                                      <Grid.Col
-                                                        span={2}
-                                                        style={{ textAlign: 'center', marginBottom: '16px' }}
-                                                      >
-                                                        <div>的值设为</div>
-                                                      </Grid.Col>
+                                          <Grid.Col span={2} style={{ textAlign: 'center', marginBottom: '16px' }}>
+                                            <div>的值设为</div>
+                                          </Grid.Col>
 
-                                                      <Grid.Col span={3}>
-                                                        <Form.Item field={item.field + '.operatorType'}>
-                                                          <Select
-                                                            className={styles.itemSelect}
-                                                            disabled={
-                                                              form.getFieldValue(item.field + '.cpId') == undefined
-                                                            }
-                                                            options={opCodeOptions}
-                                                            onChange={() => {
-                                                              form.setFieldValue(item.field + '.value', undefined);
-                                                              // 如果是范围类型 需要用数组兜底
-                                                              if (
-                                                                form.getFieldValue(item.field + '.op') ==
-                                                                VALIDATION_TYPE.RANGE
-                                                              ) {
-                                                                form.setFieldValue(item.field + '.value', [
-                                                                  undefined,
-                                                                  undefined
-                                                                ]);
-                                                              }
-                                                            }}
-                                                          ></Select>
-                                                        </Form.Item>
-                                                      </Grid.Col>
+                                          <Grid.Col span={3}>
+                                            <Form.Item field={item.field + '.operatorType'}>
+                                              <Select
+                                                className={styles.itemSelect}
+                                                disabled={form.getFieldValue(item.field + '.cpId') == undefined}
+                                                options={opCodeOptions}
+                                                onChange={() => {
+                                                  form.setFieldValue(item.field + '.value', undefined);
+                                                  // 如果是范围类型 需要用数组兜底
+                                                  if (form.getFieldValue(item.field + '.op') == VALIDATION_TYPE.RANGE) {
+                                                    form.setFieldValue(item.field + '.value', [undefined, undefined]);
+                                                  }
+                                                }}
+                                              ></Select>
+                                            </Form.Item>
+                                          </Grid.Col>
 
-                                                      <Grid.Col span={6}>
-                                                        {form.getFieldValue(item.field + '.operatorType') ==
-                                                          undefined && (
-                                                          <Form.Item field={item.field + '.value'}>
-                                                            <Input placeholder="请输入" disabled />
-                                                          </Form.Item>
-                                                        )}
-                                                        {form.getFieldValue(item.field + '.operatorType') ==
-                                                          FieldType.VALUE && (
-                                                          <Form.Item field={item.field + '.value'}>
-                                                            <Input placeholder="请输入静态值" />
-                                                          </Form.Item>
-                                                        )}
+                                          <Grid.Col span={6}>
+                                            {form.getFieldValue(item.field + '.operatorType') == undefined && (
+                                              <Form.Item field={item.field + '.value'}>
+                                                <Input placeholder="请输入" disabled />
+                                              </Form.Item>
+                                            )}
+                                            {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE && (
+                                              <Form.Item field={item.field + '.value'}>
+                                                <Input placeholder="请输入静态值" />
+                                              </Form.Item>
+                                            )}
 
-                                                        {form.getFieldValue(item.field + '.operatorType') ==
-                                                          FieldType.VARIABLES && (
-                                                          <Form.Item field={item.field + '.value'}>
-                                                            <Select />
-                                                          </Form.Item>
-                                                        )}
+                                            {form.getFieldValue(item.field + '.operatorType') ==
+                                              FieldType.VARIABLES && (
+                                              <Form.Item field={item.field + '.value'}>
+                                                <Select />
+                                              </Form.Item>
+                                            )}
 
-                                                        {form.getFieldValue(item.field + '.operatorType') ==
-                                                          FieldType.FORMULA && (
-                                                          <Form.Item field={item.field + '.value'}>
-                                                            <Button
-                                                              //   onClick={() => openFormulaEditor(item.field + '.value')}
-                                                              long
-                                                            >
-                                                              {form.getFieldValue(item.field + '.value')
-                                                                ? '已设置公式'
-                                                                : 'ƒx 编辑公式'}
-                                                              {form.getFieldValue(item.field + '.value') ? (
-                                                                <IconLaunch />
-                                                              ) : (
-                                                                ''
-                                                              )}
-                                                            </Button>
-                                                          </Form.Item>
-                                                        )}
-                                                      </Grid.Col>
-                                                    </>
-                                                  )}
+                                            {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
+                                              <Form.Item field={item.field + '.value'}>
+                                                <Button
+                                                  //   onClick={() => openFormulaEditor(item.field + '.value')}
+                                                  long
+                                                >
+                                                  {form.getFieldValue(item.field + '.value')
+                                                    ? '已设置公式'
+                                                    : 'ƒx 编辑公式'}
+                                                  {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ''}
+                                                </Button>
+                                              </Form.Item>
+                                            )}
+                                          </Grid.Col>
+                                        </>
+                                      )}
 
-                                                  <Grid.Col span={1}>
-                                                    <IconDelete
-                                                      style={{
-                                                        fontSize: '15px',
-                                                        color: '#4E5969',
-                                                        marginBottom: '15px'
-                                                      }}
-                                                      onClick={() => {
-                                                        childRemove(childIndex);
-                                                        if (condition.length === 1) {
-                                                          removeAction(index);
-                                                        }
-                                                      }}
-                                                    />
-                                                  </Grid.Col>
-                                                </Grid.Row>
-                                              );
-                                            })}
-                                          </div>
-                                        );
-                                      }}
-                                    </Form.List>
+                                      <Grid.Col span={1}>
+                                        <IconDelete
+                                          style={{
+                                            fontSize: '15px',
+                                            color: '#4E5969',
+                                            marginBottom: '15px'
+                                          }}
+                                          onClick={() => {
+                                            removeAction(index);
+                                          }}
+                                        />
+                                      </Grid.Col>
+                                    </Grid.Row>
                                   </div>
                                 </div>
                               );
@@ -675,9 +616,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                             <Button
                               type="text"
                               onClick={() => {
-                                addAction({
-                                  actions: [undefined]
-                                });
+                                addAction({});
                               }}
                             >
                               + 添加动作
