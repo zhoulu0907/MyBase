@@ -150,7 +150,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     @Override
     public PageResult<Map<String, Object>> getDataPage(Long entityId, Integer pageNo, Integer pageSize,
                                                        String sortField, String sortDirection,
-                                                       Map<String, Object> filters, String methodCode) {
+                                                       Map<String, Object> filters, String methodCode, Long menuId) {
         // 添加调试日志
         log.info("核心服务分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}",
                 entityId, pageNo, pageSize, pageSize != null ? pageSize.getClass().getSimpleName() : "null");
@@ -165,6 +165,24 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
         log.info("成功切换到数据源：{}", datasource.getCode());
         boolean hasDeletedField = fields.stream().anyMatch(f -> "deleted".equalsIgnoreCase(f.getFieldName()));
+
+        // 获取权限上下文
+        final MetadataPermissionContext permissionContext;
+        final LoginUserCtx loginUserCtx;
+        if (enableAuthCheck && menuId != null) {
+            MetadataDataMethodRequestContext requestContext = new MetadataDataMethodRequestContext();
+            requestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.GET_PAGE);
+            requestContext.setEntityId(entityId);
+            requestContext.setClientTypeEnum(ClientTypeEnum.RUNTIME);
+            requestContext.setMenuId(menuId);
+            requestContext.setMethodCode(methodCode);
+            this.fetchRuntimePermission(requestContext);
+            permissionContext = requestContext.getPermissionContext();
+            loginUserCtx = requestContext.getLoginUserCtx();
+        } else {
+            loginUserCtx = null;
+            permissionContext = null;
+        }
 
         return TenantUtils.executeIgnore(() -> {
             ConfigStore configs = new DefaultConfigStore();
@@ -221,6 +239,12 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
                 configs.and(Compare.EQUAL, "deleted", 0);
                 deletedConditionAdded = true;
             }
+
+            // 应用数据权限过滤
+            if (permissionContext != null && loginUserCtx != null) {
+                permissionQueryHelper.applyQueryPermissionFilter(configs, permissionContext, loginUserCtx, fields);
+            }
+
             Set<String> fieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
             if (StringUtils.hasText(sortField) && fieldNames.contains(sortField)) {
                 String orderClause = sortField;
@@ -279,6 +303,12 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             if (hasDeletedField) {
                 countConfigs.and(Compare.EQUAL, "deleted", 0);
             }
+
+            // 应用数据权限过滤到 count 查询
+            if (permissionContext != null && loginUserCtx != null) {
+                permissionQueryHelper.applyQueryPermissionFilter(countConfigs, permissionContext, loginUserCtx, fields);
+            }
+
             long total = temporaryService.count(quoteTableName(entity.getTableName()), countConfigs);
             DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
             List<Map<String, Object>> list = new ArrayList<>();
