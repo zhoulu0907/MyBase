@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
 import com.cmsr.onebase.framework.security.core.handler.AccessDeniedHandlerImpl;
 import com.cmsr.onebase.framework.security.core.handler.AuthenticationEntryPointImpl;
+import com.cmsr.onebase.framework.security.runtime.filter.RemoteCallAuthenticationFilter;
 import com.cmsr.onebase.framework.security.runtime.filter.RuntimeAuthenticationFilter;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import jakarta.annotation.Resource;
@@ -21,10 +22,9 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 /**
  * Spring Security 自动配置类，主要用于相关组件的配置
- *
+ * <p>
  * 注意，不能和 {@link RuntimeWebSecurityConfigurerAdapter} 用一个，原因是会导致初始化报错。
  * 参见 https://stackoverflow.com/questions/53847050/spring-boot-delegatebuilder-cannot-be-null-on-autowiring-authenticationmanager 文档。
- *
  */
 @AutoConfiguration
 @AutoConfigureOrder(-1) // 目的：先于 Spring Security 自动配置，避免一键改包后，org.* 基础包无法生效
@@ -66,8 +66,13 @@ public class RuntimeSecurityAutoConfiguration {
      */
     @Bean
     public RuntimeAuthenticationFilter runtimeAuthenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
-                                                               OAuth2TokenCommonApi oauth2TokenApi) {
+                                                                        OAuth2TokenCommonApi oauth2TokenApi) {
         return new RuntimeAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi);
+    }
+
+    @Bean
+    public RemoteCallAuthenticationFilter remoteCallAuthenticationFilter(GlobalExceptionHandler globalExceptionHandler) {
+        return new RemoteCallAuthenticationFilter(globalExceptionHandler);
     }
 
     /**

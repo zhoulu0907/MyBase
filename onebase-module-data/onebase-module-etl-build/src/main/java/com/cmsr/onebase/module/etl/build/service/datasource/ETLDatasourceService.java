@@ -3,8 +3,9 @@ package com.cmsr.onebase.module.etl.build.service.datasource;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
-import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
@@ -27,7 +28,7 @@ public interface ETLDatasourceService {
 
     void executeMetadataCollectJob(Long datasourceId);
 
-    DataPreviewVO previewTable(TablePreviewVO tablePreviewVO);
+    DataPreview previewTable(TablePreviewVO tablePreviewVO);
 
     List<MetaBriefVO> listDatasources(Long applicationId, Integer writable);
 
