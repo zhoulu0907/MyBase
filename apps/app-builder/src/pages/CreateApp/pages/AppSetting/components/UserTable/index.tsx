@@ -206,10 +206,6 @@ const UserMembers = (props: IProps) => {
 
   // 获取部门层级
   const fetchDeptData = async (id: string, idType: string) => {
-    if (cacheDeptListRef.current[id]) {
-      setContent(cacheDeptListRef.current[id]);
-      return;
-    }
     if (loadingDeptRef.current[id]) return; // 已在加载中，防止重复请求
 
     loadingDeptRef.current[id] = true;

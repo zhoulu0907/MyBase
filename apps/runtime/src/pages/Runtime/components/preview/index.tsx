@@ -145,7 +145,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
       if (field) {
         console.log('field: ', field);
-        formData[field.fieldId] = value;
+        formData[field.fieldId] = value || '';
       }
 
       // 处理子表逻辑

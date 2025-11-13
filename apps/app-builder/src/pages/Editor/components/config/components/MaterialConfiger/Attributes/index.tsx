@@ -39,6 +39,8 @@ import DynamicVerifyConfig from './components/DynamicVerifyConfig';
 import DynamicDateRangeConfig from './components/DynamicDateRangeConfig';
 import DynamicTimeRangeConfig from './components/DynamicTimeRangeConfig';
 import styles from './index.module.less';
+import DynamicDeptDefaultValueConfig from './components/DynamicDeptDefaultValueConfig';
+import DynamicSelectScopeConfig from './components/DynamicSelectScopeConfig';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -746,8 +748,28 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         // 日期可选范围
         return <DynamicDateRangeConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.TIME_RANGE:
-        // 日期可选范围
+        // 时间可选范围
         return <DynamicTimeRangeConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
+      case CONFIG_TYPES.DEPT_DEFAULT_VALUE:
+        return (
+          <DynamicDeptDefaultValueConfig
+            key={index}
+            id={cpID}
+            handlePropsChange={handlePropsChange}
+            item={item}
+            configs={configs}
+          />
+        );
+      case CONFIG_TYPES.DEPT_SELECT_SCOPE:
+        return (
+          <DynamicSelectScopeConfig
+            key={index}
+            id={cpID}
+            handlePropsChange={handlePropsChange}
+            item={item}
+            configs={configs}
+          />
+        );
       default:
         return (
           <FormItem className={styles.formItem} label={item.name}>
