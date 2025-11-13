@@ -11,7 +11,7 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public enum BpmDelegationStatus {
+public enum BpmAgentStatus {
     /**
      * 待生效
      */
@@ -37,16 +37,16 @@ public enum BpmDelegationStatus {
     private final String name;
 
 
-    public static BpmDelegationStatus getByCode(String code) {
+    public static BpmAgentStatus getByCode(String code) {
         if (code == null || code.trim().isEmpty()) {
             return null;
         }
 
         String lowerCode = code.toLowerCase();
 
-        for (BpmDelegationStatus delegationStatus : values()) {
-            if (delegationStatus.getCode().equals(lowerCode)) {
-                return delegationStatus;
+        for (BpmAgentStatus agentStatus : values()) {
+            if (agentStatus.getCode().equals(lowerCode)) {
+                return agentStatus;
             }
         }
 

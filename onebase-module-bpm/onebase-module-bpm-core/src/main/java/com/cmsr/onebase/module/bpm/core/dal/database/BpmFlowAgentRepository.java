@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowDelegationDO;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
  * @date 2025-11-10
  */
 @Repository
-public class BpmFlowDelegationRepository extends DataRepository<BpmFlowDelegationDO> {
-    public BpmFlowDelegationRepository() {
-        super(BpmFlowDelegationDO.class);
+public class BpmFlowAgentRepository extends DataRepository<BpmFlowAgentDO> {
+    public BpmFlowAgentRepository() {
+        super(BpmFlowAgentDO.class);
     }
 }

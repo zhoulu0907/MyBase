@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
  * @date 2025-11-10
  */
 @Data
-@Table(name = "bpm_flow_delegation")
-public class BpmFlowDelegationDO extends TenantBaseDO {
+@Table(name = "bpm_flow_agent")
+public class BpmFlowAgentDO extends TenantBaseDO {
     /**
      * 应用ID
      */
@@ -23,16 +23,26 @@ public class BpmFlowDelegationDO extends TenantBaseDO {
     private Long appId;
 
     /**
-     * 发起人ID
+     * 被代理人用户ID
      */
     @Column(name = "principal_id")
     private Long principalId;
+    /*
+    *被代理人用户名称
+     */
+    @Column(name = "principal_name")
+    private String principalName;
+    /**
+     * 代理人用户ID
+     */
+    @Column(name = "agent_id")
+    private Long agentId;
 
     /**
-     * 发起人名称（冗余字段，方便查询显示）
+     * 代理人用户名称
      */
-    @Column(name = "delegate_id")
-    private Long delegateId;
+    @Column(name = "agent_name")
+    private String agentName;
 
     /**
      * 代理开始时间
