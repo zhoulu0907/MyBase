@@ -173,16 +173,19 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
         {
           label: '选项一',
           colorType: '',
+          isChosen: false,
           value: '选项一'
         },
         {
           label: '选项二',
           colorType: '',
+          isChosen: false,
           value: '选项二'
         },
         {
           label: '选项三',
           colorType: '',
+          isChosen: false,
           value: '选项三'
         }
       ],

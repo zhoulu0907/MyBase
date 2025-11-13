@@ -36,23 +36,16 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
   const { curAppId } = useAppStore();
 
   const [selectDisabled, setSelectDisabled] = useState<boolean>(false);
-  const [typeDisabled, setTypeDisabled] = useState<boolean>(false);
   const [selectDictModalVisible, setSelectDictModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    getDefaultOptions();
-  }, [configs.dataField]);
-
-  useEffect(() => {
-    setSelectDisabled(false);
-    setTypeDisabled(false);
-    getDefaultOptions(true);
-    if (configs[checkboxKey].type === DEFAULT_OPTIONS_TYPE.DICT) {
-      setSelectDisabled(true);
+    if (configs.id) {
+      setSelectDisabled(false);
+      getDefaultOptions();
     }
-  }, [configs.id]);
+  }, []);
 
-  const getDefaultOptions = async (flag?: boolean) => {
+  const getDefaultOptions = async () => {
     const value = configs.dataField;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
@@ -65,29 +58,38 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
         if (dictOptions.length) {
-          if (flag) {
-            const newDefaultOptionsConfig = {
-              type: DEFAULT_OPTIONS_TYPE.DICT,
-              dictTypeId: currentMainField.dictTypeId,
-              disabled: true,
-              colorMode: true,
-              colorModeType: COLOR_MODE_TYPES.POINT,
-              defaultOptions: dictOptions
-            };
-            handlePropsChange(checkboxKey, newDefaultOptionsConfig);
-          }
+          const newDefaultOptionsConfig = {
+            type: DEFAULT_OPTIONS_TYPE.DICT,
+            disabled: true,
+            dictTypeId: currentMainField.dictTypeId,
+            defaultOptions: dictOptions.map((e: any) => {
+              if (configs[checkboxKey].defaultOptions?.length) {
+                const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
+                if (oldOption && oldOption.isChosen) {
+                  return { ...e, isChosen: true };
+                }
+              }
+              return { ...e, isChosen: false };
+            })
+          };
+          handlePropsChange(checkboxKey, newDefaultOptionsConfig);
           setSelectDisabled(true);
-          setTypeDisabled(true);
         }
       } else if (currentMainField.options?.length) {
-        const newOptions = currentMainField.options?.map((e: any) => ({
-          label: e.optionLabel,
-          value: e.optionValue
-        }));
-        if (flag) {
-          handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions, disabled: true });
-        }
-        setTypeDisabled(true);
+        const newOptions = currentMainField.options?.map((e: any) => {
+          if (configs[checkboxKey].defaultOptions?.length) {
+            const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
+            if (oldOption && oldOption.isChosen) {
+              return { label: e.optionLabel, value: e.optionValue, isChosen: true };
+            }
+          }
+          return {
+            label: e.optionLabel,
+            value: e.optionValue,
+            isChosen: false
+          };
+        });
+        handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions, disabled: true });
         setSelectDisabled(true);
       }
     } else if (isSubEntity && currentSubField) {
@@ -97,30 +99,39 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
         if (dictOptions.length) {
-          if (flag) {
-            const newDefaultOptionsConfig = {
-              type: DEFAULT_OPTIONS_TYPE.DICT,
-              dictTypeId: currentSubField.dictTypeId,
-              disabled: true,
-              colorMode: true,
-              colorModeType: COLOR_MODE_TYPES.POINT,
-              defaultOptions: dictOptions
-            };
-            handlePropsChange(checkboxKey, newDefaultOptionsConfig);
-          }
+          const newDefaultOptionsConfig = {
+            type: DEFAULT_OPTIONS_TYPE.DICT,
+            disabled: true,
+            dictTypeId: currentSubField.dictTypeId,
+            defaultOptions: dictOptions.map((e: any) => {
+              if (configs[checkboxKey].defaultOptions?.length) {
+                const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
+                if (oldOption && oldOption.isChosen) {
+                  return { ...e, isChosen: true };
+                }
+              }
+              return { ...e, isChosen: false };
+            })
+          };
+          handlePropsChange(checkboxKey, newDefaultOptionsConfig);
           setSelectDisabled(true);
-          setTypeDisabled(true);
         }
       } else if (currentSubField.options?.length) {
-        const newOptions = currentSubField.options?.map((e: any) => ({
-          label: e.optionLabel,
-          value: e.optionValue
-        }));
-        if (flag) {
-          handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions, disabled: true });
-        }
+        const newOptions = currentSubField.options?.map((e: any) => {
+          if (configs[checkboxKey].defaultOptions?.length) {
+            const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
+            if (oldOption && oldOption.isChosen) {
+              return { label: e.optionLabel, value: e.optionValue, isChosen: true };
+            }
+          }
+          return {
+            label: e.optionLabel,
+            value: e.optionValue,
+            isChosen: false
+          };
+        });
+        handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions, disabled: true });
         setSelectDisabled(true);
-        setTypeDisabled(true);
       }
     }
   };
@@ -132,13 +143,9 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
       handlePropsChange(checkboxKey, {
         ...configs[checkboxKey],
         defaultOptions: dictOptions,
-        disabled: true,
-        dictTypeId: dict.id,
-        colorMode: true,
-        colorModeType: COLOR_MODE_TYPES.POINT
+        dictTypeId: dict.id
       });
-      setTypeDisabled(false);
-      setSelectDisabled(true);
+      setSelectDisabled(false);
     }
     setSelectDictModalVisible(false);
   };
@@ -153,17 +160,12 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
         <Form.Item>
           <Select
             value={configs[checkboxKey].type}
-            disabled={typeDisabled}
+            disabled={configs[checkboxKey].disabled}
             onChange={(value) => {
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
-                setTypeDisabled(false);
                 setSelectDisabled(false);
               }
-              handlePropsChange(checkboxKey, {
-                ...configs[checkboxKey],
-                type: value,
-                defaultOptions: [],
-              });
+              handlePropsChange(checkboxKey, { ...configs[checkboxKey], type: value });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
@@ -189,7 +191,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                   name: 'table-col-item'
                 }}
                 swap
-                sort={!selectDisabled}
+                sort={!configs[checkboxKey].disabled && !selectDisabled}
                 handle=".table-col-item-handle"
                 className={styles.componentCollapseContent}
                 forceFallback={true}
@@ -219,8 +221,8 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 {configs[checkboxKey].defaultOptions?.map((_col: any, idx: number) => (
                   <Tooltip
                     key={idx}
-                    content={typeDisabled ? '如需修改请前往数据建模' : '如需修改请前往数据字典'}
-                    disabled={!selectDisabled}
+                    content={selectDisabled ? '如需修改请前往数据建模' : '如需修改请前往数据字典'}
+                    disabled={!configs[checkboxKey].disabled && !selectDisabled}
                   >
                     <div className={styles.tableColumnItem}>
                       <Space>
@@ -276,7 +278,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                             }}
                           ></ColorPicker>
                         )}
-                        {!selectDisabled && (
+                        {!configs[checkboxKey].disabled && !selectDisabled && (
                           <Button
                             icon={<IconDelete />}
                             shape="circle"
@@ -299,24 +301,31 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 ))}
               </ReactSortable>
 
-              {!selectDisabled && configs[checkboxKey].type !== DEFAULT_OPTIONS_TYPE.DICT && (
-                <Button
-                  type="outline"
-                  onClick={() => {
-                    const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
-                    const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${checkboxKey}[0]`;
-                    const newList = [
-                      ...configs[checkboxKey].defaultOptions,
-                      { label: item.displayName || newLabel, value: item.fieldName || newValue }
-                    ];
-                    add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
-                    const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
-                    handlePropsChange(checkboxKey, newConfig);
-                  }}
-                >
-                  添加一项
-                </Button>
-              )}
+              {!configs[checkboxKey].disabled &&
+                !selectDisabled &&
+                configs[checkboxKey].type !== DEFAULT_OPTIONS_TYPE.DICT && (
+                  <Button
+                    type="outline"
+                    onClick={() => {
+                      const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
+                      const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${checkboxKey}[0]`;
+                      const newList = [
+                        ...configs[checkboxKey].defaultOptions,
+                        {
+                          label: item.displayName || newLabel,
+                          value: item.fieldName || newValue,
+                          isChosen: false,
+                          colorType: ''
+                        }
+                      ];
+                      add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
+                      const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
+                      handlePropsChange(checkboxKey, newConfig);
+                    }}
+                  >
+                    添加一项
+                  </Button>
+                )}
             </div>
           )}
         </Form.List>
@@ -327,7 +336,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
           </Grid.Col>
           <Grid.Col span={4}>
             <Switch
-              disabled={selectDisabled}
+              disabled={configs[checkboxKey].disabled || selectDisabled}
               size="small"
               checked={configs[checkboxKey].colorMode}
               onChange={(value) => {
@@ -337,7 +346,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
           </Grid.Col>
           <Grid.Col span={14}>
             <Radio.Group
-              disabled={selectDisabled}
+              disabled={configs[checkboxKey].disabled || selectDisabled}
               value={configs[checkboxKey].colorModeType}
               onChange={(value) => {
                 handlePropsChange(checkboxKey, { ...configs[checkboxKey], colorModeType: value });

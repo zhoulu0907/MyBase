@@ -104,7 +104,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
           setSelectDisabled(true);
         }
       } else if (currentSubField.options?.length) {
-         const newOptions = currentSubField.options?.map((e: any) => {
+        const newOptions = currentSubField.options?.map((e: any) => {
           if (configs[selectKey].defaultOptions?.length) {
             const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
             if (oldOption && oldOption.isChosen) {
@@ -152,7 +152,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
               }
-              handlePropsChange(selectKey, { ...configs[selectKey], type: value, defaultOptions: [] });
+              handlePropsChange(selectKey, { ...configs[selectKey], type: value,  });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
@@ -223,7 +223,6 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                         <Radio
                           checked={configs[selectKey].defaultOptions[idx].isChosen}
                           onChange={(e) => {
-                            console.log('变了');
                             let newList = [...configs[selectKey].defaultOptions].map((item) => ({
                               ...item,
                               isChosen: false
@@ -285,7 +284,12 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                       const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${selectKey}[0]`;
                       const newList = [
                         ...configs[selectKey].defaultOptions,
-                        { label: item.displayName || newLabel, value: item.fieldName || newValue }
+                        {
+                          label: item.displayName || newLabel,
+                          value: item.fieldName || newValue,
+                          isChosen: false,
+                          colorType: ''
+                        }
                       ];
                       add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
                       const newConfig = { ...configs[selectKey], defaultOptions: newList };
