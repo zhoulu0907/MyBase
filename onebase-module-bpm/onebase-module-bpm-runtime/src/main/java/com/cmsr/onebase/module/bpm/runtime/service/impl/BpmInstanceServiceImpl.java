@@ -329,6 +329,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Override
     public void execTask(ExecTaskReqVO reqVO) {
         String taskId = reqVO.getTaskId();
+        User matchedUser = null;
 
         BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(reqVO.getButtonType());
         if (buttonEnum == null) {
@@ -381,7 +382,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         List<User> users = userService.getByAssociateds(List.of(task.getId()),
                 BpmUserTypeEnum.APPROVAL.getCode(),
                 BpmUserTypeEnum.TRANSFER.getCode(),
-                BpmUserTypeEnum.DEPUTE.getCode());
+                BpmUserTypeEnum.DEPUTE.getCode(),
+                BpmUserTypeEnum.AGENT.getCode());
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         boolean hasPermission = false;
 
@@ -389,6 +391,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             if (user.getProcessedBy().equals(String.valueOf(loginUserId))) {
                 // 说明是当前登录用户拥有权限
                 hasPermission = true;
+                matchedUser = user;
                 break;
             }
         }
@@ -398,7 +401,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         // 执行
-        execTaskStrategyManager.execute(task, extDTO, reqVO);
+        execTaskStrategyManager.execute(matchedUser, task, extDTO, reqVO);
     }
 
     @Override

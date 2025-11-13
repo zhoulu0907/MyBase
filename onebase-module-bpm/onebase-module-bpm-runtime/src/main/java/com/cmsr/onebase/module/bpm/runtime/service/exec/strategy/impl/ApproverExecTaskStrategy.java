@@ -1,22 +1,25 @@
 package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
-import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
-import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowUser;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.FlowParams;
+import org.dromara.warm.flow.core.entity.HisTask;
 import org.dromara.warm.flow.core.entity.Skip;
 import org.dromara.warm.flow.core.entity.Task;
+import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.utils.StringUtils;
 import org.springframework.stereotype.Component;
@@ -34,6 +37,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
  * @author liyang
  * @date 2025-11-03
  */
+@Slf4j
 @Component
 public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverNodeExtDTO> {
     @Override
@@ -42,8 +46,21 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
     }
 
     @Override
-    public void execute(Task task, ApproverNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
+    public void execute(User matchedUser, Task task, ApproverNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
         String buttonType = reqVO.getButtonType();
+        String userId = matchedUser.getProcessedBy();
+        BpmCooperateTypeEnum cooperateType = null;
+
+        if (Objects.equals(matchedUser.getType(), BpmUserTypeEnum.APPROVAL.getCode())) {
+
+        } else if (Objects.equals(matchedUser.getType(), BpmUserTypeEnum.AGENT.getCode())) {
+            // 代理模式下，会使用被代理人的用户ID执行操作
+            userId = matchedUser.getCreateBy();
+            cooperateType = BpmCooperateTypeEnum.AGENT;
+        } else {
+            // todo 其他用户类型，后续再处理
+            throw exception(ErrorCodeConstants.UNSUPPORT_NODE_APPROVAL_MODE);
+        }
 
         // 获取按钮权限
         List<ApproverNodeBtnCfgDTO> buttonConfigs = extDTO.getButtonConfigs();
@@ -78,10 +95,15 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         FlowParams skipParams = FlowParams.build().variable(variables)
                  .message(comment);
 
+        if (cooperateType != null) {
+            skipParams = skipParams.cooperateType(cooperateType.getCode());
+        }
+
         if (Objects.equals(buttonType, BpmActionButtonEnum.APPROVE.getCode())) {
             skipParams = skipParams.skipType(SkipType.PASS.getKey())
                 .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
-               .hisStatus("已" + matchButtonConfig.getButtonName());
+               .hisStatus("已" + matchButtonConfig.getButtonName())
+                    .handler(userId);
 
             taskService.skip(skipParams, task);
         } else if (Objects.equals(buttonType, BpmActionButtonEnum.REJECT.getCode())) {
@@ -99,7 +121,8 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             skipParams = skipParams.message(comment)
                     .skipType(SkipType.REJECT.getKey())
                     .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
-                    .hisStatus("已" + matchButtonConfig.getButtonName());
+                    .hisStatus("已" + matchButtonConfig.getButtonName())
+                    .handler(userId);
 
             // 有拒绝节点则走拒绝路线，否则则退回到上一层
             if (hasRejectNode) {
@@ -109,6 +132,40 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             }
         } else {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
+        }
+
+        // 处理代理的场景
+        if (Objects.equals(matchedUser.getType(), BpmUserTypeEnum.AGENT.getCode())) {
+            // 先更新已办
+            HisTask hisTaskQuery = new FlowHisTask();
+            hisTaskQuery.setApprover(userId);
+            hisTaskQuery.setTaskId(task.getId());
+            hisTaskQuery.setCooperateType(BpmCooperateTypeEnum.AGENT.getCode());
+
+            // 在会签和票签场景下，会有新增已办记录，其它可以在全局的Listener里处理
+            HisTask hisTask = hisTaskService.getOne(hisTaskQuery);
+
+            if (hisTask != null) {
+                hisTask.setCollaborator(matchedUser.getProcessedBy());
+                hisTaskService.updateById(hisTask);
+            }
+
+            // 先查出被代理人关联的代理人用户信息
+
+            User userQuery = new FlowUser();
+            userQuery.setAssociated(task.getId());
+            userQuery.setType(BpmUserTypeEnum.AGENT.getCode());
+            userQuery.setCreateBy(userId);
+
+            List<User> agentUsers = userService.list(userQuery);
+
+            // todo：是否要创建已办记录
+            if (CollectionUtil.isNotEmpty(agentUsers)) {
+                log.info("处理代理的场景，被代理人关联的代理人用户信息：{}", agentUsers);
+            }
+
+            // 删除被代理人关联的代理人用户信息
+            userService.remove(userQuery);
         }
 
         FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
