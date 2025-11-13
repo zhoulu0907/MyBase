@@ -1327,8 +1327,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 生成添加列 DDL
                 String addColumnDDL = generateAddColumnDDL(tableName, field);
 
-                // 执行添加列语句
-                service.execute(addColumnDDL);
+                // 针对DM数据库：拆分DDL语句，分别执行ALTER TABLE和COMMENT ON COLUMN
+                // DM数据库不支持在同一批处理中执行ALTER TABLE和COMMENT语句
+                String[] sqlStatements = addColumnDDL.split(";\n");
+                for (String sql : sqlStatements) {
+                    if (sql != null && !sql.trim().isEmpty()) {
+                        String trimmedSql = sql.trim();
+                        log.debug("执行DDL语句: {}", trimmedSql);
+                        service.execute(trimmedSql);
+                    }
+                }
 
                 log.info("成功为表 {} 添加列: {}", tableName, field.getFieldName());
                 return null;
