@@ -196,4 +196,6 @@ public interface PermissionService {
      * @return 删除的行数
      */
     long deleteRoleMenus(Long roleId, Set<Long> menuIds);
+
+    void devAssignUserRoles(Long userId, Long devRoleId);
 }

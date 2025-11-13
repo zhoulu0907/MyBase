@@ -4,7 +4,11 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.vo.dept.*;
@@ -74,6 +78,18 @@ public class DeptServiceImpl implements DeptService {
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
+
+        String  fromSceneType = WebFrameworkUtils.getXFromSceneType();
+        if(XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)){
+            dept.setDeptType(fromSceneType);
+        }else {
+            dept.setDeptType(fromSceneType);
+            LoginUser user = SecurityFrameworkUtils.getLoginUser();
+            if(null !=user){
+                dept.setCorpId(user.getCorpId());
+            }
+        }
+
         deptDataRepository.insert(dept);
 
         return dept.getId();

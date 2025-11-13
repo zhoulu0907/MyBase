@@ -289,4 +289,9 @@ public class RoleServiceImpl implements RoleService {
         return roleDataRepository.getRoleIdsByCodeAndTenantId(code, id);
     }
 
+    @TenantIgnore
+    public RoleDO getRoleByCodeIgnoreTenant(String code) {
+        return roleDataRepository.getRoleByCodeIgnoreTenant(code);
+    }
+
 }

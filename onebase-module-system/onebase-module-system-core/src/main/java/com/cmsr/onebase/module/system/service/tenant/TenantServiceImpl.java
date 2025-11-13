@@ -215,13 +215,19 @@ public class TenantServiceImpl implements TenantService {
         // 创建租户的管理员1
         TenantDO finalTenant = tenant;
         TenantUtils.execute(tenant.getId(), () -> {
-            // 创建角色
+            // 创建管理员角色
             Long roleId = createTenantAdminRole();
+            //  开发者角色 判断是否存在开发者，如果存在，就分配角色，不存在就新增开发者角色
+            Long devRoleId= createDevAdminRole();
             // 创建用户，并分配角色
-            createSystemUser(roleId, createReqVO);
+            createSystemUser(roleId, devRoleId, createReqVO);
         });
         return tenant.getId();
     }
+
+
+
+
 
     private Long getExistTenantCount() {
         // 排除平台租户
@@ -230,7 +236,7 @@ public class TenantServiceImpl implements TenantService {
         return existTenantCount;
     }
 
-    private void createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
+    private void createSystemUser(Long roleId, Long devRoleId, TenantInsertReqVO insertReqVO) {
         List<TenantAdminUserReqVO> adminUserReqVOList = insertReqVO.getTenantAdminUserReqVOList();
         adminUserReqVOList.forEach(adminUserReqVO -> {
             UserInsertReqVO reqVO = new UserInsertReqVO();
@@ -239,11 +245,13 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setMobile(adminUserReqVO.getAdminMobile());
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
-            reqVO.setId(adminUserReqVO.getAdminUserId());
             // 创建用户
             Long userId = userService.createUser(reqVO);
-            // 分配角色
+            // 分配 管理员角色
             permissionService.assignUserRoles(userId, singleton(roleId));
+            // 分配开发者角色
+            permissionService.devAssignUserRoles(userId, devRoleId);
+
         });
     }
 
@@ -255,6 +263,24 @@ public class TenantServiceImpl implements TenantService {
         Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
         return roleId;
     }
+
+
+    @TenantIgnore
+    private Long createDevAdminRole() {
+        Long roleId=null;
+        RoleDO roleDO= roleService.getRoleByCodeIgnoreTenant(RoleCodeEnum.APP_DEVELOPER.getCode());
+        if(roleDO==null) {
+            // 创建角色
+            RoleInsertReqVO reqVO = new RoleInsertReqVO();
+            reqVO.setName(RoleCodeEnum.APP_DEVELOPER.getName()).setCode(RoleCodeEnum.APP_DEVELOPER.getCode())
+                    .setSort(0).setRemark("系统自动生成");
+              roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+        }else{
+              roleId=roleDO.getId();
+        }
+        return roleId;
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -322,12 +348,12 @@ public class TenantServiceImpl implements TenantService {
         if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null && updateReqVO.getTenantAdminUserUpdateReqVOSList().size() > 0) {
             TenantUtils.execute(updateObj.getId(), () -> {
 
-
                 // 管理员变了，把旧管理员角色移除，并降级为自定义
                 Long  roleId = getAdminRoleAndDeleteOldUserRole(tenant);
+                Long  devRoleId=createDevAdminRole();
                 // 判断管理员是否发生变更
               List<String> adminUserRespDTOS=  adminUserRoleApi.getUserRoleByRoleIdAndTenantId(roleId,tenant.getId());
-                List<Long> userIds = adminUserRespDTOS.stream()
+              List<Long> userIds = adminUserRespDTOS.stream()
                         .map(Long::valueOf)
                         .collect(Collectors.toList());
                 // 使用AdminUserService批量获取用户数据
@@ -349,6 +375,8 @@ public class TenantServiceImpl implements TenantService {
                     UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(userId, roleId);
                     if (userRoleDO != null) {
                         permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
+                        // 删除旧的开发者
+                        permissionService.deleteRoleUsers(devRoleId, singleton(userRoleDO.getUserId()));
                     }
                     // 将旧管理员设置为普通用户,降级
                     userService.updateAdminType(userId, AdminTypeEnum.CUSTOM.getType());
@@ -356,10 +384,31 @@ public class TenantServiceImpl implements TenantService {
                 }
 
                 updateReqVO.getTenantAdminUserUpdateReqVOSList().forEach(adminUserReqVO -> {
+                    // 已存在的用户
+                    AdminUserDO newAdminUser = userService.getUserByUsername(adminUserReqVO.getAdminUserName());
+                    // 判断前端上送的管理员是否已存在，存在则分配角色且不是老用户
+                    if (newAdminUser == null) {
+                        // 新管理员用户不存在，创建用户，并分配角色
+                        UserInsertReqVO userInsertReqVO = new UserInsertReqVO();
+                        userInsertReqVO.setUsername(adminUserReqVO.getAdminUserName());
+                        userInsertReqVO.setNickname(adminUserReqVO.getAdminNickName());
+                        userInsertReqVO.setMobile(adminUserReqVO.getAdminMobile());
+                        userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
+                        userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
+                        // 创建用户
+                        Long userId = userService.createUser(userInsertReqVO);
+                        // 分配管理员权限
+                        permissionService.assignUserRoles(userId, singleton(roleId));
+                        // 分配开发者权限
+                        permissionService.devAssignUserRoles(userId, devRoleId);
+                    } else {
                         // 新管理员用户存在，直接分配角色
                         permissionService.assignUserRoles(adminUserReqVO.getAdminUserId(), singleton(roleId));
                         // 将新管理员设置为内置用户类型
                         userService.updateAdminType(adminUserReqVO.getAdminUserId(), AdminTypeEnum.SYSTEM.getType());
+                        // 分配开发者权限
+                        permissionService.devAssignUserRoles(adminUserReqVO.getAdminUserId(), devRoleId);
+                    }
                 });
             });
         }

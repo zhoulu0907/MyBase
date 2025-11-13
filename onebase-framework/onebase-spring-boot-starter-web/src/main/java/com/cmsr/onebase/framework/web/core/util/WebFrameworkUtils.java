@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.enums.TerminalEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ public class WebFrameworkUtils {
     public static final String HEADER_X_TENANT_ID = "X-Tenant-Id";
     public static final String HEADER_X_CORP_ID = "X-Corp-Id";
     public static final String HEADER_X_APP_ID = "X-App-Id";
+    public static final String X_From_Scene_Type = "X-From-Scene-Type";
 
     /**
      * 终端的 Header
@@ -172,6 +174,24 @@ public class WebFrameworkUtils {
      */
     public static boolean isRpcRequest(String className) {
         return className.endsWith("Api");
+    }
+
+    /**
+     * 获取企业id
+     * @param request
+     * @return
+     */
+    public static Long getCorpId() {
+       HttpServletRequest request = getRequest();
+        String corpID = request.getHeader(HEADER_X_CORP_ID);
+        return NumberUtil.isNumber(corpID) ? Long.valueOf(corpID) : null;
+    }
+
+    public static String getXFromSceneType() {
+        HttpServletRequest request = getRequest();
+        String fromType = request.getHeader(X_From_Scene_Type);
+        //TODO 后期更新前端后，取消默认平台
+        return  fromType==null? XFromSceneTypeEnum.TENANT.getCode():fromType;
     }
 
 }

@@ -287,6 +287,21 @@ public class PermissionServiceImpl implements PermissionService {
         }
     }
 
+
+    @Override
+    public void devAssignUserRoles(Long userId, Long roleIds) {
+        Collection<Long> createRoleIds =  new ArrayList<>();
+        createRoleIds.add(roleIds);
+        if (!CollUtil.isEmpty(createRoleIds)) {
+            userRoleDataRepository.insertBatch(CollectionUtils.convertList(createRoleIds, roleId -> {
+                UserRoleDO entity = new UserRoleDO();
+                entity.setUserId(userId);
+                entity.setRoleId(roleId);
+                return entity;
+            }));
+        }
+    }
+
     @Override
     @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public void processUserDeleted(Long userId) {

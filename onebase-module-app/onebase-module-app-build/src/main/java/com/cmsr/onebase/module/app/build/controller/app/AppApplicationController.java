@@ -69,6 +69,14 @@ public class AppApplicationController {
         return CommonResult.success(true);
     }
 
+    @PostMapping("/update-app-time")
+    @PermitAll
+    @Operation(summary = "更新应用编辑时间")
+    public CommonResult<Boolean> updateAppTimeById(@RequestParam("appId") Long appId) {
+        appApplicationService.updateAppTimeById(appId);
+        return CommonResult.success(true);
+    }
+
     @PostMapping("/delete")
     @Operation(summary = "删除应用")
     public CommonResult<Boolean> deleteApplication(@RequestParam("id") Long id,

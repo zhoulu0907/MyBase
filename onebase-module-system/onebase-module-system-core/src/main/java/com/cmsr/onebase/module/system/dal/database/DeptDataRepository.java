@@ -1,7 +1,11 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.springframework.stereotype.Repository;
@@ -33,7 +37,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 子部门列表
      */
     public List<DeptDO> findAllByParentId(Long parentId) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        DefaultConfigStore configs = getCorpConfigStore();;
         configs.and(Compare.EQUAL, DeptDO.PARENT_ID, parentId);
         return findAllByConfig(configs);
     }
@@ -46,7 +50,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 部门对象
      */
     public DeptDO findOneByParentIdAndName(Long parentId, String name) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        DefaultConfigStore configs = getCorpConfigStore();;
         configs.and(Compare.EQUAL, DeptDO.PARENT_ID, parentId);
         configs.and(Compare.EQUAL, DeptDO.NAME, name);
         return findOne(configs);
@@ -59,7 +63,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 部门对象
      */
     public DeptDO findOneByName(String name) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        DefaultConfigStore configs = getCorpConfigStore();;
         configs.and(Compare.EQUAL, DeptDO.NAME, name);
         return findOne(configs);
     }
@@ -71,7 +75,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 部门列表
      */
     public List<DeptDO> findAllByLeaderUserId(Long leaderUserId) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        DefaultConfigStore configs = getCorpConfigStore();;
         configs.and(Compare.EQUAL, DeptDO.LEADER_USER_ID, leaderUserId);
         return findAllByConfig(configs);
     }
@@ -83,7 +87,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 子部门列表
      */
     public List<DeptDO> findAllByParentIds(Collection<Long> parentIds) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        DefaultConfigStore configs =getCorpConfigStore();;
         configs.and(Compare.IN, DeptDO.PARENT_ID, parentIds);
         return findAllByConfig(configs);
     }
@@ -96,7 +100,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 部门列表
      */
     public List<DeptDO> findAllByNameAndStatus(String name, Integer status) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        DefaultConfigStore configs =getCorpConfigStore();
         if (name != null) {
             configs.and(Compare.LIKE, DeptDO.NAME, name);
         }
@@ -105,5 +109,23 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
         }
         configs.order(DeptDO.SORT, org.anyline.entity.Order.TYPE.ASC);
         return findAllByConfig(configs);
+    }
+
+    public DefaultConfigStore getCorpConfigStore(){
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        String  fromSceneType = WebFrameworkUtils.getXFromSceneType();
+        if(XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)){
+            configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
+        }else {
+            Long corpId = SecurityFrameworkUtils.getLoginUser().getCorpId();
+            if (null != corpId) {
+                configStore.and(Compare.EQUAL, DeptDO.CORP_ID, corpId);
+                configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.CORP.getCode());
+            } else{
+                // TODO  改造未成功之前，默认取全部，
+                configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
+            }
+        }
+        return configStore;
     }
 }

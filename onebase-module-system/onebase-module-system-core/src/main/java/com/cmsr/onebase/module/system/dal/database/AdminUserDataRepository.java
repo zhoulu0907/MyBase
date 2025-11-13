@@ -2,8 +2,13 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -117,11 +122,13 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @param status 状态
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllByStatus(Integer status,String userNickName) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        if(userNickName!=null){
+    public List<AdminUserDO> findAllByStatus(Integer status, String userNickName) {
+        DefaultConfigStore configStore = getCorpConfigStore();
+        ;
+        if (userNickName != null) {
             configStore.like(AdminUserDO.NICKNAME, userNickName);
         }
+
         configStore.eq(AdminUserDO.STATUS, status)
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
@@ -150,7 +157,8 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findPage(UserPageReqVO reqVO, Collection<Long> deptIds, Collection<Long> includeRoleUserIds, Collection<Long> excludeRoleUserIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        DefaultConfigStore configStore = getCorpConfigStore();
+        ;
 
         // 根据关键词模糊查询
         if (reqVO.getKeyword() != null && !reqVO.getKeyword().trim().isEmpty()) {
@@ -204,6 +212,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
             configStore.notIn(BaseDO.ID, excludeRoleUserIds);
         }
 
+
         // 添加排序
         configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
 
@@ -217,7 +226,8 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findSimpleEnablePage(UserSimplePageReqVO reqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        DefaultConfigStore configStore = getCorpConfigStore();
+        ;
         configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
 
         // 根据关键词模糊查询
@@ -232,7 +242,9 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
     }
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        DefaultConfigStore configStore = getCorpConfigStore();
+        ;
+
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
@@ -242,11 +254,32 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
 
 
     public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> userIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        DefaultConfigStore configStore = getCorpConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
+
+    public DefaultConfigStore getCorpConfigStore() {
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        String fromSceneType = WebFrameworkUtils.getXFromSceneType();
+        if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
+            configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
+        } else {
+            Long corpId = SecurityFrameworkUtils.getLoginUser().getCorpId();
+            if (null != corpId) {
+                configStore.and(Compare.EQUAL, DeptDO.CORP_ID, corpId);
+                configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.CORP.getCode());
+            } else {
+                // TODO  改造未成功之前，默认取全部，
+                configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
+            }
+        }
+        return configStore;
+    }
+
+
 }
