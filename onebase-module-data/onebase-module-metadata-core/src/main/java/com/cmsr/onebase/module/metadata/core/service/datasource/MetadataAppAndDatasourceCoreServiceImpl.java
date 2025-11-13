@@ -56,9 +56,14 @@ public class MetadataAppAndDatasourceCoreServiceImpl implements MetadataAppAndDa
         // 根据数据源ID列表查询数据源详情
         List<MetadataDatasourceDO> datasources = new ArrayList<>();
         for (Long datasourceId : datasourceIds) {
-            MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
-            if (datasource != null) {
-                datasources.add(datasource);
+            try {
+                MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
+                if (datasource != null) {
+                    datasources.add(datasource);
+                }
+            } catch (Exception e) {
+                // 如果数据源不存在或查询失败,记录日志并跳过
+                log.warn("查询数据源失败,数据源ID: {},错误: {}", datasourceId, e.getMessage());
             }
         }
 
