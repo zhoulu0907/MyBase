@@ -1,4 +1,4 @@
-import { Divider } from '@arco-design/web-react';
+import { Divider, Button } from '@arco-design/web-react';
 import styles from './index.module.less';
 import dayjs from 'dayjs';
 import type { TableColumnProps } from '@arco-design/web-react';
@@ -84,21 +84,21 @@ export const getVersionColumns = (
     key: 'operation',
     title: '操作',
     render: (_, record) => (
-      <div className={styles.operation}>
-        <span className={`${styles.operationBtn} ${styles.green}`} onClick={() => handleView(record)}>
+      <div>
+        <Button type="text" status="success" onClick={() => handleView(record)}>
           查看
-        </span>
+        </Button>
         <Divider type="vertical" />
-        <span className={`${styles.operationBtn} ${styles.green}`} onClick={() => handleEditRemark(record)}>
+        <Button type="text" status="success" onClick={() => handleEditRemark(record)}>
           修改备注
-        </span>
+        </Button>
 
         {record.versionStatus !== VersionStatus.PUBLISHED && (
           <>
             <Divider type="vertical" />
-            <span className={`${styles.operationBtn} ${styles.yellow}`} onClick={() => handleDelete(record)}>
+            <Button type="text" status="warning" onClick={() => handleDelete(record)}>
               删除
-            </span>
+            </Button>
           </>
         )}
       </div>

@@ -1,4 +1,4 @@
-import TableIcon from '@/assets/images/etl/table.svg';
+import FieldIcon from '@/assets/images/etl/field.svg';
 import { Button, Input } from '@arco-design/web-react';
 import { listETLTables, previewETLDatasource, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
@@ -48,11 +48,8 @@ export const InputNodeConfig: React.FC = () => {
   };
 
   const handlePreviewData = async () => {
-    // const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
-    // const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
-
-    const datasourceId = '115160185129926656';
-    const tableId = '125809900172541968';
+    const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
+    const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
 
     if (!datasourceId || !tableId) {
       return;
@@ -61,20 +58,23 @@ export const InputNodeConfig: React.FC = () => {
       datasourceId: datasourceId,
       tableId: tableId
     });
+
+    console.log('res: ', res);
     const previewData = {
       columns: res.columns.map((column: any) => ({
-        title: column.name,
-        dataIndex: column.id,
-        key: column.id
+        title: column.displayName,
+        dataIndex: column.fieldFqn,
+        key: column.fieldFqn
       })),
       data: res.data.map((row: any[]) => {
         const obj: any = {};
         res.columns.forEach((col: any, idx: number) => {
-          obj[col.id] = row[idx];
+          obj[col.fieldFqn] = row[idx];
         });
         return obj;
       })
     };
+    console.log('previewData: ', previewData);
     setPreviewData(previewData);
   };
 
@@ -104,7 +104,7 @@ export const InputNodeConfig: React.FC = () => {
                 <div className={styles.dataSourceContentItems}>
                   {nodeData.value[curNode.value.id]?.config?.fields.map((field: any) => (
                     <div key={field.fieldName} className={styles.dataSourceContentItem}>
-                      <img src={TableIcon} alt="column" />
+                      <img src={FieldIcon} alt="column" />
                       {field.fieldName}
                     </div>
                   ))}

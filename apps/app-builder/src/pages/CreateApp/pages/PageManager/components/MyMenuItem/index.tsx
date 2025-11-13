@@ -91,22 +91,24 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           编辑
         </MenuItem>
       )}
-      {(renameForm && triggerRename) && <MenuItem
-        className={styles.menuContent}
-        key="rename"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerRename();
+      {renameForm && triggerRename && (
+        <MenuItem
+          className={styles.menuContent}
+          key="rename"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerRename();
 
-          renameForm.resetFields();
-          renameForm.setFieldValue('menuName', menuName);
-          renameForm.setFieldValue('menuId', menuID);
-          renameForm.setFieldValue('menuIcon', menuIcon);
-        }}
-      >
-        <img src={RenameIcon} alt="重命名" />
-        重命名
-      </MenuItem>}
+            renameForm.resetFields();
+            renameForm.setFieldValue('menuName', menuName);
+            renameForm.setFieldValue('menuId', menuID);
+            renameForm.setFieldValue('menuIcon', menuIcon);
+          }}
+        >
+          <img src={RenameIcon} alt="重命名" />
+          重命名
+        </MenuItem>
+      )}
       <MenuItem
         className={styles.menuContent}
         key="visible"
@@ -122,7 +124,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         )}
         {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
       </MenuItem>
-      {(!isGroup && copyForm && triggerCopy) && (
+      {!isGroup && copyForm && triggerCopy && (
         <MenuItem
           className={styles.menuContent}
           key="copy"
@@ -138,7 +140,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           复制
         </MenuItem>
       )}
-      {(isGroup && createForm && triggerCreate) && (
+      {isGroup && createForm && triggerCreate && (
         <MenuItem
           className={styles.menuContent}
           key="createPage"
@@ -154,7 +156,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </MenuItem>
       )}
 
-      {(isGroup && createForm && triggerCreate) && (
+      {isGroup && createForm && triggerCreate && (
         <MenuItem
           className={styles.menuContent}
           key="createGroup"
@@ -169,18 +171,20 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           新建分组
         </MenuItem>
       )}
-      {triggerDelete && <MenuItem
-        className={styles.menuContent}
-        key="delete"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerDelete(menuID);
-        }}
-        style={{ color: 'red' }}
-      >
-        <img src={DeleteMenuIcon} alt="删除" />
-        删除
-      </MenuItem>}
+      {triggerDelete && (
+        <MenuItem
+          className={styles.menuContent}
+          key="delete"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerDelete(menuID);
+          }}
+          style={{ color: 'red' }}
+        >
+          <img src={DeleteMenuIcon} alt="删除" />
+          删除
+        </MenuItem>
+      )}
     </Menu>
   );
 
@@ -225,7 +229,9 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             style={{ marginRight: 16 }}
           />
           {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
-          {menuIcon.indexOf('-taskicon') > 0 && <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />}
+          {menuIcon.indexOf('-taskicon') > 0 && (
+            <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+          )}
           <span className={styles.name} style={{ maxWidth: maxWidth + 'px' }}>
             {label}
           </span>

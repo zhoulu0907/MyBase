@@ -1,10 +1,17 @@
 import DatabaseIcon from '@/assets/images/etl/database.svg';
 import TableIcon from '@/assets/images/etl/table.svg';
 import TableIconActive from '@/assets/images/etl/table_active.svg';
-import { Button, Checkbox, Input, Modal, Tabs } from '@arco-design/web-react';
+import { Button, Checkbox, Input, Modal, Popover, Tabs } from '@arco-design/web-react';
 import { IconPlus, IconSwap } from '@arco-design/web-react/icon';
-import { listETLTableColumns, listETLTables, type ELTColumn, type ETLTable } from '@onebase/app';
-import { etlEditorSignal } from '@onebase/common';
+import {
+  listAppETLDatasource,
+  listETLTableColumns,
+  listETLTables,
+  type ELTColumn,
+  type ETLDatasource,
+  type ETLTable
+} from '@onebase/app';
+import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useMemo, useState } from 'react';
 import CreateExternalModal from '../createExternalModal';
 import styles from './index.module.less';
@@ -21,15 +28,26 @@ interface DatasourceModalProps {
 }
 
 const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClose, onOk }) => {
+  const { curNode, setNodeData, nodeData } = etlEditorSignal;
+
   const [activeTab, setActiveTab] = useState('external');
-  const [curDatasourceId, setCurDatasourceId] = useState('126770168960581632');
+  const [allDatasources, setAllDatasources] = useState<ETLDatasource[]>([]);
+  const [curDatasourceId, setCurDatasourceId] = useState<string>(
+    nodeData.value[curNode.value.id]?.config?.datasourceId || ''
+  );
   const [curTables, setCurTables] = useState<ETLTable[]>([]);
-  const [selectedTableId, setSelectedTableId] = useState('');
+  const [selectedTableId, setSelectedTableId] = useState(nodeData.value[curNode.value.id]?.config?.tableId || '');
   const [curColumns, setCurColumns] = useState<ELTColumn[]>([]);
 
-  const [selectedColumns, setSelectColumns] = useState<ELTColumn[]>([]);
+  const [selectedColumns, setSelectColumns] = useState<ELTColumn[]>(
+    nodeData.value[curNode.value.id]?.config?.fields || []
+  );
 
-  const { curNode, setNodeData, nodeData } = etlEditorSignal;
+  useEffect(() => {
+    if (isModalVisible) {
+      handleListETLDatasources();
+    }
+  }, [isModalVisible]);
 
   useEffect(() => {
     if (curDatasourceId) {
@@ -42,6 +60,10 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
       handlelistETLTableColumns(selectedTableId);
     }
   }, [selectedTableId]);
+
+  useEffect(() => {
+    console.log(selectedColumns);
+  }, [selectedColumns]);
 
   const [createExternalModalVisible, setCreateExternalModalVisible] = useState(false);
 
@@ -57,6 +79,19 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
     const res = await listETLTableColumns({ tableId });
     console.log(res);
     setCurColumns(res);
+  };
+
+  const handleListETLDatasources = async () => {
+    const curAppId = getHashQueryParam('appId');
+    if (!curAppId) {
+      return;
+    }
+    const res = await listAppETLDatasource({
+      applicationId: curAppId,
+      writable: 0
+    });
+    console.log(res);
+    setAllDatasources(res);
   };
 
   const handleCreateExternalModalClose = () => {
@@ -82,17 +117,17 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
       datasourceId: curDatasourceId,
       tableId: selectedTableId,
       fields: selectedColumns.map((column) => ({
-        fieldName: column.name,
-        fieldType: column.type
+        fieldName: column.fieldName,
+        fieldType: column.fieldType
       }))
     };
 
     payload.output = {
       verified: true,
       fields: selectedColumns.map((column) => ({
-        fieldFqn: `${selectedTableId}.${column.name}`,
-        fieldName: column.name,
-        fieldType: column.type
+        fieldFqn: `${selectedTableId}.${column.fieldName}`,
+        fieldName: column.fieldName,
+        fieldType: column.fieldType
       }))
     };
 
@@ -106,12 +141,12 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
   const handleColumnSelect = (columnId: string) => {
     setSelectColumns((prevSelected: ELTColumn[]) => {
       // 判断该字段是否已经被选中
-      if (prevSelected.some((col) => col.id === columnId)) {
+      if (prevSelected.some((col) => col.fieldName === columnId)) {
         // 如果已经选中则移除
-        return prevSelected.filter((col) => col.id !== columnId);
+        return prevSelected.filter((col) => col.fieldName !== columnId);
       }
       // 否则将该字段加入已选中列表
-      const column = curColumns.find((col) => col.id === columnId);
+      const column = curColumns.find((col) => col.fieldName === columnId);
       return column ? [...prevSelected, column] : prevSelected;
     });
   };
@@ -181,9 +216,33 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
                   <div className={styles.externalDatasourceContentItem}>
                     <div className={styles.databaseItem}>
                       <img src={DatabaseIcon} alt="database" />
-                      <div>数据库</div>
+                      <div>
+                        {curDatasourceId
+                          ? allDatasources.find((datasource) => datasource.id === curDatasourceId)?.name
+                          : '数据库'}
+                      </div>
                     </div>
-                    <Button type="text" icon={<IconSwap />}></Button>
+                    <Popover
+                      content={
+                        <div className={styles.datasourceContent}>
+                          <Input.Search placeholder="搜索数据源" style={{ marginBottom: '8px' }} />
+                          {allDatasources.map((datasource) => (
+                            <div key={datasource.id} className={styles.datasourceItem}>
+                              <div className={styles.datasourceItemName}>{datasource.name}</div>
+                              <div>
+                                {curDatasourceId == datasource.id ? (
+                                  <div className={styles.datasourceItemCurrent}>当前数据库</div>
+                                ) : (
+                                  <IconSwap onClick={() => setCurDatasourceId(datasource.id)} />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      }
+                    >
+                      <Button type="text" icon={<IconSwap />}></Button>
+                    </Popover>
                   </div>
                   <div className={styles.tableList}>
                     {curTables.map((table) => (
@@ -217,14 +276,14 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
               </Checkbox>
             </div>
             {curColumns.map((column: ELTColumn) => (
-              <div key={column.id} className={styles.columnItem}>
+              <div key={column.fieldName} className={styles.columnItem}>
                 <Checkbox
-                  checked={selectedColumns.some((col: ELTColumn) => col.id === column.id)}
-                  onChange={() => handleColumnSelect(column.id)}
+                  checked={selectedColumns.some((col: ELTColumn) => col.fieldName === column.fieldName)}
+                  onChange={() => handleColumnSelect(column.fieldName)}
                   className={styles.columnItemName}
                   style={{ height: '32px' }}
                 >
-                  {column.name}
+                  {column.fieldName}
                 </Checkbox>
               </div>
             ))}

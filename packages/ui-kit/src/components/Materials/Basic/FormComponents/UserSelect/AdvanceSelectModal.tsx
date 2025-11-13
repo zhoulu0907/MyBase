@@ -165,6 +165,10 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
     []
   );
 
+  useEffect(() => {
+    return () => debouncedUpdate.cancel();
+  }, [debouncedUpdate]);
+
   const handleUpdateSelectedMembers = (members: any[]) => {
      setSelectedMembers(members);
      setSelectUserName(members.length > 0 ? members[0].name : '');

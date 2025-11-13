@@ -1,104 +1,105 @@
+import { VALIDATION_TYPE } from '@onebase/app';
 import { FORM_COMPONENT_TYPES } from '@onebase/ui-kit';
 
 // 枚举所有操作符，涵盖常见的字段判断操作
 export const OPERATOR_OPTIONS_EQUAL = [
   {
     label: '等于',
-    value: 'equal'
+    value: VALIDATION_TYPE.EQUALS
   },
   {
     label: '不等于',
-    value: 'not_equal'
+    value: VALIDATION_TYPE.NOT_EQUALS
   }
 ];
 export const OPERATOR_OPTIONS_CONTAINS = [
   {
     label: '包含',
-    value: 'contains'
+    value: VALIDATION_TYPE.CONTAINS
   },
   {
     label: '不包含',
-    value: 'not_contains'
+    value: VALIDATION_TYPE.NOT_CONTAINS
   }
 ];
 export const OPERATOR_OPTIONS_IN = [
   {
     label: '存在于',
-    value: 'in'
+    value: VALIDATION_TYPE.EXISTS_IN
   },
   {
     label: '不存在于',
-    value: 'not_in'
+    value: VALIDATION_TYPE.NOT_EXISTS_IN
   }
 ];
 export const OPERATOR_OPTIONS_NULL = [
   {
     label: '为空',
-    value: 'is_null'
+    value: VALIDATION_TYPE.IS_EMPTY
   },
   {
     label: '不为空',
-    value: 'is_not_null'
+    value: VALIDATION_TYPE.IS_NOT_EMPTY
   }
 ];
 
 export const OPERATOR_OPTIONS_NUMBER_COMPARE = [
   {
     label: '大于',
-    value: 'greater_than'
+    value: VALIDATION_TYPE.GREATER_THAN
   },
   {
     label: '大于等于',
-    value: 'greater_than_or_equal'
+    value: VALIDATION_TYPE.GREATER_EQUALS
   },
   {
     label: '小于',
-    value: 'less_than'
+    value: VALIDATION_TYPE.LESS_THAN
   },
   {
     label: '小于等于',
-    value: 'less_than_or_equal'
+    value: VALIDATION_TYPE.LESS_EQUALS
   }
 ];
 
 export const OPERATOR_OPTIONS_RANGE = [
   {
     label: '范围',
-    value: 'range'
+    value: VALIDATION_TYPE.RANGE
   }
 ];
 
 export const OPERATOR_OPTIONS_DATE_TIME_COMPARE = [
   {
     label: '早于',
-    value: 'before'
+    value: VALIDATION_TYPE.EARLIER_THAN
   },
   {
     label: '晚于',
-    value: 'after'
+    value: VALIDATION_TYPE.LATER_THAN
   }
 ];
 
 export const OPERATOR_OPTIONS_MULTI_SELECT = [
   {
     label: '等于',
-    value: 'equal'
+    value: VALIDATION_TYPE.EQUALS
   },
   {
     label: '包含全部',
-    value: 'contains_all'
+    value: VALIDATION_TYPE.CONTAINS
   },
   {
     label: '不包含全部',
-    value: 'not_contains_all'
+    value: VALIDATION_TYPE.NOT_CONTAINS
   },
   {
     label: '包含任一',
-    value: 'contains_any'
+    value: VALIDATION_TYPE.CONTAINS
   },
   {
     label: '不包含任一',
-    value: 'not_contains_any'
+    value: VALIDATION_TYPE.NOT_CONTAINS
   },
   ...OPERATOR_OPTIONS_NULL
 ];

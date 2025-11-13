@@ -579,3 +579,15 @@ export const defaultValueConfig:any ={
   name:'默认值',
   type: CONFIG_TYPES.DEFAULT_VALUE
 }
+
+export const defaultValueModeConfig: any = {
+  key: 'defaultValueMode',
+  name:'默认值',
+  type: CONFIG_TYPES.DEPT_DEFAULT_VALUE
+}
+
+export const selectScopeConfig: any = {
+  key: 'selectScope',
+  name:'可选范围',
+  type: CONFIG_TYPES.DEPT_SELECT_SCOPE
+}
