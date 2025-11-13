@@ -90,7 +90,7 @@ public class RuntimeWebSecurityConfigurerAdapter {
 
         // 添加 Token Filter
         httpSecurity.addFilterBefore(runtimeAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
-        //httpSecurity.addFilterBefore(remoteCallAuthenticationFilter, RuntimeAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(remoteCallAuthenticationFilter, RuntimeAuthenticationFilter.class);
         return httpSecurity.build();
     }
 
