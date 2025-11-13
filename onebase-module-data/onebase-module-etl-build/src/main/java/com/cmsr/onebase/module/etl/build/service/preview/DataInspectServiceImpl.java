@@ -2,11 +2,11 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ColumnDefine;
-import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLFlinkMappingRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
@@ -18,6 +18,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
@@ -64,7 +65,7 @@ public class DataInspectServiceImpl implements DataInspectService {
     }
 
     @Override
-    public DataPreviewVO previewData(TablePreviewVO previewVO) {
+    public DataPreview previewData(TablePreviewVO previewVO) {
         Long datasourceId = previewVO.getDatasourceId();
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
         if (datasourceDO == null) {
@@ -89,7 +90,7 @@ public class DataInspectServiceImpl implements DataInspectService {
                 default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_METADATA_TYPE);
             }
             Map<String, String> fieldTypeMapping = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceType);
-            DataPreviewVO dataPreviewVO = new DataPreviewVO();
+            DataPreview dataPreview = new DataPreview();
             TableData tableData = tableDO.getMetaInfo();
             List<ColumnData> columnDataList = tableData.getColumns();
             List<ColumnDefine> columnList = new ArrayList<>(columnDataList.size());
@@ -118,11 +119,13 @@ public class DataInspectServiceImpl implements DataInspectService {
                 int metaColumnIdx = columnData.getPosition() - 1;
                 columnList.add(metaColumnIdx, columnDefine);
             }
-            dataPreviewVO.setColumns(columnList);
+            dataPreview.setColumns(columnList);
             ConfigStore cs = new DefaultConfigStore();
             cs.limit(inspectSize);
             DataSet dataSet = temporary.querys(table, cs);
-            return dataPreviewVO.appendData(dataSet);
+            List<DataRow> rows = dataSet.getRows();
+            rows.forEach(row -> dataPreview.getData().add(row.values()));
+            return dataPreview;
         } catch (Exception e) {
             log.error("数据源连接异常，数据源信息: {}", datasourceDO, e);
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);

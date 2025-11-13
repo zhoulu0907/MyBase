@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
-import com.cmsr.onebase.module.flow.core.graph.FlowVersionProvider;
+import com.cmsr.onebase.module.flow.core.graph.FlowCacheClient;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -13,13 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @Setter
 @SpringBootTest(classes = OneBaseServerApplication.class)
-public class FlowVersionProviderTest {
+public class FlowCacheClientTest {
 
     @Autowired
-    private FlowVersionProvider flowVersionProvider;
+    private FlowCacheClient flowCacheClient;
 
     @Test
     public void testUpdateApplicationVersion() {
-        flowVersionProvider.onApplicationUpdate(120906250090807296L);
+        flowCacheClient.applicationUpdate(120906250090807296L);
     }
 }

@@ -3,8 +3,7 @@ package com.cmsr.onebase.module.flow.graph;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
-import com.cmsr.onebase.module.flow.core.flow.ExecutorRequest;
-import com.cmsr.onebase.module.flow.core.flow.FlowExecuteProvider;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -16,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.UUID;
 
 @Setter
 @SpringBootTest(classes = OneBaseServerRuntimeApplication.class)
@@ -30,7 +28,7 @@ public class FlowProcessGUITest {
         private FlowProcessExecApiImpl flowProcessExecApi;
 
         @Autowired//日期触发用
-        private FlowExecuteProvider flowExecuteProvider;
+        private FlowRemoteCallExecutor flowRemoteCallExecutor;
 
         @Autowired
         private FlowProcessExecService flowProcessExecService;

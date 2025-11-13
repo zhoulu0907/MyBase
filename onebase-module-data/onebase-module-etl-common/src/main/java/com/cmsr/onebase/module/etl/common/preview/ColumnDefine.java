@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.build.service.datasource.vo;
+package com.cmsr.onebase.module.etl.common.preview;
 
 import lombok.Data;
 

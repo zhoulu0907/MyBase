@@ -7,18 +7,18 @@ import lombok.Data;
  * @Date：2025/10/15 18:16
  */
 @Data
-public class ExecutorRequest {
+public class RemoteCallRequest {
 
     public static final String JOB_TYPE_TIME = "time";
 
     public static final String JOB_TYPE_FIELD = "fld";
 
+    private Long applicationId;
+
     private Long processId;
 
+    private String processName;
+
     private String jobType;
-
-    private String time;
-
-    private String uuid;
 
 }

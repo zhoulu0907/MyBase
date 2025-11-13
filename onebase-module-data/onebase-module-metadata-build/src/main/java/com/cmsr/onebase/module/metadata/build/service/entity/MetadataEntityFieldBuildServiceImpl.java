@@ -1327,8 +1327,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 生成添加列 DDL
                 String addColumnDDL = generateAddColumnDDL(tableName, field);
 
-                // 执行添加列语句
-                service.execute(addColumnDDL);
+                // 针对DM数据库：拆分DDL语句，分别执行ALTER TABLE和COMMENT ON COLUMN
+                // DM数据库不支持在同一批处理中执行ALTER TABLE和COMMENT语句
+                String[] sqlStatements = addColumnDDL.split(";\n");
+                for (String sql : sqlStatements) {
+                    if (sql != null && !sql.trim().isEmpty()) {
+                        String trimmedSql = sql.trim();
+                        log.debug("执行DDL语句: {}", trimmedSql);
+                        service.execute(trimmedSql);
+                    }
+                }
 
                 log.info("成功为表 {} 添加列: {}", tableName, field.getFieldName());
                 return null;
@@ -1401,6 +1409,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     private boolean checkColumnExists(AnylineService<?> service, String tableName, String columnName) {
         try {
             log.info("检查列是否存在 - 表名: {}, 列名: {}", tableName, columnName);
+
+            // 关键修复：清除Anyline的元数据缓存
+            // Anyline会缓存表结构信息(默认缓存24小时)，导致刚添加的列查询不到
+            // 使用CacheProxy.clear()清除缓存，强制重新从数据库查询最新的表结构
+            try {
+                org.anyline.proxy.CacheProxy.clear();
+                log.debug("已清除Anyline元数据缓存");
+            } catch (Exception e) {
+                log.warn("清除Anyline元数据缓存失败: {}", e.getMessage());
+            }
 
             // 使用Anyline元数据API，完全跨数据库兼容
             // Anyline会自动处理不同数据库的元数据查询、标识符大小写问题
