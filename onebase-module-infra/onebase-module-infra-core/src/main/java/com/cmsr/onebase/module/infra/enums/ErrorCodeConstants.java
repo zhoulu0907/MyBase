@@ -48,6 +48,7 @@ public interface ErrorCodeConstants {
     ErrorCode WEAK_PASSWORD_LOGIC_SEQUENTIAL = new ErrorCode(1_001_005_010, "密码包含逻辑连续字符");
     ErrorCode WEAK_PASSWORD_SAME_CHAR_SEQUENTIAL = new ErrorCode(1_001_005_011, "密码包含连续相同字符");
     ErrorCode WEAK_PASSWORD_TENANT_EMPTY = new ErrorCode(1_001_005_012, "无法获取租户ID信息");
+    ErrorCode PASSWORD_IN_HISTORY = new ErrorCode(1_001_005_013, "新密码不能与最近{}次历史密码相同");
 
     // ========== 文件配置 1-001-006-000 ==========
     ErrorCode FILE_CONFIG_NOT_EXISTS = new ErrorCode(1_001_006_000, "文件配置不存在");
