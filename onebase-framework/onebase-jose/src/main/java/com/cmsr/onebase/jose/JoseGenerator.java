@@ -4,53 +4,47 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.crypto.RSAEncrypter;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.IOUtils;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.UUID;
 
 public class JoseGenerator {
-    private static final String PUBLIC_KEY_PEM = "/onebase_pub.pem";
 
-    public static String generateToken(int expireSeconds) throws Exception {
+    private static final String PUBLIC_KEY_PEM = "/public-key.json";
 
-        try (InputStream resourceInputStream = JoseGenerator.class.getResourceAsStream(PUBLIC_KEY_PEM);
-             InputStreamReader inputStreamReader = new InputStreamReader(resourceInputStream)
-        ) {
-            PEMParser pemParser = new PEMParser(inputStreamReader);
-            SubjectPublicKeyInfo publicKeyInfo = (SubjectPublicKeyInfo) pemParser.readObject();
+    private static int expireSeconds = 30;
 
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-            RSAPublicKey publicKey = (RSAPublicKey) converter.getPublicKey(publicKeyInfo);
+    public static String generateToken() throws Exception {
+        try (InputStream resourceInputStream = JoseGenerator.class.getResourceAsStream(PUBLIC_KEY_PEM)) {
+            String json = IOUtils.readInputStreamToString(resourceInputStream);
+            RSAKey rsaJWK = RSAKey.parse(json);
+            RSAKey publicKey = rsaJWK.toPublicJWK();
 
-            JWTClaimsSet.Builder claimSetBuilder = new JWTClaimsSet.Builder();
-            claimSetBuilder.issuer("onebase");
-            claimSetBuilder.subject("onebase");
-
-            claimSetBuilder.expirationTime(new Date(new Date().getTime() + 1000L * expireSeconds));
-            claimSetBuilder.notBeforeTime(new Date());
-            claimSetBuilder.jwtID(UUID.randomUUID().toString());
-            //
             JWEHeader jweHeader = new JWEHeader(JWEAlgorithm.RSA_OAEP_512, EncryptionMethod.A192CBC_HS384);
-            EncryptedJWT jwt = new EncryptedJWT(jweHeader, claimSetBuilder.build());
 
+            Date now = new Date();
+            JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
+                    .issuer("OneBase")
+                    .subject("OneBase")
+                    .expirationTime(new Date(now.getTime() + 1000L * expireSeconds))
+                    .notBeforeTime(now)
+                    .jwtID(UUID.randomUUID().toString())
+                    .build();
+            //
+            EncryptedJWT jwt = new EncryptedJWT(jweHeader, claimSet);
             RSAEncrypter rsaEncrypter = new RSAEncrypter(publicKey);
             jwt.encrypt(rsaEncrypter);
-
             return jwt.serialize();
         }
     }
 
     public static void main(String[] args) throws Exception {
-        String token = generateToken(30);
-
+        String token = generateToken();
         System.out.println("${setValue(accessToken=" + token + ")}");
     }
 }
