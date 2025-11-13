@@ -45,3 +45,14 @@ export enum VALIDATION_TYPE {
   // 不包含
   NOT_CONTAINS = 'NOT_CONTAINS'
 }
+
+export const OPERATOR_MAP: Record<string, string> = {
+  [VALIDATION_TYPE.EQUALS]: '==',
+  [VALIDATION_TYPE.NOT_EQUALS]: '!=',
+  [VALIDATION_TYPE.GREATER_THAN]: '>',
+  [VALIDATION_TYPE.GREATER_EQUALS]: '>=',
+  [VALIDATION_TYPE.LESS_THAN]: '<',
+  [VALIDATION_TYPE.LESS_EQUALS]: '<=',
+  [VALIDATION_TYPE.IS_EMPTY]: 'is empty',
+  [VALIDATION_TYPE.IS_NOT_EMPTY]: 'is not empty'
+};

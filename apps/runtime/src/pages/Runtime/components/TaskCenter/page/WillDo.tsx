@@ -1,5 +1,5 @@
 import { useState, type FC, useEffect } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Link } from '@arco-design/web-react';
+import { Table, type TableColumnProps, Button, Tag, Pagination, Message } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import BatchApproveModal from '../modal/batchApprove';
@@ -8,21 +8,21 @@ import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
 import dayjs from 'dayjs';
 import '../style/tcPage.less';
 
- const getTimeAgo = (time: number) => {
-   const now = Date.now();
-   const diff = now - time;
-   const minutes = Math.floor(diff / 60000);
-   const hours = Math.floor(minutes / 60);
-   const days = Math.floor(hours / 24);
-   if (days > 0) return `${days}天前`;
-   if (hours > 0) return `${hours}小时前`;
-   if (minutes > 0) return `${minutes}分钟前`;
-   return '刚刚';
- };
+const getTimeAgo = (time: number) => {
+  const now = Date.now();
+  const diff = now - time;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  if (days > 0) return `${days}天前`;
+  if (hours > 0) return `${hours}小时前`;
+  if (minutes > 0) return `${minutes}分钟前`;
+  return '刚刚';
+};
 
- interface WillDoProps {
-   appId: string;
- }
+interface WillDoProps {
+  appId: string;
+}
 const WillDo: FC<WillDoProps> = ({ appId }) => {
   const columns: TableColumnProps[] = [
     {
@@ -93,7 +93,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       render: (_: any, record: any) => (
         <Button
           type="text"
-          status="success"
           onClick={() => {
             handleDetailPage(record);
           }}
@@ -103,13 +102,21 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       )
     }
   ];
-  let [tbRowSelection, setTbRowSelection] = useState<any>();
+  const [tbRowSelection, setTbRowSelection] = useState<any>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<any>();
   const [data, setData] = useState<any>();
   const [rowData, setRowData] = useState();
   const [taskId, setTaskId] = useState('');
-  let [detailPopVisible, setPopVisible] = useState(false);
-  let [approveVisible, setApproveVisible] = useState(false);
+  const [detailPopVisible, setPopVisible] = useState(false);
+  const [approveVisible, setApproveVisible] = useState(false);
+  const [pagination, setPagination] = useState<any>({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  });
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState<any>({});
+  const defaultPageNo = 1;
 
   function handleBatchClick(hasRowCheck: boolean) {
     console.log('batch click!', hasRowCheck);
@@ -135,39 +142,57 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
     setPopVisible(true);
     setRowData(row);
   }
-
-  const fetchFormData = async () => {
-    const req = {
-      appId
-      //   pageNo: 1,
-      //   pageSize: 10,
-      //   processTitle: '',
-      //   initiator: 'admin',
-      //   formSummary: '',
-      //   sortType: '',
-      //   submitTimeStart: '',
-      //   submitTimeEnd: ''
-    };
-    const res = await getTodoPageList(req);
-    if (Array.isArray(res?.list)) {
-      setData(
-        res.list.map((item: object, i: number) => {
-          return {
-            ...(item || {}),
-            key: i
-          };
-        })
-      );
+  const fetchFormData = async (currentParams = filters, currentPage = 1, currentPageSize = pagination.pageSize) => {
+    setLoading(true);
+    try {
+      const queryParams = {
+        ...currentParams,
+        pageNo: currentPage,
+        pageSize: currentPageSize,
+        appId
+      };
+      const res = await getTodoPageList(queryParams);
+      if (Array.isArray(res?.list)) {
+        setData(
+          res.list.map((item: object, i: number) => {
+            return {
+              ...(item || {}),
+              key: i
+            };
+          })
+        );
+      }
+      setPagination({
+        current: currentPage,
+        pageSize: currentPageSize,
+        total: res.total || 0
+      });
+      setFilters(currentParams);
+    } catch (error) {
+      Message.error('加载失败');
+    } finally {
+      setLoading(false);
     }
   };
 
   const onBack = () => {
     setPopVisible(false);
-    fetchFormData();
+    fetchFormData(filters, defaultPageNo);
+  };
+
+  const handleSearch = (newFilters: any) => {
+    fetchFormData(newFilters, defaultPageNo);
+  };
+  const handleReset = () => {
+    fetchFormData({}, defaultPageNo);
+  };
+
+  const handlePageChange = (current: number, pageSize: number) => {
+    fetchFormData(filters, current, pageSize);
   };
 
   useEffect(() => {
-    fetchFormData();
+    fetchFormData({}, defaultPageNo);
   }, []);
 
   return (
@@ -177,6 +202,8 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
         <TableSearch
           uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: true }}
           batchEvent={handleBatchClick}
+          onReset={handleReset}
+          onFilterChange={handleSearch}
         />
       </div>
       {tbRowSelection && (
@@ -195,7 +222,23 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
           </div>
         </div>
       )}
-      <Table className="task-tb-box" rowSelection={tbRowSelection} columns={columns} data={data} />
+      <Table
+        className="task-tb-box"
+        loading={loading}
+        rowSelection={tbRowSelection}
+        columns={columns}
+        data={data}
+        pagination={false}
+      />
+      <Pagination
+        current={pagination.current}
+        pageSize={pagination.pageSize}
+        total={pagination.total}
+        onChange={handlePageChange}
+        showTotal={(total: any) => `共 ${total} 项数据`}
+        showJumper
+        sizeCanChange
+      />
       {detailPopVisible && (
         <DetailPop
           detailPopVisible={detailPopVisible}

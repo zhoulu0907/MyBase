@@ -52,6 +52,13 @@ export interface GetMyCreatePageListReq {
   submitTimeEnd?: string;
   flowStatus?:string;
 }
+export interface GetPageSetListReq {
+  applicationId: string;
+  pageSetType?: string;
+}
+export interface GetListNodesReq {
+  businessId: string;
+}
 
 export enum FLOWSTATUS_TYPE {
   IN_APPROVAL = 'in_approval',

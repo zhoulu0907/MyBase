@@ -1,11 +1,10 @@
 import { Button, Divider, Dropdown, Form, Grid, Input, Menu, Modal, Select, Switch, Tag } from '@arco-design/web-react';
 import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
-import { FieldType, VALIDATION_TYPE } from '@onebase/app';
+import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app';
 import { useFormEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { InteractionActionType } from './action';
 import styles from './index.module.less';
 import { getOperatorOptions } from './ruleMap';
 

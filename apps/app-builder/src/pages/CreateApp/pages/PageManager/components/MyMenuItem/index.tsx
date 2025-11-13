@@ -10,8 +10,9 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { menuIconList } from '@/components/MenuIcon/const';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import { getPageSetId, menuSignal, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
+import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -71,6 +72,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   useSignals();
   const navigate = useNavigate();
   const { curMenu } = menuSignal;
+  const { curPage } = pagesRuntimeSignal;
 
   const [popupVisible, setPopupVisible] = useState(false);
 
@@ -197,8 +199,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       return;
     }
 
+    const editorType =
+      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: menuID, name: menuName, icon: menuIcon }));
-    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
   };
 
   return (
