@@ -126,7 +126,6 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      */
     public List<AdminUserDO> findAllByStatus(Integer status, String userNickName) {
         DefaultConfigStore configStore = getCorpConfigStore();
-        ;
         if (userNickName != null) {
             configStore.like(AdminUserDO.NICKNAME, userNickName);
         }
@@ -160,8 +159,6 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      */
     public PageResult<AdminUserDO> findPage(UserPageReqVO reqVO, Collection<Long> deptIds, Collection<Long> includeRoleUserIds, Collection<Long> excludeRoleUserIds) {
         DefaultConfigStore configStore = getCorpConfigStore();
-        ;
-
         // 根据关键词模糊查询
         if (reqVO.getKeyword() != null && !reqVO.getKeyword().trim().isEmpty()) {
             configStore.and(new DefaultConfigStore()
@@ -229,7 +226,6 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      */
     public PageResult<AdminUserDO> findSimpleEnablePage(UserSimplePageReqVO reqVO) {
         DefaultConfigStore configStore = getCorpConfigStore();
-        ;
         configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
 
         // 根据关键词模糊查询
@@ -245,8 +241,6 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
         DefaultConfigStore configStore = getCorpConfigStore();
-        ;
-
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)

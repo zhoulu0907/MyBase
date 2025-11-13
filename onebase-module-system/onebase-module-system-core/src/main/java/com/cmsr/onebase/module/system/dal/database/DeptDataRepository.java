@@ -52,7 +52,6 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      */
     public DeptDO findOneByParentIdAndName(Long parentId, String name) {
         DefaultConfigStore configs = getCorpConfigStore();
-        ;
         configs.and(Compare.EQUAL, DeptDO.PARENT_ID, parentId);
         configs.and(Compare.EQUAL, DeptDO.NAME, name);
         return findOne(configs);
@@ -66,7 +65,6 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      */
     public DeptDO findOneByName(String name) {
         DefaultConfigStore configs = getCorpConfigStore();
-        ;
         configs.and(Compare.EQUAL, DeptDO.NAME, name);
         return findOne(configs);
     }
@@ -79,7 +77,6 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      */
     public List<DeptDO> findAllByLeaderUserId(Long leaderUserId) {
         DefaultConfigStore configs = getCorpConfigStore();
-        ;
         configs.and(Compare.EQUAL, DeptDO.LEADER_USER_ID, leaderUserId);
         return findAllByConfig(configs);
     }
@@ -92,7 +89,6 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      */
     public List<DeptDO> findAllByParentIds(Collection<Long> parentIds) {
         DefaultConfigStore configs = getCorpConfigStore();
-        ;
         configs.and(Compare.IN, DeptDO.PARENT_ID, parentIds);
         return findAllByConfig(configs);
     }

@@ -70,7 +70,6 @@ public class AppApplicationController {
     }
 
     @PostMapping("/update-app-time")
-    @PermitAll
     @Operation(summary = "更新应用编辑时间")
     public CommonResult<Boolean> updateAppTimeById(@RequestParam("appId") Long appId) {
         appApplicationService.updateAppTimeById(appId);
