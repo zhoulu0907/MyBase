@@ -93,7 +93,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       render: (_: any, record: any) => (
         <Button
           type="text"
-          status="success"
           onClick={() => {
             handleDetailPage(record);
           }}
