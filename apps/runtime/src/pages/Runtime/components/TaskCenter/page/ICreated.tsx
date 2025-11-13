@@ -85,7 +85,6 @@ const ICreated: FC = ({ appId }: any) => {
       render: (_: any, record: any) => (
         <Button
           type="text"
-          status="success"
           onClick={() => {
             handleDetailPage(record);
           }}
