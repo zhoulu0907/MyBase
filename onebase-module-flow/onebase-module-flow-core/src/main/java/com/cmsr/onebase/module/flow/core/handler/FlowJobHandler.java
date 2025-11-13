@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowJobStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
+import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
 import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
@@ -117,9 +118,12 @@ public class FlowJobHandler {
         JsonGraph jsonGraph = FlowGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartTimeNodeData startTimeNodeData = (StartTimeNodeData) jsonGraph.getStartNode().getData();
         JobCreateRequest jobCreateRequest = consumerSettingParams(startTimeNodeData);
-        jobCreateRequest.setApplicationId(flowProcessDO.getApplicationId());
-        jobCreateRequest.setProcessId(flowProcessDO.getId());
-        jobCreateRequest.setProcessName(flowProcessDO.getProcessName());
+        RemoteCallRequest remoteCallRequest = new RemoteCallRequest();
+        remoteCallRequest.setJobType(RemoteCallRequest.JOB_TYPE_TIME);
+        remoteCallRequest.setApplicationId(flowProcessDO.getApplicationId());
+        remoteCallRequest.setProcessId(flowProcessDO.getId());
+        remoteCallRequest.setProcessName(flowProcessDO.getProcessName());
+        jobCreateRequest.setRemoteCallRequest(remoteCallRequest);
         String jobId = jobClient.startJob(jobCreateRequest);
         if (flowProcessTimeDO == null) {
             flowProcessTimeDO = new FlowProcessTimeDO();
@@ -153,9 +157,12 @@ public class FlowJobHandler {
         JsonGraph jsonGraph = FlowGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartDateFieldNodeData startDateFieldNodeData = (StartDateFieldNodeData) jsonGraph.getStartNode().getData();
         JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
-        jobCreateRequest.setApplicationId(flowProcessDO.getApplicationId());
-        jobCreateRequest.setProcessId(flowProcessDO.getId());
-        jobCreateRequest.setProcessName(flowProcessDO.getProcessName());
+        RemoteCallRequest remoteCallRequest = new RemoteCallRequest();
+        remoteCallRequest.setJobType(RemoteCallRequest.JOB_TYPE_FIELD);
+        remoteCallRequest.setApplicationId(flowProcessDO.getApplicationId());
+        remoteCallRequest.setProcessId(flowProcessDO.getId());
+        remoteCallRequest.setProcessName(flowProcessDO.getProcessName());
+        jobCreateRequest.setRemoteCallRequest(remoteCallRequest);
         String jobId = jobClient.startJob(jobCreateRequest);
         if (flowProcessDateFieldDO == null) {
             flowProcessDateFieldDO = new FlowProcessDateFieldDO();

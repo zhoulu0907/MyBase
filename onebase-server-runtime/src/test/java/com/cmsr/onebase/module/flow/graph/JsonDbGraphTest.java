@@ -1,8 +1,10 @@
-package com.cmsr.onebase.module.flow.core.graph;
+package com.cmsr.onebase.module.flow.graph;
 
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
+import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +27,12 @@ public class JsonDbGraphTest {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
         String json = flowProcessDO.getProcessDefinition();
         JsonGraph jsonGraph = FlowGraphBuilder.build(json);
-        System.out.println(jsonGraph.toFlowChain());
+        String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
+        System.out.println(flowChain);
     }
 
     @Test
     public void testSimple() throws IOException {
-        testToFlowChain(46713060766187520L);
+        testToFlowChain(114994365031546880L);
     }
 }
