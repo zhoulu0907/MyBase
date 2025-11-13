@@ -50,10 +50,10 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.chosen)?.value}
+        initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.isChosen)?.value}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{defaultOptionsConfig?.defaultOptions?.find((op) => op.chosen)?.label || '--'}</div>
+          <div>{defaultOptionsConfig?.defaultOptions?.find((op) => op.isChosen)?.label || '--'}</div>
         ) : (
           <Select
             placeholder="请选择"

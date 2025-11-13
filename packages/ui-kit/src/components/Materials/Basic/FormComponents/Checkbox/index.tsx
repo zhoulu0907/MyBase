@@ -45,7 +45,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.chosen)?.map(ele => ele.value) || []}
+        initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value) || []}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap>

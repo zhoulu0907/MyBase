@@ -55,7 +55,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
     const value = configs.dataField;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
-    const isSubEntity = subEntities.entities?.find((ele:any) => value?.includes(ele.entityId));
+    const isSubEntity = subEntities.entities?.find((ele: any) => value?.includes(ele.entityId));
     const currentSubField = isSubEntity?.fields.find((ele: any) => value.includes(ele.fieldId));
     if (isMainEntity && currentMainField) {
       // 主表
@@ -71,7 +71,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
               dictTypeId: currentMainField.dictTypeId,
               colorMode: true,
               colorModeType: COLOR_MODE_TYPES.POINT,
-              defaultOptions: dictOptions
+              defaultOptions: dictOptions.map((e: any) => ({ ...e, isChosen: false }))
             };
             handlePropsChange(radioKey, newDefaultOptionsConfig);
           }
@@ -79,7 +79,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
           setTypeDisabled(true);
         }
       } else if (currentMainField.options?.length) {
-        const newOptions = currentMainField.options?.map((e:any) => ({
+        const newOptions = currentMainField.options?.map((e: any) => ({
           label: e.optionLabel,
           value: e.optionValue
         }));
@@ -111,7 +111,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
           setTypeDisabled(true);
         }
       } else if (currentSubField.options?.length) {
-        const newOptions = currentSubField.options?.map((e:any) => ({
+        const newOptions = currentSubField.options?.map((e: any) => ({
           label: e.optionLabel,
           value: e.optionValue
         }));
@@ -210,7 +210,11 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
                 }}
               >
                 {configs[radioKey].defaultOptions?.map((_col: any, idx: number) => (
-                  <Tooltip key={idx} content={typeDisabled ? '如需修改请前往数据建模':'如需修改请前往数据字典'} disabled={!selectDisabled}>
+                  <Tooltip
+                    key={idx}
+                    content={typeDisabled ? '如需修改请前往数据建模' : '如需修改请前往数据字典'}
+                    disabled={!selectDisabled}
+                  >
                     <div className={styles.tableColumnItem}>
                       <Space>
                         <IconDragDotVertical
@@ -222,13 +226,13 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
                           }}
                         />
                         <Radio
-                          checked={configs[radioKey].defaultOptions[idx].chosen || false}
+                          checked={configs[radioKey].defaultOptions[idx].isChosen || false}
                           onChange={(e) => {
                             let newList = [...configs[radioKey].defaultOptions];
-                            newList = newList.map((item) => ({ ...item, chosen: false }));
+                            newList = newList.map((item) => ({ ...item, isChosen: false }));
                             newList[idx] = {
                               ...newList[idx],
-                              chosen: true
+                              isChosen: true
                             };
                             const newConfig = { ...configs[radioKey], defaultOptions: newList };
                             handlePropsChange(radioKey, newConfig);

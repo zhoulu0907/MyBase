@@ -38,10 +38,10 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.chosen)?.value}
+        initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.isChosen)?.value}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div>{defaultOptionsConfig?.defaultOptions?.find((op) => op.chosen)?.label || '--'}</div>
+          <div>{defaultOptionsConfig?.defaultOptions?.find((op) => op.isChosen)?.label || '--'}</div>
         ) : (
           <RadioGroup
             direction={direction}

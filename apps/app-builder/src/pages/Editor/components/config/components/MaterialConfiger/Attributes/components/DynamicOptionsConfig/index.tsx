@@ -30,10 +30,9 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
       setSelectDisabled(false);
       getDefaultOptions();
     }
-  }, [configs]);
+  }, []);
 
   const getDefaultOptions = async () => {
-    console.log('configs[selectKey]', configs[selectKey]);
     const value = configs.dataField;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
@@ -53,11 +52,11 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
             defaultOptions: dictOptions.map((e: any) => {
               if (configs[selectKey].defaultOptions?.length) {
                 const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
-                if (oldOption && oldOption.chosen) {
-                  return { ...e, chosen: true };
+                if (oldOption && oldOption.isChosen) {
+                  return { ...e, isChosen: true };
                 }
               }
-              return { ...e };
+              return { ...e, isChosen: false };
             })
           };
           handlePropsChange(selectKey, newDefaultOptionsConfig);
@@ -67,13 +66,14 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
         const newOptions = currentMainField.options?.map((e: any) => {
           if (configs[selectKey].defaultOptions?.length) {
             const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
-            if (oldOption && oldOption.chosen) {
-              return { label: e.optionLabel, value: e.optionValue, chosen: true };
+            if (oldOption && oldOption.isChosen) {
+              return { label: e.optionLabel, value: e.optionValue, isChosen: true };
             }
           }
           return {
             label: e.optionLabel,
-            value: e.optionValue
+            value: e.optionValue,
+            isChosen: false
           };
         });
         handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions, disabled: true });
@@ -90,16 +90,33 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
             type: DEFAULT_OPTIONS_TYPE.DICT,
             disabled: true,
             dictTypeId: currentSubField.dictTypeId,
-            defaultOptions: dictOptions
+            defaultOptions: dictOptions.map((e: any) => {
+              if (configs[selectKey].defaultOptions?.length) {
+                const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
+                if (oldOption && oldOption.isChosen) {
+                  return { ...e, isChosen: true };
+                }
+              }
+              return { ...e, isChosen: false };
+            })
           };
           handlePropsChange(selectKey, newDefaultOptionsConfig);
           setSelectDisabled(true);
         }
       } else if (currentSubField.options?.length) {
-        const newOptions = currentSubField.options?.map((e: any) => ({
-          label: e.optionLabel,
-          value: e.optionValue
-        }));
+         const newOptions = currentSubField.options?.map((e: any) => {
+          if (configs[selectKey].defaultOptions?.length) {
+            const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
+            if (oldOption && oldOption.isChosen) {
+              return { label: e.optionLabel, value: e.optionValue, isChosen: true };
+            }
+          }
+          return {
+            label: e.optionLabel,
+            value: e.optionValue,
+            isChosen: false
+          };
+        });
         handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions, disabled: true });
         setSelectDisabled(true);
       }
@@ -204,15 +221,16 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                           }}
                         />
                         <Radio
-                          checked={configs[selectKey].defaultOptions[idx].chosen}
+                          checked={configs[selectKey].defaultOptions[idx].isChosen}
                           onChange={(e) => {
+                            console.log('变了');
                             let newList = [...configs[selectKey].defaultOptions].map((item) => ({
                               ...item,
-                              chosen: false
+                              isChosen: false
                             }));
                             newList[idx] = {
                               ...newList[idx],
-                              chosen: true
+                              isChosen: true
                             };
                             const newConfig = { ...configs[selectKey], defaultOptions: newList };
                             handlePropsChange(selectKey, newConfig);

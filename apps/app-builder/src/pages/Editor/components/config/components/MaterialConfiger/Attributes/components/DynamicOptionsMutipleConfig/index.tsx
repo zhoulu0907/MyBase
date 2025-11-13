@@ -214,12 +214,12 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
                         />
                         {/* SelectMutiple */}
                         <Checkbox
-                          checked={configs[selectKey].defaultOptions[idx].chosen || false}
+                          checked={configs[selectKey].defaultOptions[idx].isChosen || false}
                           onChange={(e) => {
                             let newList = [...configs[selectKey].defaultOptions];
                             newList[idx] = {
                               ...newList[idx],
-                              chosen: e
+                              isChosen: e
                             };
                             const newConfig = { ...configs[selectKey], defaultOptions: newList };
                             handlePropsChange(selectKey, newConfig);

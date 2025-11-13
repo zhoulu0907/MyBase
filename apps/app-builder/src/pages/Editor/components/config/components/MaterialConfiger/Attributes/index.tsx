@@ -106,7 +106,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     if (!cpID) {
       return;
     }
-    // console.debug('curComponentSchema------', curComponentSchema);
 
     setEditData(curComponentSchema.editData);
     setConfigs(curComponentSchema.config);
