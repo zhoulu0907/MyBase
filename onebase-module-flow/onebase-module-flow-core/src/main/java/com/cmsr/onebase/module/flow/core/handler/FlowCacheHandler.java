@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
+import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
@@ -83,7 +84,7 @@ public class FlowCacheHandler {
             log.error("流程定义错误：{}", processDO);
             return;
         }
-        String flowChain = jsonGraph.toFlowChain();
+        String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //

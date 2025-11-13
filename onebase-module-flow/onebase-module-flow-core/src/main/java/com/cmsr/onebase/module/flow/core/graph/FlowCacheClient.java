@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
-public class FlowVersionProvider {
+public class FlowCacheClient {
 
     @Setter
     @Autowired
@@ -45,7 +45,7 @@ public class FlowVersionProvider {
     @Autowired
     private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
 
-    public void onApplicationUpdate(Long applicationId) {
+    public void applicationUpdate(Long applicationId) {
         log.info("更新应用版本：{}", applicationId);
         List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
@@ -84,7 +84,7 @@ public class FlowVersionProvider {
         }
     }
 
-    public void onApplicationDelete(Long applicationId) {
+    public void applicationDelete(Long applicationId) {
         RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY);
         mapCache.put(applicationId, -1L, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
         RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);

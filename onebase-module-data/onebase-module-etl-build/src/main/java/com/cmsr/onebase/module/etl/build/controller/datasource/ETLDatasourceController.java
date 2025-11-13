@@ -3,11 +3,11 @@ package com.cmsr.onebase.module.etl.build.controller.datasource;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.datasource.ETLDatasourceService;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ColumnDefine;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.TestConnectionVO;
-import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
@@ -99,8 +99,8 @@ public class ETLDatasourceController {
 
     @PostMapping("/preview")
     @Operation(summary = "预览表数据")
-    public CommonResult<DataPreviewVO> previewTableData(@Validated @RequestBody TablePreviewVO tablePreviewVO) {
-        DataPreviewVO dataPreviewVO = etlDatasourceService.previewTable(tablePreviewVO);
-        return CommonResult.success(dataPreviewVO);
+    public CommonResult<DataPreview> previewTableData(@Validated @RequestBody TablePreviewVO tablePreviewVO) {
+        DataPreview dataPreview = etlDatasourceService.previewTable(tablePreviewVO);
+        return CommonResult.success(dataPreview);
     }
 }

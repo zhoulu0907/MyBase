@@ -22,7 +22,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowExecuteProvider {
+public class FlowRemoteCallExecutor {
 
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
@@ -30,13 +30,13 @@ public class FlowExecuteProvider {
     @Autowired
     private FlowProcessCache flowProcessCache;
 
-    public ExecutorResult executeFlow(ExecutorRequest jobMessage) {
+    public ExecutorResult executeFlow(RemoteCallRequest jobMessage) {
         ExecutorResult executorResult;
         try {
             Map<String, Object> inputParams;
-            if (ExecutorRequest.JOB_TYPE_FIELD.equals(jobMessage.getJobType())) {
+            if (RemoteCallRequest.JOB_TYPE_FIELD.equals(jobMessage.getJobType())) {
                 inputParams = createDateFieldInputParams(jobMessage);
-            } else if (ExecutorRequest.JOB_TYPE_TIME.equals(jobMessage.getJobType())) {
+            } else if (RemoteCallRequest.JOB_TYPE_TIME.equals(jobMessage.getJobType())) {
                 inputParams = createTimeInputParams(jobMessage);
             } else {
                 ExecutorResult result = ExecutorResult.error(jobMessage.getProcessId(), "未知的流程类型:" + jobMessage.getJobType());
@@ -54,7 +54,7 @@ public class FlowExecuteProvider {
         return executorResult;
     }
 
-    private Map<String, Object> createDateFieldInputParams(ExecutorRequest message) {
+    private Map<String, Object> createDateFieldInputParams(RemoteCallRequest message) {
         Long processId = message.getProcessId();
         StartDateFieldNodeData startDateFieldNodeData = flowProcessCache.findStartDateFieldNodeDataByProcessId(processId);
         if (startDateFieldNodeData == null) {
@@ -63,7 +63,7 @@ public class FlowExecuteProvider {
         return Collections.emptyMap();
     }
 
-    private Map<String, Object> createTimeInputParams(ExecutorRequest message) {
+    private Map<String, Object> createTimeInputParams(RemoteCallRequest message) {
         Long processId = message.getProcessId();
         StartTimeNodeData startTimeNodeData = flowProcessCache.findStartTimeNodeDataByProcessId(processId);
         if (startTimeNodeData == null) {
