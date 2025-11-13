@@ -318,12 +318,4 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     public List<ApplicationDO> getMySimpleAppListByName(String appName) {
         return applicationRepository.findMyAppApplicationByAppName(appName);
     }
-
-    @Override
-    public void updateAppTimeById(Long appId) {
-        // 更新修改日期 没有别的字段更新，不写不生效
-        DataRow row = new DataRow();
-        row.put(BaseDO.UPDATE_TIME,  LocalDateTime.now());
-        applicationRepository.updateByConfig(row, new DefaultConfigStore().eq(ApplicationDO.ID, appId));
-    }
 }

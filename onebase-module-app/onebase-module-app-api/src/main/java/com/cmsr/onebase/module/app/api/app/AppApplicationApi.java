@@ -17,4 +17,6 @@ public interface AppApplicationApi {
     List findAppApplicationByAppIds(Collection<Long> appIds);
 
     Map<Integer,Integer> findAppApplicationAll();
+
+    void  updateAppTimeById(Long appId);
 }

@@ -35,5 +35,4 @@ public interface AppApplicationService {
 
     List<ApplicationDO> getMySimpleAppListByName(String appName);
 
-    void updateAppTimeById(Long appId);
 }
