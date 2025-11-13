@@ -1,6 +1,6 @@
 import { Form, Radio, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES } from '../../../constants';
 import '../index.css';
@@ -21,6 +21,17 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     runtime = true
   } = props;
 
+  const { form } = Form.useFormContext();
+  const [fieldId, setFieldId] = useState('');
+
+  const fieldValue = Form.useWatch(fieldId, form);
+
+  useEffect(() => {
+    if (dataField.length > 0) {
+      setFieldId(dataField[dataField.length - 1]);
+    }
+  }, [dataField]);
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -28,7 +39,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`}
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
@@ -41,7 +52,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
         initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.isChosen)?.value}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div>{defaultOptionsConfig?.defaultOptions?.find((op) => op.isChosen)?.label || '--'}</div>
+          <div>{fieldValue && defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue)?.label || '--'}</div>
         ) : (
           <RadioGroup
             direction={direction}

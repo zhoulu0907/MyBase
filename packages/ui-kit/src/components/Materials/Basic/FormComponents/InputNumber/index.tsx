@@ -37,7 +37,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
   }, [dataField]);
 
   const detailValue = (value: number) => {
-    let result = '';
+    let result = (value || '').toString();
     if (showPercent) {
       value = value * 100;
     }
@@ -64,9 +64,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`
-        }
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}

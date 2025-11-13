@@ -33,11 +33,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -115,13 +115,13 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                       }
                     }}
                   />
-                  <IconDelete
+                  {!detailMode && <IconDelete
                     onClick={() => {
                       if (fileProps.onRemove) {
                         fileProps.onRemove(file);
                       }
                     }}
-                  />
+                  />}
                 </div>
               )}
             </div>
@@ -191,14 +191,14 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     <div className="uplaodList-card-item-size">
                       {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
                     </div>
-                    <IconDelete
+                    {!detailMode && <IconDelete
                       style={{ cursor: 'pointer' }}
                       onClick={() => {
                         if (fileProps.onRemove) {
                           fileProps.onRemove(file);
                         }
                       }}
-                    />
+                    />}
                   </div>
                 }
               />

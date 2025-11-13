@@ -38,9 +38,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`
-        }
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
@@ -53,7 +51,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
         initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.isChosen)?.value}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{defaultOptionsConfig?.defaultOptions?.find((op) => op.isChosen)?.label || '--'}</div>
+          <div>{ fieldValue && defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue)?.label || '--'}</div>
         ) : (
           <Select
             placeholder="请选择"

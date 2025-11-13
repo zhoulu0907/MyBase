@@ -94,20 +94,21 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
               </div>
             ) : (
               <div className="uplaodList-text-item-opera">
-                <IconDownload
+                {showDownload && <IconDownload
                   onClick={() => {
                     if (file.url && file.name) {
                       downloadFileByUrl(file.url, file.name);
                     }
                   }}
-                />
-                <IconDelete
+                />}
+
+                {!detailMode && <IconDelete
                   onClick={() => {
                     if (props.onRemove) {
                       props.onRemove(file);
                     }
                   }}
-                />
+                />}
               </div>
             )}
           </div>

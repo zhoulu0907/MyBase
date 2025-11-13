@@ -118,6 +118,25 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     }
   };
 
+  const renderTime = ()=>{
+    if(!fieldValue){
+      return '--'
+    }
+    switch (currentDateType) {
+      case DATE_VALUES[DATE_OPTIONS.YEAR]:
+        return <>{dayjs(fieldValue).format('YYYY')}</>;
+      case DATE_VALUES[DATE_OPTIONS.MONTH]:
+        return <>{dayjs(fieldValue).format('YYYY-MM')}</>;
+      case DATE_VALUES[DATE_OPTIONS.DATE]:
+        return <>{dayjs(fieldValue).format('YYYY-MM-DD')}</>;
+      case DATE_VALUES[DATE_OPTIONS.FULL]:
+        return <>{dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss')}</>;
+      default:
+        // 默认显示日期选择器
+        return <DatePicker style={{ width: '100%' }} format='YYYY-MM-DD' />;
+    }
+  }
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -139,7 +158,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
+          <div>{renderTime() || '--'}</div>
         ) : (
           renderDatePicker()
         )}
