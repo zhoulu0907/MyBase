@@ -27,6 +27,11 @@ import org.anyline.service.AnylineService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -185,6 +190,11 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                         log.debug("字段 {} 的JSON反序列化失败，保持原值: {}", fieldName, e.getMessage());
                         resultMap.put(fieldName, value);
                     }
+                } else if("DATETIME".equals(fieldType) && value instanceof Timestamp timestamp){
+                    Instant instant = timestamp.toInstant();
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+                    String timeStr = dateTimeFormatter.format(instant);
+                    resultMap.put(fieldName, timeStr);
                 } else {
                     resultMap.put(fieldName, value);
                 }

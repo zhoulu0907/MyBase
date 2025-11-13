@@ -121,7 +121,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
         // 查询要撤销的代理记录
-        BpmFlowAgentDO agent = bpmFlowAgentRepository.findById(reqVO.getAgentId());
+        BpmFlowAgentDO agent = bpmFlowAgentRepository.findById(reqVO.getId());
         if (agent == null) {
             throw exception(ErrorCodeConstants.AGENT_NOT_EXISTS);
         }
