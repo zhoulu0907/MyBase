@@ -2040,6 +2040,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             Map<Long, MetadataEntityFieldOptionDO> existingOptionsMap = existingOptions.stream()
                 .collect(java.util.stream.Collectors.toMap(MetadataEntityFieldOptionDO::getId, o -> o, (a, b) -> a));
             
+            // 创建 optionValue -> option 的映射，用于查找重复选项
+            Map<String, MetadataEntityFieldOptionDO> existingOptionsByValue = existingOptions.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                    MetadataEntityFieldOptionDO::getOptionValue, 
+                    o -> o, 
+                    (a, b) -> a // 如果有重复值，保留第一个
+                ));
+            
             // 用于标记已处理的选项ID
             Set<Long> processedOptionIds = new java.util.HashSet<>();
             
@@ -2069,16 +2077,37 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     }
                 }
                 
-                // 新增选项
-                MetadataEntityFieldOptionDO d = new MetadataEntityFieldOptionDO();
-                d.setFieldId(fieldId);
-                d.setOptionLabel(opt.getOptionLabel());
-                d.setOptionValue(opt.getOptionValue());
-                d.setOptionOrder(opt.getOptionOrder());
-                d.setIsEnabled(opt.getIsEnabled());
-                d.setDescription(opt.getDescription());
-                d.setAppId(entityField.getAppId());
-                fieldOptionService.create(d);
+                // 智能处理：检查是否已存在相同 optionValue 的选项
+                // 如果存在，则更新该选项；否则新增
+                MetadataEntityFieldOptionDO existingByValue = existingOptionsByValue.get(opt.getOptionValue());
+                if (existingByValue != null) {
+                    // 找到相同 optionValue 的选项，更新它
+                    log.info("发现已存在相同值的选项，自动转换为更新操作: fieldId={}, optionValue={}, existingId={}", 
+                             fieldId, opt.getOptionValue(), existingByValue.getId());
+                    MetadataEntityFieldOptionDO updateObj = new MetadataEntityFieldOptionDO();
+                    updateObj.setId(existingByValue.getId());
+                    updateObj.setFieldId(fieldId);
+                    updateObj.setOptionLabel(opt.getOptionLabel());
+                    updateObj.setOptionValue(opt.getOptionValue());
+                    updateObj.setOptionOrder(opt.getOptionOrder());
+                    updateObj.setIsEnabled(opt.getIsEnabled());
+                    updateObj.setDescription(opt.getDescription());
+                    updateObj.setAppId(entityField.getAppId());
+                    fieldOptionService.update(updateObj);
+                    processedOptionIds.add(existingByValue.getId());
+                } else {
+                    // 确实是新选项，新增
+                    MetadataEntityFieldOptionDO d = new MetadataEntityFieldOptionDO();
+                    d.setFieldId(fieldId);
+                    d.setOptionLabel(opt.getOptionLabel());
+                    d.setOptionValue(opt.getOptionValue());
+                    d.setOptionOrder(opt.getOptionOrder());
+                    d.setIsEnabled(opt.getIsEnabled());
+                    d.setDescription(opt.getDescription());
+                    d.setAppId(entityField.getAppId());
+                    fieldOptionService.create(d);
+                    log.debug("新增字段选项: fieldId={}, optionValue={}", fieldId, opt.getOptionValue());
+                }
             }
             
             // 删除未在请求中出现的旧选项
