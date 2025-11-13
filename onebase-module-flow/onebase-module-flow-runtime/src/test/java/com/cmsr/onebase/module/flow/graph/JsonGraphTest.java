@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.graph;
 
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -20,7 +21,8 @@ class JsonGraphTest {
         String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
         JsonGraph jsonGraph = FlowGraphBuilder.build(json);
-        System.out.println(jsonGraph.toFlowChain());
+        String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
+        System.out.println(flowChain);
     }
 
     @Test
