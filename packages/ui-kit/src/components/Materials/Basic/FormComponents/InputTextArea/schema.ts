@@ -3,7 +3,7 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  labelColSpanConfig,
+  defaultValueConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
@@ -45,7 +45,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  IDefaultValueConfigType
 } from '../../../types';
 
 export interface XInputTextAreaSchema {
@@ -71,6 +72,7 @@ export type TXInputTextAreaEditData = Array<
   | IDataFieldConfigType
   | ISecurityConfigType
   | IVerifyConfigType
+  | IDefaultValueConfigType
 >;
 
 export interface XInputTextAreaConfig extends ICommonBaseType {
@@ -109,6 +111,7 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
    * 默认值
    */
   defaultValue?: TTextDefaultType;
+  defaultValueConfig?: any;
 
   /**
    * 字段宽度
@@ -169,6 +172,7 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
 
   /**
    * 多行文本最小高度
+   * 多行文本展示行数
    */
   minRows?: TNumberDefaultType;
 
@@ -196,21 +200,24 @@ const XInputTextArea: XInputTextAreaSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'placeholder',
-      name: '占位符',
+      name: '占位提示',
       type: CONFIG_TYPES.PLACEHOLDER_INPUT
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
+    //  数据绑定
+    ...dataFieldConfig,
+    // 默认值
+    defaultValueConfig,
     {
-      key: 'defaultValue',
-      name: '默认值',
-      type: CONFIG_TYPES.TEXT_INPUT
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
     },
     {
       key: 'minLength',
@@ -224,43 +231,21 @@ const XInputTextArea: XInputTextAreaSchema = {
     },
     {
       key: 'minRows',
-      name: '多行文本最小高度',
+      name: '文本展示行数',
       type: CONFIG_TYPES.NUMBER_INPUT
     },
-    {
-      key: 'maxRows',
-      name: '多行文本最大高度',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    layoutConfig,
-    labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'color',
-      name: '文本颜色',
-      type: CONFIG_TYPES.COLOR
-    },
-    {
-      key: 'bgColor',
-      name: '背景颜色',
-      type: CONFIG_TYPES.COLOR
-    },
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    // 显示状态
     statusConfig,
+    // 对齐方式
     alignConfig,
+    // 布局方式
+    layoutConfig,
     {
       key: 'security',
       name: '安全',
       type: CONFIG_TYPES.SECURITY
     },
+    // 字段宽度
     widthConfig
   ],
   config: {
@@ -276,6 +261,7 @@ const XInputTextArea: XInputTextAreaSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
+    defaultValueConfig:{},
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,

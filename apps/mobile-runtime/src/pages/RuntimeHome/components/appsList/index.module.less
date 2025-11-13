@@ -3,63 +3,66 @@
   background-color: #fff;
   margin: 0 0.12rem;
   border-radius: 0.06rem;
-    .label {
-      font-size: 0.16rem;
-      line-height: 0.24rem;
-      font-weight: bold;
-      color: #272E3B;
-      margin-bottom: 0.12rem;
+  margin-bottom: 0.12rem;
+
+  .label {
+    font-size: 0.16rem;
+    line-height: 0.24rem;
+    font-weight: bold;
+    color: #272e3b;
+    margin-bottom: 0.12rem;
+  }
+  .treeItem {
+    font-size: 0.16rem;
+    line-height: 0.56rem;
+    color: #1d2129;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0; // #F2F3F5;
+    height: 0.56rem;
+    :global {
+      .arco-ellipsis {
+        font-size: 0.16rem;
+      }
     }
-    .treeItem {
-      font-size: 0.16rem;
-      line-height: 0.56rem;
-      color: #1D2129;
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid #e0e0e0;// #F2F3F5;
-      height: 0.56rem;
-      :global {
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  .treeItemIcon {
+    height: 0.24rem;
+    width: 0.24rem;
+    margin-right: 0.08rem;
+  }
+  .treeItemGroupHeader {
+    display: flex;
+    align-items: center;
+  }
+  .treeItemGroup {
+    // border-bottom: 1px solid #e0e0e0;// #F2F3F5;
+    :global {
+      .arco-collapse-header {
+        height: 0.56rem;
+        line-height: 0.56rem;
+        margin-left: 0;
+        padding: 0;
+        color: #1d2129;
+        font-size: 0.16rem;
+        border-bottom: 1px solid #e0e0e0; // #F2F3F5;
         .arco-ellipsis {
           font-size: 0.16rem;
         }
       }
-      &:last-child {
-        border-bottom: none;
+      .arco-collapse-icon svg,
+      .arco-collapse-icon i {
+        height: 0.12rem;
+        width: 0.12rem;
+      }
+      .arco-collapse-content-container {
+        padding: 0;
       }
     }
-    .treeItemIcon {
-        height: 0.24rem;
-        width: 0.24rem;
-        margin-right: 0.08rem;
-    }
-    .treeItemGroupHeader {
-      display: flex;
-      align-items: center;
-    }
-    .treeItemGroup {
-      // border-bottom: 1px solid #e0e0e0;// #F2F3F5;
-      :global {
-        .arco-collapse-header {
-          height: 0.56rem;
-          line-height: 0.56rem;
-          margin-left: 0;
-          padding: 0;
-          color: #1D2129;
-          font-size: 0.16rem;
-          border-bottom: 1px solid #e0e0e0;// #F2F3F5;
-          .arco-ellipsis {
-            font-size: 0.16rem;
-          }
-        }
-        .arco-collapse-icon svg, .arco-collapse-icon i {
-          height: 0.12rem;
-          width: 0.12rem;
-        }
-        .arco-collapse-content-container {
-          padding: 0;
-        }
-      }
-    }
+  }
 }
 .ineedtodo-icon {
   background: url(@/assets/images/task_center/willdo-on.svg) no-repeat center;
@@ -68,4 +71,40 @@
 .ihavedone-icon {
   background: url(@/assets/images/task_center/idone-on.svg) no-repeat center;
   background-size: 100% 100%;
+}
+
+.gridLayout {
+  :global(.arco-grid-rows-item-text) {
+    margin-top: 0.04rem;
+  }
+}
+
+.tabs {
+  :global(.arco-tab-cell-container-wrap.vertical) {
+    height: 0.42rem;
+    margin-bottom: 0.16rem;
+  }
+
+  :global(.arco-tab-cell.vertical:not(.custom).line:not(.last)) {
+    color: #4e5969;
+    margin-right: 0.16rem;
+  }
+
+  :global(.arco-tab-cell.vertical:not(.custom).line.active) {
+    color: rgb(var(--primary-6));
+    margin-right: 0.16rem;
+  }
+
+  :global(.arco-tab-cell-underline-inner) {
+    background-color: rgb(var(--primary-6));
+  }
+
+  :global(.arco-tab-cell) {
+    color: rgb(var(--parmary-6));
+    text-align: center;
+    font-family: PingFang SC;
+    font-size: 0.16rem;
+    font-style: normal;
+    font-weight: 500;
+  }
 }

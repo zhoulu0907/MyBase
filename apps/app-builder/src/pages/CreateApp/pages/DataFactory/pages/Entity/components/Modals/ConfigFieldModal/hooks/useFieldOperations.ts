@@ -43,7 +43,7 @@ export const useFieldOperations = (
 
   // 删除字段
   const deleteField = useCallback(
-    (id: string) => {
+    (id: string, onDelete?: (id: string) => void) => {
       // 通过 getCurrentTableData 获取最新的列表数据
       const customFields = getCurrentTableData();
       const field = customFields.find((f) => f.id === id);
@@ -63,6 +63,9 @@ export const useFieldOperations = (
       }
 
       setFields(newFields);
+
+      // 通知删除回调，用于关闭相关的 popover
+      onDelete?.(id);
     },
     [getCurrentTableData, setFields]
   );

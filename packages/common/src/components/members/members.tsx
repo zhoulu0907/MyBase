@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Button, Modal, Input, Space, List, Breadcrumb, Avatar, Typography, Spin } from '@arco-design/web-react';
-import { IconRight, IconClose } from '@arco-design/web-react/icon';
-import { formatDeptAndUsers } from './const';
+import { useState } from 'react';
+import { Button, Modal, Checkbox } from '@arco-design/web-react';
 import DeptMember from './deptMember';
 
 interface IData {
@@ -15,10 +13,12 @@ interface IProps {
   loading: boolean;
   visible: boolean;
   selectedMembers: any[];
+  isFromPermission?: boolean;
+  selectMemberCanEmpty?: boolean;
   onExpand: (value: string) => void;
   onSearch: (value: string) => void;
   onCancel: () => void;
-  onConfirm: (value: any[]) => void;
+  onConfirm: (value: any[], isIncludeChild?: boolean) => void;
   onUpdateSelectedMembers?: (members: any[]) => void;
 }
 
@@ -31,6 +31,8 @@ const AddMembers = (props: IProps) => {
     data,
     loading,
     selectedMembers,
+    isFromPermission = false,
+    selectMemberCanEmpty = false,
     onExpand,
     onSearch,
     onCancel,
@@ -39,9 +41,16 @@ const AddMembers = (props: IProps) => {
   } = props;
 
   const [resetFlag, setResetFlag] = useState(false);
+  const [isIncludeChild, setIsIncludeChild] = useState(false);
 
   const isSelectDepartment = title === 'specifiedDepartment';
   const isSelectPerson = title === 'specifiedPerson';
+  const modalTitle = (() => {
+  if (!isSelectDepartment && !isSelectPerson) return title;
+  const action = isFromPermission ? '添加' : '指定';
+  const subject = isSelectDepartment ? '部门' : '成员';
+  return `${action}${subject}`;
+})();
 
   // 点击取消时的处理函数
   const handleCancel = () => {
@@ -52,7 +61,7 @@ const AddMembers = (props: IProps) => {
   return (
     <Modal
       title={
-        <div style={{ textAlign: 'left' }}>{isSelectDepartment ? '指定部门' : isSelectPerson ? '指定成员' : title}</div>
+        <div style={{ textAlign: 'left' }}>{modalTitle}</div>
       }
       onOk={onCancel}
       onCancel={handleCancel}
@@ -65,13 +74,18 @@ const AddMembers = (props: IProps) => {
       style={{ width }}
       maskClosable={true}
       footer={
-        <div style={{ textAlign: 'right' }}>
-          <Button type="default" onClick={handleCancel} style={{ marginRight: 12 }}>
-            取消
-          </Button>
-          <Button type="primary" disabled={selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers)}>
-            确定
-          </Button>
+        <div style={{display: 'flex'}}>
+          <div style={{ flex: 1,textAlign: 'left' }}>
+            {(isFromPermission && isSelectDepartment) && <Checkbox checked={isIncludeChild} onChange={(value)=>setIsIncludeChild(value)}>包含勾选部门及下级部门</Checkbox>}
+          </div>
+          <div>
+            <Button type="default" onClick={handleCancel} style={{ marginRight: 12 }}>
+              取消
+            </Button>
+            <Button type="primary" disabled={!selectMemberCanEmpty && selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers, isIncludeChild)}>
+              确定
+            </Button>
+          </div>
         </div>
       }
     >

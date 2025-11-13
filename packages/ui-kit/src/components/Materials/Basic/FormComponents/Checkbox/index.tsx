@@ -15,6 +15,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
     tooltip,
     status,
     defaultValue,
+    defaultOptions,
     verify,
     layout,
     direction,
@@ -33,7 +34,10 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
@@ -47,17 +51,17 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap>
-            {fieldValue && defaultValue && fieldValue.map((ele: any, index: number) => <Tag key={index}>
-              {defaultValue.find((e: any) => e.value === ele)?.label}
+            {fieldValue && defaultOptions && fieldValue.map((ele: any, index: number) => <Tag key={index}>
+              {defaultOptions.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>
         ) : (
           <CheckboxGroup
-            defaultValue={defaultValue?.filter((op) => op.chosen).map((op) => op.value)}
-            options={defaultValue}
+            options={defaultOptions}
             direction={direction}
             style={{
               width: '100%',

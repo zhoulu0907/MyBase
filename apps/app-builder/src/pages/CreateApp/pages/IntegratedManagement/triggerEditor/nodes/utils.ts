@@ -38,7 +38,7 @@ export const clearDataOriginNodeId = (nodeId: string) => {
           const newConditions = filterCondition.conditions
             .filter((c: any) => c !== null && c !== undefined)
             .filter((c: any) => c.fieldId && !c.fieldId.startsWith(nodeId))
-            .filter((c: any) => c.value && !c.value.startsWith(nodeId));
+            .filter((c: any) => c.value && !`${c.value}`.startsWith(nodeId));
           if (newConditions.length > 0) {
             newFilterCondition.push({ conditions: newConditions });
           }

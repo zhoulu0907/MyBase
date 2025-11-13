@@ -4,6 +4,7 @@ import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
+  TIME_VALUES,
   FILL_OPTIONS,
   FILL_VALUES,
   LAYOUT_OPTIONS,
@@ -155,6 +156,7 @@ export const alignConfig: IAlignConfigType<TAlignSelectKeyType> = {
 };
 
 export type TDateTypeSelectKeyType = (typeof DATE_VALUES)[keyof typeof DATE_VALUES];
+export type TTimeTypeSelectKeyType = (typeof TIME_VALUES)[keyof typeof TIME_VALUES];
 export const dateTypeConfig: IDateTypeConfigType<TDateTypeSelectKeyType> = {
   key: 'dateType',
   name: '日期格式',
@@ -235,20 +237,20 @@ export const listTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
   name: '展示样式',
   type: CONFIG_TYPES.STATUS_RADIO,
   range: [
+    // {
+    //   key: UPLOAD_OPTIONS.TEXT,
+    //   text: UPLOAD_OPTIONS.TEXT,
+    //   value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+    // },
     {
-      key: UPLOAD_OPTIONS.TEXT,
-      text: UPLOAD_OPTIONS.TEXT,
-      value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+      key: UPLOAD_OPTIONS.CARD,
+      text: UPLOAD_OPTIONS.CARD,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
     },
     {
       key: UPLOAD_OPTIONS.LIST,
       text: UPLOAD_OPTIONS.LIST,
       value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
-    },
-    {
-      key: UPLOAD_OPTIONS.CARD,
-      text: UPLOAD_OPTIONS.CARD,
-      value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
     }
   ]
 };
@@ -341,7 +343,7 @@ export const fillConfig: IStatusConfigType<TFillSelectKeyType> = {
 export const dataFieldConfig: IDataFieldConfigType[] = [
   {
     key: 'dataField',
-    name: '数据字段',
+    name: '数据绑定',
     type: CONFIG_TYPES.FIELD_DATA
   }
 ];
@@ -545,4 +547,47 @@ export const autoCodeConfig:any = {
   key: 'rules',
   name:'编号规则配置',
   type: CONFIG_TYPES.AUTO_CODE_RULES
+}
+
+export const imageHandleConfig:any = {
+  key: 'imageHandle',
+  name:'图片处理',
+  type: CONFIG_TYPES.IMAGE_HANDLE
+}
+
+export const dateFormatConfig:any = {
+  key: 'dateFormat',
+  name:'日期格式',
+  type: CONFIG_TYPES.DATE_FORMAT
+}
+
+export const timeFormatConfig:any = {
+  key: 'timeFormat',
+  name:'日期格式',
+  type: CONFIG_TYPES.TIME_FORMAT
+}
+
+export const switchFillTextConfig:any = {
+  key: 'fillText',
+  name:'填充文本',
+  type: CONFIG_TYPES.SWITCH_FILL_TEXT
+}
+
+// 默认值
+export const defaultValueConfig:any ={
+  key: 'defaultValueConfig',
+  name:'默认值',
+  type: CONFIG_TYPES.DEFAULT_VALUE
+}
+
+export const defaultValueModeConfig: any = {
+  key: 'defaultValueMode',
+  name:'默认值',
+  type: CONFIG_TYPES.DEPT_DEFAULT_VALUE
+}
+
+export const selectScopeConfig: any = {
+  key: 'selectScope',
+  name:'可选范围',
+  type: CONFIG_TYPES.DEPT_SELECT_SCOPE
 }

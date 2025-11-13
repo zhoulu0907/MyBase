@@ -26,7 +26,10 @@ const XStaticText = memo((props: XStaticTextConfig & { runtime?: boolean; detail
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.STATIC_TEXT}_${nanoid()}`
         }

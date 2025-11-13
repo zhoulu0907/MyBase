@@ -5,6 +5,7 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
 import '../index.css';
 import type { XInputSelectMutipleConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -17,6 +18,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     labelColSpan = 0,
     showSearch,
     defaultValue,
+    defaultOptions,
     runtime = true,
     detailMode
   } = props;
@@ -32,18 +34,13 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`
         }
@@ -59,11 +56,12 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap>
-            {fieldValue && defaultValue && fieldValue.map((ele: any, index: number) => <Tag key={index}>
-              {defaultValue.find((e: any) => e.value === ele)?.label}
+            {fieldValue && defaultOptions && fieldValue.map((ele: any, index: number) => <Tag key={index}>
+              {defaultOptions.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>
         ) : (
@@ -76,7 +74,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             placeholder="请选择"
-            options={defaultValue}
+            options={defaultOptions}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

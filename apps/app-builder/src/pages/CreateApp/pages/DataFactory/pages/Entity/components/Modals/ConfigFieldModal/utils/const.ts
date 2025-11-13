@@ -48,3 +48,19 @@ export const AUTO_CODE_NUMBER_DEFAULT_CONFIG = {
   initialValue: START_VALUE_DEFAULT,
   resetCycle: AUTO_CODE_RESET_CYCLE.NONE
 } as const;
+
+// 日期格式值
+export const DATE_FORMAT_VALUES = {
+  YEAR_MONTH_DAY: '年月日',
+  YEAR_MONTH: '年月',
+  YEAR: '年',
+  YEAR_MONTH_DAY_TIME: '年月日时分',
+  YEAR_MONTH_DAY_TIME_SECOND: '年月日时分秒',
+  CUSTOM: '自定义'
+} as const;
+
+// 日期格式选项
+export const DATE_FORMAT_OPTIONS = Object.values(DATE_FORMAT_VALUES).map((value) => ({
+  label: value,
+  value: value
+})) as { label: string; value: string }[];

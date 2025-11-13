@@ -1,5 +1,5 @@
 import { useI18n } from '@/hooks/useI18n';
-import { Collapse, Ellipsis } from '@arco-design/mobile-react';
+import { Collapse, Ellipsis, Grid, Tabs } from '@arco-design/mobile-react';
 import {
   listApplicationMenu,
   menuSignal,
@@ -11,20 +11,13 @@ import {
 } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { IconUser, IconHome } from '@arco-design/mobile-react/esm/icon';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
-
+import { DynamicIcon, menuIconList } from '@onebase/common';
+import { splitAndFlatten, type TreeNode } from '@/utils/tree';
 import styles from './index.module.less';
 
-interface TreeNode {
-  key: string;
-  id: string;
-  icon: string;
-  title: string;
-  isVisible: number;
-  children?: TreeNode[];
-}
+const isGridLayout = true;
 
 const levelStyle = (level: number) => ({ padding: `0 ${level > 5 ? '0' : '0.12rem'}` })
 
@@ -33,7 +26,7 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
   const location = useLocation();
   const getGroupItem = (itemData: TreeNode, level: number = 0) => {
     if (!itemData.children || itemData.children.length === 0) {
-      return <div key={itemData.key + 1} className={styles.treeItem} style={levelStyle(level)} onClick={() => handlerItemClick(itemData.id)}>
+      return <div key={itemData.key + 1} className={styles.treeItem} style={levelStyle(level)} onClick={() => handlerItemClick(itemData.id!)}>
         <IconUser className={styles.treeItemIcon} />
         <Ellipsis text={itemData.title} />
       </div>
@@ -54,6 +47,25 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
       }
     />
   }
+
+  const GridLayout = ({ data }: { data: TreeNode[] }) => {
+    const renderData = data.map((item) => ({
+      img: <DynamicIcon
+        IconComponent={menuIconList.find((icon) => icon.code === item.icon)?.icon}
+        theme="outline"
+        size="0.24rem"
+        fill="#F2F3F5"
+        style={{ backgroundColor: '#009E9E', borderRadius: '0.08rem', padding: '0.08rem' }}
+      />,
+      title: <div style={{ fontSize: '0.14rem', lineHeight: '0.22rem', whiteSpace: 'nowrap' }}>{item.title.slice(0, 5)}</div>,
+      onClick: () => handlerItemClick(item.id!)
+    }));
+
+    return (
+      <Grid className={styles.gridLayout} data={renderData} gutter={16} columns={4} />
+    );
+  };
+
   const handlerItemClick = (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(curMenuId));
@@ -62,15 +74,35 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
     navigate(to);
   };
 
+  const tabData = useMemo(() => {
+    return splitAndFlatten(treeData).map(item => ({ title: item.title }));
+  }, [treeData]);
+
   return (
-    <div className={styles.appsList}>
-      <div className={styles.label}>
-        应用菜单
+    <>
+      <div className={styles.appsList}>
+        <div className={styles.label}>
+          应用菜单
+        </div>
+        {
+          isGridLayout ? <GridLayout data={treeData} /> : treeData.map((item) => getGroupItem(item))
+        }
       </div>
-      {
-        treeData.map((item) => getGroupItem(item))
-      }
-    </div>
+
+      {isGridLayout && <div className={styles.appsList}>
+        <Tabs
+          className={styles.tabs}
+          tabs={tabData}
+          tabBarHasDivider={false}
+        >
+          {
+            splitAndFlatten(treeData).map(item => (
+              <GridLayout data={item.children} key={item.key} />
+            ))
+          }
+        </Tabs>
+      </div>}
+    </>
   );
 };
 

@@ -1,45 +1,53 @@
 import { useState, type FC, forwardRef, useImperativeHandle } from 'react';
-import { Form, Input, Upload, Message,Button } from '@arco-design/web-react';
+import { Form, Input, Upload, Message, Button } from '@arco-design/web-react';
 import { IconFileImage, IconAttachment } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
-// import { fetchExecTask } from '../../../../../../../../packages/app/src/services/app_runtime';
 import { fetchExecTask } from '@onebase/app/src/services/app_runtime';
 
-import '../style/detailOkConfirm.less'
+import '../style/detailOkConfirm.less';
 
+interface ChildMethodParams {
+  value: {
+    buttonType: string;
+    [key: string]: any;
+  };
+  entityData: any;
+}
 const FormItem = Form.Item;
 
-const maxImgSizeMB = 20
-const maxFileSizeMB = 50
+const maxImgSizeMB = 20;
+const maxFileSizeMB = 50;
 
-const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
-    const { setPopupVisible, onBack, taskId, instanceId } = props;
-    const [form] = Form.useForm();
-    const [imgUpList, setImgUpList] = useState<any>()
+const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
+  const { onSetPopupVisible, onBack, taskId, instanceId, isRequired } = props;
+  const [form] = Form.useForm();
+  const [imgUpList, setImgUpList] = useState<any>();
 
-    useImperativeHandle(ref, () => ({
-        childMethod: () => {           
-            fetchExec();
-        }
-    }));
+  useImperativeHandle(ref, () => ({
+    childMethod: ({ value, entityData }: ChildMethodParams) => {
+      fetchExec({ value, entityData });
+    }
+  }));
 
-    const fetchExec = async () => {
-      try {
-        await form.validate();
-        const nameValue = form.getFieldValue('name');
-        const req = {
-          buttonType: 'approve',
-          taskId,
-          instanceId,
-          comment: nameValue
-        };
-        await fetchExecTask(req);
-        setPopupVisible(false);
-        onBack();
-      } catch (error) {
-        console.log('表单验证失败:', error);
-      }
-    };
+  const fetchExec = async ({ value, entityData }: ChildMethodParams) => {
+    const buttonType = value?.buttonType;
+    try {
+      await form.validate();
+      const nameValue = form.getFieldValue('name');
+      const req = {
+        buttonType,
+        taskId,
+        instanceId,
+        comment: nameValue,
+        entity: entityData
+      };
+      await fetchExecTask(req);
+      onSetPopupVisible(false);
+      onBack();
+    } catch (error) {
+      console.log('表单验证失败:', error);
+    }
+  };
     const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
         const formData = new FormData();
         formData.append('file', file);
@@ -61,7 +69,7 @@ const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
       <section className="detail-confirm-page">
         <Form form={form} layout="vertical">
           <div className="form-item-title">审批意见</div>
-          <FormItem field="name" rules={[{ required: true,message:'请输入审批意见' }]}>
+          <FormItem field="name" rules={[{ required: isRequired, message: '请输入审批意见' }]}>
             <Input.TextArea
               maxLength={500}
               showWordLimit
@@ -93,7 +101,7 @@ const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
                   return false;
                 }
               }}
-              customRequest={async (option) => {
+              customRequest={async (option: any) => {
                 const { onProgress, onError, onSuccess, file } = option;
                 try {
                   const uploadImgUrl = await handleUpload(file, onProgress);
@@ -141,7 +149,7 @@ const DetailOKConfirm:FC = forwardRef((props: any, ref: any) => {
                   return false;
                 }
               }}
-              customRequest={async (option) => {
+              customRequest={async (option: any) => {
                 const { onProgress, onError, onSuccess, file } = option;
                 try {
                   const uploadImgUrl = await handleUpload(file, onProgress);

@@ -11,12 +11,7 @@ import close from '../../assets/close.svg';
 import edit from '../../assets/edit.svg';
 import styles from './index.module.less';
 import { SidebarContext } from '../../context';
-import { type NodeRenderReturnType } from '@flowgram.ai/free-layout-editor';
-interface HeaderProps {
-  nodeRender: NodeRenderReturnType;
-}
-export default function Header() {
-  // export default function Header({ nodeRender }: HeaderProps) {
+export default function Header({ changeName }: { changeName?: (name: string) => void }) {
   const { node, data } = useNodeRenderContext();
   const { setNodeId } = useContext(SidebarContext);
   const [isEditing, setIsEditing] = useState(false);
@@ -30,10 +25,8 @@ export default function Header() {
   };
 
   const handleSave = () => {
-    // // setData({ ...data, name: editValue });
-    // nodeRender?.form?.setValueIn('name', editValue);
-    // setIsEditing(false);
-    // console.log(nodeRender);
+    setIsEditing(false);
+    changeName && changeName(editValue);
   };
 
   const handleCancel = () => {
@@ -55,11 +48,13 @@ export default function Header() {
                 handleCancel();
               }
             }}
+            size="small"
+            style={{ margin: '0 8px' }}
             className={styles.titleInput}
             autoFocus
           />
         ) : (
-          <div className={styles.title}>{data.name}</div>
+          <div className={styles.title}>{editValue}</div>
         )}
         {!isEditing && <img className={styles.edit} src={edit} onClick={handleEdit} />}
       </div>

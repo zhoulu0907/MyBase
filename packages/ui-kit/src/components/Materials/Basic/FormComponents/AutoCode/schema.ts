@@ -133,7 +133,7 @@ export interface XautoCodeConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   // 编码规则
-  autoCodeConfig?: any[],
+  autoCodeConfig?: any,
   autoCodeDisabled?: boolean,
 
   /**
@@ -195,11 +195,11 @@ const XautoCode: XautoCodeSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'color',
       name: '文本颜色',
@@ -238,7 +238,7 @@ const XautoCode: XautoCodeSchema = {
     bgColor: '',
     labelColSpan: 200,
     maxLength: 40,
-    autoCodeConfig: [],
+    autoCodeConfig: {},
     autoCodeDisabled: false,
     verify: {
       required: false

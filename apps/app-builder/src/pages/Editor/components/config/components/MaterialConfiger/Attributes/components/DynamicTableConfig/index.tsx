@@ -1,7 +1,7 @@
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { FilterEntityFields, getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
-import { ENTITY_FIELD_TYPE, useAppEntityStore } from '@onebase/ui-kit';
+import { ENTITY_FIELD_TYPE, useAppEntityStore, getPopupContainer } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
@@ -152,6 +152,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
         <Select
           placeholder={`请选择${item.name}`}
           value={configs[item.key]}
+          getPopupContainer={getPopupContainer}
           onChange={(value) => {
             handleMultiPropsChange([
               { key: item.key, value: value },
@@ -179,7 +180,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => {}}
+                setList={() => { }}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -195,7 +196,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 onSort={(e) => {
                   console.log(e);
                   const newList = [...configs[columnsKey]];
-                  console.log('configs[columnsKey]',configs[columnsKey])
+                  console.log('configs[columnsKey]', configs[columnsKey])
                   // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
                   const { oldIndex, newIndex } = e;
                   if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
@@ -314,6 +315,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                       ))}
                   </Menu>
                 }
+                getPopupContainer={getPopupContainer}
               >
                 <Button type={enableAddColumn ? 'outline' : 'secondary'} disabled={!enableAddColumn}>
                   新增列
@@ -372,6 +374,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                     <Select
                       size="small"
                       value={configs[searchItemsKey][idx].label}
+                      getPopupContainer={getPopupContainer}
                       onChange={(e, option: any) => {
                         const newList = [...searchItemsConfig];
                         newList[idx] = {
@@ -440,6 +443,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                       ))}
                   </Menu>
                 }
+                getPopupContainer={getPopupContainer}
               >
                 <Button type={enableAddSearchItem ? 'outline' : 'secondary'} disabled={!enableAddSearchItem}>
                   新增搜索项

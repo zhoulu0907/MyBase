@@ -11,16 +11,21 @@ import EditRender from 'src/components/render/EditRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
-import { ALL_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { ENTITY_COMPONENT_TYPES,ALL_COMPONENT_TYPES,FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { COMPONENT_MAP } from '../../../componentsMap';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_VALUES,WIDTH_OPTIONS } from '../../../constants';
 import { getComponentSchema } from '../../../schema';
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
+import { useAppEntityStore } from 'src/signals/store_entity'
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
+import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 
 const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { colCount, id, runtime = true } = props;
 
   useSignals();
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
     curComponentID,
@@ -34,7 +39,9 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
     setShowDeleteButton,
 
     layoutSubComponents,
-    setLayoutSubComponents
+    setLayoutSubComponents,
+    subTableComponents,
+    setSubTableComponents
   } = usePageEditorSignal();
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
@@ -181,13 +188,128 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
             id={`workspace-content-${id}-${index}`}
             list={colComponents[index]}
             setList={(newList) => {
-              colComponents[index] = newList;
+              const entityList: GridItem[] = [];
+              newList.forEach(async(item) => {
+               if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
+                  // 子表业务实体
+                  const cpName = item.entityName || '子表单';
+                  const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
+                  const cpID = `${cpType}-${uuidv4()}`;
+
+                  // 子表单 配置
+                  const schema = getComponentSchema(cpType as any);
+                  schema.config.cpName = cpName;
+                  schema.config.id = cpID;
+                  schema.config.label.text = cpName;
+                  schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                  schema.config.subTable = item.id;
+
+                  const props = {
+                    id: cpID,
+                    type: cpType,
+                    ...schema
+                  };
+                  setPageComponentSchemas(cpID!, props);
+                  setShowDeleteButton(false);
+
+                  const subFieldList = item.fields.filter(
+                    (field: AppEntityField) =>
+                      field.fieldName !== 'lock_version' &&
+                      field.fieldName !== 'deleted' &&
+                      field.fieldName !== 'parent_id' &&
+                      field.isSystemField !== 1
+                  );
+                  // 子表单的每个表单项配置
+                  let subFieldComponents: any = [];
+                  for (let ele of subFieldList) {
+                    const subType = COMPONENT_MAP[ele.fieldType];
+                    if (!subType) {
+                      continue;
+                    }
+                    const subSchema = getComponentSchema(subType as any);
+                    const subId = `${subType}-${uuidv4()}`;
+
+                    // 数据长度 dataLength
+                    // 小数位数 decimalPlaces
+                    // 默认值 defaultValue
+                    subSchema.config.defaultValue = ele.defaultValue;
+                    // 字段描述 description
+                    subSchema.config.tooltip = ele.description;
+                    subSchema.config.verify = {
+                      ...subSchema.config.verify,
+                      required: ele.isRequired,
+                      noRepeat: ele.isUnique
+                    };
+
+                    // 字段选项列表（单/多选字段专用） options
+                    if (
+                      subType === FORM_COMPONENT_TYPES.SELECT_ONE ||
+                      subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
+                    ) {
+                      if (ele.dictTypeId) {
+                        const res = await getDictDetail(ele.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          schema.config.defaultOptions = dictOptions;
+                        }
+                      } else if (ele.options?.length) {
+                        subSchema.config.defaultOptions = ele.options.map((e:any) => ({
+                          chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
+                          label: e.optionLabel,
+                          value: e.optionValue
+                        }));
+                      }
+                    }
+                    // 字段约束配置（长度/正则） constraints
+                    subSchema.config.constraints = ele.constraints;
+                    // 自动编号完整配置（含规则项） autoNumberConfig
+                    if (subType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+                      subSchema.config.autoCodeConfig = ele.autoNumberConfig || subSchema.config.autoCodeConfig;
+                      subSchema.config.autoCodeDisabled = ele?.autoNumberConfig?.id ? true : false;
+                    }
+                    // 关联的字典类型ID    dictTypeId
+
+                    subSchema.config.cpName = ele.displayName;
+                    subSchema.config.id = subId;
+                    subSchema.config.label.text = ele.displayName;
+                    subSchema.config.label.display = false;
+                    subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                    subSchema.config.dataField = [item.entityId, ele.fieldId];
+                    subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
+                    const subProps = {
+                      id: subId,
+                      type: subType,
+                      ...subSchema
+                    };
+                    setPageComponentSchemas(subId, subProps);
+                    subFieldComponents.push({ id: subId, type: subType, displayName: ele.displayName });
+                  }
+                  setSubTableComponents(cpID, subFieldComponents);
+                  entityList.push({ displayName: cpName, id: cpID, type: cpType });
+                } else if (item.entityID && item.entityID !== mainEntity.entityId) {
+                  // 子表 数据字段  不做任何操作
+                } else {
+                  // 主表字段、普通字段
+                  entityList.push(item);
+                }
+              });
+              colComponents[index] = entityList;
             }}
             onAdd={(e) => {
               const cpID = e.item.id || e.item.getAttribute('data-cp-id');
               console.log(`拖入组件${id}内， 索引为${index}， 拖入组件为 ${cpID}`);
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
+              const entityID = e.item.getAttribute('data-entity-id');
+               // 子表字段不允许
+              if (
+                (entityID && entityID !== mainEntity.entityId) ||
+                itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
+                itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
+              ) {
+                return;
+              }
 
               const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
 
@@ -245,8 +367,10 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                   data-cp-id={cp.id}
                   className="componentItem"
                   style={{
-                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
-                    borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
+                    width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
+                    borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent',
+                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                    margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();

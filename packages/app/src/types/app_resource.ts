@@ -83,4 +83,30 @@ export interface PageView {
   created?: boolean;
   //   是否最新更新的视图
   isLatestUpdated?: number;
+
+  interactionRules?: InteractionRule[];
+}
+
+export interface InteractionRule {
+  id: string;
+  description: string;
+  enabled: boolean;
+  formAction: FormAction[];
+  interactionCondition: InteractionCondition[];
+}
+
+export interface FormAction {
+  action: string;
+  cpId: string;
+}
+
+export interface InteractionCondition {
+  conditions: InteractionSubCondition[];
+}
+
+export interface InteractionSubCondition {
+  cpId: string;
+  op: string;
+  operatorType: string;
+  value: string;
 }

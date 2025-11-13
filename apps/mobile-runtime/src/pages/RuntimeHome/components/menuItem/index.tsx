@@ -1,8 +1,7 @@
 import { menuSignal } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
-import DynamicIcon from '../DynamicIcon';
-import { menuIconList } from '../DynamicIcon/const';
+import { DynamicIcon, menuIconList } from '@onebase/common';
 import styles from './index.module.less';
 
 /**

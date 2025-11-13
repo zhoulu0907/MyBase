@@ -52,7 +52,7 @@ const AutoCodeNumberSettingsModal: React.FC<AutoCodeNumberSettingsModalProps> = 
         const config = initialConfig as AutoNumberRuleResponce & { startValue?: number };
         const values = {
           ...config,
-          initialValue: config.startValue
+          initialValue: config.startValue || initialConfig.initialValue
         };
         form.setFieldsValue(values);
       } else {

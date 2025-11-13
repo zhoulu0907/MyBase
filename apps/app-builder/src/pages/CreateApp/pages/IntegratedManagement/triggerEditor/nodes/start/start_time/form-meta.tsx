@@ -86,7 +86,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   field="startTime"
                   rules={[{ required: true, message: '请选择结束时间' }]}
                 >
-                  <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " style={{ width: '100%' }} />
+                  <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: '100%' }} />
                 </Form.Item>
               </Grid.Col>
               <Grid.Col span={12}>
@@ -96,7 +96,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   field="endTime"
                   rules={[{ required: true, message: '请选择结束时间' }]}
                 >
-                  <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " style={{ width: '100%' }} />
+                  <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: '100%' }} />
                 </Form.Item>
               </Grid.Col>
             </Grid.Row>
@@ -123,7 +123,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Grid.Col span={12}>
                 {repeatType === REPEAT_TYPE_OPTIONS.NONE && (
                   <Form.Item field="triggerTime" rules={[{ required: true, message: '请选择触发时间' }]}>
-                    <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " />
+                    <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
                   </Form.Item>
                 )}
 

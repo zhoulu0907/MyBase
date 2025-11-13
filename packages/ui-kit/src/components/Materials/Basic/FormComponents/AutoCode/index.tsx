@@ -36,7 +36,10 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         layout={layout}
         rules={[{ required: verify?.required }]}
         tooltip={tooltip}
@@ -49,13 +52,13 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <Input
             readOnly={true}
-            defaultValue={defaultValue}
             placeholder={placeholder}
             style={{
               width: '100%',

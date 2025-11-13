@@ -1,0 +1,27 @@
+.navWrapper {
+  width: 100%;
+
+  :global(.arco-nav-bar) {
+    background-color: transparent;
+  }
+
+  .nav {
+    height: 0.44rem;
+
+    :global(.arco-nav-bar-left) {
+      padding: 0 0.15rem;
+      font-size: 0.18rem;
+
+      & > div {
+        width: 0.16rem;
+        height: 0.16rem;
+      }
+    }
+
+    :global(.arco-nav-bar-title) {
+      & > div {
+        font-size: 0.18rem;
+      }
+    }
+  }
+}

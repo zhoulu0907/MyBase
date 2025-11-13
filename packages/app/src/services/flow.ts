@@ -1,5 +1,5 @@
-import { CreateFlowMgmtReq, RenameFlowMgmtReq, UpdateFlowMgmtDefinitionReq } from '../types/flow';
 import { type PageParam } from '../types/common';
+import { CreateFlowMgmtReq, RenameFlowMgmtReq, UpdateFlowMgmtDefinitionReq } from '../types/flow';
 import { flowService } from './clients';
 
 export const listFlowMgmt = (params: PageParam) => {
@@ -40,6 +40,10 @@ export const renameFlowMgmt = (params: RenameFlowMgmtReq) => {
 
 export const updateFlowMgmtDefinition = (params: UpdateFlowMgmtDefinitionReq) => {
   return flowService.post('/mgmt/update-definition', params);
+};
+
+export const refreshFlowMgmt = (appId: string) => {
+  return flowService.post(`/exec/flow-handler/update?applicationId=${appId}`);
 };
 
 // 分页查询执行日志

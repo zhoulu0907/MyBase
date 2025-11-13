@@ -9,6 +9,7 @@ import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
+import AdvancedConfig from './advancedConfig/index'
 import { ApproveDrawerTab } from './constant';
 import { useLocation } from 'react-router-dom';
 import type {
@@ -39,6 +40,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
       }
     }
   );
+  const [editValue, setEditValue] = useState('');
   const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
 
   function setApprovalConfigData<T extends keyof ApproverConfigDataType>(
@@ -84,7 +86,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           />
         );
       case ApproveDrawerTab.ADVANCED_SETTINGS:
-        return <div>高级设置</div>;
+        return <AdvancedConfig />;
       default:
         return <div>审批人</div>;
     }
@@ -92,12 +94,12 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
 
   function handleSubmit() {
     console.log('approverConfigData ===', approverConfigData);
-    handleConfigSubmit && handleConfigSubmit(approverConfigData, []);
+    handleConfigSubmit && handleConfigSubmit(approverConfigData, editValue);
   }
 
   return (
     <>
-      <Header />
+      <Header changeName={(name) => setEditValue(name)} />
       <div className={styles.approver}>
         <RadioGroup
           className={styles.radioGroup}

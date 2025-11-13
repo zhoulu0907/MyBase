@@ -15,6 +15,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     defaultValue,
     layout,
     labelColSpan = 0,
+    fillText,
     runtime = true,
     detailMode
   } = props;
@@ -33,8 +34,11 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -49,9 +53,15 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue ? '开启' : '关闭'}</div>
+          <div>
+            {fieldValue
+              ? (fillText.display && fillText.checkedText) || '开启'
+              : (fillText.display && fillText.uncheckedText) || '关闭'}
+          </div>
         ) : (
           <Switch
+            checkedText={fillText.display && fillText.checkedText}
+            uncheckedText={fillText.display && fillText.uncheckedText}
             defaultChecked={defaultValue}
             style={{
               pointerEvents: runtime ? 'unset' : 'none'

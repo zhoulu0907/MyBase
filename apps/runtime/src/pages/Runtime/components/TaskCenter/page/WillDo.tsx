@@ -8,7 +8,7 @@ import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
 import dayjs from 'dayjs';
 import '../style/tcPage.less';
 
- const getTimeAgo = (time) => {
+ const getTimeAgo = (time: number) => {
    const now = Date.now();
    const diff = now - time;
    const minutes = Math.floor(diff / 60000);
@@ -20,7 +20,10 @@ import '../style/tcPage.less';
    return '刚刚';
  };
 
-const WillDo: FC = ({ appId }) => {
+ interface WillDoProps {
+   appId: string;
+ }
+const WillDo: FC<WillDoProps> = ({ appId }) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -29,17 +32,17 @@ const WillDo: FC = ({ appId }) => {
     {
       title: '发起人',
       dataIndex: 'initiator',
-      render: (val, record) => (
+      render: (obj: any) => (
         <span className="flex-bw-center">
-          <img src="/src/assets/images/avatar.svg" />
-          {val}
+          <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
+          {obj?.name}
         </span>
       )
     },
     {
       title: '流程状态',
       dataIndex: 'flowStatus',
-      render: (val, record) => {
+      render: (val: FLOWSTATUS_TYPE) => {
         if (val === FLOWSTATUS_TYPE.APPROVED) {
           return (
             <Tag color="green" size="medium">
@@ -87,7 +90,7 @@ const WillDo: FC = ({ appId }) => {
       title: '操作',
       dataIndex: 'op',
       align: 'center',
-      render: (_, record) => (
+      render: (_: any, record: any) => (
         <Button
           type="text"
           status="success"
@@ -128,7 +131,6 @@ const WillDo: FC = ({ appId }) => {
   }
 
   function handleDetailPage(row: any) {
-    console.log('click to detail page === row ===', row);
     setTaskId(row?.taskId);
     setPopVisible(true);
     setRowData(row);
@@ -147,7 +149,16 @@ const WillDo: FC = ({ appId }) => {
       //   submitTimeEnd: ''
     };
     const res = await getTodoPageList(req);
-    setData(res?.list);
+    if (Array.isArray(res?.list)) {
+      setData(
+        res.list.map((item: object, i: number) => {
+          return {
+            ...(item || {}),
+            key: i
+          };
+        })
+      );
+    }
   };
 
   const onBack = () => {
@@ -184,7 +195,7 @@ const WillDo: FC = ({ appId }) => {
           </div>
         </div>
       )}
-      <Table className="task-tb-box" rowKey="name" rowSelection={tbRowSelection} columns={columns} data={data} />
+      <Table className="task-tb-box" rowSelection={tbRowSelection} columns={columns} data={data} />
       {detailPopVisible && (
         <DetailPop
           detailPopVisible={detailPopVisible}

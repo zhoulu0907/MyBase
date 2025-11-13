@@ -85,6 +85,8 @@ export interface XCollapseLayoutConfig extends ICommonBaseType {
    * 默认展示样式
    */
   collapsed: TSelectDefaultType<TCollapsedSelectKeyType>;
+  // 页面类型
+  pageType?:string;
 }
 
 const XLCollapseLayout: XCollapseLayoutSchema = {

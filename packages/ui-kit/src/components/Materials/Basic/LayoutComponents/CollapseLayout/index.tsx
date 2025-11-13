@@ -20,8 +20,8 @@ import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { COLLAPSED_OPTIONS, COLLAPSED_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XCollapseLayoutConfig } from './schema';
 import './index.css';
+import type { XCollapseLayoutConfig } from './schema';
 
 const CollapseItem = Collapse.Item;
 
@@ -274,9 +274,10 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
                     data-cp-id={cp.id}
                     className="componentItem"
                     style={{
-                      width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
+                      width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                       borderColor: curComponentID === cp.id ? '#009E9E' : 'transparent',
-                      borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
+                      borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                      margin: '4px'
                     }}
                     onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                       e.stopPropagation();

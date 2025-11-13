@@ -164,26 +164,6 @@ export interface IWidthConfigType<KeyType> {
   }>;
 }
 
-// 默认值配置
-export interface IDefaultValueConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.DEFAULT_VALUE_SELECT;
-  range: Array<{
-    key: string;
-    text: string;
-    value: KeyType;
-  }>;
-}
-
-// 默认值输入配置
-export interface IDefaultValueInputConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.DEFAULT_VALUE_INPUT;
-  placeholder?: string;
-}
-
 // 是否必填配置
 export interface IRequiredCheckboxConfigType {
   key: string;
@@ -425,4 +405,39 @@ export interface IAutoCodeConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.AUTO_CODE_RULES;
+}
+
+export interface IImageHandleConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.IMAGE_HANDLE;
+}
+
+// 日期格式
+export interface IDateFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_FORMAT;
+}
+
+// 时间格式
+export interface ITimrFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_FORMAT;
+}
+
+
+// 填充文本 switch
+export interface ISwitchFillTextConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SWITCH_FILL_TEXT;
+}
+
+// 默认值
+export interface IDefaultValueConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DEFAULT_VALUE;
 }

@@ -146,11 +146,11 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'verify',
       name: '校验',

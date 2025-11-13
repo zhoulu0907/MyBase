@@ -18,7 +18,7 @@ const radioList = [
 ]
 let defaultCheck = 'all'
 
-const ICreated: FC = ({ appId }) => {
+const ICreated: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -27,7 +27,7 @@ const ICreated: FC = ({ appId }) => {
     {
       title: '流程状态',
       dataIndex: 'flowStatus',
-      render: (val, record) => {
+      render: (val: FLOWSTATUS_TYPE) => {
         if (val === FLOWSTATUS_TYPE.APPROVED) {
           return (
             <Tag color="green" size="medium">
@@ -58,22 +58,21 @@ const ICreated: FC = ({ appId }) => {
     {
       title: '当前节点处理人',
       dataIndex: 'currentNodeHandler',
-       render: (val, record) => {
-        const userNames = val?.map((item:any) => item.userName) || [];
+       render: (userArr:any) => {
         return (
-            <span className="flex-bw-center">
-              {userNames.length > 0 ? (
-                <>
-                  <img src="/src/assets/images/avatar.svg" />
-                  {userNames.join('、')}
-                </>
+            <div className="flex-bw-center">
+              {userArr?.length > 0 ? (
+                userArr.map((item: any, i:number) => {
+                  return <div className="flex-bw-center" key={'user' + i}>
+                    <div className='photo-img'>{item?.avatar && <img src={item?.avatar} />}</div><span className='tb-uname'>{item?.userName}</span>
+                  </div>
+                })
               ) : (
                 '-'
               )}
-            </span>
+            </div>
         );
-       }
-
+      }
     },
     {
       title: '发起时间',
@@ -93,7 +92,7 @@ const ICreated: FC = ({ appId }) => {
       title: '操作',
       dataIndex: 'op',
       align: 'center',
-      render: (_, record) => (
+      render: (_:any, record:any) => (
         <Button
           type="text"
           status="success"
@@ -132,7 +131,14 @@ const ICreated: FC = ({ appId }) => {
       //   submitTimeEnd: ''
     };
     const res = await getMyCreatePageList(req);
-    setData(res?.list);
+    if (Array.isArray(res?.list)) {
+      setData(res.list.map((item: object, i: number) => {
+        return {
+          ...(item || {}),
+          key: i
+        }
+      }));
+    }
   };
 
   const onBack = () => {
@@ -158,7 +164,7 @@ const ICreated: FC = ({ appId }) => {
             {radioList.map((item) => {
               return (
                 <Radio key={item.value} value={item.value}>
-                  {({ checked }) => {
+                  {({ checked }: { checked: boolean }) => {
                     return (
                       <Button key={item.value} type="text" className={`${checked ? 'rdo-checked' : ''}`}>
                         {item.label}

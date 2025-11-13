@@ -4,6 +4,9 @@ import Login from './pages/Login';
 import Runtime from './pages/Runtime';
 import RuntimeLast from './pages/RuntimeLast';
 import RuntimeHome from './pages/RuntimeHome';
+import RuntimeHomeProtocol from './pages/RuntimeHome/components/Protocol';
+import RuntimeHomePrivacy from './pages/RuntimeHome/components/Privacy';
+import RuntimeHomeAbout from './pages/RuntimeHome/components/About';
 import '@icon-park/react/styles/index.css';
 // import Runtime from './pages/Runtime';
 
@@ -15,6 +18,10 @@ function AppContent() {
       <Route path="/:appId/:tenantId/login" element={<Login />} />
 
       <Route path="/onebase/runtime-home/:appId/" element={<RuntimeHome />} />
+      <Route path="/onebase/runtime-home/protocol" element={<RuntimeHomeProtocol />} />
+      <Route path="/onebase/runtime-home/privacy" element={<RuntimeHomePrivacy />} />
+      <Route path="/onebase/runtime-home/about" element={<RuntimeHomeAbout />} />
+
       <Route path="/onebase/runtime-last/:appId/" element={<RuntimeLast />} />
       <Route path="/onebase/runtime/:appId/" element={<Runtime />} />
 

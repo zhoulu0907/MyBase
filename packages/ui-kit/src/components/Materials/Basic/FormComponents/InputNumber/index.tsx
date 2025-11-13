@@ -61,7 +61,10 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`
         }
@@ -81,12 +84,12 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{detailValue(fieldValue) || '--'}</div>
         ) : (
           <InputNumber
-            defaultValue={defaultValue}
             placeholder={placeholder}
             step={step}
             min={verify?.min}

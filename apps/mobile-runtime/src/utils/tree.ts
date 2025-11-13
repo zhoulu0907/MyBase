@@ -1,6 +1,9 @@
 export interface TreeNode {
-  key?: number | string; // arco-design default tree props
-  title?: string; // arco-design default tree props
+  key: string; // arco-design default tree props
+  title: string; // arco-design default tree props
+  id?: string;
+  icon?: string;
+  isVisible?: number;
   children?: TreeNode[];
   [key: string]: any;
 }
@@ -109,4 +112,44 @@ export const treeFilter = <T = any>(
   }
 
   return loop(data);
+};
+
+/**
+ * 将树形结构的 children 节点递归打平为一维数组
+ * @param nodes 要展开的节点数组
+ * @returns 返回一个包含所有子节点（多层递归打平）的数组
+ */
+export const flattenChildren = (nodes: TreeNode[]): TreeNode[] => {
+  const result: TreeNode[] = [];
+
+  /**
+   * 深度优先遍历（DFS）
+   * 递归收集所有层级的节点
+   */
+  const dfs = (arr: TreeNode[]) => {
+    arr.forEach((node) => {
+      result.push(node);
+
+      if (node.children && node.children.length > 0) {
+        dfs(node.children);
+      }
+    });
+  };
+
+  dfs(nodes);
+  return result;
+};
+
+/**
+ * 处理树形数据：
+ * - 仅保留第一层中有 children 的节点
+ * - 并将其 children 扁平化为一维数组
+ */
+export const splitAndFlatten = (treeData: TreeNode[]) => {
+  return treeData
+    .filter((node) => node.children && node.children.length > 0)
+    .map(({ children, ...rest }) => ({
+      ...rest,
+      children: flattenChildren(children!),
+    }));
 };

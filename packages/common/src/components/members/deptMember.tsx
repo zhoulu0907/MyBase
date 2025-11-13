@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Input, Space, List, Breadcrumb, Avatar, Typography, Spin, Radio } from '@arco-design/web-react';
+import { Button, Input, Space, List, Breadcrumb, Avatar, Typography, Spin, Radio, Checkbox } from '@arco-design/web-react';
 import { IconRight, IconClose } from '@arco-design/web-react/icon';
 import { formatDeptAndUsers } from './const';
 
@@ -148,12 +148,9 @@ const DeptMember = (props: IProps) => {
                 item.type === 'user' && !isSelectDepartment ? (
                   <div key={`user-${item.key}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
                     {isMultiple ? (
-                        <input
-                      type="checkbox"
-                      checked={selectedKeys.includes(item.key)}
+                      <Checkbox checked={selectedKeys.includes(item.key)}
                       onChange={(e) => {
-                        const checked = e.target.checked;
-                        if (checked) {
+                        if (e) {
                           setSelectedKeys([...selectedKeys, item.key]);
                           const newSelectedMembers = [
                             ...selectedMembers,
@@ -169,9 +166,7 @@ const DeptMember = (props: IProps) => {
                         } else {
                           removeMember(item.key);
                         }
-                      }}
-                      style={{ cursor: 'pointer' }}
-                    />
+                      }}/>
                     ) : (
                         <Radio key={item.key}
                            checked={selectedKeys.includes(item.key)}
@@ -205,12 +200,9 @@ const DeptMember = (props: IProps) => {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
                       {isMultiple ? (
-                        <input
-                        type="checkbox"
-                        checked={selectedKeys.includes(item.key)}
+                        <Checkbox checked={selectedKeys.includes(item.key)}
                         onChange={(e) => {
-                          const checked = e.target.checked;
-                          if (checked) {
+                          if (e) {
                             setSelectedKeys([...selectedKeys, item.key]);
                             const newSelectedMembers = [
                               ...selectedMembers,
@@ -226,9 +218,7 @@ const DeptMember = (props: IProps) => {
                           } else {
                             removeMember(item.key);
                           }
-                        }}
-                        style={{ cursor: 'pointer' }}
-                      />
+                        }}/>
                       ) : (
                         <Radio key={item.key}
                              checked={selectedKeys.includes(item.key)}

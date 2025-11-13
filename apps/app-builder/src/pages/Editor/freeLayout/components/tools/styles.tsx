@@ -23,12 +23,7 @@ export const ToolContainer = styled.div`
 export const ToolSection = styled.div`
   display: flex;
   align-items: center;
-  background-color: #fff;
-  border: 1px solid rgba(68, 83, 130, 0.25);
   border-radius: 10px;
-  box-shadow:
-    rgba(0, 0, 0, 0.04) 0px 2px 6px 0px,
-    rgba(0, 0, 0, 0.02) 0px 4px 12px 0px;
   column-gap: 2px;
   height: 40px;
   padding: 0 4px;
