@@ -12,7 +12,6 @@ public class JoseValidator {
     private static final String PRIVATE_KEY_PEM = "/private-key.json";
 
     public static boolean validate(String token) throws Exception {
-        Date now = new Date();
         try (InputStream resourceStream = JoseValidator.class.getResourceAsStream(PRIVATE_KEY_PEM)) {
             String json = IOUtils.readInputStreamToString(resourceStream);
             RSAKey rsaKey = RSAKey.parse(json);
@@ -22,6 +21,7 @@ public class JoseValidator {
             jwt.decrypt(decrypter);
 
             Date expirationTime = jwt.getJWTClaimsSet().getExpirationTime();
+            Date now = new Date();
             if (expirationTime.before(now)) {
                 throw new IllegalStateException("Token expired");
             }
