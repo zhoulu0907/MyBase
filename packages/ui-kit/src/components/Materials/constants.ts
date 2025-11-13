@@ -97,7 +97,11 @@ export const CONFIG_TYPES = {
   SWITCH_FILL_TEXT: 'SwitchFillText',
 
   TABLE_OPERATION: 'TableOperation',
-  TABLE_BUTTON: 'advancedButtonPermission'
+  TABLE_BUTTON: 'advancedButtonPermission',
+  //选择部门默认值
+  DEPT_DEFAULT_VALUE: 'deptDefaultValue',
+  //选择部门可选范围
+  DEPT_SELECT_SCOPE: 'deptSelectScope',
 } as const;
 
 // 状态选项常量

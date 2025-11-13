@@ -35,6 +35,8 @@ import DynamicTimeFormatConfig from './components/DynamicTimeFormatConfig';
 import DynamicSwitchFillTextConfig from './components/DynamicSwitchFillTextConfig';
 import DynamicDefaultValueConfig from './components/DynamicDefaultValueConfig';
 import styles from './index.module.less';
+import DynamicDeptDefaultValueConfig from './components/DynamicDeptDefaultValueConfig';
+import DynamicSelectScopeConfig from './components/DynamicSelectScopeConfig';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -804,6 +806,26 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               </Row>
             </>
           </FormItem>
+        );
+      case CONFIG_TYPES.DEPT_DEFAULT_VALUE:
+        return (
+          <DynamicDeptDefaultValueConfig
+            key={index}
+            id={cpID}
+            handlePropsChange={handlePropsChange}
+            item={item}
+            configs={configs}
+          />
+        );
+      case CONFIG_TYPES.DEPT_SELECT_SCOPE:
+        return (
+          <DynamicSelectScopeConfig
+            key={index}
+            id={cpID}
+            handlePropsChange={handlePropsChange}
+            item={item}
+            configs={configs}
+          />
         );
       default:
         return (

@@ -1,8 +1,11 @@
 import {
   baseConfig,
   baseDefault,
+  dataFieldConfig,
+  defaultValueModeConfig,
   labelColSpanConfig,
   layoutConfig,
+  selectScopeConfig,
   statusConfig,
   widthConfig,
   type ICommonBaseType,
@@ -21,6 +24,7 @@ import {
 } from '../../../constants';
 import type {
   IBooleanConfigType,
+  IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -48,6 +52,7 @@ export type TXInputDeptSelectEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
+  | IDataFieldConfigType
   | ITooltipConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -76,15 +81,40 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   tooltip?: TTextAreaDefaultType;
 
   /**
+    * 数据字段
+  */
+  dataField: TTextDefaultType[];
+
+  /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
   status?: TSelectDefaultType<TStatusSelectKeyType>;
 
-  /**
-   * 默认值
+   /**
+   * 默认值方式
    */
-  defaultValue?: TTextDefaultType;
+  defaultValueMode?: TTextDefaultType;
+
+  /**
+   * 部门默认值
+   */
+  defaultDeptValue?: TTextDefaultType;
+
+  /**
+   * 多选模式
+   */
+  // multipleMode?: TBooleanDefaultType;
+
+  /**
+   * 可选范围switch
+   */
+  isSelectScope?: TBooleanDefaultType;
+
+  /**
+   * 可选范围
+   */
+  selectScope?: TTextDefaultType[];
 
   /**
    * 字段宽度
@@ -130,6 +160,14 @@ const XDeptSelect: XInputDeptSelectSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
+    ...dataFieldConfig,
+    defaultValueModeConfig,
+    // {
+    //   key: 'multipleMode',
+    //   name: '多选模式',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
+    selectScopeConfig,
     layoutConfig,
     labelColSpanConfig,
     // {
@@ -151,10 +189,15 @@ const XDeptSelect: XInputDeptSelectSchema = {
       text: '部门选择',
       display: true
     },
+    dataField: [],
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
+    defaultValueMode: 'custom',
+    defaultDeptValue: '',
+    // multipleMode: false,
+    isSelectScope: false,
+    selectScope: [],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     saveWithHidden: false,
     labelColSpan: 200,
