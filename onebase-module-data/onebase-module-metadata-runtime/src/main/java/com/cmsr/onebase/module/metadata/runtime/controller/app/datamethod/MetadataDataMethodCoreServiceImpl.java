@@ -530,6 +530,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         }
 
         RTLoginUser loginUser = RTSecurityContext.getLoginUser();
+        if (loginUser == null) {
+            throw exception(GlobalErrorCodeConstants.UNAUTHORIZED);
+        }
 
         DataPermission menuDataPermission = RTSecurityContext.getMenuDataPermission(menuId);
         FieldPermission menuFieldPermission = RTSecurityContext.getMenuFieldPermission(menuId);
