@@ -34,7 +34,6 @@ public class FlowChainBuilder {
         this.nodes = jsonGraph.getNodes();
     }
 
-
     public SerELWrapper build() {
         return blocksNodeDefine(nodes);
     }
@@ -130,11 +129,6 @@ public class FlowChainBuilder {
 
     private CommonNodeELWrapper toDefine(JsonGraphNode node) {
         return ELBus.node(node.getType()).tag(node.getId());
-
-//        StringBuilder define = new StringBuilder();
-//        define.append(node.getType()).append(".tag(\"").append(node.getId()).append("\")");
-//        return define.toString();
     }
-
 
 }
