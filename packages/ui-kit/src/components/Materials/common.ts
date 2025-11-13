@@ -16,6 +16,7 @@ import {
   UPLOAD_OPTIONS,
   UPLOAD_TYPE_OPTIONS,
   UPLOAD_VALUES,
+  UPLOAD_BUTTON_TYPES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   TABS_TYPE_OPTIONS,
@@ -277,6 +278,8 @@ export const uploadTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
     }
   ]
 };
+
+export type TUploadButtonType =  (typeof UPLOAD_BUTTON_TYPES)[keyof typeof UPLOAD_BUTTON_TYPES];
 
 export type TPagePositionSelectKeyType = (typeof PAGINATION_POSITION_VALUES)[keyof typeof PAGINATION_POSITION_VALUES];
 export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> = {

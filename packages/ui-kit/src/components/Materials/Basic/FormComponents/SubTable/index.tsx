@@ -24,7 +24,7 @@ import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
-  const { id, label, tooltip, labelColSpan = 100, status, verify, runtime = true, detailMode, pageType } = props;
+  const { id, label, tooltip, status, verify, runtime = true, detailMode, pageType } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
@@ -338,9 +338,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         layout="vertical"
         rules={[{ required: verify?.required }]}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           width: '100%',

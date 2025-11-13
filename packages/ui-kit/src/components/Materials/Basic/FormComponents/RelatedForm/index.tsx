@@ -16,13 +16,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
     placeholder,
     tooltip,
     status,
-    // defaultValue,
-    verify,
-    align,
     layout,
-    color,
-    bgColor,
-    labelColSpan = 0,
     runtime = true
   } = props;
 
@@ -68,11 +62,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -86,9 +76,6 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
           getPopupContainer={getPopupContainer}
           style={{
             width: '100%',
-            color,
-            textAlign: align,
-            backgroundColor: bgColor,
             pointerEvents: runtime ? 'unset' : 'none'
           }}
         />

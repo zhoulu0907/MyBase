@@ -198,10 +198,25 @@ export const UPLOAD_TYPE_OPTIONS = {
   CARD: '卡片'
 } as const;
 
+// 按钮分为 主要按钮、次要按钮、虚线按钮、线形按钮和文本按钮五种
+export const UPLOAD_BUTTON_TYPES = {
+  PRIMARY: 'primary',
+  SECONDARY: 'secondary',
+  DASHED: 'dashed',
+  OUTLINE: 'outline',
+  TEXT: 'text'
+} as const;
+
+
 export const UPLOAD_VALUES = {
   [UPLOAD_OPTIONS.TEXT]: 'text',
   [UPLOAD_OPTIONS.LIST]: 'picture-list',
   [UPLOAD_OPTIONS.CARD]: 'picture-card'
+} as const;
+
+export const UPLOAD_TRIGGER_TYPE = {
+  CLICK: 'click',
+  DRAG: 'drag'
 } as const;
 
 // 日期选择格式
@@ -421,7 +436,7 @@ export const WEEK_OPTIONS = {
 } as const;
 
 export const COLOR_MODE_TYPES = {
-  TAG:'tag',
+  TAG: 'tag',
   POINT: 'point'
 }
 

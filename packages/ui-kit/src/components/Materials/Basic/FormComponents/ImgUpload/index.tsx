@@ -21,7 +21,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     imageHandle,
     verify,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -221,9 +220,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -242,7 +238,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 ? undefined
                 : verify?.maxCount
           }
-          accept="image/*"
+          accept={verify?.fileFormat || "image/*"}
           listType={'text'}
           beforeUpload={async (file) => {
             const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
