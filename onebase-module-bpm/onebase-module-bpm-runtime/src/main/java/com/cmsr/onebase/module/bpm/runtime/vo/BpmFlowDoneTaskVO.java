@@ -34,6 +34,9 @@ public class BpmFlowDoneTaskVO {
     @Schema(description = "任务id")
     private Long taskId;
 
+    @Schema(description = "历史任务id")
+    private Long hisTaskId;
+
     @Schema(description = "流程实例id")
     private Long instanceId;
 

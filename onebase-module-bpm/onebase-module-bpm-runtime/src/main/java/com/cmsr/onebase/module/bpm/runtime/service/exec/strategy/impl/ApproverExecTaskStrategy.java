@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
@@ -48,15 +49,19 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
     @Override
     public void execute(User matchedUser, Task task, ApproverNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
         String buttonType = reqVO.getButtonType();
-        String userId = matchedUser.getProcessedBy();
-        BpmCooperateTypeEnum cooperateType = null;
+
+        // 原审批人
+        String approverId = matchedUser.getProcessedBy();
+        Map<String, Object> hisExtMap = new HashMap<>();
 
         if (Objects.equals(matchedUser.getType(), BpmUserTypeEnum.APPROVAL.getCode())) {
 
         } else if (Objects.equals(matchedUser.getType(), BpmUserTypeEnum.AGENT.getCode())) {
-            // 代理模式下，会使用被代理人的用户ID执行操作
-            userId = matchedUser.getCreateBy();
-            cooperateType = BpmCooperateTypeEnum.AGENT;
+            // 代理模式下，会使用原审批人的用户ID执行操作
+            approverId = matchedUser.getCreateBy();
+
+            // todo: 是否存入更多信息
+            hisExtMap.put("agentId", matchedUser.getProcessedBy());
         } else {
             // todo 其他用户类型，后续再处理
             throw exception(ErrorCodeConstants.UNSUPPORT_NODE_APPROVAL_MODE);
@@ -93,17 +98,14 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
 
         // 基础 FlowParams
         FlowParams skipParams = FlowParams.build().variable(variables)
-                 .message(comment);
-
-        if (cooperateType != null) {
-            skipParams = skipParams.cooperateType(cooperateType.getCode());
-        }
+                 .message(comment)
+                .hisTaskExt(JsonUtils.toJsonString(hisExtMap));
 
         if (Objects.equals(buttonType, BpmActionButtonEnum.APPROVE.getCode())) {
             skipParams = skipParams.skipType(SkipType.PASS.getKey())
                 .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
                .hisStatus("已" + matchButtonConfig.getButtonName())
-                    .handler(userId);
+                    .handler(approverId);
 
             taskService.skip(skipParams, task);
         } else if (Objects.equals(buttonType, BpmActionButtonEnum.REJECT.getCode())) {
@@ -122,7 +124,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                     .skipType(SkipType.REJECT.getKey())
                     .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
                     .hisStatus("已" + matchButtonConfig.getButtonName())
-                    .handler(userId);
+                    .handler(approverId);
 
             // 有拒绝节点则走拒绝路线，否则则退回到上一层
             if (hasRejectNode) {
@@ -138,24 +140,42 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         if (Objects.equals(matchedUser.getType(), BpmUserTypeEnum.AGENT.getCode())) {
             // 先更新已办
             HisTask hisTaskQuery = new FlowHisTask();
-            hisTaskQuery.setApprover(userId);
+            hisTaskQuery.setApprover(approverId);
             hisTaskQuery.setTaskId(task.getId());
-            hisTaskQuery.setCooperateType(BpmCooperateTypeEnum.AGENT.getCode());
 
             // 在会签和票签场景下，会有新增已办记录，其它可以在全局的Listener里处理
-            HisTask hisTask = hisTaskService.getOne(hisTaskQuery);
+            List<HisTask> hisTaskList = hisTaskService.list(hisTaskQuery);
 
-            if (hisTask != null) {
-                hisTask.setCollaborator(matchedUser.getProcessedBy());
-                hisTaskService.updateById(hisTask);
+            if (CollectionUtil.isNotEmpty(hisTaskList)) {
+                for (HisTask hisTask : hisTaskList) {
+                    if (StringUtils.isEmpty(hisTask.getExt())) {
+                        continue;
+                    }
+
+                    Map<String, Object> lastHisExtMap = JsonUtils.parseObject(hisTask.getExt(), Map.class);
+
+                    if (lastHisExtMap == null) {
+                        return;
+                    }
+
+                    String agentId = MapUtils.getString(lastHisExtMap, "agentId");
+
+                    if (!Objects.equals(matchedUser.getProcessedBy(), agentId)) {
+                        continue;
+                    }
+
+                    // 理论上只会有一条
+                    hisTask.setCollaborator(matchedUser.getProcessedBy());
+                    hisTaskService.updateById(hisTask);
+                    break;
+                }
             }
 
             // 先查出被代理人关联的代理人用户信息
-
             User userQuery = new FlowUser();
             userQuery.setAssociated(task.getId());
             userQuery.setType(BpmUserTypeEnum.AGENT.getCode());
-            userQuery.setCreateBy(userId);
+            userQuery.setCreateBy(approverId);
 
             List<User> agentUsers = userService.list(userQuery);
 
