@@ -71,8 +71,8 @@ public class RuntimeSecurityAutoConfiguration {
     }
 
     @Bean
-    public RemoteCallAuthenticationFilter remoteCallAuthenticationFilter(GlobalExceptionHandler globalExceptionHandler) {
-        return new RemoteCallAuthenticationFilter(globalExceptionHandler);
+    public RemoteCallAuthenticationFilter remoteCallAuthenticationFilter() {
+        return new RemoteCallAuthenticationFilter();
     }
 
     /**

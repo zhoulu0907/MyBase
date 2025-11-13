@@ -2,7 +2,6 @@ package com.cmsr.onebase.framework.security.runtime.filter;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
-import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.jose.JoseValidator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,8 +30,6 @@ public class RemoteCallAuthenticationFilter extends OncePerRequestFilter {
     public static final String X_REMOTE_CALL_TOKEN = "X-Remote-Call-Token";
 
     private RequestMatcher flowRemoteCallRequestMatcher = new AntPathRequestMatcher("/runtime/flow/remote-call/**", "POST");
-
-    private final GlobalExceptionHandler globalExceptionHandler;
 
     private boolean doFilter(HttpServletRequest request) {
         return flowRemoteCallRequestMatcher.matches(request);
