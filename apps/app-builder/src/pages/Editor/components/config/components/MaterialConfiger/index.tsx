@@ -2,10 +2,10 @@ import { ICON_Map_By_Type } from '@/components/MaterialCard/icons';
 import { useI18n } from '@/hooks/useI18n';
 import { Tabs } from '@arco-design/web-react';
 import { usePageEditorSignal } from '@onebase/ui-kit';
+import TabTitle from '../TabTitle';
 import Advanced from './Advanced';
 import Attributes from './Attributes';
 import styles from './index.module.less';
-import TabTitle from './TabTitle';
 
 const TabPane = Tabs.TabPane;
 

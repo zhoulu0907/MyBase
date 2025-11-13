@@ -3,32 +3,46 @@ import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
-import { LISTTYPE, FlowStatusMap } from '@onebase/app';
+import { LISTTYPE, FlowStatusMap, BPMConfigButtonType } from '@onebase/app';
 import DetailTable from './DetailTable';
 import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
-import { getFormDetail, getOperatorRecord } from '@onebase/app/src/services/app_runtime';
-
+import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
+import PreviewContainer from './DetailForm';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
 interface PageProps {
   detailPopVisible: boolean;
-  setPopVisible: Function;
-  onBack?: Function;
+  setPopVisible: (visible: boolean) => void;
+  onBack?: () => void;
   taskId?: string;
   rowData?: any;
   listType?: string;
 }
 
-const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, taskId, rowData, listType }) => {
+const DetailPage: React.FC<PageProps> = ({
+  detailPopVisible = false,
+  setPopVisible,
+  onBack,
+  taskId,
+  rowData,
+  listType
+}) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
-  const [popupVisible, setPopupVisible] = useState(false);
   const [stepData, setStepData] = useState();
-  const [detailData, setDetailData] = useState();
+  const [detailData, setDetailData] = useState<any>();
   let confirmRef = useRef<any>(null);
+  const formRef = useRef<any>(null);
 
+  const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
+  const setPopupVisibleByIndex = (index: number, visible: boolean) => {
+    setPopupVisibleMap((prev: any) => ({
+      ...prev,
+      [index]: visible
+    }));
+  };
   function toggleFullScreen(type: string) {
     if (type === 'FULLSCREEN') {
       setDrawWidth('100%');
@@ -51,9 +65,28 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
       </>
     );
   }
-  function handleConfirmOK() {
-    confirmRef.current.childMethod();
-  }
+
+  const fetchExec = async (value: any) => {
+    const buttonType = value?.buttonType;
+    const entityData = await formRef.current.getFormData();
+    try {
+      const req = {
+        buttonType,
+        taskId: rowData?.taskId,
+        instanceId: rowData?.instanceId,
+        entity: entityData
+      };
+      await fetchExecTask(req);
+      onBack && onBack();
+    } catch (error) {}
+  };
+
+  const handleConfirmOK = async (value: any) => {
+    const entityData = await formRef.current.getFormData();
+
+    confirmRef.current.childMethod({ value, entityData });
+  };
+
   function handlePreview() {
     console.log('handle Preview ...');
   }
@@ -64,32 +97,55 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           <img src={ProPreviewImg} style={{ marginRight: '3px' }} />
           流程预览
         </Button>
-        <Popconfirm
-          title=""
-          style={{ maxWidth: '420px', width: '420px' }}
-          className="dt-ok-confirm"
-          content={
-            <DetailOKConfirm
-              ref={confirmRef}
-              setPopupVisible={setPopupVisible}
-              onBack={onBack}
-              taskId={taskId}
-              instanceId={rowData?.instanceId}
-            />
-          }
-          onOk={() => {
-            handleConfirmOK();
-          }}
-          popupVisible={popupVisible}
-          onCancel={() => setPopupVisible(false)}
-        >
-          <Button type="primary" onClick={() => setPopupVisible(true)}>
-            同意
-          </Button>
-        </Popconfirm>
-        <Button type="outline" onClick={() => setPopVisible(false)}>
-          拒绝
-        </Button>
+        {detailData?.buttonConfigs &&
+          detailData?.buttonConfigs?.map((item: any, index: number) => {
+            if (
+              item?.buttonType === BPMConfigButtonType.SAVE ||
+              item?.buttonType === BPMConfigButtonType.SUBMIT ||
+              item?.buttonType === BPMConfigButtonType.WITHDRAW
+            ) {
+              return (
+                <Button
+                  type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
+                  onClick={() => fetchExec(item)}
+                >
+                  {item?.buttonName}
+                </Button>
+              );
+            } else {
+              return (
+                <Popconfirm
+                  title=""
+                  key={index}
+                  style={{ maxWidth: '420px', width: '420px' }}
+                  className="dt-ok-confirm"
+                  content={
+                    <DetailOKConfirm
+                      ref={confirmRef}
+                      onSetPopupVisible={(visible: any) => setPopupVisibleByIndex(index, visible)}
+                      onBack={onBack}
+                      taskId={taskId}
+                      instanceId={rowData?.instanceId}
+                      itemData={item}
+                      isRequired={item?.approvalCommentRequired}
+                    />
+                  }
+                  onOk={() => {
+                    handleConfirmOK(item);
+                  }}
+                  popupVisible={!!popupVisibleMap[index]}
+                  onCancel={() => setPopupVisibleByIndex(index, false)}
+                >
+                  <Button
+                    type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
+                    onClick={() => setPopupVisibleByIndex(index, true)}
+                  >
+                    {item?.buttonName}
+                  </Button>
+                </Popconfirm>
+              );
+            }
+          })}
       </>
     );
   }
@@ -101,6 +157,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   const fetchDetailData = async () => {
     const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: rowData?.taskId });
     setDetailData(res);
+    // 拿到详情信息
   };
 
   useEffect(() => {
@@ -155,16 +212,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           </Row>
           <div className="draw-content">
             <div className="draw-left">
-              <Row className="" style={{ marginBottom: 16 }}>
-                <Col span={12}>
-                  <p className="gray-color">申请原因</p>
-                  <div className="photo-box">
-                    需要采购一批办公用品
-                  </div>
-                </Col>
-              </Row>
-              <p className="gray-color photo-box">申请明细</p>
-              <DetailTable />
+              <PreviewContainer ref={formRef} pageSetId={rowData?.businessId} detailData={detailData} />
             </div>
             {isShowRight ? (
               <div className="draw-right">

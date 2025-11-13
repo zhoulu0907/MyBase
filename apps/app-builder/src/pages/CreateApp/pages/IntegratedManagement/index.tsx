@@ -39,12 +39,10 @@ const IntegratedManagementPage: React.FC = () => {
             key="record"
             onClick={() => navigate(`/onebase/create-app/integrated-management/flow-execute-record?appId=${curAppId}`)}
           >
-            <IconRefresh />
-            执行记录
+            <IconRefresh /> 执行记录
           </MenuItem>
           <MenuItem key="node">
-            <IconTool />
-            节点与连接器
+            <IconTool /> 节点与连接器
           </MenuItem>
         </Menu>
 

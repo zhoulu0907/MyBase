@@ -9,6 +9,7 @@ import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
 import { hiddenFieldTypes } from '../DynamicTableConfig';
+import { getPopupContainer } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -188,7 +189,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
           <Select
             placeholder="请选择"
             defaultValue={configs[item.key].entityId}
-            getPopupContainer={(node) => node.parentNode as HTMLElement}
+            getPopupContainer={getPopupContainer}
             onChange={(value) => {
               handleSourceChange(value);
             }}
@@ -226,7 +227,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                   value={selected}
                   onChange={(e) => handleSelectedChange(e)}
                   placeholder="设置显示字段"
-                  getPopupContainer={(node) => node.parentNode as HTMLElement}
+                  getPopupContainer={getPopupContainer}
                   renderFormat={() => (selected.length > 0 ? `显示 ${selected.length} 个字段` : '设置显示字段')}
                   dropdownRender={() => (
                     <div className={styles.dropdownRender}>

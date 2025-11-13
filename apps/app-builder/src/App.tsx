@@ -1,11 +1,12 @@
 import { Message } from '@arco-design/web-react';
+import '@icon-park/react/styles/index.css';
 import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import { EditorPage } from './pages/Editor';
+import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import SettingPage from './pages/Setting';
-import '@icon-park/react/styles/index.css';
 
 function AppContent() {
   //   // 启用token自动刷新
@@ -49,6 +50,7 @@ function AppContent() {
       />
 
       <Route path="/onebase/editor/*" element={<EditorPage />} />
+      <Route path="/onebase/etl_editor/*" element={<ETLFlowEditorPage />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />

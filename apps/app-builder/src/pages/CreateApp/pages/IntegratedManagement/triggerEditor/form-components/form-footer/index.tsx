@@ -1,24 +1,24 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Button } from '@arco-design/web-react';
 import { getNodeForm, useClientContext } from '@flowgram.ai/fixed-layout-editor';
+import { type ConditionField, DATA_SOURCE_TYPE, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
 import { NodeType } from '@onebase/common';
-import {
-  clearDataOriginNodeId,
-  searchNodeById,
-  validateNodeForm,
-  getDataNodeSource,
-  getEntityFieldList
-} from '../../nodes/utils';
-import { type ConditionField, getEntityFields, DATA_SOURCE_TYPE, getEntityFieldsWithChildren } from '@onebase/app';
-import styles from './index.module.less';
 import { updateLoopOutputs } from '../../nodes/control/loop/output';
 import { updateDataAddOutputs } from '../../nodes/data/data-add/output';
 import { updateDataCalcOutputs } from '../../nodes/data/data-calc/output';
 import { updateDataDeleteOutputs } from '../../nodes/data/data-delete/output';
-import { updateDataQueryOutputs } from '../../nodes/data/data-query/output';
 import { updateDataQueryMultipleOutputs } from '../../nodes/data/data-query-multiple/output';
+import { updateDataQueryOutputs } from '../../nodes/data/data-query/output';
 import { updateDataUpdateOutputs } from '../../nodes/data/data-update/output';
 import { updateModalOutputs } from '../../nodes/interaction/modal/output';
+import {
+  clearDataOriginNodeId,
+  getDataNodeSource,
+  getEntityFieldList,
+  searchNodeById,
+  validateNodeForm
+} from '../../nodes/utils';
+import styles from './index.module.less';
 
 export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
   const { nodeId, nodeData, nodes, setNodeId, setNodeData } = triggerEditorSignal;
@@ -259,7 +259,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           updateDataUpdateOutputs(curNode.id, dataUpdateFields);
           break;
         case NodeType.MODAL:
-          const modalFields: ConditionField[] = formInfo.fields
+          const modalFields: ConditionField[] = (formInfo.fields || [])
             .filter((item: any) => item && item.fieldName && item.fieldType)
             .map((item: any) => {
               return {
@@ -314,7 +314,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         取消
       </Button>
       <Button type="primary" onClick={saveNode}>
-        保存
+        确定
       </Button>
     </div>
   );

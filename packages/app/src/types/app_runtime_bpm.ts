@@ -94,3 +94,14 @@ export enum LISTTYPE {
   IDONE = 'idone',
   ICREATED = 'icreated'
 }
+export const BPMConfigButtonType = {
+  APPROVE: 'approve',
+  REJECT: 'reject',
+  SAVE: 'save',
+  TRANSFER: 'transfer',
+  ADD_SIGN: 'add_sign',
+  RETURN: 'return',
+  WITHDRAW: 'withdraw',
+  ABSTAIN: 'abstain',
+  SUBMIT: 'submit'
+};

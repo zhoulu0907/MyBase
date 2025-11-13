@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button, Input, Switch, Form, Message } from '@arco-design/web-react';
+import { Button, Input, Switch, Form, Message, Select } from '@arco-design/web-react';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
+import { REGEX_LIST } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/CreateEditRuleModal/rule';
 import styles from '../index.module.less';
 
 // 字段约束配置接口
@@ -19,6 +20,18 @@ interface FieldConstraintProps {
   onCancel: () => void;
   initialConfig?: FieldConstraintConfig;
 }
+
+const REGEX_OPTIONS = REGEX_LIST.map((item) => {
+  return {
+    label: (
+      <>
+        <span>{item.label}</span>
+        <span className={styles.regexText}>{item.value}</span>
+      </>
+    ),
+    value: item.value
+  };
+});
 
 export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onCancel, initialConfig }) => {
   const [form] = Form.useForm();
@@ -149,7 +162,21 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
                       rules={[{ required: true, message: '请输入正则表达式' }]}
                       style={{ marginBottom: 0 }}
                     >
-                      <Input placeholder="请输入正则表达式" style={{ width: '200px' }} />
+                      <Select
+                        placeholder="请输入正则表达式"
+                        options={REGEX_OPTIONS}
+                        allowCreate
+                        filterOption
+                        labelInValue
+                        style={{ width: '200px' }}
+                        onChange={(value) => {
+                          if (typeof value === 'string') {
+                            form.setFieldValue('regexPattern', value);
+                          } else if (value && typeof value === 'object' && 'value' in value) {
+                            form.setFieldValue('regexPattern', value.value);
+                          }
+                        }}
+                      />
                     </Form.Item>
                   </div>
 

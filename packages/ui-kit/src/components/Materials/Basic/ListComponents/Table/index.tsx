@@ -26,6 +26,7 @@ import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { RedirectMethod } from '../../../constants';
 import './index.css';
 import type { XTableConfig } from './schema';
+import TableSearch from './tableSerach';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -269,7 +270,7 @@ const XTable = memo(
     };
 
     const handlePage = async () => {
-      if (!runtime) {
+      if (!runtime || !metaData) {
         return;
       }
 
@@ -325,7 +326,17 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key].userName;
+                newItem[key] = newItem[key]?.userName || '';
+              }
+            }
+
+            // 部门选择单选 TODO
+            const deptSelectField = mainMetaData.parentFields.find(
+              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+            );
+            if (deptSelectField && newItem[key]) {
+              if (newItem[key]) {
+                newItem[key] = newItem[key]?.deptName || '';
               }
             }
           }
@@ -399,38 +410,8 @@ const XTable = memo(
         }}
       >
         <div className="tableHeader">
-          <Form form={form} className="searchGroup">
-            {searchItems?.map((item, idx) => (
-              <Form.Item
-                key={idx}
-                className="searchItem"
-                field={item.value}
-                label={
-                  <div
-                    style={{
-                      textAlign: 'right',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}
-                  >
-                    {`${item.label}`}
-                  </div>
-                }
-                style={{
-                  minWidth: '350px',
-                  maxWidth: '400px',
-                  marginBottom: 0
-                }}
-                layout={'horizontal'}
-                labelCol={{
-                  style: { width: labelColSpan, flex: 'unset' }
-                }}
-                wrapperCol={{ style: { flex: 1 } }}
-              >
-                <Input placeholder={`请输入${item.label}`} />
-              </Form.Item>
-            ))}
+          <Form form={form} className="searchGroup" layout="horizontal" labelAlign="right">
+            <TableSearch searchItems={searchItems} labelColSpan={labelColSpan} runtime={runtime} />
           </Form>
 
           <div className="tableHeaderButton">

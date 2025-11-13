@@ -38,6 +38,9 @@ export interface MetadataEntityField {
   status: number;
   fieldCode?: string;
   disabled?: boolean;
+  options?: any[];
+  constraints?: any;
+  autoNumberConfig?:any;
 }
 
 export interface AppEntities {
@@ -61,15 +64,17 @@ export interface ChildEntity {
   relationshipType: string;
   sourceFieldName: string;
   targetFieldName: string;
+  dictTypeId?: string;
 }
 
-export interface AppEntityField {
+export interface AppEntityField extends MetadataEntityField {
   id: string;
   fieldId: string; // 字段ID
   fieldName: string; // 字段名称
   fieldType: string; // 字段类型，如 BIGINT、VARCHAR、INT、DECIMAL、TIMESTAMP、TEXT、NUMBER 等
   isSystemField: number; // 是否是系统字段
   displayName: string; // 显示名称
+  dictTypeId?: string;
 }
 
 export interface EntityWithChildren {

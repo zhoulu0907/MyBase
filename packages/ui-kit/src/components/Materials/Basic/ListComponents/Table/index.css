@@ -15,11 +15,6 @@
     align-items: center;
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 10px;
-
-    .searchItem {
-      width: 200px;
-    }
   }
 
   .tableHeaderButton {
@@ -43,4 +38,10 @@
       white-space: nowrap;
     }
   }
+}
+
+.searchItem {
+  min-width: 350px;
+  max-width: 400px;
+  margin-bottom: 0;
 }

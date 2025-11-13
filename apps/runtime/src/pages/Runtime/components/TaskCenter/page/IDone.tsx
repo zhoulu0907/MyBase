@@ -7,7 +7,7 @@ import { LISTTYPE, TaskStatusMap } from '@onebase/app';
 // import { getDonePageList } from '../../../../../../../../packages/app/src/services/app_runtime';
 import dayjs from 'dayjs';
 
-const IDone: FC = ({ appId }) => {
+const IDone: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -16,17 +16,17 @@ const IDone: FC = ({ appId }) => {
     {
       title: '发起人',
       dataIndex: 'initiator',
-      render: (val, record) => (
+      render: (obj: any) => (
         <span className="flex-bw-center">
-          <img src="/src/assets/images/avatar.svg" />
-          {val}
+          <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
+          {obj?.name}
         </span>
       )
     },
     {
       title: '处理操作',
       dataIndex: 'taskStatus',
-      render: (val, record) => {
+      render: (val: TaskStatusMap) => {
         if (val === TaskStatusMap.SUBMITTED || val === TaskStatusMap.AGREED || val === TaskStatusMap.PASS) {
           return <span style={{ color: '#00B42A' }}>{val}</span>;
         } else if (
@@ -52,7 +52,7 @@ const IDone: FC = ({ appId }) => {
       title: '操作',
       dataIndex: 'op',
       align: 'center',
-      render: (_, record) => (
+      render: (_:any, record:any) => (
         <Button
           type="text"
           status="success"
@@ -86,7 +86,14 @@ const IDone: FC = ({ appId }) => {
       //   submitTimeEnd: ''
     };
     const res = await getDonePageList(req);
-    setData(res?.list);
+    if (Array.isArray(res?.list)) {
+      setData(res.list.map((item: object, i: number) => {
+        return {
+          ...(item || {}),
+          key: i
+        }
+      }));
+    }
   };
 
   const onBack = () => {

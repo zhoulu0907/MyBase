@@ -13,6 +13,11 @@ export interface DeptVO {
   [key: string]: any;
 }
 
+export interface GetDeptsByIdReq {
+  id: string;
+  idType: string;
+}
+
 export interface DeptTree extends DeptVO {
   userCount: number;
   children?: DeptVO[];

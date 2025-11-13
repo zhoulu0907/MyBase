@@ -99,6 +99,7 @@ export interface XSubTableConfig extends ICommonBaseType {
     maxLength: TTextDefaultType;
     allowNull: TBooleanDefaultType;
   };
+  pageType?: string;
 }
 
 export interface XSubTableSchema {

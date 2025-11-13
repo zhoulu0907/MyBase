@@ -1,0 +1,67 @@
+.versionModal {
+  width: 1200px;
+  .searchHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .left {
+      display: flex;
+      align-items: center;
+
+      span {
+        cursor: pointer;
+        padding: 0 8px;
+
+        &.active {
+          font-weight: bold;
+        }
+
+        &.divider {
+          color: var(--color-border-2);
+          cursor: default;
+        }
+      }
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+    }
+  }
+  .userCell {
+    .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+  }
+
+  .versionStatus {
+    border-radius: 4px;
+    width: 52px;
+    display: inline-block;
+    line-height: 18px;
+    text-align: center;
+    height: 18px;
+    padding: 2px 4px;
+    font-size: 12px;
+  }
+  .designing {
+    background: #e8f5ff;
+    color: #1979ff;
+  }
+  .published {
+    background: #e8ffea;
+    color: #00b42a;
+  }
+  .history {
+    background: #e5e6eb;
+    color: #86909c;
+  }
+
+
+}

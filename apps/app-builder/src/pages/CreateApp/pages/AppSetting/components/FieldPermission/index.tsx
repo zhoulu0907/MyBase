@@ -170,16 +170,18 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
     const updatedFieldPermissions = Object.fromEntries(
       Object.entries(formData.authFields as Record<string, { isCanRead: boolean; isCanEdit: boolean }>).map(
-        ([key, value]) => [key, { ...value, isCanEdit: checked }]
+        ([key, value]) => [key, { ...value, isCanEdit: checked, isCanRead: checked ? checked : value.isCanRead }]
       )
     );
 
     setCheckEditableAll(checked);
+    setCheckReadableAll(checked);
     setIndeterminateEditable(false);
     form.setFieldValue('authFields', updatedFieldPermissions);
     const updateFields = fieldPermission?.map((field) => ({
       ...field,
-      isCanEdit: +checked
+      isCanEdit: +checked,
+      isCanRead: checked ? +checked : field.isCanRead
     }));
     setFieldPermission(updateFields);
     updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
@@ -247,7 +249,17 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (value) {
       updateFieldsPermission(fieldPermission || [], value);
     } else {
-      generatePermFields();
+      // 切换自定义时默认全选中
+      const defaultAuthFields = fieldPermission.map((field) => ({
+        ...field,
+        isCanEdit: 1,
+        isCanRead: 1
+      }));
+      form.setFieldValue('authFields', defaultAuthFields);
+      setCheckEditableAll(true);
+      setCheckReadableAll(true);
+      setFieldPermission(defaultAuthFields);
+      updateFieldsPermission(defaultAuthFields, value); //更新数据
     }
   };
 

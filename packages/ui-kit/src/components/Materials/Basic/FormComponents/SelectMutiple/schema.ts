@@ -96,6 +96,7 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
    * 默认值
    */
   defaultValue?: any;
+  defaultOptions: { label: string; value: any; [property: string]: any }[];
 
   /**
    * 字段宽度
@@ -155,11 +156,11 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
       name: '开启搜索',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     {
       key: 'verify',
       name: '校验',
@@ -178,7 +179,8 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: [
+    defaultValue: undefined,
+    defaultOptions: [
       {
         label: '选项一',
         value: '选项一'

@@ -14,7 +14,7 @@ export interface DynamicCheckboxConfigProps {
 }
 
 const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePropsChange, item, configs, id }) => {
-  const checkboxKey = 'defaultValue';
+  const checkboxKey = 'defaultOptions';
   const [checkboxConfig, setCheckboxConfig] = useState<any[]>(configs[checkboxKey] || []);
 
   console.debug({

@@ -1,6 +1,5 @@
 import { createClient } from '@onebase/common';
 
-
 /**
  * 预定义的客户端实例
  */

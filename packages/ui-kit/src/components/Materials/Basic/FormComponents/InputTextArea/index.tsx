@@ -44,7 +44,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXTAREA}_${nanoid()}`
         }
@@ -72,13 +75,13 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <TextArea
             key={`${minRows}-${maxRows}`}
-            defaultValue={defaultValue}
             placeholder={placeholder}
             maxLength={maxLength}
             allowClear

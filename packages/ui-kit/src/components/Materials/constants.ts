@@ -22,10 +22,8 @@ export const CONFIG_TYPES = {
   STATUS_RADIO: 'StatusRadio',
   // 组件宽度选择
   WIDTH_RADIO: 'WidthRadio',
-  // 组件默认值选择
-  DEFAULT_VALUE_SELECT: 'DefaultValueSelect',
-  // 组件默认值输入
-  DEFAULT_VALUE_INPUT: 'DefaultValueInput',
+  // 组件默认值
+  DEFAULT_VALUE: 'DefaultValue',
   // 组件必填选择
   REQUIRED_CHECKBOX: 'RequiredCheckBox',
   // 布局列数选择
@@ -85,13 +83,25 @@ export const CONFIG_TYPES = {
   // 静态文件
   IMAGE: 'Image',
   FILE: 'File',
+  // 图片处理
+  IMAGE_HANDLE: 'ImageHandle',
   // 折叠面板展开状态
   COLLAPSED: 'Collapsed',
   // 自动编号规则
   AUTO_CODE_RULES: 'autoCodeRules',
+  // 日期格式
+  DATE_FORMAT: 'DateFormat',
+  // 时间格式
+  TIME_FORMAT: 'TimeFormat',
+  // 填充文本 switch
+  SWITCH_FILL_TEXT: 'SwitchFillText',
 
   TABLE_OPERATION: 'TableOperation',
-  TABLE_BUTTON: 'advancedButtonPermission'
+  TABLE_BUTTON: 'advancedButtonPermission',
+  //选择部门默认值
+  DEPT_DEFAULT_VALUE: 'deptDefaultValue',
+  //选择部门可选范围
+  DEPT_SELECT_SCOPE: 'deptSelectScope',
 } as const;
 
 // 状态选项常量
@@ -177,7 +187,7 @@ export const ALIGN_VALUES = {
 export const UPLOAD_OPTIONS = {
   TEXT: '文本',
   LIST: '列表',
-  CARD: '平铺'
+  CARD: '卡片'
 } as const;
 
 export const UPLOAD_TYPE_OPTIONS = {
@@ -200,11 +210,37 @@ export const DATE_OPTIONS = {
   FULL: '年月日时'
 } as const;
 
+// 时间选择格式
+export const TIME_OPTIONS = {
+  HOUR:'时',
+  MINUTE:'分',
+  SECOND:'秒'
+} as const;
+
 export const DATE_VALUES = {
   [DATE_OPTIONS.YEAR]: 'year',
   [DATE_OPTIONS.MONTH]: 'month',
   [DATE_OPTIONS.DATE]: 'date',
   [DATE_OPTIONS.FULL]: 'full'
+} as const;
+
+export const TIME_VALUES = {
+  [TIME_OPTIONS.HOUR]: 'hour',
+  [TIME_OPTIONS.MINUTE]: 'minute',
+  [TIME_OPTIONS.SECOND]: 'second',
+} as const;
+
+export const DATE_FORMAT = {
+  [DATE_VALUES[DATE_OPTIONS.YEAR]]: 'YYYY',
+  [DATE_VALUES[DATE_OPTIONS.MONTH]]: 'YYYY-MM',
+  [DATE_VALUES[DATE_OPTIONS.DATE]]: 'YYYY-MM-DD',
+  [DATE_VALUES[DATE_OPTIONS.FULL]]: 'YYYY-MM-DD HH:mm:ss',
+} as const;
+
+export const TIME_FORMAT = {
+  [TIME_VALUES[TIME_OPTIONS.HOUR]]: 'HH',
+  [TIME_VALUES[TIME_OPTIONS.MINUTE]]: 'HH:mm',
+  [TIME_VALUES[TIME_OPTIONS.SECOND]]: 'HH:mm:ss',
 } as const;
 
 // 表单的布局
@@ -300,3 +336,15 @@ export enum TableOperationButtonStyle {
   TEXT = 'text',
   ALL = 'all'
 }
+
+// 默认值
+export const DEFAULT_VALUE_TYPES = {
+  CUSTOM: 'custom',
+  FORMULA: 'formula',
+  LINKAGE: 'linkage'
+} as const;
+export const DEFAULT_VALUE_TYPES_LABELS = {
+  custom: '自定义',
+  formula: '公式计算',
+  linkage: '数据联动'
+} as const;

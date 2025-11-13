@@ -5,6 +5,7 @@ import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputDateTimePickerConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -31,18 +32,13 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`
         }
@@ -58,13 +54,14 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <DatePicker
             showTime
-            defaultValue={defaultValue}
+            format="YYYY-MM-DD HH:mm:ss"
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

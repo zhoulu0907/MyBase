@@ -5,6 +5,7 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputSelectOneConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -17,6 +18,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
     labelColSpan = 0,
     showSearch,
     defaultValue,
+    defaultOptions,
     runtime = true,
     detailMode
   } = props;
@@ -32,18 +34,13 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`
         }
@@ -59,9 +56,10 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{defaultValue.find((item: any) => item.value == fieldValue)?.label || '--'}</div>
+          <div>{defaultOptions.find((item: any) => item.value == fieldValue)?.label || '--'}</div>
         ) : (
           <Select
             placeholder="请选择"
@@ -70,7 +68,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             allowClear
-            options={defaultValue}
+            options={defaultOptions}
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

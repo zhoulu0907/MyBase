@@ -3,8 +3,9 @@ import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
 import type { XInputDatePickerConfig } from './schema';
+import { getPopupContainer } from '@/utils';
+import '../index.css';
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -42,32 +43,28 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
       width: '100%',
       pointerEvents: (runtime ? 'auto' : 'none') as React.CSSProperties['pointerEvents']
     };
-    const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-      return (
-        (node?.closest('.arco-form-item') as HTMLElement) ||
-        node?.parentNode as HTMLElement ||
-        document.body
-      );
-    };
     switch (currentDateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
-        return <YearPicker style={styles} getPopupContainer={getPopupContainer} />;
+        return <YearPicker style={styles} format='YYYY' getPopupContainer={getPopupContainer} />;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
-        return <MonthPicker style={styles} getPopupContainer={getPopupContainer} />;
+        return <MonthPicker style={styles} format='YYYY-MM' getPopupContainer={getPopupContainer} />;
       case DATE_VALUES[DATE_OPTIONS.DATE]:
-        return <DatePicker style={styles} getPopupContainer={getPopupContainer} />;
+        return <DatePicker style={styles} format='YYYY-MM-DD' getPopupContainer={getPopupContainer} />;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
-        return <DatePicker showTime style={styles} getPopupContainer={getPopupContainer} />;
+        return <DatePicker showTime style={styles} format="YYYY-MM-DD HH:mm:ss" getPopupContainer={getPopupContainer} />;
       default:
         // 默认显示日期选择器
-        return <DatePicker style={{ width: '100%' }} />;
+        return <DatePicker style={{ width: '100%' }} format='YYYY-MM-DD' />;
     }
   };
 
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
         }

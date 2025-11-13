@@ -69,6 +69,11 @@ interface Options {
   value: string;
 }
 
+const menuStyles = {
+  height: '40px',
+  padding: '9px 12px'
+};
+
 const PageManagerPage: FC = () => {
   useSignals();
 
@@ -139,7 +144,7 @@ const PageManagerPage: FC = () => {
     menus: ApplicationMenu[],
     maxWidth: number,
     showOption: boolean = false,
-    style: React.CSSProperties = {}
+    style: React.CSSProperties = menuStyles
   ): any[] => {
     return menus.map((menu) => ({
       key: menu.id,
@@ -190,10 +195,6 @@ const PageManagerPage: FC = () => {
     const processedRes = addParentIdToChildren(res, RootParentPage.id);
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
 
-    const menuStyles = {
-      height: '40px',
-      padding: '9px 12px'
-    };
     const treeData = convertMenuToTreeData(res, initTreeItemWidth, true, menuStyles);
     setTreeData(treeData);
 
@@ -439,92 +440,99 @@ const PageManagerPage: FC = () => {
     return () => debouncedSearch.cancel();
   }, [debouncedSearch]);
 
-  // 菜单节点拖拽排序
-  const moveNode = (dragNode: TreeNode, dropNode: TreeNode | null, dropPosition: number): void => {
-    // 移除节点
-    const removeNode = (nodes: TreeNode[], key: string): TreeNode | null => {
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].key === key) return nodes.splice(i, 1)[0];
-        if (nodes[i].children) {
-          const removed = removeNode(nodes[i].children!, key);
-          if (removed) return removed;
-        }
-      }
-      return null;
-    };
-
-    const dragItem = treeData ? removeNode(treeData, dragNode.key) : null;
-    if (!dragItem) return;
-
-    // 插入节点
-    const insertNode = (
-      nodes: TreeNode[],
-      key: string | null,
-      nodeToInsert: TreeNode,
-      position: number,
-      parentNodes: TreeNode[] = nodes
-    ): boolean => {
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].key === key) {
-          const dropType = nodes[i].menuType;
-          const dragType = nodeToInsert.menuType;
-
-          // 页面节点不能放到页面节点内部
-          if (dragType === MenuType.PAGE && dropType === MenuType.PAGE && position === 0) {
-            return false;
-          }
-
-          if (dropType === MenuType.GROUP && position === 0) {
-            // 拖到分组节点上 -> 插入 children
-            if (!nodes[i].children) nodes[i].children = [];
-            nodes[i].children!.push(nodeToInsert);
-            setExpandedKeys((prev) => [...prev, nodes[i].key]);
-          } else if (position === -1) {
-            // 放在目标节点前面
-            const index = parentNodes.indexOf(nodes[i]);
-            parentNodes.splice(index, 0, nodeToInsert);
-          } else if (position === 1) {
-            // 放在目标节点后面
-            const index = parentNodes.indexOf(nodes[i]);
-            parentNodes.splice(index + 1, 0, nodeToInsert);
-          }
-
-          return true;
-        }
-
-        if (nodes[i].children && insertNode(nodes[i].children!, key, nodeToInsert, position, nodes[i].children)) {
-          return true;
-        }
-      }
-
-      // 拖到空白处，插入顶层
-      if (key === null && parentNodes === nodes) {
-        nodes.push(nodeToInsert);
-        return true;
-      }
-
-      return false;
-    };
-
-    insertNode(treeData!, dropNode ? dropNode.key : null, dragItem, dropPosition);
-    setTreeData([...treeData!]);
-  };
-
   const buildMenuTree = (nodes: TreeNode[]): { id: string; children: any[] }[] =>
     nodes.map((node) => ({
       id: node.key,
       children: node.children ? buildMenuTree(node.children) : []
     }));
 
-  const findParentNode = (list: TreeNode[], key: string): TreeNode | null => {
-    for (const node of list) {
-      if (node.children?.some((c) => c.key === key)) {
-        return node;
+  const findParentKey = (data: TreeNode[], childKey: string, parentKey: string | null = null): string | null => {
+    for (const item of data) {
+      if (item.key === childKey) {
+        return parentKey;
       }
-      const found = findParentNode(node.children || [], key);
-      if (found) return found;
+      if (item.children) {
+        const result = findParentKey(item.children, childKey, item.key);
+        if (result) return result;
+      }
     }
     return null;
+  };
+
+  // 遍历工具函数
+  const loop = (
+    data: TreeNode[],
+    key: string,
+    callback: (item: TreeNode, index: number, arr: TreeNode[]) => void
+  ): boolean => {
+    return data.some((item, index, arr) => {
+      if (item.key === key) {
+        callback(item, index, arr);
+        return true;
+      }
+      if (item.children) {
+        return loop(item.children, key, callback);
+      }
+      return false;
+    });
+  };
+
+  const handleDrop = async ({ dragNode, dropNode, dropPosition }: any) => {
+    const data = [...treeData!];
+    const dragType = dragNode.props.menuType;
+    const dropType = dropNode.props.menuType;
+
+    // ✅ 规则校验：只允许 PAGE → GROUP
+    if (dropPosition === 0 && !(dragType === MenuType.PAGE && dropType === MenuType.GROUP)) {
+      console.warn('❌ 只能将页面拖入分组下');
+      return;
+    }
+    if (dropType === MenuType.PAGE && dropPosition === 0) {
+      console.warn('❌ 分组不能拖入页面');
+      return;
+    }
+
+    let dragItem: TreeNode | undefined;
+
+    // 从原位置移除
+    loop(data, dragNode.key, (item, index, arr) => {
+      arr.splice(index, 1);
+      dragItem = item;
+    });
+
+    if (!dragItem) return;
+
+    // 新的 parentId（默认 null = 根节点）
+    let newParentId: string | null = null;
+
+    if (dropPosition === 0) {
+      // 拖入节点内部
+      loop(data, dropNode.key, (item) => {
+        item.children = item.children || [];
+        item.children.push(dragItem!);
+      });
+      newParentId = dropNode.key; // ✅ 设置新父节点 id
+      setExpandedKeys([newParentId!]);
+    } else {
+      // 拖入节点前后
+      loop(data, dropNode.key, (_item, index, arr) => {
+        arr.splice(dropPosition < 0 ? index : index + 1, 0, dragItem!);
+      });
+      // 前后拖拽，父节点等于 dropNode 的父节点
+      newParentId = findParentKey(treeData!, dropNode.key);
+    }
+
+    setTreeData([...data]);
+
+    // 生成接口参数
+    const payload: UpdateApplicationMenuOrderReq = {
+      id: dragNode.key,
+      parentId: newParentId ?? '0',
+      menuTree: buildMenuTree(data)
+    };
+
+    console.debug('✅ 更新后的参数:', payload, data);
+    await updateApplicationMenuOrder(payload);
   };
 
   return (
@@ -574,33 +582,18 @@ const PageManagerPage: FC = () => {
               gap: 8
             }}
             allowDrop={(info: any) => {
-              const { dragNode, dropNode, dropPosition } = info;
-
-              const dragParent = dragNode?.props?.parentKey;
-              const dropParent = dropNode?.props?.parentKey;
-              const sameParent = dragParent === dropParent;
-
-              // 仅允许同级间上下移动
-              return sameParent && dropPosition !== 0;
-            }}
-            onDrop={async (info: any) => {
               const dragNode = info.dragNode;
               const dropNode = info.dropNode;
               const dropPosition = info.dropPosition;
-              const dropNodeParent = findParentNode(treeData!, dropNode.key);
+              const dragType = dragNode?.props?.menuType;
+              const dropType = dropNode.props?.menuType;
 
-              moveNode(dragNode, dropNode, dropPosition);
-
-              // 生成接口参数
-              const payload: UpdateApplicationMenuOrderReq = {
-                id: dragNode.key,
-                parentId: dropNodeParent?.key || '0',
-                menuTree: buildMenuTree(treeData!)
-              };
-
-              console.debug('✅ 更新后的参数:', payload);
-              await updateApplicationMenuOrder(payload);
+              if (dropPosition === 0) {
+                return dragType === MenuType.PAGE && dropType === MenuType.GROUP;
+              }
+              return true;
             }}
+            onDrop={handleDrop}
           />
         </Sider>
         <Content className={styles.content}>

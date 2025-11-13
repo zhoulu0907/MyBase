@@ -76,6 +76,24 @@ export interface RoleAddUserReq {
   userIds: string[];
 }
 
+/**
+ * AuthRoleAddDeptReq
+ */
+export interface RoleAddDeptReq {
+    /**
+     * 部门ID列表
+     */
+    deptIds: string[];
+    /**
+     * 是否包含子部门
+     */
+    isIncludeChild?: number;
+    /**
+     * 角色id
+     */
+    roleId: string;
+} 
+
 export interface RoleDeleteUserReq {
   /**
    * 角色ID
@@ -85,6 +103,31 @@ export interface RoleDeleteUserReq {
    * 用户ID列表
    */
   userIds: string[];
+}
+
+/**
+ * RoleDeleteMemberReq
+ */
+export interface RoleDeleteMemberReq {
+    /**
+     * 部门和成员列表
+     */
+    members: UserMembers[];
+    /**
+     * 角色id
+     */
+    roleId: string;
+}
+
+/**
+ * UserMembers
+ */
+export interface UserMembers {
+    id?: number;
+    isIncludeChild?: number;
+    memberId?: number;
+    memberName?: string;
+    memberType?: string;
 }
 
 export interface DeleteRoleReq {
@@ -122,6 +165,29 @@ export interface GetDeptUserReq {
    * 角色ID
    */
   roleId: string;
+}
+
+export interface getRoleMembersReq {
+  /**
+   * 成员名称
+   */
+  memberName?: string;
+  /**
+   * 页码，从 1 开始
+   */
+  pageNo: number;
+  /**
+   * 每页条数，最大值为 100
+   */
+  pageSize: number;
+  /**
+   * 角色ID
+   */
+  roleId: string;
+  /**
+   * 成员类型
+   */
+  memberType?: string;
 }
 
 /**
@@ -254,4 +320,5 @@ export interface AuthRoleUsersPageRespVO {
      * 用户名
      */
     nickname?: string;
+    key?: string;
 }

@@ -269,9 +269,10 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean; detail
                   data-cp-id={cp.id}
                   className="componentItem"
                   style={{
-                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
+                    width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                     borderColor: curComponentID === cp.id ? '#009E9E' : 'transparent',
-                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
+                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                    margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();

@@ -20,9 +20,10 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
     setconfigFormForm: (form: FormInstance) => setconfigFormForm(form)
   };
 
-  const handleSubmit = (data: any, errmsg: string[]) => {
+  const handleSubmit = (data: any, nodeName: string) => {
+    nodeName && (data.name = nodeName);
     nodeRender.updateData(Object.assign({}, nodeRender.data, data));
-    console.log(nodeRender.data,'更新后的data');
+    console.log(nodeRender.data, '更新后的data');
   };
 
   return (
@@ -38,9 +39,11 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
         }}
       >
         {nodeRender?.type === WorkflowNodeType.APPROVER && (
-          <ApproveDreawer handleConfigSubmit={handleSubmit} configData={nodeRender.data || {}} />
+          <ApproveDreawer handleConfigSubmit={handleSubmit} configData={nodeRender.data} />
         )}
-        {nodeRender?.type === WorkflowNodeType.INITIATION && <Launch handleConfigSubmit={handleSubmit} />}
+        {nodeRender?.type === WorkflowNodeType.INITIATION && (
+          <Launch handleConfigSubmit={handleSubmit} configData={nodeRender.data} />
+        )}
       </div>
     </NodeRenderContext.Provider>
   );

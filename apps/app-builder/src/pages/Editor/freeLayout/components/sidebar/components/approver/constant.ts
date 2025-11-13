@@ -70,8 +70,8 @@ export interface ApproverConfigDataType {
 }
 
 export interface ApproveDrawerProps {
-  configData: ApproverConfigDataType;
-  handleConfigSubmit: (data: ApproverConfigDataType, other: any[]) => void;
+  configData?: ApproverConfigDataType;
+  handleConfigSubmit: (data: ApproverConfigDataType, name: string) => void;
 }
 
 type ConfigKey = 'approverConfig' | 'buttonConfigs' | 'fieldPermConfig';

@@ -31,8 +31,8 @@ const relationshipTypeMap: Record<string, string> = {
 const relationKeyMap: Record<string, string> = {
   sourceEntityName: '左关联实体',
   targetEntityName: '右关联实体',
-  sourceFieldName: '左关联字段',
-  targetFieldName: '右关联字段',
+  sourceFieldDisplayName: '左关联字段',
+  targetFieldDisplayName: '右关联字段',
   relationshipType: '关联关系'
 };
 

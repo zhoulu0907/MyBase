@@ -30,6 +30,7 @@ interface PreviewRenderProps {
   showFromPageData?: Function;
 
   refresh?: number;
+  pageType?: string;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -39,7 +40,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   runtime,
   detailMode,
   showFromPageData,
-  refresh
+  refresh,
+  pageType
 }) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
@@ -231,7 +233,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} pageType={pageType} />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
         return (
@@ -246,11 +248,11 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
+        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} />;
       case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
-        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} />;
+        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} />;
       case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
-        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} />;
+        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:

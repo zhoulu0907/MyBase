@@ -45,7 +45,7 @@ export interface ConfigFieldModalProps {
 // 字段操作接口
 export interface FieldOperations {
   addField: () => void;
-  deleteField: (id: string) => void;
+  deleteField: (id: string, onDelete?: (id: string) => void) => void;
   updateField: (id: string, updates: Partial<FieldFormValues>) => void;
   moveField: (oldIndex: number, newIndex: number) => void;
   getFieldById: (id: string) => FieldFormValues | undefined;
@@ -108,6 +108,7 @@ export interface AutoNumberRuleResponce {
   resetCycle?: string;
   resetOnInitialChange?: number;
   startValue?: number;
+  initialValue?:number
 }
 // 创建自动编号规则
 export interface AutoNumberRule {
@@ -147,4 +148,11 @@ export interface AutoCodeRule {
 
 export interface AutoCodeRules {
   rules: AutoCodeRule[];
+}
+
+// 实体及子表字段
+export interface EntityFieldsWithChildren {
+  label: string;
+  value: string;
+  children: { label: string; value: string; fieldType: string }[];
 }

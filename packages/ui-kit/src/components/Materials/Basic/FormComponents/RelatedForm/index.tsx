@@ -6,6 +6,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constant
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import '../index.css';
 import { type XRelatedFormConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -55,14 +56,13 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
     }
   };
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (node?.closest('.arco-form-item') as HTMLElement) || (node?.parentNode as HTMLElement) || document.body;
-  };
-
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`
         }

@@ -22,7 +22,7 @@ const ICopied:FC = () => {
             dataIndex: 'salary',
             render: (val, record) => (
                 <span className='flex-bw-center'>
-                    <img src="/src/assets/images/avatar.svg" />{val}
+                    <div className='photo-img'>{record?.avatar && <img src={record?.avatar} />}</div>{val}
                 </span>
             ),
         },

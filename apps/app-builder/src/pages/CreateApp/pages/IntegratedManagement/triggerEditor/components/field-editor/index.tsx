@@ -114,7 +114,11 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
           key: `${nodeId}.${field.value}`,
           title: field.label
         });
-      } else if (field?.fieldType === fieldType) {
+      } else if (
+        field?.fieldType === fieldType ||
+        ([ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.ID.VALUE].includes(field?.fieldType) &&
+          [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.ID.VALUE].includes(fieldType))
+      ) {
         children.push({
           key: `${nodeId}.${field.value}`,
           title: field.label

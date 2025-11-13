@@ -20,6 +20,7 @@ import { IconDragDotVertical, IconEdit, IconExclamationCircle } from '@arco-desi
 import { IconEditStroked } from '@douyinfe/semi-icons';
 import type { PageView } from '@onebase/app';
 import {
+  getPopupContainer,
   iconColorList,
   iconMap,
   operationIcon,
@@ -207,15 +208,15 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
         const newValue = newData.map((op: OperationButtonConfig) =>
           op.type === modalButtonVisible
             ? {
-                ...op,
-                buttonName: values.buttonName,
-                buttonIcon: values.buttonIcon,
-                iconColor: values.iconColor,
-                confirmText: values.confirmText,
-                deletedAction: values.deletedAction,
-                redirectPageId: values.redirectPageId,
-                redirectMethod: values.redirectMethod
-              }
+              ...op,
+              buttonName: values.buttonName,
+              buttonIcon: values.buttonIcon,
+              iconColor: values.iconColor,
+              confirmText: values.confirmText,
+              deletedAction: values.deletedAction,
+              redirectPageId: values.redirectPageId,
+              redirectMethod: values.redirectMethod
+            }
             : op
         );
         handlePropsChange(operationButton, newValue);
@@ -406,13 +407,14 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
           >
             <Select
               style={{ width: '230px' }}
+              getPopupContainer={getPopupContainer}
               options={(Object.values(pageViews.value) as PageView[])
                 .filter((item: PageView) => item.detailViewMode === 1)
                 .map((item: PageView) => ({
                   label: item.pageName,
                   value: item.id
                 }))}
-            ></Select>
+            />
           </Form.Item>
 
           <Form.Item
@@ -422,7 +424,10 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
             style={{ flex: 1 }}
             rules={[{ required: true, message: '请选择打开方式' }]}
           >
-            <Select options={openTypeOptions}></Select>
+            <Select
+              options={openTypeOptions}
+              getPopupContainer={getPopupContainer}
+            />
           </Form.Item>
         </Form>
       </Modal>
@@ -545,6 +550,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                         label: item.pageName,
                         value: item.id
                       }))}
+                    getPopupContainer={getPopupContainer}
                   />
                 </Form.Item>
               </Col>
@@ -557,7 +563,11 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                   style={{ flex: 1 }}
                   rules={[{ required: true, message: '请选择打开方式' }]}
                 >
-                  <Select defaultValue={RedirectMethod.NEW_TAB} options={openButtonTypeOptions}></Select>
+                  <Select
+                    defaultValue={RedirectMethod.NEW_TAB}
+                    options={openButtonTypeOptions}
+                    getPopupContainer={getPopupContainer}
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -583,7 +593,11 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                   style={{ flex: 1 }}
                   rules={[{ required: true, message: '请选择删除后动作' }]}
                 >
-                  <Select defaultValue={RedirectMethod.REFRESH} options={openButtonActionOptions}></Select>
+                  <Select
+                    defaultValue={RedirectMethod.REFRESH}
+                    options={openButtonActionOptions}
+                    getPopupContainer={getPopupContainer}
+                  />
                 </Form.Item>
               </Col>
             </Row>

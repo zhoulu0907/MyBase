@@ -105,9 +105,21 @@ export class HttpClient {
               TokenManager.clearToken();
 
               const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
-              //   window.location.href = '/#/login';
 
-              window.location.href = `/#/login?redirectURL=${redirectURL}`;
+              // 使用 URL 构造器解析，获取 hash 前的地址路径
+              let basePath = redirectURL;
+              try {
+                const urlObj = new URL(redirectURL);
+                // 不包含 hash，仅取协议、主机、端口和 pathname、search 部分
+                basePath = urlObj.origin + urlObj.pathname + urlObj.search;
+                console.log(urlObj);
+              } catch (e) {
+                // fallback：不合法 URL 则按原先逻辑处理
+                const hashIndex = redirectURL.indexOf('#');
+                basePath = hashIndex !== -1 ? redirectURL.substring(0, hashIndex) : redirectURL;
+              }
+
+              window.location.href = `${basePath}#/login?redirectURL=${redirectURL}`;
             }
             return Promise.reject(new Error(data.msg || '请求失败'));
           }
