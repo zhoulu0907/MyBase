@@ -149,7 +149,7 @@ const IDone: FC = ({ appId }: any) => {
         pageSize={pagination.pageSize}
         total={pagination.total}
         onChange={handlePageChange}
-        showTotal={(total: any) => `共 ${total} 条`}
+        showTotal={(total: any) => `共 ${total} 项数据`}
         showJumper
         sizeCanChange
       />

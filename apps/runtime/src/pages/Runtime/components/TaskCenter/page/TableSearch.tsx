@@ -14,6 +14,8 @@ export interface FilterParams {
   businessId?: string;
   nodeCode?: string;
   dateRange?: [Date, Date];
+  keyword?: string;
+  sortType?:string
 }
 
 export interface OptionItem {
@@ -25,6 +27,10 @@ const pageSetFormType = '2';
 const selectType = {
   EQUAL: 'equal',
   CONTAIN: 'contain'
+};
+const sortTypeEnum = {
+  DESC: 'desc',
+  ASC: 'asc'
 };
 
 const Option = Select.Option;
@@ -47,9 +53,17 @@ const TableSearch: FC<any> = ({
   const [loadingSecond, setLoadingSecond] = useState(false);
   const [loadingThird, setLoadingThird] = useState(false);
   const [operator, setOperator] = useState<string>(selectType.EQUAL);
-  function handleSortItem(key: string) {
+  const handleSortItem=(key: string)=> {
     setSortCheck(key);
+    handleFilterChange('sortType', key)
+     const newFilters = {
+       ...filters,
+       sortType: key
+     };
+     const newParams = parseParams(newFilters);
+     onFilterChange(newParams);
   }
+
 
   useEffect(() => {
     if (filters.businessId) {
@@ -106,7 +120,9 @@ const TableSearch: FC<any> = ({
       flowStatus: undefined,
       businessId: undefined,
       nodeCode: undefined,
-      dateRange: undefined
+      dateRange: undefined,
+      keyword:undefined,
+      sortType:undefined
     };
     setFilters(resetFilters);
     setNodeOptions([]);
@@ -117,7 +133,8 @@ const TableSearch: FC<any> = ({
     const result: any = {};
     if (params.businessId) result.businessId = params.businessId;
     if (params.nodeCode) result.nodeCode = params.nodeCode;
-
+    if(params.keyword) result.keyword = params.keyword;
+    if (params.sortType) result.sortType = params.sortType;
     if (params.flowStatus) {
       result.flowStatus = Array.isArray(params.flowStatus) ? params.flowStatus.join(',') : params.flowStatus;
     }
@@ -129,6 +146,7 @@ const TableSearch: FC<any> = ({
     return result;
   };
   const handleSearch = () => {
+    console.log(filters,'=============')
     const newParams = parseParams(filters);
     onFilterChange(newParams);
   };
@@ -138,7 +156,16 @@ const TableSearch: FC<any> = ({
   }, []);
   return (
     <div className="title-rgt-tb-search">
-      {uiConfig?.hasInput && <Input.Search allowClear placeholder="输入内容查询" style={{ width: 230, height: 32 }} />}
+      {uiConfig?.hasInput && (
+        <Input.Search
+          allowClear
+          placeholder="输入内容查询"
+          style={{ width: 230, height: 32 }}
+          value={filters.keyword}
+          onChange={(value: any) => handleFilterChange('keyword', value)}
+          onPressEnter={() => handleSearch()}
+        />
+      )}
       {uiConfig?.hasFilter && (
         <Dropdown
           position="br"
@@ -296,12 +323,18 @@ const TableSearch: FC<any> = ({
         <Dropdown
           position="bottom"
           droplist={
-            <Menu onClickMenuItem={(key) => handleSortItem(key)}>
-              <Menu.Item className={sortCheck === 'newest' ? 'item-actived' : 'item-no-check'} key="newest">
+            <Menu onClickMenuItem={(key: any) => handleSortItem(key)}>
+              <Menu.Item
+                className={sortCheck === sortTypeEnum.DESC ? 'item-actived' : 'item-no-check'}
+                key={sortTypeEnum.DESC}
+              >
                 最新发起的
                 <IconCheck className="svg" />
               </Menu.Item>
-              <Menu.Item className={sortCheck === 'earlier' ? 'item-actived' : 'item-no-check'} key="earlier">
+              <Menu.Item
+                className={sortCheck === sortTypeEnum.ASC ? 'item-actived' : 'item-no-check'}
+                key={sortTypeEnum.ASC}
+              >
                 最早发起的
                 <IconCheck className="svg" />
               </Menu.Item>
