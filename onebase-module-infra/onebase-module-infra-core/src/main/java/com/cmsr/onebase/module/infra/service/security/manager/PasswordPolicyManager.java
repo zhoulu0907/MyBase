@@ -93,8 +93,21 @@ public class PasswordPolicyManager {
         config.setCheckUpperCase(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.uppperCase.getKey()));
         config.setCheckContainSpecialChar(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.specialChar.getKey()));
 
-        log.debug("租户密码策略配置转换完成，tenantId: {}, enableWeakPassword: {}, minLength: {}, checkUpperCase: {}, checkContainSpecialChar: {}",
-                null, config.getEnableWeakPassword(), config.getMinLength(), config.getCheckUpperCase(), config.getCheckContainSpecialChar());
+        // 设置历史密码限制
+        String historyLimit = getConfigValue(configMap, SecurityConfigKey.historyLimit.getConfigKey());
+        if (historyLimit != null) {
+            try {
+                config.setHistoryLimit(Integer.parseInt(historyLimit.trim()));
+            } catch (NumberFormatException e) {
+                log.warn("historyLimit配置值无效，使用默认值3");
+                config.setHistoryLimit(3);
+            }
+        } else {
+            config.setHistoryLimit(3); // 默认值
+        }
+
+        log.debug("租户密码策略配置转换完成，tenantId: {}, enableWeakPassword: {}, minLength: {}, checkUpperCase: {}, checkContainSpecialChar: {}, historyLimit: {}",
+                null, config.getEnableWeakPassword(), config.getMinLength(), config.getCheckUpperCase(), config.getCheckContainSpecialChar(), config.getHistoryLimit());
 
         return config;
     }

@@ -33,4 +33,33 @@ public interface SecurityConfigApi {
     @PostMapping("/validate")
     CommonResult<Boolean> validatePassword(@RequestParam("password") String password);
 
+    /**
+     * 校验密码历史
+     * 
+     * 检查新密码是否与历史密码重复
+     * 基于当前租户的historyLimit配置，比对历史密码记录
+     * 如果新密码与历史密码重复，抛出业务异常
+     *
+     * @param userId   用户ID
+     * @param password 待校验的新密码（明文）
+     * @return 校验结果，成功返回success，失败返回error及错误信息
+     */
+    @PostMapping("/validate-history")
+    CommonResult<Boolean> validatePasswordHistory(@RequestParam("userId") Long userId,
+                                                   @RequestParam("password") String password);
+
+    /**
+     * 保存密码历史
+     * 
+     * 在用户修改密码后，将加密后的新密码保存到历史记录表
+     * 如果历史记录数超过historyLimit，自动删除最旧的记录
+     *
+     * @param userId          用户ID
+     * @param encodedPassword 加密后的密码
+     * @return 保存结果
+     */
+    @PostMapping("/save-history")
+    CommonResult<Boolean> savePasswordHistory(@RequestParam("userId") Long userId,
+                                               @RequestParam("encodedPassword") String encodedPassword);
+
 }
