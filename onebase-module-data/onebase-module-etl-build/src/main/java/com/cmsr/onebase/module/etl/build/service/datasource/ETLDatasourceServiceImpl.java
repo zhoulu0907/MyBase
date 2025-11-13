@@ -5,37 +5,49 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatabaseTypeVO;
+import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
+import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollector;
+import com.cmsr.onebase.module.etl.build.service.collector.MetadataManager;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourcePingVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.TestConnectionVO;
+import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
+import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.common.entity.CatalogData;
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
+import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.metainfo.MetaColumn;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import com.cmsr.onebase.module.etl.core.service.DataInspectService;
-import com.cmsr.onebase.module.etl.core.service.MetadataCollectorService;
-import com.cmsr.onebase.module.etl.core.vo.datasource.*;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import jakarta.annotation.PostConstruct;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
+import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 
 @Service
 @Slf4j
 public class ETLDatasourceServiceImpl implements ETLDatasourceService {
+
+    @Resource
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Resource
     private ETLDatasourceRepository datasourceRepository;
@@ -53,49 +65,24 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     private ETLWorkflowTableRepository workflowTableRepository;
 
     @Resource
-    private MetadataCollectorService metadataCollectorService;
+    private ETLFlinkMappingRepository flinkMappingRepository;
+
+    @Resource
+    private MetadataManager metadataManager;
+
+    @Resource
+    private MetadataCollector metadataCollector;
+
+    @Resource
+    private DatasourceFactory datasourceFactory;
 
     @Resource
     private DataInspectService dataInspectService;
 
-    private Map<String, String> supportedDbs = Maps.newHashMap();
-
-    @PostConstruct
-    public void init() throws ClassNotFoundException {
-        DatabaseType[] dbs = {
-                DatabaseType.PostgreSQL,
-                DatabaseType.KingBase,
-                DatabaseType.ORACLE,
-                DatabaseType.MySQL
-        };
-        for (DatabaseType db : dbs) {
-            // 跳过非常规类型
-            if (StringUtils.isBlank(db.driver())) {
-                continue;
-            }
-            String driverName = db.driver();
-            ClassUtils.getClass(driverName);
-            supportedDbs.put(db.name(), db.title());
-        }
-    }
-
     @Override
-    public List<DatabaseTypeVO> getSupportedDatabaseTypes() {
-        List<DatabaseTypeVO> supportedDbVOs = Lists.newArrayList();
-        for (String dbName : supportedDbs.keySet()) {
-            DatabaseTypeVO typeVO = new DatabaseTypeVO();
-            typeVO.setDatasourceType(dbName);
-            typeVO.setDisplayName(supportedDbs.get(dbName));
-            supportedDbVOs.add(typeVO);
-        }
-        return supportedDbVOs;
-    }
-
-    @Override
-    public Boolean pingDatasource(ETLDatasourcePingVO pingVO) {
-        validDatasourceTypeSupported(pingVO.getDatasourceType());
+    public Boolean pingDatasource(TestConnectionVO pingVO) {
         ETLDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, ETLDatasourceDO.class);
-        return metadataCollectorService.testConnection(datasourceDO);
+        return dataInspectService.testConnection(datasourceDO);
     }
 
     @Override
@@ -122,10 +109,9 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public CommonResult<Long> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
-        validDatasourceTypeSupported(createReqVO.getDatasourceType());
-
         Long applicationId = createReqVO.getApplicationId();
         String datasourceType = createReqVO.getDatasourceType();
+
         ETLDatasourceDO datasourceDO = new ETLDatasourceDO();
         datasourceDO.setApplicationId(applicationId);
         UUID uuid = UUID.randomUUID();
@@ -133,19 +119,19 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         datasourceDO.setDatasourceName(createReqVO.getDatasourceName());
         datasourceDO.setDeclaration(createReqVO.getDeclaration());
         datasourceDO.setDatasourceType(datasourceType);
-        datasourceDO.setConfig(JsonUtils.toJsonString(createReqVO.getConfig()));
+        datasourceDO.setConfig(createReqVO.getConfig());
         datasourceDO.setReadonly(createReqVO.getReadonly());
         // initialize collect status to `none`, infer datasource will be empty.
         datasourceDO.setCollectStatus(CollectStatus.NONE);
+        complementJdbcDatasourceProperties(datasourceDO);
         datasourceDO = datasourceRepository.insert(datasourceDO);
         Long datasourceId = datasourceDO.getId();
         Boolean withCollect = createReqVO.getWithCollect();
         if (withCollect) {
             try {
-                boolean collectResult = metadataCollectorService.doCollection(applicationId, datasourceId, datasourceType);
+                boolean collectResult = runMetadataCollect(LocalDateTime.now(), datasourceDO);
                 if (!collectResult) {
-                    CommonResult.error(
-                            ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
+                    ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
                             ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getMsg(),
                             datasourceId);
                 }
@@ -161,19 +147,25 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
-        validDatasourceCodeDuplicate(updateReqVO.getDatasourceCode(), updateReqVO.getId());
-        validDatasourceTypeSupported(updateReqVO.getDatasourceType());
-
         ETLDatasourceDO oldDatasource = datasourceRepository.findById(updateReqVO.getId());
-        oldDatasource.setDatasourceCode(updateReqVO.getDatasourceCode());
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
-        oldDatasource.setConfig(JsonUtils.toJsonString(updateReqVO.getConfig()));
+        oldDatasource.setConfig(updateReqVO.getConfig());
         oldDatasource.setReadonly(updateReqVO.getReadonly());
         // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
-
+        complementJdbcDatasourceProperties(oldDatasource);
         datasourceRepository.update(oldDatasource);
+    }
+
+    private void complementJdbcDatasourceProperties(ETLDatasourceDO datasourceDO) {
+        String datasourceType = datasourceDO.getDatasourceType();
+        DatabaseType databaseType = DatasourceFactory.parseDatabaseType(datasourceType);
+        Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
+        connectionProperties.put("driver", databaseType.driver());
+        String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, connectionProperties);
+        connectionProperties.put("jdbcUrl", jdbcUrl);
+        datasourceDO.setConfig(connectionProperties);
     }
 
     @Override
@@ -203,12 +195,32 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        // 托管给MetadataCollectorService
-        metadataCollectorService.submitCollectJob(datasourceDO);
+        LocalDateTime plannedTime = LocalDateTime.now();
+        checkDatasourceCollectRunnable(datasourceDO, plannedTime);
+
+        threadPoolTaskExecutor.submit(() -> this.runMetadataCollect(plannedTime, datasourceDO));
+    }
+
+    private boolean runMetadataCollect(LocalDateTime plannedTime, ETLDatasourceDO datasourceDO) {
+        Long applicationId = datasourceDO.getApplicationId();
+        Long datasourceId = datasourceDO.getId();
+        log.info("提交元数据采集任务，数据源ID: {}", datasourceId);
+        try {
+            DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, false);
+            CatalogData catalogData = metadataCollector.collectCatalog(datasourceId, datasource);
+            metadataManager.saveMetadata(applicationId, datasourceId, catalogData);
+            long timeCost = Duration.between(plannedTime, LocalDateTime.now()).toMillis();
+            log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+            return true;
+        } catch (Exception e) {
+            long timeCost = Duration.between(plannedTime, LocalDateTime.now()).toMillis();
+            log.error("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+            return false;
+        }
     }
 
     @Override
-    public DataPreviewVO previewTable(TablePreviewVO tablePreviewVO) {
+    public DataPreview previewTable(TablePreviewVO tablePreviewVO) {
         return dataInspectService.previewData(tablePreviewVO);
     }
 
@@ -242,7 +254,8 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
                 .map(tableDO -> {
                     MetaBriefVO briefVO = new MetaBriefVO();
                     briefVO.setId(String.valueOf(tableDO.getId()));
-                    briefVO.setName(tableDO.getDisplayName());
+                    briefVO.setName(tableDO.getTableName());
+                    briefVO.setDisplayName(tableDO.getDisplayName());
                     return briefVO;
                 }).toList();
     }
@@ -253,28 +266,50 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
-
-        List<MetaColumn> columns = tableDO.getMetaInfo().getColumns();
+        ETLDatasourceDO datasourceDO = datasourceRepository.findById(tableDO.getDatasourceId());
+        if (datasourceDO == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+        }
+        Map<String, String> flinkTypeMappings = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceDO.getDatasourceType());
+        TableData tableData = tableDO.getMetaInfo();
+        List<ColumnData> columns = tableData.getColumns();
         return columns.stream()
-                .map(metaColumn -> {
+                .map(columnMeta -> {
                     ColumnDefine columnDefine = new ColumnDefine();
-                    columnDefine.setId(metaColumn.getId());
-                    columnDefine.setName(metaColumn.getDisplayName());
-                    columnDefine.setType(metaColumn.getFlinkType());
+                    String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getId(),
+                            tableData.getCatalogName(),
+                            tableData.getSchemaName(),
+                            tableData.getName(),
+                            columnMeta.getName());
+                    columnDefine.setFieldFqn(fqn);
+                    String tableName = columnMeta.getName();
+                    String displayName = columnMeta.getDisplayName();
+                    String comment = columnMeta.getComment();
+                    String declaration = columnMeta.getDeclaration();
+                    columnDefine.setFieldName(tableName);
+                    columnDefine.setDisplayName(tableName);
+                    if (StringUtils.isNotBlank(comment)) columnDefine.setDisplayName(comment);
+                    if (StringUtils.isNotBlank(declaration) && !StringUtils.equals(declaration, comment))
+                        columnDefine.setDisplayName(declaration);
+                    if (StringUtils.isNotBlank(displayName) && !StringUtils.equals(tableName, displayName))
+                        columnDefine.setDisplayName(displayName);
+                    columnDefine.setFieldType(flinkTypeMappings.get(columnMeta.getType()));
                     return columnDefine;
                 }).toList();
     }
 
-    private void validDatasourceCodeDuplicate(String datasourceCode, Long filterId) {
-        boolean exists = datasourceRepository.existsByDatasourceCodeFilterById(datasourceCode, filterId);
-        if (exists) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_CODE_DUPLICATE);
+    private void checkDatasourceCollectRunnable(ETLDatasourceDO datasourceDO, LocalDateTime plannedTime) {
+        CollectStatus currentStatus = datasourceDO.getCollectStatus();
+        // case (none, required, success, failed) -> running
+        if (!CollectStatus.RUNNING.equals(currentStatus)) {
+            return;
         }
-    }
-
-    private void validDatasourceTypeSupported(String datasourceType) {
-        if (!supportedDbs.containsKey(datasourceType)) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
+        // case running -> running
+        LocalDateTime perviousStartTime = datasourceDO.getCollectStartTime();
+        Duration timeBetween = Duration.between(perviousStartTime, plannedTime);
+        long minuteScale = timeBetween.toMinutes();
+        if (minuteScale < 5L) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_RUNNING);
         }
     }
 }

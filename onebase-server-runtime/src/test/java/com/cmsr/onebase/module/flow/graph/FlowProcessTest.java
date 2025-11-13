@@ -8,9 +8,10 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
+import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
-import com.cmsr.onebase.module.flow.core.flow.ExecutorRequest;
-import com.cmsr.onebase.module.flow.core.flow.FlowExecuteProvider;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -41,7 +42,7 @@ public class FlowProcessTest {
     private FlowProcessExecApiImpl flowProcessExecApi;
 
     @Autowired
-    private FlowExecuteProvider flowExecuteProvider;
+    private FlowRemoteCallExecutor flowRemoteCallExecutor;
 
     @Autowired
     private FlowProcessExecService flowProcessExecService;
@@ -50,12 +51,13 @@ public class FlowProcessTest {
         FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
         String json = flowProcessDO.getProcessDefinition();
         JsonGraph jsonGraph = FlowGraphBuilder.build(json);
-        System.out.println(jsonGraph.toFlowChain());
+        String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
+        System.out.println(flowChain);
     }
 
     @Test
     public void testSimple() throws IOException {
-         testSimple2();
+        testSimple2();
         testSimple2();
         testSimple2();
         testSimple2();
@@ -93,11 +95,26 @@ public class FlowProcessTest {
     }
 
     @Test
+    public void testSimple23() throws IOException {
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(88576673965670400L);
+        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        reqDTO.setFieldData(Map.of(
+                "8857773477298176", "测试部门号",
+                "88577773477298181", "测试部门",
+                "88577773477298186", "Manager"
+        ));
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        System.out.println(respDTO);
+    }
+
+    @Test
     public void testSimple3() throws IOException {
-        ExecutorRequest jobMessage = new ExecutorRequest();
+        RemoteCallRequest jobMessage = new RemoteCallRequest();
         jobMessage.setJobType("fld");
         jobMessage.setProcessId(89995954500108288L);
-        flowExecuteProvider.executeFlow(jobMessage);
+        flowRemoteCallExecutor.executeFlow(jobMessage);
     }
 
     @Test

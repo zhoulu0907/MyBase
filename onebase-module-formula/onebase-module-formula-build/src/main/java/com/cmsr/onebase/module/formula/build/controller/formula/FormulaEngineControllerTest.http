@@ -114,13 +114,13 @@ Content-Type: application/json
 
 { "formula": "EXACT('abc','ABC')" }
 
-### RMBCAP (假设存在)
+### RMBCAP
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "RMBCAP(12345)" }
+{ "formula": "RMBCAP(123.45)" }
 
 ### UUID
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -136,7 +136,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXREPLACE('abc123','\\\\d+','X')" }
+{ "formula": "REGEXREPLACE('abc12312345678','\\\\d{11}','X')" }
 
 ### REGEXMATCH
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -144,7 +144,12 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXMATCH('abc123','^abc')" }
+{ "formula": "REGEXMATCH(text,reg)",
+  "parameters": {
+    "text": "13812345679",
+    "reg": "^\\d{11}$"
+  }
+}
 
 ### REGEXEXTRACT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -152,15 +157,15 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXEXTRACT('a1b2c3','\\\\d')" }
+{ "formula": "REGEXEXTRACT('a1b2c13812345679','\\\\d{11}')" }
 
 ### REGEXEXTRACTALL
-POST {{baseUrl}}/formula/engine/execute-formula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXEXTRACTALL('a1b2c3','\\\\d')" }
+{ "formula": "REGEXEXTRACTALL('小明的电话号码是 13812345679，13812345678','1[3-9]\\\\d{9}')" }
 
 ### ENCODEURL
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -184,7 +189,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TEXTSPLIT('a,b,c',',')" }
+{ "formula": "TEXTSPLIT('a#b#c','#')" }
 
 ### GETUSER
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -202,7 +207,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETDEPT(deptno,name)",
+{ "formula": "GETDEPT(id,name)",
   "parameters": {}
 }
 
@@ -212,7 +217,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETUPDEPT(deptno,name)",
+{ "formula": "GETUPDEPT(id,name)",
   "parameters": {}
 }
 
@@ -222,8 +227,8 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETROLE(userId)",
-  "parameters": {"userId":12}
+{ "formula": "GETROLE(id)",
+  "parameters": {"id":114}
 }
 
 ### GETSUPERVISOR
@@ -242,7 +247,9 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "ISINROLE(18,'admin')" }
+{ "formula": "ISINROLE(id,roleId,isInRole)",
+  "parameters": {"id":114,"roleId": 8728438702112768}
+}
 
 ### ISINDEPT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -250,7 +257,12 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "ISINDEPT(18,100)" }
+{
+  "formula": "ISINDEPT(id,isInDept)",
+  "parameters": {
+    "id": 103
+  }
+}
 
 ### SUM
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -564,13 +576,13 @@ Content-Type: application/json
 
 { "formula": "TIME(12,30,0)" }
 
-### TIMESTAMP (假设存在)
+### TIMESTAMP
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TIMESTAMP()" }
+{ "formula": "TIMESTAMP('2021-03-24')" }
 
 ### EDATE
 POST {{baseUrl}}/formula/engine/execute-formula

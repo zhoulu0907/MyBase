@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.security.runtime;
 
+import com.cmsr.onebase.framework.security.core.LoginUser;
 import lombok.Data;
 
 /**
@@ -7,12 +8,9 @@ import lombok.Data;
  * @Date：2025/10/17 12:31
  */
 @Data
-public class RTLoginUser {
-
-    private String token;
-
-    private Long userId;
-
+public class RTLoginUser extends LoginUser {
+    /**
+     * 应用ID
+     */
     private Long applicationId;
-
 }

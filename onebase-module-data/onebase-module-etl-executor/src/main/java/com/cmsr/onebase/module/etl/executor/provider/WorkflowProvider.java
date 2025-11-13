@@ -1,20 +1,17 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
-import com.cmsr.onebase.module.etl.common.entity.EtlColumn;
-import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
-import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
-import com.cmsr.onebase.module.etl.common.entity.EtlTableColumn;
-import com.cmsr.onebase.module.etl.common.graph.conf.Field;
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
+import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.NodeConfig;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
-import com.cmsr.onebase.module.etl.common.graph.conf.JdbcConfig;
-import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
-import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
-import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputMapper;
-import com.cmsr.onebase.module.etl.executor.provider.dao.*;
+import com.cmsr.onebase.module.etl.common.graph.conf.*;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -71,30 +68,30 @@ public class WorkflowProvider {
         jdbcInputConfig.setJdbcConfig(jdbcConfig);
 
         List<EtlFlinkMapping> flinkMappings = queryProvider.findFlinkMapping(jdbcConfig.getDatabaseType());
-        List<EtlColumn> etlColumns = JacksonUtil.fromJson(etlTable.getMetaInfo(), EtlTableColumn.class).getColumns();
+        List<ColumnData> etlColumns = JacksonUtil.fromJson(etlTable.getMetaInfo(), TableData.class).getColumns();
         List<Field> fields = jdbcInputConfig.getFields();
 
         // 调用优化后的方法
         complementFields(fields, etlColumns, flinkMappings);
     }
 
-    private void complementFields(List<Field> fields, List<EtlColumn> etlColumns, List<EtlFlinkMapping> flinkMappings) {
+    private void complementFields(List<Field> fields, List<ColumnData> etlColumns, List<EtlFlinkMapping> flinkMappings) {
         // 预构建查找表，提高查找效率
-        Map<String, EtlColumn> columnMap = etlColumns.stream()
-                .collect(Collectors.toMap(EtlColumn::getId, column -> column));
-        
+        Map<String, ColumnData> columnMap = etlColumns.stream()
+                .collect(Collectors.toMap(ColumnData::getName, column -> column));
+
         // 按类型名转小写构建映射，支持忽略大小写查找
         Map<String, EtlFlinkMapping> flinkMappingMap = flinkMappings.stream()
                 .collect(Collectors.toMap(mapping -> mapping.getOriginType().toLowerCase(), mapping -> mapping));
 
         for (Field field : fields) {
-            String fieldId = field.getFieldId();
-            EtlColumn etlColumn = columnMap.get(fieldId);
+            String fieldName = field.getFieldName();
+            ColumnData etlColumn = columnMap.get(fieldName);
             if (etlColumn == null) {
-                throw new IllegalArgumentException(String.format("字段ID %s 不存在", fieldId));
+                throw new IllegalArgumentException(String.format("字段ID %s 不存在", fieldName));
             }
 
-            String originType = etlColumn.getOriginType();
+            String originType = etlColumn.getType();
             EtlFlinkMapping etlFlinkMapping = flinkMappingMap.get(originType.toLowerCase());
             if (etlFlinkMapping == null) {
                 throw new IllegalArgumentException(String.format("字段类型 %s 不存在映射", originType));
@@ -121,45 +118,37 @@ public class WorkflowProvider {
         jdbcOutputConfig.setJdbcConfig(jdbcConfig);
 
         List<EtlFlinkMapping> flinkMappings = queryProvider.findFlinkMapping(jdbcConfig.getDatabaseType());
-        List<EtlColumn> etlColumns = JacksonUtil.fromJson(etlTable.getMetaInfo(), EtlTableColumn.class).getColumns();
-        List<JdbcOutputMapper> fields = jdbcOutputConfig.getFields();
-
-        List<Field> targetFieldList = toFields(fields, etlColumns, flinkMappings);
-        jdbcOutputConfig.setTargetFields(targetFieldList);
+        List<ColumnData> etlColumns = JacksonUtil.fromJson(etlTable.getMetaInfo(), TableData.class).getColumns();
+        List<JdbcOutputMapper> jdbcOutputMappers = jdbcOutputConfig.getFields();
+        complementJdbcOutputMappers(jdbcOutputMappers, etlColumns, flinkMappings);
     }
 
-    private List<Field> toFields(List<JdbcOutputMapper> fields, List<EtlColumn> etlColumns, List<EtlFlinkMapping> flinkMappings) {
+    private void complementJdbcOutputMappers(List<JdbcOutputMapper> jdbcOutputMappers, List<ColumnData> etlColumns, List<EtlFlinkMapping> flinkMappings) {
         // 预构建查找表，提高查找效率
-        Map<String, EtlColumn> columnMap = etlColumns.stream()
-                .collect(Collectors.toMap(EtlColumn::getId, column -> column));
-        
+        Map<String, ColumnData> columnMap = etlColumns.stream()
+                .collect(Collectors.toMap(ColumnData::getName, column -> column));
+
         // 按类型名转小写构建映射，支持忽略大小写查找
         Map<String, EtlFlinkMapping> flinkMappingMap = flinkMappings.stream()
                 .collect(Collectors.toMap(mapping -> mapping.getOriginType().toLowerCase(), mapping -> mapping));
 
-        // 使用stream API进行转换，使代码更简洁
-        return fields.stream().map(mapper -> {
-            String targetFieldId = mapper.getTargetFieldId();
-            EtlColumn etlColumn = columnMap.get(targetFieldId);
+        for (JdbcOutputMapper jdbcOutputMapper : jdbcOutputMappers) {
+            String fieldName = StringUtils.substringAfterLast(jdbcOutputMapper.getTargetFieldName(), ".");
+            ColumnData etlColumn = columnMap.get(fieldName);
             if (etlColumn == null) {
-                throw new IllegalArgumentException(String.format("目标字段ID %s 不存在", targetFieldId));
+                throw new IllegalArgumentException(String.format("目标字段ID %s 不存在", jdbcOutputMapper));
             }
-
-            String originType = etlColumn.getOriginType();
+            String originType = etlColumn.getType();
             EtlFlinkMapping etlFlinkMapping = flinkMappingMap.get(originType.toLowerCase());
             if (etlFlinkMapping == null) {
                 throw new IllegalArgumentException(String.format("字段类型 %s 不存在映射", originType));
             }
-
-            Field field = new Field();
-            field.setFieldId(targetFieldId);
-            field.setFieldName(etlColumn.getName());
-            field.setFieldType(etlFlinkMapping.getFlinkType());
-            field.setLength(etlColumn.getLength());
-            field.setPrecision(etlColumn.getPrecision());
-            field.setScale(etlColumn.getScale());
-            return field;
-        }).collect(Collectors.toList());
+            jdbcOutputMapper.setTargetFieldName(etlColumn.getName());
+            jdbcOutputMapper.setTargetFieldType(etlFlinkMapping.getFlinkType());
+            jdbcOutputMapper.setTargetFieldLength(etlColumn.getLength());
+            jdbcOutputMapper.setTargetFieldPrecision(etlColumn.getPrecision());
+            jdbcOutputMapper.setTargetFieldScale(etlColumn.getScale());
+        }
     }
 
 

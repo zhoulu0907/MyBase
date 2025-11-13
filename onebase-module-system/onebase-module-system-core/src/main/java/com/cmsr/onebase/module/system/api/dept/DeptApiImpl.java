@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
+import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.vo.dept.DeptAndUsersRespVO;
 import com.cmsr.onebase.module.system.convert.dept.DeptConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -55,4 +56,9 @@ public class DeptApiImpl implements DeptApi {
         return success(BeanUtils.toBean(depts, DeptRespDTO.class));
     }
 
+    @Override
+    public CommonResult<List<DeptRespDTO>> getParentDeptsListByUserId(Long userId) {
+        List<DeptDO> deptDOList = deptService.getParentDeptsListById(userId, IdTypeEnum.USER.getCode());
+        return success(BeanUtils.toBean(deptDOList, DeptRespDTO.class));
+    }
 }

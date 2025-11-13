@@ -8,10 +8,10 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
+import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
-// MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
 import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
@@ -20,37 +20,34 @@ import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSystemMethodCoreService;
-//import com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl.MetadataDataMethodCreateImpl;
-//import com.cmsr.onebase.module.metadata.core.service.datamethod.datamethodImpl.MetadataDataMethodUpdateImpl;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.engine.MultiTableQueryEngine;
+import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
-import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
-import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.engine.MultiTableQueryEngine;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodCreateImpl;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodDeleteImpl;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodQueryImpl;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodUpdateImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.entity.DataRow;
-import org.anyline.entity.DataSet;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.data.param.ConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.PageNavi;
-import org.anyline.entity.DefaultPageNavi;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.*;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED;
 
 /**
  * 数据方法 Service 核心实现类 - 只处理基础数据操作，不依赖VO
@@ -550,7 +547,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     private LoginUserCtx convertLoginUserCtx(RTLoginUser loginUser) {
         LoginUserCtx loginUserCtx = new LoginUserCtx();
-        loginUserCtx.setUserId(loginUser.getUserId());
+        loginUserCtx.setUserId(loginUser.getId());
         loginUserCtx.setApplicationId(loginUser.getApplicationId());
         return loginUserCtx;
     }

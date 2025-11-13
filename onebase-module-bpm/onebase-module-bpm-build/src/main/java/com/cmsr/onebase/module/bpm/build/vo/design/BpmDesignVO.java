@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.vo.design;
 
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

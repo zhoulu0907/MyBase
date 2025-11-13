@@ -15,18 +15,35 @@ public class ETLCatalogRepository extends DataRepository<ETLCatalogDO> {
         super(ETLCatalogDO.class);
     }
 
-    public ETLCatalogDO findOneByNameAndDatasourceId(Long datasourceId, String catalogName) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("datasource_id", datasourceId);
-        cs.eq("catalog_name", catalogName);
-
-        return findOne(cs);
-    }
-
     public void deleteAllByDatasourceId(Long datasourceId) {
         ConfigStore cs = new DefaultConfigStore();
         cs.eq("datasource_id", datasourceId);
 
         deleteByConfig(cs);
+    }
+
+    @Override
+    public ETLCatalogDO upsert(ETLCatalogDO catalogDO) {
+        Long applicationId = catalogDO.getApplicationId();
+        Long datasourceId = catalogDO.getDatasourceId();
+        String catalogName = catalogDO.getCatalogName();
+        // 调用优化后的方法名
+        ETLCatalogDO oldCatalog = findOneByQualifiedName(applicationId, datasourceId, catalogName);
+        if (oldCatalog == null) {
+            catalogDO = insert(catalogDO);
+        } else {
+            catalogDO.setId(oldCatalog.getId());
+            update(catalogDO);
+        }
+        return catalogDO;
+    }
+
+    // 优化方法名：更简洁但保持语义清晰
+    public ETLCatalogDO findOneByQualifiedName(Long applicationId, Long datasourceId, String catalogName) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("application_id", applicationId);
+        cs.eq("datasource_id", datasourceId);
+        cs.eq("catalog_name", catalogName);
+        return findOne(cs);
     }
 }

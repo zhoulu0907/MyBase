@@ -28,4 +28,8 @@ public class AuthRegisterReqVO extends CaptchaVerificationReqVO {
     @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "123456")
     @NotEmpty(message = "密码不能为空")
     private String password;
+
+    @Schema(description = "AppId", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @NotEmpty(message = "AppId不能为空")
+    private Long appId;
 }

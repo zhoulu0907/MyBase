@@ -24,6 +24,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
@@ -32,6 +33,7 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
@@ -55,6 +57,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.*;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
+import static java.util.Collections.singleton;
 
 /**
  * 后台用户 Service 实现类
@@ -173,7 +176,18 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         AdminUserDO adminUserDO= adminUserDataRepository.insert(userDO);
+        Long roleId=createCoreAdminRole();
+        permissionService.assignUserRoles(adminUserDO.getId(), singleton(roleId));
        return adminUserDO.getId();
+    }
+
+    private Long createCoreAdminRole() {
+        // 创建角色
+        RoleInsertReqVO reqVO = new RoleInsertReqVO();
+        reqVO.setName(RoleCodeEnum.CORP_ADMIN.getName()).setCode(RoleCodeEnum.CORP_ADMIN.getCode())
+                .setSort(0).setRemark("系统自动生成");
+        Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+        return roleId;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -279,6 +293,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    @TenantIgnore
     public void updateAdminType(Long id, Integer adminType) {
         // 校验正确性
         validateUserExists(id);
@@ -436,7 +451,13 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUser(Long id) {
-        return adminUserDataRepository.findById(id);
+        AdminUserDO adminUserDo= adminUserDataRepository.findById(id);
+        if(CommonStatusEnum.ENABLE.getStatus().equals(adminUserDo.getStatus())){
+            adminUserDo.setStatusDesc(CommonStatusEnum.ENABLE.getName());
+        }else{
+            adminUserDo.setStatusDesc(CommonStatusEnum.DISABLE.getName());
+        }
+        return adminUserDo;
     }
 
     @Override
@@ -681,7 +702,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByStatus(Integer status,String userNickName) {
+    public List<AdminUserDO> getUserListByStatus(Integer status, String userNickName) {
         return adminUserDataRepository.findAllByStatus(status,userNickName);
     }
 

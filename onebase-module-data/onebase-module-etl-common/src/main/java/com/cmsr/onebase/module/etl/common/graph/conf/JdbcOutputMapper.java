@@ -5,15 +5,16 @@ import lombok.Data;
 @Data
 public class JdbcOutputMapper {
 
-    /**
-     * 界面配置  TODO 有问题，如果是 union join sql等节点输出，没有实际的id，只有名称
-     */
-    private String sourceFieldId;
 
     /**
      * 界面配置
      */
-    private String targetFieldId;
+    private String targetFieldName;
+
+    /**
+     * 界面配置
+     */
+    private String sourceFieldFqn;
 
     /**
      * 界面配置
@@ -24,4 +25,26 @@ public class JdbcOutputMapper {
      * 界面配置
      */
     private String sourceFieldType;
+
+    /**
+     * 数据库补充
+     */
+    private String targetFieldType;
+
+    /**
+     * 数据库补充
+     */
+    private Integer targetFieldLength;
+
+    /**
+     * 数据库补充
+     */
+    private Integer targetFieldPrecision;
+
+    /**
+     * 数据库补充
+     */
+    private Integer targetFieldScale;
+
+
 }
