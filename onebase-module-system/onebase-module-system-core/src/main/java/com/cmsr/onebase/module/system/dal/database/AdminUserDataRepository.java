@@ -2,9 +2,11 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -267,16 +269,23 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
         DefaultConfigStore configStore = new DefaultConfigStore();
         String fromSceneType = WebFrameworkUtils.getXFromSceneType();
         if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
-            configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
+            configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
         } else {
-            Long corpId = SecurityFrameworkUtils.getLoginUser().getCorpId();
-            if (null != corpId) {
-                configStore.and(Compare.EQUAL, DeptDO.CORP_ID, corpId);
-                configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.CORP.getCode());
-            } else {
+            LoginUser loginUser =SecurityFrameworkUtils.getLoginUser();
+            if(null !=loginUser){
+                Long corpId=loginUser.getCorpId();
+                if (null != corpId) {
+                    configStore.and(Compare.EQUAL, AdminUserDO.CORP_ID, corpId);
+                    configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue());
+                } else {
+                    // TODO  改造未成功之前，默认取全部，
+                    configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
+                }
+            }else {
                 // TODO  改造未成功之前，默认取全部，
-                configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
+                configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
             }
+
         }
         return configStore;
     }
