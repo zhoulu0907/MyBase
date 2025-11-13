@@ -769,107 +769,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             // 新增：当未提供ID或ID为空白时进入
             if (!Boolean.TRUE.equals(item.getIsDeleted()) && (item.getId() == null || item.getId().trim().isEmpty())) {
-                // 智能处理：如果没有传ID，但fieldName已存在，则自动转换为更新操作
-                MetadataEntityFieldDO existingField = findExistingFieldByCodeOrName(reqVO.getEntityId(), item);
-                if (existingField != null) {
-                    log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}",
-                            item.getFieldName(), existingField.getId());
+                // 【安全策略优化】不再通过 fieldName 自动匹配现有字段进行更新
+                // 原因：fieldName 在跨应用、跨表中不具备唯一性，存在安全风险
+                // 策略：更新操作必须明确提供字段 ID，未提供 ID 时一律作为新增处理
+                log.info("未提供字段ID，将作为新增字段处理: fieldName={}, entityId={}, appId={}",
+                        item.getFieldName(), reqVO.getEntityId(), reqVO.getAppId());
 
-                    // 关键安全校验：验证查找到的字段确实属于当前实体和应用
-                    if (!existingField.getEntityId().equals(Long.valueOf(reqVO.getEntityId()))) {
-                        log.error("安全校验失败：查找到的字段不属于当前实体。fieldName={}, 字段归属entityId={}, 请求entityId={}", 
-                                 item.getFieldName(), existingField.getEntityId(), reqVO.getEntityId());
-                        throw new IllegalArgumentException("字段不属于当前实体，禁止跨实体操作");
-                    }
-                    if (!existingField.getAppId().equals(Long.valueOf(reqVO.getAppId()))) {
-                        log.error("安全校验失败：查找到的字段不属于当前应用。fieldName={}, 字段归属appId={}, 请求appId={}", 
-                                 item.getFieldName(), existingField.getAppId(), reqVO.getAppId());
-                        throw new IllegalArgumentException("字段不属于当前应用，禁止跨应用操作");
-                    }
-
-                    // 转换为更新操作
-                    item.setId(existingField.getId().toString());
-                    String updateFieldName = item.getFieldName() != null ? item.getFieldName() : existingField.getFieldName();
-                    validateEntityFieldNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateFieldName);
-                    String updateDisplayName = item.getDisplayName() != null ? item.getDisplayName() : existingField.getDisplayName();
-                    validateEntityFieldDisplayNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateDisplayName);
-
-                    Integer maxLength = extractMaxLength(item);
-
-                    // 组装更新对象（只覆盖非空字段）
-                    MetadataEntityFieldDO upd = new MetadataEntityFieldDO();
-                    upd.setId(existingField.getId());
-                    upd.setEntityId(existingField.getEntityId());
-                    if (item.getFieldName() != null) upd.setFieldName(item.getFieldName());
-                    if (item.getDisplayName() != null) upd.setDisplayName(item.getDisplayName());
-                    if (item.getFieldType() != null) upd.setFieldType(item.getFieldType());
-                    if (maxLength != null) {
-                        upd.setDataLength(maxLength);
-                    }
-                    if (item.getDecimalPlaces() != null) upd.setDecimalPlaces(item.getDecimalPlaces());
-                    if (item.getDefaultValue() != null) upd.setDefaultValue(item.getDefaultValue());
-                    if (item.getDescription() != null) upd.setDescription(item.getDescription());
-                    if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
-                    if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
-                    if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
-                    if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
-                    if (item.getDictTypeId() != null) {
-                        upd.setDictTypeId(item.getDictTypeId());
-                    }
-
-                    metadataEntityFieldRepository.update(upd);
-
-                    // 收集物理表更新操作
-                    if (datasource != null && businessEntity.getTableName() != null) {
-                        // 若字段名变更，先收集重命名操作
-                        if (item.getFieldName() != null && !item.getFieldName().equals(existingField.getFieldName())) {
-                            PhysicalTableOperation renameOp = new PhysicalTableOperation();
-                            renameOp.setOperationType("RENAME");
-                            renameOp.setOldFieldName(existingField.getFieldName());
-                            renameOp.setFieldName(item.getFieldName());
-                            physicalTableOps.add(renameOp);
-                        }
-                        
-                        DefaultConfigStore cs2 = new DefaultConfigStore();
-                        cs2.and("id", existingField.getId());
-                        MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
-                        PhysicalTableOperation alterOp = new PhysicalTableOperation();
-                        alterOp.setOperationType("ALTER");
-                        alterOp.setFieldInfo(full);
-                        physicalTableOps.add(alterOp);
-                    }
-                    resp.getUpdatedIds().add(existingField.getId().toString());
-                    
-                    // 同步选项、约束和自动编号（使用智能更新逻辑）
-                    Long fieldId = existingField.getId();
-                    DefaultConfigStore cs2 = new DefaultConfigStore();
-                    cs2.and("id", existingField.getId());
-                    MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
-                    processFieldRelatedData(fieldId, full, item.getOptions(), item.getConstraints(), item.getAutoNumber());
-                    
-                    if (item.getIsRequired() != null && !item.getIsRequired().equals(existingField.getIsRequired())) {
-                        processRequiredValidation(fieldId, full);
-                    }
-                    
-                    if (item.getIsUnique() != null && !item.getIsUnique().equals(existingField.getIsUnique())) {
-                        processUniqueValidation(fieldId, full);
-                    }
-                    
-                    boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
-                        (item.getConstraints().getLengthEnabled() != null || 
-                         item.getConstraints().getMinLength() != null || 
-                         item.getConstraints().getMaxLength() != null ||
-                         StringUtils.hasText(item.getConstraints().getLengthPrompt()));
-                    if (maxLength != null && !maxLength.equals(existingField.getDataLength()) && !hasConstraintsLengthConfig) {
-                        processLengthValidation(fieldId, full);
-                    }
-                    
-                    validateValidationRuleUniqueness(fieldId, existingField.getEntityId());
-                    
-                    continue; // 跳过新增逻辑
-                }
-
-                // 确实是新增字段的情况
+                // 新增字段的情况
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
                 validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), item.getDisplayName());
                 validateEntityAllowModifyStructure(Long.valueOf(reqVO.getEntityId()));
