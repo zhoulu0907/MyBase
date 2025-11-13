@@ -209,6 +209,11 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             if (reqVO.getAuthDataGroup().getDataFilters() != null) {
                 authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
             }
+            if (!reqVO.getAuthDataGroup().getScopeTags().contains("customCondition")) {
+                authDataGroupDO.setScopeFieldId(null);
+                authDataGroupDO.setScopeLevel(null);
+                authDataGroupDO.setScopeValue(null);
+            }
             authDataGroupRepository.insert(authDataGroupDO);
         } else {
             AuthDataGroupDO authDataGroupDO = authDataGroupRepository.findById(dataGroupId);
@@ -222,7 +227,12 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             if (reqVO.getAuthDataGroup().getDataFilters() != null) {
                 authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
             }
-            authDataGroupRepository.update(authDataGroupDO);
+            if (!reqVO.getAuthDataGroup().getScopeTags().contains("customCondition")) {
+                authDataGroupDO.setScopeFieldId(null);
+                authDataGroupDO.setScopeLevel(null);
+                authDataGroupDO.setScopeValue(null);
+            }
+            authDataGroupRepository.updateAuthDataGroup(authDataGroupDO);
         }
         appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }
