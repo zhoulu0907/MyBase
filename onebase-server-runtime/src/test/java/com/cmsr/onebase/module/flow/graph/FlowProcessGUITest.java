@@ -80,4 +80,20 @@ public class FlowProcessGUITest {
 
 
 
+    //    分支
+    @Test
+    public void testGUI4() throws IOException {
+        TenantContextHolder.setIgnore(true);
+        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+        reqVO.setProcessId(131695087709290496L);  //
+//        reqVO.setExecutionUuid("79858562-e948-4d26-9d0c-dfc181829712");
+        Map<Long, String> inputParams = Map.of(
+                115291181633175552L,"中文111"
+        );
+        reqVO.setInputParams(inputParams);
+        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
+        System.out.println(respVO);
+    }
+
+
 }
