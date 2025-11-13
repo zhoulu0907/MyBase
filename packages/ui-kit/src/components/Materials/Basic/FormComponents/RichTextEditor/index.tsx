@@ -40,7 +40,7 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div dangerouslySetInnerHTML={{ __html: defaultValueConfig.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig.customValue : '' }}></div>
+          <div dangerouslySetInnerHTML={{ __html: defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '' }}></div>
         ) : (
           <WangEditor
             runtime={runtime}

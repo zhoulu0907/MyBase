@@ -37,7 +37,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       <Form.Item layout="vertical" label={item.name || '默认值'} className={styles.formItem}>
         <Select
           onChange={(value) => handleChange('type', value)}
-          value={defaultValueConfig.type}
+          value={defaultValueConfig?.type}
           options={[
             { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.CUSTOM], value: DEFAULT_VALUE_TYPES.CUSTOM },
             { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.FORMULA], value: DEFAULT_VALUE_TYPES.FORMULA }
@@ -46,13 +46,13 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
         ></Select>
       </Form.Item>
       {/* 自定义 */}
-      {defaultValueConfig.type === DEFAULT_VALUE_TYPES.CUSTOM && (
+      {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM && (
         <Form.Item layout="vertical" className={styles.formItem}>
-          {typeof defaultValueConfig.customValue === 'boolean' ? (
-            <Switch checked={defaultValueConfig.customValue} onChange={(value) => handleChange('customValue', value)} />
+          {typeof defaultValueConfig?.customValue === 'boolean' ? (
+            <Switch checked={defaultValueConfig?.customValue} onChange={(value) => handleChange('customValue', value)} />
           ) : (
             <Input
-              value={defaultValueConfig.customValue}
+              value={defaultValueConfig?.customValue}
               onChange={(value) => handleChange('customValue', value)}
               placeholder="请输入"
             />
@@ -60,7 +60,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
         </Form.Item>
       )}
       {/* TODO 公式计算 */}
-      {defaultValueConfig.type === DEFAULT_VALUE_TYPES.FORMULA && <Button>设置公式</Button>}
+      {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA && <Button>设置公式</Button>}
     </>
   );
 };
