@@ -1,0 +1,101 @@
+.about {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  background-color: #f7f8fa;
+  position: relative;
+
+  &::before {
+    content: '';
+    width: 4.6rem;
+    height: 4.3rem;
+    transform: rotate(-30deg);
+    flex-shrink: 0;
+    border-radius: 1rem;
+    background: rgba(0, 158, 158, 0.04);
+    position: absolute;
+    right: 1.75rem;
+    top: -1.2rem;
+  }
+
+  &::after {
+    content: '';
+    width: 6.5rem;
+    height: 4.3rem;
+    transform: rotate(-70deg);
+    flex-shrink: 0;
+    border-radius: 1rem;
+    background: rgba(0, 158, 158, 0.04);
+    position: absolute;
+    left: 2.1rem;
+    top: 1rem;
+  }
+
+  .container {
+    flex: 1;
+    display: flex;
+    width: 3.51rem;
+    padding: 0.4rem;
+    border-radius: 0.08rem;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow: hidden;
+
+    .basicInfo {
+      margin-bottom: 0.85rem;
+
+      .icon {
+        width: 0.72rem;
+        height: 0.72rem;
+        border-radius: 0.16rem;
+        vertical-align: middle;
+        margin-bottom: 0.24rem;
+        background-color: #009e9e;
+      }
+
+      .name {
+        color: #000;
+        font-family: 'PingFang SC';
+        font-size: 0.24rem;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 0.26rem;
+        margin-bottom: 0.04rem;
+      }
+
+      .version {
+        color: #86909c;
+        font-family: 'PingFang SC';
+        font-size: 0.14rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+      }
+    }
+
+    .desc {
+      flex: 1;
+      color: #1d2129;
+      font-family: 'PingFang SC';
+      font-size: 0.16rem;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 0.32rem;
+    }
+
+    .copyright {
+      align-self: center;
+      color: #86909c;
+      text-align: right;
+      font-family: 'PingFang SC';
+      font-size: 0.12rem;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+}

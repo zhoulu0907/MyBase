@@ -52,9 +52,9 @@ const Me: React.FC<MeProps> = ({ nickname, username }) => {
         </div>
       </div>
       <Cell.Group className={styles.meCellGroup}>
-        <Cell icon={<img className={styles.meCellIcon} src={file} alt="logout" />} label="用户协议" showArrow />
-        <Cell icon={<img className={styles.meCellIcon} src={lock} alt="logout" />} label="隐私政策" showArrow />
-        <Cell icon={<img className={styles.meCellIcon} src={account} alt="logout" />} label="关于我们" showArrow />
+        <Cell icon={<img className={styles.meCellIcon} src={file} alt="protocol" />} label="用户协议" showArrow onClick={() => navigate('/onebase/runtime-home/protocol')} />
+        <Cell icon={<img className={styles.meCellIcon} src={lock} alt="privacy" />} label="隐私政策" showArrow onClick={() => navigate('/onebase/runtime-home/privacy')} />
+        <Cell icon={<img className={styles.meCellIcon} src={account} alt="about" />} label="关于我们" showArrow onClick={() => navigate('/onebase/runtime-home/about')} />
         <Cell icon={<img className={styles.meCellIcon} src={logout} alt="logout" />} label="退出登录" showArrow onClick={toLogout} />
       </Cell.Group>
     </div>
