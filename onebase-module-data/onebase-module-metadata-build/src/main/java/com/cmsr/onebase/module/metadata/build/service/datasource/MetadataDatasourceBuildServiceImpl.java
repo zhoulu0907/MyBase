@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.service.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceRespVO;
@@ -226,28 +227,39 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         return metadataDatasourceCoreService.createDatasource(datasource);
     }
 
-    @Override
+        @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid DatasourceSaveReqVO createReqVO) {
-        // 校验编码唯一性（创建时ID为null，所以传null；appId需要安全转换）
+        // 校验必填参数
+        if (createReqVO.getAppId() == null || createReqVO.getAppId().trim().isEmpty()) {
+            throw new IllegalArgumentException("应用ID不能为空");
+        }
+        if (createReqVO.getAppUid() == null || createReqVO.getAppUid().trim().isEmpty()) {
+            throw new IllegalArgumentException("应用UID不能为空");
+        }
+
+        // 校验编码唯一性(创建时ID为null,所以传null;appId需要安全转换)
         Long id = (createReqVO.getId() != null && !createReqVO.getId().trim().isEmpty()) ? Long.valueOf(createReqVO.getId()) : null;
-        Long appId = (createReqVO.getAppId() != null && !createReqVO.getAppId().trim().isEmpty()) ? Long.valueOf(createReqVO.getAppId()) : null;
+        Long appId = Long.valueOf(createReqVO.getAppId());
+        String appUid = createReqVO.getAppUid();
         validateDatasourceCodeUnique(id, createReqVO.getCode(), appId);
 
         // 转换VO为DO
         MetadataDatasourceDO datasource = modelMapper.map(createReqVO, MetadataDatasourceDO.class);
 
+        // 修复config字段: 将Map转换为JSON字符串存储
+        if (createReqVO.getConfig() != null) {
+            datasource.setConfig(JsonUtils.toJsonString(createReqVO.getConfig()));
+        }
+
         // 使用 core 模块基础服务创建数据源
         Long datasourceId = createDatasource(datasource);
 
-        // 创建应用与数据源的关联关系（使用之前安全转换的appId）
-        if (appId == null) {
-            throw new IllegalArgumentException("应用ID不能为空");
-        }
+        // 创建应用与数据源的关联关系
         metadataDatasourceCoreService.createAppDatasourceRelation(appId, datasourceId,
-                datasource.getDatasourceType(), createReqVO.getAppUid());
+                datasource.getDatasourceType(), appUid);
 
-        log.info("创建数据源成功，ID: {}，应用ID: {}", datasourceId, appId);
+        log.info("创建数据源成功,ID: {},应用ID: {},应用UID: {}", datasourceId, appId, appUid);
         return datasourceId;
     }
 
