@@ -109,10 +109,14 @@ public class JsonGraph {
     }
 
     private String switchDefaultNodeDefine(int deep, JsonGraphNode defaultJsonGraphNode) {
-        if (CollectionUtils.isEmpty(defaultJsonGraphNode.getBlocks())) {
-            return "";
+        String blocksNodeDefine;
+        if (CollectionUtils.isNotEmpty(defaultJsonGraphNode.getBlocks())) {
+            blocksNodeDefine = blocksNodeDefine(deep, defaultJsonGraphNode.getBlocks());
+        } else {
+            StringBuilder define = new StringBuilder();
+            define.append(repeatIndent(deep)).append("noop");
+            blocksNodeDefine = define.toString();
         }
-        String blocksNodeDefine = blocksNodeDefine(deep, defaultJsonGraphNode.getBlocks());
         StringBuilder define = new StringBuilder();
         define.append(".DEFAULT(");
         define.append(NEW_LINE).append(blocksNodeDefine).append(".tag(\"").append(defaultJsonGraphNode.getId()).append("\")");
