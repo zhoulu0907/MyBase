@@ -30,7 +30,15 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 
 /**
- * 数据方法API实现类（运行态）
+ * 数据方法API实现类
+ * 
+ * 依赖 MetadataDataMethodCoreService，该服务有两个实现：
+ * 1. MetadataDataMethodCoreServiceBuildImpl - 编辑态实现（在 build 模块）
+ * 2. MetadataDataMethodCoreServiceImpl - 运行态实现（在 runtime 模块）
+ * 
+ * Spring会根据环境自动选择合适的实现：
+ * - 在 onebase-server（编辑态）中使用 BuildImpl
+ * - 在 onebase-server-runtime（运行态）中使用 RuntimeImpl
  * 
  * @author bty418
  * @date 2025-10-23

@@ -39,6 +39,7 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-security-build</artifactId>
+            <version>${revision}</version>
         </dependency>
         
         <!-- 新增：流程模块 API（用于触发流程） -->
