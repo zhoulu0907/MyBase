@@ -23,27 +23,21 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
   const { curAppId } = useAppStore();
 
   const [selectDisabled, setSelectDisabled] = useState<boolean>(false);
-  const [typeDisabled, setTypeDisabled] = useState<boolean>(false);
   const [selectDictModalVisible, setSelectDictModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    getDefaultOptions();
-  }, [configs.dataField]);
-
-  useEffect(() => {
-    setSelectDisabled(false);
-    setTypeDisabled(false);
-    getDefaultOptions(true);
-    if (configs[selectKey].type === DEFAULT_OPTIONS_TYPE.DICT) {
-      setSelectDisabled(true);
+    if (configs.id) {
+      setSelectDisabled(false);
+      getDefaultOptions();
     }
-  }, [configs.id]);
+  }, [configs]);
 
-  const getDefaultOptions = async (flag?: boolean) => {
+  const getDefaultOptions = async () => {
+    console.log('configs[selectKey]', configs[selectKey]);
     const value = configs.dataField;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
-    const isSubEntity = subEntities.entities?.find((ele:any) => value?.includes(ele.entityId));
+    const isSubEntity = subEntities.entities?.find((ele: any) => value?.includes(ele.entityId));
     const currentSubField = isSubEntity?.fields.find((ele: any) => value.includes(ele.fieldId));
     if (isMainEntity && currentMainField) {
       // 主表
@@ -52,27 +46,37 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
         if (dictOptions.length) {
-          if (flag) {
-            const newDefaultOptionsConfig = {
-              type: DEFAULT_OPTIONS_TYPE.DICT,
-              disabled: true,
-              dictTypeId: currentMainField.dictTypeId,
-              defaultOptions: dictOptions
-            };
-            handlePropsChange(selectKey, newDefaultOptionsConfig);
-          }
+          const newDefaultOptionsConfig = {
+            type: DEFAULT_OPTIONS_TYPE.DICT,
+            disabled: true,
+            dictTypeId: currentMainField.dictTypeId,
+            defaultOptions: dictOptions.map((e: any) => {
+              if (configs[selectKey].defaultOptions?.length) {
+                const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
+                if (oldOption && oldOption.chosen) {
+                  return { ...e, chosen: true };
+                }
+              }
+              return { ...e };
+            })
+          };
+          handlePropsChange(selectKey, newDefaultOptionsConfig);
           setSelectDisabled(true);
-          setTypeDisabled(true);
         }
       } else if (currentMainField.options?.length) {
-        const newOptions = currentMainField.options?.map((e:any) => ({
-          label: e.optionLabel,
-          value: e.optionValue
-        }));
-        if (flag) {
-          handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions, disabled: true });
-        }
-        setTypeDisabled(true);
+        const newOptions = currentMainField.options?.map((e: any) => {
+          if (configs[selectKey].defaultOptions?.length) {
+            const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
+            if (oldOption && oldOption.chosen) {
+              return { label: e.optionLabel, value: e.optionValue, chosen: true };
+            }
+          }
+          return {
+            label: e.optionLabel,
+            value: e.optionValue
+          };
+        });
+        handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions, disabled: true });
         setSelectDisabled(true);
       }
     } else if (isSubEntity && currentSubField) {
@@ -82,28 +86,22 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
         if (dictOptions.length) {
-          if (flag) {
-            const newDefaultOptionsConfig = {
-              type: DEFAULT_OPTIONS_TYPE.DICT,
-              disabled: true,
-              dictTypeId: currentSubField.dictTypeId,
-              defaultOptions: dictOptions
-            };
-            handlePropsChange(selectKey, newDefaultOptionsConfig);
-          }
+          const newDefaultOptionsConfig = {
+            type: DEFAULT_OPTIONS_TYPE.DICT,
+            disabled: true,
+            dictTypeId: currentSubField.dictTypeId,
+            defaultOptions: dictOptions
+          };
+          handlePropsChange(selectKey, newDefaultOptionsConfig);
           setSelectDisabled(true);
-          setTypeDisabled(true);
         }
       } else if (currentSubField.options?.length) {
-        const newOptions = currentSubField.options?.map((e:any) => ({
+        const newOptions = currentSubField.options?.map((e: any) => ({
           label: e.optionLabel,
           value: e.optionValue
         }));
-        if (flag) {
-          handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions, disabled: true });
-        }
+        handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions, disabled: true });
         setSelectDisabled(true);
-        setTypeDisabled(true);
       }
     }
   };
@@ -117,8 +115,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
         defaultOptions: dictOptions,
         dictTypeId: dict.id
       });
-      setTypeDisabled(false);
-      setSelectDisabled(true);
+      setSelectDisabled(false);
     }
     setSelectDictModalVisible(false);
   };
@@ -133,10 +130,9 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
         <Form.Item>
           <Select
             value={configs[selectKey].type}
-            disabled={typeDisabled}
+            disabled={configs[selectKey].disabled}
             onChange={(value) => {
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
-                setTypeDisabled(false);
                 setSelectDisabled(false);
               }
               handlePropsChange(selectKey, { ...configs[selectKey], type: value, defaultOptions: [] });
@@ -164,7 +160,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                   name: 'table-col-item'
                 }}
                 swap
-                sort={!selectDisabled}
+                sort={!configs[selectKey].disabled && !selectDisabled}
                 handle=".table-col-item-handle"
                 className={styles.componentCollapseContent}
                 forceFallback={true}
@@ -194,8 +190,8 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                 {configs[selectKey].defaultOptions?.map((_col: any, idx: number) => (
                   <Tooltip
                     key={idx}
-                    content={typeDisabled ? '如需修改请前往数据建模' : '如需修改请前往数据字典'}
-                    disabled={!selectDisabled}
+                    content={selectDisabled ? '如需修改请前往数据建模' : '如需修改请前往数据字典'}
+                    disabled={!configs[selectKey].disabled && !selectDisabled}
                   >
                     <div className={styles.tableColumnItem}>
                       <Space>
@@ -208,10 +204,12 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                           }}
                         />
                         <Radio
-                          checked={configs[selectKey].defaultOptions[idx].chosen || false}
+                          checked={configs[selectKey].defaultOptions[idx].chosen}
                           onChange={(e) => {
-                            let newList = [...configs[selectKey].defaultOptions];
-                            newList = newList.map((item) => ({ ...item, chosen: false }));
+                            let newList = [...configs[selectKey].defaultOptions].map((item) => ({
+                              ...item,
+                              chosen: false
+                            }));
                             newList[idx] = {
                               ...newList[idx],
                               chosen: true
@@ -222,7 +220,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                         />
                         <Input
                           size="small"
-                          disabled={selectDisabled}
+                          disabled={configs[selectKey].disabled || selectDisabled}
                           value={configs[selectKey].defaultOptions[idx].label}
                           onChange={(e) => {
                             const newList = [...configs[selectKey].defaultOptions];
@@ -236,7 +234,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                           className={styles.tableColumnItemInput}
                           placeholder={'新选项'}
                         />
-                        {!selectDisabled && (
+                        {!configs[selectKey].disabled && !selectDisabled && (
                           <Button
                             icon={<IconDelete />}
                             shape="circle"
@@ -259,24 +257,26 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                 ))}
               </ReactSortable>
 
-              {!selectDisabled && configs[selectKey].type !== DEFAULT_OPTIONS_TYPE.DICT && (
-                <Button
-                  type="outline"
-                  onClick={() => {
-                    const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
-                    const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${selectKey}[0]`;
-                    const newList = [
-                      ...configs[selectKey].defaultOptions,
-                      { label: item.displayName || newLabel, value: item.fieldName || newValue }
-                    ];
-                    add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
-                    const newConfig = { ...configs[selectKey], defaultOptions: newList };
-                    handlePropsChange(selectKey, newConfig);
-                  }}
-                >
-                  添加一项
-                </Button>
-              )}
+              {!configs[selectKey].disabled &&
+                !selectDisabled &&
+                configs[selectKey].type !== DEFAULT_OPTIONS_TYPE.DICT && (
+                  <Button
+                    type="outline"
+                    onClick={() => {
+                      const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
+                      const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${selectKey}[0]`;
+                      const newList = [
+                        ...configs[selectKey].defaultOptions,
+                        { label: item.displayName || newLabel, value: item.fieldName || newValue }
+                      ];
+                      add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
+                      const newConfig = { ...configs[selectKey], defaultOptions: newList };
+                      handlePropsChange(selectKey, newConfig);
+                    }}
+                  >
+                    添加一项
+                  </Button>
+                )}
             </div>
           )}
         </Form.List>
