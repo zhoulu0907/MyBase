@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.vo.design.node;
 
+import com.cmsr.onebase.module.bpm.core.dto.node.base.AdvancedConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
@@ -53,5 +54,12 @@ public class ApproverNodeVO extends BaseNodeVO {
          */
         @Valid
         private FieldPermCfgDTO fieldPermConfig = new FieldPermCfgDTO();
+
+        /**
+         * 高级设置
+         */
+        @Valid
+        private AdvancedConfigDTO advancedConfig = new AdvancedConfigDTO() ;
+
     }
 }

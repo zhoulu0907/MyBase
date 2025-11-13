@@ -7,7 +7,7 @@ import lombok.Data;
 @Schema(description = "流程代理撤销 VO")
 @Data
 public class BpmAgentRevokeReqVO {
-    @Schema(description = "agentId", requiredMode = Schema.RequiredMode.REQUIRED, example = "143434334")
+    @Schema(description = "id", requiredMode = Schema.RequiredMode.REQUIRED, example = "143434334")
     @NotNull(message = "ID不能为空")
-    private Long agentId;
+    private Long id;
 }
