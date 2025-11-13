@@ -75,6 +75,7 @@ const IDone: FC = ({ appId }: any) => {
   });
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<any>({});
+  const defaultPageNo = 1;
   function handleDetailPage(row: any) {
     console.log('click to detail page === row ===', row);
     setRowData(row);
@@ -116,14 +117,14 @@ const IDone: FC = ({ appId }: any) => {
 
   const onBack = () => {
     setPopVisible(false);
-    fetchFormData(filters, 1);
+    fetchFormData(filters, defaultPageNo);
   };
 
   const handleSearch = (newFilters: any) => {
-    fetchFormData(newFilters, 1);
+    fetchFormData(newFilters, defaultPageNo);
   };
   const handleReset = () => {
-    fetchFormData({}, 1);
+    fetchFormData({}, defaultPageNo);
   };
 
   const handlePageChange = (current: number, pageSize: number) => {
@@ -131,7 +132,7 @@ const IDone: FC = ({ appId }: any) => {
   };
 
   useEffect(() => {
-    fetchFormData({}, 1);
+    fetchFormData({}, defaultPageNo);
   }, []);
   return (
     <section className="page-content-rgt">

@@ -99,22 +99,13 @@ const TableSearch: FC<any> = ({
     setOperator(newOperator);
     handleFilterChange('flowStatus', '');
   };
-  const handleFilterChange = useCallback(
-    (key: keyof FilterParams, value: any) => {
-      const newFilters = { ...filters };
-
-      if (key === 'businessId') {
-        newFilters.businessId = value;
-        newFilters.nodeCode = undefined;
-      } else if (key === 'dateRange') {
-        newFilters.dateRange = value;
-      } else {
-        newFilters[key] = value;
-      }
-      setFilters(newFilters);
-    },
-    [filters]
-  );
+  const handleFilterChange = (key: keyof FilterParams, value: any) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+      ...(key === 'businessId' && { nodeCode: undefined })
+    }));
+  };
   const handleReset = useCallback(() => {
     const resetFilters: FilterParams = {
       flowStatus: undefined,
@@ -131,10 +122,18 @@ const TableSearch: FC<any> = ({
 
   const parseParams = (params: any) => {
     const result: any = {};
-    if (params.businessId) result.businessId = params.businessId;
-    if (params.nodeCode) result.nodeCode = params.nodeCode;
-    if(params.keyword) result.keyword = params.keyword;
-    if (params.sortType) result.sortType = params.sortType;
+    if (params.businessId) {
+      result.businessId = params.businessId;
+    }
+    if (params.nodeCode) {
+      result.nodeCode = params.nodeCode;
+    }
+    if (params.keyword) {
+      result.keyword = params.keyword;
+    }
+    if (params.sortType) {
+      result.sortType = params.sortType;
+    }
     if (params.flowStatus) {
       result.flowStatus = Array.isArray(params.flowStatus) ? params.flowStatus.join(',') : params.flowStatus;
     }
@@ -146,7 +145,6 @@ const TableSearch: FC<any> = ({
     return result;
   };
   const handleSearch = () => {
-    console.log(filters,'=============')
     const newParams = parseParams(filters);
     onFilterChange(newParams);
   };

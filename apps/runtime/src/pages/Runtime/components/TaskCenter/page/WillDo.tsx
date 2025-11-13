@@ -117,6 +117,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
   });
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<any>({});
+  const defaultPageNo = 1;
 
   function handleBatchClick(hasRowCheck: boolean) {
     console.log('batch click!', hasRowCheck);
@@ -177,24 +178,22 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
 
   const onBack = () => {
     setPopVisible(false);
-    fetchFormData(filters,1);
+    fetchFormData(filters, defaultPageNo);
   };
-
 
   const handleSearch = (newFilters: any) => {
-    fetchFormData(newFilters, 1);
+    fetchFormData(newFilters, defaultPageNo);
   };
   const handleReset = () => {
-    fetchFormData({}, 1);
+    fetchFormData({}, defaultPageNo);
   };
 
   const handlePageChange = (current: number, pageSize: number) => {
     fetchFormData(filters, current, pageSize);
   };
 
-  
   useEffect(() => {
-    fetchFormData({}, 1);
+    fetchFormData({}, defaultPageNo);
   }, []);
 
   return (
