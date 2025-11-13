@@ -59,11 +59,14 @@
             <artifactId>onebase-module-metadata-build</artifactId>
             <version>${revision}</version>
         </dependency>
+        <!-- 已移除 onebase-module-metadata-runtime 依赖，运行态功能保留在 runtime 模块 -->
+        <!--
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-runtime</artifactId>
             <version>${revision}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-infra-build</artifactId>
