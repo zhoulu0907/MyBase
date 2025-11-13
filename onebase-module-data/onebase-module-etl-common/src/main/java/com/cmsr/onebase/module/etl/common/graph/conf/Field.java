@@ -11,7 +11,7 @@ public class Field {
     private String fieldName;
 
     /**
-     * 数据库补充
+     * 界面配置, 数据库补充
      */
     private String fieldType;
 

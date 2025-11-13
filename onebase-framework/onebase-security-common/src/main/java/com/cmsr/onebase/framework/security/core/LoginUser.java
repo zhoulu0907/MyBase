@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.security.core;
 
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import cn.hutool.core.map.MapUtil;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -30,14 +30,21 @@ public class LoginUser {
      * 关联 {@link UserTypeEnum}
      */
     private Integer userType;
+
+    /**
+     * 登录用户 租户ID
+     */
+    private Long tenantId;
+
+    /**
+     * 登录用户 企业ID
+     */
+    private Long corpId;
+
     /**
      * 额外的用户信息
      */
     private Map<String, String> info;
-    /**
-     * 租户编号
-     */
-    private Long tenantId;
     /**
      * 授权范围
      */

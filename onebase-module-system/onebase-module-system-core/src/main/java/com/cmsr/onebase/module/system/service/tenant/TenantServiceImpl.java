@@ -73,7 +73,7 @@ import static java.util.Collections.singleton;
 public class TenantServiceImpl implements TenantService {
 
     // 租户管理员设置默认密码
-    private static final String TENANT_ADMIN_PASSWORD = "admin123";
+    private static final String TENANT_ADMIN_PASSWORD = "AdminChina2025!";
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Resource // 由于 onebase.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
@@ -356,29 +356,10 @@ public class TenantServiceImpl implements TenantService {
                 }
 
                 updateReqVO.getTenantAdminUserUpdateReqVOSList().forEach(adminUserReqVO -> {
-                    UserInsertReqVO reqVO = new UserInsertReqVO();
-                    // 已存在的用户
-                    AdminUserDO newAdminUser = userService.getUserByUsername(adminUserReqVO.getAdminUserName());
-                    // 判断前端上送的管理员是否已存在，存在则分配角色且不是老用户
-                    if (newAdminUser == null) {
-                        // 新管理员用户不存在，创建用户，并分配角色
-                        UserInsertReqVO userInsertReqVO = new UserInsertReqVO();
-                        userInsertReqVO.setUsername(adminUserReqVO.getAdminUserName());
-                        userInsertReqVO.setNickname(adminUserReqVO.getAdminNickName());
-                        userInsertReqVO.setMobile(adminUserReqVO.getAdminMobile());
-                        userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-                        userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
-                        // 创建用户
-                        Long userId = userService.createUser(reqVO);
-                        permissionService.assignUserRoles(userId, singleton(roleId));
-
-                    } else {
                         // 新管理员用户存在，直接分配角色
-                        permissionService.assignUserRoles(newAdminUser.getId(), singleton(roleId));
-                        Long userId = newAdminUser.getId();
+                        permissionService.assignUserRoles(adminUserReqVO.getAdminUserId(), singleton(roleId));
                         // 将新管理员设置为内置用户类型
-                        userService.updateAdminType(userId, AdminTypeEnum.SYSTEM.getType());
-                    }
+                        userService.updateAdminType(adminUserReqVO.getAdminUserId(), AdminTypeEnum.SYSTEM.getType());
                 });
             });
         }

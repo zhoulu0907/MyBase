@@ -27,6 +27,11 @@ import org.anyline.service.AnylineService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -185,6 +190,11 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                         log.debug("字段 {} 的JSON反序列化失败，保持原值: {}", fieldName, e.getMessage());
                         resultMap.put(fieldName, value);
                     }
+                } else if("DATETIME".equals(fieldType) && value instanceof Timestamp timestamp){
+                    Instant instant = timestamp.toInstant();
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+                    String timeStr = dateTimeFormatter.format(instant);
+                    resultMap.put(fieldName, timeStr);
                 } else {
                     resultMap.put(fieldName, value);
                 }
@@ -221,7 +231,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                 upperFieldType.contains("IMAGE") ||         // 图片
                 upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
-                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                upperFieldType.contains("DEPARTMENT") ||    // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
                 upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
                 upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
                 upperFieldType.contains("GEO") ||           // 地理位置（简写）

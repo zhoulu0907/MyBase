@@ -60,4 +60,9 @@ public interface DeptApi {
     @Parameter(name = "id", description = "部门编号", example = "1024", required = true)
     CommonResult<List<DeptRespDTO>> getChildDeptList(@RequestParam("id") Long id);
 
+    @GetMapping(PREFIX + "/get-dept-by-user-id")
+    @Operation(summary = "根据用户ID获取其所属部门及其父部门列表")
+    @Parameter(name = "ids", description = "根据用户ID获取其所属部门及其父部门列表", example = "1", required = true)
+    CommonResult<List<DeptRespDTO>> getParentDeptsListByUserId(@RequestParam("userId") Long userId);
+
 }

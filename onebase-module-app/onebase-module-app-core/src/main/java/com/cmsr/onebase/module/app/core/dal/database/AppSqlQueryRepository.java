@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.api.app.dto.UserPhotoDTO;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -179,7 +180,7 @@ public class AppSqlQueryRepository {
         return new ArrayList<>();
     }
 
-    public Map<Long, List<Map<String, String>>> findUserPhotoList(List<Long> appIds) {
+    public Map<Long, List<UserPhotoDTO>> findUserPhotoList(List<Long> appIds) {
         if (appIds == null || appIds.isEmpty()) {
             return new HashMap<>();
         }
@@ -210,11 +211,11 @@ public class AppSqlQueryRepository {
                         row -> row.getLong("application_id"),
                         Collectors.mapping(
                                 row -> {
-                                    Map<String, String> userMap = new HashMap<>();
-                                    userMap.put("id", String.valueOf(row.get("id")));
-                                    userMap.put("avatar", (String) row.get("avatar"));
-                                    userMap.put("nickName", (String) row.get("nickName"));
-                                    return userMap;
+                                    UserPhotoDTO appPhotoDTO = new UserPhotoDTO();
+                                    appPhotoDTO.setId(String.valueOf(row.get("id")));
+                                    appPhotoDTO.setAvatar( (String) row.get("avatar"));
+                                    appPhotoDTO.setNickName( (String) row.get("nickName"));
+                                    return appPhotoDTO;
                                 },
                                 Collectors.toList()
                         )

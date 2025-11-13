@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
-import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -12,7 +11,6 @@ import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -31,24 +29,6 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
         }
         ETLDatasourceDO datasourceDO = findOne(cs);
         return datasourceDO != null;
-    }
-
-    public void changeCollectStatusById(Long datasourceId, CollectStatus collectStatus) {
-        ETLDatasourceDO datasourceDO = findById(datasourceId);
-        LocalDateTime currentTime = LocalDateTime.now();
-        switch (collectStatus) {
-            case RUNNING: {
-                datasourceDO.setCollectStartTime(currentTime);
-                datasourceDO.setCollectEndTime(null);
-                break;
-            }
-            case SUCCESS, FAILED: {
-                datasourceDO.setCollectEndTime(currentTime);
-                break;
-            }
-        }
-        datasourceDO.setCollectStatus(collectStatus);
-        update(datasourceDO);
     }
 
     public PageResult<ETLDatasourceDO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO) {
@@ -81,6 +61,8 @@ public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> {
         if (writable != null) {
             cs.eq("readonly", 0);
         }
+        cs.order("create_time", Order.TYPE.DESC);
+        cs.order("update_time", Order.TYPE.DESC);
 
         return findAllByConfig(cs);
     }

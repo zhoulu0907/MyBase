@@ -24,7 +24,11 @@
             <artifactId>onebase-project-base</artifactId>
             <version>${revision}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-security-platform</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-platform</artifactId>

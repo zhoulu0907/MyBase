@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
-import com.cmsr.onebase.module.etl.common.graph.conf.Field;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.types.DataType;
 
@@ -16,27 +15,27 @@ public class FlinkUtil {
      *
      * @return Flink DataType对象
      */
-    public static DataType toFlinkTableType(Field field) {
-        if (field.getFieldType() == null) {
+    public static DataType toFlinkTableType(String type, Integer length, Integer precision, Integer scale) {
+        if (type == null) {
             throw new IllegalArgumentException("Type cannot be null");
         }
-        switch (field.getFieldType().toUpperCase()) {
+        switch (type.toUpperCase()) {
             case "CHAR":
-                return DataTypes.CHAR(field.getLength());
+                return DataTypes.CHAR(length);
             case "VARCHAR":
-                return DataTypes.VARCHAR(field.getLength());
+                return DataTypes.VARCHAR(length);
             case "STRING":
                 return DataTypes.STRING();
             case "BOOLEAN":
                 return DataTypes.BOOLEAN();
             case "BINARY":
-                return DataTypes.BINARY(field.getLength());
+                return DataTypes.BINARY(length);
             case "VARBINARY":
-                return DataTypes.VARBINARY(field.getLength());
+                return DataTypes.VARBINARY(length);
             case "BYTES":
                 return DataTypes.BYTES();
             case "DECIMAL":
-                return DataTypes.DECIMAL(field.getPrecision(), field.getScale());
+                return DataTypes.DECIMAL(precision, scale);
             case "TINYINT":
                 return DataTypes.TINYINT();
             case "SMALLINT":
@@ -54,9 +53,9 @@ public class FlinkUtil {
             case "TIME":
                 return DataTypes.TIME(0);
             case "TIMESTAMP":
-                return DataTypes.TIMESTAMP(field.getScale());
+                return DataTypes.TIMESTAMP(scale);
             case "TIMESTAMP_LTZ":
-                return DataTypes.TIMESTAMP_LTZ(field.getScale());
+                return DataTypes.TIMESTAMP_LTZ(scale);
             case "INTERVAL":
                 return DataTypes.INTERVAL(DataTypes.SECOND(3));
             case "ARRAY":
@@ -68,7 +67,7 @@ public class FlinkUtil {
             case "ROW":
                 return DataTypes.ROW();
             default:
-                throw new IllegalArgumentException("Unsupported Flink data type: " + field.getFieldType());
+                throw new IllegalArgumentException("Unsupported Flink data type: " + type);
         }
     }
 }

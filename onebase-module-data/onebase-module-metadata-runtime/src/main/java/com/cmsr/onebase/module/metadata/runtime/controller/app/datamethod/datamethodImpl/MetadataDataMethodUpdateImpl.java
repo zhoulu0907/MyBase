@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
@@ -179,7 +180,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                                 upperFieldType.contains("IMAGE") ||         // 图片
                                 upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
-                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DEPARTMENT") ||    // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
                                 upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
                                 upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
                                 upperFieldType.contains("GEO") ||           // 地理位置（简写）
@@ -345,15 +346,32 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
     @Override
     protected void executePreWorkflow(ProcessContext context) {
+        // 根据id查询修改前数据
+        MetadataBusinessEntityDO entity = context.getEntity();
+        List<MetadataEntityFieldDO> fields = context.getFields();
+
+        String primaryKeyField = getPrimaryKeyFieldName(fields);
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        Object id = context.getId();
+        configStore.and(primaryKeyField, id);
+
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
+        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+
         Long entityId = context.getEntityId();
-        Map<String, Object> data = context.getData();
-        data.put("id",context.getId());//存放id字段
-        Map fieldData = convertNameToId(entityId,data);
+        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(context.getRequestContext().getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
-        reqDTO.setFieldData(fieldData);
+        reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("BEFORE_UPDATE 数据更新前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
@@ -369,15 +387,32 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
     @Override
     protected void executePostWorkflow(ProcessContext context) {
+        // 根据id查询修改后数据
+        MetadataBusinessEntityDO entity = context.getEntity();
+        List<MetadataEntityFieldDO> fields = context.getFields();
+
+        String primaryKeyField = getPrimaryKeyFieldName(fields);
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        Object id = context.getId();
+        configStore.and(primaryKeyField, id);
+
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
+        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+
         Long entityId = context.getEntityId();
-        Map<String, Object> data = context.getData();
-        data.put("id",context.getId());//存放id字段
-        Map fieldData = convertNameToId(entityId,data);
+        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(context.getRequestContext().getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-        reqDTO.setFieldData(fieldData);
+        reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("AFTER_UPDATE 数据更新后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());

@@ -32,4 +32,6 @@ public interface AppApplicationService {
     Long generateId();
 
     List<ApplicationDO> getSimpleAppList(Integer status);
+
+    List<ApplicationDO> getMySimpleAppListByName(String appName);
 }
