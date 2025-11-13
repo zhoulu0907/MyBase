@@ -36,9 +36,21 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', visibleCreateForm === 'group' ? 'seo-folder' : 'page');
+      form.setFieldValue('menuIcon', iconMap[visibleCreateForm as keyof typeof iconMap]);
     }
   }, [menuIcon, visibleCreateForm]);
+
+  const nameMap = {
+    page: '页面',
+    group: '分组',
+    workbench: '页面'
+  };
+
+  const iconMap = {
+    page: 'page',
+    group: 'seo-folder',
+    workbench: 'page'
+  };
 
   const handleCloseModal = () => {
     setMenuIcon('');
@@ -103,16 +115,16 @@ const CreateModal: React.FC<CreateModalProps> = ({
           )}
 
           <Form.Item
-            label={visibleCreateForm === 'group' ? '分组名称' : '页面名称'}
+            label={nameMap[visibleCreateForm as keyof typeof nameMap]}
             field="menuName"
             rules={[
-              { required: true, message: '请输入页面名称' },
+              { required: true, message: `请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}名称` },
               { maxLength: 20, message: '页面名称不能超过20个字符' }
             ]}
           >
             <Input
               maxLength={20}
-              placeholder="请输入页面名称，不超过20个字符"
+              placeholder={`请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}名称，不超过20个字符`}
               allowClear
               onChange={(value) => {
                 form.setFieldValue('menuName', value);
@@ -146,7 +158,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 ) : (
                   <DynamicIcon
                     IconComponent={
-                      menuIconList.find((icon) => icon.code === (visibleCreateForm === 'group' ? 'seo-folder' : 'page'))
+                      menuIconList.find((icon) => icon.code === iconMap[visibleCreateForm as keyof typeof iconMap])
                         ?.icon
                     }
                     theme="outline"
