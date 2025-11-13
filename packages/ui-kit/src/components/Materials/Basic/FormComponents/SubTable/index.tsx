@@ -163,6 +163,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           if (dictOptions.length) {
             const newDefaultOptionsConfig = {
               type: DEFAULT_OPTIONS_TYPE.DICT,
+              disabled: true,
               dictTypeId: currentField.dictTypeId,
               colorMode: true,
               colorModeType: COLOR_MODE_TYPES.POINT,
@@ -182,6 +183,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           };
           schema.config.defaultOptionsConfig = {
             ...schema.config.defaultOptionsConfig,
+            disabled: true,
             ...newDefaultOptionsConfig
           };
         }

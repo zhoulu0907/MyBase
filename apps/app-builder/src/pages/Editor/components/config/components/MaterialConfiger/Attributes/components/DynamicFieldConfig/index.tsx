@@ -192,6 +192,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
       if (dictOptions.length) {
         newConfig.type = DEFAULT_OPTIONS_TYPE.DICT;
+        newConfig.disabled = true;
         newConfig.dictTypeId = field.dictTypeId;
         newConfig.colorMode = true;
         newConfig.colorModeType = COLOR_MODE_TYPES.POINT;
@@ -199,6 +200,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       }
     } else if (field.options?.length) {
       newConfig.type = DEFAULT_OPTIONS_TYPE.CUSTOM;
+      newConfig.disabled = true;
       newConfig.defaultOptions = field.options?.map((e: any) => ({
         label: e.optionLabel,
         value: e.optionValue

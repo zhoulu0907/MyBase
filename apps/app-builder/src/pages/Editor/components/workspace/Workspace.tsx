@@ -318,6 +318,7 @@ export default function EditorWorkspace() {
                         if (dictOptions.length) {
                           const newDefaultOptionsConfig = {
                             type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
                             dictTypeId: field.dictTypeId,
                             colorMode: true,
                             colorModeType: COLOR_MODE_TYPES.POINT,
@@ -337,6 +338,7 @@ export default function EditorWorkspace() {
                         };
                         schema.config.defaultOptionsConfig = {
                           ...schema.config.defaultOptionsConfig,
+                          disabled: true,
                           ...newDefaultOptionsConfig
                         };
                       }
@@ -429,6 +431,7 @@ export default function EditorWorkspace() {
                         if (dictOptions.length) {
                           const newDefaultOptionsConfig = {
                             type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
                             dictTypeId: ele.dictTypeId,
                             colorMode: true,
                             colorModeType: COLOR_MODE_TYPES.POINT,
@@ -448,6 +451,7 @@ export default function EditorWorkspace() {
                         };
                         subSchema.config.defaultOptionsConfig = {
                           ...subSchema.config.defaultOptionsConfig,
+                          disabled: true,
                           ...newDefaultOptionsConfig
                         };
                       }
@@ -578,6 +582,7 @@ export default function EditorWorkspace() {
                         if (dictOptions.length) {
                           const newDefaultOptionsConfig = {
                             type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
                             dictTypeId: currentField.dictTypeId,
                             colorMode: true,
                             colorModeType: COLOR_MODE_TYPES.POINT,
@@ -597,6 +602,7 @@ export default function EditorWorkspace() {
                         };
                         schema.config.defaultOptionsConfig = {
                           ...schema.config.defaultOptionsConfig,
+                          disabled: true,
                           ...newDefaultOptionsConfig
                         };
                       }

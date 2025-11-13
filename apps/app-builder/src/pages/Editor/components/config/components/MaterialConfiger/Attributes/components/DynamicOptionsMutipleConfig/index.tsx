@@ -60,6 +60,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
           if (flag) {
             const newDefaultOptionsConfig = {
               type: DEFAULT_OPTIONS_TYPE.DICT,
+              disabled: true,
               dictTypeId: currentMainField.dictTypeId,
               defaultOptions: dictOptions
             };
@@ -74,7 +75,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
           value: e.optionValue
         }));
         if (flag) {
-          handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions });
+          handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions,disabled: true });
         }
         setTypeDisabled(true);
         setSelectDisabled(true);
@@ -89,6 +90,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
           if (flag) {
             const newDefaultOptionsConfig = {
               type: DEFAULT_OPTIONS_TYPE.DICT,
+              disabled: true,
               dictTypeId: currentSubField.dictTypeId,
               defaultOptions: dictOptions
             };
@@ -103,7 +105,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
           value: e.optionValue
         }));
         if (flag) {
-          handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions });
+          handlePropsChange(selectKey, { ...configs[selectKey], defaultOptions: newOptions,disabled: true });
         }
         setSelectDisabled(true);
         setTypeDisabled(true);

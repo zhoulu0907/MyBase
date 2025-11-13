@@ -87,6 +87,7 @@ export interface XInputSelectOneConfig extends ICommonBaseType {
    */
   defaultOptionsConfig?: {
     type: string;
+    disabled?: boolean,
     dictTypeId?: string;
     defaultOptions: { label: string; value: any;[property: string]: any }[];
   }
@@ -164,6 +165,7 @@ const XSelectOne: XInputSelectOneSchema = {
     dataField: [],
     defaultOptionsConfig: {
       type: DEFAULT_OPTIONS_TYPE.CUSTOM,
+      disabled: false,
       dictTypeId: '',
       defaultOptions: [
         {

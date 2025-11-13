@@ -254,6 +254,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                         if (dictOptions.length) {
                           const newDefaultOptionsConfig = {
                             type: DEFAULT_OPTIONS_TYPE.CUSTOM,
+                            disabled: true,
                             dictTypeId: ele.dictTypeId,
                             colorMode: true,
                             colorModeType: COLOR_MODE_TYPES.POINT,
@@ -273,6 +274,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                         };
                         subSchema.config.defaultOptionsConfig = {
                           ...subSchema.config.defaultOptionsConfig,
+                          disabled: true,
                           ...newDefaultOptionsConfig
                         };
                       }

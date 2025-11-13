@@ -88,6 +88,7 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
    */
   defaultOptionsConfig?: {
     type: string;
+    disabled?: boolean,
     dictTypeId?: string;
     defaultOptions: { label: string; value: any;[property: string]: any }[];
   }
@@ -166,6 +167,7 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     dataField: [],
     defaultOptionsConfig: {
       type: DEFAULT_OPTIONS_TYPE.CUSTOM,
+      disabled: false,
       dictTypeId: '',
       defaultOptions: [
         {

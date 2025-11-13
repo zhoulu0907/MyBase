@@ -90,6 +90,7 @@ export interface XInputRadioConfig extends ICommonBaseType {
   defaultOptionsConfig?: {
     type: string;
     dictTypeId?: string;
+    disabled?: boolean;
     defaultOptions: { label: string; value: any;[property: string]: any }[];
     colorMode?: boolean;
     colorModeType?: string;
@@ -175,6 +176,7 @@ const XRadio: XInputRadioSchema = {
     dataField: [],
     defaultOptionsConfig: {
       type: DEFAULT_OPTIONS_TYPE.CUSTOM,
+      disabled: false,
       dictTypeId: '',
       colorMode: false,
       colorModeType: COLOR_MODE_TYPES.TAG,

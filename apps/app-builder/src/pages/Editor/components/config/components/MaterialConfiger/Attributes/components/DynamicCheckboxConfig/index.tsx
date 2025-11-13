@@ -56,7 +56,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
     const value = configs.dataField;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
-    const isSubEntity = subEntities.entities?.find((ele:any) => value?.includes(ele.entityId));
+    const isSubEntity = subEntities.entities?.find((ele: any) => value?.includes(ele.entityId));
     const currentSubField = isSubEntity?.fields.find((ele: any) => value.includes(ele.fieldId));
     if (isMainEntity && currentMainField) {
       // 主表
@@ -69,6 +69,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             const newDefaultOptionsConfig = {
               type: DEFAULT_OPTIONS_TYPE.DICT,
               dictTypeId: currentMainField.dictTypeId,
+              disabled: true,
               colorMode: true,
               colorModeType: COLOR_MODE_TYPES.POINT,
               defaultOptions: dictOptions
@@ -79,12 +80,12 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
           setTypeDisabled(true);
         }
       } else if (currentMainField.options?.length) {
-        const newOptions = currentMainField.options?.map((e:any) => ({
+        const newOptions = currentMainField.options?.map((e: any) => ({
           label: e.optionLabel,
           value: e.optionValue
         }));
         if (flag) {
-          handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions });
+          handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions, disabled: true });
         }
         setTypeDisabled(true);
         setSelectDisabled(true);
@@ -100,6 +101,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             const newDefaultOptionsConfig = {
               type: DEFAULT_OPTIONS_TYPE.DICT,
               dictTypeId: currentSubField.dictTypeId,
+              disabled: true,
               colorMode: true,
               colorModeType: COLOR_MODE_TYPES.POINT,
               defaultOptions: dictOptions
@@ -110,12 +112,12 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
           setTypeDisabled(true);
         }
       } else if (currentSubField.options?.length) {
-        const newOptions = currentSubField.options?.map((e:any) => ({
+        const newOptions = currentSubField.options?.map((e: any) => ({
           label: e.optionLabel,
           value: e.optionValue
         }));
         if (flag) {
-          handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions });
+          handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions, disabled: true });
         }
         setSelectDisabled(true);
         setTypeDisabled(true);
@@ -130,6 +132,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
       handlePropsChange(checkboxKey, {
         ...configs[checkboxKey],
         defaultOptions: dictOptions,
+        disabled: true,
         dictTypeId: dict.id,
         colorMode: true,
         colorModeType: COLOR_MODE_TYPES.POINT
@@ -156,7 +159,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 setTypeDisabled(false);
                 setSelectDisabled(false);
               }
-              handlePropsChange(checkboxKey, { ...configs[checkboxKey], type: value, defaultOptions: [] });
+              handlePropsChange(checkboxKey, {
+                ...configs[checkboxKey],
+                type: value,
+                defaultOptions: [],
+              });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
@@ -164,13 +171,14 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             ]}
           ></Select>
         </Form.Item>
-        {configs[checkboxKey].type === DEFAULT_OPTIONS_TYPE.DICT && configs[checkboxKey].defaultOptions.length === 0 && (
-          <Form.Item>
-            <Button long onClick={() => setSelectDictModalVisible(true)}>
-              请选择数据字典
-            </Button>
-          </Form.Item>
-        )}
+        {configs[checkboxKey].type === DEFAULT_OPTIONS_TYPE.DICT &&
+          configs[checkboxKey].defaultOptions.length === 0 && (
+            <Form.Item>
+              <Button long onClick={() => setSelectDictModalVisible(true)}>
+                请选择数据字典
+              </Button>
+            </Form.Item>
+          )}
         <Form.List initialValue={configs[checkboxKey].defaultOptions} field={`${id}-${checkboxKey}`}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
@@ -209,7 +217,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 }}
               >
                 {configs[checkboxKey].defaultOptions?.map((_col: any, idx: number) => (
-                  <Tooltip key={idx} content={typeDisabled ? '如需修改请前往数据建模':'如需修改请前往数据字典'} disabled={!selectDisabled}>
+                  <Tooltip
+                    key={idx}
+                    content={typeDisabled ? '如需修改请前往数据建模' : '如需修改请前往数据字典'}
+                    disabled={!selectDisabled}
+                  >
                     <div className={styles.tableColumnItem}>
                       <Space>
                         <IconDragDotVertical

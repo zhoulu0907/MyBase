@@ -67,6 +67,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
           if (flag) {
             const newDefaultOptionsConfig = {
               type: DEFAULT_OPTIONS_TYPE.DICT,
+              disabled: true,
               dictTypeId: currentMainField.dictTypeId,
               colorMode: true,
               colorModeType: COLOR_MODE_TYPES.POINT,
@@ -83,7 +84,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
           value: e.optionValue
         }));
         if (flag) {
-          handlePropsChange(radioKey, { ...configs[radioKey], defaultOptions: newOptions });
+          handlePropsChange(radioKey, { ...configs[radioKey], defaultOptions: newOptions, disabled: true });
         }
         setTypeDisabled(true);
         setSelectDisabled(true);
@@ -98,6 +99,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
           if (flag) {
             const newDefaultOptionsConfig = {
               type: DEFAULT_OPTIONS_TYPE.DICT,
+              disabled: true,
               dictTypeId: currentSubField.dictTypeId,
               colorMode: true,
               colorModeType: COLOR_MODE_TYPES.POINT,
@@ -114,7 +116,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
           value: e.optionValue
         }));
         if (flag) {
-          handlePropsChange(radioKey, { ...configs[radioKey], defaultOptions: newOptions });
+          handlePropsChange(radioKey, { ...configs[radioKey], defaultOptions: newOptions, disabled: true });
         }
         setSelectDisabled(true);
         setTypeDisabled(true);
