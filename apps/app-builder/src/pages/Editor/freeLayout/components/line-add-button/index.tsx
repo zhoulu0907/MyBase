@@ -34,7 +34,6 @@ export const LineAddButton = (props: LineRenderProps) => {
   const { fromPort, toPort } = line;
 
   const onClick = useCallback(async () => {
-    console.log('出噶')
     // calculate the middle point of the line - 计算线条的中点位置
     const position = {
       x: (line.position.from.x + line.position.to.x) / 2,
