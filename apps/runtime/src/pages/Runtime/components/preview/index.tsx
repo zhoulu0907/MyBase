@@ -388,13 +388,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     );
 
     setCpStates(states);
-
-    // // 遍历 cpActions 对象，打印每个 cpId 及其对应的动作
-    // if (cpActions && typeof cpActions === 'object') {
-    //   Object.entries(cpActions).forEach(([fieldId, actions]) => {
-    //     console.log('fieldId:', fieldId, 'actions:', actions);
-    //   });
-    // }
   };
 
   return (
