@@ -17,7 +17,7 @@ export interface DynamicRadioConfigProps {
 }
 
 const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChange, item, configs, id }) => {
-  const selectKey = item.key || 'defaultOptionsConfig';
+  const selectKey = 'defaultOptionsConfig';
   const { mainEntity, subEntities } = useAppEntityStore();
   useSignals();
   const { curAppId } = useAppStore();
