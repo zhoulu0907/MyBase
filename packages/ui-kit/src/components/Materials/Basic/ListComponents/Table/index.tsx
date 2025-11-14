@@ -1,4 +1,4 @@
-import { Button, Checkbox, Form, Input, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
@@ -11,6 +11,7 @@ import {
 
 import DynamicIcon from '@/components/DynamicIcon';
 import { iconMap } from '@/utils/const';
+import { IconPlus, IconRefresh, IconSearch } from '@arco-design/web-react/icon';
 import {
   dataMethodDelete,
   dataMethodPage,
@@ -332,7 +333,8 @@ const XTable = memo(
 
             // 部门选择单选 TODO
             const deptSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
             );
             if (deptSelectField && newItem[key]) {
               if (newItem[key]) {
@@ -410,35 +412,30 @@ const XTable = memo(
         }}
       >
         <div className="tableHeader">
-          <Form form={form} className="searchGroup" layout="horizontal" labelAlign="right">
-            <TableSearch searchItems={searchItems} labelColSpan={labelColSpan} runtime={runtime} />
-          </Form>
+          <div className="searchGroup">
+            <Form form={form} layout="horizontal" labelAlign="right" className="searchItems">
+              <TableSearch searchItems={searchItems} labelColSpan={labelColSpan} runtime={runtime} />
+            </Form>
 
-          <div className="tableHeaderButton">
-            {searchItems?.length ? (
-              <>
-                <Button type="primary" onClick={handleSearch}>
-                  查询
-                </Button>
-                <Button type="primary" onClick={handleReset}>
-                  重置
-                </Button>
-              </>
-            ) : null}
+            <div className="searchBtns">
+              {searchItems?.length ? (
+                <>
+                  <Button type="primary" onClick={handleSearch} icon={<IconSearch />}>
+                    查询
+                  </Button>
+                  <Button type="default" onClick={handleReset} icon={<IconRefresh />}>
+                    重置
+                  </Button>
+                </>
+              ) : null}
+            </div>
+          </div>
+          <div className="addButton">
             {showAddBtn && (
-              <Button type="primary" onClick={handleCreate}>
-                新增
+              <Button type="primary" onClick={handleCreate} icon={<IconPlus />}>
+                添加数据
               </Button>
             )}
-            {/* <Button
-            type="outline"
-            style={{
-              border: 'none'
-            }}
-          >
-            <IconDown />
-            <span>展开</span>
-          </Button> */}
           </div>
         </div>
         <div>

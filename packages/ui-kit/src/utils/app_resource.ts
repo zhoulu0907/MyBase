@@ -364,6 +364,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     pageSetId: pageSetId
   });
 
+  console.log('res: ', res);
+
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图
 
