@@ -10,7 +10,8 @@ import { getAppIdByPageSetId, listRole, type ListRoleReq } from '@onebase/app';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
-
+const userMaxCount = 100;
+const roleMaxCount = 10;
 const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -20,6 +21,18 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
   const [roleOptions, setRoleOptions] = useState<any[]>([]);
   const [simpleCkType, setSimpleCkType] = useState<string>(approverConfig?.approverType || 'user');
   const [form] = Form.useForm();
+  const [selectedUser, setSelectedUser] = useState<string[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string[]>([]);
+  const handleChangeUser = (val: string[]) => {
+    if (val.length <= userMaxCount) {
+      setSelectedUser(val);
+    }
+  };
+  const handleChangeRole = (val: string[]) => {
+    if (val.length <= roleMaxCount) {
+      setSelectedRole(val);
+    }
+  };
   // 校验规则
   const approverFormRules = {
     user: [{ required: true, message: '请选择审批人' }],
@@ -201,13 +214,22 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
             rules={approverFormRules.user}
             wrapperCol={{ style: { width: '100%' } }}
           >
-            <Select mode="multiple" placeholder="选择审批人" 
-                    filterOption={(inputValue, option) =>
-                      option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
-                    }
-                    allowClear>
+            <Select
+              mode="multiple"
+              placeholder="选择审批人"
+              value={selectedUser}
+              onChange={handleChangeUser}
+              filterOption={(inputValue, option) =>
+                option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
+              }
+              allowClear
+            >
               {userOptions?.map((option: any) => (
-                <Option key={option?.userId} value={option?.userId}>
+                <Option
+                  key={option?.userId}
+                  value={option?.userId}
+                  disabled={selectedUser.length === userMaxCount && !selectedUser.includes(option.userId)}
+                >
                   {option.name}
                 </Option>
               ))}
@@ -222,13 +244,22 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
             rules={approverFormRules.role}
             wrapperCol={{ style: { width: '100%' } }}
           >
-            <Select mode="multiple" placeholder="选择角色" 
-                    filterOption={(inputValue, option) =>
-                      option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
-                    }
-                    allowClear>
+            <Select
+              mode="multiple"
+              placeholder="选择角色"
+              value={selectedRole}
+              onChange={handleChangeRole}
+              filterOption={(inputValue, option) =>
+                option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
+              }
+              allowClear
+            >
               {roleOptions?.map((option: any) => (
-                <Option key={option?.roleId} value={option?.roleId}>
+                <Option
+                  key={option?.roleId}
+                  value={option?.roleId}
+                  disabled={selectedRole.length === roleMaxCount && !selectedRole.includes(option.roleId)}
+                >
                   {option.roleName}
                 </Option>
               ))}
