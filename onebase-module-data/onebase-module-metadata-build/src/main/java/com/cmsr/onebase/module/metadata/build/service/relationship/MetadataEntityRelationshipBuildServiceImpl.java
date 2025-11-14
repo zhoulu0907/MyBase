@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 实体关系 Service 实现类
@@ -732,5 +733,18 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     @Override
     public List<MetadataEntityRelationshipDO> findAllByConfig(DefaultConfigStore configStore) {
         return entityRelationshipRepository.findAllByConfig(configStore);
+    }
+
+    /**
+     * 根据字段id删除关联关系 包括字段作为 源字段和目标字段 两种情况
+     * @param fieldId
+     * @return
+     */
+    public void deleteRelationShipByFieldId(Long fieldId){
+        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.getRelationshipsByFieldId(fieldId);
+        List<Long> ids = relationships.stream().map(MetadataEntityRelationshipDO::getId).collect(Collectors.toList());
+        for(Long id : ids){
+            entityRelationshipRepository.deleteById(id);
+        }
     }
 }
