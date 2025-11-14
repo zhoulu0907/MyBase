@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
 import com.cmsr.onebase.module.etl.executor.provider.dao.*;
-import com.fasterxml.uuid.Generators;
+import com.github.f4b6a3.tsid.TsidCreator;
 import org.apache.commons.dbutils.QueryRunner;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -120,7 +120,8 @@ public class QueryProvider {
     }
 
     public void insertEtlExecutionLog(EtlExecutionLog etlExecutionLog) throws Exception {
-        etlExecutionLog.setId(Generators.timeBasedEpochGenerator().generate().toString());
+        long tsid = TsidCreator.getTsid().toLong();
+        etlExecutionLog.setId(tsid);
         var query = context.insertInto(DSL.table("etl_execution_log"),
                         DSL.field("id"),
                         DSL.field("application_id"),

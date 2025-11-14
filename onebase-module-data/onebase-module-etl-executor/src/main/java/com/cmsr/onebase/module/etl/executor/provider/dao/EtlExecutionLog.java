@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 public class EtlExecutionLog {
 
-    private String id;
+    private Long id;
 
     private Long applicationId;
 
