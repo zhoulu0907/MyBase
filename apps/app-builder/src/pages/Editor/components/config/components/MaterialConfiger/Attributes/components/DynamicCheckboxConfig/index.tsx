@@ -30,7 +30,7 @@ export interface DynamicCheckboxConfigProps {
 }
 
 const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePropsChange, item, configs, id }) => {
-  const checkboxKey = item.key || 'defaultOptionsConfig';
+  const checkboxKey = 'defaultOptionsConfig';
   const { mainEntity, subEntities } = useAppEntityStore();
   useSignals();
   const { curAppId } = useAppStore();

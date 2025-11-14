@@ -35,7 +35,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
   configs,
   id
 }) => {
-  const selectMutipleKey = item.key || 'defaultOptionsConfig';
+  const selectMutipleKey = 'defaultOptionsConfig';
   const { mainEntity, subEntities } = useAppEntityStore();
   useSignals();
   const { curAppId } = useAppStore();
