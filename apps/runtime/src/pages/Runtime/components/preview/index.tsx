@@ -378,12 +378,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setDetailMode(false);
   };
 
-  const handleFormValuesChange = (value: Partial<any>, values: Partial<any>) => {
-    initInteractionRule(
+  const [cpStates, setCpStates] = useState<Record<string, any>>({});
+
+  const handleFormValuesChange = async (value: Partial<any>, values: Partial<any>) => {
+    const states = await initInteractionRule(
       values,
       pageViews.value[curViewId.value]?.interactionRules,
       useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value
     );
+
+    setCpStates(states);
+
+    // // 遍历 cpActions 对象，打印每个 cpId 及其对应的动作
+    // if (cpActions && typeof cpActions === 'object') {
+    //   Object.entries(cpActions).forEach(([fieldId, actions]) => {
+    //     console.log('fieldId:', fieldId, 'actions:', actions);
+    //   });
+    // }
   };
 
   return (
@@ -443,6 +454,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                       showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
+                      cpState={cpStates[cp.id]}
                     />
                   </div>
                 )}
