@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useCallback } from 'react';
+import { useCallback,useState } from 'react';
 
 import { WorkflowNodePanelService, WorkflowNodePanelUtils } from '@flowgram.ai/free-node-panel-plugin';
 import type { LineRenderProps } from '@flowgram.ai/free-lines-plugin';
@@ -103,6 +103,17 @@ export const LineAddButton = (props: LineRenderProps) => {
     line.dispose();
   }, []);
 
+     const handleDeleteLine = (e: React.MouseEvent) => {
+       e.stopPropagation();
+       e.preventDefault();
+
+       console.log('删除连线:', line.id);
+
+       // 删除连线
+    //    const commandService = useState(CommandService);
+    //    commandService.executeCommand('DELETE', [line]);
+     };
+
   if (!visible) {
     return <div className="line-node" style={{}}></div>;
   }
@@ -120,6 +131,31 @@ export const LineAddButton = (props: LineRenderProps) => {
       onClick={onClick}
     >
       <IconPlusCircle />
+      {/* todo:连接线删除测试
+      {selected && (
+        <div
+          className="line-delete-button"
+          style={{
+            position:'absolute',
+            left:'20px',
+            width: '18px',
+            height: '18px',
+            backgroundColor: '#ff4d4f',
+            color: 'white',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            cursor: 'pointer',
+            flexShrink: 0
+          }}
+          onClick={handleDeleteLine}
+          title="删除连线"
+        >
+          ×
+        </div>
+      )} */}
     </div>
   );
 };

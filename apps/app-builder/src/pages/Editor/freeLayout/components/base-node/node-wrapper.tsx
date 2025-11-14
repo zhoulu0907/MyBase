@@ -14,6 +14,8 @@ import { NodeWrapperStyle } from './styles';
 import iconCopy from '../../assets/copy.svg';
 import iconDelete from '../../assets/delete.svg';
 import { WorkflowNodeType } from '../../nodes/constants';
+import { CopyShortcut } from '../../shortcuts/copy/index';
+import { PasteShortcut } from '../../shortcuts/paste/index';
 import './node-wrapper.less';
 
 export interface NodeWrapperProps {
@@ -60,12 +62,18 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
     [node]
   );
   const deleteNode = useCallback(() => {
-    // 删除节点
     ctx.get<CommandService>(CommandService).executeCommand('DELETE', [node]);
   }, [node]);
-  const copyNode = useCallback(() => {
-    console.log('复制节点');
-  }, [node]);
+  const copyNode = useCallback(
+    (e: React.MouseEvent) => {
+      const copyShortcut = new CopyShortcut(ctx);
+      const pasteShortcut = new PasteShortcut(ctx);
+      const data = copyShortcut.toClipboardData([node]);
+      pasteShortcut.apply(data);
+      e.stopPropagation();
+    },
+    [ctx, node]
+  );
 
   return (
     <>
