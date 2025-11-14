@@ -27,6 +27,7 @@ import { RedirectMethod } from '../../../constants';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
+import { useFormEditorSignal } from 'src/signals/page_editor';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -51,6 +52,7 @@ const XTable = memo(
     }
   ) => {
     useSignals();
+    const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
@@ -211,6 +213,13 @@ const XTable = memo(
             ellipsis: true,
             width: v.width + 'px',
             render: (_text: any) => {
+              const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
+              const cpId = componentSchemasKeys.find((ele) => {
+                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(v.id);
+              });
+              if(cpId){
+                
+              }
               return <span>{_text}</span>
             }
           };
