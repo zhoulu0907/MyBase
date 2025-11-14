@@ -37,7 +37,7 @@ public interface BpmInstanceService {
      *
      * @param instanceId 流程实例ID
      */
-    BpmFlowTaskDetailVO getFormDetail(Long instanceId);
+    BpmTaskDetailRespVO getFormDetail(Long instanceId);
 
     /**
      * 流程预测
