@@ -36,6 +36,11 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-jose</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

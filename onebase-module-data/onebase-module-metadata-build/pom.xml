@@ -39,7 +39,30 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-security-build</artifactId>
+            <version>${revision}</version>
         </dependency>
+        
+        <!-- 新增：流程模块 API（用于触发流程） -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        
+        <!-- 新增：流程组件（临时加，后续看如何解耦） -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-component</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        
+        <!-- 新增：应用模块 API（权限相关） -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
