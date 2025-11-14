@@ -789,7 +789,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                     AdminUserRespDTO user = userMap.get(handler.getHandlerId());
                     if (user != null) {
                         handler.setHandlerName(user.getNickname());
-                        handler.setUserAvatar(user.getAvatar());
+                        handler.setAvatar(user.getAvatar());
                     } else {
                         // todo：处理用户不存在的情况，名称先设置成 "-"
                         handler.setHandlerName("-");
