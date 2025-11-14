@@ -53,7 +53,7 @@ class MetadataQueryServiceImplTest {
         when(entityFieldCoreService.getEntityFieldListByEntityId(entityId))
             .thenReturn(List.of(nameField, ageField, enrollDateField));
 
-        when(dataMethodCoreService.getDataPage(anyLong(), anyInt(), anyInt(), any(), any(), anyMap(), any()))
+        when(dataMethodCoreService.getDataPage(anyLong(), anyInt(), anyInt(), any(), any(), anyMap(), any(), any()))
             .thenReturn(null);
 
         QueryCondition c1 = new QueryCondition(); c1.setFieldId(nameField.getId()); c1.setOperator("CONTAINS"); c1.setFieldValues(List.of("年级"));
@@ -71,7 +71,7 @@ class MetadataQueryServiceImplTest {
         // 捕获第一次 OR 组的 filters
         var filtersCaptor = org.mockito.ArgumentCaptor.forClass(Map.class);
         verify(dataMethodCoreService, atLeastOnce()).getDataPage(
-                eq(entityId), anyInt(), anyInt(), any(), any(), filtersCaptor.capture(), any());
+                eq(entityId), anyInt(), anyInt(), any(), any(), filtersCaptor.capture(), any(), any());
 
         Map<String, Object> filters = filtersCaptor.getValue();
         assertThat(filters.values()).hasSize(2);
