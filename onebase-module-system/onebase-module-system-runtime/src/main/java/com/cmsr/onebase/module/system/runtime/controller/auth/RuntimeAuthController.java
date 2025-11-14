@@ -7,11 +7,7 @@ import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
-import com.cmsr.onebase.module.system.runtime.vo.auth.RuntimeAuthLoginReqVO;
-import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
-import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
-import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
+import com.cmsr.onebase.module.system.vo.auth.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,8 +23,8 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
  * 运行态登录认证相关服务
- * 1. 应用登录-内部用户登录
- * 2. 应用登录-第三方系统用户登录
+ * 1. AppLogin 应用登录-内部用户登录（内部模式，账密登录）
+ * 2. AppLogin 应用登录-外部用户登录（SaaS模式，手机号登录）
  *
  * @author matianyu
  * @date 2025-11
@@ -46,11 +42,19 @@ public class RuntimeAuthController {
     @Resource
     private SecurityProperties securityProperties;
 
-    @PostMapping("/login")
+    @PostMapping("/app-login")
     @PermitAll
-    @Operation(summary = "使用账号密码登录")
-    public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid RuntimeAuthLoginReqVO reqVO) {
-        return success(runtimeAuthService.login(reqVO));
+    @Operation(summary = "内部用户登录（Inner模式，账密登录）")
+    public CommonResult<AuthLoginRespVO> appUsernameLogin(@RequestBody @Valid AppUserNameLoginReqVO reqVO) {
+        return success(runtimeAuthService.appUsernameLogin(reqVO));
+    }
+
+
+    @PostMapping("/app-login-mobile")
+    @PermitAll
+    @Operation(summary = "外部用户登录（SaaS模式，手机号登录）")
+    public CommonResult<AuthLoginRespVO> appMobileLogin(@RequestBody @Valid AppMobileLoginReqVO reqVO) {
+        return success(runtimeAuthService.appMobileLogin(reqVO));
     }
 
     @PostMapping("/logout")

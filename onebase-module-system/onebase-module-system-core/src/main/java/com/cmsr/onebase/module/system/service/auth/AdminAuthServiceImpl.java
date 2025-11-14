@@ -88,19 +88,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
         AdminUserDO user = userService.getUserByUsername(username);
-        if (user == null) {
-            createLoginLog(null, username, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
-            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
-        }
-        if (!userService.isPasswordMatch(password, user.getPassword())) {
-            createLoginLog(user.getId(), username, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
-            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
-        }
-        // 校验是否禁用
-        if (CommonStatusEnum.isDisable(user.getStatus())) {
-            createLoginLog(user.getId(), username, logTypeEnum, LoginResultEnum.USER_DISABLED);
-            throw exception(AUTH_LOGIN_USER_DISABLED);
-        }
+        checkUserPsdAndStatus(username, password, user, logTypeEnum);
         return user;
     }
 
@@ -108,20 +96,24 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
         AdminUserDO user = userService.getUserByMobile(mobile);
+        checkUserPsdAndStatus(mobile, password, user, logTypeEnum);
+        return user;
+    }
+
+    private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
-            createLoginLog(null, mobile, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
         }
         if (!userService.isPasswordMatch(password, user.getPassword())) {
-            createLoginLog(user.getId(), mobile, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            createLoginLog(user.getId(), account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
         }
         // 校验是否禁用
         if (CommonStatusEnum.isDisable(user.getStatus())) {
-            createLoginLog(user.getId(), mobile, logTypeEnum, LoginResultEnum.USER_DISABLED);
+            createLoginLog(user.getId(), account, logTypeEnum, LoginResultEnum.USER_DISABLED);
             throw exception(AUTH_LOGIN_USER_DISABLED);
         }
-        return user;
     }
 
 
@@ -171,43 +163,11 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     @Override
-    public AuthLoginRespVO mobileLogin(MobleLoginReqVO reqVO) {
+    public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
         // 校验验证码
         mobileValidateCaptcha(reqVO);
 
-        // 增加日志输出，便于调试
-        log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
-
-        // 确保配置值不为null，并且为false时才执行校验
-        if (Boolean.FALSE.equals(platformTenantEnableCreateApp)) {
-            log.info("平台租户创建应用功能已禁用，开始校验租户信息");
-            // 校验当前用户绑定的租户是否为平台租户，是则不允许登录
-            tenantService.handleTenantInfo(tenant -> {
-                if (tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    log.warn("平台租户用户尝试登录，但平台租户创建应用功能已禁用");
-                    throw exception(AUTH_LOGIN_PLATFORM_TENANT_ERROR);
-                }
-            });
-        } else {
-            log.debug("平台租户创建应用功能已启用，跳过租户校验");
-        }
-
-        // 使用手机密码，进行登录
-        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
-    }
-
-    @Override
-    public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
-        // 校验验证码
-        ResponseModel response = doValidateCaptcha(reqVO);
-        // 校验验证码
-        if (!response.isSuccess()) {
-            // 创建登录失败日志（验证码不正确)
-            createLoginLog(null, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
-            throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
-        }
-        // 2. 使用手机和密码，进行登录
+        // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
         return createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
     }
@@ -264,7 +224,6 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
     }
 
-    @VisibleForTesting
     void validateCaptcha(UserLoginReqVO reqVO) {
         ResponseModel response = doValidateCaptcha(reqVO);
         // 校验验证码
@@ -275,8 +234,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
     }
 
-    @VisibleForTesting
-    void mobileValidateCaptcha(MobleLoginReqVO reqVO) {
+    void mobileValidateCaptcha(MobileLoginReqVO reqVO) {
         ResponseModel response = doValidateCaptcha(reqVO);
         // 校验验证码
         if (!response.isSuccess()) {
