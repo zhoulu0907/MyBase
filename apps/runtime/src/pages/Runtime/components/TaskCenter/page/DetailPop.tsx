@@ -188,7 +188,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
             <Col span={6}>
               <p className="gray-color">发起人</p>
               <div className="photo-box">
-                <p className="photo-img"></p>
+                <p className="photo-img">{detailData?.initiator?.avatar && <img src={detailData?.initiator?.avatar} alt='' />}</p>
                 {detailData?.initiatorName}
               </div>
             </Col>
