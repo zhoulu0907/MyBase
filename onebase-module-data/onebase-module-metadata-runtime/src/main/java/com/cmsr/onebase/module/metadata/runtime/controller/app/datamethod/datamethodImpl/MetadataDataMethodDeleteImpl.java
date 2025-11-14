@@ -20,6 +20,7 @@ import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.Pro
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.data.transaction.TransactionState;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.Order;
@@ -128,6 +129,9 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             Map sourceData = convertDataRowToMap(sourceDataRow,fields);
             context.setProcessedData(sourceData);//保存源业务实体数据 在级联删除的时候使用（根据关联字段查询原始值）
 
+            // AnyLine开启事务
+            TransactionState transactionState = temporaryService.start();
+
             long deleteCount;
             if (hasDeletedField) {
                 // 软删除：更新deleted字段为删除时间戳
@@ -149,8 +153,17 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             }
             boolean ok = deleteCount > 0;
             if(ok){
-//               super.storeData(context);
-                handleSubEntities(context);
+                try {
+                    super.storeData(context);// 子表处理创建嵌套内部事务
+                    log.info("子表处理完成，准备提交事务");
+                    // 子表处理完成 提交事务
+                    temporaryService.commit(transactionState);
+                }catch (Exception e){
+                    log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
+                    // 子表处理出现异常 回滚事务
+                    temporaryService.rollback(transactionState);
+                    throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+                }
             }
             return ok;
         });

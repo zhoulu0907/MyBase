@@ -595,7 +595,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     protected void storeData(ProcessContext context) {
 
         //处理子表逻辑
-        if (CollectionUtils.isNotEmpty(context.getSubEntities())) {
+        if (CollectionUtils.isNotEmpty(context.getSubEntities()) || MetadataDataMethodOpEnum.DELETE == context.getOperationType()) {
             handleSubEntities(context);
         }
 

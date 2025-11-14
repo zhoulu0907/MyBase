@@ -23,6 +23,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.data.transaction.TransactionState;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.service.AnylineService;
@@ -220,9 +221,23 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             // 4. 执行更新
             DataRow dataRow = new DataRow(processedData);
+
+            // AnyLine开启事务
+            TransactionState transactionState = temporaryService.start();
+
             long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
             log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
-            super.storeData(context);
+            try {
+                super.storeData(context);// 子表处理创建嵌套内部事务
+                log.info("子表处理完成，准备提交事务");
+                // 子表处理完成 提交事务
+                temporaryService.commit(transactionState);
+            }catch (Exception e){
+                log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
+                // 子表处理出现异常 回滚事务
+                temporaryService.rollback(transactionState);
+                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+            }
 
             return null;
         });
