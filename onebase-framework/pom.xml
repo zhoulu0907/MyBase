@@ -26,7 +26,8 @@
         <module>onebase-spring-boot-starter-biz-tenant</module>
         <module>onebase-project-base</module>
         <module>onebase-spring-boot-starter-dolphinscheduler</module>
-<!--        <module>onebase-spring-boot-starter-dolphinscheduler-client</module>-->
+        <module>onebase-jose</module>
+        <!--        <module>onebase-spring-boot-starter-dolphinscheduler-client</module>-->
     </modules>
 
     <artifactId>onebase-framework</artifactId>

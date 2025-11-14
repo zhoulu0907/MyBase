@@ -423,3 +423,9 @@ COMMENT ON COLUMN bpm_flow_agent.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_agent.tenant_id IS '租户ID';
 COMMENT ON COLUMN bpm_flow_agent.agent_name IS '代理人用户名称';
 COMMENT ON COLUMN bpm_flow_agent.principal_name IS '被代理人用户名称';
+
+
+
+
+-- 以下为增量更新
+ALTER TABLE "bpm_flow_user" ALTER COLUMN "type" TYPE varchar(8) COLLATE "pg_catalog"."default" USING "type"::varchar(8);

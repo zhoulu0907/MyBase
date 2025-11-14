@@ -41,6 +41,6 @@ public class BpmPredictRespVO {
         private String handlerName;
 
         @Schema(description = "处理人头像")
-        private String userAvatar;
+        private String avatar;
     }
 }

@@ -1,9 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.vo.design.node.base;
 
-import com.cmsr.onebase.module.bpm.core.vo.design.node.ApproverNodeVO;
-import com.cmsr.onebase.module.bpm.core.vo.design.node.EndNodeVO;
-import com.cmsr.onebase.module.bpm.core.vo.design.node.InitiationNodeVO;
-import com.cmsr.onebase.module.bpm.core.vo.design.node.StartNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,7 +24,8 @@ import lombok.Data;
         @JsonSubTypes.Type(value = ApproverNodeVO.class, name = "approver"),
         @JsonSubTypes.Type(value = StartNodeVO.class, name = "start"),
         @JsonSubTypes.Type(value = EndNodeVO.class, name = "end"),
-        @JsonSubTypes.Type(value = InitiationNodeVO.class, name = "initiation")
+        @JsonSubTypes.Type(value = InitiationNodeVO.class, name = "initiation"),
+        @JsonSubTypes.Type(value = CondNodeVO.class, name = "condition")
         // 需要添加更多类型
 })
 @Data

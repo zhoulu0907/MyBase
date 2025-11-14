@@ -94,6 +94,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
 
             // 构建登录用户
             return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+                    .setCorpId(accessToken.getCorpId())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
                     .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
                     .setExpiresTime(accessToken.getExpiresTime());

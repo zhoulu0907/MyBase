@@ -45,7 +45,7 @@ public class DataRepository<T extends BaseDOInterface> {
     }
 
     @Resource
-    private AnylineService<?> anylineService;
+    protected AnylineService<?> anylineService;
 
     private Class<T> defaultClazz = null;
 
