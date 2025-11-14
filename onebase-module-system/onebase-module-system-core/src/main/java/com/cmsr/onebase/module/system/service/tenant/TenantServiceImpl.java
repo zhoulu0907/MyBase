@@ -83,16 +83,16 @@ public class TenantServiceImpl implements TenantService {
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private AdminUserService userService;
+    private AdminUserService     userService;
 
     @Resource
-    private RoleService roleService;
+    private RoleService       roleService;
     @Resource
-    private MenuService menuService;
+    private MenuService       menuService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private LicenseService licenseService;
+    private LicenseService    licenseService;
     @Resource
     private AppApplicationApi appApplicationApi;
 
@@ -217,16 +217,11 @@ public class TenantServiceImpl implements TenantService {
         TenantUtils.execute(tenant.getId(), () -> {
             // 创建管理员角色
             Long roleId = createTenantAdminRole();
-            //  开发者角色 判断是否存在开发者，如果存在，就分配角色，不存在就新增开发者角色
-            Long devRoleId= createDevAdminRole();
             // 创建用户，并分配角色
-            createSystemUser(roleId, devRoleId, createReqVO);
+            createSystemUser(roleId, createReqVO);
         });
         return tenant.getId();
     }
-
-
-
 
 
     private Long getExistTenantCount() {
@@ -236,7 +231,7 @@ public class TenantServiceImpl implements TenantService {
         return existTenantCount;
     }
 
-    private void createSystemUser(Long roleId, Long devRoleId, TenantInsertReqVO insertReqVO) {
+    private void createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
         List<TenantAdminUserReqVO> adminUserReqVOList = insertReqVO.getTenantAdminUserReqVOList();
         adminUserReqVOList.forEach(adminUserReqVO -> {
             UserInsertReqVO reqVO = new UserInsertReqVO();
@@ -249,9 +244,6 @@ public class TenantServiceImpl implements TenantService {
             Long userId = userService.createUser(reqVO);
             // 分配 管理员角色
             permissionService.assignUserRoles(userId, singleton(roleId));
-            // 分配开发者角色
-            permissionService.devAssignUserRoles(userId, devRoleId);
-
         });
     }
 
@@ -263,24 +255,6 @@ public class TenantServiceImpl implements TenantService {
         Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
         return roleId;
     }
-
-
-    @TenantIgnore
-    private Long createDevAdminRole() {
-        Long roleId=null;
-        RoleDO roleDO= roleService.getRoleByCodeIgnoreTenant(RoleCodeEnum.APP_DEVELOPER.getCode());
-        if(roleDO==null) {
-            // 创建角色
-            RoleInsertReqVO reqVO = new RoleInsertReqVO();
-            reqVO.setName(RoleCodeEnum.APP_DEVELOPER.getName()).setCode(RoleCodeEnum.APP_DEVELOPER.getCode())
-                    .setSort(0).setRemark("系统自动生成");
-              roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
-        }else{
-              roleId=roleDO.getId();
-        }
-        return roleId;
-    }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -311,7 +285,7 @@ public class TenantServiceImpl implements TenantService {
                         userLimit,
                         remainingCount);
             }
-            if(updateReqVO.getAccountCount()==null){
+            if (updateReqVO.getAccountCount() == null) {
                 updateReqVO.setAccountCount(tenant.getAccountCount());
             }
             TenantUtils.execute(tenant.getId(), () -> {
@@ -329,7 +303,7 @@ public class TenantServiceImpl implements TenantService {
         DataRow row = new DataRow();
         row.put(TenantDO.ID, updateObj.getId());
         if (updateObj.getAdminUserId() != null) {
-           // row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
+            // row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
         }
         if (StringUtils.isNotEmpty(updateObj.getName())) {
             row.put(TenantDO.NAME, updateObj.getName());
@@ -349,11 +323,10 @@ public class TenantServiceImpl implements TenantService {
             TenantUtils.execute(updateObj.getId(), () -> {
 
                 // 管理员变了，把旧管理员角色移除，并降级为自定义
-                Long  roleId = getAdminRoleAndDeleteOldUserRole(tenant);
-                Long  devRoleId=createDevAdminRole();
+                Long roleId = getAdminRoleAndDeleteOldUserRole(tenant);
                 // 判断管理员是否发生变更
-              List<String> adminUserRespDTOS=  adminUserRoleApi.getUserRoleByRoleIdAndTenantId(roleId,tenant.getId());
-              List<Long> userIds = adminUserRespDTOS.stream()
+                List<String> adminUserRespDTOS = adminUserRoleApi.getUserRoleByRoleIdAndTenantId(roleId, tenant.getId());
+                List<Long> userIds = adminUserRespDTOS.stream()
                         .map(Long::valueOf)
                         .collect(Collectors.toList());
                 // 使用AdminUserService批量获取用户数据
@@ -369,18 +342,14 @@ public class TenantServiceImpl implements TenantService {
                         .filter(entry -> !adminUsernameMap.containsKey(entry.getKey()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-
                 for (Long userId : usersToDelete.values()) {
                     // 移除旧用户租户管理员角色
                     UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(userId, roleId);
                     if (userRoleDO != null) {
                         permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
-                        // 删除旧的开发者
-                        permissionService.deleteRoleUsers(devRoleId, singleton(userRoleDO.getUserId()));
                     }
                     // 将旧管理员设置为普通用户,降级
                     userService.updateAdminType(userId, AdminTypeEnum.CUSTOM.getType());
-
                 }
 
                 updateReqVO.getTenantAdminUserUpdateReqVOSList().forEach(adminUserReqVO -> {
@@ -399,15 +368,11 @@ public class TenantServiceImpl implements TenantService {
                         Long userId = userService.createUser(userInsertReqVO);
                         // 分配管理员权限
                         permissionService.assignUserRoles(userId, singleton(roleId));
-                        // 分配开发者权限
-                        permissionService.devAssignUserRoles(userId, devRoleId);
                     } else {
                         // 新管理员用户存在，直接分配角色
                         permissionService.assignUserRoles(adminUserReqVO.getAdminUserId(), singleton(roleId));
                         // 将新管理员设置为内置用户类型
                         userService.updateAdminType(adminUserReqVO.getAdminUserId(), AdminTypeEnum.SYSTEM.getType());
-                        // 分配开发者权限
-                        permissionService.devAssignUserRoles(adminUserReqVO.getAdminUserId(), devRoleId);
                     }
                 });
             });
@@ -516,7 +481,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
-         Map<Long, Integer> corpCountMap = findCorpCount();
+        Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量
         Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
@@ -531,10 +496,10 @@ public class TenantServiceImpl implements TenantService {
         }
         tenantRespVO.setCorpCount(corpCount);
         // 获取当前空间的管理员角色id
-     //  RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
-        RoleDO roleDO = roleService.getRoleIdsByCodeAndTenantId(RoleCodeEnum.TENANT_ADMIN.getCode(),id);
-        if(roleDO!=null) {
-            List<String> adminUserRespDTOS = adminUserRoleApi.getUserRoleByRoleIdAndTenantId(roleDO.getId(),id);
+        //  RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+        RoleDO roleDO = roleService.getRoleIdsByCodeAndTenantId(RoleCodeEnum.TENANT_ADMIN.getCode(), id);
+        if (roleDO != null) {
+            List<String> adminUserRespDTOS = adminUserRoleApi.getUserRoleByRoleIdAndTenantId(roleDO.getId(), id);
             List<Long> userIds = adminUserRespDTOS.stream()
                     .map(Long::valueOf)
                     .collect(Collectors.toList());
@@ -583,6 +548,7 @@ public class TenantServiceImpl implements TenantService {
     public Map<Integer, Integer> findAppCount() {
         return appApplicationApi.findAppApplicationAll();
     }
+
     @TenantIgnore
     @Override
     public PageResult<TenantRespVO> getTenantPage(TenantPageReqVO reqVO) {
@@ -590,9 +556,9 @@ public class TenantServiceImpl implements TenantService {
         if (CollUtil.isEmpty(tenantDOPageResult.getList())) {
             return PageResult.empty();
         }
-        List<TenantDO> tenantDOList=tenantDOPageResult.getList();
+        List<TenantDO> tenantDOList = tenantDOPageResult.getList();
         List<Long> tenantIds = CollectionUtils.convertList(tenantDOList, TenantDO::getId);
-        Map<Long,Integer> existUserCountMap = adminUserService.getTenantExistUserCountByIds(tenantIds);
+        Map<Long, Integer> existUserCountMap = adminUserService.getTenantExistUserCountByIds(tenantIds);
         Map<Long, Integer> coupCountMap = findCorpCount();
         Map<Integer, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称
