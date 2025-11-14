@@ -1,4 +1,4 @@
-import { Button, Form } from '@arco-design/web-react';
+import { Button, Form, Modal } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 
@@ -7,6 +7,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import PreviewDataSelectModal from './previewDataSelectModal';
 import { XDataSelectConfig } from './schema';
 import cloneDeep from 'lodash-es/cloneDeep';
+import { IconClose } from '@arco-design/web-react/icon';
 
 const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -30,28 +31,46 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   const [previewDataSelectVisible, setPreviewDataSelectVisible] = useState(false); //预览数据选择popup
   const [initialSelectedId, setInitialSelectedId] = useState<string>('');
   const [displayFieldsWithValue, setdisplayFieldsWithValue] = useState<any[]>([]);
+
+  // 字段回显
+  const [selectFieldValue, setSelectFieldValue] = useState<string>('');
+
   const fieldValue = Form.useWatch(fieldName, form);
 
   useEffect(() => {
     if (runtime === true && fieldValue) {
       setInitialSelectedId(fieldValue.selectID);
-      const map = new Map<string, string>();
-      for (const s of fieldValue.dataFields) {
-          if (s.value != null && s.dataValue !== undefined) map.set(s.value, s.dataValue);
-      }
-      const displayFieldsWithValue = [...displayFields].map(t => ({
-          ...t,
-          dataValue: map.has(t.value) ? map.get(t.value) : t.dataValue,
-      }));
-      setdisplayFieldsWithValue(displayFieldsWithValue);
+      setSelectFieldValue(fieldValue.dataFields[0]?.dataValue);
+      // const map = new Map<string, string>();
+      // for (const s of fieldValue.dataFields) {
+      //     if (s.value != null && s.dataValue !== undefined) map.set(s.value, s.dataValue);
+      // }
+      // const displayFieldsWithValue = [...displayFields].map(t => ({
+      //     ...t,
+      //     dataValue: map.has(t.value) ? map.get(t.value) : t.dataValue,
+      // }));
+      // setdisplayFieldsWithValue(displayFieldsWithValue);
     } else {
+      resetDisplayValue();
       setdisplayFieldsWithValue(cloneDeep(displayFields));
     }
   }, [fieldValue]);
 
   useEffect(() => {
     setdisplayFieldsWithValue(cloneDeep(displayFields));
+    resetDisplayValue();
   }, [displayFields])
+
+  const handleClear = (e: React.MouseEvent) => {
+    // 阻止冒泡，避免触发按钮的 onClick（打开弹窗）
+    e.stopPropagation();
+    resetDisplayValue();
+  };
+
+  const resetDisplayValue = () => {
+    setInitialSelectedId('');
+    setSelectFieldValue('');
+  }
 
   return (
     <div className="formWrapper">
@@ -75,7 +94,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           margin: '0px'
         }}
       >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? 
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode || !runtime ? 
         (
           <Button
           type="secondary"
@@ -84,22 +103,45 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
             pointerEvents: 'none'
           }}
         >
-          {defaultValue}
+          {selectFieldValue || defaultValue}
         </Button>
         ) : 
         (
-          <Button
-          type="secondary"
-          long
-          style={{
-            pointerEvents: runtime ? 'unset' : 'none'
-          }}
-          onClick={() => setPreviewDataSelectVisible(true)}
-        >
-          {defaultValue}
+          (initialSelectedId && selectFieldValue) ? (
+            <Button
+              type="secondary" long
+              style={{
+                pointerEvents: runtime ? 'unset' : 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+              onClick={() => setPreviewDataSelectVisible(true)}
+            >
+            <span style={{ pointerEvents: 'none' }}>{selectFieldValue || <span style={{ color: '#999' }}>{defaultValue}</span>}</span>
+            <span
+              onClick={handleClear}
+              style={{
+                cursor:'pointer'
+              }}
+              title="清除"
+            >
+            <IconClose style={{ fontSize: 12}} />
+            </span>
         </Button>
-        )}
-        
+          ) : (
+          <Button
+            type="secondary"
+            long
+            style={{
+              pointerEvents: runtime ? 'unset' : 'none',
+            }}
+            onClick={() => setPreviewDataSelectVisible(true)}
+          >
+            {defaultValue}
+          </Button>
+        )
+      )}
       </Form.Item>
       <PreviewDataSelectModal
           visible={previewDataSelectVisible}
@@ -111,7 +153,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           initialSelectedId = {initialSelectedId}
         />
       <div style={{ marginTop: '16px', background: '#f7f8fa' }}>
-        {displayFieldsWithValue.map((field) => (
+        {/* {displayFieldsWithValue.map((field) => (
           <Form.Item
             key={field.label}
             label={field.label}
@@ -120,7 +162,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           >
             <span style={{ color: '#c9cdd4' }}>{field.dataValue ?? '暂无内容'}</span>
           </Form.Item>
-        ))}
+        ))} */}
       </div>
     </div>
   );
