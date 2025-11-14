@@ -27,7 +27,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class RemoteCallAuthenticationFilter extends OncePerRequestFilter {
 
-    public static final String X_REMOTE_CALL_TOKEN = "X-Remote-Call-Token";
+    public static final String X_EXEC_TOKEN = "X-Exec-Token";
 
     private RequestMatcher flowRemoteCallRequestMatcher = new AntPathRequestMatcher("/runtime/flow/remote-call/**", "POST");
 
@@ -68,7 +68,7 @@ public class RemoteCallAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        return request.getHeader(X_REMOTE_CALL_TOKEN);
+        return request.getHeader(X_EXEC_TOKEN);
     }
 
 }
