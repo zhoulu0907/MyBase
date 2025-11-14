@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.UNAUTHORIZED;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED;
 
@@ -530,6 +531,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         }
 
         RTLoginUser loginUser = RTSecurityContext.getLoginUser();
+        if (loginUser == null) {
+            throw exception(UNAUTHORIZED);
+        }
 
         DataPermission menuDataPermission = RTSecurityContext.getMenuDataPermission(menuId);
         FieldPermission menuFieldPermission = RTSecurityContext.getMenuFieldPermission(menuId);

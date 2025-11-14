@@ -54,6 +54,12 @@ public class ApproverInstanceDetailStrategy extends AbstractInstanceDetailStrate
             fieldIdNameMap.put(entityField.getId(), entityField.getFieldName());
         }
 
+        vo.getFormData().put("fieldPerm", fieldPermMap);
+
+        // 这里只是为了方便查看id和name的关联关系，业务上暂时没用上
+        vo.getFormData().put("fieldIdName", fieldIdNameMap);
+
+        // 没有配置字段权限，则返回只读权限
         if (!CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
             return;
         }
@@ -88,11 +94,6 @@ public class ApproverInstanceDetailStrategy extends AbstractInstanceDetailStrate
                 entityDataMap.remove(hiddenFieldName);
             }
         }
-
-        vo.getFormData().put("fieldPerm", fieldPermMap);
-
-        // 这里只是为了方便查看id和name的关联关系，业务上暂时没用上
-        vo.getFormData().put("fieldIdName", fieldIdNameMap);
     }
 
     @Override

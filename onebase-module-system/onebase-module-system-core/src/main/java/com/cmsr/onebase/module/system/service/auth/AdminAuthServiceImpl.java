@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.system.service.auth;
 
+import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
@@ -158,12 +158,12 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     @Override
-    public AuthLoginRespVO corpLogin(AuthLoginReqVO reqVO) {
+    public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
         // 2. 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @Override
@@ -241,10 +241,14 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, LoginLogTypeEnum logType) {
+        return createCorpAfterLoginSuccess(null, userId, username, logType);
+    }
+
+    private AuthLoginRespVO createCorpAfterLoginSuccess(Long corpId, Long userId, String username, LoginLogTypeEnum logType) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessToken(userId, getUserType().getValue(),
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createCorpAccessToken(corpId, userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());

@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import org.dromara.warm.flow.core.entity.Task;
+import org.dromara.warm.flow.core.entity.User;
 
 /**
  * execTask 策略接口
@@ -30,7 +31,7 @@ public interface ExecTaskStrategy<T extends BaseNodeExtDTO> {
      * @param extDTO 节点扩展信息
      * @param reqVO 请求参数
      */
-    void execute(Task task, T extDTO, ExecTaskReqVO reqVO);
+    void execute(User matchedUser, Task task, T extDTO, ExecTaskReqVO reqVO);
 }
 
 
