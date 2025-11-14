@@ -76,7 +76,8 @@ export default function EditorWorkspace() {
     setLayoutSubComponents,
     delLayoutSubComponents,
     subTableComponents,
-    setSubTableComponents
+    setSubTableComponents,
+    delSubTableComponents
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -185,6 +186,7 @@ export default function EditorWorkspace() {
     delComponents(componentId);
     delPageComponentSchemas(componentId);
     delLayoutSubComponents(componentId);
+    delSubTableComponents(componentId);
 
     if (layoutSubComponents[componentId]) {
       // 收集所有需要删除的组件 ID
@@ -213,6 +215,33 @@ export default function EditorWorkspace() {
         // 明确参数类型
         delPageComponentSchemas(id);
         delLayoutSubComponents(id);
+      });
+    }
+
+    // 子表单删除
+    if (subTableComponents[componentId]) {
+      // 收集所有需要删除的组件 ID
+      const idsToDelete = new Set<string>();
+
+      // 递归收集需要删除的组件 ID
+      function collectDeleteIds(id: string) {
+        if (subTableComponents[id]) {
+          subTableComponents[id].forEach((row: any) => {
+            if (!idsToDelete.has(row.id)) {
+              idsToDelete.add(row.id);
+            }
+          });
+        }
+      }
+
+      // 开始收集
+      collectDeleteIds(componentId);
+
+      // 删除所有收集到的组件
+      idsToDelete.forEach((id: string) => {
+        // 明确参数类型
+        delPageComponentSchemas(id);
+        delSubTableComponents(id);
       });
     }
 
