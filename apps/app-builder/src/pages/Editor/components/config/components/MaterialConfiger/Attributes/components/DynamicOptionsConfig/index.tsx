@@ -1,13 +1,13 @@
-import { Button, Form, Input, Radio, Space, Tooltip, Select } from '@arco-design/web-react';
+import SelectDictModal from '@/components/SelectDictModal';
+import { useAppStore } from '@/store/store_app';
+import { Button, Form, Input, Radio, Select, Space, Tooltip } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
+import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
+import { DEFAULT_OPTIONS_TYPE, useAppEntityStore } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
-import { useAppEntityStore, DEFAULT_OPTIONS_TYPE } from '@onebase/ui-kit';
-import { useSignals } from '@preact/signals-react/runtime';
-import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
-import SelectDictModal from '@/components/SelectDictModal';
-import { useAppStore } from '@/store/store_app';
 
 export interface DynamicSelectConfigProps {
   handlePropsChange: (key: string, value: any) => void;
@@ -152,7 +152,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
               }
-              handlePropsChange(selectKey, { ...configs[selectKey], type: value,  });
+              handlePropsChange(selectKey, { ...configs[selectKey], type: value });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },

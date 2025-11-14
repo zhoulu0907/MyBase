@@ -16,10 +16,11 @@ export async function initInteractionRule(
   // 初始化一个map，用于后续交互规则处理
   const fieldMap: Record<string, any> = {};
   Object.entries(pageComponentSchemas).forEach(([key, value]: [string, any]) => {
-    const dataFieldIndex = value.config.dataField?.length > 0 ? value.config.dataField.length - 1 : 0
-    const fieldId = value.config.dataField[dataFieldIndex];
-    const fieldValue = formValues[fieldId];
-    fieldMap[key.replaceAll('-', '')] = fieldValue;
+    if (value.config.dataField?.length > 1) {
+      const fieldId = value.config.dataField[1];
+      const fieldValue = formValues[fieldId];
+      fieldMap[key.replaceAll('-', '')] = fieldValue;
+    }
   });
 
   console.log('fieldMap: ', fieldMap);
