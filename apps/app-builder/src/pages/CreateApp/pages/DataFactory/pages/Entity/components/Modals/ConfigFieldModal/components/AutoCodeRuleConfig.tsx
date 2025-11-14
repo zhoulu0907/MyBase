@@ -64,7 +64,6 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   // 使用对象存储每个规则的校验状态，key 为 rule.id
   const [fixedTextStatusMap, setFixedTextStatusMap] = useState<Record<string, 'error' | undefined>>({});
   const [customDateFormatStatusMap, setCustomDateFormatStatusMap] = useState<Record<string, 'error' | undefined>>({});
-  const [fixedTextErrorText, setFixedTextErrorText] = useState<string>('');
 
   // 默认规则
   const getInitialRules = useCallback((): AutoCodeRule[] => {
