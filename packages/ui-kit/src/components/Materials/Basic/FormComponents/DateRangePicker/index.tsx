@@ -53,8 +53,8 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
         initialValue={[
-          startdefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? startdefaultValueConfig?.customValue : '',
-          enddefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? enddefaultValueConfig?.customValue : ''
+          startDefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? startDefaultValueConfig?.customValue : '',
+          endDefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? endDefaultValueConfig?.customValue : ''
         ]}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
