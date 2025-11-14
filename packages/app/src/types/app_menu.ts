@@ -29,7 +29,9 @@ export enum PageType {
   // 普通表单
   NORMAL = 1,
   // 流程表单
-  BPM = 2
+  BPM = 2,
+  // 工作台
+  WORKBENCH = 3
 }
 
 export enum CATEGORY_TYPE {
@@ -60,6 +62,7 @@ export interface CreateApplicationMenuReq {
   menuType: MenuType;
   menuIcon: string;
   entityId?: string;
+  pageType?: string;
 }
 
 export interface UpdateApplicationMenuNameReq {

@@ -6,7 +6,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import { type XInputTextConfig } from './schema';
 
-const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMode?: boolean; cpState?: any }) => {
   const {
     label,
     dataField,
@@ -22,7 +22,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     labelColSpan = 0,
     maxLength,
     runtime = true,
-    detailMode
+    detailMode,
+    cpState
   } = props;
 
   const { form } = Form.useFormContext();

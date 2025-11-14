@@ -728,6 +728,9 @@ importers:
       '@onebase/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
+      '@pawel-up/jexl':
+        specifier: ^4.4.2
+        version: 4.4.2
       '@preact/signals-react':
         specifier: ^3.2.1
         version: 3.2.1(react@18.3.1)
@@ -3095,6 +3098,10 @@ packages:
   '@parcel/watcher@2.5.1':
     resolution: {integrity: sha512-dfUnCxiN9H4ap84DvD2ubjw+3vUNpstxa0TneY/Paat8a3R4uQZDLSvWjmznAY/DoahqTHl9V46HF/Zs3F29pg==}
     engines: {node: '>= 10.0.0'}
+
+  '@pawel-up/jexl@4.4.2':
+    resolution: {integrity: sha512-/XWtUY5Go4hcm3q+wiN4pPvRRrYxfQBZaXucrdZPCSOFhm2l6Spf9JzH167ywwE310ZmAjNpBgtn6NGnk7KjUg==}
+    engines: {node: '>=20.0.0'}
 
   '@phosphor/algorithm@1.2.0':
     resolution: {integrity: sha512-C9+dnjXyU2QAkWCW6QVDGExk4hhwxzAKf5/FIuYlHAI9X5vFv99PYm0EREDxX1PbMuvfFBZhPNu0PvuSDQ7sFA==}
@@ -6086,6 +6093,9 @@ packages:
 
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
+
+  json-schema@0.4.0:
+    resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
@@ -9940,7 +9950,7 @@ snapshots:
       '@babel/preset-env': 7.20.2(@babel/core@7.28.0)
       '@babel/preset-react': 7.13.13(@babel/core@7.28.0)
       '@rushstack/eslint-config': 3.1.1(eslint@8.57.1)(typescript@5.8.3)
-      '@typescript-eslint/eslint-plugin': 6.21.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
+      '@typescript-eslint/eslint-plugin': 6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
       '@typescript-eslint/parser': 6.21.0(eslint@8.57.1)(typescript@5.8.3)
       eslint: 8.57.1
       eslint-config-prettier: 8.10.2(eslint@8.57.1)
@@ -10911,6 +10921,10 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.5.1
     optional: true
 
+  '@pawel-up/jexl@4.4.2':
+    dependencies:
+      json-schema: 0.4.0
+
   '@phosphor/algorithm@1.2.0': {}
 
   '@phosphor/collections@1.2.0':
@@ -11730,7 +11744,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)':
+  '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
       '@typescript-eslint/parser': 6.21.0(eslint@8.57.1)(typescript@5.8.3)
@@ -14232,6 +14246,8 @@ snapshots:
   json-parse-even-better-errors@2.3.1: {}
 
   json-schema-traverse@0.4.1: {}
+
+  json-schema@0.4.0: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 

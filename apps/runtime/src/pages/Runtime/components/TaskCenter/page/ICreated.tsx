@@ -1,28 +1,19 @@
-import { useState, useEffect,type FC } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
+import { useState, useEffect, type FC } from 'react';
+import { Table, type TableColumnProps, Button, Tag, Message, Pagination, Radio } from '@arco-design/web-react';
 import { getMyCreatePageList } from '@onebase/app/src/services/app_runtime';
 import { LISTTYPE, FLOWSTATUS_TYPE, FlowStatusMap } from '@onebase/app';
 import dayjs from 'dayjs';
 import TableSearch from './TableSearch';
-import DetailPop from './DetailPop'
-import '../style/tcPage.less'
-
-const radioList = [
-    {label: '全部', value: 'all'},
-    {label: '草稿', value: '1'},
-    {label: '审批中', value: '2'},
-    {label: '已通过', value: '3'},
-    {label: '已拒绝', value: '4'},
-    {label: '已撤回', value: '5'},
-    {label: '已终止', value: '6'}
-]
-let defaultCheck = 'all'
+import DetailPop from './DetailPop';
+import '../style/tcPage.less';
 
 const ICreated: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
-      dataIndex: 'processTitle'
+      dataIndex: 'processTitle',
+      width: 250,
+      ellipsis: true
     },
     {
       title: '流程状态',
@@ -58,21 +49,23 @@ const ICreated: FC = ({ appId }: any) => {
     {
       title: '当前节点处理人',
       dataIndex: 'currentNodeHandler',
-       render: (userArr:any) => {
+      render: (userArr: any) => {
         return (
-            <div className="flex-bw-center">
-              {userArr?.length > 0 ? (
-                userArr.map((item: any, i:number) => {
-                  return <div className="flex-bw-center" key={'user' + i}>
-                    <div className='photo-img'>{item?.avatar && <img src={item?.avatar} />}</div><span className='tb-uname'>{item?.userName}</span>
-                  </div>
+          <div className="flex-bw-center">
+            {userArr?.length > 0
+              ? userArr.map((item: any, i: number) => {
+                  return (
+                    <div className="flex-bw-center" key={'user' + i}>
+                      <div className="photo-img">{item?.avatar && <img src={item?.avatar} />}</div>
+                      <span className="tb-uname">{item?.userName}</span>
+                    </div>
+                  );
                 })
-              ) : (
-                '-'
-              )}
-            </div>
+              : '-'}
+          </div>
         );
-      }
+      },
+      ellipsis: true
     },
     {
       title: '发起时间',
@@ -92,10 +85,9 @@ const ICreated: FC = ({ appId }: any) => {
       title: '操作',
       dataIndex: 'op',
       align: 'center',
-      render: (_:any, record:any) => (
+      render: (_: any, record: any) => (
         <Button
           type="text"
-          status="success"
           onClick={() => {
             handleDetailPage(record);
           }}
@@ -106,48 +98,74 @@ const ICreated: FC = ({ appId }: any) => {
     }
   ];
 
-  let [detailPopVisible, setPopVisible] = useState(false);
+  const [detailPopVisible, setPopVisible] = useState(false);
   const [data, setData] = useState<any>();
   const [rowData, setRowData] = useState();
-
-  function CreatedRadioChange(val: string) {
-    console.log('radio ====', val);
-  }
+  const [pagination, setPagination] = useState<any>({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  });
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState<any>({});
+  const defaultPageNo = 1;
 
   function handleDetailPage(row: any) {
     setRowData(row);
     setPopVisible(true);
   }
-  const fetchFormData = async () => {
-    const req = {
-      appId
-      //   pageNo: 1,
-      //   pageSize: 10,
-      //   processTitle: '',
-      //   initiator: 'admin',
-      //   formSummary: '',
-      //   sortType: '',
-      //   submitTimeStart: '',
-      //   submitTimeEnd: ''
-    };
-    const res = await getMyCreatePageList(req);
-    if (Array.isArray(res?.list)) {
-      setData(res.list.map((item: object, i: number) => {
-        return {
-          ...(item || {}),
-          key: i
-        }
-      }));
+
+  const fetchFormData = async (currentParams = filters, currentPage = 1, currentPageSize = pagination.pageSize) => {
+    setLoading(true);
+    try {
+      const queryParams = {
+        ...currentParams,
+        pageNo: currentPage,
+        pageSize: currentPageSize,
+        appId
+      };
+      const res = await getMyCreatePageList(queryParams);
+      if (Array.isArray(res?.list)) {
+        setData(
+          res.list.map((item: object, i: number) => {
+            return {
+              ...(item || {}),
+              key: i
+            };
+          })
+        );
+      }
+      setPagination({
+        current: currentPage,
+        pageSize: currentPageSize,
+        total: res.total || 0
+      });
+      setFilters(currentParams);
+    } catch (error) {
+      Message.error('加载失败');
+    } finally {
+      setLoading(false);
     }
   };
 
   const onBack = () => {
     setPopVisible(false);
-    fetchFormData();
+    fetchFormData(filters, defaultPageNo);
+  };
+
+  const handleSearch = (newFilters: any) => {
+    fetchFormData(newFilters, defaultPageNo);
+  };
+  const handleReset = () => {
+    fetchFormData({}, defaultPageNo);
+  };
+
+  const handlePageChange = (current: number, pageSize: number) => {
+    fetchFormData(filters, current, pageSize);
   };
 
   useEffect(() => {
-    fetchFormData();
+    fetchFormData({}, defaultPageNo);
   }, []);
 
   return (
@@ -155,36 +173,30 @@ const ICreated: FC = ({ appId }: any) => {
       <div className="table-title-box">
         <div>
           <b style={{ marginRight: '8px' }}>我创建的</b>
-          <Radio.Group
-            defaultValue={defaultCheck}
-            onChange={CreatedRadioChange}
-            name="button-radio-group"
-            className="created-radio-group"
-          >
-            {radioList.map((item) => {
-              return (
-                <Radio key={item.value} value={item.value}>
-                  {({ checked }: { checked: boolean }) => {
-                    return (
-                      <Button key={item.value} type="text" className={`${checked ? 'rdo-checked' : ''}`}>
-                        {item.label}
-                      </Button>
-                    );
-                  }}
-                </Radio>
-              );
-            })}
-          </Radio.Group>
         </div>
-        <TableSearch uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: false }} />
+        <TableSearch
+          uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: false }}
+          onReset={handleReset}
+          onFilterChange={handleSearch}
+        />
       </div>
-      <Table className="task-tb-box" columns={columns} data={data} />
+      <Table className="task-tb-box" columns={columns} data={data} pagination={false} loading={loading} />
+      <Pagination
+        current={pagination.current}
+        pageSize={pagination.pageSize}
+        total={pagination.total}
+        onChange={handlePageChange}
+        showTotal={(total: any) => `共 ${total} 项数据`}
+        showJumper
+        sizeCanChange
+      />
       {detailPopVisible && (
         <DetailPop
           detailPopVisible={detailPopVisible}
           setPopVisible={setPopVisible}
           rowData={rowData}
           listType={LISTTYPE.ICREATED}
+          onBack={onBack}
         />
       )}
     </section>
