@@ -1,15 +1,19 @@
 package com.cmsr.onebase.framework.ds.client;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.ds.constant.DolphinSchedulerConstants;
 import com.cmsr.onebase.framework.ds.exception.DolphinschedulerException;
 import com.cmsr.onebase.framework.ds.model.common.PageInfo;
+import com.cmsr.onebase.framework.ds.model.common.Parameter;
 import com.cmsr.onebase.framework.ds.model.common.Result;
+import com.cmsr.onebase.framework.ds.model.common.TaskResource;
 import com.cmsr.onebase.framework.ds.model.schedule.ScheduleInfoResp;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.TaskDefinition;
 import com.cmsr.onebase.framework.ds.model.task.TaskLocation;
 import com.cmsr.onebase.framework.ds.model.task.TaskRelation;
-import com.cmsr.onebase.framework.ds.model.task.def.AbstractTask;
+import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
+import com.cmsr.onebase.framework.ds.model.task.def.ShellTask;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDefinitionResp;
 import com.cmsr.onebase.framework.ds.model.workflow.WorkflowDetailedResp;
 import com.cmsr.onebase.framework.ds.model.workflow.sub.ComplementTime;
@@ -35,8 +39,9 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Lazy
 @Setter
@@ -70,6 +75,9 @@ public class DolphinSchedulerClient {
 
     @Value("${onebase.scheduler.worker-group:default}")
     private String workerGroup;
+
+    @Value("${onebase.scheduler.jose:onebase-ds/default/resources/onebase-jose.jar}")
+    private String joseJar;
 
     private DolphinschedulerClientStub dsClientStub;
 
@@ -119,10 +127,10 @@ public class DolphinSchedulerClient {
     /**
      * 创建工作流
      */
-    public Long createSingletonWorkflow(Long projectCode,
-                                        String flowName,
-                                        AbstractTask task,
-                                        String description) {
+    public Long createSingletonHttpWorkflow(Long projectCode,
+                                            String flowName,
+                                            HttpTask task,
+                                            String description) {
         // 1. verify-name unique
         Result<WorkflowDetailedResp> uniqueResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
         if (uniqueResp.getSuccess()) {
@@ -131,22 +139,45 @@ public class DolphinSchedulerClient {
             purgeWorkflow(projectCode, existingData.getCode());
         }
         // 2. generate unique task code
-        Result<List<Long>> genTaskCodes = execute(dsClientStub.generateTaskCodes(projectCode, 1));
-        Long taskCode = genTaskCodes.getData().get(0);
+        Result<List<Long>> genTaskCodes = execute(dsClientStub.generateTaskCodes(projectCode, 2));
+        Long joseCode = genTaskCodes.getData().get(0);
+        Long taskCode = genTaskCodes.getData().get(1);
         // 3. create
-        String taskType = task.grantTaskType();
-        TaskDefinition taskDefinition = TaskDefinition.singleton(task)
+
+        // 3.1. create shell task to grant auth-token
+        Map<String, String> paramMap = Map.of(DolphinSchedulerConstants.ACCESS_TOKEN, "");
+        ShellTask shellTask = new ShellTask();
+        Parameter outputParam = Parameter.getOut(DolphinSchedulerConstants.ACCESS_TOKEN);
+        shellTask.setRawScript(DolphinSchedulerConstants.JOSE_SCRIPT);
+        shellTask.setResourceList(List.of(TaskResource.of(DolphinSchedulerConstants.JOSE_RESOURCE)));
+        shellTask.setLocalParams(List.of(outputParam));
+
+        TaskDefinition joseDefinition = TaskDefinition.singleton(shellTask)
+                .setCode(joseCode)
+                .setName("获取AccessToken")
+                .setTaskParamMap(paramMap)
+                .setTaskParamList(List.of(outputParam))
+                .setTaskType(shellTask.grantTaskType())
+                .setEnvironmentCode(environmentCode);
+
+        // 3.2. modify http task, add auth token to header
+        Parameter inputParam = Parameter.getIn(DolphinSchedulerConstants.ACCESS_TOKEN);
+        task.setLocalParams(List.of(inputParam));
+        task.header(DolphinSchedulerConstants.HTTP_AUTH_HEADER, "${" + DolphinSchedulerConstants.ACCESS_TOKEN + "}");
+        TaskDefinition httpDefinition = TaskDefinition.singleton(task)
                 .setCode(taskCode)
                 .setName(flowName + "_" + taskCode)
-                .setTaskType(taskType)
+                .setTaskParamMap(paramMap)
+                .setTaskParamList(List.of(inputParam))
+                .setTaskType(task.grantTaskType())
                 .setEnvironmentCode(environmentCode);
-        TaskRelation taskRelation = TaskRelation.singleton(taskCode);
-        TaskLocation taskLocation = TaskLocation.singleton(taskCode);
+        List<TaskRelation> taskRelations = TaskRelation.oneLineRelation(joseCode, taskCode);
+        List<TaskLocation> taskLocations = TaskLocation.horizontalLocation(joseCode, taskCode);
         Result<WorkflowDefinitionResp> response = execute(
                 dsClientStub.createWorkflow(projectCode,
-                        wrapSingleton2ListedJsonString(taskDefinition),
-                        wrapSingleton2ListedJsonString(taskRelation),
-                        wrapSingleton2ListedJsonString(taskLocation),
+                        wrap2ListedJsonString(joseDefinition, httpDefinition),
+                        wrap2ListedJsonString(taskRelations.toArray()),
+                        wrap2ListedJsonString(taskLocations.toArray()),
                         flowName,
                         EXECUTION_TYPE_SERIAL_WAIT,
                         description, "[]", "0"
@@ -314,8 +345,8 @@ public class DolphinSchedulerClient {
         return workflowDef;
     }
 
-    private <T> String wrapSingleton2ListedJsonString(T args) {
-        List<T> array = Collections.singletonList(args);
+    private String wrap2ListedJsonString(Object... args) {
+        List<?> array = Arrays.asList(args);
         return JsonUtils.toJsonString(array);
     }
 
