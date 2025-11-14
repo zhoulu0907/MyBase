@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.infra.api.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,7 +99,7 @@ public interface SecurityConfigApi {
      * @return 失败处理结果
      */
     @PostMapping("/record-failure")
-    CommonResult<com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO> recordLoginFailure(@RequestParam("userId") Long userId);
+    CommonResult<LoginFailureResultDTO> recordLoginFailure(@RequestParam("userId") Long userId);
 
     /**
      * 清除登录失败记录

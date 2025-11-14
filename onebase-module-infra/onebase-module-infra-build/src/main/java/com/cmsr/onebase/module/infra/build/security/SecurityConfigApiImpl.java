@@ -178,10 +178,11 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.PASSWORD_IN
             // 获取当前租户ID
             Long tenantId = TenantContextHolder.getTenantId();
 
-            // 检查账号锁定状态
-            Long remainingLockSeconds = antiBruteForceService.checkAccountLocked(tenantId, userId);
+            // 检查账号锁定状态，如果被锁定则直接抛出异常
+            antiBruteForceService.checkAccountLocked(tenantId, userId);
 
-            return success(remainingLockSeconds);
+            // 如果未被锁定，返回null
+            return success(null);
         }
 
         @Override
@@ -190,7 +191,7 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.PASSWORD_IN
             // 获取当前租户ID
             Long tenantId = TenantContextHolder.getTenantId();
 
-            // 记录登录失败
+            // 记录登录失败，如果达到阈值会直接抛出异常
             LoginFailureResult internalResult = antiBruteForceService.recordLoginFailure(tenantId, userId);
 
             // 转换为API DTO

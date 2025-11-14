@@ -1,11 +1,13 @@
 package com.cmsr.onebase.module.infra.service.security;
 
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
 import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
+import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -29,12 +31,12 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
     /**
      * Redis Key前缀 - 失败次数记录
      */
-    private static final String REDIS_KEY_FAIL_COUNT = "security:login:fail:";
+    private static final String REDIS_KEY_FAIL_COUNT = "infra:security:login:fail:";
 
     /**
      * Redis Key前缀 - 锁定状态记录
      */
-    private static final String REDIS_KEY_LOCK = "security:login:lock:";
+    private static final String REDIS_KEY_LOCK = "infra:security:login:lock:";
 
     /**
      * 默认失败锁定阈值
@@ -62,7 +64,12 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
 
         if (ttl != null && ttl > 0) {
             log.debug("账号已锁定，tenantId: {}, userId: {}, 剩余锁定时间: {}秒", tenantId, userId, ttl);
-            return ttl;
+            
+            // 格式化锁定时间提示
+            String timeHint = formatLockTimeHint(ttl);
+            
+            // 抛出异常，包含锁定时间提示
+            throw exception(ErrorCodeConstants.AUTH_LOGIN_ACCOUNT_LOCKED, timeHint);
         }
 
         return null;
@@ -91,12 +98,12 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
             saveLockRecord(tenantId, userId, config.lockDuration());
 
             long lockSeconds = config.lockDuration() * 60L;
-            return LoginFailureResult.builder()
-                    .locked(true)
-                    .remainingAttempts(0)
-                    .remainingLockSeconds(lockSeconds)
-                    .message(formatLockMessage(lockSeconds))
-                    .build();
+            
+            // 格式化锁定时间提示
+            String timeHint = formatLockTimeHint(lockSeconds);
+            
+            // 达到阈值，直接抛出异常
+            throw exception(ErrorCodeConstants.AUTH_LOGIN_ACCOUNT_LOCKED, timeHint);
         } else {
             // 未锁定，返回剩余次数
             int remainingAttempts = config.failedLockThreshold() - failCount.intValue();
@@ -266,14 +273,14 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
      * @param lockSeconds 锁定秒数
      * @return 提示消息
      */
-    private String formatLockMessage(long lockSeconds) {
+    private String formatLockTimeHint(long lockSeconds) {
         long minutes = lockSeconds / 60;
         long seconds = lockSeconds % 60;
 
         if (minutes > 0) {
-            return String.format("账号已被锁定，请%d分钟%d秒后再试", minutes, seconds);
+            return String.format("%d分钟%d秒", minutes, seconds);
         } else {
-            return String.format("账号已被锁定，请%d秒后再试", seconds);
+            return String.format("%d秒", seconds);
         }
     }
 
