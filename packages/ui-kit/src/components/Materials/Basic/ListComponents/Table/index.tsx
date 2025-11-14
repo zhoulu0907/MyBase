@@ -54,7 +54,7 @@ const XTable = memo(
     }
   ) => {
     useSignals();
-    const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
+    const { pageComponentSchemas: fromPageComponentSchemas, layoutSubComponents: fromLayoutSubComponents, components } = useFormEditorSignal;
 
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
@@ -227,9 +227,15 @@ const XTable = memo(
             ...column,
             ellipsis: true,
             width: column.width + 'px',
+            bodyCellStyle: { padding: '0 10px 0 0', textAlign: 'center' },
             render: (_text: string, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
               const cpId = componentSchemasKeys.find((ele) => {
+                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
+              });
+              const layoutSubSchemasKeys = Object.keys(fromLayoutSubComponents.value || {});
+
+              const layoutSubCpId = componentSchemasKeys.find((ele) => {
                 return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
               });
               if (cpId) {
@@ -260,6 +266,9 @@ const XTable = memo(
                     tooltip: ''
                   }
                 };
+                if(!cpType){
+                  return <span>{_text}</span>
+                }
 
                 return (
                   <PreviewRender

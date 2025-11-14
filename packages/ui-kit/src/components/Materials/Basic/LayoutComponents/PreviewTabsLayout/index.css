@@ -1,6 +1,17 @@
 .XPreviewTabsLayout {
   max-width: 100%;
   border: 1px solid transparent;
+  overflow: visible;
+
+  .arco-tabs-content {
+    overflow: visible !important;
+  }
+
+  .arco-tabs-content .arco-tabs-content-item.arco-tabs-content-item-active {
+    overflow: visible !important;
+  }
+
+
 
   .item {
     min-height: 200px;
