@@ -5,9 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * 密码策略配置对象，用于密码校验
  *
@@ -127,5 +124,10 @@ public class PasswordPolicyConfig {
      */
     @Builder.Default
     private Integer limitSameCharNum = 3;
+
+    /**
+     * 历史密码限制次数
+     */
+    private Integer historyLimit;
 
 }
