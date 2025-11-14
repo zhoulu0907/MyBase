@@ -15,10 +15,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     status,
     verify,
     layout,
-    labelColSpan = 0,
-    showSearch,
-    defaultValue,
-    defaultOptions,
+    defaultOptionsConfig,
     runtime = true,
     detailMode
   } = props;
@@ -46,9 +43,6 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }, { maxLength: verify?.maxChecked }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -56,25 +50,24 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
+        initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value)}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <Space wrap>
-            {fieldValue && defaultOptions && fieldValue.map((ele: any, index: number) => <Tag key={index}>
-              {defaultOptions.find((e: any) => e.value === ele)?.label}
+          <Space wrap size={[4,4]}>
+            {fieldValue && defaultOptionsConfig?.defaultOptions && typeof fieldValue === 'string' && fieldValue.split(', ').map((ele: any, index: number) => <Tag key={index} style={{ marginBottom: '0' }}>
+              {defaultOptionsConfig?.defaultOptions.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>
         ) : (
           <Select
             mode="multiple"
             allowClear
-            showSearch={showSearch}
             getPopupContainer={getPopupContainer}
             filterOption={(input, option) => {
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             placeholder="请选择"
-            options={defaultOptions}
+            options={defaultOptionsConfig?.defaultOptions}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

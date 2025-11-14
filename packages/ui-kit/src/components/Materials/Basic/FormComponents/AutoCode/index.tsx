@@ -11,13 +11,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
     tooltip,
     placeholder,
     status,
-    defaultValue,
-    verify,
-    align,
     layout,
-    color,
-    bgColor,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -41,18 +35,13 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
         layout={layout}
-        rules={[{ required: verify?.required }]}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
@@ -62,9 +51,6 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
             placeholder={placeholder}
             style={{
               width: '100%',
-              color,
-              textAlign: align,
-              backgroundColor: bgColor,
               pointerEvents: runtime ? 'unset' : 'none'
             }}
           />

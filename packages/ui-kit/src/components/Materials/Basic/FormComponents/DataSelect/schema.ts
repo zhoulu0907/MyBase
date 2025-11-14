@@ -2,7 +2,6 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  labelColSpanConfig,
   layoutConfig,
   selectDataResourceConfig,
   statusConfig,
@@ -175,19 +174,12 @@ const XDataSelect: XDataSelectSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    layoutConfig,
-    labelColSpanConfig,
-    // {
-    //   key: 'saveWithHidden',
-    //   name: '隐藏时提交数据',
-    //   type: CONFIG_TYPES.SWITCH_INPUT
-    // },
+    ...dataFieldConfig,
     selectDataResourceConfig,
     {
       key: 'verify',
@@ -195,12 +187,13 @@ const XDataSelect: XDataSelectSchema = {
       type: CONFIG_TYPES.VERIFY
     },
     statusConfig,
+    layoutConfig,
     widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
-      text: '选择数据',
+      text: '数据选择',
       display: true
     },
     dataField: [],
@@ -208,7 +201,7 @@ const XDataSelect: XDataSelectSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '选择数据',
+    defaultValue: '数据选择',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 200,
     saveWithHidden: false,

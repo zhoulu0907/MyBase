@@ -87,6 +87,6 @@ export const COMPONENT_FIELD_MAP: Record<string, string[]> = {
   [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: [],
   // 子表单 XSubTable => 无
   [FORM_COMPONENT_TYPES.SUB_TABLE]: [],
-  // 选择数据 XDataSelect => 选择数据
+  //数据选择XDataSelect => 数据选择
   [FORM_COMPONENT_TYPES.DATA_SELECT]: [ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE]
 };

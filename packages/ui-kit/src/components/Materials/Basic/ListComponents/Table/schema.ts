@@ -44,7 +44,6 @@ import type {
   TSelectDefaultType,
   TTextDefaultType
 } from '../../../types';
-import {type FormInstance} from '@arco-design/web-react';
 
 export interface XTableSchema {
   editData: TXTableEditData;
@@ -341,7 +340,7 @@ const XTable: XTableSchema = {
     pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
     pageSize: 10,
     metaData: '',
-    labelColSpan: 200,
+    labelColSpan: 100,
     defaultValue: [],
     columns: [],
 

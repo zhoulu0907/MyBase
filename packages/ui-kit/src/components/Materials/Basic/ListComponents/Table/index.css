@@ -1,31 +1,25 @@
 .tableHeader {
   width: 100%;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   flex-wrap: wrap;
   margin-bottom: 10px;
+}
 
-  .searchGroup {
+.searchGroup {
     width: 100%;
-    flex: 5;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
     flex-wrap: wrap;
-  }
-
-  .tableHeaderButton {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-  }
 }
+
+
+
+
 
 .tableFormItem {
   .arco-form-label-item {
@@ -40,8 +34,26 @@
   }
 }
 
+.searchItems {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  width: 92%;
+}
+
 .searchItem {
-  min-width: 350px;
+  min-width: 200px;
   max-width: 400px;
   margin-bottom: 0;
+}
+
+.searchBtns {
+    width: 8%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
 }

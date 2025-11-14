@@ -15,10 +15,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
     status,
     verify,
     layout,
-    labelColSpan = 0,
-    showSearch,
-    defaultValue,
-    defaultOptions,
+    defaultOptionsConfig,
     runtime = true,
     detailMode
   } = props;
@@ -41,14 +38,9 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`
-        }
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -56,19 +48,18 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
+        initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.isChosen)?.value}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{defaultOptions.find((item: any) => item.value == fieldValue)?.label || '--'}</div>
+          <div>{ fieldValue && defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue)?.label || '--'}</div>
         ) : (
           <Select
             placeholder="请选择"
-            showSearch={showSearch}
             filterOption={(input, option) => {
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             allowClear
-            options={defaultOptions}
+            options={defaultOptionsConfig?.defaultOptions}
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

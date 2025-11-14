@@ -24,6 +24,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
       const cpId = componentSchemasKeys.find((ele) => {
         return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(item.value);
       });
+
       if (cpId) {
         // 当前组件配置
         const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
@@ -234,16 +235,19 @@ const TableSearch = memo((props: TableSearchConfig) => {
     }
 
     return (
-      <Form.Item
-        field={item.value}
-        label={item.label}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-      >
-        <Input placeholder={`请输入${item.label}`} />
-      </Form.Item>
+      <div className="formWrapper">
+        <Form.Item
+          field={item.value}
+          label={<span className={'labelText'}>{item.label}</span>}
+          labelCol={{
+            style: { width: labelColSpan, flex: 'unset' }
+          }}
+          wrapperCol={{ style: { flex: 1 } }}
+          labelAlign="right"
+        >
+          <Input placeholder={`请输入${item.label}`} />
+        </Form.Item>
+      </div>
     );
   };
 

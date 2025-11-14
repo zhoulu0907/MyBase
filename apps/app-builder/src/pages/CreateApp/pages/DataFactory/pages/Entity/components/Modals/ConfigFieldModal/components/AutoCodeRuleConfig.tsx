@@ -260,9 +260,10 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               <Input
                 value={(rule.config.fixedText as string) || ''}
                 placeholder="请输入内容"
+                maxLength={10}
                 onChange={(value) => {
                   const ruleId = rule.id!;
-                  if (!/^[_\-+=/()<>[\]{}.~、#%&*]+$/.test(value as string)) {
+                  if (!/^[0-9a-zA-Z_\-+=/()<>[\]{}.~、#%&*]+$/.test(value as string)) {
                     setFixedTextStatusMap((prev) => ({ ...prev, [ruleId]: 'error' }));
                   } else {
                     setFixedTextStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
@@ -273,7 +274,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
                 status={fixedTextStatusMap[rule.id!]}
               />
               {fixedTextStatusMap[rule.id!] === 'error' && (
-                <span className={styles.ruleInputError}>{`仅支持：_-=+()<>[]{}.~、#%&*`}</span>
+                <span className={styles.ruleInputError}>{`支持字母数字和特殊字符_-=+()<>[]{}.~、#%&*`}</span>
               )}
             </Space>
             <Button

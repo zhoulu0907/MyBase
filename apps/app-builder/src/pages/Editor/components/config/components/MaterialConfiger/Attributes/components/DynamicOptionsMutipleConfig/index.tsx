@@ -22,15 +22,20 @@ import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import SelectDictModal from '@/components/SelectDictModal';
 import { useAppStore } from '@/store/store_app';
 
-export interface DynamicCheckboxConfigProps {
+export interface DynamicSelectMutipleConfigProps {
   handlePropsChange: (key: string, value: any) => void;
   item: any;
   configs: any;
   id: string;
 }
 
-const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePropsChange, item, configs, id }) => {
-  const checkboxKey = item.key || 'defaultOptionsConfig';
+const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
+  handlePropsChange,
+  item,
+  configs,
+  id
+}) => {
+  const selectMutipleKey = item.key || 'defaultOptionsConfig';
   const { mainEntity, subEntities } = useAppEntityStore();
   useSignals();
   const { curAppId } = useAppStore();
@@ -63,8 +68,8 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             disabled: true,
             dictTypeId: currentMainField.dictTypeId,
             defaultOptions: dictOptions.map((e: any) => {
-              if (configs[checkboxKey].defaultOptions?.length) {
-                const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
+              if (configs[selectMutipleKey].defaultOptions?.length) {
+                const oldOption = configs[selectMutipleKey].defaultOptions.find((ele: any) => ele.value === e.value);
                 if (oldOption && oldOption.isChosen) {
                   return { ...e, isChosen: true };
                 }
@@ -72,13 +77,13 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
               return { ...e, isChosen: false };
             })
           };
-          handlePropsChange(checkboxKey, newDefaultOptionsConfig);
+          handlePropsChange(selectMutipleKey, newDefaultOptionsConfig);
           setSelectDisabled(true);
         }
       } else if (currentMainField.options?.length) {
         const newOptions = currentMainField.options?.map((e: any) => {
-          if (configs[checkboxKey].defaultOptions?.length) {
-            const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
+          if (configs[selectMutipleKey].defaultOptions?.length) {
+            const oldOption = configs[selectMutipleKey].defaultOptions.find((ele: any) => ele.value === e.value);
             if (oldOption && oldOption.isChosen) {
               return { label: e.optionLabel, value: e.optionValue, isChosen: true };
             }
@@ -89,7 +94,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             isChosen: false
           };
         });
-        handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions, disabled: true });
+        handlePropsChange(selectMutipleKey, {
+          ...configs[selectMutipleKey],
+          defaultOptions: newOptions,
+          disabled: true
+        });
         setSelectDisabled(true);
       }
     } else if (isSubEntity && currentSubField) {
@@ -104,8 +113,8 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             disabled: true,
             dictTypeId: currentSubField.dictTypeId,
             defaultOptions: dictOptions.map((e: any) => {
-              if (configs[checkboxKey].defaultOptions?.length) {
-                const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
+              if (configs[selectMutipleKey].defaultOptions?.length) {
+                const oldOption = configs[selectMutipleKey].defaultOptions.find((ele: any) => ele.value === e.value);
                 if (oldOption && oldOption.isChosen) {
                   return { ...e, isChosen: true };
                 }
@@ -113,13 +122,13 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
               return { ...e, isChosen: false };
             })
           };
-          handlePropsChange(checkboxKey, newDefaultOptionsConfig);
+          handlePropsChange(selectMutipleKey, newDefaultOptionsConfig);
           setSelectDisabled(true);
         }
       } else if (currentSubField.options?.length) {
         const newOptions = currentSubField.options?.map((e: any) => {
-          if (configs[checkboxKey].defaultOptions?.length) {
-            const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
+          if (configs[selectMutipleKey].defaultOptions?.length) {
+            const oldOption = configs[selectMutipleKey].defaultOptions.find((ele: any) => ele.value === e.value);
             if (oldOption && oldOption.isChosen) {
               return { label: e.optionLabel, value: e.optionValue, isChosen: true };
             }
@@ -130,7 +139,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             isChosen: false
           };
         });
-        handlePropsChange(checkboxKey, { ...configs[checkboxKey], defaultOptions: newOptions, disabled: true });
+        handlePropsChange(selectMutipleKey, {
+          ...configs[selectMutipleKey],
+          defaultOptions: newOptions,
+          disabled: true
+        });
         setSelectDisabled(true);
       }
     }
@@ -140,8 +153,8 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
     if (dict?.type) {
       const dictDataList = await getDictDataListByType(dict.type);
       const dictOptions = dictDataList.filter((item: any) => item.status === 1);
-      handlePropsChange(checkboxKey, {
-        ...configs[checkboxKey],
+      handlePropsChange(selectMutipleKey, {
+        ...configs[selectMutipleKey],
         defaultOptions: dictOptions,
         dictTypeId: dict.id
       });
@@ -159,13 +172,13 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
       <Form.Item layout="vertical" labelAlign="left" label={item.name || '自定义配置'} className={styles.formItem}>
         <Form.Item>
           <Select
-            value={configs[checkboxKey].type}
-            disabled={configs[checkboxKey].disabled}
+            value={configs[selectMutipleKey].type}
+            disabled={configs[selectMutipleKey].disabled}
             onChange={(value) => {
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
               }
-              handlePropsChange(checkboxKey, { ...configs[checkboxKey], type: value });
+              handlePropsChange(selectMutipleKey, { ...configs[selectMutipleKey], type: value });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
@@ -173,25 +186,25 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             ]}
           ></Select>
         </Form.Item>
-        {configs[checkboxKey].type === DEFAULT_OPTIONS_TYPE.DICT &&
-          configs[checkboxKey].defaultOptions.length === 0 && (
+        {configs[selectMutipleKey].type === DEFAULT_OPTIONS_TYPE.DICT &&
+          configs[selectMutipleKey].defaultOptions.length === 0 && (
             <Form.Item>
               <Button long onClick={() => setSelectDictModalVisible(true)}>
                 请选择数据字典
               </Button>
             </Form.Item>
           )}
-        <Form.List initialValue={configs[checkboxKey].defaultOptions} field={`${id}-${checkboxKey}`}>
+        <Form.List initialValue={configs[selectMutipleKey].defaultOptions} field={`${id}-${selectMutipleKey}`}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
-                list={configs[checkboxKey].defaultOptions}
+                list={configs[selectMutipleKey].defaultOptions}
                 setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
                 swap
-                sort={!configs[checkboxKey].disabled && !selectDisabled}
+                sort={!configs[selectMutipleKey].disabled && !selectDisabled}
                 handle=".table-col-item-handle"
                 className={styles.componentCollapseContent}
                 forceFallback={true}
@@ -201,7 +214,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 }}
                 onSort={(e) => {
                   console.log(e);
-                  const newList = [...configs[checkboxKey].defaultOptions];
+                  const newList = [...configs[selectMutipleKey].defaultOptions];
                   // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
                   const { oldIndex, newIndex } = e;
                   console.log(oldIndex, newIndex);
@@ -213,16 +226,16 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                     // 插入到新位置
                     movedList.splice(newIndex, 0, movedItem);
                     // 更新属性
-                    const newConfig = { ...configs[checkboxKey], defaultOptions: movedList };
-                    handlePropsChange(checkboxKey, newConfig);
+                    const newConfig = { ...configs[selectMutipleKey], defaultOptions: movedList };
+                    handlePropsChange(selectMutipleKey, newConfig);
                   }
                 }}
               >
-                {configs[checkboxKey].defaultOptions?.map((_col: any, idx: number) => (
+                {configs[selectMutipleKey].defaultOptions?.map((_col: any, idx: number) => (
                   <Tooltip
                     key={idx}
                     content={selectDisabled ? '如需修改请前往数据建模' : '如需修改请前往数据字典'}
-                    disabled={!configs[checkboxKey].disabled && !selectDisabled}
+                    disabled={!configs[selectMutipleKey].disabled && !selectDisabled}
                   >
                     <div className={styles.tableColumnItem}>
                       <Space>
@@ -235,62 +248,62 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                           }}
                         />
                         <Checkbox
-                          checked={configs[checkboxKey].defaultOptions[idx].isChosen}
+                          checked={configs[selectMutipleKey].defaultOptions[idx].isChosen}
                           onChange={(e) => {
-                            let newList = [...configs[checkboxKey].defaultOptions];
+                            let newList = [...configs[selectMutipleKey].defaultOptions];
                             newList[idx] = {
                               ...newList[idx],
                               isChosen: e
                             };
-                            const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
-                            handlePropsChange(checkboxKey, newConfig);
+                            const newConfig = { ...configs[selectMutipleKey], defaultOptions: newList };
+                            handlePropsChange(selectMutipleKey, newConfig);
                           }}
                         />
                         <Input
                           size="small"
                           disabled={selectDisabled}
-                          value={configs[checkboxKey].defaultOptions[idx].label}
+                          value={configs[selectMutipleKey].defaultOptions[idx].label}
                           onChange={(e) => {
-                            const newList = [...configs[checkboxKey].defaultOptions];
+                            const newList = [...configs[selectMutipleKey].defaultOptions];
                             newList[idx] = {
                               ...newList[idx],
                               label: e
                             };
-                            const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
-                            handlePropsChange(checkboxKey, newConfig);
+                            const newConfig = { ...configs[selectMutipleKey], defaultOptions: newList };
+                            handlePropsChange(selectMutipleKey, newConfig);
                           }}
                           className={styles.tableColumnItemInput}
                           placeholder={'新选项'}
                         />
-                        {configs[checkboxKey]['colorMode'] && (
+                        {configs[selectMutipleKey]['colorMode'] && (
                           <ColorPicker
                             size="mini"
                             disabled={selectDisabled}
-                            value={configs[checkboxKey].defaultOptions[idx].colorType || 'rgb(var(--primary-7))'}
+                            value={configs[selectMutipleKey].defaultOptions[idx].colorType || 'rgb(var(--primary-7))'}
                             onChange={(e) => {
-                              const newList = [...configs[checkboxKey].defaultOptions];
+                              const newList = [...configs[selectMutipleKey].defaultOptions];
                               newList[idx] = {
                                 ...newList[idx],
                                 colorType: e
                               };
-                              const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
-                              handlePropsChange(checkboxKey, newConfig);
+                              const newConfig = { ...configs[selectMutipleKey], defaultOptions: newList };
+                              handlePropsChange(selectMutipleKey, newConfig);
                             }}
                           ></ColorPicker>
                         )}
-                        {!configs[checkboxKey].disabled && !selectDisabled && (
+                        {!configs[selectMutipleKey].disabled && !selectDisabled && (
                           <Button
                             icon={<IconDelete />}
                             shape="circle"
                             size="mini"
                             status="danger"
-                            disabled={configs[checkboxKey]?.defaultOptions?.length <= 2}
+                            disabled={configs[selectMutipleKey]?.defaultOptions?.length <= 2}
                             className={styles.tableColumnItemButton}
                             onClick={() => {
-                              const newList = [...configs[checkboxKey].defaultOptions];
+                              const newList = [...configs[selectMutipleKey].defaultOptions];
                               newList.splice(idx, 1);
-                              const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
-                              handlePropsChange(checkboxKey, newConfig);
+                              const newConfig = { ...configs[selectMutipleKey], defaultOptions: newList };
+                              handlePropsChange(selectMutipleKey, newConfig);
                               remove(idx);
                             }}
                           />
@@ -301,16 +314,16 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 ))}
               </ReactSortable>
 
-              {!configs[checkboxKey].disabled &&
+              {!configs[selectMutipleKey].disabled &&
                 !selectDisabled &&
-                configs[checkboxKey].type !== DEFAULT_OPTIONS_TYPE.DICT && (
+                configs[selectMutipleKey].type !== DEFAULT_OPTIONS_TYPE.DICT && (
                   <Button
                     type="outline"
                     onClick={() => {
                       const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
-                      const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${checkboxKey}[0]`;
+                      const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${selectMutipleKey}[0]`;
                       const newList = [
-                        ...configs[checkboxKey].defaultOptions,
+                        ...configs[selectMutipleKey].defaultOptions,
                         {
                           label: item.displayName || newLabel,
                           value: item.fieldName || newValue,
@@ -319,8 +332,8 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                         }
                       ];
                       add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
-                      const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
-                      handlePropsChange(checkboxKey, newConfig);
+                      const newConfig = { ...configs[selectMutipleKey], defaultOptions: newList };
+                      handlePropsChange(selectMutipleKey, newConfig);
                     }}
                   >
                     添加一项
@@ -336,20 +349,20 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
           </Grid.Col>
           <Grid.Col span={4}>
             <Switch
-              disabled={configs[checkboxKey].disabled || selectDisabled}
+              disabled={configs[selectMutipleKey].disabled || selectDisabled}
               size="small"
-              checked={configs[checkboxKey].colorMode}
+              checked={configs[selectMutipleKey].colorMode}
               onChange={(value) => {
-                handlePropsChange(checkboxKey, { ...configs[checkboxKey], colorMode: value });
+                handlePropsChange(selectMutipleKey, { ...configs[selectMutipleKey], colorMode: value });
               }}
             />
           </Grid.Col>
           <Grid.Col span={14}>
             <Radio.Group
-              disabled={configs[checkboxKey].disabled || selectDisabled}
-              value={configs[checkboxKey].colorModeType}
+              disabled={configs[selectMutipleKey].disabled || selectDisabled}
+              value={configs[selectMutipleKey].colorModeType}
               onChange={(value) => {
-                handlePropsChange(checkboxKey, { ...configs[checkboxKey], colorModeType: value });
+                handlePropsChange(selectMutipleKey, { ...configs[selectMutipleKey], colorModeType: value });
               }}
             >
               <Radio value={COLOR_MODE_TYPES.TAG} style={{ marginRight: '8px' }}>
@@ -375,7 +388,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
       <SelectDictModal
         appId={curAppId}
         visible={selectDictModalVisible}
-        dictTypeId={configs[checkboxKey].dictTypeId}
+        dictTypeId={configs[selectMutipleKey].dictTypeId}
         onOk={handleSelectDictOk}
         onCancel={handleSelectDictCancel}
       />
@@ -383,4 +396,4 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
   );
 };
 
-export default DynamicCheckboxConfig;
+export default DynamicSelectMutipleConfig;
