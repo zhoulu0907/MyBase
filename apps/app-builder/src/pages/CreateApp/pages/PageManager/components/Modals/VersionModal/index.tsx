@@ -31,11 +31,9 @@ export default function VersionModal({
   const handleView = (record: VersionData) => {
     changeCurrentFlow(record.id);
     handleCloseModal();
-    // 处理查看逻辑
   };
 
   const handleEditRemark = (record: VersionData) => {
-    // 处理修改备注逻辑
     setCurrentItem(record);
     setEditRemarkVisible(true);
   };
@@ -46,8 +44,6 @@ export default function VersionModal({
       getVersionMgmtData(record.id);
       getVersonList();
     });
-
-    // 处理删除逻辑
   };
   const columns = getVersionColumns(handleView, handleEditRemark, handleDelete);
   const getVersionMgmtData = async (deleteId?: string) => {
