@@ -9,7 +9,7 @@ import { getComponentSchema } from '../../../schema';
 import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
 import EditRender from 'src/components/render/EditRender';
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
-import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES,DEFAULT_OPTIONS_TYPE } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE } from '../../../constants';
 import { v4 as uuidv4 } from 'uuid';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
@@ -261,8 +261,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       const tableColumn = {
         title: (
           <>
+            {required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
             {displayName}
-            {required ? <span style={{ color: 'red', paddingLeft: '4px' }}>*</span> : null}
           </>
         ),
         dataIndex: column.id,
@@ -431,6 +431,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   }}
                 >
                   <div className="simulate-header-item">
+                    {pageComponentSchemas[cp.id].config?.verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
                     {pageComponentSchemas[cp.id].config.label.text || pageComponentSchemas[cp.id].config.displayName}
                   </div>
                   <EditRender
